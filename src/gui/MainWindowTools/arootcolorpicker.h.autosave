@@ -1,0 +1,24 @@
+#ifndef AROOTCOLORPICKER_H
+#define AROOTCOLORPICKER_H
+
+#include <QDialog>
+
+class QPainter;
+
+class ARootColorPicker : public QDialog
+{
+public:
+  ARootColorPicker(int& color, int& width, int& style, QWidget* parent = 0);
+
+protected:
+  void paintEvent(QPaintEvent *e);
+  // void mouseMoveEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e);
+
+private:
+  QList<int> colors;
+
+  void PaintColorRow(QPainter *p, int row, int colorBase);
+};
+
+#endif // AROOTCOLORPICKER_H

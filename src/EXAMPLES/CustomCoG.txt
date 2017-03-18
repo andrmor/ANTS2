@@ -1,0 +1,46 @@
+//custom CoG reconstruction template
+
+//settings
+var SignalThreshold = 5
+
+//cashing PM center positions
+var PMx = []
+var PMy = []
+for (var ipm=0; ipm<events.GetNumPMs(); ipm++)
+ {
+    PMx.push(config.GetPMx(ipm))   
+    PMy.push(config.GetPMy(ipm))   
+ }
+
+//reconstructing event positions
+var GoodEvents = 0
+for (var iev=0; iev<events.GetNumEvents(); iev++)
+{
+   var sum = 0
+   var sumX = 0
+   var sumY = 0
+   
+   for (var ipm=0; ipm<events.GetNumPMs(); ipm++)
+   {
+       var sig = events.GetPMsignal(iev, ipm)
+       if (sig < SignalThreshold) continue
+       
+       sum += sig
+       sumX += sig*PMx[ipm]
+       sumY += sig*PMy[ipm]
+   }
+   if (sum <= 0)
+   {
+       events.SetReconstructionOK(iev, false)
+       events.SetReconstructedGoodEvent(iev, false)
+       continue
+    }
+   
+   events.SetReconstructedX(iev, sumX/sum)
+   events.SetReconstructedY(iev, sumY/sum)
+   GoodEvents++
+}
+events.SetReconstructionReady() //declaring that reconstruction was performed
+geowin.ShowReconstructedPositions()
+
+core.print("Successfully reconstructed " + GoodEvents + " from total of "+ events.GetNumEvents() + " events")

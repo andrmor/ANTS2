@@ -1,0 +1,2700 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LRFwindow</class>
+ <widget class="QMainWindow" name="LRFwindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>711</width>
+    <height>605</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>LRFs</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="fAll">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>751</width>
+      <height>590</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="pbUpdateHistory">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>420</y>
+       <width>101</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>...updateHistory</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lbl_nodes_X">
+     <property name="geometry">
+      <rect>
+       <x>33</x>
+       <y>224</y>
+       <width>21</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>X:</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbUseGroupping">
+     <property name="geometry">
+      <rect>
+       <x>19</x>
+       <y>95</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use PM groupping</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>43</y>
+       <width>67</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Source:</string>
+     </property>
+    </widget>
+    <widget class="QFrame" name="fNodesY">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>245</y>
+       <width>119</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QSpinBox" name="sbSplNodesY">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>2</y>
+        <width>61</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>3</number>
+      </property>
+      <property name="maximum">
+       <number>30</number>
+      </property>
+      <property name="value">
+       <number>10</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_nodes_Y">
+      <property name="geometry">
+       <rect>
+        <x>22</x>
+        <y>4</y>
+        <width>21</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Y:</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QStackedWidget" name="swLRFtype">
+     <property name="geometry">
+      <rect>
+       <x>77</x>
+       <y>174</y>
+       <width>170</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page">
+      <widget class="QComboBox" name="cob2Dtype">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>1</y>
+         <width>114</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>Axial</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>XY</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Polar</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Composite</string>
+        </property>
+       </item>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_2">
+      <widget class="QComboBox" name="cob3Dtype">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>1</y>
+         <width>114</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>Axial + Z</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Sliced (XY+Z)</string>
+        </property>
+       </item>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="fPMgroups">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>115</y>
+       <width>338</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QComboBox" name="cb_pmt_group_type">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>3</y>
+        <width>211</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>One LRF for all PMs</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Group PMs by radius from center</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Assume square packing</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Assume hexagonal packing</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QCheckBox" name="cb_adj_gains">
+      <property name="geometry">
+       <rect>
+        <x>245</x>
+        <y>4</y>
+        <width>101</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Adjust gains</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="Line" name="line">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>27</y>
+       <width>385</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_store_error">
+     <property name="geometry">
+      <rect>
+       <x>562</x>
+       <y>96</y>
+       <width>131</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Store and use error</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb3D_LRFs">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>151</y>
+       <width>231</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LRF is function of Z (for 3D reconstruction)</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbEnergyScalling">
+     <property name="geometry">
+      <rect>
+       <x>19</x>
+       <y>72</y>
+       <width>181</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Take into account event energy</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cb_data_selector">
+     <property name="geometry">
+      <rect>
+       <x>59</x>
+       <y>41</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Position+energy data source:
+ 1) Known from simulation or loaded calibration data
+2)  Reconstructed in ANTS2</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Use true/scan data</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Use reconstructed data</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QSpinBox" name="sbSplNodesX">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>222</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <number>30</number>
+     </property>
+     <property name="value">
+      <number>10</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>24</x>
+       <y>177</y>
+       <width>61</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LRF type:</string>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="pbarLRF">
+     <property name="geometry">
+      <rect>
+       <x>159</x>
+       <y>284</y>
+       <width>161</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>15</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Current LRFs:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>411</x>
+       <y>56</y>
+       <width>61</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LRF history</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbSaveLRFs">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>155</x>
+       <y>369</y>
+       <width>90</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save LRFs</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbLoadLRFs">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>369</y>
+       <width>90</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Can load multiple files: LRF files, iteration files or config files containing LRFs</string>
+     </property>
+     <property name="text">
+      <string>Load LRFs</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbClearHistory">
+     <property name="geometry">
+      <rect>
+       <x>425</x>
+       <y>528</y>
+       <width>101</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear history</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_5">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>15</y>
+       <width>16</width>
+       <height>538</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_ready">
+     <property name="geometry">
+      <rect>
+       <x>85</x>
+       <y>11</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>NOT ready</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_4">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>390</y>
+       <width>385</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbUpdateGUI">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>9</y>
+       <width>111</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>...update GUI</string>
+     </property>
+    </widget>
+    <widget class="QFrame" name="fCompression">
+     <property name="geometry">
+      <rect>
+       <x>236</x>
+       <y>176</y>
+       <width>158</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QCheckBox" name="cb_compress_r">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>161</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Use radial compression</string>
+      </property>
+     </widget>
+     <widget class="QFrame" name="fCompressData">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>19</x>
+        <y>17</y>
+        <width>131</width>
+        <height>75</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLineEdit" name="led_compression_k">
+       <property name="geometry">
+        <rect>
+         <x>73</x>
+         <y>3</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>3</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="led_compression_r0">
+       <property name="geometry">
+        <rect>
+         <x>73</x>
+         <y>26</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>150</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>3</x>
+         <y>3</y>
+         <width>91</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Comp. factor</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="led_compression_lam">
+       <property name="geometry">
+        <rect>
+         <x>73</x>
+         <y>49</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>50</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>3</x>
+         <y>26</y>
+         <width>91</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Switchover</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>3</x>
+         <y>49</y>
+         <width>91</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Smothness</string>
+       </property>
+      </widget>
+      <zorder>label_8</zorder>
+      <zorder>label_9</zorder>
+      <zorder>label_10</zorder>
+      <zorder>led_compression_r0</zorder>
+      <zorder>led_compression_lam</zorder>
+      <zorder>led_compression_k</zorder>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="pbMakeLRF">
+     <property name="geometry">
+      <rect>
+       <x>14</x>
+       <y>278</y>
+       <width>132</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Only events passing all activated filters are used to calculate LRFs!</string>
+     </property>
+     <property name="text">
+      <string>Make LRFs</string>
+     </property>
+    </widget>
+    <widget class="QFrame" name="fPlot">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>400</y>
+       <width>391</width>
+       <height>180</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QCheckBox" name="cb_diff">
+      <property name="geometry">
+       <rect>
+        <x>91</x>
+        <y>103</y>
+        <width>85</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Difference</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbPMnoButons">
+      <property name="geometry">
+       <rect>
+        <x>76</x>
+        <y>3</y>
+        <width>42</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="frame">
+       <bool>true</bool>
+      </property>
+      <property name="buttonSymbols">
+       <enum>QAbstractSpinBox::NoButtons</enum>
+      </property>
+      <property name="keyboardTracking">
+       <bool>true</bool>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cb_data">
+      <property name="geometry">
+       <rect>
+        <x>91</x>
+        <y>82</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change data source using &amp;quot;Source&amp;quot; selector in the Make panel above&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Data</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbPMnumberSpinButtons">
+      <property name="geometry">
+       <rect>
+        <x>118</x>
+        <y>3</y>
+        <width>16</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cb_LRF">
+      <property name="geometry">
+       <rect>
+        <x>91</x>
+        <y>62</y>
+        <width>61</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LRF</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_17">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>7</y>
+        <width>36</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PM#:</string>
+      </property>
+     </widget>
+     <widget class="QFrame" name="fZ">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>158</x>
+        <y>-1</y>
+        <width>231</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLineEdit" name="ledZrange">
+       <property name="geometry">
+        <rect>
+         <x>146</x>
+         <y>6</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0.5</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>97</x>
+         <y>6</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Z range:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>7</y>
+         <width>21</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Z =</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ledZcenter">
+       <property name="geometry">
+        <rect>
+         <x>36</x>
+         <y>6</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_13">
+       <property name="geometry">
+        <rect>
+         <x>201</x>
+         <y>6</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>mm</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="Line" name="line_3">
+      <property name="geometry">
+       <rect>
+        <x>97</x>
+        <y>54</y>
+        <width>3</width>
+        <height>62</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbShow2D">
+      <property name="geometry">
+       <rect>
+        <x>41</x>
+        <y>32</y>
+        <width>114</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Show vs XY</string>
+      </property>
+     </widget>
+     <widget class="Line" name="line_8">
+      <property name="geometry">
+       <rect>
+        <x>196</x>
+        <y>39</y>
+        <width>3</width>
+        <height>140</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cb_data_2">
+      <property name="geometry">
+       <rect>
+        <x>289</x>
+        <y>83</y>
+        <width>71</width>
+        <height>14</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change data source using &amp;quot;Source&amp;quot; selector in the Make panel above&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string>Data</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="Line" name="line_7">
+      <property name="geometry">
+       <rect>
+        <x>295</x>
+        <y>52</y>
+        <width>3</width>
+        <height>62</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cb_diff_2">
+      <property name="geometry">
+       <rect>
+        <x>289</x>
+        <y>99</y>
+        <width>85</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Difference</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cb_LRF_2">
+      <property name="geometry">
+       <rect>
+        <x>289</x>
+        <y>62</y>
+        <width>61</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LRF</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>225</x>
+        <y>70</y>
+        <width>46</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bins:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="sbNumBins_2">
+      <property name="geometry">
+       <rect>
+        <x>213</x>
+        <y>86</y>
+        <width>51</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="keyboardTracking">
+       <bool>false</bool>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>1000</number>
+      </property>
+      <property name="value">
+       <number>200</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbShow1Ddistr">
+      <property name="geometry">
+       <rect>
+        <x>239</x>
+        <y>32</y>
+        <width>114</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>For non-axial LRFs it shows LRF averaged over all directions!</string>
+      </property>
+      <property name="text">
+       <string>Show radial</string>
+      </property>
+     </widget>
+     <widget class="Line" name="line_9">
+      <property name="geometry">
+       <rect>
+        <x>22</x>
+        <y>133</y>
+        <width>150</width>
+        <height>3</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbShowNodePositions">
+      <property name="geometry">
+       <rect>
+        <x>215</x>
+        <y>117</y>
+        <width>151</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show LRF node positions</string>
+      </property>
+     </widget>
+     <widget class="QFrame" name="frFixedMinMax">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>136</y>
+        <width>180</width>
+        <height>80</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLineEdit" name="ledFixedMin">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>94</x>
+         <y>0</y>
+         <width>50</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbFixedMin">
+       <property name="geometry">
+        <rect>
+         <x>5</x>
+         <y>1</y>
+         <width>86</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Fixed min:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="ledFixedMax">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>93</x>
+         <y>20</y>
+         <width>50</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>100</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="cbFixedMax">
+       <property name="geometry">
+        <rect>
+         <x>5</x>
+         <y>21</y>
+         <width>86</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Fixed max:</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="pbLRFexplorer">
+      <property name="geometry">
+       <rect>
+        <x>36</x>
+        <y>144</y>
+        <width>121</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>LRF explorer</string>
+      </property>
+     </widget>
+     <zorder>line_7</zorder>
+     <zorder>line_3</zorder>
+     <zorder>cb_diff</zorder>
+     <zorder>cb_data</zorder>
+     <zorder>cb_LRF</zorder>
+     <zorder>label_17</zorder>
+     <zorder>fZ</zorder>
+     <zorder>pbShow2D</zorder>
+     <zorder>line_8</zorder>
+     <zorder>cb_data_2</zorder>
+     <zorder>cb_LRF_2</zorder>
+     <zorder>label_15</zorder>
+     <zorder>sbNumBins_2</zorder>
+     <zorder>pbShow1Ddistr</zorder>
+     <zorder>line_9</zorder>
+     <zorder>cbShowNodePositions</zorder>
+     <zorder>sbPMnumberSpinButtons</zorder>
+     <zorder>sbPMnoButons</zorder>
+     <zorder>cb_diff_2</zorder>
+     <zorder>frFixedMinMax</zorder>
+     <zorder>pbLRFexplorer</zorder>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>202</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Number of nodes:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="leCurrentLRFs">
+     <property name="geometry">
+      <rect>
+       <x>403</x>
+       <y>32</y>
+       <width>143</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>--</string>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="lwLRFhistory">
+     <property name="geometry">
+      <rect>
+       <x>403</x>
+       <y>75</y>
+       <width>144</width>
+       <height>418</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>19</x>
+       <y>11</y>
+       <width>61</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LRF status:</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_2">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>356</y>
+       <width>385</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="Line" name="line_6">
+     <property name="geometry">
+      <rect>
+       <x>26</x>
+       <y>290</y>
+       <width>3</width>
+       <height>33</height>
+      </rect>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QFrame" name="fSingleGroup">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>14</x>
+       <y>307</y>
+       <width>380</width>
+       <height>56</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QPushButton" name="pbShowSensorGroups">
+      <property name="geometry">
+       <rect>
+        <x>309</x>
+        <y>4</y>
+        <width>61</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>groups</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbShowSensorGains">
+      <property name="geometry">
+       <rect>
+        <x>309</x>
+        <y>30</y>
+        <width>61</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>gains</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_20">
+      <property name="geometry">
+       <rect>
+        <x>237</x>
+        <y>18</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show sensor:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbAdjustOnlyGains">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>29</y>
+        <width>191</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Adjust gains keeping LRF shapes</string>
+      </property>
+     </widget>
+     <zorder>label_20</zorder>
+     <zorder>pbShowSensorGains</zorder>
+     <zorder>pbShowSensorGroups</zorder>
+     <zorder>pbAdjustOnlyGains</zorder>
+    </widget>
+    <widget class="QPushButton" name="pbClearTmpHistory">
+     <property name="geometry">
+      <rect>
+       <x>415</x>
+       <y>501</y>
+       <width>120</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Clear --#-- in history</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbSaveIterations">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>369</y>
+       <width>100</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Save all LRF history: provide name of a new dir</string>
+     </property>
+     <property name="text">
+      <string>Save all history</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_10">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>80</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="Line" name="line_11">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>353</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbRadialToText">
+     <property name="geometry">
+      <rect>
+       <x>562</x>
+       <y>370</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>LRF vs radial -&gt; .txt</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>562</x>
+       <y>401</y>
+       <width>46</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Step:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ledStep">
+     <property name="geometry">
+      <rect>
+       <x>594</x>
+       <y>398</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_18">
+     <property name="geometry">
+      <rect>
+       <x>652</x>
+       <y>401</y>
+       <width>46</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>mm</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbScaleForGain">
+     <property name="geometry">
+      <rect>
+       <x>572</x>
+       <y>440</y>
+       <width>70</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PM gain</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>562</x>
+       <y>421</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Scale LRF using:</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbScaleForEnergy">
+     <property name="geometry">
+      <rect>
+       <x>572</x>
+       <y>459</y>
+       <width>111</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Average  energy</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QStackedWidget" name="swAdvancedFeatures">
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>0</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="page_3">
+      <widget class="QPushButton" name="pbExpand">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>3</y>
+         <width>21</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>&gt;</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="page_4">
+      <widget class="QPushButton" name="pbShrink">
+       <property name="geometry">
+        <rect>
+         <x>128</x>
+         <y>3</y>
+         <width>21</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>&lt;</string>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="Line" name="line_12">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>140</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="Line" name="line_13">
+     <property name="geometry">
+      <rect>
+       <x>555</x>
+       <y>31</y>
+       <width>3</width>
+       <height>520</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbCompareRadials">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>258</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compare radials</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ledCompareFrom">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>287</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ledCompareTo">
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>307</y>
+       <width>51</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>20</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="sbCompareBins">
+     <property name="geometry">
+      <rect>
+       <x>611</x>
+       <y>327</y>
+       <width>50</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>10000</number>
+     </property>
+     <property name="value">
+      <number>20</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_21">
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>291</y>
+       <width>34</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>From:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_22">
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>311</y>
+       <width>34</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>To:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_23">
+     <property name="geometry">
+      <rect>
+       <x>571</x>
+       <y>329</y>
+       <width>31</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bins:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_24">
+     <property name="geometry">
+      <rect>
+       <x>667</x>
+       <y>290</y>
+       <width>27</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>mm</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_25">
+     <property name="geometry">
+      <rect>
+       <x>668</x>
+       <y>309</y>
+       <width>27</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>mm</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="sbMakePMgroup">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>127</x>
+       <y>310</y>
+       <width>52</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>999</number>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbMakePMGroup">
+     <property name="geometry">
+      <rect>
+       <x>21</x>
+       <y>312</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Only for PM#:</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_14">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>242</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbFitOnlyLast">
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>221</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>For composite LRF, when new LRF is calculated, only fit the last LRF while keeping the rest unmodified.
+Old grouping is used! New settings are ignored.</string>
+     </property>
+     <property name="text">
+      <string>Fit only last</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbCommonToIndi">
+     <property name="geometry">
+      <rect>
+       <x>569</x>
+       <y>196</y>
+       <width>111</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Creates new iteration, where common LRF is transformed to individual for each PM</string>
+     </property>
+     <property name="text">
+      <string>Com -&gt; Indi</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_15">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>180</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbTableToAxial">
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>157</y>
+       <width>111</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Fit Signal vs Distance to LRF - provide file template, last number of the name will be PM number</string>
+     </property>
+     <property name="text">
+      <string>Table to Axial</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbShowErrorVsRadius">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>570</x>
+       <y>120</y>
+       <width>110</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Error vs radius</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cbForceDerivToZeroInOrigin">
+     <property name="geometry">
+      <rect>
+       <x>566</x>
+       <y>56</y>
+       <width>121</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Force derivative to zero in origin for axial LRFs</string>
+     </property>
+     <property name="text">
+      <string>Force deriv to zero</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="bConfigureFiltering">
+     <property name="geometry">
+      <rect>
+       <x>213</x>
+       <y>8</y>
+       <width>161</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Configure event filters:
+only events passing all event filters are used to calculate LRFs.</string>
+     </property>
+     <property name="text">
+      <string>Configure filtering</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbUpdateLRFmakeJson">
+     <property name="geometry">
+      <rect>
+       <x>510</x>
+       <y>3</y>
+       <width>131</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>...updateLRFmakeJson</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_16">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>473</y>
+       <width>121</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbShowRadialForXY">
+     <property name="geometry">
+      <rect>
+       <x>562</x>
+       <y>488</y>
+       <width>121</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show radial for XY</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_26">
+     <property name="geometry">
+      <rect>
+       <x>567</x>
+       <y>518</y>
+       <width>60</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Step, mm:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ledStepForXYtoRad">
+     <property name="geometry">
+      <rect>
+       <x>633</x>
+       <y>515</y>
+       <width>50</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Step in radial direction</string>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_27">
+     <property name="geometry">
+      <rect>
+       <x>567</x>
+       <y>543</y>
+       <width>60</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Profiles:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="sbProfilesForXYtoRad">
+     <property name="geometry">
+      <rect>
+       <x>636</x>
+       <y>539</y>
+       <width>46</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>1000</number>
+     </property>
+     <property name="value">
+      <number>36</number>
+     </property>
+    </widget>
+    <zorder>cbFitOnlyLast</zorder>
+    <zorder>fSingleGroup</zorder>
+    <zorder>line_6</zorder>
+    <zorder>lwLRFhistory</zorder>
+    <zorder>pbUpdateHistory</zorder>
+    <zorder>lbl_nodes_X</zorder>
+    <zorder>cbUseGroupping</zorder>
+    <zorder>label</zorder>
+    <zorder>fNodesY</zorder>
+    <zorder>swLRFtype</zorder>
+    <zorder>fPMgroups</zorder>
+    <zorder>line</zorder>
+    <zorder>cb_store_error</zorder>
+    <zorder>cb3D_LRFs</zorder>
+    <zorder>cbEnergyScalling</zorder>
+    <zorder>cb_data_selector</zorder>
+    <zorder>sbSplNodesX</zorder>
+    <zorder>label_16</zorder>
+    <zorder>pbarLRF</zorder>
+    <zorder>label_4</zorder>
+    <zorder>label_2</zorder>
+    <zorder>pbSaveLRFs</zorder>
+    <zorder>pbLoadLRFs</zorder>
+    <zorder>pbClearHistory</zorder>
+    <zorder>line_5</zorder>
+    <zorder>label_ready</zorder>
+    <zorder>line_4</zorder>
+    <zorder>pbUpdateGUI</zorder>
+    <zorder>fCompression</zorder>
+    <zorder>pbMakeLRF</zorder>
+    <zorder>fPlot</zorder>
+    <zorder>label_3</zorder>
+    <zorder>leCurrentLRFs</zorder>
+    <zorder>label_12</zorder>
+    <zorder>line_2</zorder>
+    <zorder>pbClearTmpHistory</zorder>
+    <zorder>pbSaveIterations</zorder>
+    <zorder>line_10</zorder>
+    <zorder>line_11</zorder>
+    <zorder>pbRadialToText</zorder>
+    <zorder>label_14</zorder>
+    <zorder>ledStep</zorder>
+    <zorder>label_18</zorder>
+    <zorder>cbScaleForGain</zorder>
+    <zorder>label_19</zorder>
+    <zorder>cbScaleForEnergy</zorder>
+    <zorder>swAdvancedFeatures</zorder>
+    <zorder>line_12</zorder>
+    <zorder>line_13</zorder>
+    <zorder>pbCompareRadials</zorder>
+    <zorder>ledCompareFrom</zorder>
+    <zorder>ledCompareTo</zorder>
+    <zorder>sbCompareBins</zorder>
+    <zorder>label_21</zorder>
+    <zorder>label_22</zorder>
+    <zorder>label_23</zorder>
+    <zorder>label_24</zorder>
+    <zorder>label_25</zorder>
+    <zorder>cbMakePMGroup</zorder>
+    <zorder>line_14</zorder>
+    <zorder>pbCommonToIndi</zorder>
+    <zorder>line_15</zorder>
+    <zorder>pbTableToAxial</zorder>
+    <zorder>pbShowErrorVsRadius</zorder>
+    <zorder>cbForceDerivToZeroInOrigin</zorder>
+    <zorder>bConfigureFiltering</zorder>
+    <zorder>pbUpdateLRFmakeJson</zorder>
+    <zorder>line_16</zorder>
+    <zorder>pbShowRadialForXY</zorder>
+    <zorder>label_26</zorder>
+    <zorder>ledStepForXYtoRad</zorder>
+    <zorder>label_27</zorder>
+    <zorder>sbProfilesForXYtoRad</zorder>
+    <zorder>sbMakePMgroup</zorder>
+   </widget>
+   <widget class="QPushButton" name="pbStopLRFmake">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>329</x>
+      <y>281</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>stop</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cb_use_grid">
+    <property name="geometry">
+     <rect>
+      <x>565</x>
+      <y>31</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bin data using a grid</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox">
+    <property name="geometry">
+     <rect>
+      <x>816</x>
+      <y>186</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>18</number>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ledWx">
+    <property name="geometry">
+     <rect>
+      <x>816</x>
+      <y>226</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ledWy">
+    <property name="geometry">
+     <rect>
+      <x>896</x>
+      <y>226</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ledLx">
+    <property name="geometry">
+     <rect>
+      <x>816</x>
+      <y>286</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="ledLy">
+    <property name="geometry">
+     <rect>
+      <x>896</x>
+      <y>286</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>786</x>
+      <y>256</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>W -&gt; L</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>916</x>
+      <y>256</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>L -&gt; W</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>766</x>
+      <y>226</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Wx, Wy</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>290</y>
+      <width>46</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Lx, Ly</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>711</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuShow">
+    <property name="title">
+     <string>Show</string>
+    </property>
+    <widget class="QMenu" name="menuPM_group_info">
+     <property name="title">
+      <string>PM group info</string>
+     </property>
+     <addaction name="actionRelative_gain"/>
+     <addaction name="actionX_shift"/>
+     <addaction name="actionY_shift"/>
+     <addaction name="actionRotation_Flip"/>
+    </widget>
+    <addaction name="actionPM_numbers"/>
+    <addaction name="actionPM_groups"/>
+    <addaction name="menuPM_group_info"/>
+   </widget>
+   <addaction name="menuShow"/>
+  </widget>
+  <action name="actionPM_numbers">
+   <property name="text">
+    <string>PM numbers</string>
+   </property>
+  </action>
+  <action name="actionPM_groups">
+   <property name="text">
+    <string>PM groups</string>
+   </property>
+  </action>
+  <action name="actionRelative_gain">
+   <property name="text">
+    <string>Relative gain</string>
+   </property>
+  </action>
+  <action name="actionX_shift">
+   <property name="text">
+    <string>X shift</string>
+   </property>
+  </action>
+  <action name="actionY_shift">
+   <property name="text">
+    <string>Y shift</string>
+   </property>
+  </action>
+  <action name="actionRotation_Flip">
+   <property name="text">
+    <string>Rotation/Flip</string>
+   </property>
+  </action>
+  <action name="actionLRF_explorer">
+   <property name="text">
+    <string>LRF explorer</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cbUseGroupping</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbUpdateGUI</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>117</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb3D_LRFs</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbUpdateGUI</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>233</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cob2Dtype</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>pbUpdateGUI</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>165</x>
+     <y>215</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cob3Dtype</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>pbUpdateGUI</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>165</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_compress_r</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>fCompressData</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>258</x>
+     <y>214</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>287</x>
+     <y>273</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbNumBins_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>pbShow1Ddistr</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>528</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>253</x>
+     <y>465</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_LRF_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbShow1Ddistr</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>503</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>465</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbMakePMGroup</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbMakePMgroup</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>349</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>167</x>
+     <y>352</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_store_error</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbShowErrorVsRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>127</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>613</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_data_selector</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>548</x>
+     <y>38</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEnergyScalling</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>546</x>
+     <y>44</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseGroupping</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>140</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>581</x>
+     <y>40</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_use_grid</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>619</x>
+     <y>26</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbForceDerivToZeroInOrigin</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>649</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>636</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_pmt_group_type</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>528</x>
+     <y>31</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_adj_gains</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>342</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>40</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb3D_LRFs</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>564</x>
+     <y>36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cob2Dtype</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>139</x>
+     <y>214</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>563</x>
+     <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_compress_r</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>373</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>562</x>
+     <y>39</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>led_compression_k</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>362</x>
+     <y>230</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>574</x>
+     <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>led_compression_r0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>370</x>
+     <y>255</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>594</x>
+     <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>led_compression_lam</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>365</x>
+     <y>272</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>31</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbSplNodesX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>258</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>619</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbSplNodesY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>588</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_store_error</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>671</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFixedMin</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledFixedMin</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>269</x>
+     <y>569</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>567</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFixedMax</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledFixedMax</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>274</x>
+     <y>585</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>348</x>
+     <y>587</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cb_LRF_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frFixedMinMax</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>342</x>
+     <y>497</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>378</x>
+     <y>560</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,31 @@
+//It is possible to build simultaneously two histograms,
+//one just has to add all but last to the "basket"
+
+var mfp1 = 10
+var mfp2 = 15
+
+hist.NewHist("hMy", 100, 0,0)
+hist.SetTitles("hMy", "Distance", "Probability")
+hist.NewHist("hVit", 100, 0,0)
+hist.SetTitles("hVit", "Distance", "Probability")
+
+for (var i=0; i<10000; i++)
+{
+   //my
+   var dist1 = -mfp1 * math.log(math.random())
+   var dist2 = -mfp2 * math.log(math.random())
+   var distMy = math.min(dist1, dist2)
+   hist.Fill("hMy", distMy, 1)
+   
+   //vit
+   var mfp = 1 / ( 1/mfp1 + 1/mfp2 )
+   var distVit =  -mfp * math.log(math.random())
+   hist.Fill("hVit", distVit, 1)
+}
+
+hist.Draw("hMy", "")
+grwin.AddToBasket("My")
+
+hist.SetLineProperties("hVit", 2, 1, 1)
+hist.Draw("hVit", "")
+grwin.AddToBasket("Vit")

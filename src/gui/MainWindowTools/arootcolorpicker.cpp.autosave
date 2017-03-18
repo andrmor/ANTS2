@@ -1,0 +1,72 @@
+#include "arootcolorpicker.h"
+
+#include <QPainter>
+#include <QMouseEvent>
+#include <QtGui>
+
+#include "TROOT.h"
+#include "TColor.h"
+
+ARootColorPicker::ARootColorPicker(int &color, int &width, int &style, QWidget *parent)
+  : QDialog(parent)
+{
+  resize(450,804);
+
+  setResult(1);
+  setMouseTracking(true);
+
+  colors << 600 << 880;// << 616 << 900 << 632 << 800;// << 400 << 820 << 416 << 840 << 432 << 860 << 10;
+}
+
+void ARootColorPicker::paintEvent(QPaintEvent *)
+{
+  QPainter p;
+  p.begin(this);
+
+  p.setPen(Qt::NoPen);
+  //  kWhite =0, kBlack =1, kGray =920, kRed =632,
+  //  kGreen =416, kBlue =600, kYellow =400, kMagenta =616,
+  //  kCyan =432, kOrange =800, kSpring =820, kTeal =840,
+  //  kAzure =860, kViolet =880, kPink =900
+
+  for (int i=0; i<colors.size(); i++)
+    PaintColorRow(&p, i, colors.at(i));
+
+  p.end();
+}
+
+void ARootColorPicker::PaintColorRow(QPainter* p, int row, int colorBase)
+{
+  for (int i=-10; i<5; i++)
+    {
+      int c = colorBase + i;
+      TColor *tc = gROOT->GetColor(c);
+      int red = 255*tc->GetRed();
+      int green = 255*tc->GetGreen();
+      int blue = 255*tc->GetBlue();
+      p->setBrush(QBrush(QColor( red, green, blue )));
+      p->drawRect( (i+10)*30,row*30, 30,30);
+    }
+}
+
+//void ARootColorPicker::mouseMoveEvent(QMouseEvent *e)
+//{
+//  if (e->x()<100) color = 2;
+//  else color = 3;
+//  qDebug() << e->x() << e->y()<<color;
+//}
+
+void ARootColorPicker::mousePressEvent(QMouseEvent *e)
+{
+  qDebug() << "Selected at:"<<e->x() << e->y();
+
+  int row = e->y() / 30;
+  int num = e->x() / 30 - 10;
+
+  int color = colors.at(row) + num;
+  qDebug() << color << "at row/num:"<<row<<num;
+
+  done(color);
+}
+
+

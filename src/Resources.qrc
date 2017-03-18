@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>gui/Images/FCT.jpg</file>
+        <file>gui/Images/qren.jpg</file>
+        <file>gui/Images/LIP-logo.jpg</file>
+        <file>gui/Images/ant.png</file>
+        <file alias="BotGr.png">gui/Images/BotGr.png</file>
+        <file alias="BotSt.png">gui/Images/BotSt.png</file>
+        <file alias="lock.png">gui/Images/lock.png</file>
+        <file alias="MidGr.png">gui/Images/MidGr.png</file>
+        <file alias="MidSt.png">gui/Images/MidSt.png</file>
+        <file alias="TopGr.png">gui/Images/TopGr.png</file>
+        <file alias="TopSt.png">gui/Images/TopSt.png</file>
+        <file alias="tw-branch-closed.png">gui/Images/tw-branch-closed.png</file>
+        <file alias="tw-branch-end.png">gui/Images/tw-branch-end.png</file>
+        <file alias="tw-branch-more.png">gui/Images/tw-branch-more.png</file>
+        <file alias="tw-branch-open.png">gui/Images/tw-branch-open.png</file>
+        <file alias="tw-vline.png">gui/Images/tw-vline.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,1903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NeuralNetworksWindow</class>
+ <widget class="QMainWindow" name="NeuralNetworksWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>826</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>449</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1000</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="twTrainSettings">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>3</y>
+      <width>361</width>
+      <height>520</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tabTrainSettings">
+     <attribute name="title">
+      <string>Train settings</string>
+     </attribute>
+     <widget class="QTabWidget" name="twSubSettings">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>356</width>
+        <height>485</height>
+       </rect>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabQProp">
+       <attribute name="title">
+        <string>Quick Prop</string>
+       </attribute>
+       <widget class="QLabel" name="label_30">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Mu (step-sizes)</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsQPropDecay">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>10</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>-1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>-0.000100000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_31">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Decay (weight)</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbQPropDecay">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>10</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbQPropMu">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>40</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsQPropMu">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>40</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.750000000000000</double>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tabRProp">
+       <attribute name="title">
+        <string>Retro Prop</string>
+       </attribute>
+       <widget class="QCheckBox" name="cbRPropDecFactor">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>40</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_32">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Increase Factor</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsRPropDecFactor">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>40</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.500000000000000</double>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbRPropIncFactor">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>10</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsRPropIncFactor">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>10</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.200000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_33">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Decrease Factor</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbRPropDeltaMin">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>70</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_34">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delta Minimum</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsRPropDeltaMin">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>70</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbRPropDeltaMax">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>100</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_35">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>100</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delta Maximum</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsRPropDeltaMax">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>100</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>50.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbRPropDeltaZero">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>130</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_36">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>130</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Delta Zero</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsRPropDeltaZero">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>130</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>999999.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tabCascade">
+       <attribute name="title">
+        <string>Cascade</string>
+       </attribute>
+       <widget class="QLabel" name="label_37">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>100</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OUTPUT maximum epochs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_38">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>340</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Activation steepnesses</string>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsCascCandLimit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>250</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000000009.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascCandMaxEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>220</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>150</number>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsCascCandMult">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>280</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.400000000000000</double>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascSteep">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>340</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascCandGroups">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>310</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>2</number>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascOutMaxEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>100</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>150</number>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandGroups">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>310</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascOutMaxEpochs">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>100</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascFunctions">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>370</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandMinEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>190</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandMult">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>280</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandStagnationEpochs">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>160</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascCandMinEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>190</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_39">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>250</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE limit</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascOutStagnationEpochs">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>40</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandMaxEpochs">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>220</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsCascCandChangeFrac">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>130</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_40">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>40</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OUTPUT stagnation epochs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_41">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>220</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE maximum epochs</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascCandStagnationEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>160</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>12</number>
+        </property>
+       </widget>
+       <widget class="QDoubleSpinBox" name="bsCascOutChangeFrac">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>10</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_42">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>160</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE stagnation epochs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_43">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OUPUT minimum epochs</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascOutChangeFrac">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>10</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandChangeFrac">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>130</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascOutMinEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>70</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_44">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>OUTPUT change fraction</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_45">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>310</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE groups</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_46">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>370</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Activation functions</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leCascSteep">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>340</y>
+          <width>121</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>0.25, 0.5, 0.75, 1</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascOutMinEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>70</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leCascFunctions">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>370</y>
+          <width>121</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>SIGMOID, SIGMOID SYMMETRIC, GAUSSIAN, GAUSSIAN SYMMETRIC, ELLIOT, ELLIOT SYMMETRIC</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbCascCandLimit">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>250</y>
+          <width>24</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_47">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>280</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE multiplier</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_48">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>190</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE minimum epochs</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="bsCascOutStagnationEpochs">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="geometry">
+         <rect>
+          <x>200</x>
+          <y>40</y>
+          <width>121</width>
+          <height>24</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>9999999</number>
+        </property>
+        <property name="value">
+         <number>12</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_49">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>130</y>
+          <width>191</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>CANDIDATE change fraction</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabOutput">
+     <attribute name="title">
+      <string>Output</string>
+     </attribute>
+     <widget class="QPlainTextEdit" name="ptOutput">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>357</width>
+        <height>451</height>
+       </rect>
+      </property>
+      <property name="lineWrapMode">
+       <enum>QPlainTextEdit::NoWrap</enum>
+      </property>
+      <property name="textInteractionFlags">
+       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbNSaveOut">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>460</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&amp;Save</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="bgGeneralSettings">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>431</width>
+      <height>425</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>General Settings</string>
+    </property>
+    <widget class="QComboBox" name="cbNNTrainStop">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>360</y>
+       <width>100</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>BIT</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>MSE</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Layers (hidden)</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>90</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Output Activation Function</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>91</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Output</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Train Error Function</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbNNOutFunction">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>90</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The functions are described with functions where&lt;/p&gt;&lt;p&gt;- x is the input to the activation function,&lt;/p&gt;&lt;p&gt;- y is the output,&lt;/p&gt;&lt;p&gt;- s is the steepness and&lt;/p&gt;&lt;p&gt;- d is the derivation.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR: Linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -inf &amp;lt; y &amp;lt; inf&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;- Can NOT be used in fixed point.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD SYMMETRIC: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID: Sigmoid activation function&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = 1/(1 + exp(-2*s*x))&lt;/p&gt;&lt;p&gt;- d = 2*s*y*(1 - y)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID STEPWISE: Stepwise linear approximation to sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(Faster than sigmoid but a bit less precise)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID SYMMETRIC: Symmetric sigmoid activation function, aka. tanh.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1&lt;/p&gt;&lt;p&gt;- d = s*(1-(y*y))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;FANN_SIGMOID_SYMMETRIC Stepwise linear approximation to symmetric sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Faster than symmetric sigmoid but a bit less precise.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN: Gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- 0 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)&lt;/p&gt;&lt;p&gt;- d = -2*x*s*y*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN SYMMETRIC: Symmetric gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- -1 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)*2-1&lt;/p&gt;&lt;p&gt;- d = -2*x*s*(y+1)*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT: Fast (sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = ((x*s) / 2) / (1 + |x*s|) + 0.5&lt;/p&gt;&lt;p&gt;- d = s*1/(2*(1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT SYMMETRIC: Fast (symmetric sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = (x*s) / (1 + |x*s|)&lt;/p&gt;&lt;p&gt;- d = s*1/((1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE SYMMETRIC: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN SYMMETRIC: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS SYMMETRIC: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)/2&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)/2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>LINEAR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LINEAR PIECE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LINEAR PIECE SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>THRESHOLD</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>THRESHOLD SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID STEPWISE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GAUSSIAN</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GAUSSIAN SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ELLIOT</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ELLIOT SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIN</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIN SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>COS</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>COS SYMMETRIC</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>360</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Train Stop Function</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="twHideLayers">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>150</y>
+       <width>211</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string># neurons</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>type</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="cbNNTrainAlg">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>300</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;INCREMENTAL&lt;/span&gt;: Standard backpropagation algorithm, where the weights are updated after each training pattern.  This means that the weights are updated many times during a single epoch.  For this reason some problems, will train very fast with this algorithm, while other more advanced problems will not train very well.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;BATCH&lt;/span&gt;: Standard backpropagation algorithm, where the weights are updated after calculating the mean square error for the whole training set.  This means that the weights are only updated once during a epoch.  For this reason some problems, will train slower with this algorithm.  But since the mean square error is calculated more correctly than in incremental training, some problems will reach a better solutions with this algorithm.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;RETRO PROPAGATION&lt;/span&gt;: A more advanced batch training algorithm which achieves good results for many problems.  The RPROP training algorithm is adaptive, and does therefore not use the learning_rate.  Some other parameters can however be set to change the way the RPROP algorithm works, but it is only recommended for users with insight in how the RPROP training algorithm works.  The RPROP training algorithm is described by [Riedmiller and Braun, 1993], but the actual learning algorithm used here is the iRPROP- training algorithm which is described by [Igel and Husken, 2000] which is an variety of the standard RPROP training algorithm.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;QUICK PROPAGATION&lt;/span&gt;: A more advanced batch training algorithm which achieves good results for many problems.  The quickprop training algorithm uses the learning_rate parameter along with other more advanced parameters, but it is only recommended to change these advanced parameters, for users with insight in how the quickprop training algorithm works.  The quickprop training algorithm is described by [Fahlman, 1988].&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>INCREMENTAL</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>BATCH</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>RETRO PROPAGATION</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>QUICK PROPAGATION</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QDoubleSpinBox" name="bsNNTrainStop">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>390</y>
+       <width>101</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.001000000000000</double>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>NN Type</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="bsNNBitLimit">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>360</y>
+       <width>101</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>9999999.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>0.350000000000000</double>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbNNHideFunction">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>120</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The functions are described with functions where&lt;/p&gt;&lt;p&gt;- x is the input to the activation function,&lt;/p&gt;&lt;p&gt;- y is the output,&lt;/p&gt;&lt;p&gt;- s is the steepness and&lt;/p&gt;&lt;p&gt;- d is the derivation.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR: Linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -inf &amp;lt; y &amp;lt; inf&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;- Can NOT be used in fixed point.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD SYMMETRIC: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID: Sigmoid activation function&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = 1/(1 + exp(-2*s*x))&lt;/p&gt;&lt;p&gt;- d = 2*s*y*(1 - y)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID STEPWISE: Stepwise linear approximation to sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(Faster than sigmoid but a bit less precise)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID SYMMETRIC: Symmetric sigmoid activation function, aka. tanh.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1&lt;/p&gt;&lt;p&gt;- d = s*(1-(y*y))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;FANN_SIGMOID_SYMMETRIC	Stepwise linear approximation to symmetric sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Faster than symmetric sigmoid but a bit less precise.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN: Gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- 0 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)&lt;/p&gt;&lt;p&gt;- d = -2*x*s*y*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN SYMMETRIC: Symmetric gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- -1 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)*2-1&lt;/p&gt;&lt;p&gt;- d = -2*x*s*(y+1)*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT: Fast (sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = ((x*s) / 2) / (1 + |x*s|) + 0.5&lt;/p&gt;&lt;p&gt;- d = s*1/(2*(1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT SYMMETRIC: Fast (symmetric sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = (x*s) / (1 + |x*s|)&lt;/p&gt;&lt;p&gt;- d = s*1/((1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE SYMMETRIC: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN SYMMETRIC: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS SYMMETRIC: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)/2&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)/2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>LINEAR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LINEAR PIECE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LINEAR PIECE SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>THRESHOLD</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>THRESHOLD SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID STEPWISE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIGMOID SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GAUSSIAN</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GAUSSIAN SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ELLIOT</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ELLIOT SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIN</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SIN SYMMETRIC</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>COS</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>COS SYMMETRIC</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="cbNNTrainError">
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>330</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR&lt;/span&gt;: Standard linear error function.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;TANH&lt;/span&gt;: Tanh error function, usually better but can require a lower learning rate. This error function agressively targets outputs that differ much from the desired, while not targetting outputs that only differ a little that much. This activation function is not recommended for cascade training and incremental training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>LINEAR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>TANH</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_29">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>390</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Stop max. neurons / Function</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Hidden Activation Function</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbNNDelLayer">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>210</y>
+       <width>91</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>del Layer</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>300</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Train Algorithm</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbNNType">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>60</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The functions are described with functions where&lt;/p&gt;&lt;p&gt;- x is the input to the activation function,&lt;/p&gt;&lt;p&gt;- y is the output,&lt;/p&gt;&lt;p&gt;- s is the steepness and&lt;/p&gt;&lt;p&gt;- d is the derivation.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR: Linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -inf &amp;lt; y &amp;lt; inf&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;- Can NOT be used in fixed point.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD SYMMETRIC: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID: Sigmoid activation function&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = 1/(1 + exp(-2*s*x))&lt;/p&gt;&lt;p&gt;- d = 2*s*y*(1 - y)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID STEPWISE: Stepwise linear approximation to sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(Faster than sigmoid but a bit less precise)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID SYMMETRIC: Symmetric sigmoid activation function, aka. tanh.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1&lt;/p&gt;&lt;p&gt;- d = s*(1-(y*y))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;FANN_SIGMOID_SYMMETRIC Stepwise linear approximation to symmetric sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Faster than symmetric sigmoid but a bit less precise.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN: Gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- 0 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)&lt;/p&gt;&lt;p&gt;- d = -2*x*s*y*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN SYMMETRIC: Symmetric gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- -1 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)*2-1&lt;/p&gt;&lt;p&gt;- d = -2*x*s*(y+1)*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT: Fast (sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = ((x*s) / 2) / (1 + |x*s|) + 0.5&lt;/p&gt;&lt;p&gt;- d = s*1/(2*(1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT SYMMETRIC: Fast (symmetric sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = (x*s) / (1 + |x*s|)&lt;/p&gt;&lt;p&gt;- d = s*1/((1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE SYMMETRIC: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN SYMMETRIC: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS SYMMETRIC: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)/2&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)/2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <item>
+      <property name="text">
+       <string>STANDARD</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SHORTCUT</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CASCADE</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QPushButton" name="pbNNAddLayer">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>180</y>
+       <width>91</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>add Layer</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="bsNNMaxNeurons">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>390</y>
+       <width>100</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>9999999</number>
+     </property>
+     <property name="value">
+      <number>50</number>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbNNDataSrc">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>200</x>
+       <y>30</y>
+       <width>211</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The functions are described with functions where&lt;/p&gt;&lt;p&gt;- x is the input to the activation function,&lt;/p&gt;&lt;p&gt;- y is the output,&lt;/p&gt;&lt;p&gt;- s is the steepness and&lt;/p&gt;&lt;p&gt;- d is the derivation.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR: Linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -inf &amp;lt; y &amp;lt; inf&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;- Can NOT be used in fixed point.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;THRESHOLD SYMMETRIC: Threshold activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- x &amp;lt; 0 -&amp;gt; y = 0, x &amp;gt;= 0 -&amp;gt; y = 1&lt;/p&gt;&lt;p&gt;- Can NOT be used during training.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID: Sigmoid activation function&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = 1/(1 + exp(-2*s*x))&lt;/p&gt;&lt;p&gt;- d = 2*s*y*(1 - y)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID STEPWISE: Stepwise linear approximation to sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(Faster than sigmoid but a bit less precise)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIGMOID SYMMETRIC: Symmetric sigmoid activation function, aka. tanh.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;(One of the most used activation functions)&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1&lt;/p&gt;&lt;p&gt;- d = s*(1-(y*y))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;FANN_SIGMOID_SYMMETRIC Stepwise linear approximation to symmetric sigmoid.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Faster than symmetric sigmoid but a bit less precise.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN: Gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- 0 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)&lt;/p&gt;&lt;p&gt;- d = -2*x*s*y*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GAUSSIAN SYMMETRIC: Symmetric gaussian activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- -1 when x = -inf, 1 when x = 0 and 0 when x = inf&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = exp(-x*s*x*s)*2-1&lt;/p&gt;&lt;p&gt;- d = -2*x*s*(y+1)*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT: Fast (sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = ((x*s) / 2) / (1 + |x*s|) + 0.5&lt;/p&gt;&lt;p&gt;- d = s*1/(2*(1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ELLIOT SYMMETRIC: Fast (symmetric sigmoid like) activation function defined by David Elliott&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt; y &amp;lt; 1&lt;/p&gt;&lt;p&gt;- y = (x*s) / (1 + |x*s|)&lt;/p&gt;&lt;p&gt;- d = s*1/((1+|x*s|)*(1+|x*s|))&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;LINEAR PIECE SYMMETRIC: Bounded linear activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;y = x*s, d = 1*s&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN SYMMETRIC: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS SYMMETRIC: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: -1 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SIN: Periodical sinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = sin(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*cos(x*s)/2&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;COS: Periodical cosinus activation function.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- span: 0 &amp;lt;= y &amp;lt;= 1&lt;/p&gt;&lt;p&gt;- y = cos(x*s)/2+0.5&lt;/p&gt;&lt;p&gt;- d = s*-sin(x*s)/2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Simulation</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Exp/Reconstructed</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Trainning Data Source</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="twTrainControl">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>440</y>
+      <width>431</width>
+      <height>83</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tabTrainControl">
+     <attribute name="title">
+      <string>Train Control</string>
+     </attribute>
+     <widget class="QPushButton" name="pbNNStop">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>15</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&amp;Stop</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbNNTrain">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&amp;Train</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbNNLoad">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>15</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&amp;Load NN</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbNNResume">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>15</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&amp;Resume</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabTrainTest">
+     <attribute name="title">
+      <string>Test Data</string>
+     </attribute>
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Test Data (%)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="bsNNTestPerc">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>101</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="decimals">
+       <number>1</number>
+      </property>
+      <property name="minimum">
+       <double>0.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>50.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>20.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="bsNNTestStag">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>15</y>
+        <width>100</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>9999999</number>
+      </property>
+      <property name="value">
+       <number>10</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>320</x>
+        <y>20</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Stag. Epochs</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabTrainInput">
+     <attribute name="title">
+      <string>Train Input</string>
+     </attribute>
+     <widget class="QPushButton" name="pbTrainInput">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>91</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>File (&amp;Input)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbTrainInput">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>20</y>
+        <width>311</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>file name</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabTrainOutput">
+     <attribute name="title">
+      <string>Train Output</string>
+     </attribute>
+     <widget class="QPushButton" name="pbTrainOutput">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>91</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>File (&amp;Output)</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbTrainOutput">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>20</y>
+        <width>311</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>file name</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>826</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

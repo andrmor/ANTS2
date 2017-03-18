@@ -1,0 +1,20 @@
+config.Replace( "DetectorConfig.Electronics.PHS.Active" , true)
+
+var fileNameStart = "D:/tmp/sp"
+var fileNameEnd = ".dat"
+
+var obj = {}
+obj.Mode = 3
+
+var dist = [ [10,1], [11,5], [12,10], [13,8], [14,2] ]
+
+for (var i=0; i<pms.CountPM(); i++)
+{
+  //obj.Distribution = dist  //for direct setting use array of arrays
+  
+  var fileName = fileNameStart + fileNameEnd  // modify to use as a template!
+  obj.Distribution = core.loadArray(fileName, 2) 
+  
+   config.Replace( "DetectorConfig.Electronics.PHS.Data[" + i + "]" , obj)   
+}
+

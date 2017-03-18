@@ -1,0 +1,88 @@
+#ifndef DETECTORADDONSWINDOW_H
+#define DETECTORADDONSWINDOW_H
+
+#include <QMainWindow>
+
+class MainWindow;
+class DetectorClass;
+class InterfaceToAddObjScript;
+class AGeoTreeWidget;
+
+namespace Ui {
+  class DetectorAddOnsWindow;
+}
+
+class DetectorAddOnsWindow : public QMainWindow
+{
+  Q_OBJECT
+  
+public:
+  explicit DetectorAddOnsWindow(MainWindow *parent, DetectorClass* detector);
+  ~DetectorAddOnsWindow();
+
+  void UpdateGUI(); //update gui controls
+  void SetTab(int tab);
+  void UpdateDummyPMindication();
+  void HighlightVolume(QString VolName);  
+
+  InterfaceToAddObjScript *AddObjScriptInterface;
+  AGeoTreeWidget* twGeo;  // WorldTree widget
+
+private slots:
+  void onReconstructDetectorRequest();
+
+  void on_pbConvertToDummies_clicked();
+
+  void on_sbDummyPMindex_valueChanged(int arg1);
+
+  void on_pbDeleteDummy_clicked();
+
+  void on_pbConvertDummy_clicked();
+
+  void on_pbUpdateDummy_clicked();
+
+  void on_pbCreateNewDummy_clicked();
+
+  void on_sbDummyType_valueChanged(int arg1);
+
+  void on_pbLoadDummyPMs_clicked();
+
+  void on_pbConvertAllToPMs_clicked();
+
+  void on_pbUseScriptToAddObj_clicked();
+
+  void on_pbSaveTGeo_clicked();
+
+  void on_pbLoadTGeo_clicked();
+
+  void on_pbBackToSandwich_clicked();
+
+  void on_pbRootWeb_clicked();
+
+  void on_pbCheckGeometry_clicked();
+
+  void on_cbAutoCheck_clicked(bool checked);
+
+  void on_pbRunTestParticle_clicked();
+
+  void on_cbAutoCheck_stateChanged(int arg1);
+
+  void on_pmParseInGeometryFromGDML_clicked();
+
+private:
+  Ui::DetectorAddOnsWindow *ui;
+  MainWindow* MW;
+  DetectorClass* Detector;
+  QString ObjectScriptTarget;
+
+  void ConvertDummyToPM(int idpm);
+
+public slots:
+  void UpdateGeoTree();
+  void AddObjScriptSuccess();
+  void ReportScriptError(QString ErrorMessage);
+  void ShowObject(QString name = "");
+  void ShowObjectRecursive(QString name);
+};
+
+#endif // DETECTORADDONSWINDOW_H

@@ -34,10 +34,10 @@
 static void autoLoadPlugins() {
   typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
 
-  qDebug() << "Loading plugins from 'plugins' directory";
+  //qDebug() << "Loading plugins from 'plugins' directory";
   QDir plugins_dir(qApp->applicationDirPath());
   if(!plugins_dir.cd("plugins")) {
-    qDebug()<<"Failed to change to plugins directory";
+    qDebug()<<"LRF_v3 plugin loader: '/plugins' directory not found";
     return;
   }
 
@@ -45,17 +45,17 @@ static void autoLoadPlugins() {
     QString full_path = plugins_dir.absoluteFilePath(file_name);
     QLibrary plugin(full_path);
     if(!plugin.load()) {
-      qDebug()<<"Failed to open"<<file_name<<"plugin:";
+      qDebug()<<"LRF_v3 plugin loader: failed to open"<<file_name<<"\n";
       qDebug()<<plugin.errorString();
     }
     else {
       auto plugin_setup = (LrfPluginSetupFn)plugin.resolve("Setup");
       if(plugin_setup) {
         plugin_setup(LRF::ALrfTypeManager::instance());
-        qDebug()<<"Setup"<<file_name<<"plugin";
+        qDebug()<<"LRF_v3 plugin loader: loaded and configured"<<file_name<<"plugin";
       }
       else
-        qDebug()<<"Failed to setup"<<file_name<<"plugin";
+        qDebug()<<"LRF_v3 plugin loader: failed to configure"<<file_name<<"plugin";
     }
   }
 }

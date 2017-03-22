@@ -2538,8 +2538,7 @@ void MainWindow::LoadPMsignalsRequested()
 #endif
     }
 
-  fStopLoadRequested = false;
-  WindowNavigator->BusyOn();
+  fStopLoadRequested = false;  
   ui->fLoadProgress->setVisible(true);
   ui->pbStopLoad->setVisible(true);
   QString SnumFiles = QString::number(fileNames.size());
@@ -2566,7 +2565,6 @@ void MainWindow::LoadPMsignalsRequested()
     }
   ui->fLoadProgress->setVisible(false);
   ui->pbStopLoad->setVisible(false);
-  WindowNavigator->BusyOff(false);
   if (!EventsDataHub->Events.isEmpty())
     {
       ui->cbPMsignalPreProcessing->setEnabled(true);      
@@ -4564,10 +4562,13 @@ void MainWindow::on_pbManifestFileHelp_clicked()
 
 void MainWindow::on_pbLoadAppendFiles_clicked()
 { 
-   if (ui->cobLoadDataType->currentIndex() == 0)
-     MainWindow::LoadPMsignalsRequested();
-   else
-     MainWindow::LoadSimTreeRequested();
+   WindowNavigator->BusyOn();
+   qApp->processEvents();
+
+   if (ui->cobLoadDataType->currentIndex() == 0) LoadPMsignalsRequested();
+   else LoadSimTreeRequested();
+
+   WindowNavigator->BusyOff();
 }
 
 void MainWindow::on_sbLoadASCIIpositionXchannel_valueChanged(int arg1)
@@ -4797,8 +4798,7 @@ void MainWindow::on_pbSurfaceWLS_LoadSpec_clicked()
 }
 
 void MainWindow::on_pbUpdatePreprocessingSettings_clicked()
-{    
-    qDebug() << "naaaaaaaaaaaaaaaaaaaaaaaaa";
+{
     writeLoadExpDataConfigToJson(Detector->PreprocessingJson);
     Detector->writeToJson(Config->JSON);
 

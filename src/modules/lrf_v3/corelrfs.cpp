@@ -293,11 +293,11 @@ void ASlicedXY::getXYRange(double &xmin, double &xmax, double &ymin, double &yma
 /***************************************************************************\
 *                   Implementation of Script and related                    *
 \***************************************************************************/
-std::vector<AScript::ParamInfo> AScript::getScriptParams(QScriptValue script_var)
+std::vector<AScriptParamInfo> AScript::getScriptParams(QScriptValue script_var)
 {
   //Parameters are variables not starting with _ which are: numbers, or objects
   // which contain init and/or min+max
-  std::vector<AScript::ParamInfo> param_info;
+  std::vector<AScriptParamInfo> param_info;
   QScriptValueIterator val(script_var);
   while (val.hasNext()) {
     val.next();
@@ -310,7 +310,7 @@ std::vector<AScript::ParamInfo> AScript::getScriptParams(QScriptValue script_var
     if(param_obj.isFunction())
       continue;
 
-    AScript::ParamInfo pinfo(script_var.engine()->toStringHandle(val.name()));
+    AScriptParamInfo pinfo(script_var.engine()->toStringHandle(val.name()));
     if(param_obj.isNumber()) {
       pinfo.init = param_obj.toNumber();
     } else if(param_obj.isObject()) {
@@ -406,10 +406,32 @@ void AScript::setSigmaVar(QScriptString name)
 }
 
 
+QScriptValueList AScriptPolar::makeArguments(const APoint &pos) const
+{
+  QScriptValueList args;
+  for(EvalArgument arg : arguments) {
+    switch(arg) {
+      case EvalArgument::local_coords: {
+        APoint p = transf.inverse(pos);
+        QScriptValue arr = script_var.engine()->newArray(1);
+        arr.setProperty(0, p.normxy());
+        args<<arr;
+      } break;
+      case EvalArgument::global_coords: {
+        QScriptValue arr = script_var.engine()->newArray(1);
+        arr.setProperty(0, pos.normxy());
+        args<<arr;
+      } break;
+      default: args<<0;
+    }
+  }
+  return args;
+}
+
 AScriptPolar::AScriptPolar(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection,
-                     QScriptString name, const QString &script,/* std::vector<ParamInfo> params,*/
+                     QScriptString name, const QString &script,
                      double rmax, const ATransform &t)
-  : AScript(type, lrf_collection, name, script, /*params,*/ t), rmax(rmax)
+  : AScript(type, lrf_collection, name, script, t), rmax(rmax)
 { }
 
 bool AScriptPolar::inDomain(const APoint &pos) const
@@ -419,52 +441,14 @@ bool AScriptPolar::inDomain(const APoint &pos) const
 
 double AScriptPolar::eval(const APoint &pos) const
 {
-  QScriptValueList args;
-  for(EvalArgument arg : arguments) {
-    switch(arg) {
-      case EvalArgument::local_coords: {
-        APoint p = transf.inverse(pos);
-        QScriptValue arr = script_var.engine()->newArray(2);
-        arr.setProperty(0, p.normxy());
-        arr.setProperty(1, p.z());
-        args<<arr;
-      } break;
-      case EvalArgument::global_coords: {
-        QScriptValue arr = script_var.engine()->newArray(2);
-        arr.setProperty(0, pos.normxy());
-        arr.setProperty(1, pos.z());
-        args<<arr;
-      } break;
-      default: args<<0;
-    }
-  }
-  QScriptValue res = script_eval->call(script_var, args);
+  QScriptValue res = script_eval->call(script_var, makeArguments(pos));
   //toNumber may throw exception in engine. The result is undefined.
   return res.toNumber();
 }
 
 double AScriptPolar::sigma(const APoint &pos) const
 {
-  QScriptValueList args;
-  for(EvalArgument arg : arguments) {
-    switch(arg) {
-      case EvalArgument::local_coords: {
-        APoint p = transf.inverse(pos);
-        QScriptValue arr = script_var.engine()->newArray(2);
-        arr.setProperty(0, p.normxy());
-        arr.setProperty(1, p.z());
-        args<<arr;
-      } break;
-      case EvalArgument::global_coords: {
-        QScriptValue arr = script_var.engine()->newArray(2);
-        arr.setProperty(0, pos.normxy());
-        arr.setProperty(1, pos.z());
-        args<<arr;
-      } break;
-      default: args<<0;
-    }
-  }
-  QScriptValue res = script_sigma->call(script_var_sigma, args);
+  QScriptValue res = script_sigma->call(script_var_sigma, makeArguments(pos));
   //toNumber may throw exception in engine. The result is undefined.
   return res.toNumber();
 }
@@ -496,11 +480,89 @@ void AScriptPolar::getXYRange(double &xmin, double &xmax, double &ymin, double &
 }
 
 
+QScriptValueList AScriptPolarZ::makeArguments(const APoint &pos) const
+{
+  QScriptValueList args;
+  for(EvalArgument arg : arguments) {
+    switch(arg) {
+      case EvalArgument::local_coords: {
+        APoint p = transf.inverse(pos);
+        QScriptValue arr = script_var.engine()->newArray(2);
+        arr.setProperty(0, p.normxy());
+        arr.setProperty(1, p.z());
+        args<<arr;
+      } break;
+      case EvalArgument::global_coords: {
+        QScriptValue arr = script_var.engine()->newArray(2);
+        arr.setProperty(0, pos.normxy());
+        arr.setProperty(1, pos.z());
+        args<<arr;
+      } break;
+      default: args<<0;
+    }
+  }
+  return args;
+}
+
+AScriptPolarZ::AScriptPolarZ(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection,
+                             QScriptString name, const QString &script, double rmax, const ATransform &t)
+  : AScriptPolar(type, lrf_collection, name, script, rmax, t)
+{
+
+}
+
+double AScriptPolarZ::eval(const APoint &pos) const
+{
+  QScriptValue res = script_eval->call(script_var, makeArguments(pos));
+  //toNumber may throw exception in engine. The result is undefined.
+  return res.toNumber();
+}
+
+double AScriptPolarZ::sigma(const APoint &pos) const
+{
+  QScriptValue res = script_sigma->call(script_var_sigma, makeArguments(pos));
+  //toNumber may throw exception in engine. The result is undefined.
+  return res.toNumber();
+}
+
+ALrf *AScriptPolarZ::clone() const
+{
+  QScriptString new_name = deepCopyScriptVar();
+
+  AScriptPolarZ *lrf = new AScriptPolarZ(type(), lrf_collection, new_name, script, rmax, transf);
+  lrf->setSigmaVar(name_sigma);
+  return lrf;
+}
+
+
+QScriptValueList AScriptCartesian::makeArguments(const APoint &pos) const
+{
+  QScriptValueList args;
+  for(EvalArgument arg : arguments) {
+    switch(arg) {
+      case EvalArgument::local_coords: {
+        APoint inv = transf.inverse(pos);
+        QScriptValue arr = script_var.engine()->newArray(2);
+        arr.setProperty(0, inv[0]);
+        arr.setProperty(1, inv[1]);
+        args<<arr;
+      } break;
+      case EvalArgument::global_coords: {
+        QScriptValue arr = script_var.engine()->newArray(2);
+        arr.setProperty(0, pos[0]);
+        arr.setProperty(1, pos[1]);
+        args<<arr;
+      } break;
+      default: args<<0;
+    }
+  }
+  return args;
+}
+
 AScriptCartesian::AScriptCartesian(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection,
-                     QScriptString name, const QString &script,
-                     /*std::vector<AScript::ParamInfo> params,*/ double xmin,
+                     QScriptString name, const QString &script, double xmin,
                      double xmax, double ymin, double ymax, const ATransform &t)
-  : AScript(type, lrf_collection, name, script, /*params,*/ t),
+  : AScript(type, lrf_collection, name, script, t),
     xmin(xmin), xmax(xmax), ymin(ymin), ymax(ymax)
 { }
 
@@ -512,58 +574,14 @@ bool AScriptCartesian::inDomain(const APoint &pos) const
 
 double AScriptCartesian::eval(const APoint &pos) const
 {
-  QScriptValueList args;
-  for(EvalArgument arg : arguments) {
-    switch(arg) {
-      case EvalArgument::local_coords: {
-        APoint inv = transf.inverse(pos);
-        QScriptValue arr = script_var.engine()->newArray(3);
-        arr.setProperty(0, inv[0]);
-        arr.setProperty(1, inv[1]);
-        arr.setProperty(2, inv[2]);
-        args<<arr;
-      } break;
-      case EvalArgument::global_coords: {
-        QScriptValue arr = script_var.engine()->newArray(3);
-        arr.setProperty(0, pos[0]);
-        arr.setProperty(1, pos[1]);
-        arr.setProperty(2, pos[2]);
-        args<<arr;
-      } break;
-      default: args<<0;
-    }
-  }
-
-  QScriptValue res = script_eval->call(script_var, args);
+  QScriptValue res = script_eval->call(script_var, makeArguments(pos));
   //toNumber may throw exception in engine. The result is undefined.
   return res.toNumber();
 }
 
 double AScriptCartesian::sigma(const APoint &pos) const
 {
-  QScriptValueList args;
-  for(EvalArgument arg : arguments) {
-    switch(arg) {
-      case EvalArgument::local_coords: {
-        APoint inv = transf.inverse(pos);
-        QScriptValue arr = script_var.engine()->newArray(3);
-        arr.setProperty(0, inv[0]);
-        arr.setProperty(1, inv[1]);
-        arr.setProperty(2, inv[2]);
-        args<<arr;
-      } break;
-      case EvalArgument::global_coords: {
-        QScriptValue arr = script_var.engine()->newArray(3);
-        arr.setProperty(0, pos[0]);
-        arr.setProperty(1, pos[1]);
-        arr.setProperty(2, pos[2]);
-        args<<arr;
-      } break;
-      default: args<<0;
-    }
-  }
-
-  QScriptValue res = script_sigma->call(script_var_sigma, args);
+  QScriptValue res = script_sigma->call(script_var_sigma, makeArguments(pos));
   //toNumber may throw exception in engine. The result is undefined.
   return res.toNumber();
 }
@@ -593,6 +611,63 @@ void AScriptCartesian::getXYRange(double &xmin, double &xmax, double &ymin, doub
   xmax = center.x() + this->xmax;
   ymin = center.y() + this->ymin;
   ymax = center.y() + this->ymax;
+}
+
+
+QScriptValueList AScriptCartesianZ::makeArguments(const APoint &pos) const
+{
+  QScriptValueList args;
+  for(EvalArgument arg : arguments) {
+    switch(arg) {
+      case EvalArgument::local_coords: {
+        APoint inv = transf.inverse(pos);
+        QScriptValue arr = script_var.engine()->newArray(3);
+        arr.setProperty(0, inv[0]);
+        arr.setProperty(1, inv[1]);
+        arr.setProperty(2, inv[2]);
+        args<<arr;
+      } break;
+      case EvalArgument::global_coords: {
+        QScriptValue arr = script_var.engine()->newArray(3);
+        arr.setProperty(0, pos[0]);
+        arr.setProperty(1, pos[1]);
+        arr.setProperty(2, pos[2]);
+        args<<arr;
+      } break;
+      default: args<<0;
+    }
+  }
+  return args;
+}
+
+AScriptCartesianZ::AScriptCartesianZ(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection,
+                                     QScriptString name, const QString &script, double xmin,
+                                     double xmax, double ymin, double ymax, const ATransform &t)
+  : AScriptCartesian(type, lrf_collection, name, script, xmin, xmax, ymin, ymax, t)
+{ }
+
+double AScriptCartesianZ::eval(const APoint &pos) const
+{
+  QScriptValue res = script_eval->call(script_var, makeArguments(pos));
+  //toNumber may throw exception in engine. The result is undefined.
+  return res.toNumber();
+}
+
+double AScriptCartesianZ::sigma(const APoint &pos) const
+{
+  QScriptValue res = script_sigma->call(script_var_sigma, makeArguments(pos));
+  //toNumber may throw exception in engine. The result is undefined.
+  return res.toNumber();
+}
+
+ALrf *AScriptCartesianZ::clone() const
+{
+  QScriptString new_name = deepCopyScriptVar();
+
+  AScriptCartesianZ *lrf = new AScriptCartesianZ(type(), lrf_collection, new_name, script,
+                                               xmin, xmax, ymin, ymax, transf);
+  lrf->setSigmaVar(name_sigma);
+  return lrf;
 }
 
 } } //namespace LRF::CoreLrfs

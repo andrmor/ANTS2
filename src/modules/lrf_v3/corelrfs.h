@@ -186,18 +186,17 @@ public:
 };
 
 
+class AScriptParamInfo {
+public:
+  QScriptString name;
+  double init, min, max;
+  AScriptParamInfo() : init(0), min(0), max(0) {}
+  AScriptParamInfo(QScriptString name, double init = 0, double min = 0, double max = 0)
+    : name(name), init(init), min(min), max(max) { }
+};
 //TODO: provide better debuggin capabilities by outputting script exceptions
 class AScript : public ARelativeLrf
 {
-public:
-  struct ParamInfo {
-    QScriptString name;
-    double init, min, max;
-    ParamInfo() : init(0), min(0), max(0) {}
-    ParamInfo(QScriptString name, double init = 0, double min = 0, double max = 0)
-      : name(name), init(init), min(min), max(max) { }
-  };
-
 protected:
   enum class EvalArgument {
     local_coords,
@@ -223,7 +222,7 @@ protected:
   //std::vector<ParamInfo> params;
 
 public:
-  static std::vector<AScript::ParamInfo> getScriptParams(QScriptValue script_var);
+  static std::vector<AScriptParamInfo> getScriptParams(QScriptValue script_var);
   static QStringList getFunctionArgumentNames(QScriptValue &function);
 
   AScript(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection, QScriptString name,
@@ -245,6 +244,8 @@ public:
 
 class AScriptPolar : public AScript
 {
+  QScriptValueList makeArguments(const APoint &pos) const;
+protected:
   double rmax;
 public:
   AScriptPolar(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection, QScriptString name,
@@ -262,8 +263,23 @@ public:
   double getRmax() const { return rmax; }
 };
 
+class AScriptPolarZ : public AScriptPolar
+{
+  QScriptValueList makeArguments(const APoint &pos) const;
+public:
+  AScriptPolarZ(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection, QScriptString name,
+            const QString &script, double rmax,
+            const ATransform &t = ATransform());
+
+  double eval(const APoint &pos) const override;
+  double sigma(const APoint &pos) const override;
+  ALrf *clone() const override;
+};
+
 class AScriptCartesian : public AScript
 {
+  QScriptValueList makeArguments(const APoint &pos) const;
+protected:
   double xmin, xmax; 	// xrange
   double ymin, ymax; 	// yrange
 public:
@@ -283,6 +299,20 @@ public:
   double getXmax() const { return xmax; }
   double getYmin() const { return ymin; }
   double getYmax() const { return ymax; }
+};
+
+
+class AScriptCartesianZ : public AScriptCartesian
+{
+  QScriptValueList makeArguments(const APoint &pos) const;
+public:
+  AScriptCartesianZ(ALrfTypeID type, std::shared_ptr<QScriptValue> lrf_collection, QScriptString name,
+            const QString &script, double xmin,
+            double xmax, double ymin, double ymax, const ATransform &t = ATransform());
+
+  double eval(const APoint &pos) const override;
+  double sigma(const APoint &pos) const override;
+  ALrf *clone() const override;
 };
 
 } } //namespace LRF::CoreLrfs

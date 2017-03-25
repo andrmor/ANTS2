@@ -6,12 +6,15 @@
 class QScriptEngine;
 class QScriptValue;
 class QScriptString;
+class TFitResultPtr;
 
 namespace LRF {
 
 class ALrfTypeManager;
 
 namespace CoreLrfs {
+
+class AScriptParamInfo;
 
 void Setup(ALrfTypeManager &manager);
 
@@ -107,6 +110,8 @@ protected:
   QScriptString evaluateScript(QString script_code) const;
   QScriptString copyScriptToCurrentThread(std::shared_ptr<const ALrf> lrf, std::shared_ptr<QScriptValue> &lrf_collection) const;
   bool loadScriptVarFromJson(const QJsonObject &json, QScriptValue &var, QScriptValue &var_sigma) const;
+  bool rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
+                          const TFitResultPtr &fit, QScriptValue &script_var) const;
 
 public:
   QJsonObject lrfToJson(const ALrf *lrf) const override;
@@ -117,9 +122,10 @@ public:
 };
 
 class ScriptPolarType : public ScriptType {
+  bool with_z;
 public:
-  ScriptPolarType() : ScriptType("Script Polar") { }
-  std::string nameUi() const override { return "Polar"; }
+  ScriptPolarType(bool with_z) : ScriptType(std::string("Script Polar")+(with_z?"+Z":"")), with_z(with_z) { }
+  std::string nameUi() const override { return with_z ? "Polar+Z" : "Polar"; }
   QJsonObject lrfToJson(const ALrf *lrf) const override;
 
   ALrf *lrfFromData(const QJsonObject &settings, bool fit_error,
@@ -136,9 +142,10 @@ public:
 };
 
 class ScriptCartesianType : public ScriptType {
+  bool with_z;
 public:
-  ScriptCartesianType() : ScriptType("Script Cartesian") { }
-  std::string nameUi() const override { return "Cartesian"; }
+  ScriptCartesianType(bool with_z) : ScriptType(std::string("Script Cartesian")+(with_z?"+Z":"")), with_z(with_z) { }
+  std::string nameUi() const override { return with_z ? "Cartesian+Z" : "Cartesian"; }
   QJsonObject lrfToJson(const ALrf *lrf) const override;
 
   ALrf *lrfFromData(const QJsonObject &settings, bool fit_error,

@@ -516,6 +516,7 @@ void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
 
   QByteArray ba = fileName.toLocal8Bit();
   const char *c_str = ba.data();
+  Detector->GeoManager->SetName("geometry");
   Detector->GeoManager->Export(c_str);
 }
 

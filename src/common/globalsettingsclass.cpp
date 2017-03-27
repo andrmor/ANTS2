@@ -2,6 +2,7 @@
 #include "ajsontools.h"
 #include "anetworkmodule.h"
 #include "ascriptmanager.h"
+#include "amessage.h"
 
 #ifdef GUI
 #include "globalsettingswindowclass.h"
@@ -64,6 +65,17 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
 
     //dir where examples will be copied
   ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES";
+
+#ifdef Q_OS_WIN32
+  if (!QDir(ExamplesDir).exists())  //direct call of ants2.exe
+  {
+      QDir dir = QDir::current();
+      dir.cdUp();
+      QString candidate = dir.absolutePath() + "/EXAMPLES";
+      if (QDir(candidate).exists())
+          ExamplesDir = candidate;
+  }
+#endif
 //   qDebug() << "-examples-"<<ExamplesDir;
 
     //dir for tmp saves

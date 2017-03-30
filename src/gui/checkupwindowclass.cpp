@@ -123,14 +123,16 @@ TriState CheckUpWindowClass::CheckGeoOverlaps()
     {
         ui->overlaplist->setVisible(false);
         ui->labelOverlaps->setVisible(false);
+        ui->labOver->setVisible(false);
         return setTabState(0, TriStateError);
     }
 
     int overlapCount = MW->Detector->checkGeoOverlaps();
     TObjArray* overlaps = MW->Detector->GeoManager->GetListOfOverlaps();
 
-    ui->overlaplist->setVisible(overlapCount);
-    ui->labelOverlaps->setVisible(!overlapCount);
+    ui->overlaplist->setVisible(overlapCount>0);
+    ui->labOver->setVisible(overlapCount>0);
+    ui->labelOverlaps->setVisible(overlapCount==0);
     ui->overlaplist->clear();
 
     for (Int_t i=0; i<overlapCount; i++)
@@ -345,17 +347,17 @@ void CheckUpWindowClass::adjustTable(QTableWidget *table, int maxw, int maxh)
 
 void CheckUpWindowClass::resizeEvent(QResizeEvent *ev)
 {
-    ui->tabWidget->resize(ev->size().width(), ev->size().height());
-    adjustTable(ui->opticsTable);
-    adjustTable(ui->pmtsTable);
+//    ui->tabWidget->resize(ev->size().width(), ev->size().height());
+//    adjustTable(ui->opticsTable);
+//    adjustTable(ui->pmtsTable);
 
-    ui->buttonRefreshAll->move(this->width()-ui->buttonRefreshAll->width(), 0);
-    ui->buttonRefreshCurrent->move(ui->buttonRefreshAll->x()-ui->buttonRefreshCurrent->width(), 0);
+//    ui->buttonRefreshAll->move(this->width()-ui->buttonRefreshAll->width(), 0);
+//    ui->buttonRefreshCurrent->move(ui->buttonRefreshAll->x()-ui->buttonRefreshCurrent->width(), 0);
 
-    //Adjust interactions text list
-    const QPoint &pos = ui->listInteraction->pos();
-    //Subtract 2*Tab bar height and 2*pos with a bit extra right margin. Still not perfect but... Close enough! :)
-    ui->listInteraction->resize(ui->tabWidget->size() - 2*QSize(pos.x()+2, pos.y()+ui->tabWidget->tabBar()->height()));
+//    //Adjust interactions text list
+//    const QPoint &pos = ui->listInteraction->pos();
+//    //Subtract 2*Tab bar height and 2*pos with a bit extra right margin. Still not perfect but... Close enough! :)
+//    ui->listInteraction->resize(ui->tabWidget->size() - 2*QSize(pos.x()+2, pos.y()+ui->tabWidget->tabBar()->height()));
 }
 
 void CheckUpWindowClass::showEvent(QShowEvent *ev)

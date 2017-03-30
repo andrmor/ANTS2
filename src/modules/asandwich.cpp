@@ -493,6 +493,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         //creating volume
         if (obj->ObjectType->isComposite())
         {
+            //qDebug() << "Composite:"<<obj->Name;
             AGeoObject* logicals = obj->getContainerWithLogical();
             if (!logicals)
             {
@@ -525,7 +526,9 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
                         logicals->HostedObjects.at(i)->Position[2],
                         lRot);
                 lTrans->RegisterYourself();
+                //qDebug() << "  member name:"<<name<<"  trans name:"<<TransName;
             }           
+
 
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
@@ -964,9 +967,9 @@ void ASandwich::readFromJson(QJsonObject &json)
       if (js.contains("WorldTree"))
         {
           //qDebug() << "...Loading WorldTree";
-          QJsonArray arrTree = js["WorldTree"].toArray();         
-          int index = 0;
-          World->readAllFromJarr(World, arrTree, index);
+          QJsonArray arrTree = js["WorldTree"].toArray();
+          World->readAllFromJarr(World, arrTree);
+          //qDebug() << "...done!";
         }
       else
           qDebug() << "...Json does not contain WordTree";

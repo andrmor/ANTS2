@@ -52,7 +52,7 @@ public:
   bool isParticleOneOfSecondary(int iParticle, QString* matNames = 0) const; //optional matNames - if provided,returns there a list of materials where this particle is secondary
 
   //Material handling
-  void AddNewMaterial();
+  void AddNewMaterial(bool fSuppressChangedSignal=false);
   void AddNewMaterial(QString name);
   void UpdateMaterial(int index, QString name, double density, double atomicDensity, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3);
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index

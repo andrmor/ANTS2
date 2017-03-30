@@ -414,7 +414,7 @@ bool DetectorClass::makeSandwichDetector()
   QJsonObject js = Config->JSON["DetectorConfig"].toObject();
 
   MpCollection->readFromJson(js);
-  PMs->readPMtypesFromJson(js);  
+  PMs->readPMtypesFromJson(js);
   readPMarraysFromJson(js);  
   PMdummies.clear();
   readDummyPMsFromJson(js);  

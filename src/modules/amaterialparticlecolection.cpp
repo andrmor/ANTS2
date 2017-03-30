@@ -148,7 +148,7 @@ void AMaterialParticleCollection::clearMaterialCollection()
   AMaterialParticleCollection::ClearTmpMaterial();
 }
 
-void AMaterialParticleCollection::AddNewMaterial()
+void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
 {
   AMaterial *m = new AMaterial;
 
@@ -201,7 +201,7 @@ void AMaterialParticleCollection::AddNewMaterial()
   tmpMaterial.OpticalOverrides.resize(numMats);
   for (int i=0; i<numMats; i++) tmpMaterial.OpticalOverrides[thisMat] = 0;
 
-  generateMaterialsChangedSignal();
+  if (!fSuppressChangedSignal) generateMaterialsChangedSignal();
 }
 
 void AMaterialParticleCollection::AddNewMaterial(QString name)
@@ -971,7 +971,7 @@ bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
   for (int i=0; i<ar.size(); i++)
     {
       QJsonObject jj = ar[i].toObject();
-      AMaterialParticleCollection::AddNewMaterial(); //also initialize overrides
+      AMaterialParticleCollection::AddNewMaterial(true); //also initialize overrides
       MaterialCollectionData.last()->readFromJson(jj, this);
     }
   int numMats = countMaterials();

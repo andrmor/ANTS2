@@ -34,97 +34,14 @@
 static QVector<TrackHolderClass> tracks;
 static TVector3 NormViz;
 
-#include <TFile.h>
-#include <TMemFile.h>
-#include <TNtuple.h>
-#include <TH2.h>
-#include <TProfile.h>
-#include <TCanvas.h>
-#include <TFrame.h>
-#include <TROOT.h>
-#include <TSystem.h>
-#include <TRandom3.h>
-#include <TInterpreter.h>
-
-#ifdef USE_ROOT_HTML
-#include <THttpServer.h>
-#endif
-
-//static THttpServer* serv1 = new THttpServer("http:8080");
-//static TH1D* hist1;
-
-bool drawIfFound1(TGeoNode* node, TString name)
-{
-    qDebug() << node->GetName()<<"  of  "<<node->GetVolume()->GetName();
-    if (node->GetName() == name)
-    {
-        qDebug() << "Found!!!";
-        TGeoVolume* vol = node->GetVolume();
-        vol->SetLineColor(2);
-        node->GetMotherVolume()->Draw();
-        return true;
-    }
-
-    int totNodes = node->GetNdaughters();
-    //qDebug() << "Nodes:"<<totNodes;
-    for (int i=0; i<totNodes; i++)
-    {
-        //qDebug() << "#"<<i;
-        TGeoNode* daugtherNode = node->GetDaughter(i);
-        //qDebug() << daugtherNode;
-        if ( drawIfFound1(daugtherNode, name) ) return true;
-      }
-    return false;
-}
-
 void MainWindow::on_pobTest_clicked()
-{    
-    GeometryWindow->ShowAndFocus();
-    Detector->GeoManager->ViewLeaves(false);
-    GeometryWindow->UpdateRootCanvas();
-    drawIfFound1(Detector->GeoManager->GetTopNode(), "a1_0");
-    GeometryWindow->UpdateRootCanvas();
+{
 
-    GeometryWindow->ShowAndFocus();
-    Detector->GeoManager->ViewLeaves(false);
-    drawIfFound1(Detector->GeoManager->GetTopNode(), "a1_0");
-    GeometryWindow->UpdateRootCanvas();
-
-/*
-    Detector->GeoManager->SetName("aha");
-    Detector->GeoManager->SetTitle("aha");
-
-    Detector->GeoManager->SaveAs("d:/tmp/geoManager.root");
-    Detector->GeoManager->SaveAs("d:/tmp/geoManager.json");
-
-    Detector->GeoManager->GetTopNode()->SaveAs("d:/tmp/top.root");
-    Detector->GeoManager->GetTopNode()->SaveAs("d:/tmp/top.json");
-    */
-
-#ifdef USE_ROOT_HTML
-
-//   serv1->SetJSROOT("https://root.cern/js/latest/");
-
-//   hist1 = new TH1D("Testrndm","uniform", GlobSet->BinsX, 0,1.);
-//   for (int i=0; i<100000; i++) hist1->Fill(Detector->RandGen->Rndm());
-//   serv1->Register("ran", hist1);
-
-//   serv1->Register("geom", Detector->GeoManager->GetTopNode());
-//   serv1->Register("geoMan", Detector->GeoManager);//->GetTopNode());
-
-   //    use: http://localhost:8080/
-#endif
 }
 
 void MainWindow::on_pobTest_2_clicked()
 {
-//    serv1->Unregister(hist1);
 
-//    hist1 = new TH1D("Testrndm","uniform", GlobSet->BinsX, 0,1.);
-//    for (int i=0; i<100000; i++) hist1->Fill(Detector->RandGen->Rndm());
-//    GraphWindow->Draw(hist1);
-
-//    serv1->Register("ran", hist1);
 }
 
 /*

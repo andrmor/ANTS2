@@ -34,7 +34,7 @@ public:
 
   //recursive json, using single object json
   void writeAllToJarr(QJsonArray& jarr);
-  void readAllFromJarr(AGeoObject *obj, QJsonArray& jarr, int &index);
+  void readAllFromJarr(AGeoObject *World, QJsonArray& jarr);
 
   ATypeObject* ObjectType;
   AGeoShape* Shape;

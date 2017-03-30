@@ -33,6 +33,8 @@
 #include "TROOT.h"
 #include "TGeoBBox.h"
 #include "TGeoTube.h"
+#include "TGeoBoolNode.h"
+#include "TGeoCompositeShape.h"
 
 DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *detector) :
   QMainWindow(parent),
@@ -562,12 +564,9 @@ TVector3 euler(TMatrixD R)
     return TVector3(thetaZ0, thetaX, thetaZ1);
 }
 
-#include "TGeoBoolNode.h"
-#include "TGeoCompositeShape.h"
-void processNonComposite(TGeoShape* Tshape, const TGeoMatrix* Matrix, QVector<AGeoObject*>& LogicalObjects)
-{
-    QString Name = Tshape->GetName();
-    //qDebug() << "Left:"<<Name<<Tshape->ClassName();
+void processNonComposite(QString Name, TGeoShape* Tshape, const TGeoMatrix* Matrix, QVector<AGeoObject*>& LogicalObjects)
+{    
+    //qDebug() << Name;
     TGeoTranslation trans(*Matrix);
     //qDebug() << "Translation:"<<trans.GetTranslation()[0]<<trans.GetTranslation()[1]<<trans.GetTranslation()[2];
     TGeoRotation rot(*Matrix);
@@ -640,8 +639,8 @@ void processTCompositeShape(TGeoCompositeShape* Tshape, QVector<AGeoObject*>& Lo
     {
         QString leftNameBase = leftName = left->GetName();
         while (isLogicalObjectsHaveName(LogicalObjects, leftName))
-            leftName = leftNameBase + "_" + AGeoObject::GenerateRandomName();
-        processNonComposite(left, n->GetLeftMatrix(), LogicalObjects);
+            leftName = leftNameBase + "_" + AGeoObject::GenerateRandomName();       
+        processNonComposite(leftName, left, n->GetLeftMatrix(), LogicalObjects);
     }
 
     TGeoShape* right = n->GetRightShape();
@@ -659,8 +658,8 @@ void processTCompositeShape(TGeoCompositeShape* Tshape, QVector<AGeoObject*>& Lo
     {
         QString rightNameBase = rightName = right->GetName();
         while (isLogicalObjectsHaveName(LogicalObjects, rightName))
-            rightName = rightNameBase + "_" + AGeoObject::GenerateRandomName();
-        processNonComposite(right, n->GetRightMatrix(), LogicalObjects);
+            rightName = rightNameBase + "_" + AGeoObject::GenerateRandomName();        
+        processNonComposite(rightName, right, n->GetRightMatrix(), LogicalObjects);
     }
 
     GenerationString = " " + leftName + operationStr + rightName + " ";
@@ -712,7 +711,7 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
 
             QVector<AGeoObject*> AllLogicalObjects;
             QString GenerationString;
-            processTCompositeShape(tshape, AllLogicalObjects, GenerationString);
+            processTCompositeShape(tshape, AllLogicalObjects, GenerationString);            
             AGeoComposite* cshape = static_cast<AGeoComposite*>(Ashape);
             cshape->GenerationString = "TGeoCompositeShape(" + GenerationString + ")";
             for (AGeoObject* ob : AllLogicalObjects)
@@ -721,7 +720,7 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
                 logicals->addObjectLast(ob);
                 cshape->members << ob->Name;
             }
-            qDebug() << cshape->GenerationString;// << cshape->members;
+            //qDebug() << cshape->GenerationString;// << cshape->members;
 
             fOK = true;
         }

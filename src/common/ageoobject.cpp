@@ -292,57 +292,47 @@ void AGeoObject::writeAllToJarr(QJsonArray &jarr)
     HostedObjects[i]->writeAllToJarr(jarr);
 }
 
-void AGeoObject::readAllFromJarr(AGeoObject* obj, QJsonArray &jarr, int &index)
+void AGeoObject::readAllFromJarr(AGeoObject* World, QJsonArray &jarr)
 {
-   //qDebug() << "Read all from array, index ="<<index<<" Previous object:"<<obj->Name;
-   if (index > jarr.size()-1) return;
+   int size = jarr.size();
+   //qDebug() << "Read all from World tree array, size:" << size;
 
-   QJsonObject json = jarr[index].toObject();
-   if (json.isEmpty()) return;
-
-   AGeoObject* newObj = new AGeoObject();
-   //qDebug() << "--record in array:"<<json;
-   newObj->readFromJson(json);
-   //qDebug() << "--read success, object name:"<<newObj->Name<< "Container:"<<newObj->tmpContName;
-
-   if (index == 0)
+   if (size<1)
      {
-       //must be World
-       if (!newObj->ObjectType->isWorld())
-         {
-           qCritical() << "First object in the WorldTree must be World!";
-           return;
-         }
-       obj->LastScript = newObj->LastScript;
-       delete newObj;
-       newObj = obj; //passing the World
+       qWarning() << "Read World tree: size cannot be < 1";
+       return;
      }
-   else
+
+   AGeoObject* prevObj = World;
+   //the first object in the tree must be World, so ignore it!
+   for (int iob=1; iob<size; iob++)
      {
-       //not World
-       AGeoObject* cont = obj->findContainerUp(newObj->tmpContName);
+       AGeoObject* newObj = new AGeoObject();
+       //qDebug() << "--record in array:"<<json;
+       QJsonObject json = jarr[iob].toObject();
+       newObj->readFromJson(json);
+       //qDebug() << "--read success, object name:"<<newObj->Name<< "Container:"<<newObj->tmpContName;
+
+       AGeoObject* cont = prevObj->findContainerUp(newObj->tmpContName);
        if (cont)
-           {
-               newObj->Container = cont;
-               cont->HostedObjects.append(newObj);
-               //qDebug() << "Success! Registered"<<newObj->Name<<"in"<<newObj->tmpContName;
-               if (newObj->isCompositeMemeber())
-               {
-                //qDebug() << "---It is composite member!";
-                if (cont->Container)
-                  cont->Container->refreshShapeCompositeMembers(); //register in the Shape
-               }
-           }
+         {
+           newObj->Container = cont;
+           cont->HostedObjects.append(newObj);
+           //qDebug() << "Success! Registered"<<newObj->Name<<"in"<<newObj->tmpContName;
+           if (newObj->isCompositeMemeber())
+             {
+               //qDebug() << "---It is composite member!";
+               if (cont->Container)
+                 cont->Container->refreshShapeCompositeMembers(); //register in the Shape
+             }
+           prevObj = newObj;
+         }
        else
-           {
-               qWarning() << "ERROR reading geo objects! Not found container:"<<newObj->tmpContName;
-               delete newObj;
-               newObj = obj;
-           }
+         {
+           qWarning() << "ERROR reading geo objects! Not found container:"<<newObj->tmpContName;
+           delete newObj;
+         }
      }
-
-   index++;
-   readAllFromJarr(newObj, jarr, index);
 }
 
 void AGeoObject::UpdateFromSlabModel(ASlabModel* SlabModel)
@@ -1352,13 +1342,16 @@ TGeoShape *AGeoComposite::createGeoShape(const QString shapeName)
   s.remove("TGeoCompositeShape(");
   s.chop(1);
 
+  //qDebug() << "--->Gen string before:"<<s;
+  //qDebug() << "--->Memebers:"<<members;
   for (int i=0; i<members.size(); i++)
     {
       QString mem = members[i];
+      QRegExp toReplace("\\b"+mem+"\\b(?!:)");
       QString memMod = mem+":_m"+mem;
-      s.replace(mem, memMod);
+      s.replace(toReplace, memMod);
     }
-  //qDebug() << "str to be used in composite generation:"<<s;
+  //qDebug() << "--->Str to be used in composite generation:"<<s;
 
   return (shapeName.isEmpty()) ? new TGeoCompositeShape(s.toLatin1().data()) : new TGeoCompositeShape(shapeName.toLatin1().data(), s.toLatin1().data());
 }

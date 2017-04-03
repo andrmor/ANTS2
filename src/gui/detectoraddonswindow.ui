@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabwidAddOns">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabWorldTree">
        <attribute name="title">
@@ -1030,7 +1030,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Export geometry as a GDML file</string>
+              <string>Export geometry as a GDML or ROOT file</string>
              </property>
             </widget>
            </item>

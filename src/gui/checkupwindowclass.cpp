@@ -8,6 +8,7 @@
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
+#include "globalsettingsclass.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -16,6 +17,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QScrollBar>
+#include <QFileDialog>
 
 #include "TGeoManager.h"
 
@@ -132,6 +134,11 @@ TriState CheckUpWindowClass::CheckGeoOverlaps()
 
     ui->overlaplist->setVisible(overlapCount>0);
     ui->labOver->setVisible(overlapCount>0);
+    ui->pbSaveOverlaps->setVisible(overlapCount>0);
+    if (overlapCount==1)
+        ui->labOver->setText("There is an overlap:");
+    else
+        ui->labOver->setText("There are "+QString::number(overlapCount)+" overlaps:");
     ui->labelOverlaps->setVisible(overlapCount==0);
     ui->overlaplist->clear();
 
@@ -368,10 +375,10 @@ void CheckUpWindowClass::showEvent(QShowEvent *ev)
 
 void CheckUpWindowClass::closeEvent(QCloseEvent *event)
 {
-    qDebug()<<"Close event received";
+    //qDebug()<<"Close event received";
     this->hide();
     event->ignore();
-    qDebug()<<"done!";
+    //qDebug()<<"done!";
 }
 
 void CheckUpWindowClass::onopticsTable_rowSelected(int row)
@@ -567,4 +574,25 @@ TriState AreaResponseCheckUpItem::doCheckUp()
     const QVector< QVector<double> > *area = MW->PMs->getAreaSensitivity(row());
     const QVector< QVector<double> > *typearea = &MW->PMs->getType(MW->PMs->at(row()).type)->AreaSensitivity;
     return setState((area->isEmpty() && typearea->isEmpty()) ? TriStateError : TriStateOk, area->isEmpty() ? "Inherited" : "Overriden");
+}
+
+void CheckUpWindowClass::on_pbSaveOverlaps_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save overlaps as text", MW->GlobSet->LastOpenDir+"/Overlaps.txt", "Text files (*.txt)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QFile outputFile(fileName);
+    outputFile.open(QIODevice::WriteOnly);
+    if(!outputFile.isOpen())
+      {
+        qWarning()<<"Unable to open file"<<fileName<<"for writing!";
+        return;
+      }
+    QTextStream outStream(&outputFile);
+
+    for (int i=0; i<ui->overlaplist->count(); i++)
+        outStream << ui->overlaplist->item(i)->text() << "\r\n";
+
+    outputFile.close();
 }

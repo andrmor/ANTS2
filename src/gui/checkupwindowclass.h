@@ -64,6 +64,8 @@ private slots:
 
 
 
+    void on_pbSaveOverlaps_clicked();
+
 private:
     Ui::CheckUpWindowClass *ui;
     MainWindow* MW;

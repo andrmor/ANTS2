@@ -512,7 +512,7 @@ void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
   if (fi.suffix().isEmpty()) fileName += ".gdml";
   if (fi.suffix().compare("root") && fi.suffix().compare("gdml"))
     {
-      message("Only root and gdml files are accepted!", this);
+      message("Only ROOT and GDML files can be created!", this);
       return;
     }
 

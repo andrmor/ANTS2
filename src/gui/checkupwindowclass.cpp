@@ -8,6 +8,7 @@
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
+#include "globalsettingsclass.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -16,6 +17,7 @@
 #include <QPainter>
 #include <QMenu>
 #include <QScrollBar>
+#include <QFileDialog>
 
 #include "TGeoManager.h"
 
@@ -123,14 +125,21 @@ TriState CheckUpWindowClass::CheckGeoOverlaps()
     {
         ui->overlaplist->setVisible(false);
         ui->labelOverlaps->setVisible(false);
+        ui->labOver->setVisible(false);
         return setTabState(0, TriStateError);
     }
 
     int overlapCount = MW->Detector->checkGeoOverlaps();
     TObjArray* overlaps = MW->Detector->GeoManager->GetListOfOverlaps();
 
-    ui->overlaplist->setVisible(overlapCount);
-    ui->labelOverlaps->setVisible(!overlapCount);
+    ui->overlaplist->setVisible(overlapCount>0);
+    ui->labOver->setVisible(overlapCount>0);
+    ui->pbSaveOverlaps->setVisible(overlapCount>0);
+    if (overlapCount==1)
+        ui->labOver->setText("There is an overlap:");
+    else
+        ui->labOver->setText("There are "+QString::number(overlapCount)+" overlaps:");
+    ui->labelOverlaps->setVisible(overlapCount==0);
     ui->overlaplist->clear();
 
     for (Int_t i=0; i<overlapCount; i++)
@@ -345,17 +354,17 @@ void CheckUpWindowClass::adjustTable(QTableWidget *table, int maxw, int maxh)
 
 void CheckUpWindowClass::resizeEvent(QResizeEvent *ev)
 {
-    ui->tabWidget->resize(ev->size().width(), ev->size().height());
-    adjustTable(ui->opticsTable);
-    adjustTable(ui->pmtsTable);
+//    ui->tabWidget->resize(ev->size().width(), ev->size().height());
+//    adjustTable(ui->opticsTable);
+//    adjustTable(ui->pmtsTable);
 
-    ui->buttonRefreshAll->move(this->width()-ui->buttonRefreshAll->width(), 0);
-    ui->buttonRefreshCurrent->move(ui->buttonRefreshAll->x()-ui->buttonRefreshCurrent->width(), 0);
+//    ui->buttonRefreshAll->move(this->width()-ui->buttonRefreshAll->width(), 0);
+//    ui->buttonRefreshCurrent->move(ui->buttonRefreshAll->x()-ui->buttonRefreshCurrent->width(), 0);
 
-    //Adjust interactions text list
-    const QPoint &pos = ui->listInteraction->pos();
-    //Subtract 2*Tab bar height and 2*pos with a bit extra right margin. Still not perfect but... Close enough! :)
-    ui->listInteraction->resize(ui->tabWidget->size() - 2*QSize(pos.x()+2, pos.y()+ui->tabWidget->tabBar()->height()));
+//    //Adjust interactions text list
+//    const QPoint &pos = ui->listInteraction->pos();
+//    //Subtract 2*Tab bar height and 2*pos with a bit extra right margin. Still not perfect but... Close enough! :)
+//    ui->listInteraction->resize(ui->tabWidget->size() - 2*QSize(pos.x()+2, pos.y()+ui->tabWidget->tabBar()->height()));
 }
 
 void CheckUpWindowClass::showEvent(QShowEvent *ev)
@@ -366,10 +375,10 @@ void CheckUpWindowClass::showEvent(QShowEvent *ev)
 
 void CheckUpWindowClass::closeEvent(QCloseEvent *event)
 {
-    qDebug()<<"Close event received";
+    //qDebug()<<"Close event received";
     this->hide();
     event->ignore();
-    qDebug()<<"done!";
+    //qDebug()<<"done!";
 }
 
 void CheckUpWindowClass::onopticsTable_rowSelected(int row)
@@ -565,4 +574,25 @@ TriState AreaResponseCheckUpItem::doCheckUp()
     const QVector< QVector<double> > *area = MW->PMs->getAreaSensitivity(row());
     const QVector< QVector<double> > *typearea = &MW->PMs->getType(MW->PMs->at(row()).type)->AreaSensitivity;
     return setState((area->isEmpty() && typearea->isEmpty()) ? TriStateError : TriStateOk, area->isEmpty() ? "Inherited" : "Overriden");
+}
+
+void CheckUpWindowClass::on_pbSaveOverlaps_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save overlaps as text", MW->GlobSet->LastOpenDir+"/Overlaps.txt", "Text files (*.txt)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QFile outputFile(fileName);
+    outputFile.open(QIODevice::WriteOnly);
+    if(!outputFile.isOpen())
+      {
+        qWarning()<<"Unable to open file"<<fileName<<"for writing!";
+        return;
+      }
+    QTextStream outStream(&outputFile);
+
+    for (int i=0; i<ui->overlaplist->count(); i++)
+        outStream << ui->overlaplist->item(i)->text() << "\r\n";
+
+    outputFile.close();
 }

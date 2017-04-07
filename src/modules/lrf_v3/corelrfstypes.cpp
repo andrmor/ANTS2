@@ -14,6 +14,9 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include <TProfile3D.h>
+#include <Fit/Fitter.h>
+#include <Fit/BinData.h>
+#include <Math/WrappedMultiTF1.h>
 #include <TFitResult.h>
 #include <TH1D.h>
 #include <TF1.h>
@@ -639,8 +642,12 @@ bool ScriptType::loadScriptVarFromJson(const QJsonObject &json, QScriptValue &va
 bool ScriptType::rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
                                     const TFitResultPtr &fit, QScriptValue &script_var) const
 {
-  const std::vector<double> &fitted_params = fit->Parameters();
+  return rootFitToScriptVar(param_info, fit->Parameters(), script_var);
+}
 
+bool ScriptType::rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
+                                    const std::vector<double> &fitted_params, QScriptValue &script_var) const
+{
   //Check for failed fit
   if(fitted_params.size() != param_info.size())
     return false;
@@ -1021,6 +1028,13 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
         nbinsz = script_nbinsz.toNumber();
     }
 
+    bool use_fitter = false;
+    {
+      QScriptValue script_nbinsz = script_var.property("_ants2_use_fitter");
+      if(script_nbinsz.isBool())
+        use_fitter = script_nbinsz.toBool();
+    }
+
     //Get zmin, zmax
     double zmin = script_var.property("zmin").toNumber();
     double zmax = script_var.property("zmax").toNumber();
@@ -1033,13 +1047,6 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
         if (event_pos[i].z() > zmax) zmax = event_pos[i].z();
       }
     }
-
-    //Setup fit data
-    auto signal_profile = std::unique_ptr<TProfile3D>(new TProfile3D("ScriptLrfSignalProf", "", nbinsx, xmin, xmax, nbinsy, ymin, ymax, nbinsz, zmin, zmax));
-    signal_profile->SetErrorOption("s");
-    signal_profile->Approximate(kTRUE); //Attempt to use low stat bins during fit
-    for(size_t i = 0; i < event_pos.size(); i++)
-      signal_profile->Fill(event_pos[i].x(), event_pos[i].y(), event_pos[i].z(), event_signal[i]);
 
     //Setup fit function (which calls script eval())
     //using & here is important for the fit error part!
@@ -1071,10 +1078,44 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
       //qDebug()<<"Set limits to"<<param_info[i].min<<"\t"<<param_info[i].max;
     }
 
-    //Do fit and set parameters in script
-    TFitResultPtr fit = signal_profile->Fit(&func, "SQ");
-    if(!rootFitToScriptVar(param_info, fit, script_var))
-      return nullptr;
+    if(use_fitter) {
+
+      qDebug()<<"Using fitter";
+      //Setup fit data
+      ROOT::Fit::BinData events_bin(event_pos.size(), 3, ROOT::Fit::BinData::kNoError);
+      for(size_t i = 0; i < event_pos.size(); i++)
+        events_bin.Add(event_pos[i].r, event_signal[i]);
+
+      //Do fit and set parameters in script
+      ROOT::Fit::Fitter fitter;
+      ROOT::Math::WrappedMultiTF1 wtf3(func, 3);
+      fitter.SetFunction(wtf3);
+      if(!fitter.Fit(events_bin))
+        return nullptr;
+
+      //Can't copy vector, it's illformed! Must copy parameter-by-parameter
+      //auto fit_params = fitter.Result().Parameters();
+      std::vector<double> fit_params(param_info.size());
+      for(unsigned int i = 0; i < fit_params.size(); i++)
+        fit_params[i] = fitter.Result().Parameter(i);
+      if(!rootFitToScriptVar(param_info, fit_params, script_var))
+        return nullptr;
+
+    } else { //Don't use fitter
+
+      qDebug()<<"Not using fitter";
+      //Setup fit data
+      auto signal_profile = std::unique_ptr<TProfile3D>(new TProfile3D("ScriptLrfSignalProf", "", nbinsx, xmin, xmax, nbinsy, ymin, ymax, nbinsz, zmin, zmax));
+      signal_profile->SetErrorOption("s");
+      signal_profile->Approximate(kTRUE); //Attempt to use low stat bins during fit
+      for(size_t i = 0; i < event_pos.size(); i++)
+        signal_profile->Fill(event_pos[i].x(), event_pos[i].y(), event_pos[i].z(), event_signal[i]);
+
+      //Do fit and set parameters in script
+      TFitResultPtr fit = signal_profile->Fit(&func, "SQ");
+      if(!rootFitToScriptVar(param_info, fit, script_var))
+        return nullptr;
+    }
 
     auto lrf = std::unique_ptr<AScriptCartesianZ>(new AScriptCartesianZ(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax));
     if(fit_error) {
@@ -1084,7 +1125,31 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
       script_var = p->lrf_collection->property(name);
       script_eval = script_var.property("eval");
 
-      signal_profile = std::unique_ptr<TProfile3D>(new TProfile3D("ScriptLrfSignalProfSigma", "", nbinsx, xmin, xmax, nbinsy, ymin, ymax, nbinsz, zmin, zmax));
+      if(use_fitter) {
+
+        //Setup fit data
+        ROOT::Fit::BinData events_bin(event_pos.size(), 3, ROOT::Fit::BinData::kNoError);
+        for(size_t i = 0; i < event_pos.size(); i++)
+          events_bin.Add(event_pos[i].r, event_signal[i] - lrf->eval(event_pos[i]));
+
+        //Do fit and set parameters in script
+        ROOT::Fit::Fitter fitter;
+        ROOT::Math::WrappedMultiTF1 wtf3(func, 3);
+        fitter.SetFunction(wtf3);
+        if(!fitter.Fit(events_bin))
+          return nullptr;
+
+        //Can't copy vector, it's illformed! Must copy parameter-by-parameter
+        //auto fit_params = fitter.Result().Parameters();
+        std::vector<double> fit_params(param_info.size());
+        for(unsigned int i = 0; i < fit_params.size(); i++)
+          fit_params[i] = fitter.Result().Parameter(i);
+        if(!rootFitToScriptVar(param_info, fit_params, script_var))
+          return nullptr;
+
+      } else { //Don't use fitter
+
+      auto signal_profile = std::unique_ptr<TProfile3D>(new TProfile3D("ScriptLrfSignalProfSigma", "", nbinsx, xmin, xmax, nbinsy, ymin, ymax, nbinsz, zmin, zmax));
       signal_profile->SetErrorOption("s");
       signal_profile->Approximate(kTRUE); //Attempt to use low stat bins during fit
       for(size_t i = 0; i < event_pos.size(); i++)
@@ -1094,6 +1159,7 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
       TFitResultPtr fit = signal_profile->Fit(&func, "SQ");
       if(!rootFitToScriptVar(param_info, fit, script_var))
         return nullptr;
+      }
 
       lrf->setSigmaVar(name);
     }

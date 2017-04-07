@@ -1011,9 +1011,15 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
 
   int nbinsx = 300;
   int nbinsy = 300;
-  int nbinsz = 300;
 
   if(with_z) { //cartesian with Z  //////////////////////////////////
+
+    int nbinsz = 100;
+    {
+      QScriptValue script_nbinsz = script_var.property("_ants2_nbinsz");
+      if(script_nbinsz.isNumber())
+        nbinsz = script_nbinsz.toNumber();
+    }
 
     //Get zmin, zmax
     double zmin = script_var.property("zmin").toNumber();

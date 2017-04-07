@@ -1194,17 +1194,20 @@ ALrf *ScriptCartesianType::lrfFromJson(const QJsonObject &json) const
 #ifdef GUI
 QWidget *ScriptCartesianType::newSettingsWidget(QWidget *parent) const
 {
-  QString code =
+  QString code; code.sprintf(
       "//Variables to be fitted and their initial values:\n"
       "var A = 150\n"
       "var sigma2x = 2\n"
       "var sigma2y = 2\n"
+      "%s"
       "var tail = 1\n"
       "function eval(r)\n"
       "{\n"
-      "   var expo = r[0]*r[0]/sigma2x + r[1]*r[1]/sigma2y\n"
-      "   return A * Math.exp(-0.5*expo) + tail\n"
-      "}\n";
+      "    var expo = r[0]*r[0]/sigma2x + r[1]*r[1]/sigma2y%s\n"
+      "    return A * Math.exp(-0.5*expo) + tail\n"
+      "}\n",
+        with_z ? "var sigma2z = 2\n":"",
+        with_z ? " + r[2]*r[2]/sigma2z":"");
   return new ScriptSettingsWidget(code, parent);
 }
 #endif

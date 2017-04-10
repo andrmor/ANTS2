@@ -2697,10 +2697,10 @@
        <widget class="QFrame" name="frame_7">
         <property name="geometry">
          <rect>
-          <x>146</x>
-          <y>12</y>
+          <x>140</x>
+          <y>5</y>
           <width>211</width>
-          <height>191</height>
+          <height>202</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -2725,7 +2725,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Blur reconstructed XYs</string>
+          <string>Blur reconstructed position</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -2734,9 +2734,9 @@
         <widget class="QPushButton" name="pbBlurReconstructedXY">
          <property name="geometry">
           <rect>
-           <x>45</x>
-           <y>100</y>
-           <width>121</width>
+           <x>17</x>
+           <y>120</y>
+           <width>80</width>
            <height>31</height>
           </rect>
          </property>
@@ -2747,16 +2747,16 @@
           </font>
          </property>
          <property name="text">
-          <string>Blur</string>
+          <string>Blur XY</string>
          </property>
         </widget>
         <widget class="QStackedWidget" name="stackedWidget_2">
          <property name="geometry">
           <rect>
-           <x>35</x>
+           <x>10</x>
            <y>61</y>
-           <width>140</width>
-           <height>36</height>
+           <width>191</width>
+           <height>61</height>
           </rect>
          </property>
          <property name="currentIndex">
@@ -2766,8 +2766,8 @@
           <widget class="QLabel" name="label_155">
            <property name="geometry">
             <rect>
-             <x>100</x>
-             <y>10</y>
+             <x>131</x>
+             <y>9</y>
              <width>21</width>
              <height>16</height>
             </rect>
@@ -2779,14 +2779,14 @@
           <widget class="QLabel" name="label_143">
            <property name="geometry">
             <rect>
-             <x>-49</x>
-             <y>11</y>
+             <x>-19</x>
+             <y>9</y>
              <width>100</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
-            <string>Width:</string>
+            <string>XY width:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2795,8 +2795,50 @@
           <widget class="QLineEdit" name="ledBlurDelta">
            <property name="geometry">
             <rect>
-             <x>55</x>
-             <y>10</y>
+             <x>85</x>
+             <y>8</y>
+             <width>41</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1.0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_159">
+           <property name="geometry">
+            <rect>
+             <x>131</x>
+             <y>30</y>
+             <width>21</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>mm</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_160">
+           <property name="geometry">
+            <rect>
+             <x>-19</x>
+             <y>31</y>
+             <width>100</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Z width:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledBlurDeltaZ">
+           <property name="geometry">
+            <rect>
+             <x>85</x>
+             <y>30</y>
              <width>41</width>
              <height>20</height>
             </rect>
@@ -2810,8 +2852,8 @@
           <widget class="QLabel" name="label_188">
            <property name="geometry">
             <rect>
-             <x>100</x>
-             <y>10</y>
+             <x>131</x>
+             <y>9</y>
              <width>40</width>
              <height>16</height>
             </rect>
@@ -2823,14 +2865,14 @@
           <widget class="QLabel" name="label_189">
            <property name="geometry">
             <rect>
-             <x>-49</x>
-             <y>11</y>
+             <x>-18</x>
+             <y>9</y>
              <width>100</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
-            <string>Sigma:</string>
+            <string>XY sigma:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2839,14 +2881,56 @@
           <widget class="QLineEdit" name="ledBlurSigma">
            <property name="geometry">
             <rect>
-             <x>55</x>
-             <y>10</y>
+             <x>85</x>
+             <y>8</y>
              <width>41</width>
              <height>20</height>
             </rect>
            </property>
            <property name="text">
             <string>1.0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_192">
+           <property name="geometry">
+            <rect>
+             <x>131</x>
+             <y>30</y>
+             <width>40</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>mm</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledBlurSigmaZ">
+           <property name="geometry">
+            <rect>
+             <x>85</x>
+             <y>30</y>
+             <width>41</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1.0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_193">
+           <property name="geometry">
+            <rect>
+             <x>-19</x>
+             <y>31</y>
+             <width>100</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Z sigma:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </widget>
@@ -2862,12 +2946,12 @@
          </property>
          <item>
           <property name="text">
-           <string>Uniform</string>
+           <string>Uniform blur</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Gaussian</string>
+           <string>Gaussian blur</string>
           </property>
          </item>
         </widget>
@@ -2875,7 +2959,7 @@
          <property name="geometry">
           <rect>
            <x>16</x>
-           <y>139</y>
+           <y>162</y>
            <width>186</width>
            <height>17</height>
           </rect>
@@ -2891,7 +2975,7 @@
          <property name="geometry">
           <rect>
            <x>16</x>
-           <y>164</y>
+           <y>180</y>
            <width>186</width>
            <height>17</height>
           </rect>
@@ -2903,7 +2987,46 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QPushButton" name="pbBlurReconstructedZ">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>120</y>
+           <width>80</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Blur Z</string>
+         </property>
+        </widget>
+        <zorder>label_142</zorder>
+        <zorder>stackedWidget_2</zorder>
+        <zorder>cobBlurType</zorder>
+        <zorder>cbOnBlurUpdateFilters</zorder>
+        <zorder>cbOnBlurApplyToAllGroups</zorder>
+        <zorder>pbBlurReconstructedXY</zorder>
+        <zorder>pbBlurReconstructedZ</zorder>
        </widget>
+       <zorder>frame_7</zorder>
+       <zorder>label_142</zorder>
+       <zorder>cobBlurType</zorder>
+       <zorder>stackedWidget_2</zorder>
+       <zorder>pbBlurReconstructedXY</zorder>
+       <zorder>cbOnBlurUpdateFilters</zorder>
+       <zorder>cbOnBlurApplyToAllGroups</zorder>
+       <zorder>label_142</zorder>
+       <zorder>cobBlurType</zorder>
+       <zorder>stackedWidget_2</zorder>
+       <zorder>pbBlurReconstructedXY</zorder>
+       <zorder>cbOnBlurUpdateFilters</zorder>
+       <zorder>cbOnBlurApplyToAllGroups</zorder>
       </widget>
       <widget class="QWidget" name="tabAdaptive">
        <attribute name="title">

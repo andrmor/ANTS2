@@ -66,7 +66,8 @@ public:
     void clearReconstruction(int igroup);
     void createDefaultReconstructionData(int igroup = 0); //recreates new container - clears data completely!
     void resetReconstructionData(int numGgroups);         //reinitialize numPoints to 1 for each event. Keeps eventId intact!
-    void BlurReconstructionData(int type, double sigma, TRandom2 *RandGen, int igroup = -1); // 0 - uniform, 1 - gauss; igroup<0 -> apply to all groups
+    bool BlurReconstructionData(int type, double sigma, TRandom2 *RandGen, int igroup = -1); // 0 - uniform, 1 - gauss; igroup<0 -> apply to all groups
+    bool BlurReconstructionDataZ(int type, double sigma, TRandom2 *RandGen, int igroup = -1); // 0 - uniform, 1 - gauss; igroup<0 -> apply to all groups
     void PurgeFilteredEvents(int igroup = 0);
     void Purge(int OnePer, int igroup = 0);    
     int countGoodEvents(int igroup = 0);

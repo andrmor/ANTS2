@@ -56,6 +56,8 @@ void ReconstructionWindow::writeMiscGUIsettingsToJson(QJsonObject &json)
   bj["BlurType"] = ui->cobBlurType->currentIndex();
   bj["BlurWidth"] = ui->ledBlurDelta->text().toDouble();
   bj["BlurSigma"] = ui->ledBlurSigma->text().toDouble();
+  bj["BlurWidthZ"] = ui->ledBlurDeltaZ->text().toDouble();
+  bj["BlurSigmaZ"] = ui->ledBlurSigmaZ->text().toDouble();
   js["Blur"] = bj;
 
   json["ReconstructionWindow"] = js;
@@ -97,6 +99,8 @@ void ReconstructionWindow::readMiscGUIsettingsFromJson(QJsonObject &json)
    JsonToComboBox(bj, "BlurType", ui->cobBlurType);
    JsonToLineEdit(bj, "BlurWidth", ui->ledBlurDelta);
    JsonToLineEdit(bj, "BlurSigma", ui->ledBlurSigma);
+   JsonToLineEdit(bj, "BlurWidthZ", ui->ledBlurDeltaZ);
+   JsonToLineEdit(bj, "BlurSigmaZ", ui->ledBlurSigmaZ);
 }
 
 void ReconstructionWindow::on_pbSaveScanTree_clicked()

@@ -517,6 +517,8 @@ private slots:
 
   void on_pbUpdateGuiSettingsInJSON_clicked();
 
+  void on_pbBlurReconstructedZ_clicked();
+
 protected:
     bool event(QEvent *event);
 

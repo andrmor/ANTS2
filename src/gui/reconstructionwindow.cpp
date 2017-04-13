@@ -4051,6 +4051,29 @@ void ReconstructionWindow::on_pbBlurReconstructedXY_clicked()
    MW->WindowNavigator->BusyOff(false);
 }
 
+void ReconstructionWindow::on_pbBlurReconstructedZ_clicked()
+{
+  MW->WindowNavigator->BusyOn();
+
+  bool fApplyToAllGroup = ui->cbOnBlurApplyToAllGroups->isChecked();
+  int igroup = (fApplyToAllGroup ? -1 : PMgroups->getCurrentGroup());
+
+  int type = ui->cobBlurType->currentIndex();
+  if (type == 0)
+    { //uniform
+      double delta = ui->ledBlurDeltaZ->text().toDouble();
+      EventsDataHub->BlurReconstructionDataZ(0, delta, MW->Detector->RandGen, igroup);
+    }
+  else
+    { //Gauss
+      double sigma = ui->ledBlurSigmaZ->text().toDouble();
+      EventsDataHub->BlurReconstructionDataZ(1, sigma, MW->Detector->RandGen, igroup);
+    }
+
+   if (ui->cbOnBlurUpdateFilters->isChecked()) UpdateStatusAllEvents();
+   MW->WindowNavigator->BusyOff(false);
+}
+
 void ReconstructionWindow::on_pbDefNNMin_clicked()
 {
 #ifdef ANTS_FLANN 

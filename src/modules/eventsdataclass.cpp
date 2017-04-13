@@ -160,18 +160,19 @@ void EventsDataClass::purge1e10events()
     }
 }
 
-void EventsDataClass::BlurReconstructionData(int type, double sigma, TRandom2* RandGen, int igroup)
+bool EventsDataClass::BlurReconstructionData(int type, double sigma, TRandom2* RandGen, int igroup)
 {
   if (igroup > ReconstructionData.size()-1)
   {
       ErrorString = "Incorrect igroup number!";
       qWarning() << ErrorString;
-      return;
+      return false;
   }
   if (type<0 || type>1)
   {
       ErrorString = "EventsDataHub: Undefined blur type";
       qWarning() << ErrorString;
+      return false;
   }
 
   int istart = 0;
@@ -205,7 +206,52 @@ void EventsDataClass::BlurReconstructionData(int type, double sigma, TRandom2* R
               ReconstructionData[igr][iev]->Points[ip].r[1] += RandGen->Gaus(0, sigma);
             }
         }
+    }
+  return true;
+}
+
+bool EventsDataClass::BlurReconstructionDataZ(int type, double sigma, TRandom2 *RandGen, int igroup)
+{
+  if (igroup > ReconstructionData.size()-1)
+  {
+      ErrorString = "Incorrect igroup number!";
+      qWarning() << ErrorString;
+      return false;
   }
+  if (type<0 || type>1)
+  {
+      ErrorString = "EventsDataHub: Undefined blur type";
+      qWarning() << ErrorString;
+      return false;
+  }
+
+  int istart = 0;
+  int istop = ReconstructionData.size();
+  if (igroup>-1)
+  {
+      //just one group
+      istart = igroup;
+      istop = igroup+1;
+  }
+
+  for (int igr=istart; igr<istop; igr++)
+  {
+      if (type == 0)
+        {
+          //uniform
+          for (int iev=0; iev<ReconstructionData[igr].size(); iev++)
+            for (int ip=0; ip<ReconstructionData[igr][iev]->Points.size(); ip++)
+              ReconstructionData[igr][iev]->Points[ip].r[2] += -sigma + 2.0*sigma*RandGen->Rndm();
+        }
+      else if (type == 1)
+        {
+          //Gauss
+          for (int iev=0; iev<ReconstructionData[igr].size(); iev++)
+            for (int ip=0; ip<ReconstructionData[igr][iev]->Points.size(); ip++)
+              ReconstructionData[igr][iev]->Points[ip].r[2] += RandGen->Gaus(0, sigma);
+        }
+    }
+  return true;
 }
 
 void EventsDataClass::PurgeFilteredEvents(int igroup)

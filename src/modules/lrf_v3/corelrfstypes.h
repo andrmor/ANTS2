@@ -112,6 +112,8 @@ protected:
   bool loadScriptVarFromJson(const QJsonObject &json, QScriptValue &var, QScriptValue &var_sigma) const;
   bool rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
                           const TFitResultPtr &fit, QScriptValue &script_var) const;
+  bool rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
+                          const std::vector<double> &fitted_params, QScriptValue &script_var) const;
 
 public:
   QJsonObject lrfToJson(const ALrf *lrf) const override;

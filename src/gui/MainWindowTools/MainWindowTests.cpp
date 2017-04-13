@@ -34,12 +34,12 @@
 static QVector<TrackHolderClass> tracks;
 static TVector3 NormViz;
 
-#include "TBufferJSON.h"
+//#include "TBufferJSON.h"
 
 void MainWindow::on_pobTest_clicked()
 {
-   TString str = TBufferJSON::ConvertToJSON(Detector->GeoManager);
-   qDebug() << str;
+   //TString str = TBufferJSON::ConvertToJSON(Detector->GeoManager);
+   //qDebug() << str;
 }
 
 void MainWindow::on_pobTest_2_clicked()

@@ -885,7 +885,7 @@ void LRFwindow::on_pbAxial3DvsRandZ_clicked()
     TString str = "LRF of pm#";
     str += ipm;
     TGraph2D* gr = MW->GraphWindow->ConstructTGraph2D(R, Z, L, str, "R, mm", "Z, mm", "LRF", 2,0,0, 2,1,2);
-    MW->GraphWindow->Draw(gr, "TRI");
+    MW->GraphWindow->Draw(gr, "surf");
 }
 
 void LRFwindow::on_pbShowErrorVsRadius_clicked()

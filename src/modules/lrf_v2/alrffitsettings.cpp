@@ -11,7 +11,6 @@ ALrfFitSettings::ALrfFitSettings()
   fForceZeroDeriv = true;
   fFitError = false;
   scale_by_energy = true;
-  fFitOnlyLast = false;
 
   fDoGrouping = false;
   GroupingIndex = 0;
@@ -50,8 +49,6 @@ bool ALrfFitSettings::readFromJson(QJsonObject &json)
   parseJson(json, "StoreError", fFitError);
   scale_by_energy = true;
   parseJson(json, "UseEnergy", scale_by_energy);
-  fFitOnlyLast = false;
-  parseJson(json, "FitOnlyLast", fFitOnlyLast);
 
   //grouping
   fDoGrouping = false;

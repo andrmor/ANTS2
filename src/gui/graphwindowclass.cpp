@@ -1561,7 +1561,7 @@ void GraphWindowClass::UpdateControls()
        ui->ledZto->setText( QString::number(zmax, 'g', 4) );
 
 //      qDebug()<<"from object:"<<xmin<<xmax<<ymin<<ymax<<zmin<<zmax;
-      ui->leOptions->setEnabled(false);
+      //ui->leOptions->setEnabled(false);
     }
   else ui->leOptions->setEnabled(true);
 

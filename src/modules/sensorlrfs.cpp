@@ -48,6 +48,11 @@ SensorLRFs::SensorLRFs(int nPMs, QObject *parent) :
   LRFmakeJson["DataSelector"] = 0;
   LRFmakeJson["FitOnlyLast"] = false;
   LRFmakeJson["ForceZeroDeriv"] = true;
+
+  LRFmakeJson["ForceNonNegative"] = false;
+  LRFmakeJson["ForceNonIncreasingInR"] = false;
+  LRFmakeJson["ForceInZ"] = 0;
+
   LRFmakeJson["GroupToMake"] = 0;
   LRFmakeJson["GroupingOption"] = "Individual";
   LRFmakeJson["GrouppingType"] = 0;

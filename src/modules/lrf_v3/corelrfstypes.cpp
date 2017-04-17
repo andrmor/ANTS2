@@ -928,7 +928,12 @@ ALrf *ScriptPolarType::lrfFromJson(const QJsonObject &json) const
   double rmax = json["rmax"].toDouble();
   ATransform t = ATransform::fromJson(json["transform"].toObject());
 
-  AScriptPolar *lrf = new AScriptPolar(id(), p->lrf_collection, name, script_code, rmax, t);
+
+  AScriptPolar *lrf;
+  if(with_z)
+    lrf = new AScriptPolarZ(id(), p->lrf_collection, name, script_code, rmax, t);
+  else
+    lrf = new AScriptPolar(id(), p->lrf_collection, name, script_code, rmax, t);
   lrf->setSigmaVar(name_sigma);
   return lrf;
 }
@@ -1258,7 +1263,12 @@ ALrf *ScriptCartesianType::lrfFromJson(const QJsonObject &json) const
   double ymax = json["ymax"].toDouble();
   ATransform t = ATransform::fromJson(json["transform"].toObject());
 
-  AScriptCartesian *lrf = new AScriptCartesian(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
+
+  AScriptCartesian *lrf;
+  if(with_z)
+    lrf = new AScriptCartesianZ(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
+  else
+    lrf = new AScriptCartesian(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
   lrf->setSigmaVar(name_sigma);
   return lrf;
 }

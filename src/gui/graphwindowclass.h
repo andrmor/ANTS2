@@ -9,6 +9,7 @@ class RasterWindowGraphClass;
 class TH2;
 class TH1D;
 class TGraph;
+class TGraph2D;
 class QGraphicsView;
 class ToolboxScene;
 class QListWidgetItem;
@@ -114,6 +115,7 @@ public:
     double extractedY2();
     QList<double> extractedPolygon();
 
+    //deprecated!
     TGraph* MakeGraph(const QVector<double> *x, const QVector<double> *y,
                       Color_t color, const char *XTitle, const char *YTitle,
                       int MarkerStyle=20, int MarkerSize=1, int LineStyle=1, int LineWidth = 2,
@@ -121,7 +123,16 @@ public:
                       bool OnlyBuild = false);
 
     //use this to only construct!
-    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y);
+    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y) const;
+    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y,
+                            const char *Title, const char *XTitle, const char *YTitle,
+                            Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                            Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
+    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const;
+    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+                              const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
+                              Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
+                              Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
     void OnBusyOn();
     void OnBusyOff();

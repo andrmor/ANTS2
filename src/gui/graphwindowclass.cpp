@@ -33,6 +33,7 @@
 
 //Root
 #include "TGraph.h"
+#include "TGraph2D.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -40,7 +41,6 @@
 #include "TSystem.h"
 #include "TStyle.h"
 #include "TList.h"
-#include "TGraph2D.h"
 #include "TF1.h"
 #include "TF2.h"
 #include "TMath.h"
@@ -394,7 +394,7 @@ TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<doub
     return 0;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y)
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y) const
 {
   int numEl = x.size();
   TVectorD xx(numEl);
@@ -409,6 +409,41 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector
   gr->SetFillStyle(0);
   gr->SetFillColor(0);
   return gr;
+}
+
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y,
+                                          const char *Title, const char *XTitle, const char *YTitle,
+                                          Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                          Color_t LineColor, int LineStyle, int LineWidth) const
+{
+    TGraph* gr = ConstructTGraph(x,y);
+    gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle);
+    gr->SetMarkerStyle(MarkerStyle); gr->SetMarkerColor(MarkerColor); gr->SetMarkerSize(MarkerSize);
+    gr->SetEditable(false); gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
+    gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
+    return gr;
+}
+
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const
+{
+    int numEl = x.size();
+    TGraph2D* gr = new TGraph2D(numEl, (double*)x.data(), (double*)y.data(), (double*)z.data());
+    gr->SetFillStyle(0);
+    gr->SetFillColor(0);
+    return gr;
+}
+
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+                                            const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
+                                            Color_t MarkerColor, int MarkerStyle, int MarkerSize,
+                                            Color_t LineColor, int LineStyle, int LineWidth)
+{
+    TGraph2D* gr = ConstructTGraph2D(x,y,z);
+    gr->SetTitle(Title); gr->GetXaxis()->SetTitle(XTitle); gr->GetYaxis()->SetTitle(YTitle); gr->GetZaxis()->SetTitle(ZTitle);
+    gr->SetMarkerStyle(MarkerStyle); gr->SetMarkerColor(MarkerColor); gr->SetMarkerSize(MarkerSize);
+    gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
+    gr->SetLineWidth(LineWidth); gr->SetLineColor(LineColor); gr->SetLineStyle(LineStyle);
+    return gr;
 }
 
 void GraphWindowClass::ShowAndFocus()
@@ -1526,7 +1561,7 @@ void GraphWindowClass::UpdateControls()
        ui->ledZto->setText( QString::number(zmax, 'g', 4) );
 
 //      qDebug()<<"from object:"<<xmin<<xmax<<ymin<<ymax<<zmin<<zmax;
-      ui->leOptions->setEnabled(false);
+      //ui->leOptions->setEnabled(false);
     }
   else ui->leOptions->setEnabled(true);
 

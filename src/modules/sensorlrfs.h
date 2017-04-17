@@ -79,9 +79,6 @@ public:
     bool makeAxialLRFsFromRfiles(QJsonObject &json, QString FileNamePattern, pms *PMs);
     bool onlyGains(QJsonObject &json, EventsDataClass *EventsDataHub, pms *PMs);
 
-    //tmp, it is a check!
-    QString copyCommonToIndividual(pms *PMs);
-
     double getFunction(double *r, double *p);
     double getFunction2D(double *r, double *p);
     double getInvertedFunction2D(double *r, double *p);

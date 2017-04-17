@@ -14,7 +14,6 @@ public:
   bool fForceZeroDeriv;
   bool fFitError;
   bool scale_by_energy;
-  bool fFitOnlyLast; //only for composite
  //grouping
   bool fDoGrouping;
   int GroupingIndex;

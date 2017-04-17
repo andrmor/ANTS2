@@ -788,7 +788,7 @@ bool SensorLRFs::makeLRFs(QJsonObject &json, EventsDataClass *EventsDataHub, pms
   //making sensor groups
   QVector<PMsensorGroup> *groups;
   QVector<PMsensorGroup> stackGroups;
-  if (LRFsettings.fLimitGroup || LRFsettings.fFitOnlyLast)
+  if (LRFsettings.fLimitGroup)
     { //use existent groups
       qDebug() << "!--Keeping old groups!";
       groups = getIteration()->getGroups();
@@ -997,41 +997,6 @@ bool SensorLRFs::onlyGains(QJsonObject &json, EventsDataClass *EventsDataHub, pm
   return OK;
 }
 
-QString SensorLRFs::copyCommonToIndividual(pms *PMs)
-{
-  if (!isAllLRFsDefined())
-      return "LRFs are not defined!";
-
-  if (currentIter->getGrouppingOption() != "One LRF for all PMs")
-    return "Error: All PMs should be grouped in one group";
-
-  //making sensor groups
-  QVector<PMsensorGroup> stackGroups = PMsensorGroup::mkIndividual(PMs);
-
-  LRF2* oldLRF = currentIter->getGroup(0)->getLRF();
-  for (int i=0; i< PMs->count(); i++)
-    {
-      LRF2* newLRF = LRFfactory::copyLRF(oldLRF);
-      stackGroups[i].setLRF(newLRF);
-      qDebug() << stackGroups[i].getPMs()->at(0).GetGain();
-    }
-
-  //Attempting to register the created iteration. Sets it as current if valid
-  bool OK = addNewIteration(PMs->count(), stackGroups, "Individual");
-  error_string = "";
-  if (OK)
-    {
-      qDebug() << "New current iteration registered";
-      emit SensorLRFsReadySignal(true);
-    }
-  else
-    {
-      error_string = "Error: failed to copy LRFs!";
-      emit ProgressReport(0);
-    }
-  return error_string;
-}
-
 bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PMsensorGroup> *groups, SensorLocalCache *lrfmaker)
 {
   //qDebug() << "Making LRFs for sensor group " << igrp;
@@ -1049,7 +1014,7 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
     case 0: newLRF = lrfmaker->mkLRFaxial(LRFsettings.nodesx, LRFsettings.compr); break;
     case 1: newLRF = lrfmaker->mkLRFxy(LRFsettings.nodesx, LRFsettings.nodesy); break;
     case 2: return false; //polar
-    case 3: newLRF = lrfmaker->mkLRFcomposite(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr, group->getLRF()); break;
+    case 3: newLRF = lrfmaker->mkLRFcomposite(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 4: newLRF = lrfmaker->mkLRFaxial3d(LRFsettings.nodesx, LRFsettings.nodesy); break;
     case 5: newLRF = lrfmaker->mkLRFsliced3D(LRFsettings.nodesx, LRFsettings.nodesy); break;
     }  

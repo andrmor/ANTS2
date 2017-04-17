@@ -258,40 +258,8 @@ LRF2 *SensorLocalCache::mkLRFxy(int nodesx, int nodesy) const
     return fitLRF(new LRFxy(minx, maxx, nodesx, miny, maxy, nodesy));
 }
 
-LRF2 *SensorLocalCache::mkLRFcomposite(int nodesr, int nodesxy, double *compr, LRF2 *oldLRF) const
-{
-  if (LRFsettings->fFitOnlyLast)
-    {
-      qDebug() << "Composite lrf fit: ONLY LAST lrf fit mode";
-      if (!oldLRF)
-        {
-          qWarning() << "Previous LRF is NOT defined!";
-          return 0;
-        }
-      LRF2* LRFtoInherit = 0;
-      LRFcomposite* oldCompositeLRF = dynamic_cast<LRFcomposite*>(oldLRF);
-      if (oldCompositeLRF)
-        {
-          if (oldCompositeLRF->lrfdeck.size() != 2)
-            {
-              qWarning() << "Old lrf deck must contain two lrfs!";
-              return 0;
-            }
-          LRFtoInherit = oldCompositeLRF->lrfdeck[0];
-        }
-      else
-        LRFtoInherit = oldLRF;
-
-      LRF2* lrf_0 = LRFfactory::copyLRF(LRFtoInherit);
-      LRFcomposite *mylrf = new LRFcomposite(lrf_0);
-      mylrf->setFitAll(false);
-
-      mylrf->add(new LRFxy(minx, maxx, nodesxy, miny, maxy, nodesxy));
-      return fitLRF(mylrf);
-    }
-  else
-    {
-      qDebug() << "Composit lrf fit: ALL lrf fit mode";
+LRF2 *SensorLocalCache::mkLRFcomposite(int nodesr, int nodesxy, double *compr) const
+{  
       LRFaxial *lrf_r;
       if (!compr) lrf_r = new LRFaxial(maxr, nodesr);
       else lrf_r = new LRFcAxial(maxr, nodesr, compr[0], compr[1], compr[2]);
@@ -299,7 +267,6 @@ LRF2 *SensorLocalCache::mkLRFcomposite(int nodesr, int nodesxy, double *compr, L
       LRFcomposite *mylrf = new LRFcomposite(lrf_r);
       mylrf->add(new LRFxy(minx, maxx, nodesxy, miny, maxy, nodesxy));
       return fitLRF(mylrf);
-    }
 }
 
 LRF2 *SensorLocalCache::mkLRFaxial3d(int nodesr, int nodesz) const

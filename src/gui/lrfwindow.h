@@ -84,10 +84,8 @@ private slots:
   void on_pbRadialToText_clicked();
   void on_pbShowSensorGains_clicked();
   void on_pbAdjustOnlyGains_clicked();
-  void on_pbCompareRadials_clicked();
   void on_led_compression_k_editingFinished();
   void on_cbUseGroupping_toggled(bool checked);
-  void on_pbCommonToIndi_clicked();
   void on_pbTableToAxial_clicked();
   void on_pbShowErrorVsRadius_clicked();
   void on_bConfigureFiltering_clicked();
@@ -102,6 +100,10 @@ private slots:
   void on_pbLRFexplorer_clicked();
   void on_cb_data_clicked();
   void on_cb_diff_clicked();
+
+  void on_pbAxial3DvsRandZ_clicked();
+
+  void on_pbAxial3DvsZ_clicked();
 
 protected:
     bool event(QEvent *event);

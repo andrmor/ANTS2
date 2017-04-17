@@ -36,6 +36,8 @@
 #include "TFile.h"
 #include "TF1.h"
 #include "TAxis.h"
+#include "TGraph.h"
+#include "TGraph2D.h"
 
 LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
   QMainWindow(parent),
@@ -147,26 +149,25 @@ void LRFwindow::on_pbUpdateGUI_clicked()
 {
   if (tmpIgnore) return;
 
-  // PM groups
   ui->fPMgroups->setEnabled(ui->cbUseGroupping->isChecked());
-
-  // 2D or 3D
   bool f3D = ui->cb3D_LRFs->isChecked();
-  //    qDebug()<<"3D?"<<f3D;
-  if (f3D) ui->swLRFtype->setCurrentIndex(1); else ui->swLRFtype->setCurrentIndex(0);
 
-  // Compressing for axial
+  if (f3D) ui->swLRFtype->setCurrentIndex(1);
+  else ui->swLRFtype->setCurrentIndex(0);
+
   bool fCompression = true;
+  bool fEnableShowAxial3D = false;
   if (f3D)
     {
       if (ui->cob3Dtype->currentIndex() == 1) fCompression = false; //not for sliced XY
+      else fEnableShowAxial3D = true;
     }
   else
     {
       if (ui->cob2Dtype->currentIndex() == 1) fCompression = false; //for XY cannot use compression
     }
   ui->fCompression->setVisible(fCompression);
-  ui->cbFitOnlyLast->setVisible(false);
+  ui->frVsZ->setEnabled(fEnableShowAxial3D);
 
   // Nodes
   if (f3D)
@@ -210,8 +211,7 @@ void LRFwindow::on_pbUpdateGUI_clicked()
         case 3: // composite
           ui->lbl_nodes_X->setText("R:");
           ui->lbl_nodes_Y->setText("X&Y:");
-          ui->sbSplNodesY->setEnabled(true);
-          ui->cbFitOnlyLast->setVisible(true);
+          ui->sbSplNodesY->setEnabled(true);          
           break;
         }
     }
@@ -432,7 +432,6 @@ void LRFwindow::writeToJson(QJsonObject &json) const
   json["ForceZeroDeriv"] = ui->cbForceDerivToZeroInOrigin->isChecked();
   json["StoreError"] = ui->cb_store_error->isChecked();
   json["UseEnergy"] = ui->cbEnergyScalling->isChecked();
-  json["FitOnlyLast"] = ui->cbFitOnlyLast->isChecked();
 
   //Grouping
   bool fUseGrouping = ui->cbUseGroupping->isChecked();
@@ -787,6 +786,106 @@ void LRFwindow::on_pbShowRadialForXY_clicked()
     TString str = "LRF of pm#";
     str += ipm;
     MW->GraphWindow->MakeGraph(&Rad, &LRF, 4, "Radial distance, mm", "LRF", 6, 1, 0, 0, "");
+}
+
+void LRFwindow::on_pbAxial3DvsZ_clicked()
+{
+    if (!SensLRF->isAllLRFsDefined())
+    {
+        message("LRFs are not defined!", this);
+        return;
+    }
+
+    int ipm = ui->sbPMnoButons->value();
+    if (ipm > PMs->count()-1)  //protection
+    {
+        message("Invalid PM number!", this);
+        return;
+    }
+
+    const LRFaxial3d* lrf = dynamic_cast<const LRFaxial3d*>( (*SensLRF)[ipm] );
+    if (!lrf)
+    {
+        message("This operation is only allowed for Axial3D LRFs", this);
+        return;
+    }
+
+    double radius = ui->ledAxial3DvsZ->text().toDouble();
+
+    QVector<double> Z, L;
+    double z0 = lrf->getZmin();
+    double z1 = lrf->getZmax();
+    double rr[3];
+    rr[0] = radius;
+    rr[1] = 0;
+    int bins = MW->GlobSet->FunctionPointsX;
+    double stepZ = (z1-z0)/bins;
+    for (int i=0; i<bins; i++)
+    {
+        rr[2] = z0 + stepZ*i;
+        Z << rr[2];
+        L << SensLRF->getLRFlocal(ipm, rr);
+    }
+
+    MW->GraphWindow->ShowAndFocus();
+    TString str = "LRF of pm#";
+    str += ipm;
+    str += " at R=";
+    str += radius;
+    str += " mm";
+    TGraph* gr = MW->GraphWindow->ConstructTGraph(Z, L, str, "Z, mm", "LRF", 2,0,0, 2,1,2);
+    MW->GraphWindow->Draw(gr, "APL");
+}
+
+void LRFwindow::on_pbAxial3DvsRandZ_clicked()
+{
+    if (!SensLRF->isAllLRFsDefined())
+    {
+        message("LRFs are not defined!", this);
+        return;
+    }
+
+    int ipm = ui->sbPMnoButons->value();
+    if (ipm > PMs->count()-1)  //protection
+    {
+        message("Invalid PM number!", this);
+        return;
+    }
+
+    const LRFaxial3d* lrf = dynamic_cast<const LRFaxial3d*>( (*SensLRF)[ipm] );
+    if (!lrf)
+    {
+        message("This operation is only allowed for Axial3D LRFs", this);
+        return;
+    }
+
+    QVector<double> R, Z, L;
+    double r0 = lrf->getXmin();
+    double r1 = lrf->getXmax();
+    double z0 = lrf->getZmin();
+    double z1 = lrf->getZmax();
+
+    double rr[3];
+    rr[1] = 0;
+    int binsR = MW->GlobSet->FunctionPointsX;
+    int binsZ = MW->GlobSet->FunctionPointsY;
+    double stepR = (r1-r0)/binsR;
+    double stepZ = (z1-z0)/binsZ;
+    for (int ir=0; ir<binsR; ir++)
+        for (int iz=0; iz<binsZ; iz++)
+        {
+            rr[0] = r0 + stepR*ir;
+            rr[2] = z0 + stepZ*iz;
+            R << rr[0];
+            Z << rr[2];
+            L << SensLRF->getLRFlocal(ipm, rr);
+        }
+
+    MW->GraphWindow->ShowAndFocus();
+    TString str = "LRF of pm#";
+    str += ipm;
+    TGraph2D* gr = MW->GraphWindow->ConstructTGraph2D(R, Z, L, str, "R, mm", "Z, mm", "LRF", 2,0,0, 2,1,2);
+    MW->GraphWindow->Draw(gr, "surf");
 }
 
 void LRFwindow::on_pbShowErrorVsRadius_clicked()
@@ -1311,74 +1410,6 @@ void LRFwindow::on_pbShowSensorGains_clicked()
     MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
 }
 
-void LRFwindow::on_pbCompareRadials_clicked()
-{
-  int bins = ui->sbCompareBins->value();
-  double R0 = ui->ledCompareFrom->text().toDouble();
-  double R1 = ui->ledCompareTo  ->text().toDouble();
-
-  if (R1<0 || R0<0 || R0>R1)
-  {
-      message("Input error", this);
-      return;
-  }
-
-  if (!SensLRF->isAllLRFsDefined())
-    {
-      message("LRFs are not defined!", this);
-      return;
-    }
-
-  if (secondIter == -1)
-    {
-      message("Second iteration is not selected", this);
-      return;
-    }
-
-    if (secondIter >= SensLRF->countIterations())
-    {
-       message("Error in second iteration number", this);
-       return;
-    }
-
-  double p[3];
-  p[0] = ui->sbPMnoButons->value(); //ipm
-  p[1] = ui->ledZcenter->text().toDouble(); //z0
-  p[2] = secondIter;
-
-  int step = (R1-R0)/bins;
-  double MeanDelta = 0, RMSdelta = 0, Mean1 = 0, Mean2 = 0;
-  for (int i=0; i<=bins; i++)
-  {
-      double r = R0 + step*i;
-
-      double LRF1 = SensLRF->getRadial(&r, p);
-      double LRF2 = SensLRF->getRadialPlus(&r, p);
-
-//      qDebug() << i << "LRF1, LRF2=" << LRF1 << LRF2;
-      Mean1 += LRF1;
-      Mean2 += LRF2;
-      MeanDelta += (LRF1-LRF2);
-      RMSdelta += (LRF1-LRF2)*(LRF1-LRF2);
-  }
-
-  qDebug() << "\n----------\n";
-  qDebug() << "Comparing LRFs for"<< ui->sbPMnoButons->value() << "PM.";
-  qDebug() << "range:" << R0 << R1;
-  qDebug() << "Mean delta: "<< MeanDelta;
-  qDebug() << "RMS of delta: "<<RMSdelta;
-  double factor = Mean2/Mean1;
-  qDebug() << "Scaling: "<< factor;
-
-  MW->Owindow->show();
-  MW->Owindow->raise();
-  MW->Owindow->activateWindow();
-  MW->Owindow->OutText("\n----------\n");
-  MW->Owindow->OutText("Mean delta: "+QString::number(MeanDelta));
-  MW->Owindow->OutText("RMS of delta: "+QString::number(RMSdelta));
-  MW->Owindow->OutText("Scaling: "+QString::number(factor));
-}
-
 void LRFwindow::on_led_compression_k_editingFinished()
 {
   double val = ui->led_compression_k->text().toDouble();
@@ -1396,13 +1427,6 @@ void LRFwindow::on_cbUseGroupping_toggled(bool checked)
   else         txt = "Only for PM#:";
   ui->cbMakePMGroup->setText(txt);
   ui->fSingleGroup->setEnabled(checked);
-}
-
-void LRFwindow::on_pbCommonToIndi_clicked()
-{
-    QString str = SensLRF->copyCommonToIndividual(PMs);
-    qDebug() << str;
-    LRFwindow::on_pbUpdateHistory_clicked(); //updating iteration history indication
 }
 
 void LRFwindow::on_pbTableToAxial_clicked()

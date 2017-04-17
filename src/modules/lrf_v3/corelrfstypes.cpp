@@ -634,7 +634,7 @@ bool ScriptType::loadScriptVarFromJson(const QJsonObject &json, QScriptValue &va
   ctx->setActivationObject(var_sigma);
   p->engine.popContext();
   if(!var_sigma.isObject() || !var_sigma.property("eval").isFunction())
-    return false;
+    var_sigma = QScriptValue();
 
   return true;
 }

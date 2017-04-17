@@ -737,8 +737,8 @@ ALrf *ScriptPolarType::lrfFromData(const QJsonObject &settings, bool fit_error,
   //  TODO signals (event signals)
   std::vector<AScriptParamInfo> param_info = AScript::getScriptParams(script_var);
 
-  int nbinsr = 300;
-  int nbinsz = 300;
+  int nbinsr = 100;
+  int nbinsz = 50;
   /*if(event_pos.size() > 100000) nbins = 1000;
 else if(event_pos.size() >  10000) nbins = event_pos.size() / 100 + 1;
 else if(event_pos.size() >    100) nbins = event_pos.size() /  10 + 1;*/
@@ -1016,12 +1016,12 @@ ALrf *ScriptCartesianType::lrfFromData(const QJsonObject &settings, bool fit_err
   //Collect parameter info of script function
   std::vector<AScriptParamInfo> param_info = AScript::getScriptParams(script_var);
 
-  int nbinsx = 300;
-  int nbinsy = 300;
+  int nbinsx = 100;
+  int nbinsy = 100;
 
   if(with_z) { //cartesian with Z  //////////////////////////////////
 
-    int nbinsz = 100;
+    int nbinsz = 50;
     {
       QScriptValue script_nbinsz = script_var.property("_ants2_nbinsz");
       if(script_nbinsz.isNumber())

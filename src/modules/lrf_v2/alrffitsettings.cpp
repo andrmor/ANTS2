@@ -45,6 +45,14 @@ bool ALrfFitSettings::readFromJson(QJsonObject &json)
   parseJson(json, "UseGrid", fUseGrid);
   fForceZeroDeriv = true;
   parseJson(json, "ForceZeroDeriv", fForceZeroDeriv);
+
+  fForceNonNegative = false;
+  parseJson(json, "ForceNonNegative", fForceNonNegative);
+  fForceNonIncreasingInR = false;
+  parseJson(json, "ForceNonIncreasingInR", fForceNonIncreasingInR);
+  fForceInZ = 0;
+  parseJson(json, "ForceInZ", fForceInZ);
+
   fFitError = false;
   parseJson(json, "StoreError", fFitError);
   scale_by_energy = true;

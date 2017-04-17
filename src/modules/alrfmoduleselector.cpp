@@ -41,7 +41,7 @@ bool ALrfModuleSelector::isAllLRFsDefined(bool fUseOldModule) const
 double ALrfModuleSelector::getLRF(int pmt, const double *r)
 {
   if (fOldSelected) return OldModule->getLRF(pmt, r);
-  else if(fUseNewModCopy) return (*NewModuleCopy)[pmt].eval(APoint(r));
+  else if(fUseNewModCopy) return  (*NewModuleCopy)[pmt].eval(APoint(r));
   else return NewModule->getLRF(pmt, APoint(r));
 }
 

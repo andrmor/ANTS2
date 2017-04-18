@@ -108,7 +108,7 @@ protected:
 
   QScriptString generateLrfName() const;
   QScriptString evaluateScript(QString script_code) const;
-  QScriptString copyScriptToCurrentThread(std::shared_ptr<const ALrf> lrf, std::shared_ptr<QScriptValue> &lrf_collection) const;
+  QScriptString copyScriptToCurrentThread(std::shared_ptr<const ALrf> lrf, std::shared_ptr<QScriptValue> &lrf_collection, QScriptString &sigma_name) const;
   bool loadScriptVarFromJson(const QJsonObject &json, QScriptValue &var, QScriptValue &var_sigma) const;
   bool rootFitToScriptVar(const std::vector<AScriptParamInfo> &param_info,
                           const TFitResultPtr &fit, QScriptValue &script_var) const;

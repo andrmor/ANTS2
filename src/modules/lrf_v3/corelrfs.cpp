@@ -390,6 +390,24 @@ QScriptString AScript::deepCopyScriptVar(QScriptValue *dest) const
   return new_name;
 }
 
+QScriptString AScript::deepCopyScriptVarSigma(QScriptValue *dest) const
+{
+  if(dest == nullptr)
+    dest = this->lrf_collection.get();
+
+  QScriptEngine *engine = dest->engine();
+  QString timestamp = QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch(), 16);
+  QScriptString new_name = engine->toStringHandle(QString::number(qrand(), 16)+'_'+timestamp);
+
+  QScriptContext *ctx = engine->pushContext();
+  QScriptValue new_val = AScriptValueCopier(*engine).copy(script_var_sigma);
+  ctx->setActivationObject(new_val);
+  dest->setProperty(new_name, new_val);
+  engine->popContext();
+
+  return new_name;
+}
+
 void AScript::setSigmaVar(QScriptString name)
 {
   name_sigma = name;
@@ -458,7 +476,7 @@ ALrf *AScriptPolar::clone() const
   QScriptString new_name = deepCopyScriptVar();
 
   AScriptPolar *lrf = new AScriptPolar(type(), lrf_collection, new_name, script, rmax, transf);
-  lrf->setSigmaVar(name_sigma);
+  lrf->setSigmaVar(deepCopyScriptVarSigma());
   return lrf;
 }
 
@@ -530,7 +548,7 @@ ALrf *AScriptPolarZ::clone() const
   QScriptString new_name = deepCopyScriptVar();
 
   AScriptPolarZ *lrf = new AScriptPolarZ(type(), lrf_collection, new_name, script, rmax, transf);
-  lrf->setSigmaVar(name_sigma);
+  lrf->setSigmaVar(deepCopyScriptVarSigma());
   return lrf;
 }
 
@@ -592,7 +610,7 @@ ALrf *AScriptCartesian::clone() const
 
   AScriptCartesian *lrf = new AScriptCartesian(type(), lrf_collection, new_name, script,
                                                xmin, xmax, ymin, ymax, transf);
-  lrf->setSigmaVar(name_sigma);
+  lrf->setSigmaVar(deepCopyScriptVarSigma());
   return lrf;
 }
 
@@ -666,7 +684,7 @@ ALrf *AScriptCartesianZ::clone() const
 
   AScriptCartesianZ *lrf = new AScriptCartesianZ(type(), lrf_collection, new_name, script,
                                                xmin, xmax, ymin, ymax, transf);
-  lrf->setSigmaVar(name_sigma);
+  lrf->setSigmaVar(deepCopyScriptVarSigma());
   return lrf;
 }
 

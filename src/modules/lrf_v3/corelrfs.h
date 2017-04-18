@@ -232,6 +232,7 @@ public:
   virtual ~AScript();
 
   QScriptString deepCopyScriptVar(QScriptValue *dest = nullptr) const;
+  QScriptString deepCopyScriptVarSigma(QScriptValue *dest = nullptr) const;
 
   void setSigmaVar(QScriptString name);
 

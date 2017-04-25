@@ -687,6 +687,14 @@ void EventFilterClass::execute()
     //qDebug() << Id<<"> Applying basic filters for events from"<<EventsFrom<<" to "<<EventsTo-1;
 
     bool fMultipleScanEvents = FiltSet->fMultipleScanEvents && !EventsDataHub->isScanEmpty();
+    bool fDoSpatialFilter = FiltSet->fSpF_custom &&
+                            (
+                               (FiltSet->SpF_RecOrScan == 0 && EventsDataHub->fReconstructionDataReady)
+                                ||
+                               (FiltSet->SpF_RecOrScan == 1 && !EventsDataHub->isScanEmpty())
+                            );
+    bool fDoRecEnergyFilter = FiltSet->fEnergyFilter && EventsDataHub->fReconstructionDataReady;
+    bool fDoChi2Filter = FiltSet->fChi2Filter && EventsDataHub->fReconstructionDataReady;
 
     for (int iev=EventsFrom; iev<EventsTo; iev++)
     {
@@ -698,7 +706,6 @@ void EventFilterClass::execute()
 
         if (FiltSet->fEventNumberFilter)
             if (iev < FiltSet->EventNumberFilterMin || iev > FiltSet->EventNumberFilterMax) goto BadEventLabel;
-
 
         if (FiltSet->fCutOffFilter || FiltSet->fSumCutOffFilter)
         {
@@ -725,29 +732,9 @@ void EventFilterClass::execute()
         }
 
         if (fMultipleScanEvents)
-        {
             if (EventsDataHub->Scan.at(iev)->Points.size() > 1) goto BadEventLabel;
-        }
 
-        //if reconstruction was not performed, other filters are NOT checked
-        if (!EventsDataHub->fReconstructionDataReady)
-        {  // so "false" can be only if data are processed which has not yet been reconstructed
-            rec->GoodEvent = true;  //before: was set good only if ReconstructionOK, which was set by CoG
-            continue;
-        }
-
-        //advanced filters - appear here ONLY reconstruction was successful
-        if (FiltSet->fEnergyFilter)
-        {
-            double TotalEnergy = 0;
-            for (int iPo=0; iPo<rec->Points.size(); iPo++) TotalEnergy += rec->Points[iPo].energy;
-            if (TotalEnergy < FiltSet->EnergyFilterMin || TotalEnergy > FiltSet->EnergyFilterMax) goto BadEventLabel;
-        }
-
-        if (FiltSet->fChi2Filter)
-            if (rec->chi2 < FiltSet->Chi2FilterMin || rec->chi2 > FiltSet->Chi2FilterMax) goto BadEventLabel;
-
-        if (FiltSet->fSpF_custom)
+        if (fDoSpatialFilter)
         {
             double xx, yy, zz;
             if (FiltSet->SpF_RecOrScan == 0)
@@ -759,23 +746,14 @@ void EventFilterClass::execute()
             }
             else
             {
-                if (EventsDataHub->isScanEmpty())
-                {
-                    //force pass the filter, disable the filter
-                    FiltSet->fSpF_custom = false;
-                    goto gotoIfNoScanData; //just to skip this filter
-                }
-                else
-                {
-                    xx = EventsDataHub->Scan.at(iev)->Points[0].r[0];
-                    yy = EventsDataHub->Scan.at(iev)->Points[0].r[1];
-                    zz = EventsDataHub->Scan.at(iev)->Points[0].r[2];
-                }
+                xx = EventsDataHub->Scan.at(iev)->Points[0].r[0];
+                yy = EventsDataHub->Scan.at(iev)->Points[0].r[1];
+                zz = EventsDataHub->Scan.at(iev)->Points[0].r[2];
             }
             //first checking Z
             if (!FiltSet->fSpF_allZ && (zz<FiltSet->SpF_Zfrom || zz>FiltSet->SpF_Zto) ) goto BadEventLabel;
 
-            bool fPass = true; //migh be inverted below!
+            bool fPass = true; //migh be inverted below if the spatial filter setting is "inside"!
             switch (FiltSet->SpF_shape)
             {
               case 0:
@@ -806,11 +784,20 @@ void EventFilterClass::execute()
             if (FiltSet->SpF_CutOutsideInside == 1) fPass = !fPass; //if cut inside, invert the filter results
             if (!fPass) goto BadEventLabel;
         }
-gotoIfNoScanData: //if spatial filter is on and set to use scan data, but scan data is not available
+
+        if (fDoRecEnergyFilter)
+        {
+            double TotalEnergy = 0;
+            for (int iPo=0; iPo<rec->Points.size(); iPo++) TotalEnergy += rec->Points[iPo].energy;
+            if (TotalEnergy < FiltSet->EnergyFilterMin || TotalEnergy > FiltSet->EnergyFilterMax) goto BadEventLabel;
+        }
+
+        if (fDoChi2Filter)
+            if (rec->chi2 < FiltSet->Chi2FilterMin || rec->chi2 > FiltSet->Chi2FilterMax) goto BadEventLabel;
+
         //if come to this point, its a good event
         rec->GoodEvent = true;
         continue;
-
         //goto for bad event collected here:
 BadEventLabel:
         rec->GoodEvent = false;

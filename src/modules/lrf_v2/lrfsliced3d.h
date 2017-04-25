@@ -27,7 +27,7 @@ public:
     int getNintX() const {return nintx;}
     int getNintY() const {return ninty;}
     int getNintZ() const {return nintz;}
-    double getSliceMedianZ(int iz) {return zbot+dz*iz;}
+    double getSliceMedianZ(int iz) const {return zbot+dz*iz;}
     virtual double eval(double x, double y, double z) const;
     virtual double evalErr(double x, double y, double z=0.) const;
     virtual double evalDrvX(double x, double y, double z) const;

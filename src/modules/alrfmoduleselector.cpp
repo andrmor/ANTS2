@@ -136,7 +136,18 @@ QJsonObject ALrfModuleSelector::getLRFv3makeJson() const
 
 bool ALrfModuleSelector::isOldSelected() const
 {
-  return fOldSelected;
+    return fOldSelected;
+}
+
+bool ALrfModuleSelector::isAllSlice3Dold() const
+{
+    if (fOldSelected)
+    {
+        for (int ipm=0; ipm<PMs->count(); ipm++)
+            if ( (*OldModule)[ipm]->type() != QString("Sliced3D") ) return false;
+        return true;
+    }
+    return false;
 }
 
 SensorLRFs *ALrfModuleSelector::getOldModule()

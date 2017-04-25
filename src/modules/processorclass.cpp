@@ -810,6 +810,13 @@ BadEventLabel:
 void CGonCPUreconstructorClass::execute()
 {
   //qDebug() << "CConCPU starting";
+  if (LRFs.isAllSlice3Dold())
+  {
+      //qDebug() << "Sliced3D old module - special procedure!";
+      executeSliced3Dold();
+      return;
+  }
+
   fFinished = false;
   float Factor = 100.0/(EventsTo-EventsFrom);
   double r2max = (RecSet->fLimitNodes) ? RecSet->LimitNodesSize1*RecSet->LimitNodesSize1 : 0;  //round only uses size1
@@ -938,5 +945,162 @@ void CGonCPUreconstructorClass::execute()
     }
 
   emit finished();
-  fFinished = true; 
+  fFinished = true;
+}
+
+void CGonCPUreconstructorClass::executeSliced3Dold()
+{
+    fFinished = false;
+    float Factor = 100.0/(EventsTo-EventsFrom);
+
+    eventsProcessed = 0;
+    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs.getOldModule())[0] );
+    if (!lrf) return;
+    //qDebug() << "Slices:"<<lrf->getNintZ();
+
+    for (int iev=EventsFrom; iev<EventsTo; iev++)
+      {
+        BestSlResult = 1.0e20;
+        AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
+        if (!rec->ReconstructionOK) continue; //cog failed!
+        if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
+
+        for (int isl=0; isl<lrf->getNintZ(); isl++)
+        {
+            if (fStopRequested) break;
+            oneSlice(iev, isl);
+        }
+
+        if (BestSlResult == 1.0e20)
+        {  //not a single good node was found
+            rec->ReconstructionOK = false;
+            rec->GoodEvent = false;
+        }
+        else
+        {
+            rec->Points[0].r[0] = BestSlX;
+            rec->Points[0].r[1] = BestSlY;
+            rec->Points[0].r[2] = BestSlZ;
+            rec->Points[0].energy = BestSlEnergy;
+            //alread have "OK and Good" status from CoG
+        }
+
+        eventsProcessed++;
+        Progress = eventsProcessed*Factor;
+      }
+
+    emit finished();
+    fFinished = true;
+}
+
+void CGonCPUreconstructorClass::oneSlice(int iev, int iSlice)
+{
+    double r2max = (RecSet->fLimitNodes) ? RecSet->LimitNodesSize1*RecSet->LimitNodesSize1 : 0;  //round only uses size1
+    AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
+
+    double CenterX, CenterY;
+    //starting coordinates
+    if (RecSet->CGstartOption == 1)
+    { //starting from XY of the centre of the PM with max signal
+        CenterX = PMs->X(rec->iPMwithMaxSignal);
+        CenterY = PMs->Y(rec->iPMwithMaxSignal);
+    }
+    else if (RecSet->CGstartOption == 2 && !EventsDataHub->isScanEmpty())
+    {
+        //starting from true XY
+        CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
+        CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
+    }
+    else
+    { //start from CoG data
+        CenterX = rec->xCoG;
+        CenterY = rec->yCoG;
+    }
+    //qDebug() << "Center option:"<<RecSet->CGstartOption<<"Center xy:"<< CenterX<<CenterY;
+
+    int Nodes = RecSet->CGnodesXY;
+    double Step = RecSet->CGinitialStep;
+    int numPMs = PMs->count();
+    double bestResult = 1.0e20;
+    double bestX, bestY, bestZ;
+    double bestEnergy = -1;
+    const LRFsliced3D* lrf = dynamic_cast<const LRFsliced3D*>( (*LRFs.getOldModule())[0] );
+    rec->Points[0].r[2] = lrf->getSliceMedianZ(iSlice);
+
+    for (int iter = 0; iter<RecSet->CGiterations; iter++)
+          {
+            for (int ix = 0; ix<Nodes; ix++)
+              for (int iy = 0; iy<Nodes; iy++)
+                {
+                  //coordinates of this node
+                  rec->Points[0].r[0] = CenterX - (0.5*(Nodes-1) - ix)*Step;
+                  rec->Points[0].r[1] = CenterY - (0.5*(Nodes-1) - iy)*Step;
+
+                  //if we have some spatial filtering:
+                  if (RecSet->fLimitNodes)
+                    {
+                      if (RecSet->LimitNodesShape == 0)
+                        {
+                          //rectangular
+                          if ( fabs(rec->Points[0].r[0]) > RecSet->LimitNodesSize1 ) continue;
+                          if ( fabs(rec->Points[0].r[1]) > RecSet->LimitNodesSize2 ) continue;
+                        }
+                      else
+                        {
+                          //round
+                          double r2 = rec->Points[0].r[0]*rec->Points[0].r[0] + rec->Points[0].r[1]*rec->Points[0].r[1];
+                          if (r2 > r2max) continue;
+                        }
+                    }
+
+                  //energy assuming event is in this node
+                  if (RecSet->fReconstructEnergy)
+                    {
+                      bool fBadLRFfound = false;
+                      double sumLRFs = 0;
+                      double SumSignal = 0;
+                      for (int ipm = 0; ipm < numPMs; ipm++)
+                        if (DynamicPassives->isActive(ipm))
+                          {
+                           double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r);
+                           if (LRFhere <= 0.0)
+                             {
+                               fBadLRFfound = true;
+                               break;
+                             }
+                           sumLRFs += LRFhere;
+                           SumSignal += EventsDataHub->Events[iev].at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
+                          }
+                      if (fBadLRFfound) continue; //skip this location
+                      rec->Points[0].energy = SumSignal/sumLRFs;//energy cannot be zero here
+                    }
+                  else rec->Points[0].energy = RecSet->SuggestedEnergy;
+
+                  double result = (RecSet->CGoptimizeWhat == 0) ? calculateChi2NoDegFree(iev, rec) : calculateMLfactor(iev, rec);
+                  if (result == 1.0e20) continue; //fail - one of LRFs is undefined for these coordinates
+
+                  if (result < bestResult)
+                    { //current best
+                      bestResult = result;
+                      bestX = rec->Points[0].r[0];
+                      bestY = rec->Points[0].r[1];
+                      bestZ = rec->Points[0].r[2];
+                      bestEnergy = rec->Points[0].energy;
+                    }
+                }
+            //preparing for new iteration
+            CenterX = bestX;
+            CenterY = bestY;
+            Step /= RecSet->CGreduction;
+          }
+        //qDebug() << "Slice:"<<iSlice<<"Result, xyzenergy:"<<bestResult<<bestX<<bestY<<bestZ<<bestEnergy;
+
+        if (bestResult < BestSlResult)
+          {
+            BestSlResult = bestResult;
+            BestSlX = bestX;
+            BestSlY = bestY;
+            BestSlZ = bestZ;
+            BestSlEnergy = bestEnergy;
+          }
 }

@@ -557,13 +557,15 @@ void CudaManagerClass::ConfigureLRFs()
     case 2:
       ConfigureLRFs_Sliced3D();
       mem = lrfSplineData[0].size()*lrfSplineData.size();
+      break;
     case 4:
       ConfigureLRFs_Composite();
       mem = numPMsStaticActive * lrfFloatsPerPM * 4;
-    default:
+      break;
+    default:      
       break;
     }  
-  //qDebug() << "==>Cuda: Constant memory size needed:" << mem;
+  qDebug() << "==>Cuda: LRF memory size requested:" << mem;
 }
 
 void CudaManagerClass::ConfigureLRFs_Axial()

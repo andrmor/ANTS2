@@ -585,7 +585,7 @@ QScriptString ScriptType::evaluateScript(QString script_code) const
   }
 }
 
-QScriptString ScriptType::copyScriptToCurrentThread(std::shared_ptr<const ALrf> lrf, std::shared_ptr<QScriptValue> &lrf_collection) const
+QScriptString ScriptType::copyScriptToCurrentThread(std::shared_ptr<const ALrf> lrf, std::shared_ptr<QScriptValue> &lrf_collection, QScriptString &sigma_name) const
 {
   const AScript *slrf = static_cast<const AScript*>(lrf.get());
   auto it_thr_lrfs = p->thread_lrf_collections.find(std::this_thread::get_id());
@@ -617,6 +617,7 @@ QScriptString ScriptType::copyScriptToCurrentThread(std::shared_ptr<const ALrf> 
   }
 
   //With lrf collection creation handled, we just copy the script vars to it.
+  sigma_name = slrf->deepCopyScriptVarSigma(lrf_collection.get());
   return slrf->deepCopyScriptVar(lrf_collection.get());
 }
 
@@ -634,7 +635,7 @@ bool ScriptType::loadScriptVarFromJson(const QJsonObject &json, QScriptValue &va
   ctx->setActivationObject(var_sigma);
   p->engine.popContext();
   if(!var_sigma.isObject() || !var_sigma.property("eval").isFunction())
-    return false;
+    var_sigma = QScriptValue();
 
   return true;
 }
@@ -928,7 +929,12 @@ ALrf *ScriptPolarType::lrfFromJson(const QJsonObject &json) const
   double rmax = json["rmax"].toDouble();
   ATransform t = ATransform::fromJson(json["transform"].toObject());
 
-  AScriptPolar *lrf = new AScriptPolar(id(), p->lrf_collection, name, script_code, rmax, t);
+
+  AScriptPolar *lrf;
+  if(with_z)
+    lrf = new AScriptPolarZ(id(), p->lrf_collection, name, script_code, rmax, t);
+  else
+    lrf = new AScriptPolar(id(), p->lrf_collection, name, script_code, rmax, t);
   lrf->setSigmaVar(name_sigma);
   return lrf;
 }
@@ -953,11 +959,18 @@ QWidget *ScriptPolarType::newSettingsWidget(QWidget *parent) const
 std::shared_ptr<const ALrf> ScriptPolarType::copyToCurrentThread(std::shared_ptr<const ALrf> lrf) const
 {
   std::shared_ptr<QScriptValue> thr_lrfs;
-  QScriptString new_name = copyScriptToCurrentThread(lrf, thr_lrfs);
+  QScriptString new_sigma_name;
+  QScriptString new_name = copyScriptToCurrentThread(lrf, thr_lrfs, new_sigma_name);
   if(new_name.isValid()) {
     const AScriptPolar *slrf = static_cast<const AScriptPolar*>(lrf.get());
-    return std::shared_ptr<AScriptPolar>(new AScriptPolar(id(), thr_lrfs, new_name,
-      slrf->getScript(), slrf->getRmax(), slrf->getTransform()));
+    AScriptPolar *lrf_copy;
+    if(with_z)
+      lrf_copy = new AScriptPolarZ(id(), thr_lrfs, new_name, slrf->getScript(), slrf->getRmax(), slrf->getTransform());
+    else
+      lrf_copy = new AScriptPolar(id(), thr_lrfs, new_name, slrf->getScript(), slrf->getRmax(), slrf->getTransform());
+
+    lrf_copy->setSigmaVar(new_sigma_name);
+    return std::shared_ptr<AScriptPolar>(lrf_copy);
   } else {
     return lrf;
   }
@@ -1258,7 +1271,12 @@ ALrf *ScriptCartesianType::lrfFromJson(const QJsonObject &json) const
   double ymax = json["ymax"].toDouble();
   ATransform t = ATransform::fromJson(json["transform"].toObject());
 
-  AScriptCartesian *lrf = new AScriptCartesian(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
+
+  AScriptCartesian *lrf;
+  if(with_z)
+    lrf = new AScriptCartesianZ(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
+  else
+    lrf = new AScriptCartesian(id(), p->lrf_collection, name, script_code, xmin, xmax, ymin, ymax, t);
   lrf->setSigmaVar(name_sigma);
   return lrf;
 }
@@ -1287,12 +1305,22 @@ QWidget *ScriptCartesianType::newSettingsWidget(QWidget *parent) const
 std::shared_ptr<const ALrf> ScriptCartesianType::copyToCurrentThread(std::shared_ptr<const ALrf> lrf) const
 {
   std::shared_ptr<QScriptValue> thr_lrfs;
-  QScriptString new_name = copyScriptToCurrentThread(lrf, thr_lrfs);
+  QScriptString new_sigma_name;
+  QScriptString new_name = copyScriptToCurrentThread(lrf, thr_lrfs, new_sigma_name);
   if(new_name.isValid()) {
     const AScriptCartesian *slrf = static_cast<const AScriptCartesian*>(lrf.get());
-    return std::shared_ptr<AScriptCartesian>(new AScriptCartesian(id(), thr_lrfs, new_name,
-      slrf->getScript(), slrf->getXmin(), slrf->getXmin(),
-      slrf->getYmin(), slrf->getYmax(), slrf->getTransform()));
+    AScriptCartesian *lrf_copy;
+    if(with_z)
+      lrf_copy = new AScriptCartesianZ(id(), thr_lrfs, new_name,
+                                       slrf->getScript(), slrf->getXmin(), slrf->getXmin(),
+                                       slrf->getYmin(), slrf->getYmax(), slrf->getTransform());
+    else
+      lrf_copy = new AScriptCartesian(id(), thr_lrfs, new_name,
+                                      slrf->getScript(), slrf->getXmin(), slrf->getXmin(),
+                                      slrf->getYmin(), slrf->getYmax(), slrf->getTransform());
+
+    lrf_copy->setSigmaVar(new_sigma_name);
+    return std::shared_ptr<AScriptCartesian>(lrf_copy);
   } else {
     return lrf;
   }

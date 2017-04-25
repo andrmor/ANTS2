@@ -443,10 +443,32 @@ void MainWindow::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAl
     GeometryWindow->UpdateRootCanvas();
 }
 
-void MainWindow::clearGeoMarkers()
-{
-  for (int i=0; i<GeoMarkers.size(); i++) delete GeoMarkers[i];
-  GeoMarkers.clear();
+void MainWindow::clearGeoMarkers(int All_Rec_True)
+{    
+  for (int i=GeoMarkers.size()-1; i>-1; i--)
+  {
+      switch (All_Rec_True)
+      {
+        case 1:
+          if (GeoMarkers.at(i)->Type == "Recon")
+          {
+              delete GeoMarkers[i];
+              GeoMarkers.remove(i);
+          }
+          break;
+        case 2:
+          if (GeoMarkers.at(i)->Type == "Scan")
+          {
+              delete GeoMarkers[i];
+              GeoMarkers.remove(i);
+          }
+          break;
+        case 0:
+        default:
+          delete GeoMarkers[i];
+          GeoMarkers.remove(i);
+      }
+  }
 }
 
 void MainWindow::clearCustomScanNodes()

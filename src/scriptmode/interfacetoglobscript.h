@@ -598,7 +598,6 @@ public slots:
   void ShowPMnumbers();
   void ShowReconstructedPositions();
   void SetShowOnlyFirstEvents(bool fOn, int number = -1);
-  void SetShowTrue(bool fOn, bool fActualOnTop = false);
   void ShowTruePositions();
   void ShowTracks(int num, int OnlyColor = -1);
   void ShowSPS_position();

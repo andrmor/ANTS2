@@ -111,7 +111,7 @@ public:
 
   void HideCutShapes(); //hide correlation cut shapes
 
-  void ShowReconstructionPositionsIfWindowVisible();
+  //void ShowReconstructionPositionsIfWindowVisible();
   void DotActualPositions();
 
   void SaveIndividualCutOffs(QString fileName);
@@ -519,6 +519,10 @@ private slots:
 
   void on_pbBlurReconstructedZ_clicked();
 
+  void on_pbShowTruePositions_clicked();
+
+  void on_pbClearPositions_clicked();
+
 protected:
     bool event(QEvent *event);
 
@@ -612,6 +616,7 @@ public slots:
   void onKNNreadyXchanged(bool ready, int events);
   void onKNNreadyYchanged(bool ready, int events);
 
+  void ShowPositions(int Rec_True, bool fOnlyIfWindowVisible = false);
 signals:
 
   void cbReconstructEnergyChanged(bool changed);
@@ -628,7 +633,6 @@ public:
 
   //for script mode:
   void SetShowFirst(bool fOn, int number = -1);
-  void SetShowActual(bool fOn, bool fActualOnTop = false);
   void UpdateReconConfig();
 };
 

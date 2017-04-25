@@ -3014,19 +3014,6 @@
         <zorder>pbBlurReconstructedXY</zorder>
         <zorder>pbBlurReconstructedZ</zorder>
        </widget>
-       <zorder>frame_7</zorder>
-       <zorder>label_142</zorder>
-       <zorder>cobBlurType</zorder>
-       <zorder>stackedWidget_2</zorder>
-       <zorder>pbBlurReconstructedXY</zorder>
-       <zorder>cbOnBlurUpdateFilters</zorder>
-       <zorder>cbOnBlurApplyToAllGroups</zorder>
-       <zorder>label_142</zorder>
-       <zorder>cobBlurType</zorder>
-       <zorder>stackedWidget_2</zorder>
-       <zorder>pbBlurReconstructedXY</zorder>
-       <zorder>cbOnBlurUpdateFilters</zorder>
-       <zorder>cbOnBlurApplyToAllGroups</zorder>
       </widget>
       <widget class="QWidget" name="tabAdaptive">
        <attribute name="title">
@@ -5432,7 +5419,7 @@ Individual sensors can belong to multiple groups!</string>
             </rect>
            </property>
            <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
+            <enum>QFrame::NoFrame</enum>
            </property>
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>

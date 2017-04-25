@@ -10,7 +10,6 @@
 #include "outputwindow.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
-//#include "lrfsliced3d.h"
 #include "lrfwindow.h"
 #include "CorrelationFilters.h"
 #include "windownavigatorclass.h"
@@ -212,10 +211,8 @@ void ReconstructionWindow::UpdateStatusAllEvents()
 
   if (EventsDataHub->isEmpty()) return;
 
-  //TMPignore = true;
   ReconstructionManager->filterEvents(MW->Config->JSON, MW->GlobSet->NumThreads);
   //   qDebug() << "  Found good events:"<<EventsDataHub->countGoodEvents();
-  //TMPignore = false;
   //qDebug() << "Update done";
 }
 

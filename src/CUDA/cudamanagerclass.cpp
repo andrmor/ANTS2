@@ -207,7 +207,7 @@ bool CudaManagerClass::RunCuda(QString method)
           return false;
         }
     }
-
+/*
   if (IgnoreFarPMs)
     if (Method != 0 && Method != 3 && Method != 4)
       {
@@ -215,14 +215,15 @@ bool CudaManagerClass::RunCuda(QString method)
         message("LRFs should be Axial/CompAxial/Composite to use dynamic passives by distance!");
         return false;
       }
-
+*/
 
   //clear containers
   Clear();
 
 //  qDebug()<<"\n\n==>Starting cuda inits...";
 
-  if (Method == 0 || Method == 3 || Method == 4) ConfigurePMcenters();
+//  if (Method == 0 || Method == 3 || Method == 4)
+  ConfigurePMcenters();
 //   qDebug()<<"..centers";
   ConfigureLRFs(); //also defines slices data for Slice3D
 //   qDebug()<<"..LRFs";
@@ -313,9 +314,9 @@ bool CudaManagerClass::PerformSliced()
                       IgnoreLowSigPMs,
                       IgnoreThresholdLow,
                       IgnoreThresholdHigh,
-                      false, //cannot use IgnoreByDistance option anyway in this mode
-                      1000.0,
-                      0.0,     //dont care about compression
+                      IgnoreFarPMs,
+                      IgnoreDistance,
+                      0.0,     //compression cannot be used with XY-sym lrfs
                       0.0,
                       0.0,
                       0.0,
@@ -349,8 +350,8 @@ bool CudaManagerClass::PerformSliced()
            if (MLorChi2 == 0) RecData[iz][iev].Probability = probability[iev];
           }
 
-        if (MLorChi2 == 0) qDebug()<<iz<<"> Prob:"<<probability[0]<<"  x,y,E,chi2:"<<recX[0]<<recY[0]<<recEnergy[0]<<chi2[0];
-        else qDebug()<<iz<<"> Chi2:"<<chi2[0]<<"  x,y,E:"<<recX[0]<<recY[0]<<recEnergy[0];
+        if (MLorChi2 == 0) qDebug()<<iz<<"First event> Prob:"<<probability[0]<<"  x,y,E,chi2:"<<recX[0]<<recY[0]<<recEnergy[0]<<chi2[0];
+        else qDebug()<<iz<<"First event> Chi2:"<<chi2[0]<<"  x,y,E:"<<recX[0]<<recY[0]<<recEnergy[0];
         ElapsedTime += ElapsedTimeDelta;
       }
 

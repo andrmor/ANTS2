@@ -117,6 +117,10 @@ __global__ void kernelXY(const bool mlORchi2,
                                const bool ignoreLowSignalPMs,
                                const float ignoreThresholdLow,
                                const float ignoreThresholdHigh,
+                         const bool ignoreFarPMs,
+                         const float ignoreDistance2,
+                         const float* pmx,
+                         const float* pmy,
                                const int iterations,
                                float scale,
                                const float scaleReductionFactor,
@@ -134,7 +138,7 @@ __global__ void kernelXY(const bool mlORchi2,
                                float *d_probability);
 
 
-//__constant__ float d_LRF[16384];  //constant memory containing LRF data
+//__constant__ float d_LRF[16384];  //constant memory - former was containing LRF data
 
 
 //=============== implementation ===============
@@ -365,6 +369,10 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 3 - CompRad
                                                          ignoreLowSigPMs,
                                                          ignoreThresholdLow,
                                                          ignoreThresholdHigh,
+                                                       ignoreFarPMs,
+                                                       ignoreDistance*ignoreDistance,
+                                                       d_pmx,
+                                                       d_pmy,
                                                          iterations,
                                                          scale,
                                                          scaleReductionFactor,
@@ -1327,6 +1335,10 @@ __global__ void kernelXY(const bool mlORchi2,
                                const bool ignoreLowSignalPMs,
                                const float ignoreThresholdLow,
                                const float ignoreThresholdHigh,
+                         const bool ignoreFarPMs,
+                         const float ignoreDistance2,
+                         const float* pmx,
+                         const float* pmy,
                                const int iterations,
                                float scale,
                                const float scaleReductionFactor,
@@ -1345,11 +1357,14 @@ __global__ void kernelXY(const bool mlORchi2,
 
 {
   //setting up shared memory
-  int activeThreads = blockDim.x * blockDim.y;
-
+  int activeThreads = blockDim.x * blockDim.y;    
   extern __shared__ float shared[];  //these data are shared withing a thread block - that is for all points of the grid (one event!)
+    //PM centers
+ float* PMx = (float*) &shared;
+ float* PMy = (float*) &PMx[numPMs];
     //grid location
-  int* nodeIX = (int*) &shared;
+  //int* nodeIX = (int*) &shared;
+  int* nodeIX = (int*) &PMy[numPMs];
   int* nodeIY = (int*) &nodeIX[activeThreads];
   float* nodeChi2 = (float*) &nodeIY[activeThreads];
   float* nodeEnergy = (float*) &nodeChi2[activeThreads];
@@ -1360,6 +1375,8 @@ __global__ void kernelXY(const bool mlORchi2,
 
   __shared__ float Xoffset;
   __shared__ float Yoffset;
+  __shared__ float Xoffset0; //will be kept unchanged, for dynamic passives by distance
+  __shared__ float Yoffset0; //will be kept unchanged, for dynamic passives by distance
 
   int ievent = blockIdx.x + gridDim.x * blockIdx.y;      //cuda GRID is used to select an event - below word "grid" refers to the grid of XYs positions
   int threadID = threadIdx.x + threadIdx.y * blockDim.x; //block is used to scan XY (each node - one thread)
@@ -1375,7 +1392,9 @@ __global__ void kernelXY(const bool mlORchi2,
   if (threadID == 0)
     { //0th tread sets the center of the grid
       Xoffset = d_eventsData[ievent*(numPMs+2) + numPMs];  //offsetX;
-      Yoffset = d_eventsData[ievent*(numPMs+2) + numPMs+1];//offsetX;
+      Xoffset0 = Xoffset;
+      Yoffset = d_eventsData[ievent*(numPMs+2) + numPMs+1];//offsetY;
+      Yoffset0 = Yoffset;
     }
 
   __syncthreads(); //need to synchronize - all shared input data are ready
@@ -1448,6 +1467,19 @@ __global__ void kernelXY(const bool mlORchi2,
                     //signal < threshold, ignoring this PM
                     continue;
                   }
+             if (ignoreFarPMs)
+               {
+                 float stX  = (PMx[ipm] - Xoffset0);
+                 float stY  = (PMy[ipm] - Yoffset0);
+                 float r2 = stX*stX + stY*stY; // r  = sqrtf(r);
+                 //distance2 from this PM center to the start position of the search
+                 if (r2 > ignoreDistance2)
+                  {
+                   //too far from this PM center, ignoring this PM
+                   continue;
+                  }
+               }
+
              activePMs++; //this one is active
 
              sumsig += tsig;

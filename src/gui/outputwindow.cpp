@@ -87,8 +87,10 @@ void OutputWindow::PMnumChanged()
 
 void OutputWindow::SetCurrentEvent(int iev)
 {  
-  if (iev == ui->sbEvent->value()) OutputWindow::on_pbRefreshViz_clicked();
+  if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev);
   else ui->sbEvent->setValue(iev); //update on_change
+
+  RefreshData();
 }
 
 void OutputWindow::on_pbShowPMtime_clicked()
@@ -492,11 +494,9 @@ void OutputWindow::RefreshData()
     ui->sbPMnumberToShowTime->setValue(0);
 
   bool fHaveSiPMpixData = !SiPMpixels.isEmpty();
-  //bool fHaveStat = EventsDataHub->LastSimSet.fLogsStat;
   bool fTimeResolved = !EventsDataHub->TimedEvents.isEmpty();
 
   ui->pbSiPMpixels->setEnabled(fHaveSiPMpixData);
-  //ui->tabPhStatistics->setEnabled(fHaveStat);
   ui->sbTimeBin->setEnabled(fTimeResolved);
   ui->pbShowPMtime->setEnabled(fTimeResolved);
 
@@ -1216,24 +1216,26 @@ void OutputWindow::ShowPhotonLossLog()
   ui->pteOut->appendPlainText(s);
 }
 
-void OutputWindow::ClearMaterialCobs()
+void OutputWindow::UpdateMaterials()
 {
-  ui->cobShowMaterial->clear();
+   int old = ui->cobShowMaterial->currentIndex();
+
+   ui->cobShowMaterial->clear();
+   for (int i=0; i<MW->MpCollection->countMaterials(); i++)
+      ui->cobShowMaterial->addItem( (*MW->MpCollection)[i]->name );
+
+   if (old < ui->cobShowMaterial->count()) ui->cobShowMaterial->setCurrentIndex(old);
 }
 
-void OutputWindow::ClearParticleCobs()
+void OutputWindow::UpdateParticles()
 {
+  int old = ui->cobShowParticle->currentIndex();
+
   ui->cobShowParticle->clear();
-}
+  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
+      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
-void OutputWindow::AddMaterial(QString mat)
-{
-  ui->cobShowMaterial->addItem(mat);
-}
-
-void OutputWindow::AddParticle(QString part)
-{
-  ui->cobShowParticle->addItem(part);
+  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
 }
 
 void OutputWindow::on_pbShowSelected_clicked()
@@ -1452,4 +1454,12 @@ void OutputWindow::on_cobWhatToShow_currentIndexChanged(int index)
 void OutputWindow::on_pbNextEvent_clicked()
 {
     ui->sbEvent->setValue(ui->sbEvent->value()+1);
+}
+
+void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
+{
+    if (index==1)
+    {
+        QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
+    }
 }

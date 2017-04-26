@@ -443,10 +443,32 @@ void MainWindow::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAl
     GeometryWindow->UpdateRootCanvas();
 }
 
-void MainWindow::clearGeoMarkers()
-{
-  for (int i=0; i<GeoMarkers.size(); i++) delete GeoMarkers[i];
-  GeoMarkers.clear();
+void MainWindow::clearGeoMarkers(int All_Rec_True)
+{    
+  for (int i=GeoMarkers.size()-1; i>-1; i--)
+  {
+      switch (All_Rec_True)
+      {
+        case 1:
+          if (GeoMarkers.at(i)->Type == "Recon")
+          {
+              delete GeoMarkers[i];
+              GeoMarkers.remove(i);
+          }
+          break;
+        case 2:
+          if (GeoMarkers.at(i)->Type == "Scan")
+          {
+              delete GeoMarkers[i];
+              GeoMarkers.remove(i);
+          }
+          break;
+        case 0:
+        default:
+          delete GeoMarkers[i];
+          GeoMarkers.remove(i);
+      }
+  }
 }
 
 void MainWindow::clearCustomScanNodes()
@@ -517,13 +539,14 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    ui->cobMatPointSource->clear();
-    Owindow->ClearMaterialCobs();
-
+    ui->cobMatPointSource->clear();    
     int numMats = MpCollection->countMaterials();
     for (int i=0; i<numMats; i++)
         AddMaterialToCOBs( (*MpCollection)[i]->name );
+
     MIwindow->UpdateActiveMaterials();
+    Owindow->UpdateMaterials();
+
     DoNotUpdateGeometry = tmpBool;
 
     //restore override material selection
@@ -543,7 +566,6 @@ void MainWindow::AddMaterialToCOBs(QString s)
     ui->cobMaterialForWaveTests->addItem(s);
     ui->cobMatPointSource->addItem(s);
 
-    Owindow->AddMaterial(s);
     MIwindow->AddMatToCobs(s);
 }
 

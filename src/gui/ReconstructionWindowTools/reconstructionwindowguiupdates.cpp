@@ -19,14 +19,14 @@ void ReconstructionWindow::onRequestEventsGuiUpdate()
 
     ui->dLoadedEnergy->setEnabled(EventsDataHub->fLoadedEventsHaveEnergyInfo);
     if (!EventsDataHub->fLoadedEventsHaveEnergyInfo) ui->cbActivateLoadedEnergyFilter->setChecked(false);
-    if (EventsDataHub->isScanEmpty()) ui->cbShowActualPosition->setChecked(false);
+    //if (EventsDataHub->isScanEmpty()) ui->cbShowActualPosition->setChecked(false);
     ui->fAnalysisAreaScan->setEnabled(false);
 
     if (EventsDataHub->ScanNumberOfRuns>1) //clearData sets ScanNumberOfRuns to 1
       if (EventsDataHub->Scan.size() > EventsDataHub->ScanNumberOfRuns) //if not single point scan
         ui->fAnalysisAreaScan->setEnabled(true);
     bool fScanEmpty = EventsDataHub->isScanEmpty();
-    ui->cbShowActualPosition->setEnabled(!fScanEmpty);
+    //ui->cbShowActualPosition->setEnabled(!fScanEmpty);
     if (fScanEmpty) ui->cbPlotVsActualPosition->setChecked(false);
     ui->cbPlotVsActualPosition->setEnabled(!fScanEmpty);
     onManifestItemsGuiUpdate();

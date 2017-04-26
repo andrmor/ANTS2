@@ -75,9 +75,7 @@ void MainWindow::on_pbRefreshParticles_clicked()
   foreach (QComboBox* cob, cobs)
     updateParticleCOB(cob, Detector);
 
-  Owindow->ClearParticleCobs();
-  for (int i=0; i<Detector->MpCollection->countParticles(); i++)
-      Owindow->AddParticle( Detector->MpCollection->getParticleName(i) );
+  Owindow->UpdateParticles();
 }
 
 void MainWindow::on_lwParticles_currentRowChanged(int currentRow)

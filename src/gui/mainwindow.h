@@ -422,7 +422,7 @@ public:
 
     void writeLoadExpDataConfigToJson(QJsonObject &json);
     bool readLoadExpDataConfigFromJson(QJsonObject &json);
-    void clearGeoMarkers();
+    void clearGeoMarkers(int All_Rec_True = 0);
     void clearCustomScanNodes();
     void setFontSizeAllWindows(int size);
     void writeExtraGuiToJson(QJsonObject &json);

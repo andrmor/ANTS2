@@ -1838,17 +1838,13 @@ void InterfaceToGeoWin::ShowPMnumbers()
 
 void InterfaceToGeoWin::ShowReconstructedPositions()
 {
-  MW->Rwindow->ShowReconstructionPositionsIfWindowVisible();
+  //MW->Rwindow->ShowReconstructionPositionsIfWindowVisible();
+  MW->Rwindow->ShowPositions(0, true);
 }
 
 void InterfaceToGeoWin::SetShowOnlyFirstEvents(bool fOn, int number)
 {
   MW->Rwindow->SetShowFirst(fOn, number);
-}
-
-void InterfaceToGeoWin::SetShowTrue(bool fOn, bool fActualOnTop)
-{
-  MW->Rwindow->SetShowActual(fOn, fActualOnTop);
 }
 
 void InterfaceToGeoWin::ShowTruePositions()

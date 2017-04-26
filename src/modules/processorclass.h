@@ -80,6 +80,11 @@ public slots:
   virtual void execute();
 };
 
+struct ASliceRecRecord
+{
+
+};
+
 /// Contracting grids on CPU
 class CGonCPUreconstructorClass : public ProcessorClass
 {
@@ -96,6 +101,14 @@ public:
   ~CGonCPUreconstructorClass(){}
 public slots:
   virtual void execute();
+
+private:
+  void executeSliced3Dold();
+  void oneSlice(int iev, int iSlice);
+
+  double BestSlResult;
+  double BestSlX, BestSlY, BestSlZ;
+  double BestSlEnergy;
 };
 
 /// Root minimizer (Migrad2 or Simplex) for point events

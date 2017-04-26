@@ -47,6 +47,7 @@ public:
   void selectOld() {fOldSelected = true;}
   void selectNew() {fOldSelected = false;}
   bool isOldSelected() const;
+  bool isAllSlice3Dold() const;
   SensorLRFs* getOldModule();
   LRF::ARepository* getNewModule();
 

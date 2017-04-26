@@ -43,10 +43,8 @@ public:
     void ShowPhotonProcessesLog();
     void ShowPhotonLossLog();
 
-    void ClearMaterialCobs();
-    void ClearParticleCobs();
-    void AddMaterial(QString mat);
-    void AddParticle(QString part);
+    void UpdateMaterials();
+    void UpdateParticles();
 
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -76,6 +74,9 @@ private slots:
     void on_cobWhatToShow_currentIndexChanged(int index);
     void on_pbNextEvent_clicked();
 
+    void on_tabwinDiagnose_tabBarClicked(int index);
+    void RefreshPMhitsTable();
+
 protected:
     bool event(QEvent *event);   
 
@@ -98,8 +99,7 @@ private:
     void updateSignalLabels(double MaxSignal);
     void addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
     void addTextitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
-    void updateSignalScale();
-    void RefreshPMhitsTable();
+    void updateSignalScale();    
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);

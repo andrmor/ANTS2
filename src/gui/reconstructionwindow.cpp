@@ -10,7 +10,6 @@
 #include "outputwindow.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
-//#include "lrfsliced3d.h"
 #include "lrfwindow.h"
 #include "CorrelationFilters.h"
 #include "windownavigatorclass.h"
@@ -212,10 +211,8 @@ void ReconstructionWindow::UpdateStatusAllEvents()
 
   if (EventsDataHub->isEmpty()) return;
 
-  //TMPignore = true;
   ReconstructionManager->filterEvents(MW->Config->JSON, MW->GlobSet->NumThreads);
   //   qDebug() << "  Found good events:"<<EventsDataHub->countGoodEvents();
-  //TMPignore = false;
   //qDebug() << "Update done";
 }
 
@@ -245,15 +242,12 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
    if (EventsDataHub->isEmpty()) return;
 
    int totNumEvents = EventsDataHub->Events.size();
-   if ( totNumEvents == 0) return;
+   if (totNumEvents == 0) return;
    if (arg1 > totNumEvents-1)
      {
        ui->sbEventNumberInspect->setValue(totNumEvents-1);
        return;
      }
-
-   MW->Owindow->SetCurrentEvent(arg1);
-   MW->Owindow->RefreshData();
 
    if (MW->GraphWindow->isVisible())
      {
@@ -262,48 +256,18 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
        if (MW->GraphWindow->LastDistributionShown == "MapEvent") ReconstructionWindow::on_pbShowMap_clicked();
      }
 
-   ReconstructionWindow::on_pbReconstructOneEvent_clicked(); //no actual reconstruction
-}
-
-void ReconstructionWindow::on_pbReconstructOneEvent_clicked()
-{
-  if (EventsDataHub->isEmpty())
-    {
-      message("Data are empty!", this);
-      ui->twData->setCurrentIndex(0);
-      return;
-    }
-
   int CurrentGroup = PMgroups->getCurrentGroup();
-  //if (!EventsDataHub->isReconstructionReady(CurrentGroup))
-  //  {
-  //    qWarning() << "Reconstruction was not yet performed, showing only available data";
-  //    //return;
-  //  }
-  int iev = ui->sbEventNumberInspect->value();
-  if (iev > EventsDataHub->Events.size()-1)
-    {
-      qDebug()<<"Bad event number in reconstruct one event!";
-      return;
-    }  
-
-  AReconRecord* result = EventsDataHub->ReconstructionData[CurrentGroup][iev];
-  MW->Owindow->ShowOneEventLog(iev);
+  AReconRecord* result = EventsDataHub->ReconstructionData[CurrentGroup][arg1];
   MW->Owindow->SetCurrentEvent(ui->sbEventNumberInspect->value());
-  MW->Owindow->RefreshData();
 
   if (MW->GeometryWindow->isVisible())
     {
-      //MW->DotsTGeo.resize(0);
       MW->clearGeoMarkers();
       MW->Detector->GeoManager->ClearTracks();
 
-      //if (EventsDataHub->fSimulatedData) ReconstructionWindow::UpdateSimVizData(iev);
-      if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(iev);
+      if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(arg1);
       if (result->ReconstructionOK)
         {
-//          for (int i=0; i<result->Points.size(); i++)
-//            MW->DotsTGeo.append(DotsTGeoStruct(result->Points[i].r, kRed));
           GeoMarkerClass* marks = new GeoMarkerClass("Recon", 6, 2, kRed);
           for (int i=0; i<result->Points.size(); i++)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
@@ -311,7 +275,6 @@ void ReconstructionWindow::on_pbReconstructOneEvent_clicked()
         }
       MW->ShowGeometry(false);  //to clear view
       MW->ShowTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
-      //MW->ShowGeoMarkers();
     }
 }
 
@@ -359,14 +322,123 @@ void ReconstructionWindow::VisualizeScan(int iev)
   if (fAppend) MW->GeoMarkers.append(marks);
 }
 
-void ReconstructionWindow::on_pbShowReconstructionPositions_clicked()
+void ReconstructionWindow::on_pbClearPositions_clicked()
 {
+    MW->clearGeoMarkers();
+    MW->ShowGeometry(false);
+}
+
+void ReconstructionWindow::on_pbShowReconstructionPositions_clicked()
+{    
+    ShowPositions(0);
+}
+
+void ReconstructionWindow::on_pbShowTruePositions_clicked()
+{
+    ShowPositions(1);
+}
+
+void ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible)
+{
+    if (fOnlyIfWindowVisible && !MW->GeometryWindow->isVisible()) return;
+    if (Rec_True<0 || Rec_True>1)
+    {
+        qWarning() << "Wrong index in ShowPositions";
+        return;
+    }
+
+    int CurrentGroup = PMgroups->getCurrentGroup();
+    bool fRecReady = EventsDataHub->isReconstructionReady(CurrentGroup);
+
+    int numEvents;
+    GeoMarkerClass* marks;
+    if (Rec_True == 0)
+    {
+        int CurrentGroup = PMgroups->getCurrentGroup();
+        if (!fRecReady)
+        {
+            message("Reconstruction not ready!", this);
+            return;
+        }
+        numEvents = EventsDataHub->ReconstructionData[CurrentGroup].size();
+        marks = new GeoMarkerClass("Recon", 6, 2, kRed);
+    }
+    else if (Rec_True == 1)
+    {
+        if (EventsDataHub->isScanEmpty())
+        {
+            message("There are no true positions available!", this);
+            return;
+        }
+        numEvents = EventsDataHub->Scan.size();
+        marks = new GeoMarkerClass("Scan", 6, 2, kBlue);
+    }
+
+    MW->Detector->GeoManager->ClearTracks(); //tracks could be used for indication (if continuous deposition)
+    MW->clearGeoMarkers(Rec_True+1);
+
+    int goodCounter = 0;
+    int everyPeriod = ui->sbShowEventsEvery->value();
+    int everyCounter = 0;
+
+    int UpperLimit = numEvents;
+    if (ui->cbLimitNumberEvents->isChecked()) UpperLimit = ui->sbLimitNumberEvents->value();
+
+    for (int iev=0; iev<numEvents; iev++)
+      {
+        if (fRecReady && !EventsDataHub->ReconstructionData.at(CurrentGroup).at(iev)->GoodEvent) continue;
+
+        everyCounter++;
+        if (everyCounter == everyPeriod)
+            {
+                if (Rec_True == 0)
+                {
+                    for (int iP = 0; iP<EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points.size(); iP++)
+                    marks->SetNextPoint(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[iP].r[0],
+                                        EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[iP].r[1],
+                                        EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[iP].r[2]);
+                }
+                else
+                {
+                    ReconstructionWindow::VisualizeScan(iev);
+                    if ( EventsDataHub->Scan[iev]->ScintType == 2)  //secondary scint
+                      {
+                        for (int j=0; j<EventsDataHub->Scan[iev]->Points.size(); j++)
+                          {
+                            marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->Points[j].r[2]);
+                            marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->zStop);
+                            //showing track
+                            Int_t track_index = MW->Detector->GeoManager->AddTrack(10,55); //  Here track_index is the index of the newly created track in the array of primaries. One can get the pointer of this track and make it known as current track by the manager class:
+                            TVirtualGeoTrack *track = MW->Detector->GeoManager->GetTrack(track_index);
+                            track->SetLineColor(kBlue);
+                            track->AddPoint( EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->Points[j].r[2], 0);
+                            track->AddPoint( EventsDataHub->Scan[iev]->Points[j].r[0], EventsDataHub->Scan[iev]->Points[j].r[1], EventsDataHub->Scan[iev]->zStop, 0);
+                          }
+                      }
+                    else
+                      {
+                        for (int j=0; j<EventsDataHub->Scan[iev]->Points.size(); j++)
+                          marks->SetNextPoint(EventsDataHub->Scan[iev]->Points[j].r[0],
+                                              EventsDataHub->Scan[iev]->Points[j].r[1],
+                                              EventsDataHub->Scan[iev]->Points[j].r[2]);
+                      }
+                }
+
+                everyCounter = 0;
+                goodCounter++;
+                if (goodCounter > UpperLimit) break;
+            }
+      }
+    MW->GeoMarkers.append(marks);
+
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
-    ReconstructionWindow::ShowReconstructionPositionsIfWindowVisible();
+    MW->ShowGeometry(false);
+    MW->ShowTracks();
 }
 
+/*
 void ReconstructionWindow::ShowReconstructionPositionsIfWindowVisible()
 {  
   if (!MW->GeometryWindow->isVisible()) return;
@@ -383,7 +455,7 @@ void ReconstructionWindow::ShowReconstructionPositionsIfWindowVisible()
   MW->clearGeoMarkers();
 
   //showing actual (if enabled) - if NOT on top
-  if (!ui->cbActualOnTop->isChecked()) ReconstructionWindow::DotActualPositions();
+  //if (!ui->cbActualOnTop->isChecked()) ReconstructionWindow::DotActualPositions();
 
   //showing reconstruction
   int UpperLimit = numEvents;
@@ -415,15 +487,16 @@ void ReconstructionWindow::ShowReconstructionPositionsIfWindowVisible()
   MW->GeoMarkers.append(marks);
 
   //showing actual (if enabled) - if on top
-  if (ui->cbActualOnTop->isChecked()) ReconstructionWindow::DotActualPositions();
+  //if (ui->cbActualOnTop->isChecked()) ReconstructionWindow::DotActualPositions();
 
   MW->ShowGeometry(false);
   MW->ShowTracks();
 }
+*/
 
 void ReconstructionWindow::DotActualPositions()
 {  
-  if (!ui->cbShowActualPosition->isChecked()) return;
+  //if (!ui->cbShowActualPosition->isChecked()) return;
   if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::VisualizeScan();  
 }
 
@@ -792,14 +865,6 @@ void ReconstructionWindow::SetGuiBusyStatusOn()
 void ReconstructionWindow::SetGuiBusyStatusOff()
 {
     MW->WindowNavigator->BusyOff();
-}
-
-void ReconstructionWindow::on_pbShowPMtable_clicked()
-{   
-    MW->Owindow->SetTab(2);
-    MW->Owindow->showNormal();
-    MW->Owindow->raise();
-    MW->Owindow->activateWindow();
 }
 
 void ReconstructionWindow::on_pbGoToNextEvent_clicked()
@@ -1905,6 +1970,9 @@ void ReconstructionWindow::on_pbShowLog_clicked()
     MW->Owindow->raise();
     MW->Owindow->showNormal();
     MW->Owindow->activateWindow();
+
+    int iev = ui->sbEventNumberInspect->value();
+    if (iev<EventsDataHub->Events.size()) MW->Owindow->ShowOneEventLog(iev);
 }
 
 void ReconstructionWindow::on_pbDoAutogroup_clicked()
@@ -5598,7 +5666,9 @@ void ReconstructionWindow::onReconstructionFinished(bool fSuccess, bool fShow)
 {
   if (fSuccess)
     {
-       if (fShow) ShowReconstructionPositionsIfWindowVisible();
+       if (fShow)
+           //ShowReconstructionPositionsIfWindowVisible();
+           ShowPositions(0, true);
        MW->Owindow->RefreshData();   // *** !!!
        ShowStatistics();
        double usPerEvent = ReconstructionManager->getUsPerEvent();
@@ -5621,12 +5691,6 @@ void ReconstructionWindow::SetShowFirst(bool fOn, int number)
 {
   ui->cbLimitNumberEvents->setChecked(fOn);
   if (number != -1) ui->sbLimitNumberEvents->setValue(number);
-}
-
-void ReconstructionWindow::SetShowActual(bool fOn, bool fActualOnTop)
-{
-  ui->cbShowActualPosition->setChecked(fOn);
-  ui->cbActualOnTop->setChecked(fActualOnTop);
 }
 
 void ReconstructionWindow::on_cbCustomBinning_toggled(bool checked)
@@ -6019,7 +6083,8 @@ void ReconstructionWindow::on_pbTrueToRec_clicked()
 {
   EventsDataHub->copyTrueToReconstructed();
   SetProgress(100);
-  ShowReconstructionPositionsIfWindowVisible();
+  //ShowReconstructionPositionsIfWindowVisible();
+  ShowPositions(0, true);
   ShowStatistics();
   ui->leoMsPerEv->setText("");
 }

@@ -43,10 +43,8 @@ public:
     void ShowPhotonProcessesLog();
     void ShowPhotonLossLog();
 
-    void ClearMaterialCobs();
-    void ClearParticleCobs();
-    void AddMaterial(QString mat);
-    void AddParticle(QString part);
+    void UpdateMaterials();
+    void UpdateParticles();
 
 protected:
     void resizeEvent(QResizeEvent *event);

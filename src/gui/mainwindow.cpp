@@ -539,13 +539,14 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    ui->cobMatPointSource->clear();
-    Owindow->ClearMaterialCobs();
-
+    ui->cobMatPointSource->clear();    
     int numMats = MpCollection->countMaterials();
     for (int i=0; i<numMats; i++)
         AddMaterialToCOBs( (*MpCollection)[i]->name );
+
     MIwindow->UpdateActiveMaterials();
+    Owindow->UpdateMaterials();
+
     DoNotUpdateGeometry = tmpBool;
 
     //restore override material selection
@@ -565,7 +566,6 @@ void MainWindow::AddMaterialToCOBs(QString s)
     ui->cobMaterialForWaveTests->addItem(s);
     ui->cobMatPointSource->addItem(s);
 
-    Owindow->AddMaterial(s);
     MIwindow->AddMatToCobs(s);
 }
 

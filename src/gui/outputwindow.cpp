@@ -1216,24 +1216,26 @@ void OutputWindow::ShowPhotonLossLog()
   ui->pteOut->appendPlainText(s);
 }
 
-void OutputWindow::ClearMaterialCobs()
+void OutputWindow::UpdateMaterials()
 {
-  ui->cobShowMaterial->clear();
+   int old = ui->cobShowMaterial->currentIndex();
+
+   ui->cobShowMaterial->clear();
+   for (int i=0; i<MW->MpCollection->countMaterials(); i++)
+      ui->cobShowMaterial->addItem( (*MW->MpCollection)[i]->name );
+
+   if (old < ui->cobShowMaterial->count()) ui->cobShowMaterial->setCurrentIndex(old);
 }
 
-void OutputWindow::ClearParticleCobs()
+void OutputWindow::UpdateParticles()
 {
+  int old = ui->cobShowParticle->currentIndex();
+
   ui->cobShowParticle->clear();
-}
+  for (int i=0; i<MW->Detector->MpCollection->countParticles(); i++)
+      ui->cobShowParticle->addItem( MW->Detector->MpCollection->getParticleName(i) );
 
-void OutputWindow::AddMaterial(QString mat)
-{
-  ui->cobShowMaterial->addItem(mat);
-}
-
-void OutputWindow::AddParticle(QString part)
-{
-  ui->cobShowParticle->addItem(part);
+  if (old < ui->cobShowParticle->count()) ui->cobShowParticle->setCurrentIndex(old);
 }
 
 void OutputWindow::on_pbShowSelected_clicked()

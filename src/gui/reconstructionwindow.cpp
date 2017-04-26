@@ -285,7 +285,7 @@ void ReconstructionWindow::on_pbReconstructOneEvent_clicked()
     }  
 
   AReconRecord* result = EventsDataHub->ReconstructionData[CurrentGroup][iev];
-  MW->Owindow->ShowOneEventLog(iev);
+  //MW->Owindow->ShowOneEventLog(iev);
   MW->Owindow->SetCurrentEvent(ui->sbEventNumberInspect->value());
   MW->Owindow->RefreshData();
 

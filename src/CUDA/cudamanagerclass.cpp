@@ -176,7 +176,6 @@ bool CudaManagerClass::RunCuda(QString method)
      }
 
   for (int ipm=0; ipm<numPMs; ipm++)
-   //if (Detector->PMs->at(ipm).passive == 0)
    if (PMgroups->isActive(ipm))
     {
       const LRF2* lrf =  (*SensLRF)[0];
@@ -557,7 +556,7 @@ void CudaManagerClass::ConfigureLRFs()
       break;
     case 2:
       ConfigureLRFs_Sliced3D();
-      mem = lrfSplineData[0].size()*lrfSplineData.size();
+      mem = lrfSplineData[0].size()*lrfSplineData.size() * 4;
       break;
     case 4:
       ConfigureLRFs_Composite();
@@ -566,7 +565,7 @@ void CudaManagerClass::ConfigureLRFs()
     default:      
       break;
     }  
-  qDebug() << "==>Cuda: LRF memory size requested:" << mem;
+  qDebug() << "==>Cuda: LRF memory size requested:" << mem << "bytes";
 }
 
 void CudaManagerClass::ConfigureLRFs_Axial()

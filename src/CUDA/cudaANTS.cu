@@ -226,13 +226,13 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 3 - CompRad
   cudaMalloc((void**) &d_lrfData, sizeLRFsFloat);
 
   if (checkCUDAError("Memory alloc (eventsData bufer)")) return false;
-  if (Method == 0 || Method == 3 || Method == 4)
-    {
+  //if (Method == 0 || Method == 3 || Method == 4)
+  //  {
       cudaMalloc((void**) &d_pmx, sizePMsFloat);
       if (checkCUDAError("Memory alloc (pmx)")) return false;
       cudaMalloc((void**) &d_pmy, sizePMsFloat);
       if (checkCUDAError("Memory alloc (pmy)")) return false;
-    }
+  //  }
 
     //output
   cudaMalloc((void**) &d_recX, sizeEvents);
@@ -253,13 +253,13 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 3 - CompRad
   // copy events to GPU global memory
   cudaMemcpy(d_eventsData, EventsData, sizeEventsBuffer, cudaMemcpyHostToDevice);
   if (checkCUDAError("Copy events data to GPU (events data)")) return false;
-  if (Method == 0 || Method == 3 || Method == 4)
-    {
+  //if (Method == 0 || Method == 3 || Method == 4)
+  //  {
       cudaMemcpy(d_pmx, PMx, sizePMsFloat, cudaMemcpyHostToDevice);
       if (checkCUDAError("Copy events data to GPU (PMx)")) return false;
       cudaMemcpy(d_pmy, PMy, sizePMsFloat, cudaMemcpyHostToDevice);
       if (checkCUDAError("Copy events data to GPU (PMy)")) return false;
-    }
+  //  }
 
 /*
   //setting up constant memory
@@ -276,7 +276,8 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 3 - CompRad
 
   //calculating total ammount of needed shared memory
   int sizeSharedMem = 0;
-  if (Method == 0 || Method == 3 || Method == 4) sizeSharedMem += numPMs * 2; //PMx and PMy
+  //if (Method == 0 || Method == 3 || Method == 4)
+  sizeSharedMem += numPMs * 2; //PMx and PMy
   sizeSharedMem += numPMs; //one-event data
   if (mlORchi2 == 0) sizeSharedMem += blockSizeXY*blockSizeXY; //probability - ML only
   sizeSharedMem += blockSizeXY*blockSizeXY; // X
@@ -456,11 +457,11 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 3 - CompRad
   cudaEventDestroy(stop);
 
   cudaFree(d_eventsData);
-  if (Method == 0 || Method == 3)
-    {
+  //if (Method == 0 || Method == 3)
+  //  {
       cudaFree(d_pmx);
       cudaFree(d_pmy);
-    }
+  //  }
   cudaFree(d_recX);
   cudaFree(d_recY);
   cudaFree(d_recEnergy);
@@ -1386,6 +1387,9 @@ __global__ void kernelXY(const bool mlORchi2,
   //to do!!! case when numPMs>numtreads in block
   if (threadID<numPMs)
     { //in this block _only_: threadID is PMs index
+      PMx[threadID] = pmx[threadID];
+      PMy[threadID] = pmy[threadID];
+
       signal[threadID] = d_eventsData[ievent*(numPMs+2) + threadID]; //buffer: signals of all active PMs +XY offset
     }
 

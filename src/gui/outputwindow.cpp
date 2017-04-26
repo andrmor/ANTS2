@@ -87,8 +87,10 @@ void OutputWindow::PMnumChanged()
 
 void OutputWindow::SetCurrentEvent(int iev)
 {  
-  if (iev == ui->sbEvent->value()) OutputWindow::on_pbRefreshViz_clicked();
+  if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev);
   else ui->sbEvent->setValue(iev); //update on_change
+
+  RefreshData();
 }
 
 void OutputWindow::on_pbShowPMtime_clicked()
@@ -492,11 +494,9 @@ void OutputWindow::RefreshData()
     ui->sbPMnumberToShowTime->setValue(0);
 
   bool fHaveSiPMpixData = !SiPMpixels.isEmpty();
-  //bool fHaveStat = EventsDataHub->LastSimSet.fLogsStat;
   bool fTimeResolved = !EventsDataHub->TimedEvents.isEmpty();
 
   ui->pbSiPMpixels->setEnabled(fHaveSiPMpixData);
-  //ui->tabPhStatistics->setEnabled(fHaveStat);
   ui->sbTimeBin->setEnabled(fTimeResolved);
   ui->pbShowPMtime->setEnabled(fTimeResolved);
 
@@ -1454,4 +1454,12 @@ void OutputWindow::on_cobWhatToShow_currentIndexChanged(int index)
 void OutputWindow::on_pbNextEvent_clicked()
 {
     ui->sbEvent->setValue(ui->sbEvent->value()+1);
+}
+
+void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
+{
+    if (index==1)
+    {
+        QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
+    }
 }

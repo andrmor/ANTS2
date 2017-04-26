@@ -242,15 +242,12 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
    if (EventsDataHub->isEmpty()) return;
 
    int totNumEvents = EventsDataHub->Events.size();
-   if ( totNumEvents == 0) return;
+   if (totNumEvents == 0) return;
    if (arg1 > totNumEvents-1)
      {
        ui->sbEventNumberInspect->setValue(totNumEvents-1);
        return;
      }
-
-   MW->Owindow->SetCurrentEvent(arg1);
-   MW->Owindow->RefreshData();
 
    if (MW->GraphWindow->isVisible())
      {
@@ -259,48 +256,18 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
        if (MW->GraphWindow->LastDistributionShown == "MapEvent") ReconstructionWindow::on_pbShowMap_clicked();
      }
 
-   ReconstructionWindow::on_pbReconstructOneEvent_clicked(); //no actual reconstruction
-}
-
-void ReconstructionWindow::on_pbReconstructOneEvent_clicked()
-{
-  if (EventsDataHub->isEmpty())
-    {
-      message("Data are empty!", this);
-      ui->twData->setCurrentIndex(0);
-      return;
-    }
-
   int CurrentGroup = PMgroups->getCurrentGroup();
-  //if (!EventsDataHub->isReconstructionReady(CurrentGroup))
-  //  {
-  //    qWarning() << "Reconstruction was not yet performed, showing only available data";
-  //    //return;
-  //  }
-  int iev = ui->sbEventNumberInspect->value();
-  if (iev > EventsDataHub->Events.size()-1)
-    {
-      qDebug()<<"Bad event number in reconstruct one event!";
-      return;
-    }  
-
-  AReconRecord* result = EventsDataHub->ReconstructionData[CurrentGroup][iev];
-  //MW->Owindow->ShowOneEventLog(iev);
+  AReconRecord* result = EventsDataHub->ReconstructionData[CurrentGroup][arg1];
   MW->Owindow->SetCurrentEvent(ui->sbEventNumberInspect->value());
-  MW->Owindow->RefreshData();
 
   if (MW->GeometryWindow->isVisible())
     {
-      //MW->DotsTGeo.resize(0);
       MW->clearGeoMarkers();
       MW->Detector->GeoManager->ClearTracks();
 
-      //if (EventsDataHub->fSimulatedData) ReconstructionWindow::UpdateSimVizData(iev);
-      if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(iev);
+      if (!EventsDataHub->isScanEmpty()) ReconstructionWindow::UpdateSimVizData(arg1);
       if (result->ReconstructionOK)
         {
-//          for (int i=0; i<result->Points.size(); i++)
-//            MW->DotsTGeo.append(DotsTGeoStruct(result->Points[i].r, kRed));
           GeoMarkerClass* marks = new GeoMarkerClass("Recon", 6, 2, kRed);
           for (int i=0; i<result->Points.size(); i++)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
@@ -308,7 +275,6 @@ void ReconstructionWindow::on_pbReconstructOneEvent_clicked()
         }
       MW->ShowGeometry(false);  //to clear view
       MW->ShowTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
-      //MW->ShowGeoMarkers();
     }
 }
 
@@ -899,14 +865,6 @@ void ReconstructionWindow::SetGuiBusyStatusOn()
 void ReconstructionWindow::SetGuiBusyStatusOff()
 {
     MW->WindowNavigator->BusyOff();
-}
-
-void ReconstructionWindow::on_pbShowPMtable_clicked()
-{   
-    MW->Owindow->SetTab(2);
-    MW->Owindow->showNormal();
-    MW->Owindow->raise();
-    MW->Owindow->activateWindow();
 }
 
 void ReconstructionWindow::on_pbGoToNextEvent_clicked()
@@ -2012,6 +1970,9 @@ void ReconstructionWindow::on_pbShowLog_clicked()
     MW->Owindow->raise();
     MW->Owindow->showNormal();
     MW->Owindow->activateWindow();
+
+    int iev = ui->sbEventNumberInspect->value();
+    if (iev<EventsDataHub->Events.size()) MW->Owindow->ShowOneEventLog(iev);
 }
 
 void ReconstructionWindow::on_pbDoAutogroup_clicked()

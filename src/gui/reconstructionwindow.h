@@ -161,8 +161,6 @@ private slots:
 
   void on_pbShowLRFwindow_clicked();
 
-  void on_pbReconstructOneEvent_clicked();
-
   void on_pbReconstructTrack_clicked();
 
   void on_cobReconstructionAlgorithm_currentIndexChanged(int index);
@@ -182,8 +180,6 @@ private slots:
   void on_pbShowSumSignal_clicked();
 
   void on_pbShowIndividualSpectrum_clicked();
-
-  void on_pbShowPMtable_clicked();  
 
   void on_pbGoToNextEvent_clicked();
 

@@ -1102,25 +1102,6 @@
          </property>
         </item>
        </widget>
-       <widget class="QPushButton" name="pbReconstructOneEvent">
-        <property name="geometry">
-         <rect>
-          <x>140</x>
-          <y>8</y>
-          <width>131</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Show event</string>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pbGoToNextEvent">
         <property name="geometry">
          <rect>
@@ -1138,9 +1119,9 @@
         <property name="geometry">
          <rect>
           <x>280</x>
-          <y>0</y>
-          <width>16</width>
-          <height>240</height>
+          <y>68</y>
+          <width>20</width>
+          <height>171</height>
          </rect>
         </property>
         <property name="orientation">
@@ -1275,19 +1256,6 @@
          </property>
         </widget>
        </widget>
-       <widget class="QPushButton" name="pbShowPMtable">
-        <property name="geometry">
-         <rect>
-          <x>321</x>
-          <y>9</y>
-          <width>171</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Show PM signals</string>
-        </property>
-       </widget>
        <widget class="Line" name="line_23">
         <property name="geometry">
          <rect>
@@ -1337,25 +1305,12 @@
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="line_77">
-        <property name="geometry">
-         <rect>
-          <x>290</x>
-          <y>60</y>
-          <width>288</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
        <widget class="Line" name="line_78">
         <property name="geometry">
          <rect>
           <x>-1</x>
           <y>60</y>
-          <width>288</width>
+          <width>531</width>
           <height>16</height>
          </rect>
         </property>
@@ -1553,9 +1508,9 @@
        <widget class="QPushButton" name="pbShowLog">
         <property name="geometry">
          <rect>
-          <x>322</x>
-          <y>36</y>
-          <width>169</width>
+          <x>140</x>
+          <y>7</y>
+          <width>131</width>
           <height>23</height>
          </rect>
         </property>
@@ -1566,7 +1521,6 @@
        <zorder>line_76</zorder>
        <zorder>line_6</zorder>
        <zorder>cobGoToSelector</zorder>
-       <zorder>pbReconstructOneEvent</zorder>
        <zorder>pbGoToNextEvent</zorder>
        <zorder>line_5</zorder>
        <zorder>pbShowMap</zorder>
@@ -1574,10 +1528,8 @@
        <zorder>label_7</zorder>
        <zorder>pbShowMeasuredVsExpected</zorder>
        <zorder>fNoiseEvents</zorder>
-       <zorder>pbShowPMtable</zorder>
        <zorder>line_23</zorder>
        <zorder>cobMapType</zorder>
-       <zorder>line_77</zorder>
        <zorder>line_78</zorder>
        <zorder>label_144</zorder>
        <zorder>ledMapRange</zorder>
@@ -12299,7 +12251,6 @@ Beware of bugs!</string>
   <tabstop>pbMainWindow</tabstop>
   <tabstop>cbShowManifestItems</tabstop>
   <tabstop>cobGoToSelector</tabstop>
-  <tabstop>pbReconstructOneEvent</tabstop>
   <tabstop>cobCorrCutType</tabstop>
   <tabstop>cobCorrLineCutOption</tabstop>
   <tabstop>cbShowPMs</tabstop>
@@ -12331,7 +12282,6 @@ Beware of bugs!</string>
   <tabstop>cbActivateNNfilter</tabstop>
   <tabstop>cobMapType</tabstop>
   <tabstop>pbNNshowSpectrum</tabstop>
-  <tabstop>pbShowPMtable</tabstop>
   <tabstop>pbDefNNMin</tabstop>
   <tabstop>pbDefNNMax</tabstop>
   <tabstop>cbNNshowPos</tabstop>

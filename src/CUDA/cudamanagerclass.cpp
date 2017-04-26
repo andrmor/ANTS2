@@ -107,9 +107,8 @@ CudaManagerClass::CudaManagerClass(pms* PMs, APmGroupsManager* PMgroups, SensorL
       IgnoreDistance = RecSet->MaxDistance;
   }
 
-
-   //qDebug() << "Doing ML=0/LS=1 :"<<MLorChi2;
-   //qDebug() << BlockSizeXY << Iterations<< Scale<<ScaleReductionFactor<<OffsetOption<<OffsetX<<OffsetY<<MLorChi2<<IgnoreLowSigPMs<<ignoreThreshold<<IgnoreFarPMs<<IgnoreDistance<<StarterZ;
+  //qDebug() << "Doing ML=0/LS=1 :"<<MLorChi2;
+  //qDebug() << BlockSizeXY << Iterations<< Scale<<ScaleReductionFactor<<OffsetOption<<OffsetX<<OffsetY<<MLorChi2<<IgnoreLowSigPMs<<IgnoreThresholdLow<<IgnoreThresholdHigh<<IgnoreFarPMs<<IgnoreDistance<<StarterZ;
 }
 
 CudaManagerClass::~CudaManagerClass()
@@ -349,8 +348,8 @@ bool CudaManagerClass::PerformSliced()
            if (MLorChi2 == 0) RecData[iz][iev].Probability = probability[iev];
           }
 
-        if (MLorChi2 == 0) qDebug()<<iz<<"First event> Prob:"<<probability[0]<<"  x,y,E,chi2:"<<recX[0]<<recY[0]<<recEnergy[0]<<chi2[0];
-        else qDebug()<<iz<<"First event> Chi2:"<<chi2[0]<<"  x,y,E:"<<recX[0]<<recY[0]<<recEnergy[0];
+        //if (MLorChi2 == 0) qDebug()<<iz<<"First event> Prob:"<<probability[0]<<"  x,y,E,chi2:"<<recX[0]<<recY[0]<<recEnergy[0]<<chi2[0];
+        //else qDebug()<<iz<<"First event> Chi2:"<<chi2[0]<<"  x,y,E:"<<recX[0]<<recY[0]<<recEnergy[0];
         ElapsedTime += ElapsedTimeDelta;
       }
 
@@ -396,6 +395,8 @@ bool CudaManagerClass::PerformSliced()
 
         tmp->Points[0].r[0] = RecData[imax][iev].X;
         tmp->Points[0].r[1] = RecData[imax][iev].Y;
+        //const LRFsliced3D *lrf = dynamic_cast<const LRFsliced3D*>( (*SensLRF)[0] );
+        //if (lrf) tmp->Points[0].r[2] = lrf->getSliceMedianZ(imax); //like in CPU based
         tmp->Points[0].r[2] = Slice0Z + imax * SliceThickness;
         tmp->Points[0].energy = RecData[imax][iev].Energy;
         tmp->chi2 = RecData[imax][iev].Chi2;
@@ -802,16 +803,16 @@ void CudaManagerClass::ConfigureLRFs_Sliced3D()
   p1 = xNodes;
   int yNodes = lrf->getNintY();
   p2 = yNodes;
-  qDebug()<<"nodes:"<<xNodes<<yNodes;
+  //qDebug()<<"nodes:"<<xNodes<<yNodes;
   zSlices = lrf->getNintZ();
-  qDebug()<<"Z lices:"<<zSlices;
+  //qDebug()<<"Z slices:"<<zSlices;
   double Zmin = lrf->getZmin();
   double Zmax = lrf->getZmax();
   double dZ = Zmax - Zmin;
-  qDebug()<<"Zmin, Zmax, dz"<<Zmin<<Zmax<<dZ;
+  //qDebug()<<"Zmin, Zmax, dz"<<Zmin<<Zmax<<dZ;
   SliceThickness = dZ/zSlices;
   Slice0Z = -0.5*(zSlices-1)*SliceThickness;
-  qDebug()<<"0th slice mid is at z="<<Slice0Z<<"  slice thickness="<<SliceThickness;
+  //qDebug()<<"0th slice mid is at z="<<Slice0Z<<"  slice thickness="<<SliceThickness;
 
   int nodesDataSize = (xNodes+3) * (yNodes+3);  //(nodes+3) coeff in x * (nodes+3) coeff in y
   lrfFloatsPerPM = nodesDataSize + 9; // adding:   dx, dy, sinphi, cosphi, flip,  minX, maxX, minY, maxY
@@ -819,7 +820,7 @@ void CudaManagerClass::ConfigureLRFs_Sliced3D()
 
   for (int iz=0; iz<zSlices; iz++)
     {
-      qDebug() << " Prepare LRF data for slice#"<<iz;
+      //qDebug() << " Prepare LRF data for slice#"<<iz;
       lrfSplineData[iz].resize( numPMsStaticActive * lrfFloatsPerPM );
 
       int ipm = 0;
@@ -827,16 +828,16 @@ void CudaManagerClass::ConfigureLRFs_Sliced3D()
        //if (Detector->PMs->at(iActualPM).passive == 0)
        if (PMgroups->isActive(iActualPM))
         {
-          qDebug() << "  Extracting coefficients for PM#"<< iActualPM;
+          //qDebug() << "  Extracting coefficients for PM#"<< iActualPM;
           LRFsliced3D *lrf = (LRFsliced3D*)(*SensLRF)[iActualPM];//iActualPM - acual PM index, ipm - pm index for CUDA
           const PMsensor *sensor = SensLRF->getIteration()->sensor(iActualPM);
           double gain = sensor->GetGain();
-          qDebug() << "  Gain = "<<gain;
-          qDebug() << "  Ponter to spline:" <<lrf->getSpline(iz);
+          //qDebug() << "  Gain = "<<gain;
+          //qDebug() << "  Ponter to spline:" <<lrf->getSpline(iz);
           std::vector <double> coef = lrf->getSpline(iz)->GetCoef();
           for (int i=0; i<nodesDataSize; i++) lrfSplineData[iz][lrfFloatsPerPM*ipm + i] = coef[i] * gain;
 
-          qDebug() << "  Filling transform data";
+          //qDebug() << "  Filling transform data";
           double dx, dy, phi;
           bool fFlip;
           sensor->GetTransform(&dx, &dy, &phi, &fFlip);

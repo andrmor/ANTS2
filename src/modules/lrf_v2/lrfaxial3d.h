@@ -33,6 +33,14 @@ public:
     virtual void writeJSON(QJsonObject &json) const;
     virtual QJsonObject reportSettings() const;
 
+    virtual double compress(double r) const { return r; }
+    virtual double comprDev(double r) const;
+
+    void SetFlatTop(bool val) {flat_top = val;}
+    void SetNonNegative(bool val) {non_negative = val;}
+    void SetNonIncreasing(bool val) {non_increasing = val;}
+    void SetForcedZSlope(int val) {z_slope = val;}
+
 private:
     double rmax;	// domain
     int nint;		// intervals
@@ -40,7 +48,10 @@ private:
     int nintz;	// intervals
     TPspline3 *bsr; 	// spline describing radial dependence
     TPspline3 *bse; 	// spline describing radial error dependence
-    bool logscale;	// spline stores logarithm
+    bool flat_top;
+    bool non_negative;
+    bool non_increasing;
+    int z_slope;
 };
 
 #endif // LRFAXIAL3D_H

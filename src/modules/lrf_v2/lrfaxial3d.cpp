@@ -1,18 +1,25 @@
 #include "lrfaxial3d.h"
 #include "spline.h"
 #include "jsonparser.h"
+#include "tps3fit.h"
 
 #include <math.h>
 
 #include <QJsonObject>
 
+#define NEWFIT
+
 LRFaxial3d::LRFaxial3d(double r, int nint_, double z_min,
             double z_max, int n_intz, bool log) : LRF3d(), rmax(r), nint(nint_),
-            zmin(z_min), zmax(z_max), nintz(n_intz), bsr(NULL), bse(NULL), logscale(log)
+            zmin(z_min), zmax(z_max), nintz(n_intz), bsr(NULL), bse(NULL)
 {
+    flat_top = false;
+    non_increasing = false;
+    non_negative = false;
+    z_slope = 0;
 }
 
-LRFaxial3d::LRFaxial3d(QJsonObject &json) : LRF3d(), bsr(NULL), bse(NULL), logscale(false)
+LRFaxial3d::LRFaxial3d(QJsonObject &json) : LRF3d(), bsr(NULL), bse(NULL)
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -63,7 +70,7 @@ double LRFaxial3d::eval(double x, double y, double z) const
     if (r > rmax || z<zmin || z>zmax)
         return 0.;
 
-    return logscale ? exp(bsr->Eval(r, z)) : bsr->Eval(r, z);
+    return bsr->Eval(compress(r), z);
 }
 
 double LRFaxial3d::evalErr(double /*x*/, double /*y*/, double /*z*/) const
@@ -78,7 +85,7 @@ double LRFaxial3d::evalDrvX(double x, double y, double z) const
     if (r > rmax || z<zmin || z>zmax)
         return 0.;
 // TODO: handle logscale if possible
-    return bsr->EvalDrvX(r, z)*x/r;
+    return bsr->EvalDrvX(compress(r), z)*comprDev(r)*x/r;
 }
 
 double LRFaxial3d::evalDrvY(double x, double y, double z) const
@@ -88,7 +95,7 @@ double LRFaxial3d::evalDrvY(double x, double y, double z) const
     if (r > rmax || z<zmin || z>zmax)
         return 0.;
 // TODO: handle logscale if possible
-    return bsr->EvalDrvX(r, z)*y/r;
+    return bsr->EvalDrvX(compress(r), z)*comprDev(r)*y/r;
 }
 
 double LRFaxial3d::eval(double x, double y, double z, double *err) const
@@ -98,9 +105,48 @@ double LRFaxial3d::eval(double x, double y, double z, double *err) const
         *err = 0.;
         return 0.;
     }
-    *err = bse ? bse->Eval(r, z) : 0.;
-    return logscale ? exp(bsr->Eval(r, z)) : bsr->Eval(r, z);
+    *err = bse ? bse->Eval(compress(r), z) : 0.;
+    return bsr->Eval(compress(r), z);
 }
+
+#ifdef NEWFIT
+double LRFaxial3d::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
+{
+    std::vector <double> vr;
+    std::vector <double> vz;
+    std::vector <double> va;
+    for (int i=0; i<npts; i++) {
+        if (!inDomain(x[i], y[i], z[i]))
+            continue;
+        vr.push_back(compress(hypot(x[i], y[i])));
+        vz.push_back(z[i]);
+        va.push_back(data[i]);
+    }
+
+    bsr = new TPspline3(0., compress(rmax), nint, zmin, zmax, nintz);
+    valid = true;
+
+    TPS3fit F(bsr);
+    if (flat_top)
+        F.SetConstraintDdxAt0();
+    if (non_negative)
+        F.SetConstraintNonNegative();
+    if (non_increasing)
+        F.SetConstraintNonIncreasingX();
+    if (z_slope)
+        F.SetConstraintSlopeY(z_slope);
+
+    if (!grid) {
+        F.Fit(va.size(), &vr[0], &vz[0], &va[0]);
+        return F.GetResidual();
+    } else {
+        F.AddData(va.size(), &vr[0], &vz[0], &va[0]);
+        F.Fit();
+        return F.GetResidual();
+    }
+}
+
+#else
 
 double LRFaxial3d::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
 {  
@@ -110,12 +156,12 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
     for (int i=0; i<npts; i++) {
         if (!inDomain(x[i], y[i], z[i]))
             continue;
-        vr.push_back(hypot(x[i], y[i]));
+        vr.push_back(compress(hypot(x[i], y[i])));
         vz.push_back(z[i]);
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(0., rmax, nint, zmin, zmax, nintz);
+    bsr = new TPspline3(0., compress(rmax), nint, zmin, zmax, nintz);
     valid = true;
 
     if (!grid)
@@ -123,6 +169,7 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
     else
         return fit_tpspline3_grid(bsr, va.size(), &vr[0], &vz[0], &va[0], true);
 }
+#endif
 
 void LRFaxial3d::setSpline(TPspline3 *bs, bool log)
 {
@@ -130,7 +177,6 @@ void LRFaxial3d::setSpline(TPspline3 *bs, bool log)
     double dummy;
     bsr->GetRangeX(&dummy, &rmax);
     bsr->GetRangeY(&zmin, &zmax);
-    logscale = log;
 }
 
 void LRFaxial3d::writeJSON(QJsonObject &json) const
@@ -159,7 +205,11 @@ QJsonObject LRFaxial3d::reportSettings() const
   json["type"] = QString(type());
   json["n1"] = nint;
   json["n2"] = nintz;
-  json["logscale"] = logscale;
 
   return json;
+}
+
+double LRFaxial3d::comprDev(double /*r*/) const
+{
+    return 1.0;
 }

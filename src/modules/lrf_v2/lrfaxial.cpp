@@ -2,11 +2,14 @@
 #include "spline.h"
 #include "bspline3.h"
 #include "jsonparser.h"
+#include "bs3fit.h"
 
 #include <math.h>
 
 #include <QDebug>
 #include <QJsonObject>
+
+#define NEWFIT
 
 LRFaxial::LRFaxial(double r, int nint) :
             LRF2()
@@ -17,6 +20,8 @@ LRFaxial::LRFaxial(double r, int nint) :
     bsr = 0;
     bse = 0;
     flattop = true;
+    non_increasing = false;
+    non_negative = false;
 }
 
 LRFaxial::LRFaxial(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL)
@@ -107,6 +112,39 @@ double LRFaxial::eval(double x, double y, double /*z*/, double *err) const
     return bsr->Eval(compress(r));
 }
 
+#ifdef NEWFIT
+double LRFaxial::fit(int npts, const double *x, const double *y, const double* /*z*/, const double *data, bool grid)
+{
+    std::vector <double> vr;
+    std::vector <double> va;
+
+    for (int i=0; i<npts; i++) {
+        if (!inDomain(x[i], y[i]))
+            continue;
+        double r = hypot(x[i], y[i]);
+        vr.push_back(compress(r));
+        va.push_back(data[i]);
+    }
+ //qDebug() << "fit vectors ready";
+    bsr = new Bspline3(0., compress(rmax), nint);
+ //qDebug() << "bsr created";
+    valid = true;
+
+    BS3fit F(bsr);
+    if (flattop) F.SetConstraintEven();
+    if (non_negative) F.SetConstraintNonNegative();
+    if (non_increasing) F.SetConstraintNonIncreasing();
+
+    if (!grid) {
+        F.Fit(va.size(), &vr[0], &va[0]);
+        return F.GetResidual();
+    } else {
+        F.AddData(va.size(), &vr[0], &va[0]);
+        F.Fit();
+        return F.GetResidual();
+    }
+}
+#else
 double LRFaxial::fit(int npts, const double *x, const double *y, const double* /*z*/, const double *data, bool grid)
 {
   //qDebug() << "fit axial start, flattop flag:"<<flattop;
@@ -140,6 +178,8 @@ double LRFaxial::fit(int npts, const double *x, const double *y, const double* /
     else
         return fit_bspline3_grid(bsr, va.size(), &vr[0], &va[0], flattop);
 }
+
+#endif
 
 double LRFaxial::fitRData(int npts, const double *r, const double *data)
 {

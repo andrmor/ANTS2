@@ -7,7 +7,7 @@ ANTS2_VERSION = 2180
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #tells compiler to use Eigen3 instead of ROOT for linear algebra
+CONFIG += ants2_eigen3      #tells compiler to use Eigen3 instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
@@ -175,6 +175,7 @@ SOURCES += main.cpp \
     modules/lrf_v2/lrfcomposite.cpp \
     modules/lrf_v2/lrfsliced3d.cpp \
     modules/lrf_v2/lrfaxial3d.cpp \
+    modules/lrf_v2/lrfcaxial3d.cpp \
     modules/lrf_v2/lrf3d.cpp \
     modules/lrf_v2/sensorlocalcache.cpp \
     modules/lrf_v2/lrffactory.cpp \
@@ -212,7 +213,9 @@ SOURCES += main.cpp \
     Net/anetworkmodule.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
-    modules/lrf_v3/gui/avladimircompressionwidget.cpp
+    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
+    SplineLibrary/bs3fit.cpp \
+    SplineLibrary/tps3fit.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -262,6 +265,7 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v2/lrfcomposite.h \
     modules/lrf_v2/lrfsliced3d.h \
     modules/lrf_v2/lrfaxial3d.h \
+    modules/lrf_v2/lrfcaxial3d.h \
     modules/lrf_v2/lrf3d.h \
     modules/lrf_v2/sensorlocalcache.h \
     modules/lrf_v2/lrffactory.h \
@@ -311,7 +315,10 @@ HEADERS  += common/CorrelationFilters.h \
     Net/anetworkmodule.h \
     Net/awebsocketserver.h \
     modules/lrf_v3/gui/atpspline3widget.h \
-    modules/lrf_v3/gui/avladimircompressionwidget.h
+    modules/lrf_v3/gui/avladimircompressionwidget.h \
+    SplineLibrary/eiquadprog.hpp \
+    SplineLibrary/bs3fit.h \
+    SplineLibrary/tps3fit.h
 
 # --- SIM ---
 ants2_SIM {

@@ -32,6 +32,7 @@ public:
     virtual const char *type() const {return "XY";}
     virtual void writeJSON(QJsonObject &json) const;
     virtual QJsonObject reportSettings() const;
+    void SetNonNegative(bool val) {non_negative = val;}
 
 private:
 // rectangular domain
@@ -41,6 +42,7 @@ private:
     TPspline3 *bsr; 	// 2D spline
     TPspline3 *bse; 	// 2D error spline
     bool logscale;	// spline stores logarithm
+    bool non_negative;
 };
 
 #endif // LRFXY_H

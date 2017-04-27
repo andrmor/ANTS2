@@ -11,6 +11,7 @@ LRFxy::LRFxy(double x_min, double x_max, int n_intx, double y_min,
             double y_max, int n_inty, bool log) : LRF2(), xmin(x_min), xmax(x_max),
             ymin(y_min), ymax(y_max), nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL), logscale(log)
 {
+    non_negative = false;
 }
 
 LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL), logscale(false)

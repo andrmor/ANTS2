@@ -12,6 +12,9 @@ public:
   int dataScanRecon;
   bool fUseGrid;
   bool fForceZeroDeriv;
+  bool fForceNonNegative;
+  bool fForceNonIncreasingInR;
+  int fForceInZ; // 0 - not enforced, 1 - increasing; 2 - decreasing
   bool fFitError;
   bool scale_by_energy;
  //grouping

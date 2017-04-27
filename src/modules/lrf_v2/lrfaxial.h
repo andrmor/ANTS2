@@ -38,6 +38,8 @@ public:
     virtual double compress(double r) const { return r; }
     virtual double comprDev(double r) const;
     void SetFlatTop(bool val) {flattop = val;}
+    void SetNonNegative(bool val) {non_negative = val;}
+    void SetNonIncreasing(bool val) {non_increasing = val;}
 
 protected:
     double rmax;	// domain
@@ -46,6 +48,8 @@ protected:
     Bspline3 *bsr; 	// spline describing radial dependence
     Bspline3 *bse; 	// spline describing radial error dependence
     bool flattop;   // set to true if you want to have zero derivative at the origin
+    bool non_negative;
+    bool non_increasing;
 };
 
 #endif // LRFAXIAL_H

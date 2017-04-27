@@ -41,11 +41,16 @@
 #endif
 
 #define SECOND_DRV
+//#define USE_QP
+
+#ifdef USE_QP
+#include "eiquadprog.hpp"
+#endif
 
 #include "apoint.h"
 
 // TODO:
-// - Consider encalsulating this fuctionality in classes derived from BSpline and TPSpline
+// - Consider encapsulating this fuctionality in classes derived from BSpline and TPSpline
 
 void write_bspline3_json(const Bspline3 *bs, QJsonObject &json)
 {
@@ -296,6 +301,7 @@ TPspline3 *read_tpspline3_xml(pugi::xml_node node)
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::JacobiSVD;
+#ifndef USE_QP
 double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even)
 {
 	int nbas = bs->GetNbas(); 	// numbes of basis functions
@@ -313,6 +319,12 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
 		for (int k=0; k<nbas; k++)
 			A(i, k) = bs->Basis(datax[i], k);
 	}
+
+    std::cout << "A0:" << std::endl;
+    std::cout << A << std::endl;
+
+    std::cout << "y0:" << std::endl;
+    std::cout << y << std::endl;
 
 // force the function even by setting 
 // the derivative to 0 at x=0 in the last equation
@@ -337,6 +349,9 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
 //		return -1.;
 //	}
 
+    std::cout << "x0:" << std::endl;
+    std::cout << c_svd << std::endl;
+
 // fill bs from the solution vector
 	double *c = new double[nbas];
 	for (int i=0; i<nbas; i++)
@@ -347,6 +362,86 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
     VectorXd residual = A*c_svd - y;
     return sqrt(residual.squaredNorm());
 }
+#else
+double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even)
+{
+    int nbas = bs->GetNbas(); 	// numbes of basis functions
+    Bool_t success;
+
+// linear least squares
+// we've got npts equations with nbas unknowns
+    MatrixXd A(npts, nbas);
+    VectorXd y(npts);
+
+// fill the equations
+    for (int i=0; i<npts; i++) {
+        y(i) = datay[i];
+        for (int k=0; k<nbas; k++)
+            A(i, k) = bs->Basis(datax[i], k);
+    }
+
+// solve the system using quadratic programming, i.e.
+// minimize 1/2 * x G x + g0 x subject to some inequality and equality constraints,
+// where G = A'A and g0 = y'A (' denotes transposition)
+    MatrixXd G = A.transpose()*A;  //
+    VectorXd g0 = (y.transpose()*A)*(-1.);  //
+    VectorXd x(nbas);
+
+//  set ineqaulity constraints:
+    MatrixXd CI = MatrixXd::Zero(nbas, nbas);
+    VectorXd ci0 = VectorXd::Zero(nbas);
+//  make all spline coefficients non-negative
+    for (int i = 0; i<nbas; i++)
+        CI(i, i) = 1.;
+//  make them also non-increasing
+    for (int i = 0; i<nbas-1; i++)
+        CI(i+1, i) = -1.;
+
+//  set equality constraints (unconstrained by default)
+    MatrixXd CE;
+    VectorXd ce0;
+
+    if (even) {
+// force the function even by constraining the derivative to 0 at x=0
+        CE = MatrixXd::Zero(nbas, 1);
+        ce0 = VectorXd::Zero(1);
+        for (int k=0; k<nbas; k++)
+            CE(k, 0) = bs->BasisDrv(0., k);
+    }
+
+/*
+    std::cout << "A:" << std::endl;
+    std::cout << A << std::endl;
+
+    std::cout << "y:" << std::endl;
+    std::cout << y << std::endl;
+
+    std::cout << "G:" << std::endl;
+    std::cout << G << std::endl;
+
+    std::cout << "g0:" << std::endl;
+    std::cout << g0 << std::endl;
+
+    std::cout << "CE:" << std::endl;
+    std::cout << CE << std::endl;
+
+    std::cout << "CI:" << std::endl;
+    std::cout << CI << std::endl;
+*/
+
+// all prepared - call the solver
+    float res = solve_quadprog(G, g0,  CE, ce0,  CI, ci0, x);
+
+// fill bs from the solution vector
+    double *c = new double[nbas];
+    for (int i=0; i<nbas; i++)
+        c[i] = x(i);
+    bs->SetCoef(c);
+    delete[] c;
+
+    return res;
+}
+#endif
 #else
 
 double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, const double *weight, bool even)
@@ -495,6 +590,7 @@ double fit_bspline3_grid(Bspline3 *bs, int npts, const double *datax, const doub
 }
 
 #ifdef USE_EIGEN
+#ifndef USE_QP
 double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions
@@ -620,7 +716,122 @@ double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double 
     VectorXd residual = A*c_svd - z;
     return sqrt(residual.squaredNorm());
 }
-#else
+#else // use QP
+double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
+{
+    int nbas = bs->GetNbas(); 	// numbes of basis functions
+    int nbasx = bs->GetBSX().GetNbas();
+    int nbasy = bs->GetBSY().GetNbas();
+    Bool_t success;
+
+    std::vector <double> vz;
+    std::vector <double> vrow;
+    std::vector <std::vector <double> > vmat;
+
+// linear least squares
+
+    // ========== fill the equations ===========
+
+    for (int i=0; i<npts; i++) {
+        int w = weight ? weight[i] : 1.;
+        if (w>0.5) { // normal point
+// f(x,y) = z
+            vz.push_back(dataz[i]*w);
+            for (int k=0; k<nbas; k++)
+                vrow.push_back(bs->Basis(datax[i], datay[i], k)*w);
+            vmat.push_back(vrow);
+            vrow.clear();
+        }
+    }
+
+// ========= solve the system using Eigen machinery =========
+
+// we've got vz.size() equations with nbas unknowns
+    MatrixXd A(vz.size(), nbas);
+    VectorXd z(vz.size());
+
+    for (int irow=0; irow<vz.size(); irow++) {
+        z(irow) = vz[irow];
+        for (int icol=0; icol<nbas; icol++)
+            A(irow, icol) = vmat[irow][icol];
+    }
+
+// solve the system using quadratic programming, i.e.
+// minimize 1/2 * x G x + g0 x subject to some inequality and equality constraints,
+// where G = A'A and g0 = z'A (' denotes transposition)
+    MatrixXd G = A.transpose()*A;  //
+    VectorXd g0 = (z.transpose()*A)*(-1.);  //
+    VectorXd x(nbas);
+
+//  set ineqaulity constraints:
+    MatrixXd CI = MatrixXd::Zero(nbas, nbas+(nbasy-1)*3);
+    VectorXd ci0 = VectorXd::Zero(nbas+(nbasy-1)*3);
+//  make all spline coefficients non-negative
+    for (int i = 0; i<nbas; i++)
+        CI(i, i) = 1.;
+//  make them also non-increasing in x direction
+    for (int iy = 0; iy<nbasy; iy++)
+        for (int ix = 0; ix<nbasx-1; ix++) {
+            int i = ix + iy*nbasx;
+            CI(i+1, i) = -1.;
+    }
+// and in y direction (along the x=0 line)
+    for (int iy = 0; iy<nbasy-1; iy++)
+      for (int i=0; i<3; i++) {
+        CI(iy*nbasx+i, iy*3+nbas+i) = -1.;
+        CI((iy+1)*nbasx+i, iy*3+nbas+i) = 1.;
+    }
+
+/*
+    for (int ix = 0; ix<nbasx; ix++)
+        for (int iy = 1; iy<nbasy; iy++) {
+            int i = ix + iy*nbasx;
+            CI(i-nbasx, i) = -1.;
+    }
+*/
+//  set equality constraints (unconstrained by default)
+    MatrixXd CE;
+    VectorXd ce0;
+
+
+//    JacobiSVD <MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+//    std::cout << "Singular values: " << svd.singularValues();
+//    VectorXd c_svd = svd.solve(z);
+
+//    VectorXd c_svd = A.colPivHouseholderQr().solve(z);
+/*
+    std::cout << "A:" << std::endl;
+    std::cout << A << std::endl;
+
+    std::cout << "z:" << std::endl;
+    std::cout << z << std::endl;
+
+    std::cout << "G:" << std::endl;
+    std::cout << G << std::endl;
+
+    std::cout << "g0:" << std::endl;
+    std::cout << g0 << std::endl;
+
+    std::cout << "CE:" << std::endl;
+    std::cout << CE << std::endl;
+
+    std::cout << "CI:" << std::endl;
+    std::cout << CI << std::endl;
+*/
+// all prepared - call the solver
+    float res = solve_quadprog(G, g0,  CE, ce0,  CI, ci0, x);
+
+// fill bs from the solution vector
+    double *c = new double[nbas];
+    for (int i=0; i<nbas; i++)
+        c[i] = x(i);
+    bs->SetCoef(c);
+    delete[] c;
+
+    return res;
+}
+#endif // use QP
+#else // use ROOT instead of Eigen
 double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions

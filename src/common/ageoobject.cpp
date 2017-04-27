@@ -146,7 +146,7 @@ bool AGeoObject::readShapeFromString(QString GenerationString, bool OnlyCheck)
   bool ok = newShape->readFromString(GenerationString);
   if (!ok)
     {
-      qWarning() << "Failed to read shape Shape properties from the generation string!";
+      qWarning() << "Failed to read shape properties from the generation string!";
       delete newShape;
       return false;
     }
@@ -1317,7 +1317,7 @@ const QString AGeoComposite::getHelp()
 
 bool AGeoComposite::readFromString(QString GenerationString)
 {
-    //qDebug() << "Number of defined members:"<<members.size();
+  //qDebug() << "Number of defined members:"<<members.size();
   QString s = GenerationString.simplified();
 
   s.remove("TGeoCompositeShape");
@@ -1328,7 +1328,10 @@ bool AGeoComposite::readFromString(QString GenerationString)
   //qDebug() << "Requested members in composite generation:"<<requested;
   QSet<QString> setRequested = QSet<QString>::fromList(requested);
   QSet<QString> setMembers = QSet<QString>::fromList(members);
-  if (setRequested != setMembers) return false;
+  //qDebug() << "Members:"<<setMembers;
+  //qDebug() << "Requested:"<<setRequested;
+  //qDebug() << "Memebers contain requested?"<<setMembers.contains(setRequested);
+  if (!setMembers.contains(setRequested)) return false;
 
   this->GenerationString = GenerationString.simplified();
   return true;

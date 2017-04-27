@@ -1,0 +1,131 @@
+//  "mini" unit allows to make automatic detector optimization or fit data to a 
+// model by running simulations with modified detector configuration
+
+// IMPORTANT:  syntax errors in Functor might be not detected, but cause break of the execution:
+//then the minimizer is not received the results (chi2) which will lead to a crash or sending "nan" values as Functor parameters during next call. Can be diagnosed
+//but what looks like Functor doing only first iteration of the simulation cycle.
+
+Functor() //just to force engine to check the syntax of the function
+msg.Move(100,50)
+msg.Resize(300,700)
+msg.Show()
+msg.Clear()
+
+graph.NewGraph("g1")
+graph.SetTitles("g1", "Iter#", "Chi2")
+grwin.SetLog(false, true)
+
+config.Load( core.GetExamplesDir() +"/naus.json" )
+
+// Load data
+//var CamLengths = core.loadColumn("D:/WORK/LZ/NAUS/Experimental-final/Datset1-corrected.txt", 0)
+//var ExpSignals = core.loadColumn("D:/WORK/LZ/NAUS/Experimental-final/Datset1-corrected.txt", 1)
+//var ExpUncerts = core.loadColumn("D:/WORK/LZ/NAUS/Experimental-final/Datset1-corrected.txt", 2)
+var CamLengths = [19, 26, 33, 40, 47, 61, 68, 75, 82, 82, 89, 96, 103, 110, 117, 124, 131, 138, 138, 145]
+var ExpSignals = [6027.49, 4515.95, 3378.91, 2659.51, 2040.91, 1277.53, 1052.23, 858.20107, 713.73, 713.03817, 571.02906, 477.39516, 394.08483, 337.67373, 285.22207, 237.95669, 193.10996, 161.24943, 160.09231, 134.90293]
+var ExpUncerts = [120.341, 11.0647, 5.70989, 1.88535, 6.02564, 0.57148, 0.60701, 0.50198, 0.57819, 0.79642, 0.39993, 0.21271, 0.18128, 0.11884, 0.11131, 0.08876, 0.09046, 0.07893, 0.06228, 0.04957]
+
+var ld = "Loaded data:<br>"
+for (var i=0; i<CamLengths.length; i++)
+{
+  ld += CamLengths[i] + "    " +  ExpSignals[i] + "    " + ExpUncerts[i] + "<br>"
+}
+ld += "<br>"
+msg.Append(ld)
+
+// confirm right sim mode
+config.Replace("SimulationConfig.Mode", "PointSim") //Photon sources sim
+config.Replace(".NumberThreads", 6)   //number of threads
+config.Replace(".Single_Scan_Flood", 2)  //Flood sim
+config.Replace(".FloodOptions.Nodes", 20)  //Events per sim
+
+var IterNumber = 0;
+var bestChi2 = 1e10
+function Functor() 
+{
+  if (arguments.length < 4) return 0 // this is for the check (see script first line)
+
+  var albedo =  arguments[0] //arguments.length
+  var refrTefl = arguments[1]
+  var abs = arguments[2]
+  var scale = arguments[3]
+  //msg.Clear()
+  msg.Append("Functor call:<br>"+"Albedo:"+core.str(albedo,4)+" RefrTefl:"+core.str(refrTefl,4)+" Abs: "+core.str(abs,4)+" Scale:"+core.str(scale,4) )
+
+  config.Replace(".Overrides[1].Albedo", albedo)
+  config.Replace(".Materials[3].RefractiveIndex", refrTefl)
+  config.Replace(".Materials[0].BulkAbsorption", abs)
+  
+  var chi2 = 0
+  for (var iXeLev=0; iXeLev<CamLengths.length; iXeLev++)
+  {        
+     var height = CamLengths[iXeLev]
+     var emissionPos = -0.5*height + 0.05
+     msg.Append("   ---Height:"+height)// + " Emission position:" + emissionPos)
+     config.Replace(".Slabs[1].height", height)
+     config.Replace(".FloodOptions.Zfixed",emissionPos)
+        
+     sim.RunPhotonSources()
+      if (typeof geowin == "object") geowin.ClearMarkers()
+     
+     var size = events.GetNumEvents()
+     if (size == 0)
+     {
+       core.abort("No events were recorded!")
+       return 0;
+     }
+        
+     var S = 0
+     var S2 = 0
+     for (var i=0; i<size; i++)
+        {
+          var sig = events.GetPMsignal(i, 0) //0th pm
+          S += sig
+          S2 += sig*sig
+        }
+      
+      var average = S / size
+      var SimSigma2 = average
+      if (size>4)
+        {
+          SimSigma2 = 1.0/(size-1)*(S2 - 2.0*average*S + average*average*size); //sigma2 of the set
+          SimSigma2 /= size; //uncertainty2 of the mean
+        }     
+      var ExpSigma2 = ExpUncerts[iXeLev]*ExpUncerts[iXeLev]*scale*scale
+      var sigma2 = SimSigma2 + ExpSigma2
+
+      var exper = scale * ExpSignals[iXeLev] //scaled experimental signal
+      var chi2Contrib =  (average-exper) * (average-exper) / sigma2
+      
+      var outText = "  SimSig:"+ core.str(average,4)+"  ExpSig:"+ core.str(exper,4)
+      outText += " dChi2:"+core.str(chi2Contrib, 4)
+      msg.Append(outText)
+      
+      chi2 += chi2Contrib;
+    }
+   
+  msg.Append("   -Chi2:"+chi2)
+  graph.AddPoint("g1", IterNumber, chi2)
+  if (IterNumber>0) graph.Draw("g1", "APL")
+  IterNumber++
+   
+  if (chi2 < bestChi2)
+  {
+     bestChi2 = chi2
+     var s = "Optimal settings so far with Chi2 of "+core.str(chi2,4) + " at "+ core.GetTimeStamp()+"<br><br>"
+     s += "Albedo: " + core.str(albedo, 4) + "<br>RefrTefl: " + core.str(refrTefl, 4) + "<br>Abs: " + core.str(abs, 4) + "mm-1 "+ core.str(1.0/abs, 4)+ "mm<br>Scale:" + core.str(scale, 4)
+    core.clearText()
+    core.print(s)
+   }
+  
+  return chi2;
+}
+
+sim.SetSeed(11223344)
+mini.Clear()
+mini.SetFunctorName("Functor")
+mini.AddVariable("Albedo",	0.96, 	0.01, 	0.93,	0.99999999  )  //name, start, ini_step, min, max
+mini.AddVariable("RefrTefl",	1.684, 	0.002, 	1.65, 	1.68999999  )
+mini.AddVariable("Abs",	0.0005,	0.0001, 	0.0003,	0.001  )
+mini.AddVariable("Scale",	0.9, 	0.1, 	0.5, 	1.5  )
+mini.Run()

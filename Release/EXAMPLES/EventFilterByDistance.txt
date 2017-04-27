@@ -1,0 +1,23 @@
+
+// filters out all events which have the distance between the true and reconstructed position (in XY)
+// larger than the given threshold
+
+var threshold = 5
+
+var numEv = events.GetNumEvents()
+for (var i=0; i<numEv; i++)
+{
+   var dx2 = events.GetReconstructedX(i) - events.GetTrueX(i)
+   dx2 *= dx2
+   var dy2 = events.GetReconstructedY(i) - events.GetTrueY(i)
+   dy2 *= dy2
+   
+   var  r = math.sqrt( dx2 + dy2 )
+   if (r > threshold) events.SetReconstructedGoodEvent(i, false)
+   
+   if ( i % 5000 == 0)   
+     {
+        core.clearText()
+        core.print(i)
+      }
+}

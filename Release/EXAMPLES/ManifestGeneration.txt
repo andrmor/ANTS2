@@ -1,0 +1,16 @@
+
+var manifestFileName = core.GetScriptDir() + "/manifestScanXY.txt"
+core.createFile(manifestFileName, false)
+
+core.save(manifestFileName, "#X0 -13.9\n")
+core.save(manifestFileName, "#Y0 -13.5\n")
+
+for (var ix=0; ix<14; ix++)
+   for (var iy=0;iy<14; iy++)
+  {
+     var fileName = "FastScanXY_" + ix*12 + "X_" + iy*12 + "Y_25kevt.dat"
+     
+     var X = (13 - ix)*2.1
+     var Y = iy*2.1
+     core.save(manifestFileName, fileName + " " + X + " " + Y + "\n"  )
+  }

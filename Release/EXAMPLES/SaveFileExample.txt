@@ -1,0 +1,17 @@
+var fileName = "D:/Temp/test.txt"
+
+var ar = []
+
+for (var i=0; i<1000; i++)
+{
+   var el = []
+   el.push(i)
+   el.push(math.random()) 
+   ar.push(el)
+}
+
+core.createFile(fileName, false)
+
+core.save(fileName, "This is a header\n")
+
+core.saveArray(fileName, ar)

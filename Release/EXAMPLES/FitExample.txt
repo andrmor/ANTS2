@@ -1,0 +1,39 @@
+
+var RealFrequency = 2.5
+var RealPhase = 1.0
+
+var bestD2 = 1e30
+msg.Show()
+msg.Resize(700, 600)
+msg.Clear()
+
+function Functor() 
+{
+  var freq =  arguments[0] //arguments.length
+  var phase = arguments[1]
+
+  var d2 = 0
+  for (var i=0; i<50; i++)
+  {   
+    var data = Math.sin(RealFrequency * i*3.1415926/50 + RealPhase);
+    var sim = Math.sin(freq  * i*3.1415926/50 + phase)
+    d2 += (data-sim)*(data-sim);
+  }
+  d2 = Math.sqrt(d2)
+  
+  if (d2 < bestD2)
+  {
+     bestD2 = d2
+     var s = ""
+     s += " Frequency: " + freq + "   Phase: " + phase +" Delta: " + d2
+     msg.Append(s)
+   }
+  
+  return d2;
+}
+
+mini.Clear()
+mini.SetFunctorName("Functor")
+mini.AddVariable("Freq", 1.0, 0.2, 1, 3)
+mini.AddVariable("Phas", 0.5, 0.2, 0, 3)
+mini.Run()

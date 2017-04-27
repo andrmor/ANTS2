@@ -1,0 +1,94 @@
+
+config.Load(core.GetExamplesDir() + "/B4C_multigap.json")
+////==============DETECTOR==============
+// Configuring detector layers
+geo.ClearAll()
+    var Layers = 5  //Number of converter layers
+    //Material indexes
+    var Gas = 0
+    var Glass = 1
+    var B4C = 2
+    //Size of plates in X and Y, all in mm
+    var XYsize = 10
+    //Thickness
+    var GlassThick = 0.5
+    var GasGap = 0.35
+    var ConverterThick = 0.002 
+    var Zstep = GlassThick + GasGap + ConverterThick 
+    //offset
+    var Z0 = 1
+for (var i=0; i<Layers+1; i++)
+{
+  var z = Z0 + Zstep*i 
+  geo.Box('Lwind'+i,     XYsize,XYsize, GlassThick, Glass, 'World', 0,0, z, 0,0,0)
+  if (i == Layers) break;
+  geo.Box('Converter'+i, XYsize,XYsize, ConverterThick, B4C,   'World', 0,0, z+0.5*GlassThick+0.5*ConverterThick, 0,0,0)
+  geo.Box('Gas'+i,           XYsize,XYsize, GasGap,              Gas,   'World', 0,0, z+0.5*GlassThick+ConverterThick+0.5*GasGap, 0,0,0)
+}
+geo.UpdateGeometry()
+
+//==============TRACKING NEUTRONS//==============
+//Populating particle stack with neutrons
+    var neutron = 2
+    var neutronEnergy = 2.53e-5 //in keV
+    var numberNeutrons = 10000
+depo.ClearStack()
+depo.AddParticleToStack(neutron,  0,0,-1,  0,0,1,  0, neutronEnergy,  numberNeutrons)
+
+//Tracking neutrons
+depo.TrackStack()
+
+//==============ANALYSIS//==============
+//distribution in the gas
+//SELECTOR:
+var Selector = "r" // select either "RZ" or  "r" or "R": RZ-along Z, r-Perpendicular distance or R-Total distance
+
+    var GasMatId = 0        // material id for the gas
+    var thresholdE = 100  //energy threshold
+    var NeutronId = 2
+
+var good = 0 // captures with energy depsoition in the gas above threshold
+var total = 0  // total captures
+hist.NewHist("hist1", 50, 0, 0)
+hist.SetTitles("hist1", Selector +" in the gas (mm)", "")
+grwin.Show()
+
+for (var ipart=0; ipart<depo.count(); ipart++)
+{    
+   for (var imat=0; imat<depo.Deposition_countMaterials(ipart); imat++)
+   {
+       if ( depo.Deposition_matId(ipart, imat ) != GasMatId) continue  //wrong material
+       
+       var edep = 0
+       var inode = 0
+       for (inode=0; inode<depo.Deposition_countNodes(ipart, imat); inode++)
+          edep +=  depo.Deposition_dE(ipart, imat, inode)
+           
+       if (edep >= 0) total++        
+       if (edep >= thresholdE) good++
+       
+       var x = depo.Deposition_X(ipart, imat, inode-1)
+       var y = depo.Deposition_Y(ipart, imat, inode-1)
+       var z = depo.Deposition_Z(ipart, imat, inode-1)
+       var x0 = depo.Deposition_startX(ipart, imat)
+       var y0 = depo.Deposition_startY(ipart, imat)
+       var z0 = depo.Deposition_startZ(ipart, imat)
+       
+       var res = 0;
+       if (Selector == "RZ")
+           res =  z - z0
+       else if (Selector == "r") 
+           res = math.sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0))
+       else if (Selector == "R")    
+           res = math.sqrt((x-x0)*(x-x0) + (y-y0)*(y-y0) + (z-z0)*(z-z0))
+       else
+           core.abort("Unknown distance selector option")
+           
+       hist.Fill("hist1", res, 1)
+    }    
+}
+
+if (good>0) hist.Draw("hist1", "")
+core.print("detected events: "+good+"  total n captures:"+ total + " escape probability: " + good/total)
+
+if (numberNeutrons>0) core.print("Total det efficiency: " + good/numberNeutrons*100 + " %")

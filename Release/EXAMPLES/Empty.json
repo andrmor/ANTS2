@@ -1,0 +1,694 @@
+{
+    "DetectorConfig": {
+        "ANTS2build": 1986,
+        "DummyPMs": [
+        ],
+        "Electronics": {
+            "ADC": {
+                "ADCbits": [
+                ],
+                "ADCmax": [
+                ],
+                "Active": false
+            },
+            "MCcrosstalk": {
+                "Active": false,
+                "Model": [
+                ],
+                "ProbDistr": [
+                ],
+                "TrigProb": [
+                ]
+            },
+            "Noise": {
+                "Active": false,
+                "NoiseSigma": [
+                ]
+            },
+            "PHS": {
+                "Active": false,
+                "Data": [
+                ]
+            },
+            "TimeWindow": 150
+        },
+        "FixedWorldSizes": {
+            "WorldSizeFixed": false,
+            "XY": 18.186533479473212,
+            "Z": 18.186533479473212
+        },
+        "IndividualPMoverrides": {
+            "RelQEandElStr": [
+            ]
+        },
+        "LoadExpDataConfig": {
+            "AddMulti": [
+            ],
+            "IgnoreThresholds": {
+                "Activated": false,
+                "Max": 1e+10,
+                "Min": 1
+            },
+            "LoadFirst": -1,
+            "LoadedEnergy": {
+                "Activated": false,
+                "Add": 0,
+                "Channel": 0,
+                "Multi": 1
+            },
+            "LoadedPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "LoadedZPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "ManifestFile": "",
+            "Preprocessing": false
+        },
+        "MaterialCollection": {
+            "LogLog": false,
+            "Materials": [
+                {
+                    "*MaterialName": "Vacuum",
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "Comments": "",
+                    "Density": 0,
+                    "ElDriftVelo": 0,
+                    "IsotopeDensity": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 0,
+                    "SecScint_Tau": 0,
+                    "W": 0
+                }
+            ]
+        },
+        "PMarrays": [
+            {
+                "PMarrayData": {
+                    "Activated": false,
+                    "CenterToCenter": 110,
+                    "NumRings": 0,
+                    "PMtype": 0,
+                    "Packing": 1,
+                    "Regularity": 0,
+                    "UseRings": true
+                }
+            },
+            {
+                "PMarrayData": {
+                    "Activated": false,
+                    "CenterToCenter": 80,
+                    "NumX": 2,
+                    "NumY": 2,
+                    "PMtype": 0,
+                    "Packing": 0,
+                    "Regularity": 0,
+                    "UseRings": false
+                }
+            }
+        ],
+        "PMtypes": [
+            {
+                "AngularResponse": {
+                    "RefrIndexMeasure": 1,
+                    "ResponseVsAngle": [
+                    ]
+                },
+                "AreaResponse": {
+                    "AreaStepX": 1,
+                    "AreaStepY": 1,
+                    "ResponseVsXY": [
+                    ]
+                },
+                "General": {
+                    "MaterialIndex": 0,
+                    "Name": "Type1",
+                    "Shape": 0,
+                    "SiPM": false,
+                    "SizeX": 100,
+                    "SizeY": 100
+                },
+                "PDEproperties": {
+                    "PDE": 1,
+                    "PDEwave": [
+                    ]
+                },
+                "SiPMproperties": {
+                    "DarkCountRate": 1e+07,
+                    "PixelsX": 50,
+                    "PixelsY": 50,
+                    "RecoveryTime": 50
+                }
+            }
+        ],
+        "ParticleCollection": [
+            {
+                "Charge": 0,
+                "Mass": 0,
+                "Name": "gamma",
+                "Type": 0
+            },
+            {
+                "Charge": 2,
+                "Mass": 4,
+                "Name": "alpha",
+                "Type": 1
+            },
+            {
+                "Charge": 0,
+                "Mass": 1,
+                "Name": "neutron",
+                "Type": 2
+            }
+        ],
+        "Sandwich": {
+            "DefaultXY": {
+                "angle": 0,
+                "shape": 0,
+                "sides": 6,
+                "size1": 100,
+                "size2": 100
+            },
+            "Slabs": [
+            ],
+            "State": "CommonShapeSize",
+            "WorldMaterial": 0,
+            "WorldTree": [
+                {
+                    "Container": "",
+                    "Locked": false,
+                    "Name": "World",
+                    "ObjectType": {
+                        "Type": "World"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                }
+            ],
+            "ZeroZ": "Center"
+        }
+    },
+    "GUI": {
+        "GeometryWindow": {
+            "ZoomLevel": 2
+        },
+        "MW": {
+            "ConfigGuiLocked": false
+        },
+        "PartcleStackChecker": {
+            "Copies": 1,
+            "Energy": 200,
+            "Particle": 0,
+            "ScriptEV": "",
+            "Time": 0,
+            "X": 0,
+            "Y": 0,
+            "Z": 0,
+            "dX": 1,
+            "dY": 0,
+            "dZ": 0
+        },
+        "ReconstructionWindow": {
+            "Blur": {
+                "BlurSigma": 1,
+                "BlurType": 0,
+                "BlurWidth": 1
+            },
+            "PlotXYsettings": {
+                "PlotXYbinsX": 50,
+                "PlotXYbinsY": 50,
+                "PlotXYfromX": -180,
+                "PlotXYfromY": -180,
+                "PlotXYfromZ": -5,
+                "PlotXYoptionZ": 0,
+                "PlotXYtoX": 180,
+                "PlotXYtoY": 180,
+                "PlotXYtoZ": 5
+            }
+        }
+    },
+    "ReconstructionConfig": {
+        "ANTS2build": 1986,
+        "FilterOptions": [
+            {
+                "Chi2": {
+                    "Active": false,
+                    "Max": 1e+10,
+                    "Min": 0
+                },
+                "Correlation": {
+                    "Active": false,
+                    "Set": [
+                        {
+                            "Active": true,
+                            "AutoSize": true,
+                            "BinX": 100,
+                            "BinY": 100,
+                            "Cut": {
+                                "CutOption": 0,
+                                "Data": [
+                                    0,
+                                    1,
+                                    300
+                                ],
+                                "Type": "line"
+                            },
+                            "XY": [
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                },
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                }
+                            ],
+                            "maxX": 20,
+                            "maxY": 20,
+                            "minX": -20,
+                            "minY": -20
+                        }
+                    ]
+                },
+                "EventNumber": {
+                    "Active": false,
+                    "Max": 0,
+                    "Min": 0
+                },
+                "IndividualPMSignal": {
+                    "Active": false,
+                    "UsePassives": true
+                },
+                "LoadedEnergy": {
+                    "Active": false,
+                    "Max": 1e+10,
+                    "Min": 0
+                },
+                "MultipleScanEvents": false,
+                "ReconstructedEnergy": {
+                    "Active": false,
+                    "Max": 1e+10,
+                    "Min": 0
+                },
+                "SpatialCustom": {
+                    "Active": false,
+                    "AllZ": true,
+                    "Angle": 0,
+                    "CutOutsideInside": 0,
+                    "Diameter": 30,
+                    "Polygon": [
+                    ],
+                    "RecOrScan": 0,
+                    "Shape": 0,
+                    "Side": 15,
+                    "SizeX": 30,
+                    "SizeY": 30,
+                    "X0": 0,
+                    "Y0": 0,
+                    "Zfrom": -5,
+                    "Zto": 5
+                },
+                "SpatialToObject": {
+                    "Active": false,
+                    "LimitObject": "PrScint",
+                    "RecOrScan": 0
+                },
+                "SumSignal": {
+                    "Active": false,
+                    "Max": 1e+10,
+                    "Min": 0,
+                    "UseGains": false,
+                    "UsePassives": true
+                },
+                "kNN": {
+                    "Active": false,
+                    "AverageOver": 10,
+                    "Max": 1e+10,
+                    "Min": 0
+                }
+            }
+        ],
+        "LRFmakeJson": {
+            "AdjustGains": true,
+            "Compression_k": 5,
+            "Compression_lam": 50,
+            "Compression_r0": 150,
+            "DataSelector": 0,
+            "FitOnlyLast": false,
+            "ForceZeroDeriv": true,
+            "GroupToMake": 0,
+            "GroupingOption": "Individual",
+            "GrouppingType": 0,
+            "LRF_3D": false,
+            "LRF_compress": true,
+            "LRF_type": 0,
+            "LimitGroup": false,
+            "Nodes_x": 10,
+            "Nodes_y": 10,
+            "StoreError": false,
+            "UseEnergy": true,
+            "UseGrid": true,
+            "UseGroupping": false
+        },
+        "LRFmoduleSelected": 0,
+        "ReconstructionOptions": [
+            {
+                "AlgorithmOptions": {
+                    "Algorithm": 0,
+                    "CGonCUDAsettings": {
+                        "Iterations": 3,
+                        "OptimizeMLChi2": 0,
+                        "ScaleReduction": 8,
+                        "StartOption": 0,
+                        "StartStep": 10,
+                        "StartX": 0,
+                        "StartY": 0,
+                        "StarterZ": 0,
+                        "ThreadBlockXY": 8
+                    },
+                    "CPUgridsOptions": {
+                        "InitialStep": 10,
+                        "Iterations": 3,
+                        "NodesXY": 8,
+                        "OptimizeWhat": 0,
+                        "Reduction": 8,
+                        "StartOption": 0
+                    },
+                    "CoGoptions": {
+                        "DoStretch": false,
+                        "ForceFixedZ": true,
+                        "IgnoreBySignal": false,
+                        "IgnoreDistance": 100,
+                        "IgnoreFar": false,
+                        "IgnoreThresholdHigh": 1e+10,
+                        "IgnoreThresholdLow": 5,
+                        "StretchX": 1,
+                        "StretchY": 1,
+                        "StretchZ": 1
+                    },
+                    "RootMinimizerOptions": {
+                        "LSorLikelihood": 0,
+                        "LSsuppressConsole": true,
+                        "MaxCalls": 500,
+                        "Minuit2Option": 0,
+                        "StartOption": 0,
+                        "StartStepEnergy": 0.1,
+                        "StartStepX": 1,
+                        "StartStepY": 1,
+                        "StartStepZ": 1
+                    }
+                },
+                "DynamicPassives": {
+                    "DistanceLimit": 120,
+                    "IgnoreByDistance": true,
+                    "IgnoreBySignal": false,
+                    "SignalLimitHigh": 1e+10,
+                    "SignalLimitLow": 0
+                },
+                "General": {
+                    "IncludePassives": false,
+                    "InitialEnergy": 1,
+                    "InitialZ": 0,
+                    "ReconstructEnergy": true,
+                    "ReconstructZ": false,
+                    "WeightedChi2": true,
+                    "Zstrategy": 0
+                },
+                "MultipleEvents": {
+                    "Option": 0
+                }
+            }
+        ],
+        "SensorGroups": [
+            {
+                "CutOffs": [
+                ],
+                "Gains": [
+                ],
+                "Name": "Default group",
+                "PmIndexes": [
+                ]
+            }
+        ],
+        "StaticPassives": [
+        ]
+    },
+    "SimulationConfig": {
+        "ANTS2build": 1986,
+        "DoGuiUpdate": true,
+        "GeneralSimConfig": {
+            "AcceleratorConfig": {
+                "CheckBeforeTrack": false,
+                "LogsStatistics": false,
+                "MaxNumTransitions": 500,
+                "OnlyTracksOnPMs": false
+            },
+            "AngleConfig": {
+                "AngResolved": false,
+                "NumBins": 1000
+            },
+            "AreaConfig": {
+                "AreaResolved": false
+            },
+            "BuildPhotonTracks": false,
+            "DetStatNumBins": 100,
+            "LrfBasedSim": {
+                "NumPhotElLRFunity": 1,
+                "NumPhotsLRFunity": 20000,
+                "UseLRFs": false
+            },
+            "MaxNumberOfTracks": 1000,
+            "SecScintConfig": {
+                "Type": 0
+            },
+            "TimeConfig": {
+                "TimeBins": 5,
+                "TimeFrom": 0,
+                "TimeResolved": false,
+                "TimeTo": 1000
+            },
+            "TrackingConfig": {
+                "MaxStep": 0.1,
+                "MinEnergy": 0.01,
+                "MinStep": 5e-05,
+                "Safety": 1e-10,
+                "TrackColorAdd": 0,
+                "dE": 0.05
+            },
+            "WaveConfig": {
+                "WaveFrom": 200,
+                "WaveNodes": 121,
+                "WaveResolved": false,
+                "WaveStep": 5,
+                "WaveTo": 800
+            }
+        },
+        "Mode": "PointSim",
+        "ParticleSourcesConfig": {
+            "ParticleSources": [
+            ],
+            "SourceControlOptions": {
+                "AllowMultipleParticles": false,
+                "AverageParticlesPerEvent": 0.1,
+                "DoS1": true,
+                "DoS2": false,
+                "EventsToDo": 10,
+                "IgnoreNoDepoEvents": true,
+                "IgnoreNoHitsEvents": false,
+                "ParticleTracks": true
+            }
+        },
+        "PointSourcesConfig": {
+            "BadEventOptions": {
+                "BadEvents": false,
+                "NoiseArray": [
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in one PM",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in one PM\n(over a normal event)",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in all PMs",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in all PMs\n(over a normal event)",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 0,
+                        "Description": "Double event\n(two independent)",
+                        "Probability": 0.01,
+                        "Spread": 0
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 0.5,
+                        "Description": "Double event\n(# of photons is shared)",
+                        "Probability": 0.01,
+                        "Spread": 0.25
+                    }
+                ],
+                "Probability": 0,
+                "SigmaDouble": 10
+            },
+            "ControlOptions": {
+                "LimitNodes": true,
+                "LimitNodesTo": "PrScint",
+                "MultipleRuns": false,
+                "MultipleRunsNumber": 100,
+                "Primary_Secondary": 0,
+                "Single_Scan_Flood": 0
+            },
+            "CustomNodesOptions": {
+                "Nodes": [
+                ],
+                "Script": ""
+            },
+            "FloodOptions": {
+                "CenterX": 0,
+                "CenterY": 0,
+                "DiameterIn": 0,
+                "DiameterOut": 450,
+                "Nodes": 1000,
+                "Shape": 0,
+                "Xfrom": -50,
+                "Xto": 50,
+                "Yfrom": -50,
+                "Yto": 50,
+                "Zfixed": 0,
+                "Zfrom": -2.49,
+                "Zoption": 0,
+                "Zto": 2.49
+            },
+            "PhotPerNodeOptions": {
+                "PhotPerNodeConstant": 4000,
+                "PhotPerNodeCustom": [
+                ],
+                "PhotPerNodeGaussMean": 10,
+                "PhotPerNodeGaussSigma": 2.5,
+                "PhotPerNodeMode": 0,
+                "PhotPerNodeUniMax": 12,
+                "PhotPerNodeUniMin": 10
+            },
+            "PhotonDirectionOptions": {
+                "Cone": 45,
+                "FixedX": 0,
+                "FixedY": 0,
+                "FixedZ": 1,
+                "Fixed_or_Cone": 0,
+                "Random": true
+            },
+            "RegularScanOptions": {
+                "AxesData": [
+                    {
+                        "Nodes": 5,
+                        "Option": 0,
+                        "dX": 10,
+                        "dY": 0,
+                        "dZ": 0
+                    },
+                    {
+                        "Nodes": 5,
+                        "Option": 0,
+                        "dX": 0,
+                        "dY": 10,
+                        "dZ": 0
+                    }
+                ],
+                "ScanX0": 0,
+                "ScanY0": 0,
+                "ScanZ0": 0
+            },
+            "SinglePositionOptions": {
+                "SingleX": 0,
+                "SingleY": 0,
+                "SingleZ": 0
+            },
+            "WaveTimeOptions": {
+                "DecayTime": 0,
+                "Direct_Material": 1,
+                "Material": 0,
+                "WaveIndex": 0
+            }
+        }
+    }
+}

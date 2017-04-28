@@ -1,7 +1,10 @@
 #include "lrfaxial3d.h"
 #include "spline.h"
 #include "jsonparser.h"
+
+#ifdef NEWFIT
 #include "tps3fit.h"
+#endif
 
 #include <math.h>
 

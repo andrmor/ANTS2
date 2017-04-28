@@ -2,7 +2,10 @@
 #include "spline.h"
 #include "bspline3.h"
 #include "jsonparser.h"
+
+#ifdef NEWFIT
 #include "bs3fit.h"
+#endif
 
 #include <math.h>
 

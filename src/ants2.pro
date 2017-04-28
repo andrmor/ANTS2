@@ -7,7 +7,7 @@ ANTS2_VERSION = 2180
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
@@ -34,6 +34,14 @@ ants2_eigen3 {
      #advanced options:
      DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
      #DEFINES += TPS3M  #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
+
+     SOURCES += SplineLibrary/bs3fit.cpp \
+                SplineLibrary/tps3fit.cpp \
+                SplineLibrary/tpspline3m.cpp
+
+     HEADERS += SplineLibrary/bs3fit.h \
+                SplineLibrary/tps3fit.h \
+                SplineLibrary/tpspline3m.h
 }
 #----------
 
@@ -217,10 +225,7 @@ SOURCES += main.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    SplineLibrary/bs3fit.cpp \
-    SplineLibrary/tps3fit.cpp \
-    SplineLibrary/tpspline3.cpp \
-    SplineLibrary/tpspline3m.cpp
+    SplineLibrary/tpspline3.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -321,10 +326,7 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
-    SplineLibrary/bs3fit.h \
-    SplineLibrary/tps3fit.h \
-    SplineLibrary/tpspline3.h \
-    SplineLibrary/tpspline3m.h
+    SplineLibrary/tpspline3.h
 
 # --- SIM ---
 ants2_SIM {

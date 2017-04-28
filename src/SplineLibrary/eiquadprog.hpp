@@ -81,6 +81,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
+#include <memory>
 #include <Eigen/Dense>
 
 namespace Eigen {
@@ -152,7 +153,9 @@ inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,
   VectorXi A(m + p), A_old(m + p), iai(m + p);
   int q;
   int iq, iter = 0;
-  bool iaexcl[m + p];
+
+//  bool iaexcl[m + p]; // non-standard: compiles on GCC but not on MSVC
+  std::unique_ptr<bool[]> iaexcl(new bool[m + p]);
  	
   me = p; /* number of equality constraints */
   mi = m; /* number of inequality constraints */

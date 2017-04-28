@@ -180,10 +180,12 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
             ci0_a = VectorXd::Zero(nbas);
         }
         if (non_negative) {
+            std::cout << "Non-negative\n";
             for (int i = 0; i<nbas; i++)
                 CI_a(i, i) = 1.;
         }
         if (non_increasing_x) {
+            std::cout << "Non-increasing x\n";
             for (int iy = 0; iy<nbasy; iy++)
                 for (int ix = 0; ix<nbasx-1; ix++) {
                     int i = ix + iy*nbasx;
@@ -196,7 +198,7 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
             CI_b = MatrixXd::Zero(nbas, (nbasy-1)*3);
             ci0_b = VectorXd::Zero((nbasy-1)*3);
             double slope = slope_y == 1 ? 1. : -1.; // slope == 1 => increasing with y
-
+            std::cout << "Slope y: " << slope <<"\n";
             for (int iy = 0; iy<nbasy-1; iy++)
               for (int i=0; i<3; i++) {
                 CI_b(iy*nbasx+i, iy*3+i) = -slope;
@@ -205,13 +207,23 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
         }
 
         // now concatenate the components into final CI matrix and ci0 vector
-        CI = MatrixXd::Zero(nbas, CI_a.cols()+CI_b.cols());
-        ci0 = VectorXd::Zero(ci0_a.size()+ci0_b.size());
-        CI << CI_a, CI_b;
-        ci0 << ci0_a, ci0_b;
-
+        int acols = CI_a.cols();
+        int bcols = CI_b.cols();
+        if (acols>0 && bcols>0) {
+            CI = MatrixXd::Zero(nbas, acols+bcols);
+            ci0 = VectorXd::Zero(acols+bcols);
+            CI << CI_a, CI_b;
+            ci0 << ci0_a, ci0_b;
+        } else if (acols > 0) {
+            CI = CI_a;
+            ci0 = ci0_a;
+        } else if (bcols > 0) {
+            CI = CI_b;
+            ci0 = ci0_b;
+        }
 
         if (flat_top_x) {
+            std::cout << "Flat top (set d/dx=0 at x=0)\n";
         // force the function even by constraining d/dx to 0 at x=0
         // let's do it for the center of each interval in y
             double ymin = bs->GetYmin();

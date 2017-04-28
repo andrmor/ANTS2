@@ -9,8 +9,6 @@
 #include <QDebug>
 #include <QJsonObject>
 
-#define NEWFIT
-
 LRFaxial::LRFaxial(double r, int nint) :
             LRF2()
 {

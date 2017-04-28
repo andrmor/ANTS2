@@ -1,5 +1,5 @@
 /*
- * tpspline3.h
+ * tpspline3m.h
  * 
  * Copyright 2013 Vova <vova@lexx>
  * 
@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef TPSPLINE3_H
-#define TPSPLINE3_H
+#ifndef TPSPLINE3M_H
+#define TPSPLINE3M_H
 
 #include "bspline3.h"
 #include <Eigen/Dense>
@@ -30,10 +30,10 @@ using Eigen::MatrixXd;
 using Eigen::Matrix4d;
 using Eigen::Vector4d;
 
-class TPspline3
+class TPspline3M
 {
 	public:
-		TPspline3(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
+        TPspline3M(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
 				void SetRangeX(double xmin, double xmax);
 		void SetRangeY(double ymin, double ymax);
 		void GetRangeX(double *xmin, double *xmax) {*xmin = xl;	*xmax = xr;}
@@ -71,14 +71,15 @@ class TPspline3
         void SetWrapY(bool w) {wrapy = w;}
         bool GetWrapY() {return wrapy;}
         int GetWrapped(int n);
+    private:
         Vector4d PowerVec(double x) const;
         Vector4d PowerVecDrv(double x) const;
         bool Locate(double x, double y, int *ix, int *iy, double *xf, double *yf) const;
 
 	private:
 		Bspline3 bsx, bsy;
-// this version uses Eigen marices to store spline and plynomial coefficients
-// the matrices are organized as folows: X - rows, Y - columns
+// this version uses Eigen marices to store spline and polynomial coefficients
+// the matrices are organized as follows: X - rows, Y - columns
         MatrixXd C;                 // matrix of coefficients, corresponds to old "coef"
         std::vector <Matrix4d> P;   // vector of matrices with polynomial coefficients (old "poly")
         Matrix4d B;                 // matrix of UCBS coefficients
@@ -95,4 +96,4 @@ class TPspline3
         bool wrapy;
 };
 
-#endif /* TPSPLINE3_H */ 
+#endif /* TPSPLINE3M_H */

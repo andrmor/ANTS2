@@ -7,8 +7,6 @@
 
 #include <QJsonObject>
 
-#define NEWFIT
-
 LRFaxial3d::LRFaxial3d(double r, int nint_, double z_min,
             double z_max, int n_intz, bool log) : LRF3d(), rmax(r), nint(nint_),
             zmin(z_min), zmax(z_max), nintz(n_intz), bsr(NULL), bse(NULL)

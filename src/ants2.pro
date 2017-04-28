@@ -9,6 +9,13 @@ ANTS2_VERSION = 2180
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #tells compiler to use Eigen3 instead of ROOT for linear algebra
 
+ants2_eigen3 {
+# use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
+    DEFINES += NEWFIT
+# use matrix algebra for TP splines
+#    DEFINES += TPS3M
+}
+
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
 #---CERN ROOT---
@@ -165,7 +172,6 @@ SOURCES += main.cpp \
     SplineLibrary/spline.cpp \
     SplineLibrary/bspline.cpp \
     SplineLibrary/bspline3.cpp \
-    SplineLibrary/tpspline3.cpp \
     modules/lrf_v2/pmsensor.cpp \
     modules/lrf_v2/lrf2.cpp \
     modules/lrf_v2/lrfcaxial.cpp \
@@ -215,7 +221,9 @@ SOURCES += main.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     SplineLibrary/bs3fit.cpp \
-    SplineLibrary/tps3fit.cpp
+    SplineLibrary/tps3fit.cpp \
+    SplineLibrary/tpspline3.cpp \
+    SplineLibrary/tpspline3m.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -252,7 +260,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
     SplineLibrary/bspline3nu.h \
-    SplineLibrary/tpspline3.h \
     SplineLibrary/spline.h \
     SplineLibrary/bspline.h \
     SplineLibrary/bspline3.h \
@@ -318,7 +325,9 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
     SplineLibrary/bs3fit.h \
-    SplineLibrary/tps3fit.h
+    SplineLibrary/tps3fit.h \
+    SplineLibrary/tpspline3.h \
+    SplineLibrary/tpspline3m.h
 
 # --- SIM ---
 ants2_SIM {

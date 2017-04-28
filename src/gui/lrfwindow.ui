@@ -1908,70 +1908,6 @@ only events passing all event filters are used to calculate LRFs.</string>
      <zorder>label_22</zorder>
      <zorder>label_23</zorder>
     </widget>
-    <widget class="QCheckBox" name="cbForceNonNegative">
-     <property name="geometry">
-      <rect>
-       <x>565</x>
-       <y>100</y>
-       <width>141</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Non-negative</string>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="cbForceNonIncreasingInR">
-     <property name="geometry">
-      <rect>
-       <x>565</x>
-       <y>119</y>
-       <width>141</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Non-increasing in R</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="cobForceInZ">
-     <property name="geometry">
-      <rect>
-       <x>600</x>
-       <y>138</y>
-       <width>77</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>none</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>increasing</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>decreasing</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QLabel" name="label_24">
-     <property name="geometry">
-      <rect>
-       <x>565</x>
-       <y>143</y>
-       <width>47</width>
-       <height>13</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>in Z:</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_25">
      <property name="geometry">
       <rect>
@@ -1997,6 +1933,105 @@ only events passing all event filters are used to calculate LRFs.</string>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+    </widget>
+    <widget class="QFrame" name="frAdvancedLrfConstrains">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>99</y>
+       <width>150</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QComboBox" name="cobForceInZ">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>40</y>
+        <width>77</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Force the selected constrain on Axial3D LRF with Z</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>none</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>increasing</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>decreasing</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QCheckBox" name="cbForceNonNegative">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>2</y>
+        <width>116</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>LRF after fit will be non-negative</string>
+      </property>
+      <property name="text">
+       <string>Non-negative</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbForceNonIncreasingInR">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>21</y>
+        <width>125</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Axial (and Axial3D) LRFs will have profiles non-increasing with R</string>
+      </property>
+      <property name="text">
+       <string>Non-increasing in R</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>45</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>in Z:</string>
+      </property>
+     </widget>
+     <zorder>cobForceInZ</zorder>
+     <zorder>cbForceNonNegative</zorder>
+     <zorder>cbForceDerivToZeroInOrigin</zorder>
+     <zorder>label_25</zorder>
+     <zorder>cbForceNonIncreasingInR</zorder>
+     <zorder>label_24</zorder>
+     <zorder>cobForceInZ</zorder>
+     <zorder>cbForceNonNegative</zorder>
+     <zorder>cbForceNonIncreasingInR</zorder>
+     <zorder>label_24</zorder>
     </widget>
     <zorder>fSingleGroup</zorder>
     <zorder>line_6</zorder>
@@ -2061,12 +2096,9 @@ only events passing all event filters are used to calculate LRFs.</string>
     <zorder>sbProfilesForXYtoRad</zorder>
     <zorder>sbMakePMgroup</zorder>
     <zorder>frVsZ</zorder>
-    <zorder>cbForceNonNegative</zorder>
-    <zorder>cbForceNonIncreasingInR</zorder>
-    <zorder>label_24</zorder>
-    <zorder>cobForceInZ</zorder>
     <zorder>label_25</zorder>
     <zorder>line_15</zorder>
+    <zorder>frAdvancedLrfConstrains</zorder>
    </widget>
    <widget class="QPushButton" name="pbStopLRFmake">
     <property name="enabled">

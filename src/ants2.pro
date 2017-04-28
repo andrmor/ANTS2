@@ -7,29 +7,35 @@ ANTS2_VERSION = 2180
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-CONFIG += ants2_eigen3      #tells compiler to use Eigen3 instead of ROOT for linear algebra
-
-ants2_eigen3 {
-# use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
-    DEFINES += NEWFIT
-# use matrix algebra for TP splines
-#    DEFINES += TPS3M
-}
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
 #---CERN ROOT---
 win32 {
-        INCLUDEPATH += c:/root/include
-        LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
-        ants2_RootServer {LIBS += -llibRHTTP}
+     INCLUDEPATH += c:/root/include
+     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
+     ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
-        INCLUDEPATH += $$system(root-config --incdir)
-        LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
-        ants2_RootServer {LIBS += -llibRHTTP}
+     INCLUDEPATH += $$system(root-config --incdir)
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
+     ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
+
+#---EIGEN---
+ants2_eigen3 {
+     DEFINES += USE_EIGEN
+
+     win32 { INCLUDEPATH += C:/eigen3 }
+     linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
+
+     #advanced options:
+     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
+     #DEFINES += TPS3M  #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
+}
+#----------
 
 #---FLANN---
 ants2_flann {
@@ -54,15 +60,6 @@ ants2_fann {
      linux-g++ || unix { LIBS += -lfann }
 }
 #---------
-
-#---EIGEN---
-ants2_eigen3 {
-     DEFINES += USE_EIGEN
-
-     win32 { INCLUDEPATH += C:/eigen3 }
-     linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
-}
-#----------
 
 #---CUDA---
 ants2_cuda {

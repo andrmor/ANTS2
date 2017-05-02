@@ -1,13 +1,13 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
 ANTS2_MINOR = 12
-ANTS2_VERSION = 2180
+ANTS2_VERSION = 2197
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 

@@ -4,6 +4,7 @@
 #include "lrfaxial.h"
 #include "lrfcaxial.h"
 #include "lrfaxial3d.h"
+#include "lrfcaxial3d.h"
 #include "lrfxy.h"
 #include "lrfcomposite.h"
 #include "lrfsliced3d.h"
@@ -20,6 +21,7 @@ public:
     else if (!strcmp(type, "ComprAxial")) return new LRFcAxial(lrf_json);
     else if (!strcmp(type, "ComprRad"))   return new LRFcAxial(lrf_json);  //compatibility
     else if (!strcmp(type, "Axial3D"))    return new LRFaxial3d(lrf_json);
+    else if (!strcmp(type, "ComprAxial3D"))    return new LRFcAxial3d(lrf_json);
     else if (!strcmp(type, "Radial3D"))   return new LRFaxial3d(lrf_json); //compatibility
     else if (!strcmp(type, "XY"))         return new LRFxy(lrf_json);
     else if (!strcmp(type, "Freeform"))   return new LRFxy(lrf_json);      //compatibility
@@ -42,6 +44,7 @@ public:
     else if (!strcmp(type, "ComprAxial")) return new LRFcAxial(json);
     else if (!strcmp(type, "ComprRad"))   return new LRFcAxial(json);  //compatibility
     else if (!strcmp(type, "Axial3D"))    return new LRFaxial3d(json);
+    else if (!strcmp(type, "ComprAxial3D")) return new LRFcAxial3d(json);
     else if (!strcmp(type, "Radial3D"))   return new LRFaxial3d(json); //compatibility
     else if (!strcmp(type, "XY"))         return new LRFxy(json);
     else if (!strcmp(type, "Freeform"))   return new LRFxy(json);      //compatibility

@@ -305,6 +305,7 @@ bool PMsensorGroup::readJSON(QJsonObject &json)
   else if (type == "ComprAxial") lrf = new LRFcAxial(lrf_json);
   else if (type == "ComprRad")   lrf = new LRFcAxial(lrf_json);  // compatibility
   else if (type == "Axial3D")    lrf = new LRFaxial3d(lrf_json);
+  else if (type == "ComprAxial3D")    lrf = new LRFcAxial3d(lrf_json);
   else if (type == "Radial3D")   lrf = new LRFaxial3d(lrf_json); // compatibility
   else if (type == "XY")         lrf = new LRFxy(lrf_json);
   else if (type == "Freeform")   lrf = new LRFxy(lrf_json);      // compatibility

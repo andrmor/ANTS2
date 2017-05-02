@@ -250,12 +250,16 @@ LRF2 *SensorLocalCache::mkLRFaxial(int nodes, double *compr) const
     //else return (LRFcAxial*)fitLRF(new LRFcAxial(maxr, nodes, compr[0], compr[1], compr[2]));
     LRFaxial* lrf = compr ? new LRFcAxial(maxr, nodes, compr[0], compr[1], compr[2]) : new LRFaxial(maxr, nodes);
     lrf->SetFlatTop(LRFsettings->fForceZeroDeriv);
+    lrf->SetNonNegative(LRFsettings->fForceNonNegative);
+    lrf->SetNonIncreasing(LRFsettings->fForceNonIncreasingInR);
     return fitLRF(lrf);
 }
 
 LRF2 *SensorLocalCache::mkLRFxy(int nodesx, int nodesy) const
 {
-    return fitLRF(new LRFxy(minx, maxx, nodesx, miny, maxy, nodesy));
+    LRFxy* lrf = new LRFxy(minx, maxx, nodesx, miny, maxy, nodesy);
+    lrf->SetNonNegative(LRFsettings->fForceNonNegative);
+    return fitLRF(lrf);
 }
 
 LRF2 *SensorLocalCache::mkLRFcomposite(int nodesr, int nodesxy, double *compr) const
@@ -269,9 +273,17 @@ LRF2 *SensorLocalCache::mkLRFcomposite(int nodesr, int nodesxy, double *compr) c
       return fitLRF(mylrf);
 }
 
-LRF2 *SensorLocalCache::mkLRFaxial3d(int nodesr, int nodesz) const
+LRF2 *SensorLocalCache::mkLRFaxial3d(int nodesr, int nodesz, double *compr) const
 {
-    return fitLRF(new LRFaxial3d(maxr, nodesr, minz, maxz, nodesz));
+//    return fitLRF(new LRFaxial3d(maxr, nodesr, minz, maxz, nodesz));
+
+    LRFaxial3d* lrf = compr ? new LRFcAxial3d(maxr, nodesr, minz, maxz, nodesz, compr[0], compr[1], compr[2]) :
+        new LRFaxial3d(maxr, nodesr, minz, maxz, nodesz);
+    lrf->SetFlatTop(LRFsettings->fForceZeroDeriv);
+    lrf->SetNonNegative(LRFsettings->fForceNonNegative);
+    lrf->SetNonIncreasing(LRFsettings->fForceNonIncreasingInR);
+    lrf->SetForcedZSlope(LRFsettings->fForceInZ);
+    return fitLRF(lrf);
 }
 
 LRF2 *SensorLocalCache::mkLRFsliced3D(int nodesr, int nodesz) const

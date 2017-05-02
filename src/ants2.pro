@@ -1,28 +1,49 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
 ANTS2_MINOR = 12
-ANTS2_VERSION = 2180
+ANTS2_VERSION = 2197
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #tells compiler to use Eigen3 instead of ROOT for linear algebra
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
 #---CERN ROOT---
 win32 {
-        INCLUDEPATH += c:/root/include
-        LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
-        ants2_RootServer {LIBS += -llibRHTTP}
+     INCLUDEPATH += c:/root/include
+     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
+     ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
-        INCLUDEPATH += $$system(root-config --incdir)
-        LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
-        ants2_RootServer {LIBS += -llibRHTTP}
+     INCLUDEPATH += $$system(root-config --incdir)
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
+     ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
+
+#---EIGEN---
+ants2_eigen3 {
+     DEFINES += USE_EIGEN
+
+     win32 { INCLUDEPATH += C:/eigen3 }
+     linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
+
+     #advanced options:
+     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
+     #DEFINES += TPS3M  #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
+
+     SOURCES += SplineLibrary/bs3fit.cpp \
+                SplineLibrary/tps3fit.cpp \
+                SplineLibrary/tpspline3m.cpp
+
+     HEADERS += SplineLibrary/bs3fit.h \
+                SplineLibrary/tps3fit.h \
+                SplineLibrary/tpspline3m.h
+}
+#----------
 
 #---FLANN---
 ants2_flann {
@@ -47,15 +68,6 @@ ants2_fann {
      linux-g++ || unix { LIBS += -lfann }
 }
 #---------
-
-#---EIGEN---
-ants2_eigen3 {
-     DEFINES += USE_EIGEN
-
-     win32 { INCLUDEPATH += C:/eigen3 }
-     linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
-}
-#----------
 
 #---CUDA---
 ants2_cuda {
@@ -165,7 +177,6 @@ SOURCES += main.cpp \
     SplineLibrary/spline.cpp \
     SplineLibrary/bspline.cpp \
     SplineLibrary/bspline3.cpp \
-    SplineLibrary/tpspline3.cpp \
     modules/lrf_v2/pmsensor.cpp \
     modules/lrf_v2/lrf2.cpp \
     modules/lrf_v2/lrfcaxial.cpp \
@@ -175,6 +186,7 @@ SOURCES += main.cpp \
     modules/lrf_v2/lrfcomposite.cpp \
     modules/lrf_v2/lrfsliced3d.cpp \
     modules/lrf_v2/lrfaxial3d.cpp \
+    modules/lrf_v2/lrfcaxial3d.cpp \
     modules/lrf_v2/lrf3d.cpp \
     modules/lrf_v2/sensorlocalcache.cpp \
     modules/lrf_v2/lrffactory.cpp \
@@ -212,7 +224,8 @@ SOURCES += main.cpp \
     Net/anetworkmodule.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
-    modules/lrf_v3/gui/avladimircompressionwidget.cpp
+    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
+    SplineLibrary/tpspline3.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -249,7 +262,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
     SplineLibrary/bspline3nu.h \
-    SplineLibrary/tpspline3.h \
     SplineLibrary/spline.h \
     SplineLibrary/bspline.h \
     SplineLibrary/bspline3.h \
@@ -262,6 +274,7 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v2/lrfcomposite.h \
     modules/lrf_v2/lrfsliced3d.h \
     modules/lrf_v2/lrfaxial3d.h \
+    modules/lrf_v2/lrfcaxial3d.h \
     modules/lrf_v2/lrf3d.h \
     modules/lrf_v2/sensorlocalcache.h \
     modules/lrf_v2/lrffactory.h \
@@ -311,7 +324,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/anetworkmodule.h \
     Net/awebsocketserver.h \
     modules/lrf_v3/gui/atpspline3widget.h \
-    modules/lrf_v3/gui/avladimircompressionwidget.h
+    modules/lrf_v3/gui/avladimircompressionwidget.h \
+    SplineLibrary/eiquadprog.hpp \
+    SplineLibrary/tpspline3.h
 
 # --- SIM ---
 ants2_SIM {

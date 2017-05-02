@@ -48,6 +48,11 @@ SensorLRFs::SensorLRFs(int nPMs, QObject *parent) :
   LRFmakeJson["DataSelector"] = 0;
   LRFmakeJson["FitOnlyLast"] = false;
   LRFmakeJson["ForceZeroDeriv"] = true;
+
+  LRFmakeJson["ForceNonNegative"] = false;
+  LRFmakeJson["ForceNonIncreasingInR"] = false;
+  LRFmakeJson["ForceInZ"] = 0;
+
   LRFmakeJson["GroupToMake"] = 0;
   LRFmakeJson["GroupingOption"] = "Individual";
   LRFmakeJson["GrouppingType"] = 0;
@@ -1015,7 +1020,7 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
     case 1: newLRF = lrfmaker->mkLRFxy(LRFsettings.nodesx, LRFsettings.nodesy); break;
     case 2: return false; //polar
     case 3: newLRF = lrfmaker->mkLRFcomposite(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
-    case 4: newLRF = lrfmaker->mkLRFaxial3d(LRFsettings.nodesx, LRFsettings.nodesy); break;
+    case 4: newLRF = lrfmaker->mkLRFaxial3d(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 5: newLRF = lrfmaker->mkLRFsliced3D(LRFsettings.nodesx, LRFsettings.nodesy); break;
     }  
   if (!newLRF)

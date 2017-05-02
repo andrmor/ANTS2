@@ -72,6 +72,14 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   QObject::connect(SensLRF, SIGNAL(SensorLRFsReadySignal(bool)), this, SLOT(LRF_ModuleReadySlot(bool)));
   QObject::connect(SensLRF, SIGNAL(ProgressReport(int)), this, SLOT(onProgressReportReceived(int)));
 
+#ifndef NEWFIT
+  ui->frAdvancedLrfConstrains->setEnabled(false);
+
+  ui->cbForceNonNegative->setChecked(false);
+  ui->cbForceNonIncreasingInR->setChecked(false);
+  ui->cobForceInZ->setCurrentIndex(0);
+#endif
+
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
   LRFwindow::on_pbShrink_clicked();
   ui->fSingleGroup->setEnabled(false);
@@ -430,6 +438,9 @@ void LRFwindow::writeToJson(QJsonObject &json) const
   json["DataSelector"] = ui->cb_data_selector->currentIndex();
   json["UseGrid"] = ui->cb_use_grid->isChecked();
   json["ForceZeroDeriv"] = ui->cbForceDerivToZeroInOrigin->isChecked();
+  json["ForceNonNegative"] = ui->cbForceNonNegative->isChecked();
+  json["ForceNonIncreasingInR"] = ui->cbForceNonIncreasingInR->isChecked();
+  json["ForceInZ"] = ui->cobForceInZ->currentIndex();
   json["StoreError"] = ui->cb_store_error->isChecked();
   json["UseEnergy"] = ui->cbEnergyScalling->isChecked();
 
@@ -492,6 +503,14 @@ void LRFwindow::loadJSON(QJsonObject &json)
   ui->cb_use_grid->setChecked(bTmp);
   parser.ParseObject("ForceZeroDeriv", bTmp);
   ui->cbForceDerivToZeroInOrigin->setChecked(bTmp);
+
+  ui->cbForceNonNegative->setChecked(false);
+  ui->cbForceNonIncreasingInR->setChecked(false);
+  ui->cobForceInZ->setCurrentIndex(0);
+  JsonToCheckbox(json, "ForceNonNegative", ui->cbForceNonNegative);
+  JsonToCheckbox(json, "ForceNonIncreasingInR", ui->cbForceNonIncreasingInR);
+  JsonToComboBox(json, "ForceInZ", ui->cobForceInZ);
+
   parser.ParseObject("StoreError", bTmp);
   ui->cb_store_error->setChecked(bTmp);
   parser.ParseObject("UseEnergy", bTmp);

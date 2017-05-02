@@ -518,14 +518,18 @@ __global__ void kernelRadial2D(const bool mlORchi2,
                                                          //threadIdx.x is related to offset in X from Xcenter of the grid
                                                          //threadIdx.y is related to offset in Y from Ycenter of the grid
 
-  //to do!!! case when numPMs>numtreads in block
-  if (threadID<numPMs)
-    { //in this block _only_: threadID is PMs index
-      PMx[threadID] = pmx[threadID];
-      PMy[threadID] = pmy[threadID];
-
-      signal[threadID] = d_eventsData[ievent*(numPMs+2) + threadID]; //buffer contains PM signals and XY offset
-    }
+  int multi = 1 + numPMs / activeThreads;
+  for (int im=0; im<multi; im++)
+  {
+      int ipm = threadID + im*activeThreads;
+      if (ipm<numPMs)
+        {
+          //printf("ThreadId:%i pm#:%i \n",threadID,ipm);
+          PMx[ipm] = pmx[ipm];
+          PMy[ipm] = pmy[ipm];
+          signal[ipm] = d_eventsData[ievent*(numPMs+2) + ipm]; //buffer: signals of all active PMs +XY offset
+        }
+  }
 
   if (threadID == 0)
     { //0th tread sets the center of the grid
@@ -801,14 +805,18 @@ __global__ void kernelRadial2Dcomp(const bool mlORchi2,
                                                          //threadIdx.x is related to offset in X from Xcenter of the grid
                                                          //threadIdx.y is related to offset in Y from Ycenter of the grid
 
-  //to do!!! case when numPMs>numtreads in block
-  if (threadID<numPMs)
-    { //in this block _only_: threadID is PMs index
-      PMx[threadID] = pmx[threadID];
-      PMy[threadID] = pmy[threadID];
-
-      signal[threadID] = d_eventsData[ievent*(numPMs+2) + threadID]; //buffer contains PM signals and XY offset
-    }
+  int multi = 1 + numPMs / activeThreads;
+  for (int im=0; im<multi; im++)
+  {
+      int ipm = threadID + im*activeThreads;
+      if (ipm<numPMs)
+        {
+          //printf("ThreadId:%i pm#:%i \n",threadID,ipm);
+          PMx[ipm] = pmx[ipm];
+          PMy[ipm] = pmy[ipm];
+          signal[ipm] = d_eventsData[ievent*(numPMs+2) + ipm]; //buffer: signals of all active PMs +XY offset
+        }
+  }
 
   if (threadID == 0)
     { //0th tread sets the center of the grid
@@ -1358,7 +1366,7 @@ __global__ void kernelXY(const bool mlORchi2,
 
 {
   //setting up shared memory
-  int activeThreads = blockDim.x * blockDim.y;    
+  int activeThreads = blockDim.x * blockDim.y;
   extern __shared__ float shared[];  //these data are shared withing a thread block - that is for all points of the grid (one event!)
     //PM centers
  float* PMx = (float*) &shared;
@@ -1384,14 +1392,18 @@ __global__ void kernelXY(const bool mlORchi2,
                                                          //threadIdx.x is related to offset in X from Xcenter of the grid
                                                          //threadIdx.y is related to offset in Y from Ycenter of the grid
 
-  //to do!!! case when numPMs>numtreads in block
-  if (threadID<numPMs)
-    { //in this block _only_: threadID is PMs index
-      PMx[threadID] = pmx[threadID];
-      PMy[threadID] = pmy[threadID];
-
-      signal[threadID] = d_eventsData[ievent*(numPMs+2) + threadID]; //buffer: signals of all active PMs +XY offset
-    }
+  int multi = 1 + numPMs / activeThreads;
+  for (int im=0; im<multi; im++)
+  {
+      int ipm = threadID + im*activeThreads;
+      if (ipm<numPMs)
+        {
+          //printf("ThreadId:%i pm#:%i \n",threadID,ipm);
+          PMx[ipm] = pmx[ipm];
+          PMy[ipm] = pmy[ipm];
+          signal[ipm] = d_eventsData[ievent*(numPMs+2) + ipm]; //buffer: signals of all active PMs +XY offset
+        }
+  }
 
   if (threadID == 0)
     { //0th tread sets the center of the grid
@@ -1714,14 +1726,18 @@ __global__ void kernelComposite(const bool mlORchi2,
                                                          //threadIdx.x is related to offset in X from Xcenter of the grid
                                                          //threadIdx.y is related to offset in Y from Ycenter of the grid
 
-  //to do!!! case when numPMs>numtreads in block
-  if (threadID<numPMs)
-    { //in this block _only_: threadID is PMs index
-      PMx[threadID] = pmx[threadID];
-      PMy[threadID] = pmy[threadID];
-
-      signal[threadID] = d_eventsData[ievent*(numPMs+2) + threadID]; //buffer contains PM signals and XY offset
-    }
+  int multi = 1 + numPMs / activeThreads;
+  for (int im=0; im<multi; im++)
+  {
+      int ipm = threadID + im*activeThreads;
+      if (ipm<numPMs)
+        {
+          //printf("ThreadId:%i pm#:%i \n",threadID,ipm);
+          PMx[ipm] = pmx[ipm];
+          PMy[ipm] = pmy[ipm];
+          signal[ipm] = d_eventsData[ievent*(numPMs+2) + ipm]; //buffer: signals of all active PMs +XY offset
+        }
+  }
 
   if (threadID == 0)
     { //0th tread sets the center of the grid

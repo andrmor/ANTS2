@@ -32,7 +32,7 @@ public:
     LRF2 *mkLRFaxial(int nodes, double *compr) const;
     LRF2 *mkLRFxy(int nodesx, int nodesy) const;
     LRF2 *mkLRFcomposite(int nodesr, int nodesxy, double *compr) const;
-    LRF2 *mkLRFaxial3d(int nodesr, int nodesz) const;
+    LRF2 *mkLRFaxial3d(int nodesr, int nodesz, double *compr) const;
     LRF2 *mkLRFsliced3D(int nodesr, int nodesz) const;
 
     void expandDomain(double fraction);

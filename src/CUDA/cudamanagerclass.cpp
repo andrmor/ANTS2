@@ -9,7 +9,11 @@
 #include "lrfcaxial.h"
 #include "lrfxy.h"
 #include "bspline3.h"
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
 #include "lrfsliced3d.h"
 #include "apositionenergyrecords.h"
 #include "ajsontools.h"

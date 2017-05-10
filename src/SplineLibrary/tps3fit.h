@@ -31,6 +31,7 @@ private:
     bool non_increasing_x;
     bool flat_top_x; // force d/dx = 0 at x=0
     int slope_y;     // force d/dy positive (1) or negative (2) at x = 0
+    bool sparse;     // use sparse QR for unconstrained fit - EXPERIMENTAL
     double residual;
     bool status;
     TProfile2D *h1;

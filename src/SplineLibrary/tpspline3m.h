@@ -30,10 +30,10 @@ using Eigen::MatrixXd;
 using Eigen::Matrix4d;
 using Eigen::Vector4d;
 
-class TPspline3M
+class TPspline3
 {
 	public:
-        TPspline3M(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
+        TPspline3(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
 				void SetRangeX(double xmin, double xmax);
 		void SetRangeY(double ymin, double ymax);
 		void GetRangeX(double *xmin, double *xmax) {*xmin = xl;	*xmax = xr;}
@@ -55,7 +55,7 @@ class TPspline3M
 		double Basis(double *x, double *p);  // insertable into ROOT function
 		double Eval_slow(double x, double y);
         double Eval(double x, double y) const;
-        double Eval_greedy(double x, double y);
+        double Eval_greedy(double x, double y) const;
         double EvalDrvX(double x, double y);
         double EvalDrvY(double x, double y);
 		double Eval(double *x, double *p);	// insertable into ROOT function

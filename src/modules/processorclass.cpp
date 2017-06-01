@@ -320,6 +320,116 @@ void RootMinReconstructorClass::execute()
   fFinished = true;
 }
 
+// -----Experimental-----
+RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(pms *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo) :
+    RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo)
+{
+    qDebug() << "Warning! Experimental feature activated - reconstruction by RootMin for ranged X or Y\nScanX or ScanY of 1e10 -> free search, otherwise within"<<Range<<"from ScanX or ScanY value";
+}
+
+RootMinRangedReconstructorClass::~RootMinRangedReconstructorClass() {}
+
+void RootMinRangedReconstructorClass::execute()
+{
+    fFinished = false;
+    float Factor = 100.0/(EventsTo-EventsFrom);
+    eventsProcessed = 0;
+    //qDebug() << Id<<"> Starting RootMinRanged reconstruction. Events from"<<EventsFrom<<" to "<<EventsTo-1;
+    //qDebug() << "Range:"<<Range<<"StepXY"<<RecSet->RMstepX<<RecSet->RMstepY<<"Start option:"<<RecSet->RMstartOption;
+    //qDebug() << "ML?"<<RecSet->fRMuseML<<"Z?"<<RecSet->fReconstructZ<<"En?"<<RecSet->fReconstructEnergy;
+
+    for (int iev=EventsFrom; iev<EventsTo; iev++)
+      {
+        if (fStopRequested) break;
+        AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
+        if (rec->ReconstructionOK)
+          {
+            PMsignals = &EventsDataHub->Events[iev];
+            if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
+
+            // reset for the new event
+            if (RecSet->fRMuseML) LastMiniValue = 1.e100;
+            else LastMiniValue = 1.e6;
+
+            //set variables to minimize
+            // if Scan X or Y is 1e10, variable if free, else it is confined to the range of +-Range around Scan value
+            for (int ia=0; ia<2; ia++)
+            {
+                const double& val = EventsDataHub->Scan[iev]->Points[0].r[ia];
+                //qDebug() << ia << val << (val == 1.0e10);
+                if (val == 1.0e10)
+                {
+                    //free variable
+                    if (RecSet->RMstartOption == 1)
+                      {  //starting from the centre of the PM with max signal
+                        if (ia==0) RootMinimizer->SetVariable(0, "x", PMs->X(rec->iPMwithMaxSignal), RecSet->RMstepX);
+                        else       RootMinimizer->SetVariable(1, "y", PMs->Y(rec->iPMwithMaxSignal), RecSet->RMstepY);
+                      }
+                    else if (RecSet->RMstartOption == 2)
+                      {
+                        //start from true XY position
+                        if (ia==0) RootMinimizer->SetVariable(0, "x", EventsDataHub->Scan[iev]->Points[0].r[0], RecSet->RMstepX);
+                        else       RootMinimizer->SetVariable(1, "y", EventsDataHub->Scan[iev]->Points[0].r[1], RecSet->RMstepY);
+                      }
+                    else
+                      {
+                        //else start from CoG data
+                        if (ia==0) RootMinimizer->SetVariable(0, "x", rec->xCoG, RecSet->RMstepX);
+                        else       RootMinimizer->SetVariable(1, "y", rec->yCoG, RecSet->RMstepY);
+                      }
+                }
+                else
+                {
+                    // range variable
+                    if (ia==0) RootMinimizer->SetLimitedVariable(0, "x", val, RecSet->RMstepX, val-Range, val+Range);
+                    else       RootMinimizer->SetLimitedVariable(1, "y", val, RecSet->RMstepY, val-Range, val+Range);
+                }
+            }
+
+            if (RecSet->fReconstructZ) RootMinimizer->SetVariable(2, "z", rec->zCoG, RecSet->RMstepZ);
+            else RootMinimizer->SetFixedVariable(2, "z", rec->zCoG);
+            if (RecSet->fReconstructEnergy) RootMinimizer->SetLowerLimitedVariable(3, "e", RecSet->SuggestedEnergy, RecSet->RMstepEnergy, 0.);
+            else RootMinimizer->SetFixedVariable(3, "e", RecSet->SuggestedEnergy);
+            //prepare to transfer pointer to this object (Raimundo changed to memcpy at march 7th)
+            //int intPoint = reinterpret_cast<int>(this);
+            double dPoint;// = intPoint;
+            void *thisvalue = this;
+            memcpy(&dPoint, &thisvalue, sizeof(void *));
+            //We need to fix for the possibility that double isn't enough to store void*
+            RootMinimizer->SetFixedVariable(4, "p", dPoint);
+
+            // do the minimization
+            bool fOK = RootMinimizer->Minimize();
+            //double MinValue = RootMinimizer->MinValue();
+            //if (MinValue != MinValue)
+            //  qDebug()<<"nan detected! Minimization success? "<<fOK;
+
+            if (fOK)
+              {
+                const double *xs = RootMinimizer->X();
+                rec->Points[0].r[0] = xs[0];
+                rec->Points[0].r[1] = xs[1];
+                rec->Points[0].r[2] = xs[2];
+                rec->Points[0].energy = xs[3];
+                //alread have "OK and Good" status from CoG
+              }
+            else
+              {
+                rec->chi2 = -1.0; //signal for double event recon that cog rec was allright (default chi2=0)
+                rec->ReconstructionOK = false;
+                rec->GoodEvent = false;
+              }
+          }
+        //else CoG failed event
+
+        eventsProcessed++;
+        Progress = eventsProcessed*Factor;
+      }
+    emit finished();
+    fFinished = true;
+}
+// -------------------------
+
 RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(pms* PMs,
                                                                  APmGroupsManager* PMgroups,
                                                                  ALrfModuleSelector *LRFs,

@@ -38,6 +38,7 @@ void DynamicPassivesHandler::init(ReconstructionSettings *RecSet, int ThisPmGrou
       CenterOption = RecSet->CGstartOption;
       break;
     case 2:
+    case 6:
       fByThreshold = RecSet->fUseDynamicPassivesSignal;
       fByDistance =  RecSet->fUseDynamicPassivesDistance;
       ThresholdLow = RecSet->SignalThresholdLow;

@@ -7494,6 +7494,11 @@ Individual sensors can belong to multiple groups!</string>
             <string>kNN reconstruction</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Experimental! RootRanged</string>
+           </property>
+          </item>
          </widget>
          <widget class="QStackedWidget" name="swReconstructionAlgorithm">
           <property name="geometry">

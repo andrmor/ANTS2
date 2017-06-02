@@ -229,9 +229,10 @@ void ReconstructionWindow::InitWindow()
 
 void ReconstructionWindow::on_cobReconstructionAlgorithm_currentIndexChanged(int index)
 {
+    if (index==6) index = 2; //same tab for both
     ui->swReconstructionAlgorithm->setCurrentIndex(index);
     ReconstructionWindow::updateRedStatusOfRecOptions(); //update warning indicator in tabWidget
-    if (index == 1 || index == 2 || index == 4) ui->fDynPassive->setVisible(true);
+    if (index == 1 || index == 2 || index == 4 ) ui->fDynPassive->setVisible(true);
     else ui->fDynPassive->setVisible(false);  
     ui->cobMultipleOption->setEnabled(index == 2);
 }

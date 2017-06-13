@@ -4970,7 +4970,8 @@ void ReconstructionWindow::updateReconSettings()
     gjson["InitialZ"] = ui->ledSuggestedZ->text().toDouble();
     gjson["IncludePassives"] = ui->cbIncludePassives->isChecked();
     gjson["WeightedChi2"] = ui->cbWeightedChi2->isChecked();
-    //gjson["NumThreads"] = ui->sbRecNumThreads->value();
+    gjson["LimitSearchIfTrueIsSet"] = ui->cbLimitSearchToVicinity->isChecked();
+    gjson["RangeForLimitSearchIfTrueSet"] = ui->ledLimitSearchRange->text().toDouble();
   RecJson["General"] = gjson;
 
   //Algotithm
@@ -5126,8 +5127,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   ui->cobZ->setCurrentIndex(0); //compatibility
   JsonToComboBox(gjson, "Zstrategy", ui->cobZ);
   JsonToCheckbox(gjson, "IncludePassives", ui->cbIncludePassives);
-  JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);
-  //JsonToSpinBox(gjson, "NumThreads", ui->sbRecNumThreads);
+  JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);  
+  ui->cbLimitSearchToVicinity->setChecked(false); //compatibility
+  JsonToCheckbox(gjson, "LimitSearchIfTrueIsSet", ui->cbLimitSearchToVicinity);
+  JsonToLineEdit(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
   if (RecJson.contains("DynamicPassives"))

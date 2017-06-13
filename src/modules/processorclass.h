@@ -145,10 +145,12 @@ public:
                                     EventsDataClass *EventsDataHub,
                                     ReconstructionSettings *RecSet,
                                     int ThisPmGroup,
-                                    int EventsFrom, int EventsTo);
+                                    int EventsFrom, int EventsTo,
+                                    double Range);
     ~RootMinRangedReconstructorClass();
 
-    const double Range = 0.5; // minimization will be withing +-range around the true value
+private:
+    double Range; // minimization will be within +-range around the true/scan value
 
 public slots:
     virtual void execute();

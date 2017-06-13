@@ -1548,9 +1548,9 @@
        <widget class="QLabel" name="label_14">
         <property name="geometry">
          <rect>
-          <x>4</x>
+          <x>1</x>
           <y>12</y>
-          <width>62</width>
+          <width>76</width>
           <height>16</height>
          </rect>
         </property>
@@ -1564,9 +1564,9 @@
        <widget class="QLabel" name="label_119">
         <property name="geometry">
          <rect>
-          <x>33</x>
+          <x>1</x>
           <y>38</y>
-          <width>32</width>
+          <width>75</width>
           <height>16</height>
          </rect>
         </property>
@@ -1580,9 +1580,9 @@
        <widget class="QLabel" name="label_120">
         <property name="geometry">
          <rect>
-          <x>22</x>
+          <x>1</x>
           <y>63</y>
-          <width>43</width>
+          <width>75</width>
           <height>16</height>
          </rect>
         </property>
@@ -1615,7 +1615,7 @@
        <widget class="QComboBox" name="cobTreeViewWhat">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>10</y>
           <width>381</width>
           <height>22</height>
@@ -1633,7 +1633,7 @@
        <widget class="QComboBox" name="cobTreeViewCuts">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>36</y>
           <width>381</width>
           <height>22</height>
@@ -1646,7 +1646,7 @@
        <widget class="QComboBox" name="cobTreeViewOptions">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>62</y>
           <width>381</width>
           <height>22</height>
@@ -1889,7 +1889,7 @@
          <rect>
           <x>30</x>
           <y>118</y>
-          <width>101</width>
+          <width>130</width>
           <height>17</height>
          </rect>
         </property>
@@ -1902,7 +1902,7 @@
          <rect>
           <x>176</x>
           <y>119</y>
-          <width>111</width>
+          <width>140</width>
           <height>17</height>
          </rect>
         </property>
@@ -2502,7 +2502,7 @@
         <widget class="QSpinBox" name="sbAnalysisEventNumber">
          <property name="geometry">
           <rect>
-           <x>80</x>
+           <x>130</x>
            <y>10</y>
            <width>61</width>
            <height>22</height>
@@ -2518,9 +2518,9 @@
         <widget class="QLabel" name="label_29">
          <property name="geometry">
           <rect>
-           <x>-5</x>
+           <x>10</x>
            <y>12</y>
-           <width>81</width>
+           <width>116</width>
            <height>16</height>
           </rect>
          </property>
@@ -3308,7 +3308,7 @@
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>380</x>
       <y>310</y>
       <width>210</width>
       <height>23</height>
@@ -7452,7 +7452,7 @@ Individual sensors can belong to multiple groups!</string>
          <widget class="QComboBox" name="cobReconstructionAlgorithm">
           <property name="geometry">
            <rect>
-            <x>145</x>
+            <x>177</x>
             <y>5</y>
             <width>251</width>
             <height>22</height>
@@ -7492,11 +7492,6 @@ Individual sensors can belong to multiple groups!</string>
           <item>
            <property name="text">
             <string>kNN reconstruction</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Experimental! RootRanged</string>
            </property>
           </item>
          </widget>
@@ -7716,15 +7711,15 @@ Individual sensors can belong to multiple groups!</string>
              <string>Takes gains into account</string>
             </property>
             <property name="text">
-             <string>Ignore PMs by distance from the PM with the maximum signal</string>
+             <string>Ignore PMs based on distance from the PM with max signal</string>
             </property>
            </widget>
            <widget class="QFrame" name="fCoGIgnoreFar">
             <property name="geometry">
              <rect>
-              <x>238</x>
+              <x>200</x>
               <y>103</y>
-              <width>211</width>
+              <width>230</width>
               <height>41</height>
              </rect>
             </property>
@@ -7737,14 +7732,17 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_101">
              <property name="geometry">
               <rect>
-               <x>8</x>
+               <x>5</x>
                <y>6</y>
-               <width>91</width>
+               <width>94</width>
                <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>Ignore threshold:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLabel" name="label_170">
@@ -8006,14 +8004,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_168">
             <property name="geometry">
              <rect>
-              <x>36</x>
+              <x>17</x>
               <y>91</y>
-              <width>141</width>
+              <width>151</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
              <string>Search starts centered on:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobCGoptimizeWhat">
@@ -8039,14 +8040,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_173">
             <property name="geometry">
              <rect>
-              <x>99</x>
+              <x>18</x>
               <y>71</y>
-              <width>67</width>
+              <width>150</width>
               <height>13</height>
              </rect>
             </property>
             <property name="text">
              <string>Optimization:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </widget>
@@ -8054,14 +8058,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_46">
             <property name="geometry">
              <rect>
-              <x>18</x>
+              <x>10</x>
               <y>87</y>
-              <width>133</width>
+              <width>137</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Initial step (X,Y,Z,Energy):</string>
+             <string>Start step (X,Y,Z,  E):</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLineEdit" name="ledInitialStepX">
@@ -8119,27 +8126,33 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_78">
             <property name="geometry">
              <rect>
-              <x>88</x>
+              <x>17</x>
               <y>115</y>
-              <width>55</width>
+              <width>130</width>
               <height>14</height>
              </rect>
             </property>
             <property name="text">
              <string>Max calls:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
            <widget class="QLabel" name="label_100">
             <property name="geometry">
              <rect>
-              <x>35</x>
+              <x>16</x>
               <y>60</y>
-              <width>107</width>
+              <width>130</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
              <string>Start search from XY:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobLSstartingXY">
@@ -8228,27 +8241,33 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_118">
             <property name="geometry">
              <rect>
-              <x>76</x>
+              <x>16</x>
               <y>36</y>
-              <width>67</width>
+              <width>130</width>
               <height>13</height>
              </rect>
             </property>
             <property name="text">
              <string>Optimization:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
            <widget class="QLabel" name="label_441">
             <property name="geometry">
              <rect>
-              <x>69</x>
+              <x>17</x>
               <y>5</y>
-              <width>78</width>
+              <width>130</width>
               <height>20</height>
              </rect>
             </property>
             <property name="text">
              <string>Minuit2 option:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobMinuit2Option">
@@ -8328,7 +8347,7 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_55">
              <property name="geometry">
               <rect>
-               <x>6</x>
+               <x>7</x>
                <y>5</y>
                <width>98</width>
                <height>16</height>
@@ -8341,9 +8360,9 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_122">
              <property name="geometry">
               <rect>
-               <x>26</x>
+               <x>10</x>
                <y>36</y>
-               <width>80</width>
+               <width>93</width>
                <height>16</height>
               </rect>
              </property>
@@ -8412,7 +8431,7 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_126">
              <property name="geometry">
               <rect>
-               <x>13</x>
+               <x>4</x>
                <y>90</y>
                <width>141</width>
                <height>16</height>
@@ -8420,6 +8439,9 @@ Individual sensors can belong to multiple groups!</string>
              </property>
              <property name="text">
               <string>Search starts centered on:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QComboBox" name="cobCUDAoffsetOption">
@@ -8462,7 +8484,7 @@ Individual sensors can belong to multiple groups!</string>
               </rect>
              </property>
              <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
@@ -8567,9 +8589,9 @@ Individual sensors can belong to multiple groups!</string>
              <widget class="QLabel" name="label_125">
               <property name="geometry">
                <rect>
-                <x>8</x>
+                <x>5</x>
                 <y>1</y>
-                <width>81</width>
+                <width>83</width>
                 <height>16</height>
                </rect>
               </property>
@@ -8604,14 +8626,17 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_130">
              <property name="geometry">
               <rect>
-               <x>78</x>
+               <x>11</x>
                <y>66</y>
-               <width>67</width>
+               <width>134</width>
                <height>13</height>
               </rect>
              </property>
              <property name="text">
               <string>Optimization:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </widget>
@@ -9049,12 +9074,15 @@ Individual sensors can belong to multiple groups!</string>
            <rect>
             <x>10</x>
             <y>7</y>
-            <width>141</width>
+            <width>163</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Reconstruction algorithm:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QFrame" name="fDynPassive">
@@ -9975,7 +10003,7 @@ Beware of bugs!</string>
            <rect>
             <x>110</x>
             <y>40</y>
-            <width>391</width>
+            <width>201</width>
             <height>31</height>
            </rect>
           </property>
@@ -9990,7 +10018,7 @@ Beware of bugs!</string>
             <rect>
              <x>6</x>
              <y>2</y>
-             <width>211</width>
+             <width>181</width>
              <height>22</height>
             </rect>
            </property>
@@ -10041,7 +10069,7 @@ Beware of bugs!</string>
            <rect>
             <x>20</x>
             <y>80</y>
-            <width>311</width>
+            <width>271</width>
             <height>22</height>
            </rect>
           </property>
@@ -10218,6 +10246,61 @@ Beware of bugs!</string>
              <string>26.5</string>
             </property>
            </widget>
+          </widget>
+         </widget>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="geometry">
+           <rect>
+            <x>326</x>
+            <y>8</y>
+            <width>176</width>
+            <height>101</height>
+           </rect>
+          </property>
+          <property name="title">
+           <string>Root-based reconstruction</string>
+          </property>
+          <widget class="QCheckBox" name="cbLimitSearchToVicinity">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>11</y>
+             <width>161</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>If there is scan data, and 
+xScan (or yScan) != 1e10,
+limit search in this direction
+to +- around the Scan value:</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledLimitSearchRange">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>72</y>
+             <width>51</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_194">
+           <property name="geometry">
+            <rect>
+             <x>87</x>
+             <y>75</y>
+             <width>47</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>mm</string>
+           </property>
           </widget>
          </widget>
         </widget>

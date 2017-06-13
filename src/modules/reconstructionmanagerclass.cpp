@@ -99,7 +99,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
 
       //main algorithm
         //qDebug() << "--> Performing reconstruction with the algorithm:"<<RecSet.at(CurrentGroup).ReconstructionAlgorithm;
-      bool fMultiThreaded = (NumThreads>0) && ( RecSet.at(CurrentGroup).ReconstructionAlgorithm == 1 || RecSet.at(CurrentGroup).ReconstructionAlgorithm == 2 || RecSet.at(CurrentGroup).ReconstructionAlgorithm == 6);
+      bool fMultiThreaded = (NumThreads>0) && ( RecSet.at(CurrentGroup).ReconstructionAlgorithm == 1 || RecSet.at(CurrentGroup).ReconstructionAlgorithm == 2 );
       if (fMultiThreaded)
       {
           todo.clear();
@@ -283,12 +283,11 @@ void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorCl
           todo << new CGonCPUreconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;
       case 2:
-          if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
-              todo << new RootMinDoubleReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
+          if (RecSet.at(CurrentGroup).fLimitSearchIfTrueIsSet)
+               todo << new RootMinRangedReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to, RecSet.at(CurrentGroup).RangeForLimitSearchIfTrueSet);
+          else if (RecSet.at(CurrentGroup).MultipleEventOption == 1) //in the case of 2(chose best single or double), first single is calculated
+               todo << new RootMinDoubleReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           else todo << new RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
-          break;
-      case 6:
-          todo << new RootMinRangedReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);
           break;
       case 10:
           todo << new Chi2calculatorClass(PMs, PMgroups, LRFs, EventsDataHub, &RecSet[CurrentGroup], CurrentGroup, from, to);

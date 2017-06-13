@@ -32,6 +32,11 @@ APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator,
     p = new APhoton();
 }
 
+APhotonTracer::~APhotonTracer()
+{
+    delete p;
+}
+
 void APhotonTracer::configure(const GeneralSimSettings *simSet, OneEventClass* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
 {
    SimSet = simSet;

@@ -16,7 +16,8 @@ public:
   double SuggestedEnergy;
   bool   fIncludePassive;
   bool   fWeightedChi2calculation;
-  //int    NumThreads;
+  bool   fLimitSearchIfTrueIsSet;
+  double RangeForLimitSearchIfTrueSet;
 
   //Algorithm
   int    ReconstructionAlgorithm;  //0-CoG, 1-Multigrid, 2-RootMinimizer, 4-ANN, 5-GPU_CG
@@ -73,7 +74,9 @@ public:
   bool readFromJson(QJsonObject &Json);
 
   ReconstructionSettings() : fReconstructZ(false), SuggestedZ(0), Zstrategy(0), fReconstructEnergy(false), SuggestedEnergy(1),
-    fIncludePassive(false), fWeightedChi2calculation(true), ReconstructionAlgorithm(0),
+    fIncludePassive(false), fWeightedChi2calculation(true),
+    fLimitSearchIfTrueIsSet(false), RangeForLimitSearchIfTrueSet(1.0),
+    ReconstructionAlgorithm(0),
     fUseDynamicPassivesDistance(false), fUseDynamicPassivesSignal(false), fUseDynamicPassives(false),
     SignalThresholdLow(0), SignalThresholdHigh(1e10), MaxDistance(100), MaxDistanceSquare(10000),
     fCoGStretch (false), fCoGIgnoreBySignal(false), fCoGIgnoreFar(false), fCogForceFixedZ(true), fLimitNodes(false) {}

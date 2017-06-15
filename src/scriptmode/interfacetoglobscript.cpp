@@ -1394,6 +1394,30 @@ bool InterfaceToData::GetTrueNumberPoints(int ievent)
   return EventsDataHub->Scan.at(ievent)->Points.size();
 }
 
+void InterfaceToData::SetScanX(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[0] = value;
+}
+
+void InterfaceToData::SetScanY(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[1] = value;
+}
+
+void InterfaceToData::SetScanZ(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[2] = value;
+}
+
+void InterfaceToData::SetScanEnergy(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].energy = value;
+}
+
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;

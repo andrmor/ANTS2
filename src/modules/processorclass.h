@@ -129,9 +129,31 @@ public:
  const QVector< float >* PMsignals;
 public slots:
   virtual void execute();
-private:
+protected:
   ROOT::Math::Functor *FunctorLSML;
   ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
+};
+
+/// Root minimizer (Migrad2 or Simplex) for point events with possibility that some events have known range in X or Y
+class RootMinRangedReconstructorClass : public RootMinReconstructorClass
+{
+  Q_OBJECT
+public:
+    RootMinRangedReconstructorClass(pms* PMs,
+                                    APmGroupsManager* PMgroups,
+                                    ALrfModuleSelector* LRFs,
+                                    EventsDataClass *EventsDataHub,
+                                    ReconstructionSettings *RecSet,
+                                    int ThisPmGroup,
+                                    int EventsFrom, int EventsTo,
+                                    double Range);
+    ~RootMinRangedReconstructorClass();
+
+private:
+    double Range; // minimization will be within +-range around the true/scan value
+
+public slots:
+    virtual void execute();
 };
 
 /// Root minimizer (Migrad2 or Simplex) with double events

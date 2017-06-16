@@ -122,7 +122,8 @@ public:
                             EventsDataClass *EventsDataHub,
                             ReconstructionSettings *RecSet,
                             int ThisPmGroup,
-                            int EventsFrom, int EventsTo);
+                            int EventsFrom, int EventsTo,
+                            bool UseGauss = false);
   ~RootMinReconstructorClass();
  //public for static use
  double LastMiniValue;
@@ -146,11 +147,14 @@ public:
                                     ReconstructionSettings *RecSet,
                                     int ThisPmGroup,
                                     int EventsFrom, int EventsTo,
-                                    double Range);
+                                    double Range, bool UseGauss);
     ~RootMinRangedReconstructorClass();
 
-private:
     double Range; // minimization will be within +-range around the true/scan value
+
+    //internal - used by the minimizer in Gaussian mode
+    bool RangedX, RangedY;
+    double CenterX, CenterY;
 
 public slots:
     virtual void execute();
@@ -223,7 +227,9 @@ private:
 
 //static functions to use with Root minimizer
 double Chi2static(const double *p);
+double Chi2staticGauss(const double *p);
 double Chi2staticDouble(const double *p);
 double MLstatic(const double *p);
+double MLstaticGauss(const double *p);
 double MLstaticDouble(const double *p);
 #endif // PROCESSORCLASS_H

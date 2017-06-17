@@ -86,7 +86,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
   if (!json.contains("SimulationConfig"))
     {
-      message("Json dos not contain simulation config!");
+      message("Json does not contain simulation config!");
       return;
     }
   QJsonObject jsSimSet = json["SimulationConfig"].toObject();

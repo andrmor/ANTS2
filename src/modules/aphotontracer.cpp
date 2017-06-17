@@ -255,7 +255,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          //qDebug()<<"Normal length is:"<<sqrt(N[0]*N[0] + N[1]*N[1] + N[2]*N[2]);
          //qDebug()<<"Dir vector length is:"<<sqrt(p->v[0]*p->v[0] + p->v[1]*p->v[1] + p->v[2]*p->v[2]);
 
-         double prob = CalculateReflectionCoefficient(); //reflection probability
+         const double prob = CalculateReflectionCoefficient(); //reflection probability
          if (RandGen->Rndm() < prob)
            { //-----Reflection-----
              //qDebug()<<"Fresnel - reflection!";
@@ -291,7 +291,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
        {
        case 'P': // PM hit
          {
-           int PMnumber = NodeAfterInterface->GetNumber();
+           const int PMnumber = NodeAfterInterface->GetNumber();
            //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle();
            PMwasHit(PMnumber);
            OneEvent->SimStat->HitPM++;
@@ -321,7 +321,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
      if (fDoFresnel)
            {
                  //-----Refraction-----
-                 bool ok = PerformRefraction( RefrIndexFrom/RefrIndexTo); // true - successful
+                 const bool ok = PerformRefraction( RefrIndexFrom/RefrIndexTo); // true - successful
                  // true - successful, false - forbidden -> considered that the photon is absorbed at the surface! Should not happen
                  if (!ok) qWarning()<<"Error in photon tracker: problem with transmission!";
            }
@@ -369,7 +369,7 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
     bool DoAbsorption;
     double AbsPath;
 
-    double AbsCoeff = (*MaterialCollection)[MatIndexFrom]->getAbsorptionCoefficient(p->waveIndex);
+    const double AbsCoeff = (*MaterialCollection)[MatIndexFrom]->getAbsorptionCoefficient(p->waveIndex);
     if (AbsCoeff > 0)
       {
         AbsPath = -log(RandGen->Rndm())/AbsCoeff;
@@ -502,16 +502,16 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
 
 double APhotonTracer::CalculateReflectionCoefficient()
 {
-    double NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2]; // NK = cos of the angle of incidence = cos1
-    double cos1 = fabs(NK);
+    const double NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2]; // NK = cos of the angle of incidence = cos1
+    const double cos1 = fabs(NK);
     //qDebug() << "Cos of incidence:"<<cos1;
 
     RefrIndexFrom = MaterialFrom->getRefractiveIndex(p->waveIndex);
     RefrIndexTo   = MaterialTo->getRefractiveIndex(p->waveIndex);
 
     //qDebug()<<"Photon wavelength"<<p->wavelength<<"WaveIndex:"<<p->WaveIndex<<"n1 and n2 are: "<<RefrIndexFrom<<RefrIndexTo;
-    double sin1 = sqrt(1.0 - NK*NK);
-    double sin2 = RefrIndexFrom/RefrIndexTo*sin1;
+    const double sin1 = sqrt(1.0 - NK*NK);
+    const double sin2 = RefrIndexFrom/RefrIndexTo*sin1;
 
 //         qDebug()<<"cos1 sin1 sin2 are:"<<cos1<<sin1<<sin2;
     if (fabs(sin2)>1.0)
@@ -532,7 +532,7 @@ double APhotonTracer::CalculateReflectionCoefficient()
 
 void APhotonTracer::PMwasHit(int PMnumber)
 {
-    bool fSiPM = PMs->isSiPM(PMnumber);
+    const bool fSiPM = PMs->isSiPM(PMnumber);
 
     Double_t local[3];//if no area dep or not SiPM - local[0] and [1] are undefined!
     if (SimSet->fAreaResolved || fSiPM)
@@ -572,15 +572,15 @@ bool APhotonTracer::PerformRefraction(Double_t nn) // nn = nFrom / nTo
     // T = -( nn*(NK) - sqrt(1-nn*nn*[1-(NK)*(NK)]))*N + nn*K
 
     if (!fHaveNormal) N = navigator->FindNormal(kFALSE);
-    Double_t NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2];
+    const Double_t NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2];
 
-    Double_t UnderRoot = 1.0 - nn*nn*(1.0 - NK*NK);
+    const Double_t UnderRoot = 1.0 - nn*nn*(1.0 - NK*NK);
     if (UnderRoot<0)
       {
 //        qDebug()<<"total internal detected - will assume this photon is abosrbed at the surface";
         return false;    //total internal reflection! //previous reflection test should catch this situation
       }
-    Double_t tmp = nn*NK - sqrt(UnderRoot);
+    const Double_t tmp = nn*NK - sqrt(UnderRoot);
 
     p->v[0] = -tmp*N[0] + nn*p->v[0];
     p->v[1] = -tmp*N[1] + nn*p->v[1];
@@ -602,7 +602,7 @@ void APhotonTracer::PerformReflection()
 
   //rotating the vector
   //K = K - 2*(NK)*N    where K is the photon direction vector
-  double NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2];
+  const double NK = N[0]*p->v[0] + N[1]*p->v[1] + N[2]*p->v[2];
   p->v[0] -= 2.0 * NK * N[0];
   p->v[1] -= 2.0 * NK * N[1];
   p->v[2] -= 2.0 * NK * N[2];

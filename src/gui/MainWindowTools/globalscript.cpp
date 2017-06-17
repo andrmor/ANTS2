@@ -20,6 +20,7 @@
 #include "checkupwindowclass.h"
 #include "ainterfacetowebsocket.h"
 #include "anetworkmodule.h"
+#include "ainterfacetophotonscript.h"
 
 #include <QDebug>
 
@@ -80,6 +81,9 @@ void MainWindow::createScriptWindow()
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
     ScriptWindow->SetInterfaceObject(web, "web");
+
+    AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config);
+    ScriptWindow->SetInterfaceObject(photon, "photon");
 
 
     // Interfaces which rely on MainWindow

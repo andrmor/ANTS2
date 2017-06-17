@@ -20,6 +20,8 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   parseJson(gjson, "LimitSearchIfTrueIsSet", fLimitSearchIfTrueIsSet);
   RangeForLimitSearchIfTrueSet = 1.0; //compatibility
   parseJson(gjson, "RangeForLimitSearchIfTrueSet", RangeForLimitSearchIfTrueSet);
+  LimitSearchGauss = false;
+  parseJson(gjson, "LimitSearchGauss", LimitSearchGauss);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
   if (RecJson.contains("DynamicPassives"))

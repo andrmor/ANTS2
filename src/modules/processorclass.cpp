@@ -203,7 +203,8 @@ RootMinReconstructorClass::RootMinReconstructorClass(pms* PMs,
                                                      EventsDataClass *EventsDataHub,
                                                      ReconstructionSettings *RecSet,
                                                      int CurrentGroup,
-                                                     int EventsFrom, int EventsTo)
+                                                     int EventsFrom, int EventsTo,
+                                                     bool UseGauss)
   : ProcessorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, CurrentGroup, EventsFrom, EventsTo)
 {    
   switch (RecSet->RMminuitOption)
@@ -221,8 +222,16 @@ RootMinReconstructorClass::RootMinReconstructorClass(pms* PMs,
   RootMinimizer->SetMaxFunctionCalls(RecSet->RMmaxCalls);
   RootMinimizer->SetMaxIterations(1000);
   RootMinimizer->SetTolerance(0.001);
-  if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstatic, 5);
-  else FunctorLSML = new ROOT::Math::Functor(&Chi2static, 5);
+  if (UseGauss)
+    {
+      if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstaticGauss, 5);
+      else FunctorLSML = new ROOT::Math::Functor(&Chi2staticGauss, 5);
+    }
+  else
+    {
+      if (RecSet->fRMuseML) FunctorLSML = new ROOT::Math::Functor(&MLstatic, 5);
+      else FunctorLSML = new ROOT::Math::Functor(&Chi2static, 5);
+    }
   RootMinimizer->SetFunction(*FunctorLSML);
 }
 
@@ -321,8 +330,8 @@ void RootMinReconstructorClass::execute()
 }
 
 // -----Experimental-----
-RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(pms *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range) :
-    RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo), Range(Range)
+RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(pms *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range, bool UseGauss) :
+    RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo, UseGauss), Range(Range)
 {
     qDebug() << "Warning! Experimental feature activated - reconstruction by RootMin for ranged X or Y\nScanX or ScanY of 1e10 -> free search, otherwise within"<<Range<<"from ScanX or ScanY value";
 }
@@ -353,6 +362,7 @@ void RootMinRangedReconstructorClass::execute()
 
             //set variables to minimize
             // if Scan X or Y is 1e10, variable if free, else it is confined to the range of +-Range around Scan value
+            RangedX = RangedY = false;
             for (int ia=0; ia<2; ia++)
             {
                 const double& val = EventsDataHub->Scan[iev]->Points[0].r[ia];
@@ -381,8 +391,18 @@ void RootMinRangedReconstructorClass::execute()
                 else
                 {
                     // range variable
-                    if (ia==0) RootMinimizer->SetLimitedVariable(0, "x", val, RecSet->RMstepX, val-Range, val+Range);
-                    else       RootMinimizer->SetLimitedVariable(1, "y", val, RecSet->RMstepY, val-Range, val+Range);
+                    if (ia==0)
+                      {
+                        RootMinimizer->SetLimitedVariable(0, "x", val, RecSet->RMstepX, val-Range, val+Range);
+                        RangedX = true;
+                        CenterX = val;
+                      }
+                    else
+                      {
+                        RootMinimizer->SetLimitedVariable(1, "y", val, RecSet->RMstepY, val-Range, val+Range);
+                        RangedY = true;
+                        CenterY = val;
+                      }
                 }
             }
 
@@ -670,6 +690,53 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
   return Reconstructor->LastMiniValue = sum;
 }
 
+double Chi2staticGauss(const double *p)  //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMinReconstructorClass
+{
+  double sum = 0;
+  void *thisvalue;
+  memcpy(&thisvalue, &p[4], sizeof(void *));
+  RootMinRangedReconstructorClass* Reconstructor = (RootMinRangedReconstructorClass*)thisvalue;
+  for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+    if (Reconstructor->DynamicPassives->isActive(ipm))
+     {
+       double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];
+       if (LRFhere <= 0) return Reconstructor->LastMiniValue *= 1.25; //if LRFs are not defined for this coordinates
+
+       double delta = (LRFhere - Reconstructor->PMsignals->at(ipm));
+       if (Reconstructor->RecSet->fWeightedChi2calculation)
+         {
+            double sigma2;
+            double err = Reconstructor->LRFs.getLRFErr(ipm, p)*p[3];//X, Y, Z) * energy;
+            sigma2 = LRFhere + err*err; // if err is not calculated, 0 is returned
+            sum += delta*delta/sigma2;
+         }
+       else sum += delta*delta;
+     }
+
+  const double sigma = Reconstructor->Range/2.35482;
+  if ( fabs(sigma) > 1.0e-10)
+    {
+      if (Reconstructor->RangedX)
+        {
+          double po = (Reconstructor->CenterX - p[0]) / sigma;
+          po *= po;
+          double gauss = exp(-0.5*po);
+          if (gauss < 0.0001) gauss = 0.0001;
+          sum /= gauss;
+        }
+      if (Reconstructor->RangedY)
+        {
+          double po = (Reconstructor->CenterY - p[1]) / sigma;
+          po *= po;
+          double gauss = exp(-0.5*po);
+          if (gauss < 0.0001) gauss = 0.0001;
+          sum /= gauss;
+        }
+    }
+
+  return Reconstructor->LastMiniValue = sum;
+}
+
 double Chi2staticDouble(const double *p)
 {
   double sum = 0;
@@ -734,6 +801,43 @@ double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMin
        sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
      }
     //qDebug() << "Log Likelihood = " << sum;
+  return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
+}
+
+double MLstaticGauss(const double *p)
+{
+  double sum = 0;
+  void *thisvalue;
+  memcpy(&thisvalue, &p[4], sizeof(void *));
+  RootMinRangedReconstructorClass* Reconstructor = (RootMinRangedReconstructorClass*)thisvalue;
+
+  for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
+    if (Reconstructor->DynamicPassives->isActive(ipm))
+      {
+       double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];//X, Y, Z) * energy;
+       if (LRFhere <= 0.)
+           return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+
+       sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
+     }
+
+  const double sigma = Reconstructor->Range/2.35482;
+  if ( fabs(sigma) > 1.0e-10)
+    {
+      if (Reconstructor->RangedX)
+        {
+          double po = (Reconstructor->CenterX - p[0]) / sigma;
+          po *= po;
+          sum *= exp(-0.5*po);
+        }
+      if (Reconstructor->RangedY)
+        {
+          double po = (Reconstructor->CenterY - p[1]) / sigma;
+          po *= po;
+          sum *= exp(-0.5*po);
+        }
+    }
+
   return Reconstructor->LastMiniValue = -sum; //-probability, since we use minimizer
 }
 

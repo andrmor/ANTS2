@@ -526,9 +526,9 @@ RC_FILE = myapp.rc
 
 #---Windows-specific compilation mode and warning suppression
 win32 {
-  #if the next 2 instructions are not commented, there is no optimization during compilation: drastic shortening of compilation, but ~20% performance loss
-  QMAKE_CXXFLAGS_RELEASE -= -O2
-  QMAKE_CXXFLAGS_RELEASE *= -Od
+  #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
+  #QMAKE_CXXFLAGS_RELEASE -= -O2
+  #QMAKE_CXXFLAGS_RELEASE *= -Od
 
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam

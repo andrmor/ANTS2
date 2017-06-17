@@ -3308,8 +3308,8 @@
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>310</y>
+      <x>320</x>
+      <y>300</y>
       <width>210</width>
       <height>23</height>
      </rect>
@@ -10002,7 +10002,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>110</x>
-            <y>40</y>
+            <y>33</y>
             <width>201</width>
             <height>31</height>
            </rect>
@@ -10033,7 +10033,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>18</x>
-            <y>44</y>
+            <y>37</y>
             <width>101</width>
             <height>17</height>
            </rect>
@@ -10067,9 +10067,9 @@ Beware of bugs!</string>
           </property>
           <property name="geometry">
            <rect>
-            <x>20</x>
-            <y>80</y>
-            <width>271</width>
+            <x>17</x>
+            <y>65</y>
+            <width>293</width>
             <height>22</height>
            </rect>
           </property>
@@ -10093,7 +10093,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>118</y>
+            <y>95</y>
             <width>211</width>
             <height>17</height>
            </rect>
@@ -10105,9 +10105,9 @@ Beware of bugs!</string>
          <widget class="QFrame" name="fInRecFilter">
           <property name="geometry">
            <rect>
-            <x>230</x>
-            <y>111</y>
-            <width>271</width>
+            <x>7</x>
+            <y>116</y>
+            <width>301</width>
             <height>61</height>
            </rect>
           </property>
@@ -10120,8 +10120,8 @@ Beware of bugs!</string>
           <widget class="QLineEdit" name="ledInRecSize1">
            <property name="geometry">
             <rect>
-             <x>60</x>
-             <y>31</y>
+             <x>58</x>
+             <y>29</y>
              <width>51</width>
              <height>20</height>
             </rect>
@@ -10166,8 +10166,8 @@ Beware of bugs!</string>
           <widget class="QLabel" name="lInRecX">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>34</y>
+             <x>8</x>
+             <y>32</y>
              <width>47</width>
              <height>13</height>
             </rect>
@@ -10182,8 +10182,8 @@ Beware of bugs!</string>
           <widget class="QLabel" name="label_19">
            <property name="geometry">
             <rect>
-             <x>118</x>
-             <y>33</y>
+             <x>116</x>
+             <y>31</y>
              <width>20</width>
              <height>13</height>
             </rect>
@@ -10195,8 +10195,8 @@ Beware of bugs!</string>
           <widget class="QFrame" name="fInRecSize2">
            <property name="geometry">
             <rect>
-             <x>140</x>
-             <y>27</y>
+             <x>138</x>
+             <y>25</y>
              <width>141</width>
              <height>31</height>
             </rect>
@@ -10254,7 +10254,7 @@ Beware of bugs!</string>
             <x>326</x>
             <y>8</y>
             <width>176</width>
-            <height>101</height>
+            <height>131</height>
            </rect>
           </property>
           <property name="title">
@@ -10300,6 +10300,20 @@ to +- around the Scan value:</string>
            </property>
            <property name="text">
             <string>mm</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="cbGaussWeightInMinimization">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>93</y>
+             <width>161</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Gauss weight
+in minimization</string>
            </property>
           </widget>
          </widget>
@@ -13550,7 +13564,7 @@ to +- around the Scan value:</string>
      <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>373</x>
+     <x>351</x>
      <y>317</y>
     </hint>
    </hints>
@@ -13562,8 +13576,8 @@ to +- around the Scan value:</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>290</y>
+     <x>209</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -13806,8 +13820,8 @@ to +- around the Scan value:</string>
      <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>353</x>
-     <y>302</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13822,8 +13836,8 @@ to +- around the Scan value:</string>
      <y>115</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13838,8 +13852,8 @@ to +- around the Scan value:</string>
      <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>383</x>
-     <y>314</y>
+     <x>363</x>
+     <y>334</y>
     </hint>
    </hints>
   </connection>
@@ -13854,8 +13868,8 @@ to +- around the Scan value:</string>
      <y>118</y>
     </hint>
     <hint type="destinationlabel">
-     <x>407</x>
-     <y>304</y>
+     <x>387</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13870,8 +13884,8 @@ to +- around the Scan value:</string>
      <y>112</y>
     </hint>
     <hint type="destinationlabel">
-     <x>431</x>
-     <y>311</y>
+     <x>411</x>
+     <y>331</y>
     </hint>
    </hints>
   </connection>
@@ -13886,8 +13900,8 @@ to +- around the Scan value:</string>
      <y>212</y>
     </hint>
     <hint type="destinationlabel">
-     <x>362</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13902,8 +13916,8 @@ to +- around the Scan value:</string>
      <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>392</x>
-     <y>300</y>
+     <x>372</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13918,8 +13932,8 @@ to +- around the Scan value:</string>
      <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>347</x>
-     <y>301</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13934,8 +13948,8 @@ to +- around the Scan value:</string>
      <y>283</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13950,8 +13964,8 @@ to +- around the Scan value:</string>
      <y>213</y>
     </hint>
     <hint type="destinationlabel">
-     <x>446</x>
-     <y>305</y>
+     <x>426</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13966,8 +13980,8 @@ to +- around the Scan value:</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>466</x>
-     <y>305</y>
+     <x>446</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13982,8 +13996,8 @@ to +- around the Scan value:</string>
      <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>481</x>
-     <y>306</y>
+     <x>461</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13998,8 +14012,8 @@ to +- around the Scan value:</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>501</x>
-     <y>308</y>
+     <x>481</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14010,12 +14024,12 @@ to +- around the Scan value:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>365</x>
+     <x>351</x>
      <y>317</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>306</y>
+     <x>499</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14030,8 +14044,8 @@ to +- around the Scan value:</string>
      <y>182</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14046,8 +14060,8 @@ to +- around the Scan value:</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>300</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14062,8 +14076,8 @@ to +- around the Scan value:</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14078,8 +14092,8 @@ to +- around the Scan value:</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>483</x>
-     <y>305</y>
+     <x>463</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14094,8 +14108,8 @@ to +- around the Scan value:</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>470</x>
-     <y>300</y>
+     <x>450</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14110,8 +14124,8 @@ to +- around the Scan value:</string>
      <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>455</x>
-     <y>306</y>
+     <x>435</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14126,8 +14140,8 @@ to +- around the Scan value:</string>
      <y>277</y>
     </hint>
     <hint type="destinationlabel">
-     <x>443</x>
-     <y>310</y>
+     <x>423</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14142,8 +14156,8 @@ to +- around the Scan value:</string>
      <y>215</y>
     </hint>
     <hint type="destinationlabel">
-     <x>463</x>
-     <y>304</y>
+     <x>443</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14158,8 +14172,8 @@ to +- around the Scan value:</string>
      <y>242</y>
     </hint>
     <hint type="destinationlabel">
-     <x>420</x>
-     <y>305</y>
+     <x>400</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14174,8 +14188,8 @@ to +- around the Scan value:</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>394</x>
-     <y>309</y>
+     <x>374</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14190,8 +14204,8 @@ to +- around the Scan value:</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>350</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14206,8 +14220,8 @@ to +- around the Scan value:</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>373</x>
-     <y>309</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14222,8 +14236,8 @@ to +- around the Scan value:</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>421</x>
-     <y>310</y>
+     <x>401</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14238,8 +14252,8 @@ to +- around the Scan value:</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>473</x>
-     <y>307</y>
+     <x>453</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14254,8 +14268,8 @@ to +- around the Scan value:</string>
      <y>323</y>
     </hint>
     <hint type="destinationlabel">
-     <x>362</x>
-     <y>300</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14270,8 +14284,8 @@ to +- around the Scan value:</string>
      <y>320</y>
     </hint>
     <hint type="destinationlabel">
-     <x>449</x>
-     <y>303</y>
+     <x>429</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14286,8 +14300,8 @@ to +- around the Scan value:</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
-     <y>308</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14302,8 +14316,8 @@ to +- around the Scan value:</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>366</x>
-     <y>306</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14318,8 +14332,8 @@ to +- around the Scan value:</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>310</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14334,8 +14348,8 @@ to +- around the Scan value:</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>354</x>
-     <y>304</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14350,8 +14364,8 @@ to +- around the Scan value:</string>
      <y>276</y>
     </hint>
     <hint type="destinationlabel">
-     <x>471</x>
-     <y>310</y>
+     <x>451</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14366,8 +14380,8 @@ to +- around the Scan value:</string>
      <y>302</y>
     </hint>
     <hint type="destinationlabel">
-     <x>397</x>
-     <y>306</y>
+     <x>377</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14382,8 +14396,8 @@ to +- around the Scan value:</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>491</x>
-     <y>310</y>
+     <x>471</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14398,8 +14412,8 @@ to +- around the Scan value:</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>478</x>
-     <y>305</y>
+     <x>458</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14446,8 +14460,8 @@ to +- around the Scan value:</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>503</x>
-     <y>302</y>
+     <x>483</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14462,8 +14476,8 @@ to +- around the Scan value:</string>
      <y>231</y>
     </hint>
     <hint type="destinationlabel">
-     <x>356</x>
-     <y>321</y>
+     <x>360</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -14478,8 +14492,8 @@ to +- around the Scan value:</string>
      <y>270</y>
     </hint>
     <hint type="destinationlabel">
-     <x>531</x>
-     <y>306</y>
+     <x>511</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14542,8 +14556,8 @@ to +- around the Scan value:</string>
      <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>317</y>
+     <x>360</x>
+     <y>337</y>
     </hint>
    </hints>
   </connection>
@@ -14558,8 +14572,8 @@ to +- around the Scan value:</string>
      <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>316</y>
+     <x>360</x>
+     <y>336</y>
     </hint>
    </hints>
   </connection>
@@ -14574,8 +14588,8 @@ to +- around the Scan value:</string>
      <y>290</y>
     </hint>
     <hint type="destinationlabel">
-     <x>331</x>
-     <y>321</y>
+     <x>360</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -14590,8 +14604,8 @@ to +- around the Scan value:</string>
      <y>178</y>
     </hint>
     <hint type="destinationlabel">
-     <x>351</x>
-     <y>280</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14752,6 +14766,54 @@ to +- around the Scan value:</string>
     <hint type="destinationlabel">
      <x>480</x>
      <y>491</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitSearchToVicinity</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>486</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>492</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledLimitSearchRange</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>401</x>
+     <y>334</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbGaussWeightInMinimization</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>375</x>
+     <y>279</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>343</y>
     </hint>
    </hints>
   </connection>

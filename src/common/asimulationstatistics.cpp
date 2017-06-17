@@ -45,7 +45,7 @@ void ASimulationStatistics::initialize(int nBins)
     if (TransitionSpectrum) delete TransitionSpectrum;
     TransitionSpectrum = new TH1I("TransitionsSpectrum"+NameID, "Transitions", nBins, 0,-1);
 
-    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = 0;
+    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = 0;
 
     FresnelTransmitted = FresnelReflected = BulkAbsorption = Rayleigh = Reemission = 0;
     OverrideForward = OverrideBack = 0;
@@ -98,6 +98,7 @@ void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatisti
   LossOnGrid += from->LossOnGrid;
   TracingSkipped += from->TracingSkipped;
   MaxCyclesReached += from->MaxCyclesReached;
+  GeneratedOutsideGeometry += from->GeneratedOutsideGeometry;
 
   FresnelTransmitted += from->FresnelTransmitted;
   FresnelReflected += from->FresnelReflected;

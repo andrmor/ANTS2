@@ -1195,8 +1195,7 @@ void OutputWindow::ShowPhotonLossLog()
       return;
   }
 
-
-  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached;
+  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry;
   QString s = "\n=====================\n";
   s += "Photon tracing ended:\n";
   s +=        "---------------------\n";
@@ -1208,11 +1207,10 @@ void OutputWindow::ShowPhotonLossLog()
       "Loss on optical grids: "+QString::number(d->LossOnGrid)+"\n"+
       "Tracing skipped (QE accelerator): "+QString::number(d->TracingSkipped)+"\n"+
       "Max tracing cycles reached: "+QString::number(d->MaxCyclesReached)+"\n"+
+      "Generated outside defined geometry: "+QString::number(d->GeneratedOutsideGeometry)+"\n"+
       "---------------------\n"+
       "Total: "+QString::number(sum)+"\n"+
       "=====================";
-  //OutText(s);
-  //SetTab(0);
   ui->pteOut->appendPlainText(s);
 }
 

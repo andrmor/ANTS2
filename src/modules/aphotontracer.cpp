@@ -80,6 +80,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
    if (navigator->IsOutside())
      {
 //     qDebug()<<"Generated outside geometry!";
+       OneEvent->SimStat->GeneratedOutsideGeometry++;
        return;
      }
 

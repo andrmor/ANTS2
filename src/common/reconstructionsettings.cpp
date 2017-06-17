@@ -5,13 +5,8 @@
 
 bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
 {
-    //if (!Json.contains("ReconstructionOptions"))
-    //  {
-    //    ErrorString = "Json sent to reconstructor does not contain reconstruction config data!";
-    //    return false;
-    //  }
   ErrorString = "";
-    //QJsonObject RecJson = Json["ReconstructionOptions"].toObject();
+
   //general
   QJsonObject gjson = RecJson["General"].toObject();
   fReconstructEnergy = gjson["ReconstructEnergy"].toBool();
@@ -21,7 +16,13 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   Zstrategy = gjson["Zstrategy"].toInt();
   fIncludePassive = gjson["IncludePassives"].toBool();
   fWeightedChi2calculation = gjson["WeightedChi2"].toBool();
-  //NumThreads = gjson["NumThreads"].toInt();
+  fLimitSearchIfTrueIsSet = false; //compatibility
+  parseJson(gjson, "LimitSearchIfTrueIsSet", fLimitSearchIfTrueIsSet);
+  RangeForLimitSearchIfTrueSet = 1.0; //compatibility
+  parseJson(gjson, "RangeForLimitSearchIfTrueSet", RangeForLimitSearchIfTrueSet);
+  LimitSearchGauss = false;
+  parseJson(gjson, "LimitSearchGauss", LimitSearchGauss);
+
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
   if (RecJson.contains("DynamicPassives"))
     {

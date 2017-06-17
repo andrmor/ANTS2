@@ -154,7 +154,12 @@ void MainWindow::on_cobParticleToInspect_currentIndexChanged(int index)
 
 void MainWindow::on_pbRemoveParticle_clicked()
 {
-    int Id = ui->lwParticles->currentRow();
+    int Id = ui->cobParticleToInspect->currentIndex();
+    if (Id == -1)
+    {
+        message("Select one of the defined particles", this);
+        return;
+    }
     MainWindow::RemoveParticle(Id);
 }
 
@@ -162,10 +167,9 @@ void MainWindow::on_pbRemoveParticle_clicked()
 void MainWindow::RemoveParticle(int Id)
 {
   switch( QMessageBox::information( this, "", "Remove particle " + MpCollection->getParticleName(Id) + " ?",
-                                        "Yes", "Cancel",
-                                        0, 1 ) )
+                                        "Yes", "Cancel", 0, 1 ) )
     {
-      case 0: break;  //OK received;
+      case 0: break;
       default: return;
     }
 

@@ -182,6 +182,10 @@ public slots:
   int GetTruePoints(int ievent);
   bool IsTrueGoodEvent(int ievent);
   bool GetTrueNumberPoints(int ievent);
+  void SetScanX(int ievent, double value);
+  void SetScanY(int ievent, double value);
+  void SetScanZ(int ievent, double value);
+  void SetScanEnergy(int ievent, double value);
 
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction

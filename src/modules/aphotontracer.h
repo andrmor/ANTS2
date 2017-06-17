@@ -25,6 +25,7 @@ public:
                            AMaterialParticleCollection* materialCollection,
                            pms* Pms,
                            const QList<AGridElementRecord*>* Grids);
+    ~APhotonTracer();
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}//will be obsolete with new simulation system soon
     void configure(const GeneralSimSettings *simSet, OneEventClass* oneEvent, bool fBuildTracks, QVector<TrackHolderClass *> *tracks);

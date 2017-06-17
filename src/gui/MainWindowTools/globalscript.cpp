@@ -82,7 +82,9 @@ void MainWindow::createScriptWindow()
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
     ScriptWindow->SetInterfaceObject(web, "web");
 
-    AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config);
+    // Optional MainWindow
+
+    AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, this);
     ScriptWindow->SetInterfaceObject(photon, "photon");
 
 

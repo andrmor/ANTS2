@@ -10,7 +10,6 @@
 #include "atrackrecords.h"
 #include "TMath.h"
 
-#include "mainwindow.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "TGeoTrack.h"
@@ -20,11 +19,10 @@
 
 #include <QDebug>
 
-AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, MainWindow* MW) :
-    Config(Config), Detector(Config->GetDetector()), MW(MW)
+AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, EventsDataClass* EventsDataHub) :
+    Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
 {
-    Stat = new ASimulationStatistics();
-    Event = new OneEventClass(Detector->PMs, Detector->RandGen, Stat);
+    Event = new OneEventClass(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
     Tracer = new APhotonTracer(Detector->GeoManager, Detector->RandGen, Detector->MpCollection, Detector->PMs, &Detector->Sandwich->GridRecords);
 }
 
@@ -32,7 +30,12 @@ AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
 {
     delete Tracer;
     delete Event;
-    delete Stat;
+}
+
+void AInterfaceToPhotonScript::ClearData()
+{
+    EventsDataHub->clear();
+    Detector->GeoManager->ClearTracks();
 }
 
 bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time)
@@ -50,12 +53,12 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
 
     simSet.fQEaccelerator = false;
     bBuildTracks = true;
-    simSet.MaxNumberOfTracks = 10000;
+    simSet.fLogsStat = true;
+    simSet.MaxNumberOfTracks = MaxNumberTracks;
 
-    Event->configure(&simSet);
-    Stat->initialize();
+    Event->configure(&simSet);    
     Tracer->configure(&simSet, Event, bBuildTracks, &Tracks);
-    clearTracks();
+    clearTrackHolder();
 
     double r[3];
     r[0]=x;
@@ -68,59 +71,106 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     normalizeVector(v);
 
     APhoton* phot = new APhoton(r, v, iWave, time);
-    phot->SimStat = Stat;
-    for (int i=0; i<copies; i++)
+    phot->SimStat = EventsDataHub->SimStat;
+
+    for (int i=0; i<copies; i++) Tracer->TracePhoton(phot);
+
+    Event->HitsToSignal();
+    EventsDataHub->Events.append(Event->PMsignals);
+
+    if (bBuildTracks)
     {
-        Tracer->TracePhoton(phot);
-    }
-
-    if (MW)
-    {
-        MW->EventsDataHub->SimStat->initialize();
-        MW->EventsDataHub->SimStat->AppendSimulationStatistics(Stat);
-        if (simSet.fAngResolved)  addTH1(MW->EventsDataHub->SimStat->getCosAngleSpectrum(), Stat->getCosAngleSpectrum());
-        if (simSet.fTimeResolved) addTH1(MW->EventsDataHub->SimStat->getTimeSpectrum(),     Stat->getTimeSpectrum());
-        if (simSet.fWaveResolved) addTH1(MW->EventsDataHub->SimStat->getWaveSpectrum(),     Stat->getWaveSpectrum());
-        addTH1(MW->EventsDataHub->SimStat->getTransitionSpectrum(), Stat->getTransitionSpectrum());
-
-        Detector->GeoManager->ClearTracks();
-
-        if (true)
-          {
-            int numTracks = 0;
-            for (int iTr=0; iTr<Tracks.size(); iTr++)
-              {
-                TrackHolderClass* th = Tracks.at(iTr);
-                TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-                track->SetLineColor(1);
-                track->SetLineWidth(th->Width);
-                for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                    track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-                if (track->GetNpoints()>1)
-                {
-                    numTracks++;
-                    Detector->GeoManager->AddTrack(track);
-                }
-                else delete track;
-              }
-          }
+        int numTracks = 0;
+        for (int iTr=0; iTr<Tracks.size() && numTracks < MaxNumberTracks; iTr++)
+        {
+            TrackHolderClass* th = Tracks.at(iTr);
+            TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+            track->SetLineColor(TrackColor);
+            track->SetLineWidth(TrackWidth);
+            for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+                track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+            if (track->GetNpoints()>1)
+            {
+                numTracks++;
+                Detector->GeoManager->AddTrack(track);
+            }
+            else delete track;
+        }
     }
 
     return true;
 }
 
-void AInterfaceToPhotonScript::clearTracks()
+long AInterfaceToPhotonScript::GetBulkAbsorbed() const
+{
+    return EventsDataHub->SimStat->Absorbed;
+}
+
+long AInterfaceToPhotonScript::GetOverrideLoss() const
+{
+    return EventsDataHub->SimStat->OverrideLoss;
+}
+
+long AInterfaceToPhotonScript::GetHitPM() const
+{
+    return EventsDataHub->SimStat->HitPM;
+}
+
+long AInterfaceToPhotonScript::GetHitDummy() const
+{
+    return EventsDataHub->SimStat->HitDummy;
+}
+
+long AInterfaceToPhotonScript::GetEscaped() const
+{
+    return EventsDataHub->SimStat->Escaped;
+}
+
+long AInterfaceToPhotonScript::GetLossOnGrid() const
+{
+    return EventsDataHub->SimStat->LossOnGrid;
+}
+
+long AInterfaceToPhotonScript::GetTracingSkipped() const
+{
+    return EventsDataHub->SimStat->TracingSkipped;
+}
+
+long AInterfaceToPhotonScript::GetMaxCyclesReached() const
+{
+    return EventsDataHub->SimStat->MaxCyclesReached;
+}
+
+long AInterfaceToPhotonScript::GetGeneratedOutsideGeometry() const
+{
+    return EventsDataHub->SimStat->GeneratedOutsideGeometry;
+}
+
+long AInterfaceToPhotonScript::GetFresnelTransmitted() const
+{
+    return EventsDataHub->SimStat->FresnelTransmitted;
+}
+
+long AInterfaceToPhotonScript::GetFresnelReflected() const
+{
+    return EventsDataHub->SimStat->FresnelReflected;
+}
+
+long AInterfaceToPhotonScript::GetRayleigh() const
+{
+    return EventsDataHub->SimStat->Rayleigh;
+}
+
+long AInterfaceToPhotonScript::GetReemitted() const
+{
+    return EventsDataHub->SimStat->Reemission;
+}
+
+void AInterfaceToPhotonScript::clearTrackHolder()
 {
     for(int i=0; i<Tracks.size(); i++)
         delete Tracks[i];
     Tracks.clear();
-}
-
-void AInterfaceToPhotonScript::addTH1(TH1 *first, const TH1 *second)
-{
-    int bins = second->GetNbinsX();
-    for(int i = 0; i < bins; i++)
-        first->Fill(second->GetBinCenter(i), second->GetBinContent(i));
 }
 
 void AInterfaceToPhotonScript::normalizeVector(double *arr)

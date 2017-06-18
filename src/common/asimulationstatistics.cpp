@@ -63,9 +63,8 @@ void ASimulationStatistics::setWavelengthBinning(double waveNodes)
 }
 
 bool ASimulationStatistics::isEmpty()
-{
-  if (!TransitionSpectrum) return true;
-  return (TransitionSpectrum->GetEntries() > 0) ? false : true;
+{    
+  return (countPhotons() == 0);
 }
 
 void ASimulationStatistics::registerWave(int iWave)
@@ -126,5 +125,10 @@ void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatisti
 
   OverrideWLSabs += from->OverrideWLSabs;
   OverrideWLSshift += from->OverrideWLSshift;
+}
+
+long ASimulationStatistics::countPhotons()
+{
+    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry;
 }
 

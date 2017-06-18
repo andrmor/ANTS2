@@ -53,6 +53,8 @@ private:
 
     double WaveFrom, WaveTo;
     int WaveNodes;
+
+    long countPhotons();
 };
 
 #endif // ASIMULATIONSTATISTICS_H

@@ -1,6 +1,7 @@
 #ifndef APHOTONTRACER_H
 #define APHOTONTRACER_H
 
+#include "aphotonhistorylog.h"
 #include <QVector>
 #include "TMathBase.h"
 
@@ -44,6 +45,7 @@ private:
     OneEventClass* OneEvent; //PM signals for this event are collected here
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
+    QVector<APhotonHistoryLog> PhLog;
 
     int Counter; //number of photon transitions - there is a limit on this set by user
     APhoton* p; //the photon which is traced

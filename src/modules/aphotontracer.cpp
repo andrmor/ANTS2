@@ -47,6 +47,7 @@ void APhotonTracer::configure(const GeneralSimSettings *simSet, OneEventClass* o
 
 void APhotonTracer::TracePhoton(const APhoton* Photon)
 {
+  bool bDoLog = true;
   //qDebug() << "----accel is on?"<<SimSet->fQEaccelerator<< "Build tracks?"<<fBuildTracks;
   //accelerators
   if (SimSet->fQEaccelerator)
@@ -100,6 +101,12 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          }
        else fBuildTracks = false;
      }
+
+   if (bDoLog)
+   {
+       PhLog.clear();
+       PhLog.append( APhotonHistoryLog(p->r, APhotonHistoryLog::Created) );
+   }
 
    TGeoNode* NodeAfterInterface;
    MatIndexFrom = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
@@ -260,6 +267,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
            { //-----Reflection-----
              //qDebug()<<"Fresnel - reflection!";
              OneEvent->SimStat->FresnelReflected++;
+             if (bDoLog) PhLog.append( APhotonHistoryLog(p->r, APhotonHistoryLog::FresnelReflected) );
              // photon remains in the same volume -> continue to the next iteration
              navigator->PopPoint(); //restore the point before the border
              PerformReflection();             
@@ -295,12 +303,14 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
            //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle();
            PMwasHit(PMnumber);
            OneEvent->SimStat->HitPM++;
+           if (bDoLog) PhLog.append( APhotonHistoryLog(p->r, APhotonHistoryLog::HitPM) );
            goto force_stop_tracing; //finished with this photon
          }
        case 'p': // dummy PM hit
          {
            //qDebug() << "Dummy PM hit";
            OneEvent->SimStat->HitDummy++;
+           if (bDoLog) PhLog.append( APhotonHistoryLog(p->r, APhotonHistoryLog::HitDummyPM) );
            goto force_stop_tracing; //finished with this photon
          }
        case 'G': // grid hit
@@ -324,6 +334,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                  const bool ok = PerformRefraction( RefrIndexFrom/RefrIndexTo); // true - successful
                  // true - successful, false - forbidden -> considered that the photon is absorbed at the surface! Should not happen
                  if (!ok) qWarning()<<"Error in photon tracker: problem with transmission!";
+                 if (bDoLog) PhLog.append( APhotonHistoryLog(p->r, APhotonHistoryLog::FresnelTransmitted) );
            }
 
          MatIndexFrom = MatIndexTo;
@@ -354,6 +365,8 @@ force_stop_tracing:
            Tracks->append(track);
          }
      }
+
+   if (bDoLog) p->SimStat->PhotonHistoryLog.append(PhLog);
 
    //qDebug()<<"Finished with the photon";
    //qDebug() << "Track size:" <<Tracks->size();

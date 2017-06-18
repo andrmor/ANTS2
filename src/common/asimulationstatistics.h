@@ -1,7 +1,12 @@
 #ifndef ASIMULATIONSTATISTICS_H
 #define ASIMULATIONSTATISTICS_H
 
+#include "aphotonhistorylog.h"
+
+#include <QVector>
+
 #include "TString.h"
+
 class TH1I;
 class TH1D;
 
@@ -41,6 +46,8 @@ public:
     long OverrideMetalAbs, OverrideMetalReflection; //on metal
     long OverrideClaudioAbs, OverrideClaudioSpec, OverrideClaudioLamb; //Claudio's
     long OverrideWLSabs, OverrideWLSshift;
+
+    QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;
 
 private:
     TH1I* WaveSpectrum;

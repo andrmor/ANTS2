@@ -98,6 +98,8 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
         }
     }
 
+    qDebug() << "PhLog size:"<<EventsDataHub->SimStat->PhotonHistoryLog.size();
+
     return true;
 }
 

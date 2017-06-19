@@ -104,6 +104,32 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     return true;
 }
 
+void AInterfaceToPhotonScript::ConfigureFilter(QVariant MustInclude, QVariant MustNotInclude)
+{
+  QVariantList vMI = MustInclude.toList();
+  QJsonArray arMI = QJsonArray::fromVariantList(vMI);
+  QVariantList vMNI = MustNotInclude.toList();
+  QJsonArray arMNI = QJsonArray::fromVariantList(vMNI);
+
+  ClearFilter();
+  for (int i=0; i<arMI.size(); i++)
+    {
+      if (!arMI[i].isDouble()) continue;
+      EventsDataHub->SimStat->MustInclude << arMI[i].toInt();
+    }
+  for (int i=0; i<arMNI.size(); i++)
+    {
+      if (!arMNI[i].isDouble()) continue;
+      EventsDataHub->SimStat->MustNotInclude << arMNI[i].toInt();
+    }
+}
+
+void AInterfaceToPhotonScript::ClearFilter()
+{
+    EventsDataHub->SimStat->MustInclude.clear();
+    EventsDataHub->SimStat->MustNotInclude.clear();
+}
+
 long AInterfaceToPhotonScript::GetBulkAbsorbed() const
 {
     return EventsDataHub->SimStat->Absorbed;

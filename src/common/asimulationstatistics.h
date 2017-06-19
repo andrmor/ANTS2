@@ -4,6 +4,7 @@
 #include "aphotonhistorylog.h"
 
 #include <QVector>
+#include <QSet>
 
 #include "TString.h"
 
@@ -47,7 +48,10 @@ public:
     long OverrideClaudioAbs, OverrideClaudioSpec, OverrideClaudioLamb; //Claudio's
     long OverrideWLSabs, OverrideWLSshift;
 
+    //only affects script unit "photon" tracing!
     QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;
+    QSet<int> MustNotInclude;
+    QVector<int> MustInclude;
 
 private:
     TH1I* WaveSpectrum;

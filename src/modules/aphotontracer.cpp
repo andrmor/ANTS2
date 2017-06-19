@@ -386,7 +386,40 @@ force_stop_tracing:
          }
      }
 
-   if (SimSet->bDoPhotonHistoryLog) p->SimStat->PhotonHistoryLog.append(PhLog);
+   if (SimSet->bDoPhotonHistoryLog)
+     {
+       bool bVeto = false;
+       if (!p->SimStat->MustNotInclude.isEmpty())
+         for (int i=0; i<PhLog.size(); i++)
+           if ( p->SimStat->MustNotInclude.contains(PhLog.at(i).node) )
+             {
+               bVeto = true;
+               break;
+             }
+
+       if (!bVeto)
+         {
+           bool bFound = true;
+           for (int im = 0; im<p->SimStat->MustInclude.size(); im++)
+             {
+               bool bFoundThis = false;
+               for (int i=PhLog.size()-1; i>-1; i--)
+                 if ( p->SimStat->MustInclude.at(im) == PhLog.at(i).node)
+                   {
+                     bFoundThis = true;
+                     break;
+                   }
+               if (!bFoundThis)
+                 {
+                   bFound = false;
+                   break;
+                 }
+             }
+
+           if (bFound) p->SimStat->PhotonHistoryLog.append(PhLog);
+         }
+
+     }
 
    //qDebug()<<"Finished with the photon";
    //qDebug() << "Track size:" <<Tracks->size();

@@ -79,14 +79,14 @@ void OneEventClass::clearHits()
   }
 }
 
-void OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
+bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
     {
       iTime = OneEventClass::TimeToBin(time);
-      if (iTime == -1) return;
+      if (iTime == -1) return false;
     }
   //cheking vs photon detection efficiency
   double DetProbability = PMs->getActualPDE(ipm, WaveIndex);
@@ -95,22 +95,23 @@ void OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
   //checking vs area response
   DetProbability *= PMs->getActualAreaResponse(ipm, x, y);
   if (rnd > DetProbability)  //random number is provided by the tracker - done for the accelerator function
-      return;
+      return false;
 
   PMhitsTotal[ipm]++;
   if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm]++;
 
   if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+  return true;
 }
 
-void OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
+bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
     {
       iTime = OneEventClass::TimeToBin(time);
-      if (iTime == -1) return;
+      if (iTime == -1) return false;
     }
   //cheking vs photon detection efficiency
   double DetProbability = 1;
@@ -121,7 +122,7 @@ void OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
   DetProbability *= PMs->getActualAreaResponse(ipm, x, y);
   //    qDebug()<<"composite detection probability: "<<DetProbability;
   if (rnd > DetProbability) //random number is provided by the tracker - done for the accelerator function
-      return;
+      return false;
 
   //    qDebug()<<"Detected!";
   const int itype = PMs->at(ipm).type;
@@ -151,6 +152,7 @@ void OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
     registerSiPMhit(ipm, iTime, binX, binY);
 
   if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+  return true;
 }
 
 void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int numHits)

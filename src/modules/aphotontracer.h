@@ -67,6 +67,9 @@ private:
     Double_t FromGridElementToGridBulk[3]; //add to xyz of current point for gridnavigator to obtain normal navigator current point coordinates
     TGeoVolume* GridVolume; // the grid bulk
 
+    QString nameFrom;
+    QString nameTo;
+
     enum AbsRayEnum {AbsRayNotTriggered=0, AbsTriggered, RayTriggered, WaveShifted};
     inline AbsRayEnum AbsorptionAndRayleigh();
     inline double CalculateReflectionCoefficient();

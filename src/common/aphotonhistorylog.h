@@ -3,57 +3,29 @@
 
 #include <QString>
 
+class AMaterialParticleCollection;
+
 class APhotonHistoryLog
 {
 public:
-    enum NodeType {Undefined = 0, Created, HitPM, HitDummyPM, Escaped, Absorbed, MaxNumberCyclesReacehed, Rayleigh,
-                   Reemitted, FresnelReflected, FresnelTransmitted, LossOnOverride, OverrideForward, OverrideBack};
+    enum NodeType {Undefined = 0, Created, HitPM, HitDummyPM, Escaped, Absorbed, MaxNumberCyclesReached, Rayleigh,
+                   Reemission, Fresnel_Reflection, Fresnel_Transmition, Override_Loss, Override_Forward, Override_Back, Detected, NotDetected, GeneratedOutsideGeometry};
 
 public:
-    APhotonHistoryLog(const double* Position, double Time, NodeType node, int MatIndex, int MatIndexAfter = -1) :
-      node(node), time(Time),
-      matIndex(MatIndex), matIndexAfter(MatIndexAfter)
-    {r[0]=Position[0]; r[1]=Position[1]; r[2]=Position[2];}
+    APhotonHistoryLog(const double* Position, const QString volumeName, double Time, NodeType node, int MatIndex = -1, int MatIndexAfter = -1, int number = -1);
     APhotonHistoryLog() : node(Undefined) {}
 
-    double r[3];        //position
+    NodeType node;
+    double r[3];        //position xyz
+    QString volumeName;
     double time;
     int matIndex;       //material index of the medium
     int matIndexAfter;  //material index of the medium after interface (if applicable)
+    int number;         //multipurpose (-1 value by default), if node HitPM/Detected/NotDetected -> contains PM number
 
-    NodeType node;
+    QString Print(AMaterialParticleCollection* MpCollection) const;
 
-    QString Print() const
-    {
-      QString s = QString("XYZ=") + QString::number(r[0]) +","+ QString::number(r[1]) + ","+QString::number(r[2])+", ";
-      s += QString("Time=")+QString::number(time)+", ";
-      s += QString("MatIndex=")+QString::number(matIndex)+", ";
-      s += (matIndexAfter==-1 ? "" : "MatIndexAfter="+QString::number(matIndexAfter)+", ");
-      s += GetProcessName(node);
-      return s;
-    }
-
-    static const QString GetProcessName(int nodeType)
-    {
-      switch (nodeType)
-        {
-        case Undefined: return "Undefined";
-        case Created: return "Created";
-        case HitPM: return "HitPM";
-        case HitDummyPM: return "HitDummyPM";
-        case Escaped: return "Escaped";
-        case Absorbed: return "Absorbed";
-        case MaxNumberCyclesReacehed: return "MaxNumberCyclesReacehed";
-        case Rayleigh: return "Rayleigh";
-        case Reemitted: return "Reemitted";
-        case FresnelReflected: return "FresnelReflected";
-        case FresnelTransmitted: return "FresnelTransmitted";
-        case LossOnOverride: return "LossOnOverride";
-        case OverrideForward: return "OverrideForward";
-        case OverrideBack: return "OverrideBack";
-        default: return "Error: unknown index!";
-        }
-    }
+    static const QString GetProcessName(int nodeType);
 };
 
 #endif // APHOTONHISTORYLOG_H

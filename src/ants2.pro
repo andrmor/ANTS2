@@ -226,7 +226,8 @@ SOURCES += main.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     SplineLibrary/tpspline3.cpp \
-    scriptmode/ainterfacetophotonscript.cpp
+    scriptmode/ainterfacetophotonscript.cpp \
+    common/aphotonhistorylog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \

@@ -51,6 +51,7 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
         return false;
     }
 
+    simSet.bDoPhotonHistoryLog = true;
     simSet.fQEaccelerator = false;
     bBuildTracks = true;
     simSet.fLogsStat = true;
@@ -209,7 +210,7 @@ QString AInterfaceToPhotonScript::PrintRecord(int iPhoton, int iRecord)
   if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return "Invalid photon index";
   if (iRecord<0 || iRecord>=EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).size()) return "Invalid record index";
 
-  return EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).Print();
+  return EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).Print(Detector->MpCollection);
 }
 
 void AInterfaceToPhotonScript::clearTrackHolder()

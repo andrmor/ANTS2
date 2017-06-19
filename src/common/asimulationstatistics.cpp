@@ -54,6 +54,8 @@ void ASimulationStatistics::initialize(int nBins)
     OverrideMetalAbs = OverrideMetalReflection = 0;
     OverrideClaudioAbs = OverrideClaudioSpec = OverrideClaudioLamb = 0;
     OverrideWLSabs = OverrideWLSshift = 0;
+
+    PhotonHistoryLog.clear();
 }
 
 void ASimulationStatistics::setWavelengthBinning(double waveNodes)

@@ -4,6 +4,7 @@
 #include "scriptinterfaces.h"
 
 #include <QVector>
+#include <QVariant>
 
 class AConfiguration;
 class EventsDataClass;
@@ -44,6 +45,12 @@ public slots:
     long GetFresnelReflected() const;
     long GetRayleigh() const;
     long GetReemitted() const;
+
+    //history record
+    QVariant GetHistory() const; //
+
+    QString GetProcessName(int NodeType);
+    QString PrintRecord(int iPhoton, int iRecord);
 
 private:
     AConfiguration* Config;

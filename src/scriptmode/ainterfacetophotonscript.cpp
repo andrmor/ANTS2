@@ -34,7 +34,7 @@ AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
 
 void AInterfaceToPhotonScript::ClearData()
 {
-    EventsDataHub->clear();
+    EventsDataHub->clear();    
     Detector->GeoManager->ClearTracks();
 }
 
@@ -165,7 +165,51 @@ long AInterfaceToPhotonScript::GetRayleigh() const
 
 long AInterfaceToPhotonScript::GetReemitted() const
 {
-    return EventsDataHub->SimStat->Reemission;
+  return EventsDataHub->SimStat->Reemission;
+}
+
+QVariant AInterfaceToPhotonScript::GetHistory() const
+{
+  QJsonArray arr;
+
+  const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
+  for (int iPh=0; iPh<AllPhLog.size(); iPh++)
+    {
+      const QVector <APhotonHistoryLog> &ThisPhLog = AllPhLog.at(iPh);
+      QJsonArray nodeArr;
+      for (int iR=0; iR<ThisPhLog.size(); iR++)
+        {
+          const APhotonHistoryLog &rec = ThisPhLog.at(iR);
+          QJsonObject ob;
+
+          QJsonArray pos;
+          pos << rec.r[0] << rec.r[1] << rec.r[2];
+          ob["position"] = pos;
+          ob["time"] = rec.time;
+          ob["matIndex"] = rec.matIndex;
+          ob["matIndexAfter"] = rec.matIndexAfter;
+          ob["nodeType"] = static_cast<int>(rec.node);
+
+          nodeArr << ob;
+        }
+
+      arr << nodeArr;
+    }
+
+  return arr.toVariantList();
+}
+
+QString AInterfaceToPhotonScript::GetProcessName(int NodeType)
+{
+  return APhotonHistoryLog::GetProcessName(NodeType);
+}
+
+QString AInterfaceToPhotonScript::PrintRecord(int iPhoton, int iRecord)
+{
+  if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return "Invalid photon index";
+  if (iRecord<0 || iRecord>=EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).size()) return "Invalid record index";
+
+  return EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).Print();
 }
 
 void AInterfaceToPhotonScript::clearTrackHolder()

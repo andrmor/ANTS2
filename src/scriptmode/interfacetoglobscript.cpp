@@ -2641,10 +2641,11 @@ void InterfaceToGraphWin::AddToBasket(QString Title)
   MW->GraphWindow->AddCurrentToBasket(Title);
 }
 
-//void InterfaceToGraphWin::ClearBasket()
-//{
-//  MW->GraphWindow->ClearBasket();
-//}
+void InterfaceToGraphWin::ClearBasket()
+{
+  MW->GraphWindow->ClearBasket();
+
+}
 
 void InterfaceToGraphWin::SaveImage(QString fileName)
 {

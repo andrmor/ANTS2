@@ -30,7 +30,8 @@ public slots:
     void SetTrackWidth(int width) {TrackWidth = width;}
     void SetMaxNumberTracks(int maxNumber) {MaxNumberTracks = maxNumber;}
 
-    void SetHistoryFilters(QVariant MustInclude, QVariant MustNotInclude);
+    void SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude);
+    void SetHistoryFilters_Volumes(QVariant MustInclude, QVariant MustNotInclude);
     void ClearHistoryFilters();
 
     void SetRandomGeneratorSeed(int seed);

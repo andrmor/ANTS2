@@ -104,30 +104,54 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     return true;
 }
 
-void AInterfaceToPhotonScript::SetHistoryFilters(QVariant MustInclude, QVariant MustNotInclude)
+void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
 {
   QVariantList vMI = MustInclude.toList();
   QJsonArray arMI = QJsonArray::fromVariantList(vMI);
   QVariantList vMNI = MustNotInclude.toList();
   QJsonArray arMNI = QJsonArray::fromVariantList(vMNI);
 
-  ClearHistoryFilters();
+  EventsDataHub->SimStat->MustInclude_Processes.clear();
+  EventsDataHub->SimStat->MustNotInclude_Processes.clear();
   for (int i=0; i<arMI.size(); i++)
     {
       if (!arMI[i].isDouble()) continue;
-      EventsDataHub->SimStat->MustInclude << arMI[i].toInt();
+      EventsDataHub->SimStat->MustInclude_Processes << arMI[i].toInt();
     }
   for (int i=0; i<arMNI.size(); i++)
     {
       if (!arMNI[i].isDouble()) continue;
-      EventsDataHub->SimStat->MustNotInclude << arMNI[i].toInt();
+      EventsDataHub->SimStat->MustNotInclude_Processes << arMNI[i].toInt();
+    }
+}
+
+void AInterfaceToPhotonScript::SetHistoryFilters_Volumes(QVariant MustInclude, QVariant MustNotInclude)
+{
+  QVariantList vMI = MustInclude.toList();
+  QJsonArray arMI = QJsonArray::fromVariantList(vMI);
+  QVariantList vMNI = MustNotInclude.toList();
+  QJsonArray arMNI = QJsonArray::fromVariantList(vMNI);
+
+  EventsDataHub->SimStat->MustNotInclude_Volumes.clear();
+  EventsDataHub->SimStat->MustInclude_Volumes.clear();
+  for (int i=0; i<arMI.size(); i++)
+    {
+      if (!arMI[i].isString()) continue;
+      EventsDataHub->SimStat->MustInclude_Volumes << arMI[i].toString();
+    }
+  for (int i=0; i<arMNI.size(); i++)
+    {
+      if (!arMNI[i].isString()) continue;
+      EventsDataHub->SimStat->MustNotInclude_Volumes << arMNI[i].toString();
     }
 }
 
 void AInterfaceToPhotonScript::ClearHistoryFilters()
 {
-    EventsDataHub->SimStat->MustInclude.clear();
-    EventsDataHub->SimStat->MustNotInclude.clear();
+    EventsDataHub->SimStat->MustInclude_Processes.clear();
+    EventsDataHub->SimStat->MustInclude_Volumes.clear();
+    EventsDataHub->SimStat->MustNotInclude_Processes.clear();
+    EventsDataHub->SimStat->MustNotInclude_Volumes.clear();
 }
 
 void AInterfaceToPhotonScript::SetRandomGeneratorSeed(int seed)

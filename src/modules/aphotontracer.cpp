@@ -364,43 +364,10 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
    if (Counter == SimSet->MaxNumTrans) OneEvent->SimStat->MaxCyclesReached++;
 
    //here all tracing terminators end
-force_stop_tracing:       
+force_stop_tracing:
    if (SimSet->bDoPhotonHistoryLog)
      {
-       bool bVeto = false;
-       if (!p->SimStat->MustNotInclude.isEmpty())
-         for (int i=0; i<PhLog.size(); i++)
-           if ( p->SimStat->MustNotInclude.contains(PhLog.at(i).process) )
-             {
-               bVeto = true;
-               break;
-             }
-
-       if (!bVeto)
-         {
-           bool bFound = true;
-           for (int im = 0; im<p->SimStat->MustInclude.size(); im++)
-             {
-               bool bFoundThis = false;
-               for (int i=PhLog.size()-1; i>-1; i--)
-                 if ( p->SimStat->MustInclude.at(im) == PhLog.at(i).process)
-                   {
-                     bFoundThis = true;
-                     break;
-                   }
-               if (!bFoundThis)
-                 {
-                   bFound = false;
-                   break;
-                 }
-             }
-
-           if (bFound)
-             {
-               p->SimStat->PhotonHistoryLog.append(PhLog);
-               if (fBuildTracks) AppendTrack();
-             }
-         }
+       AppendHistoryRecord(); //Add tracks is alsow there, it has extra filtering
      }
    else
      {
@@ -409,6 +376,100 @@ force_stop_tracing:
 
    //qDebug()<<"Finished with the photon";
    //qDebug() << "Track size:" <<Tracks->size();
+}
+
+void APhotonTracer::AppendHistoryRecord()
+{
+  bool bVeto = false;
+  //by process
+  if (!p->SimStat->MustNotInclude_Processes.isEmpty())
+    {
+      for (int i=0; i<PhLog.size(); i++)
+        if ( p->SimStat->MustNotInclude_Processes.contains(PhLog.at(i).process) )
+          {
+            bVeto = true;
+            break;
+          }
+    }
+  //by Volume
+  if (!bVeto && !p->SimStat->MustNotInclude_Volumes.isEmpty())
+        {
+          for (int i=0; i<PhLog.size(); i++)
+            if ( p->SimStat->MustNotInclude_Volumes.contains(PhLog.at(i).volumeName) )
+              {
+                bVeto = true;
+                break;
+              }
+        }
+
+  if (!bVeto)
+    {
+      bool bFound = true;
+      //in processes
+      for (int im = 0; im<p->SimStat->MustInclude_Processes.size(); im++)
+        {
+          bool bFoundThis = false;
+          for (int i=PhLog.size()-1; i>-1; i--)
+            if ( p->SimStat->MustInclude_Processes.at(im) == PhLog.at(i).process)
+              {
+                bFoundThis = true;
+                break;
+              }
+          if (!bFoundThis)
+            {
+              bFound = false;
+              break;
+            }
+        }
+
+      //in volumes
+      if (bFound)
+        {
+          for (int im = 0; im<p->SimStat->MustInclude_Volumes.size(); im++)
+            {
+              bool bFoundThis = false;
+              for (int i=PhLog.size()-1; i>-1; i--)
+                if ( p->SimStat->MustInclude_Volumes.at(im) == PhLog.at(i).volumeName)
+                  {
+                    bFoundThis = true;
+                    break;
+                  }
+              if (!bFoundThis)
+                {
+                  bFound = false;
+                  break;
+                }
+            }
+        }
+
+      if (bFound)
+        {
+          p->SimStat->PhotonHistoryLog.append(PhLog);
+          if (fBuildTracks) AppendTrack();
+        }
+    }
+}
+
+void APhotonTracer::AppendTrack()
+{
+  //color track according to PM hit status and scintillation type
+  if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
+  else
+    {
+      track->UserIndex = 22;
+      track->Width = 1;
+      if (fMissPM)
+        {
+          switch (p->scint_type)
+            {
+            case 1: track->Color = 7; break; //primary -> kTeal
+            case 2: track->Color = kMagenta; break; //secondary -> kMagenta
+            default: track->Color = kGray;
+            }
+        }
+      else track->Color = 2;//kRed
+      Tracks->append(track);
+    }
 }
 
 APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
@@ -824,26 +885,3 @@ void APhotonTracer::ReturnFromGridShift()
     //qDebug() << "<--True coordinates:"<<navigator->GetCurrentPoint()[0]<<navigator->GetCurrentPoint()[1]<<navigator->GetCurrentPoint()[2];
     //qDebug() << "<--After back shift in"<<navigator->FindNode()->GetName();
 }
-
-void APhotonTracer::AppendTrack()
-{
-  //color track according to PM hit status and scintillation type
-  if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
-  else
-    {
-      track->UserIndex = 22;
-      track->Width = 1;
-      if (fMissPM)
-        {
-          switch (p->scint_type)
-            {
-            case 1: track->Color = 7; break; //primary -> kTeal
-            case 2: track->Color = kMagenta; break; //secondary -> kMagenta
-            default: track->Color = kGray;
-            }
-        }
-      else track->Color = 2;//kRed
-      Tracks->append(track);
-    }
-}
-

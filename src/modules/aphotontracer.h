@@ -80,5 +80,6 @@ private:
     inline bool GridWasHit(int GridNumber);
     inline void ReturnFromGridShift();
     inline void AppendTrack();
+    inline void AppendHistoryRecord();
 };
 #endif // APHOTONTRACER_H

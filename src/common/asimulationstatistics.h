@@ -49,9 +49,12 @@ public:
     long OverrideWLSabs, OverrideWLSshift;
 
     //only affects script unit "photon" tracing!
-    QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;
-    QSet<int> MustNotInclude;
-    QVector<int> MustInclude;
+    QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;    
+    QSet<int> MustNotInclude_Processes;   //v.fast
+    QVector<int> MustInclude_Processes;   //slow
+    QSet<QString> MustNotInclude_Volumes; //fast
+    QVector<QString> MustInclude_Volumes; //v.slow
+
 
 private:
     TH1I* WaveSpectrum;

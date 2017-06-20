@@ -79,5 +79,6 @@ private:
     inline void RandomDir();
     inline bool GridWasHit(int GridNumber);
     inline void ReturnFromGridShift();
+    inline void AppendTrack();
 };
 #endif // APHOTONTRACER_H

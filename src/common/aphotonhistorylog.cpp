@@ -2,7 +2,7 @@
 #include "amaterialparticlecolection.h"
 
 APhotonHistoryLog::APhotonHistoryLog(const double *Position, const QString volumeName, double Time, APhotonHistoryLog::NodeType node, int MatIndex, int MatIndexAfter, int number) :
-  volumeName(volumeName), time(Time), node(node),
+  volumeName(volumeName), time(Time), process(node),
   matIndex(MatIndex), matIndexAfter(MatIndexAfter),
   number(number)
 {
@@ -15,12 +15,12 @@ QString APhotonHistoryLog::Print(AMaterialParticleCollection *MpCollection) cons
 {
   QString s;
 
-  s += GetProcessName(node);
+  s += GetProcessName(process);
 
-  if (node == HitPM || node == Detected || node == NotDetected) s += " PM# " + QString::number(number);
-  if (node == HitDummyPM) s += " DummyPM# " + QString::number(number);
+  if (process == HitPM || process == Detected || process == NotDetected) s += " PM# " + QString::number(number);
+  if (process == HitDummyPM) s += " DummyPM# " + QString::number(number);
 
-  if (node == Fresnel_Reflection || node == Override_Loss || node == Override_Back || node == Fresnel_Transmition || node == Override_Forward)
+  if (process == Fresnel_Reflection || process == Override_Loss || process == Override_Back || process == Fresnel_Transmition || process == Override_Forward)
     s += " [" + MpCollection->getMaterialName(matIndex) +"/"+ MpCollection->getMaterialName(matIndexAfter)+"]";
 
   s += QString(" at ( ") + QString::number(r[0])+", "+ QString::number(r[1]) + ", "+QString::number(r[2])+" )";
@@ -55,6 +55,14 @@ const QString APhotonHistoryLog::GetProcessName(int nodeType)
     case GeneratedOutsideGeometry: return "GeneratedOutsideGeometry";
     default: return "Error: unknown index!";
     }
+}
+
+const QString APhotonHistoryLog::PrintAllProcessTypes()
+{
+  QString s = "<br>Defined types:<br>";
+  for (int i=0; i<__SizeOfNodeTypes__; i++)
+    s += QString::number(i) + " -> " + GetProcessName(i) + "<br>";
+  return s;
 }
 
 

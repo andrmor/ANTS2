@@ -9,12 +9,14 @@
 #include "aphoton.h"
 #include "atrackrecords.h"
 #include "TMath.h"
+#include "TRandom2.h"
 
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "TGeoTrack.h"
 #include "TGeoManager.h"
 #include "TH1.h"
+
 
 
 #include <QDebug>
@@ -99,19 +101,17 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
         }
     }
 
-    qDebug() << "PhLog size:"<<EventsDataHub->SimStat->PhotonHistoryLog.size();
-
     return true;
 }
 
-void AInterfaceToPhotonScript::ConfigureFilter(QVariant MustInclude, QVariant MustNotInclude)
+void AInterfaceToPhotonScript::SetHistoryFilters(QVariant MustInclude, QVariant MustNotInclude)
 {
   QVariantList vMI = MustInclude.toList();
   QJsonArray arMI = QJsonArray::fromVariantList(vMI);
   QVariantList vMNI = MustNotInclude.toList();
   QJsonArray arMNI = QJsonArray::fromVariantList(vMNI);
 
-  ClearFilter();
+  ClearHistoryFilters();
   for (int i=0; i<arMI.size(); i++)
     {
       if (!arMI[i].isDouble()) continue;
@@ -124,10 +124,15 @@ void AInterfaceToPhotonScript::ConfigureFilter(QVariant MustInclude, QVariant Mu
     }
 }
 
-void AInterfaceToPhotonScript::ClearFilter()
+void AInterfaceToPhotonScript::ClearHistoryFilters()
 {
     EventsDataHub->SimStat->MustInclude.clear();
     EventsDataHub->SimStat->MustNotInclude.clear();
+}
+
+void AInterfaceToPhotonScript::SetRandomGeneratorSeed(int seed)
+{
+    Detector->RandGen->SetSeed(seed);
 }
 
 long AInterfaceToPhotonScript::GetBulkAbsorbed() const
@@ -213,9 +218,10 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
           pos << rec.r[0] << rec.r[1] << rec.r[2];
           ob["position"] = pos;
           ob["time"] = rec.time;
-          ob["matIndex"] = rec.matIndex;
-          ob["matIndexAfter"] = rec.matIndexAfter;
-          ob["nodeType"] = static_cast<int>(rec.node);
+          ob["iMat"] = rec.matIndex;
+          ob["iMatNext"] = rec.matIndexAfter;
+          ob["process"] = static_cast<int>(rec.process);
+          ob["volumeName"] = rec.volumeName;
 
           nodeArr << ob;
         }
@@ -224,6 +230,18 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
     }
 
   return arr.toVariantList();
+}
+
+QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
+{
+  QString s = "<br>Defined record fields:<br>";
+  s += "process -> process type<br>";
+  s += "position -> array of x, y and z<br>";
+  s += "volumeName -> name of the current geometry volume<br>";
+  s += "time -> time in ns<br>";
+  s += "iMat -> material index of this volume (-1 if undefined)<br>";
+  s += "iMatNext -> material index after interface (-1 if undefined)<br>";
+  return s;
 }
 
 QString AInterfaceToPhotonScript::GetProcessName(int NodeType)
@@ -237,6 +255,11 @@ QString AInterfaceToPhotonScript::PrintRecord(int iPhoton, int iRecord)
   if (iRecord<0 || iRecord>=EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).size()) return "Invalid record index";
 
   return EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).Print(Detector->MpCollection);
+}
+
+QString AInterfaceToPhotonScript::PrintAllDefinedProcessTypes()
+{
+  return APhotonHistoryLog::PrintAllProcessTypes();
 }
 
 void AInterfaceToPhotonScript::clearTrackHolder()

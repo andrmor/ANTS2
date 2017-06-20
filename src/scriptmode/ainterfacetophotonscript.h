@@ -30,8 +30,10 @@ public slots:
     void SetTrackWidth(int width) {TrackWidth = width;}
     void SetMaxNumberTracks(int maxNumber) {MaxNumberTracks = maxNumber;}
 
-    void ConfigureFilter(QVariant MustInclude, QVariant MustNotInclude);
-    void ClearFilter();
+    void SetHistoryFilters(QVariant MustInclude, QVariant MustNotInclude);
+    void ClearHistoryFilters();
+
+    void SetRandomGeneratorSeed(int seed);
 
     //photon loss statistics
     long GetBulkAbsorbed() const;  //Absorbed and BulkAbosrbed are the same
@@ -54,6 +56,8 @@ public slots:
 
     QString GetProcessName(int NodeType);
     QString PrintRecord(int iPhoton, int iRecord);
+    QString PrintAllDefinedProcessTypes();
+    QString PrintAllDefinedRecordMemebers();
 
 private:
     AConfiguration* Config;

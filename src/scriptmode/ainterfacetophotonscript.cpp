@@ -222,6 +222,7 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
           ob["iMatNext"] = rec.matIndexAfter;
           ob["process"] = static_cast<int>(rec.process);
           ob["volumeName"] = rec.volumeName;
+          ob["number"] = rec.number;
 
           nodeArr << ob;
         }
@@ -241,6 +242,7 @@ QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
   s += "time -> time in ns<br>";
   s += "iMat -> material index of this volume (-1 if undefined)<br>";
   s += "iMatNext -> material index after interface (-1 if undefined)<br>";
+  s += "number -> multifunction, e.g. PM# for PMhit (-1 if undefined)<br>";
   return s;
 }
 

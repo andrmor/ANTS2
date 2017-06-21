@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
-ANTS2_MINOR = 12
+ANTS2_MINOR = 13
 ANTS2_VERSION = 2197
 
 #Optional libraries
@@ -531,8 +531,8 @@ RC_FILE = myapp.rc
 #---Windows-specific compilation mode and warning suppression
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  QMAKE_CXXFLAGS_RELEASE -= -O2
-  QMAKE_CXXFLAGS_RELEASE *= -Od
+  #QMAKE_CXXFLAGS_RELEASE -= -O2
+  #QMAKE_CXXFLAGS_RELEASE *= -Od
 
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
@@ -577,5 +577,3 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-
-DISTFILES +=

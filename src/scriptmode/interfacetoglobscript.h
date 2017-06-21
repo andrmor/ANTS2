@@ -536,6 +536,7 @@ public slots:
 
   //basket operation
   void AddToBasket(QString Title);
+  void ClearBasket();
 
   void SaveImage(QString fileName);  
   void ExportTH2AsText(QString fileName);

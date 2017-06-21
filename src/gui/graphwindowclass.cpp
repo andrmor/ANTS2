@@ -781,7 +781,11 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
 
   GraphWindowClass::doDraw(obj, options, DoUpdate);
 
-  if (CurrentBasketItem == -1) MasterDrawObjects = DrawObjects; //pointers are copied!
+  if (CurrentBasketItem == -1)
+    {
+      if (RegisterObject) MasterDrawObjects = DrawObjects; //pointers are copied!
+      else MasterDrawObjects.clear();
+    }
   fFirstTime = false;
 
   //update range indication etc
@@ -1143,6 +1147,7 @@ void GraphWindowClass::RedrawAll()
   if (DrawObjects.isEmpty())
     {
       ClearRootCanvas();
+      UpdateRootCanvas();
       return;
     }
 
@@ -2556,7 +2561,8 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
       if (ret == QMessageBox::Yes)
       {
           ClearBasket();
-          UpdateBasketGUI();
+          //UpdateBasketGUI();
+          on_pbBasketBackToLast_clicked();
       }
     }
   else if (selectedItem == save)
@@ -2740,8 +2746,9 @@ void GraphWindowClass::ClearBasket()
    for (int ib=0; ib<Basket.size(); ib++)
        Basket[ib].clearObjects();
 
-  Basket.clear();
-  if (!MW->ShutDown) GraphWindowClass::on_pbBasketBackToLast_clicked();
+  Basket.clear();  
+  on_pbBasketBackToLast_clicked();
+  UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()

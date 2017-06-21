@@ -138,6 +138,7 @@ public:
     void OnBusyOff();
 
     void switchOffBasket();
+    void ClearBasket();
     TObject *GetMainPlottedObject();
     void SaveGraph(QString fileName);    
     void EnforceOverlayOff();    
@@ -270,8 +271,7 @@ private:
     void updateLegendVisibility();
     void startOverlayMode();
     void endOverlayMode();
-    void UpdateBasketGUI();
-    void ClearBasket();
+    void UpdateBasketGUI();    
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
     void SaveBasket();

@@ -692,22 +692,23 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
     {
       if (mat->atomicDensity == 0) return 6;
 
-      if (mp->Terminators.isEmpty()) return 75;
-
       int numTerm = mp->Terminators.size();
-      //qDebug()<<"Terms:"<<numTerm;
+      qDebug()<<"Terms:"<<numTerm;
       if (numTerm == 0) return 75;
 
-      //confirming all terminators type is "capture"
+      //confirming all terminators type is "capture" or "ellastic"
       for (int i=0; i<numTerm; i++)
         {
-          if (mp->Terminators[i].Type != 2) return 7;
+          qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
+          if (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture &&
+              mp->Terminators[i].Type != NeutralTerminatorStructure::EllasticScattering) return 7;
           //qDebug() << mp->Terminators[i].ReactionType;
         }
 
       //checking all terminator one by one
       for (int iTerm=0; iTerm<numTerm; iTerm++)
         {
+          qDebug() << "Checking term #"<<iTerm;
           //check partial cross-section
           QVector<double>* e  = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
           QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
@@ -716,37 +717,39 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
           for (int i=0; i<interSize; i++) if (mp->InteractionDataX[i] != e->at(i)) return 7;
 
           // confirminf that partial cross section is indeed Branching fractin of TotalInteraction
-          double branch = mp->Terminators[iTerm].branching;
-          for (int i=0; i<interSize; i++)
-            {
-              double delta = mp->Terminators[iTerm].PartialCrossSection[i] - branch*mp->InteractionDataF[i];
-              if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] ) return 7;
-            }
+//          double branch = mp->Terminators[iTerm].branching;
+//          for (int i=0; i<interSize; i++)
+//            {
+//              double delta = mp->Terminators[iTerm].PartialCrossSection[i] - branch*mp->InteractionDataF[i];
+//              if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] ) return 7;
+//            }
 
           //checking generated particles and their initial energies
-          QVector<int>* gp = &mp->Terminators[iTerm].GeneratedParticles;
-          if (gp->isEmpty()) return 71;
-          QVector<double>* gpE = &mp->Terminators[iTerm].GeneratedParticleEnergies;
-          if (gp->isEmpty()) return 72;
-          int numPart = gp->size();
-          if (numPart != gpE->size()) return 73;
-          //checking particle/energy pairs one by one
-          for (int iGP=0; iGP<numPart; iGP++)
-            {
-              int part = gp->at(iGP);
-              if (part<0 || part>ParticleCollection.size()-1) return 74;  //unknown particle
+//          QVector<int>* gp = &mp->Terminators[iTerm].GeneratedParticles;
+//          if (gp->isEmpty()) return 71;
+//          QVector<double>* gpE = &mp->Terminators[iTerm].GeneratedParticleEnergies;
+//          if (gp->isEmpty()) return 72;
+//          int numPart = gp->size();
+//          if (numPart != gpE->size()) return 73;
+//          //checking particle/energy pairs one by one
+//          for (int iGP=0; iGP<numPart; iGP++)
+//            {
+//              int part = gp->at(iGP);
+//              if (part<0 || part>ParticleCollection.size()-1) return 74;  //unknown particle
 
-              //test that all materials where this particle can be tracked (not-trasparent),
-              //have initial energy within the total interaction energy range
-              int energy = gpE->at(iGP);
+//              //test that all materials where this particle can be tracked (not-trasparent),
+//              //have initial energy within the total interaction energy range
+//              int energy = gpE->at(iGP);
 
-              ConflictingMaterialIndex = AMaterialParticleCollection::CheckParticleEnergyInRange(part, energy);
-              if (ConflictingMaterialIndex != -1)
-                {
-                  ConflictingParticleIndex = part;
-                  return 76;
-                }
-            }
+//              ConflictingMaterialIndex = AMaterialParticleCollection::CheckParticleEnergyInRange(part, energy);
+//              if (ConflictingMaterialIndex != -1)
+//                {
+//                  ConflictingParticleIndex = part;
+//                  return 76;
+//                }
+//            }
+
+
         }
     }
 

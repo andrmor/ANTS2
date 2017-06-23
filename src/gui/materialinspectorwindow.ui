@@ -2384,10 +2384,24 @@ with the relative numeric fractions of 90 to 1.</string>
             <zorder>label_54</zorder>
             <zorder>cobTerminationScenarios</zorder>
            </widget>
+           <widget class="QPushButton" name="pbTest">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>30</y>
+              <width>75</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Test</string>
+            </property>
+           </widget>
            <zorder>fNeutron</zorder>
            <zorder>line_4</zorder>
            <zorder>pbLoadTotalInteractionCoefficient</zorder>
            <zorder>cobTotalInteractionLoadEnergyUnits</zorder>
+           <zorder>pbTest</zorder>
           </widget>
          </widget>
          <widget class="QLabel" name="labNeutra_TotalInteractiondataMissing">

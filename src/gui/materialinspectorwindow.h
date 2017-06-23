@@ -163,6 +163,8 @@ private slots:
 
     void on_pbShowPairProduction_clicked();
 
+    void on_pbTest_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

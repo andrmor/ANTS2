@@ -23,7 +23,8 @@ struct EventHistoryStructure
                           ErrorDuringTracking = 6,
                           CreatedOutside = 7,   // created outside defined geometry
                           FoundUntrackableMaterial = 8,
-                          PairProduction = 9};  // keep the numbers - scripts operate with int
+                          PairProduction = 9,
+                          EllasticScattering = 10};  // keep the numbers - scripts operate with int
 
     int ParticleId;
     int index; // this is particle index! - "serial number" of the particle

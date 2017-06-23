@@ -2203,9 +2203,9 @@ void MaterialInspectorWindow::ShowTotalInteraction()
   QVector<double> X(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX);
   QVector<double> Y(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF);
 
-  TString Title, Xtitle, Ytitle;
+  TString Title="Total interaction coefficient", Xtitle, Ytitle;
   if (type == AParticle::_charged_)
-    {
+    {      
       Xtitle = "Energy, keV";
       Ytitle = "Stopping power, keV cm2/g";
     }
@@ -2221,7 +2221,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
       for (int i=0; i<X.size(); i++)
         {
           X[i] *= 1.0e6; // keV -> meV
-          Y[i] *= 1.0e24; // back to barns
+          Y[i] *= 1.0e24; // cm2 to barns
         }
     }
   else
@@ -2230,10 +2230,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
       exit(666);
     }
 
-  TGraph* gr = MW->GraphWindow->ConstructTGraph(X, Y);
-  gr->SetTitle("Total interaction coefficient");
-  gr->SetMarkerColor(kRed);
-  gr->SetMarkerStyle(2);
+  TGraph* gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
   MW->GraphWindow->Draw(gr, "AP");
 
   TGraph* graphOver = constructInterpolationGraph(X, Y);

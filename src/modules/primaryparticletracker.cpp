@@ -386,7 +386,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 for (int i=0; i<3; i++) Vnew[i] *= Vmod;
                                 double vnew[3]; //neutrn velocity in the lab frame
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
-                                double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the velocity
+                                double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
+                                qDebug() << "new neutron velocity:"<<vnewMod;
                                 AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, energy, counter);
                                 ParticleStack->append(tmp);
 

@@ -30,10 +30,16 @@ photon.SetHistoryFilters_Processes([6], [11])	//only escaped and WITHOUT fresnel
 //photon.SetHistoryFilters_Volumes([], ["World", "UpWin"])	//photons which have never entered World and UpWin volumes
 //photon.SetHistoryFilters_Volumes([], ["UpWin"])	//photons which have never entered UpWin volume
 
-//photon.TracePhotons(numPhotons,    -95,0.1,0,    1,0,0.1,   0,0)	// if photon direction should be user-defined
-photon.TracePhotonsIsotropic(numPhotons,    -95,0.1,0,    0,0)	// if photon direction should be isotropic
+// ====== tracing photons ======
+
+photon.TracePhotonsIsotropic(numPhotons,    -95,0.1,0,    0,0)	// if photon direction should be isotropic, otherwise use e.g., photon.TracePhotons(numPhotons,    -95,0.1,0,    1,0,0.1,   0,0)
+
+// =======================
 
 var history = photon.GetHistory()
+
+//save to file, format   cycle#  process   x y z VolumeName  number  matIndex matIndexAfterInterface waveIndex
+//photon.SaveHistoryToFile( core.GetWorkDir()+"/PhotonHistoryLog.txt", true, 0)  //can be combined with photon.ClearData() in a cycle, so very long logs can be generated
 
 // ------ Printout of all records (do not forget about the applied filter!) 
 // ------ Comment away to remove spam!!!

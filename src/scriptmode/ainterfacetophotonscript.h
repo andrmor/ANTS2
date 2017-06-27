@@ -54,7 +54,9 @@ public slots:
     long GetReemitted() const;
 
     //history record
+    int GetHistoryLength() const;
     QVariant GetHistory() const;
+    bool SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom);
 
     QString GetProcessName(int NodeType);
     QString PrintRecord(int iPhoton, int iRecord);

@@ -1,10 +1,14 @@
 #include "aphotonhistorylog.h"
 #include "amaterialparticlecolection.h"
 
-APhotonHistoryLog::APhotonHistoryLog(const double *Position, const QString volumeName, double Time, APhotonHistoryLog::NodeType node, int MatIndex, int MatIndexAfter, int number) :
+APhotonHistoryLog::APhotonHistoryLog(const double *Position, const QString volumeName,
+                                     double Time,
+                                     int iWave,
+                                     APhotonHistoryLog::NodeType node,
+                                     int MatIndex, int MatIndexAfter,
+                                     int number) :
   volumeName(volumeName), time(Time), process(node),
-  matIndex(MatIndex), matIndexAfter(MatIndexAfter),
-  number(number)
+  matIndex(MatIndex), matIndexAfter(MatIndexAfter), number(number), iWave(iWave)
 {
   r[0] = Position[0];
   r[1] = Position[1];
@@ -24,9 +28,8 @@ QString APhotonHistoryLog::Print(AMaterialParticleCollection *MpCollection) cons
     s += " [" + MpCollection->getMaterialName(matIndex) +"/"+ MpCollection->getMaterialName(matIndexAfter)+"]";
 
   s += QString(" at ( ") + QString::number(r[0])+", "+ QString::number(r[1]) + ", "+QString::number(r[2])+" )";
-  if (!volumeName.isEmpty())
-    s += " in " + volumeName;
-
+  if (!volumeName.isEmpty()) s += " in " + volumeName;
+  if (iWave != -1) s += " iWave="+QString::number(iWave);
   s += ", " + QString::number(time)+" ns";
 
   return s;

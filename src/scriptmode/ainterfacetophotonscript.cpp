@@ -17,6 +17,7 @@
 #include "TH1.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, EventsDataClass* EventsDataHub) :
     Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
@@ -216,7 +217,12 @@ long AInterfaceToPhotonScript::GetRayleigh() const
 
 long AInterfaceToPhotonScript::GetReemitted() const
 {
-  return EventsDataHub->SimStat->Reemission;
+    return EventsDataHub->SimStat->Reemission;
+}
+
+int AInterfaceToPhotonScript::GetHistoryLength() const
+{
+    return EventsDataHub->SimStat->PhotonHistoryLog.size();
 }
 
 QVariant AInterfaceToPhotonScript::GetHistory() const
@@ -242,6 +248,7 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
           ob["process"] = static_cast<int>(rec.process);
           ob["volumeName"] = rec.volumeName;
           ob["number"] = rec.number;
+          ob["wave"] = rec.iWave;
 
           nodeArr << ob;
         }
@@ -250,6 +257,46 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
     }
 
   return arr.toVariantList();
+}
+
+bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom)
+{
+    if (!AllowAppend && QFileInfo(FileName).exists())
+      {
+        abort("File already exists and append was not allowed!");
+        return false;
+      }
+
+    QFile file(FileName);
+    if ( !file.open(QIODevice::Append ) )
+    {
+        abort("Cannot open file: " + FileName);
+        return false;
+    }
+
+    QTextStream s(&file);
+    const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
+    for (int iPh=StartFrom; iPh<AllPhLog.size(); iPh++)
+      {
+        const QVector <APhotonHistoryLog> &ThisPhLog = AllPhLog.at(iPh);
+        for (int iR=0; iR<ThisPhLog.size(); iR++)
+          {
+            const APhotonHistoryLog &rec = ThisPhLog.at(iR);
+
+            s << iR << "   "
+              << APhotonHistoryLog::GetProcessName(rec.process) << "   "
+              << rec.r[0] <<" "<< rec.r[1] <<" "<< rec.r[2] << " " <<rec.time << "  "
+              << rec.volumeName << "  "
+              << rec.number << "  "
+              << rec.matIndex << " " << rec.matIndexAfter << "   "
+              << rec.iWave
+              << "\r\n";
+          }
+        s << "\r\n";
+      }
+    file.close();
+
+    return true;
 }
 
 QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
@@ -261,7 +308,8 @@ QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
   s += "time -> time in ns<br>";
   s += "iMat -> material index of this volume (-1 if undefined)<br>";
   s += "iMatNext -> material index after interface (-1 if undefined)<br>";
-  s += "number -> multifunction, e.g. PM# for PMhit (-1 if undefined)<br>";
+  s += "number -> index of PM hit (-1 if undefined)<br>";
+  s += "wave -> wavelength index (-1 if undefined)<br>";
   return s;
 }
 

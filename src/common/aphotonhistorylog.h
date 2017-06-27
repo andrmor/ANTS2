@@ -18,8 +18,8 @@ public:
                   };
 
 public:
-    APhotonHistoryLog(const double* Position, const QString volumeName, double Time, NodeType process, int MatIndex = -1, int MatIndexAfter = -1, int number = -1);
-    APhotonHistoryLog() : process(Undefined) {}
+    APhotonHistoryLog(const double* Position, const QString volumeName, double Time, int iWave, NodeType process, int MatIndex = -1, int MatIndexAfter = -1, int number = -1);
+    APhotonHistoryLog() : process(Undefined), iWave(-1) {}
 
     NodeType process;
     double r[3];        //position xyz
@@ -27,7 +27,8 @@ public:
     double time;
     int matIndex;       //material index of the medium
     int matIndexAfter;  //material index of the medium after interface (if applicable)
-    int number;         //multipurpose (-1 value by default), if node HitPM/Detected/NotDetected -> contains PM number
+    int number;         //if node type is HitPM/Detected/NotDetected -> contains PM number
+    int iWave;          //photon wave index
 
     QString Print(AMaterialParticleCollection* MpCollection) const;
 

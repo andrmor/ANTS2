@@ -1389,11 +1389,13 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
   bool AccountForPassive = ui->cbPassivePMsTakenAccount->isChecked();
 
   //init
-  double Zmin = ui->ledZfrom->text().toDouble();
-  double Zmax = ui->ledZto->text().toDouble();
-  bool UseScan = ui->cbPlotVsActualPosition->isChecked();
-  bool fShowPMs = ui->cbShowPMs->isChecked();
-  bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const double Zmin = ui->ledZfrom->text().toDouble();
+  const double Zmax = ui->ledZto->text().toDouble();
+  const bool UseScan = ui->cbPlotVsActualPosition->isChecked();
+  const bool fShowPMs = ui->cbShowPMs->isChecked();
+  const bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const bool bInvertX = ui->cbInvertX->isChecked();
+  const bool bInvertY = ui->cbInvertY->isChecked();
 
   auto hist2D = new TH2D("hist2d","",ui->sbXbins->value(), ui->ledXfrom->text().toDouble(), ui->ledXto->text().toDouble(),
                                     ui->sbYbins->value(), ui->ledYfrom->text().toDouble(), ui->ledYto->text().toDouble());
@@ -1479,16 +1481,22 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
         default:;
         }
 
+        double X, Y;
         if (UseScan)
           {
-             hist2D->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1], val);
-            histNum->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1]);
+             X = EventsDataHub->Scan[iev]->Points[0].r[0];
+             Y = EventsDataHub->Scan[iev]->Points[0].r[1];
           }
         else
           {
-             hist2D->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1], val);
-            histNum->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1]);
+             X = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0];
+             Y = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1];
           }
+        if (bInvertX) X *= -1.0;
+        if (bInvertY) Y *= -1.0;
+
+        hist2D->Fill( X, Y, val );
+        histNum->Fill( X, Y );
       }
     else qWarning() << "Not implemented for multiple points!";
 

@@ -2,7 +2,7 @@
 #define AINTERFACETOPHOTONSCRIPT_H
 
 #include "scriptinterfaces.h"
-
+#include "generalsimsettings.h"
 #include <QVector>
 #include <QVariant>
 
@@ -68,6 +68,8 @@ private:
 
     APhotonTracer* Tracer;
 
+    GeneralSimSettings simSet;
+
     bool bBuildTracks = false;
     int TrackColor = 7;
     int TrackWidth = 1;
@@ -77,6 +79,8 @@ private:
 
     void clearTrackHolder();
     void normalizeVector(double *arr);
+    bool initTracer();
+    void processTracks();
 };
 
 #endif // AINTERFACETOPHOTONSCRIPT_H

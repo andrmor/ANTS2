@@ -867,9 +867,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QLabel" name="label_64">
           <property name="geometry">
            <rect>
-            <x>12</x>
+            <x>0</x>
             <y>7</y>
-            <width>66</width>
+            <width>80</width>
             <height>21</height>
            </rect>
           </property>
@@ -885,7 +885,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <rect>
             <x>81</x>
             <y>8</y>
-            <width>101</width>
+            <width>150</width>
             <height>20</height>
            </rect>
           </property>
@@ -915,8 +915,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QSpinBox" name="sbPMtype">
           <property name="geometry">
            <rect>
-            <x>240</x>
-            <y>8</y>
+            <x>420</x>
+            <y>30</y>
             <width>51</width>
             <height>22</height>
            </rect>
@@ -1048,7 +1048,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QLabel" name="lTypeNumber">
           <property name="geometry">
            <rect>
-            <x>187</x>
+            <x>240</x>
             <y>11</y>
             <width>47</width>
             <height>13</height>
@@ -1421,7 +1421,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <rect>
           <x>10</x>
           <y>3</y>
-          <width>231</width>
+          <width>361</width>
           <height>31</height>
          </rect>
         </property>
@@ -1434,9 +1434,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QComboBox" name="cobPMtypes">
          <property name="geometry">
           <rect>
-           <x>126</x>
+           <x>132</x>
            <y>3</y>
-           <width>101</width>
+           <width>180</width>
            <height>22</height>
           </rect>
          </property>
@@ -1458,6 +1458,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          </property>
          <property name="text">
           <string>Select a defined type:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </widget>

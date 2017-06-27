@@ -36,6 +36,7 @@ void AInterfaceToPhotonScript::ClearData()
 {
     EventsDataHub->clear();    
     Detector->GeoManager->ClearTracks();
+    clearTrackHolder();
 }
 
 bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time)
@@ -61,6 +62,7 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     Event->HitsToSignal();
     EventsDataHub->Events.append(Event->PMsignals);
     if (bBuildTracks) processTracks();
+    delete phot;
     return true;
 }
 
@@ -97,6 +99,7 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
    Event->HitsToSignal();
    EventsDataHub->Events.append(Event->PMsignals);
    if (bBuildTracks) processTracks();
+   delete phot;
    return true;
 }
 
@@ -351,14 +354,12 @@ bool AInterfaceToPhotonScript::initTracer()
     }
 
     simSet.bDoPhotonHistoryLog = true;
-    simSet.fQEaccelerator = false;
-    bBuildTracks = true;
+    simSet.fQEaccelerator = false;    
     simSet.fLogsStat = true;
     simSet.MaxNumberOfTracks = MaxNumberTracks;
 
     Event->configure(&simSet);
-    Tracer->configure(&simSet, Event, bBuildTracks, &Tracks);
-    clearTrackHolder();
+    Tracer->configure(&simSet, Event, (Tracks.size() >= MaxNumberTracks ? false : bBuildTracks), &Tracks);
 
     return true;
 }

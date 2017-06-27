@@ -24,6 +24,7 @@ public:
 public slots:
     void ClearData();
     bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time);
+    bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time);
 
     void SetBuildTracks(bool flag) {bBuildTracks = flag;}
     void SetTrackColor(int color) {TrackColor = color;}

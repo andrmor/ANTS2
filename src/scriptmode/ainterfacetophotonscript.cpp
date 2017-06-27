@@ -104,6 +104,25 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     return true;
 }
 
+bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time)
+{
+   double v[3];
+   //Sphere function of Root:
+   double a=0, b=0, r2=1;
+   while (r2 > 0.25)
+     {
+         a  = Detector->RandGen->Rndm() - 0.5;
+         b  = Detector->RandGen->Rndm() - 0.5;
+         r2 =  a*a + b*b;
+     }
+   v[2] = ( -1.0 + 8.0 * r2 );
+   double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+   v[0] = a*scale;
+   v[1] = b*scale;
+
+   return TracePhotons(copies, x, y, z, v[0], v[1], v[2], iWave, time);
+}
+
 void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
 {
   QVariantList vMI = MustInclude.toList();

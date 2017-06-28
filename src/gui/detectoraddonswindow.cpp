@@ -43,11 +43,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
   MW = parent;
   Detector = detector;
   ui->setupUi(this);
-//  this->setFixedSize(this->size());
-//  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-//  windowFlags |= Qt::WindowCloseButtonHint;
-//  windowFlags |= Qt::WindowStaysOnTopHint;
-//  this->setWindowFlags( windowFlags );
 
   ui->pbBackToSandwich->setEnabled(false);
 
@@ -1069,4 +1064,61 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
   p.setColor(QPalette::Active, QPalette::WindowText, col );
   p.setColor(QPalette::Inactive, QPalette::WindowText, col );
   ui->cbAutoCheck->setPalette(p);
+}
+
+#include <QClipboard>
+void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
+{
+    QString script = "// Auto-generated script\n";
+    for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
+        script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
+
+    AGeoObject* World = Detector->Sandwich->World;
+
+    objectMembersToScript(World, script, 2);
+
+    script += "\n\n  geo.UpdateGeometry()";
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(script);
+    qDebug() << script;
+}
+
+void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &script, int ident)
+{
+    for (AGeoObject* obj : Master->HostedObjects)
+    {
+        if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+            objectMembersToScript(obj, script, ident + 2);
+        }
+    }
+}
+
+QString DetectorAddOnsWindow::makeScriptString_basicObject(AGeoObject* obj)
+{
+    return  "geo.TGeo( '" +
+            obj->Name +
+            "', '" +
+            obj->Shape->getGenerationString() + "', " +
+            Detector->MpCollection->getMaterialName(obj->Material) + "_mat, " +  //QString::number(obj->Material) + ", " +
+            "'"+obj->Container->Name + "',   "+
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
+            QString::number(obj->Orientation[0]) + ", " +
+            QString::number(obj->Orientation[1]) + ", " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString DetectorAddOnsWindow::makeLinePropertiesString(AGeoObject *obj)
+{
+    return "geo.SetLine( '" +
+            obj->Name +
+            "',  " +
+            QString::number(obj->color) + ",  " +
+            QString::number(obj->width) + ",  " +
+            QString::number(obj->style) + " )";
 }

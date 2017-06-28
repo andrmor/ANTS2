@@ -670,6 +670,7 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
   for (int i=0; i<GeoObjects.size(); i++)
     {
       const QString name = GeoObjects.at(i)->Name;
+      qDebug() << "Checking"<<name;
       if (Detector->Sandwich->World->isNameExists(name))
         {         
           clearGeoObjects();          
@@ -700,7 +701,7 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
       if (!fFound)
         {
           //maybe it will be inside one of the GeoObjects defined ABOVE this one?
-          for (int j=0; j<i; i++)
+          for (int j=0; j<i; j++)
           {
               if (cont == GeoObjects.at(j)->Name)
               {

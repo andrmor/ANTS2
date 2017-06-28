@@ -7,6 +7,7 @@ class MainWindow;
 class DetectorClass;
 class InterfaceToAddObjScript;
 class AGeoTreeWidget;
+class AGeoObject;
 
 namespace Ui {
   class DetectorAddOnsWindow;
@@ -69,13 +70,18 @@ private slots:
 
   void on_pmParseInGeometryFromGDML_clicked();
 
+  void on_pbConvertToScript_clicked();
+
 private:
   Ui::DetectorAddOnsWindow *ui;
   MainWindow* MW;
   DetectorClass* Detector;
   QString ObjectScriptTarget;
 
-  void ConvertDummyToPM(int idpm);
+  void ConvertDummyToPM(int idpm);  
+  QString makeScriptString_basicObject(AGeoObject *obj);
+  QString makeLinePropertiesString(AGeoObject *obj);
+  void objectMembersToScript(AGeoObject *Master, QString &script, int ident);
 
 public slots:
   void UpdateGeoTree();

@@ -2855,8 +2855,6 @@ void GraphWindowClass::SaveBasket()
 
 void GraphWindowClass::AppendBasket()
 {
-  qDebug() << "Appending to basket";
-
   QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -2868,33 +2866,30 @@ void GraphWindowClass::AppendBasket()
 
   TNamed* desc = (TNamed*)f->Get("BasketDescription");
   QString text = desc->GetTitle();
-  qDebug() << text;
-
-  TH1::AddDirectory(false);  // ***
+  //qDebug() << text;
 
   if (desc)
     {
-      qDebug()<<"Proper basket file!";
+      //qDebug()<<"Proper basket file!";
       QStringList sl = text.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
 
       int numLines = sl.size();
-      qDebug() << "Lines: "<<numLines;
+      //qDebug() << "Lines: "<<numLines;
 
-      //int numFileObjects = f->GetListOfKeys()->GetEntries();
       bool ok = true;
       int indexFileObject = 0;
       if (numLines % 2 == 0 )
         {
-          qDebug() << "Ok, even number of lines";
+          //qDebug() << "Ok, even number of lines";
           for (int iDrawObject=0; iDrawObject<numLines/2; iDrawObject++ )
             {
-              qDebug() << iDrawObject<<">-----";
+              //qDebug() << iDrawObject<<">-----";
               QString name = sl[iDrawObject*2];
               bool ok;
               QStringList fields = sl[iDrawObject*2+1].split("|");
               if (fields.size()<2)
                 {
-                  qDebug()<<"Too short descr line";
+                  qWarning()<<"Too short descr line";
                   ok=false;
                   break;
                 }
@@ -2902,13 +2897,13 @@ void GraphWindowClass::AppendBasket()
               if (!ok) break;
               if (numObj != fields.size()-1)
                 {
-                  qDebug()<<"Num objects vs option strings mismatch:"<<numObj<<fields.size()-1;
+                  qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
                   ok=false;
                   break;
                 }
 
-              qDebug() << "name:"<< name;
-              qDebug() << "objects:"<< numObj;
+              //qDebug() << "name:"<< name;
+              //qDebug() << "objects:"<< numObj;
 
               QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
               for (int i=0; i<numObj; i++)
@@ -2916,8 +2911,8 @@ void GraphWindowClass::AppendBasket()
                   TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject);
                   indexFileObject++;
                   QString type = key->GetClassName();
-                  TString objName = key->GetName();
-                  qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
+                  //TString objName = key->GetName();
+                  //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
                   TObject *p = 0;
 
                   if (type=="TH1D") p = (TH1D*)key->ReadObj();
@@ -2942,14 +2937,16 @@ void GraphWindowClass::AppendBasket()
                   if (type=="TGraph") p = (TGraph*)key->ReadObj();
                   if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
 
+                  if (type=="TLegend") p = (TLegend*)key->ReadObj();
+
                   if (p)
                     {
-                      qDebug() << p->GetName();
+                      //qDebug() << p->GetName();
                       drawObjects->append(DrawObjectStructure(p, fields[i+1]));
                     }
                   else
                     {
-                      qWarning() << "Unregistered object type for load basket from file!";
+                      qWarning() << "Unregistered object type" << type <<"for load basket from file!";
                     }
                 }
               Basket.append(BasketItemClass(name, drawObjects));
@@ -2958,22 +2955,14 @@ void GraphWindowClass::AppendBasket()
         }
       else ok = false;
 
-      if (ok)
-        {
-          qDebug() << "Append successful";
-        }
-      else
-        {
-          qDebug() << "Corrupted basked description";
-        }
+      if (ok) qDebug() << "Append successful";
+      else    qDebug() << "Corrupted basked file";
     }
   else
     {
       message("It is not a proper Basket file!", this);
     }
   f->Close();
-
-  TH1::AddDirectory(true); // ***
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()

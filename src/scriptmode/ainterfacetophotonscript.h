@@ -58,6 +58,8 @@ public slots:
     QVariant GetHistory() const;
     bool SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom);
 
+    void AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth);
+
     QString GetProcessName(int NodeType);
     QString PrintRecord(int iPhoton, int iRecord);
     QString PrintAllDefinedProcessTypes();

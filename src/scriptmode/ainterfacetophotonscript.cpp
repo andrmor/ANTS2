@@ -302,6 +302,24 @@ bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowApp
     return true;
 }
 
+void AInterfaceToPhotonScript::AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth)
+{
+    if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return;
+
+    const QVector <APhotonHistoryLog> &ThisPhLog = EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton);
+    if (ThisPhLog.size()<2) return;
+
+    TGeoTrack* track = new TGeoTrack(1, 1);
+    track->SetLineColor(TrackColor);
+    track->SetLineWidth(TrackWidth);
+    for (int iR=0; iR<ThisPhLog.size(); iR++)
+    {
+        const APhotonHistoryLog &rec = ThisPhLog.at(iR);
+        track->AddPoint(rec.r[0], rec.r[1], rec.r[2], rec.time);
+    }
+    Detector->GeoManager->AddTrack(track);
+}
+
 QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
 {
   QString s = "<br>Defined record fields:<br>";

@@ -56,6 +56,10 @@ const QString APhotonHistoryLog::GetProcessName(int nodeType)
     case Detected: return "Detected";
     case NotDetected: return "NotDetected";
     case GeneratedOutsideGeometry: return "GeneratedOutsideGeometry";
+    case Grid_Enter: return "Grid_Enter";
+    case Grid_Exit: return "Grid_Exit";
+    case Grid_ShiftIn: return "Grid_ShiftIn";
+    case Grid_ShiftOut: return "Grid_ShiftOut";
     default: return "Error: unknown index!";
     }
 }
@@ -67,6 +71,3 @@ const QString APhotonHistoryLog::PrintAllProcessTypes()
     s += QString::number(i) + " -> " + GetProcessName(i) + "<br>";
   return s;
 }
-
-
-

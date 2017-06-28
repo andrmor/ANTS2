@@ -13,6 +13,7 @@ public:
 
                    Created, HitPM, HitDummyPM, Detected, NotDetected, Escaped, Absorbed, MaxNumberCyclesReached, Rayleigh,
                    Reemission, Fresnel_Reflection, Fresnel_Transmition, Override_Loss, Override_Forward, Override_Back, GeneratedOutsideGeometry,
+                   Grid_Enter, Grid_Exit, Grid_ShiftIn, Grid_ShiftOut,
 
                    __SizeOfNodeTypes__//keep it last!!!
                   };

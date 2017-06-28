@@ -418,7 +418,7 @@ void OneEventClass::AddDarkCounts()
 
 void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
 {
-    if (SimSet->fWaveResolved)
+    //if (SimSet->fWaveResolved)
       SimStat->registerWave(WaveIndex);
     //if (SimSet->fTimeResolved)
       SimStat->registerTime(time);

@@ -439,9 +439,9 @@ void Simulator::appendToDataHub(EventsDataClass *dataHub)
     if(simSettings->fAngResolved)
       addTH1(dataHub->SimStat->getCosAngleSpectrum(), this->dataHub->SimStat->getCosAngleSpectrum());
     //if(simSettings->fTimeResolved)
-      addTH1(dataHub->SimStat->getTimeSpectrum(), this->dataHub->SimStat->getTimeSpectrum());
-    if(simSettings->fWaveResolved)
-      addTH1(dataHub->SimStat->getWaveSpectrum(), this->dataHub->SimStat->getWaveSpectrum());
+    addTH1(dataHub->SimStat->getTimeSpectrum(), this->dataHub->SimStat->getTimeSpectrum());
+    //if(simSettings->fWaveResolved)
+    addTH1(dataHub->SimStat->getWaveSpectrum(), this->dataHub->SimStat->getWaveSpectrum());
     addTH1(dataHub->SimStat->getTransitionSpectrum(), this->dataHub->SimStat->getTransitionSpectrum());
 
     dataHub->SimStat->AppendSimulationStatistics(this->dataHub->SimStat);

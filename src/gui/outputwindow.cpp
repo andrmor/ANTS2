@@ -727,7 +727,6 @@ bool OutputWindow::event(QEvent *event)
 
 void OutputWindow::on_pbWaveSpectrum_clicked()
 {
-  //if (!EventsDataHub->LastSimSet.fWaveResolved) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {
@@ -756,7 +755,6 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
 
 void OutputWindow::on_pbTimeSpectrum_clicked()
 {
-  //if (!EventsDataHub->isTimed()) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {
@@ -768,9 +766,8 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Time data are empty!\n"
-              "Make sure the following settings were configured before simulation:\n"
-              "* Simulation_options/Accelerators/Do_logs_and_statistics is checked\n"
-              "* Simulation_options/Time/Time-resolved is checked", this);
+              "Make sure the following is set before simulation:\n"
+              "Simulation_options/Accelerators/Do_logs_and_statistics is checked\n", this);
       return;
     }
 
@@ -779,7 +776,6 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
 
 void OutputWindow::on_pbAngleSpectrum_clicked()
 {
-  //if (!EventsDataHub->LastSimSet.fAngResolved) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {

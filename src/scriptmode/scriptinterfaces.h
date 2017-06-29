@@ -88,6 +88,9 @@ public slots:
   void AddToStack(QVariant names, QString StackName);
   void RecalculateStack(QString StackName);
 
+  void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
+  void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
+
   void SetLine(QString name, int color, int width, int style);
   void ClearAll();
   void Remove(QString Object);

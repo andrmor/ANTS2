@@ -1109,25 +1109,32 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
         }
         else if (obj->ObjectType->isComposite())
         {
-            script += "\n" + QString(" ").repeated(ident)+ "//---logical volumes for " + obj->Name;
+            script += "\n" + QString(" ").repeated(ident) + "//-->-- logical volumes for " + obj->Name;
             objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4);
+            script += "\n" + QString(" ").repeated(ident) + "//--<-- logical volumes end for " + obj->Name;
 
             script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
             script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
             objectMembersToScript(obj, script, ident + 2);
         }
+        else if (obj->ObjectType->isArray())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
+        }
 
-        else if (obj->ObjectType->isComposite()){}
-        else if (obj->ObjectType->isComposite()){}
+
+        //else if (obj->ObjectType->isComposite()){}
     }
 }
 
 QString DetectorAddOnsWindow::makeScriptString_basicObject(AGeoObject* obj)
 {
-    return  "geo.TGeo( '" +
-            obj->Name +
-            "', '" +
-            obj->Shape->getGenerationString() + "', " +
+    return  QString("geo.TGeo( ") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Shape->getGenerationString() + "', " +
             Detector->MpCollection->getMaterialName(obj->Material) + "_mat, " +  //QString::number(obj->Material) + ", " +
             "'"+obj->Container->Name + "',   "+
             QString::number(obj->Position[0]) + ", " +
@@ -1135,6 +1142,30 @@ QString DetectorAddOnsWindow::makeScriptString_basicObject(AGeoObject* obj)
             QString::number(obj->Position[2]) + ",   " +
             QString::number(obj->Orientation[0]) + ", " +
             QString::number(obj->Orientation[1]) + ", " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
+{
+    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
+    if (!a)
+    {
+        qWarning() << "It is not an array!";
+        return "Error accessing object as array!";
+    }
+
+    return  QString("geo.Array( ") +
+            "'" + obj->Name + "', " +
+            QString::number(a->numX) + ", " +
+            QString::number(a->numY) + ", " +
+            QString::number(a->numZ) + ",   " +
+            QString::number(a->stepX) + ", " +
+            QString::number(a->stepY) + ", " +
+            QString::number(a->stepZ) + ", " +
+            "'" + obj->Container->Name + "',   " +
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
             QString::number(obj->Orientation[2]) + " )";
 }
 

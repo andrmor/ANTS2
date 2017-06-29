@@ -587,6 +587,33 @@ void InterfaceToAddObjScript::RecalculateStack(QString StackName)
   Detector->BuildDetector_CallFromScript();
 }
 
+void InterfaceToAddObjScript::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
+{
+    AGeoObject* o = new AGeoObject(name, container, 0, 0, x,y,z, 0,0,psi);
+    delete o->ObjectType;
+    o->ObjectType = new ATypeArrayObject(numX, numY, numZ, stepX, stepY, stepZ);
+    GeoObjects.append(o);
+}
+
+void InterfaceToAddObjScript::ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
+{
+    AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
+    if (!obj)
+    {
+        abort("Cannot find object "+name);
+        return;
+    }
+
+    if (obj->ObjectType->isArray())
+    {
+        abort("This object is not an array: "+name);
+        return;
+    }
+
+    ATypeArrayObject* a = static_cast<ATypeArrayObject*>(obj->ObjectType);
+    a->Reconfigure(numX, numY, numZ, stepX, stepY, stepZ);
+}
+
 void InterfaceToAddObjScript::SetLine(QString name, int color, int width, int style)
 {
   AGeoObject* obj = 0;

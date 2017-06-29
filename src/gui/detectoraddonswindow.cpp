@@ -1067,6 +1067,7 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 }
 
 #include <QClipboard>
+#include "ascriptwindow.h"
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
     QString script = "// Auto-generated script\n\n";
@@ -1089,7 +1090,11 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText(script);
-    qDebug() << script;
+
+    MW->ScriptWindow->onLoadRequested(script);
+    MW->ScriptWindow->showNormal();
+    MW->ScriptWindow->raise();
+    MW->ScriptWindow->activateWindow();
 }
 
 void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &script, int ident)
@@ -1134,12 +1139,25 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
         {
             script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
             script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
+            script += "\n" + QString(" ").repeated(ident)+ "// Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
+            script += "\n" + QString(" ").repeated(ident)+ "// For the rest of elements they are calculated automatically";
             objectMembersToScript(obj, script, ident + 2);
             script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
-            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
+            if (!obj->HostedObjects.isEmpty())
+                script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
         }
-
-        //else if (obj->ObjectType->isComposite()){}
+        else if (obj->ObjectType->isGrid())
+        {
+            script += "\n";
+            script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
+            script += "\n";
+        }
+        else if (obj->ObjectType->isGroup())
+        {
+            script += "\n";
+            script += "\n" + QString(" ").repeated(ident)+ "//=== Group object is not supported! Make a request to the developers ===";
+            script += "\n";
+        }
     }
 }
 
@@ -1184,22 +1202,16 @@ QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
 
 QString DetectorAddOnsWindow::makeScriptString_stackObjectStart(AGeoObject *obj)
 {
-    return  QString("geo.MakeEmptyStack(") +
-            "'" + obj->Name + "' )";
+    return  QString("geo.MakeStack(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
 }
 
 QString DetectorAddOnsWindow::makeScriptString_stackObjectEnd(AGeoObject *obj)
 {
-    QString s = QString("geo.AddToStack( ");
-    s += "[ ";
-    for (int i=0; i<obj->HostedObjects.size(); i++)
-    {
-        if (i !=0 ) s += " , ";
-        s += " '" + obj->HostedObjects.at(i)->Name + "' ";
-    }
-    s += "], ";
-    s += "'" + obj->Name + "' )";
-    return s;
+    return QString("geo.InitializeStack( ") +
+           "'" + obj->Name + "',  " +
+           "'" + obj->HostedObjects.first()->Name + "' )";
 }
 
 QString DetectorAddOnsWindow::makeLinePropertiesString(AGeoObject *obj)

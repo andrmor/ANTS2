@@ -371,14 +371,18 @@ InterfaceToAddObjScript::InterfaceToAddObjScript(DetectorClass* Detector)
                 "If all objects inside also have to be deleted, use RemoveRecursive function.";
   H["RemoveRecursive"] = "Removes the Object (if not locked) and all non-locked objects hosted inside.";
 
+  H["RemoveAllExceptWorld"] = "Removes all slabs and configured objects, ignoring the lock status!";
+
   H["UpdateGeometry"] = "Updates geometry and do optional check for geometry definition errors.\n"
                         "It is performed automatically for the script called from Advanced Settings window.";
 
-  H["Stack"] = "Adds a stack object. It's container and position is defined by the first object placed in the stack.\n"
-               "An array with object names can be provided directly, or objects can be added later with AddToStack function.";
+  H["MakeStack"] = "Adds empty stack object. Volumes can be added normally to this object, stating its name as the container.\n"
+                   "After the last element is added, call InitializeStack(StackName, Origin) function. "
+                   "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
+  H["InitializeStack"] = "Call this function after the last element has been added to the stack."
+                   "It will automatically calculate x,y and z positions of all elements, keeping user-configured xyz position of the Origin element.";
 
-  H["AddToStack"] = "Adds an object or a list of objects to the stack (must be defined with Stack function).";
-  H["RecalculateStack"] = "Recalculates Z positions. Has to be called if config.Replace() was used to change thickness of members.";
+  H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
 }
 
 InterfaceToAddObjScript::~InterfaceToAddObjScript()
@@ -536,54 +540,78 @@ void InterfaceToAddObjScript::TGeo(QString name, QString GenerationString, int i
     GeoObjects.append(o);
 }
 
-void InterfaceToAddObjScript::Stack(QString StackName, QVariant Members)
+void InterfaceToAddObjScript::MakeStack(QString name, QString container)
 {
-  QStringList list = Members.toStringList();
-  list.insert(0, StackName);
-  Stacks << list;
-    //qDebug() << list << Stacks.size();
+    AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    delete o->ObjectType;
+    o->ObjectType = new ATypeStackContainerObject();
+    GeoObjects.append(o);
 }
 
-void InterfaceToAddObjScript::MakeEmptyStack(QString StackName)
+void InterfaceToAddObjScript::InitializeStack(QString StackName, QString Origin_MemberName)
 {
-  QStringList list;
-  list << StackName;
-  Stacks << list;
-}
+    AGeoObject* StackObj = 0;
+    for (AGeoObject* obj : GeoObjects)
+        if (obj->Name == StackName && obj->ObjectType->isStack())
+        {
+            StackObj = obj;
+            break;
+        }
 
-void InterfaceToAddObjScript::AddOneToStack(QString name, QString StackName)
-{
-  for (int i=0; i<Stacks.size(); i++)
-    if (Stacks.at(i).first() == StackName)
-      {
-        Stacks[i] << name;
-        return;
-      }
-}
-
-void InterfaceToAddObjScript::AddToStack(QVariant names, QString StackName)
-{
-  QStringList list = names.toStringList();
-
-  for (int i=0; i<Stacks.size(); i++)
-    if (Stacks.at(i).first() == StackName)
-      {
-        Stacks[i] << list;
-        return;
-      }
-}
-
-void InterfaceToAddObjScript::RecalculateStack(QString StackName)
-{
-    //qDebug() << "Update stack triggered";
-  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(StackName);
-    //qDebug() << "stack obj:"<<obj;
-  if (obj)
+    if (!StackObj)
     {
-        //qDebug() << "Obj:"<<obj->Name <<"Hosted objects:"<<obj->HostedObjects.size();
-      if (!obj->HostedObjects.isEmpty())
-        obj->HostedObjects[0]->updateStack();
+        abort("Stack with name " + StackName + " not found!");
+        return;
     }
+
+    bool bFound = false;
+    AGeoObject* origin_obj = 0;
+    for (int io=0; io<GeoObjects.size(); io++)
+    {
+        AGeoObject* obj = GeoObjects.at(io);
+        if (obj->Name == Origin_MemberName)
+        {
+            bFound = true;
+            origin_obj = obj;
+        }
+        if (obj->tmpContName == StackName)
+            StackObj->HostedObjects << obj;
+    }
+
+    if (!bFound)
+    {
+        abort("Stack element with name " + Origin_MemberName + " not found!");
+        return;
+    }
+
+   origin_obj->Container = StackObj;
+   origin_obj->updateStack();
+
+   origin_obj->Container = 0;
+   StackObj->HostedObjects.clear();
+}
+
+void InterfaceToAddObjScript::RecalculateStack(QString name)
+{
+  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
+  if (!obj)
+  {
+      abort("Stack or stack element with name " + name + " not found!");
+      return;
+  }
+
+  if (obj->ObjectType->isStack())
+  {
+      if (obj->HostedObjects.isEmpty()) return; //nothing to recalculate
+      else obj = obj->HostedObjects.first();
+  }
+  else if (!obj->Container->ObjectType->isStack())
+  {
+      abort("Object with name " + name + " is not a stack or stack element!");
+      return;
+  }
+
+  obj->updateStack();
   Detector->BuildDetector_CallFromScript();
 }
 
@@ -740,19 +768,7 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
                   fFound = true;
                   break;
               }
-          }
-          if (!fFound)
-          {
-              //maybe it will be inside one of Stacks?
-              for (int iS=0; iS<Stacks.size(); iS++)
-              {
-                  if (cont == Stacks.at(iS).at(0))  //first is the stack name
-                  {
-                      fFound = true;
-                      break;
-                  }
-              }
-          }
+          }    
           if (!fFound)
           {
               clearGeoObjects();              
@@ -761,60 +777,6 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
           }
         }
     }
-
-  //checking Stacks
-  for (int iStack=0; iStack<Stacks.size(); iStack++)
-  {
-      if (Stacks.at(iStack).size()<2)
-        {
-          clearGeoObjects();
-          abort("Stack should contain at least one object!");
-          return;
-        }
-
-      //stack name should be unique
-      const QString name = Stacks.at(iStack).first();
-      if (Detector->Sandwich->World->isNameExists(name))
-        {
-          clearGeoObjects();
-          abort("Add geo object: Name already exists in detector geometry: "+name);
-          return;
-        }
-      for (int j=0; j<GeoObjects.size(); j++)
-        {
-          if (name == GeoObjects.at(j)->Name)
-            {
-              clearGeoObjects();
-              abort("Add geo object: At least two objects have the same name: "+name);
-              return;
-            }
-        }
-      for (int j=0; j<Stacks.size(); j++)
-        {
-          if (j == iStack) continue;
-          if (name == Stacks.at(j).first())
-            {
-              clearGeoObjects();
-              abort("Stack with this name already defined: "+name);
-              return;
-            }
-        }
-
-      //names should be defined in World or in list of objects to add
-      for (int iObjName=1; iObjName<Stacks.at(iStack).size(); iObjName++)
-        {
-          QString name = Stacks.at(iStack).at(iObjName);
-          if (Detector->Sandwich->World->isNameExists(name)) continue;
-          bool fFound = false;
-          for (int j=0; j<GeoObjects.size(); j++)
-             if (name == GeoObjects.at(j)->Name) fFound = true;
-          if (fFound) continue;
-
-          clearGeoObjects();
-          abort("Add stack: Object not found: "+name);
-          return;
-        }
-  }
 
   //adding objects
   while (!GeoObjects.isEmpty())
@@ -831,46 +793,6 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
      contObj->addObjectLast(GeoObjects.first());
      GeoObjects.removeFirst();
   }
-
-  //adding stacks
-  for (int iStack=0; iStack<Stacks.size(); iStack++)
-  {
-     AGeoObject* stackObj = new AGeoObject();
-
-     delete stackObj->ObjectType;
-     stackObj->ObjectType = new ATypeStackContainerObject();
-     stackObj->Name = Stacks.at(iStack).first();
-
-     QStringList ObjNames = Stacks.at(iStack);
-     ObjNames.removeFirst();
-
-     QString FirstName = ObjNames.first(); //stack will be inside the container of the first object
-     AGeoObject* firstObj = Detector->Sandwich->World->findObjectByName(FirstName);
-     if (!firstObj)
-       {
-         qCritical() << "Object not found:"<<FirstName;
-         exit(666);
-       }
-     AGeoObject* contObj = firstObj->Container;
-     stackObj->Container = contObj;
-     qDebug() << "--Stack will be hosted by:"<<stackObj->Container->Name;
-
-     for (int i=0; i<ObjNames.size(); i++)
-       {
-         QString name = ObjNames.at(i);
-         AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
-         if (!obj) continue;
-         if (obj->ObjectType->isSlab()) continue;
-
-         obj->Container->HostedObjects.removeOne(obj);
-         obj->Container = stackObj;
-         stackObj->HostedObjects.append(obj);
-       }
-     contObj->HostedObjects.insert(0, stackObj);
-
-     firstObj->updateStack();
-  }
-  Stacks.clear();
 
   Detector->BuildDetector_CallFromScript();
 
@@ -890,7 +812,6 @@ void InterfaceToAddObjScript::clearGeoObjects()
     for (int i=0; i<GeoObjects.size(); i++)
         delete GeoObjects[i];
     GeoObjects.clear();
-    Stacks.clear();
 }
 #endif
 //-----------------------------------------

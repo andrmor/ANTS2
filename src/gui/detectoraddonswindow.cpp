@@ -1105,7 +1105,13 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
         {
             script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
             script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
-            objectMembersToScript(obj, script, ident + 2);
+            if (obj->ObjectType->isLightguide())
+            {
+                script += "\n";
+                script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
+                script += "\n";
+            }
+            objectMembersToScript(obj, script, ident + 2);            
         }
         else if (obj->ObjectType->isComposite())
         {
@@ -1124,7 +1130,14 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
             objectMembersToScript(obj, script, ident + 2);
             script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
         }
-
+        else if (obj->ObjectType->isStack())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
+        }
 
         //else if (obj->ObjectType->isComposite()){}
     }
@@ -1167,6 +1180,26 @@ QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
             QString::number(obj->Position[1]) + ", " +
             QString::number(obj->Position[2]) + ",   " +
             QString::number(obj->Orientation[2]) + " )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_stackObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeEmptyStack(") +
+            "'" + obj->Name + "' )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_stackObjectEnd(AGeoObject *obj)
+{
+    QString s = QString("geo.AddToStack( ");
+    s += "[ ";
+    for (int i=0; i<obj->HostedObjects.size(); i++)
+    {
+        if (i !=0 ) s += " , ";
+        s += " '" + obj->HostedObjects.at(i)->Name + "' ";
+    }
+    s += "], ";
+    s += "'" + obj->Name + "' )";
+    return s;
 }
 
 QString DetectorAddOnsWindow::makeLinePropertiesString(AGeoObject *obj)

@@ -81,6 +81,8 @@ private:
   void ConvertDummyToPM(int idpm);  
   QString makeScriptString_basicObject(AGeoObject *obj);
   QString makeScriptString_arrayObject(AGeoObject *obj);
+  QString makeScriptString_stackObjectStart(AGeoObject *obj);
+  QString makeScriptString_stackObjectEnd(AGeoObject *obj);
   QString makeLinePropertiesString(AGeoObject *obj);
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident);
 

@@ -544,14 +544,14 @@ void InterfaceToAddObjScript::Stack(QString StackName, QVariant Members)
     //qDebug() << list << Stacks.size();
 }
 
-void InterfaceToAddObjScript::Stack(QString StackName)
+void InterfaceToAddObjScript::MakeEmptyStack(QString StackName)
 {
   QStringList list;
   list << StackName;
   Stacks << list;
 }
 
-void InterfaceToAddObjScript::AddToStack(QString name, QString StackName)
+void InterfaceToAddObjScript::AddOneToStack(QString name, QString StackName)
 {
   for (int i=0; i<Stacks.size(); i++)
     if (Stacks.at(i).first() == StackName)
@@ -739,6 +739,18 @@ void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
               {
                   fFound = true;
                   break;
+              }
+          }
+          if (!fFound)
+          {
+              //maybe it will be inside one of Stacks?
+              for (int iS=0; iS<Stacks.size(); iS++)
+              {
+                  if (cont == Stacks.at(iS).at(0))  //first is the stack name
+                  {
+                      fFound = true;
+                      break;
+                  }
               }
           }
           if (!fFound)

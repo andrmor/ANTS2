@@ -82,9 +82,9 @@ public slots:
 
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
-  void Stack(QString StackName, QVariant Members);
-  void Stack(QString StackName);
-  void AddToStack(QString name, QString StackName);
+  void MakeEmptyStack(QString StackName);
+  void Stack(QString StackName, QVariant Members);  
+  void AddOneToStack(QString name, QString StackName);
   void AddToStack(QVariant names, QString StackName);
   void RecalculateStack(QString StackName);
 

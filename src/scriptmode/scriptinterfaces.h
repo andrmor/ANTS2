@@ -92,6 +92,7 @@ public slots:
   void ClearAll();
   void Remove(QString Object);
   void RemoveRecursive(QString Object);
+  void RemoveAllExceptWorld();
 
   void UpdateGeometry(bool CheckOverlaps = true);
 

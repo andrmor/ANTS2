@@ -258,6 +258,7 @@ public slots:
   void RemoveAllPMs();
   bool AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
   bool AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
+  void SetAllArraysFullyCustom();
 
 private:
   AConfiguration* Config;

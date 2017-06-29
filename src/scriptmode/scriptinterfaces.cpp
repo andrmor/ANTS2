@@ -662,6 +662,11 @@ void InterfaceToAddObjScript::RemoveRecursive(QString Object)
     obj->recursiveSuicide();
 }
 
+void InterfaceToAddObjScript::RemoveAllExceptWorld()
+{
+    Detector->Sandwich->clearWorld();
+}
+
 //--------------------------------------------------------------
 
 void InterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)

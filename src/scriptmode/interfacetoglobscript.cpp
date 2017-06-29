@@ -2841,6 +2841,13 @@ bool AInterfaceToPMs::AddPM(int UpperLower, int type, double X, double Y, double
     return true;
 }
 
+void AInterfaceToPMs::SetAllArraysFullyCustom()
+{
+    for (int i=0; i<Config->GetDetector()->PMarrays.size(); i++)
+        Config->GetDetector()->PMarrays[i].Regularity = 2;
+    Config->GetDetector()->writeToJson(Config->JSON);
+}
+
 #ifdef GUI
 AInterfaceToOutputWin::AInterfaceToOutputWin(MainWindow *MW)
 {

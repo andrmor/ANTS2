@@ -1069,7 +1069,15 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
 #include <QClipboard>
 void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 {
-    QString script = "// Auto-generated script\n";
+    QString script = "// Auto-generated script\n\n";
+
+    script += "  //Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
+    script += "  pms.SetAllArraysFullyCustom()\n";
+    script += "  //Remove all slabs and objects\n";
+    script += "  geo.RemoveAllExceptWorld()\n";
+
+    script += "\n";
+    script += "  //Defined materials:\n";
     for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
         script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
 
@@ -1077,7 +1085,7 @@ void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
 
     objectMembersToScript(World, script, 2);
 
-    script += "\n\n  geo.UpdateGeometry()";
+    script += "\n\n  geo.UpdateGeometry(true)";
 
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText(script);
@@ -1088,12 +1096,29 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
 {
     for (AGeoObject* obj : Master->HostedObjects)
     {
-        if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
+        if (obj->ObjectType->isLogical())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+        }
+        else if (obj->ObjectType->isCompositeContainer()) {} //nothing to do
+        else if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
         {
             script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
             script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
             objectMembersToScript(obj, script, ident + 2);
         }
+        else if (obj->ObjectType->isComposite())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ "//---logical volumes for " + obj->Name;
+            objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4);
+
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+            objectMembersToScript(obj, script, ident + 2);
+        }
+
+        else if (obj->ObjectType->isComposite()){}
+        else if (obj->ObjectType->isComposite()){}
     }
 }
 

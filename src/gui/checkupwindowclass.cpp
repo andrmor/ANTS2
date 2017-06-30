@@ -12,12 +12,12 @@
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
-#include <QResizeEvent>
 #include <QDebug>
 #include <QPainter>
 #include <QMenu>
 #include <QScrollBar>
 #include <QFileDialog>
+#include <QCloseEvent>
 
 #include "TGeoManager.h"
 
@@ -350,21 +350,6 @@ void CheckUpWindowClass::adjustTable(QTableWidget *table, int maxw, int maxh)
             th = maxh;
     }
     table->resize(tw, th);
-}
-
-void CheckUpWindowClass::resizeEvent(QResizeEvent *ev)
-{
-//    ui->tabWidget->resize(ev->size().width(), ev->size().height());
-//    adjustTable(ui->opticsTable);
-//    adjustTable(ui->pmtsTable);
-
-//    ui->buttonRefreshAll->move(this->width()-ui->buttonRefreshAll->width(), 0);
-//    ui->buttonRefreshCurrent->move(ui->buttonRefreshAll->x()-ui->buttonRefreshCurrent->width(), 0);
-
-//    //Adjust interactions text list
-//    const QPoint &pos = ui->listInteraction->pos();
-//    //Subtract 2*Tab bar height and 2*pos with a bit extra right margin. Still not perfect but... Close enough! :)
-//    ui->listInteraction->resize(ui->tabWidget->size() - 2*QSize(pos.x()+2, pos.y()+ui->tabWidget->tabBar()->height()));
 }
 
 void CheckUpWindowClass::showEvent(QShowEvent *ev)

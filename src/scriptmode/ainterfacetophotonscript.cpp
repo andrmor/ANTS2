@@ -4,7 +4,6 @@
 #include "detectorclass.h"
 #include "asandwich.h"
 #include "oneeventclass.h"
-#include "generalsimsettings.h"
 #include "asimulationstatistics.h"
 #include "aphoton.h"
 #include "atrackrecords.h"
@@ -17,9 +16,8 @@
 #include "TGeoManager.h"
 #include "TH1.h"
 
-
-
 #include <QDebug>
+#include <QFileInfo>
 
 AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, EventsDataClass* EventsDataHub) :
     Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
@@ -38,35 +36,18 @@ void AInterfaceToPhotonScript::ClearData()
 {
     EventsDataHub->clear();    
     Detector->GeoManager->ClearTracks();
+    clearTrackHolder();
 }
 
 bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time)
 {
-    Tracer->UpdateGeoManager(Detector->GeoManager);
-
-    GeneralSimSettings simSet;
-    QJsonObject jsSimSet = Config->JSON["SimulationConfig"].toObject();
-    bool ok = simSet.readFromJson(jsSimSet);
-    if (!ok)
-    {
-        qWarning() << "Config does not contain simulation settings!";
-        return false;
-    }
-
-    simSet.bDoPhotonHistoryLog = true;
-    simSet.fQEaccelerator = false;
-    bBuildTracks = true;
-    simSet.fLogsStat = true;
-    simSet.MaxNumberOfTracks = MaxNumberTracks;
-
-    Event->configure(&simSet);    
-    Tracer->configure(&simSet, Event, bBuildTracks, &Tracks);
-    clearTrackHolder();
+    if (!initTracer()) return false;
 
     double r[3];
     r[0]=x;
     r[1]=y;
     r[2]=z;
+
     double v[3];
     v[0] = vx;
     v[1] = vy;
@@ -80,28 +61,46 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
 
     Event->HitsToSignal();
     EventsDataHub->Events.append(Event->PMsignals);
-
-    if (bBuildTracks)
-    {
-        int numTracks = 0;
-        for (int iTr=0; iTr<Tracks.size() && numTracks < MaxNumberTracks; iTr++)
-        {
-            TrackHolderClass* th = Tracks.at(iTr);
-            TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-            track->SetLineColor(TrackColor);
-            track->SetLineWidth(TrackWidth);
-            for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-            if (track->GetNpoints()>1)
-            {
-                numTracks++;
-                Detector->GeoManager->AddTrack(track);
-            }
-            else delete track;
-        }
-    }
-
+    if (bBuildTracks) processTracks();
+    delete phot;
     return true;
+}
+
+bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time)
+{
+   if (!initTracer()) return false;
+
+   double r[3];
+   r[0]=x;
+   r[1]=y;
+   r[2]=z;
+
+   double v[3];  //will be defined for each photon individually
+   APhoton* phot = new APhoton(r, v, iWave, time);
+   phot->SimStat = EventsDataHub->SimStat;
+
+   for (int i=0; i<copies; i++)
+   {
+       //Sphere function of Root:
+       double a=0, b=0, r2=1.0;
+       while (r2 > 0.25)
+         {
+             a  = Detector->RandGen->Rndm() - 0.5;
+             b  = Detector->RandGen->Rndm() - 0.5;
+             r2 =  a*a + b*b;
+         }
+       phot->v[2] = ( -1.0 + 8.0 * r2 );
+       double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+       phot->v[0] = a*scale;
+       phot->v[1] = b*scale;
+       Tracer->TracePhoton(phot);
+   }
+
+   Event->HitsToSignal();
+   EventsDataHub->Events.append(Event->PMsignals);
+   if (bBuildTracks) processTracks();
+   delete phot;
+   return true;
 }
 
 void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
@@ -221,7 +220,12 @@ long AInterfaceToPhotonScript::GetRayleigh() const
 
 long AInterfaceToPhotonScript::GetReemitted() const
 {
-  return EventsDataHub->SimStat->Reemission;
+    return EventsDataHub->SimStat->Reemission;
+}
+
+int AInterfaceToPhotonScript::GetHistoryLength() const
+{
+    return EventsDataHub->SimStat->PhotonHistoryLog.size();
 }
 
 QVariant AInterfaceToPhotonScript::GetHistory() const
@@ -247,6 +251,7 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
           ob["process"] = static_cast<int>(rec.process);
           ob["volumeName"] = rec.volumeName;
           ob["number"] = rec.number;
+          ob["wave"] = rec.iWave;
 
           nodeArr << ob;
         }
@@ -255,6 +260,64 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
     }
 
   return arr.toVariantList();
+}
+
+bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom)
+{
+    if (!AllowAppend && QFileInfo(FileName).exists())
+      {
+        abort("File already exists and append was not allowed!");
+        return false;
+      }
+
+    QFile file(FileName);
+    if ( !file.open(QIODevice::Append ) )
+    {
+        abort("Cannot open file: " + FileName);
+        return false;
+    }
+
+    QTextStream s(&file);
+    const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
+    for (int iPh=StartFrom; iPh<AllPhLog.size(); iPh++)
+      {
+        const QVector <APhotonHistoryLog> &ThisPhLog = AllPhLog.at(iPh);
+        for (int iR=0; iR<ThisPhLog.size(); iR++)
+          {
+            const APhotonHistoryLog &rec = ThisPhLog.at(iR);
+
+            s << iR << "   "
+              << APhotonHistoryLog::GetProcessName(rec.process) << "   "
+              << rec.r[0] <<" "<< rec.r[1] <<" "<< rec.r[2] << " " <<rec.time << "  "
+              << rec.volumeName << "  "
+              << rec.number << "  "
+              << rec.matIndex << " " << rec.matIndexAfter << "   "
+              << rec.iWave
+              << "\r\n";
+          }
+        s << "\r\n";
+      }
+    file.close();
+
+    return true;
+}
+
+void AInterfaceToPhotonScript::AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth)
+{
+    if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return;
+
+    const QVector <APhotonHistoryLog> &ThisPhLog = EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton);
+    if (ThisPhLog.size()<2) return;
+
+    TGeoTrack* track = new TGeoTrack(1, 1);
+    track->SetLineColor(TrackColor);
+    track->SetLineWidth(TrackWidth);
+    for (int iR=0; iR<ThisPhLog.size(); iR++)
+    {
+        const APhotonHistoryLog &rec = ThisPhLog.at(iR);
+        track->AddPoint(rec.r[0], rec.r[1], rec.r[2], rec.time);
+    }
+    Detector->GeoManager->AddTrack(track);
 }
 
 QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
@@ -266,7 +329,8 @@ QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
   s += "time -> time in ns<br>";
   s += "iMat -> material index of this volume (-1 if undefined)<br>";
   s += "iMatNext -> material index after interface (-1 if undefined)<br>";
-  s += "number -> multifunction, e.g. PM# for PMhit (-1 if undefined)<br>";
+  s += "number -> index of PM hit (-1 if undefined)<br>";
+  s += "wave -> wavelength index (-1 if undefined)<br>";
   return s;
 }
 
@@ -293,6 +357,49 @@ void AInterfaceToPhotonScript::clearTrackHolder()
     for(int i=0; i<Tracks.size(); i++)
         delete Tracks[i];
     Tracks.clear();
+}
+
+bool AInterfaceToPhotonScript::initTracer()
+{
+    Tracer->UpdateGeoManager(Detector->GeoManager);
+
+    QJsonObject jsSimSet = Config->JSON["SimulationConfig"].toObject();
+    bool ok = simSet.readFromJson(jsSimSet);
+    if (!ok)
+    {
+        qWarning() << "Config does not contain simulation settings!";
+        return false;
+    }
+
+    simSet.bDoPhotonHistoryLog = true;
+    simSet.fQEaccelerator = false;    
+    simSet.fLogsStat = true;
+    simSet.MaxNumberOfTracks = MaxNumberTracks;
+
+    Event->configure(&simSet);
+    Tracer->configure(&simSet, Event, (Tracks.size() >= MaxNumberTracks ? false : bBuildTracks), &Tracks);
+
+    return true;
+}
+
+void AInterfaceToPhotonScript::processTracks()
+{
+    int numTracks = 0;
+    for (int iTr=0; iTr<Tracks.size() && numTracks < MaxNumberTracks; iTr++)
+    {
+        TrackHolderClass* th = Tracks.at(iTr);
+        TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+        track->SetLineColor(TrackColor);
+        track->SetLineWidth(TrackWidth);
+        for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+            track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+        if (track->GetNpoints()>1)
+        {
+            numTracks++;
+            Detector->GeoManager->AddTrack(track);
+        }
+        else delete track;
+    }
 }
 
 void AInterfaceToPhotonScript::normalizeVector(double *arr)

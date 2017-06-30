@@ -1145,8 +1145,6 @@ void MaterialInspectorWindow::on_pbLoadTotalInteractionCoefficient_clicked()
         QTextStream in(&file);
 
         int particleId = ui->cobParticle->currentIndex();
-        //tmpMaterial.MatParticle[particleId].InteractionDataX.resize(0);
-        //tmpMaterial.MatParticle[particleId].InteractionDataF.resize(0);
 
         double Multiplier;
         switch (ui->cobTotalInteractionLoadEnergyUnits->currentIndex())
@@ -2193,9 +2191,11 @@ void MaterialInspectorWindow::ShowTotalInteraction()
   QVector<double> X(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX);
   QVector<double> Y(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF);
 
-  TString Title, Xtitle, Ytitle;
+  qDebug() << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF;
+
+  TString Title="Total interaction coefficient", Xtitle, Ytitle;
   if (type == AParticle::_charged_)
-    {
+    {      
       Xtitle = "Energy, keV";
       Ytitle = "Stopping power, keV cm2/g";
     }
@@ -2211,7 +2211,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
       for (int i=0; i<X.size(); i++)
         {
           X[i] *= 1.0e6; // keV -> meV
-          Y[i] *= 1.0e24; // back to barns
+          Y[i] *= 1.0e24; // cm2 to barns
         }
     }
   else
@@ -2220,10 +2220,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
       exit(666);
     }
 
-  TGraph* gr = MW->GraphWindow->ConstructTGraph(X, Y);
-  gr->SetTitle("Total interaction coefficient");
-  gr->SetMarkerColor(kRed);
-  gr->SetMarkerStyle(2);
+  TGraph* gr = MW->GraphWindow->ConstructTGraph(X, Y, Title, Xtitle, Ytitle, kRed, 2, 1, kRed, 0, 1);
   MW->GraphWindow->Draw(gr, "AP");
 
   TGraph* graphOver = constructInterpolationGraph(X, Y);
@@ -2344,4 +2341,43 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
 {
     if (arg1.toDouble() != MW->MpCollection->tmpMaterial.MatParticle.at(ui->cobYieldForParticle->currentIndex()).PhYield)
       on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbTest_clicked()
+{
+  int particleId = ui->cobParticle->currentIndex();
+  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+  tmpMaterial.MatParticle[particleId].InteractionDataX.clear();
+  tmpMaterial.MatParticle[particleId].InteractionDataX << 1e-10 << 1e10;
+  tmpMaterial.MatParticle[particleId].InteractionDataF.clear();
+  tmpMaterial.MatParticle[particleId].InteractionDataF << 1.734e-24 << 1.734e-24;
+
+  tmpMaterial.MatParticle[particleId].Terminators.resize(2);
+  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy << 1e-10 << 1e10;
+  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSection.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSection << 0.231e-24 << 0.231e-24;
+  tmpMaterial.MatParticle[particleId].Terminators[0].Type = NeutralTerminatorStructure::Capture;
+  tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticles.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticleEnergies.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[0].branching = 0.1332;
+
+  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy << 1e-10 << 1e10;
+  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
+  tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::EllasticScattering;
+  tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticles.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticleEnergies.clear();
+  tmpMaterial.MatParticle[particleId].Terminators[1].branching = 1.0-0.1332;
+
+  ui->fNeutron->setEnabled(true);
+  ui->pbShowTotalInteraction->setEnabled(true);
+  ui->pbAddNewTerminationScenario->setEnabled(true);
+
+  MaterialInspectorWindow::on_pbWasModified_clicked();
+
+  MaterialInspectorWindow::on_cobParticle_currentIndexChanged(ui->cobParticle->currentIndex());
+  MaterialInspectorWindow::on_ledBranching_editingFinished(); //to update cross-sections
 }

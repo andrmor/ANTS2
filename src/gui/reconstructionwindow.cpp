@@ -1051,14 +1051,14 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 void ReconstructionWindow::updateFiltersGui()
 {
   //Update UI
-  ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
-  ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
-  ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
-  ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
+  //ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
+  //ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
+  //ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
+  //ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
-  ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
-  ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
+  //ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
+  //ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
     //warning icons
   bool masterWarningFlag = false;
   QIcon no;

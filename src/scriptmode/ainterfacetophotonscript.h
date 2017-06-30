@@ -2,7 +2,7 @@
 #define AINTERFACETOPHOTONSCRIPT_H
 
 #include "scriptinterfaces.h"
-
+#include "generalsimsettings.h"
 #include <QVector>
 #include <QVariant>
 
@@ -24,6 +24,7 @@ public:
 public slots:
     void ClearData();
     bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time);
+    bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time);
 
     void SetBuildTracks(bool flag) {bBuildTracks = flag;}
     void SetTrackColor(int color) {TrackColor = color;}
@@ -53,7 +54,11 @@ public slots:
     long GetReemitted() const;
 
     //history record
+    int GetHistoryLength() const;
     QVariant GetHistory() const;
+    bool SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom);
+
+    void AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth);
 
     QString GetProcessName(int NodeType);
     QString PrintRecord(int iPhoton, int iRecord);
@@ -67,6 +72,8 @@ private:
 
     APhotonTracer* Tracer;
 
+    GeneralSimSettings simSet;
+
     bool bBuildTracks = false;
     int TrackColor = 7;
     int TrackWidth = 1;
@@ -76,6 +83,8 @@ private:
 
     void clearTrackHolder();
     void normalizeVector(double *arr);
+    bool initTracer();
+    void processTracks();
 };
 
 #endif // AINTERFACETOPHOTONSCRIPT_H

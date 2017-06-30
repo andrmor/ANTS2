@@ -94,6 +94,7 @@ private slots:
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
 
+
     //user or code controlled change -safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
     void on_lwGeneratedParticlesEnergies_currentRowChanged(int currentRow);
@@ -108,6 +109,9 @@ private slots:
     void on_actionUse_log_log_interpolation_triggered();
 
     //new auto-generated, not cathegorized
+
+    void on_pbTest_clicked();
+
 
 private:
     Ui::MaterialInspectorWindow *ui;

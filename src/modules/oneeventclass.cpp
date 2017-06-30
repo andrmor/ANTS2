@@ -81,6 +81,8 @@ void OneEventClass::clearHits()
 
 bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
+  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
@@ -100,12 +102,13 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
   PMhitsTotal[ipm]++;
   if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm]++;
 
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
   return true;
 }
 
 bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
+  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
@@ -151,7 +154,6 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
   else
     registerSiPMhit(ipm, iTime, binX, binY);
 
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
   return true;
 }
 
@@ -415,10 +417,13 @@ void OneEventClass::AddDarkCounts()
 }
 
 void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
-{  
-    if (SimSet->fWaveResolved) SimStat->registerWave(WaveIndex);
-    if (SimSet->fTimeResolved) SimStat->registerTime(time);
-    if (SimSet->fAngResolved)  SimStat->registerAngle(cosAngle);
+{
+    //if (SimSet->fWaveResolved)
+      SimStat->registerWave(WaveIndex);
+    //if (SimSet->fTimeResolved)
+      SimStat->registerTime(time);
+    if (SimSet->fAngResolved)
+      SimStat->registerAngle(cosAngle);
     SimStat->registerNumTrans(Transitions);
 }
 

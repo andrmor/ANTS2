@@ -2376,8 +2376,8 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   ui->pbShowTotalInteraction->setEnabled(true);
   ui->pbAddNewTerminationScenario->setEnabled(true);
 
-  MaterialInspectorWindow::on_pbWasModified_clicked();
+  on_pbUpdateInteractionIndication_clicked();
+  on_ledBranching_editingFinished(); //to update cross-sections
 
-  MaterialInspectorWindow::on_cobParticle_currentIndexChanged(ui->cobParticle->currentIndex());
-  MaterialInspectorWindow::on_ledBranching_editingFinished(); //to update cross-sections
+  on_pbWasModified_clicked();
 }

@@ -2388,9 +2388,9 @@ with the relative numeric fractions of 90 to 1.</string>
            <widget class="QPushButton" name="pbTest">
             <property name="geometry">
              <rect>
-              <x>0</x>
-              <y>30</y>
-              <width>75</width>
+              <x>364</x>
+              <y>29</y>
+              <width>50</width>
               <height>23</height>
              </rect>
             </property>

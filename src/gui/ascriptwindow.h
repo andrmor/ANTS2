@@ -38,6 +38,8 @@ public:
     void SetScript(QString *text);
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
+    void AddNewTab();
+
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
     void HighlightErrorLine(int line);
 
@@ -122,7 +124,6 @@ private:
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
 
-    void addNewTab();
     void removeTab(int tab);
     void clearAllTabs();
     QString createNewTabName();

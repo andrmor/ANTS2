@@ -81,7 +81,7 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     twScriptTabs->setMovable(true);
     //twScriptTabs->setTabShape(QTabWidget::Triangular);
     twScriptTabs->setMinimumHeight(25);
-    addNewTab();
+    AddNewTab();
       //
     QSplitter* hor = new QSplitter(); //all upper widgets are here
     hor->setContentsMargins(0,0,0,0);
@@ -271,7 +271,7 @@ void AScriptWindow::SetScript(QString* text)
     tmpIgnore = true;
       ScriptTabs[CurrentTab]->TextEdit->clear();
       ScriptTabs[CurrentTab]->TextEdit->append(*text);
-    tmpIgnore = false;
+      tmpIgnore = false;
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -328,7 +328,7 @@ void AScriptWindow::ReadFromJson(QJsonObject &json)
     for (int i=0; i<ar.size(); i++)
     {
         QJsonObject js = ar[i].toObject();
-        addNewTab();
+        AddNewTab();
         AScriptWindowTabItem* st = ScriptTabs.last();
         st->ReadFromJson(js);
         if (!st->FileName.isEmpty())
@@ -343,7 +343,7 @@ void AScriptWindow::ReadFromJson(QJsonObject &json)
            }
         }
     }
-    if (ScriptTabs.isEmpty()) addNewTab();
+    if (ScriptTabs.isEmpty()) AddNewTab();
 
     CurrentTab = json["CurrentTab"].toInt();
     if (CurrentTab<0 || CurrentTab>ScriptTabs.size()-1) CurrentTab = 0;
@@ -500,7 +500,7 @@ void AScriptWindow::on_pbLoad_clicked()
 
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
-    if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty()) addNewTab();
+    if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty()) AddNewTab();
     twScriptTabs->setTabText(CurrentTab, "__123456789");
     twScriptTabs->setTabText(CurrentTab, createNewTabName());
 
@@ -1076,7 +1076,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 
     if (selectedItem == add)
       {
-        addNewTab();
+        AddNewTab();
       }
     else if (selectedItem == remove)
       {
@@ -1101,7 +1101,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
         if (ret == QMessageBox::Yes)
         {
             clearAllTabs();
-            addNewTab();
+            AddNewTab();
         }
     }
 }
@@ -1110,10 +1110,9 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 {
    qDebug() << "Form->to:"<<from<<to;
    ScriptTabs.swap(from, to);
-
 }
 
-void AScriptWindow::addNewTab()
+void AScriptWindow::AddNewTab()
 {
     ScriptTabs.append(new AScriptWindowTabItem(completitionModel));
     ScriptTabs.last()->highlighter->setCustomCommands(functions);
@@ -1157,7 +1156,7 @@ void AScriptWindow::removeTab(int tab)
     delete ScriptTabs[tab];
     ScriptTabs.removeAt(tab);
 
-    if (ScriptTabs.isEmpty()) addNewTab();
+    if (ScriptTabs.isEmpty()) AddNewTab();
 }
 
 void AScriptWindow::clearAllTabs()

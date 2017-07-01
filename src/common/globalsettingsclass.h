@@ -59,6 +59,7 @@ public:
   QString GlobScript;
   QJsonObject ScriptWindowJson;
   int DefaultFontSize_ScriptWindow;
+  QList<int> MainSplitterSizes_ScriptWindow;
 
   //Network
   int DefaultWebSocketPort;

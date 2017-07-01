@@ -162,6 +162,9 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
   js["DefaultFontSize_ScriptWindow"] = DefaultFontSize_ScriptWindow;
+  QJsonArray mspAr;
+  for (int w : MainSplitterSizes_ScriptWindow) mspAr << w;
+  js["MainSplitterSizes_ScriptWindow"] = mspAr;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
   js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
@@ -209,6 +212,10 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
 
     parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
+    QJsonArray mspAr;
+    parseJson(js, "MainSplitterSizes_ScriptWindow", mspAr);
+    for (int imsa=0; imsa<mspAr.size(); imsa++)
+        MainSplitterSizes_ScriptWindow << mspAr[imsa].toInt(50);
 
     //network
     DefaultWebSocketPort = 1234;

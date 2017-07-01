@@ -48,6 +48,8 @@ public:
 
     void UpdateHighlight();
 
+    void SetMainSplitterSizes(QList<int> values);
+
     AScriptManager* ScriptManager;
     QStringList functions;
 
@@ -99,6 +101,7 @@ private:
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
+    QSplitter* splMain;
     QSplitter* splHelp;
     QPlainTextEdit* pteOut;
     QTreeWidget* trwHelp;

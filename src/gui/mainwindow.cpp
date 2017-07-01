@@ -201,8 +201,8 @@ void MainWindow::closeEvent(QCloseEvent *)
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
-   //qDebug()<<"--Saving ANTS configuration";
-   if (ScriptWindow) ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   //qDebug()<<"--Saving ANTS configuration";   
+   ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
    GlobSet->SaveANTSconfiguration();
 
    bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it   

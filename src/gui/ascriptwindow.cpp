@@ -69,9 +69,9 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     completitionModel = new QStringListModel(QStringList());
 
     //more GUI
-    QSplitter* sp = new QSplitter();  // upper + output with buttons
-    sp->setOrientation(Qt::Vertical);
-    sp->setChildrenCollapsible(false);
+    splMain = new QSplitter();  // upper + output with buttons
+    splMain->setOrientation(Qt::Vertical);
+    splMain->setChildrenCollapsible(false);
       //
     twScriptTabs = new QTabWidget();
     connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
@@ -178,8 +178,8 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     //splHelp->setVisible(false);
 
     hor->addWidget(splHelp);
-
-    sp->addWidget(hor);
+    hor->setMinimumHeight(60);
+    splMain->addWidget(hor);
       //
     pteOut = new QPlainTextEdit();
     pteOut->setMinimumHeight(25);
@@ -190,16 +190,22 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     pteOut->setPalette(p);
     pteHelp->setPalette(p);
     hor->setSizes(sizes);  // sizes of Script / Help / Config
-    sizes.clear();
-    sizes << 800 << 50;
-    sp->setSizes(sizes);
 
-    sp->addWidget(pteOut);
+    splMain->addWidget(pteOut);
     ui->centralwidget->layout()->removeItem(ui->horizontalLayout);
-    ui->centralwidget->layout()->addWidget(sp);
+    ui->centralwidget->layout()->addWidget(splMain);
     ui->centralwidget->layout()->addItem(ui->horizontalLayout);
 
     trwJson->header()->resizeSection(0, 200);
+
+    if (!GlobSet->MainSplitterSizes_ScriptWindow.isEmpty())
+        SetMainSplitterSizes(GlobSet->MainSplitterSizes_ScriptWindow);
+    else
+    {
+        sizes.clear();
+        sizes << 800 << 70;
+        splMain->setSizes(sizes);
+    }
 
     //shortcuts
     QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
@@ -211,7 +217,7 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
 
 AScriptWindow::~AScriptWindow()
 {
-  //qDebug() << "Destructor of script window called";  
+  //qDebug() << "Destructor of script window called";
   tmpIgnore = true;
   clearAllTabs();
   delete ui;
@@ -317,6 +323,8 @@ void AScriptWindow::WriteToJson(QJsonObject &json)
     }
     json["ScriptTabs"] = ar;
     json["CurrentTab"] = CurrentTab;
+
+    GlobSet->MainSplitterSizes_ScriptWindow = splMain->sizes();
 }
 
 void AScriptWindow::ReadFromJson(QJsonObject &json)
@@ -354,6 +362,11 @@ void AScriptWindow::UpdateHighlight()
 {
    for (int i=0; i<ScriptTabs.size(); i++)
        ScriptTabs[i]->UpdateHighlight();
+}
+
+void AScriptWindow::SetMainSplitterSizes(QList<int> values)
+{
+    splMain->setSizes(values);
 }
 
 void AScriptWindow::ShowText(QString text)

@@ -64,42 +64,46 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             tc.movePosition(QTextCursor::EndOfLine);
             tc.select(QTextCursor::WordUnderCursor);
             //qDebug() << tc.selectedText();
-            QString lastWord = tc.selectedText();
+
+            //auto-insert "{" and "}"
+//            QString lastWord = tc.selectedText();
             bool fUp = false;
-            if ( line.simplified().endsWith("{") )
-              {
-                 //if the next curly bracket is "{" (or do not found), add "}"
-                 QTextCursor tmpc = this->textCursor();
-                 bool fDoIt = true;
-                 do
-                   {
-                     tmpc.clearSelection();
-                     tmpc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-                     QString st = tmpc.selectedText();
-                     if (st == "}")
-                       {
-                         fDoIt = false;
-                         break;
-                       }
-                     if (st == "{") break; //still true
-                   }
-                 while (!tmpc.atEnd());
-                 if (fDoIt)
-                   {
-                     insert += spacer+"    \n"+
-                               spacer+"}";
-                     fUp = true;
-                   }
-                 else insert += spacer+"  ";
-              }
-            else if (line.simplified().startsWith("for") || lastWord == "while" || lastWord == "do")
-              {
-                 insert += spacer +"{\n"+
-                           spacer+"   \n"+
-                           spacer+"}";
-                 fUp = true;
-              }
-            else insert += spacer;
+//            if ( line.simplified().endsWith("{") )
+//              {
+//                 //if the next curly bracket is "{" (or do not found), add "}"
+//                 QTextCursor tmpc = this->textCursor();
+//                 bool fDoIt = true;
+//                 do
+//                   {
+//                     tmpc.clearSelection();
+//                     tmpc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+//                     QString st = tmpc.selectedText();
+//                     if (st == "}")
+//                       {
+//                         fDoIt = false;
+//                         break;
+//                       }
+//                     if (st == "{") break; //still true
+//                   }
+//                 while (!tmpc.atEnd());
+//                 if (fDoIt)
+//                   {
+//                     insert += spacer+"    \n"+
+//                               spacer+"}";
+//                     fUp = true;
+//                   }
+//                 else insert += spacer+"  ";
+//              }
+
+//            else if (line.simplified().startsWith("for") || lastWord == "while" || lastWord == "do")
+//              {
+//                 insert += spacer +"{\n"+
+//                           spacer+"   \n"+
+//                           spacer+"}";
+//                 fUp = true;
+//              }
+//            else
+            insert += spacer;
 
             tc.movePosition(QTextCursor::EndOfLine);           
             tc.insertText(insert);

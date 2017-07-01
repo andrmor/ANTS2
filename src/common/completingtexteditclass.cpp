@@ -135,7 +135,8 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
     }
 
     //Copy line;
-    if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) )
+    if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) ||
+         (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::ShiftModifier) )
       {
         if (e->key() == Qt::Key_Down)
           {

@@ -958,6 +958,13 @@ bool AScriptWindow::event(QEvent *e)
     return QMainWindow::event(e) ;
 }
 
+void AScriptWindow::onDefaulFontSizeChanged(int size)
+{
+    GlobSet->DefaultFontSize_ScriptWindow = size;
+    for (AScriptWindowTabItem* tab : ScriptTabs)
+        tab->TextEdit->SetFontSize(size);
+}
+
 QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
@@ -1114,8 +1121,11 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 
 void AScriptWindow::AddNewTab()
 {
-    ScriptTabs.append(new AScriptWindowTabItem(completitionModel));
-    ScriptTabs.last()->highlighter->setCustomCommands(functions);
+    AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel);
+    tab->highlighter->setCustomCommands(functions);
+    tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+    QObject::connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
+    ScriptTabs.append(tab);
 
     twScriptTabs->addTab(ScriptTabs.last()->TextEdit, createNewTabName());
     QObject::connect(ScriptTabs.last()->TextEdit, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
@@ -1174,4 +1184,17 @@ void AScriptWindow::on_pbConfig_toggled(bool checked)
 void AScriptWindow::on_pbHelp_toggled(bool checked)
 {
     frHelper->setVisible(checked);
+}
+
+void AScriptWindow::on_actionIncrease_font_size_triggered()
+{
+    onDefaulFontSizeChanged(++GlobSet->DefaultFontSize_ScriptWindow);
+}
+
+void AScriptWindow::on_actionDecrease_font_size_triggered()
+{
+    if (GlobSet->DefaultFontSize_ScriptWindow<1) return;
+
+    onDefaulFontSizeChanged(--GlobSet->DefaultFontSize_ScriptWindow);
+    //qDebug() << "New font size:"<<GlobSet->DefaultFontSize_ScriptWindow;
 }

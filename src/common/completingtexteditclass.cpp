@@ -116,20 +116,16 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 
     //font size
     if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Plus )
-    {
-        QFont f = font();
-        f.setPointSize(f.pointSize()+1);
-        setFont(f);
+    {                
+        int size = font().pointSize();
+        setFontSizeAndEmitSignal(++size);
         e->ignore();
         return;
     }
     if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Minus )
     {
-        QFont f = font();
-        int size = f.pointSize()-1;
-        if (size<1) size = 1;
-        f.setPointSize(size);
-        setFont(f);
+        int size = font().pointSize();
+        setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
         e->ignore();
         return;
     }
@@ -222,19 +218,9 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
 {
   if (e->modifiers().testFlag(Qt::ControlModifier))
     {
-      QFont f = font();
-      if (e->delta()>0)
-      {
-        f.setPointSize(f.pointSize()+1);
-        setFont(f);
-      }
-      else
-      {
-        int size = f.pointSize()-1;
-        if (size<1) size = 1;
-        f.setPointSize(size);
-        setFont(f);
-      }
+      int size = font().pointSize();
+      if (e->delta() > 0) setFontSizeAndEmitSignal(++size);
+      else setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
     }
   else
     {
@@ -242,6 +228,15 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
       int vas = this->verticalScrollBar()->value();
       this->verticalScrollBar()->setValue(vas - e->delta()*0.5);
     }
+}
+
+void CompletingTextEditClass::setFontSizeAndEmitSignal(int size)
+{
+    QFont f = font();
+    if (size<1) size = 1;
+    f.setPointSize(size);
+    setFont(f);
+    emit fontSizeChanged(size);
 }
 
 void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
@@ -503,7 +498,15 @@ void CompletingTextEditClass::onCursorPositionChanged()
       extraSelections.append(extra);
       setExtraSelections(extraSelections);
       return;
-    }
+  }
+}
+
+void CompletingTextEditClass::SetFontSize(int size)
+{
+    if (size<1) size = 1;
+    QFont f = font();
+    f.setPointSize(size);
+    setFont(f);
 }
 
 QString CompletingTextEditClass::textUnderCursor() const

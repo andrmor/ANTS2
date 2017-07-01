@@ -87,6 +87,9 @@ private slots:
     void on_pbConfig_toggled(bool checked);
     void on_pbHelp_toggled(bool checked);
 
+    void on_actionIncrease_font_size_triggered();
+    void on_actionDecrease_font_size_triggered();
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;
@@ -145,6 +148,7 @@ public slots:
     void receivedOnStart() {emit onStart();}
     void receivedOnAbort() {emit onAbort();}
     void receivedOnSuccess(QString eval) {emit success(eval);}
+    void onDefaulFontSizeChanged(int size);
 };
 
 class AScriptWindowTabItem : QObject

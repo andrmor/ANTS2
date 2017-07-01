@@ -57,6 +57,8 @@ public:
     void setCompleter(QCompleter *completer);
     QCompleter *completer() const {return c; }
 
+    void SetFontSize(int size);
+
     QStringList functionList;
 
 protected:
@@ -74,12 +76,14 @@ private:
     QString textUnderCursor() const;
     QString SelectObjFunctUnderCursor(QTextCursor* cursor = 0) const;
     bool findInList(QString text, QString &tmp);
+    void setFontSizeAndEmitSignal(int size);
 
     QCompleter *c;    
 
 signals:
     void requestHelp(QString);
     void editingFinished();
+    void fontSizeChanged(int size);
 //    void requestHistoryBefore();
 //    void requestHistoryAfter();
 //    void requestHistoryStart();

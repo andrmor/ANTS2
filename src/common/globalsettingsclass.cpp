@@ -29,6 +29,8 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   NumSegments = 20;
   MaxNumberOfTracks = 1000;
 
+  DefaultFontSize_ScriptWindow = 12;
+
   NumThreads = -1; //if not loaded - set it using recommended settings
   RecNumTreads = QThread::idealThreadCount()-1;
   if (RecNumTreads<1) RecNumTreads = 1;
@@ -159,6 +161,7 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
 
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
+  js["DefaultFontSize_ScriptWindow"] = DefaultFontSize_ScriptWindow;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
   js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
@@ -204,6 +207,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "GlobScript", GlobScript);
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
+
+    parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
 
     //network
     DefaultWebSocketPort = 1234;

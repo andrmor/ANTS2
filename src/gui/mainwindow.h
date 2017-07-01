@@ -625,6 +625,8 @@ private slots:
 
     void on_bpResults_2_clicked();
 
+    void on_actionScript_window_triggered();
+
 public slots:
     void on_cobSF_chi2Vs_activated(int index);
     void on_pbRebuildDetector_clicked();

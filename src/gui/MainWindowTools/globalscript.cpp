@@ -109,13 +109,6 @@ void MainWindow::createScriptWindow()
     ScriptWindow->UpdateHighlight();
 }
 
-void MainWindow::on_actionGlobal_script_triggered()
-{
-  ScriptWindow->show();
-  ScriptWindow->raise();
-  ScriptWindow->activateWindow();   
-}
-
 void MainWindow::onGlobalScriptStarted()
 {
   WindowNavigator->BusyOn();

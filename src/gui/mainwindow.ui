@@ -16144,6 +16144,7 @@ on stack</string>
     </property>
     <addaction name="separator"/>
     <addaction name="actionWindow_navigator"/>
+    <addaction name="actionScript_window"/>
     <addaction name="actionReconstructor"/>
     <addaction name="actionOutput"/>
     <addaction name="actionLRF"/>
@@ -16316,6 +16317,11 @@ on stack</string>
    </property>
    <property name="toolTip">
     <string>Shows/hides the window of the new LRF module</string>
+   </property>
+  </action>
+  <action name="actionScript_window">
+   <property name="text">
+    <string>Script window</string>
    </property>
   </action>
  </widget>

@@ -339,3 +339,15 @@ void MainWindow::setFontSizeAllWindows(int size)
 
   for (int i=0; i<wins.size(); i++) wins[i]->setFont(font);
 }
+
+void MainWindow::on_actionGlobal_script_triggered()
+{
+    on_actionScript_window_triggered();
+}
+
+void MainWindow::on_actionScript_window_triggered()
+{
+    ScriptWindow->show();
+    ScriptWindow->raise();
+    ScriptWindow->activateWindow();
+}

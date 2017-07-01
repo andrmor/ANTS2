@@ -94,10 +94,11 @@ void MainWindow::on_actionGain_evaluation_triggered()
   Rwindow->ShowGainWindow();
 }
 
+#include "alrfwindow.h"
 void MainWindow::on_actionReset_position_of_windows_triggered()
 {
    QList<QMainWindow*> list;
-   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow;
+   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow<<ScriptWindow<<newLrfWindow;
    foreach(QMainWindow *w, list)
      {
        w->move(20,20);

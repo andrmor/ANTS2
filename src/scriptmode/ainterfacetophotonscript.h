@@ -56,6 +56,7 @@ public slots:
     //history record
     int GetHistoryLength() const;
     QVariant GetHistory() const;
+    void DeleteHistoryRecord(int iPhoton);
     bool SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom);
 
     void AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth);

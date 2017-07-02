@@ -262,6 +262,12 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
   return arr.toVariantList();
 }
 
+void AInterfaceToPhotonScript::DeleteHistoryRecord(int iPhoton)
+{
+    if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return;
+    EventsDataHub->SimStat->PhotonHistoryLog.remove(iPhoton);
+}
+
 bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom)
 {
     if (!AllowAppend && QFileInfo(FileName).exists())

@@ -55,11 +55,6 @@ void ASimulationStatistics::initialize(int nBins)
     OverrideClaudioAbs = OverrideClaudioSpec = OverrideClaudioLamb = 0;
     OverrideWLSabs = OverrideWLSshift = 0;
 
-    MustNotInclude_Processes.clear();
-    MustInclude_Processes.clear();
-    MustNotInclude_Volumes.clear();
-    MustInclude_Volumes.clear();
-
     PhotonHistoryLog.clear();
 }
 

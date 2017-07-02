@@ -230,6 +230,7 @@ int AInterfaceToPhotonScript::GetHistoryLength() const
 
 QVariant AInterfaceToPhotonScript::GetHistory() const
 {
+  //qDebug() << "   get history triggered";
   QJsonArray arr;
 
   const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;
@@ -257,8 +258,9 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
         }
 
       arr << nodeArr;
+      //if (iPh%100 == 0)qDebug() << iPh << "of" << AllPhLog.size();
     }
-
+  //qDebug() << "   sending history to script...";
   return arr.toVariantList();
 }
 

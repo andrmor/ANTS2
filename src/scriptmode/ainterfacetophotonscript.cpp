@@ -365,6 +365,7 @@ void AInterfaceToPhotonScript::clearTrackHolder()
     for(int i=0; i<Tracks.size(); i++)
         delete Tracks[i];
     Tracks.clear();
+    Tracks.squeeze();
 }
 
 bool AInterfaceToPhotonScript::initTracer()

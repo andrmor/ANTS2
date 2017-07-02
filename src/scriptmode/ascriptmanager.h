@@ -23,6 +23,7 @@ public:
     int FindSyntaxError(QString script); //returns line number of the first syntax error; -1 if no errors found
     QString Evaluate(QString Script);
 
+    void CollectGarbage();
 
     QScriptEngine* engine;
     TRandom2* RandGen;     //math module uses it

@@ -56,6 +56,7 @@ void ASimulationStatistics::initialize(int nBins)
     OverrideWLSabs = OverrideWLSshift = 0;
 
     PhotonHistoryLog.clear();
+    PhotonHistoryLog.squeeze();
 }
 
 void ASimulationStatistics::setWavelengthBinning(double waveNodes)

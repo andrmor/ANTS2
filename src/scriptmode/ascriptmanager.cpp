@@ -60,6 +60,11 @@ QString AScriptManager::Evaluate(QString Script)
     return result;
 }
 
+void AScriptManager::CollectGarbage()
+{
+    engine->collectGarbage();
+}
+
 void AScriptManager::AbortEvaluation(QString message)
 {
     qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;

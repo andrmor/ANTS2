@@ -444,7 +444,7 @@ void AScriptWindow::on_pbRunScript_clicked()
        ui->pbRunScript->setIcon(QIcon()); //clear red icon
      }
 
-   ScriptManager->engine->collectGarbage();
+   ScriptManager->CollectGarbage();
 }
 
 //void AScriptWindow::abortEvaluation(QString message)

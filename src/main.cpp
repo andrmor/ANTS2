@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
-        InterfaceToTexter* txt = new InterfaceToTexter();
+        InterfaceToTexter* txt = new InterfaceToTexter(&GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window

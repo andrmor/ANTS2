@@ -76,7 +76,7 @@ void MainWindow::createScriptWindow()
     InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
-    InterfaceToTexter* txt = new InterfaceToTexter();
+    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();

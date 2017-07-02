@@ -38,6 +38,14 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     QMainWindow(parent),
     ui(new Ui::AScriptWindow)
 {
+    if (parent)
+    {
+        //not a standalone window
+        Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+        windowFlags |= Qt::WindowCloseButtonHint;
+        this->setWindowFlags( windowFlags );
+    }
+
     ScriptManager = new AScriptManager(RandGen);
     QObject::connect(ScriptManager, SIGNAL(showMessage(QString)), this, SLOT(ShowText(QString)));
     QObject::connect(ScriptManager, SIGNAL(clearText()), this, SLOT(ClearText()));
@@ -217,7 +225,6 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
 
 AScriptWindow::~AScriptWindow()
 {
-  //qDebug() << "Destructor of script window called";
   tmpIgnore = true;
   clearAllTabs();
   delete ui;
@@ -939,12 +946,12 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 
 void AScriptWindow::closeEvent(QCloseEvent *e)
 {
-  if (ScriptManager->fEngineIsRunning)
-    {
-      e->ignore();
-      return;
-    }
-  ScriptManager->deleteMsgDialog();
+//  qDebug() << "Script window: Close event";
+//  if (ScriptManager->fEngineIsRunning)
+//    {
+//      e->ignore();
+//      return;
+//    }
 }
 
 bool AScriptWindow::event(QEvent *e)
@@ -960,10 +967,14 @@ bool AScriptWindow::event(QEvent *e)
                 // lost focus
                 break;
             case QEvent::Hide :
-                emit WindowHidden("script");//MW->WindowNavigator->HideWindowTriggered("gain");
+                //qDebug() << "Script window: hide event";
+                ScriptManager->hideMsgDialog();
+                emit WindowHidden("script");
                 break;
             case QEvent::Show :
-                emit WindowShown("script");//MW->WindowNavigator->ShowWindowTriggered("gain");
+                //qDebug() << "Script window: show event";
+                ScriptManager->restoreMsgDialog();
+                emit WindowShown("script");
                 break;
             default:;
         };

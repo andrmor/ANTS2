@@ -142,3 +142,29 @@ void AScriptManager::deleteMsgDialog()
         }
     }
 }
+
+void AScriptManager::hideMsgDialog()
+{
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        if (t)
+        {
+            t->hide();
+            return;
+        }
+    }
+}
+
+void AScriptManager::restoreMsgDialog()
+{
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        if (t)
+        {
+            if (t->isActive()) t->restore();
+            return;
+        }
+    }
+}

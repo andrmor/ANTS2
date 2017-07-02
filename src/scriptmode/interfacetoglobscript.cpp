@@ -857,15 +857,17 @@ bool InterfaceToConfig::Save(QString FileName)
 
 //-----------------------------------
 static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-InterfaceToTexter::InterfaceToTexter()
+InterfaceToTexter::InterfaceToTexter(QMainWindow* parent) : D(0), Parent(parent)
 {
-  fEnabled = true;
-  Init(false);
+  bEnabled = true;
+  bActivated = false;
+  init(false);
 }
 
-void InterfaceToTexter::Init(bool fTransparent)
+void InterfaceToTexter::init(bool fTransparent)
 {
-  D = new QDialog();
+  D = new QDialog(Parent);
+  QObject::connect(D, &QDialog::finished, this, &InterfaceToTexter::Hide);
 
   QVBoxLayout* l = new QVBoxLayout;
   e = new QPlainTextEdit();
@@ -894,6 +896,7 @@ void InterfaceToTexter::Init(bool fTransparent)
 
 InterfaceToTexter::~InterfaceToTexter()
 {
+  //qDebug() << "Msg destructor";
   deleteDialog();
 }
 
@@ -902,7 +905,7 @@ void InterfaceToTexter::SetTransparent(bool flag)
   QString text = e->document()->toPlainText();
   delete D;
   D = 0;
-  Init(flag);
+  init(flag);
   e->setPlainText(text);
 }
 
@@ -918,7 +921,7 @@ void InterfaceToTexter::Clear()
 
 void InterfaceToTexter::Show(QString txt, int ms)
 {
-  if (!fEnabled) return;
+  if (!bEnabled) return;
   e->clear();
   e->appendHtml(txt);
 
@@ -926,16 +929,19 @@ void InterfaceToTexter::Show(QString txt, int ms)
     {
       D->show();
       D->raise();
+      bActivated = true;
       return;
     }
 
   D->show();
   D->raise();
+  bActivated = true;
   QTime t;
   t.restart();
   do qApp->processEvents();
   while (t.elapsed()<ms);
   D->hide();
+  bActivated = false;
 }
 
 void InterfaceToTexter::Move(double x, double y)
@@ -952,14 +958,16 @@ void InterfaceToTexter::Resize(double w, double h)
 
 void InterfaceToTexter::Show()
 {
-  if (!fEnabled) return;
+  if (!bEnabled) return;
   D->show();
   D->raise();
+  bActivated = true;
 }
 
 void InterfaceToTexter::Hide()
 {
   D->hide();
+  bActivated = false;
 }
 
 void InterfaceToTexter::SetFontSize(int size)
@@ -971,8 +979,18 @@ void InterfaceToTexter::SetFontSize(int size)
 
 void InterfaceToTexter::deleteDialog()
 {
-   if (D) delete D;
+   delete D;
    D = 0;
+}
+
+void InterfaceToTexter::hide()
+{
+    if (D) D->hide();
+}
+
+void InterfaceToTexter::restore()
+{
+    if (D) D->show();
 }
 
 #ifdef SIM

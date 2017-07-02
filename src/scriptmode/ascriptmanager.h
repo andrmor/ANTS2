@@ -44,6 +44,8 @@ public:
     int numVariables;
 
     void deleteMsgDialog();  //needed in batch mode to force close MSG window if shown
+    void hideMsgDialog();
+    void restoreMsgDialog();
 
 public slots:    
     void AbortEvaluation(QString message = "Aborted!");

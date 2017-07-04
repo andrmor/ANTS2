@@ -24,6 +24,7 @@ AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, Event
 {
     Event = new OneEventClass(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
     Tracer = new APhotonTracer(Detector->GeoManager, Detector->RandGen, Detector->MpCollection, Detector->PMs, &Detector->Sandwich->GridRecords);
+    ClearHistoryFilters();
 }
 
 AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
@@ -230,7 +231,7 @@ int AInterfaceToPhotonScript::GetHistoryLength() const
 
 QVariant AInterfaceToPhotonScript::GetHistory() const
 {
-  //qDebug() << "   get history triggered";
+  //qDebug() << "   get history triggered"<< EventsDataHub->SimStat->PhotonHistoryLog.capacity();
   QJsonArray arr;
 
   const QVector< QVector <APhotonHistoryLog> > &AllPhLog = EventsDataHub->SimStat->PhotonHistoryLog;

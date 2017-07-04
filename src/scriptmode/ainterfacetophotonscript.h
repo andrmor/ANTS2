@@ -23,6 +23,7 @@ public:
 
 public slots:
     void ClearData();
+    void ClearTracks();
     bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time);
     bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time);
 
@@ -54,12 +55,13 @@ public slots:
     long GetReemitted() const;
 
     //history record
-    int GetHistoryLength() const;
+    int GetHistoryLength() const;    
     QVariant GetHistory() const;
     void DeleteHistoryRecord(int iPhoton);
     bool SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom);
 
     void AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth);
+    int GetNumberOfTracks() const;
 
     QString GetProcessName(int NodeType);
     QString PrintRecord(int iPhoton, int iRecord);

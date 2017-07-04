@@ -40,9 +40,13 @@ AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
 
 void AInterfaceToPhotonScript::ClearData()
 {
-    EventsDataHub->clear();    
-    Detector->GeoManager->ClearTracks();
+    EventsDataHub->clear();
     clearTrackHolder();
+}
+
+void AInterfaceToPhotonScript::ClearTracks()
+{
+    Detector->GeoManager->ClearTracks();
 }
 
 bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time)
@@ -67,7 +71,8 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
 
     Event->HitsToSignal();
     EventsDataHub->Events.append(Event->PMsignals);
-    if (bBuildTracks) processTracks();
+
+    processTracks();
     delete phot;
     return true;
 }
@@ -104,9 +109,8 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
 
    Event->HitsToSignal();
    EventsDataHub->Events.append(Event->PMsignals);
-   qDebug() << "before -- build?"<<bBuildTracks <<"container:" <<Tracks.size() <<"max num:"<< MaxNumberTracks <<"inGeoMan"<< Detector->GeoManager->GetNtracks();
-   if (bBuildTracks) processTracks();
-   qDebug() << "after -- build?"<<bBuildTracks <<"container:" <<Tracks.size() <<"max num:"<< MaxNumberTracks <<"inGeoMan"<< Detector->GeoManager->GetNtracks();
+
+   processTracks();
    delete phot;
    return true;
 }
@@ -336,6 +340,11 @@ void AInterfaceToPhotonScript::AddTrackFromHistory(int iPhoton, int TrackColor, 
     Detector->GeoManager->AddTrack(track);
 }
 
+int AInterfaceToPhotonScript::GetNumberOfTracks() const
+{
+    return Detector->GeoManager->GetNtracks();
+}
+
 QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
 {
   QString s = "<br>Defined record fields:<br>";
@@ -370,8 +379,7 @@ QString AInterfaceToPhotonScript::PrintAllDefinedProcessTypes()
 
 void AInterfaceToPhotonScript::clearTrackHolder()
 {
-    for(int i=0; i<Tracks.size(); i++)
-        delete Tracks[i];
+    for(int i=0; i<Tracks.size(); i++) delete Tracks[i];
     Tracks.clear();
     Tracks.squeeze();
 }
@@ -388,34 +396,37 @@ bool AInterfaceToPhotonScript::initTracer()
         return false;
     }
 
+    int AlreadyStoredTracks = Detector->GeoManager->GetNtracks();
+
     simSet.bDoPhotonHistoryLog = true;
     simSet.fQEaccelerator = false;    
     simSet.fLogsStat = true;
-    simSet.MaxNumberOfTracks = MaxNumberTracks;
+    simSet.MaxNumberOfTracks = MaxNumberTracks - AlreadyStoredTracks;
 
     Event->configure(&simSet);
-    Tracer->configure(&simSet, Event, (Tracks.size() >= MaxNumberTracks ? false : bBuildTracks), &Tracks);
+    bool bBuildTracksThisTime = bBuildTracks && (AlreadyStoredTracks < MaxNumberTracks);
+    //qDebug() << bBuildTracksThisTime<< simSet.MaxNumberOfTracks<<AlreadyStoredTracks << MaxNumberTracks;
+    Tracer->configure(&simSet, Event, bBuildTracksThisTime, &Tracks);
 
     return true;
 }
 
 void AInterfaceToPhotonScript::processTracks()
 {
-    int numTracks = 0;
-    for (int iTr=0; iTr<Tracks.size() && numTracks < MaxNumberTracks; iTr++)
+    for (int iTr=0; iTr<Tracks.size(); iTr++)
     {
         TrackHolderClass* th = Tracks.at(iTr);
-        TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-        track->SetLineColor(TrackColor);
-        track->SetLineWidth(TrackWidth);
+        TGeoTrack* geoTrack = new TGeoTrack(1, th->UserIndex);
+        geoTrack->SetLineColor(TrackColor);
+        geoTrack->SetLineWidth(TrackWidth);
         for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-            track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-        if (track->GetNpoints()>1)
+            geoTrack->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+        if (geoTrack->GetNpoints()>1)
         {
-            numTracks++;
-            Detector->GeoManager->AddTrack(track);
+            Detector->GeoManager->AddTrack(geoTrack);
+            if (Detector->GeoManager->GetNtracks() >= MaxNumberTracks) break;
         }
-        else delete track;
+        else delete geoTrack;
     }
     clearTrackHolder();
 }

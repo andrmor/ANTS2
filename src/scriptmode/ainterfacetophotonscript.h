@@ -75,10 +75,10 @@ private:
 
     GeneralSimSettings simSet;
 
-    bool bBuildTracks = false;
-    int TrackColor = 7;
-    int TrackWidth = 1;
-    int MaxNumberTracks = 1000;
+    bool bBuildTracks;
+    int TrackColor;
+    int TrackWidth;
+    int MaxNumberTracks;
     QVector<TrackHolderClass *> Tracks;
     OneEventClass* Event;
 

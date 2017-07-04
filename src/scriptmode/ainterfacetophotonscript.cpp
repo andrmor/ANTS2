@@ -25,6 +25,11 @@ AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, Event
     Event = new OneEventClass(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
     Tracer = new APhotonTracer(Detector->GeoManager, Detector->RandGen, Detector->MpCollection, Detector->PMs, &Detector->Sandwich->GridRecords);
     ClearHistoryFilters();
+
+    bBuildTracks = false;
+    TrackColor = 7;
+    TrackWidth = 1;
+    MaxNumberTracks = 1000;
 }
 
 AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
@@ -99,7 +104,9 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
 
    Event->HitsToSignal();
    EventsDataHub->Events.append(Event->PMsignals);
+   qDebug() << "before -- build?"<<bBuildTracks <<"container:" <<Tracks.size() <<"max num:"<< MaxNumberTracks <<"inGeoMan"<< Detector->GeoManager->GetNtracks();
    if (bBuildTracks) processTracks();
+   qDebug() << "after -- build?"<<bBuildTracks <<"container:" <<Tracks.size() <<"max num:"<< MaxNumberTracks <<"inGeoMan"<< Detector->GeoManager->GetNtracks();
    delete phot;
    return true;
 }
@@ -410,6 +417,7 @@ void AInterfaceToPhotonScript::processTracks()
         }
         else delete track;
     }
+    clearTrackHolder();
 }
 
 void AInterfaceToPhotonScript::normalizeVector(double *arr)

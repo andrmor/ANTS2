@@ -744,66 +744,76 @@ void MainWindow::on_pbUpdateSources_clicked()
           MainWindow::ReconstructDetector();
         }
     }
-  MainWindow::on_pbGunShowSource_clicked();
-  MainWindow::on_pbUpdateSimConfig_clicked();
+  //on_pbGunShowSource_clicked();
+  on_pbUpdateSimConfig_clicked();
   on_pbUpdateSourcesIndication_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    //qDebug() << "______ Update indication for particle sources";
+  qDebug() << "______ Update indication for particle sources";
   int isource = ui->cobParticleSource->currentIndex();
+  qDebug() << "source:"<<isource<<ui->cobParticleSource->count();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
-  if (numSources == 0)
-  {
-      ui->cobParticleSource->clear();
-      ui->cobParticleSource->setCurrentIndex(-1);
-      ui->fParticleSources->setEnabled(false);
-      return;
-  }
+  clearParticleSourcesIndication();
+  if (numSources == 0) return;
+
   ui->fParticleSources->setEnabled(true);
 
-  if (isource == -1) isource = 0;
-
-  ui->cobParticleSource->clear();
   for (int i=0; i<numSources; i++)
       ui->cobParticleSource->addItem(ParticleSources->getSource(i)->name);
-  if (isource > numSources-1) isource = 0;
+  if (isource >= numSources) isource = 0;
+  if (isource == -1) selectFirstActiveParticleSource();
+  if (isource == -1) isource = 0;  //paranoic
   ui->cobParticleSource->setCurrentIndex(isource);
 
-  bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
-  BulkUpdate = true;
+  updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
 
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
-  double activity = ps->Activity;
-  ui->ledSourceActivity->setText(QString::number(activity));
-  double fraction = 0;
-  double TotalActivity = ParticleSources->getTotalActivity();
-  if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
-  ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
-
-  ui->cobGunSourceType->setCurrentIndex(ps->index);
-  ui->ledGunOriginX->setText(QString::number(ps->X0));
-  ui->ledGunOriginY->setText(QString::number(ps->Y0));
-  ui->ledGunOriginZ->setText(QString::number(ps->Z0));
-  ui->ledGunPhi->setText(QString::number(ps->Phi));
-  ui->ledGunTheta->setText(QString::number(ps->Theta));
-  ui->ledGunPsi->setText(QString::number(ps->Psi));
-  ui->ledGun1DSize->setText(QString::number(ps->size1));
-  ui->ledGun2DSize->setText(QString::number(ps->size2));
-  ui->ledGun3DSize->setText(QString::number(ps->size3));
-  ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
-  ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
-  ui->ledGunSpread->setText(QString::number(ps->Spread));
-
-  ui->cbSourceLimitmat->setChecked(ps->DoMaterialLimited);
-  ui->leSourceLimitMaterial->setText(ps->LimtedToMatName);
-
-  BulkUpdate = BulkUpdateCopy;
   on_pbGunRefreshparticles_clicked();
   on_leSourceLimitMaterial_textChanged("");
+}
+
+void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
+{
+    bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
+    BulkUpdate = true;
+
+    double activity = ps->Activity;
+    ui->ledSourceActivity->setText(QString::number(activity));
+    double fraction = 0;
+    double TotalActivity = ParticleSources->getTotalActivity();
+    if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
+    ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
+
+    ui->cobGunSourceType->setCurrentIndex(ps->index);
+    ui->ledGunOriginX->setText(QString::number(ps->X0));
+    ui->ledGunOriginY->setText(QString::number(ps->Y0));
+    ui->ledGunOriginZ->setText(QString::number(ps->Z0));
+    ui->ledGunPhi->setText(QString::number(ps->Phi));
+    ui->ledGunTheta->setText(QString::number(ps->Theta));
+    ui->ledGunPsi->setText(QString::number(ps->Psi));
+    ui->ledGun1DSize->setText(QString::number(ps->size1));
+    ui->ledGun2DSize->setText(QString::number(ps->size2));
+    ui->ledGun3DSize->setText(QString::number(ps->size3));
+    ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
+    ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
+    ui->ledGunSpread->setText(QString::number(ps->Spread));
+
+    ui->cbSourceLimitmat->setChecked(ps->DoMaterialLimited);
+    ui->leSourceLimitMaterial->setText(ps->LimtedToMatName);
+
+    BulkUpdate = BulkUpdateCopy;
+}
+
+void MainWindow::clearParticleSourcesIndication()
+{
+    ParticleSourceStructure ps;
+    updateOneParticleSourcesIndication(&ps);
+    ui->cobParticleSource->clear();
+    ui->cobParticleSource->setCurrentIndex(-1);
+    ui->fParticleSources->setEnabled(false);
 }
 
 void MainWindow::on_pbGunShowSource_clicked()

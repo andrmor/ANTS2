@@ -55,6 +55,7 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
+class ParticleSourceStructure;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -644,6 +645,9 @@ private:
     void initDetectorSandwich();
     void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
+    void clearParticleSourcesIndication();
+    void selectFirstActiveParticleSource();
+    void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
 
     //new sandwich
 public slots:

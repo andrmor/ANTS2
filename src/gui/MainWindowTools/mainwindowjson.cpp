@@ -282,7 +282,6 @@ void MainWindow::onRequestSimulationGuiUpdate()
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  qDebug() << "SimFromJson"<<ui->cobParticleSource->currentIndex();
   if (!json.contains("SimulationConfig"))
     {
       //qWarning() << "Json does not contain sim settings!";
@@ -577,6 +576,7 @@ if (scj.contains("CustomDistrib"))
   JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
   ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(true);//compatibility
   JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
+
   //particle sources
   int SelectedSource = ui->cobParticleSource->currentIndex();
   ParticleSources->clear();

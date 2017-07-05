@@ -751,9 +751,7 @@ void MainWindow::on_pbUpdateSources_clicked()
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-  qDebug() << "______ Update indication for particle sources";
   int isource = ui->cobParticleSource->currentIndex();
-  qDebug() << "source:"<<isource<<ui->cobParticleSource->count();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
@@ -767,12 +765,11 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
   if (isource >= numSources) isource = 0;
   if (isource == -1) selectFirstActiveParticleSource();
   if (isource == -1) isource = 0;  //paranoic
+
   ui->cobParticleSource->setCurrentIndex(isource);
-
   updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
-
   on_pbGunRefreshparticles_clicked();
-  on_leSourceLimitMaterial_textChanged("");
+  on_leSourceLimitMaterial_textChanged("");  //update color only!
 }
 
 void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)

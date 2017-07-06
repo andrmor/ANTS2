@@ -215,7 +215,6 @@ void MainWindow::ShowSource(int isource, bool clear)
       track->SetLineColor(9);
   }
 
-  GeometryWindow->ShowAndFocus();
   MainWindow::ShowTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
@@ -224,7 +223,8 @@ void MainWindow::ShowSource(int isource, bool clear)
 
 void MainWindow::on_pbGunTest_clicked()
 {
-  MainWindow::on_pbGunShowSource_clicked();
+  //MainWindow::on_pbGunShowSource_clicked();
+  MainWindow::on_pbGunShowSource_toggled(true);
 
   QVector<double> activities;
   //forcing to 100% activity the currently selected source
@@ -697,8 +697,20 @@ void MainWindow::on_pbRemoveSource_clicked()
       on_pbUpdateSourcesIndication_clicked(); //to clean indication
       ParticleSources->remove(0);
     }
-  on_pbUpdateSourcesIndication_clicked();
+
   on_pbUpdateSimConfig_clicked();
+
+  on_pbUpdateSourcesIndication_clicked();
+  if (ui->pbGunShowSource->isChecked())
+    {
+      if (ParticleSources->size() == 0)
+        {
+           Detector->GeoManager->ClearTracks();
+           ShowGeometry(false);
+        }
+        else
+        ShowParticleSource_noFocus();
+    }
 }
 
 void MainWindow::on_pbAddSource_clicked()
@@ -711,6 +723,8 @@ void MainWindow::on_pbAddSource_clicked()
   ui->ledGunParticleWeight->setText("1");
   ui->cbIndividualParticle->setChecked(true);
   on_pbGunAddNew_clicked(); //to add new particle and register the changes in config
+  on_pbUpdateSourcesIndication_clicked();
+  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
@@ -788,6 +802,7 @@ void MainWindow::on_pbUpdateSources_clicked()
     }
   on_pbUpdateSimConfig_clicked();
      //on_pbUpdateSourcesIndication_clicked();
+  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
   //qDebug() << "...update sources done";
 }
 
@@ -856,16 +871,42 @@ void MainWindow::clearParticleSourcesIndication()
     ui->frSelectSource->setEnabled(false);
 }
 
-void MainWindow::on_pbGunShowSource_clicked()
+//void MainWindow::on_pbGunShowSource_clicked()
+//{
+//   int isource = ui->cobParticleSource->currentIndex();
+//   if (isource < 0) return;
+//   if (isource >= ParticleSources->size())
+//     {
+//       message("Source number is out of bounds!",this);
+//       return;
+//     }
+//   MainWindow::ShowSource(isource, true);
+//}
+
+void MainWindow::on_pbGunShowSource_toggled(bool checked)
 {
-   int isource = ui->cobParticleSource->currentIndex();
-   if (isource < 0) return;
-   if (isource >= ParticleSources->size())
-     {
-       message("Source number is out of bounds!",this);
-       return;
-     }
-   MainWindow::ShowSource(isource, true);
+    if (checked)
+      {
+        GeometryWindow->ShowAndFocus();
+        ShowParticleSource_noFocus();
+      }
+    else
+      {
+        Detector->GeoManager->ClearTracks();
+        ShowGeometry();
+      }
+}
+
+void MainWindow::ShowParticleSource_noFocus()
+{
+  int isource = ui->cobParticleSource->currentIndex();
+  if (isource < 0) return;
+  if (isource >= ParticleSources->size())
+    {
+      message("Source number is out of bounds!",this);
+      return;
+    }
+  ShowSource(isource, true);
 }
 
 void MainWindow::on_lwGunParticles_currentRowChanged(int /*currentRow*/)

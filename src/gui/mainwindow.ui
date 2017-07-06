@@ -11473,6 +11473,9 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="text">
           <string>Show geometry</string>
          </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
         </widget>
         <widget class="QLabel" name="label_150">
          <property name="geometry">

@@ -5079,3 +5079,8 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->activateWindow();
   Owindow->SetTab(3);
 }
+
+void MainWindow::on_cobParticleSource_activated(int /*index*/)
+{
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
+}

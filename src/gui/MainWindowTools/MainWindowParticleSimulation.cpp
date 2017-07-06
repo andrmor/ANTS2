@@ -194,7 +194,7 @@ void MainWindow::ShowSource(int isource, bool clear)
   TVector3 K(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta)); //collimation direction
   Int_t track_index = Detector->GeoManager->AddTrack(1,22);
   TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-  double Klength = 20.0;
+  double Klength = Detector->WorldSizeXY*0.5; //20 before
 
   track->AddPoint(X0, Y0, Z0, 0);
   track->AddPoint(X0+K[0]*Klength, Y0+K[1]*Klength, Z0+K[2]*Klength, 0);
@@ -227,14 +227,36 @@ void MainWindow::on_pbGunTest_clicked()
 {
   MainWindow::on_pbGunShowSource_clicked();
 
+  QVector<double> activities;
+  //forcing to 100% activity the currently selected source
+  int isource = ui->cobParticleSource->currentIndex();
+  for (int i=0; i<ParticleSources->size(); i++)
+  {
+      activities << ParticleSources->getSource(i)->Activity; //remember old
+      if (i==isource) ParticleSources->getSource(i)->Activity = 1.0;
+      else ParticleSources->getSource(i)->Activity = 0;
+  }
   ParticleSources->Init();
 
+  double Length = Detector->WorldSizeXY*0.4;
   double R[3], K[3];
-  int Points = ui->sbGunTestEvents->value();
-  for (int i=0; i<Points; i++)
+  int numParticles = ui->sbGunTestEvents->value();
+  bool bHaveSome = false;
+  for (int iRun=0; iRun<numParticles; iRun++)
     {      
       QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
-      //qDebug()<<"particles:"<<GP->size();
+      if (GP->size()>0)
+          bHaveSome = true;
+      else
+      {
+          if (iRun>2)
+          {
+             if (ui->cbSourceLimitmat->isChecked()) message("Did several attempts but no particles were generated!\n"
+                                                            "Possible reason: generation is limited to a wrong material", this);
+             else message("Did several attempts but no particles were generated!", this);
+             return;
+          }
+      }
       for (int iP = 0; iP<GP->size(); iP++)
         {
           R[0] = (*GP)[iP].Position[0];
@@ -247,15 +269,20 @@ void MainWindow::on_pbGunTest_clicked()
           Int_t track_index = Detector->GeoManager->AddTrack(1,22);
           TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
           track->AddPoint(R[0], R[1], R[2], 0);
-          track->AddPoint(R[0]+K[0]*20., R[1]+K[1]*20., R[2]+K[2]*20., 0);
+          track->AddPoint(R[0]+K[0]*Length, R[1]+K[1]*Length, R[2]+K[2]*Length, 0);
           track->SetLineWidth(1);
           track->SetLineColor(1+(*GP)[iP].ParticleId);
         }
-      //clear ad delete QVector with generated event
+      //clear and delete QVector with generated event
       GP->clear();
       delete GP;
     }
-   MainWindow::ShowTracks();
+
+  MainWindow::ShowTracks();
+
+  //restore activities of the sources
+  for (int i=0; i<ParticleSources->size(); i++)
+      ParticleSources->getSource(i)->Activity = activities.at(i);
 }
 
 void MainWindow::on_pbGunRefreshparticles_clicked()
@@ -610,12 +637,14 @@ void MainWindow::on_pbGunLoadSpectrum_clicked()
   MainWindow::on_pbUpdateSources_clicked();
 }
 
+#include "TH1.h"
 void MainWindow::on_pbGunShowSpectrum_clicked()
 {
   int isource = ui->cobParticleSource->currentIndex();
   ParticleSourceStructure* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
+  ps->GunParticles[particle]->spectrum->GetXaxis()->SetTitle("Energy, keV");
   GraphWindow->Draw(ps->GunParticles[particle]->spectrum, "", true, false);
 }
 
@@ -675,7 +704,8 @@ void MainWindow::on_pbRemoveSource_clicked()
 
 void MainWindow::on_pbAddSource_clicked()
 {
-  ParticleSources->append(new ParticleSourceStructure());
+  ParticleSourceStructure* s = new ParticleSourceStructure();
+  ParticleSources->append(s);
   ui->cobParticleSource->addItem(ParticleSources->getLastSource()->name);
   ui->cobParticleSource->setCurrentIndex(ParticleSources->size()-1);
 
@@ -722,6 +752,7 @@ void MainWindow::on_pbUpdateSources_clicked()
   ps->Spread = ui->ledGunSpread->text().toDouble();
   ps->DoMaterialLimited = ui->cbSourceLimitmat->isChecked();
   ps->LimtedToMatName = ui->leSourceLimitMaterial->text();
+  ParticleSources->checkLimitedToMaterial(ps);
 
   //if (!GeoManagerImported)
   if (Detector->isGDMLempty())

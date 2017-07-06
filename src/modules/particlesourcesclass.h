@@ -76,7 +76,6 @@ struct ParticleSourceStructure
   ~ParticleSourceStructure();
 
 
-
   //local variables, used in tracking, calculated autonatically, not to be loaded/saved!
   int LimitedToMat; //automatically calculated if LimtedToMatName matches a material
   bool fLimit;
@@ -139,7 +138,8 @@ public:
   bool LoadSourceFromJsonFile(QString fileName, int iSource);
   bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 
-  TVector3 GenerateRandomDirection();
+  TVector3 GenerateRandomDirection();  
+  void checkLimitedToMaterial(ParticleSourceStructure *s);
 
 public slots:
   void onIsParticleInUse(int particleId, bool& fAnswer, QString* SourceName);

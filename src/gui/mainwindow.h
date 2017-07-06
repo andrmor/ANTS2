@@ -55,7 +55,7 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
-class ParticleSourceStructure;
+struct ParticleSourceStructure;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;

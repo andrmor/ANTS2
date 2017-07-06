@@ -192,7 +192,7 @@ void MainWindow::ShowSource(int isource, bool clear)
   TVector3 K(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta)); //collimation direction
   Int_t track_index = Detector->GeoManager->AddTrack(1,22);
   TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-  double Klength = Detector->WorldSizeXY*0.5; //20 before
+  double Klength = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.5; //20 before
 
   track->AddPoint(X0, Y0, Z0, 0);
   track->AddPoint(X0+K[0]*Klength, Y0+K[1]*Klength, Z0+K[2]*Klength, 0);
@@ -237,7 +237,7 @@ void MainWindow::on_pbGunTest_clicked()
   }
   ParticleSources->Init();
 
-  double Length = Detector->WorldSizeXY*0.4;
+  double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
   double R[3], K[3];
   int numParticles = ui->sbGunTestEvents->value();
   bool bHaveSome = false;

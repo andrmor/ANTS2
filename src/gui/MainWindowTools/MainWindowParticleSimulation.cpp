@@ -51,8 +51,6 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
 void MainWindow::ShowSource(int isource, bool clear)
 {
-  if (BulkUpdate) return;
-
   ParticleSourceStructure* p = ParticleSources->getSource(isource);
 
   int index = p->index;
@@ -217,6 +215,7 @@ void MainWindow::ShowSource(int isource, bool clear)
       track->SetLineColor(9);
   }
 
+  GeometryWindow->ShowAndFocus();
   MainWindow::ShowTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
@@ -715,8 +714,14 @@ void MainWindow::on_pbAddSource_clicked()
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
-{
-    //qDebug() << "________ updates particle sources triggered";
+{  
+  int isource = ui->cobParticleSource->currentIndex();
+  //qDebug() << "________ updates particle sources triggered. Source#:"<<isource;
+  if (isource<0)
+    {
+      qWarning() << "Attempt to update source with number <0";
+      return;
+    }
 
   if (BulkUpdate) return;
   if (DoNotUpdateGeometry) return;
@@ -726,9 +731,10 @@ void MainWindow::on_pbUpdateSources_clicked()
       qWarning()<<"Attempt to update particle source while there are no defined ones!";
       return;
     }
-  //qDebug()<<"Update sources";
-  int isource = ui->cobParticleSource->currentIndex();
-  if (isource < 0 || isource > ParticleSources->size()-1)
+
+  //qDebug()<<"Update source#"<<isource<<"   defined in total:"<<ParticleSources->size();
+
+  if (isource >= ParticleSources->size())
     {
       message("Error: Attempting to update particle source parameters, but source number is out of bounds!",this);
       return;
@@ -754,7 +760,6 @@ void MainWindow::on_pbUpdateSources_clicked()
   ps->LimtedToMatName = ui->leSourceLimitMaterial->text();
   ParticleSources->checkLimitedToMaterial(ps);
 
-  //if (!GeoManagerImported)
   if (Detector->isGDMLempty())
     { //check world size
       double XYm = 0;
@@ -781,21 +786,20 @@ void MainWindow::on_pbUpdateSources_clicked()
           MainWindow::ReconstructDetector();
         }
     }
-  //on_pbGunShowSource_clicked();
   on_pbUpdateSimConfig_clicked();
-  on_pbUpdateSourcesIndication_clicked();
+     //on_pbUpdateSourcesIndication_clicked();
+  //qDebug() << "...update sources done";
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-  //qDebug() << "Update. size="<<ParticleSources->size();
+  //qDebug() << "Update sources inidcation. Defined sources:"<<ParticleSources->size();
   int isource = ui->cobParticleSource->currentIndex();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
   clearParticleSourcesIndication();
   if (numSources == 0) return;
-
   ui->fParticleSources->setEnabled(true);
   ui->frSelectSource->setEnabled(true);
 
@@ -854,7 +858,6 @@ void MainWindow::clearParticleSourcesIndication()
 
 void MainWindow::on_pbGunShowSource_clicked()
 {
-   if (BulkUpdate) return;
    int isource = ui->cobParticleSource->currentIndex();
    if (isource < 0) return;
    if (isource >= ParticleSources->size())

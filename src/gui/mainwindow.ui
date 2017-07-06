@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -6892,7 +6892,7 @@ Constructor is disabled!</string>
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9625,8 +9625,8 @@ double events:</string>
        <widget class="QFrame" name="fGunMultipleEvents">
         <property name="geometry">
          <rect>
-          <x>214</x>
-          <y>302</y>
+          <x>248</x>
+          <y>299</y>
           <width>281</width>
           <height>21</height>
          </rect>
@@ -9640,9 +9640,9 @@ double events:</string>
         <widget class="QLabel" name="label_258">
          <property name="geometry">
           <rect>
-           <x>0</x>
+           <x>-14</x>
            <y>1</y>
-           <width>220</width>
+           <width>226</width>
            <height>16</height>
           </rect>
          </property>
@@ -9656,13 +9656,13 @@ double events:</string>
           <string>Average number of particles per event:</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
         <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
          <property name="geometry">
           <rect>
-           <x>220</x>
+           <x>221</x>
            <y>0</y>
            <width>41</width>
            <height>20</height>
@@ -9682,7 +9682,7 @@ double events:</string>
        <widget class="QLabel" name="label_76">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>25</x>
           <y>9</y>
           <width>131</width>
           <height>16</height>
@@ -9701,8 +9701,8 @@ double events:</string>
        <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
         <property name="geometry">
          <rect>
-          <x>12</x>
-          <y>303</y>
+          <x>38</x>
+          <y>300</y>
           <width>191</width>
           <height>17</height>
          </rect>
@@ -9721,7 +9721,7 @@ double events:</string>
         <property name="geometry">
          <rect>
           <x>380</x>
-          <y>10</y>
+          <y>0</y>
           <width>142</width>
           <height>23</height>
          </rect>
@@ -9743,16 +9743,16 @@ double events:</string>
         <property name="geometry">
          <rect>
           <x>5</x>
-          <y>39</y>
+          <y>68</y>
           <width>523</width>
-          <height>240</height>
+          <height>201</height>
          </rect>
         </property>
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Plain</enum>
         </property>
         <widget class="QTabWidget" name="twParticleSourceSettings">
          <property name="enabled">
@@ -9761,7 +9761,7 @@ double events:</string>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>73</y>
+           <y>37</y>
            <width>507</width>
            <height>160</height>
           </rect>
@@ -9773,7 +9773,7 @@ double events:</string>
           </font>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_6">
           <attribute name="title">
@@ -10970,30 +10970,11 @@ If material with this name does not exist, this limitation is not applied.</stri
           </widget>
          </widget>
         </widget>
-        <widget class="QPushButton" name="pbRemoveSource">
-         <property name="geometry">
-          <rect>
-           <x>280</x>
-           <y>9</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Remove</string>
-         </property>
-        </widget>
         <widget class="QPushButton" name="pbSaveParticleSource">
          <property name="geometry">
           <rect>
            <x>398</x>
-           <y>9</y>
+           <y>6</y>
            <width>61</width>
            <height>23</height>
           </rect>
@@ -11012,7 +10993,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="geometry">
           <rect>
            <x>457</x>
-           <y>9</y>
+           <y>6</y>
            <width>61</width>
            <height>23</height>
           </rect>
@@ -11027,49 +11008,11 @@ If material with this name does not exist, this limitation is not applied.</stri
           <string>Import</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbGunShowSource">
-         <property name="geometry">
-          <rect>
-           <x>398</x>
-           <y>40</y>
-           <width>120</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_150">
-         <property name="geometry">
-          <rect>
-           <x>9</x>
-           <y>15</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Source:</string>
-         </property>
-        </widget>
         <widget class="QLineEdit" name="ledSourceActivity">
          <property name="geometry">
           <rect>
            <x>129</x>
-           <y>43</y>
+           <y>7</y>
            <width>67</width>
            <height>20</height>
           </rect>
@@ -11088,7 +11031,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="geometry">
           <rect>
            <x>36</x>
-           <y>44</y>
+           <y>8</y>
            <width>88</width>
            <height>16</height>
           </rect>
@@ -11107,7 +11050,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="geometry">
           <rect>
            <x>213</x>
-           <y>47</y>
+           <y>11</y>
            <width>46</width>
            <height>13</height>
           </rect>
@@ -11123,7 +11066,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="geometry">
           <rect>
            <x>261</x>
-           <y>45</y>
+           <y>9</y>
            <width>121</width>
            <height>16</height>
           </rect>
@@ -11142,7 +11085,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <property name="geometry">
           <rect>
            <x>420</x>
-           <y>67</y>
+           <y>31</y>
            <width>101</width>
            <height>23</height>
           </rect>
@@ -11157,43 +11100,11 @@ If material with this name does not exist, this limitation is not applied.</stri
           <string>...update Sources</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="cobParticleSource">
-         <property name="geometry">
-          <rect>
-           <x>51</x>
-           <y>10</y>
-           <width>132</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="editable">
-          <bool>false</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_241">
-         <property name="geometry">
-          <rect>
-           <x>201</x>
-           <y>47</y>
-           <width>21</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>=</string>
-         </property>
-        </widget>
         <widget class="QLabel" name="lSourceActive">
          <property name="geometry">
           <rect>
            <x>15</x>
-           <y>44</y>
+           <y>8</y>
            <width>21</width>
            <height>16</height>
           </rect>
@@ -11202,31 +11113,12 @@ If material with this name does not exist, this limitation is not applied.</stri
           <string>--</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbRenameSource">
-         <property name="geometry">
-          <rect>
-           <x>194</x>
-           <y>9</y>
-           <width>81</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Rename</string>
-         </property>
-        </widget>
        </widget>
        <widget class="QLabel" name="labPartSourcesDefined">
         <property name="geometry">
          <rect>
-          <x>139</x>
-          <y>12</y>
+          <x>162</x>
+          <y>11</y>
           <width>20</width>
           <height>13</height>
          </rect>
@@ -11247,9 +11139,9 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QPushButton" name="pbAddSource">
         <property name="geometry">
          <rect>
-          <x>199</x>
+          <x>203</x>
           <y>7</y>
-          <width>166</width>
+          <width>198</width>
           <height>23</height>
          </rect>
         </property>
@@ -11421,8 +11313,8 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QCheckBox" name="cbIgnoreEventsWithNoHits">
         <property name="geometry">
          <rect>
-          <x>12</x>
-          <y>283</y>
+          <x>38</x>
+          <y>280</y>
           <width>191</width>
           <height>17</height>
          </rect>
@@ -11443,8 +11335,8 @@ If material with this name does not exist, this limitation is not applied.</stri
         </property>
         <property name="geometry">
          <rect>
-          <x>220</x>
-          <y>283</y>
+          <x>265</x>
+          <y>280</y>
           <width>271</width>
           <height>17</height>
          </rect>
@@ -11462,6 +11354,154 @@ If material with this name does not exist, this limitation is not applied.</stri
          <bool>true</bool>
         </property>
        </widget>
+       <widget class="Line" name="line_16">
+        <property name="geometry">
+         <rect>
+          <x>131</x>
+          <y>50</y>
+          <width>4</width>
+          <height>19</height>
+         </rect>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+       <widget class="QFrame" name="frSelectSource">
+        <property name="geometry">
+         <rect>
+          <x>6</x>
+          <y>28</y>
+          <width>524</width>
+          <height>36</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QPushButton" name="pbRemoveSource">
+         <property name="geometry">
+          <rect>
+           <x>444</x>
+           <y>7</y>
+           <width>71</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Remove</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="cobParticleSource">
+         <property name="geometry">
+          <rect>
+           <x>58</x>
+           <y>8</y>
+           <width>132</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="editable">
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbRenameSource">
+         <property name="geometry">
+          <rect>
+           <x>197</x>
+           <y>7</y>
+           <width>71</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Rename</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_2">
+         <property name="geometry">
+          <rect>
+           <x>163</x>
+           <y>17</y>
+           <width>308</width>
+           <height>3</height>
+          </rect>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbGunShowSource">
+         <property name="geometry">
+          <rect>
+           <x>274</x>
+           <y>7</y>
+           <width>120</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Show geometry</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_150">
+         <property name="geometry">
+          <rect>
+           <x>-5</x>
+           <y>12</y>
+           <width>60</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Source:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <zorder>line_2</zorder>
+        <zorder>pbRemoveSource</zorder>
+        <zorder>cobParticleSource</zorder>
+        <zorder>pbRenameSource</zorder>
+        <zorder>pbGunShowSource</zorder>
+        <zorder>label_150</zorder>
+       </widget>
+       <zorder>line_16</zorder>
+       <zorder>frSelectSource</zorder>
        <zorder>line_21</zorder>
        <zorder>fGunMultipleEvents</zorder>
        <zorder>label_76</zorder>
@@ -16559,12 +16599,12 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>465</y>
+     <x>368</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
-     <x>521</x>
-     <y>490</y>
+     <x>519</x>
+     <y>468</y>
     </hint>
    </hints>
   </connection>
@@ -16591,8 +16631,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>438</y>
+     <x>307</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>255</x>
@@ -16816,7 +16856,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>206</x>
-     <y>300</y>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17551,8 +17591,8 @@ on stack</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>253</x>
-     <y>467</y>
+     <x>231</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -17567,8 +17607,8 @@ on stack</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>467</y>
+     <x>184</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -17839,8 +17879,8 @@ on stack</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>489</y>
+     <x>216</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -18687,8 +18727,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>213</x>
-     <y>451</y>
+     <x>217</x>
+     <y>429</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>
@@ -18703,8 +18743,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>451</y>
+     <x>315</x>
+     <y>429</y>
     </hint>
     <hint type="destinationlabel">
      <x>290</x>
@@ -18719,8 +18759,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>407</x>
-     <y>451</y>
+     <x>405</x>
+     <y>429</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -18735,8 +18775,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>430</y>
+     <x>148</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>238</x>
@@ -18751,8 +18791,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>222</x>
-     <y>430</y>
+     <x>220</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>259</x>
@@ -18767,8 +18807,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>430</y>
+     <x>291</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -18783,8 +18823,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
-     <y>472</y>
+     <x>148</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>229</x>
@@ -18799,8 +18839,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
-     <y>472</y>
+     <x>190</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -18815,8 +18855,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>472</y>
+     <x>232</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>245</x>
@@ -18831,8 +18871,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>291</x>
-     <y>473</y>
+     <x>295</x>
+     <y>451</y>
     </hint>
     <hint type="destinationlabel">
      <x>281</x>
@@ -18847,8 +18887,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>472</y>
+     <x>394</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -18863,8 +18903,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>74</x>
-     <y>491</y>
+     <x>78</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>241</x>
@@ -18880,7 +18920,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>148</x>
-     <y>493</y>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
      <x>212</x>
@@ -18895,8 +18935,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
-     <y>493</y>
+     <x>190</x>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
      <x>226</x>
@@ -18911,8 +18951,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>493</y>
+     <x>232</x>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
      <x>248</x>
@@ -18927,8 +18967,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>296</x>
-     <y>494</y>
+     <x>300</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>275</x>
@@ -18943,8 +18983,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>357</x>
-     <y>493</y>
+     <x>361</x>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -18959,8 +18999,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>93</x>
-     <y>512</y>
+     <x>97</x>
+     <y>490</y>
     </hint>
     <hint type="destinationlabel">
      <x>242</x>
@@ -18975,8 +19015,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
-     <y>514</y>
+     <x>148</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -18991,8 +19031,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
-     <y>514</y>
+     <x>190</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>234</x>
@@ -19007,8 +19047,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>514</y>
+     <x>232</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>248</x>
@@ -19023,8 +19063,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>515</y>
+     <x>294</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>273</x>
@@ -19039,8 +19079,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>396</x>
-     <y>514</y>
+     <x>400</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
@@ -19071,8 +19111,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
-     <y>438</y>
+     <x>140</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>234</x>
@@ -19087,8 +19127,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>282</x>
-     <y>438</y>
+     <x>286</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>249</x>
@@ -19103,8 +19143,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>123</x>
-     <y>468</y>
+     <x>127</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
      <x>238</x>
@@ -19119,8 +19159,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>490</y>
+     <x>127</x>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>255</x>
@@ -19135,8 +19175,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>468</y>
+     <x>223</x>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -19152,7 +19192,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>223</x>
-     <y>490</y>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>235</x>
@@ -19167,8 +19207,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>353</x>
-     <y>465</y>
+     <x>357</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>295</x>
@@ -19183,8 +19223,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>361</x>
-     <y>488</y>
+     <x>365</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
@@ -19200,7 +19240,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>157</x>
-     <y>470</y>
+     <y>448</y>
     </hint>
     <hint type="destinationlabel">
      <x>229</x>
@@ -19215,8 +19255,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>491</y>
+     <x>157</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>231</x>
@@ -19231,8 +19271,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>470</y>
+     <x>229</x>
+     <y>448</y>
     </hint>
     <hint type="destinationlabel">
      <x>266</x>
@@ -19247,8 +19287,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>491</y>
+     <x>237</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -19263,8 +19303,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>488</y>
+     <x>368</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -19280,7 +19320,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>464</x>
-     <y>488</y>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -19663,12 +19703,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>261</y>
+     <x>183</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>402</x>
-     <y>222</y>
+     <x>406</x>
+     <y>221</y>
     </hint>
    </hints>
   </connection>

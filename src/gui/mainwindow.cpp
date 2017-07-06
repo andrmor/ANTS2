@@ -2499,7 +2499,7 @@ void MainWindow::on_pbIndShowArea_clicked()
 
 void MainWindow::on_cbGunAllowMultipleEvents_toggled(bool checked)
 {
-    ui->fGunMultipleEvents->setEnabled(checked);
+    ui->fGunMultipleEvents->setVisible(checked);
 }
 
 void MainWindow::UpdatePreprocessingSettingsIndication()

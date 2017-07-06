@@ -219,7 +219,7 @@ void MainWindow::ShowSource(int isource, bool clear)
 
   MainWindow::ShowTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
-  Detector->GeoManager->DrawCurrentPoint(9);
+  //Detector->GeoManager->DrawCurrentPoint(9);
   GeometryWindow->UpdateRootCanvas();
 }
 
@@ -651,8 +651,14 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
 void MainWindow::on_pbRemoveSource_clicked()
 {
   if (ParticleSources->size() == 0) return;
-
   int isource = ui->cobParticleSource->currentIndex();
+
+  int ret = QMessageBox::question(this, "Remove particle source",
+                                  "Are you sure - this will remove source " + ParticleSources->getSource(isource)->name,
+                                  QMessageBox::Yes | QMessageBox::Cancel,
+                                  QMessageBox::Cancel);
+  if (ret != QMessageBox::Yes) return;
+
   ParticleSources->remove(isource);
   ui->cobParticleSource->removeItem(isource);
   ui->cobParticleSource->setCurrentIndex(isource-1);
@@ -751,6 +757,7 @@ void MainWindow::on_pbUpdateSources_clicked()
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
+  //qDebug() << "Update. size="<<ParticleSources->size();
   int isource = ui->cobParticleSource->currentIndex();
 
   int numSources = ParticleSources->size();
@@ -759,12 +766,12 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
   if (numSources == 0) return;
 
   ui->fParticleSources->setEnabled(true);
+  ui->frSelectSource->setEnabled(true);
 
   for (int i=0; i<numSources; i++)
       ui->cobParticleSource->addItem(ParticleSources->getSource(i)->name);
-  if (isource >= numSources) isource = 0;
-  if (isource == -1) selectFirstActiveParticleSource();
-  if (isource == -1) isource = 0;  //paranoic
+  if (isource >= numSources) isource = 0;  
+  if (isource == -1) isource = 0;
 
   ui->cobParticleSource->setCurrentIndex(isource);
   updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
@@ -811,6 +818,7 @@ void MainWindow::clearParticleSourcesIndication()
     ui->cobParticleSource->clear();
     ui->cobParticleSource->setCurrentIndex(-1);
     ui->fParticleSources->setEnabled(false);
+    ui->frSelectSource->setEnabled(false);
 }
 
 void MainWindow::on_pbGunShowSource_clicked()
@@ -818,7 +826,7 @@ void MainWindow::on_pbGunShowSource_clicked()
    if (BulkUpdate) return;
    int isource = ui->cobParticleSource->currentIndex();
    if (isource < 0) return;
-   if (isource > ParticleSources->size()-1)
+   if (isource >= ParticleSources->size())
      {
        message("Source number is out of bounds!",this);
        return;

@@ -282,6 +282,7 @@ void MainWindow::onRequestSimulationGuiUpdate()
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
+  //qDebug() << "Read sim from json and update sim gui";
   if (!json.contains("SimulationConfig"))
     {
       //qWarning() << "Json does not contain sim settings!";
@@ -619,7 +620,9 @@ void MainWindow::selectFirstActiveParticleSource()
         int i=0;
         for (; i<ParticleSources->size(); i++)
           if (ParticleSources->getSource(i)->Activity > 0) break;
-        ui->cobParticleSource->setCurrentIndex(i);
+        ui->cobParticleSource->setCurrentIndex(i);        
       }
+    else if (ParticleSources->size()>0) ui->cobParticleSource->setCurrentIndex(0);
     else ui->cobParticleSource->setCurrentIndex(-1);
+    on_pbUpdateSourcesIndication_clicked();
 }

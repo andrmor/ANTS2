@@ -640,13 +640,13 @@ public slots:
     void onGlobalScriptFinished();
     void on_pbUpdatePreprocessingSettings_clicked(); //updates preprocessing settings in Config
     void on_pbUpdateSimConfig_clicked();   // updates simulation-related properies in Config from GUI
+    void selectFirstActiveParticleSource(); //trigger after load new config to select the first source with non-zero activity
 
 private:
     void initDetectorSandwich();
     void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
-    void clearParticleSourcesIndication();
-    void selectFirstActiveParticleSource();
+    void clearParticleSourcesIndication();   
     void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
 
     //new sandwich

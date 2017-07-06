@@ -180,6 +180,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     // connect Config requests for Gui updates
     QObject::connect(Config, &AConfiguration::requestDetectorGuiUpdate, this, &MainWindow::onRequestDetectorGuiUpdate);
     QObject::connect(Config, SIGNAL(requestSimulationGuiUpdate()), this, SLOT(onRequestSimulationGuiUpdate()));
+    QObject::connect(Config, SIGNAL(requestSelectFirstActiveParticleSource()), this, SLOT(selectFirstActiveParticleSource()));
     QObject::connect(Config, SIGNAL(requestReconstructionGuiUpdate()), Rwindow, SLOT(onRequestReconstructionGuiUpdate()));
     QObject::connect(Config, SIGNAL(requestLRFGuiUpdate()), lrfwindow, SLOT(onRequestGuiUpdate()));
     QObject::connect(Config, SIGNAL(NewConfigLoaded()), this, SLOT(onNewConfigLoaded()));
@@ -280,12 +281,12 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbInitializeScanFloodNoise << ui->pbUpdateScanFloodTabWidget << ui->fScanFloodTotProb
      << ui->fSecondaryScintLoadProfile << ui->pbUpdateSources << ui->pbUpdateSourcesIndication
      << ui->fLinkedParticle << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
-     << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML;
+     << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
     if (ui->twSingleScan->currentIndex() == 0) ui->frLimitNodesTo->setVisible(false);
     else ui->frLimitNodesTo->setVisible(true);
     QList<QWidget*> disables;
-    disables << ui->fGunParticle << ui->fGunMultipleEvents << ui->fFixedDir << ui->fFixedWorldSize;
+    disables << ui->fGunParticle << ui->fFixedDir << ui->fFixedWorldSize;
     for (int i=0;i<disables.length();i++) disables[i]->setEnabled(false);
     ui->fWaveOptions->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fWaveTests->setEnabled(ui->cbWaveResolved->isChecked());

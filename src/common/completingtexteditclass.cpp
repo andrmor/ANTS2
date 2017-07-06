@@ -162,6 +162,13 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             return;
         }
 
+    if (e->key() == Qt::Key_Delete)
+    {
+        QTextEdit::keyPressEvent(e);
+        onCursorPositionChanged();
+        return;
+    }
+
     if (c && c->popup()->isVisible())
     {        
         // The following keys are forwarded by the completer to the widget
@@ -399,6 +406,29 @@ void CompletingTextEditClass::onCursorPositionChanged()
           extra.cursor = cursor;
           extraSelections.append(extra);
           cursor = document()->find(pat, cursor, QTextDocument::FindCaseSensitively);
+        }
+      setExtraSelections(extraSelections);
+
+      //variable highlight test
+      QRegExp patvar("\\bvar\\s"+selection+"\\b");
+      QTextCursor cursor1 = document()->find(patvar, tc, QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
+      if (cursor1.hasSelection() && cursor1 != tc)
+        {
+          QTextEdit::ExtraSelection extra;
+          extra.format.setBackground(Qt::black);
+          extra.format.setForeground(Qt::white);
+          //extra.format.setFontUnderline(true);
+          //extra.format.setUnderlineColor(Qt::red);
+          extra.cursor = cursor1;
+          extraSelections.append(extra);
+
+          QTextEdit::ExtraSelection extra1;
+          //extra1.format.setFontUnderline(true);
+          //extra1.format.setUnderlineColor(Qt::blue);
+          extra1.format.setBackground(Qt::white);
+          extra1.format.setForeground(Qt::blue);
+          extra1.cursor = tc;
+          extraSelections.append(extra1);
         }
       setExtraSelections(extraSelections);
     }

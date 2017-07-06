@@ -4430,15 +4430,6 @@ void MainWindow::on_cobMatPointSource_activated(int index)
     }
 }
 
-void MainWindow::on_ledSourceActivity_textChanged(const QString &/*arg1*/)
-{
-  double val = ui->ledSourceActivity->text().toDouble();
-  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
-  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
-  if (val == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
-  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
-}
-
 void MainWindow::on_actionOpen_settings_triggered()
 {   
    GlobSetWindow->showNormal();

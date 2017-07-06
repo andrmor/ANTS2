@@ -17,6 +17,7 @@
 #include "aparticleonstack.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
+#include "guiutils.h"
 
 //Qt
 #include <QDebug>
@@ -690,13 +691,7 @@ void MainWindow::on_pbRemoveSource_clicked()
   ParticleSources->remove(isource);
   ui->cobParticleSource->removeItem(isource);
   ui->cobParticleSource->setCurrentIndex(isource-1);
-  if (ParticleSources->size() == 0)
-    {
-      //No sources left!
-      ParticleSources->append(new ParticleSourceStructure());
-      on_pbUpdateSourcesIndication_clicked(); //to clean indication
-      ParticleSources->remove(0);
-    }
+  if (ParticleSources->size() == 0) clearParticleSourcesIndication();
 
   on_pbUpdateSimConfig_clicked();
 
@@ -800,8 +795,10 @@ void MainWindow::on_pbUpdateSources_clicked()
           MainWindow::ReconstructDetector();
         }
     }
+
   on_pbUpdateSimConfig_clicked();
-     //on_pbUpdateSourcesIndication_clicked();
+
+  updateActivityWarningMarker();    //update marker!
   if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
   //qDebug() << "...update sources done";
 }
@@ -827,6 +824,16 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
   updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
   on_pbGunRefreshparticles_clicked();
   on_leSourceLimitMaterial_textChanged("");  //update color only!
+  updateActivityWarningMarker();    //update marker!
+}
+
+void MainWindow::updateActivityWarningMarker()
+{
+  double val = ui->ledSourceActivity->text().toDouble();
+  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
+  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
+  if (val == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
+  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
 }
 
 void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)

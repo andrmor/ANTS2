@@ -570,7 +570,6 @@ private slots:
     void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
-    void on_ledSourceActivity_textChanged(const QString &arg1);
     void on_actionOpen_settings_triggered();
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
     void on_pbShowEnergyDeposition_clicked();
@@ -645,7 +644,7 @@ private:
     void clearParticleSourcesIndication();   
     void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
     void ShowParticleSource_noFocus();
-
+    void updateActivityWarningMarker();
 
 public slots:
     //new sandwich

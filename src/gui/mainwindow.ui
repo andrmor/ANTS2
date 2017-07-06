@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -6892,7 +6892,7 @@ Constructor is disabled!</string>
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9682,9 +9682,9 @@ double events:</string>
        <widget class="QLabel" name="label_76">
         <property name="geometry">
          <rect>
-          <x>25</x>
+          <x>7</x>
           <y>9</y>
-          <width>131</width>
+          <width>149</width>
           <height>16</height>
          </rect>
         </property>
@@ -9696,6 +9696,9 @@ double events:</string>
         </property>
         <property name="text">
          <string>Particles sources defined:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
@@ -11122,7 +11125,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          <rect>
           <x>162</x>
           <y>11</y>
-          <width>20</width>
+          <width>40</width>
           <height>13</height>
          </rect>
         </property>
@@ -11136,15 +11139,15 @@ If material with this name does not exist, this limitation is not applied.</stri
          <string>0</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
        <widget class="QPushButton" name="pbAddSource">
         <property name="geometry">
          <rect>
-          <x>203</x>
+          <x>218</x>
           <y>7</y>
-          <width>198</width>
+          <width>197</width>
           <height>23</height>
          </rect>
         </property>
@@ -11412,7 +11415,7 @@ If material with this name does not exist, this limitation is not applied.</stri
           <rect>
            <x>58</x>
            <y>8</y>
-           <width>132</width>
+           <width>150</width>
            <height>22</height>
           </rect>
          </property>
@@ -11423,7 +11426,7 @@ If material with this name does not exist, this limitation is not applied.</stri
         <widget class="QPushButton" name="pbRenameSource">
          <property name="geometry">
           <rect>
-           <x>197</x>
+           <x>212</x>
            <y>7</y>
            <width>71</width>
            <height>23</height>
@@ -11458,7 +11461,7 @@ If material with this name does not exist, this limitation is not applied.</stri
         <widget class="QPushButton" name="pbGunShowSource">
          <property name="geometry">
           <rect>
-           <x>274</x>
+           <x>289</x>
            <y>7</y>
            <width>120</width>
            <height>23</height>

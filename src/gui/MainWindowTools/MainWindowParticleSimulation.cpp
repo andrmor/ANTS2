@@ -798,7 +798,7 @@ void MainWindow::on_pbUpdateSources_clicked()
 
   on_pbUpdateSimConfig_clicked();
 
-  updateActivityWarningMarker();    //update marker!
+  updateActivityIndication();    //update marker!
   if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
   //qDebug() << "...update sources done";
 }
@@ -824,16 +824,21 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
   updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
   on_pbGunRefreshparticles_clicked();
   on_leSourceLimitMaterial_textChanged("");  //update color only!
-  updateActivityWarningMarker();    //update marker!
+  updateActivityIndication();
 }
 
-void MainWindow::updateActivityWarningMarker()
+void MainWindow::updateActivityIndication()
 {
-  double val = ui->ledSourceActivity->text().toDouble();
+  double activity = ui->ledSourceActivity->text().toDouble();
   QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
   QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
-  if (val == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
+  if (activity == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
   else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
+
+  double fraction = 0;
+  double TotalActivity = ParticleSources->getTotalActivity();
+  if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
+  ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
 }
 
 void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
@@ -841,13 +846,7 @@ void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
     bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
     BulkUpdate = true;
 
-    double activity = ps->Activity;
-    ui->ledSourceActivity->setText(QString::number(activity));
-    double fraction = 0;
-    double TotalActivity = ParticleSources->getTotalActivity();
-    if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
-    ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
-
+    ui->ledSourceActivity->setText(QString::number(ps->Activity));
     ui->cobGunSourceType->setCurrentIndex(ps->index);
     ui->ledGunOriginX->setText(QString::number(ps->X0));
     ui->ledGunOriginY->setText(QString::number(ps->Y0));

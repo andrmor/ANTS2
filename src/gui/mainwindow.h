@@ -644,7 +644,7 @@ private:
     void clearParticleSourcesIndication();   
     void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
     void ShowParticleSource_noFocus();
-    void updateActivityWarningMarker();
+    void updateActivityIndication();
 
 public slots:
     //new sandwich

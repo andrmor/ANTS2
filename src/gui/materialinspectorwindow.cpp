@@ -915,7 +915,6 @@ void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
             return;
         }
 
-        MW->Owindow->OutText("File "+fileName+ " with Trim data has been loaded.");
         file.close();
         ui->pbShowStoppingPower->setEnabled(true);
         on_pbUpdateInteractionIndication_clicked();
@@ -1240,7 +1239,6 @@ void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
   int numPoints = tmpMaterial.PrimarySpectrum_lambda.size();
   QString str;
   str.setNum(numPoints);
-  MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
 
   if (numPoints>0)
     {
@@ -1312,7 +1310,6 @@ void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
   int numPoints = tmpMaterial.SecondarySpectrum_lambda.size();
   QString str;
   str.setNum(numPoints); 
-  MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
 
   if (numPoints>0)
     {
@@ -1359,7 +1356,6 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
   int numPoints = tmpMaterial.nWave_lambda.size();
   QString str;
   str.setNum(numPoints);
-  MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
 
   if (numPoints>0)
     {
@@ -1407,7 +1403,6 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
   int numPoints = tmpMaterial.absWave_lambda.size();
   QString str;
   str.setNum(numPoints);
-  MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
 
   if (numPoints>0)
     {

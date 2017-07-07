@@ -94,11 +94,11 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
-        <string>Text log</string>
+        <string>Text</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <property name="leftMargin">
@@ -1181,6 +1181,28 @@
         </item>
         <item>
          <widget class="QPlainTextEdit" name="pteOut"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabLogger">
+       <attribute name="title">
+        <string>Session log</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_14">
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QTextEdit" name="teLogger"/>
         </item>
        </layout>
       </widget>

@@ -622,7 +622,17 @@ double GraphWindowClass::extracted2DLineB()
 
 double GraphWindowClass::extracted2DLineC()
 {
-  return RasterWindow->extracted2DLineC;
+    return RasterWindow->extracted2DLineC;
+}
+
+double GraphWindowClass::extracted2DLineXstart()
+{
+    return RasterWindow->Line2DstartX;
+}
+
+double GraphWindowClass::extracted2DLineXstop()
+{
+    return RasterWindow->Line2DstopX;
 }
 
 double GraphWindowClass::extracted2DEllipseX()
@@ -2317,7 +2327,7 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
           g->SetFillColor(0);
           g->SetFillStyle(0);
           obj = g;
-          options += "AL";
+          //options += "AL";
           Type = g->ClassName();
         }
       else if (type == "TF2")
@@ -3184,10 +3194,12 @@ void GraphWindowClass::on_pbAddText_clicked()
   D.exec();
   if (D.result() == QDialog::Rejected) return;
 
-  bool fShowFrame = cbFrame->isChecked();
-  QString Text = te->toPlainText();
-  if (Text.isEmpty()) return;
+  QString Text = te->toPlainText();  
+  if (!Text.isEmpty()) ShowTextPanel(Text, cbFrame->isChecked(), cobAlign->currentIndex());
+}
 
+void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
+{
   double xc1, yc1, xc2, yc2;
   RasterWindow->fCanvas->GetRange(xc1, yc1, xc2, yc2);
 
@@ -3200,28 +3212,26 @@ void GraphWindowClass::on_pbAddText_clicked()
 
   TPaveText* la = new TPaveText(x1, y1, x2, y2);
   la->SetFillColor(0);
-  la->SetBorderSize(fShowFrame ? 1 : 0);
+  la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);
-  la->SetTextAlign( (1+cobAlign->currentIndex())*10+2);
+  la->SetTextAlign( (AlignLeftCenterRight + 1) * 10 + 2);
 
   QStringList sl = Text.split("\n");
-  for (QString s : sl)
-    {
-      la->AddText(s.toLatin1());
-    }
+  for (QString s : sl) la->AddText(s.toLatin1());
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-     RegisterTObject(la);
-     DrawObjects.append(DrawObjectStructure(la, "same"));
-  }
-  else
-  {
-     //do not register for basket - they have their own system
-     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
-  }
+  Draw(la, "same");
+//  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+//  {
+//     RegisterTObject(la);
+//     DrawObjects.append(DrawObjectStructure(la, "same"));
+//  }
+//  else
+//  {
+//     //do not register for basket - they have their own system
+//     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
+//  }
 
-  RedrawAll();
+//  RedrawAll();
 }
 
 void GraphWindowClass::on_pbRemoveText_clicked()
@@ -3239,4 +3249,108 @@ void GraphWindowClass::on_pbRemoveText_clicked()
           }
     }
   qDebug() << "Text object was not found!";
+}
+
+
+bool GraphWindowClass::Extraction()
+{
+    do
+      {
+        qApp->processEvents();
+        if (IsExtractionCanceled()) break;
+      }
+    while (!IsExtractionComplete() );
+
+    MW->WindowNavigator->BusyOff(false);
+
+    return !IsExtractionCanceled();  //returns false = canceled
+}
+
+Double_t GauseWithBase(Double_t *x, Double_t *par)
+{
+   return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
+}
+
+void GraphWindowClass::on_pbFWHM_clicked()
+{
+    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    if (DrObj.isEmpty())
+    {
+        message("No data", this);
+        return;
+    }
+
+    const QString cn = DrObj.first().getPointer()->ClassName();
+    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    {
+        message("Can be used only with 1D histograms!", this);
+        return;
+    }
+
+    MW->WindowNavigator->BusyOn();
+    Extract2DLine();
+    if (!Extraction()) return; //cancel
+
+    double startX = extracted2DLineXstart();
+    double stopX = extracted2DLineXstop();
+    if (startX>stopX) std::swap(startX, stopX);
+    //qDebug() << startX << stopX;
+
+    double a = extracted2DLineA();
+    double b = extracted2DLineB();
+    double c = extracted2DLineC();
+    if (fabs(b)<1.0e-10)
+    {
+        message("Bad base line, cannot fit", this);
+        return;
+    }
+
+    TH1* h =   static_cast<TH1*>(DrObj.first().getPointer());
+                                                                   //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
+    TF1 *f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
+
+    double initMid = startX + 0.5*(stopX - startX);
+    //qDebug() << "Initial mid:"<<initMid;
+    double initSigma = (stopX - startX)/2.3548; //sigma
+    double startPar1 = -0.5 / (initSigma * initSigma );
+    //qDebug() << "Initial par1"<<startPar1;
+    double midBinNum = h->GetXaxis()->FindBin(initMid);
+    double valOnMid = h->GetBinContent(midBinNum);
+    double baseAtMid = (c - a * initMid) / b;
+    double gaussAtMid = valOnMid - baseAtMid;
+    //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
+
+    f->SetParameter(0, gaussAtMid);
+    f->SetParameter(1, startPar1);
+    f->SetParameter(2, -initMid);
+    f->FixParameter(3, -a/b);  // fixed!
+    f->FixParameter(4, c/b);   // fixed!
+
+    int status = h->Fit(f, "R0");
+    if (status == 0)
+    {
+        double mid = -f->GetParameter(2);
+        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
+        //qDebug() << "sigma:"<<sigma;
+        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
+        double rel = FWHM/mid;
+
+        QVector<DrawObjectStructure> CopyMasterDrawObjects;
+        if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
+
+        //drawing the fit
+        Draw(f, "same");
+
+        //draw base line
+        TF1 *fl = new TF1("line", "pol2", startX, stopX);
+        fl->SetLineStyle(2);
+        fl->SetParameters(c/b, -a/b);
+        Draw(fl, "same");
+
+        //draw panel with results
+        ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
+
+        MasterDrawObjects = CopyMasterDrawObjects;
+    }
+    else message("Fit failed!", this);
 }

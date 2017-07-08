@@ -581,8 +581,6 @@ private:
   bool start2DEllipseExtraction();
   bool start2DBoxExtraction();  
   bool start2DPolygonExtraction();
-    //all use this:
-  bool Extraction();
 
   void updateRedStatusOfRecOptions();
   void RefreshNumEventsIndication();

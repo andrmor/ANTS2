@@ -141,7 +141,7 @@ public:
   void updateFiltersGui();
 
 public slots:
-  void ShowStatistics();
+  void ShowStatistics(bool bCopyToTextLog = false);
   void LRF_ModuleReadySlot(bool ready);
   void onSelectionChange(QVector<int> selectionArray);
 

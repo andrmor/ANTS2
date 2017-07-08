@@ -5670,7 +5670,7 @@ void ReconstructionWindow::onReconstructionFinished(bool fSuccess, bool fShow)
            //ShowReconstructionPositionsIfWindowVisible();
            ShowPositions(0, true);
        MW->Owindow->RefreshData();   // *** !!!
-       ShowStatistics();
+       ShowStatistics(true);
        double usPerEvent = ReconstructionManager->getUsPerEvent();
        ui->leoMsPerEv->setText(QString::number(usPerEvent, 'g', 4));
     }

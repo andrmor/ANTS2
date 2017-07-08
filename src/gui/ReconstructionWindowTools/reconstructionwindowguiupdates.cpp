@@ -90,7 +90,7 @@ void ReconstructionWindow::RefreshNumEventsIndication()
    ui->leoTimeBins->setText(str);
 }
 
-void ReconstructionWindow::ShowStatistics()
+void ReconstructionWindow::ShowStatistics(bool bCopyToTextLog)
 {
   //qDebug()<<"   Show statistics triggered in Recon window";
   int GoodEvents;
@@ -102,11 +102,21 @@ void ReconstructionWindow::ShowStatistics()
   ui->leoAverageDeviation->setText("");
   if (GoodEvents == 0) return;
 
+  QString txt("\nReconstruction -> ");
+  txt += "Good events: "+QString::number(GoodEvents);
+
   ui->leoEventsPassingAllFilters->setText( QString::number(GoodEvents));
   if (AvChi2 != -1)
-    {
+  {
       ui->leoAverageChi2->setText( QString::number(AvChi2) );
+      txt += "   Average chi2: "+QString::number(AvChi2);
       lastChi2 = AvChi2;
-    }
-  if (AvDeviation != -1)  ui->leoAverageDeviation->setText(QString::number(AvDeviation));
+  }
+  if (AvDeviation != -1)
+  {
+      ui->leoAverageDeviation->setText(QString::number(AvDeviation));
+      txt += "   Average XY deviation: "+QString::number(AvDeviation);
+  }
+
+  if (bCopyToTextLog) MW->Owindow->OutText(txt);
 }

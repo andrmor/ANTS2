@@ -2318,6 +2318,8 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
           //does not work normal way - e.g. recalculated LRFs will replace old ones even in the copied object
           TF1* f = (TF1*)(*drawObjects)[i].getPointer();
           TGraph* g = HistToGraph( f->GetHistogram() );
+          g->GetXaxis()->SetTitle( f->GetHistogram()->GetXaxis()->GetTitle() );
+          g->GetYaxis()->SetTitle( f->GetHistogram()->GetYaxis()->GetTitle() );
           g->SetLineStyle( f->GetLineStyle());
           g->SetLineColor(f->GetLineColor());
           g->SetLineWidth(f->GetLineWidth());
@@ -2327,7 +2329,9 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
           g->SetFillColor(0);
           g->SetFillStyle(0);
           obj = g;
-          //options += "AL";
+          if (!options.contains("same", Qt::CaseInsensitive))
+              if (!options.contains("AL", Qt::CaseInsensitive))
+                  options += "AL";
           Type = g->ClassName();
         }
       else if (type == "TF2")
@@ -2378,15 +2382,7 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
                 }
             }
           obj = newm;
-        }
-
-      else if (type == "TLegend")
-        {
-          //obj = new TLegend( *(TLegend*)(*drawObjects)[i].getPointer());
-          //likely causes problem because of the pointers, has to be locally recreated
-            //qDebug() << "Skipping TLegend";
-          continue;
-        }
+        }      
       else
         {
           message("Non-implemented object type: "+type);

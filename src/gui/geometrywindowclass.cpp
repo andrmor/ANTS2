@@ -745,3 +745,16 @@ void GeometryWindowClass::on_actionDecrease_line_width_triggered()
     SetAsActiveRootWindow();
     MW->Detector->top->Draw("");
 }
+
+void GeometryWindowClass::on_pbWebViewer_clicked()
+{
+#ifdef USE_ROOT_HTML
+    QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/World_1&opt=dray;all;tracks";
+    t += ";transp"+QString::number(ui->sbTransparency->value());
+    if (ui->cbShowAxes->isChecked()) t += ";axis";
+
+    QDesktopServices::openUrl(QUrl(t));
+#else
+    message("ANTS2 has to be compiled with the activated option in ants2.pro: CONFIG += ants2_RootServer", this);
+#endif
+}

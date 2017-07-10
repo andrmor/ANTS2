@@ -718,10 +718,8 @@
         </rect>
        </property>
        <property name="toolTip">
-        <string>Show last drawn object. If toolbox was used, the object last analysed will be redrawn</string>
-       </property>
-       <property name="statusTip">
-        <string>Extract relative FWHM. \nClick-drag-release selects the base line and the range of the fit.</string>
+        <string>Extract relative FWHM. 
+Click-drag-release selects the base line and the range of the fit.</string>
        </property>
        <property name="text">
         <string>Extract fwhm/mean</string>

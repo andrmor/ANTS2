@@ -112,6 +112,8 @@ private slots:
 
     void on_actionDecrease_line_width_triggered();
 
+    void on_pbWebViewer_clicked();
+
 private:
   Ui::GeometryWindowClass *ui;
   MainWindow* MW;

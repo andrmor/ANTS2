@@ -95,6 +95,8 @@ private:
     QVector< QVector<int> > secs;
     double TotalEnergyDeposited;
 
+    bool bForbidUpdate;
+
     void clearGrItems();
     void updateSignalLabels(double MaxSignal);
     void addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);

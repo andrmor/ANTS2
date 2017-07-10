@@ -382,7 +382,8 @@ void DetectorClass::constructDetector()
 
 void DetectorClass::onRequestRegisterTopNode()
 {
-  emit newTopInGeoManager(GeoManager->GetTopNode());
+    if (GeoManager)
+        emit newTopInGeoManager(GeoManager->GetTopNode());
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

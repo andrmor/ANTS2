@@ -29,7 +29,6 @@
 #include <QString>
 #include <QBitArray>
 #include <QStandardItemModel>
-#include <QDateTime>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
     QMainWindow(parent),
@@ -72,28 +71,12 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     gvOut->setRenderHints(QPainter::Antialiasing);  
 
     ui->tabwinDiagnose->setCurrentIndex(0);
-
-    initLogger();
 }
 
 OutputWindow::~OutputWindow()
 {
   clearGrItems();
   delete ui;  
-}
-
-void OutputWindow::initLogger()
-{
-  //int versionNumber = ANTS2_VERSION;
-  int minVer = ANTS2_MINOR;
-  QString miv = QString::number(minVer);
-  if (miv.length() == 1) miv = "0"+miv;
-  int majVer = ANTS2_MAJOR;
-  QString mav = QString::number(majVer);
-  //QString qv = QT_VERSION_STR;
-
-
-  AppendLog("Ants2 started, runing version " + mav + "." + miv);
 }
 
 void OutputWindow::PMnumChanged()
@@ -274,13 +257,6 @@ void OutputWindow::SetTab(int index)
     if (index <0) return;
     if (index > ui->tabwinDiagnose->count()-1) return;
     ui->tabwinDiagnose->setCurrentIndex(index);
-}
-
-void OutputWindow::AppendLog(QString text)
-{
-  QString add = "\n" + QDateTime::currentDateTime().toString("dd MM yyyy  hh:mm");
-  add += "\n" + text + "\n";
-  ui->teLogger->append(add);
 }
 
 void OutputWindow::on_pbSiPMpixels_clicked()
@@ -734,7 +710,7 @@ void OutputWindow::on_tabwinDiagnose_currentChanged(int index)
 {
   if (index == 2) OutputWindow::on_pbRefreshViz_clicked();
 
-  ui->frEventNumber->setVisible( index < 3 );
+  ui->frEventNumber->setVisible( index != 3);
   ui->pbClearText->setVisible( index==0 || index==3 );
   gvOut->update();
 }

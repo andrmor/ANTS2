@@ -33,8 +33,6 @@ public:
 
     void SetTab(int index);
 
-    void AppendLog(QString text);
-
     void RefreshData();
     void ResetViewport(); //auto-size and center viewing area
     void InitWindow();
@@ -105,7 +103,6 @@ private:
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
-    void initLogger();
 };
 
 #endif // OUTPUTWINDOW_H

@@ -519,6 +519,8 @@ private slots:
 
   void on_pbClearPositions_clicked();
 
+  void on_pbRecToTrue_clicked();
+
 protected:
     bool event(QEvent *event);
 

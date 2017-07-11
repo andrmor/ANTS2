@@ -6083,9 +6083,14 @@ void ReconstructionWindow::on_pbTrueToRec_clicked()
 {
   EventsDataHub->copyTrueToReconstructed();
   SetProgress(100);
-  //ShowReconstructionPositionsIfWindowVisible();
   ShowPositions(0, true);
   ShowStatistics();
+  ui->leoMsPerEv->setText("");
+}
+
+void ReconstructionWindow::on_pbRecToTrue_clicked()
+{
+  EventsDataHub->copyReconstructedToTrue();
   ui->leoMsPerEv->setText("");
 }
 

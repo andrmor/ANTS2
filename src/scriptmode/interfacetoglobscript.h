@@ -149,7 +149,9 @@ public:
 
 public slots:
   int GetNumPMs();
+  int countPMs();
   int GetNumEvents();
+  int countEvents();
   double GetPMsignal(int ievent, int ipm);
   void SetPMsignal(int ievent, int ipm, double value);
 
@@ -187,6 +189,10 @@ public slots:
   void SetScanY(int ievent, double value);
   void SetScanZ(int ievent, double value);
   void SetScanEnergy(int ievent, double value);
+
+  //raw signal values
+  QVariant GetPMsSortedBySignal(int ievent);
+  int GetPMwithMaxSignal(int ievent);
 
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
@@ -228,8 +234,8 @@ private:
   ReconstructionManagerClass* RManager;
   EventsDataClass* EventsDataHub;
 
-  bool checkReconstructionDataRequest(int ievent);
-  bool checkReconstructionDataRequest(int igroup, int ievent, int ipoint);
+  bool checkEventNumber(int ievent);
+  bool checkEventNumber(int igroup, int ievent, int ipoint);
   bool checkPM(int ipm);
   bool checkTrueDataRequest(int ievent);
   bool checkSetReconstructionDataRequest(int ievent);

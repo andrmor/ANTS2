@@ -22,6 +22,10 @@
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
 
+#ifdef ANTS_FLANN
+  #include "ainterfacetoknnscript.h"
+#endif
+
 #include <QDebug>
 
 void MainWindow::createScriptWindow()
@@ -85,6 +89,10 @@ void MainWindow::createScriptWindow()
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(photon, "photon");
 
+#ifdef ANTS_FLANN
+    AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
+    ScriptWindow->SetInterfaceObject(knn, "knn");
+#endif
 
     // Interfaces which rely on MainWindow
 

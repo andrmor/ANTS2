@@ -53,6 +53,9 @@ ants2_flann {
         LIBS += -LC:/FLANN/lib -lflann
         INCLUDEPATH += C:/FLANN/include
      }
+
+    HEADERS += scriptmode/ainterfacetoknnscript.h
+    SOURCES += scriptmode/ainterfacetoknnscript.cpp
 }
 #----------
 
@@ -228,6 +231,7 @@ SOURCES += main.cpp \
     SplineLibrary/tpspline3.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp
+
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -531,8 +535,8 @@ RC_FILE = myapp.rc
 #---Windows-specific compilation mode and warning suppression
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  #QMAKE_CXXFLAGS_RELEASE -= -O2
-  #QMAKE_CXXFLAGS_RELEASE *= -Od
+  QMAKE_CXXFLAGS_RELEASE -= -O2
+  QMAKE_CXXFLAGS_RELEASE *= -Od
 
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam

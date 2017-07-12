@@ -98,6 +98,41 @@ private:
   void reconstructPositions(int icoord, flann::Matrix<int> *indices, flann::Matrix<float> *dists);
 };
 
+class AScriptInterfacer
+{
+public:
+   AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
+
+   QVariant getNeighbours(int ievent, int numNeighbours);
+
+   void clearCalibration();
+   bool setCalibration(bool bUseScan);
+   int countCalibrationEvents() {return numEvents;}
+
+   double getCalibrationEventX(int ievent);
+   double getCalibrationEventY(int ievent);
+   double getCalibrationEventZ(int ievent);
+   double getCalibrationEventE(int ievent);
+   QVariant getCalibrationEventSignals(int ievent);
+
+   QString ErrorString;
+
+private:
+   EventsDataClass* EventsDataHub;
+   pms* PMs;
+
+   int numEvents;
+   int numPMs;
+
+   flann::Matrix<float>* CalibrationEvents;       //calibration events - signals
+   QVector<float> X, Y, Z, E;                     //calibration events - positions and energy
+
+   flann::Index<flann::L1<float> > *FlannIndex;   //flann index data
+
+   bool isValidEventIndex(int ievent);
+
+};
+
 class NNmoduleClass
 {  
 public:
@@ -106,6 +141,7 @@ public:
 
   KNNfilterClass Filter;
   KNNreconstructorClass Reconstructor;
+  AScriptInterfacer* ScriptInterfacer;
 
 private:
   EventsDataClass *EventsDataHub;

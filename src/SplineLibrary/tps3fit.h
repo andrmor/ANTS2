@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <cmath>
 
 class TPspline3;
 class TProfile2D;
@@ -19,10 +20,12 @@ public:
     void SetConstraintNonIncreasingX() {non_increasing_x=true;}
     void SetConstraintDdxAt0() {flat_top_x=true;}
     void SetConstraintSlopeY(int val) {slope_y = val;}
+    void SetConstraintTopDown(double x, double y) {x0 = x; y0 = y; top_down = true;}
     bool Fit(int npts, double const *datax, double const *datay, double const *dataz, double const *dataw = 0);
     bool Fit();
     double GetResidual() {return residual;}
 private:
+    double r(double x, double y) {return hypot(x-x0, y-y0);}
     TPspline3 *bs;
     int nbas;
     int nbinsx;
@@ -31,6 +34,8 @@ private:
     bool non_increasing_x;
     bool flat_top_x; // force d/dx = 0 at x=0
     int slope_y;     // force d/dy positive (1) or negative (2) at x = 0
+    double x0, y0;   // coordinates of the "top" point
+    bool top_down;   // force upproximately non-increasing behavior with distance from (x0,y0)
     bool sparse;     // use sparse QR for unconstrained fit - EXPERIMENTAL
     double residual;
     bool status;

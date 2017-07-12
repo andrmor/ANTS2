@@ -70,7 +70,6 @@ public:
   virtual bool InitOnRun();
 
   QList<AGeoObject*> GeoObjects;
-  QList< QStringList > Stacks;
 
 public slots:
   void Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
@@ -82,16 +81,19 @@ public slots:
 
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
-  void Stack(QString StackName, QVariant Members);
-  void Stack(QString StackName);
-  void AddToStack(QString name, QString StackName);
-  void AddToStack(QVariant names, QString StackName);
-  void RecalculateStack(QString StackName);
+  void RecalculateStack(QString name);
+
+  void MakeStack(QString name, QString container);
+  void InitializeStack(QString StackName, QString Origin_MemberName);
+
+  void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
+  void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
 
   void SetLine(QString name, int color, int width, int style);
   void ClearAll();
   void Remove(QString Object);
   void RemoveRecursive(QString Object);
+  void RemoveAllExceptWorld();
 
   void UpdateGeometry(bool CheckOverlaps = true);
 

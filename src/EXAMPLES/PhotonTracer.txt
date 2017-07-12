@@ -1,0 +1,89 @@
+//list of available processes and history fields
+var s = photon.PrintAllDefinedProcessTypes()
+s += photon.PrintAllDefinedRecordMemebers()
+msg.Clear()
+msg.Append(s)
+msg.Show()
+
+//inits
+var numPhotons = 100
+photon.SetRandomGeneratorSeed(11223344)	//Random generator seed!!!
+
+photon.ClearData()
+//grwin.ClearBasket()
+
+photon.SetBuildTracks(true)
+photon.SetTrackColor(1)
+photon.SetTrackWidth(2)
+
+// --- History filter by process type. 
+// --- First array is Must_Have, second is Should_Not_Have
+//photon.SetHistoryFilters_Processes([4], [])  		//only detected
+//photon.SetHistoryFilters_Processes([6], [])		//only escaped 
+//photon.SetHistoryFilters_Processes([6, 11], [])		//only escaped and with Fresnel reflection
+photon.SetHistoryFilters_Processes([6], [11])	//only escaped and WITHOUT fresnel reflection
+//photon.SetHistoryFilters_Processes([7], [15, 11])
+
+// --- History filter by volume name
+// --- First array is Must_Have, second is Should_Not_Have
+//photon.SetHistoryFilters_Volumes(["PM0"], [])  		//"PM0" is NOT PM#0, it is PM of type #0
+//photon.SetHistoryFilters_Volumes([], ["World", "UpWin"])	//photons which have never entered World and UpWin volumes
+//photon.SetHistoryFilters_Volumes([], ["UpWin"])	//photons which have never entered UpWin volume
+
+// ====== tracing photons ======
+
+photon.TracePhotonsIsotropic(numPhotons,    -95,0.1,0,    0,0)	// if photon direction should be isotropic, otherwise use e.g., photon.TracePhotons(numPhotons,    -95,0.1,0,    1,0,0.1,   0,0)
+
+// =======================
+
+var history = photon.GetHistory()
+
+//save to file, format   cycle#  process   x y z VolumeName  number  matIndex matIndexAfterInterface waveIndex
+//photon.SaveHistoryToFile( core.GetWorkDir()+"/PhotonHistoryLog.txt", true, 0)  //can be combined with photon.ClearData() in a cycle, so very long logs can be generated
+
+// ------ Printout of all records (do not forget about the applied filter!) 
+// ------ Comment away to remove spam!!!
+core.print( "History length: "+ history.length)
+for (var i=0; i<history.length; i++)
+{
+  core.print("Photon #" + i)
+  for (var j=0; j<history[i].length; j++)
+     core.print(  photon.PrintRecord(i,j) )     
+   core.print("\n")  
+ }
+ // -------
+
+if (history.length == 0) core.abort("history is empty!")
+
+//getting statistics
+hist.NewHist("t",100,0,0)
+hist.NewHist("d",100,0,0)
+for (var ih=0; ih<history.length; ih++)
+{
+     var lastIndex = history[ih].length - 1
+     
+    //time of travel   
+    hist.Fill("t",    history[ih][lastIndex].time, 1 )
+    
+    //distance travelled
+    var path = 0
+    for (var j=1; j<=lastIndex; j++)
+    {
+       var delta = 0
+       for (var ii=0; ii<3; ii++) 
+       {        
+          var d = history[ih][j].position[ii] - history[ih][j-1].position[ii]         
+          delta += d*d
+       }
+       delta = math.sqrt(delta)
+       path += delta
+    }
+   hist.Fill("d", path, 1) 
+}
+hist.SetTitles("t", "Time, ns", "")
+hist.SetTitles("d", "Distance, mm", "")
+
+hist.Draw("t", "")
+grwin.AddToBasket("Time")
+hist.Draw("d",  "")
+grwin.AddToBasket("Distance")

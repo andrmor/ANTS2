@@ -249,6 +249,14 @@ class ATypeArrayObject : public ATypeObject
 {
 public:
     ATypeArrayObject() {Type = "Array"; Handling = "Array"; numX = 2; numY = 2; numZ = 1; stepX = 25; stepY = 25; stepZ = 25;}
+    ATypeArrayObject(int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
+        : numX(numX), numY(numY), numZ(numZ), stepX(stepX), stepY(stepY), stepZ(stepZ) {Type = "Array"; Handling = "Array";}
+
+    void Reconfigure(int NumX, int NumY, int NumZ, double StepX, double StepY, double StepZ)
+    {
+        numX = NumX; numY = NumY; numZ = NumZ;
+        stepX = StepX; stepY = StepY; stepZ = StepZ;
+    }
 
     virtual void writeToJson(QJsonObject& json);
     virtual void readFromJson(QJsonObject& json);

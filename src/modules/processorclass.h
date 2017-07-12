@@ -122,16 +122,42 @@ public:
                             EventsDataClass *EventsDataHub,
                             ReconstructionSettings *RecSet,
                             int ThisPmGroup,
-                            int EventsFrom, int EventsTo);
+                            int EventsFrom, int EventsTo,
+                            bool UseGauss = false);
   ~RootMinReconstructorClass();
  //public for static use
  double LastMiniValue;
  const QVector< float >* PMsignals;
 public slots:
   virtual void execute();
-private:
+protected:
   ROOT::Math::Functor *FunctorLSML;
   ROOT::Minuit2::Minuit2Minimizer* RootMinimizer;
+};
+
+/// Root minimizer (Migrad2 or Simplex) for point events with possibility that some events have known range in X or Y
+class RootMinRangedReconstructorClass : public RootMinReconstructorClass
+{
+  Q_OBJECT
+public:
+    RootMinRangedReconstructorClass(pms* PMs,
+                                    APmGroupsManager* PMgroups,
+                                    ALrfModuleSelector* LRFs,
+                                    EventsDataClass *EventsDataHub,
+                                    ReconstructionSettings *RecSet,
+                                    int ThisPmGroup,
+                                    int EventsFrom, int EventsTo,
+                                    double Range, bool UseGauss);
+    ~RootMinRangedReconstructorClass();
+
+    double Range; // minimization will be within +-range around the true/scan value
+
+    //internal - used by the minimizer in Gaussian mode
+    bool RangedX, RangedY;
+    double CenterX, CenterY;
+
+public slots:
+    virtual void execute();
 };
 
 /// Root minimizer (Migrad2 or Simplex) with double events
@@ -201,7 +227,9 @@ private:
 
 //static functions to use with Root minimizer
 double Chi2static(const double *p);
+double Chi2staticGauss(const double *p);
 double Chi2staticDouble(const double *p);
 double MLstatic(const double *p);
+double MLstaticGauss(const double *p);
 double MLstaticDouble(const double *p);
 #endif // PROCESSORCLASS_H

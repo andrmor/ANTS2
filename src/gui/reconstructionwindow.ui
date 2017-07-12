@@ -587,9 +587,9 @@
        <widget class="QCheckBox" name="cbPlotVsActualPosition">
         <property name="geometry">
          <rect>
-          <x>354</x>
+          <x>327</x>
           <y>175</y>
-          <width>171</width>
+          <width>97</width>
           <height>17</height>
          </rect>
         </property>
@@ -597,7 +597,7 @@
          <string notr="true">For simulations or data with loaded XY positions</string>
         </property>
         <property name="text">
-         <string>Plot data vs true positions</string>
+         <string>Plot vs true</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_18">
@@ -788,11 +788,14 @@
        <widget class="QCheckBox" name="cbShowPMs">
         <property name="geometry">
          <rect>
-          <x>201</x>
+          <x>179</x>
           <y>193</y>
-          <width>142</width>
+          <width>140</width>
           <height>17</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>Show contours of PMs on the XY plot</string>
         </property>
         <property name="text">
          <string>Show PMs</string>
@@ -845,14 +848,17 @@
        <widget class="QCheckBox" name="cbSuppress0bins">
         <property name="geometry">
          <rect>
-          <x>201</x>
+          <x>179</x>
           <y>174</y>
-          <width>151</width>
+          <width>145</width>
           <height>17</height>
          </rect>
         </property>
+        <property name="toolTip">
+         <string>If checked, zero bins are shown in white.</string>
+        </property>
         <property name="text">
-         <string>Suppress 0 bins indication</string>
+         <string>Suppress 0 bins</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -861,14 +867,17 @@
        <widget class="QCheckBox" name="cbShowManifestItems">
         <property name="geometry">
          <rect>
-          <x>354</x>
+          <x>327</x>
           <y>193</y>
-          <width>151</width>
+          <width>100</width>
           <height>17</height>
          </rect>
         </property>
-        <property name="text">
+        <property name="toolTip">
          <string>Show manifest items</string>
+        </property>
+        <property name="text">
+         <string>Show manifest</string>
         </property>
        </widget>
        <widget class="QCheckBox" name="cbXYsymmetric">
@@ -957,10 +966,10 @@
        <widget class="QPushButton" name="pbPMTcol">
         <property name="geometry">
          <rect>
-          <x>280</x>
-          <y>193</y>
+          <x>263</x>
+          <y>192</y>
           <width>30</width>
-          <height>18</height>
+          <height>19</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1022,6 +1031,32 @@
          <string>X</string>
         </property>
        </widget>
+       <widget class="QCheckBox" name="cbInvertX">
+        <property name="geometry">
+         <rect>
+          <x>438</x>
+          <y>175</y>
+          <width>70</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Invert X</string>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="cbInvertY">
+        <property name="geometry">
+         <rect>
+          <x>438</x>
+          <y>193</y>
+          <width>70</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Invert Y</string>
+        </property>
+       </widget>
        <zorder>line_40</zorder>
        <zorder>label_16</zorder>
        <zorder>leoEventsPassingAllFilters</zorder>
@@ -1072,6 +1107,8 @@
        <zorder>label_135</zorder>
        <zorder>pbShowTruePositions</zorder>
        <zorder>pbClearPositions</zorder>
+       <zorder>cbInvertX</zorder>
+       <zorder>cbInvertY</zorder>
       </widget>
       <widget class="QWidget" name="tabPointSingle">
        <attribute name="title">
@@ -1548,9 +1585,9 @@
        <widget class="QLabel" name="label_14">
         <property name="geometry">
          <rect>
-          <x>4</x>
+          <x>1</x>
           <y>12</y>
-          <width>62</width>
+          <width>76</width>
           <height>16</height>
          </rect>
         </property>
@@ -1564,9 +1601,9 @@
        <widget class="QLabel" name="label_119">
         <property name="geometry">
          <rect>
-          <x>33</x>
+          <x>1</x>
           <y>38</y>
-          <width>32</width>
+          <width>75</width>
           <height>16</height>
          </rect>
         </property>
@@ -1580,9 +1617,9 @@
        <widget class="QLabel" name="label_120">
         <property name="geometry">
          <rect>
-          <x>22</x>
+          <x>1</x>
           <y>63</y>
-          <width>43</width>
+          <width>75</width>
           <height>16</height>
          </rect>
         </property>
@@ -1615,7 +1652,7 @@
        <widget class="QComboBox" name="cobTreeViewWhat">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>10</y>
           <width>381</width>
           <height>22</height>
@@ -1633,7 +1670,7 @@
        <widget class="QComboBox" name="cobTreeViewCuts">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>36</y>
           <width>381</width>
           <height>22</height>
@@ -1646,7 +1683,7 @@
        <widget class="QComboBox" name="cobTreeViewOptions">
         <property name="geometry">
          <rect>
-          <x>71</x>
+          <x>79</x>
           <y>62</y>
           <width>381</width>
           <height>22</height>
@@ -1889,7 +1926,7 @@
          <rect>
           <x>30</x>
           <y>118</y>
-          <width>101</width>
+          <width>130</width>
           <height>17</height>
          </rect>
         </property>
@@ -1902,7 +1939,7 @@
          <rect>
           <x>176</x>
           <y>119</y>
-          <width>111</width>
+          <width>140</width>
           <height>17</height>
          </rect>
         </property>
@@ -2502,7 +2539,7 @@
         <widget class="QSpinBox" name="sbAnalysisEventNumber">
          <property name="geometry">
           <rect>
-           <x>80</x>
+           <x>130</x>
            <y>10</y>
            <width>61</width>
            <height>22</height>
@@ -2518,9 +2555,9 @@
         <widget class="QLabel" name="label_29">
          <property name="geometry">
           <rect>
-           <x>-5</x>
+           <x>10</x>
            <y>12</y>
-           <width>81</width>
+           <width>116</width>
            <height>16</height>
           </rect>
          </property>
@@ -3308,8 +3345,8 @@
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>310</y>
+      <x>320</x>
+      <y>300</y>
       <width>210</width>
       <height>23</height>
      </rect>
@@ -7452,7 +7489,7 @@ Individual sensors can belong to multiple groups!</string>
          <widget class="QComboBox" name="cobReconstructionAlgorithm">
           <property name="geometry">
            <rect>
-            <x>145</x>
+            <x>177</x>
             <y>5</y>
             <width>251</width>
             <height>22</height>
@@ -7711,15 +7748,15 @@ Individual sensors can belong to multiple groups!</string>
              <string>Takes gains into account</string>
             </property>
             <property name="text">
-             <string>Ignore PMs by distance from the PM with the maximum signal</string>
+             <string>Ignore PMs based on distance from the PM with max signal</string>
             </property>
            </widget>
            <widget class="QFrame" name="fCoGIgnoreFar">
             <property name="geometry">
              <rect>
-              <x>238</x>
+              <x>200</x>
               <y>103</y>
-              <width>211</width>
+              <width>230</width>
               <height>41</height>
              </rect>
             </property>
@@ -7732,14 +7769,17 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_101">
              <property name="geometry">
               <rect>
-               <x>8</x>
+               <x>5</x>
                <y>6</y>
-               <width>91</width>
+               <width>94</width>
                <height>16</height>
               </rect>
              </property>
              <property name="text">
               <string>Ignore threshold:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QLabel" name="label_170">
@@ -8001,14 +8041,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_168">
             <property name="geometry">
              <rect>
-              <x>36</x>
+              <x>17</x>
               <y>91</y>
-              <width>141</width>
+              <width>151</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
              <string>Search starts centered on:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobCGoptimizeWhat">
@@ -8034,14 +8077,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_173">
             <property name="geometry">
              <rect>
-              <x>99</x>
+              <x>18</x>
               <y>71</y>
-              <width>67</width>
+              <width>150</width>
               <height>13</height>
              </rect>
             </property>
             <property name="text">
              <string>Optimization:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </widget>
@@ -8049,14 +8095,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_46">
             <property name="geometry">
              <rect>
-              <x>18</x>
+              <x>10</x>
               <y>87</y>
-              <width>133</width>
+              <width>137</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Initial step (X,Y,Z,Energy):</string>
+             <string>Start step (X,Y,Z,  E):</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLineEdit" name="ledInitialStepX">
@@ -8114,27 +8163,33 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_78">
             <property name="geometry">
              <rect>
-              <x>88</x>
+              <x>17</x>
               <y>115</y>
-              <width>55</width>
+              <width>130</width>
               <height>14</height>
              </rect>
             </property>
             <property name="text">
              <string>Max calls:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
            <widget class="QLabel" name="label_100">
             <property name="geometry">
              <rect>
-              <x>35</x>
+              <x>16</x>
               <y>60</y>
-              <width>107</width>
+              <width>130</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
              <string>Start search from XY:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobLSstartingXY">
@@ -8223,27 +8278,33 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_118">
             <property name="geometry">
              <rect>
-              <x>76</x>
+              <x>16</x>
               <y>36</y>
-              <width>67</width>
+              <width>130</width>
               <height>13</height>
              </rect>
             </property>
             <property name="text">
              <string>Optimization:</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
            <widget class="QLabel" name="label_441">
             <property name="geometry">
              <rect>
-              <x>69</x>
+              <x>17</x>
               <y>5</y>
-              <width>78</width>
+              <width>130</width>
               <height>20</height>
              </rect>
             </property>
             <property name="text">
              <string>Minuit2 option:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QComboBox" name="cobMinuit2Option">
@@ -8323,7 +8384,7 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_55">
              <property name="geometry">
               <rect>
-               <x>6</x>
+               <x>7</x>
                <y>5</y>
                <width>98</width>
                <height>16</height>
@@ -8336,9 +8397,9 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_122">
              <property name="geometry">
               <rect>
-               <x>26</x>
+               <x>10</x>
                <y>36</y>
-               <width>80</width>
+               <width>93</width>
                <height>16</height>
               </rect>
              </property>
@@ -8407,7 +8468,7 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_126">
              <property name="geometry">
               <rect>
-               <x>13</x>
+               <x>4</x>
                <y>90</y>
                <width>141</width>
                <height>16</height>
@@ -8415,6 +8476,9 @@ Individual sensors can belong to multiple groups!</string>
              </property>
              <property name="text">
               <string>Search starts centered on:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QComboBox" name="cobCUDAoffsetOption">
@@ -8457,7 +8521,7 @@ Individual sensors can belong to multiple groups!</string>
               </rect>
              </property>
              <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+              <enum>QFrame::NoFrame</enum>
              </property>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
@@ -8562,9 +8626,9 @@ Individual sensors can belong to multiple groups!</string>
              <widget class="QLabel" name="label_125">
               <property name="geometry">
                <rect>
-                <x>8</x>
+                <x>5</x>
                 <y>1</y>
-                <width>81</width>
+                <width>83</width>
                 <height>16</height>
                </rect>
               </property>
@@ -8599,14 +8663,17 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_130">
              <property name="geometry">
               <rect>
-               <x>78</x>
+               <x>11</x>
                <y>66</y>
-               <width>67</width>
+               <width>134</width>
                <height>13</height>
               </rect>
              </property>
              <property name="text">
               <string>Optimization:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </widget>
@@ -9044,12 +9111,15 @@ Individual sensors can belong to multiple groups!</string>
            <rect>
             <x>10</x>
             <y>7</y>
-            <width>141</width>
+            <width>163</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
            <string>Reconstruction algorithm:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
          <widget class="QFrame" name="fDynPassive">
@@ -9969,8 +10039,8 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>110</x>
-            <y>40</y>
-            <width>391</width>
+            <y>33</y>
+            <width>201</width>
             <height>31</height>
            </rect>
           </property>
@@ -9985,7 +10055,7 @@ Beware of bugs!</string>
             <rect>
              <x>6</x>
              <y>2</y>
-             <width>211</width>
+             <width>181</width>
              <height>22</height>
             </rect>
            </property>
@@ -10000,7 +10070,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>18</x>
-            <y>44</y>
+            <y>37</y>
             <width>101</width>
             <height>17</height>
            </rect>
@@ -10034,9 +10104,9 @@ Beware of bugs!</string>
           </property>
           <property name="geometry">
            <rect>
-            <x>20</x>
-            <y>80</y>
-            <width>311</width>
+            <x>17</x>
+            <y>65</y>
+            <width>293</width>
             <height>22</height>
            </rect>
           </property>
@@ -10060,7 +10130,7 @@ Beware of bugs!</string>
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>118</y>
+            <y>95</y>
             <width>211</width>
             <height>17</height>
            </rect>
@@ -10072,9 +10142,9 @@ Beware of bugs!</string>
          <widget class="QFrame" name="fInRecFilter">
           <property name="geometry">
            <rect>
-            <x>230</x>
-            <y>111</y>
-            <width>271</width>
+            <x>7</x>
+            <y>116</y>
+            <width>301</width>
             <height>61</height>
            </rect>
           </property>
@@ -10087,8 +10157,8 @@ Beware of bugs!</string>
           <widget class="QLineEdit" name="ledInRecSize1">
            <property name="geometry">
             <rect>
-             <x>60</x>
-             <y>31</y>
+             <x>58</x>
+             <y>29</y>
              <width>51</width>
              <height>20</height>
             </rect>
@@ -10133,8 +10203,8 @@ Beware of bugs!</string>
           <widget class="QLabel" name="lInRecX">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>34</y>
+             <x>8</x>
+             <y>32</y>
              <width>47</width>
              <height>13</height>
             </rect>
@@ -10149,8 +10219,8 @@ Beware of bugs!</string>
           <widget class="QLabel" name="label_19">
            <property name="geometry">
             <rect>
-             <x>118</x>
-             <y>33</y>
+             <x>116</x>
+             <y>31</y>
              <width>20</width>
              <height>13</height>
             </rect>
@@ -10162,8 +10232,8 @@ Beware of bugs!</string>
           <widget class="QFrame" name="fInRecSize2">
            <property name="geometry">
             <rect>
-             <x>140</x>
-             <y>27</y>
+             <x>138</x>
+             <y>25</y>
              <width>141</width>
              <height>31</height>
             </rect>
@@ -10213,6 +10283,75 @@ Beware of bugs!</string>
              <string>26.5</string>
             </property>
            </widget>
+          </widget>
+         </widget>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="geometry">
+           <rect>
+            <x>326</x>
+            <y>8</y>
+            <width>176</width>
+            <height>131</height>
+           </rect>
+          </property>
+          <property name="title">
+           <string>Root-based reconstruction</string>
+          </property>
+          <widget class="QCheckBox" name="cbLimitSearchToVicinity">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>11</y>
+             <width>161</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>If there is scan data, and 
+xScan (or yScan) != 1e10,
+limit search in this direction
+to +- around the Scan value:</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledLimitSearchRange">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>72</y>
+             <width>51</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_194">
+           <property name="geometry">
+            <rect>
+             <x>87</x>
+             <y>75</y>
+             <width>47</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>mm</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="cbGaussWeightInMinimization">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>93</y>
+             <width>161</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Gauss weight
+in minimization</string>
+           </property>
           </widget>
          </widget>
         </widget>
@@ -13462,7 +13601,7 @@ Beware of bugs!</string>
      <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>373</x>
+     <x>351</x>
      <y>317</y>
     </hint>
    </hints>
@@ -13474,8 +13613,8 @@ Beware of bugs!</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>290</y>
+     <x>209</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -13718,8 +13857,8 @@ Beware of bugs!</string>
      <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>353</x>
-     <y>302</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13734,8 +13873,8 @@ Beware of bugs!</string>
      <y>115</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13750,8 +13889,8 @@ Beware of bugs!</string>
      <y>100</y>
     </hint>
     <hint type="destinationlabel">
-     <x>383</x>
-     <y>314</y>
+     <x>363</x>
+     <y>334</y>
     </hint>
    </hints>
   </connection>
@@ -13766,8 +13905,8 @@ Beware of bugs!</string>
      <y>118</y>
     </hint>
     <hint type="destinationlabel">
-     <x>407</x>
-     <y>304</y>
+     <x>387</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13782,8 +13921,8 @@ Beware of bugs!</string>
      <y>112</y>
     </hint>
     <hint type="destinationlabel">
-     <x>431</x>
-     <y>311</y>
+     <x>411</x>
+     <y>331</y>
     </hint>
    </hints>
   </connection>
@@ -13798,8 +13937,8 @@ Beware of bugs!</string>
      <y>212</y>
     </hint>
     <hint type="destinationlabel">
-     <x>362</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13814,8 +13953,8 @@ Beware of bugs!</string>
      <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>392</x>
-     <y>300</y>
+     <x>372</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13830,8 +13969,8 @@ Beware of bugs!</string>
      <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>347</x>
-     <y>301</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13846,8 +13985,8 @@ Beware of bugs!</string>
      <y>283</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13862,8 +14001,8 @@ Beware of bugs!</string>
      <y>213</y>
     </hint>
     <hint type="destinationlabel">
-     <x>446</x>
-     <y>305</y>
+     <x>426</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13878,8 +14017,8 @@ Beware of bugs!</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>466</x>
-     <y>305</y>
+     <x>446</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13894,8 +14033,8 @@ Beware of bugs!</string>
      <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>481</x>
-     <y>306</y>
+     <x>461</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13910,8 +14049,8 @@ Beware of bugs!</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>501</x>
-     <y>308</y>
+     <x>481</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13922,12 +14061,12 @@ Beware of bugs!</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>365</x>
+     <x>351</x>
      <y>317</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>306</y>
+     <x>499</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13942,8 +14081,8 @@ Beware of bugs!</string>
      <y>182</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>307</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13958,8 +14097,8 @@ Beware of bugs!</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>300</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13974,8 +14113,8 @@ Beware of bugs!</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -13990,8 +14129,8 @@ Beware of bugs!</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>483</x>
-     <y>305</y>
+     <x>463</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14006,8 +14145,8 @@ Beware of bugs!</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>470</x>
-     <y>300</y>
+     <x>450</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14022,8 +14161,8 @@ Beware of bugs!</string>
      <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>455</x>
-     <y>306</y>
+     <x>435</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14038,8 +14177,8 @@ Beware of bugs!</string>
      <y>277</y>
     </hint>
     <hint type="destinationlabel">
-     <x>443</x>
-     <y>310</y>
+     <x>423</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14054,8 +14193,8 @@ Beware of bugs!</string>
      <y>215</y>
     </hint>
     <hint type="destinationlabel">
-     <x>463</x>
-     <y>304</y>
+     <x>443</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14070,8 +14209,8 @@ Beware of bugs!</string>
      <y>242</y>
     </hint>
     <hint type="destinationlabel">
-     <x>420</x>
-     <y>305</y>
+     <x>400</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14086,8 +14225,8 @@ Beware of bugs!</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>394</x>
-     <y>309</y>
+     <x>374</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14102,8 +14241,8 @@ Beware of bugs!</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>350</x>
-     <y>305</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14118,8 +14257,8 @@ Beware of bugs!</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>373</x>
-     <y>309</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14134,8 +14273,8 @@ Beware of bugs!</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>421</x>
-     <y>310</y>
+     <x>401</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14150,8 +14289,8 @@ Beware of bugs!</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>473</x>
-     <y>307</y>
+     <x>453</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14166,8 +14305,8 @@ Beware of bugs!</string>
      <y>323</y>
     </hint>
     <hint type="destinationlabel">
-     <x>362</x>
-     <y>300</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14182,8 +14321,8 @@ Beware of bugs!</string>
      <y>320</y>
     </hint>
     <hint type="destinationlabel">
-     <x>449</x>
-     <y>303</y>
+     <x>429</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14198,8 +14337,8 @@ Beware of bugs!</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
-     <y>308</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14214,8 +14353,8 @@ Beware of bugs!</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>366</x>
-     <y>306</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14230,8 +14369,8 @@ Beware of bugs!</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>310</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14246,8 +14385,8 @@ Beware of bugs!</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>354</x>
-     <y>304</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14262,8 +14401,8 @@ Beware of bugs!</string>
      <y>276</y>
     </hint>
     <hint type="destinationlabel">
-     <x>471</x>
-     <y>310</y>
+     <x>451</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14278,8 +14417,8 @@ Beware of bugs!</string>
      <y>302</y>
     </hint>
     <hint type="destinationlabel">
-     <x>397</x>
-     <y>306</y>
+     <x>377</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14294,8 +14433,8 @@ Beware of bugs!</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>491</x>
-     <y>310</y>
+     <x>471</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14310,8 +14449,8 @@ Beware of bugs!</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>478</x>
-     <y>305</y>
+     <x>458</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14358,8 +14497,8 @@ Beware of bugs!</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>503</x>
-     <y>302</y>
+     <x>483</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14374,8 +14513,8 @@ Beware of bugs!</string>
      <y>231</y>
     </hint>
     <hint type="destinationlabel">
-     <x>356</x>
-     <y>321</y>
+     <x>360</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -14390,8 +14529,8 @@ Beware of bugs!</string>
      <y>270</y>
     </hint>
     <hint type="destinationlabel">
-     <x>531</x>
-     <y>306</y>
+     <x>511</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14454,8 +14593,8 @@ Beware of bugs!</string>
      <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>317</y>
+     <x>360</x>
+     <y>337</y>
     </hint>
    </hints>
   </connection>
@@ -14470,8 +14609,8 @@ Beware of bugs!</string>
      <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>316</y>
+     <x>360</x>
+     <y>336</y>
     </hint>
    </hints>
   </connection>
@@ -14486,8 +14625,8 @@ Beware of bugs!</string>
      <y>290</y>
     </hint>
     <hint type="destinationlabel">
-     <x>331</x>
-     <y>321</y>
+     <x>360</x>
+     <y>341</y>
     </hint>
    </hints>
   </connection>
@@ -14502,8 +14641,8 @@ Beware of bugs!</string>
      <y>178</y>
     </hint>
     <hint type="destinationlabel">
-     <x>351</x>
-     <y>280</y>
+     <x>360</x>
+     <y>330</y>
     </hint>
    </hints>
   </connection>
@@ -14664,6 +14803,54 @@ Beware of bugs!</string>
     <hint type="destinationlabel">
      <x>480</x>
      <y>491</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitSearchToVicinity</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>486</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>492</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledLimitSearchRange</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>250</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>401</x>
+     <y>334</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbGaussWeightInMinimization</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>375</x>
+     <y>279</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>343</y>
     </hint>
    </hints>
   </connection>

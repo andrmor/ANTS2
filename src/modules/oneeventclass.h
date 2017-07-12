@@ -31,8 +31,8 @@ public:
   //hits processing
   void clearHits();
   bool isHitsEmpty();
-  void CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd);
-  void CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd);
+  bool CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd);
+  bool CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd);
   void HitsToSignal();  //convert hits of PMs to signal using "electronics" settings
   void addHits(int ipm, int hits) {PMhitsTotal[ipm] += hits;}
   void addTimedHits(int itime, int ipm, int hits) {TimedPMhits[itime][ipm] += hits;}

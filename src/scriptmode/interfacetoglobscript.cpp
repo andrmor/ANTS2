@@ -1394,6 +1394,30 @@ bool InterfaceToData::GetTrueNumberPoints(int ievent)
   return EventsDataHub->Scan.at(ievent)->Points.size();
 }
 
+void InterfaceToData::SetScanX(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[0] = value;
+}
+
+void InterfaceToData::SetScanY(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[1] = value;
+}
+
+void InterfaceToData::SetScanZ(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].r[2] = value;
+}
+
+void InterfaceToData::SetScanEnergy(int ievent, double value)
+{
+    if (!checkTrueDataRequest(ievent)) return; //anyway aborted
+    EventsDataHub->Scan.at(ievent)->Points[0].energy = value;
+}
+
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
@@ -2617,6 +2641,12 @@ void InterfaceToGraphWin::AddToBasket(QString Title)
   MW->GraphWindow->AddCurrentToBasket(Title);
 }
 
+void InterfaceToGraphWin::ClearBasket()
+{
+  MW->GraphWindow->ClearBasket();
+
+}
+
 void InterfaceToGraphWin::SaveImage(QString fileName)
 {
     MW->GraphWindow->SaveGraph(fileName);
@@ -2809,6 +2839,13 @@ bool AInterfaceToPMs::AddPM(int UpperLower, int type, double X, double Y, double
     Config->GetDetector()->writeToJson(Config->JSON);
     Config->GetDetector()->BuildDetector();
     return true;
+}
+
+void AInterfaceToPMs::SetAllArraysFullyCustom()
+{
+    for (int i=0; i<Config->GetDetector()->PMarrays.size(); i++)
+        Config->GetDetector()->PMarrays[i].Regularity = 2;
+    Config->GetDetector()->writeToJson(Config->JSON);
 }
 
 #ifdef GUI

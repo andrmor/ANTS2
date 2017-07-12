@@ -45,7 +45,7 @@ void ASimulationStatistics::initialize(int nBins)
     if (TransitionSpectrum) delete TransitionSpectrum;
     TransitionSpectrum = new TH1I("TransitionsSpectrum"+NameID, "Transitions", nBins, 0,-1);
 
-    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = 0;
+    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = 0;
 
     FresnelTransmitted = FresnelReflected = BulkAbsorption = Rayleigh = Reemission = 0;
     OverrideForward = OverrideBack = 0;
@@ -54,6 +54,13 @@ void ASimulationStatistics::initialize(int nBins)
     OverrideMetalAbs = OverrideMetalReflection = 0;
     OverrideClaudioAbs = OverrideClaudioSpec = OverrideClaudioLamb = 0;
     OverrideWLSabs = OverrideWLSshift = 0;
+
+    MustNotInclude_Processes.clear();
+    MustInclude_Processes.clear();
+    MustNotInclude_Volumes.clear();
+    MustInclude_Volumes.clear();
+
+    PhotonHistoryLog.clear();
 }
 
 void ASimulationStatistics::setWavelengthBinning(double waveNodes)
@@ -63,9 +70,8 @@ void ASimulationStatistics::setWavelengthBinning(double waveNodes)
 }
 
 bool ASimulationStatistics::isEmpty()
-{
-  if (!TransitionSpectrum) return true;
-  return (TransitionSpectrum->GetEntries() > 0) ? false : true;
+{    
+  return (countPhotons() == 0);
 }
 
 void ASimulationStatistics::registerWave(int iWave)
@@ -98,6 +104,7 @@ void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatisti
   LossOnGrid += from->LossOnGrid;
   TracingSkipped += from->TracingSkipped;
   MaxCyclesReached += from->MaxCyclesReached;
+  GeneratedOutsideGeometry += from->GeneratedOutsideGeometry;
 
   FresnelTransmitted += from->FresnelTransmitted;
   FresnelReflected += from->FresnelReflected;
@@ -125,5 +132,10 @@ void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatisti
 
   OverrideWLSabs += from->OverrideWLSabs;
   OverrideWLSshift += from->OverrideWLSshift;
+}
+
+long ASimulationStatistics::countPhotons()
+{
+    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry;
 }
 

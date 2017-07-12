@@ -216,29 +216,29 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                       double SoFarShortest = 1.0e10;
                       for (int i=0; i<processes; i++)
                         {
-                          //                       qDebug()<<"process #:"<<i;
+                             qDebug()<<"---Process #:"<<i;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
                           const double InteractionCoefficient = InteractionValue(energy, &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSectionEnergy,
                                                                            &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSection,
                                                                            MpCollection->fLogLogInterpolation);
-                          //                       qDebug()<<energy<<InteractionCoefficient;
+                             qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
                           double MeanFreePath;
                           if (MpCollection->getParticleType(Id) == AParticle::_neutron_)
                             { //neutron! - using atomic density and cross-section in barns
-                              //                           qDebug()<<InteractionCoefficient<<AtomicDensity;
+                                qDebug()<<"isotope density:"<<AtomicDensity;
                               MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
                             }
                           else MeanFreePath = 10.0/InteractionCoefficient/Density;  //1/(cm2/g)/(g/cm3) - need in mm (so that 10.)
-                          //                       qDebug()<<"MeanFreePath="<<MeanFreePath;
+                             qDebug()<<"MeanFreePath="<<MeanFreePath;
                           double Step = -MeanFreePath * log(RandGen->Rndm());
-                          //                       qDebug()<< "Generated length:"<<Step;
+                             qDebug()<< "Generated length:"<<Step;
                           if (Step < SoFarShortest)
                             {
                               SoFarShortest = Step;
                               SoFarShortestId = i;
                             }
                         }
-                      //                   qDebug()<<SoFarShortest<<SoFarShortestId;
+                                         qDebug()<<SoFarShortest<<SoFarShortestId;
                       //shortest vs MaxLength?
                       if (SoFarShortest >= MaxLength)
                         {
@@ -306,36 +306,39 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 //nothing is added to the EnergyVector, the result of capture is generation of secondary particles!
                                 int numGenParticles = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles.size();
 
-                                //adding first particle to the stack
-                                double vv[3]; //random direction
-                                GenerateRandomDirection(vv);
-                                const int  &Particle1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[0];
-                                const double &energy1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[0];
-                                //                         qDebug()<<"Adding to stack particle with id: "<<Particle1<<" energy:"<<energy1;
-                                AParticleOnStack* pp = new AParticleOnStack(Particle1, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy1, counter);
-                                ParticleStack->append(pp);
-
-                                // adding second particle
-                                //  for the moment, the creation rule is: opposite direction to the first particle    <- POSSIBLE UPGRADE ***
-                                if (numGenParticles > 1)
+                                if (numGenParticles>0)
                                   {
-                                    const int  &Particle2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[1];
-                                    const double &energy2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[1];
-                                    //                                 qDebug()<<"Adding to stack particle with id: "<<Particle2<<" energy:"<<energy2;
-                                    pp = new AParticleOnStack(Particle2, r[0], r[1], r[2], -vv[0], -vv[1], -vv[2], time, energy2, counter);
+                                    //adding first particle to the stack
+                                    double vv[3]; //random direction
+                                    GenerateRandomDirection(vv);
+                                    const int  &Particle1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[0];
+                                    const double &energy1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[0];
+                                    //                         qDebug()<<"Adding to stack particle with id: "<<Particle1<<" energy:"<<energy1;
+                                    AParticleOnStack* pp = new AParticleOnStack(Particle1, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy1, counter);
                                     ParticleStack->append(pp);
+
+                                    // adding second particle
+                                    //  for the moment, the creation rule is: opposite direction to the first particle    <- POSSIBLE UPGRADE ***
+                                    if (numGenParticles > 1)
+                                      {
+                                        const int  &Particle2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[1];
+                                        const double &energy2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[1];
+                                        //                                 qDebug()<<"Adding to stack particle with id: "<<Particle2<<" energy:"<<energy2;
+                                        pp = new AParticleOnStack(Particle2, r[0], r[1], r[2], -vv[0], -vv[1], -vv[2], time, energy2, counter);
+                                        ParticleStack->append(pp);
+                                      }
+                                    if (numGenParticles > 2)
+                                      for (int ipart=2; ipart<numGenParticles; ipart++)
+                                        {
+                                          //                                   //all particle after 2nd - random direction
+                                          GenerateRandomDirection(vv);
+                                          const int  &Particle = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[ipart];
+                                          const double &energy = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[ipart];
+                                          //                             qDebug()<<"Adding to stack particle with id: "<<Particle<<" energy:"<<energy;
+                                          AParticleOnStack* pp = new AParticleOnStack(Particle, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
+                                          ParticleStack->append(pp);
+                                        }
                                   }
-                                if (numGenParticles > 2)
-                                  for (int ipart=2; ipart<numGenParticles; ipart++)
-                                    {
-                                      //                                   //all particle after 2nd - random direction
-                                      GenerateRandomDirection(vv);
-                                      const int  &Particle = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[ipart];
-                                      const double &energy = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[ipart];
-                                      //                             qDebug()<<"Adding to stack particle with id: "<<Particle<<" energy:"<<energy;
-                                      AParticleOnStack* pp = new AParticleOnStack(Particle, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
-                                      ParticleStack->append(pp);
-                                    }
 
                                 terminationStatus = EventHistoryStructure::Capture;//5
                                 distanceHistory = SoFarShortest;
@@ -361,6 +364,37 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 distanceHistory = SoFarShortest;
                                 energyHistory = depo;
                                 break; //switch-break
+                              }
+                            case (NeutralTerminatorStructure::EllasticScattering): //4
+                              {
+                                double m = 27; //mass of atom in atomic units
+                                //vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
+                                //vn[i] = 2200.0*v[i];
+                                //va[] is randomly generated from Gauss(0, sqrt(kT/m)
+                                double va[3];
+                                double a = sqrt(1.38065e-23*300/m/1.6605e-27);
+                                for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
+                                qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
+                                const double sumM = m + 1.0;
+                                double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
+                                for (int i=0; i<3; i++) vcm[i] = (2200.0*v[i]+m*va[i])/sumM;
+                                double V[3]; //neutron velocity in the center of mass frame
+                                for (int i=0; i<3; i++) V[i] = 2200.0*v[i] - vcm[i];
+                                double Vmod = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]); //abs value of the velocity
+                                double Vnew[3]; //neutron velocity after scatter in thecenter of mass frame
+                                GenerateRandomDirection(Vnew);
+                                for (int i=0; i<3; i++) Vnew[i] *= Vmod;
+                                double vnew[3]; //neutrn velocity in the lab frame
+                                for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
+                                double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
+                                qDebug() << "new neutron velocity:"<<vnewMod;
+                                AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, energy, counter);
+                                ParticleStack->append(tmp);
+
+                                terminationStatus = EventHistoryStructure::EllasticScattering;
+                                distanceHistory = SoFarShortest;
+                                energyHistory = 0;
+                                break;//switch-break
                               }
                             }
                         }

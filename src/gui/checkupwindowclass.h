@@ -50,7 +50,6 @@ protected:
 
     void showEvent(QShowEvent *ev);
     void closeEvent(QCloseEvent *event);
-    void resizeEvent(QResizeEvent *ev);
 
 private slots:
     void on_overlaplist_clicked(const QModelIndex &index);

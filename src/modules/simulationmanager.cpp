@@ -86,7 +86,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
   if (!json.contains("SimulationConfig"))
     {
-      message("Json dos not contain simulation config!");
+      message("Json does not contain simulation config!");
       return;
     }
   QJsonObject jsSimSet = json["SimulationConfig"].toObject();
@@ -436,9 +436,12 @@ void Simulator::appendToDataHub(EventsDataClass *dataHub)
     dataHub->Events << this->dataHub->Events;
     dataHub->TimedEvents << this->dataHub->TimedEvents;
     dataHub->Scan << this->dataHub->Scan;
-    if(simSettings->fAngResolved) addTH1(dataHub->SimStat->getCosAngleSpectrum(), this->dataHub->SimStat->getCosAngleSpectrum());
-    if(simSettings->fTimeResolved) addTH1(dataHub->SimStat->getTimeSpectrum(), this->dataHub->SimStat->getTimeSpectrum());
-    if(simSettings->fWaveResolved) addTH1(dataHub->SimStat->getWaveSpectrum(), this->dataHub->SimStat->getWaveSpectrum());
+    if(simSettings->fAngResolved)
+      addTH1(dataHub->SimStat->getCosAngleSpectrum(), this->dataHub->SimStat->getCosAngleSpectrum());
+    //if(simSettings->fTimeResolved)
+    addTH1(dataHub->SimStat->getTimeSpectrum(), this->dataHub->SimStat->getTimeSpectrum());
+    //if(simSettings->fWaveResolved)
+    addTH1(dataHub->SimStat->getWaveSpectrum(), this->dataHub->SimStat->getWaveSpectrum());
     addTH1(dataHub->SimStat->getTransitionSpectrum(), this->dataHub->SimStat->getTransitionSpectrum());
 
     dataHub->SimStat->AppendSimulationStatistics(this->dataHub->SimStat);

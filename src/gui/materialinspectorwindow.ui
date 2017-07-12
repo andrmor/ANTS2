@@ -249,17 +249,18 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QPushButton" name="pbUpdateIndication">
+   <widget class="QPushButton" name="pbUpdateInteractionIndication">
     <property name="geometry">
      <rect>
       <x>410</x>
       <y>130</y>
       <width>75</width>
-      <height>41</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
      <string>...update
+iteraction
 indication</string>
     </property>
    </widget>
@@ -1488,7 +1489,7 @@ resolution:</string>
            </rect>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="pageGamma">
            <widget class="QFrame" name="fGamma">
@@ -2384,10 +2385,24 @@ with the relative numeric fractions of 90 to 1.</string>
             <zorder>label_54</zorder>
             <zorder>cobTerminationScenarios</zorder>
            </widget>
+           <widget class="QPushButton" name="pbTest">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>30</y>
+              <width>75</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Test</string>
+            </property>
+           </widget>
            <zorder>fNeutron</zorder>
            <zorder>line_4</zorder>
            <zorder>pbLoadTotalInteractionCoefficient</zorder>
            <zorder>cobTotalInteractionLoadEnergyUnits</zorder>
+           <zorder>pbTest</zorder>
           </widget>
          </widget>
          <widget class="QLabel" name="labNeutra_TotalInteractiondataMissing">
@@ -2897,7 +2912,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <zorder>pbRename</zorder>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
-   <zorder>pbUpdateIndication</zorder>
+   <zorder>pbUpdateInteractionIndication</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -3036,8 +3051,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>272</x>
-     <y>206</y>
+     <x>274</x>
+     <y>204</y>
     </hint>
     <hint type="destinationlabel">
      <x>323</x>
@@ -3212,8 +3227,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>207</y>
+     <x>253</x>
+     <y>204</y>
     </hint>
     <hint type="destinationlabel">
      <x>329</x>
@@ -3244,8 +3259,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>208</y>
+     <x>223</x>
+     <y>204</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -3260,8 +3275,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>222</x>
-     <y>207</y>
+     <x>224</x>
+     <y>204</y>
     </hint>
     <hint type="destinationlabel">
      <x>439</x>
@@ -3431,13 +3446,13 @@ with the relative numeric fractions of 90 to 1.</string>
   </connection>
   <connection>
    <sender>cbTrackingAllowed</sender>
-   <signal>toggled(bool)</signal>
+   <signal>clicked()</signal>
    <receiver>pbWasModified</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>247</y>
+     <x>237</x>
+     <y>236</y>
     </hint>
     <hint type="destinationlabel">
      <x>473</x>
@@ -3452,8 +3467,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>270</x>
-     <y>360</y>
+     <x>262</x>
+     <y>334</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
@@ -3468,8 +3483,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>352</x>
-     <y>392</y>
+     <x>354</x>
+     <y>377</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -3484,8 +3499,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>487</y>
+     <x>90</x>
+     <y>478</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
@@ -3500,27 +3515,11 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>196</x>
-     <y>395</y>
+     <x>198</x>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
      <x>465</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPrimaryYield</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>191</x>
-     <y>475</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
      <y>93</y>
     </hint>
    </hints>
@@ -3580,8 +3579,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>79</x>
-     <y>289</y>
+     <x>81</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
      <x>478</x>
@@ -3698,6 +3697,38 @@ with the relative numeric fractions of 90 to 1.</string>
     <hint type="destinationlabel">
      <x>381</x>
      <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbTrackingAllowed</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>227</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobParticle</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateInteractionIndication</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>115</x>
+     <y>226</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>179</y>
     </hint>
    </hints>
   </connection>

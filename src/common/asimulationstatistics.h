@@ -1,7 +1,13 @@
 #ifndef ASIMULATIONSTATISTICS_H
 #define ASIMULATIONSTATISTICS_H
 
+#include "aphotonhistorylog.h"
+
+#include <QVector>
+#include <QSet>
+
 #include "TString.h"
+
 class TH1I;
 class TH1D;
 
@@ -30,7 +36,7 @@ public:
     TH1I* getTransitionSpectrum() {return TransitionSpectrum;}
 
     //photon loss statistics
-    long Absorbed, OverrideLoss, HitPM, HitDummy, Escaped, LossOnGrid, TracingSkipped, MaxCyclesReached;
+    long Absorbed, OverrideLoss, HitPM, HitDummy, Escaped, LossOnGrid, TracingSkipped, MaxCyclesReached, GeneratedOutsideGeometry;
 
     //statistics for optical processes
     long FresnelTransmitted, FresnelReflected, BulkAbsorption, Rayleigh, Reemission; //general bulk
@@ -41,6 +47,14 @@ public:
     long OverrideMetalAbs, OverrideMetalReflection; //on metal
     long OverrideClaudioAbs, OverrideClaudioSpec, OverrideClaudioLamb; //Claudio's
     long OverrideWLSabs, OverrideWLSshift;
+
+    //only affects script unit "photon" tracing!
+    QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;    
+    QSet<int> MustNotInclude_Processes;   //v.fast
+    QVector<int> MustInclude_Processes;   //slow
+    QSet<QString> MustNotInclude_Volumes; //fast
+    QVector<QString> MustInclude_Volumes; //v.slow
+
 
 private:
     TH1I* WaveSpectrum;
@@ -53,6 +67,8 @@ private:
 
     double WaveFrom, WaveTo;
     int WaveNodes;
+
+    long countPhotons();
 };
 
 #endif // ASIMULATIONSTATISTICS_H

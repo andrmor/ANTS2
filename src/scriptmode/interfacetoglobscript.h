@@ -182,6 +182,10 @@ public slots:
   int GetTruePoints(int ievent);
   bool IsTrueGoodEvent(int ievent);
   bool GetTrueNumberPoints(int ievent);
+  void SetScanX(int ievent, double value);
+  void SetScanY(int ievent, double value);
+  void SetScanZ(int ievent, double value);
+  void SetScanEnergy(int ievent, double value);
 
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
@@ -254,6 +258,7 @@ public slots:
   void RemoveAllPMs();
   bool AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
   bool AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
+  void SetAllArraysFullyCustom();
 
 private:
   AConfiguration* Config;
@@ -532,6 +537,7 @@ public slots:
 
   //basket operation
   void AddToBasket(QString Title);
+  void ClearBasket();
 
   void SaveImage(QString fileName);  
   void ExportTH2AsText(QString fileName);

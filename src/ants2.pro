@@ -1,13 +1,13 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
-ANTS2_MINOR = 12
-ANTS2_VERSION = 2180
+ANTS2_MINOR = 13
+ANTS2_VERSION = 2197
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
@@ -242,7 +242,10 @@ SOURCES += main.cpp \
     Net/anetworkmodule.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
-    modules/lrf_v3/gui/avladimircompressionwidget.cpp
+    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
+    SplineLibrary/tpspline3.cpp \
+    scriptmode/ainterfacetophotonscript.cpp \
+    common/aphotonhistorylog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -343,6 +346,9 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
+    SplineLibrary/tpspline3.h \
+    scriptmode/ainterfacetophotonscript.h \
+    common/aphotonhistorylog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -542,9 +548,9 @@ RC_FILE = myapp.rc
 
 #---Windows-specific compilation mode and warning suppression
 win32 {
-  #if the next 2 instructions are not commented, there is no optimization during compilation: drastic shortening of compilation, but ~20% performance loss
-  QMAKE_CXXFLAGS_RELEASE -= -O2
-  QMAKE_CXXFLAGS_RELEASE *= -Od
+  #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
+  #QMAKE_CXXFLAGS_RELEASE -= -O2
+  #QMAKE_CXXFLAGS_RELEASE *= -Od
 
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
@@ -589,5 +595,3 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-
-DISTFILES +=

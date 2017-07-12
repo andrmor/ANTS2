@@ -229,9 +229,10 @@ void ReconstructionWindow::InitWindow()
 
 void ReconstructionWindow::on_cobReconstructionAlgorithm_currentIndexChanged(int index)
 {
+    if (index==6) index = 2; //same tab for both
     ui->swReconstructionAlgorithm->setCurrentIndex(index);
     ReconstructionWindow::updateRedStatusOfRecOptions(); //update warning indicator in tabWidget
-    if (index == 1 || index == 2 || index == 4) ui->fDynPassive->setVisible(true);
+    if (index == 1 || index == 2 || index == 4 ) ui->fDynPassive->setVisible(true);
     else ui->fDynPassive->setVisible(false);  
     ui->cobMultipleOption->setEnabled(index == 2);
 }
@@ -1050,14 +1051,14 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 void ReconstructionWindow::updateFiltersGui()
 {
   //Update UI
-  ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
-  ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
-  ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
-  ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
+  //ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
+  //ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
+  //ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
+  //ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
-  ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
-  ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
+  //ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
+  //ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
     //warning icons
   bool masterWarningFlag = false;
   QIcon no;
@@ -1388,11 +1389,13 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
   bool AccountForPassive = ui->cbPassivePMsTakenAccount->isChecked();
 
   //init
-  double Zmin = ui->ledZfrom->text().toDouble();
-  double Zmax = ui->ledZto->text().toDouble();
-  bool UseScan = ui->cbPlotVsActualPosition->isChecked();
-  bool fShowPMs = ui->cbShowPMs->isChecked();
-  bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const double Zmin = ui->ledZfrom->text().toDouble();
+  const double Zmax = ui->ledZto->text().toDouble();
+  const bool UseScan = ui->cbPlotVsActualPosition->isChecked();
+  const bool fShowPMs = ui->cbShowPMs->isChecked();
+  const bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const bool bInvertX = ui->cbInvertX->isChecked();
+  const bool bInvertY = ui->cbInvertY->isChecked();
 
   auto hist2D = new TH2D("hist2d","",ui->sbXbins->value(), ui->ledXfrom->text().toDouble(), ui->ledXto->text().toDouble(),
                                     ui->sbYbins->value(), ui->ledYfrom->text().toDouble(), ui->ledYto->text().toDouble());
@@ -1478,16 +1481,22 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
         default:;
         }
 
+        double X, Y;
         if (UseScan)
           {
-             hist2D->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1], val);
-            histNum->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1]);
+             X = EventsDataHub->Scan[iev]->Points[0].r[0];
+             Y = EventsDataHub->Scan[iev]->Points[0].r[1];
           }
         else
           {
-             hist2D->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1], val);
-            histNum->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1]);
+             X = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0];
+             Y = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1];
           }
+        if (bInvertX) X *= -1.0;
+        if (bInvertY) Y *= -1.0;
+
+        hist2D->Fill( X, Y, val );
+        histNum->Fill( X, Y );
       }
     else qWarning() << "Not implemented for multiple points!";
 
@@ -4969,7 +4978,9 @@ void ReconstructionWindow::updateReconSettings()
     gjson["InitialZ"] = ui->ledSuggestedZ->text().toDouble();
     gjson["IncludePassives"] = ui->cbIncludePassives->isChecked();
     gjson["WeightedChi2"] = ui->cbWeightedChi2->isChecked();
-    //gjson["NumThreads"] = ui->sbRecNumThreads->value();
+    gjson["LimitSearchIfTrueIsSet"] = ui->cbLimitSearchToVicinity->isChecked();
+    gjson["RangeForLimitSearchIfTrueSet"] = ui->ledLimitSearchRange->text().toDouble();
+    gjson["LimitSearchGauss"] = ui->cbGaussWeightInMinimization->isChecked();
   RecJson["General"] = gjson;
 
   //Algotithm
@@ -5125,8 +5136,11 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   ui->cobZ->setCurrentIndex(0); //compatibility
   JsonToComboBox(gjson, "Zstrategy", ui->cobZ);
   JsonToCheckbox(gjson, "IncludePassives", ui->cbIncludePassives);
-  JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);
-  //JsonToSpinBox(gjson, "NumThreads", ui->sbRecNumThreads);
+  JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);  
+  ui->cbLimitSearchToVicinity->setChecked(false); //compatibility
+  JsonToCheckbox(gjson, "LimitSearchIfTrueIsSet", ui->cbLimitSearchToVicinity);
+  JsonToLineEdit(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
+  JsonToCheckbox(gjson, "LimitSearchGauss", ui->cbGaussWeightInMinimization);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
   if (RecJson.contains("DynamicPassives"))

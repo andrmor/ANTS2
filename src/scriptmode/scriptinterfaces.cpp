@@ -591,6 +591,14 @@ void InterfaceToAddObjScript::InitializeStack(QString StackName, QString Origin_
    StackObj->HostedObjects.clear();
 }
 
+void InterfaceToAddObjScript::MakeGroup(QString name, QString container)
+{
+    AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
+    delete o->ObjectType;
+    o->ObjectType = new ATypeGroupContainerObject();
+    GeoObjects.append(o);
+}
+
 void InterfaceToAddObjScript::RecalculateStack(QString name)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);

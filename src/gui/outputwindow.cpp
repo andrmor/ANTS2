@@ -38,6 +38,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     EventsDataHub = eventsDataHub;
     GVscale = 10.0;
     ui->setupUi(this);
+    bForbidUpdate = false;
 
     this->setWindowTitle("Output");
 
@@ -87,8 +88,10 @@ void OutputWindow::PMnumChanged()
 
 void OutputWindow::SetCurrentEvent(int iev)
 {  
-  if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev);
-  else ui->sbEvent->setValue(iev); //update on_change
+  bForbidUpdate = true;
+  //if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev); else
+  ui->sbEvent->setValue(iev);
+  bForbidUpdate = false;
 
   RefreshData();
 }
@@ -858,7 +861,7 @@ void OutputWindow::on_sbEvent_valueChanged(int arg1)
       return; //already triggered "on change" = this procedure
     } 
 
-  if (ui->tabwinDiagnose->currentIndex() == 0) ShowOneEventLog(arg1);
+  if (ui->tabwinDiagnose->currentIndex() == 0 && !bForbidUpdate) ShowOneEventLog(arg1);
   else on_pbRefreshViz_clicked();
 }
 

@@ -51,6 +51,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           QJsonObject SimJson = json["SimulationConfig"].toObject();
           JSON["SimulationConfig"] = SimJson;
           emit requestSimulationGuiUpdate();
+          emit requestSelectFirstActiveParticleSource();
         }
       else
         {
@@ -245,7 +246,7 @@ void AConfiguration::ClearCustomNodes()
     sim["PointSourcesConfig"] = ps;
     JSON["SimulationConfig"] = sim;
 
-    requestSimulationGuiUpdate();
+    emit requestSimulationGuiUpdate();
 }
 
 QJsonArray AConfiguration::GetCustomNodes()
@@ -274,7 +275,7 @@ void AConfiguration::AddCustomNode(double x, double y, double z)
     sim["PointSourcesConfig"] = ps;
     JSON["SimulationConfig"] = sim;
 
-    requestSimulationGuiUpdate();
+    emit requestSimulationGuiUpdate();
 }
 
 bool AConfiguration::SetCustomNodes(QJsonArray arr)
@@ -299,7 +300,7 @@ bool AConfiguration::SetCustomNodes(QJsonArray arr)
     sim["PointSourcesConfig"] = ps;
     JSON["SimulationConfig"] = sim;
 
-    requestSimulationGuiUpdate();
+    emit requestSimulationGuiUpdate();
     return true;
 }
 

@@ -148,6 +148,34 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFont">
+    <property name="title">
+     <string>Font</string>
+    </property>
+    <addaction name="actionIncrease_font_size"/>
+    <addaction name="actionDecrease_font_size"/>
+   </widget>
+   <addaction name="menuFont"/>
+  </widget>
+  <action name="actionIncrease_font_size">
+   <property name="text">
+    <string>Increase font size</string>
+   </property>
+  </action>
+  <action name="actionDecrease_font_size">
+   <property name="text">
+    <string>Decrease font size</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

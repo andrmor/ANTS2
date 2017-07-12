@@ -745,3 +745,26 @@ void GeometryWindowClass::on_actionDecrease_line_width_triggered()
     SetAsActiveRootWindow();
     MW->Detector->top->Draw("");
 }
+
+#include "anetworkmodule.h"
+void GeometryWindowClass::on_pbWebViewer_clicked()
+{
+#ifdef USE_ROOT_HTML
+    if (MW->NetModule->isRootServerRunning())
+      {
+        QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/World_1&opt=dray;all;tracks";
+        t += ";transp"+QString::number(ui->sbTransparency->value());
+        if (ui->cbShowAxes->isChecked()) t += ";axis";
+
+        QDesktopServices::openUrl(QUrl(t));
+      }
+    else
+      {
+        message("Root html server has to be started:"
+                "\nUse MainWindow->Menu->Settings->Net->Run_CERN_ROOT_HTML_server", this);
+      }
+#else
+    message("ANTS2 has to be compiled with the activated option in ants2.pro:"
+            "\nCONFIG += ants2_RootServer\n", this);
+#endif
+}

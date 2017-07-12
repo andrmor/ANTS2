@@ -448,6 +448,7 @@ void APhotonTracer::AppendHistoryRecord()
 
       if (bFound)
         {
+          PhLog.squeeze();
           p->SimStat->PhotonHistoryLog.append(PhLog);
           if (fBuildTracks) AppendTrack();
         }

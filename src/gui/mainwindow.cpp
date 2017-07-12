@@ -201,8 +201,8 @@ void MainWindow::closeEvent(QCloseEvent *)
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
-   //qDebug()<<"--Saving ANTS configuration";
-   if (ScriptWindow) ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   //qDebug()<<"--Saving ANTS configuration";   
+   ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
    GlobSet->SaveANTSconfiguration();
 
    bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it   
@@ -2499,7 +2499,7 @@ void MainWindow::on_pbIndShowArea_clicked()
 
 void MainWindow::on_cbGunAllowMultipleEvents_toggled(bool checked)
 {
-    ui->fGunMultipleEvents->setEnabled(checked);
+    ui->fGunMultipleEvents->setVisible(checked);
 }
 
 void MainWindow::UpdatePreprocessingSettingsIndication()
@@ -4430,15 +4430,6 @@ void MainWindow::on_cobMatPointSource_activated(int index)
     }
 }
 
-void MainWindow::on_ledSourceActivity_textChanged(const QString &/*arg1*/)
-{
-  double val = ui->ledSourceActivity->text().toDouble();
-  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
-  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
-  if (val == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
-  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
-}
-
 void MainWindow::on_actionOpen_settings_triggered()
 {   
    GlobSetWindow->showNormal();
@@ -5078,4 +5069,9 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->raise();
   Owindow->activateWindow();
   Owindow->SetTab(3);
+}
+
+void MainWindow::on_cobParticleSource_activated(int /*index*/)
+{
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }

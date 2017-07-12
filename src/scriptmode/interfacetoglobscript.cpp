@@ -857,15 +857,17 @@ bool InterfaceToConfig::Save(QString FileName)
 
 //-----------------------------------
 static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-InterfaceToTexter::InterfaceToTexter()
+InterfaceToTexter::InterfaceToTexter(QMainWindow* parent) : D(0), Parent(parent)
 {
-  fEnabled = true;
-  Init(false);
+  bEnabled = true;
+  bActivated = false;
+  init(false);
 }
 
-void InterfaceToTexter::Init(bool fTransparent)
+void InterfaceToTexter::init(bool fTransparent)
 {
-  D = new QDialog();
+  D = new QDialog(Parent);
+  QObject::connect(D, &QDialog::finished, this, &InterfaceToTexter::Hide);
 
   QVBoxLayout* l = new QVBoxLayout;
   e = new QPlainTextEdit();
@@ -894,6 +896,7 @@ void InterfaceToTexter::Init(bool fTransparent)
 
 InterfaceToTexter::~InterfaceToTexter()
 {
+  //qDebug() << "Msg destructor";
   deleteDialog();
 }
 
@@ -902,7 +905,7 @@ void InterfaceToTexter::SetTransparent(bool flag)
   QString text = e->document()->toPlainText();
   delete D;
   D = 0;
-  Init(flag);
+  init(flag);
   e->setPlainText(text);
 }
 
@@ -918,7 +921,7 @@ void InterfaceToTexter::Clear()
 
 void InterfaceToTexter::Show(QString txt, int ms)
 {
-  if (!fEnabled) return;
+  if (!bEnabled) return;
   e->clear();
   e->appendHtml(txt);
 
@@ -926,16 +929,19 @@ void InterfaceToTexter::Show(QString txt, int ms)
     {
       D->show();
       D->raise();
+      bActivated = true;
       return;
     }
 
   D->show();
   D->raise();
+  bActivated = true;
   QTime t;
   t.restart();
   do qApp->processEvents();
   while (t.elapsed()<ms);
   D->hide();
+  bActivated = false;
 }
 
 void InterfaceToTexter::Move(double x, double y)
@@ -952,14 +958,16 @@ void InterfaceToTexter::Resize(double w, double h)
 
 void InterfaceToTexter::Show()
 {
-  if (!fEnabled) return;
+  if (!bEnabled) return;
   D->show();
   D->raise();
+  bActivated = true;
 }
 
 void InterfaceToTexter::Hide()
 {
   D->hide();
+  bActivated = false;
 }
 
 void InterfaceToTexter::SetFontSize(int size)
@@ -971,8 +979,18 @@ void InterfaceToTexter::SetFontSize(int size)
 
 void InterfaceToTexter::deleteDialog()
 {
-   if (D) delete D;
+   delete D;
    D = 0;
+}
+
+void InterfaceToTexter::hide()
+{
+    if (D) D->hide();
+}
+
+void InterfaceToTexter::restore()
+{
+    if (D) D->show();
 }
 
 #ifdef SIM
@@ -1152,18 +1170,24 @@ int InterfaceToData::GetNumPMs()
   return EventsDataHub->Events.first().size();
 }
 
-int InterfaceToData::GetNumEvents()
+int InterfaceToData::countPMs()
 {
-  return EventsDataHub->Events.size();
+    if (EventsDataHub->Events.isEmpty()) return 0;
+    return EventsDataHub->Events.first().size();
 }
 
-bool InterfaceToData::checkReconstructionDataRequest(int ievent)
+int InterfaceToData::GetNumEvents()
 {
-  //if (!EventsDataHub->isReconstructionReady())
-  //  {
-  //    abort("Reconstruction was not yet performed");
-  //    return false;
-  //  }
+    return EventsDataHub->Events.size();
+}
+
+int InterfaceToData::countEvents()
+{
+    return EventsDataHub->Events.size();
+}
+
+bool InterfaceToData::checkEventNumber(int ievent)
+{ 
   int numEvents = EventsDataHub->Events.size();
   if (ievent<0 || ievent>numEvents-1)
     {
@@ -1173,7 +1197,7 @@ bool InterfaceToData::checkReconstructionDataRequest(int ievent)
   return true;
 }
 
-bool InterfaceToData::checkReconstructionDataRequest(int igroup, int ievent, int ipoint)
+bool InterfaceToData::checkEventNumber(int igroup, int ievent, int ipoint)
 {
     int numGroups = EventsDataHub->ReconstructionData.size();
     if (igroup<0 || igroup>numGroups-1)
@@ -1240,58 +1264,58 @@ bool InterfaceToData::checkTrueDataRequest(int ievent)
 
 double InterfaceToData::GetReconstructedX(int ievent)
 {
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[0];
 }
 
 double InterfaceToData::GetReconstructedX(int igroup, int ievent, int ipoint)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0; //anyway aborted
+  if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[0];
 }
 
 double InterfaceToData::GetReconstructedY(int ievent)
 {
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[1];
 }
 
 double InterfaceToData::GetReconstructedY(int igroup, int ievent, int ipoint)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0; //anyway aborted
+  if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[1];
 }
 
 double InterfaceToData::GetReconstructedZ(int ievent)
 {
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[2];
 }
 
 double InterfaceToData::GetReconstructedZ(int igroup, int ievent, int ipoint)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0; //anyway aborted
+  if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[2];
 }
 
 double InterfaceToData::GetRho(int ievent, int iPM)
 {
     if (!checkPM(iPM)) return 0;
-    if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+    if (!checkEventNumber(ievent)) return 0; //anyway aborted
     return sqrt( GetRho2(ievent, iPM) );
 }
 
 double InterfaceToData::GetRho(int igroup, int ievent, int ipoint, int iPM)
 {
   if (!checkPM(iPM)) return 0;
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0; //anyway aborted
+  if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[2];
 }
 
 double InterfaceToData::GetRho2(int ievent, int iPM)
 {
   if (!checkPM(iPM)) return 0;
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted 
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   double dx2 = EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[0] - Config->GetDetector()->PMs->X(iPM);
   dx2 *= dx2;
   double dy2 = EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[1] - Config->GetDetector()->PMs->Y(iPM);
@@ -1302,7 +1326,7 @@ double InterfaceToData::GetRho2(int ievent, int iPM)
 double InterfaceToData::GetRho2(int igroup, int ievent, int ipoint, int iPM)
 {
     if (!checkPM(iPM)) return 0;
-    if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0; //anyway aborted
+    if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
     double dx2 = EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[0] - Config->GetDetector()->PMs->X(iPM);
     dx2 *= dx2;
     double dy2 = EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[1] - Config->GetDetector()->PMs->Y(iPM);
@@ -1312,25 +1336,25 @@ double InterfaceToData::GetRho2(int igroup, int ievent, int ipoint, int iPM)
 
 double InterfaceToData::GetReconstructedEnergy(int ievent)
 {
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].energy;
 }
 
 double InterfaceToData::GetReconstructedEnergy(int igroup, int ievent, int ipoint)
 {
-    if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return 0;
+    if (!checkEventNumber(igroup, ievent, ipoint)) return 0;
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].energy;
 }
 
 bool InterfaceToData::IsReconstructedGoodEvent(int ievent)
 {
-  if (!checkReconstructionDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->GoodEvent;
 }
 
 bool InterfaceToData::IsReconstructedGoodEvent(int igroup, int ievent)
 {
-    if (!checkReconstructionDataRequest(igroup, ievent, 0)) return 0;
+    if (!checkEventNumber(igroup, ievent, 0)) return 0;
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->GoodEvent;
 }
 
@@ -1418,6 +1442,48 @@ void InterfaceToData::SetScanEnergy(int ievent, double value)
     EventsDataHub->Scan.at(ievent)->Points[0].energy = value;
 }
 
+bool pairMore (const std::pair<int, float>& p1, const std::pair<int, float>& p2)
+{
+    return (p1.second > p2.second);
+}
+
+QVariant InterfaceToData::GetPMsSortedBySignal(int ievent)
+{
+    if (!checkEventNumber(ievent)) return 0; //aborted anyway
+
+    const int numPMs = EventsDataHub->Events.at(ievent).size();
+    std::vector< std::pair<int, float> > ar;
+    ar.reserve(numPMs);
+
+    for (int i=0; i<numPMs; i++)
+        ar.push_back( std::pair<int, float>(i, EventsDataHub->Events.at(ievent).at(i)) );
+
+    std::sort(ar.begin(), ar.end(), pairMore);
+
+    QVariantList aa;
+    for (const std::pair<int, float>& p : ar )
+        aa << p.first;
+    return aa;
+}
+
+int InterfaceToData::GetPMwithMaxSignal(int ievent)
+{
+    if (!checkEventNumber(ievent)) return 0; //aborted anyway
+
+    float MaxSig = EventsDataHub->Events.at(ievent).at(0);
+    int iMaxSig = 0;
+    for (int i=0; i<EventsDataHub->Events.at(ievent).size(); i++)
+    {
+        float sig = EventsDataHub->Events.at(ievent).at(i);
+        if (sig > MaxSig)
+        {
+            MaxSig = sig;
+            iMaxSig = i;
+        }
+    }
+    return iMaxSig;
+}
+
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
@@ -1468,7 +1534,7 @@ void InterfaceToData::SetReconstructionOK(int ievent, bool OK)
 
 void InterfaceToData::SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+  if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[0] = x;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[1] = y;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[2] = z;
@@ -1489,43 +1555,43 @@ void InterfaceToData::SetReconstructedFast(int igroup, int ievent, int ipoint, d
 
 void InterfaceToData::AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, 0)) return;
+  if (!checkEventNumber(igroup, ievent, 0)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points.AddPoint(x, y, z, e);
 }
 
 void InterfaceToData::SetReconstructedX(int igroup, int ievent, int ipoint, double x)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+  if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[0] = x;
 }
 
 void InterfaceToData::SetReconstructedY(int igroup, int ievent, int ipoint, double y)
 {
-    if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+    if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[1] = y;
 }
 
 void InterfaceToData::SetReconstructedZ(int igroup, int ievent, int ipoint, double z)
 {
-    if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+    if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[2] = z;
 }
 
 void InterfaceToData::SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+  if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].energy = e;
 }
 
 void InterfaceToData::SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good)
 {
-    if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+    if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = good;
 }
 
 void InterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK)
 {
-  if (!checkReconstructionDataRequest(igroup, ievent, ipoint)) return;
+  if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->ReconstructionOK = OK;
 }
 

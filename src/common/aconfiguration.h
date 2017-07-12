@@ -53,6 +53,7 @@ public slots:
 signals:
   void requestDetectorGuiUpdate();          //connect in MainWindowInits.cpp
   void requestSimulationGuiUpdate();        //connect in MainWindowInits.cpp
+  void requestSelectFirstActiveParticleSource(); //same
   void requestReconstructionGuiUpdate();    //connect in MainWindowInits.cpp
   void requestLRFGuiUpdate();               //connect in MainWindowInits.cpp
   void NewConfigLoaded();                   //connect in MainWindowInits.cpp // update GUI after new detector was loaded - only those things which should not update on each GUI update

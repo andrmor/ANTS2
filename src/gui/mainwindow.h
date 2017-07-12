@@ -55,6 +55,7 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
+struct ParticleSourceStructure;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -298,8 +299,7 @@ private slots:
     void on_pbPMtypeDeleteAngular_clicked();
     void on_pbPMtypeShowEffectiveAngular_clicked();
     void on_sbCosBins_valueChanged(int arg1);
-    void on_cobGunSourceType_currentIndexChanged(int index);
-    void on_pbGunShowSource_clicked();
+    void on_cobGunSourceType_currentIndexChanged(int index);    
     void on_pbGunTest_clicked();
     void on_pbGunRefreshparticles_clicked();
     void on_pbGunAddNew_clicked();
@@ -391,6 +391,8 @@ private slots:
     void on_pbAddSource_clicked();
     void on_pbUpdateSources_clicked();
     void on_pbUpdateSourcesIndication_clicked();
+    //void on_pbGunShowSource_clicked();
+    void on_pbGunShowSource_toggled(bool checked);
 
 protected:
     void closeEvent(QCloseEvent *);    
@@ -568,7 +570,6 @@ private slots:
     void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
-    void on_ledSourceActivity_textChanged(const QString &arg1);
     void on_actionOpen_settings_triggered();
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
     void on_pbShowEnergyDeposition_clicked();
@@ -612,18 +613,15 @@ private slots:
     void on_cbEnableMCcrosstalk_toggled(bool checked);
     void on_pbRemoveCellMCcrosstalk_clicked();
     void on_pbMCnormalize_clicked();
-
     void on_leSourceLimitMaterial_textChanged(const QString &arg1);
-
     void on_leLimitNodesObject_textChanged(const QString &arg1);
-
     void on_cbLimitNodesOutsideObject_toggled(bool checked);
-
     void on_bpResults_clicked();
-
     void on_pobTest_2_clicked();
-
     void on_bpResults_2_clicked();
+    void on_actionScript_window_triggered();
+
+    void on_cobParticleSource_activated(int index);
 
 public slots:
     void on_cobSF_chi2Vs_activated(int index);
@@ -637,14 +635,19 @@ public slots:
     void onGlobalScriptFinished();
     void on_pbUpdatePreprocessingSettings_clicked(); //updates preprocessing settings in Config
     void on_pbUpdateSimConfig_clicked();   // updates simulation-related properies in Config from GUI
+    void selectFirstActiveParticleSource(); //trigger after load new config to select the first source with non-zero activity
 
 private:
     void initDetectorSandwich();
     void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
+    void clearParticleSourcesIndication();   
+    void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
+    void ShowParticleSource_noFocus();
+    void updateActivityIndication();
 
-    //new sandwich
 public slots:
+    //new sandwich
     void UpdateSandwichGui();
     void OnWarningMessage(QString text);
     void OnDetectorColorSchemeChanged(int scheme, int matId);    

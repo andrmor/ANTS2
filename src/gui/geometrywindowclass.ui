@@ -48,7 +48,7 @@
          <x>-5</x>
          <y>243</y>
          <width>114</width>
-         <height>71</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="frameShape">
@@ -73,8 +73,8 @@
        <widget class="QLabel" name="label_2">
         <property name="geometry">
          <rect>
-          <x>31</x>
-          <y>28</y>
+          <x>25</x>
+          <y>51</y>
           <width>81</width>
           <height>16</height>
          </rect>
@@ -86,8 +86,8 @@
        <widget class="QSpinBox" name="sbTransparency">
         <property name="geometry">
          <rect>
-          <x>42</x>
-          <y>44</y>
+          <x>36</x>
+          <y>67</y>
           <width>51</width>
           <height>22</height>
          </rect>
@@ -97,6 +97,22 @@
         </property>
         <property name="value">
          <number>50</number>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbWebViewer">
+        <property name="geometry">
+         <rect>
+          <x>13</x>
+          <y>30</y>
+          <width>90</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>View geometry using JSROOT</string>
+        </property>
+        <property name="text">
+         <string>Jsroot viewer</string>
         </property>
        </widget>
       </widget>
@@ -337,7 +353,7 @@
        <property name="geometry">
         <rect>
          <x>-5</x>
-         <y>312</y>
+         <y>340</y>
          <width>118</width>
          <height>3</height>
         </rect>
@@ -402,7 +418,7 @@
        <property name="geometry">
         <rect>
          <x>16</x>
-         <y>317</y>
+         <y>345</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -415,7 +431,7 @@
        <property name="geometry">
         <rect>
          <x>16</x>
-         <y>338</y>
+         <y>366</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -428,7 +444,7 @@
        <property name="geometry">
         <rect>
          <x>16</x>
-         <y>359</y>
+         <y>387</y>
          <width>75</width>
          <height>23</height>
         </rect>
@@ -441,7 +457,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>386</y>
+         <y>414</y>
          <width>91</width>
          <height>22</height>
         </rect>
@@ -461,7 +477,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>413</y>
+         <y>441</y>
          <width>118</width>
          <height>3</height>
         </rect>
@@ -474,7 +490,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>445</y>
+         <y>473</y>
          <width>118</width>
          <height>3</height>
         </rect>
@@ -487,7 +503,7 @@
        <property name="geometry">
         <rect>
          <x>14</x>
-         <y>421</y>
+         <y>449</y>
          <width>81</width>
          <height>17</height>
         </rect>

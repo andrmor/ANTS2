@@ -1146,18 +1146,20 @@ void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &sc
             if (!obj->HostedObjects.isEmpty())
                 script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
         }
+        else if (obj->ObjectType->isGroup())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_groupObjectStart(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- group elements for " + obj->Name;
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- group elements end for " + obj->Name;
+        }
         else if (obj->ObjectType->isGrid())
         {
             script += "\n";
             script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
             script += "\n";
         }
-        else if (obj->ObjectType->isGroup())
-        {
-            script += "\n";
-            script += "\n" + QString(" ").repeated(ident)+ "//=== Group object is not supported! Make a request to the developers ===";
-            script += "\n";
-        }
+
     }
 }
 
@@ -1203,6 +1205,13 @@ QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
 QString DetectorAddOnsWindow::makeScriptString_stackObjectStart(AGeoObject *obj)
 {
     return  QString("geo.MakeStack(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_groupObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeGroup(") +
             "'" + obj->Name + "', " +
             "'" + obj->Container->Name + "' )";
 }

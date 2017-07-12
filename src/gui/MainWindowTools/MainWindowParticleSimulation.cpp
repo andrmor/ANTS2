@@ -17,6 +17,7 @@
 #include "aparticleonstack.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
+#include "guiutils.h"
 
 //Qt
 #include <QDebug>
@@ -51,8 +52,6 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
 void MainWindow::ShowSource(int isource, bool clear)
 {
-  if (BulkUpdate) return;
-
   ParticleSourceStructure* p = ParticleSources->getSource(isource);
 
   int index = p->index;
@@ -194,7 +193,7 @@ void MainWindow::ShowSource(int isource, bool clear)
   TVector3 K(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta)); //collimation direction
   Int_t track_index = Detector->GeoManager->AddTrack(1,22);
   TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-  double Klength = 20.0;
+  double Klength = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.5; //20 before
 
   track->AddPoint(X0, Y0, Z0, 0);
   track->AddPoint(X0+K[0]*Klength, Y0+K[1]*Klength, Z0+K[2]*Klength, 0);
@@ -219,22 +218,45 @@ void MainWindow::ShowSource(int isource, bool clear)
 
   MainWindow::ShowTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
-  Detector->GeoManager->DrawCurrentPoint(9);
+  //Detector->GeoManager->DrawCurrentPoint(9);
   GeometryWindow->UpdateRootCanvas();
 }
 
 void MainWindow::on_pbGunTest_clicked()
 {
-  MainWindow::on_pbGunShowSource_clicked();
+  //MainWindow::on_pbGunShowSource_clicked();
+  MainWindow::on_pbGunShowSource_toggled(true);
 
+  QVector<double> activities;
+  //forcing to 100% activity the currently selected source
+  int isource = ui->cobParticleSource->currentIndex();
+  for (int i=0; i<ParticleSources->size(); i++)
+  {
+      activities << ParticleSources->getSource(i)->Activity; //remember old
+      if (i==isource) ParticleSources->getSource(i)->Activity = 1.0;
+      else ParticleSources->getSource(i)->Activity = 0;
+  }
   ParticleSources->Init();
 
+  double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
   double R[3], K[3];
-  int Points = ui->sbGunTestEvents->value();
-  for (int i=0; i<Points; i++)
+  int numParticles = ui->sbGunTestEvents->value();
+  bool bHaveSome = false;
+  for (int iRun=0; iRun<numParticles; iRun++)
     {      
       QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
-      //qDebug()<<"particles:"<<GP->size();
+      if (GP->size()>0)
+          bHaveSome = true;
+      else
+      {
+          if (iRun>2)
+          {
+             if (ui->cbSourceLimitmat->isChecked()) message("Did several attempts but no particles were generated!\n"
+                                                            "Possible reason: generation is limited to a wrong material", this);
+             else message("Did several attempts but no particles were generated!", this);
+             return;
+          }
+      }
       for (int iP = 0; iP<GP->size(); iP++)
         {
           R[0] = (*GP)[iP].Position[0];
@@ -247,15 +269,20 @@ void MainWindow::on_pbGunTest_clicked()
           Int_t track_index = Detector->GeoManager->AddTrack(1,22);
           TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
           track->AddPoint(R[0], R[1], R[2], 0);
-          track->AddPoint(R[0]+K[0]*20., R[1]+K[1]*20., R[2]+K[2]*20., 0);
+          track->AddPoint(R[0]+K[0]*Length, R[1]+K[1]*Length, R[2]+K[2]*Length, 0);
           track->SetLineWidth(1);
           track->SetLineColor(1+(*GP)[iP].ParticleId);
         }
-      //clear ad delete QVector with generated event
+      //clear and delete QVector with generated event
       GP->clear();
       delete GP;
     }
-   MainWindow::ShowTracks();
+
+  MainWindow::ShowTracks();
+
+  //restore activities of the sources
+  for (int i=0; i<ParticleSources->size(); i++)
+      ParticleSources->getSource(i)->Activity = activities.at(i);
 }
 
 void MainWindow::on_pbGunRefreshparticles_clicked()
@@ -610,12 +637,14 @@ void MainWindow::on_pbGunLoadSpectrum_clicked()
   MainWindow::on_pbUpdateSources_clicked();
 }
 
+#include "TH1.h"
 void MainWindow::on_pbGunShowSpectrum_clicked()
 {
   int isource = ui->cobParticleSource->currentIndex();
   ParticleSourceStructure* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
+  ps->GunParticles[particle]->spectrum->GetXaxis()->SetTitle("Energy, keV");
   GraphWindow->Draw(ps->GunParticles[particle]->spectrum, "", true, false);
 }
 
@@ -651,36 +680,57 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
 void MainWindow::on_pbRemoveSource_clicked()
 {
   if (ParticleSources->size() == 0) return;
-
   int isource = ui->cobParticleSource->currentIndex();
+
+  int ret = QMessageBox::question(this, "Remove particle source",
+                                  "Are you sure - this will remove source " + ParticleSources->getSource(isource)->name,
+                                  QMessageBox::Yes | QMessageBox::Cancel,
+                                  QMessageBox::Cancel);
+  if (ret != QMessageBox::Yes) return;
+
   ParticleSources->remove(isource);
   ui->cobParticleSource->removeItem(isource);
   ui->cobParticleSource->setCurrentIndex(isource-1);
-  if (ParticleSources->size() == 0)
-    {
-      //No sources left!
-      ParticleSources->append(new ParticleSourceStructure());
-      on_pbUpdateSourcesIndication_clicked(); //to clean indication
-      ParticleSources->remove(0);
-    }
-  on_pbUpdateSourcesIndication_clicked();
+  if (ParticleSources->size() == 0) clearParticleSourcesIndication();
+
   on_pbUpdateSimConfig_clicked();
+
+  on_pbUpdateSourcesIndication_clicked();
+  if (ui->pbGunShowSource->isChecked())
+    {
+      if (ParticleSources->size() == 0)
+        {
+           Detector->GeoManager->ClearTracks();
+           ShowGeometry(false);
+        }
+        else
+        ShowParticleSource_noFocus();
+    }
 }
 
 void MainWindow::on_pbAddSource_clicked()
 {
-  ParticleSources->append(new ParticleSourceStructure());
+  ParticleSourceStructure* s = new ParticleSourceStructure();
+  ParticleSources->append(s);
   ui->cobParticleSource->addItem(ParticleSources->getLastSource()->name);
   ui->cobParticleSource->setCurrentIndex(ParticleSources->size()-1);
 
   ui->ledGunParticleWeight->setText("1");
   ui->cbIndividualParticle->setChecked(true);
   on_pbGunAddNew_clicked(); //to add new particle and register the changes in config
+  on_pbUpdateSourcesIndication_clicked();
+  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
-{
-    //qDebug() << "________ updates particle sources triggered";
+{  
+  int isource = ui->cobParticleSource->currentIndex();
+  //qDebug() << "________ updates particle sources triggered. Source#:"<<isource;
+  if (isource<0)
+    {
+      qWarning() << "Attempt to update source with number <0";
+      return;
+    }
 
   if (BulkUpdate) return;
   if (DoNotUpdateGeometry) return;
@@ -690,9 +740,10 @@ void MainWindow::on_pbUpdateSources_clicked()
       qWarning()<<"Attempt to update particle source while there are no defined ones!";
       return;
     }
-  //qDebug()<<"Update sources";
-  int isource = ui->cobParticleSource->currentIndex();
-  if (isource < 0 || isource > ParticleSources->size()-1)
+
+  //qDebug()<<"Update source#"<<isource<<"   defined in total:"<<ParticleSources->size();
+
+  if (isource >= ParticleSources->size())
     {
       message("Error: Attempting to update particle source parameters, but source number is out of bounds!",this);
       return;
@@ -716,8 +767,8 @@ void MainWindow::on_pbUpdateSources_clicked()
   ps->Spread = ui->ledGunSpread->text().toDouble();
   ps->DoMaterialLimited = ui->cbSourceLimitmat->isChecked();
   ps->LimtedToMatName = ui->leSourceLimitMaterial->text();
+  ParticleSources->checkLimitedToMaterial(ps);
 
-  //if (!GeoManagerImported)
   if (Detector->isGDMLempty())
     { //check world size
       double XYm = 0;
@@ -744,79 +795,124 @@ void MainWindow::on_pbUpdateSources_clicked()
           MainWindow::ReconstructDetector();
         }
     }
-  MainWindow::on_pbGunShowSource_clicked();
-  MainWindow::on_pbUpdateSimConfig_clicked();
-  on_pbUpdateSourcesIndication_clicked();
+
+  on_pbUpdateSimConfig_clicked();
+
+  updateActivityIndication();    //update marker!
+  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
+  //qDebug() << "...update sources done";
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    //qDebug() << "______ Update indication for particle sources";
+  //qDebug() << "Update sources inidcation. Defined sources:"<<ParticleSources->size();
   int isource = ui->cobParticleSource->currentIndex();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
-  if (numSources == 0)
-  {
-      ui->cobParticleSource->clear();
-      ui->cobParticleSource->setCurrentIndex(-1);
-      ui->fParticleSources->setEnabled(false);
-      return;
-  }
+  clearParticleSourcesIndication();
+  if (numSources == 0) return;
   ui->fParticleSources->setEnabled(true);
+  ui->frSelectSource->setEnabled(true);
 
-  if (isource == -1) isource = 0;
-
-  ui->cobParticleSource->clear();
   for (int i=0; i<numSources; i++)
       ui->cobParticleSource->addItem(ParticleSources->getSource(i)->name);
-  if (isource > numSources-1) isource = 0;
+  if (isource >= numSources) isource = 0;  
+  if (isource == -1) isource = 0;
+
   ui->cobParticleSource->setCurrentIndex(isource);
+  updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
+  on_pbGunRefreshparticles_clicked();
+  on_leSourceLimitMaterial_textChanged("");  //update color only!
+  updateActivityIndication();
+}
 
-  bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
-  BulkUpdate = true;
+void MainWindow::updateActivityIndication()
+{
+  double activity = ui->ledSourceActivity->text().toDouble();
+  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
+  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
+  if (activity == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
+  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
 
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
-  double activity = ps->Activity;
-  ui->ledSourceActivity->setText(QString::number(activity));
   double fraction = 0;
   double TotalActivity = ParticleSources->getTotalActivity();
   if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
   ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
-
-  ui->cobGunSourceType->setCurrentIndex(ps->index);
-  ui->ledGunOriginX->setText(QString::number(ps->X0));
-  ui->ledGunOriginY->setText(QString::number(ps->Y0));
-  ui->ledGunOriginZ->setText(QString::number(ps->Z0));
-  ui->ledGunPhi->setText(QString::number(ps->Phi));
-  ui->ledGunTheta->setText(QString::number(ps->Theta));
-  ui->ledGunPsi->setText(QString::number(ps->Psi));
-  ui->ledGun1DSize->setText(QString::number(ps->size1));
-  ui->ledGun2DSize->setText(QString::number(ps->size2));
-  ui->ledGun3DSize->setText(QString::number(ps->size3));
-  ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
-  ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
-  ui->ledGunSpread->setText(QString::number(ps->Spread));
-
-  ui->cbSourceLimitmat->setChecked(ps->DoMaterialLimited);
-  ui->leSourceLimitMaterial->setText(ps->LimtedToMatName);
-
-  BulkUpdate = BulkUpdateCopy;
-  on_pbGunRefreshparticles_clicked();
-  on_leSourceLimitMaterial_textChanged("");
 }
 
-void MainWindow::on_pbGunShowSource_clicked()
+void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
 {
-   if (BulkUpdate) return;
-   int isource = ui->cobParticleSource->currentIndex();
-   if (isource < 0) return;
-   if (isource > ParticleSources->size()-1)
-     {
-       message("Source number is out of bounds!",this);
-       return;
-     }
-   MainWindow::ShowSource(isource, true);
+    bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
+    BulkUpdate = true;
+
+    ui->ledSourceActivity->setText(QString::number(ps->Activity));
+    ui->cobGunSourceType->setCurrentIndex(ps->index);
+    ui->ledGunOriginX->setText(QString::number(ps->X0));
+    ui->ledGunOriginY->setText(QString::number(ps->Y0));
+    ui->ledGunOriginZ->setText(QString::number(ps->Z0));
+    ui->ledGunPhi->setText(QString::number(ps->Phi));
+    ui->ledGunTheta->setText(QString::number(ps->Theta));
+    ui->ledGunPsi->setText(QString::number(ps->Psi));
+    ui->ledGun1DSize->setText(QString::number(ps->size1));
+    ui->ledGun2DSize->setText(QString::number(ps->size2));
+    ui->ledGun3DSize->setText(QString::number(ps->size3));
+    ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
+    ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
+    ui->ledGunSpread->setText(QString::number(ps->Spread));
+
+    ui->cbSourceLimitmat->setChecked(ps->DoMaterialLimited);
+    ui->leSourceLimitMaterial->setText(ps->LimtedToMatName);
+
+    BulkUpdate = BulkUpdateCopy;
+}
+
+void MainWindow::clearParticleSourcesIndication()
+{
+    ParticleSourceStructure ps;
+    updateOneParticleSourcesIndication(&ps);
+    ui->cobParticleSource->clear();
+    ui->cobParticleSource->setCurrentIndex(-1);
+    ui->fParticleSources->setEnabled(false);
+    ui->frSelectSource->setEnabled(false);
+}
+
+//void MainWindow::on_pbGunShowSource_clicked()
+//{
+//   int isource = ui->cobParticleSource->currentIndex();
+//   if (isource < 0) return;
+//   if (isource >= ParticleSources->size())
+//     {
+//       message("Source number is out of bounds!",this);
+//       return;
+//     }
+//   MainWindow::ShowSource(isource, true);
+//}
+
+void MainWindow::on_pbGunShowSource_toggled(bool checked)
+{
+    if (checked)
+      {
+        GeometryWindow->ShowAndFocus();
+        ShowParticleSource_noFocus();
+      }
+    else
+      {
+        Detector->GeoManager->ClearTracks();
+        ShowGeometry();
+      }
+}
+
+void MainWindow::ShowParticleSource_noFocus()
+{
+  int isource = ui->cobParticleSource->currentIndex();
+  if (isource < 0) return;
+  if (isource >= ParticleSources->size())
+    {
+      message("Source number is out of bounds!",this);
+      return;
+    }
+  ShowSource(isource, true);
 }
 
 void MainWindow::on_lwGunParticles_currentRowChanged(int /*currentRow*/)

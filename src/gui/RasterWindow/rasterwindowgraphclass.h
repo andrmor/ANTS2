@@ -19,6 +19,7 @@ public:
 
   double extractedX;
   double extracted2DLineA, extracted2DLineB, extracted2DLineC;
+  double Line2DstartX, Line2DstopX, Line2DstartY, Line2DstopY;
   double extracted2DEllipseX, extracted2DEllipseY, extracted2DEllipseR1, extracted2DEllipseR2, extracted2DEllipseTheta;
   double extractedX1, extractedY1, extractedX2, extractedY2;
   QList<double> extractedPolygon;
@@ -75,7 +76,6 @@ private:
   TBox* Box2D;
   TEllipse* Ellipse;
   TPolyLine* Polygon;
-  double Line2DstartX, Line2DstopX, Line2DstartY, Line2DstopY;
 
   bool ShowCursorPosition;
 

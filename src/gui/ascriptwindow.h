@@ -48,6 +48,8 @@ public:
 
     void UpdateHighlight();
 
+    void SetMainSplitterSizes(QList<int> values);
+
     AScriptManager* ScriptManager;
     QStringList functions;
 
@@ -87,6 +89,9 @@ private slots:
     void on_pbConfig_toggled(bool checked);
     void on_pbHelp_toggled(bool checked);
 
+    void on_actionIncrease_font_size_triggered();
+    void on_actionDecrease_font_size_triggered();
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;
@@ -96,6 +101,7 @@ private:
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
+    QSplitter* splMain;
     QSplitter* splHelp;
     QPlainTextEdit* pteOut;
     QTreeWidget* trwHelp;
@@ -145,6 +151,7 @@ public slots:
     void receivedOnStart() {emit onStart();}
     void receivedOnAbort() {emit onAbort();}
     void receivedOnSuccess(QString eval) {emit success(eval);}
+    void onDefaulFontSizeChanged(int size);
 };
 
 class AScriptWindowTabItem : QObject

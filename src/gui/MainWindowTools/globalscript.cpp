@@ -76,7 +76,7 @@ void MainWindow::createScriptWindow()
     InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
-    InterfaceToTexter* txt = new InterfaceToTexter();
+    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
@@ -107,13 +107,6 @@ void MainWindow::createScriptWindow()
     QObject::connect(ScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));
 
     ScriptWindow->UpdateHighlight();
-}
-
-void MainWindow::on_actionGlobal_script_triggered()
-{
-  ScriptWindow->show();
-  ScriptWindow->raise();
-  ScriptWindow->activateWindow();   
 }
 
 void MainWindow::onGlobalScriptStarted()

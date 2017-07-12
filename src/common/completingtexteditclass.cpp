@@ -64,42 +64,46 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             tc.movePosition(QTextCursor::EndOfLine);
             tc.select(QTextCursor::WordUnderCursor);
             //qDebug() << tc.selectedText();
-            QString lastWord = tc.selectedText();
+
+            //auto-insert "{" and "}"
+//            QString lastWord = tc.selectedText();
             bool fUp = false;
-            if ( line.simplified().endsWith("{") )
-              {
-                 //if the next curly bracket is "{" (or do not found), add "}"
-                 QTextCursor tmpc = this->textCursor();
-                 bool fDoIt = true;
-                 do
-                   {
-                     tmpc.clearSelection();
-                     tmpc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-                     QString st = tmpc.selectedText();
-                     if (st == "}")
-                       {
-                         fDoIt = false;
-                         break;
-                       }
-                     if (st == "{") break; //still true
-                   }
-                 while (!tmpc.atEnd());
-                 if (fDoIt)
-                   {
-                     insert += spacer+"    \n"+
-                               spacer+"}";
-                     fUp = true;
-                   }
-                 else insert += spacer+"  ";
-              }
-            else if (line.simplified().startsWith("for") || lastWord == "while" || lastWord == "do")
-              {
-                 insert += spacer +"{\n"+
-                           spacer+"   \n"+
-                           spacer+"}";
-                 fUp = true;
-              }
-            else insert += spacer;
+//            if ( line.simplified().endsWith("{") )
+//              {
+//                 //if the next curly bracket is "{" (or do not found), add "}"
+//                 QTextCursor tmpc = this->textCursor();
+//                 bool fDoIt = true;
+//                 do
+//                   {
+//                     tmpc.clearSelection();
+//                     tmpc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+//                     QString st = tmpc.selectedText();
+//                     if (st == "}")
+//                       {
+//                         fDoIt = false;
+//                         break;
+//                       }
+//                     if (st == "{") break; //still true
+//                   }
+//                 while (!tmpc.atEnd());
+//                 if (fDoIt)
+//                   {
+//                     insert += spacer+"    \n"+
+//                               spacer+"}";
+//                     fUp = true;
+//                   }
+//                 else insert += spacer+"  ";
+//              }
+
+//            else if (line.simplified().startsWith("for") || lastWord == "while" || lastWord == "do")
+//              {
+//                 insert += spacer +"{\n"+
+//                           spacer+"   \n"+
+//                           spacer+"}";
+//                 fUp = true;
+//              }
+//            else
+            insert += spacer;
 
             tc.movePosition(QTextCursor::EndOfLine);           
             tc.insertText(insert);
@@ -116,26 +120,23 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 
     //font size
     if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Plus )
-    {
-        QFont f = font();
-        f.setPointSize(f.pointSize()+1);
-        setFont(f);
+    {                
+        int size = font().pointSize();
+        setFontSizeAndEmitSignal(++size);
         e->ignore();
         return;
     }
     if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Minus )
     {
-        QFont f = font();
-        int size = f.pointSize()-1;
-        if (size<1) size = 1;
-        f.setPointSize(size);
-        setFont(f);
+        int size = font().pointSize();
+        setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
         e->ignore();
         return;
     }
 
     //Copy line;
-    if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) )
+    if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) ||
+         (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::ShiftModifier) )
       {
         if (e->key() == Qt::Key_Down)
           {
@@ -160,6 +161,13 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             e->ignore();
             return;
         }
+
+    if (e->key() == Qt::Key_Delete)
+    {
+        QTextEdit::keyPressEvent(e);
+        onCursorPositionChanged();
+        return;
+    }
 
     if (c && c->popup()->isVisible())
     {        
@@ -222,19 +230,9 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
 {
   if (e->modifiers().testFlag(Qt::ControlModifier))
     {
-      QFont f = font();
-      if (e->delta()>0)
-      {
-        f.setPointSize(f.pointSize()+1);
-        setFont(f);
-      }
-      else
-      {
-        int size = f.pointSize()-1;
-        if (size<1) size = 1;
-        f.setPointSize(size);
-        setFont(f);
-      }
+      int size = font().pointSize();
+      if (e->delta() > 0) setFontSizeAndEmitSignal(++size);
+      else setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
     }
   else
     {
@@ -242,6 +240,15 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
       int vas = this->verticalScrollBar()->value();
       this->verticalScrollBar()->setValue(vas - e->delta()*0.5);
     }
+}
+
+void CompletingTextEditClass::setFontSizeAndEmitSignal(int size)
+{
+    QFont f = font();
+    if (size<1) size = 1;
+    f.setPointSize(size);
+    setFont(f);
+    emit fontSizeChanged(size);
 }
 
 void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
@@ -401,6 +408,29 @@ void CompletingTextEditClass::onCursorPositionChanged()
           cursor = document()->find(pat, cursor, QTextDocument::FindCaseSensitively);
         }
       setExtraSelections(extraSelections);
+
+      //variable highlight test
+      QRegExp patvar("\\bvar\\s"+selection+"\\b");
+      QTextCursor cursor1 = document()->find(patvar, tc, QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
+      if (cursor1.hasSelection() && cursor1 != tc)
+        {
+          QTextEdit::ExtraSelection extra;
+          extra.format.setBackground(Qt::black);
+          extra.format.setForeground(Qt::white);
+          //extra.format.setFontUnderline(true);
+          //extra.format.setUnderlineColor(Qt::red);
+          extra.cursor = cursor1;
+          extraSelections.append(extra);
+
+          QTextEdit::ExtraSelection extra1;
+          //extra1.format.setFontUnderline(true);
+          //extra1.format.setUnderlineColor(Qt::blue);
+          extra1.format.setBackground(Qt::white);
+          extra1.format.setForeground(Qt::blue);
+          extra1.cursor = tc;
+          extraSelections.append(extra1);
+        }
+      setExtraSelections(extraSelections);
     }
 
   //checking for '}' on the left
@@ -503,7 +533,15 @@ void CompletingTextEditClass::onCursorPositionChanged()
       extraSelections.append(extra);
       setExtraSelections(extraSelections);
       return;
-    }
+  }
+}
+
+void CompletingTextEditClass::SetFontSize(int size)
+{
+    if (size<1) size = 1;
+    QFont f = font();
+    f.setPointSize(size);
+    setFont(f);
 }
 
 QString CompletingTextEditClass::textUnderCursor() const

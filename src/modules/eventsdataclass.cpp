@@ -524,6 +524,25 @@ void EventsDataClass::copyTrueToReconstructed(int igroup)
   fReconstructionDataReady = true;
 }
 
+void EventsDataClass::copyReconstructedToTrue(int igroup)
+{
+    if (!isReconstructionReady(igroup)) return;
+
+    clearScan();
+    for (int iEvent=0; iEvent<ReconstructionData.at(igroup).size(); iEvent++)
+      {
+        AScanRecord* rec = new AScanRecord();
+        rec->ScintType = 0;
+        rec->GoodEvent = true;
+
+        rec->Points.Reinitialize(0);
+        for (int i=0; i<ReconstructionData.at(igroup).at(iEvent)->Points.size(); i++)
+           rec->Points.AddPoint(ReconstructionData.at(igroup).at(iEvent)->Points[i].r, ReconstructionData.at(igroup).at(iEvent)->Points[i].energy);
+
+        Scan.append(rec);
+      }
+}
+
 bool EventsDataClass::createReconstructionTree(pms* PMs, bool fIncludePMsignals, bool fIncludeRho, bool fIncludeTrue, int igroup)
 {
   if (igroup > ReconstructionData.size()-1)

@@ -38,6 +38,14 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     QMainWindow(parent),
     ui(new Ui::AScriptWindow)
 {
+    if (parent)
+    {
+        //not a standalone window
+        Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+        windowFlags |= Qt::WindowCloseButtonHint;
+        this->setWindowFlags( windowFlags );
+    }
+
     ScriptManager = new AScriptManager(RandGen);
     QObject::connect(ScriptManager, SIGNAL(showMessage(QString)), this, SLOT(ShowText(QString)));
     QObject::connect(ScriptManager, SIGNAL(clearText()), this, SLOT(ClearText()));
@@ -69,9 +77,9 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     completitionModel = new QStringListModel(QStringList());
 
     //more GUI
-    QSplitter* sp = new QSplitter();  // upper + output with buttons
-    sp->setOrientation(Qt::Vertical);
-    sp->setChildrenCollapsible(false);
+    splMain = new QSplitter();  // upper + output with buttons
+    splMain->setOrientation(Qt::Vertical);
+    splMain->setChildrenCollapsible(false);
       //
     twScriptTabs = new QTabWidget();
     connect(twScriptTabs, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
@@ -178,8 +186,8 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     //splHelp->setVisible(false);
 
     hor->addWidget(splHelp);
-
-    sp->addWidget(hor);
+    hor->setMinimumHeight(60);
+    splMain->addWidget(hor);
       //
     pteOut = new QPlainTextEdit();
     pteOut->setMinimumHeight(25);
@@ -190,16 +198,22 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     pteOut->setPalette(p);
     pteHelp->setPalette(p);
     hor->setSizes(sizes);  // sizes of Script / Help / Config
-    sizes.clear();
-    sizes << 800 << 50;
-    sp->setSizes(sizes);
 
-    sp->addWidget(pteOut);
+    splMain->addWidget(pteOut);
     ui->centralwidget->layout()->removeItem(ui->horizontalLayout);
-    ui->centralwidget->layout()->addWidget(sp);
+    ui->centralwidget->layout()->addWidget(splMain);
     ui->centralwidget->layout()->addItem(ui->horizontalLayout);
 
     trwJson->header()->resizeSection(0, 200);
+
+    if (!GlobSet->MainSplitterSizes_ScriptWindow.isEmpty())
+        SetMainSplitterSizes(GlobSet->MainSplitterSizes_ScriptWindow);
+    else
+    {
+        sizes.clear();
+        sizes << 800 << 70;
+        splMain->setSizes(sizes);
+    }
 
     //shortcuts
     QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
@@ -211,7 +225,6 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
 
 AScriptWindow::~AScriptWindow()
 {
-  //qDebug() << "Destructor of script window called";  
   tmpIgnore = true;
   clearAllTabs();
   delete ui;
@@ -317,6 +330,8 @@ void AScriptWindow::WriteToJson(QJsonObject &json)
     }
     json["ScriptTabs"] = ar;
     json["CurrentTab"] = CurrentTab;
+
+    GlobSet->MainSplitterSizes_ScriptWindow = splMain->sizes();
 }
 
 void AScriptWindow::ReadFromJson(QJsonObject &json)
@@ -354,6 +369,11 @@ void AScriptWindow::UpdateHighlight()
 {
    for (int i=0; i<ScriptTabs.size(); i++)
        ScriptTabs[i]->UpdateHighlight();
+}
+
+void AScriptWindow::SetMainSplitterSizes(QList<int> values)
+{
+    splMain->setSizes(values);
 }
 
 void AScriptWindow::ShowText(QString text)
@@ -424,7 +444,7 @@ void AScriptWindow::on_pbRunScript_clicked()
        ui->pbRunScript->setIcon(QIcon()); //clear red icon
      }
 
-   ScriptManager->engine->collectGarbage();
+   ScriptManager->CollectGarbage();
 }
 
 //void AScriptWindow::abortEvaluation(QString message)
@@ -926,12 +946,12 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 
 void AScriptWindow::closeEvent(QCloseEvent *e)
 {
-  if (ScriptManager->fEngineIsRunning)
-    {
-      e->ignore();
-      return;
-    }
-  ScriptManager->deleteMsgDialog();
+//  qDebug() << "Script window: Close event";
+//  if (ScriptManager->fEngineIsRunning)
+//    {
+//      e->ignore();
+//      return;
+//    }
 }
 
 bool AScriptWindow::event(QEvent *e)
@@ -947,15 +967,26 @@ bool AScriptWindow::event(QEvent *e)
                 // lost focus
                 break;
             case QEvent::Hide :
-                emit WindowHidden("script");//MW->WindowNavigator->HideWindowTriggered("gain");
+                //qDebug() << "Script window: hide event";
+                ScriptManager->hideMsgDialog();
+                emit WindowHidden("script");
                 break;
             case QEvent::Show :
-                emit WindowShown("script");//MW->WindowNavigator->ShowWindowTriggered("gain");
+                //qDebug() << "Script window: show event";
+                ScriptManager->restoreMsgDialog();
+                emit WindowShown("script");
                 break;
             default:;
         };
 
     return QMainWindow::event(e) ;
+}
+
+void AScriptWindow::onDefaulFontSizeChanged(int size)
+{
+    GlobSet->DefaultFontSize_ScriptWindow = size;
+    for (AScriptWindowTabItem* tab : ScriptTabs)
+        tab->TextEdit->SetFontSize(size);
 }
 
 QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)
@@ -1114,8 +1145,11 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 
 void AScriptWindow::AddNewTab()
 {
-    ScriptTabs.append(new AScriptWindowTabItem(completitionModel));
-    ScriptTabs.last()->highlighter->setCustomCommands(functions);
+    AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel);
+    tab->highlighter->setCustomCommands(functions);
+    tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+    QObject::connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
+    ScriptTabs.append(tab);
 
     twScriptTabs->addTab(ScriptTabs.last()->TextEdit, createNewTabName());
     QObject::connect(ScriptTabs.last()->TextEdit, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
@@ -1174,4 +1208,17 @@ void AScriptWindow::on_pbConfig_toggled(bool checked)
 void AScriptWindow::on_pbHelp_toggled(bool checked)
 {
     frHelper->setVisible(checked);
+}
+
+void AScriptWindow::on_actionIncrease_font_size_triggered()
+{
+    onDefaulFontSizeChanged(++GlobSet->DefaultFontSize_ScriptWindow);
+}
+
+void AScriptWindow::on_actionDecrease_font_size_triggered()
+{
+    if (GlobSet->DefaultFontSize_ScriptWindow<1) return;
+
+    onDefaulFontSizeChanged(--GlobSet->DefaultFontSize_ScriptWindow);
+    //qDebug() << "New font size:"<<GlobSet->DefaultFontSize_ScriptWindow;
 }

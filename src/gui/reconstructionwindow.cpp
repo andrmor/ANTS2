@@ -2448,21 +2448,21 @@ bool ReconstructionWindow::startXextraction()
 {
    MW->WindowNavigator->BusyOn();
    MW->GraphWindow->ExtractX();
-   return ReconstructionWindow::Extraction();
+   return MW->GraphWindow->Extraction();
 }
 
 bool ReconstructionWindow::start2DLineExtraction()
 {
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DLine();
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 bool ReconstructionWindow::start2DEllipseExtraction()
 {
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DEllipse();
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbDefSumCutOffs_clicked()
@@ -3464,7 +3464,7 @@ bool ReconstructionWindow::start2DBoxExtraction()
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DBox();
 
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbCorr_AddLine_clicked()
@@ -3572,21 +3572,7 @@ bool ReconstructionWindow::start2DPolygonExtraction()
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DPolygon();
 
-    return ReconstructionWindow::Extraction();
-}
-
-bool ReconstructionWindow::Extraction()
-{
-  do
-    {
-      qApp->processEvents();
-      if (MW->GraphWindow->IsExtractionCanceled()) break;
-    }
-  while (!MW->GraphWindow->IsExtractionComplete() );
-
-  MW->WindowNavigator->BusyOff(false);
-
-  return !MW->GraphWindow->IsExtractionCanceled();  //returns false = canceled
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbEvaluateGains_clicked()
@@ -5684,7 +5670,7 @@ void ReconstructionWindow::onReconstructionFinished(bool fSuccess, bool fShow)
            //ShowReconstructionPositionsIfWindowVisible();
            ShowPositions(0, true);
        MW->Owindow->RefreshData();   // *** !!!
-       ShowStatistics();
+       ShowStatistics(true);
        double usPerEvent = ReconstructionManager->getUsPerEvent();
        ui->leoMsPerEv->setText(QString::number(usPerEvent, 'g', 4));
     }
@@ -6097,9 +6083,14 @@ void ReconstructionWindow::on_pbTrueToRec_clicked()
 {
   EventsDataHub->copyTrueToReconstructed();
   SetProgress(100);
-  //ShowReconstructionPositionsIfWindowVisible();
   ShowPositions(0, true);
   ShowStatistics();
+  ui->leoMsPerEv->setText("");
+}
+
+void ReconstructionWindow::on_pbRecToTrue_clicked()
+{
+  EventsDataHub->copyReconstructedToTrue();
   ui->leoMsPerEv->setText("");
 }
 

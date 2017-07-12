@@ -216,29 +216,29 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                       double SoFarShortest = 1.0e10;
                       for (int i=0; i<processes; i++)
                         {
-                             qDebug()<<"---Process #:"<<i;
+                             //qDebug()<<"---Process #:"<<i;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
                           const double InteractionCoefficient = InteractionValue(energy, &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSectionEnergy,
                                                                            &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSection,
                                                                            MpCollection->fLogLogInterpolation);
-                             qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
+                             //qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
                           double MeanFreePath;
                           if (MpCollection->getParticleType(Id) == AParticle::_neutron_)
                             { //neutron! - using atomic density and cross-section in barns
-                                qDebug()<<"isotope density:"<<AtomicDensity;
+                                //qDebug()<<"isotope density:"<<AtomicDensity;
                               MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
                             }
                           else MeanFreePath = 10.0/InteractionCoefficient/Density;  //1/(cm2/g)/(g/cm3) - need in mm (so that 10.)
-                             qDebug()<<"MeanFreePath="<<MeanFreePath;
+                             //qDebug()<<"MeanFreePath="<<MeanFreePath;
                           double Step = -MeanFreePath * log(RandGen->Rndm());
-                             qDebug()<< "Generated length:"<<Step;
+                             //qDebug()<< "Generated length:"<<Step;
                           if (Step < SoFarShortest)
                             {
                               SoFarShortest = Step;
                               SoFarShortestId = i;
                             }
                         }
-                                         qDebug()<<SoFarShortest<<SoFarShortestId;
+                                         //qDebug()<<SoFarShortest<<SoFarShortestId;
                       //shortest vs MaxLength?
                       if (SoFarShortest >= MaxLength)
                         {

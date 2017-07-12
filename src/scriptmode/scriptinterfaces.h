@@ -86,6 +86,8 @@ public slots:
   void MakeStack(QString name, QString container);
   void InitializeStack(QString StackName, QString Origin_MemberName);
 
+  void MakeGroup(QString name, QString container);
+
   void Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi);
   void ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ);
 

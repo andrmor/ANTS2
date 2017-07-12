@@ -243,7 +243,6 @@ SOURCES += main.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    SplineLibrary/tpspline3.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp
 
@@ -346,7 +345,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
-    SplineLibrary/tpspline3.h \
     scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h
 

@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include <QDebug>
-#include <QElapsedTimer>
+#include <QTime>
 
 //#include <vector>
 
@@ -103,7 +103,7 @@ bool TPS3Dfit::Fit()
 
 bool TPS3Dfit::Fit(int npts, double const *datax, double const *datay, double const *dataz, double const *data, double const *dataw)
 {
-    QElapsedTimer myTimer;
+    QTime myTimer;
 // for the case of weighted data with missing points,
 // we need to make a provision for additional 2nd derivative equations
     int missing = 0;
@@ -175,12 +175,8 @@ bool TPS3Dfit::Fit(int npts, double const *datax, double const *datay, double co
     // solve the system using QR decomposition (SVD is too slow)
         sparse = true;
         if (!sparse) {
-            myTimer.start();
-//            MatrixXd A1 = A.transpose()*A;
-//            VectorXd y1 = A.transpose()*y;
-//            qDebug() << "Multiplication: " << myTimer.elapsed();
             x = A.colPivHouseholderQr().solve(y);
-            qDebug() << "Compute QR & solve: " << myTimer.elapsed();
+
             VectorXd r = A*x - y;
             residual = sqrt(r.squaredNorm());
         } else { // sparse QR -- EXPERIMENTAL
@@ -210,17 +206,15 @@ bool TPS3Dfit::Fit(int npts, double const *datax, double const *datay, double co
 
             qDebug() << "Solving Sparse system";
             myTimer.start();
-            SparseMatrix <double> A1_sp = A_sp.transpose()*A_sp;
-            VectorXd y1 = A.transpose()*y;
-            qDebug() << "Multiply: " << myTimer.elapsed();
+
             SparseQR <SparseMatrix<double>, Eigen::COLAMDOrdering<int> > solver;
-            solver.compute(A1_sp);
+            solver.compute(A_sp);
             if(solver.info()!=Eigen::Success) {
               std::cout << "decomposition failed\n";
               return false;
             }
             qDebug() << "Compute QR: " << myTimer.elapsed();
-            x = solver.solve(y1);
+            x = solver.solve(y);
             if(solver.info()!=Eigen::Success) {
               std::cout << "solving failed\n";
               return false;

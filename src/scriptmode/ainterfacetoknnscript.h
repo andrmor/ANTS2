@@ -15,6 +15,9 @@ public slots:
   // Main functionality
   QVariant getNeighbours(int ievent, int numNeighbours);  //array of [eventIndex, distance] - there will be numNeighbours elements
 
+  // options - set BEFORE calibration dataset is given
+  void SetSignalNormalizationType(int type_0None_1sum_2quadraSum);
+
   // Clear all calibration data
   void clearCalibrationEvents();
   // Define calibration data (overrides old)

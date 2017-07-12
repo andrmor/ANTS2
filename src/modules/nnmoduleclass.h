@@ -105,6 +105,8 @@ public:
 
    QVariant getNeighbours(int ievent, int numNeighbours);
 
+   void SetSignalNormalization(int type) {NormSwitch = type;}
+
    void clearCalibration();
    bool setCalibration(bool bUseScan);
    int countCalibrationEvents() {return numEvents;}
@@ -121,8 +123,11 @@ private:
    EventsDataClass* EventsDataHub;
    pms* PMs;
 
+   bool bCalibrationReady;
    int numEvents;
    int numPMs;
+
+   int NormSwitch;  // 0 - no norm, 1 - sum signal, 2 - quadrature sum
 
    flann::Matrix<float>* CalibrationEvents;       //calibration events - signals
    QVector<float> X, Y, Z, E;                     //calibration events - positions and energy
@@ -131,6 +136,7 @@ private:
 
    bool isValidEventIndex(int ievent);
 
+   float calculateNorm(int ievent) const;
 };
 
 class NNmoduleClass

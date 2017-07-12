@@ -7,8 +7,13 @@
 AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModule(knnModule) {}
 
 QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
+{    
+    return knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
+}
+
+void AInterfaceToKnnScript::SetSignalNormalizationType(int type_0None_1sum_2quadraSum)
 {
-   return knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
+  knnModule->ScriptInterfacer->SetSignalNormalization(type_0None_1sum_2quadraSum);
 }
 
 void AInterfaceToKnnScript::clearCalibrationEvents()

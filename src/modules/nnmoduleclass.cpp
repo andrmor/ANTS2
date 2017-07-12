@@ -533,10 +533,11 @@ NNmoduleClass::~NNmoduleClass()
 }
 
 AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, pms *PMs) :
-  EventsDataHub(EventsDataHub), PMs(PMs), CalibrationEvents(0), FlannIndex(0) {}
+  EventsDataHub(EventsDataHub), PMs(PMs), bCalibrationReady(false), NormSwitch(0), CalibrationEvents(0), FlannIndex(0) {}
 
 QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
-{
+{    
+  if (!bCalibrationReady) return QVariantList();
   if (!isValidEventIndex(ievent)) return QVariantList();
 
   int* indicesContainer;
@@ -567,14 +568,16 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
 
   float* eventdataContainer = new float[numPMs];
   flann::Matrix<float> eventData(eventdataContainer, 1, numPMs);
-  float norm = 0;
-  for (int ipm=0; ipm<numPMs; ipm++) norm += EventsDataHub->Events[ievent][ipm] * EventsDataHub->Events[ievent][ipm];
-      norm = sqrt(norm);
-  if (norm < (float)1.0e-10) norm = (float)1.0e-10;
-  for (int ipm=0; ipm<numPMs; ipm++)
-        eventData[0][ipm] = EventsDataHub->Events[ievent][ipm] / norm;
 
-     //qDebug() << "Running search" << (fTrainedXYwithSameEventSet?"in X and Y":"in X");
+  // normalisation
+  if (NormSwitch > 0)
+  {
+      const float norm = calculateNorm(ievent);
+      for (int ipm=0; ipm<numPMs; ipm++)
+            eventData[0][ipm] = EventsDataHub->Events[ievent][ipm] / norm;
+  }
+
+  //qDebug() << "Running search" << (fTrainedXYwithSameEventSet?"in X and Y":"in X");
    FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
 
    //packing results
@@ -605,6 +608,7 @@ void AScriptInterfacer::clearCalibration()
 
   numPMs = 0;
   numEvents = 0;
+  bCalibrationReady = false;
 }
 
 bool AScriptInterfacer::setCalibration(bool bUseScan)
@@ -612,7 +616,7 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
   if (bUseScan)
     {
       if (EventsDataHub->isScanEmpty())
-        {
+        {          
           ErrorString = "There are no scan data!";
           return false;
         }
@@ -630,6 +634,11 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
   clearCalibration();
 
   numEvents = EventsDataHub->countGoodEvents();
+  if (numEvents==0)
+  {
+      qWarning() << "No (good) calibration events provided";
+      return false;
+  }
   numPMs = PMs->count();
   try
   {
@@ -641,7 +650,7 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
     return false;
   }
 
-  qDebug() << "Filling the dataset and the true positions";
+  //qDebug() << "Filling the dataset and the true positions";
   int iev=0; //event index inside dataset
   for (int ievAll=0; ievAll<EventsDataHub->Events.size(); ievAll++)
     if (EventsDataHub->ReconstructionData.at(0).at(ievAll)->GoodEvent)
@@ -662,12 +671,13 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
           }
 
         // normalisation
-        float norm = 0;
-        for (int ipm=0; ipm<numPMs; ipm++) norm += EventsDataHub->Events[ievAll][ipm] * EventsDataHub->Events[ievAll][ipm];
-        norm = sqrt(norm);
-        if (norm < 1.0e-10f) norm = 1.0e-10f;
-        for (int ipm=0; ipm<numPMs; ipm++)
-          (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events[ievAll][ipm] / norm;
+        if (NormSwitch > 0)
+        {
+            const float norm = calculateNorm(ievAll);
+            for (int ipm=0; ipm<numPMs; ipm++)
+              (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events[ievAll][ipm] / norm;
+        }
+
         iev++;
       }
 
@@ -684,7 +694,35 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
     return false;
   }
 
+  bCalibrationReady = true;
   return true;
+}
+
+float AScriptInterfacer::calculateNorm(int ievent) const
+{
+    switch (NormSwitch)
+    {
+    case 1: //sum signal
+      {
+        float norm = 0;
+        for (int ipm=0; ipm<numPMs; ipm++)
+            norm += EventsDataHub->Events[ievent][ipm];
+        if (norm < 1.0e-10f) norm = 1.0e-10f;
+        return norm;
+      }
+    case 2: //quadrature sum
+      {
+        float norm = 0;
+        for (int ipm=0; ipm<numPMs; ipm++)
+            norm += EventsDataHub->Events[ievent][ipm] * EventsDataHub->Events[ievent][ipm];
+        norm = sqrt(norm);
+        if (norm < 1.0e-10f) norm = 1.0e-10f;
+        return norm;
+      }
+    default: qWarning() << "Unknown normalization type!";
+    case 0: //no norm
+        return 1.0f;
+    }
 }
 
 double AScriptInterfacer::getCalibrationEventX(int ievent)

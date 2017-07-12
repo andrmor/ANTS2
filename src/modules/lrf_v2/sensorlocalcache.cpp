@@ -3,6 +3,7 @@
 #include "lrfaxial.h"
 #include "lrfcaxial.h"
 #include "lrfxy.h"
+#include "lrfxyz.h"
 #include "lrfcomposite.h"
 #include "lrfaxial3d.h"
 #include "lrfsliced3d.h"
@@ -289,6 +290,13 @@ LRF2 *SensorLocalCache::mkLRFaxial3d(int nodesr, int nodesz, double *compr) cons
 LRF2 *SensorLocalCache::mkLRFsliced3D(int nodesr, int nodesz) const
 {
     return fitLRF(new LRFsliced3D(minx, maxx, nodesr, miny, maxy, nodesr, minz, maxz, nodesz));
+}
+
+LRF2 *SensorLocalCache::mkLRFxyz(int nodesr, int nodesz) const
+{
+    LRFxyz* lrf = new LRFxyz(minx, maxx, nodesr, miny, maxy, nodesr, minz, maxz, nodesz);
+//    lrf->SetNonNegative(LRFsettings->fForceNonNegative);
+    return fitLRF(lrf);
 }
 
 void SensorLocalCache::expandDomain(double fraction)

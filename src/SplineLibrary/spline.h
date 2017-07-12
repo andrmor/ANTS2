@@ -28,7 +28,13 @@
 //#define USE_PUGIXML
 
 #include "bspline3.h"
+
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
+
 #include <stdio.h>
 #include <iostream>
 #include <fstream>

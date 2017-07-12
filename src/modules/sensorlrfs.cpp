@@ -13,6 +13,7 @@
 #include "lrfcaxial.h"
 #include "lrfaxial3d.h"
 #include "lrfxy.h"
+#include "lrfxyz.h"
 #include "lrfcomposite.h"
 #include "lrfsliced3d.h"
 #include "lrffactory.h"
@@ -1022,6 +1023,7 @@ bool SensorLRFs::makeGroupLRF(int igrp, ALrfFitSettings &LRFsettings, QVector<PM
     case 3: newLRF = lrfmaker->mkLRFcomposite(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 4: newLRF = lrfmaker->mkLRFaxial3d(LRFsettings.nodesx, LRFsettings.nodesy, LRFsettings.compr); break;
     case 5: newLRF = lrfmaker->mkLRFsliced3D(LRFsettings.nodesx, LRFsettings.nodesy); break;
+    case 6: newLRF = lrfmaker->mkLRFxyz(LRFsettings.nodesx, LRFsettings.nodesy); break;
     }  
   if (!newLRF)
     {

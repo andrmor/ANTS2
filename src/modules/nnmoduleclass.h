@@ -104,7 +104,7 @@ public:
    AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
 
    QVariant getNeighbours(int ievent, int numNeighbours);
-   bool filterByDistance(int numNeighbours, float maxDistance);  //event = bad if average distance to numNeighbours of the calibration set < maxDistance
+   bool filterByDistance(int numNeighbours, float maxDistance, bool filterOutEventsWithSmallerDistance);
 
    void SetSignalNormalization(int type) {NormSwitch = type;}
 
@@ -116,7 +116,7 @@ public:
    double getCalibrationEventY(int ievent);
    double getCalibrationEventZ(int ievent);
    double getCalibrationEventE(int ievent);
-   QVariant getCalibrationEventSignals(int ievent);
+   QVariant getCalibrationEventSignals(int ievent);  //if norm is active, the signal values are normalized!
 
    QString ErrorString;
 

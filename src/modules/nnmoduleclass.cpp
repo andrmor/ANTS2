@@ -537,13 +537,21 @@ AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, pms *PMs) :
 
 QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
 {    
-  if (!bCalibrationReady) return QVariantList();
-  if (!isValidEventIndex(ievent)) return QVariantList();
+  if (!bCalibrationReady)
+  {
+      ErrorString = "Calibration set is empty!";
+      return QVariantList();
+  }
+  if (!isValidEventIndex(ievent))
+  {
+      ErrorString = "Wrong event number";
+      return QVariantList();
+  }
 
   int* indicesContainer;
   try
   {
-    indicesContainer = new int[numCalibrationEvents*numNeighbours];
+    indicesContainer = new int[1*numNeighbours];
   }
   catch (...)
   {
@@ -554,7 +562,7 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
   float* distsContainer;
   try
   {
-    distsContainer = new float[numCalibrationEvents*numNeighbours];
+    distsContainer = new float[1*numNeighbours];
   }
   catch (...)
   {
@@ -563,8 +571,8 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
     return QVariantList();
   }
 
-  flann::Matrix<int> indices(indicesContainer, numCalibrationEvents, numNeighbours);
-  flann::Matrix<float> dists(distsContainer, numCalibrationEvents, numNeighbours);
+  flann::Matrix<int> indices(indicesContainer, 1, numNeighbours);
+  flann::Matrix<float> dists(distsContainer, 1, numNeighbours);
 
   float* eventdataContainer = new float[numPMs];
   flann::Matrix<float> eventData(eventdataContainer, 1, numPMs);
@@ -596,14 +604,16 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
    return vl;
 }
 
-bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance)
+bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance, bool filterOutEventsWithSmallerDistance)
 {
     if (!bCalibrationReady) return false;
+
+    int numEvents = EventsDataHub->Events.size();
 
     int* indicesContainer;
     try
     {
-      indicesContainer = new int[numCalibrationEvents*numNeighbours];
+      indicesContainer = new int[numEvents*numNeighbours];
     }
     catch (...)
     {
@@ -614,7 +624,7 @@ bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance)
     float* distsContainer;
     try
     {
-      distsContainer = new float[numCalibrationEvents*numNeighbours];
+      distsContainer = new float[numEvents*numNeighbours];
     }
     catch (...)
     {
@@ -623,10 +633,8 @@ bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance)
       return false;
     }
 
-    flann::Matrix<int> indices(indicesContainer, numCalibrationEvents, numNeighbours);
-    flann::Matrix<float> dists(distsContainer, numCalibrationEvents, numNeighbours);
-
-    int numEvents = EventsDataHub->Events.size();
+    flann::Matrix<int> indices(indicesContainer, numEvents, numNeighbours);
+    flann::Matrix<float> dists(distsContainer, numEvents, numNeighbours);
 
     float* eventdataContainer = new float[numEvents*numPMs];
     flann::Matrix<float> eventData(eventdataContainer, numEvents, numPMs);
@@ -651,7 +659,14 @@ bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance)
             avDist += dists[iev][in];
         avDist /= numNeighbours;
 
-        if (avDist < maxDistance) EventsDataHub->ReconstructionData[0][iev]->GoodEvent = false;
+        if (filterOutEventsWithSmallerDistance)
+        {
+           if (avDist < maxDistance) EventsDataHub->ReconstructionData[0][iev]->GoodEvent = false;
+        }
+        else
+        {
+           if (avDist > maxDistance) EventsDataHub->ReconstructionData[0][iev]->GoodEvent = false;
+        }
     }
 
     //qDebug() << "Cleanup phase";
@@ -820,13 +835,13 @@ QVariant AScriptInterfacer::getCalibrationEventSignals(int ievent)
   if (!isValidEventIndex(ievent)) return QVariantList();
   QVariantList l;
   for (int i=0; i<numPMs; i++)
-    l << (*(*CalibrationEvents)[ievent]);
+    l << (*CalibrationEvents)[ievent][i];
   return l;
 }
 
 bool AScriptInterfacer::isValidEventIndex(int ievent)
 {
-  if (ievent < 0 || ievent >= numCalibrationEvents) return false;
+  if (ievent < 0 || ievent >= EventsDataHub->Events.size()) return false;
   return true;
 }
 

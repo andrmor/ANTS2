@@ -8,12 +8,17 @@ AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModu
 
 QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
 {    
-    return knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
+    QVariant res = knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
+    if (res == QVariantList())
+    {
+        abort("kNN module reports fail:\n" + knnModule->ScriptInterfacer->ErrorString);
+    }
+    return res;
 }
 
-void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double maxDistance)
+void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance)
 {
-    bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, maxDistance);
+    bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, distanceLimit, filterOutEventsWithSmallerDistance);
     if (!ok)
     {
         abort("kNN module reports fail:\n" + knnModule->ScriptInterfacer->ErrorString);

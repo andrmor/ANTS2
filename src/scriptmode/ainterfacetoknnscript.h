@@ -14,6 +14,7 @@ public:
 public slots:
   // Main functionality
   QVariant getNeighbours(int ievent, int numNeighbours);  //array of [eventIndex, distance] - there will be numNeighbours elements
+  void filterByDistance(int numNeighbours, double maxDistance);
 
   // options - set BEFORE calibration dataset is given
   void SetSignalNormalizationType(int type_0None_1sum_2quadraSum);

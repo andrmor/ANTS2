@@ -104,12 +104,13 @@ public:
    AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
 
    QVariant getNeighbours(int ievent, int numNeighbours);
+   bool filterByDistance(int numNeighbours, float maxDistance);  //event = bad if average distance to numNeighbours of the calibration set < maxDistance
 
    void SetSignalNormalization(int type) {NormSwitch = type;}
 
    void clearCalibration();
    bool setCalibration(bool bUseScan);
-   int countCalibrationEvents() {return numEvents;}
+   int countCalibrationEvents() {return numCalibrationEvents;}
 
    double getCalibrationEventX(int ievent);
    double getCalibrationEventY(int ievent);
@@ -124,7 +125,7 @@ private:
    pms* PMs;
 
    bool bCalibrationReady;
-   int numEvents;
+   int numCalibrationEvents;
    int numPMs;
 
    int NormSwitch;  // 0 - no norm, 1 - sum signal, 2 - quadrature sum

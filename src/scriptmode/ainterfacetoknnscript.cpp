@@ -11,6 +11,16 @@ QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
     return knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
 }
 
+void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double maxDistance)
+{
+    bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, maxDistance);
+    if (!ok)
+    {
+        abort("kNN module reports fail:\n" + knnModule->ScriptInterfacer->ErrorString);
+        return;
+    }
+}
+
 void AInterfaceToKnnScript::SetSignalNormalizationType(int type_0None_1sum_2quadraSum)
 {
   knnModule->ScriptInterfacer->SetSignalNormalization(type_0None_1sum_2quadraSum);

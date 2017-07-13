@@ -543,7 +543,7 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
   int* indicesContainer;
   try
   {
-    indicesContainer = new int[numEvents*numNeighbours];
+    indicesContainer = new int[numCalibrationEvents*numNeighbours];
   }
   catch (...)
   {
@@ -554,7 +554,7 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
   float* distsContainer;
   try
   {
-    distsContainer = new float[numEvents*numNeighbours];
+    distsContainer = new float[numCalibrationEvents*numNeighbours];
   }
   catch (...)
   {
@@ -563,8 +563,8 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
     return QVariantList();
   }
 
-  flann::Matrix<int> indices(indicesContainer, numEvents, numNeighbours);
-  flann::Matrix<float> dists(distsContainer, numEvents, numNeighbours);
+  flann::Matrix<int> indices(indicesContainer, numCalibrationEvents, numNeighbours);
+  flann::Matrix<float> dists(distsContainer, numCalibrationEvents, numNeighbours);
 
   float* eventdataContainer = new float[numPMs];
   flann::Matrix<float> eventData(eventdataContainer, 1, numPMs);
@@ -596,6 +596,72 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
    return vl;
 }
 
+bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance)
+{
+    if (!bCalibrationReady) return false;
+
+    int* indicesContainer;
+    try
+    {
+      indicesContainer = new int[numCalibrationEvents*numNeighbours];
+    }
+    catch (...)
+    {
+      ErrorString = "Failed to reserve space for indices";
+      return false;
+    }
+
+    float* distsContainer;
+    try
+    {
+      distsContainer = new float[numCalibrationEvents*numNeighbours];
+    }
+    catch (...)
+    {
+      ErrorString = "Failed to reserve space for distances";
+      delete[] indicesContainer;
+      return false;
+    }
+
+    flann::Matrix<int> indices(indicesContainer, numCalibrationEvents, numNeighbours);
+    flann::Matrix<float> dists(distsContainer, numCalibrationEvents, numNeighbours);
+
+    int numEvents = EventsDataHub->Events.size();
+
+    float* eventdataContainer = new float[numEvents*numPMs];
+    flann::Matrix<float> eventData(eventdataContainer, numEvents, numPMs);
+
+    // normalisation
+    if (NormSwitch > 0)
+    {
+        for (int iev=0; iev<numEvents; iev++)
+        {
+            const float norm = calculateNorm(iev);
+            for (int ipm=0; ipm<numPMs; ipm++)
+                  eventData[iev][ipm] = EventsDataHub->Events[iev][ipm] / norm;
+        }
+    }
+
+    FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
+
+    for (int iev=0; iev<numEvents; iev++)
+    {
+        float avDist = 0;
+        for (int in=0; in<numNeighbours; in++)
+            avDist += dists[iev][in];
+        avDist /= numNeighbours;
+
+        if (avDist < maxDistance) EventsDataHub->ReconstructionData[0][iev]->GoodEvent = false;
+    }
+
+    //qDebug() << "Cleanup phase";
+    delete[] eventData.ptr();
+    delete[] indices.ptr();
+    delete[] dists.ptr();
+
+    return true;
+}
+
 void AScriptInterfacer::clearCalibration()
 {
   delete CalibrationEvents; CalibrationEvents = 0;
@@ -607,7 +673,7 @@ void AScriptInterfacer::clearCalibration()
   E.clear();
 
   numPMs = 0;
-  numEvents = 0;
+  numCalibrationEvents = 0;
   bCalibrationReady = false;
 }
 
@@ -633,8 +699,8 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
   ErrorString.clear();
   clearCalibration();
 
-  numEvents = EventsDataHub->countGoodEvents();
-  if (numEvents==0)
+  numCalibrationEvents = EventsDataHub->countGoodEvents();
+  if (numCalibrationEvents==0)
   {
       qWarning() << "No (good) calibration events provided";
       return false;
@@ -642,7 +708,7 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
   numPMs = PMs->count();
   try
   {
-    CalibrationEvents = new flann::Matrix<float> (new float[numEvents*numPMs], numEvents, numPMs);
+    CalibrationEvents = new flann::Matrix<float> (new float[numCalibrationEvents*numPMs], numCalibrationEvents, numPMs);
   }
   catch(...)
   {
@@ -760,7 +826,7 @@ QVariant AScriptInterfacer::getCalibrationEventSignals(int ievent)
 
 bool AScriptInterfacer::isValidEventIndex(int ievent)
 {
-  if (ievent < 0 || ievent >= numEvents) return false;
+  if (ievent < 0 || ievent >= numCalibrationEvents) return false;
   return true;
 }
 

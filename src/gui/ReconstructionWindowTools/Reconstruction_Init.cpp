@@ -33,6 +33,8 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   PMgroups = MW->Detector->PMgroups;
   PMs = MW->PMs;
   TableLocked = true; //will be unlocked after table is filled
+  TMPignore = false;
+  bFilteringStarted = false;
 
   QList<int> List;
   List << 0;
@@ -64,8 +66,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   modelSpF_TV = 0;
   StopRecon = false;
   polygon.clear();
-  CorrelationFilters.resize(0);
-  TMPignore = false;
+  CorrelationFilters.resize(0);  
   vo = 0;
   dialog = 0;
   PMcolor = 1; PMwidth = 1; PMstyle = 1;

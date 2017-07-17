@@ -26,6 +26,9 @@
 
 #include "bspline3.h"
 #include <Eigen/Dense>
+// the following is needed to ensure proper alignment of std::vector <Matrix4d>
+#include <Eigen/StdVector>
+
 using Eigen::MatrixXd;
 using Eigen::Matrix4d;
 using Eigen::Vector4d;
@@ -81,7 +84,8 @@ class TPspline3
 // this version uses Eigen marices to store spline and polynomial coefficients
 // the matrices are organized as follows: X - rows, Y - columns
         MatrixXd C;                 // matrix of coefficients, corresponds to old "coef"
-        std::vector <Matrix4d> P;   // vector of matrices with polynomial coefficients (old "poly")
+        std::vector <Matrix4d, Eigen::aligned_allocator<Matrix4d> > P; // vector of matrices with polynomial coefficients (old "poly")
+//        std::vector <Matrix4d> P;   // vector of matrices with polynomial coefficients (old "poly")
         Matrix4d B;                 // matrix of UCBS coefficients
         mutable std::vector <double> coef;  // needed for backward compatibility
 //		double *coef;
@@ -94,6 +98,8 @@ class TPspline3
 		int nbas;	// number of basis splines
 		int nbasx;  // columns in spline grid
         bool wrapy;
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* TPSPLINE3M_H */

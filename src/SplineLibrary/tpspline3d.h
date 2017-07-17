@@ -99,6 +99,8 @@ class TPspline3D
         int nbas;	// total number of 3D basis splines
         int nbasxy;  // number of 2D basis splines in one XY plane
         int nbasz;
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* TPSPLINE3D_H */

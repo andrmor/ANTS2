@@ -37,7 +37,7 @@ public slots:
   void StartRootHttpServer(unsigned int port = 8080, QString OptionalUrlJsRoot = "https://root.cern/js/latest/");
   void StopRootHttpServer();
 
-  void onNewGeoManagerCreated(TObject* TopNode);
+  void onNewGeoManagerCreated(TObject* GeoManager);
   void OnWebSocketTextMessageReceived(QString message);
 
 signals:

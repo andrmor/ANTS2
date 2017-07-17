@@ -376,14 +376,14 @@ void DetectorClass::constructDetector()
     }
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
-  emit newTopInGeoManager(GeoManager->GetTopNode());
+  emit newGeoManager(GeoManager);
   //qDebug() << "===> All done!";
 }
 
-void DetectorClass::onRequestRegisterTopNode()
+void DetectorClass::onRequestRegisterGeoManager()
 {
     if (GeoManager)
-        emit newTopInGeoManager(GeoManager->GetTopNode());
+        emit newGeoManager(GeoManager);
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

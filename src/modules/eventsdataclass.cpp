@@ -20,7 +20,7 @@ EventsDataClass::EventsDataClass(const TString nameID) //nameaddon to make uniqu
 {
 #ifdef SIM
   SimStat = new ASimulationStatistics(nameID);
-  SimStat->initialize();
+  //SimStat->initialize();
 #endif
   fReconstructionDataReady = false;
   ReconstructionTree = 0;

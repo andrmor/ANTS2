@@ -10,6 +10,7 @@
 
 class TH1I;
 class TH1D;
+class AMonitor;
 
 class ASimulationStatistics
 {
@@ -18,7 +19,10 @@ public:
     ~ASimulationStatistics();
 
     void initialize(int nBins = 0, int waveNodes = 0); //0 - default (100) or previously set value will be used
-    bool isEmpty();
+
+    void clearAll();
+
+    bool isEmpty();  //need update - particles added, so photons-only test is not valid
 
     void registerWave(int iWave);
     void registerTime(double Time);
@@ -54,7 +58,6 @@ public:
     QSet<QString> MustNotInclude_Volumes; //fast
     QVector<QString> MustInclude_Volumes; //v.slow
 
-
 private:
     TH1I* WaveSpectrum;
     TH1D* TimeSpectrum;
@@ -67,7 +70,10 @@ private:
     double WaveFrom, WaveTo;
     int WaveNodes;
 
+    QVector<AMonitor*> Monitors;
+
     long countPhotons();
+    void clearMonitors();
 };
 
 #endif // ASIMULATIONSTATISTICS_H

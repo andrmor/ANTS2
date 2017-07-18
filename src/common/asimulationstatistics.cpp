@@ -1,4 +1,6 @@
 #include "asimulationstatistics.h"
+#include "ageoobject.h"
+#include "amonitor.h"
 
 #include <QDebug>
 
@@ -20,10 +22,16 @@ ASimulationStatistics::ASimulationStatistics(const TString nameID)
 
 ASimulationStatistics::~ASimulationStatistics()
 {
-    if (WaveSpectrum) delete WaveSpectrum;
-    if (TimeSpectrum) delete TimeSpectrum;
-    if (CosAngleSpectrum) delete CosAngleSpectrum;
-    if (TransitionSpectrum) delete TransitionSpectrum;
+    //clearAll();
+}
+
+void ASimulationStatistics::clearAll()
+{
+    if (WaveSpectrum) delete WaveSpectrum; WaveSpectrum = 0;
+    if (TimeSpectrum) delete TimeSpectrum; TimeSpectrum = 0;
+    if (CosAngleSpectrum) delete CosAngleSpectrum; CosAngleSpectrum = 0;
+    if (TransitionSpectrum) delete TransitionSpectrum; TransitionSpectrum = 0;
+    clearMonitors();
 }
 
 void ASimulationStatistics::initialize(int nBins, int waveNodes)
@@ -58,6 +66,8 @@ void ASimulationStatistics::initialize(int nBins, int waveNodes)
 
     PhotonHistoryLog.clear();
     PhotonHistoryLog.squeeze();
+
+    clearMonitors();
 }
 
 bool ASimulationStatistics::isEmpty()
@@ -128,5 +138,12 @@ void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatisti
 long ASimulationStatistics::countPhotons()
 {
     return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry;
+}
+
+void ASimulationStatistics::clearMonitors()
+{
+    for (AMonitor* mon : Monitors)
+        delete mon;
+    Monitors.clear();
 }
 

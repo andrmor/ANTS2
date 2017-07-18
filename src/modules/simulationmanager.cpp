@@ -423,6 +423,7 @@ bool Simulator::setup(QJsonObject &json)
 
 static void addTH1(TH1 *first, const TH1 *second)
 {
+    if (!first || !second) return;
     int bins = second->GetNbinsX();
     for(int i = 0; i < bins; i++)
         first->Fill(second->GetBinCenter(i), second->GetBinContent(i));

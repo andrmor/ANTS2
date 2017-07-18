@@ -52,8 +52,7 @@ public:
     //Detection statistics
     ASimulationStatistics* SimStat;
     bool isStatEmpty() {return SimStat->isEmpty();}
-    void setDetStatNumBins(int numBins);
-    int  getStatDataNumBins() {return DetStatNumBins;}
+    void setDetStatNumBins(int numBins, int waveNodes);
 #endif
 
     //Reconstruction data
@@ -127,7 +126,6 @@ public slots:
     void onRequestStopLoad();
 
 private:
-    int DetStatNumBins;
     int fStopLoadRequested;
 
 signals:

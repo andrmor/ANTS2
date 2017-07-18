@@ -17,8 +17,7 @@ public:
     ASimulationStatistics(const TString nameID = "");
     ~ASimulationStatistics();
 
-    void initialize(int nBins = 0); //0 - default (101) or previously set value will be used
-    void setWavelengthBinning(double waveNodes);
+    void initialize(int nBins = 0, int waveNodes = 0); //0 - default (100) or previously set value will be used
     bool isEmpty();
 
     void registerWave(int iWave);

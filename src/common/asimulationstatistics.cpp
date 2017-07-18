@@ -12,9 +12,10 @@ ASimulationStatistics::ASimulationStatistics(const TString nameID)
     CosAngleSpectrum = 0;
     TransitionSpectrum = 0;
     WaveNodes = 0;
+    numBins = 100;
 
     NameID = nameID;
-    initialize(101);
+    initialize(numBins);
 }
 
 ASimulationStatistics::~ASimulationStatistics()
@@ -25,25 +26,25 @@ ASimulationStatistics::~ASimulationStatistics()
     if (TransitionSpectrum) delete TransitionSpectrum;
 }
 
-void ASimulationStatistics::initialize(int nBins)
-{
-    if (nBins == 0) nBins = numBins;
-    else numBins = nBins;
+void ASimulationStatistics::initialize(int nBins, int waveNodes)
+{    
+    if (nBins != 0) numBins = nBins;
+    if (waveNodes != 0) WaveNodes = waveNodes;
 
     if (WaveSpectrum) delete WaveSpectrum;
     if (WaveNodes != 0)
-       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum",WaveNodes, 0, WaveNodes-1);
+       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum", WaveNodes, 0, WaveNodes-1);
     else
-       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum",nBins,0,-1);
+       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum",numBins,0,-1);
 
     if (TimeSpectrum) delete TimeSpectrum;
-    TimeSpectrum = new TH1D("TimeSpectrum"+NameID, "Time spectrum",nBins,0,-1);
+    TimeSpectrum = new TH1D("TimeSpectrum"+NameID, "Time spectrum",numBins,0,-1);
 
     if (CosAngleSpectrum) delete CosAngleSpectrum;
-    CosAngleSpectrum = new TH1I("CosAngleSpectrum"+NameID, "cosAngle spectrum", nBins, 0,-1);
+    CosAngleSpectrum = new TH1I("CosAngleSpectrum"+NameID, "cosAngle spectrum", numBins, 0,-1);
 
     if (TransitionSpectrum) delete TransitionSpectrum;
-    TransitionSpectrum = new TH1I("TransitionsSpectrum"+NameID, "Transitions", nBins, 0,-1);
+    TransitionSpectrum = new TH1I("TransitionsSpectrum"+NameID, "Transitions", numBins, 0,-1);
 
     Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = 0;
 
@@ -57,12 +58,6 @@ void ASimulationStatistics::initialize(int nBins)
 
     PhotonHistoryLog.clear();
     PhotonHistoryLog.squeeze();
-}
-
-void ASimulationStatistics::setWavelengthBinning(double waveNodes)
-{
-  WaveNodes = waveNodes;
-  initialize();
 }
 
 bool ASimulationStatistics::isEmpty()

@@ -20,8 +20,7 @@ EventsDataClass::EventsDataClass(const TString nameID) //nameaddon to make uniqu
 {
 #ifdef SIM
   SimStat = new ASimulationStatistics(nameID);
-  DetStatNumBins = 100;
-  SimStat->initialize(DetStatNumBins);
+  SimStat->initialize();
 #endif
   fReconstructionDataReady = false;
   ReconstructionTree = 0;
@@ -124,10 +123,9 @@ void EventsDataClass::clearManifest()
 }
 
 #ifdef SIM
-void EventsDataClass::setDetStatNumBins(int numBins)
+void EventsDataClass::setDetStatNumBins(int numBins, int waveNodes)
 {
-  DetStatNumBins = numBins;
-  SimStat->initialize(DetStatNumBins);
+  SimStat->initialize(numBins, waveNodes);
 }
 #endif
 

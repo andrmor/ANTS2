@@ -99,8 +99,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
   bool fRunTThreads = threadCount > 0;
   simSettings.readFromJson(jsSimSet);
-  dataHub->setDetStatNumBins(simSettings.DetStatNumBins);
-  if (simSettings.fWaveResolved) dataHub->SimStat->setWavelengthBinning(simSettings.WaveNodes);
+  dataHub->setDetStatNumBins(simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
   modeSetup = jsSimSet["Mode"].toString();
   //qDebug() << "-------------";
   //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
@@ -382,9 +381,7 @@ void Simulator::updateGeoManager()
 void Simulator::setSimSettings(const GeneralSimSettings *settings)
 {
   this->simSettings = settings;
-  dataHub->setDetStatNumBins(settings->DetStatNumBins);
-  if (simSettings->fWaveResolved)
-    dataHub->SimStat->setWavelengthBinning(simSettings->WaveNodes);
+  dataHub->setDetStatNumBins(settings->DetStatNumBins, (simSettings->fWaveResolved ? simSettings->WaveNodes : 0));
 }
 
 void Simulator::setRngSeed(int seed)

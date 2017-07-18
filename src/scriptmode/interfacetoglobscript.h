@@ -202,7 +202,9 @@ public slots:
   void SetReconstructedZ(int ievent, double z);
   void SetReconstructedEnergy(int ievent, double e);
   void SetReconstructedGoodEvent(int ievent, bool good);
+  void SetReconstructedAllEventsGood(bool flag);
   void SetReconstructionOK(int ievent, bool OK);
+
     //general
   void SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e);
   void SetReconstructedFast(int igroup, int ievent, int ipoint, double x, double y, double z, double e); // no checks!!! unsafe
@@ -211,7 +213,7 @@ public slots:
   void SetReconstructedY(int igroup, int ievent, int ipoint, double y);
   void SetReconstructedZ(int igroup, int ievent, int ipoint, double z);
   void SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e);
-  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);
+  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);  
   void SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK);
     //set when reconstruction is ready for all events! - otherwise GUI will complain
   void SetReconstructionReady();

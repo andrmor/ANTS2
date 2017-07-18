@@ -112,7 +112,7 @@
          <string>View geometry using JSROOT</string>
         </property>
         <property name="text">
-         <string>Jsroot viewer</string>
+         <string>JSROOT</string>
         </property>
        </widget>
       </widget>

@@ -1155,14 +1155,24 @@ void ReconstructionWindow::updateFiltersGui()
 void ReconstructionWindow::on_pbUpdateFilters_clicked()
 {
   //qDebug() << "UpdateFilterButton pressed";
-  ReconstructionWindow::updateFiltersGui();
-  if (ui->cbSpFcustom->isChecked() && ui->twData->tabText(ui->twData->currentIndex())=="Spatial")
-    if (MW->GeometryWindow->isVisible()) ReconstructionWindow::on_pbShowSpatialFilter_clicked();
+  if (bFilteringStarted) //without this on-Editing-finished is triggered when disable kick in and cursor is in one of the edit boxes
+  {
+      //qDebug() << "Igonred, already filetring";
+      return;
+  }
 
-  if (TMPignore)
-      UpdateReconConfig(); // in this case only GUI update and Config->JSON update
-  else
-      UpdateStatusAllEvents();
+  bFilteringStarted = true;  //--in--//
+  MW->WindowNavigator->BusyOn();
+
+  ReconstructionWindow::updateFiltersGui();
+  if (ui->cbSpFcustom->isChecked() && ui->twData->tabText(ui->twData->currentIndex()) == "Spatial")
+    if (MW->GeometryWindow->isVisible()) on_pbShowSpatialFilter_clicked();
+
+  if (TMPignore) UpdateReconConfig(); // in this case only GUI update and Config->JSON update
+  else UpdateStatusAllEvents();
+
+  MW->WindowNavigator->BusyOff();
+  bFilteringStarted = false; //--out--//
 }
 
 void ReconstructionWindow::on_pbEnergySpectrum1_clicked()
@@ -2477,7 +2487,6 @@ void ReconstructionWindow::on_pbDefSumCutOffs_clicked()
    if (!ok) return;
 
    ui->ledFilterSumMin->setText(QString::number(MW->GraphWindow->extractedX(), 'g', 4));
-   //ReconstructionWindow::on_ledFilterSumMin_editingFinished();
    ReconstructionWindow::on_pbUpdateFilters_clicked();
    ReconstructionWindow::on_pbShowSumSignal_clicked();
 }

@@ -546,8 +546,9 @@ private:
   bool StopRecon; //stop button flag
 
   int ShiftZoldValue;
-  bool ForbidUpdate;  
+  bool ForbidUpdate;
   bool TMPignore;
+  bool bFilteringStarted;
 
   double lastChi2;
 

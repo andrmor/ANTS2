@@ -1526,6 +1526,12 @@ void InterfaceToData::SetReconstructedGoodEvent(int ievent, bool good)
   EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = good;
 }
 
+void InterfaceToData::SetReconstructedAllEventsGood(bool flag)
+{
+    for (int i=0; i<EventsDataHub->ReconstructionData.at(0).size(); i++)
+        EventsDataHub->ReconstructionData[0][i]->GoodEvent = flag;
+}
+
 void InterfaceToData::SetReconstructionOK(int ievent, bool OK)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;

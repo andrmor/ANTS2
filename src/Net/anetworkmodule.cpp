@@ -101,11 +101,11 @@ void ANetworkModule::StopRootHttpServer()
 #endif
 }
 
-void ANetworkModule::onNewGeoManagerCreated(TObject *TopNode)
+void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
 {
 #ifdef USE_ROOT_HTML
     if (!RootHttpServer) return;
-    RootHttpServer->UpdateGeoWorld(TopNode);
+    RootHttpServer->UpdateGeoWorld(GeoManager);
 #endif
 }
 

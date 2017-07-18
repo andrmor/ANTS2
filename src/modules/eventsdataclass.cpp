@@ -383,15 +383,23 @@ void EventsDataClass::createDefaultReconstructionData(int igroup)
       if (igroup > ReconstructionData.size()-1) ReconstructionData.resize(igroup+1);
   }
 
-  //filling default values
-  ReconstructionData[igroup].reserve(Events.size());
-  for (int ievent=0; ievent<Events.size(); ievent++)
+  try   //added in July 2017 - attempt to find memory leak
   {
-      AReconRecord* r = new AReconRecord();
-      r->EventId = ievent;
-      r->chi2 = 0;
-      r->ReconstructionOK = false;     
-      ReconstructionData[igroup].append(r);
+    ReconstructionData[igroup].reserve(Events.size());
+    //filling default values
+    for (int ievent=0; ievent<Events.size(); ievent++)
+    {
+        AReconRecord* r = new AReconRecord();
+        r->EventId = ievent;
+        r->chi2 = 0;
+        r->ReconstructionOK = false;
+        ReconstructionData[igroup].append(r);
+    }
+  }
+  catch (...)
+  {
+    qCritical() << "Failed allocate space for reconstruction data";
+    exit(888);
   }
 }
 

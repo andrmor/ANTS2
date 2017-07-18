@@ -399,9 +399,11 @@ bool CudaManagerClass::PerformSliced()
 
         tmp->Points[0].r[0] = RecData[imax][iev].X;
         tmp->Points[0].r[1] = RecData[imax][iev].Y;
-        //const LRFsliced3D *lrf = dynamic_cast<const LRFsliced3D*>( (*SensLRF)[0] );
-        //if (lrf) tmp->Points[0].r[2] = lrf->getSliceMedianZ(imax); //like in CPU based
-        tmp->Points[0].r[2] = Slice0Z + imax * SliceThickness;
+        const LRFsliced3D *lrf = dynamic_cast<const LRFsliced3D*>( (*SensLRF)[0] );
+        if (lrf)
+           tmp->Points[0].r[2] = lrf->getSliceMedianZ(imax); //like in CPU based
+        else
+           tmp->Points[0].r[2] = Slice0Z + imax * SliceThickness;
         tmp->Points[0].energy = RecData[imax][iev].Energy;
         tmp->chi2 = RecData[imax][iev].Chi2;
         tmp->ReconstructionOK = true;

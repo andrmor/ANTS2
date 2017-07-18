@@ -1,15 +1,29 @@
 #include "tps3fit.h"
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
+#include <Eigen/SparseQR>
+#include <Eigen/OrderingMethods>
 #include "eiquadprog.hpp"
 #include <TProfile2D.h>
 #include <iostream>
+
+#include <QDebug>
+#include <QTime>
+
 
 //#include <vector>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::JacobiSVD;
+using Eigen::Triplet;
+using Eigen::SparseQR;
+using Eigen::SparseMatrix;
 
 TPS3fit::TPS3fit(TPspline3 *bs_)
 {
@@ -22,6 +36,7 @@ TPS3fit::TPS3fit(TPspline3 *bs_)
     non_negative = false;
     non_increasing_x = false;
     flat_top_x = false;
+    top_down = false;
     slope_y = 0;
     h1 = 0;
 }
@@ -91,6 +106,7 @@ bool TPS3fit::Fit()
 
 bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double const *dataz, double const *dataw)
 {
+    QTime myTimer;
 
 // for the case of weighted data with missing points,
 // we need to make a provision for additional 2nd derivative equations
@@ -144,12 +160,58 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
         }
     }
 
-    if (!non_negative && !non_increasing_x && !slope_y && !flat_top_x) { // unconstrained fit
+    if (!non_negative && !non_increasing_x && !slope_y && !flat_top_x && !top_down) { // unconstrained fit
     // solve the system using QR decomposition (SVD is too slow)
-        x = A.colPivHouseholderQr().solve(y);
+        sparse = true;
+        if (!sparse) {
+            myTimer.start();
+            x = A.colPivHouseholderQr().solve(y);
+            qDebug() << "Solve: " << myTimer.elapsed();
+            VectorXd r = A*x - y;
+            residual = sqrt(r.squaredNorm());
+        } else { // sparse version - EXPERIMENTAL
+            int nz_elem = 0;
+            for (int i=0; i<A.rows(); i++)
+                for (int j=0; j<A.cols(); j++)
+                    if (A(i,j) != 0.)
+                        nz_elem++;
 
-        VectorXd r = A*x - y;
-        residual = sqrt(r.squaredNorm());
+            qDebug() << "Non-zero elements: " << nz_elem;
+
+            qDebug() << "Make triplet list";
+            myTimer.start();
+            std::vector <Eigen::Triplet<double> > tripletList;
+            tripletList.reserve(nz_elem);
+            for (int i=0; i<A.rows(); i++)
+                for (int j=0; j<A.cols(); j++)
+                    if (A(i,j) != 0.)
+                        tripletList.push_back(Eigen::Triplet<double>(i,j,A(i,j)));
+            qDebug() << "Done: " << myTimer.elapsed();
+            qDebug() << "Fill sparse matrix";
+            myTimer.start();
+            SparseMatrix <double> A_sp(A.rows(),A.cols());
+            A_sp.setFromTriplets(tripletList.begin(), tripletList.end());
+            qDebug() << "Done: " << myTimer.elapsed();
+
+            qDebug() << "Solving Sparse system";
+            myTimer.start();
+
+            SparseQR <SparseMatrix<double>, Eigen::COLAMDOrdering<int> > solver;
+            solver.compute(A_sp);
+            if(solver.info()!=Eigen::Success) {
+              std::cout << "decomposition failed\n";
+              return false;
+            }
+            qDebug() << "Compute QR: " << myTimer.elapsed();
+            x = solver.solve(y);
+            if(solver.info()!=Eigen::Success) {
+              std::cout << "solving failed\n";
+              return false;
+            }
+            qDebug() << "Solve: " << myTimer.elapsed();
+            VectorXd r = A_sp*x - y;
+            residual = sqrt(r.squaredNorm());
+        }
 
     } else { // constrained fit
 
@@ -206,20 +268,61 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
             }
         }
 
-        // now concatenate the components into final CI matrix and ci0 vector
-        int acols = CI_a.cols();
-        int bcols = CI_b.cols();
-        if (acols>0 && bcols>0) {
-            CI = MatrixXd::Zero(nbas, acols+bcols);
-            ci0 = VectorXd::Zero(acols+bcols);
-            CI << CI_a, CI_b;
-            ci0 << ci0_a, ci0_b;
-        } else if (acols > 0) {
-            CI = CI_a;
-            ci0 = ci0_a;
-        } else if (bcols > 0) {
-            CI = CI_b;
-            ci0 = ci0_b;
+        if (top_down) { // this option is only compatible with non_negative, trumps everything else
+            int cols = (nbasx-1)*(nbasy-1);
+            if (non_negative)
+                cols += 2*(nbasx+nbasy-2);
+            CI = MatrixXd::Zero(nbas, cols);
+            ci0 = VectorXd::Zero(cols);
+            double xmin = bs->GetXmin();
+            double xmax = bs->GetXmax();
+            double ymin = bs->GetYmin();
+            double ymax = bs->GetYmax();
+            int nintx = bs->GetNintX();
+            int ninty = bs->GetNintX();
+            double dx = xmin-xmax/nintx;
+            double dy = ymin-ymax/ninty;
+            for (int iy = 0; iy<nbasy-1; iy++)
+                for (int ix = 0; ix<nbasx-1; ix++) {
+                    int i = ix + iy*nbasx;
+                    double x = xmin + dx*(ix-1);
+                    double y = ymin + dy*(iy-1);
+                    if (r(x, y) > r(x, y+dy)) {
+                        CI(i, i) = -1; CI(i+nbasx, i)=1;
+                    } else {
+                        CI(i, i) = 1; CI(i+nbasx, i)=-1;
+                    }
+
+                    if (r(x, y) > r(x+dx, y)) {
+                        CI(i, i) = -1; CI(i+1, i)=1;
+                    } else {
+                        CI(i, i) = 1; CI(i+1, i)=-1;
+                    }
+            }
+            if (non_negative) {
+                int k = (nbasx-1)*(nbasy-1);
+                for (int iy = 0; iy<nbasy; iy++)
+                    for (int ix = 0; ix<nbasx; ix++)
+                        if (ix == 0 || ix == nbasx-1 || iy == 0 || iy == nbasy-1)
+                            CI(ix + iy*nbasx ,k++) = 1.;
+            }
+
+        } else {
+            // now concatenate the components into final CI matrix and ci0 vector
+            int acols = CI_a.cols();
+            int bcols = CI_b.cols();
+            if (acols>0 && bcols>0) {
+                CI = MatrixXd::Zero(nbas, acols+bcols);
+                ci0 = VectorXd::Zero(acols+bcols);
+                CI << CI_a, CI_b;
+                ci0 << ci0_a, ci0_b;
+            } else if (acols > 0) {
+                CI = CI_a;
+                ci0 = ci0_a;
+            } else if (bcols > 0) {
+                CI = CI_b;
+                ci0 = ci0_b;
+            }
         }
 
         if (flat_top_x) {

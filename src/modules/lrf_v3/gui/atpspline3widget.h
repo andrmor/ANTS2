@@ -3,7 +3,11 @@
 
 #include <QWidget>
 
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
 
 class QLineEdit;
 class QTableWidget;

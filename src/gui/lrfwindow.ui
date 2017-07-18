@@ -211,6 +211,11 @@
          <string>Sliced (XY+Z)</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Full 3D (XYZ)</string>
+        </property>
+       </item>
       </widget>
      </widget>
     </widget>
@@ -2022,16 +2027,6 @@ only events passing all event filters are used to calculate LRFs.</string>
        <string>in Z:</string>
       </property>
      </widget>
-     <zorder>cobForceInZ</zorder>
-     <zorder>cbForceNonNegative</zorder>
-     <zorder>cbForceDerivToZeroInOrigin</zorder>
-     <zorder>label_25</zorder>
-     <zorder>cbForceNonIncreasingInR</zorder>
-     <zorder>label_24</zorder>
-     <zorder>cobForceInZ</zorder>
-     <zorder>cbForceNonNegative</zorder>
-     <zorder>cbForceNonIncreasingInR</zorder>
-     <zorder>label_24</zorder>
     </widget>
     <zorder>fSingleGroup</zorder>
     <zorder>line_6</zorder>
@@ -2256,7 +2251,7 @@ only events passing all event filters are used to calculate LRFs.</string>
      <x>0</x>
      <y>0</y>
      <width>711</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuShow">

@@ -23,7 +23,7 @@
 
 #include "tpspline3m.h"
 
-TPspline3M::TPspline3M(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty) :
+TPspline3::TPspline3(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty) :
                     xl(xmin), yl(ymin), xr(xmax), yr(ymax), nintx(n_intx), ninty(n_inty),
                     bsx(xmin, xmax, n_intx), bsy(ymin, ymax, n_inty)
 {
@@ -38,12 +38,12 @@ TPspline3M::TPspline3M(double xmin, double xmax, int n_intx, double ymin, double
 // construct UCBS matrix
     B <<    1, -3,  3, -1,
             4,  0, -6,  3,
-            1,  3,  3, -1,
+            1,  3,  3, -3,
             0,  0,  0,  1;
     B /= 6.;
 }
 
-void TPspline3M::SetRangeX(double xmin, double xmax)
+void TPspline3::SetRangeX(double xmin, double xmax)
 {
 	xl = xmin;
 	xr = xmax;
@@ -51,7 +51,7 @@ void TPspline3M::SetRangeX(double xmin, double xmax)
 	bsx.SetRange(xl, xr);
 }
 
-void TPspline3M::SetRangeY(double ymin, double ymax)
+void TPspline3::SetRangeY(double ymin, double ymax)
 {
 	yl = ymin;
 	yr = ymax;
@@ -61,7 +61,7 @@ void TPspline3M::SetRangeY(double ymin, double ymax)
 
 // this function calculates equivalent basis function number
 // for the case of wrapped around Y
-int TPspline3M::GetWrapped(int n)
+int TPspline3::GetWrapped(int n)
 {
     if (!wrapy)
         return n;
@@ -75,42 +75,42 @@ int TPspline3M::GetWrapped(int n)
 
 // for the following basis functions
 // nx = n%nbasx; ny = n/nbasx;
-double TPspline3M::Basis(double x, double y, int n)
+double TPspline3::Basis(double x, double y, int n)
 {
     return bsx.Basis(x, n%nbasx)*bsy.Basis(y, n/nbasx);
 }
 
-double TPspline3M::BasisDrvX(double x, double y, int n)
+double TPspline3::BasisDrvX(double x, double y, int n)
 {
     return bsx.BasisDrv(x, n%nbasx)*bsy.Basis(y, n/nbasx);
 }
 
-double TPspline3M::BasisDrvY(double x, double y, int n)
+double TPspline3::BasisDrvY(double x, double y, int n)
 {
     return bsx.Basis(x, n%nbasx)*bsy.BasisDrv(y, n/nbasx);
 }
 
-double TPspline3M::BasisDrv2XX(double x, double y, int n)
+double TPspline3::BasisDrv2XX(double x, double y, int n)
 {
     return bsx.BasisDrv2(x, n%nbasx)*bsy.Basis(y, n/nbasx);
 }
 
-double TPspline3M::BasisDrv2YY(double x, double y, int n)
+double TPspline3::BasisDrv2YY(double x, double y, int n)
 {
     return bsx.Basis(x, n%nbasx)*bsy.BasisDrv2(y, n/nbasx);
 }
 
-double TPspline3M::BasisDrv2XY(double x, double y, int n)
+double TPspline3::BasisDrv2XY(double x, double y, int n)
 {
     return bsx.BasisDrv(x, n%nbasx)*bsy.BasisDrv(y, n/nbasx);
 }
 
-double TPspline3M::Basis(double *x, double *p)  // insertable into ROOT function
+double TPspline3::Basis(double *x, double *p)  // insertable into ROOT function
 {
     return Basis(x[0], x[1], (int)p[0]);
 }
 
-double TPspline3M::Eval_slow(double x, double y)
+double TPspline3::Eval_slow(double x, double y)
 {
 	double sum = 0;
 	for (int i=0; i<nbas; i++)
@@ -118,7 +118,7 @@ double TPspline3M::Eval_slow(double x, double y)
 	return sum;	
 }
 
-Vector4d TPspline3M::PowerVec(double x) const
+Vector4d TPspline3::PowerVec(double x) const
 {
     Vector4d X;
     double x2 = x*x;
@@ -127,7 +127,7 @@ Vector4d TPspline3M::PowerVec(double x) const
     return X;
 }
 
-Vector4d TPspline3M::PowerVecDrv(double x) const
+Vector4d TPspline3::PowerVecDrv(double x) const
 {
     Vector4d X;
     X << 0., 1., x+x, 3*x*x;
@@ -137,7 +137,7 @@ Vector4d TPspline3M::PowerVecDrv(double x) const
 // translate xy coordinates into rectangle position (ix, iy) and
 // position inside the rectangle (xf, yf)
 // returns true if inside the domain
-bool TPspline3M::Locate(double x, double y, int *ix, int *iy, double *xf, double *yf) const
+bool TPspline3::Locate(double x, double y, int *ix, int *iy, double *xf, double *yf) const
 {
     double xi = (x-xl)/dx*nintx; *ix = (int)xi;
     if (*ix < 0 || *ix >= nintx)
@@ -151,7 +151,7 @@ bool TPspline3M::Locate(double x, double y, int *ix, int *iy, double *xf, double
     return true;
 }
 
-double TPspline3M::Eval(double x, double y) const
+double TPspline3::Eval(double x, double y) const
 {
     int ix, iy;
     double xf, yf;
@@ -163,7 +163,7 @@ double TPspline3M::Eval(double x, double y) const
 }
 
 // this eval tries to get best speed with reduced shared memory usage
-double TPspline3M::Eval_greedy(double x, double y)
+double TPspline3::Eval_greedy(double x, double y) const
 {
     int ix, iy;
     double xf, yf;
@@ -177,7 +177,7 @@ double TPspline3M::Eval_greedy(double x, double y)
     return xx.transpose()*C.block<4,4>(ix,iy)*yy;
 }
 
-double TPspline3M::EvalDrvX(double x, double y)
+double TPspline3::EvalDrvX(double x, double y)
 {
     int ix, iy;
     double xf, yf;
@@ -188,7 +188,7 @@ double TPspline3M::EvalDrvX(double x, double y)
     return PowerVecDrv(xf).transpose()*P[ix + iy*nintx]*PowerVec(yf);
 }
 
-double TPspline3M::EvalDrvY(double x, double y)
+double TPspline3::EvalDrvY(double x, double y)
 {
     int ix, iy;
     double xf, yf;
@@ -199,22 +199,22 @@ double TPspline3M::EvalDrvY(double x, double y)
     return PowerVec(xf).transpose()*P[ix + iy*nintx]*PowerVecDrv(yf);
 }
 
-double TPspline3M::Eval(double *x, double* /*p*/)	// insertable into ROOT function
+double TPspline3::Eval(double *x, double* /*p*/)	// insertable into ROOT function
 {
 	return Eval(x[0], x[1]);
 }
 
-double TPspline3M::EvalDrvX(double *x, double* /*p*/)	// insertable into ROOT function
+double TPspline3::EvalDrvX(double *x, double* /*p*/)	// insertable into ROOT function
 {
     return EvalDrvX(x[0], x[1]);
 }
 
-double TPspline3M::EvalDrvY(double *x, double* /*p*/)	// insertable into ROOT function
+double TPspline3::EvalDrvY(double *x, double* /*p*/)	// insertable into ROOT function
 {
     return EvalDrvY(x[0], x[1]);
 }
 
-void TPspline3M::SetCoef(double *c)
+void TPspline3::SetCoef(double *c)
 {
 	for (int i=0; i<nbas; i++)
         C(i%nbasx, i/nbasx) = c[i];
@@ -224,19 +224,19 @@ void TPspline3M::SetCoef(double *c)
           P[ix + iy*nintx] = B.transpose()*C.block<4,4>(ix,iy)*B;
 }
 
-void TPspline3M::SetCoef(std::vector <double> c)
+void TPspline3::SetCoef(std::vector <double> c)
 {
     if ((int)c.size() == nbas)
         SetCoef(&c[0]);
 }
 
-void TPspline3M::GetCoef(double *c)
+void TPspline3::GetCoef(double *c)
 {
 	for (int i=0; i<nbas; i++)
         c[i] = C(i%nbasx, i/nbasx);
 }
 
-const std::vector<double> &TPspline3M::GetCoef() const
+const std::vector<double> &TPspline3::GetCoef() const
 {
     for (int i=0; i<nbas; i++)
         coef[i] = C(i%nbasx, i/nbasx);

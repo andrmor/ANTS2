@@ -5,7 +5,12 @@
 #include <QJsonObject>
 
 #include <math.h>
-#include <tpspline3.h>
+
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
+#include "tpspline3.h"
+#endif
 
 
 LRFsliced3D::LRFsliced3D(double x_min, double x_max, int n_intx, double y_min,

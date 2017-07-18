@@ -8,6 +8,9 @@ class LRF2;
 class LRFaxial;
 class LRFcAxial;
 class LRFxy;
+#ifdef TPS3M
+class LRFxyz;
+#endif
 class LRFcomposite;
 class LRFaxial3d;
 class LRFsliced3D;
@@ -34,6 +37,9 @@ public:
     LRF2 *mkLRFcomposite(int nodesr, int nodesxy, double *compr) const;
     LRF2 *mkLRFaxial3d(int nodesr, int nodesz, double *compr) const;
     LRF2 *mkLRFsliced3D(int nodesr, int nodesz) const;
+#ifdef TPS3M
+    LRF2 *mkLRFxyz(int nodesr, int nodesz) const;
+#endif
 
     void expandDomain(double fraction);
 

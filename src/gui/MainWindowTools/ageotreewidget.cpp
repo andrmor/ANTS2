@@ -500,6 +500,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
   QAction* newArrayA  = Action(menu, "Add new array inside");
   QAction* newCompositeA  = Action(menu, "Add new composite object inside");
   QAction* newGridA = Action(menu, "Add optical grid");
+  QAction* newMonitorA = Action(menu, "Add monitor");
 
   menu.addSeparator();
 
@@ -558,6 +559,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
       newCompositeA->setEnabled(fNotGrid);
       newArrayA->setEnabled(fNotGrid && !ObjectType.isArray());
+      newMonitorA->setEnabled(fNotGrid && !ObjectType.isArray());
       newGridA->setEnabled(fNotGrid);
       copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab());  //supported so far only Single and Slab
       removeHostedA->setEnabled(fNotGrid);
@@ -603,6 +605,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
      menuActionAddNewArray(selected.first()->text(0));
   else if (SelectedAction == newGridA) //ADD NEW GRID
      menuActionAddNewGrid(selected.first()->text(0));
+  else if (SelectedAction == newMonitorA) //ADD NEW MONITOR
+     menuActionAddNewMonitor(selected.first()->text(0));
   else if (SelectedAction == addUpperLGA || SelectedAction == addLoweLGA) // ADD LIGHTGUIDE
      addLightguide(SelectedAction == addUpperLGA);
   else if (SelectedAction == copyA) // COPY OBJECT
@@ -900,6 +904,33 @@ void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
   UpdateGui(name);
 }
 
+void AGeoTreeWidget::menuActionAddNewMonitor(QString ContainerName)
+{
+    qDebug() << "Add new monitor requested";
+
+    AGeoObject* ContObj = World->findObjectByName(ContainerName);
+    if (!ContObj) return;
+
+    AGeoObject* newObj = new AGeoObject();
+    do newObj->Name = AGeoObject::GenerateRandomMonitorName();
+    while (World->isNameExists(newObj->Name));
+
+    newObj->Material = ContObj->Material;
+
+    delete newObj->ObjectType;
+    newObj->ObjectType = new ATypeMonitorObject();
+
+    newObj->updateMonitorShape();
+
+    newObj->color = 1;
+    ContObj->addObjectFirst(newObj);
+
+    QString name = newObj->Name;
+    UpdateGui(name);
+    emit RequestRebuildDetector();
+    UpdateGui(name);
+}
+
 void AGeoTreeWidget::menuActionAddNewComposite(QString ContainerName)
 {
   AGeoObject* ContObj = World->findObjectByName(ContainerName);
@@ -1117,6 +1148,7 @@ AGeoWidget::AGeoWidget(AGeoObject *World, AGeoTreeWidget *tw) :
   GeoObjectDelegate = 0;
   SlabDelegate = 0;
   GridDelegate = 0;
+  MonitorDelegate = 0;
   fIgnoreSignals = true;
   fEditingMode = false;
 
@@ -1201,11 +1233,10 @@ void AGeoWidget::ClearGui()
       delete SlabDelegate;
       SlabDelegate = 0;
     }
-  if (GridDelegate)
+  if (MonitorDelegate)
     {
-      //delete CurrentSlabDelegate->Widget;
-      delete GridDelegate;
-      GridDelegate = 0;
+      delete MonitorDelegate;
+      MonitorDelegate = 0;
     }
 
   fIgnoreSignals = false;
@@ -1247,6 +1278,11 @@ void AGeoWidget::UpdateGui()
         // special for grid element delegate
         addInfoLabel("Elementary block of the grid");
         GridDelegate = createAndAddGridElementDelegate(CurrentObject);
+    }
+  else if (CurrentObject->ObjectType->isMonitor())
+    {
+        addInfoLabel("Monitor");
+        MonitorDelegate = createAndAddMonitorDelegate(CurrentObject);
     }
   else
   {   // Normal AGeoObject based
@@ -1351,6 +1387,18 @@ AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *ob
     ObjectLayout->addStretch();
     connect(Del, SIGNAL(ContentChanged()), this, SLOT(onStartEditing()));
     connect(Del, SIGNAL(RequestReshapeGrid(QString)), tw, SLOT(onGridReshapeRequested(QString)));
+    return Del;
+}
+
+AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj)
+{
+    AMonitorDelegate* Del = new AMonitorDelegate(obj->Name);
+    Del->Update(obj);
+    Del->Widget->setEnabled(!CurrentObject->fLocked);
+    ObjectLayout->addWidget(Del->Widget);
+    ObjectLayout->addStretch();
+    connect(Del, SIGNAL(ContentChanged()), this, SLOT(onStartEditing()));
+    //connect(Del, SIGNAL(RequestReshapeGrid(QString)), tw, SLOT(onGridReshapeRequested(QString)));
     return Del;
 }
 
@@ -2312,4 +2360,104 @@ void AGridElementDelegate::onInstructionsForGridRequested()
                 "   Grid generation dialog generates a correct grid element automatically";
 
     QMessageBox::information(this, "", s);
+}
+
+AMonitorDelegate::AMonitorDelegate(QString name)
+{
+    CurrentObject = 0;
+
+    frMainFrame = new QFrame(this);
+    frMainFrame->setFrameShape(QFrame::Box);
+    QPalette palette = frMainFrame->palette();
+    palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
+    frMainFrame->setPalette( palette );
+    frMainFrame->setAutoFillBackground( true );
+    frMainFrame->setMinimumHeight(150);
+    frMainFrame->setMaximumHeight(150);
+
+    QVBoxLayout* vl = new QVBoxLayout();
+
+    QGridLayout *lay = new QGridLayout();
+    lay->setContentsMargins(20, 5, 20, 5);
+    lay->setVerticalSpacing(3);
+
+      QLabel *la = new QLabel("Shape:");
+      lay->addWidget(la, 0, 0);
+      lSize1 = new QLabel("dX, mm:");
+      lay->addWidget(lSize1, 1, 0);
+      la = new QLabel("    dZ, mm:");
+      la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+      lay->addWidget(la, 0, 2);
+      lSize2 = new QLabel("    dY, mm:");
+      lSize2->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+      lay->addWidget(lSize2, 1, 2);
+
+      cobShape = new QComboBox(this);
+      cobShape->addItem("Rectangular");
+      cobShape->addItem("Hexagonal");
+      connect(cobShape, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
+      lay->addWidget(cobShape, 0, 1);
+
+      ledDZ = new QLineEdit(this);
+      connect(ledDZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      lay->addWidget(ledDZ, 0, 3);
+      ledDX = new QLineEdit(this);
+      connect(ledDX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      lay->addWidget(ledDX, 1, 1);
+      ledDY = new QLineEdit(this);
+      connect(ledDY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      lay->addWidget(ledDY, 1, 3);
+
+    vl->addLayout(lay);
+    QPushButton* pbInstructions = new QPushButton();
+    //connect(pbInstructions, SIGNAL(clicked(bool)), this, SLOT(onInstructionsForGridRequested()));
+    pbInstructions->setText("Read me");
+    pbInstructions->setMinimumWidth(200);
+    pbInstructions->setMaximumWidth(200);
+    vl->addWidget(pbInstructions);
+    vl->setAlignment(pbInstructions, Qt::AlignHCenter);
+
+    QPushButton* pbAuto = new QPushButton();
+    //connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
+    pbAuto->setText("Open generation dialog");
+    pbAuto->setMinimumWidth(200);
+    pbAuto->setMaximumWidth(200);
+    vl->addWidget(pbAuto);
+    vl->setAlignment(pbAuto, Qt::AlignHCenter);
+
+    frMainFrame->setLayout(vl);
+    Widget = frMainFrame;
+
+    //installing double validators for edit boxes
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    ledDX->setValidator(dv);
+    ledDY->setValidator(dv);
+    ledDZ->setValidator(dv);
+}
+
+void AMonitorDelegate::Update(const AGeoObject *obj)
+{
+    ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
+    if (!mon)
+    {
+        qWarning() << "Attempt to use non-monitor object to update monitor delegate!";
+        return;
+    }
+
+    CurrentObject = obj;
+
+    if (mon->shape==0 || mon->shape==1) cobShape->setCurrentIndex(0);
+    else cobShape->setCurrentIndex(1);
+    //updateVisibility();
+
+    ledDZ->setText( QString::number(mon->dz));
+    ledDX->setText( QString::number(mon->size1));
+    ledDY->setText( QString::number(mon->size2));
+}
+
+void AMonitorDelegate::onContentChanged()
+{
+    //updateVisibility();
+    emit ContentChanged();
 }

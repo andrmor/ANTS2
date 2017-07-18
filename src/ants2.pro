@@ -4,12 +4,12 @@ ANTS2_MINOR = 13
 ANTS2_VERSION = 2197
 
 #Optional libraries
-#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
+CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
 
 #---CERN ROOT---
 win32 {
@@ -247,7 +247,8 @@ SOURCES += main.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
-    common/aphotonhistorylog.cpp
+    common/aphotonhistorylog.cpp \
+    common/amonitor.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -350,7 +351,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
     scriptmode/ainterfacetophotonscript.h \
-    common/aphotonhistorylog.h
+    common/aphotonhistorylog.h \
+    common/amonitor.h
 
 # --- SIM ---
 ants2_SIM {

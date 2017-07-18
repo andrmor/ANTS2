@@ -2,6 +2,7 @@
 #define AGEOTREEWIDGET_H
 
 #include <QTreeWidget>
+#include <QSyntaxHighlighter>
 
 class AGeoObject;
 class AGeoWidget;
@@ -71,6 +72,7 @@ private:
   void menuActionAddNewComposite(QString ContainerName);
   void menuActionAddNewArray(QString ContainerName);
   void menuActionAddNewGrid(QString ContainerName);
+  void menuActionAddNewMonitor(QString ContainerName);
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
   void RequestRebuildDetector();
@@ -89,6 +91,7 @@ class QGridLayout;
 class QPushButton;
 class AGeoObjectDelegate;
 class AGridElementDelegate;
+class AMonitorDelegate;
 class QLabel;
 class ASlabDelegate;
 class ATypeCompositeObject;
@@ -111,6 +114,7 @@ private:
   AGeoObjectDelegate* GeoObjectDelegate;
   ASlabDelegate* SlabDelegate;
   AGridElementDelegate* GridDelegate;
+  AMonitorDelegate* MonitorDelegate;
 
   QVBoxLayout *lMain;
   QVBoxLayout *ObjectLayout;
@@ -144,6 +148,7 @@ private:
   AGeoObjectDelegate *createAndAddGeoObjectDelegate(AGeoObject *obj);
   ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
+  AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj);
 
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
   void getValuesFromNonSlabDelegates(AGeoObject *objMain);
@@ -181,7 +186,7 @@ public slots:
   void Update(const AGeoObject* obj);
 
 private slots:
-  void onContentChanged();  
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
   void onHelpRequested();   //AGeoShape list is here!!!
   void onCursorPositionChanged();
 
@@ -213,7 +218,7 @@ public slots:
   void Update(const AGeoObject* obj);
 
 private slots:
-  void onContentChanged();
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
   void StartDialog();
   void onInstructionsForGridRequested();
 
@@ -222,8 +227,37 @@ signals:
   void RequestReshapeGrid(QString);
 };
 
+class AMonitorDelegate : public QWidget
+{
+  Q_OBJECT
 
-#include <QSyntaxHighlighter>
+public:
+   AMonitorDelegate(QString name);
+
+   QFrame* Widget;
+
+   QFrame* frMainFrame;
+   QLineEdit *ledDX, *ledDY, *ledDZ;
+   QComboBox *cobShape;
+   QLabel *lSize1, *lSize2;
+
+private:
+   const AGeoObject* CurrentObject;
+
+   //void updateVisibility();
+
+public slots:
+  void Update(const AGeoObject* obj);
+
+private slots:
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
+  //void StartDialog();
+  //void onInstructionsForGridRequested();
+
+signals:
+  void ContentChanged();
+};
+
 class AShapeHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT

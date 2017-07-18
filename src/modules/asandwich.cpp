@@ -4,6 +4,7 @@
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
+//#include "amonitor.h"
 
 #include <QDebug>
 
@@ -242,7 +243,6 @@ void ASandwich::convertObjToGrid(AGeoObject *obj)
   elObj->color = 1;
   obj->addObjectFirst(elObj);
   elObj->updateGridElementShape();
-
 }
 
 void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, double p2)
@@ -533,7 +533,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
         else
-        {   //if (obj->ObjectType == AGeoObject::NormalObject) + world + slab now            
+        {
+            //qDebug() << obj->Name << obj->Shape->getGenerationString();
             vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
         }
 
@@ -548,6 +549,13 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             int GridCounter = GridRecords.size();
             GridRecords.append(obj->createGridRecord());
             parent->AddNode(vol, GridCounter, lTrans);            
+          }
+        else if (obj->ObjectType->isMonitor())
+          {
+            int MonitorCounter = MonitorsRecords.size();
+            MonitorsRecords.append(obj);
+            (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
+            parent->AddNode(vol, MonitorCounter, lTrans);
           }
         else parent->AddNode(vol, 0, lTrans);
     }    
@@ -624,6 +632,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
 
     //Grids require specific title - they are recognized by it
     if (obj->ObjectType->isGrid()) vol->SetTitle("G");
+    if (obj->ObjectType->isMonitor()) vol->SetTitle("M");
     else vol->SetTitle("-");
 }
 
@@ -631,6 +640,11 @@ void ASandwich::clearGridRecords()
 {
     for (int i=0; i<GridRecords.size(); i++) delete GridRecords[i];
     GridRecords.clear();
+}
+
+void ASandwich::clearMonitorRecords()
+{
+    MonitorsRecords.clear(); //dno delete - it is just pointers to world tree objects
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,

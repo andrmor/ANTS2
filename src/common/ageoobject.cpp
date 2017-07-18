@@ -256,6 +256,7 @@ void AGeoObject::readFromJson(QJsonObject &json)
             delete ObjectType;
             ObjectType = newType;
             ObjectType->readFromJson(jj);
+            if (ObjectType->isMonitor()) updateMonitorShape();
         }
         else
             qDebug() << "ObjectType read failed for object:" << Name << ", keeping default type";
@@ -477,6 +478,26 @@ AGridElementRecord *AGeoObject::createGridRecord()
 
   ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(geObj->ObjectType);
   return new AGridElementRecord(GE->shape, GE->size1, GE->size2);
+}
+
+void AGeoObject::updateMonitorShape()
+{
+    if (!ObjectType->isMonitor())
+    {
+        qWarning() << "Attempt to update monitor shape for non-monitor object";
+        return;
+    }
+
+    ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
+    delete Shape;
+    if (mon->shape == 0) //rectangular
+    {
+        Shape = new AGeoBox(mon->size1, mon->size2, mon->dz);
+    }
+    else //round
+    {
+        Shape = new AGeoTube(0, mon->size1, mon->dz);
+    }
 }
 
 AGeoObject *AGeoObject::findObjectByName(const QString name)
@@ -995,6 +1016,13 @@ QString AGeoObject::GenerateRandomStackName()
 {
   QString str = randomString(2, 1);
   str = "Stack_" + str;
+  return str;
+}
+
+QString AGeoObject::GenerateRandomMonitorName()
+{
+  QString str = randomString(2, 1);
+  str = "Monitor_" + str;
   return str;
 }
 
@@ -2621,6 +2649,21 @@ void ATypeGridElementObject::readFromJson(QJsonObject &json)
   parseJson(json, "dz", dz);
 }
 
+void ATypeMonitorObject::writeToJson(QJsonObject &json)
+{
+    ATypeObject::writeToJson(json);
+    json["size1"] = size1;
+    json["size2"] = size2;
+    json["shape"] = shape;
+}
+
+void ATypeMonitorObject::readFromJson(QJsonObject &json)
+{
+    parseJson(json, "size1", size1);
+    parseJson(json, "size2", size2);
+    parseJson(json, "shape", shape);
+}
+
 bool ATypeObject::isUpperLightguide() const
 {
   if ( Type != "Lightguide") return false;
@@ -2661,6 +2704,8 @@ ATypeObject *ATypeObject::TypeObjectFactory(const QString Type)
         return new ATypeGridObject();
     else if (Type == "GridElement")
         return new ATypeGridElementObject();
+    else if (Type == "Monitor")
+        return new ATypeMonitorObject();
     else
     {
         qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;

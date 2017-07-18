@@ -343,6 +343,10 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
            if (SimSet->bDoPhotonHistoryLog) PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Grid_ShiftIn) );
            break;
          }
+       case 'M': //monitor
+         {
+           qDebug() << "Monitor hit!" << ThisVolume->GetName() << "Number:"<<NodeAfterInterface->GetNumber() << MatIndexFrom<<MatIndexTo;
+         }
        default:
          {
            //other volumes have title '-'

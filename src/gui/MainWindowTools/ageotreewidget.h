@@ -138,8 +138,11 @@ private slots:
 
 private:
   void rotate(TVector3* v, double dPhi, double dTheta, double dPsi);
+
+  void getValuesFromNonSlabDelegates(AGeoObject *objMain);
   void confirmChangesForSlab();
   void confirmChangesForGridDelegate();
+  void confirmChangesForMonitorDelegate();
 
   void exitEditingMode();
   QString getSuffix(AGeoObject *objCont);
@@ -151,7 +154,7 @@ private:
   AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj);
 
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
-  void getValuesFromNonSlabDelegates(AGeoObject *objMain);
+
 };
 
 

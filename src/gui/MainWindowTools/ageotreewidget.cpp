@@ -1584,15 +1584,19 @@ void AGeoWidget::onConfirmPressed()
       confirmChangesForSlab();  // SLAB including LIGHTGUIDE goes here
       return;
     }
-  if (GridDelegate)
+  else if (GridDelegate)
     {
       confirmChangesForGridDelegate(); // Grid element processed here
       return;
     }
-
-  if (!GeoObjectDelegate)
+  else if (MonitorDelegate)
     {
-      //qWarning() << "Confirm triggered without CurrentObject!";
+      confirmChangesForMonitorDelegate(); // Monitor processed here
+      return;
+    }
+  else if (!GeoObjectDelegate)
+    {
+      qWarning() << "Confirm triggered without CurrentObject!";
       exitEditingMode();
       tw->UpdateGui();
       return;
@@ -1829,6 +1833,41 @@ void AGeoWidget::confirmChangesForGridDelegate()
     tw->UpdateGui(name);
     emit tw->RequestRebuildDetector();
     tw->UpdateGui(name);
+}
+
+void AGeoWidget::confirmChangesForMonitorDelegate()
+{
+  if (!CurrentObject) return;
+  if (!CurrentObject->ObjectType->isMonitor()) return;
+
+  //verification
+  QString newName = MonitorDelegate->leName->text();
+  if (newName != CurrentObject->Name && World->isNameExists(newName))
+    {
+      QMessageBox::warning(this, "", "This name already exists: "+newName);
+      return;
+    }
+
+  CurrentObject->Name = newName;
+
+  CurrentObject->Position[0] = MonitorDelegate->ledX->text().toDouble();
+  CurrentObject->Position[1] = MonitorDelegate->ledY->text().toDouble();
+  CurrentObject->Position[2] = MonitorDelegate->ledZ->text().toDouble();
+  CurrentObject->Orientation[0] = MonitorDelegate->ledPhi->text().toDouble();
+  CurrentObject->Orientation[1] = MonitorDelegate->ledTheta->text().toDouble();
+  CurrentObject->Orientation[2] = MonitorDelegate->ledPsi->text().toDouble();
+
+  ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(CurrentObject->ObjectType);
+  mon->shape = MonitorDelegate->cobShape->currentIndex();
+  mon->size1 = MonitorDelegate->ledDX->text().toDouble();
+  mon->size2 = MonitorDelegate->ledDY->text().toDouble();
+  CurrentObject->updateMonitorShape();
+
+  exitEditingMode();
+
+  tw->UpdateGui(newName);
+  emit tw->RequestRebuildDetector();
+  tw->UpdateGui(newName);
 }
 
 void AGeoWidget::rotate(TVector3* v, double dPhi, double dTheta, double dPsi)
@@ -2525,9 +2564,8 @@ void AMonitorDelegate::Update(const AGeoObject *obj)
 
     leName->setText(obj->Name);
 
-    if (mon->shape==0 || mon->shape==1) cobShape->setCurrentIndex(0);
+    if (mon->shape == 0) cobShape->setCurrentIndex(0);
     else cobShape->setCurrentIndex(1);
-    //updateVisibility();
 
     ledDX->setText( QString::number(mon->size1));
     ledDY->setText( QString::number(mon->size2));

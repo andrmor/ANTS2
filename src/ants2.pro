@@ -249,7 +249,8 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
-    common/aroothistappenders.cpp
+    common/aroothistappenders.cpp \
+    gui/MainWindowTools/amonitordelegateform.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -354,7 +355,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h \
     common/amonitor.h \
-    common/aroothistappenders.h
+    common/aroothistappenders.h \
+    gui/MainWindowTools/amonitordelegateform.h
 
 # --- SIM ---
 ants2_SIM {
@@ -601,3 +603,6 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/MainWindowTools/amonitordelegateform.ui

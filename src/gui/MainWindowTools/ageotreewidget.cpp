@@ -2401,6 +2401,7 @@ void AGridElementDelegate::onInstructionsForGridRequested()
     QMessageBox::information(this, "", s);
 }
 
+#include "amonitordelegateform.h"
 AMonitorDelegate::AMonitorDelegate(QString name)
 {
     CurrentObject = 0;
@@ -2411,11 +2412,18 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(250);
-    frMainFrame->setMaximumHeight(250);
+    frMainFrame->setMinimumHeight(340);
+    frMainFrame->setMaximumHeight(340);
 
     QVBoxLayout* vl = new QVBoxLayout();
+    vl->setContentsMargins(0,0,0,0);
 
+    del = new AMonitorDelegateForm(this);
+    del->UpdateVisibility();
+    connect(del, SIGNAL(contentChanged()), this, SLOT(onContentChanged()));
+    vl->addWidget(del);
+
+    /*
     QGridLayout *lay = new QGridLayout();
     lay->setContentsMargins(20, 5, 20, 5);
     lay->setVerticalSpacing(3);
@@ -2449,14 +2457,6 @@ AMonitorDelegate::AMonitorDelegate(QString name)
       connect(ledDY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDY, 1, 3);
     vl->addLayout(lay);
-
-//    QPushButton* pbInstructions = new QPushButton();
-//    //connect(pbInstructions, SIGNAL(clicked(bool)), this, SLOT(onInstructionsForGridRequested()));
-//    pbInstructions->setText("Read me");
-//    pbInstructions->setMinimumWidth(200);
-//    pbInstructions->setMaximumWidth(200);
-//    vl->addWidget(pbInstructions);
-//    vl->setAlignment(pbInstructions, Qt::AlignHCenter);
 
     QWidget* PosOrient = new QWidget();
     PosOrient->setContentsMargins(0,0,0,0);
@@ -2526,60 +2526,37 @@ AMonitorDelegate::AMonitorDelegate(QString name)
        msLay->addWidget(cobTarget);
     vl->addLayout(msLay);
 
-
+*/
     frMainFrame->setLayout(vl);
     Widget = frMainFrame;
 
     //installing double validators for edit boxes
-    QDoubleValidator* dv = new QDoubleValidator(this);
-    dv->setNotation(QDoubleValidator::ScientificNotation);
-    ledDX->setValidator(dv);
-    ledDY->setValidator(dv);
+//    QDoubleValidator* dv = new QDoubleValidator(this);
+//    dv->setNotation(QDoubleValidator::ScientificNotation);
+//    ledDX->setValidator(dv);
+//    ledDY->setValidator(dv);
 }
 
-void AMonitorDelegate::updateVisibility()
-{
-  if (cobShape->currentIndex() == 0)
-  {  //rectangular
-     lSize1->setText("dX, mm:");
-     lSize2->setVisible(true);
-     ledDY->setVisible(true);
-  }
-  else
-  {
-      lSize1->setText("dR, mm:");
-      lSize2->setVisible(false);
-      ledDY->setVisible(false);
-  }
-
-}
+//void AMonitorDelegate::updateVisibility()
+//{
+//    return;
+//  if (cobShape->currentIndex() == 0)
+//  {  //rectangular
+//     lSize1->setText("dX, mm:");
+//     lSize2->setVisible(true);
+//     ledDY->setVisible(true);
+//  }
+//  else
+//  {
+//      lSize1->setText("dR, mm:");
+//      lSize2->setVisible(false);
+//      ledDY->setVisible(false);
+//  }
+//}
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
 {
-    ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
-    if (!mon)
-    {
-        qWarning() << "Attempt to use non-monitor object to update monitor delegate!";
-        return;
-    }
-
-    CurrentObject = obj;
-
-    leName->setText(obj->Name);
-
-    if (mon->shape == 0) cobShape->setCurrentIndex(0);
-    else cobShape->setCurrentIndex(1);
-
-    ledDX->setText( QString::number(mon->size1));
-    ledDY->setText( QString::number(mon->size2));
-
-    ledX->setText(QString::number(obj->Position[0]));
-    ledY->setText(QString::number(obj->Position[1]));
-    ledZ->setText(QString::number(obj->Position[2]));
-
-    ledPhi->setText(QString::number(obj->Orientation[0]));
-    ledTheta->setText(QString::number(obj->Orientation[1]));
-    ledPsi->setText(QString::number(obj->Orientation[2]));
+    del->Update(obj);
 }
 
 void AMonitorDelegate::onContentChanged()

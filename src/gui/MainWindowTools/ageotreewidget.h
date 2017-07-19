@@ -96,6 +96,7 @@ class QLabel;
 class ASlabDelegate;
 class ATypeCompositeObject;
 class TVector3;
+class AMonitorDelegateForm;
 
 class AGeoWidget : public QWidget
 {
@@ -239,6 +240,8 @@ public:
 
    QFrame* Widget;
 
+   AMonitorDelegateForm* del;
+
    QFrame    *frMainFrame;
    QLineEdit *leName;
    QLineEdit *ledDX, *ledDY;
@@ -258,7 +261,7 @@ public slots:
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
-  void updateVisibility();
+  //void updateVisibility();
 
 signals:
   void ContentChanged();

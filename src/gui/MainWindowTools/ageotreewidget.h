@@ -248,6 +248,8 @@ public:
    QLineEdit *ledX, *ledY, *ledZ;
    QLineEdit *ledPhi, *ledTheta, *ledPsi;
 
+   QComboBox *cobTarget;
+
 private:
    const AGeoObject* CurrentObject;
 

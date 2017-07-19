@@ -2411,8 +2411,8 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
     frMainFrame->setPalette( palette );
     frMainFrame->setAutoFillBackground( true );
-    frMainFrame->setMinimumHeight(150);
-    frMainFrame->setMaximumHeight(150);
+    frMainFrame->setMinimumHeight(250);
+    frMainFrame->setMaximumHeight(250);
 
     QVBoxLayout* vl = new QVBoxLayout();
 
@@ -2457,14 +2457,6 @@ AMonitorDelegate::AMonitorDelegate(QString name)
 //    pbInstructions->setMaximumWidth(200);
 //    vl->addWidget(pbInstructions);
 //    vl->setAlignment(pbInstructions, Qt::AlignHCenter);
-
-//    QPushButton* pbAuto = new QPushButton();
-//    //connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
-//    pbAuto->setText("Open generation dialog");
-//    pbAuto->setMinimumWidth(200);
-//    pbAuto->setMaximumWidth(200);
-//    vl->addWidget(pbAuto);
-//    vl->setAlignment(pbAuto, Qt::AlignHCenter);
 
     QWidget* PosOrient = new QWidget();
     PosOrient->setContentsMargins(0,0,0,0);
@@ -2522,6 +2514,17 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     PosOrient->setLayout(gr);
     vl->addWidget(PosOrient);
 
+    QHBoxLayout* msLay = new QHBoxLayout();
+       la = new QLabel("Monitoring target:");
+       la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+       msLay->addWidget(la);
+       cobTarget = new QComboBox();
+       cobTarget->addItem("Optical photons");
+       cobTarget->addItem("Particles");
+       connect(cobTarget, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
+       connect(cobTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVisibility()));
+       msLay->addWidget(cobTarget);
+    vl->addLayout(msLay);
 
 
     frMainFrame->setLayout(vl);

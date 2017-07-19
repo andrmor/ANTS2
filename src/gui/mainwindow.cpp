@@ -4152,6 +4152,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
     pss->setup(json);
+    pss->initSimStat();
     pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
     return pss;
 }

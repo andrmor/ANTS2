@@ -11,6 +11,7 @@
 class TH1I;
 class TH1D;
 class AMonitor;
+class AGeoObject;
 
 class ASimulationStatistics
 {
@@ -18,7 +19,7 @@ public:
     ASimulationStatistics(const TString nameID = "");
     ~ASimulationStatistics();
 
-    void initialize(int nBins = 0, int waveNodes = 0); //0 - default (100) or previously set value will be used
+    void initialize(QVector<const AGeoObject*> monitorRecords = QVector<const AGeoObject*>(), int nBins = 0, int waveNodes = 0); //0 - default (100) or previously set value will be used
 
     void clearAll();
 
@@ -30,13 +31,13 @@ public:
     void registerNumTrans(int NumTransitions);
 
     //since every thread has its own statistics container:
-    void AppendSimulationStatistics(const ASimulationStatistics *from);
+    void AppendSimulationStatistics(ASimulationStatistics *from);
 
     //read-outs
-    TH1I* getWaveSpectrum() {return WaveSpectrum;}
+    TH1D* getWaveSpectrum() {return WaveSpectrum;}
     TH1D* getTimeSpectrum() {return TimeSpectrum;}
-    TH1I* getCosAngleSpectrum() {return CosAngleSpectrum;}
-    TH1I* getTransitionSpectrum() {return TransitionSpectrum;}
+    TH1D* getCosAngleSpectrum() {return CosAngleSpectrum;}
+    TH1D* getTransitionSpectrum() {return TransitionSpectrum;}
 
     //photon loss statistics
     long Absorbed, OverrideLoss, HitPM, HitDummy, Escaped, LossOnGrid, TracingSkipped, MaxCyclesReached, GeneratedOutsideGeometry;
@@ -58,11 +59,13 @@ public:
     QSet<QString> MustNotInclude_Volumes; //fast
     QVector<QString> MustInclude_Volumes; //v.slow
 
+    QVector<AMonitor*> Monitors;
+
 private:
-    TH1I* WaveSpectrum;
+    TH1D* WaveSpectrum;
     TH1D* TimeSpectrum;
-    TH1I* CosAngleSpectrum;
-    TH1I* TransitionSpectrum;
+    TH1D* CosAngleSpectrum;
+    TH1D* TransitionSpectrum;
 
     int numBins;
     TString NameID;
@@ -70,7 +73,6 @@ private:
     double WaveFrom, WaveTo;
     int WaveNodes;
 
-    QVector<AMonitor*> Monitors;
 
     long countPhotons();
     void clearMonitors();

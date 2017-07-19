@@ -737,7 +737,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
       return;
   }
 
-  TH1I* spec = d->getWaveSpectrum();
+  TH1D* spec = d->getWaveSpectrum();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Wavelength data are empty!\n\n"
@@ -797,7 +797,7 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
       return;
   }
 
-  TH1I* spec = d->getCosAngleSpectrum();
+  TH1D* spec = d->getCosAngleSpectrum();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Angle of incidence data are empty!\n"
@@ -831,7 +831,7 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
       return;
   }
 
-   TH1I* spec = d->getTransitionSpectrum();
+   TH1D* spec = d->getTransitionSpectrum();
 
    if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
      {
@@ -1474,4 +1474,23 @@ void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
     {
         QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
     }
+}
+#include "amonitor.h"
+void OutputWindow::on_pbMonitorShowXY_clicked()
+{
+    int imon = ui->sbMonitorNum->value();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->FrontData.PhotonStat.getXY(), "colz", true, false);
+}
+
+void OutputWindow::on_pbMonitorShowTime_clicked()
+{
+    qDebug() << "Monitors:"<< EventsDataHub->SimStat->Monitors.size();
+    int imon = ui->sbMonitorNum->value();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->FrontData.PhotonStat.getTime(), "", true, false);
 }

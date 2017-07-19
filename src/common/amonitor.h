@@ -3,6 +3,7 @@
 
 class TH1D;
 class TH2D;
+class AGeoObject;
 
 class AMonitorPhotonStat
 {
@@ -16,11 +17,13 @@ public:
                    int xBins, double xFrom, double xTo,
                    int yBins, double yFrom, double yTo);
 
-    void fill(double Time, int waveIndex, double x, double y);
+    void fill(double x, double y, double Time, int waveIndex);
 
     TH1D* getTime() const {return time;}
     TH1D* getWave() const {return wave;}
     TH2D* getXY()   const {return xy;}
+
+    void appendFrom(AMonitorPhotonStat* from);
 
 private:
     TH1D* time;
@@ -35,6 +38,9 @@ public:
     ~AMonitorData();
 
     void clear() {PhotonStat.clear();}
+    void appendFrom(AMonitorData* from);
+
+    bool readFrom(const AGeoObject* MonitorRecord);
 
     AMonitorPhotonStat PhotonStat;
 
@@ -43,9 +49,11 @@ public:
 class AMonitor
 {
 public:
-    AMonitor();
+    AMonitor() {}
+    AMonitor(const AGeoObject* MonitorRecord);
 
     void clearData() {FrontData.clear();}
+    void appendFrom(AMonitor* from);
 
     AMonitorData FrontData;
     //AMonitorData BackData;

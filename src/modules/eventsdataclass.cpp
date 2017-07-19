@@ -123,9 +123,9 @@ void EventsDataClass::clearManifest()
 }
 
 #ifdef SIM
-void EventsDataClass::setDetStatNumBins(int numBins, int waveNodes)
+void EventsDataClass::initializeSimStat(QVector<const AGeoObject*> monitorRecords, int numBins, int waveNodes)
 {
-  SimStat->initialize(numBins, waveNodes);
+  SimStat->initialize(monitorRecords, numBins, waveNodes);
 }
 #endif
 

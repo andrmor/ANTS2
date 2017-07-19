@@ -248,7 +248,8 @@ SOURCES += main.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp \
-    common/amonitor.cpp
+    common/amonitor.cpp \
+    common/aroothistappenders.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -352,7 +353,8 @@ HEADERS  += common/CorrelationFilters.h \
     SplineLibrary/eiquadprog.hpp \
     scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h \
-    common/amonitor.h
+    common/amonitor.h \
+    common/aroothistappenders.h
 
 # --- SIM ---
 ants2_SIM {

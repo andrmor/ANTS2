@@ -253,6 +253,9 @@ public:
 
    QComboBox *cobTarget;
 
+   QString getName() const;
+   void updateObject(AGeoObject* obj);
+
 private:
    const AGeoObject* CurrentObject;
 

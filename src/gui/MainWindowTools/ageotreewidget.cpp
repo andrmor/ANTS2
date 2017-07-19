@@ -1840,28 +1840,16 @@ void AGeoWidget::confirmChangesForMonitorDelegate()
   if (!CurrentObject) return;
   if (!CurrentObject->ObjectType->isMonitor()) return;
 
+
   //verification
-  QString newName = MonitorDelegate->leName->text();
+  QString newName = MonitorDelegate->getName();
   if (newName != CurrentObject->Name && World->isNameExists(newName))
     {
       QMessageBox::warning(this, "", "This name already exists: "+newName);
       return;
     }
 
-  CurrentObject->Name = newName;
-
-  CurrentObject->Position[0] = MonitorDelegate->ledX->text().toDouble();
-  CurrentObject->Position[1] = MonitorDelegate->ledY->text().toDouble();
-  CurrentObject->Position[2] = MonitorDelegate->ledZ->text().toDouble();
-  CurrentObject->Orientation[0] = MonitorDelegate->ledPhi->text().toDouble();
-  CurrentObject->Orientation[1] = MonitorDelegate->ledTheta->text().toDouble();
-  CurrentObject->Orientation[2] = MonitorDelegate->ledPsi->text().toDouble();
-
-  ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(CurrentObject->ObjectType);
-  mon->shape = MonitorDelegate->cobShape->currentIndex();
-  mon->size1 = MonitorDelegate->ledDX->text().toDouble();
-  mon->size2 = MonitorDelegate->ledDY->text().toDouble();
-  CurrentObject->updateMonitorShape();
+  MonitorDelegate->updateObject(CurrentObject);
 
   exitEditingMode();
 
@@ -2534,7 +2522,17 @@ AMonitorDelegate::AMonitorDelegate(QString name)
 //    QDoubleValidator* dv = new QDoubleValidator(this);
 //    dv->setNotation(QDoubleValidator::ScientificNotation);
 //    ledDX->setValidator(dv);
-//    ledDY->setValidator(dv);
+    //    ledDY->setValidator(dv);
+}
+
+QString AMonitorDelegate::getName() const
+{
+    return del->getName();
+}
+
+void AMonitorDelegate::updateObject(AGeoObject *obj)
+{
+    del->updateObject(obj);
 }
 
 //void AMonitorDelegate::updateVisibility()
@@ -2555,12 +2553,14 @@ AMonitorDelegate::AMonitorDelegate(QString name)
 //}
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
-{
-    del->Update(obj);
+{    
+    bool bOK = del->updateGUI(obj);
+    if (!bOK) return;
+
+    CurrentObject = obj;
 }
 
 void AMonitorDelegate::onContentChanged()
 {
-    //updateVisibility();
     emit ContentChanged();
 }

@@ -26,13 +26,13 @@ AMonitorDelegateForm::~AMonitorDelegateForm()
     delete ui;
 }
 
-void AMonitorDelegateForm::Update(const AGeoObject *obj)
+bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
 {
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     if (!mon)
     {
         qWarning() << "Attempt to use non-monitor object to update monitor delegate!";
-        return;
+        return false;
     }
 
     ui->leName->setText(obj->Name);
@@ -50,6 +50,31 @@ void AMonitorDelegateForm::Update(const AGeoObject *obj)
     ui->ledPhi->setText(QString::number(obj->Orientation[0]));
     ui->ledTheta->setText(QString::number(obj->Orientation[1]));
     ui->ledPsi->setText(QString::number(obj->Orientation[2]));
+
+    return true;
+}
+
+QString AMonitorDelegateForm::getName() const
+{
+    return ui->leName->text();
+}
+
+void AMonitorDelegateForm::updateObject(AGeoObject *obj)
+{
+    obj->Name = ui->leName->text();
+
+    obj->Position[0] = ui->ledX->text().toDouble();
+    obj->Position[1] = ui->ledY->text().toDouble();
+    obj->Position[2] = ui->ledZ->text().toDouble();
+    obj->Orientation[0] = ui->ledPhi->text().toDouble();
+    obj->Orientation[1] = ui->ledTheta->text().toDouble();
+    obj->Orientation[2] = ui->ledPsi->text().toDouble();
+
+    ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
+    mon->shape = ui->cobShape->currentIndex();
+    mon->size1 = ui->ledSize1->text().toDouble();
+    mon->size2 = ui->ledSize2->text().toDouble();
+    obj->updateMonitorShape();
 }
 
 void AMonitorDelegateForm::UpdateVisibility()

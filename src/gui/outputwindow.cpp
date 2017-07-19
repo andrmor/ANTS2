@@ -1483,7 +1483,7 @@ void OutputWindow::on_pbMonitorShowXY_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->FrontData.PhotonStat.getXY(), "colz", true, false);
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->PhotonStat.getXY(), "colz", true, false);
 }
 
 void OutputWindow::on_pbMonitorShowTime_clicked()
@@ -1492,5 +1492,5 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->FrontData.PhotonStat.getTime(), "", true, false);
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->PhotonStat.getTime(), "", true, false);
 }

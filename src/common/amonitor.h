@@ -5,58 +5,86 @@ class TH1D;
 class TH2D;
 class AGeoObject;
 
-class AMonitorPhotonStat
+class AMonitorBaseStat
 {
 public:
-    AMonitorPhotonStat() : time(0), wave(0), xy(0) {}
-    ~AMonitorPhotonStat();
+  AMonitorBaseStat() : time(0), xy(0) {}
 
-    void clear();
-    void configure(int timeBins, double timeFrom, double timeTo,
-                   int waveBins, int waveFrom, int waveTo,
-                   int xBins, double xFrom, double xTo,
+  void clear();
+  void configureTime(int timeBins, double timeFrom, double timeTo);
+  void configureXY(int xBins, double xFrom, double xTo,
                    int yBins, double yFrom, double yTo);
+  void setActive(bool flag) {bActive = flag;}
+  void setUpperIsSensitive(bool flag) {bUpper = flag;}
+  void setLowerIsSensitive(bool flag) {bLower = flag;}
 
-    void fill(double x, double y, double Time, int waveIndex);
+  void fill(double x, double y, double Time);
 
-    TH1D* getTime() const {return time;}
-    TH1D* getWave() const {return wave;}
-    TH2D* getXY()   const {return xy;}
+  TH1D* getTime() const {return time;}
+  TH2D* getXY()   const {return xy;}
 
-    void appendFrom(AMonitorPhotonStat* from);
+  void appendFrom(AMonitorBaseStat* from);
 
-private:
-    TH1D* time;
-    TH1D* wave;
-    TH2D* xy;
+protected:
+  TH1D* time;
+  TH2D* xy;
+
+  //runtime selectors
+  bool bActive;
+  bool bUpper; // direction: z>0 is upper, z<0 is lower
+  bool bLower;
 };
 
-class AMonitorData
+class AMonitorPhotonStat : public AMonitorBaseStat
 {
 public:
-    AMonitorData();
-    ~AMonitorData();
+  AMonitorPhotonStat() : wave(0) {}
+  ~AMonitorPhotonStat();
 
-    void clear() {PhotonStat.clear();}
-    void appendFrom(AMonitorData* from);
+  void clear();
+  void configureWave(int waveBins, int waveFrom, int waveTo);
 
-    bool readFrom(const AGeoObject* MonitorRecord);
+  void fill(double x, double y, double Time, int waveIndex);
 
-    AMonitorPhotonStat PhotonStat;
+  TH1D* getWave() const {return wave;}
 
+  void appendFrom(AMonitorPhotonStat* from);
+
+protected:
+  TH1D* wave;
+
+  //runtime selectors
+};
+
+class AMonitorParticleStat : public AMonitorBaseStat
+{
+public:
+
+  void setParticle(int particleIndex) {ParticleIndex = particleIndex;}
+  void setPrimaryEnabled(bool flag) {bPrimary = flag;}
+  void setSecondaryEnabled(bool flag) {bSecondary = flag;}
+
+protected:
+  //runtime selectors
+  int ParticleIndex;
+  bool bPrimary;
+  bool bSecondary;
 };
 
 class AMonitor
 {
 public:
-    AMonitor() {}
-    AMonitor(const AGeoObject* MonitorRecord);
+  AMonitor() {}
+  AMonitor(const AGeoObject* MonitorRecord);
 
-    void clearData() {FrontData.clear();}
-    void appendFrom(AMonitor* from);
+  void clearData();
 
-    AMonitorData FrontData;
-    //AMonitorData BackData;
+  bool readFrom(const AGeoObject* MonitorRecord);
+
+  void appendFrom(AMonitor* from);
+
+  AMonitorPhotonStat   PhotonStat;
+  AMonitorParticleStat ParticleStat;
 };
 
 #endif // AMONITOR_H

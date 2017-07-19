@@ -352,7 +352,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
            navigator->MasterToLocal(global, local);
            //qDebug()<<local[0]<<local[1];
            //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
-           p->SimStat->Monitors[NodeAfterInterface->GetNumber()]->FrontData.PhotonStat.fill(local[0], local[1], p->time, p->waveIndex);
+           p->SimStat->Monitors[NodeAfterInterface->GetNumber()]->PhotonStat.fill(local[0], local[1], p->time, p->waveIndex);
            goto force_stop_tracing; //finished with this photon
          }
        default:

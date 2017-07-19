@@ -15,6 +15,7 @@
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "apmgroupsmanager.h"
+#include "amonitor.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -1475,7 +1476,7 @@ void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
         QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
     }
 }
-#include "amonitor.h"
+
 void OutputWindow::on_pbMonitorShowXY_clicked()
 {
     int imon = ui->sbMonitorNum->value();
@@ -1487,7 +1488,6 @@ void OutputWindow::on_pbMonitorShowXY_clicked()
 
 void OutputWindow::on_pbMonitorShowTime_clicked()
 {
-    qDebug() << "Monitors:"<< EventsDataHub->SimStat->Monitors.size();
     int imon = ui->sbMonitorNum->value();
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 

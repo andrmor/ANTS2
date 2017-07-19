@@ -9,8 +9,6 @@ void appendTH1D(TH1D *toHist, TH1D *fromHist)
 {
     if (!toHist || !fromHist) return;
 
-    qDebug() << toHist->GetEntries() << fromHist->GetEntries();
-
     double numEntries = toHist->GetEntries();
     if (numEntries < 1)
     {
@@ -19,22 +17,18 @@ void appendTH1D(TH1D *toHist, TH1D *fromHist)
     else
     {
         int bins = fromHist->GetNbinsX();
-        qDebug() << "biiiins"<<bins+2;
 
         for (int i = 0; i < bins+2; i++)
             toHist->Fill(fromHist->GetBinCenter(i), fromHist->GetBinContent(i));
 
-        qDebug() << "waaait"<<toHist->GetEntries();
+        toHist->BufferEmpty(1); //otherwise set entries will not have effect for histograms with small number of entries (i.e. when buffer is not full)
         toHist->TH1::SetEntries(numEntries + fromHist->GetEntries());
     }
-     qDebug() << toHist->GetEntries();
 }
 
 void appendTH2D(TH2D *toHist, TH2D *fromHist)
 {
     if (!toHist || !fromHist) return;
-
-    //qDebug() << toHist->GetEntries() << fromHist->GetEntries();
 
     double numEntries = toHist->GetEntries();
     if (numEntries < 1)
@@ -54,7 +48,7 @@ void appendTH2D(TH2D *toHist, TH2D *fromHist)
                 toHist->Fill(x, y, fromHist->GetBinContent(ix, iy));
             }
 
+        toHist->BufferEmpty(1);
         toHist->SetEntries(numEntries + fromHist->GetEntries());
     }
-    //qDebug() << toHist->GetEntries();
 }

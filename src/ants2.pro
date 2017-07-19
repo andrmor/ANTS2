@@ -1,7 +1,7 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
-ANTS2_MINOR = 13
-ANTS2_VERSION = 2197
+ANTS2_MINOR = 14
+ANTS2_VERSION = 2220
 
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!

@@ -102,10 +102,10 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
   modeSetup = jsSimSet["Mode"].toString();
-  qDebug() << "-------------";
-  qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
-  qDebug() << "Simulation mode:" << modeSetup;
-  qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
+  //qDebug() << "-------------";
+  //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
+  //qDebug() << "Simulation mode:" << modeSetup;
+  //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
 
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
@@ -1696,8 +1696,6 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
 
     Runner->setup(json, threads);
 
-    qDebug() << "Before sim start, manager has monitors:"<< EventsDataHub->SimStat->Monitors.size();
-
     simThread.start();
     if (fFromGui) simTimerGuiUpdate.start();
 }
@@ -1735,8 +1733,7 @@ void ASimulationManager::clearTracks()
 
 void ASimulationManager::onSimulationFinished()
 {
-    qDebug() << "after finish, manager has monitors:"<< EventsDataHub->SimStat->Monitors.size();
-
+    //qDebug() << "after finish, manager has monitors:"<< EventsDataHub->SimStat->Monitors.size();
     simTimerGuiUpdate.stop();
     QThread::usleep(5000); // to make sure update cycle is finished
     simThread.quit();

@@ -37,7 +37,6 @@ void ASimulationStatistics::clearAll()
 
 void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords, int nBins, int waveNodes)
 {    
-    qDebug() << "Initialize sim statistics triggered";
     if (nBins != 0) numBins = nBins;
     if (waveNodes != 0) WaveNodes = waveNodes;
 
@@ -72,7 +71,6 @@ void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords
     clearMonitors();
     if (!monitorRecords.isEmpty())
     {
-        qDebug() << "Monitor records not empty!";
         for (int i=0; i<monitorRecords.size(); i++)
             Monitors.append(new AMonitor(monitorRecords.at(i)));
     }
@@ -155,10 +153,10 @@ void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* fr
     OverrideWLSabs += from->OverrideWLSabs;
     OverrideWLSshift += from->OverrideWLSshift;
 
-    qDebug() << "Monitors here and in 'from':" << Monitors.size() << from->Monitors.size();
     if (Monitors.size() != from->Monitors.size())
     {
-        qWarning() << "Cannot append monitor data - size mismatch!";
+        qWarning() << "Cannot append monitor data - size mismatch:\n" <<
+                      "Monitors here and in 'from':" << Monitors.size() << from->Monitors.size();
     }
     else
     {

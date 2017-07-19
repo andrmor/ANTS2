@@ -7318,7 +7318,7 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QCheckBox" name="cbReconstructEnergy">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>50</x>
           <y>4</y>
           <width>135</width>
           <height>17</height>
@@ -7340,9 +7340,9 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QLabel" name="lReconstructEnergy">
         <property name="geometry">
          <rect>
-          <x>160</x>
+          <x>239</x>
           <y>4</y>
-          <width>115</width>
+          <width>130</width>
           <height>16</height>
          </rect>
         </property>
@@ -7353,7 +7353,7 @@ Individual sensors can belong to multiple groups!</string>
          </font>
         </property>
         <property name="text">
-         <string>Initial / fixed energy:</string>
+         <string>Initial energy:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -7362,7 +7362,7 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QLineEdit" name="ledSuggestedEnergy">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>376</x>
           <y>3</y>
           <width>51</width>
           <height>20</height>
@@ -7384,7 +7384,7 @@ Individual sensors can belong to multiple groups!</string>
         </property>
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>50</x>
           <y>27</y>
           <width>132</width>
           <height>17</height>
@@ -7403,7 +7403,7 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QLabel" name="label_8">
         <property name="geometry">
          <rect>
-          <x>334</x>
+          <x>430</x>
           <y>26</y>
           <width>21</width>
           <height>16</height>
@@ -7422,7 +7422,7 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QLineEdit" name="ledSuggestedZ">
         <property name="geometry">
          <rect>
-          <x>280</x>
+          <x>376</x>
           <y>25</y>
           <width>51</width>
           <height>20</height>
@@ -7441,9 +7441,9 @@ Individual sensors can belong to multiple groups!</string>
        <widget class="QComboBox" name="cobZ">
         <property name="geometry">
          <rect>
-          <x>170</x>
+          <x>239</x>
           <y>25</y>
-          <width>106</width>
+          <width>131</width>
           <height>20</height>
          </rect>
         </property>

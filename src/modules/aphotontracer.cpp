@@ -346,14 +346,19 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          }
        case 'M': //monitor
          {
-           qDebug() << "Monitor hit!" << ThisVolume->GetName() << "Number:"<<NodeAfterInterface->GetNumber() << MatIndexFrom<<MatIndexTo;
-           Double_t local[3];
-           const Double_t *global = navigator->GetCurrentPoint();
-           navigator->MasterToLocal(global, local);
-           //qDebug()<<local[0]<<local[1];
-           //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
-           p->SimStat->Monitors[NodeAfterInterface->GetNumber()]->PhotonStat.fill(local[0], local[1], p->time, p->waveIndex);
-           goto force_stop_tracing; //finished with this photon
+           const int iMon = NodeAfterInterface->GetNumber();
+           //qDebug() << "Monitor hit!" << ThisVolume->GetName() << "Number:"<<iMon;// << MatIndexFrom<<MatIndexTo;
+           if (p->SimStat->Monitors.at(iMon)->PhotonStat.isActive())
+             {
+               Double_t local[3];
+               const Double_t *global = navigator->GetCurrentPoint();
+               navigator->MasterToLocal(global, local);
+               //qDebug()<<local[0]<<local[1];
+               //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
+               p->SimStat->Monitors[iMon]->PhotonStat.fill(local[0], local[1], p->time, p->waveIndex);
+               goto force_stop_tracing; //finished with this photon
+             }
+           break;
          }
        default:
          {

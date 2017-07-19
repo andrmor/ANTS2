@@ -18,6 +18,10 @@ public:
   void setUpperIsSensitive(bool flag) {bUpper = flag;}
   void setLowerIsSensitive(bool flag) {bLower = flag;}
 
+  inline bool isActive() const {return bActive;}
+  inline bool isUpperSensitive() const {return bUpper;}
+  inline bool isLowerSensitive() const {return bLower;}
+
   void fill(double x, double y, double Time);
 
   TH1D* getTime() const {return time;}

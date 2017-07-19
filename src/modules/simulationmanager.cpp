@@ -1315,7 +1315,8 @@ ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, 
                                                  detector->MpCollection,
                                                  &ParticleStack,
                                                  &EnergyVector,
-                                                 &dataHub->EventHistory);
+                                                 &dataHub->EventHistory,
+                                                 dataHub->SimStat);
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 

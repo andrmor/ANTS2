@@ -30,7 +30,7 @@ bool AMonitor::readFrom(const AGeoObject *MonitorRecord)
   PhotonStat.configureWave(111, 000, 000);
   PhotonStat.configureXY(111, -mon->size1, mon->size1,
                          111, -mon->size2, mon->size2);
-  PhotonStat.setActive(true);
+  PhotonStat.setActive(false);
   PhotonStat.setLowerIsSensitive(true);
   PhotonStat.setUpperIsSensitive(true);
 

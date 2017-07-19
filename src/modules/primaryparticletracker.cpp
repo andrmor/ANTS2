@@ -7,6 +7,8 @@
 #include "aparticleonstack.h"
 #include "ahistoryrecords.h"
 #include "acommonfunctions.h"
+#include "asimulationstatistics.h"
+#include "amonitor.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -17,9 +19,16 @@
 #include "TRandom2.h"
 #include "TGeoTrack.h"
 
-PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* MpCollection, QVector<AParticleOnStack*>* particleStack, QVector<AEnergyDepositionCell*>* energyVector, QVector<EventHistoryStructure*>* eventHistory, QObject *parent) :
+PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
+                                               TRandom2 *RandomGenerator,
+                                               AMaterialParticleCollection* MpCollection,
+                                               QVector<AParticleOnStack*>* particleStack,
+                                               QVector<AEnergyDepositionCell*>* energyVector,
+                                               QVector<EventHistoryStructure*>* eventHistory,
+                                               ASimulationStatistics *simStat,
+                                               QObject *parent) :
   QObject(parent), GeoManager(geoManager), RandGen (RandomGenerator),
-  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory)
+  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat)
 {
   BuildTracks = true;
   RemoveTracksIfNoEnergyDepo = true;
@@ -111,13 +120,31 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           double distanceHistory = 0; //for diagnostics - travelled distance and deposited energy in THIS material
           double energyHistory = 0;
 
-          for (int j=0; j<3; j++) r[j]=navigator->GetCurrentPoint()[j]; //current position
+          const Double_t *global = navigator->GetCurrentPoint();
+          for (int j=0; j<3; j++) r[j] = global[j]; //current position
 
           if (navigator->IsOutside())
             {
               //              qDebug()<<"Escaped from the defined geometry!";
               terminationStatus = EventHistoryStructure::Escaped;//1
               break; //do-break
+            }
+
+          //monitors
+          if (!SimStat->Monitors.isEmpty())
+            {
+              if (navigator->GetCurrentVolume()->GetTitle()[0] == 'M')
+                {
+                  const int iMon = navigator->GetCurrentNode()->GetNumber();
+                  //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
+                  if (SimStat->Monitors.at(iMon)->ParticleStat.isActive())
+                    {
+                      Double_t local[3];
+                      navigator->MasterToLocal(global, local);
+                      //qDebug()<<local[0]<<local[1];
+                      SimStat->Monitors[iMon]->ParticleStat.fill(local[0], local[1], time);
+                    }
+                }
             }
 
           if ( !(*MpCollection)[MatId]->MatParticle[Id].TrackingAllowed )

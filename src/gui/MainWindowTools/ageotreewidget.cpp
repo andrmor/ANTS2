@@ -2381,49 +2381,109 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     lay->setContentsMargins(20, 5, 20, 5);
     lay->setVerticalSpacing(3);
 
-      QLabel *la = new QLabel("Shape:");
-      lay->addWidget(la, 0, 0);
-      lSize1 = new QLabel("dX, mm:");
-      lay->addWidget(lSize1, 1, 0);
-      la = new QLabel("    dZ, mm:");
-      la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      lay->addWidget(la, 0, 2);
-      lSize2 = new QLabel("    dY, mm:");
-      lSize2->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      lay->addWidget(lSize2, 1, 2);
+    QLabel *la = new QLabel("Name:");
+    lay->addWidget(la, 0, 0);
+    leName = new QLineEdit(name, this);
+    connect(leName, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+    lay->addWidget(leName, 0, 1);
 
+    la = new QLabel("    Shape:");
+    la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    lay->addWidget(la, 0, 2);
       cobShape = new QComboBox(this);
       cobShape->addItem("Rectangular");
-      cobShape->addItem("Hexagonal");
+      cobShape->addItem("Round");
       connect(cobShape, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
-      lay->addWidget(cobShape, 0, 1);
+      connect(cobShape, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVisibility()));
+      lay->addWidget(cobShape, 0, 3);
 
-      ledDZ = new QLineEdit(this);
-      connect(ledDZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      lay->addWidget(ledDZ, 0, 3);
+      lSize1 = new QLabel("dX, mm:");
+      lay->addWidget(lSize1, 1, 0);
       ledDX = new QLineEdit(this);
       connect(ledDX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDX, 1, 1);
+
+      lSize2 = new QLabel("    dY, mm:");
+      lSize2->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+      lay->addWidget(lSize2, 1, 2);
       ledDY = new QLineEdit(this);
       connect(ledDY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
       lay->addWidget(ledDY, 1, 3);
-
     vl->addLayout(lay);
-    QPushButton* pbInstructions = new QPushButton();
-    //connect(pbInstructions, SIGNAL(clicked(bool)), this, SLOT(onInstructionsForGridRequested()));
-    pbInstructions->setText("Read me");
-    pbInstructions->setMinimumWidth(200);
-    pbInstructions->setMaximumWidth(200);
-    vl->addWidget(pbInstructions);
-    vl->setAlignment(pbInstructions, Qt::AlignHCenter);
 
-    QPushButton* pbAuto = new QPushButton();
-    //connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
-    pbAuto->setText("Open generation dialog");
-    pbAuto->setMinimumWidth(200);
-    pbAuto->setMaximumWidth(200);
-    vl->addWidget(pbAuto);
-    vl->setAlignment(pbAuto, Qt::AlignHCenter);
+//    QPushButton* pbInstructions = new QPushButton();
+//    //connect(pbInstructions, SIGNAL(clicked(bool)), this, SLOT(onInstructionsForGridRequested()));
+//    pbInstructions->setText("Read me");
+//    pbInstructions->setMinimumWidth(200);
+//    pbInstructions->setMaximumWidth(200);
+//    vl->addWidget(pbInstructions);
+//    vl->setAlignment(pbInstructions, Qt::AlignHCenter);
+
+//    QPushButton* pbAuto = new QPushButton();
+//    //connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
+//    pbAuto->setText("Open generation dialog");
+//    pbAuto->setMinimumWidth(200);
+//    pbAuto->setMaximumWidth(200);
+//    vl->addWidget(pbAuto);
+//    vl->setAlignment(pbAuto, Qt::AlignHCenter);
+
+    QWidget* PosOrient = new QWidget();
+    PosOrient->setContentsMargins(0,0,0,0);
+    PosOrient->setMaximumHeight(80);
+    QGridLayout *gr = new QGridLayout();
+    gr->setContentsMargins(50, 0, 50, 3);
+    gr->setVerticalSpacing(1);
+      ledX = new QLineEdit();
+      ledX->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledX, 0, 1);
+      ledY = new QLineEdit();
+      ledY->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledY, 1, 1);
+      ledZ = new QLineEdit();
+      ledZ->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledZ, 2, 1);
+
+      ledPhi = new QLineEdit();
+      ledPhi->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledPhi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledPhi, 0, 3);
+      ledTheta = new QLineEdit();
+      ledTheta->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledTheta, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledTheta, 1, 3);
+      ledPsi = new QLineEdit();
+      ledPsi->setContextMenuPolicy(Qt::NoContextMenu);
+      connect(ledPsi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
+      gr->addWidget(ledPsi, 2, 3);
+
+      QLabel *l = new QLabel("X:");
+      gr->addWidget(l, 0, 0);
+      l = new QLabel("Y:");
+      gr->addWidget(l, 1, 0);
+      l = new QLabel("Z:");
+      gr->addWidget(l, 2, 0);
+
+      l = new QLabel("mm    Phi:");
+      gr->addWidget(l, 0, 2);
+      l = new QLabel("mm  Theta:");
+      gr->addWidget(l, 1, 2);
+      l = new QLabel("mm    Psi:");
+      gr->addWidget(l, 2, 2);
+
+      l = new QLabel("°");
+      gr->addWidget(l, 0, 4);
+      l = new QLabel("°");
+      gr->addWidget(l, 1, 4);
+      l = new QLabel("°");
+      gr->addWidget(l, 2, 4);
+
+    PosOrient->setLayout(gr);
+    vl->addWidget(PosOrient);
+
+
 
     frMainFrame->setLayout(vl);
     Widget = frMainFrame;
@@ -2433,7 +2493,23 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     dv->setNotation(QDoubleValidator::ScientificNotation);
     ledDX->setValidator(dv);
     ledDY->setValidator(dv);
-    ledDZ->setValidator(dv);
+}
+
+void AMonitorDelegate::updateVisibility()
+{
+  if (cobShape->currentIndex() == 0)
+  {  //rectangular
+     lSize1->setText("dX, mm:");
+     lSize2->setVisible(true);
+     ledDY->setVisible(true);
+  }
+  else
+  {
+      lSize1->setText("dR, mm:");
+      lSize2->setVisible(false);
+      ledDY->setVisible(false);
+  }
+
 }
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
@@ -2447,13 +2523,22 @@ void AMonitorDelegate::Update(const AGeoObject *obj)
 
     CurrentObject = obj;
 
+    leName->setText(obj->Name);
+
     if (mon->shape==0 || mon->shape==1) cobShape->setCurrentIndex(0);
     else cobShape->setCurrentIndex(1);
     //updateVisibility();
 
-    ledDZ->setText( QString::number(mon->dz));
     ledDX->setText( QString::number(mon->size1));
     ledDY->setText( QString::number(mon->size2));
+
+    ledX->setText(QString::number(obj->Position[0]));
+    ledY->setText(QString::number(obj->Position[1]));
+    ledZ->setText(QString::number(obj->Position[2]));
+
+    ledPhi->setText(QString::number(obj->Orientation[0]));
+    ledTheta->setText(QString::number(obj->Orientation[1]));
+    ledPsi->setText(QString::number(obj->Orientation[2]));
 }
 
 void AMonitorDelegate::onContentChanged()

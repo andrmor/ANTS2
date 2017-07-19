@@ -236,23 +236,24 @@ public:
 
    QFrame* Widget;
 
-   QFrame* frMainFrame;
-   QLineEdit *ledDX, *ledDY, *ledDZ;
+   QFrame    *frMainFrame;
+   QLineEdit *leName;
+   QLineEdit *ledDX, *ledDY;
    QComboBox *cobShape;
-   QLabel *lSize1, *lSize2;
+   QLabel    *lSize1, *lSize2;
+
+   QLineEdit *ledX, *ledY, *ledZ;
+   QLineEdit *ledPhi, *ledTheta, *ledPsi;
 
 private:
    const AGeoObject* CurrentObject;
-
-   //void updateVisibility();
 
 public slots:
   void Update(const AGeoObject* obj);
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
-  //void StartDialog();
-  //void onInstructionsForGridRequested();
+  void updateVisibility();
 
 signals:
   void ContentChanged();

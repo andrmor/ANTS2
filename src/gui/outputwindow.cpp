@@ -353,6 +353,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
       case EventHistoryStructure::PairProduction:           s += "pair production"; break;
+      case EventHistoryStructure::StoppedOnMonitor:         s += "stopped on monitor"; break;
       default:                                              s += "UNKNOWN TYPE"; break;
       }
     ui->pteOut->appendHtml(s);

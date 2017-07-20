@@ -41,19 +41,50 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
 
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
-
     ui->ledSize1->setText( QString::number(config.size1));
     ui->ledSize2->setText( QString::number(config.size2));
 
     ui->ledX->setText(QString::number(obj->Position[0]));
     ui->ledY->setText(QString::number(obj->Position[1]));
     ui->ledZ->setText(QString::number(obj->Position[2]));
-
     ui->ledPhi->setText(QString::number(obj->Orientation[0]));
     ui->ledTheta->setText(QString::number(obj->Orientation[1]));
     ui->ledPsi->setText(QString::number(obj->Orientation[2]));
 
+    int sens = 0;
+    if (config.bLower && !config.bUpper) sens = 1;
+    else if (config.bLower && config.bUpper) sens = 2;
+    ui->cobSensitiveDirection->setCurrentIndex(sens);
+
+    ui->cobMonitoring->setCurrentIndex(config.PhotonOrParticle);
+
     ui->cbStopTracking->setChecked(config.bStopTracking);
+
+    if (config.PhotonOrParticle == 1)
+    {
+        ui->cobParticle->setCurrentIndex(config.ParticleIndex);
+        int prsec = 0;
+        if (config.bSecondary && !config.bPrimary) prsec = 1;
+        else if (config.bSecondary && config.bPrimary) prsec = 2;
+        ui->cobPrimarySecondary->setCurrentIndex(prsec);
+    }
+
+    ui->sbXbins->setValue(config.xbins);
+    ui->sbYbins->setValue(config.ybins);
+    ui->sbTimeBins->setValue(config.timeBins);
+    ui->sbAngleBins->setValue(config.angleBins);
+    ui->sbWaveBins->setValue(config.waveBins);
+    ui->sbEnergyBins->setValue(config.energyBins);
+
+    ui->ledTimeFrom->setText( QString::number(config.timeFrom) );
+    ui->ledAngleFrom->setText( QString::number(config.angleFrom) );
+    ui->ledWaveFrom->setText( QString::number(config.waveFrom) );
+    ui->ledEnergyFrom->setText( QString::number(config.energyFrom) );
+
+    ui->ledTimeTo->setText( QString::number(config.timeTo) );
+    ui->ledAngleTo->setText( QString::number(config.angleTo) );
+    ui->ledWaveTo->setText( QString::number(config.waveTo) );
+    ui->ledEnergyTo->setText( QString::number(config.energyTo) );
 
     return true;
 }
@@ -67,6 +98,13 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
 {
     obj->Name = ui->leName->text();
 
+    ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
+    AMonitorConfig& config = mon->config;
+    config.shape = ui->cobShape->currentIndex();
+    config.size1 = ui->ledSize1->text().toDouble();
+    config.size2 = ui->ledSize2->text().toDouble();
+    obj->updateMonitorShape();
+
     obj->Position[0] = ui->ledX->text().toDouble();
     obj->Position[1] = ui->ledY->text().toDouble();
     obj->Position[2] = ui->ledZ->text().toDouble();
@@ -74,12 +112,48 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     obj->Orientation[1] = ui->ledTheta->text().toDouble();
     obj->Orientation[2] = ui->ledPsi->text().toDouble();
 
-    ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
-    AMonitorConfig& config = mon->config;
-    config.shape = ui->cobShape->currentIndex();
-    config.size1 = ui->ledSize1->text().toDouble();
-    config.size2 = ui->ledSize2->text().toDouble();
-    obj->updateMonitorShape();
+    int sens = ui->cobSensitiveDirection->currentIndex();
+    switch (sens)
+    {
+      case 0: config.bUpper = true; config.bLower = false; break;
+      case 1: config.bUpper = false; config.bLower = true; break;
+      case 2: config.bUpper = true; config.bLower = true; break;
+      default: qWarning() << "Bad sensitive directions!";
+    }
+
+    config.PhotonOrParticle = ui->cobMonitoring->currentIndex();
+
+    config.bStopTracking = ui->cbStopTracking->isChecked();
+
+    if (ui->cobMonitoring->currentIndex() == 1)
+    {
+        config.ParticleIndex = ui->cobParticle->currentIndex();
+        int prsec =  ui->cobPrimarySecondary->currentIndex();
+        switch (prsec)
+        {
+        case 0: config.bPrimary = true; config.bSecondary = false; break;
+        case 1: config.bPrimary = false; config.bSecondary = true; break;
+        case 2: config.bPrimary = true; config.bSecondary = true; break;
+        default: qWarning() << "bad primary/secondary selector";
+        }
+    }
+
+    config.xbins = ui->sbXbins->value();
+    config.ybins = ui->sbYbins->value();
+    config.timeBins = ui->sbTimeBins->value();
+    config.angleBins = ui->sbAngleBins->value();
+    config.waveBins = ui->sbWaveBins->value();
+    config.energyBins = ui->sbEnergyBins->value();
+
+    config.timeFrom = ui->ledTimeFrom->text().toDouble();
+    config.angleFrom = ui->ledAngleFrom->text().toDouble();
+    config.waveFrom = ui->ledWaveFrom->text().toDouble();
+    config.energyFrom = ui->ledEnergyFrom->text().toDouble();
+
+    config.timeTo = ui->ledTimeTo->text().toDouble();
+    config.angleTo = ui->ledAngleTo->text().toDouble();
+    config.waveTo = ui->ledWaveTo->text().toDouble();
+    config.energyTo = ui->ledEnergyTo->text().toDouble();
 }
 
 void AMonitorDelegateForm::UpdateVisibility()

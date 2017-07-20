@@ -88,7 +88,7 @@ private:
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident);
 
 public slots:
-  void UpdateGeoTree();
+  void UpdateGeoTree(QString name = "");
   void AddObjScriptSuccess();
   void ReportScriptError(QString ErrorMessage);
   void ShowObject(QString name = "");

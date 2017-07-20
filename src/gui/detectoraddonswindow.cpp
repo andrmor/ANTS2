@@ -244,9 +244,9 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
   Detector->PMdummies.remove(idpm);
 }
 
-void DetectorAddOnsWindow::UpdateGeoTree()
+void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
-    twGeo->UpdateGui();
+    twGeo->UpdateGui(name);
 }
 
 void DetectorAddOnsWindow::on_pbConvertAllToPMs_clicked()

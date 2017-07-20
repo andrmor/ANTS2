@@ -16,6 +16,8 @@
 #include "amessage.h"
 #include "apmgroupsmanager.h"
 #include "amonitor.h"
+#include "asandwich.h"
+#include "ageoobject.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -540,6 +542,44 @@ void OutputWindow::RefreshData()
   if (ui->cbShowPMsignals->isChecked())
     addTextitems(fHaveData, CurrentEvent, MaxSignal, Passives); //add icons with signal text to the scene
   updateSignalScale();
+
+  //Monitors
+  int numMonitors = MW->Detector->Sandwich->MonitorsRecords.size();
+  ui->frMonitors->setVisible(numMonitors != 0);
+  ui->labNoMonitors->setVisible(numMonitors == 0);
+  if (numMonitors>0)
+  {
+      int oldNum = ui->cobMonitor->currentIndex();
+      ui->cobMonitor->clear();
+      for (int i=0; i<numMonitors; i++)
+      {
+          const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
+          ui->cobMonitor->addItem(obj->Name);
+      }
+      if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
+
+      int imon = ui->cobMonitor->currentIndex();
+      const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
+      const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+      if (mon)
+      {
+          ui->frMonitors->setEnabled(true);
+          int numDet = 0;
+          if (imon < EventsDataHub->SimStat->Monitors.size())
+              if (EventsDataHub->SimStat->Monitors.at(imon)->getXY())
+                  numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
+          ui->leDetections->setText( QString::number(numDet) );
+
+          bool bPhotonMode = mon->config.PhotonOrParticle == 0;
+          ui->pbMonitorShowWave->setVisible(bPhotonMode);
+          ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
+      }
+      else
+      {
+          ui->frMonitors->setEnabled(false);
+          qWarning() << "Something is wrong: this is not a monitor object!";
+      }
+  }
 
   delete Passives;
 }
@@ -1481,7 +1521,7 @@ void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
 
 void OutputWindow::on_pbMonitorShowXY_clicked()
 {
-    int imon = ui->sbMonitorNum->value();
+    int imon = ui->cobMonitor->currentIndex();
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
@@ -1490,9 +1530,17 @@ void OutputWindow::on_pbMonitorShowXY_clicked()
 
 void OutputWindow::on_pbMonitorShowTime_clicked()
 {
-    int imon = ui->sbMonitorNum->value();
+    int imon = ui->cobMonitor->currentIndex();
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
     MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getTime(), "", true, false);
+}
+
+#include "detectoraddonswindow.h"
+void OutputWindow::on_pbShowProperties_clicked()
+{
+    MW->DAwindow->showNormal();
+    //MW->DAwindow->raise();
+    MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
 }

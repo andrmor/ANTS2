@@ -81,6 +81,8 @@ private slots:
 
     void on_pbMonitorShowTime_clicked();
 
+    void on_pbShowProperties_clicked();
+
 protected:
     bool event(QEvent *event);   
 

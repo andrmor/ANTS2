@@ -250,7 +250,8 @@ SOURCES += main.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
     common/aroothistappenders.cpp \
-    gui/MainWindowTools/amonitordelegateform.cpp
+    gui/MainWindowTools/amonitordelegateform.cpp \
+    common/amonitorconfig.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -356,7 +357,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aphotonhistorylog.h \
     common/amonitor.h \
     common/aroothistappenders.h \
-    gui/MainWindowTools/amonitordelegateform.h
+    gui/MainWindowTools/amonitordelegateform.h \
+    common/amonitorconfig.h
 
 # --- SIM ---
 ants2_SIM {

@@ -55,7 +55,7 @@ void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords
     if (TransitionSpectrum) delete TransitionSpectrum;
     TransitionSpectrum = new TH1D("TransitionsSpectrum"+NameID, "Transitions", numBins, 0,-1);
 
-    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = 0;
+    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = KilledByMonitor = 0;
 
     FresnelTransmitted = FresnelReflected = BulkAbsorption = Rayleigh = Reemission = 0;
     OverrideForward = OverrideBack = 0;
@@ -125,6 +125,7 @@ void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* fr
     TracingSkipped += from->TracingSkipped;
     MaxCyclesReached += from->MaxCyclesReached;
     GeneratedOutsideGeometry += from->GeneratedOutsideGeometry;
+    KilledByMonitor += from->KilledByMonitor;
 
     FresnelTransmitted += from->FresnelTransmitted;
     FresnelReflected += from->FresnelReflected;
@@ -161,13 +162,13 @@ void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* fr
     else
     {
         for (int i=0; i<Monitors.size(); i++)
-            Monitors[i]->appendFrom(from->Monitors[i]);
+            Monitors[i]->appendDataFromAnotherMonitor(from->Monitors[i]);
     }
 }
 
 long ASimulationStatistics::countPhotons()
 {
-    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry;
+    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry + KilledByMonitor;
 }
 
 void ASimulationStatistics::clearMonitors()

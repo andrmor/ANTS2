@@ -7,107 +7,107 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
-AMonitor::AMonitor(const AGeoObject *MonitorRecord)
+AMonitor::AMonitor() : time(0), xy(0), wave(0) {}
+
+AMonitor::AMonitor(const AGeoObject *MonitorGeoObject) : time(0), xy(0), wave(0)
 {
-  readFrom(MonitorRecord);
+    readFromGeoObject(MonitorGeoObject);
+}
+
+AMonitor::~AMonitor()
+{
+    clearData();
 }
 
 void AMonitor::clearData()
 {
-  PhotonStat.clear();
-  ParticleStat.clear();
+    delete time; time = 0;
+    delete xy;   xy = 0;
+    delete wave; wave = 0;
 }
 
-bool AMonitor::readFrom(const AGeoObject *MonitorRecord)
+void AMonitor::fillForParticle(double x, double y, double Time)
 {
-  const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(MonitorRecord->ObjectType);
-  if (!mon)
-    {
-      qWarning() << "This is not a monitor type AGeoObject!";
-      return false;
-    }
-  PhotonStat.configureTime(111, 000, 000);
-  PhotonStat.configureWave(111, 000, 000);
-  PhotonStat.configureXY(111, -mon->size1, mon->size1,
-                         111, -mon->size2, mon->size2);
-  PhotonStat.setActive(false);
-  PhotonStat.setLowerIsSensitive(true);
-  PhotonStat.setUpperIsSensitive(true);
-
-  ParticleStat.configureTime(111, 000, 000);
-  ParticleStat.configureXY(111, -mon->size1, mon->size1,
-                           111, -mon->size2, mon->size2);
-  ParticleStat.setActive(true);
-  ParticleStat.setLowerIsSensitive(true);
-  ParticleStat.setUpperIsSensitive(true);
-  ParticleStat.setParticle(0);
-  ParticleStat.setPrimaryEnabled(true);
-  ParticleStat.setSecondaryEnabled(true);
-
-  return true;
+    time->Fill(Time);
+    xy->Fill(x,y);
 }
 
-void AMonitor::appendFrom(AMonitor *from)
+void AMonitor::fillForPhoton(double x, double y, double Time, int waveIndex)
 {
-  PhotonStat.appendFrom(&from->PhotonStat);
-  ParticleStat.appendFrom(&from->ParticleStat);
+    time->Fill(Time);
+    xy->Fill(x,y);
+    wave->Fill(waveIndex);
 }
 
-AMonitorPhotonStat::~AMonitorPhotonStat()
+bool AMonitor::readFromGeoObject(const AGeoObject *MonitorRecord)
 {
-  clear();
+    const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(MonitorRecord->ObjectType);
+    if (!mon)
+      {
+        qWarning() << "This is not a monitor type AGeoObject!";
+        return false;
+      }
+
+    config = mon->config;
+
+    initXYHist();
+    initTimeHist();
+
+    if (config.PhotonOrParticle == 0) initWaveHist();
+    else ;
+
+    return true;
 }
 
-void AMonitorPhotonStat::clear()
+void AMonitor::appendDataFromAnotherMonitor(AMonitor *from)
 {
-  AMonitorBaseStat::clear();
-  delete wave; wave = 0;
+    appendTH1D(time, from->getTime());
+    appendTH2D(xy, from->getXY());
+    appendTH1D(wave, from->getWave());
 }
 
-void AMonitorPhotonStat::configureWave(int waveBins, int waveFrom, int waveTo)
+void AMonitor::configureTime(int timeBins, double timeFrom, double timeTo)
 {
-  delete wave;
-  wave = new TH1D("", "", waveBins, waveFrom, waveTo);
+    config.timeBins = timeBins;
+    config.timeFrom = timeFrom;
+    config.timeTo = timeTo;
+    initTimeHist();
 }
 
-void AMonitorPhotonStat::fill(double x, double y, double Time, int waveIndex)
+void AMonitor::configureXY(int xBins, int yBins)
 {
-  AMonitorBaseStat::fill(x, y, Time);
-  wave->Fill(waveIndex);
+    config.xbins = xBins;
+    config.ybins = yBins;
+    initXYHist();
 }
 
-void AMonitorPhotonStat::appendFrom(AMonitorPhotonStat *from)
+void AMonitor::configureWave(int waveBins, int waveFrom, int waveTo)
 {
-  AMonitorBaseStat::appendFrom(from);
-  appendTH1D(wave, from->getWave());
+    config.waveBins = waveBins;
+    config.waveFrom = waveFrom;
+    config.waveTo = waveTo;
+    initWaveHist();
 }
 
-void AMonitorBaseStat::clear()
+void AMonitor::initXYHist()
 {
-  delete time; time = 0;
-  delete xy;   xy = 0;
+    delete xy;
+    const double limit2 = ( config.shape == 0 ? config.size2 : config.size1 ); // 0 - rectangular, 1 - round
+    xy = new TH2D("", "", config.xbins, -config.size1, +config.size1, config.ybins, -limit2, limit2);
 }
 
-void AMonitorBaseStat::configureTime(int timeBins, double timeFrom, double timeTo)
+void AMonitor::initTimeHist()
 {
-  delete time;
-  time = new TH1D("", "", timeBins, timeFrom, timeTo);
+    delete time;
+    time = new TH1D("", "", config.timeBins, config.timeFrom, config.timeTo);
 }
 
-void AMonitorBaseStat::configureXY(int xBins, double xFrom, double xTo, int yBins, double yFrom, double yTo)
+void AMonitor::initWaveHist()
 {
-  delete xy;
-  xy = new TH2D("", "", xBins, xFrom, xTo, yBins, yFrom, yTo);
+    delete wave;
+    wave = new TH1D("", "", config.waveBins, config.waveFrom, config.waveTo);
 }
 
-void AMonitorBaseStat::fill(double x, double y, double Time)
-{
-  time->Fill(Time);
-  xy->Fill(x,y);
-}
 
-void AMonitorBaseStat::appendFrom(AMonitorBaseStat *from)
-{
-  appendTH1D(time, from->getTime());
-  appendTH2D(xy, from->getXY());
-}
+
+

@@ -1282,7 +1282,9 @@ void AGeoWidget::UpdateGui()
   else if (CurrentObject->ObjectType->isMonitor())
     {
         addInfoLabel("Monitor");
-        MonitorDelegate = createAndAddMonitorDelegate(CurrentObject);
+        QStringList particles;
+        emit tw->RequestListOfParticles(particles);
+        MonitorDelegate = createAndAddMonitorDelegate(CurrentObject, particles);
     }
   else
   {   // Normal AGeoObject based
@@ -1390,9 +1392,9 @@ AGridElementDelegate *AGeoWidget::createAndAddGridElementDelegate(AGeoObject *ob
     return Del;
 }
 
-AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj)
+AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles)
 {
-    AMonitorDelegate* Del = new AMonitorDelegate(obj->Name);
+    AMonitorDelegate* Del = new AMonitorDelegate(particles);
     Del->Update(obj);
     Del->Widget->setEnabled(!CurrentObject->fLocked);
     ObjectLayout->addWidget(Del->Widget);
@@ -2390,7 +2392,7 @@ void AGridElementDelegate::onInstructionsForGridRequested()
 }
 
 #include "amonitordelegateform.h"
-AMonitorDelegate::AMonitorDelegate(QString name)
+AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
 {
     CurrentObject = 0;
 
@@ -2406,7 +2408,7 @@ AMonitorDelegate::AMonitorDelegate(QString name)
     QVBoxLayout* vl = new QVBoxLayout();
     vl->setContentsMargins(0,0,0,0);
 
-    del = new AMonitorDelegateForm(this);
+    del = new AMonitorDelegateForm(definedParticles, this);
     del->UpdateVisibility();
     connect(del, SIGNAL(contentChanged()), this, SLOT(onContentChanged()));
     vl->addWidget(del);

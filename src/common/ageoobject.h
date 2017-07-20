@@ -1,6 +1,8 @@
 #ifndef AGEOOBJECT_H
 #define AGEOOBJECT_H
 
+#include "amonitorconfig.h"
+
 #include <QString>
 #include <QStringList>
 #include <QJsonObject>
@@ -293,15 +295,12 @@ public:
 class ATypeMonitorObject : public ATypeObject
 {
 public:
-    ATypeMonitorObject() : shape(0), size1(100.0), size2(100.0), dz(0.001)
-      {Type = "Monitor"; Handling = "Standard";}
+    ATypeMonitorObject() {Type = "Monitor"; Handling = "Standard";}
 
     virtual void writeToJson(QJsonObject& json);
     virtual void readFromJson(QJsonObject& json);
 
-    int shape; // 0 - rectangular; 1 - round
-    double size1, size2; //xy sizes or radius
-    double dz;  // constant! - half-thickness
+    AMonitorConfig config;
 
     //runtime
     int index;  //index of monitor to fill and acess statistics

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>399</width>
-    <height>380</height>
+    <width>404</width>
+    <height>391</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -420,7 +420,7 @@ changed</string>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_2">
+      <widget class="QComboBox" name="cobSensitiveDirection">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -451,7 +451,7 @@ changed</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pbShowSensitiveDirection">
        <property name="text">
         <string>Show sensitive direction</string>
        </property>
@@ -520,7 +520,7 @@ changed</string>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="cbStopTracking">
        <property name="text">
         <string>Stops tracking</string>
        </property>
@@ -579,7 +579,7 @@ changed</string>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="cobPrimarySecondary">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -707,7 +707,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="spinBox">
+          <widget class="QSpinBox" name="sbXbins">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -730,7 +730,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="spinBox_2">
+          <widget class="QSpinBox" name="sbYbins">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -767,7 +767,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="spinBox_3">
+          <widget class="QSpinBox" name="sbTimeBins">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -787,7 +787,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_7">
+          <widget class="QLineEdit" name="ledTimeFrom">
            <property name="text">
             <string>0</string>
            </property>
@@ -801,7 +801,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_8">
+          <widget class="QLineEdit" name="ledTimeTo">
            <property name="text">
             <string>0</string>
            </property>
@@ -819,7 +819,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="spinBox_4">
+          <widget class="QSpinBox" name="sbAngleBins">
            <property name="minimum">
             <number>1</number>
            </property>
@@ -839,7 +839,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_9">
+          <widget class="QLineEdit" name="ledAngleFrom">
            <property name="text">
             <string>0</string>
            </property>
@@ -853,7 +853,7 @@ changed</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_10">
+          <widget class="QLineEdit" name="ledAngleTo">
            <property name="text">
             <string>0</string>
            </property>
@@ -1153,7 +1153,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>comboBox_2</sender>
+   <sender>cobSensitiveDirection</sender>
    <signal>activated(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1185,7 +1185,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>checkBox</sender>
+   <sender>cbStopTracking</sender>
    <signal>clicked()</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1217,7 +1217,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>comboBox</sender>
+   <sender>cobPrimarySecondary</sender>
    <signal>activated(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1233,7 +1233,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>spinBox</sender>
+   <sender>sbXbins</sender>
    <signal>valueChanged(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1249,7 +1249,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>spinBox_2</sender>
+   <sender>sbYbins</sender>
    <signal>valueChanged(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1265,7 +1265,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>spinBox_3</sender>
+   <sender>sbTimeBins</sender>
    <signal>valueChanged(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1281,7 +1281,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>spinBox_4</sender>
+   <sender>sbAngleBins</sender>
    <signal>valueChanged(int)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1329,7 +1329,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>lineEdit_7</sender>
+   <sender>ledTimeFrom</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1345,7 +1345,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>lineEdit_9</sender>
+   <sender>ledAngleFrom</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1393,7 +1393,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>lineEdit_8</sender>
+   <sender>ledTimeTo</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>
@@ -1409,7 +1409,7 @@ changed</string>
    </hints>
   </connection>
   <connection>
-   <sender>lineEdit_10</sender>
+   <sender>ledAngleTo</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbContentChanged</receiver>
    <slot>click()</slot>

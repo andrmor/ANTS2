@@ -102,8 +102,10 @@ private:
   void clearParticleCollection();
   void registerNewParticle(); //called after a particle was added to particle collection. It updates terminations om MatParticles
   bool readParticleCollectionFromJson(QJsonObject &json);
-
   void generateMaterialsChangedSignal();
+
+public slots:
+  void OnRequestListOfParticles(QStringList &definedParticles);
 
 signals:
   void MaterialsChanged(const QStringList);

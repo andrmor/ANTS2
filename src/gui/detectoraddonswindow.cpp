@@ -54,6 +54,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
                     "Use Alt + Drag&Drop to change order of item within the same parent.");
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+  connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
   // Object editor
   QVBoxLayout* l = new QVBoxLayout();
   l->setContentsMargins(0,0,0,0);

@@ -490,13 +490,13 @@ void AGeoObject::updateMonitorShape()
 
     ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
     delete Shape;
-    if (mon->shape == 0) //rectangular
+    if (mon->config.shape == 0) //rectangular
     {
-        Shape = new AGeoBox(mon->size1, mon->size2, mon->dz);
+        Shape = new AGeoBox(mon->config.size1, mon->config.size2, mon->config.dz);
     }
     else //round
     {
-        Shape = new AGeoTube(0, mon->size1, mon->dz);
+        Shape = new AGeoTube(0, mon->config.size1, mon->config.dz);
     }
 }
 
@@ -2652,16 +2652,12 @@ void ATypeGridElementObject::readFromJson(QJsonObject &json)
 void ATypeMonitorObject::writeToJson(QJsonObject &json)
 {
     ATypeObject::writeToJson(json);
-    json["size1"] = size1;
-    json["size2"] = size2;
-    json["shape"] = shape;
+    config.writeToJson(json);
 }
 
 void ATypeMonitorObject::readFromJson(QJsonObject &json)
 {
-    parseJson(json, "size1", size1);
-    parseJson(json, "size2", size2);
-    parseJson(json, "shape", shape);
+    config.readFromJson(json);
 }
 
 bool ATypeObject::isUpperLightguide() const

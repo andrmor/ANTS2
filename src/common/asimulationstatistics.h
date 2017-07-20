@@ -40,7 +40,7 @@ public:
     TH1D* getTransitionSpectrum() {return TransitionSpectrum;}
 
     //photon loss statistics
-    long Absorbed, OverrideLoss, HitPM, HitDummy, Escaped, LossOnGrid, TracingSkipped, MaxCyclesReached, GeneratedOutsideGeometry;
+    long Absorbed, OverrideLoss, HitPM, HitDummy, Escaped, LossOnGrid, TracingSkipped, MaxCyclesReached, GeneratedOutsideGeometry, KilledByMonitor;
 
     //statistics for optical processes
     long FresnelTransmitted, FresnelReflected, BulkAbsorption, Rayleigh, Reemission; //general bulk

@@ -4,12 +4,13 @@
 
 #include <QDebug>
 
-AMonitorDelegateForm::AMonitorDelegateForm(QWidget *parent) :
+AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::AMonitorDelegateForm)
 {
     ui->setupUi(this);
 
+    ui->cobParticle->addItems(particles);
     ui->pbContentChanged->setVisible(false);
 
     //installing double validators for edit boxes
@@ -34,14 +35,15 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
         qWarning() << "Attempt to use non-monitor object to update monitor delegate!";
         return false;
     }
+    const AMonitorConfig& config = mon->config;
 
     ui->leName->setText(obj->Name);
 
-    if (mon->shape == 0) ui->cobShape->setCurrentIndex(0);
+    if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
 
-    ui->ledSize1->setText( QString::number(mon->size1));
-    ui->ledSize2->setText( QString::number(mon->size2));
+    ui->ledSize1->setText( QString::number(config.size1));
+    ui->ledSize2->setText( QString::number(config.size2));
 
     ui->ledX->setText(QString::number(obj->Position[0]));
     ui->ledY->setText(QString::number(obj->Position[1]));
@@ -50,6 +52,8 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->ledPhi->setText(QString::number(obj->Orientation[0]));
     ui->ledTheta->setText(QString::number(obj->Orientation[1]));
     ui->ledPsi->setText(QString::number(obj->Orientation[2]));
+
+    ui->cbStopTracking->setChecked(config.bStopTracking);
 
     return true;
 }
@@ -71,9 +75,10 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     obj->Orientation[2] = ui->ledPsi->text().toDouble();
 
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
-    mon->shape = ui->cobShape->currentIndex();
-    mon->size1 = ui->ledSize1->text().toDouble();
-    mon->size2 = ui->ledSize2->text().toDouble();
+    AMonitorConfig& config = mon->config;
+    config.shape = ui->cobShape->currentIndex();
+    config.size1 = ui->ledSize1->text().toDouble();
+    config.size2 = ui->ledSize2->text().toDouble();
     obj->updateMonitorShape();
 }
 

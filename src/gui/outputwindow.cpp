@@ -1210,7 +1210,7 @@ void OutputWindow::ShowPhotonLossLog()
       return;
   }
 
-  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry;
+  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry + d->KilledByMonitor;
   QString s = "\n=====================\n";
   s += "Photon tracing ended:\n";
   s +=        "---------------------\n";
@@ -1223,6 +1223,7 @@ void OutputWindow::ShowPhotonLossLog()
       "Tracing skipped (QE accelerator): "+QString::number(d->TracingSkipped)+"\n"+
       "Max tracing cycles reached: "+QString::number(d->MaxCyclesReached)+"\n"+
       "Generated outside defined geometry: "+QString::number(d->GeneratedOutsideGeometry)+"\n"+
+      "Stopped by a monitor: "+QString::number(d->KilledByMonitor)+"\n"+
       "---------------------\n"+
       "Total: "+QString::number(sum)+"\n"+
       "=====================";
@@ -1483,11 +1484,7 @@ void OutputWindow::on_pbMonitorShowXY_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    if (EventsDataHub->SimStat->Monitors[imon]->PhotonStat.isActive())
-       MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->PhotonStat.getXY(), "colz", true, false);
-    else
-       MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->ParticleStat.getXY(), "colz", true, false);
-
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getXY(), "colz", true, false);
 }
 
 void OutputWindow::on_pbMonitorShowTime_clicked()
@@ -1496,8 +1493,5 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    if (EventsDataHub->SimStat->Monitors[imon]->PhotonStat.isActive())
-        MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->PhotonStat.getTime(), "", true, false);
-    else
-        MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->ParticleStat.getTime(), "", true, false);
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getTime(), "", true, false);
 }

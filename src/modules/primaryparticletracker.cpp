@@ -137,12 +137,12 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                 {
                   const int iMon = navigator->GetCurrentNode()->GetNumber();
                   //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
-                  if (SimStat->Monitors.at(iMon)->ParticleStat.isActive())
+                  if (SimStat->Monitors.at(iMon)->isForParticles())
                     {
                       Double_t local[3];
                       navigator->MasterToLocal(global, local);
                       //qDebug()<<local[0]<<local[1];
-                      SimStat->Monitors[iMon]->ParticleStat.fill(local[0], local[1], time);
+                      SimStat->Monitors[iMon]->fillForParticle(local[0], local[1], time);
                     }
                 }
             }

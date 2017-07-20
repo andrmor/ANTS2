@@ -48,6 +48,7 @@ public slots:
     long GetTracingSkipped() const;
     long GetMaxCyclesReached() const;
     long GetGeneratedOutsideGeometry() const;
+    long GetStoppedByMonitor() const;
     //optical processes
     long GetFresnelTransmitted() const;
     long GetFresnelReflected() const;

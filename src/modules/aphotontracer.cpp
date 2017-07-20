@@ -348,15 +348,20 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          {
            const int iMon = NodeAfterInterface->GetNumber();
            //qDebug() << "Monitor hit!" << ThisVolume->GetName() << "Number:"<<iMon;// << MatIndexFrom<<MatIndexTo;
-           if (p->SimStat->Monitors.at(iMon)->PhotonStat.isActive())
+           if (p->SimStat->Monitors.at(iMon)->isForPhotons())
              {
                Double_t local[3];
                const Double_t *global = navigator->GetCurrentPoint();
                navigator->MasterToLocal(global, local);
                //qDebug()<<local[0]<<local[1];
                //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
-               p->SimStat->Monitors[iMon]->PhotonStat.fill(local[0], local[1], p->time, p->waveIndex);
-               goto force_stop_tracing; //finished with this photon
+               p->SimStat->Monitors[iMon]->fillForPhoton(local[0], local[1], p->time, p->waveIndex);
+               if (p->SimStat->Monitors.at(iMon)->isStopsTracking())
+               {
+                   OneEvent->SimStat->KilledByMonitor++;
+                   if (SimSet->bDoPhotonHistoryLog) PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::KilledByMonitor) );
+                   goto force_stop_tracing; //finished with this photon
+               }
              }
            break;
          }

@@ -215,6 +215,11 @@ long AInterfaceToPhotonScript::GetGeneratedOutsideGeometry() const
     return EventsDataHub->SimStat->GeneratedOutsideGeometry;
 }
 
+long AInterfaceToPhotonScript::GetStoppedByMonitor() const
+{
+    return EventsDataHub->SimStat->KilledByMonitor;
+}
+
 long AInterfaceToPhotonScript::GetFresnelTransmitted() const
 {
     return EventsDataHub->SimStat->FresnelTransmitted;

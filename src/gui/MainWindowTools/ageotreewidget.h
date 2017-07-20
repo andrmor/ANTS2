@@ -73,12 +73,14 @@ private:
   void menuActionAddNewArray(QString ContainerName);
   void menuActionAddNewGrid(QString ContainerName);
   void menuActionAddNewMonitor(QString ContainerName);
+
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestShowObjectRecursive(QString name);
   void RequestNormalDetectorDraw();
+  void RequestListOfParticles(QStringList &definedParticles);
 };
 
 // GeoWidget
@@ -152,7 +154,7 @@ private:
   AGeoObjectDelegate *createAndAddGeoObjectDelegate(AGeoObject *obj);
   ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
-  AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj);
+  AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
 
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
 
@@ -236,7 +238,7 @@ class AMonitorDelegate : public QWidget
   Q_OBJECT
 
 public:
-   AMonitorDelegate(QString name);
+   AMonitorDelegate(QStringList definedParticles);
 
    QFrame* Widget;
 

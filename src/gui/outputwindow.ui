@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -1192,7 +1192,10 @@
         <item>
          <widget class="QLabel" name="labNoMonitors">
           <property name="text">
-           <string>There are no monitors defined in this configuration</string>
+           <string>There are no monitors defined in this configuration
+
+To add a monitor, go to Advanced Detector Settings window, 
+right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1222,7 +1225,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>49</height>
+               <height>32</height>
               </size>
              </property>
             </spacer>
@@ -1432,7 +1435,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>49</height>
+               <height>33</height>
               </size>
              </property>
             </spacer>

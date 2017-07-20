@@ -89,6 +89,7 @@ private:
 
 public slots:
   void UpdateGeoTree(QString name = "");
+  void ShowTab(int tab);
   void AddObjScriptSuccess();
   void ReportScriptError(QString ErrorMessage);
   void ShowObject(QString name = "");

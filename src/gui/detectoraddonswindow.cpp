@@ -249,6 +249,12 @@ void DetectorAddOnsWindow::UpdateGeoTree(QString name)
     twGeo->UpdateGui(name);
 }
 
+void DetectorAddOnsWindow::ShowTab(int tab)
+{
+    if (tab>-1 && tab<ui->tabwidAddOns->count())
+        ui->tabwidAddOns->setCurrentIndex(tab);
+}
+
 void DetectorAddOnsWindow::on_pbConvertAllToPMs_clicked()
 {
    for (int idpm = Detector->PMdummies.size()-1; idpm>-1; idpm--)

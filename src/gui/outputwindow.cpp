@@ -1526,7 +1526,8 @@ void OutputWindow::on_pbMonitorShowXY_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getXY(), "colz", true, false);
+    TH2D* h = new TH2D(*EventsDataHub->SimStat->Monitors[imon]->getXY());
+    MW->GraphWindow->Draw(h, "colz", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowTime_clicked()
@@ -1535,7 +1536,8 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getTime(), "", true, false);
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getTime());
+    MW->GraphWindow->Draw(h, "", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowAngle_clicked()
@@ -1544,7 +1546,8 @@ void OutputWindow::on_pbMonitorShowAngle_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getAngle(), "", true, false);
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getAngle());
+    MW->GraphWindow->Draw(h, "", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowWave_clicked()
@@ -1553,7 +1556,29 @@ void OutputWindow::on_pbMonitorShowWave_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getWave(), "", true, false);
+    if (!MW->EventsDataHub->LastSimSet.fWaveResolved)
+    {
+        TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
+        MW->GraphWindow->Draw(h, "", true, true);
+    }
+    else
+    {
+        TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
+        int nbins = h->GetXaxis()->GetNbins();
+
+        double WaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+        double WaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+
+        TH1D *hnew = new TH1D("", "", nbins, WaveFrom, WaveTo);
+        for (int i=1; i <= nbins; i++)
+        {
+            double y = h->GetBinContent(i);
+            double x = (WaveTo-WaveFrom)*(i-1)/(nbins-1) + WaveFrom;
+            hnew->Fill(x, y);
+        }
+        hnew->SetXTitle("Wavelength, nm");
+        MW->GraphWindow->Draw(hnew, "", true, true);
+    }
 }
 
 void OutputWindow::on_pbMonitorShowEnergy_clicked()
@@ -1562,13 +1587,15 @@ void OutputWindow::on_pbMonitorShowEnergy_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
-    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getEnergy(), "", true, false);
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getEnergy());
+    MW->GraphWindow->Draw(h, "", true, true);
 }
 
 #include "detectoraddonswindow.h"
 void OutputWindow::on_pbShowProperties_clicked()
 {
     MW->DAwindow->showNormal();
+    MW->DAwindow->ShowTab(0);
     //MW->DAwindow->raise();
     MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
 }

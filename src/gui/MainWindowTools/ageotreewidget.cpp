@@ -499,12 +499,12 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* newA  = Action(menu, "Add new object inside");
+  QAction* newA  = Action(menu, "Add object");
   QFont f = newA->font();
   f.setBold(true);
   newA->setFont(f);
-  QAction* newArrayA  = Action(menu, "Add new array inside");
-  QAction* newCompositeA  = Action(menu, "Add new composite object inside");
+  QAction* newArrayA  = Action(menu, "Add array");
+  QAction* newCompositeA  = Action(menu, "Add composite object");
   QAction* newGridA = Action(menu, "Add optical grid");
   QAction* newMonitorA = Action(menu, "Add monitor");
 
@@ -535,8 +535,8 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
 
   menu.addSeparator();
 
-  QAction* addUpperLGA = Action(menu, "Add compound lightguide (top)");
-  QAction* addLoweLGA = Action(menu, "Add compound lightguide (bottom)");
+  QAction* addUpperLGA = Action(menu, "Define compound lightguide (top)");
+  QAction* addLoweLGA = Action(menu, "Define compound lightguide (bottom)");
 
 
   // enable actions according to selection

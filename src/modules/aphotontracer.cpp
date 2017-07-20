@@ -357,7 +357,11 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
                if ( (local[2]>0 && p->SimStat->Monitors.at(iMon)->isUpperSensitive()) || (local[2]<0 && p->SimStat->Monitors.at(iMon)->isLowerSensitive()) )
                {
-                   p->SimStat->Monitors[iMon]->fillForPhoton(local[0], local[1], p->time, p->waveIndex);
+                   //angle?
+                   if (!fHaveNormal) N = navigator->FindNormal(kFALSE);
+                   double cosAngle = 0;
+                   for (int i=0; i<3; i++) cosAngle += N[i] * p->v[i];
+                   p->SimStat->Monitors[iMon]->fillForPhoton(local[0], local[1], p->time, 180.0/3.1415926535*TMath::ACos(cosAngle), p->waveIndex);
                    if (p->SimStat->Monitors.at(iMon)->isStopsTracking())
                    {
                        OneEvent->SimStat->KilledByMonitor++;

@@ -148,10 +148,13 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           //qDebug()<<local[0]<<local[1];
                           if ( (local[2]>0 && SimStat->Monitors.at(iMon)->isUpperSensitive()) || (local[2]<0 && SimStat->Monitors.at(iMon)->isLowerSensitive()) )
                           {
-                              SimStat->Monitors[iMon]->fillForParticle(local[0], local[1], time);
+                              const double* N = navigator->FindNormal(kFALSE);
+                              double cosAngle = 0;
+                              for (int i=0; i<3; i++) cosAngle += N[i] * v[i];  //assuming v never changes!
+                              SimStat->Monitors[iMon]->fillForParticle(local[0], local[1], time, 180.0/3.1415926535*TMath::ACos(cosAngle), energy);
                               if (SimStat->Monitors.at(iMon)->isStopsTracking())
                               {
-                                  terminationStatus = EventHistoryStructure::StoppedOnMonitor;//8
+                                  terminationStatus = EventHistoryStructure::StoppedOnMonitor;//11
                                   break; //do-break
                               }
                           }

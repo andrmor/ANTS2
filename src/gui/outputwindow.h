@@ -83,6 +83,12 @@ private slots:
 
     void on_pbShowProperties_clicked();
 
+    void on_pbMonitorShowAngle_clicked();
+
+    void on_pbMonitorShowWave_clicked();
+
+    void on_pbMonitorShowEnergy_clicked();
+
 protected:
     bool event(QEvent *event);   
 

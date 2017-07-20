@@ -572,6 +572,7 @@ void OutputWindow::RefreshData()
 
           bool bPhotonMode = mon->config.PhotonOrParticle == 0;
           ui->pbMonitorShowWave->setVisible(bPhotonMode);
+          ui->pbMonitorShowTime->setVisible(bPhotonMode);
           ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
       }
       else
@@ -1535,6 +1536,33 @@ void OutputWindow::on_pbMonitorShowTime_clicked()
 
     MW->GraphWindow->ShowAndFocus();
     MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getTime(), "", true, false);
+}
+
+void OutputWindow::on_pbMonitorShowAngle_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getAngle(), "", true, false);
+}
+
+void OutputWindow::on_pbMonitorShowWave_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getWave(), "", true, false);
+}
+
+void OutputWindow::on_pbMonitorShowEnergy_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(EventsDataHub->SimStat->Monitors[imon]->getEnergy(), "", true, false);
 }
 
 #include "detectoraddonswindow.h"

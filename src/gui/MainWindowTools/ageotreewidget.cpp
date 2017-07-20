@@ -311,6 +311,12 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
           QMessageBox::information(this, "", "Cannot move objects to composite logical objects!");
           return;
       }
+      if (objTo->ObjectType->isMonitor())
+      {
+          event->ignore();
+          QMessageBox::information(this, "", "Monitors cannot host objects!");
+          return;
+      }
 
       //check if any of the items are composite members and are in use
       // possible optimisation: make search only once, -> container with AGeoObjects?
@@ -549,21 +555,21 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       const ATypeObject& ObjectType = *obj->ObjectType;
 
 
-      bool fNotGrid = !ObjectType.isGrid();
+      bool fNotGridNotMonitor = !ObjectType.isGrid() && !ObjectType.isMonitor();
 
-      newA->setEnabled(fNotGrid);
+      newA->setEnabled(fNotGridNotMonitor);
       enableDisableA->setEnabled(true);      
       enableDisableA->setText( (obj->isDisabled() ? "Enable object" : "Disable object" ) );
       if (obj->getSlabModel())
           if (obj->getSlabModel()->fCenter) enableDisableA->setEnabled(false);
 
-      newCompositeA->setEnabled(fNotGrid);
-      newArrayA->setEnabled(fNotGrid && !ObjectType.isArray());
-      newMonitorA->setEnabled(fNotGrid && !ObjectType.isArray());
-      newGridA->setEnabled(fNotGrid);
+      newCompositeA->setEnabled(fNotGridNotMonitor);
+      newArrayA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
+      newMonitorA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
+      newGridA->setEnabled(fNotGridNotMonitor);
       copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab());  //supported so far only Single and Slab
-      removeHostedA->setEnabled(fNotGrid);
-      removeThisAndHostedA->setEnabled(fNotGrid);
+      removeHostedA->setEnabled(fNotGridNotMonitor);
+      removeThisAndHostedA->setEnabled(fNotGridNotMonitor);
       removeA->setEnabled(!ObjectType.isWorld());
       lockA->setEnabled(!ObjectType.isHandlingStatic() || ObjectType.isLightguide());
       unlockA->setEnabled(true);

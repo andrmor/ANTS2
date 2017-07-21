@@ -491,13 +491,9 @@ void AGeoObject::updateMonitorShape()
     ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
     delete Shape;
     if (mon->config.shape == 0) //rectangular
-    {
         Shape = new AGeoBox(mon->config.size1, mon->config.size2, mon->config.dz);
-    }
     else //round
-    {
         Shape = new AGeoTube(0, mon->config.size1, mon->config.dz);
-    }
 }
 
 AGeoObject *AGeoObject::findObjectByName(const QString name)

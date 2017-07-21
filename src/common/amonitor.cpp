@@ -116,7 +116,7 @@ void AMonitor::initXYHist()
 {
     delete xy;
     const double limit2 = ( config.shape == 0 ? config.size2 : config.size1 ); // 0 - rectangular, 1 - round
-    xy = new TH2D("", "", config.xbins, -config.size1, +config.size1, config.ybins, -limit2, limit2);
+    xy = new TH2D("", "", config.xbins, -config.size1, config.size1, config.ybins, -limit2, limit2);
     xy->SetXTitle("X, mm");
     xy->SetYTitle("Y, mm");
 }

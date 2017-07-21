@@ -81,6 +81,7 @@ signals:
   void RequestShowObjectRecursive(QString name);
   void RequestNormalDetectorDraw();
   void RequestListOfParticles(QStringList &definedParticles);
+  void RequestShowMonitor(const AGeoObject* mon);
 };
 
 // GeoWidget
@@ -134,6 +135,7 @@ public slots:
   void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update
   void onStartEditing();
   void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
+  void onMonitorRequestsShowSensitiveDirection();
 
 private slots:
   void onConfirmPressed();
@@ -155,9 +157,10 @@ private:
   ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
   AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
-
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
 
+signals:
+  void showMonitor(const AGeoObject* mon);
 };
 
 
@@ -241,19 +244,7 @@ public:
    AMonitorDelegate(QStringList definedParticles);
 
    QFrame* Widget;
-
    AMonitorDelegateForm* del;
-
-   QFrame    *frMainFrame;
-   QLineEdit *leName;
-   QLineEdit *ledDX, *ledDY;
-   QComboBox *cobShape;
-   QLabel    *lSize1, *lSize2;
-
-   QLineEdit *ledX, *ledY, *ledZ;
-   QLineEdit *ledPhi, *ledTheta, *ledPsi;
-
-   QComboBox *cobTarget;
 
    QString getName() const;
    void updateObject(AGeoObject* obj);
@@ -266,10 +257,10 @@ public slots:
 
 private slots:
   void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
-  //void updateVisibility();
 
 signals:
   void ContentChanged();
+  void requestShowSensitiveFaces();
 };
 
 class AShapeHighlighter : public QSyntaxHighlighter

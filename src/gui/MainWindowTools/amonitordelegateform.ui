@@ -203,6 +203,9 @@
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="spacing">
+          <number>5</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
@@ -225,12 +228,18 @@
            <property name="text">
             <string>mm</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="spacing">
+          <number>5</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_8">
            <property name="text">
@@ -253,12 +262,18 @@
            <property name="text">
             <string>mm</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <property name="spacing">
+          <number>5</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
@@ -281,6 +296,9 @@
            <property name="text">
             <string>mm</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
           </widget>
          </item>
         </layout>
@@ -298,6 +316,9 @@ changed</string>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <property name="rightMargin">
         <number>50</number>
        </property>
@@ -305,6 +326,9 @@ changed</string>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
           <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>5</number>
          </property>
          <item>
           <widget class="QLabel" name="label_12">
@@ -433,6 +457,9 @@ changed</string>
          <height>22</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Can discriminate particles/photon entering the monitor from top and bottom faces.</string>
+       </property>
        <item>
         <property name="text">
          <string>From top</string>
@@ -452,6 +479,9 @@ changed</string>
      </item>
      <item>
       <widget class="QPushButton" name="pbShowSensitiveDirection">
+       <property name="toolTip">
+        <string>Show sensitive face(s)</string>
+       </property>
        <property name="text">
         <string>Show sensitive direction</string>
        </property>
@@ -521,6 +551,9 @@ changed</string>
      </item>
      <item>
       <widget class="QCheckBox" name="cbStopTracking">
+       <property name="toolTip">
+        <string>if checked, the photon/particle triggered the monitor is removed from tracking</string>
+       </property>
        <property name="text">
         <string>Stops tracking</string>
        </property>
@@ -670,7 +703,7 @@ changed</string>
        <item>
         <widget class="QLabel" name="labWave">
          <property name="text">
-          <string>Wave</string>
+          <string>Wave ind</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -696,6 +729,9 @@ changed</string>
        </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <property name="spacing">
+          <number>7</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_37">
            <property name="text">
@@ -759,6 +795,9 @@ changed</string>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <property name="spacing">
+          <number>7</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_22">
            <property name="text">
@@ -788,6 +827,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledTimeFrom">
+           <property name="toolTip">
+            <string>in ns</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -802,6 +844,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledTimeTo">
+           <property name="toolTip">
+            <string>in ns</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -811,6 +856,9 @@ changed</string>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <property name="spacing">
+          <number>7</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_28">
            <property name="text">
@@ -840,6 +888,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledAngleFrom">
+           <property name="toolTip">
+            <string>in degrees</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -854,8 +905,11 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledAngleTo">
+           <property name="toolTip">
+            <string>in degrees</string>
+           </property>
            <property name="text">
-            <string>0</string>
+            <string>90</string>
            </property>
           </widget>
          </item>
@@ -863,6 +917,9 @@ changed</string>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>7</number>
+         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -895,6 +952,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledWaveFrom">
+           <property name="toolTip">
+            <string>Wave index from</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -909,6 +969,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledWaveTo">
+           <property name="toolTip">
+            <string>Wave index to</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -918,6 +981,9 @@ changed</string>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_20">
+         <property name="spacing">
+          <number>7</number>
+         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -950,6 +1016,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledEnergyFrom">
+           <property name="toolTip">
+            <string>in keV</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -964,6 +1033,9 @@ changed</string>
          </item>
          <item>
           <widget class="QLineEdit" name="ledEnergyTo">
+           <property name="toolTip">
+            <string>in keV</string>
+           </property>
            <property name="text">
             <string>0</string>
            </property>

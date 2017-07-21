@@ -38,7 +38,6 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     const AMonitorConfig& config = mon->config;
 
     ui->leName->setText(obj->Name);
-
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
     ui->ledSize1->setText( QString::number(config.size1));
@@ -196,4 +195,9 @@ void AMonitorDelegateForm::on_cobMonitoring_currentIndexChanged(int index)
 void AMonitorDelegateForm::on_pbContentChanged_clicked()
 {
     emit contentChanged();
+}
+
+void AMonitorDelegateForm::on_pbShowSensitiveDirection_clicked()
+{
+    emit showSensDirection();
 }

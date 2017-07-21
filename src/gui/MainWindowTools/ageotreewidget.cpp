@@ -6,6 +6,7 @@
 #include "slab.h"
 #include "asandwich.h"
 #include "agridelementdialog.h"
+#include "amonitordelegateform.h"
 
 #include <QDropEvent>
 #include <QDebug>
@@ -70,6 +71,7 @@ AGeoTreeWidget::AGeoTreeWidget(ASandwich *Sandwich) : Sandwich(Sandwich)
   EditWidget = new AGeoWidget(Sandwich->World, this);
   connect(this, SIGNAL(ObjectSelectionChanged(QString)), EditWidget, SLOT(onObjectSelectionChanged(QString)));
   connect(this, SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(onItemClicked()));
+  connect(EditWidget, &AGeoWidget::showMonitor, this, &AGeoTreeWidget::RequestShowMonitor);
 
   QString style;
   style = "QTreeView::branch:has-siblings:!adjoins-item {"
@@ -912,8 +914,6 @@ void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
 
 void AGeoTreeWidget::menuActionAddNewMonitor(QString ContainerName)
 {
-    qDebug() << "Add new monitor requested";
-
     AGeoObject* ContObj = World->findObjectByName(ContainerName);
     if (!ContObj) return;
 
@@ -1406,7 +1406,7 @@ AMonitorDelegate *AGeoWidget::createAndAddMonitorDelegate(AGeoObject *obj, QStri
     ObjectLayout->addWidget(Del->Widget);
     ObjectLayout->addStretch();
     connect(Del, SIGNAL(ContentChanged()), this, SLOT(onStartEditing()));
-    //connect(Del, SIGNAL(RequestReshapeGrid(QString)), tw, SLOT(onGridReshapeRequested(QString)));
+    connect(Del, &AMonitorDelegate::requestShowSensitiveFaces, this, &AGeoWidget::onMonitorRequestsShowSensitiveDirection);
     return Del;
 }
 
@@ -1560,7 +1560,12 @@ void AGeoWidget::OnCustomContextMenuTriggered_forMainObject(QPoint pos)
               emit tw->RequestRebuildDetector();
               tw->SelectObjects(names);
           }
-  } 
+  }
+}
+
+void AGeoWidget::onMonitorRequestsShowSensitiveDirection()
+{
+    emit showMonitor(CurrentObject);
 }
 
 void AGeoWidget::addInfoLabel(QString text)
@@ -2397,12 +2402,11 @@ void AGridElementDelegate::onInstructionsForGridRequested()
     QMessageBox::information(this, "", s);
 }
 
-#include "amonitordelegateform.h"
 AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
 {
     CurrentObject = 0;
 
-    frMainFrame = new QFrame(this);
+    QFrame* frMainFrame = new QFrame(this);
     frMainFrame->setFrameShape(QFrame::Box);
     QPalette palette = frMainFrame->palette();
     palette.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
@@ -2416,121 +2420,12 @@ AMonitorDelegate::AMonitorDelegate(QStringList definedParticles)
 
     del = new AMonitorDelegateForm(definedParticles, this);
     del->UpdateVisibility();
-    connect(del, SIGNAL(contentChanged()), this, SLOT(onContentChanged()));
+    connect(del, &AMonitorDelegateForm::contentChanged, this, &AMonitorDelegate::onContentChanged);
+    connect(del, &AMonitorDelegateForm::showSensDirection, this, &AMonitorDelegate::requestShowSensitiveFaces);
     vl->addWidget(del);
 
-    /*
-    QGridLayout *lay = new QGridLayout();
-    lay->setContentsMargins(20, 5, 20, 5);
-    lay->setVerticalSpacing(3);
-
-    QLabel *la = new QLabel("Name:");
-    lay->addWidget(la, 0, 0);
-    leName = new QLineEdit(name, this);
-    connect(leName, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-    lay->addWidget(leName, 0, 1);
-
-    la = new QLabel("    Shape:");
-    la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    lay->addWidget(la, 0, 2);
-      cobShape = new QComboBox(this);
-      cobShape->addItem("Rectangular");
-      cobShape->addItem("Round");
-      connect(cobShape, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
-      connect(cobShape, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVisibility()));
-      lay->addWidget(cobShape, 0, 3);
-
-      lSize1 = new QLabel("dX, mm:");
-      lay->addWidget(lSize1, 1, 0);
-      ledDX = new QLineEdit(this);
-      connect(ledDX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      lay->addWidget(ledDX, 1, 1);
-
-      lSize2 = new QLabel("    dY, mm:");
-      lSize2->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-      lay->addWidget(lSize2, 1, 2);
-      ledDY = new QLineEdit(this);
-      connect(ledDY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      lay->addWidget(ledDY, 1, 3);
-    vl->addLayout(lay);
-
-    QWidget* PosOrient = new QWidget();
-    PosOrient->setContentsMargins(0,0,0,0);
-    PosOrient->setMaximumHeight(80);
-    QGridLayout *gr = new QGridLayout();
-    gr->setContentsMargins(50, 0, 50, 3);
-    gr->setVerticalSpacing(1);
-      ledX = new QLineEdit();
-      ledX->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledX, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledX, 0, 1);
-      ledY = new QLineEdit();
-      ledY->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledY, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledY, 1, 1);
-      ledZ = new QLineEdit();
-      ledZ->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledZ, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledZ, 2, 1);
-
-      ledPhi = new QLineEdit();
-      ledPhi->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledPhi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledPhi, 0, 3);
-      ledTheta = new QLineEdit();
-      ledTheta->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledTheta, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledTheta, 1, 3);
-      ledPsi = new QLineEdit();
-      ledPsi->setContextMenuPolicy(Qt::NoContextMenu);
-      connect(ledPsi, SIGNAL(textChanged(QString)), this, SLOT(onContentChanged()));
-      gr->addWidget(ledPsi, 2, 3);
-
-      QLabel *l = new QLabel("X:");
-      gr->addWidget(l, 0, 0);
-      l = new QLabel("Y:");
-      gr->addWidget(l, 1, 0);
-      l = new QLabel("Z:");
-      gr->addWidget(l, 2, 0);
-
-      l = new QLabel("mm    Phi:");
-      gr->addWidget(l, 0, 2);
-      l = new QLabel("mm  Theta:");
-      gr->addWidget(l, 1, 2);
-      l = new QLabel("mm    Psi:");
-      gr->addWidget(l, 2, 2);
-
-      l = new QLabel("°");
-      gr->addWidget(l, 0, 4);
-      l = new QLabel("°");
-      gr->addWidget(l, 1, 4);
-      l = new QLabel("°");
-      gr->addWidget(l, 2, 4);
-
-    PosOrient->setLayout(gr);
-    vl->addWidget(PosOrient);
-
-    QHBoxLayout* msLay = new QHBoxLayout();
-       la = new QLabel("Monitoring target:");
-       la->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-       msLay->addWidget(la);
-       cobTarget = new QComboBox();
-       cobTarget->addItem("Optical photons");
-       cobTarget->addItem("Particles");
-       connect(cobTarget, SIGNAL(activated(int)), this, SLOT(onContentChanged()));
-       connect(cobTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(updateVisibility()));
-       msLay->addWidget(cobTarget);
-    vl->addLayout(msLay);
-
-*/
     frMainFrame->setLayout(vl);
     Widget = frMainFrame;
-
-    //installing double validators for edit boxes
-//    QDoubleValidator* dv = new QDoubleValidator(this);
-//    dv->setNotation(QDoubleValidator::ScientificNotation);
-//    ledDX->setValidator(dv);
-    //    ledDY->setValidator(dv);
 }
 
 QString AMonitorDelegate::getName() const
@@ -2542,23 +2437,6 @@ void AMonitorDelegate::updateObject(AGeoObject *obj)
 {
     del->updateObject(obj);
 }
-
-//void AMonitorDelegate::updateVisibility()
-//{
-//    return;
-//  if (cobShape->currentIndex() == 0)
-//  {  //rectangular
-//     lSize1->setText("dX, mm:");
-//     lSize2->setVisible(true);
-//     ledDY->setVisible(true);
-//  }
-//  else
-//  {
-//      lSize1->setText("dR, mm:");
-//      lSize2->setVisible(false);
-//      ledDY->setVisible(false);
-//  }
-//}
 
 void AMonitorDelegate::Update(const AGeoObject *obj)
 {    

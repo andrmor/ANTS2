@@ -19,13 +19,15 @@ AMonitorConfig::AMonitorConfig()
     bSecondary = false;
 
     xbins = ybins = timeBins = angleBins = waveBins = energyBins = 100;
-    timeFrom = timeTo = angleFrom = angleTo = waveFrom = waveTo = energyFrom = energyTo = 0;
+    timeFrom = timeTo = angleFrom = waveFrom = waveTo = energyFrom = energyTo = 0;
+    angleTo = 90.0;
 }
 
 void AMonitorConfig::writeToJson(QJsonObject &json)
 {
    json["shape"] = shape;
    json["size1"] = size1;
+   json["size2"] = size2;
    json["dz"] = dz;
 
    json["PhotonOrParticle"] = PhotonOrParticle;
@@ -61,6 +63,7 @@ void AMonitorConfig::readFromJson(QJsonObject &json)
 {
     parseJson(json, "shape", shape);
     parseJson(json, "size1", size1);
+    parseJson(json, "size2", size2);
     parseJson(json, "dz", dz);
 
     parseJson(json, "PhotonOrParticle", PhotonOrParticle);

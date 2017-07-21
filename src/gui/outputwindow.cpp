@@ -1568,12 +1568,14 @@ void OutputWindow::on_pbMonitorShowWave_clicked()
 
         double WaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
         double WaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+        double WaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
 
         TH1D *hnew = new TH1D("", "", nbins, WaveFrom, WaveTo);
         for (int i=1; i <= nbins; i++)
         {
             double y = h->GetBinContent(i);
-            double x = (WaveTo-WaveFrom)*(i-1)/(nbins-1) + WaveFrom;
+            double index = h->GetXaxis()->GetBinCenter(i);
+            double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
             hnew->Fill(x, y);
         }
         hnew->SetXTitle("Wavelength, nm");

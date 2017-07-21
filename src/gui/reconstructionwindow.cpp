@@ -2107,8 +2107,9 @@ void ReconstructionWindow::onUpdateGainsIndication()
     if (ui->leiPMnumberForGains->text() != "")
       {
         iCurrentPM = ui->leiPMnumberForGains->text().toInt();
-        //if (PMs->at(icurrent).group != igroup) icurrent = -1;
-        if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1;
+             //if (PMs->at(icurrent).group != igroup) icurrent = -1;
+          //if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1; //cannot do it with confgurations with no PMs
+        if (!PMgroups->isPmBelongsToGroup(iCurrentPM, CurrentGroup)) iCurrentPM = -1;
         else ui->ledGain->setText(QString::number(PMgroups->getGain(iCurrentPM, CurrentGroup)));
       }
 

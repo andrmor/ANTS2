@@ -417,7 +417,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double va[3];
                                 double a = sqrt(1.38065e-23*300/m/1.6605e-27);
                                 for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
-                                qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
+                                //qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++) vcm[i] = (2200.0*v[i]+m*va[i])/sumM;
@@ -430,7 +430,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vnew[3]; //neutrn velocity in the lab frame
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
-                                qDebug() << "new neutron velocity:"<<vnewMod;
+                                //qDebug() << "new neutron velocity:"<<vnewMod;
                                 AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, energy, counter);
                                 ParticleStack->append(tmp);
 

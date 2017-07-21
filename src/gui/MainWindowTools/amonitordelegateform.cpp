@@ -40,8 +40,8 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->leName->setText(obj->Name);
     if (config.shape == 0) ui->cobShape->setCurrentIndex(0);
     else ui->cobShape->setCurrentIndex(1);
-    ui->ledSize1->setText( QString::number(config.size1));
-    ui->ledSize2->setText( QString::number(config.size2));
+    ui->ledSize1->setText( QString::number(2.0*config.size1));
+    ui->ledSize2->setText( QString::number(2.0*config.size2));
 
     ui->ledX->setText(QString::number(obj->Position[0]));
     ui->ledY->setText(QString::number(obj->Position[1]));
@@ -100,8 +100,8 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     ATypeMonitorObject* mon = dynamic_cast<ATypeMonitorObject*>(obj->ObjectType);
     AMonitorConfig& config = mon->config;
     config.shape = ui->cobShape->currentIndex();
-    config.size1 = ui->ledSize1->text().toDouble();
-    config.size2 = ui->ledSize2->text().toDouble();
+    config.size1 = 0.5*ui->ledSize1->text().toDouble();
+    config.size2 = 0.5*ui->ledSize2->text().toDouble();
     obj->updateMonitorShape();
 
     obj->Position[0] = ui->ledX->text().toDouble();

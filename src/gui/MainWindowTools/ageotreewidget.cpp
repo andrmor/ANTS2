@@ -569,7 +569,7 @@ void AGeoTreeWidget::customMenuRequested(const QPoint &pos)
       newArrayA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
       newMonitorA->setEnabled(fNotGridNotMonitor && !ObjectType.isArray());
       newGridA->setEnabled(fNotGridNotMonitor);
-      copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab());  //supported so far only Single and Slab
+      copyA->setEnabled( ObjectType.isSingle() || ObjectType.isSlab() || ObjectType.isMonitor());  //supported so far only Single, Slab and Monitor
       removeHostedA->setEnabled(fNotGridNotMonitor);
       removeThisAndHostedA->setEnabled(fNotGridNotMonitor);
       removeA->setEnabled(!ObjectType.isWorld());
@@ -820,7 +820,7 @@ void AGeoTreeWidget::menuActionCopyObject(QString ObjToCopyName)
   AGeoObject* ObjToCopy = World->findObjectByName(ObjToCopyName);
   if (!ObjToCopy || ObjToCopy->ObjectType->isWorld()) return;
 
-  if ( !(ObjToCopy->ObjectType->isSingle() || ObjToCopy->ObjectType->isSlab()) ) return; //supported so far only Single and Slab
+  if ( !(ObjToCopy->ObjectType->isSingle() || ObjToCopy->ObjectType->isSlab() || ObjToCopy->ObjectType->isMonitor()) ) return; //supported so far only Single and Slab
 
   if (ObjToCopy->ObjectType->isSlab())
   {
@@ -829,8 +829,20 @@ void AGeoTreeWidget::menuActionCopyObject(QString ObjToCopyName)
   }
 
   AGeoObject* newObj = new AGeoObject(ObjToCopy);
-  while (World->isNameExists(newObj->Name))
-    newObj->Name = AGeoObject::GenerateRandomObjectName();
+  if (ObjToCopy->ObjectType->isMonitor())
+  {
+      while (World->isNameExists(newObj->Name))
+        newObj->Name = AGeoObject::GenerateRandomMonitorName();
+      delete newObj->ObjectType;
+      ATypeMonitorObject* mt = new ATypeMonitorObject();
+      mt->config = static_cast<ATypeMonitorObject*>(ObjToCopy->ObjectType)->config;
+      newObj->ObjectType = mt;
+  }
+  else
+  {
+      while (World->isNameExists(newObj->Name))
+        newObj->Name = AGeoObject::GenerateRandomObjectName();
+  }
 
   AGeoObject* container = ObjToCopy->Container;
   if (!container) container = World;

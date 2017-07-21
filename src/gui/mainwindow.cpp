@@ -4163,6 +4163,7 @@ void MainWindow::on_pbTrackStack_clicked()
     MainWindow::ClearData();
     GeneralSimSettings simSettings;
     ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
+    EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
 
     //============ run stack =========
     bool fOK = pss->standaloneTrackStack(&ParticleStack);

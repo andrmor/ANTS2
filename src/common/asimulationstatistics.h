@@ -27,7 +27,7 @@ public:
 
     void registerWave(int iWave);
     void registerTime(double Time);
-    void registerAngle(double CosAngle);
+    void registerAngle(double angle);
     void registerNumTrans(int NumTransitions);
 
     //since every thread has its own statistics container:
@@ -36,7 +36,7 @@ public:
     //read-outs
     TH1D* getWaveSpectrum() {return WaveSpectrum;}
     TH1D* getTimeSpectrum() {return TimeSpectrum;}
-    TH1D* getCosAngleSpectrum() {return CosAngleSpectrum;}
+    TH1D* getAngularDistr() {return AngularDistr;}
     TH1D* getTransitionSpectrum() {return TransitionSpectrum;}
 
     //photon loss statistics
@@ -64,7 +64,7 @@ public:
 private:
     TH1D* WaveSpectrum;
     TH1D* TimeSpectrum;
-    TH1D* CosAngleSpectrum;
+    TH1D* AngularDistr;
     TH1D* TransitionSpectrum;
 
     int numBins;

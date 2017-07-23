@@ -12,7 +12,7 @@ ASimulationStatistics::ASimulationStatistics(const TString nameID)
 {
     WaveSpectrum = 0;
     TimeSpectrum = 0;
-    CosAngleSpectrum = 0;
+    AngularDistr = 0;
     TransitionSpectrum = 0;
     WaveNodes = 0;
     numBins = 100;
@@ -30,7 +30,7 @@ void ASimulationStatistics::clearAll()
 {
     if (WaveSpectrum) delete WaveSpectrum; WaveSpectrum = 0;
     if (TimeSpectrum) delete TimeSpectrum; TimeSpectrum = 0;
-    if (CosAngleSpectrum) delete CosAngleSpectrum; CosAngleSpectrum = 0;
+    if (AngularDistr) delete AngularDistr; AngularDistr = 0;
     if (TransitionSpectrum) delete TransitionSpectrum; TransitionSpectrum = 0;
     clearMonitors();
 }
@@ -49,8 +49,8 @@ void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords
     if (TimeSpectrum) delete TimeSpectrum;
     TimeSpectrum = new TH1D("TimeSpectrum"+NameID, "Time spectrum",numBins,0,-1);
 
-    if (CosAngleSpectrum) delete CosAngleSpectrum;
-    CosAngleSpectrum = new TH1D("CosAngleSpectrum"+NameID, "cosAngle spectrum", numBins, 0,-1);
+    if (AngularDistr) delete AngularDistr;
+    AngularDistr = new TH1D("AngularDistr"+NameID, "cosAngle spectrum", numBins, 0, 90.0);
 
     if (TransitionSpectrum) delete TransitionSpectrum;
     TransitionSpectrum = new TH1D("TransitionsSpectrum"+NameID, "Transitions", numBins, 0,-1);
@@ -91,9 +91,9 @@ void ASimulationStatistics::registerTime(double Time)
     TimeSpectrum->Fill(Time);
 }
 
-void ASimulationStatistics::registerAngle(double CosAngle)
+void ASimulationStatistics::registerAngle(double angle)
 {
-    CosAngleSpectrum->Fill(CosAngle);
+    AngularDistr->Fill(angle);
 }
 
 void ASimulationStatistics::registerNumTrans(int NumTransitions)
@@ -111,7 +111,7 @@ void ASimulationStatistics::registerNumTrans(int NumTransitions)
 
 void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* from)
 {
-    appendTH1D(CosAngleSpectrum, from->getCosAngleSpectrum());
+    appendTH1D(AngularDistr, from->getAngularDistr());
     appendTH1D(TimeSpectrum, from->getTimeSpectrum());
     appendTH1D(WaveSpectrum, from->getWaveSpectrum());
     appendTH1D(TransitionSpectrum, from->getTransitionSpectrum());

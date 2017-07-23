@@ -81,8 +81,6 @@ void OneEventClass::clearHits()
 
 bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
-
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
@@ -99,6 +97,8 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
   if (rnd > DetProbability)  //random number is provided by the tracker - done for the accelerator function
       return false;
 
+  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
+
   PMhitsTotal[ipm]++;
   if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm]++;
 
@@ -107,8 +107,6 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
 
 bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
-  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
-
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
@@ -126,6 +124,8 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
   //    qDebug()<<"composite detection probability: "<<DetProbability;
   if (rnd > DetProbability) //random number is provided by the tracker - done for the accelerator function
       return false;
+
+  if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
 
   //    qDebug()<<"Detected!";
   const int itype = PMs->at(ipm).type;
@@ -418,12 +418,13 @@ void OneEventClass::AddDarkCounts()
 
 void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
 {
-    //if (SimSet->fWaveResolved)
-      SimStat->registerWave(WaveIndex);
-    //if (SimSet->fTimeResolved)
-      SimStat->registerTime(time);
+    SimStat->registerWave(WaveIndex);
+    SimStat->registerTime(time);
     if (SimSet->fAngResolved)
-      SimStat->registerAngle(cosAngle);
+    {
+      double angle = TMath::ACos(cosAngle)*180.0/3.1415926535;
+      SimStat->registerAngle(angle);
+    }
     SimStat->registerNumTrans(Transitions);
 }
 

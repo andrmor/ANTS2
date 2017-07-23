@@ -794,7 +794,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   //qDebug() << nBins << MW->WaveNodes;
   if (MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-      auto WavelengthSpectrum = new TH1D("","Wavelength spectrum of photons hitting PMs", nBins-1, MW->WaveFrom, MW->WaveTo);
+      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins-1, MW->WaveFrom, MW->WaveTo);
       for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
           WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
       WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
@@ -803,7 +803,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   else
     {
       spec->GetXaxis()->SetTitle("Wave index");
-      spec->SetTitle("Wave index spectrum of photons hitting PMs");
+      spec->SetTitle("Wave index of detected photons");
       MW->GraphWindow->Draw(spec, "", true, false);
     }
 }
@@ -827,7 +827,7 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
     }
 
   spec->GetXaxis()->SetTitle("Time, ns");
-  spec->SetTitle("Time spectrum of photons hitting PMs");
+  spec->SetTitle("Time of photon detection");
   MW->GraphWindow->Draw(spec, "", true, false);
 }
 
@@ -840,7 +840,7 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
       return;
   }
 
-  TH1D* spec = d->getCosAngleSpectrum();
+  TH1D* spec = d->getAngularDistr();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Angle of incidence data are empty!\n"
@@ -850,19 +850,9 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
       return;
     }
 
-  //converting to degrees
-  int nBins = spec->GetNbinsX();
-  auto AngularSpectrum = new TH1D("AngleSpectrumOutput","Angular distribution", 200, -1, -2);
-
-  for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
-    {
-      double iCosAngle = spec->GetBinCenter(i);
-      double Angle = TMath::ACos(iCosAngle)*180./3.1415926535;
-      AngularSpectrum->Fill(Angle, spec->GetBinContent(i));
-//      qDebug()<<i<<iCosAngle<<spec->GetBinContent(i)<<"----"<<Angle;
-    }
-
-  MW->GraphWindow->Draw(AngularSpectrum);
+  spec->GetXaxis()->SetTitle("Angle of incidence, degrees");
+  spec->SetTitle("Incidence angle of detected photons");
+  MW->GraphWindow->Draw(spec, "", true, false);
 }
 
 void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
@@ -884,7 +874,7 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
      }
 
    spec->GetXaxis()->SetTitle("Number of cycles in tracking");
-   spec->SetTitle("Distribution of number of tracking cycles for photons hitting PMs");
+   spec->SetTitle("Number of tracking cycles for detected photons");
    MW->GraphWindow->Draw(spec, "", true, false);
 }
 

@@ -10,4 +10,4 @@ core.print("Sub-script evaluation result: " + b)	//can return all basic types: b
 
 core.print("Local ini: " + ini)	// keeps the changes, since not defined again in the sub-script
 
-core.print("Local ini: " + a)	//does not override local variables!
+core.print("Local a: " + a)	//does not override local variables!

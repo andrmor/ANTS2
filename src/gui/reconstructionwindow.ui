@@ -10377,11 +10377,68 @@ in minimization</string>
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Signal to ph.e. - SiPM peaks</string>
+         </attribute>
+         <widget class="QPushButton" name="pbFillTestData">
+          <property name="geometry">
+           <rect>
+            <x>370</x>
+            <y>10</y>
+            <width>111</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Fill test data</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbPrepareSignalHistograms">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>40</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Prepare signals</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbExtractFromPeaks">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>90</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Extract channels/ph.e.</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbFromPeaksToPreprocessing">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>140</y>
+            <width>161</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Correct preprocessing</string>
+          </property>
+         </widget>
+        </widget>
         <widget class="QWidget" name="tabPhEl">
          <attribute name="title">
-          <string>Signal to PhEl</string>
+          <string>Signal to ph.e. - statistics</string>
          </attribute>
          <widget class="QFrame" name="frame_5">
           <property name="geometry">

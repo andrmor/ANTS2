@@ -70,12 +70,12 @@ void EventsDataClass::clear()
 #endif
   clearScan();
   clearReconstruction();
-  clearManifest();  
+  clearManifest();
   emit requestClearKNNfilter(); //save in any configuration
   squeeze();
   //preprocessing settings clear is triggered when detector is made with different number of PMs than before
 
-  emit requestGuiUpdateForClearData(); //to MainWindow
+  emit cleared();                      //to MainWindow and tmpHub
   emit requestEventsGuiUpdate();       //to ReconWindow
 }
 

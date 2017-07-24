@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+#include "TH1.h"
+
 RootDrawObj::RootDrawObj()
 {
   Obj = 0;
@@ -41,6 +43,18 @@ void TmpObjHubClass::ClearTracks()
     TrackInfo.clear();
 }
 
+void TmpObjHubClass::ClearTmpHists()
+{
+    for (TH1* h : tmpHists) delete h;
+    tmpHists.clear();
+}
+
+void TmpObjHubClass::Clear()
+{
+    ClearTracks();
+    ClearTmpHists();
+}
+
 TmpObjHubClass::TmpObjHubClass()
 {
   PreEnAdd = 0;
@@ -49,5 +63,5 @@ TmpObjHubClass::TmpObjHubClass()
 
 TmpObjHubClass::~TmpObjHubClass()
 {
-  ClearTracks();  
+  Clear();
 }

@@ -14,7 +14,7 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL 
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
+     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread -llibSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
@@ -251,7 +251,8 @@ SOURCES += main.cpp \
     common/amonitor.cpp \
     common/aroothistappenders.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
-    common/amonitorconfig.cpp
+    common/amonitorconfig.cpp \
+    common/apeakfinder.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -358,7 +359,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/amonitor.h \
     common/aroothistappenders.h \
     gui/MainWindowTools/amonitordelegateform.h \
-    common/amonitorconfig.h
+    common/amonitorconfig.h \
+    common/apeakfinder.h
 
 # --- SIM ---
 ants2_SIM {

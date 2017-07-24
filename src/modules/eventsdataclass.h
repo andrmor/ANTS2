@@ -131,7 +131,7 @@ private:
 signals:
     void loaded(int events, int progress);
     void requestClearKNNfilter();
-    void requestGuiUpdateForClearData();
+    void cleared();
     void requestEventsGuiUpdate();
 };
 

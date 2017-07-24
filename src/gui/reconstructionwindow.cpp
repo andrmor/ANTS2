@@ -35,6 +35,7 @@
 #include "alrfwindow.h" //For new LRF module
 #include "arepository.h"
 #include "amaterialparticlecolection.h"
+#include "tmpobjhubclass.h"
 
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
@@ -6429,4 +6430,133 @@ void ReconstructionWindow::on_cbSpF_LimitToObject_toggled(bool /*checked*/)
 void ReconstructionWindow::on_pbUpdateGuiSettingsInJSON_clicked()
 {
     updateGUIsettingsInConfig();
+}
+
+static Int_t npeaks = 10;
+Double_t fpeaks(Double_t *x, Double_t *par)
+{
+   Double_t result = par[0] + par[1]*x[0];
+   for (Int_t p=0;p<npeaks;p++) {
+      Double_t norm  = par[3*p+2];
+      Double_t mean  = par[3*p+3];
+      Double_t sigma = par[3*p+4];
+      result += norm*TMath::Gaus(x[0],mean,sigma);
+   }
+   return result;
+}
+
+void ReconstructionWindow::on_pbFillTestData_clicked()
+{
+    MW->TmpHub->ClearTmpHists();
+
+
+
+    for (int ipm=0; ipm<PMs->count(); ipm++)
+    {
+        TH1D* h = new TH1D("", "", MW->GlobSet->BinsX, 0,1000);
+        MW->TmpHub->tmpHists << h;
+
+        h->SetXTitle("Signal");
+
+        npeaks = 10;
+
+           //generate n peaks at random
+           Double_t par[3000];
+           par[0] = 0.8;
+           par[1] = -0.6/1000;
+           Int_t p;
+           for (p=0;p<npeaks;p++)
+           {
+              par[3*p+2] = 1;
+              par[3*p+3] = 10 + Detector->RandGen->Rndm()*980;
+              par[3*p+4] = 3+2 * Detector->RandGen->Rndm();
+           }
+           TF1 *f = new TF1("f",fpeaks,0,1000, 2+3*npeaks);
+           f->SetNpx(1000);
+           f->SetParameters(par);
+
+           h->FillRandom("f",200000);
+           if (ipm == 0) MW->GraphWindow->Draw(h, "", true, false);
+    }
+}
+
+void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
+{
+    MW->TmpHub->ClearTmpHists();
+
+    for (int ipm=0; ipm<PMs->count(); ipm++)
+    {
+        TH1D* h = new TH1D("", "", MW->GlobSet->BinsX, 0,0);
+        h->SetXTitle("Signal");
+
+      #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+        h->SetBit(TH1::kCanRebin);
+      #endif
+
+      for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
+            h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
+
+      MW->TmpHub->tmpHists << h;
+      if (ipm==0) MW->GraphWindow->Draw(h, "", true, false);
+    }
+}
+
+#include "apeakfinder.h"
+#include "TGraph.h"
+#include "TLine.h"
+void ReconstructionWindow::on_pbExtractFromPeaks_clicked()
+{
+    if (MW->TmpHub->tmpHists.size() != PMs->count())
+    {
+        message("Data not ready!", this);
+        return;
+    }
+
+    ChPerPhEl.clear();
+    for (int ipm=0; ipm<PMs->count(); ipm++)
+    {
+        APeakFinder f(MW->TmpHub->tmpHists.at(ipm));
+        QVector<double> peaks = f.findPeaks(2.0, 0.02, 30, ipm!=0);
+        if (ipm==0) MW->GraphWindow->UpdateRootCanvas();
+
+        std::sort(peaks.begin(), peaks.end());
+        qDebug() << ipm << peaks;
+
+        TGraph g;
+        for (int i=0; i<peaks.size(); i++)
+           g.SetPoint(i, i, peaks.at(i));
+
+        //MW->GraphWindow->ClearRootCanvas();
+        //MW->GraphWindow->Draw(&g, "A*", true, false);
+        //MW->GraphWindow->UpdateRootCanvas();
+
+        double constant, slope;
+        int ifail;
+        g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+        //MW->GraphWindow->UpdateRootCanvas();
+
+        qDebug() << !(bool)ifail << constant << slope;
+
+        ChPerPhEl.append(slope);
+
+//        double x0 = 0;
+//        double y0 = constant + slope*x0;
+//        double x1 = peaks.size();
+//        double y1 = constant + slope*x1;
+
+//        TLine *line = new TLine(x0,y0, x1,y1);
+//        MW->GraphWindow->Draw(line, "same", true, false);
+//        MW->GraphWindow->UpdateRootCanvas();
+    }
+
+}
+
+void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
+{
+    if (ChPerPhEl.size() != PMs->count())
+    {
+        message("Data not yet ready", this);
+        return;
+    }
+    MW->SetMultipliersUsingChPhEl(ChPerPhEl);
 }

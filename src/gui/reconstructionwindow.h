@@ -521,6 +521,14 @@ private slots:
 
   void on_pbRecToTrue_clicked();
 
+  void on_pbFillTestData_clicked();
+
+  void on_pbPrepareSignalHistograms_clicked();
+
+  void on_pbExtractFromPeaks_clicked();
+
+  void on_pbFromPeaksToPreprocessing_clicked();
+
 protected:
     bool event(QEvent *event);
 

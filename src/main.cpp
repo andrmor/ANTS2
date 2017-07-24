@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     DetectorClass Detector(&Config);
     Config.SetDetector(&Detector);
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, &Config, &AConfiguration::UpdateParticlesJson);
-    QObject::connect(&Detector, SIGNAL(requestClearEventsData()), &EventsDataHub, SLOT(clear()));
+    QObject::connect(&Detector, &DetectorClass::requestClearEventsData, &EventsDataHub, &EventsDataClass::clear);
     //qDebug() << "___> Detector created";
 
 #ifdef SIM
@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
     //qDebug() << "___> Reconstruction manager created";
 
     TmpObjHubClass TmpHub;
+    QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
     //qDebug() << "___> Tmp objects hub created";
-
 
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);

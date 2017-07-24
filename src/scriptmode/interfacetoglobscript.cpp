@@ -1675,11 +1675,18 @@ QString InterfaceToLRF::Make()
 
 double InterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
 {
-    qDebug() << ipm<<x<<y<<z;
-    qDebug() << SensLRF->getIteration()->countPMs();
+    //qDebug() << ipm<<x<<y<<z;
+    //qDebug() << SensLRF->getIteration()->countPMs();
     if (!SensLRF->isAllLRFsDefined()) return 0;
-    if (ipm<0 || ipm>SensLRF->getIteration()->countPMs()-1) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
     return SensLRF->getLRF(ipm, x, y, z);
+}
+
+double InterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
+{
+    if (!SensLRF->isAllLRFsDefined()) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
+    return SensLRF->getLRFErr(ipm, x, y, z);
 }
 
 //void InterfaceToLRF::ShowVsXY(int ipm, int PointsX, int PointsY)

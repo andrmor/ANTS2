@@ -145,3 +145,12 @@ void AScriptExampleExplorer::onTagStateChanged(QListWidgetItem* /*item*/)
     if (fBulkUpdate) return;
     UpdateGui();
 }
+
+void AScriptExampleExplorer::on_lwTags_itemDoubleClicked(QListWidgetItem *item)
+{
+    for (int i=0; i<ui->lwTags->count(); i++)
+        if (ui->lwTags->item(i) == item)
+            ui->lwTags->item(i)->setCheckState(Qt::Checked);
+        else
+            ui->lwTags->item(i)->setCheckState(Qt::Unchecked);
+}

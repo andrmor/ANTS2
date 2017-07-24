@@ -39,6 +39,8 @@ private slots:
 
     void onTagStateChanged(QListWidgetItem* item);
 
+    void on_lwTags_itemDoubleClicked(QListWidgetItem *item);
+
 signals:
     void LoadRequested(QString);
 };

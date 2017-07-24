@@ -328,6 +328,7 @@ public:
 public slots:
   QString Make();
   double GetLRF(int ipm, double x, double y, double z);
+  double GetLRFerror(int ipm, double x, double y, double z);
 
   //iterations  
   int CountIterations();

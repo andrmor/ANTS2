@@ -39,13 +39,20 @@ CoreInterfaceClass::CoreInterfaceClass(AScriptManager* ScriptManager) :
   H["isFileExists"] = "Return true if file exists";
   H["loadColumn"] = "Load a column with ascii numeric data from the file.\nSecond argument is the column number starting from 0.";
   H["loadArray"] = "Load an array of numerics (or an array of numeric arrays if columns>1).\nColumns parameter can be from 1 to 3.";
-
+  H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
 }
 
+#include "QScriptEngine"
 void CoreInterfaceClass::abort(QString message)
 {
-  qDebug() << "In-script abort triggered!";
+  //qDebug() << "In-script abort triggered!";
   ScriptManager->AbortEvaluation(message);
+}
+
+QVariant CoreInterfaceClass::evaluate(QString script)
+{
+    QScriptValue val = ScriptManager->engine->evaluate(script);
+    return val.toVariant();
 }
 
 void CoreInterfaceClass::sleep(int ms)

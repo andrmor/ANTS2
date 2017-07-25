@@ -260,6 +260,8 @@ LRF2 *SensorLocalCache::mkLRFxy(int nodesx, int nodesy) const
 {
     LRFxy* lrf = new LRFxy(minx, maxx, nodesx, miny, maxy, nodesy);
     lrf->SetNonNegative(LRFsettings->fForceNonNegative);
+    if (LRFsettings->fForceTopDown)
+        lrf->SetTopDown(true, 0., 0.);
     return fitLRF(lrf);
 }
 

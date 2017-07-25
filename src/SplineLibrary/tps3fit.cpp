@@ -269,7 +269,8 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
         }
 
         if (top_down) { // this option is only compatible with non_negative, trumps everything else
-            int cols = (nbasx-1)*(nbasy-1);
+            int cols = (nbasx-1)*(nbasy-1)*2;
+            int shift = (nbasx-1)*(nbasy-1); // shift to the second group of inequalities
             if (non_negative)
                 cols += 2*(nbasx+nbasy-2);
             CI = MatrixXd::Zero(nbas, cols);
@@ -278,29 +279,34 @@ bool TPS3fit::Fit(int npts, double const *datax, double const *datay, double con
             double xmax = bs->GetXmax();
             double ymin = bs->GetYmin();
             double ymax = bs->GetYmax();
+//            qDebug() << xmin << ", " << xmax << ", " << ymin << ", " << ymax;
             int nintx = bs->GetNintX();
             int ninty = bs->GetNintX();
-            double dx = xmin-xmax/nintx;
-            double dy = ymin-ymax/ninty;
+            double dx = (xmax-xmin)/nintx;
+            double dy = (ymax-ymin)/ninty;
             for (int iy = 0; iy<nbasy-1; iy++)
                 for (int ix = 0; ix<nbasx-1; ix++) {
                     int i = ix + iy*nbasx;
+//                                        int i = ix + iy*(nbasx-1);
                     double x = xmin + dx*(ix-1);
                     double y = ymin + dy*(iy-1);
+//                    qDebug() << x << ", " << y << ", " << r(x, y) << ", " << r(x, y+dy);
+// 1st group of inequalities
                     if (r(x, y) > r(x, y+dy)) {
                         CI(i, i) = -1; CI(i+nbasx, i)=1;
                     } else {
                         CI(i, i) = 1; CI(i+nbasx, i)=-1;
                     }
-
+// 2nd group of inequalities
                     if (r(x, y) > r(x+dx, y)) {
-                        CI(i, i) = -1; CI(i+1, i)=1;
+                        CI(i, i+shift) = -1; CI(i+1, i+shift)=1;
                     } else {
-                        CI(i, i) = 1; CI(i+1, i)=-1;
+                        CI(i, i+shift) = 1; CI(i+1, i+shift)=-1;
                     }
             }
+// 3rd group of inequalities
             if (non_negative) {
-                int k = (nbasx-1)*(nbasy-1);
+                int k = (nbasx-1)*(nbasy-1)*2;
                 for (int iy = 0; iy<nbasy; iy++)
                     for (int ix = 0; ix<nbasx; ix++)
                         if (ix == 0 || ix == nbasx-1 || iy == 0 || iy == nbasy-1)

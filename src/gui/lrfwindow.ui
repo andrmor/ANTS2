@@ -297,22 +297,6 @@
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
-    <widget class="QCheckBox" name="cb_store_error">
-     <property name="geometry">
-      <rect>
-       <x>562</x>
-       <y>170</y>
-       <width>131</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Store and use error</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="QCheckBox" name="cb3D_LRFs">
      <property name="geometry">
       <rect>
@@ -1389,7 +1373,7 @@
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>161</y>
+       <y>188</y>
        <width>121</width>
        <height>16</height>
       </rect>
@@ -1551,19 +1535,6 @@
       </widget>
      </widget>
     </widget>
-    <widget class="Line" name="line_12">
-     <property name="geometry">
-      <rect>
-       <x>560</x>
-       <y>214</y>
-       <width>121</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
     <widget class="Line" name="line_13">
      <property name="geometry">
       <rect>
@@ -1642,7 +1613,7 @@
      <property name="geometry">
       <rect>
        <x>570</x>
-       <y>194</y>
+       <y>200</y>
        <width>110</width>
        <height>23</height>
       </rect>
@@ -1923,7 +1894,7 @@ only events passing all event filters are used to calculate LRFs.</string>
       </rect>
      </property>
      <property name="text">
-      <string>Force LRFs to:</string>
+      <string>Constraints:</string>
      </property>
     </widget>
     <widget class="Line" name="line_15">
@@ -1945,7 +1916,7 @@ only events passing all event filters are used to calculate LRFs.</string>
        <x>560</x>
        <y>99</y>
        <width>150</width>
-       <height>65</height>
+       <height>91</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -2003,7 +1974,7 @@ only events passing all event filters are used to calculate LRFs.</string>
        <rect>
         <x>5</x>
         <y>21</y>
-        <width>125</width>
+        <width>141</width>
         <height>17</height>
        </rect>
       </property>
@@ -2027,6 +1998,22 @@ only events passing all event filters are used to calculate LRFs.</string>
        <string>in Z:</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="cbForceTopDown">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>65</y>
+        <width>131</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>LRF after fit will be non-negative</string>
+      </property>
+      <property name="text">
+       <string>Top-down for XY</string>
+      </property>
+     </widget>
     </widget>
     <zorder>fSingleGroup</zorder>
     <zorder>line_6</zorder>
@@ -2039,7 +2026,6 @@ only events passing all event filters are used to calculate LRFs.</string>
     <zorder>swLRFtype</zorder>
     <zorder>fPMgroups</zorder>
     <zorder>line</zorder>
-    <zorder>cb_store_error</zorder>
     <zorder>cb3D_LRFs</zorder>
     <zorder>cbEnergyScalling</zorder>
     <zorder>cb_data_selector</zorder>
@@ -2074,7 +2060,6 @@ only events passing all event filters are used to calculate LRFs.</string>
     <zorder>label_19</zorder>
     <zorder>cbScaleForEnergy</zorder>
     <zorder>swAdvancedFeatures</zorder>
-    <zorder>line_12</zorder>
     <zorder>line_13</zorder>
     <zorder>cbMakePMGroup</zorder>
     <zorder>line_14</zorder>
@@ -2116,12 +2101,12 @@ only events passing all event filters are used to calculate LRFs.</string>
      <rect>
       <x>565</x>
       <y>31</y>
-      <width>121</width>
+      <width>141</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Bin data using a grid</string>
+     <string>Bin data</string>
     </property>
     <property name="checked">
      <bool>true</bool>
@@ -2271,7 +2256,14 @@ only events passing all event filters are used to calculate LRFs.</string>
     <addaction name="actionPM_groups"/>
     <addaction name="menuPM_group_info"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="cb_store_error"/>
+   </widget>
    <addaction name="menuShow"/>
+   <addaction name="menuOptions"/>
   </widget>
   <action name="actionPM_numbers">
    <property name="text">
@@ -2306,6 +2298,14 @@ only events passing all event filters are used to calculate LRFs.</string>
   <action name="actionLRF_explorer">
    <property name="text">
     <string>LRF explorer</string>
+   </property>
+  </action>
+  <action name="cb_store_error">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Store and use error</string>
    </property>
   </action>
  </widget>
@@ -2436,22 +2436,6 @@ only events passing all event filters are used to calculate LRFs.</string>
     <hint type="destinationlabel">
      <x>167</x>
      <y>352</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cb_store_error</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pbShowErrorVsRadius</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>609</x>
-     <y>211</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>613</x>
-     <y>237</y>
     </hint>
    </hints>
   </connection>
@@ -2692,22 +2676,6 @@ only events passing all event filters are used to calculate LRFs.</string>
     <hint type="destinationlabel">
      <x>588</x>
      <y>33</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cb_store_error</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateLRFmakeJson</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>671</x>
-     <y>211</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>633</x>
-     <y>37</y>
     </hint>
    </hints>
   </connection>

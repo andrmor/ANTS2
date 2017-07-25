@@ -48,6 +48,8 @@ bool ALrfFitSettings::readFromJson(QJsonObject &json)
 
   fForceNonNegative = false;
   parseJson(json, "ForceNonNegative", fForceNonNegative);
+  fForceTopDown = false;
+  parseJson(json, "ForceTopDown", fForceTopDown);
   fForceNonIncreasingInR = false;
   parseJson(json, "ForceNonIncreasingInR", fForceNonIncreasingInR);
   fForceInZ = 0;

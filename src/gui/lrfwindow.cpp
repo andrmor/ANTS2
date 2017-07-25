@@ -439,6 +439,7 @@ void LRFwindow::writeToJson(QJsonObject &json) const
   json["UseGrid"] = ui->cb_use_grid->isChecked();
   json["ForceZeroDeriv"] = ui->cbForceDerivToZeroInOrigin->isChecked();
   json["ForceNonNegative"] = ui->cbForceNonNegative->isChecked();
+  json["ForceTopDown"] = ui->cbForceTopDown->isChecked();
   json["ForceNonIncreasingInR"] = ui->cbForceNonIncreasingInR->isChecked();
   json["ForceInZ"] = ui->cobForceInZ->currentIndex();
   json["StoreError"] = ui->cb_store_error->isChecked();

@@ -33,6 +33,7 @@ public:
     virtual void writeJSON(QJsonObject &json) const;
     virtual QJsonObject reportSettings() const;
     void SetNonNegative(bool val) {non_negative = val;}
+    void SetTopDown(bool val, double x, double y) {top_down = val; x0 = x; y0 = y;}
 
 private:
 // rectangular domain
@@ -43,6 +44,8 @@ private:
     TPspline3 *bse; 	// 2D error spline
     bool logscale;	// spline stores logarithm
     bool non_negative;
+    double x0, y0;      // coordinates of the maximum for top-down
+    bool top_down;
 };
 
 #endif // LRFXY_H

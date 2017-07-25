@@ -21,6 +21,7 @@ LRFxy::LRFxy(double x_min, double x_max, int n_intx, double y_min,
             ymin(y_min), ymax(y_max), nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL), logscale(log)
 {
     non_negative = false;
+    top_down = false;
 }
 
 LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL), logscale(false)
@@ -137,6 +138,9 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
     TPS3fit F(bsr);
     if (non_negative)
         F.SetConstraintNonNegative();
+
+    if (top_down)
+        F.SetConstraintTopDown(x0, y0);
 
     if (!grid) {
         F.Fit(va.size(), &vx[0], &vy[0], &va[0]);

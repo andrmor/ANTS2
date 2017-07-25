@@ -28,8 +28,11 @@ public:
    QList<RootDrawObj> List;
 
    int findIndexOf(QString name); //returns -1 if not found
+   bool remove(QString name);
    void append(TObject* obj, QString name, QString type);
    void clear() {List.clear();}
+   void removeAllHists();
+   void removeAllGraphs();
 };
 
 

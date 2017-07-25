@@ -412,6 +412,9 @@ public slots:
   QVariant FitGauss(QString HistName, QString options="");
   QVariant FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options="");
 
+  bool Delete(QString HistName);
+  void DeleteAllHist();
+
 signals:
   void RequestDraw(TObject* obj, QString options, bool fFocus);
 
@@ -438,6 +441,9 @@ public slots:
 
   void AddPoint(QString GraphName, double x, double y);
   void Draw(QString GraphName, QString options);
+
+  bool Delete(QString GraphName);
+  void DeleteAllGraph();
 
 signals:
   void RequestDraw(TObject* obj, QString options, bool fFocus);

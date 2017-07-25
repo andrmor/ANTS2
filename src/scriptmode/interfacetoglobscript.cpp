@@ -2205,6 +2205,16 @@ void InterfaceToGraphs::Draw(QString GraphName, QString options)
   }
 }
 
+bool InterfaceToGraphs::Delete(QString GraphName)
+{
+    return TmpHub->ScriptDrawObjects.remove(GraphName);
+}
+
+void InterfaceToGraphs::DeleteAllGraph()
+{
+    TmpHub->ScriptDrawObjects.removeAllGraphs();
+}
+
 //----------------------------------
 InterfaceToHistD::InterfaceToHistD(TmpObjHubClass* TmpHub)
   : TmpHub(TmpHub)
@@ -2451,6 +2461,16 @@ QVariant InterfaceToHistD::FitGaussWithInit(QString HistName, QVariant InitialPa
         abort("Object "+HistName+": unsupported histogram type!");
         return ReturnNanArray(6);
     }
+}
+
+bool InterfaceToHistD::Delete(QString HistName)
+{
+    return TmpHub->ScriptDrawObjects.remove(HistName);
+}
+
+void InterfaceToHistD::DeleteAllHist()
+{
+    TmpHub->ScriptDrawObjects.removeAllHists();
 }
 
 void InterfaceToHistD::Draw(QString HistName, QString options)

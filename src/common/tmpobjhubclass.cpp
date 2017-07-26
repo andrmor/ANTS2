@@ -27,12 +27,43 @@ int ScriptDrawCollection::findIndexOf(QString name)
   return -1; //not found
 }
 
+bool ScriptDrawCollection::remove(QString name)
+{
+    for (int i=0; i<List.size(); i++)
+      if (List.at(i).name == name)
+      {
+          List.removeAt(i);
+          return true;
+      }
+    return false; //not found
+}
+
 void ScriptDrawCollection::append(TObject *obj, QString name, QString type)
 {
   List.append(RootDrawObj());
   List.last().Obj = obj;
   List.last().name = name;
   List.last().type = type;
+}
+
+void ScriptDrawCollection::removeAllHists()
+{
+    for (int i=List.size()-1; i>-1; i--)
+    {
+        QString type = List.at(i).type;
+        if (type == "TH1D" || type == "TH2D")
+            List.removeAt(i);
+    }
+}
+
+void ScriptDrawCollection::removeAllGraphs()
+{
+    for (int i=List.size()-1; i>-1; i--)
+    {
+        QString type = List.at(i).type;
+        if (type == "TGraph")
+            List.removeAt(i);
+    }
 }
 
 void TmpObjHubClass::ClearTracks()

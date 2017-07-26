@@ -1675,11 +1675,18 @@ QString InterfaceToLRF::Make()
 
 double InterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
 {
-    qDebug() << ipm<<x<<y<<z;
-    qDebug() << SensLRF->getIteration()->countPMs();
+    //qDebug() << ipm<<x<<y<<z;
+    //qDebug() << SensLRF->getIteration()->countPMs();
     if (!SensLRF->isAllLRFsDefined()) return 0;
-    if (ipm<0 || ipm>SensLRF->getIteration()->countPMs()-1) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
     return SensLRF->getLRF(ipm, x, y, z);
+}
+
+double InterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
+{
+    if (!SensLRF->isAllLRFsDefined()) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
+    return SensLRF->getLRFErr(ipm, x, y, z);
 }
 
 //void InterfaceToLRF::ShowVsXY(int ipm, int PointsX, int PointsY)
@@ -2198,6 +2205,16 @@ void InterfaceToGraphs::Draw(QString GraphName, QString options)
   }
 }
 
+bool InterfaceToGraphs::Delete(QString GraphName)
+{
+    return TmpHub->ScriptDrawObjects.remove(GraphName);
+}
+
+void InterfaceToGraphs::DeleteAllGraph()
+{
+    TmpHub->ScriptDrawObjects.removeAllGraphs();
+}
+
 //----------------------------------
 InterfaceToHistD::InterfaceToHistD(TmpObjHubClass* TmpHub)
   : TmpHub(TmpHub)
@@ -2444,6 +2461,16 @@ QVariant InterfaceToHistD::FitGaussWithInit(QString HistName, QVariant InitialPa
         abort("Object "+HistName+": unsupported histogram type!");
         return ReturnNanArray(6);
     }
+}
+
+bool InterfaceToHistD::Delete(QString HistName)
+{
+    return TmpHub->ScriptDrawObjects.remove(HistName);
+}
+
+void InterfaceToHistD::DeleteAllHist()
+{
+    TmpHub->ScriptDrawObjects.removeAllHists();
 }
 
 void InterfaceToHistD::Draw(QString HistName, QString options)

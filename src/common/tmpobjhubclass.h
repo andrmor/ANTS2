@@ -8,7 +8,7 @@
 
 class TObject;
 class TrackHolderClass;
-class TH1;
+class TH1D;
 
 class RootDrawObj
 {
@@ -50,8 +50,9 @@ public:
   QVector<TrackHolderClass*> TrackInfo;
   void ClearTracks();
 
-  QVector<TH1*> tmpHists;
+  QVector<TH1D*> tmpHists;
   void ClearTmpHists();
+  QVector< QVector<double> > FoundPeaks;
 
 public slots:
   void Clear();

@@ -45,7 +45,7 @@ void TmpObjHubClass::ClearTracks()
 
 void TmpObjHubClass::ClearTmpHists()
 {
-    for (TH1* h : tmpHists) delete h;
+    for (TH1D* h : tmpHists) delete h;
     tmpHists.clear();
 }
 
@@ -53,6 +53,7 @@ void TmpObjHubClass::Clear()
 {
     ClearTracks();
     ClearTmpHists();
+    FoundPeaks.clear();
 }
 
 TmpObjHubClass::TmpObjHubClass()

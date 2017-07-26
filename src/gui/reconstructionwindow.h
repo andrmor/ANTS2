@@ -521,13 +521,15 @@ private slots:
 
   void on_pbRecToTrue_clicked();
 
-  void on_pbFillTestData_clicked();
-
   void on_pbPrepareSignalHistograms_clicked();
 
-  void on_pbExtractFromPeaks_clicked();
-
   void on_pbFromPeaksToPreprocessing_clicked();
+
+  void on_pbFromPeaksShow_clicked();
+
+  void on_pbFrindPeaks_clicked();
+
+  void on_sbFrompeakPM_valueChanged(int arg1);
 
 protected:
     bool event(QEvent *event);

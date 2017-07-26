@@ -6445,53 +6445,21 @@ Double_t fpeaks(Double_t *x, Double_t *par)
    return result;
 }
 
-void ReconstructionWindow::on_pbFillTestData_clicked()
-{
-    MW->TmpHub->ClearTmpHists();
-
-
-
-    for (int ipm=0; ipm<PMs->count(); ipm++)
-    {
-        TH1D* h = new TH1D("", "", MW->GlobSet->BinsX, 0,1000);
-        MW->TmpHub->tmpHists << h;
-
-        h->SetXTitle("Signal");
-
-        npeaks = 10;
-
-           //generate n peaks at random
-           Double_t par[3000];
-           par[0] = 0.8;
-           par[1] = -0.6/1000;
-           Int_t p;
-           for (p=0;p<npeaks;p++)
-           {
-              par[3*p+2] = 1;
-              par[3*p+3] = 10 + Detector->RandGen->Rndm()*980;
-              par[3*p+4] = 3+2 * Detector->RandGen->Rndm();
-           }
-           TF1 *f = new TF1("f",fpeaks,0,1000, 2+3*npeaks);
-           f->SetNpx(1000);
-           f->SetParameters(par);
-
-           h->FillRandom("f",200000);
-           if (ipm == 0) MW->GraphWindow->Draw(h, "", true, false);
-    }
-}
-
 void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 {
+    if (EventsDataHub->isEmpty())
+      {
+        message("There are no signal data!", this);
+        return;
+      }
+
     MW->TmpHub->ClearTmpHists();
+    ChPerPhEl.clear();
 
     for (int ipm=0; ipm<PMs->count(); ipm++)
     {
-        TH1D* h = new TH1D("", "", MW->GlobSet->BinsX, 0,0);
+        TH1D* h = new TH1D("", "", ui->sbFromPeaksBins->value(), ui->ledFromPeaksFrom->text().toDouble(),ui->ledFromPeaksTo->text().toDouble());
         h->SetXTitle("Signal");
-
-      #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-        h->SetBit(TH1::kCanRebin);
-      #endif
 
       for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
             h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
@@ -6504,59 +6472,88 @@ void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 #include "apeakfinder.h"
 #include "TGraph.h"
 #include "TLine.h"
-void ReconstructionWindow::on_pbExtractFromPeaks_clicked()
+
+void ReconstructionWindow::on_pbFrindPeaks_clicked()
 {
-    if (MW->TmpHub->tmpHists.size() != PMs->count())
-    {
-        message("Data not ready!", this);
-        return;
+  if (MW->TmpHub->tmpHists.size() != PMs->count())
+  {
+      message("Signal data not ready!", this);
+      return;
+  }
+
+  MW->TmpHub->FoundPeaks.clear();
+  ChPerPhEl.clear();
+
+  for (int ipm=0; ipm<PMs->count(); ipm++)
+  {
+      APeakFinder f(MW->TmpHub->tmpHists.at(ipm));
+      QVector<double> peaks = f.findPeaks(2.0, 0.02, 30, ipm!=0);
+
+      std::sort(peaks.begin(), peaks.end());
+
+      MW->TmpHub->FoundPeaks << peaks;
+
+      TGraph g;
+      for (int i=0; i<peaks.size(); i++)
+         g.SetPoint(i, i, peaks.at(i));
+
+      double constant, slope;
+      int ifail;
+      g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+      //qDebug() << !(bool)ifail << constant << slope;
+      ChPerPhEl.append(slope);
     }
 
-    ChPerPhEl.clear();
-    for (int ipm=0; ipm<PMs->count(); ipm++)
-    {
-        APeakFinder f(MW->TmpHub->tmpHists.at(ipm));
-        QVector<double> peaks = f.findPeaks(2.0, 0.02, 30, ipm!=0);
-        if (ipm==0) MW->GraphWindow->UpdateRootCanvas();
-
-        std::sort(peaks.begin(), peaks.end());
-        qDebug() << ipm << peaks;
-
-        TGraph g;
-        for (int i=0; i<peaks.size(); i++)
-           g.SetPoint(i, i, peaks.at(i));
-
-        //MW->GraphWindow->ClearRootCanvas();
-        //MW->GraphWindow->Draw(&g, "A*", true, false);
-        //MW->GraphWindow->UpdateRootCanvas();
-
-        double constant, slope;
-        int ifail;
-        g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
-        //MW->GraphWindow->UpdateRootCanvas();
-
-        qDebug() << !(bool)ifail << constant << slope;
-
-        ChPerPhEl.append(slope);
-
-//        double x0 = 0;
-//        double y0 = constant + slope*x0;
-//        double x1 = peaks.size();
-//        double y1 = constant + slope*x1;
-
-//        TLine *line = new TLine(x0,y0, x1,y1);
-//        MW->GraphWindow->Draw(line, "same", true, false);
-//        MW->GraphWindow->UpdateRootCanvas();
-    }
-
+  on_pbFromPeaksShow_clicked();
 }
 
 void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
 {
     if (ChPerPhEl.size() != PMs->count())
     {
-        message("Data not yet ready", this);
+        message("Data not ready", this);
         return;
     }
     MW->SetMultipliersUsingChPhEl(ChPerPhEl);
+}
+
+void ReconstructionWindow::on_pbFromPeaksShow_clicked()
+{
+  int ipm = ui->sbFrompeakPM->value();
+  int numPMs = PMs->count();
+
+  if (MW->TmpHub->tmpHists.size() != numPMs) return;
+  if (ipm >= MW->TmpHub->tmpHists.size()) return;
+  if (!MW->TmpHub->tmpHists.at(ipm)) return;
+
+  TH1D* h = new TH1D( *(MW->TmpHub->tmpHists.at(ipm)) );
+
+  MW->GraphWindow->Draw(h, "", true, true);
+
+  if (MW->TmpHub->FoundPeaks.size() == numPMs)
+    {
+      const QVector<double> &peaks = MW->TmpHub->FoundPeaks.at(ipm);
+      for (int i=0; i<peaks.size(); i++)
+        {
+          TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          l->SetLineColor(kRed);
+          l->SetLineWidth(2);
+          l->SetLineStyle(2);
+          MW->GraphWindow->Draw(l, "same", false, true);
+        }
+      MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(ChPerPhEl.at(ipm)));
+    }
+  MW->GraphWindow->UpdateRootCanvas();
+  MW->GraphWindow->LastDistributionShown = "SignalPeaks";
+}
+
+void ReconstructionWindow::on_sbFrompeakPM_valueChanged(int arg1)
+{
+    if (arg1 >= PMs->count())
+      {
+        if (PMs->count() == 0) return;
+        ui->sbFrompeakPM->setValue(PMs->count()-1);
+        return; //update on_change
+      }
+    if (MW->GraphWindow->LastDistributionShown == "SignalPeaks") on_pbFromPeaksShow_clicked();
 }

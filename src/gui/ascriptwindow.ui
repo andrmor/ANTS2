@@ -163,6 +163,8 @@
     </property>
     <addaction name="actionIncrease_font_size"/>
     <addaction name="actionDecrease_font_size"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_font"/>
    </widget>
    <addaction name="menuFont"/>
   </widget>
@@ -174,6 +176,11 @@
   <action name="actionDecrease_font_size">
    <property name="text">
     <string>Decrease font size</string>
+   </property>
+  </action>
+  <action name="actionSelect_font">
+   <property name="text">
+    <string>Select font</string>
    </property>
   </action>
  </widget>

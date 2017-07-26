@@ -92,6 +92,8 @@ private slots:
     void on_actionIncrease_font_size_triggered();
     void on_actionDecrease_font_size_triggered();
 
+    void on_actionSelect_font_triggered();
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;

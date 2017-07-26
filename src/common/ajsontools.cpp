@@ -77,7 +77,11 @@ void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
 void JsonToSpinBox(QJsonObject &json, QString key, QSpinBox *sb)
 {
   if (json.contains(key))
-    sb->setValue(json[key].toInt());
+    {
+       double val = json[key].toDouble();
+       int ival = std::round(val);
+       sb->setValue(ival);
+    }
 }
 
 void JsonToLineEdit(QJsonObject &json, QString key, QLineEdit *le)

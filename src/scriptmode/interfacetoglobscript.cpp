@@ -500,7 +500,7 @@ bool InterfaceToConfig::Replace(QString Key, QVariant val)
   bool ok = modifyJsonValue(Config->JSON, Key, jv);
   if (ok)
     {
-      qDebug() << "-------Key:"<<Key;
+      //qDebug() << "-------Key:"<<Key;
       if (Key.startsWith("DetectorConfig")) //rebuild detector if detector settings were changed
           Config->GetDetector()->BuildDetector();
       else if (Key.startsWith("ReconstructionConfig.LRFmakeJson"))

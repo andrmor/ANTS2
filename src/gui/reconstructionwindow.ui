@@ -3449,7 +3449,7 @@ Individual sensors can belong to multiple groups!</string>
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -10691,9 +10691,9 @@ in minimization</string>
           <widget class="QPushButton" name="pbAnalyzeChanPerPhEl">
            <property name="geometry">
             <rect>
-             <x>13</x>
-             <y>8</y>
-             <width>361</width>
+             <x>11</x>
+             <y>9</y>
+             <width>370</width>
              <height>23</height>
             </rect>
            </property>
@@ -10707,14 +10707,14 @@ in minimization</string>
             <string>Collects statistics for all PMs (sigma square versus average signal) and stores it in histograms</string>
            </property>
            <property name="text">
-            <string>Prepare data to extract channels per photoelectron</string>
+            <string>1. Prepare data</string>
            </property>
           </widget>
           <widget class="QSpinBox" name="sbChanPerPhElPM">
            <property name="geometry">
             <rect>
              <x>57</x>
-             <y>57</y>
+             <y>77</y>
              <width>51</width>
              <height>22</height>
             </rect>
@@ -10733,7 +10733,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>40</x>
-             <y>86</y>
+             <y>106</y>
              <width>75</width>
              <height>23</height>
             </rect>
@@ -10752,7 +10752,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>65</x>
-             <y>59</y>
+             <y>79</y>
              <width>90</width>
              <height>16</height>
             </rect>
@@ -10768,7 +10768,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>11</x>
-             <y>58</y>
+             <y>78</y>
              <width>41</width>
              <height>20</height>
             </rect>
@@ -10793,8 +10793,8 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>219</x>
-             <y>56</y>
-             <width>151</width>
+             <y>76</y>
+             <width>261</width>
              <height>23</height>
             </rect>
            </property>
@@ -10808,14 +10808,14 @@ in minimization</string>
             <string>After reconstruction/filter_change first do &quot;Prepare data...&quot;!</string>
            </property>
            <property name="text">
-            <string>Extract Ch/PhEl</string>
+            <string>2. Extract Ch/PhEl</string>
            </property>
           </widget>
           <widget class="QLineEdit" name="ledUpperLimitForChanPerPhEl">
            <property name="geometry">
             <rect>
-             <x>259</x>
-             <y>107</y>
+             <x>428</x>
+             <y>103</y>
              <width>51</width>
              <height>20</height>
             </rect>
@@ -10833,10 +10833,10 @@ in minimization</string>
           <widget class="QLabel" name="label_174">
            <property name="geometry">
             <rect>
-             <x>188</x>
-             <y>110</y>
-             <width>64</width>
-             <height>13</height>
+             <x>313</x>
+             <y>103</y>
+             <width>111</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="font">
@@ -10846,7 +10846,7 @@ in minimization</string>
             </font>
            </property>
            <property name="text">
-            <string>Upper limit:</string>
+            <string>Upper signal limit:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -10856,7 +10856,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>129</x>
-             <y>58</y>
+             <y>78</y>
              <width>71</width>
              <height>20</height>
             </rect>
@@ -10868,27 +10868,11 @@ in minimization</string>
             </font>
            </property>
           </widget>
-          <widget class="Line" name="line_86">
-           <property name="geometry">
-            <rect>
-             <x>282</x>
-             <y>62</y>
-             <width>2</width>
-             <height>80</height>
-            </rect>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
           <widget class="Line" name="line_87">
            <property name="geometry">
             <rect>
              <x>76</x>
-             <y>66</y>
+             <y>86</y>
              <width>3</width>
              <height>30</height>
             </rect>
@@ -10904,7 +10888,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>121</x>
-             <y>40</y>
+             <y>60</y>
              <width>111</width>
              <height>16</height>
             </rect>
@@ -10923,8 +10907,8 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>246</x>
-             <y>37</y>
-             <width>87</width>
+             <y>57</y>
+             <width>141</width>
              <height>17</height>
             </rect>
            </property>
@@ -10935,14 +10919,14 @@ in minimization</string>
             </font>
            </property>
            <property name="text">
-            <string>For all PMs</string>
+            <string>Perform for all PMs</string>
            </property>
           </widget>
           <widget class="Line" name="line_88">
            <property name="geometry">
             <rect>
              <x>251</x>
-             <y>40</y>
+             <y>60</y>
              <width>3</width>
              <height>20</height>
             </rect>
@@ -10957,10 +10941,10 @@ in minimization</string>
           <widget class="QLabel" name="label_175">
            <property name="geometry">
             <rect>
-             <x>200</x>
-             <y>134</y>
-             <width>47</width>
-             <height>13</height>
+             <x>133</x>
+             <y>125</y>
+             <width>121</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="font">
@@ -10973,7 +10957,7 @@ in minimization</string>
             <string>Excess Noise Factor</string>
            </property>
            <property name="text">
-            <string>ENF:</string>
+            <string>Excess noise factor:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -10983,7 +10967,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>258</x>
-             <y>131</y>
+             <y>126</y>
              <width>51</width>
              <height>20</height>
             </rect>
@@ -11001,27 +10985,27 @@ in minimization</string>
           <widget class="QPushButton" name="pbGotoPreprocessAdjust">
            <property name="geometry">
             <rect>
-             <x>110</x>
+             <x>11</x>
              <y>160</y>
-             <width>291</width>
+             <width>370</width>
              <height>24</height>
             </rect>
            </property>
            <property name="font">
             <font>
-             <weight>50</weight>
-             <bold>false</bold>
+             <weight>75</weight>
+             <bold>true</bold>
             </font>
            </property>
            <property name="text">
-            <string>Ch/PhEl -&gt; Load preprocessing</string>
+            <string>3. Ch/PhEl -&gt; Load preprocessing</string>
            </property>
           </widget>
           <widget class="Line" name="lineChPhEl">
            <property name="geometry">
             <rect>
              <x>160</x>
-             <y>59</y>
+             <y>79</y>
              <width>120</width>
              <height>16</height>
             </rect>
@@ -11036,7 +11020,7 @@ in minimization</string>
           <widget class="QSpinBox" name="pbBinsChansPerPhEl">
            <property name="geometry">
             <rect>
-             <x>395</x>
+             <x>404</x>
              <y>9</y>
              <width>51</width>
              <height>22</height>
@@ -11047,6 +11031,9 @@ in minimization</string>
              <weight>50</weight>
              <bold>false</bold>
             </font>
+           </property>
+           <property name="toolTip">
+            <string>Larger is better, but should have adequate number of events</string>
            </property>
            <property name="minimum">
             <number>10</number>
@@ -11061,7 +11048,7 @@ in minimization</string>
           <widget class="QLabel" name="label_176">
            <property name="geometry">
             <rect>
-             <x>453</x>
+             <x>460</x>
              <y>12</y>
              <width>47</width>
              <height>13</height>
@@ -11080,9 +11067,9 @@ in minimization</string>
           <widget class="Line" name="line_89">
            <property name="geometry">
             <rect>
-             <x>300</x>
+             <x>289</x>
              <y>19</y>
-             <width>118</width>
+             <width>150</width>
              <height>3</height>
             </rect>
            </property>
@@ -11097,7 +11084,7 @@ in minimization</string>
            <property name="geometry">
             <rect>
              <x>258</x>
-             <y>83</y>
+             <y>103</y>
              <width>51</width>
              <height>20</height>
             </rect>
@@ -11115,9 +11102,95 @@ in minimization</string>
           <widget class="QLabel" name="label_187">
            <property name="geometry">
             <rect>
-             <x>187</x>
-             <y>86</y>
-             <width>64</width>
+             <x>143</x>
+             <y>104</y>
+             <width>111</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Lower signal limit:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_202">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>36</y>
+             <width>155</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Range from PM center    min:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledMinRangeChanPerPhEl">
+           <property name="geometry">
+            <rect>
+             <x>166</x>
+             <y>35</y>
+             <width>51</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Data is considered only for events within this range (in mm) from the corresponding PM</string>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledMaxRangeChanPerPhEl">
+           <property name="geometry">
+            <rect>
+             <x>295</x>
+             <y>34</y>
+             <width>51</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Data is considered only for events within this range (in mm) from the corresponding PM</string>
+           </property>
+           <property name="text">
+            <string>1000</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_204">
+           <property name="geometry">
+            <rect>
+             <x>251</x>
+             <y>33</y>
+             <width>40</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string> max:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_205">
+           <property name="geometry">
+            <rect>
+             <x>350</x>
+             <y>37</y>
+             <width>47</width>
              <height>13</height>
             </rect>
            </property>
@@ -11128,16 +11201,31 @@ in minimization</string>
             </font>
            </property>
            <property name="text">
-            <string>Lower limit:</string>
+            <string>mm</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </widget>
+          <widget class="QLabel" name="label_206">
+           <property name="geometry">
+            <rect>
+             <x>222</x>
+             <y>38</y>
+             <width>47</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>mm</string>
            </property>
           </widget>
           <zorder>line_89</zorder>
           <zorder>lineChPhEl</zorder>
           <zorder>line_88</zorder>
-          <zorder>line_86</zorder>
           <zorder>line_87</zorder>
           <zorder>line_25</zorder>
           <zorder>pbAnalyzeChanPerPhEl</zorder>
@@ -11157,6 +11245,12 @@ in minimization</string>
           <zorder>label_176</zorder>
           <zorder>ledLowerLimitForChanPerPhEl</zorder>
           <zorder>label_187</zorder>
+          <zorder>label_202</zorder>
+          <zorder>ledMinRangeChanPerPhEl</zorder>
+          <zorder>ledMaxRangeChanPerPhEl</zorder>
+          <zorder>label_204</zorder>
+          <zorder>label_205</zorder>
+          <zorder>label_206</zorder>
          </widget>
         </widget>
         <widget class="QWidget" name="tabManifest">

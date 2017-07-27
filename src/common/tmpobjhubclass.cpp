@@ -43,17 +43,26 @@ void TmpObjHubClass::ClearTracks()
     TrackInfo.clear();
 }
 
-void TmpObjHubClass::ClearTmpHists()
+void TmpObjHubClass::ClearTmpHistsPeaks()
 {
-    for (TH1D* h : tmpHists) delete h;
-    tmpHists.clear();
+    for (TH1D* h : PeakHists) delete h;
+    PeakHists.clear();
+}
+
+void TmpObjHubClass::ClearTmpHistsSigma2()
+{
+    for (TH1D* h : SigmaHists) delete h;
+    SigmaHists.clear();
 }
 
 void TmpObjHubClass::Clear()
 {
     ClearTracks();
-    ClearTmpHists();
+    ClearTmpHistsPeaks();
+    ClearTmpHistsSigma2();
     FoundPeaks.clear();
+    ChPerPhEl_Peaks.clear();
+    ChPerPhEl_Sigma2.clear();
 }
 
 TmpObjHubClass::TmpObjHubClass()

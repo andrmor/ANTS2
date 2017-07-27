@@ -50,9 +50,14 @@ public:
   QVector<TrackHolderClass*> TrackInfo;
   void ClearTracks();
 
-  QVector<TH1D*> tmpHists;
-  void ClearTmpHists();
+  QVector<TH1D*> PeakHists;
+  void ClearTmpHistsPeaks();
   QVector< QVector<double> > FoundPeaks;
+  QVector<double> ChPerPhEl_Peaks;
+
+  QVector<TH1D*> SigmaHists;
+  void ClearTmpHistsSigma2();
+  QVector<double> ChPerPhEl_Sigma2;
 
 public slots:
   void Clear();

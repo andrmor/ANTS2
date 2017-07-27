@@ -566,9 +566,6 @@ private:
 
   QPolygonF polygon; //polygon for custom spatial filter
 
-  QVector<TH1D*> sigmaHists;
-  QVector<double> ChPerPhEl;
-
   QString FilterScript;
 
   int ManifestLineColor, ManifestLineStyle, ManifestLineWidth;

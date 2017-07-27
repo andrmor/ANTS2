@@ -35,16 +35,43 @@ static QVector<TrackHolderClass> tracks;
 static TVector3 NormViz;
 
 //#include "TBufferJSON.h"
-
+#include "tmpobjhubclass.h"
+#include "TAttMarker.h"
 void MainWindow::on_pobTest_clicked()
 {
-   //TString str = TBufferJSON::ConvertToJSON(Detector->GeoManager);
-   //qDebug() << str;
+   if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+   if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+
+   TGraph* g = new TGraph;
+   for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+   {
+       g->SetPoint(ipm, TmpHub->ChPerPhEl_Peaks.at(ipm), TmpHub->ChPerPhEl_Sigma2.at(ipm));
+   }
+   GraphWindow->Draw(g, "A*");
 }
 
 void MainWindow::on_pobTest_2_clicked()
 {
+    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
 
+    TGraph* g1 = new TGraph();
+    TGraph* g2 = new TGraph();
+    for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+    {
+        g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
+        g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
+    }
+    g1->SetMarkerStyle(4);
+    g2->SetMarkerStyle(3);
+    g1->SetMarkerColor(4);
+    g2->SetMarkerColor(2);
+
+    g1->SetTitle("From peaks");
+    g2->SetTitle("From stat");
+
+    GraphWindow->Draw(g1, "AP");
+    GraphWindow->Draw(g2, "P same");
 }
 
 /*

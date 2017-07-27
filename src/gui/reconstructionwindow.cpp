@@ -6484,14 +6484,22 @@ void ReconstructionWindow::on_pbFrindPeaks_clicked()
   MW->TmpHub->FoundPeaks.clear();
   ChPerPhEl.clear();
 
+  QVector<int> failedPMs;
   for (int ipm=0; ipm<PMs->count(); ipm++)
   {
       APeakFinder f(MW->TmpHub->tmpHists.at(ipm));
-      QVector<double> peaks = f.findPeaks(2.0, 0.02, 30, ipm!=0);
+      QVector<double> peaks = f.findPeaks(ui->ledFromPeaksSigma->text().toDouble(), ui->ledFromPeaksThreshold->text().toDouble(), ui->sbFromPeaksMaxPeaks->value(), true);
 
       std::sort(peaks.begin(), peaks.end());
 
       MW->TmpHub->FoundPeaks << peaks;
+
+      if (peaks.size() < 2)
+      {
+          failedPMs << ipm;
+          ChPerPhEl << -1;
+          continue;
+      }
 
       TGraph g;
       for (int i=0; i<peaks.size(); i++)
@@ -6500,11 +6508,22 @@ void ReconstructionWindow::on_pbFrindPeaks_clicked()
       double constant, slope;
       int ifail;
       g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
-      //qDebug() << !(bool)ifail << constant << slope;
-      ChPerPhEl.append(slope);
+      if ( ifail != 0 )
+      {
+          failedPMs << ipm;
+          ChPerPhEl << -1;
+          continue;
+      }
+      else ChPerPhEl.append(slope);
     }
 
   on_pbFromPeaksShow_clicked();
+  if (!failedPMs.isEmpty())
+  {
+      QString s = "Peaks < 2 or failed fit for PM#:";
+      for (int i : failedPMs) s += " " + QString::number(i);
+      message(s, this);
+  }
 }
 
 void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()

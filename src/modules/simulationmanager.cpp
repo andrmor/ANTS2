@@ -492,11 +492,9 @@ bool PointSourceSimulator::setup(QJsonObject &json)
     QJsonObject cjson = js["ControlOptions"].toObject();
     PointSimMode = cjson["Single_Scan_Flood"].toInt();    
     ScintType = 1 + cjson["Primary_Secondary"].toInt(); //0 - primary(1), 1 - secondary(2)
-    //fBuildPhotonTracks = cjson["BuildTracks"].toBool();
     NumRuns = cjson["MultipleRunsNumber"].toInt();
     if (!cjson["MultipleRuns"].toBool()) NumRuns = 1;
 
-    //fOnlyPrimScint = cjson["GenerateOnlyInPrimary"].toBool();
     fLimitNodesToObject = false;
     if (cjson.contains("GenerateOnlyInPrimary"))  //just in case it is an old config file run directly
     {
@@ -529,11 +527,15 @@ bool PointSourceSimulator::setup(QJsonObject &json)
         ErrorString = "Unknown photons per node mode!";
         return false;
     }
-    numPhotsConst = ppnjson["PhotPerNodeConstant"].toInt();
-    numPhotUniMin = ppnjson["PhotPerNodeUniMin"].toInt();
-    numPhotUniMax = ppnjson["PhotPerNodeUniMax"].toInt();
-    numPhotGaussMean = ppnjson["PhotPerNodeGaussMean"].toInt();
-    numPhotGaussSigma = ppnjson["PhotPerNodeGaussSigma"].toInt();
+    //numPhotsConst = ppnjson["PhotPerNodeConstant"].toInt();
+    parseJson(ppnjson, "PhotPerNodeConstant", numPhotsConst);
+    //numPhotUniMin = ppnjson["PhotPerNodeUniMin"].toInt();
+    parseJson(ppnjson, "PhotPerNodeUniMin", numPhotUniMin);
+    //numPhotUniMax = ppnjson["PhotPerNodeUniMax"].toInt();
+    parseJson(ppnjson, "PhotPerNodeUniMax", numPhotUniMax);
+    parseJson(ppnjson, "PhotPerNodeGaussMean", numPhotGaussMean);
+    parseJson(ppnjson, "PhotPerNodeGaussSigma", numPhotGaussSigma);
+
     if (numPhotMode == 3)
     {
         if (!ppnjson.contains("PhotPerNodeCustom"))

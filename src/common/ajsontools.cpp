@@ -25,7 +25,9 @@ bool parseJson(const QJsonObject &json, const QString &key, int &var)
 {
   if (json.contains(key))
     {
-      var = json[key].toInt();
+      //var = json[key].toInt();
+      double val = json[key].toDouble();
+      var = std::round(val);
       return true;
     }
   else return false;

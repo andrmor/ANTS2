@@ -59,12 +59,13 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
 
 #ifdef Q_OS_WIN32
   taskButton = 0;
-  QTimer::singleShot(0,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
+  QTimer::singleShot(1000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
 
   QWinJumpList* jumplist = new QWinJumpList(this);
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet->AntsBaseDir));
   jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet->LastOpenDir));
+  jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
   //jumplist->tasks()->addSeparator();
   jumplist->tasks()->setVisible(true);
 #endif
@@ -74,7 +75,6 @@ WindowNavigatorClass::~WindowNavigatorClass()
 {
   if (time) delete time;
   delete ui;
-  //MW->WindowNavigator = 0;
 }
 
 void WindowNavigatorClass::SetupWindowsTaskbar()
@@ -127,27 +127,35 @@ void WindowNavigatorClass::SetupWindowsTaskbar()
   Geo->setIcon(QIcon(pix));
   connect(Geo, SIGNAL(clicked()), this, SLOT(on_pbGeometry_clicked()));
 
-  QWinThumbnailToolButton *lrf = new QWinThumbnailToolButton(thumbbar);
-  lrf->setToolTip("LRF window");
+//  QWinThumbnailToolButton *lrf = new QWinThumbnailToolButton(thumbbar);
+//  lrf->setToolTip("LRF window");
+//  pix.fill(Qt::transparent);
+//  painter.drawText( 4, 17, "L" );
+//  lrf->setIcon(QIcon(pix));
+//  connect(lrf, SIGNAL(clicked()), this, SLOT(on_pbLRF_clicked()));
+
+  QWinThumbnailToolButton *scr = new QWinThumbnailToolButton(thumbbar);
+  scr->setToolTip("Script window");
   pix.fill(Qt::transparent);
-  painter.drawText( 4, 17, "L" );
-  lrf->setIcon(QIcon(pix));
-  connect(lrf, SIGNAL(clicked()), this, SLOT(on_pbLRF_clicked()));
+  painter.drawText( 4, 17, "S" );
+  scr->setIcon(QIcon(pix));
+  connect(scr, SIGNAL(clicked()), this, SLOT(on_pbScript_clicked()));
 
   QWinThumbnailToolButton *ex = new QWinThumbnailToolButton(thumbbar);
   ex->setToolTip("Examples/Load window");
   pix.fill(Qt::transparent);
-  painter.drawText( 5, 17, "E" );
+  painter.drawText( 4, 17, "E" );
   ex->setIcon(QIcon(pix));
   connect(ex, SIGNAL(clicked()), this, SLOT(on_pbExamples_clicked()));
 
   thumbbar->addButton(maxAll);
   thumbbar->addButton(ex);
+  thumbbar->addButton(Main);
   thumbbar->addButton(Rec);
   thumbbar->addButton(Geo);
   thumbbar->addButton(Out);  
-  thumbbar->addButton(lrf);
-  thumbbar->addButton(Main);
+//  thumbbar->addButton(lrf);
+  thumbbar->addButton(scr);
 
 #endif
 }

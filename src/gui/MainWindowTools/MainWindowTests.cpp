@@ -62,10 +62,10 @@ void MainWindow::on_pobTest_2_clicked()
         g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
         g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
     }
-    g1->SetMarkerStyle(4);
-    g2->SetMarkerStyle(3);
-    g1->SetMarkerColor(4);
-    g2->SetMarkerColor(2);
+    g1->SetMarkerStyle(4);  //round
+    g2->SetMarkerStyle(3);  //star
+    g1->SetMarkerColor(4);  //blue
+    g2->SetMarkerColor(2);  //red
 
     g1->SetTitle("From peaks");
     g2->SetTitle("From stat");

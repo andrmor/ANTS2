@@ -6536,6 +6536,27 @@ void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
     MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
 }
 
+void ReconstructionWindow::on_pbFromPeaksPedestals_clicked()
+{
+  if (MW->TmpHub->FoundPeaks.size() != PMs->count())
+  {
+      message("Data not ready", this);
+      return;
+  }
+  QVector<double> Pedestals;
+  for (int i=0; i<PMs->count(); i++)
+    {
+      if (MW->TmpHub->FoundPeaks.at(i).isEmpty())
+        {
+          message(QString("PM# ") + QString::number(i) +  " has no detected peaks!", this);
+          return;
+        }
+      Pedestals << MW->TmpHub->FoundPeaks.at(i).first();
+    }
+
+  MW->CorrectPreprocessingAdds(Pedestals);
+}
+
 void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 {
   int ipm = ui->sbFrompeakPM->value();
@@ -6547,7 +6568,9 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 
-  MW->GraphWindow->Draw(h, "", true, true);
+
+  if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
+  MW->GraphWindow->DrawWithoutFocus(h, "", true, true);
 
   if (MW->TmpHub->FoundPeaks.size() == numPMs)
     {
@@ -6558,7 +6581,7 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
           l->SetLineColor(kRed);
           l->SetLineWidth(2);
           l->SetLineStyle(2);
-          MW->GraphWindow->Draw(l, "same", false, true);
+          MW->GraphWindow->DrawWithoutFocus(l, "same", false, true);
         }
       MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(MW->TmpHub->ChPerPhEl_Peaks.at(ipm)));
     }

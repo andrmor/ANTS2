@@ -186,6 +186,7 @@ public:
     //gains and ch per ph.el
     void SetMultipliersUsingGains(QVector<double> Gains);
     void SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl);
+    void CorrectPreprocessingAdds(QVector<double> Add);
 
     //config setting (updated bu the Examples window ELwindow)
     bool ShowExamplesOnStart;

@@ -10407,7 +10407,7 @@ in minimization</string>
            <rect>
             <x>10</x>
             <y>159</y>
-            <width>160</width>
+            <width>271</width>
             <height>23</height>
            </rect>
           </property>
@@ -10417,8 +10417,11 @@ in minimization</string>
             <bold>true</bold>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Adjust multiplication factors for load ascii data in main window</string>
+          </property>
           <property name="text">
-           <string>3. Correct preprocessing</string>
+           <string>3. Chan./ Ph.e.  --&gt;  Load pre-processing</string>
           </property>
          </widget>
          <widget class="QSpinBox" name="sbFromPeaksBins">
@@ -10666,6 +10669,28 @@ in minimization</string>
             <width>50</width>
             <height>22</height>
            </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbFromPeaksPedestals">
+          <property name="geometry">
+           <rect>
+            <x>300</x>
+            <y>159</y>
+            <width>191</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Adjust add  value in pre-processing for load ascii data in main window using the position of the first peak for each PM</string>
+          </property>
+          <property name="text">
+           <string>Pedestals --&gt; pre-processing</string>
           </property>
          </widget>
         </widget>
@@ -10998,7 +11023,7 @@ in minimization</string>
             </font>
            </property>
            <property name="text">
-            <string>3. Ch/PhEl -&gt; Load preprocessing</string>
+            <string>3. Chan. / Ph.e. --&gt; Load pre-processing</string>
            </property>
           </widget>
           <widget class="Line" name="lineChPhEl">

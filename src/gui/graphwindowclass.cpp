@@ -3215,7 +3215,7 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   QStringList sl = Text.split("\n");
   for (QString s : sl) la->AddText(s.toLatin1());
 
-  Draw(la, "same");
+  DrawWithoutFocus(la, "same");
 //  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
 //  {
 //     RegisterTObject(la);

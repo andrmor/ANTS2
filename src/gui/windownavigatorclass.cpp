@@ -59,13 +59,14 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
 
 #ifdef Q_OS_WIN32
   taskButton = 0;
-  QTimer::singleShot(1000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
+  QTimer::singleShot(5000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
 
   QWinJumpList* jumplist = new QWinJumpList(this);
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet->AntsBaseDir));
   jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet->LastOpenDir));
-  jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
+  if (!MW->GlobSet->LibScripts.isEmpty())
+    jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
   //jumplist->tasks()->addSeparator();
   jumplist->tasks()->setVisible(true);
 #endif
@@ -93,7 +94,7 @@ void WindowNavigatorClass::SetupWindowsTaskbar()
   QWinThumbnailToolButton *maxAll = new QWinThumbnailToolButton(thumbbar);
   maxAll->setToolTip("Show all active");
   maxAll->setIcon(style()->standardIcon(QStyle::SP_TitleBarMaxButton));
-  maxAll->setDismissOnClick(true);
+  //maxAll->setDismissOnClick(true);
   connect(maxAll, SIGNAL(clicked()), this, SLOT(on_pbMaxAll_clicked()));
 
   QWinThumbnailToolButton *Main = new QWinThumbnailToolButton(thumbbar);

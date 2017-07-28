@@ -531,6 +531,8 @@ private slots:
 
   void on_sbFrompeakPM_valueChanged(int arg1);
 
+  void on_pbFromPeaksPedestals_clicked();
+
 protected:
     bool event(QEvent *event);
 

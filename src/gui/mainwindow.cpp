@@ -3039,8 +3039,7 @@ void MainWindow::on_pbInitializeScanFloodNoise_clicked()
 
 void MainWindow::on_twSingleScan_currentChanged(int index)
 {  
-  if (index == 0) ui->frLimitNodesTo->setVisible(false);
-  else ui->frLimitNodesTo->setVisible(true);
+  ui->frLimitNodesTo->setVisible( index != 0 );
 }
 
 void MainWindow::on_pbExportDeposition_clicked()

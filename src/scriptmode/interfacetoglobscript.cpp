@@ -2572,7 +2572,7 @@ void InterfaceToReconstructor::setPMsOfGroup(int igroup, QVariant PMlist)
     if (type == "QVariantList")
         {
           QVariantList vl = PMlist.toList();
-          qDebug() << vl;
+          //qDebug() << vl;
           QJsonArray ar = QJsonArray::fromVariantList(vl);
           for (int i=0; i<ar.size(); i++)
           {
@@ -2883,7 +2883,7 @@ bool AInterfaceToPMs::AddPMToPlane(int UpperLower, int type, double X, double Y,
   if (!checkAddPmCommon(UpperLower, type)) return false;
 
   APmArrayData& ArrData = Config->GetDetector()->PMarrays[UpperLower];
-  qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
+  //qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
 
   if (ArrData.PositionsAnglesTypes.isEmpty())
     {
@@ -2914,7 +2914,7 @@ bool AInterfaceToPMs::AddPM(int UpperLower, int type, double X, double Y, double
     if (!checkAddPmCommon(UpperLower, type)) return false;
 
     APmArrayData& ArrData = Config->GetDetector()->PMarrays[UpperLower];
-    qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
+    //qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
 
     if (ArrData.PositionsAnglesTypes.isEmpty())
       {

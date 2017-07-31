@@ -50,9 +50,9 @@ InterfaceToInteractionScript::InterfaceToInteractionScript(MainWindow* MW, Event
 
 void InterfaceToInteractionScript::ClearStack()
 {
-  qDebug() << "Clear stack triggered";
+  //qDebug() << "Clear stack triggered";
   MW->on_pbClearAllStack_clicked();
-  qDebug() << "Done";
+  //qDebug() << "Done";
 }
 
 void InterfaceToInteractionScript::AddParticleToStack(int particleID, double X, double Y, double Z,

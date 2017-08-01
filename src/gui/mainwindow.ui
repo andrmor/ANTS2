@@ -12911,7 +12911,7 @@ multiply to loaded data</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabMiscTests">
        <attribute name="title">
@@ -12931,6 +12931,9 @@ multiply to loaded data</string>
         </property>
        </widget>
        <widget class="QGroupBox" name="groupBox_3">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="geometry">
          <rect>
           <x>30</x>
@@ -14305,9 +14308,9 @@ multiply to loaded data</string>
        <widget class="QGroupBox" name="groupBox">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>510</width>
+          <x>120</x>
+          <y>140</y>
+          <width>271</width>
           <height>161</height>
          </rect>
         </property>

@@ -5705,13 +5705,18 @@ void ReconstructionWindow::SetShowFirst(bool fOn, int number)
 void ReconstructionWindow::on_cbCustomBinning_toggled(bool checked)
 {
    ui->fCustomBins->setEnabled(checked);
-   if (!checked) ui->fCustomRanges->setEnabled(false);
+   if (!checked)
+   {
+       ui->cbCustomRanges->setChecked(false);
+       ui->fCustomRanges->setEnabled(false);
+   }
 }
 
 void ReconstructionWindow::on_cbCustomRanges_toggled(bool checked)
 {
    if (checked) ui->fCustomBins->setEnabled(true);
    ui->fCustomRanges->setEnabled(checked);
+   if (checked) ui->cbCustomBinning->setChecked(true);
 }
 
 void linkCustomClass::updateBins() {bins = Qbins->value();}

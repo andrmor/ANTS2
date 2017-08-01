@@ -944,7 +944,7 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 //  ScriptTabs[CurrentTab]->TextEdit->insertPlainText(text);
 //}
 
-void AScriptWindow::closeEvent(QCloseEvent *e)
+void AScriptWindow::closeEvent(QCloseEvent* /*e*/)
 {
 //  qDebug() << "Script window: Close event";
 //  if (ScriptManager->fEngineIsRunning)

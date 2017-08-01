@@ -14,8 +14,8 @@
 CompletingTextEditClass::CompletingTextEditClass(QWidget *parent) : QTextEdit(parent), c(0)
 {
   this->setToolTipDuration(100000);
-  QObject::connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
-  //QObject::connect(this, SIGNAL(textChanged()), this, SLOT(onCursorPositionChanged()));
+  TabGivesSpaces = 7;
+  QObject::connect(this, &CompletingTextEditClass::cursorPositionChanged, this, &CompletingTextEditClass::onCursorPositionChanged);
 }
 
 void CompletingTextEditClass::setCompleter(QCompleter *completer)
@@ -33,41 +33,90 @@ void CompletingTextEditClass::setCompleter(QCompleter *completer)
 void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 {
     QTextCursor tc = this->textCursor();
+
+    if (e->key() == Qt::Key_Tab && (e->modifiers()==0))
+    {
+        QString s(" ");
+        this->insertPlainText(s.repeated(TabGivesSpaces));
+        return;
+    }
+
+    if (e->key() == Qt::Key_Delete && (e->modifiers()==0))
+    {
+        tc = this->textCursor();
+        int pos = tc.position();
+        tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+        if (tc.selectedText().simplified().isEmpty())
+        {
+            //tc.insertText("");
+            tc.removeSelectedText();
+            tc.movePosition(QTextCursor::Down);
+            tc.movePosition(QTextCursor::StartOfLine);
+            tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+            tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+            QString s = tc.selectedText().trimmed();
+            tc.removeSelectedText();
+
+            tc.setPosition(pos);
+            tc.insertText(s);
+            tc.setPosition(pos);
+            setTextCursor(tc);
+            return;
+        }
+        else
+        {
+            QTextEdit::keyPressEvent(e);
+            return;
+        }
+    }
+
     if (e->key() == Qt::Key_F1)
       {
         QString text = SelectObjFunctUnderCursor();
         emit requestHelp(text);
-        e->ignore();
         return;
       }
 
     if (e->key() == Qt::Key_Return  && !(c && c->popup()->isVisible()))
-      { //enter is pressed but completer popup is not visible        
+      { //enter is pressed but completer popup is not visible
         tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-        //qDebug() << "---"<<tc.selectedText()<<"---";
-        if (tc.selectedText().simplified() == "")
+        QString onRight = tc.selectedText();
+
+        //leading spaces?
+        tc.select(QTextCursor::LineUnderCursor);
+        QString line = tc.selectedText();
+        int startingSpaces = 0;
+        for (int i=0; line.size(); i++)
           {
-            //no text is to the right
-            tc = this->textCursor();
-            tc.select(QTextCursor::LineUnderCursor);
-            QString line = tc.selectedText();
-            int startingSpaces = 0;
-            for (int i=0; line.size(); i++)
-              {
-                if (line.at(i) != QChar::Space) break;
-                else startingSpaces++;
-              }
-            QString spacer;
-            spacer.fill(QChar::Space, startingSpaces);
+            if (line.at(i) != QChar::Space) break;
+            else startingSpaces++;
+          }
+        QString spacer;
+        spacer.fill(QChar::Space, startingSpaces);  //leading spaces
+
+
+        if (onRight.simplified() == "")
+          {
             QString insert = "\n";
-            //qDebug() <<line << startingSpaces << "starter>"+spacer+"<";
+            tc = this->textCursor();
             tc.movePosition(QTextCursor::EndOfLine);
             tc.select(QTextCursor::WordUnderCursor);
-            //qDebug() << tc.selectedText();
 
-            //auto-insert "{" and "}"
-//            QString lastWord = tc.selectedText();
             bool fUp = false;
+
+            //auto-insert "}"
+            if (SelectTextToLeft(this->textCursor(), 1) == "{")
+            {
+                //do it only if this last "{" is inside closed brackets section (or no brackets)
+                if (InsertClosingBracket())
+                {
+                    insert += spacer + QString(" ").repeated(TabGivesSpaces) + "\n" + spacer + "}";
+                    fUp = true;
+                }
+            }
+
+            //auto-insert "{" and "}"//
+//            QString lastWord = tc.selectedText();
 //            if ( line.simplified().endsWith("{") )
 //              {
 //                 //if the next curly bracket is "{" (or do not found), add "}"
@@ -105,7 +154,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 //            else
             insert += spacer;
 
-            tc.movePosition(QTextCursor::EndOfLine);           
+            tc.movePosition(QTextCursor::EndOfLine);
             tc.insertText(insert);
             if (fUp)
               {
@@ -113,9 +162,17 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
                 tc.movePosition(QTextCursor::EndOfLine);
               }
             this->setTextCursor(tc);
-            e->ignore();
             return;
           }
+        else
+        {
+            tc = this->textCursor();
+            tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+            tc.insertText("\n" + spacer + onRight);
+            this->setTextCursor(tc);
+            return;
+        }
+
       }
 
     //font size
@@ -123,14 +180,12 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
     {                
         int size = font().pointSize();
         setFontSizeAndEmitSignal(++size);
-        e->ignore();
         return;
     }
     if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Minus )
     {
         int size = font().pointSize();
         setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
-        e->ignore();
         return;
     }
 
@@ -146,7 +201,6 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             this->setTextCursor(tc);
             this->insertPlainText("\n");
             this->insertPlainText(line);
-            e->ignore();
             return;
           }
       }
@@ -158,7 +212,6 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             tc.select(QTextCursor::LineUnderCursor);
             tc.removeSelectedText();
             tc.deleteChar();
-            e->ignore();
             return;
         }
 
@@ -179,7 +232,6 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
         case Qt::Key_Escape:
         case Qt::Key_Tab:
         case Qt::Key_Backtab:        
-            e->ignore();            
             return; // let the completer do default behavior
         default:
             break;
@@ -259,27 +311,6 @@ void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
 
   QList<QTextEdit::ExtraSelection> extraSelections;
   setExtraSelections(extraSelections);
-
-//  QTextCursor tc = textCursor();
-//  tc.select(QTextCursor::WordUnderCursor);
-//      //tc.select(QTextCursor::LineUnderCursor);
-//  QString selection = tc.selectedText();
-
-//  QList<QTextEdit::ExtraSelection> extraSelections;
-
-//  QColor color = QColor(Qt::green).lighter(160);
-
-//  QTextCursor cursor = document()->find(selection, 0, QTextDocument::FindCaseSensitively);
-
-//  while(cursor.hasSelection())
-//    {
-//      QTextEdit::ExtraSelection extra;
-//      extra.format.setBackground(color);
-//      extra.cursor = cursor;
-//      extraSelections.append(extra);
-//      cursor = document()->find(selection, cursor, QTextDocument::FindCaseSensitively);
-//    }
-  //  setExtraSelections(extraSelections);
 }
 
 void CompletingTextEditClass::focusOutEvent(QFocusEvent *e)
@@ -334,7 +365,7 @@ void CompletingTextEditClass::insertCompletion(const QString &completion)
       }
 }
 
-bool CompletingTextEditClass::findInList(QString text, QString& tmp)
+bool CompletingTextEditClass::findInList(QString text, QString& tmp) const
 {
   for (int i=0; i<functionList.size(); i++)
     {
@@ -596,4 +627,44 @@ QString CompletingTextEditClass::SelectObjFunctUnderCursor(QTextCursor *cursor) 
     }
   sel += tc.selectedText();
   return sel;
+}
+
+QString CompletingTextEditClass::SelectTextToLeft(QTextCursor cursor, int num) const
+{
+    while ( num>0 && cursor.position() != 0)
+    {
+        cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+        num--;
+    }
+    return cursor.selectedText();
+}
+
+bool CompletingTextEditClass::InsertClosingBracket() const
+{
+    //to the left
+    QTextCursor tc = this->textCursor();
+    int depthL = 0;
+    do
+    {
+        QString s = SelectTextToLeft(tc, 1);
+        tc.movePosition(QTextCursor::Left);
+        if (s == "{") depthL++;
+        else if (s == "}") depthL--;
+    }
+    while (tc.position() != 0 );
+
+    //to the right
+    tc = this->textCursor();
+    int depthR = 0;
+    while (tc.position() != document()->characterCount()-1)
+      {
+        tc.movePosition(QTextCursor::Right);
+        QString s = SelectTextToLeft(tc, 1);
+        if (s == "{") depthR++;
+        if (s == "}") depthR--;
+      }
+
+    if ( (depthL + depthR) == 0) return false;
+    if ( (depthL + depthR) < 0 ) return false;
+    return true;
 }

@@ -21,6 +21,7 @@ public:
 private:
     THttpServer* server;
     TObject* GeoWorld;
+    TObject* GeoTracks;
 };
 
 #endif // AROOTHTTPSERVER_H

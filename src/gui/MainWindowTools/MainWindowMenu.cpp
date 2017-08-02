@@ -94,10 +94,11 @@ void MainWindow::on_actionGain_evaluation_triggered()
   Rwindow->ShowGainWindow();
 }
 
+#include "alrfwindow.h"
 void MainWindow::on_actionReset_position_of_windows_triggered()
 {
    QList<QMainWindow*> list;
-   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow;
+   list << this<<Rwindow<<Owindow<<lrfwindow<<MIwindow<<WindowNavigator<<ELwindow<<DAwindow<<ScriptWindow<<newLrfWindow;
    foreach(QMainWindow *w, list)
      {
        w->move(20,20);
@@ -337,4 +338,16 @@ void MainWindow::setFontSizeAllWindows(int size)
   if (GainWindow) wins << (QMainWindow*)GainWindow;
 
   for (int i=0; i<wins.size(); i++) wins[i]->setFont(font);
+}
+
+void MainWindow::on_actionGlobal_script_triggered()
+{
+    on_actionScript_window_triggered();
+}
+
+void MainWindow::on_actionScript_window_triggered()
+{
+    ScriptWindow->show();
+    ScriptWindow->raise();
+    ScriptWindow->activateWindow();
 }

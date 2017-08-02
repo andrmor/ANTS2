@@ -7,7 +7,11 @@
 
 #include "alrf.h"
 #include "bspline3.h"
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
 #include "avladimircompression.h"
 #include "atransform.h"
 #include "ascriptvaluecopier.h"

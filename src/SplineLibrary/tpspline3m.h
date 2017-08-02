@@ -26,14 +26,17 @@
 
 #include "bspline3.h"
 #include <Eigen/Dense>
+// the following is needed to ensure proper alignment of std::vector <Matrix4d>
+#include <Eigen/StdVector>
+
 using Eigen::MatrixXd;
 using Eigen::Matrix4d;
 using Eigen::Vector4d;
 
-class TPspline3M
+class TPspline3
 {
 	public:
-        TPspline3M(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
+        TPspline3(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty);
 				void SetRangeX(double xmin, double xmax);
 		void SetRangeY(double ymin, double ymax);
 		void GetRangeX(double *xmin, double *xmax) {*xmin = xl;	*xmax = xr;}
@@ -55,7 +58,7 @@ class TPspline3M
 		double Basis(double *x, double *p);  // insertable into ROOT function
 		double Eval_slow(double x, double y);
         double Eval(double x, double y) const;
-        double Eval_greedy(double x, double y);
+        double Eval_greedy(double x, double y) const;
         double EvalDrvX(double x, double y);
         double EvalDrvY(double x, double y);
 		double Eval(double *x, double *p);	// insertable into ROOT function
@@ -81,7 +84,8 @@ class TPspline3M
 // this version uses Eigen marices to store spline and polynomial coefficients
 // the matrices are organized as follows: X - rows, Y - columns
         MatrixXd C;                 // matrix of coefficients, corresponds to old "coef"
-        std::vector <Matrix4d> P;   // vector of matrices with polynomial coefficients (old "poly")
+        std::vector <Matrix4d, Eigen::aligned_allocator<Matrix4d> > P; // vector of matrices with polynomial coefficients (old "poly")
+//        std::vector <Matrix4d> P;   // vector of matrices with polynomial coefficients (old "poly")
         Matrix4d B;                 // matrix of UCBS coefficients
         mutable std::vector <double> coef;  // needed for backward compatibility
 //		double *coef;
@@ -94,6 +98,8 @@ class TPspline3M
 		int nbas;	// number of basis splines
 		int nbasx;  // columns in spline grid
         bool wrapy;
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 #endif /* TPSPLINE3M_H */

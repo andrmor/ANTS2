@@ -37,7 +37,7 @@ static void autoLoadPlugins() {
   //qDebug() << "Loading plugins from 'plugins' directory";
   QDir plugins_dir(qApp->applicationDirPath());
   if(!plugins_dir.cd("plugins")) {
-    qDebug()<<"LRF_v3 plugin loader: '/plugins' directory not found";
+    qDebug()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
     return;
   }
 
@@ -376,13 +376,14 @@ void DetectorClass::constructDetector()
     }
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
-  emit newTopInGeoManager(GeoManager->GetTopNode());
+  emit newGeoManager(GeoManager);
   //qDebug() << "===> All done!";
 }
 
-void DetectorClass::onRequestRegisterTopNode()
+void DetectorClass::onRequestRegisterGeoManager()
 {
-  emit newTopInGeoManager(GeoManager->GetTopNode());
+    if (GeoManager)
+        emit newGeoManager(GeoManager);
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

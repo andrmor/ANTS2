@@ -1,0 +1,13 @@
+
+var a = "aaaa"
+var ini = 17
+var out = 0
+
+var script = "var a = 5; core.print('Sub-script: '+ini); ini += a+2; out = 555; ini"      //or load script from a file!
+var b = core.evaluate(script)
+
+core.print("Sub-script evaluation result: " + b)	//can return all basic types: bool, numeric, string, object or array
+
+core.print("Local ini: " + ini)	// keeps the changes, since not defined again in the sub-script
+
+core.print("Local a: " + a)	//does not override local variables!

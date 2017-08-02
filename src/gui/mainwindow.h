@@ -55,6 +55,7 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
+struct ParticleSourceStructure;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -80,17 +81,25 @@ public:
                         GlobalSettingsClass *GlobSet);
     ~MainWindow();
 
-    //All config
+    // Pointers to external resources
+    DetectorClass *Detector;
+    pms* PMs;                                   //alias
+    AMaterialParticleCollection* MpCollection;  //alias
     AConfiguration* Config;
-
-    //ROOT
+    EventsDataClass *EventsDataHub;
     TApplication *RootApp;
+    ASimulationManager* SimulationManager;
+    ParticleSourcesClass* ParticleSources;      //alias
+    ReconstructionManagerClass *ReconstructionManager;
+    ANetworkModule* NetModule;
+    TmpObjHubClass *TmpHub;
+    GlobalSettingsClass* GlobSet;
 
-    //ANTS2 windows
+    // ANTS2 windows
     GraphWindowClass *GraphWindow;
     GeometryWindowClass *GeometryWindow;   
     OutputWindow *Owindow;
-    LRFwindow *lrfwindow;
+    LRFwindow *lrfwindow;                       //window of the v3 LRF module
     ReconstructionWindow *Rwindow;
     MaterialInspectorWindow *MIwindow;
     WindowNavigatorClass *WindowNavigator;
@@ -98,32 +107,17 @@ public:
     DetectorAddOnsWindow* DAwindow;
     CheckUpWindowClass* CheckUpWindow;
     GainEvaluatorWindowClass* GainWindow;
-    GenericScriptWindowClass* GenScriptWindow;
+    GenericScriptWindowClass* GenScriptWindow;  //local script window
     GlobalSettingsWindowClass* GlobSetWindow;
-    AScriptWindow* ScriptWindow; //global script window
-    ALrfWindow* newLrfWindow; //window of the new LRF module
+    AScriptWindow* ScriptWindow;                //global script window
+    ALrfWindow* newLrfWindow;                   //window of the v3 LRF module
 
 #ifdef ANTS_FANN
     NeuralNetworksWindow* NNwindow;
 #endif
 
-    //ANTS2 modules    
-    pms* PMs;    //alias
-    ASimulationManager* SimulationManager; //alias
-    ReconstructionManagerClass *ReconstructionManager;   //alias
-    ParticleSourcesClass* ParticleSources; //alias - actually belongs to SimulationManager
-    ANetworkModule* NetModule;
-
-    //Data hub
-    EventsDataClass *EventsDataHub;
-
-    //Detector-related properties
-    DetectorClass *Detector;
-    AMaterialParticleCollection* MpCollection; //just the pointer, detector has the same
+    // custom gui elements
     ASlabListWidget* lw;
-
-    //Temporary objects (more will migrate there later)
-    TmpObjHubClass *TmpHub;
 
     //local data, just for GUI
     QVector<AEnergyDepositionCell*> EnergyVector;
@@ -135,9 +129,6 @@ public:
     QVector<QVector3D*> CustomScanNodes;
     InterfaceToNodesScript *NodesScriptInterface;
     QString NodesScript;
-
-    //global settings
-    GlobalSettingsClass* GlobSet; //global settings
 
     //critical - updates
     void NumberOfPMsHaveChanged();
@@ -185,9 +176,6 @@ public:
     //gains and ch per ph.el
     void SetMultipliersUsingGains(QVector<double> Gains);
     void SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl);
-
-    //config setting (updated bu the Examples window ELwindow)
-    bool ShowExamplesOnStart;
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
@@ -298,8 +286,7 @@ private slots:
     void on_pbPMtypeDeleteAngular_clicked();
     void on_pbPMtypeShowEffectiveAngular_clicked();
     void on_sbCosBins_valueChanged(int arg1);
-    void on_cobGunSourceType_currentIndexChanged(int index);
-    void on_pbGunShowSource_clicked();
+    void on_cobGunSourceType_currentIndexChanged(int index);    
     void on_pbGunTest_clicked();
     void on_pbGunRefreshparticles_clicked();
     void on_pbGunAddNew_clicked();
@@ -391,6 +378,7 @@ private slots:
     void on_pbAddSource_clicked();
     void on_pbUpdateSources_clicked();
     void on_pbUpdateSourcesIndication_clicked();
+    void on_pbGunShowSource_toggled(bool checked);
 
 protected:
     void closeEvent(QCloseEvent *);    
@@ -417,9 +405,7 @@ public:
     void SimGeneralConfigToJson(QJsonObject &jsonMaster);                              //Save to JSON general options of simulation
     void SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerbose = false);  //Save to JSON config for PointSources simulation
     void SimParticleSourcesConfigToJson(QJsonObject &json);     //Save to JSON config for ParticleSources simulation
-
-    void updatePMArrayDataIndication();    
-
+    void updatePMArrayDataIndication();
     void writeLoadExpDataConfigToJson(QJsonObject &json);
     bool readLoadExpDataConfigFromJson(QJsonObject &json);
     void clearGeoMarkers(int All_Rec_True = 0);
@@ -429,7 +415,6 @@ public:
     void readExtraGuiFromJson(QJsonObject &json);
     void SaveSimulationDataTree();
     void SaveSimulationDataAsText();
-
     void setFloodZposition(double Z);
     void UpdateCustomScanNodesIndication();
     void CalculateIndividualQEPDE(); //Public for use in scripting
@@ -448,8 +433,6 @@ private:
     void RefreshAreaButtons();
     void ShowPMcount();
     void initOverridesAfterLoad();  //after detector is loaded, show first non-empty optical override
-    //void SavePhElToSignalData(QString fileName);
-    //void LoadPhElToSignalData(QString fileName);
     void LoadScanPhotonDistribution(QString fileName);
 
     int LoadAreaResponse(QString fileName, QVector<QVector<double> >* tmp, double* xStep, double* yStep);       ///see MainWindowDiskIO.cpp
@@ -560,6 +543,7 @@ private slots:
     void simulationFinished();
     /**************************************************************/
 
+private slots:
     void on_pbGDML_clicked();
     void on_pbLoadNodes_clicked();
     void on_pbShowNodes_clicked();
@@ -568,7 +552,6 @@ private slots:
     void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
-    void on_ledSourceActivity_textChanged(const QString &arg1);
     void on_actionOpen_settings_triggered();
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
     void on_pbShowEnergyDeposition_clicked();
@@ -612,23 +595,19 @@ private slots:
     void on_cbEnableMCcrosstalk_toggled(bool checked);
     void on_pbRemoveCellMCcrosstalk_clicked();
     void on_pbMCnormalize_clicked();
-
     void on_leSourceLimitMaterial_textChanged(const QString &arg1);
-
     void on_leLimitNodesObject_textChanged(const QString &arg1);
-
     void on_cbLimitNodesOutsideObject_toggled(bool checked);
-
     void on_bpResults_clicked();
-
     void on_pobTest_2_clicked();
-
     void on_bpResults_2_clicked();
+    void on_actionScript_window_triggered();
+
+    void on_cobParticleSource_activated(int index);
 
 public slots:
     void on_cobSF_chi2Vs_activated(int index);
     void on_pbRebuildDetector_clicked();
-
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector
     void onRequestSimulationGuiUpdate();   // called to update GUI related to simulations
     void onRequestUpdateGuiForClearData(); // called to clear data indication after EventsDataHub.clear() is triggered
@@ -637,14 +616,19 @@ public slots:
     void onGlobalScriptFinished();
     void on_pbUpdatePreprocessingSettings_clicked(); //updates preprocessing settings in Config
     void on_pbUpdateSimConfig_clicked();   // updates simulation-related properies in Config from GUI
+    void selectFirstActiveParticleSource(); //trigger after load new config to select the first source with non-zero activity
 
 private:
     void initDetectorSandwich();
     void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
+    void clearParticleSourcesIndication();   
+    void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
+    void ShowParticleSource_noFocus();
+    void updateActivityIndication();
 
-    //new sandwich
 public slots:
+    //new sandwich
     void UpdateSandwichGui();
     void OnWarningMessage(QString text);
     void OnDetectorColorSchemeChanged(int scheme, int matId);    

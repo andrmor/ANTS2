@@ -43,11 +43,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
   MW = parent;
   Detector = detector;
   ui->setupUi(this);
-//  this->setFixedSize(this->size());
-//  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
-//  windowFlags |= Qt::WindowCloseButtonHint;
-//  windowFlags |= Qt::WindowStaysOnTopHint;
-//  this->setWindowFlags( windowFlags );
 
   ui->pbBackToSandwich->setEnabled(false);
 
@@ -1069,4 +1064,171 @@ void DetectorAddOnsWindow::on_cbAutoCheck_stateChanged(int)
   p.setColor(QPalette::Active, QPalette::WindowText, col );
   p.setColor(QPalette::Inactive, QPalette::WindowText, col );
   ui->cbAutoCheck->setPalette(p);
+}
+
+#include <QClipboard>
+#include "ascriptwindow.h"
+void DetectorAddOnsWindow::on_pbConvertToScript_clicked()
+{
+    QString script = "// Auto-generated script\n\n";
+
+    script += "  //Set all PM arrays to fully custom regularity, so PM Z-positions will not be affected by slabs\n";
+    script += "  pms.SetAllArraysFullyCustom()\n";
+    script += "  //Remove all slabs and objects\n";
+    script += "  geo.RemoveAllExceptWorld()\n";
+
+    script += "\n";
+    script += "  //Defined materials:\n";
+    for (int i=0; i<Detector->MpCollection->countMaterials(); i++)
+        script += "  var " + Detector->MpCollection->getMaterialName(i) + "_mat = " + QString::number(i) + "\n";
+
+    AGeoObject* World = Detector->Sandwich->World;
+
+    objectMembersToScript(World, script, 2);
+
+    script += "\n\n  geo.UpdateGeometry(true)";
+
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText(script);
+
+    MW->ScriptWindow->onLoadRequested(script);
+    MW->ScriptWindow->showNormal();
+    MW->ScriptWindow->raise();
+    MW->ScriptWindow->activateWindow();
+}
+
+void DetectorAddOnsWindow::objectMembersToScript(AGeoObject* Master, QString &script, int ident)
+{
+    for (AGeoObject* obj : Master->HostedObjects)
+    {
+        if (obj->ObjectType->isLogical())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+        }
+        else if (obj->ObjectType->isCompositeContainer()) {} //nothing to do
+        else if (obj->ObjectType->isSlab() || obj->ObjectType->isSingle() )
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+            if (obj->ObjectType->isLightguide())
+            {
+                script += "\n";
+                script += "\n" + QString(" ").repeated(ident)+ "//=== Lightguide object is not supported! ===";
+                script += "\n";
+            }
+            objectMembersToScript(obj, script, ident + 2);            
+        }
+        else if (obj->ObjectType->isComposite())
+        {
+            script += "\n" + QString(" ").repeated(ident) + "//-->-- logical volumes for " + obj->Name;
+            objectMembersToScript(obj->getContainerWithLogical(), script, ident + 4);
+            script += "\n" + QString(" ").repeated(ident) + "//--<-- logical volumes end for " + obj->Name;
+
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_basicObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ makeLinePropertiesString(obj);
+            objectMembersToScript(obj, script, ident + 2);
+        }
+        else if (obj->ObjectType->isArray())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_arrayObject(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- array elements for " + obj->Name;
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- array elements end for " + obj->Name;
+        }
+        else if (obj->ObjectType->isStack())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectStart(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- stack elements for " + obj->Name;
+            script += "\n" + QString(" ").repeated(ident)+ "// Values of x, y, z only matter for the stack element, refered to at InitializeStack below";
+            script += "\n" + QString(" ").repeated(ident)+ "// For the rest of elements they are calculated automatically";
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- stack elements end for " + obj->Name;
+            if (!obj->HostedObjects.isEmpty())
+                script += "\n" + QString(" ").repeated(ident)+ makeScriptString_stackObjectEnd(obj);
+        }
+        else if (obj->ObjectType->isGroup())
+        {
+            script += "\n" + QString(" ").repeated(ident)+ makeScriptString_groupObjectStart(obj);
+            script += "\n" + QString(" ").repeated(ident)+ "//-->-- group elements for " + obj->Name;
+            objectMembersToScript(obj, script, ident + 2);
+            script += "\n" + QString(" ").repeated(ident)+ "//--<-- group elements end for " + obj->Name;
+        }
+        else if (obj->ObjectType->isGrid())
+        {
+            script += "\n";
+            script += "\n" + QString(" ").repeated(ident)+ "//=== Optical grid object is not supported! Make a request to the developers ===";
+            script += "\n";
+        }
+
+    }
+}
+
+QString DetectorAddOnsWindow::makeScriptString_basicObject(AGeoObject* obj)
+{
+    return  QString("geo.TGeo( ") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Shape->getGenerationString() + "', " +
+            Detector->MpCollection->getMaterialName(obj->Material) + "_mat, " +  //QString::number(obj->Material) + ", " +
+            "'"+obj->Container->Name + "',   "+
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
+            QString::number(obj->Orientation[0]) + ", " +
+            QString::number(obj->Orientation[1]) + ", " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_arrayObject(AGeoObject *obj)
+{
+    ATypeArrayObject* a = dynamic_cast<ATypeArrayObject*>(obj->ObjectType);
+    if (!a)
+    {
+        qWarning() << "It is not an array!";
+        return "Error accessing object as array!";
+    }
+
+    return  QString("geo.Array( ") +
+            "'" + obj->Name + "', " +
+            QString::number(a->numX) + ", " +
+            QString::number(a->numY) + ", " +
+            QString::number(a->numZ) + ",   " +
+            QString::number(a->stepX) + ", " +
+            QString::number(a->stepY) + ", " +
+            QString::number(a->stepZ) + ", " +
+            "'" + obj->Container->Name + "',   " +
+            QString::number(obj->Position[0]) + ", " +
+            QString::number(obj->Position[1]) + ", " +
+            QString::number(obj->Position[2]) + ",   " +
+            QString::number(obj->Orientation[2]) + " )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_stackObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeStack(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_groupObjectStart(AGeoObject *obj)
+{
+    return  QString("geo.MakeGroup(") +
+            "'" + obj->Name + "', " +
+            "'" + obj->Container->Name + "' )";
+}
+
+QString DetectorAddOnsWindow::makeScriptString_stackObjectEnd(AGeoObject *obj)
+{
+    return QString("geo.InitializeStack( ") +
+           "'" + obj->Name + "',  " +
+           "'" + obj->HostedObjects.first()->Name + "' )";
+}
+
+QString DetectorAddOnsWindow::makeLinePropertiesString(AGeoObject *obj)
+{
+    return "geo.SetLine( '" +
+            obj->Name +
+            "',  " +
+            QString::number(obj->color) + ",  " +
+            QString::number(obj->width) + ",  " +
+            QString::number(obj->style) + " )";
 }

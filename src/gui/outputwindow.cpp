@@ -38,6 +38,7 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     EventsDataHub = eventsDataHub;
     GVscale = 10.0;
     ui->setupUi(this);
+    bForbidUpdate = false;
 
     this->setWindowTitle("Output");
 
@@ -87,8 +88,10 @@ void OutputWindow::PMnumChanged()
 
 void OutputWindow::SetCurrentEvent(int iev)
 {  
-  if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev);
-  else ui->sbEvent->setValue(iev); //update on_change
+  bForbidUpdate = true;
+  //if (iev == ui->sbEvent->value()) on_sbEvent_valueChanged(iev); else
+  ui->sbEvent->setValue(iev);
+  bForbidUpdate = false;
 
   RefreshData();
 }
@@ -345,9 +348,11 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
       case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
       case EventHistoryStructure::Capture:                  s += "capture"; break;
+      case EventHistoryStructure::EllasticScattering:       s += "elastic"; break;
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
       case EventHistoryStructure::PairProduction:           s += "pair production"; break;
+      default:                                              s += "UNKNOWN TYPE"; break;
       }
     ui->pteOut->appendHtml(s);
 }
@@ -725,7 +730,6 @@ bool OutputWindow::event(QEvent *event)
 
 void OutputWindow::on_pbWaveSpectrum_clicked()
 {
-  //if (!EventsDataHub->LastSimSet.fWaveResolved) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {
@@ -737,8 +741,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Wavelength data are empty!\n\n"
-              "Make sure the following settings were configured before simulation:\n"
-              "* Simulation_options/Accelerators/Do_logs_and_statistics is checked\n"
+              "Or make sure the following is set before simulation:\n"
               "* Simulation_options/Wave/Wavelength-resolved is checked", this);
       return;
     }
@@ -746,15 +749,24 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   //converting to wavelength
   int nBins = spec->GetNbinsX();
   //qDebug() << nBins << MW->WaveNodes;
-  auto WavelengthSpectrum = new TH1D("WaveSpectrumOutput","Wavelength spectrum", nBins-1, MW->WaveFrom, MW->WaveTo);
-  for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
-      WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
-  MW->GraphWindow->Draw(WavelengthSpectrum);
+  if (MW->EventsDataHub->LastSimSet.fWaveResolved)
+    {
+      auto WavelengthSpectrum = new TH1D("","Wavelength spectrum of photons hitting PMs", nBins-1, MW->WaveFrom, MW->WaveTo);
+      for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
+          WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
+      WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
+      MW->GraphWindow->Draw(WavelengthSpectrum);
+    }
+  else
+    {
+      spec->GetXaxis()->SetTitle("Wave index");
+      spec->SetTitle("Wave index spectrum of photons hitting PMs");
+      MW->GraphWindow->Draw(spec, "", true, false);
+    }
 }
 
 void OutputWindow::on_pbTimeSpectrum_clicked()
 {
-  //if (!EventsDataHub->isTimed()) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {
@@ -766,18 +778,18 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Time data are empty!\n"
-              "Make sure the following settings were configured before simulation:\n"
-              "* Simulation_options/Accelerators/Do_logs_and_statistics is checked\n"
-              "* Simulation_options/Time/Time-resolved is checked", this);
+              "Make sure the following is set before simulation:\n"
+              "Simulation_options/Accelerators/Do_logs_and_statistics is checked\n", this);
       return;
     }
 
+  spec->GetXaxis()->SetTitle("Time, ns");
+  spec->SetTitle("Time spectrum of photons hitting PMs");
   MW->GraphWindow->Draw(spec, "", true, false);
 }
 
 void OutputWindow::on_pbAngleSpectrum_clicked()
 {
-  //if (!EventsDataHub->LastSimSet.fAngResolved) return;
   ASimulationStatistics* d = EventsDataHub->SimStat;
   if (d->isEmpty())
   {
@@ -828,6 +840,8 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
        return;
      }
 
+   spec->GetXaxis()->SetTitle("Number of cycles in tracking");
+   spec->SetTitle("Distribution of number of tracking cycles for photons hitting PMs");
    MW->GraphWindow->Draw(spec, "", true, false);
 }
 
@@ -847,7 +861,7 @@ void OutputWindow::on_sbEvent_valueChanged(int arg1)
       return; //already triggered "on change" = this procedure
     } 
 
-  if (ui->tabwinDiagnose->currentIndex() == 0) ShowOneEventLog(arg1);
+  if (ui->tabwinDiagnose->currentIndex() == 0 && !bForbidUpdate) ShowOneEventLog(arg1);
   else on_pbRefreshViz_clicked();
 }
 
@@ -1195,8 +1209,7 @@ void OutputWindow::ShowPhotonLossLog()
       return;
   }
 
-
-  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached;
+  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry;
   QString s = "\n=====================\n";
   s += "Photon tracing ended:\n";
   s +=        "---------------------\n";
@@ -1208,11 +1221,10 @@ void OutputWindow::ShowPhotonLossLog()
       "Loss on optical grids: "+QString::number(d->LossOnGrid)+"\n"+
       "Tracing skipped (QE accelerator): "+QString::number(d->TracingSkipped)+"\n"+
       "Max tracing cycles reached: "+QString::number(d->MaxCyclesReached)+"\n"+
+      "Generated outside defined geometry: "+QString::number(d->GeneratedOutsideGeometry)+"\n"+
       "---------------------\n"+
       "Total: "+QString::number(sum)+"\n"+
       "=====================";
-  //OutText(s);
-  //SetTab(0);
   ui->pteOut->appendPlainText(s);
 }
 

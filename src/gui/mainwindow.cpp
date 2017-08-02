@@ -201,8 +201,8 @@ void MainWindow::closeEvent(QCloseEvent *)
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
-   //qDebug()<<"--Saving ANTS configuration";
-   if (ScriptWindow) ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   //qDebug()<<"--Saving ANTS configuration";   
+   ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
    GlobSet->SaveANTSconfiguration();
 
    bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it   
@@ -2499,7 +2499,7 @@ void MainWindow::on_pbIndShowArea_clicked()
 
 void MainWindow::on_cbGunAllowMultipleEvents_toggled(bool checked)
 {
-    ui->fGunMultipleEvents->setEnabled(checked);
+    ui->fGunMultipleEvents->setVisible(checked);
 }
 
 void MainWindow::UpdatePreprocessingSettingsIndication()
@@ -3039,8 +3039,7 @@ void MainWindow::on_pbInitializeScanFloodNoise_clicked()
 
 void MainWindow::on_twSingleScan_currentChanged(int index)
 {  
-  if (index == 0) ui->frLimitNodesTo->setVisible(false);
-  else ui->frLimitNodesTo->setVisible(true);
+  ui->frLimitNodesTo->setVisible( index != 0 );
 }
 
 void MainWindow::on_pbExportDeposition_clicked()
@@ -3891,35 +3890,45 @@ void MainWindow::on_actionVersion_triggered()
   QString mav = QString::number(majVer);
   QString qv = QT_VERSION_STR;
 
-  QString out = "ANTS2 version:  " + mav + "." + miv + "\n"
-                "Build number:  " + QString::number(versionNumber)+"\n"
-                "Build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
+  QString out = "ANTS2\n"
+                "   version:  " + mav + "." + miv + "\n"
+                "   build number:  " + QString::number(versionNumber)+"\n"
+                "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
+                "\n"
                 "Qt version:  " + qv + "\n"
                 "\n"
-                "Compilation options:"
-                "\nCUDA (gpu):  "
+                "ROOT version:  " + gROOT->GetVersion() + "\n"
+                "\n"
+                "Compilation options:\n"
+                "   CUDA (gpu):  "
 #ifdef __USE_ANTS_CUDA__
   "on"
 #else
   "off"
 #endif
-                "\nFANN (neural networks):  "
+                "\n   FANN (neural networks):  "
 #ifdef ANTS_FANN
   "on"
 #else
   "off"
 #endif
-                "\nFLANN (kNN search):  "
+                "\n   FLANN (kNN search):  "
 #ifdef ANTS_FLANN
   "on"
 #else
   "off"
 #endif
-                "\nEigen3 (for fast LRF fitting):  "
+                "\n   Eigen3 (for fast LRF fitting):  "
 #ifdef USE_EIGEN
   "on"
 #else
   "off"
+#endif
+                "\n   Root html server (for JSROOT):  "
+#ifdef USE_ROOT_HTML
+ "on"
+#else
+ "off"
 #endif
                 "";
 
@@ -4428,15 +4437,6 @@ void MainWindow::on_cobMatPointSource_activated(int index)
     { //secondary
       if ( (*MpCollection)[index]->SecondarySpectrum_lambda.isEmpty() ) message("This material has no secondary scintillation spectrum defined!", this);
     }
-}
-
-void MainWindow::on_ledSourceActivity_textChanged(const QString &/*arg1*/)
-{
-  double val = ui->ledSourceActivity->text().toDouble();
-  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
-  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
-  if (val == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
-  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
 }
 
 void MainWindow::on_actionOpen_settings_triggered()
@@ -5078,4 +5078,9 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->raise();
   Owindow->activateWindow();
   Owindow->SetTab(3);
+}
+
+void MainWindow::on_cobParticleSource_activated(int /*index*/)
+{
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }

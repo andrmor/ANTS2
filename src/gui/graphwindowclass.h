@@ -104,6 +104,8 @@ public:
     double extracted2DLineA();
     double extracted2DLineB();
     double extracted2DLineC();
+    double extracted2DLineXstart();
+    double extracted2DLineXstop();
     double extracted2DEllipseX();
     double extracted2DEllipseY();
     double extracted2DEllipseR1();
@@ -137,12 +139,16 @@ public:
     void OnBusyOn();
     void OnBusyOff();
 
+    bool Extraction();
+
     void switchOffBasket();
+    void ClearBasket();
     TObject *GetMainPlottedObject();
     void SaveGraph(QString fileName);    
     void EnforceOverlayOff();    
     void ClearDrawObjects_OnShutDown(); //precvents crash on shut down
-    void RegisterTObject(TObject* obj); //ONLY use to register objects which were NOT drawn using Draw method of this window (but root Draw method instead)
+    void RegisterTObject(TObject* obj); //ONLY use to register objects which were NOT drawn using Draw method of this window (but root Draw method instead)    
+    void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -231,6 +237,7 @@ private slots:
     void on_pbAddText_clicked();
     void on_pbRemoveLegend_clicked();
     void on_pbRemoveText_clicked();
+    void on_pbFWHM_clicked();
 
 private:
     Ui::GraphWindowClass *ui;
@@ -270,8 +277,7 @@ private:
     void updateLegendVisibility();
     void startOverlayMode();
     void endOverlayMode();
-    void UpdateBasketGUI();
-    void ClearBasket();
+    void UpdateBasketGUI();    
     void ExportData(bool fUseBinCenters=true);
     void exportTextForTH2(TH2 *h);
     void SaveBasket();

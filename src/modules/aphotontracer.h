@@ -1,6 +1,7 @@
 #ifndef APHOTONTRACER_H
 #define APHOTONTRACER_H
 
+#include "aphotonhistorylog.h"
 #include <QVector>
 #include "TMathBase.h"
 
@@ -44,6 +45,7 @@ private:
     OneEventClass* OneEvent; //PM signals for this event are collected here
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
+    QVector<APhotonHistoryLog> PhLog;
 
     int Counter; //number of photon transitions - there is a limit on this set by user
     APhoton* p; //the photon which is traced
@@ -65,6 +67,9 @@ private:
     Double_t FromGridElementToGridBulk[3]; //add to xyz of current point for gridnavigator to obtain normal navigator current point coordinates
     TGeoVolume* GridVolume; // the grid bulk
 
+    QString nameFrom;
+    QString nameTo;
+
     enum AbsRayEnum {AbsRayNotTriggered=0, AbsTriggered, RayTriggered, WaveShifted};
     inline AbsRayEnum AbsorptionAndRayleigh();
     inline double CalculateReflectionCoefficient();
@@ -74,5 +79,7 @@ private:
     inline void RandomDir();
     inline bool GridWasHit(int GridNumber);
     inline void ReturnFromGridShift();
+    inline void AppendTrack();
+    inline void AppendHistoryRecord();
 };
 #endif // APHOTONTRACER_H

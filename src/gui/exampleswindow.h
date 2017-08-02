@@ -2,7 +2,6 @@
 #define EXAMPLESWINDOW_H
 
 #include <QMainWindow>
-//#include "classes.h"
 
 class MainWindow;
 
@@ -33,8 +32,6 @@ public:
 
   void QuickSave(); //save configuration to LAST/QuickSave.conf
   void QuickLoad();
-
-  void setShowExamplesOnStartStatus(bool show);
 
 private slots:
   void on_cbDoNotShowExamplesOnStart_toggled(bool checked);

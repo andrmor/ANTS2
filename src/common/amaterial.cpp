@@ -173,7 +173,7 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
                   {
                     QJsonObject jterm;
                     jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
-                    jterm["ReactionType"] = 2;  //can be only capture
+                    jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
                     //going through secondary particles
                     QJsonArray jsecondaries;
                     for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )
@@ -306,7 +306,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
             {
               QJsonObject jterm = jneutron[iTerm].toObject();
               parseJson(jterm, "Branching", MatParticle[ip].Terminators[iTerm].branching);
-              MatParticle[ip].Terminators[iTerm].Type = NeutralTerminatorStructure::Capture; //2, can only be capture
+              MatParticle[ip].Terminators[iTerm].Type = static_cast<NeutralTerminatorStructure::ReactionType>(jterm["ReactionType"].toInt());
               //going through secondary particles
               QJsonArray jsecondaries = jterm["Secondaries"].toArray();
               int numSecondaries = jsecondaries.size();

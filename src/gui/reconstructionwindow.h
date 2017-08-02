@@ -141,7 +141,7 @@ public:
   void updateFiltersGui();
 
 public slots:
-  void ShowStatistics();
+  void ShowStatistics(bool bCopyToTextLog = false);
   void LRF_ModuleReadySlot(bool ready);
   void onSelectionChange(QVector<int> selectionArray);
 
@@ -519,6 +519,8 @@ private slots:
 
   void on_pbClearPositions_clicked();
 
+  void on_pbRecToTrue_clicked();
+
 protected:
     bool event(QEvent *event);
 
@@ -544,8 +546,9 @@ private:
   bool StopRecon; //stop button flag
 
   int ShiftZoldValue;
-  bool ForbidUpdate;  
+  bool ForbidUpdate;
   bool TMPignore;
+  bool bFilteringStarted;
 
   double lastChi2;
 
@@ -581,8 +584,6 @@ private:
   bool start2DEllipseExtraction();
   bool start2DBoxExtraction();  
   bool start2DPolygonExtraction();
-    //all use this:
-  bool Extraction();
 
   void updateRedStatusOfRecOptions();
   void RefreshNumEventsIndication();

@@ -1,7 +1,15 @@
 #include "lrfxy.h"
 #include "jsonparser.h"
 #include "spline.h"
+#ifdef TPS3M
+#include "tpspline3m.h"
+#else
 #include "tpspline3.h"
+#endif
+
+#ifdef NEWFIT
+#include "tps3fit.h"
+#endif
 
 #include <QJsonObject>
 
@@ -13,6 +21,7 @@ LRFxy::LRFxy(double x_min, double x_max, int n_intx, double y_min,
             ymin(y_min), ymax(y_max), nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL), logscale(log)
 {
     non_negative = false;
+    top_down = false;
 }
 
 LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL), logscale(false)
@@ -109,6 +118,41 @@ double LRFxy::eval(double x, double y, double /*z*/, double *err) const
     return logscale ? exp(bsr->Eval(x, y)) : bsr->Eval(x, y);
 }
 
+#ifdef NEWFIT
+double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
+{
+    std::vector <double> vx;
+    std::vector <double> vy;
+    std::vector <double> va;
+    for (int i=0; i<npts; i++) {
+        if (!inDomain(x[i], y[i]))
+            continue;
+        vx.push_back(x[i]);
+        vy.push_back(y[i]);
+        va.push_back(data[i]);
+    }
+
+    bsr = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
+    valid = true;
+
+    TPS3fit F(bsr);
+    if (non_negative)
+        F.SetConstraintNonNegative();
+
+    if (top_down)
+        F.SetConstraintTopDown(x0, y0);
+
+    if (!grid) {
+        F.Fit(va.size(), &vx[0], &vy[0], &va[0]);
+        return F.GetResidual();
+    } else {
+        F.AddData(va.size(), &vx[0], &vy[0], &va[0]);
+        F.Fit();
+        return F.GetResidual();
+    }
+}
+
+#else
 double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
 {
     std::vector <double> vx;
@@ -130,6 +174,7 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
     else
         return fit_tpspline3_grid(bsr, va.size(), &vx[0], &vy[0], &va[0]);
 }
+#endif
 
 void LRFxy::setSpline(TPspline3 *bs, bool log)
 {

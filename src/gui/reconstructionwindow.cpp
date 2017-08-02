@@ -1051,14 +1051,14 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 void ReconstructionWindow::updateFiltersGui()
 {
   //Update UI
-  ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
-  ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
-  ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
-  ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
+  //ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
+  //ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
+  //ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
+  //ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
-  ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
-  ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
+  //ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
+  //ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
     //warning icons
   bool masterWarningFlag = false;
   QIcon no;
@@ -1155,14 +1155,24 @@ void ReconstructionWindow::updateFiltersGui()
 void ReconstructionWindow::on_pbUpdateFilters_clicked()
 {
   //qDebug() << "UpdateFilterButton pressed";
-  ReconstructionWindow::updateFiltersGui();
-  if (ui->cbSpFcustom->isChecked() && ui->twData->tabText(ui->twData->currentIndex())=="Spatial")
-    if (MW->GeometryWindow->isVisible()) ReconstructionWindow::on_pbShowSpatialFilter_clicked();
+  if (bFilteringStarted) //without this on-Editing-finished is triggered when disable kick in and cursor is in one of the edit boxes
+  {
+      //qDebug() << "Igonred, already filetring";
+      return;
+  }
 
-  if (TMPignore)
-      UpdateReconConfig(); // in this case only GUI update and Config->JSON update
-  else
-      UpdateStatusAllEvents();
+  bFilteringStarted = true;  //--in--//
+  MW->WindowNavigator->BusyOn();
+
+  ReconstructionWindow::updateFiltersGui();
+  if (ui->cbSpFcustom->isChecked() && ui->twData->tabText(ui->twData->currentIndex()) == "Spatial")
+    if (MW->GeometryWindow->isVisible()) on_pbShowSpatialFilter_clicked();
+
+  if (TMPignore) UpdateReconConfig(); // in this case only GUI update and Config->JSON update
+  else UpdateStatusAllEvents();
+
+  MW->WindowNavigator->BusyOff();
+  bFilteringStarted = false; //--out--//
 }
 
 void ReconstructionWindow::on_pbEnergySpectrum1_clicked()
@@ -1389,11 +1399,13 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
   bool AccountForPassive = ui->cbPassivePMsTakenAccount->isChecked();
 
   //init
-  double Zmin = ui->ledZfrom->text().toDouble();
-  double Zmax = ui->ledZto->text().toDouble();
-  bool UseScan = ui->cbPlotVsActualPosition->isChecked();
-  bool fShowPMs = ui->cbShowPMs->isChecked();
-  bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const double Zmin = ui->ledZfrom->text().toDouble();
+  const double Zmax = ui->ledZto->text().toDouble();
+  const bool UseScan = ui->cbPlotVsActualPosition->isChecked();
+  const bool fShowPMs = ui->cbShowPMs->isChecked();
+  const bool fShowManifest = ui->cbShowManifestItems->isChecked();
+  const bool bInvertX = ui->cbInvertX->isChecked();
+  const bool bInvertY = ui->cbInvertY->isChecked();
 
   auto hist2D = new TH2D("hist2d","",ui->sbXbins->value(), ui->ledXfrom->text().toDouble(), ui->ledXto->text().toDouble(),
                                     ui->sbYbins->value(), ui->ledYfrom->text().toDouble(), ui->ledYto->text().toDouble());
@@ -1479,16 +1491,22 @@ bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error
         default:;
         }
 
+        double X, Y;
         if (UseScan)
           {
-             hist2D->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1], val);
-            histNum->Fill( EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1]);
+             X = EventsDataHub->Scan[iev]->Points[0].r[0];
+             Y = EventsDataHub->Scan[iev]->Points[0].r[1];
           }
         else
           {
-             hist2D->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1], val);
-            histNum->Fill(EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0], EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1]);
+             X = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[0];
+             Y = EventsDataHub->ReconstructionData[CurrentGroup][iev]->Points[0].r[1];
           }
+        if (bInvertX) X *= -1.0;
+        if (bInvertY) Y *= -1.0;
+
+        hist2D->Fill( X, Y, val );
+        histNum->Fill( X, Y );
       }
     else qWarning() << "Not implemented for multiple points!";
 
@@ -2440,21 +2458,21 @@ bool ReconstructionWindow::startXextraction()
 {
    MW->WindowNavigator->BusyOn();
    MW->GraphWindow->ExtractX();
-   return ReconstructionWindow::Extraction();
+   return MW->GraphWindow->Extraction();
 }
 
 bool ReconstructionWindow::start2DLineExtraction()
 {
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DLine();
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 bool ReconstructionWindow::start2DEllipseExtraction()
 {
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DEllipse();
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbDefSumCutOffs_clicked()
@@ -2469,7 +2487,6 @@ void ReconstructionWindow::on_pbDefSumCutOffs_clicked()
    if (!ok) return;
 
    ui->ledFilterSumMin->setText(QString::number(MW->GraphWindow->extractedX(), 'g', 4));
-   //ReconstructionWindow::on_ledFilterSumMin_editingFinished();
    ReconstructionWindow::on_pbUpdateFilters_clicked();
    ReconstructionWindow::on_pbShowSumSignal_clicked();
 }
@@ -3456,7 +3473,7 @@ bool ReconstructionWindow::start2DBoxExtraction()
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DBox();
 
-    return ReconstructionWindow::Extraction();
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbCorr_AddLine_clicked()
@@ -3564,21 +3581,7 @@ bool ReconstructionWindow::start2DPolygonExtraction()
     MW->WindowNavigator->BusyOn();
     MW->GraphWindow->Extract2DPolygon();
 
-    return ReconstructionWindow::Extraction();
-}
-
-bool ReconstructionWindow::Extraction()
-{
-  do
-    {
-      qApp->processEvents();
-      if (MW->GraphWindow->IsExtractionCanceled()) break;
-    }
-  while (!MW->GraphWindow->IsExtractionComplete() );
-
-  MW->WindowNavigator->BusyOff(false);
-
-  return !MW->GraphWindow->IsExtractionCanceled();  //returns false = canceled
+    return MW->GraphWindow->Extraction();
 }
 
 void ReconstructionWindow::on_pbEvaluateGains_clicked()
@@ -5676,7 +5679,7 @@ void ReconstructionWindow::onReconstructionFinished(bool fSuccess, bool fShow)
            //ShowReconstructionPositionsIfWindowVisible();
            ShowPositions(0, true);
        MW->Owindow->RefreshData();   // *** !!!
-       ShowStatistics();
+       ShowStatistics(true);
        double usPerEvent = ReconstructionManager->getUsPerEvent();
        ui->leoMsPerEv->setText(QString::number(usPerEvent, 'g', 4));
     }
@@ -5702,13 +5705,18 @@ void ReconstructionWindow::SetShowFirst(bool fOn, int number)
 void ReconstructionWindow::on_cbCustomBinning_toggled(bool checked)
 {
    ui->fCustomBins->setEnabled(checked);
-   if (!checked) ui->fCustomRanges->setEnabled(false);
+   if (!checked)
+   {
+       ui->cbCustomRanges->setChecked(false);
+       ui->fCustomRanges->setEnabled(false);
+   }
 }
 
 void ReconstructionWindow::on_cbCustomRanges_toggled(bool checked)
 {
    if (checked) ui->fCustomBins->setEnabled(true);
    ui->fCustomRanges->setEnabled(checked);
+   if (checked) ui->cbCustomBinning->setChecked(true);
 }
 
 void linkCustomClass::updateBins() {bins = Qbins->value();}
@@ -6017,7 +6025,7 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        ui->ledSuggestedZ->setVisible(true);
        ui->label_8->setVisible(true);
-       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 106, ui->cobZ->height());
+       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 131, ui->cobZ->height());
        // combo button
        p.setColor(QPalette::Button, Qt::white);
        p.setColor(QPalette::ButtonText, Qt::black);
@@ -6029,7 +6037,7 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        ui->ledSuggestedZ->setVisible(false);
        ui->label_8->setVisible(false);
-       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 161, ui->cobZ->height());
+       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 188, ui->cobZ->height());
        p.setColor(QPalette::Button, Qt::white);
        p.setColor(QPalette::ButtonText, Qt::red);
      }
@@ -6039,13 +6047,16 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        //3D - reconstruct Z
        ui->cobZ->setItemText(0, "Start from Z of:");
-       ui->cobZ->setItemText(1, "Start from loaded/simulated Z");
+       ui->cobZ->setItemText(1, "Start from loaded/sim Z");
+       //if (ui->cobZ->count() == 3) ui->cobZ->removeItem(2);
      }
    else
      {
        //2D
        ui->cobZ->setItemText(0, "Set Z to:");
-       ui->cobZ->setItemText(1, "Use loaded/simulated Z");
+       ui->cobZ->setItemText(1, "Use loaded/sim Z");
+       //if (ui->cobZ->count() == 2) ui->cobZ->addItem("");
+       //ui->cobZ->setItemText(2, "Do not change Z");
      }
 }
 
@@ -6089,9 +6100,14 @@ void ReconstructionWindow::on_pbTrueToRec_clicked()
 {
   EventsDataHub->copyTrueToReconstructed();
   SetProgress(100);
-  //ShowReconstructionPositionsIfWindowVisible();
   ShowPositions(0, true);
   ShowStatistics();
+  ui->leoMsPerEv->setText("");
+}
+
+void ReconstructionWindow::on_pbRecToTrue_clicked()
+{
+  EventsDataHub->copyReconstructedToTrue();
   ui->leoMsPerEv->setText("");
 }
 

@@ -672,27 +672,6 @@ void ReconstructionManagerClass::singleThreadEventFilters()
               rec->GoodEvent = false;
               continue;
           }
-
-//          double x, y, z;
-//          if (FiltS->SpF_RecOrScan == 0)
-//          {
-//              x = rec->Points[0].r[0];
-//              y = rec->Points[0].r[1];
-//              z = rec->Points[0].r[2];
-//          }
-//          else
-//          {
-//              x = EventsDataHub->Scan.at(iev)->Points[0].r[0];
-//              y = EventsDataHub->Scan.at(iev)->Points[0].r[1];
-//              z = EventsDataHub->Scan.at(iev)->Points[0].r[2];
-//          }
-//          TGeoNode* node = navi->FindNode(x,y,z);
-//          if (node && TString(node->GetVolume()->GetName()) == FiltS->SpF_LimitToObj) ;//not failed
-//          else
-//          {
-//              rec->GoodEvent = false;
-//              continue;
-//          }
       }
 
       //correlation

@@ -91,7 +91,7 @@ public:
   void writePreprocessingToJson(QJsonObject &json);
 
 public slots:
-  void onRequestRegisterTopNode();
+  void onRequestRegisterGeoManager();
 private:
   //reads
   void readWorldFixedFromJson(QJsonObject &json);
@@ -117,7 +117,7 @@ signals:
                                                   //0-normal, 1-by mat, 2-highlight mat (matId)
   void requestClearEventsData();
   void requestGroupsGuiUpdate();
-  void newTopInGeoManager(TObject*);
+  void newGeoManager(TObject*);
 };
 
 #endif // DETECTORCLASS_H

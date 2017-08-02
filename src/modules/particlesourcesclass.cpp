@@ -115,7 +115,6 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
   //after any operation with sources (add, remove), init should be called before first use!
 
   QVector<GeneratedParticleStructure>* GeneratedParticles = new QVector<GeneratedParticleStructure>;
-  //GeneratedParticles.resize(0);
 
   //selecting the source
   int isource = 0;
@@ -129,7 +128,6 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
           rnd -= ParticleSourcesData[isource]->Activity;
         }
     }
-  //qDebug()<<"----Source"<<isource<<"selected";
 
   //position
   double R[3];
@@ -614,23 +612,7 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
       parseJson(json, "DoMaterialLimited", s->DoMaterialLimited);
       parseJson(json, "LimitedToMaterial", s->LimtedToMatName);
 
-      if (s->DoMaterialLimited)
-      {
-          bool fFound = false;
-          int iMat;
-          for (iMat=0; iMat<MpCollection->countMaterials(); iMat++)
-              if (s->LimtedToMatName == (*MpCollection)[iMat]->name)
-              {
-                  fFound = true;
-                  break;
-              }
-
-          if (fFound)
-          { //only in this case limit to material will be used!
-              s->fLimit = true;
-              s->LimitedToMat = iMat;
-          }
-      }
+      if (s->DoMaterialLimited) checkLimitedToMaterial(s);
   }
 
   //GunParticles
@@ -695,6 +677,25 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
       // TO DO !!! *** add error if no energy or spectrum
     }
   return true;
+}
+
+void ParticleSourcesClass::checkLimitedToMaterial(ParticleSourceStructure* s)
+{
+    bool fFound = false;
+    int iMat;
+    for (iMat=0; iMat<MpCollection->countMaterials(); iMat++)
+        if (s->LimtedToMatName == (*MpCollection)[iMat]->name)
+        {
+            fFound = true;
+            break;
+        }
+
+    if (fFound)
+    { //only in this case limit to material will be used!
+        s->fLimit = true;
+        s->LimitedToMat = iMat;
+    }
+    else s->fLimit = false;
 }
 
 bool ParticleSourcesClass::readFromJson(QJsonObject &json)
@@ -1006,7 +1007,7 @@ ParticleSourceStructure::ParticleSourceStructure()
   Phi = 0; Theta = 0; Psi = 0;
   CollPhi = 0; CollTheta = 0;
   Spread = 45;
-  DoMaterialLimited = false;
+  DoMaterialLimited = fLimit = false;
 
   GunParticles.resize(0);
 }

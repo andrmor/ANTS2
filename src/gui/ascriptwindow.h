@@ -38,6 +38,8 @@ public:
     void SetScript(QString *text);
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
+    void AddNewTab();
+
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
     void HighlightErrorLine(int line);
 
@@ -45,6 +47,8 @@ public:
     void ReadFromJson(QJsonObject &json);
 
     void UpdateHighlight();
+
+    void SetMainSplitterSizes(QList<int> values);
 
     AScriptManager* ScriptManager;
     QStringList functions;
@@ -85,6 +89,11 @@ private slots:
     void on_pbConfig_toggled(bool checked);
     void on_pbHelp_toggled(bool checked);
 
+    void on_actionIncrease_font_size_triggered();
+    void on_actionDecrease_font_size_triggered();
+
+    void on_actionSelect_font_triggered();
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;
@@ -94,6 +103,7 @@ private:
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
+    QSplitter* splMain;
     QSplitter* splHelp;
     QPlainTextEdit* pteOut;
     QTreeWidget* trwHelp;
@@ -122,7 +132,6 @@ private:
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
 
-    void addNewTab();
     void removeTab(int tab);
     void clearAllTabs();
     QString createNewTabName();
@@ -144,6 +153,7 @@ public slots:
     void receivedOnStart() {emit onStart();}
     void receivedOnAbort() {emit onAbort();}
     void receivedOnSuccess(QString eval) {emit success(eval);}
+    void onDefaulFontSizeChanged(int size);
 };
 
 class AScriptWindowTabItem : QObject

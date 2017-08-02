@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
 
 
     ANetworkModule Network;
-    QObject::connect(&Detector, &DetectorClass::newTopInGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
-    QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterTopNode);
+    QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
+    QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
       //in GlobSetWindow init now:
       //Network.StartRootHttpServer();  //does nothing if compilation flag is not set
       //Network.StartWebSocketServer(1234);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         //qDebug() << "___> Done!";
 
         //overrides the saved status of examples window
-        if (w.ShowExamplesOnStart)
+        if (GlobSet.ShowExamplesOnStart)
         {
             w.ELwindow->show();
             w.ELwindow->raise();//making sure examples window is on top
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
-        InterfaceToTexter* txt = new InterfaceToTexter();
+        InterfaceToTexter* txt = new InterfaceToTexter(&GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window

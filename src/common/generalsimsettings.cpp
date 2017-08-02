@@ -18,6 +18,7 @@ GeneralSimSettings::GeneralSimSettings()
   TimeFrom = 0;
   TimeTo = TimeBins;
   WaveStep = 1.0;
+  bDoPhotonHistoryLog = false;
 }
 
 bool GeneralSimSettings::readFromJson(QJsonObject &Json)

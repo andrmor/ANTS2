@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include "THttpServer.h"
+#include "TGeoManager.h"
 
 ARootHttpServer::ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot)
 {
@@ -13,6 +14,7 @@ ARootHttpServer::ARootHttpServer(unsigned int port, QString OptionalUrlJsRoot)
     if (!OptionalUrlJsRoot.isEmpty()) server->SetJSROOT(OptionalUrlJsRoot.toLatin1());
 
     GeoWorld = 0;
+    GeoTracks = 0;
 }
 
 ARootHttpServer::~ARootHttpServer()
@@ -22,10 +24,17 @@ ARootHttpServer::~ARootHttpServer()
 
 void ARootHttpServer::UpdateGeoWorld(TObject *NewGeoWorld)
 {
-    qDebug() << "In root html server: registering new TopNode";
+    //qDebug() << "In root html server: registering new TopNode and GeoTracks";
+
+    TGeoManager* GeoManager = dynamic_cast<TGeoManager*>(NewGeoWorld);
+
     if (GeoWorld) server->Unregister(GeoWorld);
-    server->Register("GeoWorld", NewGeoWorld);
-    GeoWorld = NewGeoWorld;
+    server->Register("GeoWorld", GeoManager->GetTopNode());
+    GeoWorld = GeoManager->GetTopNode();
+
+    if (GeoTracks) server->Unregister(GeoTracks);
+    server->Register("GeoTracks", GeoManager->GetListOfTracks());
+    GeoTracks = GeoManager->GetListOfTracks();
 }
 
 void ARootHttpServer::Register(QString name, TObject *obj)

@@ -92,7 +92,7 @@ void InterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, dou
 
 QString InterfaceToMinimizerScript::Run()
 {
-  qDebug() << "Optimization run called";
+  //qDebug() << "Optimization run called";
   ScriptManager->numVariables = Name.size();
   if (ScriptManager->numVariables == 0)
     {
@@ -137,7 +137,7 @@ QString InterfaceToMinimizerScript::Run()
   for (int i=0; i<ScriptManager->numVariables; i++)
       RootMinimizer->SetLimitedVariable(i+1, Name[i].toLatin1().data(),  Start[i], Step[i], Min[i], Max[i]);
 
-  qDebug() << "Minimizer created and configured";
+  //qDebug() << "Minimizer created and configured";
 
   // do the minimization
   //fAbort = false;

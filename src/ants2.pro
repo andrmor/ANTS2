@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 3
-ANTS2_MINOR = 12
+ANTS2_MINOR = 13
 ANTS2_VERSION = 2197
 
 #Optional libraries
@@ -23,26 +23,44 @@ linux-g++ || unix {
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
-
+linux-g++ || unix {
+    QMAKE_CXXFLAGS += -march=native
+}
 #---EIGEN---
 ants2_eigen3 {
      DEFINES += USE_EIGEN
+     CONFIG += ants2_matrix #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
 
      win32 { INCLUDEPATH += C:/eigen3 }
      linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
 
      #advanced options:
-     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)
-     #DEFINES += TPS3M  #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
+     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)  
 
      SOURCES += SplineLibrary/bs3fit.cpp \
                 SplineLibrary/tps3fit.cpp \
-                SplineLibrary/tpspline3m.cpp
+
 
      HEADERS += SplineLibrary/bs3fit.h \
-                SplineLibrary/tps3fit.h \
-                SplineLibrary/tpspline3m.h
+                SplineLibrary/tps3fit.h
 }
+
+ants2_matrix { # use matrix algebra for TP splines
+    DEFINES += TPS3M
+    SOURCES += SplineLibrary/tpspline3m.cpp \
+               SplineLibrary/tpspline3d.cpp \
+               SplineLibrary/tps3dfit.cpp \
+               modules/lrf_v2/lrfxyz.cpp
+
+    HEADERS += SplineLibrary/tpspline3m.h \
+               SplineLibrary/tpspline3d.h \
+               SplineLibrary/tps3dfit.h \
+               modules/lrf_v2/lrfxyz.h
+
+} else {
+    SOURCES += SplineLibrary/tpspline3.cpp
+    HEADERS += SplineLibrary/tpspline3.h
+} 
 #----------
 
 #---FLANN---
@@ -53,6 +71,9 @@ ants2_flann {
         LIBS += -LC:/FLANN/lib -lflann
         INCLUDEPATH += C:/FLANN/include
      }
+
+    HEADERS += scriptmode/ainterfacetoknnscript.h
+    SOURCES += scriptmode/ainterfacetoknnscript.cpp
 }
 #----------
 
@@ -225,7 +246,9 @@ SOURCES += main.cpp \
     Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
-    SplineLibrary/tpspline3.cpp
+    scriptmode/ainterfacetophotonscript.cpp \
+    common/aphotonhistorylog.cpp
+
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -326,7 +349,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
-    SplineLibrary/tpspline3.h
+    scriptmode/ainterfacetophotonscript.h \
+    common/aphotonhistorylog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -573,5 +597,3 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-
-DISTFILES +=

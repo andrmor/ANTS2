@@ -622,7 +622,17 @@ double GraphWindowClass::extracted2DLineB()
 
 double GraphWindowClass::extracted2DLineC()
 {
-  return RasterWindow->extracted2DLineC;
+    return RasterWindow->extracted2DLineC;
+}
+
+double GraphWindowClass::extracted2DLineXstart()
+{
+    return RasterWindow->Line2DstartX;
+}
+
+double GraphWindowClass::extracted2DLineXstop()
+{
+    return RasterWindow->Line2DstopX;
 }
 
 double GraphWindowClass::extracted2DEllipseX()
@@ -781,7 +791,11 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
 
   GraphWindowClass::doDraw(obj, options, DoUpdate);
 
-  if (CurrentBasketItem == -1) MasterDrawObjects = DrawObjects; //pointers are copied!
+  if (CurrentBasketItem == -1)
+    {
+      if (RegisterObject) MasterDrawObjects = DrawObjects; //pointers are copied!
+      else MasterDrawObjects.clear();
+    }
   fFirstTime = false;
 
   //update range indication etc
@@ -962,42 +976,42 @@ void GraphWindowClass::on_cbLogY_toggled(bool checked)
 
 void GraphWindowClass::on_ledXfrom_editingFinished()
 {
-  ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (xmin == ui->ledXfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledXto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (xmax == ui->ledXto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledYfrom_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (ymin == ui->ledYfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledYto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (ymax == ui->ledYto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledZfrom_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (zmin == ui->ledZfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledZto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (zmax == ui->ledZto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
@@ -1143,6 +1157,7 @@ void GraphWindowClass::RedrawAll()
   if (DrawObjects.isEmpty())
     {
       ClearRootCanvas();
+      UpdateRootCanvas();
       return;
     }
 
@@ -2303,6 +2318,8 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
           //does not work normal way - e.g. recalculated LRFs will replace old ones even in the copied object
           TF1* f = (TF1*)(*drawObjects)[i].getPointer();
           TGraph* g = HistToGraph( f->GetHistogram() );
+          g->GetXaxis()->SetTitle( f->GetHistogram()->GetXaxis()->GetTitle() );
+          g->GetYaxis()->SetTitle( f->GetHistogram()->GetYaxis()->GetTitle() );
           g->SetLineStyle( f->GetLineStyle());
           g->SetLineColor(f->GetLineColor());
           g->SetLineWidth(f->GetLineWidth());
@@ -2312,7 +2329,9 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
           g->SetFillColor(0);
           g->SetFillStyle(0);
           obj = g;
-          options += "AL";
+          if (!options.contains("same", Qt::CaseInsensitive))
+              if (!options.contains("AL", Qt::CaseInsensitive))
+                  options += "AL";
           Type = g->ClassName();
         }
       else if (type == "TF2")
@@ -2363,15 +2382,7 @@ BasketItemClass::BasketItemClass(QString name, QVector<DrawObjectStructure> *dra
                 }
             }
           obj = newm;
-        }
-
-      else if (type == "TLegend")
-        {
-          //obj = new TLegend( *(TLegend*)(*drawObjects)[i].getPointer());
-          //likely causes problem because of the pointers, has to be locally recreated
-            //qDebug() << "Skipping TLegend";
-          continue;
-        }
+        }      
       else
         {
           message("Non-implemented object type: "+type);
@@ -2556,7 +2567,8 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
       if (ret == QMessageBox::Yes)
       {
           ClearBasket();
-          UpdateBasketGUI();
+          //UpdateBasketGUI();
+          on_pbBasketBackToLast_clicked();
       }
     }
   else if (selectedItem == save)
@@ -2740,8 +2752,9 @@ void GraphWindowClass::ClearBasket()
    for (int ib=0; ib<Basket.size(); ib++)
        Basket[ib].clearObjects();
 
-  Basket.clear();
-  if (!MW->ShutDown) GraphWindowClass::on_pbBasketBackToLast_clicked();
+  Basket.clear();  
+  on_pbBasketBackToLast_clicked();
+  UpdateBasketGUI();
 }
 
 void GraphWindowClass::on_actionSave_image_triggered()
@@ -2848,8 +2861,6 @@ void GraphWindowClass::SaveBasket()
 
 void GraphWindowClass::AppendBasket()
 {
-  qDebug() << "Appending to basket";
-
   QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -2861,33 +2872,30 @@ void GraphWindowClass::AppendBasket()
 
   TNamed* desc = (TNamed*)f->Get("BasketDescription");
   QString text = desc->GetTitle();
-  qDebug() << text;
-
-  TH1::AddDirectory(false);  // ***
+  //qDebug() << text;
 
   if (desc)
     {
-      qDebug()<<"Proper basket file!";
+      //qDebug()<<"Proper basket file!";
       QStringList sl = text.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
 
       int numLines = sl.size();
-      qDebug() << "Lines: "<<numLines;
+      //qDebug() << "Lines: "<<numLines;
 
-      //int numFileObjects = f->GetListOfKeys()->GetEntries();
       bool ok = true;
       int indexFileObject = 0;
       if (numLines % 2 == 0 )
         {
-          qDebug() << "Ok, even number of lines";
+          //qDebug() << "Ok, even number of lines";
           for (int iDrawObject=0; iDrawObject<numLines/2; iDrawObject++ )
             {
-              qDebug() << iDrawObject<<">-----";
+              //qDebug() << iDrawObject<<">-----";
               QString name = sl[iDrawObject*2];
               bool ok;
               QStringList fields = sl[iDrawObject*2+1].split("|");
               if (fields.size()<2)
                 {
-                  qDebug()<<"Too short descr line";
+                  qWarning()<<"Too short descr line";
                   ok=false;
                   break;
                 }
@@ -2895,13 +2903,13 @@ void GraphWindowClass::AppendBasket()
               if (!ok) break;
               if (numObj != fields.size()-1)
                 {
-                  qDebug()<<"Num objects vs option strings mismatch:"<<numObj<<fields.size()-1;
+                  qWarning()<<"Number of objects vs option strings mismatch:"<<numObj<<fields.size()-1;
                   ok=false;
                   break;
                 }
 
-              qDebug() << "name:"<< name;
-              qDebug() << "objects:"<< numObj;
+              //qDebug() << "name:"<< name;
+              //qDebug() << "objects:"<< numObj;
 
               QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
               for (int i=0; i<numObj; i++)
@@ -2909,8 +2917,8 @@ void GraphWindowClass::AppendBasket()
                   TKey *key = (TKey*)f->GetListOfKeys()->At(indexFileObject);
                   indexFileObject++;
                   QString type = key->GetClassName();
-                  TString objName = key->GetName();
-                  qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
+                  //TString objName = key->GetName();
+                  //qDebug() << "-->"<< i<<"   "<<objName<<"  "<<type<<"   "<<fields[i+1];
                   TObject *p = 0;
 
                   if (type=="TH1D") p = (TH1D*)key->ReadObj();
@@ -2935,14 +2943,16 @@ void GraphWindowClass::AppendBasket()
                   if (type=="TGraph") p = (TGraph*)key->ReadObj();
                   if (type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
 
+                  if (type=="TLegend") p = (TLegend*)key->ReadObj();
+
                   if (p)
                     {
-                      qDebug() << p->GetName();
+                      //qDebug() << p->GetName();
                       drawObjects->append(DrawObjectStructure(p, fields[i+1]));
                     }
                   else
                     {
-                      qWarning() << "Unregistered object type for load basket from file!";
+                      qWarning() << "Unregistered object type" << type <<"for load basket from file!";
                     }
                 }
               Basket.append(BasketItemClass(name, drawObjects));
@@ -2951,22 +2961,14 @@ void GraphWindowClass::AppendBasket()
         }
       else ok = false;
 
-      if (ok)
-        {
-          qDebug() << "Append successful";
-        }
-      else
-        {
-          qDebug() << "Corrupted basked description";
-        }
+      if (ok) qDebug() << "Append successful";
+      else    qDebug() << "Corrupted basked file";
     }
   else
     {
       message("It is not a proper Basket file!", this);
     }
   f->Close();
-
-  TH1::AddDirectory(true); // ***
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()
@@ -3188,10 +3190,12 @@ void GraphWindowClass::on_pbAddText_clicked()
   D.exec();
   if (D.result() == QDialog::Rejected) return;
 
-  bool fShowFrame = cbFrame->isChecked();
-  QString Text = te->toPlainText();
-  if (Text.isEmpty()) return;
+  QString Text = te->toPlainText();  
+  if (!Text.isEmpty()) ShowTextPanel(Text, cbFrame->isChecked(), cobAlign->currentIndex());
+}
 
+void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
+{
   double xc1, yc1, xc2, yc2;
   RasterWindow->fCanvas->GetRange(xc1, yc1, xc2, yc2);
 
@@ -3204,28 +3208,26 @@ void GraphWindowClass::on_pbAddText_clicked()
 
   TPaveText* la = new TPaveText(x1, y1, x2, y2);
   la->SetFillColor(0);
-  la->SetBorderSize(fShowFrame ? 1 : 0);
+  la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);
-  la->SetTextAlign( (1+cobAlign->currentIndex())*10+2);
+  la->SetTextAlign( (AlignLeftCenterRight + 1) * 10 + 2);
 
   QStringList sl = Text.split("\n");
-  for (QString s : sl)
-    {
-      la->AddText(s.toLatin1());
-    }
+  for (QString s : sl) la->AddText(s.toLatin1());
 
-  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
-  {
-     RegisterTObject(la);
-     DrawObjects.append(DrawObjectStructure(la, "same"));
-  }
-  else
-  {
-     //do not register for basket - they have their own system
-     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
-  }
+  Draw(la, "same");
+//  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+//  {
+//     RegisterTObject(la);
+//     DrawObjects.append(DrawObjectStructure(la, "same"));
+//  }
+//  else
+//  {
+//     //do not register for basket - they have their own system
+//     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
+//  }
 
-  RedrawAll();
+//  RedrawAll();
 }
 
 void GraphWindowClass::on_pbRemoveText_clicked()
@@ -3243,4 +3245,108 @@ void GraphWindowClass::on_pbRemoveText_clicked()
           }
     }
   qDebug() << "Text object was not found!";
+}
+
+
+bool GraphWindowClass::Extraction()
+{
+    do
+      {
+        qApp->processEvents();
+        if (IsExtractionCanceled()) break;
+      }
+    while (!IsExtractionComplete() );
+
+    MW->WindowNavigator->BusyOff(false);
+
+    return !IsExtractionCanceled();  //returns false = canceled
+}
+
+Double_t GauseWithBase(Double_t *x, Double_t *par)
+{
+   return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]
+}
+
+void GraphWindowClass::on_pbFWHM_clicked()
+{
+    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    if (DrObj.isEmpty())
+    {
+        message("No data", this);
+        return;
+    }
+
+    const QString cn = DrObj.first().getPointer()->ClassName();
+    if ( !cn.startsWith("TH1") && cn!="TProfile")
+    {
+        message("Can be used only with 1D histograms!", this);
+        return;
+    }
+
+    MW->WindowNavigator->BusyOn();
+    Extract2DLine();
+    if (!Extraction()) return; //cancel
+
+    double startX = extracted2DLineXstart();
+    double stopX = extracted2DLineXstop();
+    if (startX>stopX) std::swap(startX, stopX);
+    //qDebug() << startX << stopX;
+
+    double a = extracted2DLineA();
+    double b = extracted2DLineB();
+    double c = extracted2DLineC();
+    if (fabs(b)<1.0e-10)
+    {
+        message("Bad base line, cannot fit", this);
+        return;
+    }
+
+    TH1* h =   static_cast<TH1*>(DrObj.first().getPointer());
+                                                                   //  S  * exp( -0.5/s2 * (x   -m )^2) +  A *x +  B
+    TF1 *f = new TF1("myfunc", GauseWithBase, startX, stopX, 5);  //  [0] * exp(    [1]  * (x + [2])^2) + [3]*x + [4]
+
+    double initMid = startX + 0.5*(stopX - startX);
+    //qDebug() << "Initial mid:"<<initMid;
+    double initSigma = (stopX - startX)/2.3548; //sigma
+    double startPar1 = -0.5 / (initSigma * initSigma );
+    //qDebug() << "Initial par1"<<startPar1;
+    double midBinNum = h->GetXaxis()->FindBin(initMid);
+    double valOnMid = h->GetBinContent(midBinNum);
+    double baseAtMid = (c - a * initMid) / b;
+    double gaussAtMid = valOnMid - baseAtMid;
+    //qDebug() << "bin, valMid, baseMid, gaussmid"<<midBinNum<< valOnMid << baseAtMid << gaussAtMid;
+
+    f->SetParameter(0, gaussAtMid);
+    f->SetParameter(1, startPar1);
+    f->SetParameter(2, -initMid);
+    f->FixParameter(3, -a/b);  // fixed!
+    f->FixParameter(4, c/b);   // fixed!
+
+    int status = h->Fit(f, "R0");
+    if (status == 0)
+    {
+        double mid = -f->GetParameter(2);
+        double sigma = TMath::Sqrt(-0.5/f->GetParameter(1));
+        //qDebug() << "sigma:"<<sigma;
+        double FWHM = sigma * 2.0*TMath::Sqrt(2.0*TMath::Log(2.0));
+        double rel = FWHM/mid;
+
+        QVector<DrawObjectStructure> CopyMasterDrawObjects;
+        if (CurrentBasketItem == -1) CopyMasterDrawObjects = MasterDrawObjects;
+
+        //drawing the fit
+        Draw(f, "same");
+
+        //draw base line
+        TF1 *fl = new TF1("line", "pol2", startX, stopX);
+        fl->SetLineStyle(2);
+        fl->SetParameters(c/b, -a/b);
+        Draw(fl, "same");
+
+        //draw panel with results
+        ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));
+
+        MasterDrawObjects = CopyMasterDrawObjects;
+    }
+    else message("Fit failed!", this);
 }

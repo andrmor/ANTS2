@@ -20,6 +20,11 @@
 #include "checkupwindowclass.h"
 #include "ainterfacetowebsocket.h"
 #include "anetworkmodule.h"
+#include "ainterfacetophotonscript.h"
+
+#ifdef ANTS_FLANN
+  #include "ainterfacetoknnscript.h"
+#endif
 
 #include <QDebug>
 
@@ -75,12 +80,19 @@ void MainWindow::createScriptWindow()
     InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
-    InterfaceToTexter* txt = new InterfaceToTexter();
+    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
     ScriptWindow->SetInterfaceObject(web, "web");
 
+    AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
+    ScriptWindow->SetInterfaceObject(photon, "photon");
+
+#ifdef ANTS_FLANN
+    AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
+    ScriptWindow->SetInterfaceObject(knn, "knn");
+#endif
 
     // Interfaces which rely on MainWindow
 
@@ -103,13 +115,6 @@ void MainWindow::createScriptWindow()
     QObject::connect(ScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));
 
     ScriptWindow->UpdateHighlight();
-}
-
-void MainWindow::on_actionGlobal_script_triggered()
-{
-  ScriptWindow->show();
-  ScriptWindow->raise();
-  ScriptWindow->activateWindow();   
 }
 
 void MainWindow::onGlobalScriptStarted()

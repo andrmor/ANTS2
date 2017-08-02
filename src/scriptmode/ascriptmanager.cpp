@@ -60,9 +60,14 @@ QString AScriptManager::Evaluate(QString Script)
     return result;
 }
 
+void AScriptManager::CollectGarbage()
+{
+    engine->collectGarbage();
+}
+
 void AScriptManager::AbortEvaluation(QString message)
 {
-    qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
+    //qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
 
     if (fAborted || !fEngineIsRunning) return;
     fAborted = true;
@@ -138,6 +143,32 @@ void AScriptManager::deleteMsgDialog()
         if (t)
         {
             t->deleteDialog();
+            return;
+        }
+    }
+}
+
+void AScriptManager::hideMsgDialog()
+{
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        if (t)
+        {
+            t->hide();
+            return;
+        }
+    }
+}
+
+void AScriptManager::restoreMsgDialog()
+{
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        if (t)
+        {
+            if (t->isActive()) t->restore();
             return;
         }
     }

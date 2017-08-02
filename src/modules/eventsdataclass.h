@@ -72,6 +72,7 @@ public:
     void Purge(int OnePer, int igroup = 0);    
     int countGoodEvents(int igroup = 0);
     void copyTrueToReconstructed(int igroup = 0);
+    void copyReconstructedToTrue(int igroup = 0);
     void prepareStatisticsForEvents(const bool isAllLRFsDefined, int &GoodEvents, double &AvChi2, double &AvDeviation, int igroup = 0);
 
     //load data can have manifest file with holes/slits

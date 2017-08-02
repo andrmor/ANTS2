@@ -98,6 +98,48 @@ private:
   void reconstructPositions(int icoord, flann::Matrix<int> *indices, flann::Matrix<float> *dists);
 };
 
+class AScriptInterfacer
+{
+public:
+   AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
+
+   QVariant getNeighbours(int ievent, int numNeighbours);
+   bool filterByDistance(int numNeighbours, float maxDistance, bool filterOutEventsWithSmallerDistance);
+
+   void SetSignalNormalization(int type) {NormSwitch = type;}
+
+   void clearCalibration();
+   bool setCalibration(bool bUseScan);
+   int countCalibrationEvents() {return numCalibrationEvents;}
+
+   double getCalibrationEventX(int ievent);
+   double getCalibrationEventY(int ievent);
+   double getCalibrationEventZ(int ievent);
+   double getCalibrationEventE(int ievent);
+   QVariant getCalibrationEventSignals(int ievent);  //if norm is active, the signal values are normalized!
+
+   QString ErrorString;
+
+private:
+   EventsDataClass* EventsDataHub;
+   pms* PMs;
+
+   bool bCalibrationReady;
+   int numCalibrationEvents;
+   int numPMs;
+
+   int NormSwitch;  // 0 - no norm, 1 - sum signal, 2 - quadrature sum
+
+   flann::Matrix<float>* CalibrationEvents;       //calibration events - signals
+   QVector<float> X, Y, Z, E;                     //calibration events - positions and energy
+
+   flann::Index<flann::L1<float> > *FlannIndex;   //flann index data
+
+   bool isValidEventIndex(int ievent);
+
+   float calculateNorm(int ievent) const;
+};
+
 class NNmoduleClass
 {  
 public:
@@ -106,6 +148,7 @@ public:
 
   KNNfilterClass Filter;
   KNNreconstructorClass Reconstructor;
+  AScriptInterfacer* ScriptInterfacer;
 
 private:
   EventsDataClass *EventsDataHub;

@@ -282,14 +282,14 @@ void MainWindow::onRequestSimulationGuiUpdate()
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
+  //qDebug() << "Read sim from json and update sim gui";
   if (!json.contains("SimulationConfig"))
     {
       //qWarning() << "Json does not contain sim settings!";
       return false;
     }
 
-  //cleanup
-  //MainWindow::ClearData();
+  //cleanup  
   if (histScan) delete histScan;
   histScan = 0;
   if (histSecScint) delete histSecScint;
@@ -303,12 +303,6 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
       ParticleStack.resize(0);
     }
 
-  //cleaning particle sources
-  ParticleSources->clear();
-  ParticleSources->append(new ParticleSourceStructure());
-  MainWindow::on_pbUpdateSourcesIndication_clicked(); //to clean indication
-  ParticleSources->clear();
-  MainWindow::on_pbUpdateSourcesIndication_clicked();
   DoNotUpdateGeometry = true;
   BulkUpdate = true;
   QJsonObject js = json["SimulationConfig"].toObject();
@@ -394,6 +388,7 @@ if (scj.contains("CustomDistrib"))
   {
       ui->twSingleScan->blockSignals(true);
       ui->twSingleScan->setCurrentIndex(SimMode);
+      ui->frLimitNodesTo->setVisible( ui->twSingleScan->currentIndex()!=0 );
       ui->twSingleScan->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);
@@ -583,8 +578,17 @@ if (scj.contains("CustomDistrib"))
   JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
   ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(true);//compatibility
   JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
+
   //particle sources
+  int SelectedSource = ui->cobParticleSource->currentIndex();
+  ParticleSources->clear();
   ParticleSources->readFromJson(psjs);
+  on_pbUpdateSourcesIndication_clicked();
+  if (SelectedSource>-1 && SelectedSource<ParticleSources->size())
+  {
+      ui->cobParticleSource->setCurrentIndex(SelectedSource);
+      updateOneParticleSourcesIndication(ParticleSources->getSource(SelectedSource));
+  }
 
   //Window CONTROL
   if (js.contains("Mode"))
@@ -607,15 +611,19 @@ if (scj.contains("CustomDistrib"))
   //update indication
   MainWindow::on_pbRefreshStack_clicked();
 
-  //particle sources indication  
-  if (ParticleSources->getTotalActivity() > 0)
-    {  //show the first source with non-zero activity
-      int i;
-      for (i=0; i<ParticleSources->size(); i++)
-        if (ParticleSources->getSource(i)->Activity > 0) break;
-      ui->cobParticleSource->setCurrentIndex(i);
-    }
-  MainWindow::on_pbUpdateSourcesIndication_clicked();
-
   return true;
+}
+
+void MainWindow::selectFirstActiveParticleSource()
+{
+    if (ParticleSources->getTotalActivity() > 0)
+      {  //show the first source with non-zero activity
+        int i=0;
+        for (; i<ParticleSources->size(); i++)
+          if (ParticleSources->getSource(i)->Activity > 0) break;
+        ui->cobParticleSource->setCurrentIndex(i);        
+      }
+    else if (ParticleSources->size()>0) ui->cobParticleSource->setCurrentIndex(0);
+    else ui->cobParticleSource->setCurrentIndex(-1);
+    on_pbUpdateSourcesIndication_clicked();
 }

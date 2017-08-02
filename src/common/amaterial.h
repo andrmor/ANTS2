@@ -70,7 +70,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   enum ReactionType {Photoelectric = 0,
                     ComptonScattering = 1,
                     Capture = 2,
-                    PairProduction = 3};  //must keep the numbers - directly used in json config files
+                    PairProduction = 3,
+                    EllasticScattering = 4};  //must keep the numbers - directly used in json config files
   ReactionType Type;
 
   QVector<double> PartialCrossSection;

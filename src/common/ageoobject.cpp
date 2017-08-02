@@ -794,7 +794,7 @@ void AGeoObject::unlockAllInside()
 
 void AGeoObject::updateStack()
 {
-  //qDebug() << "Stack update triggered for:"<<Name;
+  qDebug() << "Stack update triggered for:"<<Name;
   double Z = Position[2];
   double Edge = 0;
   for (int i=0; i<Container->HostedObjects.size(); i++)

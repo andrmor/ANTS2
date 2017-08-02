@@ -188,12 +188,14 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
 
         for (int i=0; i<npts; i++)
           {
+            if (!EventsDataHub->ReconstructionData[Options.CurrentGroup][i]->GoodEvent) continue;
+
             double *pos;
             if (!Options.datais)
               pos = EventsDataHub->Scan[i]->Points[0].r;
             else
               {
-                if (!EventsDataHub->ReconstructionData[Options.CurrentGroup][i]->GoodEvent) continue;
+                //if (!EventsDataHub->ReconstructionData[Options.CurrentGroup][i]->GoodEvent) continue;
                 pos = EventsDataHub->ReconstructionData[Options.CurrentGroup][i]->Points[0].r;
                 factor = EventsDataHub->ReconstructionData[Options.CurrentGroup][i]->Points[0].energy;
               }

@@ -29,6 +29,11 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   NumSegments = 20;
   MaxNumberOfTracks = 1000;
 
+  DefaultFontSize_ScriptWindow = 12;
+  DefaultFontFamily_ScriptWindow = ""; //undefined - Qt standard settings will be used
+  DefaultFontWeight_ScriptWindow = false;
+  DefaultFontItalic_ScriptWindow = false;
+
   NumThreads = -1; //if not loaded - set it using recommended settings
   RecNumTreads = QThread::idealThreadCount()-1;
   if (RecNumTreads<1) RecNumTreads = 1;
@@ -159,6 +164,13 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
 
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
+  js["DefaultFontSize_ScriptWindow"] = DefaultFontSize_ScriptWindow;
+  js["DefaultFontFamily_ScriptWindow"] = DefaultFontFamily_ScriptWindow;
+  js["DefaultFontWeight_ScriptWindow"] = DefaultFontWeight_ScriptWindow;
+  js["DefaultFontItalic_ScriptWindow"] = DefaultFontItalic_ScriptWindow;
+  QJsonArray mspAr;
+  for (int w : MainSplitterSizes_ScriptWindow) mspAr << w;
+  js["MainSplitterSizes_ScriptWindow"] = mspAr;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
   js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
@@ -204,6 +216,15 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "GlobScript", GlobScript);
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
+
+    parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
+    parseJson(js, "DefaultFontFamily_ScriptWindow", DefaultFontFamily_ScriptWindow);
+    parseJson(js, "DefaultFontWeight_ScriptWindow", DefaultFontWeight_ScriptWindow);
+    parseJson(js, "DefaultFontItalic_ScriptWindow", DefaultFontItalic_ScriptWindow);
+    QJsonArray mspAr;
+    parseJson(js, "MainSplitterSizes_ScriptWindow", mspAr);
+    for (int imsa=0; imsa<mspAr.size(); imsa++)
+        MainSplitterSizes_ScriptWindow << mspAr[imsa].toInt(50);
 
     //network
     DefaultWebSocketPort = 1234;

@@ -78,6 +78,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   ui->cbForceNonNegative->setChecked(false);
   ui->cbForceNonIncreasingInR->setChecked(false);
   ui->cobForceInZ->setCurrentIndex(0);
+  ui->cbForceTopDown->setChecked(falsey);
 #endif
 
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
@@ -508,8 +509,10 @@ void LRFwindow::loadJSON(QJsonObject &json)
   ui->cbForceNonNegative->setChecked(false);
   ui->cbForceNonIncreasingInR->setChecked(false);
   ui->cobForceInZ->setCurrentIndex(0);
+  ui->cbForceTopDown->setChecked(false);
   JsonToCheckbox(json, "ForceNonNegative", ui->cbForceNonNegative);
   JsonToCheckbox(json, "ForceNonIncreasingInR", ui->cbForceNonIncreasingInR);
+  JsonToCheckbox(json, "ForceTopDown", ui->cbForceTopDown);
   JsonToComboBox(json, "ForceInZ", ui->cobForceInZ);
 
   parser.ParseObject("StoreError", bTmp);

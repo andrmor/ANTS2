@@ -2236,7 +2236,7 @@ only events passing all event filters are used to calculate LRFs.</string>
      <x>0</x>
      <y>0</y>
      <width>711</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuShow">
@@ -2772,6 +2772,22 @@ only events passing all event filters are used to calculate LRFs.</string>
     <hint type="destinationlabel">
      <x>599</x>
      <y>34</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbForceTopDown</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateLRFmakeJson</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>591</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>529</x>
+     <y>37</y>
     </hint>
    </hints>
   </connection>

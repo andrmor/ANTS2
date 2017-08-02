@@ -281,6 +281,22 @@ void MainWindow::SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl)
     on_pbUpdatePreprocessingSettings_clicked();
 }
 
+void MainWindow::CorrectPreprocessingAdds(QVector<double> Pedestals)
+{
+  if (Pedestals.size() < PMs->count())
+    {
+      message("Size not valid!", this);
+      return;
+    }
+  for (int ipm=0; ipm<PMs->count(); ipm++)
+      PMs->at(ipm).PreprocessingAdd -= Pedestals.at(ipm);
+
+  int ipm = ui->sbPreprocessigPMnumber->value();
+  ui->ledPreprocessingAdd->setText( QString::number( PMs->at(ipm).PreprocessingAdd) );
+
+  on_pbUpdatePreprocessingSettings_clicked();
+}
+
 void MainWindow::on_actionSave_configuration_triggered()
 {
   QFileDialog fileDialog;

@@ -62,6 +62,7 @@ public:
                                 QList<APMandDummy>* PMsAndDumPMs);
 
   void clearGridRecords();
+  void clearMonitorRecords();
 
   void UpdateDetector(); //trigger this to update the detector
   void ChangeState(ASandwich::SlabState State); //triggered by GUI
@@ -82,6 +83,9 @@ public:
   ASlabXYModel* DefaultXY;
   int ZOriginType; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
   QList<AGridElementRecord*> GridRecords;
+
+  // pointers to monitors
+  QVector<const AGeoObject*> MonitorsRecords;
 
   // available after calculation of Z of layers
   double Z_UpperBound, Z_LowerBound;

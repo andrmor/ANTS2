@@ -246,6 +246,7 @@ bool APmGroupsManager::isPmBelongsToGroup(int ipm, int igroup) const
 {
     if (igroup>Groups.size()-1) return false;
     if (ipm>PMs->count()-1) return false;
+    if (Groups.at(igroup)->PMS.isEmpty()) return false;
 
     return Groups.at(igroup)->PMS.at(ipm).member;
 }

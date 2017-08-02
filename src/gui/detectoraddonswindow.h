@@ -88,11 +88,13 @@ private:
   void objectMembersToScript(AGeoObject *Master, QString &script, int ident);
 
 public slots:
-  void UpdateGeoTree();
+  void UpdateGeoTree(QString name = "");
+  void ShowTab(int tab);
   void AddObjScriptSuccess();
   void ReportScriptError(QString ErrorMessage);
   void ShowObject(QString name = "");
   void ShowObjectRecursive(QString name);
+  void OnrequestShowMonitor(const AGeoObject* mon);
 };
 
 #endif // DETECTORADDONSWINDOW_H

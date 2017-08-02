@@ -362,6 +362,7 @@ void DetectorClass::constructDetector()
   for (int i=0; i<PMs->count(); i++) PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
   for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
   Sandwich->clearGridRecords();
+  Sandwich->clearMonitorRecords();
   Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
 
   //for (int i=0; i<Sandwich->GridRecords.size(); i++)

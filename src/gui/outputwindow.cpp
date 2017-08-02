@@ -15,6 +15,9 @@
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "apmgroupsmanager.h"
+#include "amonitor.h"
+#include "asandwich.h"
+#include "ageoobject.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -352,6 +355,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
       case EventHistoryStructure::PairProduction:           s += "pair production"; break;
+      case EventHistoryStructure::StoppedOnMonitor:         s += "stopped on monitor"; break;
       default:                                              s += "UNKNOWN TYPE"; break;
       }
     ui->pteOut->appendHtml(s);
@@ -538,6 +542,45 @@ void OutputWindow::RefreshData()
   if (ui->cbShowPMsignals->isChecked())
     addTextitems(fHaveData, CurrentEvent, MaxSignal, Passives); //add icons with signal text to the scene
   updateSignalScale();
+
+  //Monitors
+  int numMonitors = MW->Detector->Sandwich->MonitorsRecords.size();
+  ui->frMonitors->setVisible(numMonitors != 0);
+  ui->labNoMonitors->setVisible(numMonitors == 0);
+  if (numMonitors>0)
+  {
+      int oldNum = ui->cobMonitor->currentIndex();
+      ui->cobMonitor->clear();
+      for (int i=0; i<numMonitors; i++)
+      {
+          const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
+          ui->cobMonitor->addItem(obj->Name);
+      }
+      if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
+
+      int imon = ui->cobMonitor->currentIndex();
+      const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
+      const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+      if (mon)
+      {
+          ui->frMonitors->setEnabled(true);
+          int numDet = 0;
+          if (imon < EventsDataHub->SimStat->Monitors.size())
+              if (EventsDataHub->SimStat->Monitors.at(imon)->getXY())
+                  numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
+          ui->leDetections->setText( QString::number(numDet) );
+
+          bool bPhotonMode = mon->config.PhotonOrParticle == 0;
+          ui->pbMonitorShowWave->setVisible(bPhotonMode);
+          ui->pbMonitorShowTime->setVisible(bPhotonMode);
+          ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
+      }
+      else
+      {
+          ui->frMonitors->setEnabled(false);
+          qWarning() << "Something is wrong: this is not a monitor object!";
+      }
+  }
 
   delete Passives;
 }
@@ -737,7 +780,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
       return;
   }
 
-  TH1I* spec = d->getWaveSpectrum();
+  TH1D* spec = d->getWaveSpectrum();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Wavelength data are empty!\n\n"
@@ -751,7 +794,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   //qDebug() << nBins << MW->WaveNodes;
   if (MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-      auto WavelengthSpectrum = new TH1D("","Wavelength spectrum of photons hitting PMs", nBins-1, MW->WaveFrom, MW->WaveTo);
+      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins-1, MW->WaveFrom, MW->WaveTo);
       for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
           WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
       WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
@@ -760,7 +803,7 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   else
     {
       spec->GetXaxis()->SetTitle("Wave index");
-      spec->SetTitle("Wave index spectrum of photons hitting PMs");
+      spec->SetTitle("Wave index of detected photons");
       MW->GraphWindow->Draw(spec, "", true, false);
     }
 }
@@ -784,7 +827,7 @@ void OutputWindow::on_pbTimeSpectrum_clicked()
     }
 
   spec->GetXaxis()->SetTitle("Time, ns");
-  spec->SetTitle("Time spectrum of photons hitting PMs");
+  spec->SetTitle("Time of photon detection");
   MW->GraphWindow->Draw(spec, "", true, false);
 }
 
@@ -797,7 +840,7 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
       return;
   }
 
-  TH1I* spec = d->getCosAngleSpectrum();
+  TH1D* spec = d->getAngularDistr();
   if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
     {
       message("Angle of incidence data are empty!\n"
@@ -807,19 +850,9 @@ void OutputWindow::on_pbAngleSpectrum_clicked()
       return;
     }
 
-  //converting to degrees
-  int nBins = spec->GetNbinsX();
-  auto AngularSpectrum = new TH1D("AngleSpectrumOutput","Angular distribution", 200, -1, -2);
-
-  for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
-    {
-      double iCosAngle = spec->GetBinCenter(i);
-      double Angle = TMath::ACos(iCosAngle)*180./3.1415926535;
-      AngularSpectrum->Fill(Angle, spec->GetBinContent(i));
-//      qDebug()<<i<<iCosAngle<<spec->GetBinContent(i)<<"----"<<Angle;
-    }
-
-  MW->GraphWindow->Draw(AngularSpectrum);
+  spec->GetXaxis()->SetTitle("Angle of incidence, degrees");
+  spec->SetTitle("Incidence angle of detected photons");
+  MW->GraphWindow->Draw(spec, "", true, false);
 }
 
 void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
@@ -831,7 +864,7 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
       return;
   }
 
-   TH1I* spec = d->getTransitionSpectrum();
+   TH1D* spec = d->getTransitionSpectrum();
 
    if (!spec || spec->GetEntries() == 0 || spec->Integral()==0)
      {
@@ -841,7 +874,7 @@ void OutputWindow::on_pbNumTransitionsSpectrum_clicked()
      }
 
    spec->GetXaxis()->SetTitle("Number of cycles in tracking");
-   spec->SetTitle("Distribution of number of tracking cycles for photons hitting PMs");
+   spec->SetTitle("Number of tracking cycles for detected photons");
    MW->GraphWindow->Draw(spec, "", true, false);
 }
 
@@ -1209,7 +1242,7 @@ void OutputWindow::ShowPhotonLossLog()
       return;
   }
 
-  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry;
+  int sum = d->Absorbed + d->OverrideLoss + d->HitPM + d->HitDummy + d->Escaped + d->LossOnGrid + d->TracingSkipped + d->MaxCyclesReached + d->GeneratedOutsideGeometry + d->KilledByMonitor;
   QString s = "\n=====================\n";
   s += "Photon tracing ended:\n";
   s +=        "---------------------\n";
@@ -1222,6 +1255,7 @@ void OutputWindow::ShowPhotonLossLog()
       "Tracing skipped (QE accelerator): "+QString::number(d->TracingSkipped)+"\n"+
       "Max tracing cycles reached: "+QString::number(d->MaxCyclesReached)+"\n"+
       "Generated outside defined geometry: "+QString::number(d->GeneratedOutsideGeometry)+"\n"+
+      "Stopped by a monitor: "+QString::number(d->KilledByMonitor)+"\n"+
       "---------------------\n"+
       "Total: "+QString::number(sum)+"\n"+
       "=====================";
@@ -1474,4 +1508,86 @@ void OutputWindow::on_tabwinDiagnose_tabBarClicked(int index)
     {
         QTimer::singleShot(50, this, SLOT(RefreshPMhitsTable()));
     }
+}
+
+void OutputWindow::on_pbMonitorShowXY_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    TH2D* h = new TH2D(*EventsDataHub->SimStat->Monitors[imon]->getXY());
+    MW->GraphWindow->Draw(h, "colz", true, true);
+}
+
+void OutputWindow::on_pbMonitorShowTime_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getTime());
+    MW->GraphWindow->Draw(h, "", true, true);
+}
+
+void OutputWindow::on_pbMonitorShowAngle_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getAngle());
+    MW->GraphWindow->Draw(h, "", true, true);
+}
+
+void OutputWindow::on_pbMonitorShowWave_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    if (!MW->EventsDataHub->LastSimSet.fWaveResolved)
+    {
+        TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
+        MW->GraphWindow->Draw(h, "", true, true);
+    }
+    else
+    {
+        TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
+        int nbins = h->GetXaxis()->GetNbins();
+
+        double WaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+        double WaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+        double WaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+
+        TH1D *hnew = new TH1D("", "", nbins, WaveFrom, WaveTo);
+        for (int i=1; i <= nbins; i++)
+        {
+            double y = h->GetBinContent(i);
+            double index = h->GetXaxis()->GetBinCenter(i);
+            double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
+            hnew->Fill(x, y);
+        }
+        hnew->SetXTitle("Wavelength, nm");
+        MW->GraphWindow->Draw(hnew, "", true, true);
+    }
+}
+
+void OutputWindow::on_pbMonitorShowEnergy_clicked()
+{
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getEnergy());
+    MW->GraphWindow->Draw(h, "", true, true);
+}
+
+#include "detectoraddonswindow.h"
+void OutputWindow::on_pbShowProperties_clicked()
+{
+    MW->DAwindow->showNormal();
+    MW->DAwindow->ShowTab(0);
+    //MW->DAwindow->raise();
+    MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
 }

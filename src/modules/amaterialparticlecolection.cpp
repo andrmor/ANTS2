@@ -1133,3 +1133,10 @@ void AMaterialParticleCollection::generateMaterialsChangedSignal()
   emit MaterialsChanged(ml);
 }
 
+void AMaterialParticleCollection::OnRequestListOfParticles(QStringList &definedParticles)
+{
+    definedParticles.clear();
+    for (int i=0; i<ParticleCollection.size(); i++)
+        definedParticles << ParticleCollection.at(i)->ParticleName;
+}
+

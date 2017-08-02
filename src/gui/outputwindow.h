@@ -77,6 +77,18 @@ private slots:
     void on_tabwinDiagnose_tabBarClicked(int index);
     void RefreshPMhitsTable();
 
+    void on_pbMonitorShowXY_clicked();
+
+    void on_pbMonitorShowTime_clicked();
+
+    void on_pbShowProperties_clicked();
+
+    void on_pbMonitorShowAngle_clicked();
+
+    void on_pbMonitorShowWave_clicked();
+
+    void on_pbMonitorShowEnergy_clicked();
+
 protected:
     bool event(QEvent *event);   
 

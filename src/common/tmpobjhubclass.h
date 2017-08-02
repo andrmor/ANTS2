@@ -4,9 +4,11 @@
 #include <QList>
 #include <QString>
 #include <QVector>
+#include <QObject>
 
 class TObject;
 class TrackHolderClass;
+class TH1D;
 
 class RootDrawObj
 {
@@ -37,9 +39,13 @@ public:
 
 
 //=================================================================
-class TmpObjHubClass
+class TmpObjHubClass : public QObject
 {
-public:  
+    Q_OBJECT
+public:
+  TmpObjHubClass();
+  ~TmpObjHubClass();
+
   ScriptDrawCollection ScriptDrawObjects;
 
   double PreEnAdd, PreEnMulti;
@@ -47,8 +53,18 @@ public:
   QVector<TrackHolderClass*> TrackInfo;
   void ClearTracks();
 
-  TmpObjHubClass();
-  ~TmpObjHubClass();
+  QVector<TH1D*> PeakHists;
+  void ClearTmpHistsPeaks();
+  QVector< QVector<double> > FoundPeaks;
+  QVector<double> ChPerPhEl_Peaks;
+
+  QVector<TH1D*> SigmaHists;
+  void ClearTmpHistsSigma2();
+  QVector<double> ChPerPhEl_Sigma2;
+
+public slots:
+  void Clear();
+
 };
 
 #endif // TMPOBJHUBCLASS_H

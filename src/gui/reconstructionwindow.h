@@ -521,6 +521,18 @@ private slots:
 
   void on_pbRecToTrue_clicked();
 
+  void on_pbPrepareSignalHistograms_clicked();
+
+  void on_pbFromPeaksToPreprocessing_clicked();
+
+  void on_pbFromPeaksShow_clicked();
+
+  void on_pbFrindPeaks_clicked();
+
+  void on_sbFrompeakPM_valueChanged(int arg1);
+
+  void on_pbFromPeaksPedestals_clicked();
+
 protected:
     bool event(QEvent *event);
 
@@ -555,9 +567,6 @@ private:
   Double_t funcParams[4];
 
   QPolygonF polygon; //polygon for custom spatial filter
-
-  QVector<TH1D*> sigmaHists;
-  QVector<double> ChPerPhEl;
 
   QString FilterScript;
 

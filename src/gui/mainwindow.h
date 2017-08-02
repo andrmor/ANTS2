@@ -176,6 +176,7 @@ public:
     //gains and ch per ph.el
     void SetMultipliersUsingGains(QVector<double> Gains);
     void SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl);
+    void CorrectPreprocessingAdds(QVector<double> Add);
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line

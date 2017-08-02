@@ -175,6 +175,7 @@ public:
     bool wasSuccessful() const { return fSuccess; }
     virtual void updateGeoManager();
     void setSimSettings(const GeneralSimSettings *settings);
+    void initSimStat();
     void setRngSeed(int seed);
     void requestStop();
 

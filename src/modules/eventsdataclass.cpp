@@ -20,8 +20,7 @@ EventsDataClass::EventsDataClass(const TString nameID) //nameaddon to make uniqu
 {
 #ifdef SIM
   SimStat = new ASimulationStatistics(nameID);
-  DetStatNumBins = 100;
-  SimStat->initialize(DetStatNumBins);
+  //SimStat->initialize();
 #endif
   fReconstructionDataReady = false;
   ReconstructionTree = 0;
@@ -71,12 +70,12 @@ void EventsDataClass::clear()
 #endif
   clearScan();
   clearReconstruction();
-  clearManifest();  
+  clearManifest();
   emit requestClearKNNfilter(); //save in any configuration
   squeeze();
   //preprocessing settings clear is triggered when detector is made with different number of PMs than before
 
-  emit requestGuiUpdateForClearData(); //to MainWindow
+  emit cleared();                      //to MainWindow and tmpHub
   emit requestEventsGuiUpdate();       //to ReconWindow
 }
 
@@ -124,10 +123,9 @@ void EventsDataClass::clearManifest()
 }
 
 #ifdef SIM
-void EventsDataClass::setDetStatNumBins(int numBins)
+void EventsDataClass::initializeSimStat(QVector<const AGeoObject*> monitorRecords, int numBins, int waveNodes)
 {
-  DetStatNumBins = numBins;
-  SimStat->initialize(DetStatNumBins);
+  SimStat->initialize(monitorRecords, numBins, waveNodes);
 }
 #endif
 

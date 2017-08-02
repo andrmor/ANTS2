@@ -35,7 +35,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   QJsonObject masterjs;
     // control options
   QJsonObject cjs;
-  cjs["EventsToDo"] = ui->sbGunEvents->value();
+  cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
   cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
   cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
   cjs["DoS1"] = ui->cbGunDoS1->isChecked();

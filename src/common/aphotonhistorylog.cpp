@@ -60,6 +60,7 @@ const QString APhotonHistoryLog::GetProcessName(int nodeType)
     case Grid_Exit: return "Grid_Exit";
     case Grid_ShiftIn: return "Grid_ShiftIn";
     case Grid_ShiftOut: return "Grid_ShiftOut";
+    case KilledByMonitor: return "StoppedByMonitor";
     default: return "Error: unknown index!";
     }
 }

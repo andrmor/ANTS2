@@ -2351,7 +2351,8 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   tmpMaterial.MatParticle[particleId].InteractionDataX.clear();
   tmpMaterial.MatParticle[particleId].InteractionDataX << 1e-10 << 1e10;
   tmpMaterial.MatParticle[particleId].InteractionDataF.clear();
-  tmpMaterial.MatParticle[particleId].InteractionDataF << 1.734e-24 << 1.734e-24;
+  //tmpMaterial.MatParticle[particleId].InteractionDataF << 1.734e-24 << 1.734e-24;
+  tmpMaterial.MatParticle[particleId].InteractionDataF << (0.231 + 0.082)*1.0e-24 << (0.231 + 0.082)*1.0e-24;
 
   tmpMaterial.MatParticle[particleId].Terminators.resize(2);
   tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy.clear();
@@ -2366,11 +2367,12 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy << 1e-10 << 1e10;
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
+  //tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
+  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 0.082e-24 << 0.082-24;
   tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::EllasticScattering;
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticles.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticleEnergies.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].branching = 1.0-0.1332;
+  tmpMaterial.MatParticle[particleId].Terminators[1].branching = 1.0 - 0.1332;
 
   ui->fNeutron->setEnabled(true);
   ui->pbShowTotalInteraction->setEnabled(true);

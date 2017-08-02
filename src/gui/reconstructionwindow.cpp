@@ -35,6 +35,7 @@
 #include "alrfwindow.h" //For new LRF module
 #include "arepository.h"
 #include "amaterialparticlecolection.h"
+#include "tmpobjhubclass.h"
 
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
@@ -106,8 +107,6 @@ ReconstructionWindow::~ReconstructionWindow()
       MW->GainWindow = 0;
       //qDebug() << "  --<Deleted";
     }
-  for (int ipm=0; ipm<sigmaHists.size(); ipm++) delete sigmaHists[ipm];
-  sigmaHists.clear();
   //qDebug() << " -<Destructor of Reconstruction window finished";
 }
 
@@ -2107,8 +2106,9 @@ void ReconstructionWindow::onUpdateGainsIndication()
     if (ui->leiPMnumberForGains->text() != "")
       {
         iCurrentPM = ui->leiPMnumberForGains->text().toInt();
-        //if (PMs->at(icurrent).group != igroup) icurrent = -1;
-        if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1;
+             //if (PMs->at(icurrent).group != igroup) icurrent = -1;
+          //if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1; //cannot do it with confgurations with no PMs
+        if (!PMgroups->isPmBelongsToGroup(iCurrentPM, CurrentGroup)) iCurrentPM = -1;
         else ui->ledGain->setText(QString::number(PMgroups->getGain(iCurrentPM, CurrentGroup)));
       }
 
@@ -3655,12 +3655,12 @@ void ReconstructionWindow::on_pbSetPresprocessingForGains_clicked()
 
 void ReconstructionWindow::on_pbGotoPreprocessAdjust_clicked()
 {
-  if (ChPerPhEl.size() != PMs->count())
+  if (MW->TmpHub->ChPerPhEl_Sigma2.size() != PMs->count())
   {
       message("Data not yet ready", this);
       return;
   }
-  MW->SetMultipliersUsingChPhEl(ChPerPhEl);
+  MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Sigma2);
 }
 
 void ReconstructionWindow::on_pbPurgeEvents_clicked()
@@ -5805,11 +5805,14 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
   MW->WindowNavigator->BusyOn();
   qApp->processEvents();
 
-  int numPMs = MW->Detector->PMs->count();
-  for (int ipm=0; ipm<sigmaHists.size(); ipm++) delete sigmaHists[ipm];
-  sigmaHists.clear();
-  QVector<TH1D*> numberHists;
-  //will be used to calculate sigma vs distance to PM center
+  const int numPMs = MW->Detector->PMs->count();
+  const double minRange = ui->ledMinRangeChanPerPhEl->text().toDouble();
+  const double minRange2 = minRange * minRange;
+  const double maxRange = ui->ledMaxRangeChanPerPhEl->text().toDouble();
+  const double maxRange2 = maxRange * maxRange;
+  MW->TmpHub->ClearTmpHistsSigma2();
+  QVector<TH1D*> numberHists; //will be used to calculate sigma vs distance to PM center
+
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       TString s = "sigma";
@@ -5817,58 +5820,54 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
       TString n = "num";
       n += ipm;
       TH1D* tmp1 = new TH1D(s, "sigma", ui->pbBinsChansPerPhEl->value(), 0,0);
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-      tmp1->SetBit(TH1::kCanRebin);
-#endif
-      sigmaHists.append(tmp1);
+
+      MW->TmpHub->SigmaHists.append(tmp1);
       tmp1->GetXaxis()->SetTitle("Average signal");
       tmp1->GetYaxis()->SetTitle("Sigma square");
       TH1D* tmp2 = new TH1D(n, "number", ui->pbBinsChansPerPhEl->value(), 0,0); //it seems both  hists update axis synchronously. Same result if fix max range
       numberHists.append(tmp2);
     }
 
-  //filling hists - go through all events, each will populate data all PMs
+  //filling hists - go through all events, each will populate data for all PMs
   for (int iev=0; iev<EventsDataHub->Events.size(); iev++)
     {
-      if (iev%1000 == 0)
+      if (iev % 1000 == 0)
         {
           int ipr = 100.0*iev/EventsDataHub->Events.size();
           SetProgress(ipr);
         }
       if (!EventsDataHub->ReconstructionData[0][iev]->GoodEvent) continue; //respecting the filters
+      if (EventsDataHub->ReconstructionData[0][iev]->Points.size()>1) continue; //ignoring multiple events in reconstruction
 
-      //double x = EventsDataHub->ReconstructionData[iev]->Points[0].r[0]; //only single events! !!!***
-      //double y = EventsDataHub->ReconstructionData[iev]->Points[0].r[1];
-      double e = EventsDataHub->ReconstructionData[0][iev]->Points[0].energy;
+      const double& x = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[0];
+      const double& y = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[1];
+      double e = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].energy;
       if (e < 1e-10) e = 1.0;
       for (int ipm=0; ipm<numPMs; ipm++)
         {
-           //double x0 = MW->Detector->PMs->X(ipm);
-           //double y0 = MW->Detector->PMs->Y(ipm);
-           //double r = sqrt( (x-x0)*(x-x0) + (y-y0)*(y-y0) );
-           //if (r>15) continue;
+           double x0 = MW->Detector->PMs->X(ipm);
+           double y0 = MW->Detector->PMs->Y(ipm);
+           double r2 = (x-x0)*(x-x0) + (y-y0)*(y-y0);
+           if ( r2 < minRange2  ||  r2 > maxRange2 ) continue;
 
-           double AvSig = Detector->LRFs->getLRF(ipm, EventsDataHub->ReconstructionData[0][iev]->Points[0].r);
-           //double AvSig = MW->Detector->SensLRF->getLRF(ipm, EventsDataHub->Scan[iev]->Points[0].r); //for test: use true
+           double AvSig = Detector->LRFs->getLRF(ipm, EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r);
            double sig = EventsDataHub->Events[iev][ipm];
            double delta2 = sig/e - AvSig; //take energy into account
            delta2 *= delta2;
 
-           sigmaHists[ipm]->Fill(AvSig, delta2);
+           MW->TmpHub->SigmaHists[ipm]->Fill(AvSig, delta2);
            numberHists[ipm]->Fill(AvSig, 1.0);
         }
     }
 
   //calculating sigmas
-  int MinEntries = 5;
+  const int MinEntries = 5;
   for (int ipm=0; ipm<numPMs; ipm++)
     {
-      //qDebug() << sigmaHists[ipm]->GetXaxis()->GetNbins() << numberHists[ipm]->GetXaxis()->GetNbins();
-      //*sigmaHists[ipm] = *sigmaHists[ipm] / *numberHists[ipm];
       for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()-1; i++) //ignoring under and over bins
         {
-          if (numberHists[ipm]->GetBinContent(i) < MinEntries) sigmaHists[ipm]->SetBinContent(i, 0);
-          else sigmaHists[ipm]->SetBinContent(i, sigmaHists[ipm]->GetBinContent(i)/numberHists[ipm]->GetBinContent(i));
+          if (numberHists[ipm]->GetBinContent(i) < MinEntries) MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, 0);
+          else MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, MW->TmpHub->SigmaHists[ipm]->GetBinContent(i)/numberHists[ipm]->GetBinContent(i));
         }
     }
 
@@ -5882,12 +5881,12 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
 {
   int ipm = ui->sbChanPerPhElPM->value();
-  if (ipm> sigmaHists.size()-1)
+  if (ipm >= MW->TmpHub->SigmaHists.size())
     {
       message("Wrong PM number or data not ready!", this);
       return;
     }
-  MW->GraphWindow->Draw(sigmaHists[ipm], "", true, false);
+  MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
 }
 
 void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
@@ -5898,12 +5897,12 @@ void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
        return;
      }
 
-   if (ChPerPhEl.isEmpty())
+   if (MW->TmpHub->ChPerPhEl_Sigma2.isEmpty())
      {
        ui->ledChansPerPhEl->setText("");
        return;
      }
-   ui->ledChansPerPhEl->setText( QString::number(ChPerPhEl[arg1], 'g', 3) );
+   ui->ledChansPerPhEl->setText( QString::number(MW->TmpHub->ChPerPhEl_Sigma2[arg1], 'g', 3) );
    if (MW->GraphWindow->isVisible()) on_pbChanPerPhElShow_clicked();
 }
 
@@ -5912,13 +5911,13 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
   int ipm = ui->sbChanPerPhElPM->value();
   int numPMs = MW->Detector->PMs->count();
 
-  if (sigmaHists.size() != numPMs)
+  if (MW->TmpHub->SigmaHists.size() != numPMs)
     {
       message("There is no data - use 'Prepare data...' first!", this);
       return;
     }
 
-  if (ChPerPhEl.size()<numPMs) ChPerPhEl.resize(numPMs);
+  if (MW->TmpHub->ChPerPhEl_Sigma2.size()<numPMs) MW->TmpHub->ChPerPhEl_Sigma2.resize(numPMs);
 
   if (ui->cbExtractChPerPhElForAll->isChecked())
     {
@@ -5933,20 +5932,23 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
               message("Fit failed!", this);
               return;
           }
-          ChPerPhEl[ipm] = ChanelsPerPhEl;
-          MW->Owindow->OutText(QString::number(ipm)+" "+QString::number(ChPerPhEl[ipm], 'g', 3));
+          MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
+          QString txt = QString::number(ipm)+" "+QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3);
+          if (MW->TmpHub->ChPerPhEl_Peaks.size() == MW->TmpHub->ChPerPhEl_Sigma2.size())
+              txt += "  from peaks: "+QString::number(MW->TmpHub->ChPerPhEl_Peaks[ipm], 'g', 3);
+          MW->Owindow->OutText(txt);
         }
     }
   else
     {
       //doing only for one selected PM
-      if (ipm > sigmaHists.size()-1)
+      if (ipm > MW->TmpHub->SigmaHists.size()-1)
         {
           message("Wrong PM number or data not ready!", this);
           return;
         }
 
-      MW->GraphWindow->Draw(sigmaHists[ipm], "", true, false);
+      MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
       double ChanelsPerPhEl = extractChPerPHEl(ipm);
       if (ChanelsPerPhEl < 0)
       {
@@ -5955,10 +5957,10 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
       }
       MW->GraphWindow->UpdateRootCanvas();
 
-      ChPerPhEl[ipm] = ChanelsPerPhEl;
+      MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
     }
 
-  if (ipm<ChPerPhEl.size()) ui->ledChansPerPhEl->setText( QString::number(ChPerPhEl[ipm], 'g', 3) );
+  if (ipm<MW->TmpHub->ChPerPhEl_Sigma2.size()) ui->ledChansPerPhEl->setText( QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3) );
   else ui->ledChansPerPhEl->setText("");
 }
 
@@ -5969,7 +5971,7 @@ double ReconstructionWindow::extractChPerPHEl(int ipm)
 
   double upperLim = ui->ledUpperLimitForChanPerPhEl->text().toDouble();
   double lowerLim = ui->ledLowerLimitForChanPerPhEl->text().toDouble();
-  TFitResultPtr fit = sigmaHists[ipm]->Fit("pol1", "S", "", lowerLim, upperLim);
+  TFitResultPtr fit = MW->TmpHub->SigmaHists[ipm]->Fit("pol1", "S", "", lowerLim, upperLim);
 
   if (!fit.Get())
     {
@@ -6436,4 +6438,172 @@ void ReconstructionWindow::on_cbSpF_LimitToObject_toggled(bool /*checked*/)
 void ReconstructionWindow::on_pbUpdateGuiSettingsInJSON_clicked()
 {
     updateGUIsettingsInConfig();
+}
+
+static Int_t npeaks = 10;
+Double_t fpeaks(Double_t *x, Double_t *par)
+{
+   Double_t result = par[0] + par[1]*x[0];
+   for (Int_t p=0;p<npeaks;p++) {
+      Double_t norm  = par[3*p+2];
+      Double_t mean  = par[3*p+3];
+      Double_t sigma = par[3*p+4];
+      result += norm*TMath::Gaus(x[0],mean,sigma);
+   }
+   return result;
+}
+
+void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
+{
+    if (EventsDataHub->isEmpty())
+      {
+        message("There are no signal data!", this);
+        return;
+      }
+
+    MW->TmpHub->ClearTmpHistsPeaks();
+    MW->TmpHub->ChPerPhEl_Sigma2.clear();
+
+    for (int ipm=0; ipm<PMs->count(); ipm++)
+    {
+        TH1D* h = new TH1D("", "", ui->sbFromPeaksBins->value(), ui->ledFromPeaksFrom->text().toDouble(),ui->ledFromPeaksTo->text().toDouble());
+        h->SetXTitle("Signal");
+
+      for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
+            h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
+
+      MW->TmpHub->PeakHists << h;
+      if (ipm==0) MW->GraphWindow->Draw(h, "", true, false);
+    }
+}
+
+#include "apeakfinder.h"
+#include "TGraph.h"
+#include "TLine.h"
+
+void ReconstructionWindow::on_pbFrindPeaks_clicked()
+{
+  if (MW->TmpHub->PeakHists.size() != PMs->count())
+  {
+      message("Signal data not ready!", this);
+      return;
+  }
+
+  MW->TmpHub->FoundPeaks.clear();
+  MW->TmpHub->ChPerPhEl_Peaks.clear();
+
+  QVector<int> failedPMs;
+  for (int ipm=0; ipm<PMs->count(); ipm++)
+  {
+      APeakFinder f(MW->TmpHub->PeakHists.at(ipm));
+      QVector<double> peaks = f.findPeaks(ui->ledFromPeaksSigma->text().toDouble(), ui->ledFromPeaksThreshold->text().toDouble(), ui->sbFromPeaksMaxPeaks->value(), true);
+
+      std::sort(peaks.begin(), peaks.end());
+
+      MW->TmpHub->FoundPeaks << peaks;
+
+      if (peaks.size() < 2)
+      {
+          failedPMs << ipm;
+          MW->TmpHub->ChPerPhEl_Peaks << -1;
+          continue;
+      }
+
+      TGraph g;
+      for (int i=0; i<peaks.size(); i++)
+         g.SetPoint(i, i, peaks.at(i));
+
+      double constant, slope;
+      int ifail;
+      g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+      if ( ifail != 0 )
+      {
+          failedPMs << ipm;
+          MW->TmpHub->ChPerPhEl_Peaks << -1;
+          continue;
+      }
+      else MW->TmpHub->ChPerPhEl_Peaks.append(slope);
+    }
+
+  on_pbFromPeaksShow_clicked();
+  if (!failedPMs.isEmpty())
+  {
+      QString s = "Peaks < 2 or failed fit for PM#:";
+      for (int i : failedPMs) s += " " + QString::number(i);
+      message(s, this);
+  }
+}
+
+void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
+{
+    if (MW->TmpHub->ChPerPhEl_Peaks.size() != PMs->count())
+    {
+        message("Data not ready", this);
+        return;
+    }
+    MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
+}
+
+void ReconstructionWindow::on_pbFromPeaksPedestals_clicked()
+{
+  if (MW->TmpHub->FoundPeaks.size() != PMs->count())
+  {
+      message("Data not ready", this);
+      return;
+  }
+  QVector<double> Pedestals;
+  for (int i=0; i<PMs->count(); i++)
+    {
+      if (MW->TmpHub->FoundPeaks.at(i).isEmpty())
+        {
+          message(QString("PM# ") + QString::number(i) +  " has no detected peaks!", this);
+          return;
+        }
+      Pedestals << MW->TmpHub->FoundPeaks.at(i).first();
+    }
+
+  MW->CorrectPreprocessingAdds(Pedestals);
+}
+
+void ReconstructionWindow::on_pbFromPeaksShow_clicked()
+{
+  int ipm = ui->sbFrompeakPM->value();
+  int numPMs = PMs->count();
+
+  if (MW->TmpHub->PeakHists.size() != numPMs) return;
+  if (ipm >= MW->TmpHub->PeakHists.size()) return;
+  if (!MW->TmpHub->PeakHists.at(ipm)) return;
+
+  TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
+
+
+  if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
+  MW->GraphWindow->DrawWithoutFocus(h, "", true, true);
+
+  if (MW->TmpHub->FoundPeaks.size() == numPMs)
+    {
+      const QVector<double> &peaks = MW->TmpHub->FoundPeaks.at(ipm);
+      for (int i=0; i<peaks.size(); i++)
+        {
+          TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          l->SetLineColor(kRed);
+          l->SetLineWidth(2);
+          l->SetLineStyle(2);
+          MW->GraphWindow->DrawWithoutFocus(l, "same", false, true);
+        }
+      MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(MW->TmpHub->ChPerPhEl_Peaks.at(ipm)));
+    }
+  MW->GraphWindow->UpdateRootCanvas();
+  MW->GraphWindow->LastDistributionShown = "SignalPeaks";
+}
+
+void ReconstructionWindow::on_sbFrompeakPM_valueChanged(int arg1)
+{
+    if (arg1 >= PMs->count())
+      {
+        if (PMs->count() == 0) return;
+        ui->sbFrompeakPM->setValue(PMs->count()-1);
+        return; //update on_change
+      }
+    if (MW->GraphWindow->LastDistributionShown == "SignalPeaks") on_pbFromPeaksShow_clicked();
 }

@@ -2,6 +2,7 @@
 #define AGEOTREEWIDGET_H
 
 #include <QTreeWidget>
+#include <QSyntaxHighlighter>
 
 class AGeoObject;
 class AGeoWidget;
@@ -71,12 +72,16 @@ private:
   void menuActionAddNewComposite(QString ContainerName);
   void menuActionAddNewArray(QString ContainerName);
   void menuActionAddNewGrid(QString ContainerName);
+  void menuActionAddNewMonitor(QString ContainerName);
+
 signals:
   void ObjectSelectionChanged(const QString); // should be fired with empty string if selection does not contain a single item  
   void RequestRebuildDetector();
   void RequestHighlightObject(QString name);
   void RequestShowObjectRecursive(QString name);
   void RequestNormalDetectorDraw();
+  void RequestListOfParticles(QStringList &definedParticles);
+  void RequestShowMonitor(const AGeoObject* mon);
 };
 
 // GeoWidget
@@ -89,10 +94,12 @@ class QGridLayout;
 class QPushButton;
 class AGeoObjectDelegate;
 class AGridElementDelegate;
+class AMonitorDelegate;
 class QLabel;
 class ASlabDelegate;
 class ATypeCompositeObject;
 class TVector3;
+class AMonitorDelegateForm;
 
 class AGeoWidget : public QWidget
 {
@@ -111,6 +118,7 @@ private:
   AGeoObjectDelegate* GeoObjectDelegate;
   ASlabDelegate* SlabDelegate;
   AGridElementDelegate* GridDelegate;
+  AMonitorDelegate* MonitorDelegate;
 
   QVBoxLayout *lMain;
   QVBoxLayout *ObjectLayout;
@@ -127,6 +135,7 @@ public slots:
   void onObjectSelectionChanged(const QString SelectedObject); //starts GUI update
   void onStartEditing();
   void OnCustomContextMenuTriggered_forMainObject(QPoint pos);
+  void onMonitorRequestsShowSensitiveDirection();
 
 private slots:
   void onConfirmPressed();
@@ -134,8 +143,11 @@ private slots:
 
 private:
   void rotate(TVector3* v, double dPhi, double dTheta, double dPsi);
+
+  void getValuesFromNonSlabDelegates(AGeoObject *objMain);
   void confirmChangesForSlab();
   void confirmChangesForGridDelegate();
+  void confirmChangesForMonitorDelegate();
 
   void exitEditingMode();
   QString getSuffix(AGeoObject *objCont);
@@ -144,9 +156,11 @@ private:
   AGeoObjectDelegate *createAndAddGeoObjectDelegate(AGeoObject *obj);
   ASlabDelegate *createAndAddSlabDelegate(AGeoObject *obj);
   AGridElementDelegate *createAndAddGridElementDelegate(AGeoObject *obj);
-
+  AMonitorDelegate *createAndAddMonitorDelegate(AGeoObject *obj, QStringList particles);
   bool checkNonSlabObjectDelegateValidity(AGeoObject *obj);
-  void getValuesFromNonSlabDelegates(AGeoObject *objMain);
+
+signals:
+  void showMonitor(const AGeoObject* mon);
 };
 
 
@@ -181,7 +195,7 @@ public slots:
   void Update(const AGeoObject* obj);
 
 private slots:
-  void onContentChanged();  
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
   void onHelpRequested();   //AGeoShape list is here!!!
   void onCursorPositionChanged();
 
@@ -213,7 +227,7 @@ public slots:
   void Update(const AGeoObject* obj);
 
 private slots:
-  void onContentChanged();
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
   void StartDialog();
   void onInstructionsForGridRequested();
 
@@ -222,8 +236,33 @@ signals:
   void RequestReshapeGrid(QString);
 };
 
+class AMonitorDelegate : public QWidget
+{
+  Q_OBJECT
 
-#include <QSyntaxHighlighter>
+public:
+   AMonitorDelegate(QStringList definedParticles);
+
+   QFrame* Widget;
+   AMonitorDelegateForm* del;
+
+   QString getName() const;
+   void updateObject(AGeoObject* obj);
+
+private:
+   const AGeoObject* CurrentObject;
+
+public slots:
+  void Update(const AGeoObject* obj);
+
+private slots:
+  void onContentChanged();  //only to enter editing mode! Object update only on confirm button!
+
+signals:
+  void ContentChanged();
+  void requestShowSensitiveFaces();
+};
+
 class AShapeHighlighter : public QSyntaxHighlighter
 {
     Q_OBJECT

@@ -7,6 +7,8 @@
 #include "aparticleonstack.h"
 #include "ahistoryrecords.h"
 #include "acommonfunctions.h"
+#include "asimulationstatistics.h"
+#include "amonitor.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -17,9 +19,16 @@
 #include "TRandom2.h"
 #include "TGeoTrack.h"
 
-PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* MpCollection, QVector<AParticleOnStack*>* particleStack, QVector<AEnergyDepositionCell*>* energyVector, QVector<EventHistoryStructure*>* eventHistory, QObject *parent) :
+PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
+                                               TRandom2 *RandomGenerator,
+                                               AMaterialParticleCollection* MpCollection,
+                                               QVector<AParticleOnStack*>* particleStack,
+                                               QVector<AEnergyDepositionCell*>* energyVector,
+                                               QVector<EventHistoryStructure*>* eventHistory,
+                                               ASimulationStatistics *simStat,
+                                               QObject *parent) :
   QObject(parent), GeoManager(geoManager), RandGen (RandomGenerator),
-  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory)
+  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat)
 {
   BuildTracks = true;
   RemoveTracksIfNoEnergyDepo = true;
@@ -111,13 +120,47 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           double distanceHistory = 0; //for diagnostics - travelled distance and deposited energy in THIS material
           double energyHistory = 0;
 
-          for (int j=0; j<3; j++) r[j]=navigator->GetCurrentPoint()[j]; //current position
+          const Double_t *global = navigator->GetCurrentPoint();
+          for (int j=0; j<3; j++) r[j] = global[j]; //current position
 
           if (navigator->IsOutside())
             {
               //              qDebug()<<"Escaped from the defined geometry!";
               terminationStatus = EventHistoryStructure::Escaped;//1
               break; //do-break
+            }
+
+          //monitors
+          if (!SimStat->Monitors.isEmpty())
+            {
+              if (navigator->GetCurrentVolume()->GetTitle()[0] == 'M')
+                {
+                  const int iMon = navigator->GetCurrentNode()->GetNumber();
+                  //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
+                  if (SimStat->Monitors.at(iMon)->isForParticles() && SimStat->Monitors.at(iMon)->getParticleIndex()==Id)
+                    {
+                      const bool bPrimary = (ParticleStack->at(0)->secondaryOf == -1);
+                      if (bPrimary && SimStat->Monitors.at(iMon)->isPrimary() ||
+                          !bPrimary && SimStat->Monitors.at(iMon)->isSecondary())
+                      {
+                          Double_t local[3];
+                          navigator->MasterToLocal(global, local);
+                          //qDebug()<<local[0]<<local[1];
+                          if ( (local[2]>0 && SimStat->Monitors.at(iMon)->isUpperSensitive()) || (local[2]<0 && SimStat->Monitors.at(iMon)->isLowerSensitive()) )
+                          {
+                              const double* N = navigator->FindNormal(kFALSE);
+                              double cosAngle = 0;
+                              for (int i=0; i<3; i++) cosAngle += N[i] * v[i];  //assuming v never changes!
+                              SimStat->Monitors[iMon]->fillForParticle(local[0], local[1], time, 180.0/3.1415926535*TMath::ACos(cosAngle), energy);
+                              if (SimStat->Monitors.at(iMon)->isStopsTracking())
+                              {
+                                  terminationStatus = EventHistoryStructure::StoppedOnMonitor;//11
+                                  break; //do-break
+                              }
+                          }
+                      }
+                    }
+                }
             }
 
           if ( !(*MpCollection)[MatId]->MatParticle[Id].TrackingAllowed )
@@ -374,7 +417,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double va[3];
                                 double a = sqrt(1.38065e-23*300/m/1.6605e-27);
                                 for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
-                                qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
+                                //qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++) vcm[i] = (2200.0*v[i]+m*va[i])/sumM;
@@ -387,7 +430,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vnew[3]; //neutrn velocity in the lab frame
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
-                                qDebug() << "new neutron velocity:"<<vnewMod;
+                                //qDebug() << "new neutron velocity:"<<vnewMod;
                                 AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, energy, counter);
                                 ParticleStack->append(tmp);
 

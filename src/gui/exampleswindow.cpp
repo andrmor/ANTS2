@@ -35,8 +35,9 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
   Examples.resize(0);
   ListedExamples.resize(0);
 
+  ui->cbDoNotShowExamplesOnStart->setChecked(!MW->GlobSet->ShowExamplesOnStart);
+
   ExamplesWindow::BuildExampleRecord();
-  //ExamplesWindow::PrepareLoadLastSettings();
 }
 
 ExamplesWindow::~ExamplesWindow()
@@ -57,14 +58,9 @@ void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimS
     MW->Config->SaveConfig(fileName, DetConstructor, SimSettings, ReconstrSettings);
 }
 
-void ExamplesWindow::setShowExamplesOnStartStatus(bool show)
-{
-  ui->cbDoNotShowExamplesOnStart->setChecked(!show);
-}
-
 void ExamplesWindow::on_cbDoNotShowExamplesOnStart_toggled(bool checked)
 {
-  MW->ShowExamplesOnStart = !checked;
+  MW->GlobSet->ShowExamplesOnStart = !checked;
 }
 
 bool ExamplesWindow::event(QEvent *event)
@@ -85,18 +81,11 @@ bool ExamplesWindow::event(QEvent *event)
 
 void ExamplesWindow::BuildExampleRecord()
 {
-//  qDebug()<<"    Reading examples tree";
-//  if (!QDir("EXAMPLES").exists())
-//    {
-//      qDebug()<<"!--Examples dir not found!";
-//      return;
-//    }
-
   QString fileName = MW->GlobSet->ExamplesDir + "/ExamplesTree.txt";
   QFile file(fileName);
   if(!file.open(QIODevice::ReadOnly | QFile::Text))
       {
-          qDebug("!--Cannot find or open ExamplesTree.txt");
+          qWarning("!--Cannot find or open ExamplesTree.txt");
           return;
       }
 
@@ -122,7 +111,7 @@ void ExamplesWindow::BuildExampleRecord()
             else
               {
                 //wrong number of fields!
-                qDebug()<<"!--Wrong number of fields found while processing ExamplesTree.txt"<<line;
+                qWarning()<<"!--Wrong number of fields found while processing ExamplesTree.txt"<<line;
               }
           }
         else if (fields[0] == "add")
@@ -130,7 +119,7 @@ void ExamplesWindow::BuildExampleRecord()
             if (fields.size() != 5 )
               {
                 //wrong number of fields!
-                qDebug()<<"!--Wrong number of fields found while processing ExamplesTree.txt: "<<line;
+                qWarning()<<"!--Wrong number of fields found while processing ExamplesTree.txt: "<<line;
               }
             else
               {
@@ -151,7 +140,7 @@ void ExamplesWindow::AddNewMainType(QString name)
   for (int i=0; i<MainTypeNames.size(); i++)
      if (name == MainTypeNames[i])
        {
-          qDebug()<<"!--Attempt to register already existent MainTypeName during ExampleTree build";
+          qWarning()<<"!--Attempt to register already existent MainTypeName during ExampleTree build";
           return;
        }
   MainTypeNames.append(name);
@@ -169,7 +158,7 @@ void ExamplesWindow::AddNewSubType(QString maintype, QString subtype)
          for (int j=0; j<SubTypeNames[i].size(); j++)
            if (subtype == SubTypeNames[i][j])
              {
-               qDebug()<<"Attempt to register already existent SubTypeName during ExampleTree build:"<<subtype;
+               qWarning()<<"Attempt to register already existent SubTypeName during ExampleTree build:"<<subtype;
                return;
              }
 
@@ -177,7 +166,7 @@ void ExamplesWindow::AddNewSubType(QString maintype, QString subtype)
          //qDebug()<<"adding"<<subtype<<"for"<<maintype<<"for index="<<i;
          return;
        }
-  qDebug()<<"!--Attempt to register subtype for a non-existent MainType during ExampleTree build:"<<maintype;
+  qWarning()<<"!--Attempt to register subtype for a non-existent MainType during ExampleTree build:"<<maintype;
   return;
 }
 
@@ -198,10 +187,10 @@ void ExamplesWindow::AddNewExample(QString maintype, QString subtype, QString fi
                return;
              }
 
-         qDebug()<<"!--Attempt to register example for a non-existent SubType during ExampleTree build:"<<subtype;
+         qWarning()<<"!--Attempt to register example for a non-existent SubType during ExampleTree build:"<<subtype;
          return;
        }
-  qDebug()<<"!--Attempt to register example for a non-existent MainType during ExampleTree build:"<<maintype;
+  qWarning()<<"!--Attempt to register example for a non-existent MainType during ExampleTree build:"<<maintype;
   return;
 }
 
@@ -284,14 +273,9 @@ void ExamplesWindow::on_pbLoadExample_clicked()
 
 void ExamplesWindow::on_lwExample_doubleClicked(const QModelIndex &index)
 {
-  //ui->lwExample->setCurrentRow(index);
-  //qDebug()<<"index:"<<ui->lwExample->currentRow();
   ui->lwExample->setCurrentRow(index.row());
-
   ExamplesWindow::on_pbLoadExample_clicked();
 }
-
-//-----------------------------------------------------------------------------------------
 
 void ExamplesWindow::on_pbSaveSessings_clicked()
 {

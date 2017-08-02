@@ -187,9 +187,6 @@ public:
     void SetMultipliersUsingGains(QVector<double> Gains);
     void SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl);
 
-    //config setting (updated bu the Examples window ELwindow)
-    bool ShowExamplesOnStart;
-
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
     bool GeometryDrawDisabled; //no drawing of th geometry or tracks

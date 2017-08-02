@@ -88,7 +88,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryDrawDisabled = false;
     fStartedFromGUI = false;
     fSimDataNotSaved = false;
-    ShowExamplesOnStart = true; //Show examples window on start    
     //aliases to use in GUI
     MpCollection = Detector->MpCollection; // just an alias
     PMs = Detector->PMs;                               // just an alias
@@ -117,8 +116,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     //qDebug()<<"->Creating Examples Window";
     QWidget* w = new QWidget();
     ELwindow = new ExamplesWindow(w, this);
-    ELwindow->move(100,100);
-    ELwindow->setShowExamplesOnStartStatus(ShowExamplesOnStart);
+    ELwindow->move(100,100);    
     //qDebug()<<"->Creating Detector Add-ons window";  //created as child window, no delete on mainwin close!
     DAwindow = new DetectorAddOnsWindow(this, Detector);
     DAwindow->move(50,50);

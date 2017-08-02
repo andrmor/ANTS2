@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         //qDebug() << "___> Done!";
 
         //overrides the saved status of examples window
-        if (w.ShowExamplesOnStart)
+        if (GlobSet.ShowExamplesOnStart)
         {
             w.ELwindow->show();
             w.ELwindow->raise();//making sure examples window is on top

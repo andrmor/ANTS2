@@ -3890,35 +3890,45 @@ void MainWindow::on_actionVersion_triggered()
   QString mav = QString::number(majVer);
   QString qv = QT_VERSION_STR;
 
-  QString out = "ANTS2 version:  " + mav + "." + miv + "\n"
-                "Build number:  " + QString::number(versionNumber)+"\n"
-                "Build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
+  QString out = "ANTS2\n"
+                "   version:  " + mav + "." + miv + "\n"
+                "   build number:  " + QString::number(versionNumber)+"\n"
+                "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
+                "\n"
                 "Qt version:  " + qv + "\n"
                 "\n"
-                "Compilation options:"
-                "\nCUDA (gpu):  "
+                "ROOT version:  " + gROOT->GetVersion() + "\n"
+                "\n"
+                "Compilation options:\n"
+                "   CUDA (gpu):  "
 #ifdef __USE_ANTS_CUDA__
   "on"
 #else
   "off"
 #endif
-                "\nFANN (neural networks):  "
+                "\n   FANN (neural networks):  "
 #ifdef ANTS_FANN
   "on"
 #else
   "off"
 #endif
-                "\nFLANN (kNN search):  "
+                "\n   FLANN (kNN search):  "
 #ifdef ANTS_FLANN
   "on"
 #else
   "off"
 #endif
-                "\nEigen3 (for fast LRF fitting):  "
+                "\n   Eigen3 (for fast LRF fitting):  "
 #ifdef USE_EIGEN
   "on"
 #else
   "off"
+#endif
+                "\n   Root html server (for JSROOT):  "
+#ifdef USE_ROOT_HTML
+ "on"
+#else
+ "off"
 #endif
                 "";
 

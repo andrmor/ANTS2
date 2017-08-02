@@ -78,7 +78,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   ui->cbForceNonNegative->setChecked(false);
   ui->cbForceNonIncreasingInR->setChecked(false);
   ui->cobForceInZ->setCurrentIndex(0);
-  ui->cbForceTopDown->setChecked(falsey);
+  ui->cbForceTopDown->setChecked(false);
 #endif
 
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status

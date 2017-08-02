@@ -976,42 +976,42 @@ void GraphWindowClass::on_cbLogY_toggled(bool checked)
 
 void GraphWindowClass::on_ledXfrom_editingFinished()
 {
-  ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (xmin == ui->ledXfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledXto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (xmax == ui->ledXto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledYfrom_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (ymin == ui->ledYfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledYto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (ymax == ui->ledYto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledZfrom_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (zmin == ui->ledZfrom->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }
 
 void GraphWindowClass::on_ledZto_editingFinished()
 {
-    ui->pbUnzoom->setFocus();
+  //ui->pbUnzoom->setFocus();
   if (zmax == ui->ledZto->text().toDouble()) return;
   GraphWindowClass::Reshape();
 }

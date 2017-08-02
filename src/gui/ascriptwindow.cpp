@@ -944,7 +944,7 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 //  ScriptTabs[CurrentTab]->TextEdit->insertPlainText(text);
 //}
 
-void AScriptWindow::closeEvent(QCloseEvent *e)
+void AScriptWindow::closeEvent(QCloseEvent* /*e*/)
 {
 //  qDebug() << "Script window: Close event";
 //  if (ScriptManager->fEngineIsRunning)
@@ -1139,7 +1139,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
 {
-   qDebug() << "Form->to:"<<from<<to;
+   //qDebug() << "Form->to:"<<from<<to;
    ScriptTabs.swap(from, to);
 }
 
@@ -1147,7 +1147,17 @@ void AScriptWindow::AddNewTab()
 {
     AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel);
     tab->highlighter->setCustomCommands(functions);
-    tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+
+    if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
+      {
+         tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+      }
+    else
+      {
+        QFont font(GlobSet->DefaultFontFamily_ScriptWindow, GlobSet->DefaultFontSize_ScriptWindow, GlobSet->DefaultFontWeight_ScriptWindow, GlobSet->DefaultFontItalic_ScriptWindow);
+        tab->TextEdit->setFont(font);
+      }
+
     QObject::connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
     ScriptTabs.append(tab);
 
@@ -1221,4 +1231,26 @@ void AScriptWindow::on_actionDecrease_font_size_triggered()
 
     onDefaulFontSizeChanged(--GlobSet->DefaultFontSize_ScriptWindow);
     //qDebug() << "New font size:"<<GlobSet->DefaultFontSize_ScriptWindow;
+}
+
+#include <QFontDialog>
+void AScriptWindow::on_actionSelect_font_triggered()
+{
+  bool ok;
+  QFont font = QFontDialog::getFont(
+                  &ok,
+                  QFont(GlobSet->DefaultFontFamily_ScriptWindow,
+                        GlobSet->DefaultFontSize_ScriptWindow,
+                        GlobSet->DefaultFontWeight_ScriptWindow,
+                        GlobSet->DefaultFontItalic_ScriptWindow),
+                  this);
+  if (!ok) return;
+
+  GlobSet->DefaultFontFamily_ScriptWindow = font.family();
+  GlobSet->DefaultFontSize_ScriptWindow = font.pointSize();
+  GlobSet->DefaultFontWeight_ScriptWindow = font.weight();
+  GlobSet->DefaultFontItalic_ScriptWindow = font.italic();
+
+  for (AScriptWindowTabItem* tab : ScriptTabs)
+      tab->TextEdit->setFont(font);
 }

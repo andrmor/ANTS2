@@ -388,6 +388,7 @@ if (scj.contains("CustomDistrib"))
   {
       ui->twSingleScan->blockSignals(true);
       ui->twSingleScan->setCurrentIndex(SimMode);
+      ui->frLimitNodesTo->setVisible( ui->twSingleScan->currentIndex()!=0 );
       ui->twSingleScan->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);

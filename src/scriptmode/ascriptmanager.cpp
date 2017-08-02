@@ -67,7 +67,7 @@ void AScriptManager::CollectGarbage()
 
 void AScriptManager::AbortEvaluation(QString message)
 {
-    qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
+    //qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
 
     if (fAborted || !fEngineIsRunning) return;
     fAborted = true;

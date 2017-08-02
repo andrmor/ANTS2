@@ -211,7 +211,7 @@ double LRFaxial::fitError(int npts, const double *x, const double *y, const doub
 //        va.push_back(fabs(err));
         va.push_back(err*err);
     }
-    qDebug() << "Performing Error fitting";
+    //qDebug() << "Performing Error fitting";
 
     bse = new Bspline3(0., compress(rmax), nint);
 

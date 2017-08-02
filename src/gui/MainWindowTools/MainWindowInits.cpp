@@ -88,7 +88,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryDrawDisabled = false;
     fStartedFromGUI = false;
     fSimDataNotSaved = false;
-    ShowExamplesOnStart = true; //Show examples window on start    
     //aliases to use in GUI
     MpCollection = Detector->MpCollection; // just an alias
     PMs = Detector->PMs;                               // just an alias
@@ -117,8 +116,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     //qDebug()<<"->Creating Examples Window";
     QWidget* w = new QWidget();
     ELwindow = new ExamplesWindow(w, this);
-    ELwindow->move(100,100);
-    ELwindow->setShowExamplesOnStartStatus(ShowExamplesOnStart);
+    ELwindow->move(100,100);    
     //qDebug()<<"->Creating Detector Add-ons window";  //created as child window, no delete on mainwin close!
     DAwindow = new DetectorAddOnsWindow(this, Detector);
     DAwindow->move(50,50);
@@ -283,8 +281,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->fLinkedParticle << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
-    if (ui->twSingleScan->currentIndex() == 0) ui->frLimitNodesTo->setVisible(false);
-    else ui->frLimitNodesTo->setVisible(true);
+    ui->frLimitNodesTo->setVisible( ui->twSingleScan->currentIndex()!=0 );
     QList<QWidget*> disables;
     disables << ui->fGunParticle << ui->fFixedDir << ui->fFixedWorldSize;
     for (int i=0;i<disables.length();i++) disables[i]->setEnabled(false);

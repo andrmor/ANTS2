@@ -5705,13 +5705,18 @@ void ReconstructionWindow::SetShowFirst(bool fOn, int number)
 void ReconstructionWindow::on_cbCustomBinning_toggled(bool checked)
 {
    ui->fCustomBins->setEnabled(checked);
-   if (!checked) ui->fCustomRanges->setEnabled(false);
+   if (!checked)
+   {
+       ui->cbCustomRanges->setChecked(false);
+       ui->fCustomRanges->setEnabled(false);
+   }
 }
 
 void ReconstructionWindow::on_cbCustomRanges_toggled(bool checked)
 {
    if (checked) ui->fCustomBins->setEnabled(true);
    ui->fCustomRanges->setEnabled(checked);
+   if (checked) ui->cbCustomBinning->setChecked(true);
 }
 
 void linkCustomClass::updateBins() {bins = Qbins->value();}
@@ -6022,7 +6027,7 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        ui->ledSuggestedZ->setVisible(true);
        ui->label_8->setVisible(true);
-       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 106, ui->cobZ->height());
+       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 131, ui->cobZ->height());
        // combo button
        p.setColor(QPalette::Button, Qt::white);
        p.setColor(QPalette::ButtonText, Qt::black);
@@ -6034,7 +6039,7 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        ui->ledSuggestedZ->setVisible(false);
        ui->label_8->setVisible(false);
-       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 161, ui->cobZ->height());
+       ui->cobZ->setGeometry(ui->cobZ->x(), ui->cobZ->y(), 188, ui->cobZ->height());
        p.setColor(QPalette::Button, Qt::white);
        p.setColor(QPalette::ButtonText, Qt::red);
      }
@@ -6044,13 +6049,16 @@ void ReconstructionWindow::on_cobZ_currentIndexChanged(int index)
      {
        //3D - reconstruct Z
        ui->cobZ->setItemText(0, "Start from Z of:");
-       ui->cobZ->setItemText(1, "Start from loaded/simulated Z");
+       ui->cobZ->setItemText(1, "Start from loaded/sim Z");
+       //if (ui->cobZ->count() == 3) ui->cobZ->removeItem(2);
      }
    else
      {
        //2D
        ui->cobZ->setItemText(0, "Set Z to:");
-       ui->cobZ->setItemText(1, "Use loaded/simulated Z");
+       ui->cobZ->setItemText(1, "Use loaded/sim Z");
+       //if (ui->cobZ->count() == 2) ui->cobZ->addItem("");
+       //ui->cobZ->setItemText(2, "Do not change Z");
      }
 }
 

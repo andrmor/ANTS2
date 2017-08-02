@@ -25,7 +25,9 @@ bool parseJson(const QJsonObject &json, const QString &key, int &var)
 {
   if (json.contains(key))
     {
-      var = json[key].toInt();
+      //var = json[key].toInt();
+      double val = json[key].toDouble();
+      var = std::round(val);
       return true;
     }
   else return false;
@@ -77,7 +79,11 @@ void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
 void JsonToSpinBox(QJsonObject &json, QString key, QSpinBox *sb)
 {
   if (json.contains(key))
-    sb->setValue(json[key].toInt());
+    {
+       double val = json[key].toDouble();
+       int ival = std::round(val);
+       sb->setValue(ival);
+    }
 }
 
 void JsonToLineEdit(QJsonObject &json, QString key, QLineEdit *le)

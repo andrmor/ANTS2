@@ -223,7 +223,7 @@ void Viewer2DarrayObject::forceResize()
 
 void Viewer2DarrayObject::sceneSelectionChanged()
 {
-  qDebug()<<"Scene selection changed!";
+//  qDebug()<<"Scene selection changed!";
   int selectedItems = scene->selectedItems().size();
 //  qDebug()<<"  --number of selected items:"<<selectedItems;
   if (selectedItems == 0)

@@ -17,7 +17,7 @@ AScriptExampleDatabase::AScriptExampleDatabase(QString ConfigText)
       }
   }
 
-  qDebug() << "Extracted"<<Examples.size()<<"examples";
+  //qDebug() << "Extracted"<<Examples.size()<<"examples";
   Tags.sort();
 }
 

@@ -15,6 +15,7 @@ public:
   bool fForceNonNegative;
   bool fForceNonIncreasingInR;
   int fForceInZ; // 0 - not enforced, 1 - increasing; 2 - decreasing
+  bool fForceTopDown;
   bool fFitError;
   bool scale_by_energy;
  //grouping

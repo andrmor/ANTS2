@@ -41,7 +41,7 @@ public:
   bool   fTracksOnPMsOnly;
   bool   fQEaccelerator;
   bool   fLogsStat;             //generate logs and statistics of detected photons
-  bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
+  bool   bDoPhotonHistoryLog; //detailed photon history, activated by "photon" script!
   int    NumThreads;
 
   int    DetStatNumBins;        //number of bins in fetection statistics

@@ -60,6 +60,7 @@ public:
     void SetFontSize(int size);
 
     QStringList functionList;
+    int TabGivesSpaces;
 
 protected:
     void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
@@ -75,7 +76,9 @@ private slots:
 private:
     QString textUnderCursor() const;
     QString SelectObjFunctUnderCursor(QTextCursor* cursor = 0) const;
-    bool findInList(QString text, QString &tmp);
+    QString SelectTextToLeft(QTextCursor cursor, int num) const;
+    bool InsertClosingBracket() const;
+    bool findInList(QString text, QString &tmp) const;
     void setFontSizeAndEmitSignal(int size);
 
     QCompleter *c;    
@@ -83,7 +86,7 @@ private:
 signals:
     void requestHelp(QString);
     void editingFinished();
-    void fontSizeChanged(int size);
+    void fontSizeChanged(int size);    
 //    void requestHistoryBefore();
 //    void requestHistoryAfter();
 //    void requestHistoryStart();

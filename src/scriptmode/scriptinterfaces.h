@@ -24,6 +24,8 @@ public slots:
   //abort execution of the script
   void abort(QString message = "Aborted!");
 
+  QVariant evaluate(QString script);
+
   //sleep
   void sleep(int ms);
 

@@ -500,7 +500,7 @@ bool InterfaceToConfig::Replace(QString Key, QVariant val)
   bool ok = modifyJsonValue(Config->JSON, Key, jv);
   if (ok)
     {
-      qDebug() << "-------Key:"<<Key;
+      //qDebug() << "-------Key:"<<Key;
       if (Key.startsWith("DetectorConfig")) //rebuild detector if detector settings were changed
           Config->GetDetector()->BuildDetector();
       else if (Key.startsWith("ReconstructionConfig.LRFmakeJson"))
@@ -1675,11 +1675,18 @@ QString InterfaceToLRF::Make()
 
 double InterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
 {
-    qDebug() << ipm<<x<<y<<z;
-    qDebug() << SensLRF->getIteration()->countPMs();
+    //qDebug() << ipm<<x<<y<<z;
+    //qDebug() << SensLRF->getIteration()->countPMs();
     if (!SensLRF->isAllLRFsDefined()) return 0;
-    if (ipm<0 || ipm>SensLRF->getIteration()->countPMs()-1) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
     return SensLRF->getLRF(ipm, x, y, z);
+}
+
+double InterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
+{
+    if (!SensLRF->isAllLRFsDefined()) return 0;
+    if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
+    return SensLRF->getLRFErr(ipm, x, y, z);
 }
 
 //void InterfaceToLRF::ShowVsXY(int ipm, int PointsX, int PointsY)
@@ -2198,6 +2205,16 @@ void InterfaceToGraphs::Draw(QString GraphName, QString options)
   }
 }
 
+bool InterfaceToGraphs::Delete(QString GraphName)
+{
+    return TmpHub->ScriptDrawObjects.remove(GraphName);
+}
+
+void InterfaceToGraphs::DeleteAllGraph()
+{
+    TmpHub->ScriptDrawObjects.removeAllGraphs();
+}
+
 //----------------------------------
 InterfaceToHistD::InterfaceToHistD(TmpObjHubClass* TmpHub)
   : TmpHub(TmpHub)
@@ -2446,6 +2463,16 @@ QVariant InterfaceToHistD::FitGaussWithInit(QString HistName, QVariant InitialPa
     }
 }
 
+bool InterfaceToHistD::Delete(QString HistName)
+{
+    return TmpHub->ScriptDrawObjects.remove(HistName);
+}
+
+void InterfaceToHistD::DeleteAllHist()
+{
+    TmpHub->ScriptDrawObjects.removeAllHists();
+}
+
 void InterfaceToHistD::Draw(QString HistName, QString options)
 {
   int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
@@ -2545,7 +2572,7 @@ void InterfaceToReconstructor::setPMsOfGroup(int igroup, QVariant PMlist)
     if (type == "QVariantList")
         {
           QVariantList vl = PMlist.toList();
-          qDebug() << vl;
+          //qDebug() << vl;
           QJsonArray ar = QJsonArray::fromVariantList(vl);
           for (int i=0; i<ar.size(); i++)
           {
@@ -2856,7 +2883,7 @@ bool AInterfaceToPMs::AddPMToPlane(int UpperLower, int type, double X, double Y,
   if (!checkAddPmCommon(UpperLower, type)) return false;
 
   APmArrayData& ArrData = Config->GetDetector()->PMarrays[UpperLower];
-  qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
+  //qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
 
   if (ArrData.PositionsAnglesTypes.isEmpty())
     {
@@ -2887,7 +2914,7 @@ bool AInterfaceToPMs::AddPM(int UpperLower, int type, double X, double Y, double
     if (!checkAddPmCommon(UpperLower, type)) return false;
 
     APmArrayData& ArrData = Config->GetDetector()->PMarrays[UpperLower];
-    qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
+    //qDebug() << "Size:"<<ArrData.PositionsAnglesTypes.size()<<"Reg:"<<ArrData.Regularity;
 
     if (ArrData.PositionsAnglesTypes.isEmpty())
       {

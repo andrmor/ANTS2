@@ -111,7 +111,7 @@
     </font>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Andrey Morozov &lt;br/&gt;Vladimir Solovov &lt;br/&gt;Raimundo Martins &lt;br/&gt;Francisco Neves&lt;br/&gt;Valdemar Domingos&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Andrey Morozov &lt;br/&gt;Vladimir Solovov &lt;br/&gt;Raimundo Martins &lt;br/&gt;Francisco Neves&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>

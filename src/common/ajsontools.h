@@ -13,7 +13,7 @@ class TH1I;
 class TH1D;
 
 bool parseJson(const QJsonObject &json, const QString &key, bool &var);
-bool parseJson(const QJsonObject &json, const QString &key, int &var);
+bool parseJson(const QJsonObject &json, const QString &key, int &var);   //can convert double content of the key to int - uses std::round
 bool parseJson(const QJsonObject &json, const QString &key, double &var);
 bool parseJson(const QJsonObject &json, const QString &key, float &var);
 bool parseJson(const QJsonObject &json, const QString &key, QString &var);

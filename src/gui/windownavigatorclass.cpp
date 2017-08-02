@@ -59,7 +59,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
 
 #ifdef Q_OS_WIN32
   taskButton = 0;
-  QTimer::singleShot(5000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
+  QTimer::singleShot(1000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
 
   QWinJumpList* jumplist = new QWinJumpList(this);
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";

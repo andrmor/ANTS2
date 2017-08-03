@@ -148,7 +148,7 @@ CorrelationUnitGenericClass* CorrelationFilterStructure::CorrUnitCreator(QString
   if (Type == "SingleChannel") return new CU_SingleChannel(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
   if (Type == "SumAllChannels") return new CU_SumAllChannels(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
   if (Type == "SumChannels") return new CU_SumChannels(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
-  if (Type == "LoadedEnergy") return new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+  if (Type == "LoadedEnergy") return new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
   if (Type == "RecE") return new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
   if (Type == "Chi2") return new CU_Chi2(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
   if (Type == "RecX") return new CU_RecX(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
@@ -222,14 +222,17 @@ CU_SumChannels *CU_SumChannels::getClone()
   return copy;
 }
 
-double CU_LoadedEnergy::getValue(int iev)
+double CU_TrueOrLoadedEnergy::getValue(int iev)
 {
-    return EventsDataHub->Events.at(iev).last();
+    //return EventsDataHub->Events.at(iev).last();
+
+    if (EventsDataHub->isScanEmpty()) return 1.0;
+    return EventsDataHub->Scan.at(iev)->Points.at(0).energy;
 }
 
-CU_LoadedEnergy *CU_LoadedEnergy::getClone()
+CU_TrueOrLoadedEnergy *CU_TrueOrLoadedEnergy::getClone()
 {
-  CU_LoadedEnergy* copy = new CU_LoadedEnergy(Channels, EventsDataHub, PMgroups, ThisPMgroup);
+  CU_TrueOrLoadedEnergy* copy = new CU_TrueOrLoadedEnergy(Channels, EventsDataHub, PMgroups, ThisPMgroup);
   return copy;
 }
 

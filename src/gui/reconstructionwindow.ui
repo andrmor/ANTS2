@@ -3449,7 +3449,7 @@ Individual sensors can belong to multiple groups!</string>
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -3474,7 +3474,7 @@ Individual sensors can belong to multiple groups!</string>
          </font>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabEventNumber">
          <attribute name="title">
@@ -6681,7 +6681,7 @@ Individual sensors can belong to multiple groups!</string>
            </item>
            <item>
             <property name="text">
-             <string>Loaded energy</string>
+             <string>True or loaded energy</string>
             </property>
            </item>
            <item>
@@ -6756,7 +6756,7 @@ Individual sensors can belong to multiple groups!</string>
            </item>
            <item>
             <property name="text">
-             <string>Loaded energy</string>
+             <string>True or loaded energy</string>
             </property>
            </item>
            <item>

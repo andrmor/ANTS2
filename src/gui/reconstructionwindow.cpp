@@ -3012,8 +3012,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList1->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr1->currentText() == "Loaded energy")
-       p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr1->currentText() == "True or loaded energy")
+       p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Reconstructed energy")
        p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Chi2")
@@ -3048,8 +3048,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList2->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr2->currentText() == "Loaded energy")
-      p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr2->currentText() == "True or loaded energy")
+      p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Reconstructed energy")
       p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Chi2")
@@ -3367,7 +3367,7 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
   }
 
   auto hist1D = new TH1D("hist1ShLoEnSp","True/loaded energy", MW->GlobSet->BinsX, 0, 0);
-  hist1D->SetXTitle("Loaded energy");
+  hist1D->SetXTitle("True or loaded energy");
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   hist1D->SetBit(TH1::kCanRebin);
 #endif

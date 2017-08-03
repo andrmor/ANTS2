@@ -667,7 +667,6 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
   //RootMinReconstructorClass* Reconstructor = reinterpret_cast<RootMinReconstructorClass*>(intPoint);
   RootMinReconstructorClass* Reconstructor = (RootMinReconstructorClass*)thisvalue;
     //qDebug() << "point:"<<X<< Y<< Z<< energy;
-  //for (int ipm = 0; ipm < Reconstructor->PMsignals->size(); ipm++) //not compatible with loaded energy mode!
   for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
     if (Reconstructor->DynamicPassives->isActive(ipm))
      {

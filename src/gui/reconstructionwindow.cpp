@@ -3012,8 +3012,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList1->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr1->currentText() == "Loaded energy")
-       p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr1->currentText() == "True or loaded energy")
+       p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Reconstructed energy")
        p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Chi2")
@@ -3048,8 +3048,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList2->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr2->currentText() == "Loaded energy")
-      p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr2->currentText() == "True or loaded energy")
+      p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Reconstructed energy")
       p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Chi2")
@@ -3360,14 +3360,14 @@ void ReconstructionWindow::on_cbActivateCorrelationFilters_toggled(bool checked)
 
 void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
 {
-  if (!EventsDataHub->fLoadedEventsHaveEnergyInfo)
+  if (!EventsDataHub->fLoadedEventsHaveEnergyInfo && EventsDataHub->isScanEmpty())
   {
-      message("Loaded data does not contain energy info!", this);
+      message("There are no energy data!", this);
       return;
   }
 
-  auto hist1D = new TH1D("hist1ShLoEnSp","Loaded energy spectrum", MW->GlobSet->BinsX, 0, 0);
-  hist1D->SetXTitle("Loaded energy");
+  auto hist1D = new TH1D("hist1ShLoEnSp","True/loaded energy", MW->GlobSet->BinsX, 0, 0);
+  hist1D->SetXTitle("True or loaded energy");
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   hist1D->SetBit(TH1::kCanRebin);
 #endif
@@ -3375,7 +3375,7 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
   bool DoFiltering = false;
   if (!EventsDataHub->isReconstructionDataEmpty()) DoFiltering = true;
 
-  int ienergy = MW->PMs->count(); //index of the energy channel
+//  int ienergy = MW->PMs->count(); //index of the energy channel
 //  qDebug()<<"Energy channel="<<ienergy;
 
   for (int i=0; i < EventsDataHub->Events.size(); i++)
@@ -3383,7 +3383,8 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
        if (DoFiltering)
          if (!EventsDataHub->ReconstructionData[0][i]->GoodEvent) continue;
 
-       hist1D->Fill(EventsDataHub->Events[i][ienergy]);
+       //hist1D->Fill(EventsDataHub->Events[i][ienergy]);
+       hist1D->Fill(EventsDataHub->Scan.at(i)->Points.at(0).energy);
     }
 
   MW->GraphWindow->Draw(hist1D);

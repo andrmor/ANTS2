@@ -149,20 +149,20 @@ class CU_SumChannels : public CorrelationUnitGenericClass
     CU_SumChannels* getClone();
 };
 
-class CU_LoadedEnergy : public CorrelationUnitGenericClass
+class CU_TrueOrLoadedEnergy : public CorrelationUnitGenericClass
 {
   public:
-    CU_LoadedEnergy(QList<int> Channels, EventsDataClass *EventsDataHub, APmGroupsManager* PMgroups, int ThisPMgroup) :
+    CU_TrueOrLoadedEnergy(QList<int> Channels, EventsDataClass *EventsDataHub, APmGroupsManager* PMgroups, int ThisPMgroup) :
         CorrelationUnitGenericClass(Channels, EventsDataHub, PMgroups, ThisPMgroup){}
 
     const QString getType() { return "LoadedEnergy";}
     int getCOBindex() const {return 3;}
-    virtual const TString getAxisTitle() { return "Loaded energy";}
+    virtual const TString getAxisTitle() { return "True or loaded energy";}
 
     double getValue(int iev);
     bool isRequireReconstruction() {return false;}
 
-    CU_LoadedEnergy* getClone();
+    CU_TrueOrLoadedEnergy* getClone();
 };
 
 class CU_RecE : public CorrelationUnitGenericClass

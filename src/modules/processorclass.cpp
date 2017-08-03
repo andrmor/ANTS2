@@ -667,7 +667,6 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
   //RootMinReconstructorClass* Reconstructor = reinterpret_cast<RootMinReconstructorClass*>(intPoint);
   RootMinReconstructorClass* Reconstructor = (RootMinReconstructorClass*)thisvalue;
     //qDebug() << "point:"<<X<< Y<< Z<< energy;
-  //for (int ipm = 0; ipm < Reconstructor->PMsignals->size(); ipm++) //not compatible with loaded energy mode!
   for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
     if (Reconstructor->DynamicPassives->isActive(ipm))
      {
@@ -900,15 +899,16 @@ void EventFilterClass::execute()
     fFinished = false;
     //qDebug() << Id<<"> Applying basic filters for events from"<<EventsFrom<<" to "<<EventsTo-1;
 
-    bool fMultipleScanEvents = FiltSet->fMultipleScanEvents && !EventsDataHub->isScanEmpty();
-    bool fDoSpatialFilter = FiltSet->fSpF_custom &&
+    const bool fMultipleScanEvents = FiltSet->fMultipleScanEvents && !EventsDataHub->isScanEmpty();
+    const bool fDoSpatialFilter = FiltSet->fSpF_custom &&
                             (
                                (FiltSet->SpF_RecOrScan == 0 && EventsDataHub->fReconstructionDataReady)
                                 ||
                                (FiltSet->SpF_RecOrScan == 1 && !EventsDataHub->isScanEmpty())
                             );
-    bool fDoRecEnergyFilter = FiltSet->fEnergyFilter && EventsDataHub->fReconstructionDataReady;
-    bool fDoChi2Filter = FiltSet->fChi2Filter && EventsDataHub->fReconstructionDataReady;
+    const bool fDoRecEnergyFilter = FiltSet->fEnergyFilter && EventsDataHub->fReconstructionDataReady;
+    const bool fDoLoadedEnergyFilter = FiltSet->fLoadedEnergyFilter && !EventsDataHub->isScanEmpty();
+    const bool fDoChi2Filter = FiltSet->fChi2Filter && EventsDataHub->fReconstructionDataReady;
 
     for (int iev=EventsFrom; iev<EventsTo; iev++)
     {
@@ -939,9 +939,10 @@ void EventFilterClass::execute()
                 if (sum < FiltSet->SumCutOffMin || sum > FiltSet->SumCutOffMax) goto BadEventLabel;
         }
 
-        if (FiltSet->fLoadedEnergyFilter)
+        if (fDoLoadedEnergyFilter)
         {
-            double energy = PMsignals->at(PMs->count());  //energy channel is always the last one, pm numbering starts with 0
+            //double energy = PMsignals->at(PMs->count());  //energy channel is always the last one, pm numbering starts with 0
+            const double& energy = EventsDataHub->Scan.at(iev)->Points[0].energy;
             if (energy < FiltSet->LoadedEnergyFilterMin || energy > FiltSet->LoadedEnergyFilterMax) goto BadEventLabel;
         }
 

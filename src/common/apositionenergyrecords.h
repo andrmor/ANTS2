@@ -23,8 +23,9 @@ class APositionEnergyBuffer
     ~APositionEnergyBuffer(){ delete [] rec; }
 
     //public functions
-    inline APositionEnergyRecord &operator[](int i) const //get record number i
-      { return rec[i]; }
+    inline APositionEnergyRecord &operator[](int i) const { return rec[i]; } //get record number i
+    inline const APositionEnergyRecord &at(int i) const { return rec[i]; }
+
     inline int size() const {return numRecords;}          //get number of points
     inline void Reinitialize(int size)              //resize (data is undefined!)
       {

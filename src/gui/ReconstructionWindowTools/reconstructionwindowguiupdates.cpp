@@ -17,7 +17,7 @@ void ReconstructionWindow::onRequestEventsGuiUpdate()
        ui->sbEventNumberInspect->setValue(0);
     ForbidUpdate = false; //--//
 
-    ui->dLoadedEnergy->setEnabled(EventsDataHub->fLoadedEventsHaveEnergyInfo);
+    ui->dLoadedEnergy->setEnabled(EventsDataHub->fLoadedEventsHaveEnergyInfo || !EventsDataHub->isScanEmpty());
     if (!EventsDataHub->fLoadedEventsHaveEnergyInfo) ui->cbActivateLoadedEnergyFilter->setChecked(false);
     //if (EventsDataHub->isScanEmpty()) ui->cbShowActualPosition->setChecked(false);
     ui->fAnalysisAreaScan->setEnabled(false);

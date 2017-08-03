@@ -913,7 +913,6 @@ void LRFwindow::on_pbAxial3DvsRandZ_clicked()
 
 void LRFwindow::on_pbShowErrorVsRadius_clicked()
 {
-  //SensorLRF module does not have PMs info!
   if (SensLRF->getIteration() == 0) return;
   MW->GraphWindow->ShowAndFocus();
 

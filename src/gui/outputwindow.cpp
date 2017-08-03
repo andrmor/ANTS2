@@ -18,6 +18,7 @@
 #include "amonitor.h"
 #include "asandwich.h"
 #include "ageoobject.h"
+#include "detectoraddonswindow.h"
 
 //ROOT
 #include "TGraph2D.h"
@@ -54,9 +55,6 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     ui->pbSiPMpixels->setEnabled(false);
     ui->sbTimeBin->setEnabled(false);
     ui->pbRefreshViz->setVisible(false);
-    //ui->tabPhStatistics->setEnabled(false);
-
-    //ui->tvPMhits->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     //Graphics view
     scaleScene = new QGraphicsScene(this);
@@ -544,45 +542,50 @@ void OutputWindow::RefreshData()
   updateSignalScale();
 
   //Monitors
-  int numMonitors = MW->Detector->Sandwich->MonitorsRecords.size();
-  ui->frMonitors->setVisible(numMonitors != 0);
-  ui->labNoMonitors->setVisible(numMonitors == 0);
-  if (numMonitors>0)
-  {
-      int oldNum = ui->cobMonitor->currentIndex();
-      ui->cobMonitor->clear();
-      for (int i=0; i<numMonitors; i++)
-      {
-          const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
-          ui->cobMonitor->addItem(obj->Name);
-      }
-      if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
-
-      int imon = ui->cobMonitor->currentIndex();
-      const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
-      const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(monObj->ObjectType);
-      if (mon)
-      {
-          ui->frMonitors->setEnabled(true);
-          int numDet = 0;
-          if (imon < EventsDataHub->SimStat->Monitors.size())
-              if (EventsDataHub->SimStat->Monitors.at(imon)->getXY())
-                  numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
-          ui->leDetections->setText( QString::number(numDet) );
-
-          bool bPhotonMode = mon->config.PhotonOrParticle == 0;
-          ui->pbMonitorShowWave->setVisible(bPhotonMode);
-          ui->pbMonitorShowTime->setVisible(bPhotonMode);
-          ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
-      }
-      else
-      {
-          ui->frMonitors->setEnabled(false);
-          qWarning() << "Something is wrong: this is not a monitor object!";
-      }
-  }
+  updateMonitors();
 
   delete Passives;
+}
+
+void OutputWindow::updateMonitors()
+{
+    int numMonitors = MW->Detector->Sandwich->MonitorsRecords.size();
+    ui->frMonitors->setVisible(numMonitors != 0);
+    ui->labNoMonitors->setVisible(numMonitors == 0);
+    if (numMonitors>0)
+    {
+        int oldNum = ui->cobMonitor->currentIndex();
+        ui->cobMonitor->clear();
+        for (int i=0; i<numMonitors; i++)
+        {
+            const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
+            ui->cobMonitor->addItem(obj->Name);
+        }
+        if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
+
+        int imon = ui->cobMonitor->currentIndex();
+        const AGeoObject* monObj = MW->Detector->Sandwich->MonitorsRecords.at(imon);
+        const ATypeMonitorObject* mon = dynamic_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+        if (mon)
+        {
+            ui->frMonitors->setEnabled(true);
+            int numDet = 0;
+            if (imon < EventsDataHub->SimStat->Monitors.size())
+                if (EventsDataHub->SimStat->Monitors.at(imon)->getXY())
+                    numDet = EventsDataHub->SimStat->Monitors.at(imon)->getXY()->GetEntries();
+            ui->leDetections->setText( QString::number(numDet) );
+
+            bool bPhotonMode = mon->config.PhotonOrParticle == 0;
+            ui->pbMonitorShowWave->setVisible(bPhotonMode);
+            ui->pbMonitorShowTime->setVisible(bPhotonMode);
+            ui->pbMonitorShowEnergy->setVisible(!bPhotonMode);
+        }
+        else
+        {
+            ui->frMonitors->setEnabled(false);
+            qWarning() << "Something is wrong: this is not a monitor object!";
+        }
+    }
 }
 
 void OutputWindow::addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives)
@@ -1583,11 +1586,15 @@ void OutputWindow::on_pbMonitorShowEnergy_clicked()
     MW->GraphWindow->Draw(h, "", true, true);
 }
 
-#include "detectoraddonswindow.h"
 void OutputWindow::on_pbShowProperties_clicked()
 {
     MW->DAwindow->showNormal();
     MW->DAwindow->ShowTab(0);
     //MW->DAwindow->raise();
     MW->DAwindow->UpdateGeoTree(ui->cobMonitor->currentText());
+}
+
+void OutputWindow::on_cobMonitor_activated(int)
+{
+    updateMonitors();
 }

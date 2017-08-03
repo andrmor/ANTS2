@@ -249,12 +249,8 @@ int MainWindow::LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVec
 int MainWindow::LoadPMsignals(QString fileName)
 {
   ui->prbarLoadData->setValue(0);
-
-  //int loaded = EventsDataHub->loadEventsFromTxtFile(fileName, js, Detector->PMs);
   int loaded = EventsDataHub->loadEventsFromTxtFile(fileName, Config->JSON, Detector->PMs);
-
   if (loaded<0) message(EventsDataHub->ErrorString, this);
-  //qDebug() << "Load reported:"<<loaded;
   return loaded;
 }
 

@@ -4,6 +4,7 @@
 #include <QList>
 #include <QObject>
 #include <QStringList>
+#include <QVector>
 
 class ASlabModel;
 class ASlabXYModel;

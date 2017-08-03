@@ -7283,8 +7283,8 @@ Constructor is disabled!</string>
           </property>
           <property name="geometry">
            <rect>
-            <x>370</x>
-            <y>25</y>
+            <x>384</x>
+            <y>18</y>
             <width>131</width>
             <height>24</height>
            </rect>
@@ -7311,7 +7311,7 @@ Constructor is disabled!</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>350</width>
+            <width>371</width>
             <height>60</height>
            </rect>
           </property>
@@ -7326,7 +7326,7 @@ Constructor is disabled!</string>
             <rect>
              <x>4</x>
              <y>22</y>
-             <width>343</width>
+             <width>361</width>
              <height>33</height>
             </rect>
            </property>
@@ -7445,7 +7445,7 @@ Constructor is disabled!</string>
              <widget class="QLineEdit" name="ledDecayTime">
               <property name="geometry">
                <rect>
-                <x>73</x>
+                <x>87</x>
                 <y>1</y>
                 <width>41</width>
                 <height>20</height>
@@ -7458,10 +7458,10 @@ Constructor is disabled!</string>
              <widget class="QLabel" name="label_134">
               <property name="geometry">
                <rect>
-                <x>3</x>
-                <y>2</y>
-                <width>68</width>
-                <height>16</height>
+                <x>4</x>
+                <y>0</y>
+                <width>81</width>
+                <height>20</height>
                </rect>
               </property>
               <property name="text">
@@ -7474,7 +7474,7 @@ Constructor is disabled!</string>
              <widget class="QLabel" name="label_133">
               <property name="geometry">
                <rect>
-                <x>119</x>
+                <x>133</x>
                 <y>4</y>
                 <width>30</width>
                 <height>13</height>
@@ -7495,7 +7495,7 @@ Constructor is disabled!</string>
               <rect>
                <x>86</x>
                <y>12</y>
-               <width>121</width>
+               <width>171</width>
                <height>20</height>
               </rect>
              </property>
@@ -7503,7 +7503,7 @@ Constructor is disabled!</string>
             <widget class="QPushButton" name="pbShowThisMatInfo">
              <property name="geometry">
               <rect>
-               <x>220</x>
+               <x>270</x>
                <y>12</y>
                <width>31</width>
                <height>20</height>
@@ -7516,7 +7516,7 @@ Constructor is disabled!</string>
             <widget class="Line" name="line_82">
              <property name="geometry">
               <rect>
-               <x>116</x>
+               <x>166</x>
                <y>21</y>
                <width>118</width>
                <height>3</height>
@@ -7540,7 +7540,7 @@ Constructor is disabled!</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>7</x>
+             <x>5</x>
              <y>7</y>
              <width>168</width>
              <height>16</height>
@@ -7553,7 +7553,7 @@ Constructor is disabled!</string>
             </font>
            </property>
            <property name="text">
-            <string>Wavelength/ decay time:</string>
+            <string>Wavelength &amp; emission time:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -7565,9 +7565,9 @@ Constructor is disabled!</string>
            </property>
            <property name="geometry">
             <rect>
-             <x>178</x>
+             <x>192</x>
              <y>6</y>
-             <width>127</width>
+             <width>165</width>
              <height>21</height>
             </rect>
            </property>
@@ -7584,7 +7584,7 @@ Constructor is disabled!</string>
            </item>
            <item>
             <property name="text">
-             <string> use material:</string>
+             <string> use material properties:</string>
             </property>
            </item>
           </widget>

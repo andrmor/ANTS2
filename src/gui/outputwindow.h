@@ -89,6 +89,8 @@ private slots:
 
     void on_pbMonitorShowEnergy_clicked();
 
+    void on_cobMonitor_activated(int index);
+
 protected:
     bool event(QEvent *event);   
 
@@ -117,6 +119,7 @@ private:
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
+    void updateMonitors();
 };
 
 #endif // OUTPUTWINDOW_H

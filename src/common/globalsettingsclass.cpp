@@ -17,8 +17,8 @@
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)
 {
   SaveLoadWindows = true;
-  AlwaysSaveOnExit = true;
-  NeverSaveOnExit = false;
+  //AlwaysSaveOnExit = true;
+  //NeverSaveOnExit = false;
   ShowExamplesOnStart = true;
   PerformAutomaticGeometryCheck = true;
 
@@ -135,8 +135,8 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   QJsonObject js;
   js["SaveLoadWindows"] = SaveLoadWindows;
   js["ShowExamplesOnStart"] = ShowExamplesOnStart;
-  js["AlwaysSaveOnExit"] = AlwaysSaveOnExit;
-  js["NeverSaveOnExit"] = NeverSaveOnExit;
+  //js["AlwaysSaveOnExit"] = AlwaysSaveOnExit;
+  //js["NeverSaveOnExit"] = NeverSaveOnExit;
   js["LastDir"] = LastOpenDir;
   js["PMtypeLib"] = LibPMtypes;
   js["MaterialLib"] = LibMaterials;
@@ -186,8 +186,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     QJsonObject js = json["ANTS2config"].toObject();
 
     parseJson(js, "SaveLoadWindows", SaveLoadWindows);
-    parseJson(js, "AlwaysSaveOnExit", AlwaysSaveOnExit);
-    parseJson(js, "NeverSaveOnExit", NeverSaveOnExit);
+    //parseJson(js, "AlwaysSaveOnExit", AlwaysSaveOnExit);
+    //parseJson(js, "NeverSaveOnExit", NeverSaveOnExit);
     parseJson(js, "ShowExamplesOnStart", ShowExamplesOnStart);
     parseJson(js, "LastDir", LastOpenDir);
     parseJson(js, "PMtypeLib", LibPMtypes);

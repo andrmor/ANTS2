@@ -346,6 +346,9 @@
       </property>
      </widget>
      <widget class="QSpinBox" name="sbRecNumTreads">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -377,14 +380,28 @@
      <widget class="QLabel" name="label_12">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>146</y>
+        <x>119</x>
+        <y>122</y>
         <width>331</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>The number of cores (x2 if hyper-threading is supported) -1</string>
+       <string>= the number of cores - 1   or,</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_22">
+      <property name="geometry">
+       <rect>
+        <x>119</x>
+        <y>138</y>
+        <width>181</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>if hyper-threading is supported,
+= the number of cores x2 - 1</string>
       </property>
      </widget>
     </widget>
@@ -1071,66 +1088,6 @@ used to draw a function</string>
      <zorder>leJSROOT</zorder>
      <zorder>leRootServerURL</zorder>
     </widget>
-    <widget class="QWidget" name="tabMisc">
-     <attribute name="title">
-      <string>Misc</string>
-     </attribute>
-     <widget class="QGroupBox" name="gbSaveOnExit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>411</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Save detector config on exit</string>
-      </property>
-      <widget class="QRadioButton" name="rbAlways">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>20</y>
-         <width>161</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Always save config on exit</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="rbNever">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>82</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Do not save</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="rbAskMe">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>60</y>
-         <width>131</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Always ask me</string>
-       </property>
-      </widget>
-     </widget>
-    </widget>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
@@ -1147,6 +1104,61 @@ used to draw a function</string>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="gbSaveOnExit">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>70</y>
+      <width>411</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Save detector config on exit</string>
+    </property>
+    <widget class="QRadioButton" name="rbAlways">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>161</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Always save config on exit</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rbNever">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Do not save</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="rbAskMe">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>131</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Always ask me</string>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

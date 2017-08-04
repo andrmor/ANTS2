@@ -205,22 +205,25 @@ void MainWindow::closeEvent(QCloseEvent *)
    ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
    GlobSet->SaveANTSconfiguration();
 
-   bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it   
-   if (DoSaveConfiguration)
-     {
-       if (!GlobSet->AlwaysSaveOnExit) //then give the choice
-         {
-           QMessageBox *msgBox = new QMessageBox( this );
-           msgBox->setWindowTitle("Session settings");
-           msgBox->setText("Remember this session settings?");
-           msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-           msgBox->setDefaultButton(QMessageBox::Yes);
+   EventsDataHub->clear();
 
-           if (msgBox->exec() == QMessageBox::No) DoSaveConfiguration = false;
-           if (msgBox) delete msgBox;
-         }
-     }
-   if (DoSaveConfiguration) ELwindow->QuickSave();
+//   bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it
+//   if (DoSaveConfiguration)
+//     {
+//       if (!GlobSet->AlwaysSaveOnExit) //then give the choice
+//         {
+//           QMessageBox *msgBox = new QMessageBox( this );
+//           msgBox->setWindowTitle("Session settings");
+//           msgBox->setText("Remember this session settings?");
+//           msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+//           msgBox->setDefaultButton(QMessageBox::Yes);
+
+//           if (msgBox->exec() == QMessageBox::No) DoSaveConfiguration = false;
+//           if (msgBox) delete msgBox;
+//         }
+//     }
+//   if (DoSaveConfiguration)
+   ELwindow->QuickSave(0);
 
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())

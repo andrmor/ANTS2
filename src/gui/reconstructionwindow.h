@@ -111,7 +111,6 @@ public:
 
   void HideCutShapes(); //hide correlation cut shapes
 
-  //void ShowReconstructionPositionsIfWindowVisible();
   void DotActualPositions();
 
   void SaveIndividualCutOffs(QString fileName);
@@ -125,11 +124,9 @@ public:
   double getSuggestedZ() const;
   double isReconstructEnergy() const;
 
-
   void writeToJson(QJsonObject &json); //all settings
   void updateReconSettings();
   void updateFilterSettings();
-
   bool readFromJson(QJsonObject &json); //all settings except LRF
 
   bool readReconSettingsFromJson(QJsonObject &jsonMaster);

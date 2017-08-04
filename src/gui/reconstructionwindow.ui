@@ -10344,7 +10344,7 @@ in minimization</string>
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -11501,7 +11501,7 @@ in minimization</string>
            </font>
           </property>
           <property name="text">
-           <string>Copy true positions to reconstructed positions</string>
+           <string>Copy true to reconstructed</string>
           </property>
          </widget>
          <widget class="QPushButton" name="pbDeclareNumRuns">
@@ -11581,7 +11581,7 @@ in minimization</string>
            </font>
           </property>
           <property name="text">
-           <string>Copy reconstructed positions to true positions</string>
+           <string>Copy reconstructed to true</string>
           </property>
          </widget>
         </widget>

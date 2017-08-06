@@ -530,6 +530,8 @@ private slots:
 
   void on_pbFromPeaksPedestals_clicked();
 
+  void on_pbClearAllFilters_clicked();
+
 protected:
     bool event(QEvent *event);
 

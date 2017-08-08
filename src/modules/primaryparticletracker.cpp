@@ -410,17 +410,20 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::EllasticScattering): //4
                               {
-                                double m = 27; //mass of atom in atomic units
+                                //"energy" is the neutron energy in keV
                                 //vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
-                                //vn[i] = 2200.0*v[i];
+                                double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
+                                //  vn[i] = vnMod * v[i]
+                                qDebug() << energy << vnMod;
                                 //va[] is randomly generated from Gauss(0, sqrt(kT/m)
                                 double va[3];
-                                double a = sqrt(1.38065e-23*300/m/1.6605e-27);
+                                double m = 27; //mass of atom in atomic units
+                                double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);
                                 for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
                                 //qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
-                                for (int i=0; i<3; i++) vcm[i] = (2200.0*v[i]+m*va[i])/sumM;
+                                for (int i=0; i<3; i++) vcm[i] = (vnMod*v[i]+m*va[i])/sumM;
                                 double V[3]; //neutron velocity in the center of mass frame
                                 for (int i=0; i<3; i++) V[i] = 2200.0*v[i] - vcm[i];
                                 double Vmod = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]); //abs value of the velocity
@@ -430,8 +433,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vnew[3]; //neutrn velocity in the lab frame
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
-                                double newEnergy = 0.5228e-8 * vnewMod * vnewMod;   // Mn*V*V/2/e
-                                //qDebug() << "new neutron velocity:"<<vnewMod;
+                                double newEnergy = 0.52270e-8 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
+                                qDebug() << "new neutron velocity:"<<vnewMod;
                                 AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                 ParticleStack->append(tmp);
 

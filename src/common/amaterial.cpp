@@ -5,6 +5,8 @@
 
 #include "TH1D.h"
 
+#include <QDebug>
+
 AMaterial::AMaterial()
 {
   PrimarySpectrumHist = 0;
@@ -72,15 +74,11 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
   //general data
   json["*MaterialName"] = name;
   json["Density"] = density;
-  //if (atomicDensity>0)
-    json["IsotopeDensity"] = atomicDensity;
+  json["IsotopeDensity"] = atomicDensity;
   json["RefractiveIndex"] = n;
   json["BulkAbsorption"] = abs;
-  //if (rayleighMFP > 0)
-    {
-      json["RayleighMFP"] = rayleighMFP;
-      json["RayleighWave"] = rayleighWave;
-    }
+  json["RayleighMFP"] = rayleighMFP;
+  json["RayleighWave"] = rayleighWave;
   json["ReemissionProb"] = reemissionProb;
   json["PrimScint_Tau"] = PriScintDecayTime;
   json["W"] = W;
@@ -93,11 +91,9 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
       json["TGeoP2"] = p2;
       json["TGeoP3"] = p3;
     }
-  //if (!Comments.isEmpty())
-    json["Comments"] = Comments;
+  json["Comments"] = Comments;
 
   //wavelength-resolved data
-  //if (nWave_lambda.size() > 0)
     {
       QJsonArray ar;
       writeTwoQVectorsToJArray(nWave_lambda, nWave, ar);
@@ -136,15 +132,13 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
       ParticleCollection->at(ip)->writeToJson(jparticle);
       jMatParticle["*Particle"] = jparticle;
       jMatParticle["TrackingAllowed"] = MatParticle[ip].TrackingAllowed;
-      //if (MatParticle[ip].TrackingAllowed) //if not, no need for anything else
-      {
-        jMatParticle["MatIsTransparent"] = MatParticle[ip].MaterialIsTransparent;
-        jMatParticle["PrimScintPhYield"] = MatParticle[ip].PhYield;
-        jMatParticle["IntrEnergyRes"] = MatParticle[ip].IntrEnergyRes;
-        jMatParticle["DataSource"] = MatParticle[ip].DataSource;
-        jMatParticle["DataString"] = MatParticle[ip].DataString;
-        if (MatParticle[ip].InteractionDataF.size() > 0)
-          {
+      jMatParticle["MatIsTransparent"] = MatParticle[ip].MaterialIsTransparent;
+      jMatParticle["PrimScintPhYield"] = MatParticle[ip].PhYield;
+      jMatParticle["IntrEnergyRes"] = MatParticle[ip].IntrEnergyRes;
+      jMatParticle["DataSource"] = MatParticle[ip].DataSource;
+      jMatParticle["DataString"] = MatParticle[ip].DataString;
+      if (MatParticle[ip].InteractionDataF.size() > 0)
+        {
             QJsonArray iar;
             writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
             jMatParticle["TotalInteraction"] = iar;
@@ -174,6 +168,13 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
                     QJsonObject jterm;
                     jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
                     jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
+                    if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::EllasticScattering)
+                    {
+                        QJsonArray ellAr;
+                        for (int i=0; i<MatParticle[ip].Terminators[iTerm].ScatterElements.size(); i++)
+                            ellAr << MatParticle[ip].Terminators[iTerm].ScatterElements[i].writeToJson();
+                        jterm["ScatterElements"] = ellAr;
+                    }
                     //going through secondary particles
                     QJsonArray jsecondaries;
                     for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )
@@ -191,9 +192,8 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
                   }
                 jMatParticle["NeutronTerminators"] = jneutron;
               }
-          }
-        else jMatParticle["MatIsTransparent"] = true; //if tracking allowed, but total interaction is NOT defined, make material transparent
-      }
+        }
+      else jMatParticle["MatIsTransparent"] = true; //if tracking allowed, but total interaction is NOT defined, make material transparent
       //appending this particle entry to the json array
       jParticleEntries.append(jMatParticle);
     }
@@ -322,12 +322,31 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
                   //qDebug() << "Secondary:"<<isp;
                   MatParticle[ip].Terminators[iTerm].GeneratedParticles[is] = isp;
                   parseJson(jsecpart, "energy", MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is]);
-                }
+                }              
               //using branchings to calculate partical cross sections (can be changed in the future!)
               MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy = MatParticle[ip].InteractionDataX;
               MatParticle[ip].Terminators[iTerm].PartialCrossSection.resize(0);
               for (int i=0; i<MatParticle[ip].InteractionDataF.size(); i++)
                 MatParticle[ip].Terminators[iTerm].PartialCrossSection.append(MatParticle[ip].Terminators[iTerm].branching * MatParticle[ip].InteractionDataF[i]);
+
+              if (jterm.contains("ScatterElements"))
+              {
+                  QJsonArray ellAr = jterm["ScatterElements"].toArray();
+                  MatParticle[ip].Terminators[iTerm].ScatterElements.clear();
+                  for (int i=0; i<ellAr.size(); i++)
+                  {
+                      AEllasticScatterElements el;
+                      QJsonObject js = ellAr[i].toObject();
+                      if ( el.readFromJson(js) )
+                         MatParticle[ip].Terminators[iTerm].ScatterElements << el;
+                      else
+                      {
+                          qCritical() << "Error in neutron ellastic scattering terminator";
+                          exit(1245);
+                      }
+                  }
+              }
+
             }
         }
     }
@@ -353,4 +372,28 @@ bool MatParticleStructure::CalculateTotal() //true - success, false - mismatch i
           InteractionDataF[j] += Terminators[i].PartialCrossSection[j];
         }
   return true;
+}
+
+void AEllasticScatterElements::writeToJson(QJsonObject &json)
+{
+    json["Name"] = Name;
+    json["Mass"] = Mass;
+    json["StatWeight"] = StatWeight;
+}
+
+const QJsonObject AEllasticScatterElements::writeToJson()
+{
+    QJsonObject json;
+    writeToJson(json);
+    return json;
+}
+
+bool AEllasticScatterElements::readFromJson(QJsonObject &json)
+{
+    if (!isContainAllKeys(json, QStringList()<<"Name"<<"Mass"<<"StatWeight")) return false;
+
+    parseJson(json, "Name", Name);
+    parseJson(json, "Mass", Mass);
+    parseJson(json, "StatWeight", StatWeight);
+    return true;
 }

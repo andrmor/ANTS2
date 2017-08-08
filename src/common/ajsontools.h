@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QStringList>
 
 class QCheckBox;
 class QSpinBox;
@@ -34,5 +35,7 @@ bool SaveJsonToFile(QJsonObject &json, QString fileName);
 
 bool writeTH1ItoJsonArr(TH1I *hist, QJsonArray &ja);
 bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja);
+
+bool isContainAllKeys(QJsonObject json, QStringList keys);
 
 #endif // AJSONTOOLS_H

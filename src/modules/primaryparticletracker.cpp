@@ -251,34 +251,40 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
               //================ Neutral particle - photoeffect/compton/capture =================
                 {
                   //how many processes?
-                  const int processes = (*MpCollection)[MatId]->MatParticle[Id].Terminators.size();
-                  //               qDebug()<<"defined processes:"<<processes;
-                  if (processes != 0)
+                  const int numProcesses = (*MpCollection)[MatId]->MatParticle[Id].Terminators.size();
+                  //               qDebug()<<"defined processes:"<<numProcesses;
+                  if (numProcesses != 0)
                     {
                       double SoFarShortestId = 0;
                       double SoFarShortest = 1.0e10;
-                      for (int i=0; i<processes; i++)
+                      for (int iProcess=0; iProcess<numProcesses; iProcess++)
                         {
-                             //qDebug()<<"---Process #:"<<i;
+                             //qDebug()<<"---Process #:"<<iProcess;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
-                          const double InteractionCoefficient = InteractionValue(energy, &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSectionEnergy,
-                                                                           &(*MpCollection)[MatId]->MatParticle[Id].Terminators[i].PartialCrossSection,
-                                                                           MpCollection->fLogLogInterpolation);
+                          const double InteractionCoefficient = InteractionValue(energy,
+                                                                                 &(*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].PartialCrossSectionEnergy,
+                                                                                 &(*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].PartialCrossSection,
+                                                                                 MpCollection->fLogLogInterpolation);
                              //qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
                           double MeanFreePath;
                           if (MpCollection->getParticleType(Id) == AParticle::_neutron_)
-                            { //neutron! - using atomic density and cross-section in barns
+                          //if ( (*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
+                            { //for capture using atomic density and cross-section in barns
                                 //qDebug()<<"isotope density:"<<AtomicDensity;
                               MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
                             }
-                          else MeanFreePath = 10.0/InteractionCoefficient/Density;  //1/(cm2/g)/(g/cm3) - need in mm (so that 10.)
-                             //qDebug()<<"MeanFreePath="<<MeanFreePath;
+                          else
+                            {
+                               //qDebug()<<"Mat density:"<<Density;
+                              MeanFreePath = 10.0/InteractionCoefficient/Density;  //1/(cm2/g)/(g/cm3) - need in mm (so that 10.)
+                            }
+                            //qDebug()<<"MeanFreePath="<<MeanFreePath;
                           double Step = -MeanFreePath * log(RandGen->Rndm());
                              //qDebug()<< "Generated length:"<<Step;
                           if (Step < SoFarShortest)
                             {
                               SoFarShortest = Step;
-                              SoFarShortestId = i;
+                              SoFarShortestId = iProcess;
                             }
                         }
                                          //qDebug()<<SoFarShortest<<SoFarShortestId;
@@ -410,6 +416,20 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::EllasticScattering): //4
                               {
+                                const QVector<AEllasticScatterElements> &elements = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].ScatterElements;
+
+                                qDebug() << "Def elements:" << elements.size();
+                                double rnd = RandGen->Rndm();
+                                qDebug() << rnd;
+                                int iselected = 0;
+                                for (; iselected<elements.size(); iselected++)
+                                {
+                                    const double thisOne = elements.at(iselected).StatWeight;
+                                    if (rnd < thisOne) break;
+                                    rnd -= thisOne;
+                                }
+                                qDebug() << "selected element:"<<iselected << elements.at(iselected).Name;
+
                                 //"energy" is the neutron energy in keV
                                 //vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
                                 double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
@@ -417,7 +437,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 qDebug() << energy << vnMod;
                                 //va[] is randomly generated from Gauss(0, sqrt(kT/m)
                                 double va[3];
-                                double m = 27; //mass of atom in atomic units
+                                const double m = elements.at(iselected).Mass; //mass of atom in atomic units
+                                qDebug() << "atom - mass:"<<m;
                                 double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);
                                 for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
                                 //qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
@@ -425,7 +446,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++) vcm[i] = (vnMod*v[i]+m*va[i])/sumM;
                                 double V[3]; //neutron velocity in the center of mass frame
-                                for (int i=0; i<3; i++) V[i] = 2200.0*v[i] - vcm[i];
+                                for (int i=0; i<3; i++) V[i] = vnMod*v[i] - vcm[i];
                                 double Vmod = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]); //abs value of the velocity
                                 double Vnew[3]; //neutron velocity after scatter in thecenter of mass frame
                                 GenerateRandomDirection(Vnew);

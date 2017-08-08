@@ -65,6 +65,22 @@ public:
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 };
 
+class AEllasticScatterElements
+{
+public:
+    QString Name;
+    double Mass;
+    double StatWeight;
+
+    AEllasticScatterElements(QString ElementName, int Mass, double StatWeight) :
+        Name(ElementName), Mass(Mass), StatWeight(StatWeight) {}
+    AEllasticScatterElements() {}
+
+    void writeToJson(QJsonObject& json);
+    const QJsonObject writeToJson();
+    bool readFromJson(QJsonObject& json);
+};
+
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles
 {
   enum ReactionType {Photoelectric = 0,
@@ -76,10 +92,14 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-  double branching; //for neutrons - cross sections do not depend on energy, can scale using total
+  double branching; //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
 
+  // for capture
   QVector<int> GeneratedParticles;
-  QVector<double> GeneratedParticleEnergies;    
+  QVector<double> GeneratedParticleEnergies;
+
+  //for ellastic
+  QVector<AEllasticScatterElements> ScatterElements;
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

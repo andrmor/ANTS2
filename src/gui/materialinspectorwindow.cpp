@@ -2370,6 +2370,7 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
   //tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 0.082e-24 << 0.082-24;
   tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::EllasticScattering;
+  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements << AEllasticScatterElements("Al", 27, 1.0);
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticles.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticleEnergies.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].branching = 1.0 - 0.1332;

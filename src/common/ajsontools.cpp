@@ -223,3 +223,10 @@ void read2DQVectorFromJArray(QJsonArray &ar, QVector<QVector<double> > &xy)
         xy[i1].append( el[i2].toDouble());
     }
 }
+
+bool isContainAllKeys(QJsonObject json, QStringList keys)
+{
+    for (QString key : keys)
+        if (!json.contains(key)) return false;
+    return true;
+}

@@ -30,8 +30,8 @@ public:
 
   void SaveConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);
 
-  void QuickSave(); //save configuration to LAST/QuickSave.conf
-  void QuickLoad();
+  void QuickSave(int i);
+  void QuickLoad(int i, QWidget* parent);
 
 private slots:
   void on_cbDoNotShowExamplesOnStart_toggled(bool checked);
@@ -48,13 +48,18 @@ private slots:
 
   void on_pbSaveSessings_clicked();
 
-  void on_pbQuickSave_clicked();
-
   void on_pbLoadSettings_clicked();
 
-  void on_pbQuickLoad_clicked();
-
   void on_pbNew_clicked();
+
+  void on_pbQuickLoad1_clicked();
+  void on_pbQuickLoad2_clicked();
+  void on_pbQuickLoad3_clicked();
+  void on_pbLoadLast_clicked();
+
+  void on_pbQuickSave1_clicked();
+  void on_pbQuickSave2_clicked();
+  void on_pbQuickSave3_clicked();
 
 protected:
     bool event(QEvent *event);

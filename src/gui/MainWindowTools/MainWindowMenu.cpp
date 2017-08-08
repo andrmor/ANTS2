@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QWindow>
 #include <QMessageBox>
+#include <QDateTime>
 
 void MainWindow::on_actionWindow_navigator_triggered()
 {
@@ -334,16 +335,6 @@ void MainWindow::on_actionNew_detector_triggered()
   if (GeometryWindow->isVisible()) ShowGeometry(false);
 }
 
-void MainWindow::on_actionQuicksave_triggered()
-{
-   ELwindow->QuickSave();
-}
-
-void MainWindow::on_actionQuickload_triggered()
-{
-   ELwindow->QuickLoad();
-}
-
 void MainWindow::setFontSizeAllWindows(int size)
 {
   QFont font = this->font();
@@ -366,4 +357,86 @@ void MainWindow::on_actionScript_window_triggered()
     ScriptWindow->show();
     ScriptWindow->raise();
     ScriptWindow->activateWindow();
+}
+
+void MainWindow::on_actionQuick_save_1_triggered()
+{
+    ELwindow->QuickSave(1);
+}
+
+void MainWindow::on_actionQuick_save_2_triggered()
+{
+    ELwindow->QuickSave(2);
+}
+
+void MainWindow::on_actionQuick_save_3_triggered()
+{
+    ELwindow->QuickSave(3);
+}
+
+void MainWindow::on_actionQuick_load_1_triggered()
+{
+    ELwindow->QuickLoad(1, this);
+}
+
+void MainWindow::on_actionQuick_load_2_triggered()
+{
+    ELwindow->QuickLoad(2, this);
+}
+
+void MainWindow::on_actionQuick_load_3_triggered()
+{
+    ELwindow->QuickLoad(3, this);
+}
+
+void MainWindow::on_actionLoad_last_config_triggered()
+{
+    ELwindow->QuickLoad(0, this);
+}
+
+void MainWindow::on_actionQuick_save_1_hovered()
+{
+    ui->actionQuick_save_1->setToolTip(getQuickSlotMessage(1));
+}
+
+void MainWindow::on_actionQuick_save_2_hovered()
+{
+    ui->actionQuick_save_2->setToolTip(getQuickSlotMessage(2));
+}
+
+void MainWindow::on_actionQuick_save_3_hovered()
+{
+    ui->actionQuick_save_3->setToolTip(getQuickSlotMessage(3));
+}
+
+void MainWindow::on_actionQuick_load_1_hovered()
+{
+    ui->actionQuick_load_1->setToolTip(getQuickSlotMessage(1));
+}
+
+void MainWindow::on_actionQuick_load_2_hovered()
+{
+    ui->actionQuick_load_2->setToolTip(getQuickSlotMessage(2));
+}
+
+void MainWindow::on_actionQuick_load_3_hovered()
+{
+    ui->actionQuick_load_3->setToolTip(getQuickSlotMessage(3));
+}
+
+void MainWindow::on_actionLoad_last_config_hovered()
+{
+    ui->actionLoad_last_config->setToolTip(getQuickSlotMessage(0));
+}
+
+QString MainWindow::getQuickSlotMessage(int i)
+{
+    QString fileName = GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+    QString s;
+    if (i==0) s = "Save on exit configuration file not found";
+    else      s = "Quick save slot # " + QString::number(i) + " is empty";
+    QFileInfo fi(fileName);
+    if (fi.exists())
+        s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
+    return s;
 }

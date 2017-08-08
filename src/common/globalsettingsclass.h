@@ -38,8 +38,8 @@ public:
 
   bool ShowExamplesOnStart; //pop-up examples window
   bool SaveLoadWindows; //save windows on exit, load them on ANTS2 start
-  bool AlwaysSaveOnExit; //save detector to QuickSave on exit, do not ask
-  bool NeverSaveOnExit; //do not save detector on exit, do not ask
+  //bool AlwaysSaveOnExit; //save detector to QuickSave on exit, do not ask
+  //bool NeverSaveOnExit; //do not save detector on exit, do not ask
 
   int NumThreads;
   int RecNumTreads;

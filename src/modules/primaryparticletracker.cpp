@@ -430,13 +430,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vnew[3]; //neutrn velocity in the lab frame
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
+                                double newEnergy = 0.5228e-8 * vnewMod * vnewMod;   // Mn*V*V/2/e
                                 //qDebug() << "new neutron velocity:"<<vnewMod;
-                                AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, energy, counter);
+                                AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                 ParticleStack->append(tmp);
 
                                 terminationStatus = EventHistoryStructure::EllasticScattering;
                                 distanceHistory = SoFarShortest;
-                                energyHistory = 0;
+                                energyHistory = energy - newEnergy;
                                 break;//switch-break
                               }
                             }

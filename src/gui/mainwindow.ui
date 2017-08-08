@@ -16260,10 +16260,15 @@ on stack</string>
     <addaction name="actionSave_configuration"/>
     <addaction name="actionLoad_configuration"/>
     <addaction name="separator"/>
-    <addaction name="actionQuicksave"/>
+    <addaction name="actionQuick_save_1"/>
+    <addaction name="actionQuick_save_2"/>
+    <addaction name="actionQuick_save_3"/>
     <addaction name="separator"/>
-    <addaction name="actionQuickload"/>
+    <addaction name="actionQuick_load_1"/>
+    <addaction name="actionQuick_load_2"/>
+    <addaction name="actionQuick_load_3"/>
     <addaction name="separator"/>
+    <addaction name="actionLoad_last_config"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
@@ -16387,20 +16392,16 @@ on stack</string>
    <property name="text">
     <string>Save configuration</string>
    </property>
+   <property name="toolTip">
+    <string>Save all configuration settings to a file</string>
+   </property>
   </action>
   <action name="actionLoad_configuration">
    <property name="text">
     <string>Load configuration</string>
    </property>
-  </action>
-  <action name="actionQuicksave">
-   <property name="text">
-    <string>QuickSave</string>
-   </property>
-  </action>
-  <action name="actionQuickload">
-   <property name="text">
-    <string>QuickLoad</string>
+   <property name="toolTip">
+    <string>Load all configuration settings from a file</string>
    </property>
   </action>
   <action name="actionGain_evaluation">
@@ -16437,6 +16438,9 @@ on stack</string>
    <property name="text">
     <string>New detector</string>
    </property>
+   <property name="toolTip">
+    <string>Clear current configuration and create a new detector</string>
+   </property>
   </action>
   <action name="actionNewLRFModule">
    <property name="text">
@@ -16449,6 +16453,62 @@ on stack</string>
   <action name="actionScript_window">
    <property name="text">
     <string>Script window</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_1">
+   <property name="text">
+    <string>Quick save 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_2">
+   <property name="text">
+    <string>Quick save 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_3">
+   <property name="text">
+    <string>Quick save 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_2">
+   <property name="text">
+    <string>Quick load 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_3">
+   <property name="text">
+    <string>Quick load 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionLoad_last_config">
+   <property name="text">
+    <string>Load last config</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_1">
+   <property name="text">
+    <string>Quick load 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
    </property>
   </action>
  </widget>

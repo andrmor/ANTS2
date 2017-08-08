@@ -1050,23 +1050,22 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 void ReconstructionWindow::updateFiltersGui()
 {
   //Update UI
-  //ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
-  //ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
-  //ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
-  //ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
-  //ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
-  //ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
     //warning icons
   bool masterWarningFlag = false;
   QIcon no;
-  if (ui->cbFilterEventNumber->isChecked() || ui->cbFilterEventNumber->isChecked())
+  if (ui->cbFilterEventNumber->isChecked() || ui->cbFilterMultipleScanEvents->isChecked())
     {
       ui->twData->tabBar()->setTabIcon(0, YellowIcon);
-      masterWarningFlag = true;
+      //ui->twData->tabBar()->setTabTextColor(0, QColor(237, 160, 59));
+      //masterWarningFlag = true;
     }
-  else ui->twData->tabBar()->setTabIcon(0, no);
+  else
+    {
+      //ui->twData->tabBar()->setTabTextColor(0, Qt::black);
+      ui->twData->tabBar()->setTabIcon(0, no);
+    }
   if (ui->cbFilterSumSignal->isChecked() || ui->cbFilterIndividualSignals->isChecked())
     {
       ui->twData->tabBar()->setTabIcon(1, YellowIcon);
@@ -6607,4 +6606,21 @@ void ReconstructionWindow::on_sbFrompeakPM_valueChanged(int arg1)
         return; //update on_change
       }
     if (MW->GraphWindow->LastDistributionShown == "SignalPeaks") on_pbFromPeaksShow_clicked();
+}
+
+void ReconstructionWindow::on_pbClearAllFilters_clicked()
+{
+    ui->cbFilterEventNumber->setChecked(false);
+    ui->cbFilterMultipleScanEvents->setChecked(false);
+    ui->cbFilterSumSignal->setChecked(false);
+    ui->cbFilterIndividualSignals->setChecked(false);
+    ui->cbActivateEnergyFilter->setChecked(false);
+    ui->cbActivateLoadedEnergyFilter->setChecked(false);
+    ui->cbActivateChi2Filter->setChecked(false);
+    ui->cbSpF_LimitToObject->setChecked(false);
+    ui->cbSpFcustom->setChecked(false);
+    ui->cbActivateCorrelationFilters->setChecked(false);
+    ui->cbActivateNNfilter->setChecked(false);
+
+    ReconstructionWindow::on_pbUpdateFilters_clicked();
 }

@@ -294,12 +294,19 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->fAngular->setEnabled(ui->cbAngularSensitive->isChecked());    
     ui->fScanSecond->setEnabled(ui->cbSecondAxis->isChecked());
     ui->fScanThird->setEnabled(ui->cbThirdAxis->isChecked());
-    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());
+    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());    
     //qDebug() << "->GUI updated";
 
     //change font size for all windows
     if (this->font().pointSize() != GlobSet->FontSize) setFontSizeAllWindows(GlobSet->FontSize);
     //qDebug() << "->Font size adjusted";
+
+    //menu properties
+    QString mss = ui->menuFile->styleSheet();
+    mss += "; QMenu::tooltip {wakeDelay: 1;}";
+    ui->menuFile->setStyleSheet(mss);
+    ui->menuFile->setToolTipsVisible(true);
+    ui->menuFile->setToolTipDuration(1000);
 
     bool fShowGeom;
     if (GlobSet->SaveLoadWindows)

@@ -489,8 +489,6 @@ private slots:
     void on_pbShowRelGains_clicked();
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
-    void on_actionQuicksave_triggered();
-    void on_actionQuickload_triggered();
     void on_pbRemoveParticle_clicked();
     void on_lwGunParticles_currentRowChanged(int currentRow);
     void on_pbSaveParticleSource_clicked();
@@ -533,10 +531,13 @@ private slots:
     void on_cbGunPhotonTracks_toggled(bool checked);
     void on_cbBuilPhotonTrackstester_toggled(bool checked);
 
+public:
+    QString getQuickSlotMessage(int i);
+
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);
-private:   
+private:
     ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings);
 signals:
     void StopRequested();
@@ -605,6 +606,34 @@ private slots:
     void on_actionScript_window_triggered();
 
     void on_cobParticleSource_activated(int index);
+
+    void on_actionQuick_save_1_triggered();
+
+    void on_actionQuick_save_2_triggered();
+
+    void on_actionQuick_save_3_triggered();
+
+    void on_actionQuick_load_1_triggered();
+
+    void on_actionQuick_load_2_triggered();
+
+    void on_actionQuick_load_3_triggered();
+
+    void on_actionLoad_last_config_triggered();
+
+    void on_actionQuick_load_1_hovered();
+
+    void on_actionQuick_save_1_hovered();
+
+    void on_actionQuick_save_2_hovered();
+
+    void on_actionQuick_save_3_hovered();
+
+    void on_actionQuick_load_2_hovered();
+
+    void on_actionQuick_load_3_hovered();
+
+    void on_actionLoad_last_config_hovered();
 
 public slots:
     void on_cobSF_chi2Vs_activated(int index);

@@ -12586,6 +12586,9 @@ in minimization</string>
       <bold>false</bold>
      </font>
     </property>
+    <property name="toolTip">
+     <string>Switch off all event filters</string>
+    </property>
     <property name="text">
      <string>C</string>
     </property>

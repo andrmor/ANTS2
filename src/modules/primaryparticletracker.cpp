@@ -174,10 +174,13 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundary();
           const Double_t MaxLength  = navigator->GetStep();
 
-          if ( !(*MpCollection)[MatId]->MatParticle[Id].MaterialIsTransparent && (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX.size() > 1 )
+          if ( (*MpCollection)[MatId]->MatParticle[Id].MaterialIsTransparent || (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX.size() < 2 )
             {
-              // if no interaction data are defined, pass this medium (one point is also not enough)
-              //           qDebug()<<"Distance to the next border: "<<MaxLength;
+              // if no interaction data are defined (or only one point is defined)  --> pass this medium
+              distanceHistory = MaxLength;
+            }
+          else
+            {
               //checking are we in range of available interaction data
               const int &DataPoints = (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX.size();
               if (energy >  (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX[DataPoints-1]) //largest value is at the end - sorted data!
@@ -475,11 +478,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                     }
                 }
                 //================ END: neutral particle ===================
-            } //end block - interaction data defined
-          else
-            {  //interaction data were not defined
-              distanceHistory = MaxLength;
-            }
+            } //end block - interaction data defined          
 
           if (SimSet->fLogsStat) History->Deposition.append(MaterialHistoryStructure(MatId,energyHistory,distanceHistory)); //if continue to the next volume
 

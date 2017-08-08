@@ -113,6 +113,10 @@ private slots:
     void on_pbTest_clicked();
 
 
+    void on_pbUpdateElements_clicked();
+
+    void on_pbAddNewElement_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

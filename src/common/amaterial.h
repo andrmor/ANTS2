@@ -71,6 +71,8 @@ public:
     QString Name;
     double Mass;
     double StatWeight;
+    QVector<double> Energy;
+    QVector<double> CrossSection;
 
     AEllasticScatterElements(QString ElementName, int Mass, double StatWeight) :
         Name(ElementName), Mass(Mass), StatWeight(StatWeight) {}

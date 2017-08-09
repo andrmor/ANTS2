@@ -53,6 +53,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->pbUpdateTmpMaterial->setVisible(false);
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
     ui->cobTotalInteractionLoadEnergyUnits->setCurrentIndex(2);
+    ui->cobUnitsForEllastic->setCurrentIndex(2);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -339,130 +340,79 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
   ui->pbShowTotalInteraction->setEnabled(true);
 
   const AParticle::ParticleType type = Detector->MpCollection->getParticleType(particleId);
-  if (type != AParticle::_charged_)
-  {
-      //neutral particles
-      ui->swMainMatParticle->setCurrentIndex(1);
-      if (type == AParticle::_neutron_)
-      {
-         //neutron
-          ui->swNeutral->setCurrentIndex(1);
-
-//          if (mp.Terminators.size() == 0)
-//            {
-//              ui->ledBranching->setText("0");
-//              ui->fNeutron->setEnabled(false);
-//            }
-//          else ui->fNeutron->setEnabled(true);
-
-          if (tmpMaterial.MatParticle[particleId].InteractionDataX.size() == 0)
-            {
-              //ui->fNeutron->setEnabled(false);
-              ui->pbShowTotalInteraction->setEnabled(false);
-              ui->pbAddNewTerminationScenario->setEnabled(false);
-            }
-          else
-            {
-              //if (mp.Terminators.size() > 0) ui->fNeutron->setEnabled(true);
-              ui->pbShowTotalInteraction->setEnabled(true);
-              ui->pbAddNewTerminationScenario->setEnabled(true);
-            }
-
-          if (!TrackingAllowed || MaterialIsTransparent || tmpMaterial.atomicDensity > 0) ui->labIsotopeDensityNotSet->setPixmap(QIcon().pixmap(16,16));
-          else ui->labIsotopeDensityNotSet->setPixmap(RedIcon.pixmap(16,16));
-
-          MaterialInspectorWindow::on_ledMFPenergy_editingFinished();
-      }
-      else if (type == AParticle::_gamma_)
-      {
-          //gamma
-          ui->swNeutral->setCurrentIndex(0);
-
-          ui->pbAddNewTerminationScenario->setEnabled( mp.Terminators.size() == 0 );
-          ui->fGamma->setEnabled( mp.Terminators.size() != 0 );
-          ui->frGamma1->setEnabled( mp.Terminators.size() != 0 );
-
-          ui->cbPairProduction->setChecked( mp.Terminators.size()>2 );
-          on_cobTerminationScenarios_currentIndexChanged(ui->cobTerminationScenarios->currentIndex());
-      }
-      else
-        {
-          message("Critical error: unknown neutral particle", this);
-          return;
-        }
-
-      if (TrackingAllowed && !MaterialIsTransparent && mp.InteractionDataX.isEmpty())
-        ui->labNeutra_TotalInteractiondataMissing->setPixmap(RedIcon.pixmap(16,16));
-      else ui->labNeutra_TotalInteractiondataMissing->setPixmap(QIcon().pixmap(16,16));
-
-      QString tmpStr;
-      int size = tmpMaterial.MatParticle[particleId].Terminators.size();
-      tmpStr.setNum(size);
-      tmpStr = "(Total defined: " + tmpStr + " )";
-
-      ui->cobTerminationScenarios->clear();
-      flagDisreguardChange = true;
-      for (int i=0; i<size; i++)
-        {
-          tmpStr.setNum(i);
-          ui->cobTerminationScenarios->addItem(tmpStr);
-          flagDisreguardChange = true;
-        }
-      //further indication is handled by  MaterialInspectorWindow::on_cobTerminationScenarios_currentIndexChanged(int index)
-      if (mp.InteractionDataX.size()>0) ui->pbShowTotalInteraction->setEnabled(true);
-      else ui->pbShowTotalInteraction->setEnabled(false);
-  }
-  else
+  if (type == AParticle::_charged_)
   {
      //charged particle
      ui->swMainMatParticle->setCurrentIndex(0);
      if (mp.InteractionDataX.size()>0) ui->pbShowStoppingPower->setEnabled(true);
      else ui->pbShowStoppingPower->setEnabled(false);
-  };
+     on_ledMFPenergy_2_editingFinished();
+  }
+  else //neutral particles
+  {      
+      ui->swMainMatParticle->setCurrentIndex(1);
 
-  ui->pbShowXCOMdata->setEnabled( !mp.DataSource.isEmpty() );
-  ui->leXCOMcomposition->setText( mp.DataString );
+      if (type == AParticle::_neutron_)
+      {
+         //neutron
+          ui->swNeutral->setCurrentIndex(1);
 
-  if (ui->swMainMatParticle->currentIndex() == 0) MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished();
-  MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished();
+          //capture
+          if (tmpMaterial.MatParticle[particleId].InteractionDataX.isEmpty())
+            {
+              ui->frReaction->setEnabled(false);
+              ui->pbShowTotalCapture->setEnabled(false);
+              ui->pbAddNewTerminationScenario->setEnabled(false);
+              ui->ledMFPenergy->setEnabled(false);
+              ui->ledBranching->setText("no reactions");
+              ui->labNeutra_TotalInteractiondataMissing->setPixmap(RedIcon.pixmap(16,16));
+              updateNeutronReactionIndication();
+            }
+          else
+            {
+              if (mp.Terminators.isEmpty())
+                {
+                  ui->ledBranching->setText("no reactions");
+                  ui->frReaction->setEnabled(false);
+                  updateNeutronReactionIndication();
+                }
+              else ui->frReaction->setEnabled(true);
+              ui->pbShowTotalCapture->setEnabled(true);
+              ui->pbAddNewTerminationScenario->setEnabled(true);
+              ui->ledMFPenergy->setEnabled(true);
+              ui->labNeutra_TotalInteractiondataMissing->setPixmap(QIcon().pixmap(16,16));
+            }
+          ui->cobTerminationScenarios->clear();
+          for (int i=0; i<tmpMaterial.MatParticle[particleId].Terminators.size(); i++)
+              ui->cobTerminationScenarios->addItem(QString::number(i));
+          updateNeutronReactionIndication();
+          on_ledAtomicDensity_textChanged(ui->ledAtomicDensity->text()); //to update warning
+          on_ledMFPenergy_editingFinished();
+
+          //ellastic
+          on_pbUpdateElements_clicked();
+          on_leMFPellastic_editingFinished();
+      }
+      else if (type == AParticle::_gamma_)
+      {
+          ui->swNeutral->setCurrentIndex(0);
+          ui->fGamma->setEnabled( mp.Terminators.size() != 0 );
+          ui->frGamma1->setEnabled( mp.Terminators.size() != 0 );
+          ui->cbPairProduction->setChecked( mp.Terminators.size()>2 );
+          ui->pbShowTotalInteraction->setEnabled( mp.InteractionDataX.size()>0 );
+          ui->pbShowXCOMdata->setEnabled( !mp.DataSource.isEmpty() );
+          ui->leXCOMcomposition->setText( mp.DataString );
+          on_ledGammaDiagnosticsEnergy_editingFinished();
+      }
+      else
+        {
+          message("Critical error: unknown neutral particle", this);
+          flagDisreguardChange = false;
+          return;
+        }
+  }
 
   flagDisreguardChange = false;
-}
-
-void MaterialInspectorWindow::on_cobTerminationScenarios_currentIndexChanged(int index)
-{
-    if (index < 0)
-    {
-        ui->lwGeneratedParticlesEnergies->clear();
-        return;
-    }
-
-    flagDisreguardChange = true; //"modified!" sign control
-
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    int particleId = ui->cobParticle->currentIndex();
-    if (tmpMaterial.MatParticle[particleId].Terminators[index].Type == NeutralTerminatorStructure::Capture) //2
-    {
-        QString str;
-        str.setNum(100.0 * tmpMaterial.MatParticle[particleId].Terminators[index].branching);
-        ui->ledBranching->setText(str);
-        //secondary particle indication     
-        ui->lwGeneratedParticlesEnergies->clear();
-        int size = tmpMaterial.MatParticle[particleId].Terminators[index].GeneratedParticles.size();
-        if (size < 1) return;
-
-        QString tmpStr, tmpStr1;
-        for (int i=0; i<size; i++)
-        {
-            int SecParticle = tmpMaterial.MatParticle[particleId].Terminators[index].GeneratedParticles[i];
-            tmpStr = Detector->MpCollection->getParticleName(SecParticle);
-            double energy = tmpMaterial.MatParticle[particleId].Terminators[index].GeneratedParticleEnergies[i];
-
-            if (energy > 0) {tmpStr1.setNum(energy); tmpStr += " / " + tmpStr1 + " keV";}           
-            ui->lwGeneratedParticlesEnergies->addItem(tmpStr);
-        }
-    }
-    flagDisreguardChange = false;
 }
 
 void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
@@ -1767,6 +1717,11 @@ void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
     ui->leMFP->setText(str);
 }
 
+void MaterialInspectorWindow::on_leMFPellastic_editingFinished()
+{
+
+}
+
 void MaterialInspectorWindow::on_pbNistPage_clicked()
 {
     QDesktopServices::openUrl(QUrl("http://physics.nist.gov/PhysRefData/Xcom/html/xcom1-t.html", QUrl::TolerantMode));
@@ -1781,7 +1736,7 @@ void MaterialInspectorWindow::on_pbAddNewSecondary_clicked()
     tmpMaterial.MatParticle[particleId].Terminators[scenario].GeneratedParticles.append(ui->cobSecondaryParticleToAdd->currentIndex());
     tmpMaterial.MatParticle[particleId].Terminators[scenario].GeneratedParticleEnergies.append(ui->ledInitialEnergy->text().toDouble());
 
-    MaterialInspectorWindow::on_cobTerminationScenarios_currentIndexChanged(scenario);
+    updateNeutronReactionIndication();
     ui->labWasModified->setVisible(true);
 }
 
@@ -1805,7 +1760,7 @@ void MaterialInspectorWindow::on_pbRemoveSecondary_clicked()
         tmpMaterial.MatParticle[ParticleId].Terminators[scenario].GeneratedParticleEnergies.remove(iSecondary);
     }
 
-    MaterialInspectorWindow::on_cobTerminationScenarios_currentIndexChanged(scenario);
+    updateNeutronReactionIndication();
     ui->labWasModified->setVisible(true);
 }
 
@@ -1835,8 +1790,8 @@ void MaterialInspectorWindow::on_ledInitialEnergy_editingFinished()
 
     double energy = ui->ledInitialEnergy->text().toDouble();
     tmpMaterial.MatParticle[ParticleId].Terminators[scenario].GeneratedParticleEnergies[row] = energy;
-    //on_pbUpdateIndication_clicked();
-    MaterialInspectorWindow::on_cobTerminationScenarios_currentIndexChanged(ui->cobTerminationScenarios->currentIndex()); //refresh indication
+
+    updateNeutronReactionIndication();
     ui->labWasModified->setVisible(true);
 }
 
@@ -2188,11 +2143,11 @@ void MaterialInspectorWindow::ShowTotalInteraction()
   QVector<double> X(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX);
   QVector<double> Y(MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF);
 
-  qDebug() << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF;
+  //qDebug() << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataX << MW->MpCollection->tmpMaterial.MatParticle[particleId].InteractionDataF;
 
-  TString Title="Total interaction coefficient", Xtitle, Ytitle;
+  TString Title="", Xtitle, Ytitle;
   if (type == AParticle::_charged_)
-    {      
+    {
       Xtitle = "Energy, keV";
       Ytitle = "Stopping power, keV cm2/g";
     }
@@ -2205,6 +2160,7 @@ void MaterialInspectorWindow::ShowTotalInteraction()
     {
       Xtitle = "Energy, meV";
       Ytitle = "Capture cross section, barns";
+
       for (int i=0; i<X.size(); i++)
         {
           X[i] *= 1.0e6; // keV -> meV
@@ -2359,7 +2315,7 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   tmpMaterial.MatParticle[particleId].Terminators[0].Type = NeutralTerminatorStructure::Capture;
   tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticles.clear();
   tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticleEnergies.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[0].branching = 0.1332;
+  tmpMaterial.MatParticle[particleId].Terminators[0].branching = 1;
 
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy << 1e-10 << 1e10;
@@ -2367,10 +2323,12 @@ void MaterialInspectorWindow::on_pbTest_clicked()
   tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
   //tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 0.082e-24 << 0.082-24;
   tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::EllasticScattering;
+  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements << AEllasticScatterElements("Al", 27, 1.0);
+  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements[0].Energy = tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy;
+  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements[0].CrossSection = tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection;
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticles.clear();
   tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticleEnergies.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].branching = 1.0 - 0.1332;
 
   //ui->fNeutron->setEnabled(true);
   ui->pbShowTotalInteraction->setEnabled(true);
@@ -2398,7 +2356,6 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
     for (int i=0; i<t.ScatterElements.size(); i++)
     {
         AEllasticScatterElements& el = t.ScatterElements[i];
-        qDebug() << i << el.Name;
         QTableWidgetItem *nameI = new QTableWidgetItem(el.Name);
         nameI->setTextAlignment(Qt::AlignCenter);
         ui->twElements->setItem(i, 0, nameI);
@@ -2408,20 +2365,71 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         QTableWidgetItem *swI = new QTableWidgetItem(QString::number(el.StatWeight));
         swI->setTextAlignment(Qt::AlignCenter);
         ui->twElements->setItem(i, 2, swI);
+        QWidget* w = new QWidget(this);
+        w->setProperty("Index", i);
+        QPushButton* pbShow = new QPushButton();
+        pbShow->setText("Show");
+        QPushButton* pbLoad = new QPushButton();
+        pbLoad->setText("Load");
+        QHBoxLayout* pLayout = new QHBoxLayout(w);
+        pLayout->addWidget(pbShow);
+        pLayout->addWidget(pbLoad);
+        pLayout->setAlignment(Qt::AlignCenter);
+        pLayout->setContentsMargins(0, 0, 0, 0);
+        pLayout->setSpacing(2);
+        w->setLayout(pLayout);
+        ui->twElements->setCellWidget(i, 3, w);
 
-
-//        QWidget* pWidget = new QWidget();
-//        QPushButton* btn_edit = new QPushButton();
-//        btn_edit->setText("Edit");
-//        QHBoxLayout* pLayout = new QHBoxLayout(pWidget);
-//        pLayout->addWidget(btn_edit);
-//        pLayout->setAlignment(Qt::AlignCenter);
-//        pLayout->setContentsMargins(0, 0, 0, 0);
-//        pWidget->setLayout(pLayout);
-//        ui.table->setCellWidget(i, 3, pWidget);
+        if (el.CrossSection.size()<2)
+        {
+            pbShow->setEnabled(false);
+            QString s = pbLoad->styleSheet();
+            s += "QPushButton {color: red;}";
+            pbLoad->setStyleSheet(s);
+        }
+        QObject::connect(pbShow, &QPushButton::clicked, [=](){obShowElementCrossClicked(i);});
+        QObject::connect(pbLoad, &QPushButton::clicked, [=](){obLoadElementCrossClicked(i);});
     }
 
     ui->twElements->resizeColumnsToContents();
+    ui->twElements->resizeRowsToContents();
+}
+
+void MaterialInspectorWindow::obShowElementCrossClicked(int index)
+{
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    if (t.Type != NeutralTerminatorStructure::EllasticScattering) return;
+    AEllasticScatterElements& el = t.ScatterElements[index];
+
+    TGraph* g = MW->GraphWindow->ConstructTGraph(el.Energy, el.CrossSection, el.Name.toLocal8Bit(), "Energy, keV", "Ellastic scattering cross-section, barns");
+    MW->GraphWindow->ShowAndFocus();
+    MW->GraphWindow->Draw(g, "");
+}
+
+void MaterialInspectorWindow::obLoadElementCrossClicked(int index)
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+    if (fileName.isEmpty()) return;
+
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    QVector<double> x, y;
+    int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
+    if (res == 0)
+    {
+        int particleId = ui->cobParticle->currentIndex();
+        AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+        if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
+        NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+        if (t.Type != NeutralTerminatorStructure::EllasticScattering) return;
+        AEllasticScatterElements& el = t.ScatterElements[index];
+        el.Energy = x;
+        el.CrossSection = y;
+        on_pbUpdateElements_clicked();
+        on_pbWasModified_clicked();
+    }
 }
 
 void MaterialInspectorWindow::on_pbAddNewElement_clicked()
@@ -2429,25 +2437,88 @@ void MaterialInspectorWindow::on_pbAddNewElement_clicked()
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty())
-        tmpMaterial.MatParticle[particleId].Terminators.resize(1);
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    if (Terminators.isEmpty())
+        Terminators.resize(1);
+    else if ( Terminators.last().Type != NeutralTerminatorStructure::EllasticScattering)
+        Terminators.resize( tmpMaterial.MatParticle[particleId].Terminators.size() + 1 );
 
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    NeutralTerminatorStructure& t = Terminators.last();
     t.Type = NeutralTerminatorStructure::EllasticScattering;
-
-
-
     AEllasticScatterElements e;
     e.Name = "Undefined";
     e.Mass = 777;
     e.StatWeight = 1.0;
-
-//    tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy.clear();
-//    tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy << 1e-10 << 1e10;
-//    tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection.clear();
-//    tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
-
     t.ScatterElements << e;
 
     on_pbUpdateElements_clicked();
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbShowTotalCapture_clicked()
+{
+    ShowTotalInteraction();
+}
+
+void MaterialInspectorWindow::on_ledAtomicDensity_textChanged(const QString &arg1)
+{
+    bool bOk;
+    arg1.toDouble(&bOk);
+    if (!bOk)
+        ui->labIsotopeDensityNotSet->setPixmap(RedIcon.pixmap(16,16));
+    else
+        ui->labIsotopeDensityNotSet->setPixmap(QIcon().pixmap(16,16));
+}
+
+void MaterialInspectorWindow::updateNeutronReactionIndication()
+{
+    int index = ui->cobTerminationScenarios->currentIndex();
+    if (index < 0)
+    {
+        ui->lwGeneratedParticlesEnergies->clear();
+        return;
+    }
+
+    flagDisreguardChange = true; //"modified!" sign control
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    if (particleId >= tmpMaterial.MatParticle.size() || index >= tmpMaterial.MatParticle[particleId].Terminators.size())
+    {
+        qWarning() << "Wrong coordinates in capture terminator indication!";
+        return;
+    }
+
+    const NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.at(index);
+    if (term.Type == NeutralTerminatorStructure::Capture)
+    {
+        ui->ledBranching->setText( QString::number(100.0 * term.branching) );
+        //secondary particle indication
+        ui->lwGeneratedParticlesEnergies->clear();
+        if (term.GeneratedParticles.isEmpty())
+        {
+            ui->lwGeneratedParticlesEnergies->addItem("Not defined");
+            ui->lwGeneratedParticlesEnergies->setEnabled(false);
+            ui->pbRemoveSecondary->setEnabled(false);
+        }
+        else
+        {
+            for (int i=0; i<term.GeneratedParticles.size(); i++)
+            {
+                QString s = Detector->MpCollection->getParticleName( term.GeneratedParticles[i] );
+                s += " / " + QString::number( term.GeneratedParticleEnergies[i] ) + " keV";
+                ui->lwGeneratedParticlesEnergies->addItem(s);
+            }
+            ui->lwGeneratedParticlesEnergies->setEnabled(true);
+            ui->pbRemoveSecondary->setEnabled(true);
+        }
+    }
+    else qWarning() << "Attempt to refresh indication for capture terminator for wrong terminator type!";
+
+    flagDisreguardChange = false;
+}
+
+void MaterialInspectorWindow::on_cobTerminationScenarios_activated(int)
+{
+    updateNeutronReactionIndication();
 }

@@ -354,7 +354,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }                            
                             case (NeutralTerminatorStructure::Capture): //2 - capture
                               {
-                                //                           qDebug()<<"capture";
+                                                           qDebug()<<"capture";
                                 //nothing is added to the EnergyVector, the result of capture is generation of secondary particles!
                                 int numGenParticles = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles.size();
 

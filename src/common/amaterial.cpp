@@ -379,6 +379,15 @@ void AEllasticScatterElements::writeToJson(QJsonObject &json)
     json["Name"] = Name;
     json["Mass"] = Mass;
     json["StatWeight"] = StatWeight;
+
+    QJsonArray ar;
+    for (int i=0; i<Energy.size(); i++)
+    {
+        QJsonArray el;
+        el << Energy.at(i) << CrossSection.at(i);
+        ar << el;
+    }
+    json["CrossSection"] = ar;
 }
 
 const QJsonObject AEllasticScatterElements::writeToJson()
@@ -395,5 +404,18 @@ bool AEllasticScatterElements::readFromJson(QJsonObject &json)
     parseJson(json, "Name", Name);
     parseJson(json, "Mass", Mass);
     parseJson(json, "StatWeight", StatWeight);
+
+    Energy.clear();
+    CrossSection.clear();
+    if (json.contains("CrossSection"))
+    {
+        QJsonArray ar = json["CrossSection"].toArray();
+        for (int i=0; i<ar.size(); i++)
+        {
+            QJsonArray el = ar[i].toArray();
+            Energy << el[0].toDouble();
+            CrossSection << el[1].toDouble();
+        }
+    }
     return true;
 }

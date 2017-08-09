@@ -36,11 +36,12 @@ protected:
 
 private slots:
     // both user and code control - potential problems
-    void on_leName_textChanged(const QString &arg1);
-    void on_cobTerminationScenarios_currentIndexChanged(int index);
+    void on_leName_textChanged(const QString &arg1);    
 
     //on user input
-    void on_pbUpdateInteractionIndication_clicked();
+    void obShowElementCrossClicked(int index);
+    void obLoadElementCrossClicked(int index);
+    void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
     void on_pbAddToActive_clicked();
@@ -77,6 +78,7 @@ private slots:
     void on_pbRemoveRayleigh_clicked();
     void on_pbShowUsage_clicked();
     void on_ledMFPenergy_editingFinished();
+    void on_leMFPellastic_editingFinished();
     void on_pbNistPage_clicked();
     void on_pbRemoveSecondary_clicked();
     void on_ledInitialEnergy_editingFinished();
@@ -93,13 +95,14 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
+    void on_pbShowTotalCapture_clicked();
 
-
-    //user or code controlled change -safe or only GUI
+    //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
     void on_lwGeneratedParticlesEnergies_currentRowChanged(int currentRow);
     void on_cbTrackingAllowed_toggled(bool checked);
     void on_ledPrimaryYield_textChanged(const QString &arg1);
+    void on_ledAtomicDensity_textChanged(const QString &arg1);
 
     //menu actions
     void on_actionSave_material_triggered();
@@ -109,13 +112,11 @@ private slots:
     void on_actionUse_log_log_interpolation_triggered();
 
     //new auto-generated, not cathegorized
-
     void on_pbTest_clicked();
-
-
     void on_pbUpdateElements_clicked();
-
     void on_pbAddNewElement_clicked();
+
+    void on_cobTerminationScenarios_activated(int index);
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -135,6 +136,7 @@ private:
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
     bool importXCOM(QTextStream &in, int particleId);
     bool isAllSameYield(double val);
+    void updateNeutronReactionIndication();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

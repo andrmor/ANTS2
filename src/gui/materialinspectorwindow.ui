@@ -2059,8 +2059,8 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QLabel" name="labNeutra_TotalInteractiondataMissing">
               <property name="geometry">
                <rect>
-                <x>7</x>
-                <y>35</y>
+                <x>11</x>
+                <y>36</y>
                 <width>12</width>
                 <height>16</height>
                </rect>
@@ -2487,8 +2487,8 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QLabel" name="labIsotopeDensityNotSet">
               <property name="geometry">
                <rect>
-                <x>7</x>
-                <y>6</y>
+                <x>11</x>
+                <y>7</y>
                 <width>15</width>
                 <height>18</height>
                </rect>

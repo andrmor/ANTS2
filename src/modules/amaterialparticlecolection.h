@@ -68,7 +68,7 @@ public:
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!
   void CopyTmpToMaterialCollection(); //creates a copy of all pointers // true is new material was added to material collection
   void CopyMaterialToTmp(int imat);
-  void RecalculateCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
+  void RecalculateCaptureCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
 
   //json write/read handling
   void writeToJson(QJsonObject &json);

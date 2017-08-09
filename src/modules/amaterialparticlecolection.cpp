@@ -693,13 +693,13 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
       if (mat->atomicDensity == 0) return 6;
 
       int numTerm = mp->Terminators.size();
-      qDebug()<<"Terms:"<<numTerm;
+      qDebug()<<"Terms:"<<numTerm << "-- dont forget to fix check up for nutron propertie sof materials";
       if (numTerm == 0) return 75;
 
       //confirming all terminators type is "capture" or "ellastic"
       for (int i=0; i<numTerm; i++)
         {
-          qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
+          //qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
           if (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture &&
               mp->Terminators[i].Type != NeutralTerminatorStructure::EllasticScattering) return 7;
           //qDebug() << mp->Terminators[i].ReactionType;
@@ -708,7 +708,7 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
       //checking all terminator one by one
       for (int iTerm=0; iTerm<numTerm; iTerm++)
         {
-          qDebug() << "Checking term #"<<iTerm;
+          //qDebug() << "Checking term #"<<iTerm;
           //check partial cross-section
           QVector<double>* e  = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
           QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
@@ -891,23 +891,27 @@ bool AMaterialParticleCollection::DeleteMaterial(int imat)
   return true;
 }
 
-void AMaterialParticleCollection::RecalculateCrossSections(int particleId)
+void AMaterialParticleCollection::RecalculateCaptureCrossSections(int particleId)
 {
-  int Scenarios = tmpMaterial.MatParticle[particleId].Terminators.size();
+  QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+  int numReactions = Terminators.size();
+  if (numReactions>0)
+      if (Terminators.last().Type = NeutralTerminatorStructure::EllasticScattering) //last reserved for scattering
+          numReactions--;
   int dataPoints = tmpMaterial.MatParticle[particleId].InteractionDataF.size();
 
-  //   qDebug()<<"particle"<<particleId<<"tot scenarios"<<Scenarios<<"data points"<<dataPoints;
-
-  for (int s=0; s<Scenarios; s++)
+  for (int iReaction=0; iReaction<numReactions; iReaction++)
     {
-      double branching = tmpMaterial.MatParticle[particleId].Terminators[s].branching;
-      tmpMaterial.MatParticle[particleId].Terminators[s].PartialCrossSectionEnergy.resize(dataPoints);
-      tmpMaterial.MatParticle[particleId].Terminators[s].PartialCrossSection.resize(dataPoints);
+      NeutralTerminatorStructure& Term = Terminators[iReaction];
+      double branching = Term.branching;
+      Term.PartialCrossSectionEnergy.resize(dataPoints);
+      Term.PartialCrossSection.resize(dataPoints);
 
       for (int i=0; i<dataPoints; i++)
         {
-          tmpMaterial.MatParticle[particleId].Terminators[s].PartialCrossSection[i] = branching * tmpMaterial.MatParticle[particleId].InteractionDataF[i];
-          tmpMaterial.MatParticle[particleId].Terminators[s].PartialCrossSectionEnergy[i] = tmpMaterial.MatParticle[particleId].InteractionDataX[i];
+          Term.PartialCrossSection[i] = branching * tmpMaterial.MatParticle[particleId].InteractionDataF[i];
+          Term.PartialCrossSectionEnergy[i] = tmpMaterial.MatParticle[particleId].InteractionDataX[i];
         }
     }
 }

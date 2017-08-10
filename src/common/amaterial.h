@@ -94,7 +94,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-  double branching; //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
+  double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
+  double MeanElementMass;   //for neutrons - average mass (in au) of elements
 
   // for capture
   QVector<int> GeneratedParticles;
@@ -102,6 +103,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   //for ellastic
   QVector<AEllasticScatterElements> ScatterElements;
+
+  void UpdateRuntimeForScatterElements(bool bUpdateStatWeights = true);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

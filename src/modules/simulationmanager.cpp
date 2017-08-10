@@ -110,7 +110,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
   //qDebug() << "Updating MaterialColecftion module according to sim settings";
-  detector->MpCollection->updateWaveProperties(&simSettings); //update wave-resolved properties of materials
+  detector->MpCollection->UpdateBeforeSimulation(&simSettings); //update wave-resolved properties of materials and runtime properties for neutrons
 
   clearWorkers(); //just rebuild them all everytime, it's easier
   threadCount = std::max(threadCount, 1);

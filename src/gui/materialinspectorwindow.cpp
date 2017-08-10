@@ -397,7 +397,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 
           //ellastic
           on_pbUpdateElements_clicked();
-          on_leMFPellastic_editingFinished();
+          on_ledMFPenergyEllastic_editingFinished();
       }
       else if (type == AParticle::_gamma_)
       {
@@ -455,7 +455,11 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.p1 = ui->ledP1->text().toDouble();
     tmpMaterial.p2 = ui->ledP2->text().toDouble();
     tmpMaterial.p3 = ui->ledP3->text().toDouble();
-    MaterialInspectorWindow::on_ledMFPenergy_editingFinished(); //update mean free path
+
+    on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
+    on_ledMFPenergy_editingFinished();              //neutron/capture - update mean free path
+    on_ledMFPenergy_2_editingFinished();            //charged - update projected range
+    on_ledMFPenergyEllastic_editingFinished();      //neutron/ellastic - update mean free path
 }
 
 void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
@@ -1540,12 +1544,13 @@ void MaterialInspectorWindow::UpdateActionButtons()
 
 void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
 {
+  int particleId = ui->cobParticle->currentIndex();
+  if (MW->MpCollection->getParticleType(particleId) != AParticle::_gamma_) return;
+
   ui->leoGammaDiagnosticsCoefficient->setText("n.a.");
   ui->leoMFPgamma->setText("n.a.");
 
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-  int particleId = ui->cobParticle->currentIndex(); 
 
   bool ok;
   double energy = ui->ledGammaDiagnosticsEnergy->text().toDouble(&ok);
@@ -1675,6 +1680,9 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
 
 void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
 {
+    int particleId = ui->cobParticle->currentIndex();
+    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
+
     if (ui->ledMFPenergy->text().isEmpty())
       {
         ui->leMFP->setText("");
@@ -1684,12 +1692,11 @@ void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     if (tmpMaterial.atomicDensity <= 0) return;
 
-    double energy = ui->ledMFPenergy->text().toDouble() *0.001; //energy in keV
-    int particleId = ui->cobParticle->currentIndex();
+    double energy = ui->ledMFPenergy->text().toDouble() * 1.0e-6; //energy meV -> keV
 
     if ( tmpMaterial.MatParticle[particleId].InteractionDataX.size() < 2)
       {
-        ui->leMFP->setText("no data");
+        ui->leMFP->setText("n.a.");
         return;
       }
     if (energy<tmpMaterial.MatParticle[particleId].InteractionDataX.first() || energy > tmpMaterial.MatParticle[particleId].InteractionDataX.last())
@@ -1706,11 +1713,6 @@ void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
     QString str;
     str.setNum(MeanFreePath, 'g', 4);
     ui->leMFP->setText(str);
-}
-
-void MaterialInspectorWindow::on_leMFPellastic_editingFinished()
-{
-
 }
 
 void MaterialInspectorWindow::on_pbNistPage_clicked()
@@ -1823,6 +1825,9 @@ void MaterialInspectorWindow::on_pbRename_clicked()
 
 void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 {
+  int particleId = ui->cobParticle->currentIndex();
+  if (MW->MpCollection->getParticleType(particleId) != AParticle::_charged_) return;
+
   if (ui->ledMFPenergy_2->text().isEmpty())
     {
       ui->leMFP_2->setText("");
@@ -1833,7 +1838,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 
   double energy;
   energy = ui->ledMFPenergy_2->text().toDouble();
-  int particleId = ui->cobParticle->currentIndex();
+
   if ( tmpMaterial.MatParticle[particleId].InteractionDataX.size() < 2)
     {
       ui->leMFP->setText("no data");
@@ -1868,7 +1873,6 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
       counter--;
     }
   while (counter>0);
-
 
   QString str;
   str.setNum(range, 'g', 4);
@@ -2430,6 +2434,20 @@ void MaterialInspectorWindow::obLoadElementCrossClicked(int index)
     int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
     if (res == 0)
     {
+        double Multiplier;
+        switch (ui->cobUnitsForEllastic->currentIndex())
+        {
+          case (0): {Multiplier = 1.0e-6; break;} //meV
+          case (1): {Multiplier = 1.0e-3; break;} //eV
+          case (2): {Multiplier = 1.0; break;}    //keV
+          case (3): {Multiplier = 1.0e3; break;}  //MeV
+        }
+        for (int i=0; i<x.size(); i++)
+        {
+            x[i] *= Multiplier;  //to keV
+            y[i] *= 1.0e-24;     //to cm2
+        }
+
         int particleId = ui->cobParticle->currentIndex();
         AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
         if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
@@ -2440,6 +2458,8 @@ void MaterialInspectorWindow::obLoadElementCrossClicked(int index)
         el.CrossSection = y;
         on_pbUpdateElements_clicked();
         on_pbWasModified_clicked();
+
+        on_ledMFPenergyEllastic_editingFinished();
     }
 }
 
@@ -2534,4 +2554,50 @@ void MaterialInspectorWindow::updateNeutronReactionIndication()
 void MaterialInspectorWindow::on_cobTerminationScenarios_activated(int)
 {
     updateNeutronReactionIndication();
+}
+
+void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
+{
+    int particleId = ui->cobParticle->currentIndex();
+    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    const QVector<NeutralTerminatorStructure> &Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+    if (Terminators.isEmpty()) return;
+
+    NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
+    term.UpdateRuntimeForScatterElements(false); //update total cross-section, but keep statweights not normalized yet
+
+    if (
+            Terminators.last().Type != NeutralTerminatorStructure::EllasticScattering ||
+            Terminators.last().ScatterElements.isEmpty() ||
+            Terminators.last().MeanElementMass == 0 ||
+            Terminators.last().PartialCrossSectionEnergy.isEmpty()
+        )
+    {
+        ui->leMFPellastic->setText("n.a.");
+        return;
+    }
+
+    const double energy = ui->ledMFPenergyEllastic->text().toDouble() * 1.0e-6;  // meV -> keV
+
+    qDebug() << energy << term.PartialCrossSectionEnergy.first() << term.PartialCrossSectionEnergy.last();
+    if (energy<term.PartialCrossSectionEnergy.first() || energy > term.PartialCrossSectionEnergy.last())
+      {
+        ui->leMFP->setText("out range");
+        return;
+      }
+
+    double AtDens = tmpMaterial.density / term.MeanElementMass / 1.66054e-24;
+    qDebug() << "Atomic density of the composition:"<<AtDens;
+
+    const double CrossSection = InteractionValue(energy,
+                                                 &term.PartialCrossSectionEnergy,
+                                                 &term.PartialCrossSection,
+                                                 MW->MpCollection->fLogLogInterpolation);
+    qDebug()<<"energy and cross-section:"<<energy<<CrossSection;
+
+    double MeanFreePath = 10.0/CrossSection/AtDens;
+    ui->leMFPellastic->setText(QString::number(MeanFreePath, 'g', 4));
 }

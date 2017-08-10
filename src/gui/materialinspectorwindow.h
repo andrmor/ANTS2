@@ -78,7 +78,6 @@ private slots:
     void on_pbRemoveRayleigh_clicked();
     void on_pbShowUsage_clicked();
     void on_ledMFPenergy_editingFinished();
-    void on_leMFPellastic_editingFinished();
     void on_pbNistPage_clicked();
     void on_pbRemoveSecondary_clicked();
     void on_ledInitialEnergy_editingFinished();
@@ -117,6 +116,8 @@ private slots:
     void on_pbAddNewElement_clicked();
 
     void on_cobTerminationScenarios_activated(int index);
+
+    void on_ledMFPenergyEllastic_editingFinished();
 
 private:
     Ui::MaterialInspectorWindow *ui;

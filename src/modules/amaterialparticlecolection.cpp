@@ -45,11 +45,14 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::updateWaveProperties(GeneralSimSettings *SimSet)
+void AMaterialParticleCollection::UpdateBeforeSimulation(GeneralSimSettings *SimSet)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
   for (int i=0; i<MaterialCollectionData.size(); i++)
+  {
     UpdateWaveResolvedProperties(i);
+    UpdateNeutronProperties(i);
+  }
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)
@@ -441,6 +444,15 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
           delete MaterialCollectionData[imat]->SecondarySpectrumHist;
           MaterialCollectionData[imat]->SecondarySpectrumHist = 0;
         }
+  }
+}
+
+void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
+{
+    for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
+    {
+        for (NeutralTerminatorStructure& term : mp.Terminators )
+            term.UpdateRuntimeForScatterElements();
     }
 }
 

@@ -428,3 +428,33 @@ bool AEllasticScatterElements::readFromJson(QJsonObject &json)
     }
     return true;
 }
+
+void NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUpdateStatWeights)
+{
+    double sum = 0;
+    double sumSW = 0;
+    for (int i=0; i<ScatterElements.size(); i++)
+    {
+        sum += ScatterElements.at(i).Mass * ScatterElements.at(i).StatWeight;
+        sumSW += ScatterElements.at(i).StatWeight;
+    }
+
+    PartialCrossSectionEnergy.clear();
+    PartialCrossSection.clear();
+    if (sumSW > 0)
+    {
+        MeanElementMass = sum / sumSW;
+
+        PartialCrossSectionEnergy = ScatterElements.first().Energy;
+        PartialCrossSection = ScatterElements.first().CrossSection;
+        for (double val : PartialCrossSection) val = 0;
+        for (int iElement=0; iElement<ScatterElements.size(); iElement++)
+        {
+            double newSW = ScatterElements[iElement].StatWeight / sumSW;
+            if (bUpdateStatWeights) ScatterElements[iElement].StatWeight = newSW;
+            for (int iEn=0; iEn>ScatterElements.at(iElement).CrossSection.size(); iEn++)
+                PartialCrossSection[iEn] += newSW * ScatterElements.at(iElement).CrossSection.at(iEn);
+        }
+    }
+    qDebug() << "Mean element mass:"<<MeanElementMass;
+}

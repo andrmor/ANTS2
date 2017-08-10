@@ -174,6 +174,8 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
       m->MatParticle[i].TrackingAllowed = false;
       m->MatParticle[i].PhYield=0;
       m->MatParticle[i].IntrEnergyRes=0;
+      m->MatParticle[i].bCaptureEnabled=true;
+      m->MatParticle[i].bEllasticEnabled=false;
       m->MatParticle[i].InteractionDataX.resize(0);
       m->MatParticle[i].InteractionDataF.resize(0);
       m->MatParticle[i].Terminators.resize(0);

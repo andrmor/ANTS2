@@ -51,28 +51,31 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
     {//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ beginning cycle over the elements of the stack
       //reading data for the top particle at the stack
       counter ++; //new particle
-      Id = ParticleStack->at(0)->Id; //id of the particle
-//      qDebug()<<"Tracking new particle "<<counter;
-//      qDebug()<<"Particle Id:"<<Id<<" (Collection size = "<<MpCollection->countParticles()<<")";
-//      qDebug()<<"Part name, charge, mass"<<MpCollection->getParticleName(Id)<<MpCollection->getParticleCharge(Id)<<MpCollection->getParticleMass(Id);
-//      qDebug()<<"Part type:"<<MpCollection->getParticleType(Id);
-//      qDebug()<<"Secondary of:"<<ParticleStack->at(0)->secondaryOf;
+      const int ParticleId = ParticleStack->at(0)->Id; //id of the particle
+      const AParticle::ParticleType ParticleType = MpCollection->getParticleType(ParticleId);
+      //qDebug()<<"Tracking new particle "<<counter;
+      //qDebug()<<"Particle Id:"<<ParticleId<<" (Collection size = "<<MpCollection->countParticles()<<")";
+      //qDebug()<<"Part name, charge, mass"<<MpCollection->getParticleName(ParticleId)<<MpCollection->getParticleCharge(ParticleId)<<MpCollection->getParticleMass(ParticleId);
+      //qDebug()<<"Part type:"<<MpCollection->getParticleType(ParticleId);
+      //qDebug()<<"Secondary of:"<<ParticleStack->at(0)->secondaryOf;
 
       EventHistoryStructure* History;
       if (SimSet->fLogsStat)
         {
           //initializing history record - at the end it will be appended to EventHistory QVector
-          History = new EventHistoryStructure(Id, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v) ;
+          History = new EventHistoryStructure(ParticleId, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v) ;
         }
       //setting current position, direction vector, energy and time
+      double r[3];          //position
+      double v[3];          //direction vector
       for (int i=0; i<3; i++)
         {
           r[i] = ParticleStack->at(0)->r[i];
           v[i] = ParticleStack->at(0)->v[i];
         }
       NormalizeVector(v); //normalization of the staring vector
-      energy = ParticleStack->at(0)->energy;
-      time = ParticleStack->at(0)->time;
+      double energy = ParticleStack->at(0)->energy;     //particle energy
+      double time = ParticleStack->at(0)->time;         //particle creation time - not modified!
 
       //initializing GeoManager navigator
       TGeoNavigator *navigator = GeoManager->GetCurrentNavigator();
@@ -107,7 +110,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
             {
               track = new TrackHolderClass();
               track->UserIndex = 22;
-              track->Color = Id+1+ AddColorIndex;
+              track->Color = ParticleId+1+ AddColorIndex;
               track->Width = 2;
               track->Nodes.append(TrackNodeStruct(r, time));
             }
@@ -137,7 +140,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                 {
                   const int iMon = navigator->GetCurrentNode()->GetNumber();
                   //qDebug() << "Monitor #:"<< iMon << "Total monitors:"<< SimStat->Monitors.size();
-                  if (SimStat->Monitors.at(iMon)->isForParticles() && SimStat->Monitors.at(iMon)->getParticleIndex()==Id)
+                  if (SimStat->Monitors.at(iMon)->isForParticles() && SimStat->Monitors.at(iMon)->getParticleIndex()==ParticleId)
                     {
                       const bool bPrimary = (ParticleStack->at(0)->secondaryOf == -1);
                       if (bPrimary && SimStat->Monitors.at(iMon)->isPrimary() ||
@@ -163,7 +166,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                 }
             }
 
-          if ( !(*MpCollection)[MatId]->MatParticle[Id].TrackingAllowed )
+          if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].TrackingAllowed )
             {
               //              qDebug()<<"Found medium where tracking is not allowed!";
               terminationStatus = EventHistoryStructure::FoundUntrackableMaterial;//8
@@ -174,27 +177,29 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundary();
           const Double_t MaxLength  = navigator->GetStep();
 
-          if ( (*MpCollection)[MatId]->MatParticle[Id].MaterialIsTransparent || (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX.size() < 2 )
+          //if ( (*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX.size() < 2 ) ; <-- cannot use this protection anymore because neutron ellastic scattering is currently not added to total interaction cross-section
+          if ( (*MpCollection)[MatId]->MatParticle[ParticleId].MaterialIsTransparent )
             {
-              // if no interaction data are defined (or only one point is defined)  --> pass this medium
+              // pass this medium
               distanceHistory = MaxLength;
             }
           else
             {
-              //checking are we in range of available interaction data
-              const int &DataPoints = (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX.size();
-              if (energy >  (*MpCollection)[MatId]->MatParticle[Id].InteractionDataX[DataPoints-1]) //largest value is at the end - sorted data!
-                {  //outside!
-                  //             qDebug()<<"energy: "<<energy;
-                  qCritical() << "Energy is outside of the supplied data range!";
-                  return false; //fail
-                }
+               // will work now without this check - interpolation function will show a warning if out of range
+//              //checking are we in range of available interaction data
+//              const int &DataPoints = (*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX.size();
+//              if (energy >  (*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX[DataPoints-1]) //largest value is at the end - sorted data!
+//                {  //outside!
+//                  //             qDebug()<<"energy: "<<energy;
+//                  qCritical() << "Energy is outside of the supplied data range!";
+//                  return false; //fail
+//                }
 
               const double &Density = (*MpCollection)[MatId]->density;
               const double &AtomicDensity = (*MpCollection)[MatId]->atomicDensity;
 
               //Next processing depends on the interaction type!
-              if (MpCollection->getParticleType(Id) == AParticle::_charged_)
+              if (ParticleType == AParticle::_charged_)
                 {
                   //================ Charged particle - continuous deposition =================
                   //historyDistance - travelled inside this material; energy - current energy
@@ -202,8 +207,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                   do
                     {
                       //dE/dx [keV/mm] = Density[g/cm3] * [cm2/g*keV] * 0.1  //0.1 since local units are mm, not cm
-                      const double dEdX = 0.1*Density * InteractionValue(energy, &(*MpCollection)[MatId]->MatParticle[Id].InteractionDataX,
-                                                                   &(*MpCollection)[MatId]->MatParticle[Id].InteractionDataF,
+                      const double dEdX = 0.1*Density * InteractionValue(energy, &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX,
+                                                                   &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataF,
                                                                    MpCollection->fLogLogInterpolation);
 
                       //recommended step: (RecFraction - suggested decrease of energy per step)
@@ -241,7 +246,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                       for (int j=0; j<3; j++) r[j] = navigator->GetCurrentPoint()[j];  //new current point
                       //                   qDebug()<<"Step"<<RecStep<<"dE"<<dE<<"New energy"<<energy;
-                      AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, RecStep, time, dE, Id, MatId, counter, eventId);
+                      AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, RecStep, time, dE, ParticleId, MatId, counter, eventId);
                       EnergyVector->append(tc);
 
                       distanceHistory += RecStep;
@@ -254,7 +259,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
               //================ Neutral particle - photoeffect/compton/capture =================
                 {
                   //how many processes?
-                  const int numProcesses = (*MpCollection)[MatId]->MatParticle[Id].Terminators.size();
+                  const int numProcesses = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators.size();
                   //               qDebug()<<"defined processes:"<<numProcesses;
                   if (numProcesses != 0)
                     {
@@ -264,13 +269,32 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                         {
                              //qDebug()<<"---Process #:"<<iProcess;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
+
+                          //for neutrons have additional flags to suppress capture and ellastic
+                          if (ParticleType == AParticle::_neutron_)
+                          {
+                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture)
+                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bCaptureEnabled )
+                                  {
+                                      //qDebug() << "Skipping capture - it is disabled";
+                                      continue;
+                                  }
+                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::EllasticScattering)
+                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bEllasticEnabled )
+                                  {
+                                      //qDebug() << "Skipping ellastic - it is disabled";
+                                      continue;
+                                  }
+                          }
+
                           const double InteractionCoefficient = InteractionValue(energy,
-                                                                                 &(*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].PartialCrossSectionEnergy,
-                                                                                 &(*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].PartialCrossSection,
+                                                                                 &(*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].PartialCrossSectionEnergy,
+                                                                                 &(*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].PartialCrossSection,
                                                                                  MpCollection->fLogLogInterpolation);
                              //qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
+
                           double MeanFreePath;
-                          if (MpCollection->getParticleType(Id) == AParticle::_neutron_)
+                          if (ParticleType == AParticle::_neutron_)
                           //if ( (*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
                             { //for capture using atomic density and cross-section in barns
                                 //qDebug()<<"isotope density:"<<AtomicDensity;
@@ -309,12 +333,12 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           for (int j=0; j<3; j++) r[j] = navigator->GetCurrentPoint()[j];  //new current point
 
                           //triggering the process
-                          switch ( (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].Type)
+                          switch ( (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].Type)
                             {
                             case (NeutralTerminatorStructure::Photoelectric): //0 - Photoelectric
                               {
                                 //                           qDebug()<<"Photoelectric";
-                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, energy, Id, MatId, counter, eventId);
+                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, energy, ParticleId, MatId, counter, eventId);
                                 EnergyVector->append(tc);
 
                                 terminationStatus = EventHistoryStructure::Photoelectric;//3
@@ -333,11 +357,11 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                                 GammaStructure G1 = Compton(&G0, RandGen); // new gamma
                                 //qDebug()<<"energy"<<G1.energy<<" "<<G1.direction[0]<<G1.direction[1]<<G1.direction[2];
-                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, G0.energy - G1.energy, Id, MatId, counter, eventId);
+                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, G0.energy - G1.energy, ParticleId, MatId, counter, eventId);
                                 EnergyVector->append(tc);
 
                                 //creating gamma and putting it on stack
-                                AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
+                                AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
                                 ParticleStack->append(tmp);
                                   //creating electron
                                   //int IdElectron =
@@ -356,15 +380,15 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               {
                                                            qDebug()<<"capture";
                                 //nothing is added to the EnergyVector, the result of capture is generation of secondary particles!
-                                int numGenParticles = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles.size();
+                                int numGenParticles = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles.size();
 
                                 if (numGenParticles>0)
                                   {
                                     //adding first particle to the stack
                                     double vv[3]; //random direction
                                     GenerateRandomDirection(vv);
-                                    const int  &Particle1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[0];
-                                    const double &energy1 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[0];
+                                    const int  &Particle1 = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles[0];
+                                    const double &energy1 = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticleEnergies[0];
                                     //                         qDebug()<<"Adding to stack particle with id: "<<Particle1<<" energy:"<<energy1;
                                     AParticleOnStack* pp = new AParticleOnStack(Particle1, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy1, counter);
                                     ParticleStack->append(pp);
@@ -373,8 +397,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     //  for the moment, the creation rule is: opposite direction to the first particle    <- POSSIBLE UPGRADE ***
                                     if (numGenParticles > 1)
                                       {
-                                        const int  &Particle2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[1];
-                                        const double &energy2 = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[1];
+                                        const int  &Particle2 = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles[1];
+                                        const double &energy2 = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticleEnergies[1];
                                         //                                 qDebug()<<"Adding to stack particle with id: "<<Particle2<<" energy:"<<energy2;
                                         pp = new AParticleOnStack(Particle2, r[0], r[1], r[2], -vv[0], -vv[1], -vv[2], time, energy2, counter);
                                         ParticleStack->append(pp);
@@ -384,8 +408,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                         {
                                           //                                   //all particle after 2nd - random direction
                                           GenerateRandomDirection(vv);
-                                          const int  &Particle = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticles[ipart];
-                                          const double &energy = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].GeneratedParticleEnergies[ipart];
+                                          const int  &Particle = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles[ipart];
+                                          const double &energy = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticleEnergies[ipart];
                                           //                             qDebug()<<"Adding to stack particle with id: "<<Particle<<" energy:"<<energy;
                                           AParticleOnStack* pp = new AParticleOnStack(Particle, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
                                           ParticleStack->append(pp);
@@ -401,15 +425,15 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               {
                                 //                           qDebug()<<"pair";
                                 const double depo = energy - 1022.0; //directly deposited energy (kinetic energies), assuming electron and positron do not travel far
-                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, depo, Id, MatId, counter, eventId);
+                                AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, depo, ParticleId, MatId, counter, eventId);
                                 EnergyVector->append(tc);
 
                                 //creating two gammas from positron anihilation and putting it on stack
                                 double vv[3];
                                 GenerateRandomDirection(vv);
-                                AParticleOnStack* tmp = new AParticleOnStack(Id, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
+                                AParticleOnStack* tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
                                 ParticleStack->append(tmp);
-                                tmp = new AParticleOnStack(Id, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
+                                tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
                                 ParticleStack->append(tmp);
 
                                 terminationStatus = EventHistoryStructure::PairProduction;//9
@@ -419,7 +443,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::EllasticScattering): //4
                               {
-                                const QVector<AEllasticScatterElements> &elements = (*MpCollection)[MatId]->MatParticle[Id].Terminators[SoFarShortestId].ScatterElements;
+                                const QVector<AEllasticScatterElements> &elements = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].ScatterElements;
 
                                 qDebug() << "Def elements:" << elements.size();
                                 double rnd = RandGen->Rndm();
@@ -459,7 +483,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
                                 double newEnergy = 0.52270e-8 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
                                 qDebug() << "new neutron velocity:"<<vnewMod;
-                                AParticleOnStack *tmp = new AParticleOnStack(Id, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
+                                AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                 ParticleStack->append(tmp);
 
                                 terminationStatus = EventHistoryStructure::EllasticScattering;
@@ -473,8 +497,9 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                   else
                     {
                       //no processes - error!
-                      qDebug()<<"Error - no processes are defined for this particle in this material!" ;
-                      return false;
+                      qWarning() << "No processes are defined for neutron in" << MpCollection->getMaterialName(MatId);
+                      distanceHistory = MaxLength;
+                      //return false;
                     }
                 }
                 //================ END: neutral particle ===================

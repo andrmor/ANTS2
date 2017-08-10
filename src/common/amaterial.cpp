@@ -137,6 +137,8 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
       jMatParticle["IntrEnergyRes"] = MatParticle[ip].IntrEnergyRes;
       jMatParticle["DataSource"] = MatParticle[ip].DataSource;
       jMatParticle["DataString"] = MatParticle[ip].DataString;
+      jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
+      jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
       if (MatParticle[ip].InteractionDataF.size() > 0)
         {
             QJsonArray iar;
@@ -276,6 +278,11 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       parseJson(jMatParticle, "DataSource", MatParticle[ip].DataSource);
       parseJson(jMatParticle, "DataString", MatParticle[ip].DataString);
 
+      MatParticle[ip].bCaptureEnabled = true; //compatibility
+      MatParticle[ip].bEllasticEnabled = false; //compatibility
+      parseJson(jMatParticle, "CaptureEnabled", MatParticle[ip].bCaptureEnabled);
+      parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bEllasticEnabled);
+
       if (jMatParticle.contains("TotalInteraction"))
         {
           QJsonArray iar = jMatParticle["TotalInteraction"].toArray();
@@ -359,6 +366,8 @@ MatParticleStructure::MatParticleStructure()
   IntrEnergyRes = 0;
   TrackingAllowed = false;
   MaterialIsTransparent = true;
+  bCaptureEnabled = true;
+  bEllasticEnabled = false;
 }
 
 bool MatParticleStructure::CalculateTotal() //true - success, false - mismatch in binning of the data

@@ -43,7 +43,7 @@ public:
 
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} //will be absolete
-    void resetCounter(){counter = -1;}  //will be absolute
+    void resetCounter() {counter = -1;}  //will be absolute
     void setAddColorIndex(int val) {AddColorIndex = val;}
 
 signals:
@@ -65,14 +65,13 @@ private:
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;
 
-    int Id;
-    double energy, time;
-    double r[3];          //position
-    double v[3];          //direction vector
+    //int Id;
+    //double energy, time;
+    //double r[3];          //position
+    //double v[3];          //direction vector
 
     int counter;          //particle "serial" number - can be reset from outside
-
-    int AddColorIndex;
+    int AddColorIndex;    //shift in track color
 
     void GenerateRandomDirection(double* vv);
 };

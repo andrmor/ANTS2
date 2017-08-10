@@ -115,7 +115,6 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
       }
 
     QString name = MW->MpCollection->tmpMaterial.name;
-//    qDebug() << "Handling material:"<<name;
     int index = MW->MpCollection->FindMaterial(name);
     if (index > -1)
       {
@@ -356,6 +355,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
       {
          //neutron
           ui->swNeutral->setCurrentIndex(1);
+          ui->cbCapture->setChecked(mp.bCaptureEnabled);
 
           //capture
           if (mp.InteractionDataX.isEmpty())
@@ -443,7 +443,10 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
       }
     else tmpMaterial.MatParticle[ui->cobYieldForParticle->currentIndex()].PhYield = prYield;
 
-    tmpMaterial.MatParticle[ui->cobParticle->currentIndex()].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
+    const int ParticleId = ui->cobParticle->currentIndex();
+    tmpMaterial.MatParticle[ParticleId].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
+    tmpMaterial.MatParticle[ParticleId].bCaptureEnabled = ui->cbCapture->isChecked();
+    tmpMaterial.MatParticle[ParticleId].bEllasticEnabled = ui->cbEnableScatter->isChecked();
 
     tmpMaterial.W = ui->ledW->text().toDouble()*0.001; //eV -> keV
     tmpMaterial.SecYield = ui->ledSecYield->text().toDouble();
@@ -1952,6 +1955,8 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
 
     tmpMaterial.MatParticle[i].DataSource.clear();
     tmpMaterial.MatParticle[i].DataString.clear();
+    tmpMaterial.MatParticle[i].bCaptureEnabled = true;
+    tmpMaterial.MatParticle[i].bEllasticEnabled = false;
 
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
@@ -1981,6 +1986,8 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
         tmpMaterial.MatParticle[i].MaterialIsTransparent = true;
         tmpMaterial.MatParticle[i].PhYield=0;
         tmpMaterial.MatParticle[i].IntrEnergyRes=0;
+        tmpMaterial.MatParticle[i].bCaptureEnabled=true;
+        tmpMaterial.MatParticle[i].bEllasticEnabled=false;
         tmpMaterial.MatParticle[i].InteractionDataX.resize(0);
         tmpMaterial.MatParticle[i].InteractionDataF.resize(0);
         tmpMaterial.MatParticle[i].Terminators.resize(0);
@@ -2332,6 +2339,8 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 {
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    ui->cbEnableScatter->setChecked(tmpMaterial.MatParticle[particleId].bEllasticEnabled);
 
     ui->twElements->clearContents();
 

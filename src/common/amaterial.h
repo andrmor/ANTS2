@@ -113,6 +113,10 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   double PhYield;         // Photon yield of the primary scintillation
   double IntrEnergyRes; // intrinsic energy resolution
 
+  //for neutrons - separate activation of capture and ellastic scattering is possible
+  bool bCaptureEnabled;
+  bool bEllasticEnabled;
+
   QVector<double> InteractionDataX; //energy in keV
   QVector<double> InteractionDataF; //stopping power (for charged) or total interaction cross-section (neutrals)
 

@@ -4070,5 +4070,53 @@ with the relative numeric fractions of 90 to 1.</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbEnableScatter</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frScatter</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCapture</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>115</x>
+     <y>304</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>69</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbEnableScatter</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>303</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>68</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

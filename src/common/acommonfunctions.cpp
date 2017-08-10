@@ -27,6 +27,17 @@ double InteractionValue(double energy, QVector<double>* X, QVector<double>* F, b
 //  qDebug()<<"data point in arrays X and F:"<<X->size()<<F->size()<<"Min X:"<<X->first()<<"Max X:"<<X->last();
   //if (degree == 1)   {
 
+    if (energy < X->first())
+    {
+        qWarning()<<"Interpolation: value is out of the data range:"<<energy<< " < " << X->first();
+        return F->first();
+    }
+    if (energy > X->last())
+    {
+        qWarning()<<"Interpolation: value is out of the data range:"<<energy<< " > " << X->last();
+        return F->last();
+    }
+
     //linear interpolation of IterationData for current energy
     QVector<double>::iterator it;
     it = qLowerBound(X->begin(), X->end(), energy);
@@ -34,8 +45,8 @@ double InteractionValue(double energy, QVector<double>* X, QVector<double>* F, b
     //qDebug()<<"energy:"<<energy<<"index"<<index;//<<*it;
     if (index < 1)
     {
-        qWarning()<<"Interpolation: value out (or on the border) of the interaction data range!";
-        return F->at(index);
+        //qWarning()<<"Interpolation: value out (or on the border) of the interaction data range!";
+        return F->first();
     }
 
     //interpolating:

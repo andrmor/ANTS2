@@ -80,7 +80,7 @@ public:
 
     void writeToJson(QJsonObject& json);
     const QJsonObject writeToJson();
-    bool readFromJson(QJsonObject& json);
+    bool readFromJson(QJsonObject& json);        
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles
@@ -103,6 +103,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   //for ellastic
   QVector<AEllasticScatterElements> ScatterElements;
+  bool isNameInUse(QString name, int ExceptIndex = -1);
 
   void UpdateRuntimeForScatterElements(bool bUpdateStatWeights = true);
 };

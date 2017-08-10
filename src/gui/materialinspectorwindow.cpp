@@ -66,6 +66,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->laBackground_3->setStyleSheet(styleGrey);
 
     flagDisreguardChange = false;
+    fLockTable = false;
     LastSelectedParticle = 0;
 
     RedIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::red);
@@ -466,7 +467,6 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
 {
   QString fileName;
   fileName = QFileDialog::getOpenFileName(this, "Load dE/dr data", MW->GlobSet->LastOpenDir, "Data files (*.dat)");
-  qDebug()<<fileName;
 
   if (!fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -536,7 +536,6 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this, "Load mass interaction coefficient data.\n"
                                             "The file should contain 3 colums: energy[keV], photoelectric_data[cm2/g], compton_data[cm2/g]", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files(*)");
-    qDebug()<<fileName;
 
     if (fileName.isEmpty()) return;
     MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -2341,6 +2340,8 @@ void MaterialInspectorWindow::on_pbTest_clicked()
 
 void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 {
+    fLockTable = true;
+
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
@@ -2394,6 +2395,8 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 
     ui->twElements->resizeColumnsToContents();
     ui->twElements->resizeRowsToContents();
+
+    fLockTable = false;
 }
 
 void MaterialInspectorWindow::obShowElementCrossClicked(int index)
@@ -2582,7 +2585,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
 
     const double energy = ui->ledMFPenergyEllastic->text().toDouble() * 1.0e-6;  // meV -> keV
 
-    qDebug() << energy << term.PartialCrossSectionEnergy.first() << term.PartialCrossSectionEnergy.last();
+    //qDebug() << energy << term.PartialCrossSectionEnergy.first() << term.PartialCrossSectionEnergy.last();
     if (energy<term.PartialCrossSectionEnergy.first() || energy > term.PartialCrossSectionEnergy.last())
       {
         ui->leMFP->setText("out range");
@@ -2590,14 +2593,77 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
       }
 
     double AtDens = tmpMaterial.density / term.MeanElementMass / 1.66054e-24;
-    qDebug() << "Atomic density of the composition:"<<AtDens;
+    //qDebug() << "Atomic density of the composition:"<<AtDens;
 
     const double CrossSection = InteractionValue(energy,
                                                  &term.PartialCrossSectionEnergy,
                                                  &term.PartialCrossSection,
                                                  MW->MpCollection->fLogLogInterpolation);
-    qDebug()<<"energy and cross-section:"<<energy<<CrossSection;
+    //qDebug()<<"energy and cross-section:"<<energy<<CrossSection;
 
     double MeanFreePath = 10.0/CrossSection/AtDens;
     ui->leMFPellastic->setText(QString::number(MeanFreePath, 'g', 4));
+}
+
+void MaterialInspectorWindow::on_twElements_cellChanged(int row, int column)
+{
+    if (fLockTable) return;
+
+    int particleId = ui->cobParticle->currentIndex();
+    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    const QVector<NeutralTerminatorStructure> &Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+    if (Terminators.isEmpty()) return;
+    NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
+
+    int iElement = row;
+    if (iElement >= term.ScatterElements.size()) return;
+
+    AEllasticScatterElements &el = term.ScatterElements[iElement];
+    switch (column)
+    {
+    case 0:
+      {
+        QString newName = ui->twElements->item(row, column)->text();
+        if (term.isNameInUse(newName, row))
+        {
+            message(QString("Element name ")+newName+" is already in use!", this);
+            on_pbUpdateInteractionIndication_clicked();
+            return;
+        }
+        el.Name = newName;
+        break;
+      }
+    case 1:
+      {
+        bool bOK;
+        double newMass = ui->twElements->item(row, column)->text().toDouble(&bOK);
+        if (!bOK || newMass<0)
+        {
+            message("Mass should be a positive floating number", this);
+            on_pbUpdateInteractionIndication_clicked();
+            return;
+        }
+        el.Mass = newMass;
+        break;
+      }
+    case 2:
+      {
+        bool bOK;
+        double newWeight = ui->twElements->item(row, column)->text().toDouble(&bOK);
+        if (!bOK || newWeight<0)
+        {
+            message("Molar fraction should be a positive floating number", this);
+            on_pbUpdateInteractionIndication_clicked();
+            return;
+        }
+        el.StatWeight = newWeight;
+        break;
+      }
+    }
+
+    on_pbUpdateTmpMaterial_clicked();
+    on_pbWasModified_clicked();
 }

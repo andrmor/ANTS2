@@ -429,8 +429,21 @@ bool AEllasticScatterElements::readFromJson(QJsonObject &json)
     return true;
 }
 
+bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex)
+{
+    for (int i=0; i<ScatterElements.size(); i++)
+    {
+        if (i==ExceptIndex) continue;
+        if (ScatterElements.at(i).Name == name) return true;
+    }
+    return false;
+}
+
 void NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUpdateStatWeights)
 {
+    if (Type != EllasticScattering) return;
+    if (ScatterElements.isEmpty()) return;
+
     double sum = 0;
     double sumSW = 0;
     for (int i=0; i<ScatterElements.size(); i++)
@@ -456,5 +469,5 @@ void NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUpdateSta
                 PartialCrossSection[iEn] += newSW * ScatterElements.at(iElement).CrossSection.at(iEn);
         }
     }
-    qDebug() << "Mean element mass:"<<MeanElementMass;
+    //qDebug() << "Mean element mass:"<<MeanElementMass;
 }

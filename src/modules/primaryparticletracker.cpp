@@ -195,8 +195,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 //                  return false; //fail
 //                }
 
-              const double &Density = (*MpCollection)[MatId]->density;
-              const double &AtomicDensity = (*MpCollection)[MatId]->atomicDensity;
+              const double &Density = (*MpCollection)[MatId]->density;              
 
               //Next processing depends on the interaction type!
               if (ParticleType == AParticle::_charged_)
@@ -295,10 +294,19 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                           double MeanFreePath;
                           if (ParticleType == AParticle::_neutron_)
-                          //if ( (*MpCollection)[MatId]->MatParticle[Id].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
                             { //for capture using atomic density and cross-section in barns
-                                //qDebug()<<"isotope density:"<<AtomicDensity;
-                              MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
+                              if ( (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
+                              {
+                                const double &AtomicDensity = (*MpCollection)[MatId]->atomicDensity;
+                                MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
+                                qDebug()<<"Capture. Isotope density:"<<AtomicDensity<< "MFP:"<<MeanFreePath;
+                              }
+                              else
+                              {
+                                  const double AtDens = Density / (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].MeanElementMass / 1.66054e-24;
+                                  MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
+                                  qDebug() << "Ellastic. Effective atomic density:"<<AtDens << "MFP:"<<MeanFreePath;
+                              }
                             }
                           else
                             {
@@ -378,7 +386,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }                            
                             case (NeutralTerminatorStructure::Capture): //2 - capture
                               {
-                                                           qDebug()<<"capture";
+                                //                           qDebug()<<"capture";
                                 //nothing is added to the EnergyVector, the result of capture is generation of secondary particles!
                                 int numGenParticles = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles.size();
 
@@ -447,7 +455,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                                 qDebug() << "Def elements:" << elements.size();
                                 double rnd = RandGen->Rndm();
-                                qDebug() << rnd;
+                                //qDebug() << rnd;
                                 int iselected = 0;
                                 for (; iselected<elements.size(); iselected++)
                                 {
@@ -461,11 +469,11 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 //vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
                                 double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
                                 //  vn[i] = vnMod * v[i]
-                                qDebug() << energy << vnMod;
+                                //qDebug() << energy << vnMod;
                                 //va[] is randomly generated from Gauss(0, sqrt(kT/m)
                                 double va[3];
                                 const double m = elements.at(iselected).Mass; //mass of atom in atomic units
-                                qDebug() << "atom - mass:"<<m;
+                                //qDebug() << "atom - mass:"<<m;
                                 double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);
                                 for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
                                 //qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
@@ -482,7 +490,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 for (int i=0; i<3; i++) vnew[i] = Vnew[i] + vcm[i];
                                 double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
                                 double newEnergy = 0.52270e-8 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
-                                qDebug() << "new neutron velocity:"<<vnewMod;
+                                //qDebug() << "new neutron velocity:"<<vnewMod;
                                 AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                 ParticleStack->append(tmp);
 

@@ -1461,7 +1461,7 @@ resolution:</string>
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pageGamma">
           <widget class="QFrame" name="fGamma">

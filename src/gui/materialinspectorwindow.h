@@ -119,6 +119,8 @@ private slots:
 
     void on_ledMFPenergyEllastic_editingFinished();
 
+    void on_twElements_cellChanged(int row, int column);
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -127,6 +129,7 @@ private:
     QIcon RedIcon;
 
     bool flagDisreguardChange;
+    bool fLockTable;
     int LastSelectedParticle;
 
     void UpdateWaveButtons();

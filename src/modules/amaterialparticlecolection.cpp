@@ -623,11 +623,9 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
   return FindCreateParticle(p.ParticleName, p.type, p.charge, p.mass, false);
 }
 
-int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
+QString AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
 {
   //returns:
-  //0 - success
-  //1 - wrong material or particle index
   //2 - total interaction is empty or contains only 1 point
   //3 - mismatch in total interaction (X and F) length
   //4 - total interaction: energy binning is not non-decreasing
@@ -641,51 +639,58 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
   //75 - neutron: decay channels following capture are not defined
   //76 - initial energy of generated particle is outside of interaction data range
 
-  if (iPart<0 || iPart>ParticleCollection.size()-1) return 1;
-
+  if (iPart<0 || iPart>ParticleCollection.size()-1) return QString("Wrong particle index: ") + QString::number(iPart);
   //qDebug()<<">"<<mat->name<<" - "<<ParticleCollection->at(iPart)->ParticleName;
 
   MatParticleStructure* mp = &mat->MatParticle[iPart];
   //shortcuts - if particle tracking is disabled or material is transparent - no checks
-  if ( ! mp->TrackingAllowed) return 0;
-  if ( mp->MaterialIsTransparent) return 0;
+  if ( ! mp->TrackingAllowed) return "";
+  if ( mp->MaterialIsTransparent) return "";
 
-  //common block - check TotalInteraction
+  const AParticle::ParticleType& pt = ParticleCollection.at(iPart)->type;
+
+  //check TotalInteraction
   int interSize = mp->InteractionDataX.size();
-  if (interSize == 0 || mp->InteractionDataF.size() == 0) return 2;
-  if (interSize<2 || mp->InteractionDataF.size()<2) return 21;
-  if (interSize != mp->InteractionDataF.size()) return 3;
-  for (int i=1; i<interSize; i++) //protected against length = 0 or 1
-    if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i]) return 4;
-
-  //getting particle type, and type-specific checks
-  AParticle::ParticleType pt = ParticleCollection.at(iPart)->type;
-
-  if (pt == AParticle::_charged_) return 0;
+  //check needed only for charged particles - they used it (stopping power is provided there)
+  if (pt == AParticle::_charged_)
+  {
+      if (interSize == 0 || mp->InteractionDataF.size() == 0) return "Empty stopping power data";
+      if (interSize<2 || mp->InteractionDataF.size()<2) return "Stopping power data size is less than 2 points";
+      if (interSize != mp->InteractionDataF.size()) return "Mismatch in total interaction (X and F) length";
+      for (int i=1; i<interSize; i++) //protected against length = 0 or 1
+          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i]) return "Stopping power data: total energy binning is not non-decreasing";
+      return ""; //nothing else is needed to be checked
+  }
 
   if (pt == AParticle::_gamma_)
     {
       const int terms = mp->Terminators.size();
-      if (mp->Terminators.isEmpty()) return 50;
-      if (terms<2 || terms>3) return 50;
+      if (mp->Terminators.isEmpty()) return "Terminators size for gamma";
+      if (terms<2 || terms>3) return "Terminators size for gamma";
 
       if (terms == 2) //compatibility - no pair production
-        if ( mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering ) return 51;
+        if (
+             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
+             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering
+            ) return "Interactions types for gamma";
 
       if (terms == 3)
-        if ( mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
+        if (
+             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
              mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering ||
-             mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction ) return 51;
-
+             mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction
+            ) return "Interactions types for gamma";
 
       //checking partial crossection for terminators
       for (int iTerm=0; iTerm<terms; iTerm++)
         {
           QVector<double>*  e = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
           QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
-          if (e->size() != interSize || cs->size() != interSize) return 52;
-          for (int i=0; i<interSize; i++) if (mp->InteractionDataX[i] != e->at(i)) return 53;
+          if (e->size() != interSize || cs->size() != interSize)
+              return "Mismatch between total and partial interaction data size";
+          for (int i=0; i<interSize; i++)
+              if (mp->InteractionDataX[i] != e->at(i))
+                  return "Mismatch in energy of total and partial cross interaction datasets";
         }
 
       // confirminf that TotalInteraction is indeed the sum of the partial cross-sections
@@ -695,28 +700,31 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
           for (int ite=0; ite<terms; ite++)
               sum += mp->Terminators[ite].PartialCrossSection[i];
           double delta =  sum - mp->InteractionDataF[i];
-          if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] ) return 54;
+          if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] )
+              return "Total interaction in not equal to sum of partials";
         }
 
       //properties for gamma are properly defined!
-      return 0;
+      return "";
     }
 
   if (pt == AParticle::_neutron_)
     {
-      if (mat->atomicDensity == 0) return 6;
+      if (!mp->bCaptureEnabled && !mp->bEllasticEnabled) return "";
+      if (mp->bCaptureEnabled && mat->atomicDensity == 0) return "Isotope density is not defined";
 
       int numTerm = mp->Terminators.size();
-      qDebug()<<"Terms:"<<numTerm << "-- dont forget to fix check up for nutron propertie sof materials";
-      if (numTerm == 0) return 75;
+      if (numTerm == 0 ) return "No capture or ellastic data defined";
 
       //confirming all terminators type is "capture" or "ellastic"
+      if (mp->bEllasticEnabled && mp->Terminators[numTerm-1].Type != NeutralTerminatorStructure::EllasticScattering)
+          return "Last terminator is expected to be ellastic scattering, but it is not";
       for (int i=0; i<numTerm; i++)
         {
           //qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
-          if (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture &&
-              mp->Terminators[i].Type != NeutralTerminatorStructure::EllasticScattering) return 7;
-          //qDebug() << mp->Terminators[i].ReactionType;
+          if ( mp->bEllasticEnabled && (i==numTerm-1) ) continue;
+          if ( mp->Terminators[i].Type != NeutralTerminatorStructure::Capture )
+              return "capture terminator expected, but wrong type received";
         }
 
       //checking all terminator one by one
@@ -724,19 +732,11 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
         {
           //qDebug() << "Checking term #"<<iTerm;
           //check partial cross-section
-          QVector<double>* e  = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
-          QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
-          //            qDebug() << "---"<<interSize<<e->size()<<cs->size();
-          if (e->size() != interSize || cs->size() != interSize) return 7;
-          for (int i=0; i<interSize; i++) if (mp->InteractionDataX[i] != e->at(i)) return 7;
-
-          // confirminf that partial cross section is indeed Branching fractin of TotalInteraction
-//          double branch = mp->Terminators[iTerm].branching;
-//          for (int i=0; i<interSize; i++)
-//            {
-//              double delta = mp->Terminators[iTerm].PartialCrossSection[i] - branch*mp->InteractionDataF[i];
-//              if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] ) return 7;
-//            }
+//          QVector<double>* e  = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
+//          QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
+//          //            qDebug() << "---"<<interSize<<e->size()<<cs->size();
+//          if (e->size() != interSize || cs->size() != interSize) return 7;
+//          for (int i=0; i<interSize; i++) if (mp->InteractionDataX[i] != e->at(i)) return "Mismatch in total";
 
           //checking generated particles and their initial energies
 //          QVector<int>* gp = &mp->Terminators[iTerm].GeneratedParticles;
@@ -762,75 +762,73 @@ int AMaterialParticleCollection::CheckMaterial(AMaterial* mat, int iPart)
 //                  return 76;
 //                }
 //            }
-
-
         }
     }
 
-  return 0; //passed all tests
+  return ""; //passed all tests
 }
 
-int AMaterialParticleCollection::CheckMaterial(int iMat, int iPart)
+QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart)
 {
-  if (iMat<0 || iMat>MaterialCollectionData.size()-1) return 1;
-  return AMaterialParticleCollection::CheckMaterial(MaterialCollectionData[iMat], iPart);
+  if (iMat<0 || iMat>MaterialCollectionData.size()-1) return "Wrong material index: " + QString::number(iMat);
+  return CheckMaterial(MaterialCollectionData[iMat], iPart);
 }
 
-int AMaterialParticleCollection::CheckMaterial(int iMat)
-{
-  for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
-    {
-      int ierr = AMaterialParticleCollection::CheckMaterial(iMat, iPart);
-      if (ierr>0) return ierr;
-    }
-  return 0;
-}
-
-int AMaterialParticleCollection::CheckTmpMaterial()
+QString AMaterialParticleCollection::CheckMaterial(int iMat)
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-      int ierr = AMaterialParticleCollection::CheckMaterial(&tmpMaterial, iPart);
-      if (ierr>0) return ierr;
+      QString err = AMaterialParticleCollection::CheckMaterial(iMat, iPart);
+      if (!err.isEmpty()) return err;
     }
-  return 0;
+  return "";
 }
 
-QString AMaterialParticleCollection::getErrorString(int iError)
+QString AMaterialParticleCollection::CheckTmpMaterial()
 {
-  switch (iError)
+  for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-    case 0: return "No errors";
-    case 1: return "Wrong material or particle index";
-    case 2: return "Total interaction data is empty";
-    case 21: return "Total interaction data size is less than 2 points";
-    case 3: return "Mismatch in total interaction (X and F) length";
-    case 4: return "Total interaction: energy binning is not non-decreasing";
-    case 50: return "Terminators size for gamma";
-    case 51: return "Interactions types for gamma";
-    case 52: return "Mismatch between total and partial interaction data size";
-    case 53: return "Mismatch in energy of total and partial cross interaction datasets";
-    case 54: return "Total interaction in not equal to sum of partials";
-    case 6: return "Isotope density is not defined while neutron interaction is enabled";
-    case 7: return "Error in terminators for neutron";
-    case 71: return "Error in generated particles for neutron capture";
-    case 72: return "Error with generated particles energies for neutron capture";
-    case 73: return "Neutron capture: Mismatch between container size of genereated particle and their energy";
-    case 74: return "Non-existent particle declared as secondary particle";
-    case 75: return "Neutron: decay channels following capture are not defined";
-    case 76:
-      {
-        QString tmp = "Initial energy of generated ";
-        tmp += ParticleCollection.at(ConflictingParticleIndex)->ParticleName;
-        tmp += "is outse of interaction range defined for ";
-        tmp += MaterialCollectionData[ConflictingMaterialIndex]->name;
-        return tmp;
-      }
-    default:;
+      QString err = AMaterialParticleCollection::CheckMaterial(&tmpMaterial, iPart);
+      if (!err.isEmpty()) return err;
     }
-
-  return "Unknown error";
+  return "";
 }
+
+//QString AMaterialParticleCollection::getErrorString(int iError)
+//{
+//  switch (iError)
+//    {
+//    case 0: return "No errors";
+//    case 1: return "Wrong material or particle index";
+//    case 2: return "Total interaction data is empty";
+//    case 21: return "Total interaction data size is less than 2 points";
+//    case 3: return "Mismatch in total interaction (X and F) length";
+//    case 4: return "Total interaction: energy binning is not non-decreasing";
+//    case 50: return "Terminators size for gamma";
+//    case 51: return "Interactions types for gamma";
+//    case 52: return "Mismatch between total and partial interaction data size";
+//    case 53: return "Mismatch in energy of total and partial cross interaction datasets";
+//    case 54: return "Total interaction in not equal to sum of partials";
+//    case 6: return "Isotope density is not defined while neutron interaction is enabled";
+//    case 7: return "Error in terminators for neutron";
+//    case 71: return "Error in generated particles for neutron capture";
+//    case 72: return "Error with generated particles energies for neutron capture";
+//    case 73: return "Neutron capture: Mismatch between container size of genereated particle and their energy";
+//    case 74: return "Non-existent particle declared as secondary particle";
+//    case 75: return "Neutron: decay channels following capture are not defined";
+//    case 76:
+//      {
+//        QString tmp = "Initial energy of generated ";
+//        tmp += ParticleCollection.at(ConflictingParticleIndex)->ParticleName;
+//        tmp += "is outse of interaction range defined for ";
+//        tmp += MaterialCollectionData[ConflictingMaterialIndex]->name;
+//        return tmp;
+//      }
+//    default:;
+//    }
+
+//  return "Unknown error";
+//}
 
 void AMaterialParticleCollection::registerNewParticle()
 {

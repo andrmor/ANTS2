@@ -2009,7 +2009,7 @@ with the relative numeric fractions of 90 to 1.</string>
             </rect>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">

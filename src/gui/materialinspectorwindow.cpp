@@ -52,8 +52,8 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
 
     ui->pbUpdateTmpMaterial->setVisible(false);
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
-    ui->cobTotalInteractionLoadEnergyUnits->setCurrentIndex(2);
-    ui->cobUnitsForEllastic->setCurrentIndex(2);
+    ui->cobTotalInteractionLoadEnergyUnits->setCurrentIndex(1);
+    ui->cobUnitsForEllastic->setCurrentIndex(1);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -107,11 +107,10 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {    
     //checkig this material
-    int ierror = MW->MpCollection->CheckTmpMaterial();
-    if (ierror != 0)
+    QString error = MW->MpCollection->CheckTmpMaterial();
+    if (!error.isEmpty())
       {
-        QString ErrStr = MW->MpCollection->getErrorString(ierror);
-        message(ErrStr, this);
+        message(error, this);
         return;
       }
 
@@ -1881,11 +1880,10 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 void MaterialInspectorWindow::on_actionSave_material_triggered()
 {
   //checkig this material
-  int ierror = MW->MpCollection->CheckTmpMaterial();
-  if (ierror != 0)
+  QString error = MW->MpCollection->CheckTmpMaterial();
+  if ( !error.isEmpty() )
     {
-      QString ErrStr = MW->MpCollection->getErrorString(ierror);
-      message(ErrStr, this);
+      message(error, this);
       return;
     }
 

@@ -130,7 +130,7 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   QString DataSource; //for gamma stores XCOM file if was used
   QString DataString;     //for gamma can be used to store composition
 
-  bool CalculateTotal();  //true - success, false - mismatch in binning of the data
+  bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 };
 
 #endif // AMATERIAL_H

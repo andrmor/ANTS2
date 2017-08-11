@@ -40,8 +40,9 @@ private slots:
     void on_twElements_cellChanged(int row, int column);
 
     //on user input
-    void obShowElementCrossClicked(int index);
-    void obLoadElementCrossClicked(int index);
+    void onShowElementCrossClicked(int index);
+    void onLoadElementCrossClicked(int index);
+    void onDelElementCrossClicked(int index);
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
@@ -100,6 +101,7 @@ private slots:
     void on_pbAddNewElement_clicked();
     void on_cobTerminationScenarios_activated(int index);
     void on_ledMFPenergyEllastic_editingFinished();
+    void on_pbShowTotalEllastic_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);

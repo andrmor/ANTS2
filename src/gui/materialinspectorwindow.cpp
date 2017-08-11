@@ -571,7 +571,7 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
     tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::PairProduction;
 
     //calculating total interaction data
-    tmpMaterial.MatParticle[particleId].CalculateTotal();
+    tmpMaterial.MatParticle[particleId].CalculateTotalForGamma();
 
     //clear XCOM data if were defined
     tmpMaterial.MatParticle[particleId].DataSource.clear();
@@ -1031,7 +1031,7 @@ bool MaterialInspectorWindow::importXCOM(QTextStream &in, int particleId)
   tmpMaterial.MatParticle[particleId].DataSource = in.readAll();
 
   //calculating total interaction cross-section
-  bool TotCalc =  tmpMaterial.MatParticle[particleId].CalculateTotal();
+  bool TotCalc =  tmpMaterial.MatParticle[particleId].CalculateTotalForGamma();
   if (!TotCalc) qCritical()<<"ERROR in calculation of the total interaction coefficient!";
 
   //      qDebug()<<"-->tmpMaterial terminators updated and total interaction calculated";
@@ -2336,6 +2336,18 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         pLayout->setSpacing(2);
         w->setLayout(pLayout);
         ui->twElements->setCellWidget(i, 3, w);
+        w = new QWidget(this);
+        w->setProperty("Index", i);
+        QPushButton* pbDel = new QPushButton();
+        pbDel->setText("X");
+        pbDel->setMaximumWidth(22);
+        pLayout = new QHBoxLayout(w);
+        pLayout->addWidget(pbDel);
+        pLayout->setAlignment(Qt::AlignCenter);
+        pLayout->setContentsMargins(0, 0, 0, 0);
+        w->setLayout(pLayout);
+        ui->twElements->setCellWidget(i, 4, w);
+
 
         if (el.CrossSection.size()<2)
         {
@@ -2344,8 +2356,9 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
             s += "QPushButton {color: red;}";
             pbLoad->setStyleSheet(s);
         }
-        QObject::connect(pbShow, &QPushButton::clicked, [=](){obShowElementCrossClicked(i);});
-        QObject::connect(pbLoad, &QPushButton::clicked, [=](){obLoadElementCrossClicked(i);});
+        QObject::connect(pbShow, &QPushButton::clicked, [=](){onShowElementCrossClicked(i);});
+        QObject::connect(pbLoad, &QPushButton::clicked, [=](){onLoadElementCrossClicked(i);});
+        QObject::connect(pbDel,  &QPushButton::clicked, [=](){onDelElementCrossClicked(i);});
     }
 
     ui->twElements->resizeColumnsToContents();
@@ -2354,7 +2367,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
     fLockTable = false;
 }
 
-void MaterialInspectorWindow::obShowElementCrossClicked(int index)
+void MaterialInspectorWindow::onShowElementCrossClicked(int index)
 {
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2371,7 +2384,9 @@ void MaterialInspectorWindow::obShowElementCrossClicked(int index)
       }
 
     MW->GraphWindow->ShowAndFocus();
-    TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, el.Name.toLocal8Bit(),
+    TString title = el.Name.toLocal8Bit() + " - ";
+    title += el.Mass;
+    TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title,
                                                  "Energy, meV", "Ellastic scattering cross-section, barns",
                                                  kRed, 2, 1, kRed, 0, 1);
     MW->GraphWindow->Draw(gr, "AP");
@@ -2382,7 +2397,7 @@ void MaterialInspectorWindow::obShowElementCrossClicked(int index)
     MW->GraphWindow->Draw(graphOver, "L same");
 }
 
-void MaterialInspectorWindow::obLoadElementCrossClicked(int index)
+void MaterialInspectorWindow::onLoadElementCrossClicked(int index)
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
     if (fileName.isEmpty()) return;
@@ -2414,6 +2429,25 @@ void MaterialInspectorWindow::obLoadElementCrossClicked(int index)
         AEllasticScatterElements& el = t.ScatterElements[index];
         el.Energy = x;
         el.CrossSection = y;
+        on_pbUpdateElements_clicked();
+        on_pbWasModified_clicked();
+
+        on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+    }
+}
+
+void MaterialInspectorWindow::onDelElementCrossClicked(int index)
+{
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    if (t.Type != NeutralTerminatorStructure::EllasticScattering) return;
+
+    int ret = QMessageBox::question(this, "Delete element", QString("Delete element ") + t.ScatterElements.at(index).Name, QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Yes);
+    if (ret == QMessageBox::Yes)
+    {
+        t.ScatterElements.removeAt(index);
         on_pbUpdateElements_clicked();
         on_pbWasModified_clicked();
 
@@ -2621,4 +2655,35 @@ void MaterialInspectorWindow::on_twElements_cellChanged(int row, int column)
 
     on_pbUpdateTmpMaterial_clicked();
     on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
+{
+    on_ledMFPenergyEllastic_editingFinished(); //to update properties
+
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    if (t.Type != NeutralTerminatorStructure::EllasticScattering) return;
+
+    if (t.ScatterElements.isEmpty()) return;
+
+    QVector<double> x,y;
+    for (int i=0; i<t.PartialCrossSectionEnergy.size(); i++)
+      {
+        x << 1.0e6 * t.PartialCrossSectionEnergy.at(i);         // keV -> meV
+        y << 1.0e24 * t.PartialCrossSection.at(i);  // cm2 to barns
+      }
+
+    MW->GraphWindow->ShowAndFocus();
+    TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, tmpMaterial.name.toLocal8Bit(),
+                                                 "Energy, meV", "Ellastic scattering cross-section, barns",
+                                                 kRed, 2, 1, kRed, 0, 1);
+    MW->GraphWindow->Draw(gr, "AP");
+
+    TGraph* graphOver = constructInterpolationGraph(x, y);
+    graphOver->SetLineColor(kRed);
+    graphOver->SetLineWidth(1);
+    MW->GraphWindow->Draw(graphOver, "L same");
 }

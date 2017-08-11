@@ -330,12 +330,16 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
                   //qDebug() << "Secondary:"<<isp;
                   MatParticle[ip].Terminators[iTerm].GeneratedParticles[is] = isp;
                   parseJson(jsecpart, "energy", MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is]);
-                }              
-              //using branchings to calculate partical cross sections (can be changed in the future!)
-              MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy = MatParticle[ip].InteractionDataX;
-              MatParticle[ip].Terminators[iTerm].PartialCrossSection.resize(0);
-              for (int i=0; i<MatParticle[ip].InteractionDataF.size(); i++)
-                MatParticle[ip].Terminators[iTerm].PartialCrossSection.append(MatParticle[ip].Terminators[iTerm].branching * MatParticle[ip].InteractionDataF[i]);
+                }
+
+              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::Capture)
+                {
+                  //using branchings to calculate partical cross sections (can be changed in the future!)
+                  MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy = MatParticle[ip].InteractionDataX;
+                  MatParticle[ip].Terminators[iTerm].PartialCrossSection.resize(0);
+                  for (int i=0; i<MatParticle[ip].InteractionDataF.size(); i++)
+                    MatParticle[ip].Terminators[iTerm].PartialCrossSection.append(MatParticle[ip].Terminators[iTerm].branching * MatParticle[ip].InteractionDataF[i]);
+                }
 
               if (jterm.contains("ScatterElements"))
               {
@@ -371,7 +375,7 @@ MatParticleStructure::MatParticleStructure()
   bEllasticEnabled = false;
 }
 
-bool MatParticleStructure::CalculateTotal() //true - success, false - mismatch in binning of the data
+bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mismatch in binning of the data
 {
   InteractionDataX = Terminators[0].PartialCrossSectionEnergy;
   InteractionDataF = Terminators[0].PartialCrossSection;
@@ -443,40 +447,42 @@ bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex)
 bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog)
 {
     if (Type != EllasticScattering) return true;
-    if (ScatterElements.isEmpty()) return true;
-
-    double sum = 0;
-    double sumSW = 0;
-    for (int i=0; i<ScatterElements.size(); i++)
-    {
-        sum += ScatterElements.at(i).Mass * ScatterElements.at(i).StatWeight;
-        sumSW += ScatterElements.at(i).StatWeight;
-    }
 
     PartialCrossSectionEnergy.clear();
     PartialCrossSection.clear();
-    if (sumSW > 0)
+    sumStatWeight = 0;
+
+    if (ScatterElements.isEmpty()) return true;
+
+    double sum = 0;
+
+    for (int i=0; i<ScatterElements.size(); i++)
     {
-        MeanElementMass = sum / sumSW;
-              qDebug() << "Mean element mass:"<<MeanElementMass;
+        sum += ScatterElements.at(i).Mass * ScatterElements.at(i).StatWeight;
+        sumStatWeight += ScatterElements.at(i).StatWeight;
+    }
+
+    if (sumStatWeight > 0)
+    {
+        MeanElementMass = sum / sumStatWeight;
+        //      qDebug() << "Mean element mass:"<<MeanElementMass;
 
         //init PartialCrossSectionEnergy using the first element
           //energy binning according to the first element
         PartialCrossSectionEnergy = ScatterElements.first().Energy;
           //content - first element cross-section times normalized stat weight of the first element
-        double firstNorm = ScatterElements.first().StatWeight / sumSW;
+        const double firstNorm = ScatterElements.first().StatWeight / sumStatWeight;
         for (int i=0; i<ScatterElements.first().CrossSection.size(); i++)
             PartialCrossSection << ScatterElements.first().CrossSection.at(i) * firstNorm;
-
         //processing other elements
           //using interpolation to match energy bins
         for (int iElement=1; iElement<ScatterElements.size(); iElement++)
         {
-            double normalizedSW = ScatterElements[iElement].StatWeight / sumSW;
-            for (int iEn=0; iEn>PartialCrossSectionEnergy.size(); iEn++)
+            const double normalizedSW = ScatterElements.at(iElement).StatWeight / sumStatWeight;
+            for (int iEn=0; iEn<PartialCrossSectionEnergy.size(); iEn++)
             {
                 const double& energy = PartialCrossSectionEnergy.at(iEn);
-                double cs = GetInterpolatedValue(energy, &ScatterElements[iElement].Energy, &ScatterElements[iElement].CrossSection, bUseLogLog);
+                const double cs = GetInterpolatedValue(energy, &ScatterElements[iElement].Energy, &ScatterElements[iElement].CrossSection, bUseLogLog);
                 PartialCrossSection[iEn] += cs * normalizedSW;
             }
         }

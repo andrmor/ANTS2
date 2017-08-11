@@ -104,7 +104,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   //for ellastic
   QVector<AEllasticScatterElements> ScatterElements;
-  bool isNameInUse(QString name, int ExceptIndex = -1);
+  bool isNameInUse(QString name, int ExceptIndex = -1) const;
 
   bool UpdateRuntimeForScatterElements(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
 };

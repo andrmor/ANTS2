@@ -434,7 +434,7 @@ bool AEllasticScatterElements::readFromJson(QJsonObject &json)
     return true;
 }
 
-bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex)
+bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex) const
 {
     for (int i=0; i<ScatterElements.size(); i++)
     {

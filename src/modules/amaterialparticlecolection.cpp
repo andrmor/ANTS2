@@ -452,7 +452,7 @@ void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
     for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
     {
         for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateRuntimeForScatterElements();
+            term.UpdateRuntimeForScatterElements(fLogLogInterpolation);
     }
 }
 
@@ -574,7 +574,7 @@ void AMaterialParticleCollection::ConvertToStandardWavelengthes(QVector<double>*
           else
             {
               //general case
-              yy = InteractionValue(xx, sp_x, sp_y); //reusing interpolation function from functions.h
+              yy = GetInterpolatedValue(xx, sp_x, sp_y); //reusing interpolation function from functions.h
               if (yy<0) yy = 0; //!!! protection against negative
             }
         }

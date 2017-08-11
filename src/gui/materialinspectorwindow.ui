@@ -3172,19 +3172,6 @@ with the relative numeric fractions of 90 to 1.</string>
      <zorder>gbSecondary</zorder>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pbTest">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>543</y>
-      <width>50</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Test</string>
-    </property>
-   </widget>
    <zorder>line_6</zorder>
    <zorder>line</zorder>
    <zorder>label</zorder>
@@ -3205,7 +3192,6 @@ with the relative numeric fractions of 90 to 1.</string>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
    <zorder>pbUpdateInteractionIndication</zorder>
-   <zorder>pbTest</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

@@ -2,6 +2,7 @@
 #include "aparticle.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
+#include "acommonfunctions.h"
 
 #include "TH1D.h"
 
@@ -439,10 +440,10 @@ bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex)
     return false;
 }
 
-void NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUpdateStatWeights)
+bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog)
 {
-    if (Type != EllasticScattering) return;
-    if (ScatterElements.isEmpty()) return;
+    if (Type != EllasticScattering) return true;
+    if (ScatterElements.isEmpty()) return true;
 
     double sum = 0;
     double sumSW = 0;
@@ -457,17 +458,36 @@ void NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUpdateSta
     if (sumSW > 0)
     {
         MeanElementMass = sum / sumSW;
+              qDebug() << "Mean element mass:"<<MeanElementMass;
 
+        //init PartialCrossSectionEnergy using the first element
+          //energy binning according to the first element
         PartialCrossSectionEnergy = ScatterElements.first().Energy;
-        PartialCrossSection = ScatterElements.first().CrossSection;
-        for (double val : PartialCrossSection) val = 0;
-        for (int iElement=0; iElement<ScatterElements.size(); iElement++)
+          //content - first element cross-section times normalized stat weight of the first element
+        double firstNorm = ScatterElements.first().StatWeight / sumSW;
+        for (int i=0; i<ScatterElements.first().CrossSection.size(); i++)
+            PartialCrossSection << ScatterElements.first().CrossSection.at(i) * firstNorm;
+
+        //processing other elements
+          //using interpolation to match energy bins
+        for (int iElement=1; iElement<ScatterElements.size(); iElement++)
         {
-            double newSW = ScatterElements[iElement].StatWeight / sumSW;
-            if (bUpdateStatWeights) ScatterElements[iElement].StatWeight = newSW;
-            for (int iEn=0; iEn>ScatterElements.at(iElement).CrossSection.size(); iEn++)
-                PartialCrossSection[iEn] += newSW * ScatterElements.at(iElement).CrossSection.at(iEn);
+            double normalizedSW = ScatterElements[iElement].StatWeight / sumSW;
+            for (int iEn=0; iEn>PartialCrossSectionEnergy.size(); iEn++)
+            {
+                const double& energy = PartialCrossSectionEnergy.at(iEn);
+                double cs = GetInterpolatedValue(energy, &ScatterElements[iElement].Energy, &ScatterElements[iElement].CrossSection, bUseLogLog);
+                PartialCrossSection[iEn] += cs * normalizedSW;
+            }
         }
     }
-    //qDebug() << "Mean element mass:"<<MeanElementMass;
+    else
+    {
+        qWarning() << "Error in ellastic scattering terminator - sum stat weight is less or equal zero";
+        return false;
+    }
+
+    //        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
+    //        qDebug() << "Cross-section-->" <<PartialCrossSection;
+    return true;
 }

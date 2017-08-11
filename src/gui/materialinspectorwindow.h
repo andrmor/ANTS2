@@ -36,7 +36,8 @@ protected:
 
 private slots:
     // both user and code control - potential problems
-    void on_leName_textChanged(const QString &arg1);    
+    void on_leName_textChanged(const QString &arg1);
+    void on_twElements_cellChanged(int row, int column);
 
     //on user input
     void obShowElementCrossClicked(int index);
@@ -95,6 +96,10 @@ private slots:
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
     void on_pbShowTotalCapture_clicked();
+    void on_pbUpdateElements_clicked();
+    void on_pbAddNewElement_clicked();
+    void on_cobTerminationScenarios_activated(int index);
+    void on_ledMFPenergyEllastic_editingFinished();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
@@ -111,15 +116,6 @@ private slots:
     void on_actionUse_log_log_interpolation_triggered();
 
     //new auto-generated, not cathegorized
-    void on_pbTest_clicked();
-    void on_pbUpdateElements_clicked();
-    void on_pbAddNewElement_clicked();
-
-    void on_cobTerminationScenarios_activated(int index);
-
-    void on_ledMFPenergyEllastic_editingFinished();
-
-    void on_twElements_cellChanged(int row, int column);
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -135,7 +131,6 @@ private:
     void UpdateWaveButtons();
     void UpdateActionButtons();
 
-    //    int InterpolationDegree;
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
     bool importXCOM(QTextStream &in, int particleId);

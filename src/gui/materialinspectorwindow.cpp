@@ -49,6 +49,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->labWasModified->setVisible(false);
     ui->pbWasModified->setVisible(false);
     ui->pbUpdateInteractionIndication->setVisible(false);
+    ui->pbUpdateElements->setVisible(false);
 
     ui->pbUpdateTmpMaterial->setVisible(false);
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
@@ -1230,7 +1231,7 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
           else
             {
               //general case
-              yy = InteractionValue(xx, sp_x, sp_y); //reusing interpolation function from functions.h
+              yy = GetInterpolatedValue(xx, sp_x, sp_y); //reusing interpolation function from functions.h
             }
         }
 //      qDebug()<<xx<<yy;
@@ -1564,7 +1565,7 @@ void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
 
   double Density = tmpMaterial.density;
   int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
-  double InteractionCoefficient = InteractionValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
+  double InteractionCoefficient = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
   //qDebug()<<energy<<InteractionCoefficient;
   str.setNum(InteractionCoefficient, 'g', 4);
 
@@ -1704,7 +1705,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
       }
 
     int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
-    double CrossSection = InteractionValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
+    double CrossSection = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
     //qDebug()<<CrossSection;
     double AtomicDensity = tmpMaterial.atomicDensity;
     double MeanFreePath = 10.0/CrossSection/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
@@ -1859,7 +1860,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
   do
     {
       if (energy < tmpMaterial.MatParticle[particleId].InteractionDataX.first()) break;
-      double InteractionCoefficient = InteractionValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
+      double InteractionCoefficient = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
       //qDebug()<<InteractionCoefficient<<tmpMaterial.density;
       //dE/dx [keV/mm] = Density[g/cm3] * [cm2/g*keV] * 0.1  //0.1 since local units are mm, not cm
       double dEdX = 0.1 * tmpMaterial.density * InteractionCoefficient;
@@ -2193,7 +2194,7 @@ TGraph *MaterialInspectorWindow::constructInterpolationGraph(QVector<double> X, 
         double XX = previousOne + 0.02* j * (thisOne-previousOne);
         xx << XX;
         double YY;
-        if (XX < X.last()) YY = InteractionValue(XX, &X, &Y, LogLogInterpolation);
+        if (XX < X.last()) YY = GetInterpolatedValue(XX, &X, &Y, LogLogInterpolation);
         else YY = Y.last();
         yy << YY;
       }
@@ -2290,50 +2291,6 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
 {
     if (arg1.toDouble() != MW->MpCollection->tmpMaterial.MatParticle.at(ui->cobYieldForParticle->currentIndex()).PhYield)
       on_pbWasModified_clicked();
-}
-
-void MaterialInspectorWindow::on_pbTest_clicked()
-{
-  int particleId = ui->cobParticle->currentIndex();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-  tmpMaterial.MatParticle[particleId].InteractionDataX.clear();
-  tmpMaterial.MatParticle[particleId].InteractionDataX << 1e-10 << 1e10;
-  tmpMaterial.MatParticle[particleId].InteractionDataF.clear();
-  tmpMaterial.MatParticle[particleId].InteractionDataF << 1.734e-24 << 1.734e-24;
-  //tmpMaterial.MatParticle[particleId].InteractionDataF << (0.231 + 0.082)*1.0e-24 << (0.231 + 0.082)*1.0e-24;
-
-  tmpMaterial.MatParticle[particleId].Terminators.resize(2);
-  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy << 1e-10 << 1e10;
-  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSection.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSection << 0.231e-24 << 0.231e-24;
-  tmpMaterial.MatParticle[particleId].Terminators[0].Type = NeutralTerminatorStructure::Capture;
-  tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticles.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[0].GeneratedParticleEnergies.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[0].branching = 1;
-
-  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy << 1e-10 << 1e10;
-  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 1.503e-24 << 1.503e-24;
-  //tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection << 0.082e-24 << 0.082-24;
-  tmpMaterial.MatParticle[particleId].Terminators[1].Type = NeutralTerminatorStructure::EllasticScattering;
-  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements << AEllasticScatterElements("Al", 27, 1.0);
-  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements[0].Energy = tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSectionEnergy;
-  tmpMaterial.MatParticle[particleId].Terminators[1].ScatterElements[0].CrossSection = tmpMaterial.MatParticle[particleId].Terminators[1].PartialCrossSection;
-  tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticles.clear();
-  tmpMaterial.MatParticle[particleId].Terminators[1].GeneratedParticleEnergies.clear();
-
-  //ui->fNeutron->setEnabled(true);
-  ui->pbShowTotalInteraction->setEnabled(true);
-  ui->pbAddNewTerminationScenario->setEnabled(true);
-
-  on_pbUpdateInteractionIndication_clicked();
-  on_ledBranching_editingFinished(); //to update cross-sections
-
-  on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbUpdateElements_clicked()
@@ -2568,7 +2525,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
     if (Terminators.isEmpty()) return;
 
     NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
-    term.UpdateRuntimeForScatterElements(false); //update total cross-section, but keep statweights not normalized yet
+    term.UpdateRuntimeForScatterElements(MW->MpCollection->fLogLogInterpolation); //update total cross-section and sum stat weights
 
     if (
             Terminators.last().Type != NeutralTerminatorStructure::EllasticScattering ||
@@ -2593,7 +2550,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
     double AtDens = tmpMaterial.density / term.MeanElementMass / 1.66054e-24;
     //qDebug() << "Atomic density of the composition:"<<AtDens;
 
-    const double CrossSection = InteractionValue(energy,
+    const double CrossSection = GetInterpolatedValue(energy,
                                                  &term.PartialCrossSectionEnergy,
                                                  &term.PartialCrossSection,
                                                  MW->MpCollection->fLogLogInterpolation);

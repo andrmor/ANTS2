@@ -10,7 +10,7 @@ bool NormalizeVector(double *arr);
 
 void UpdateMax(double &max, double value); //assume positive max and value!
 
-double InteractionValue(double energy, QVector<double> *X, QVector<double> *F, bool LogLog = false);
+double GetInterpolatedValue(double val, const QVector<double> *X, const QVector<double> *F, bool LogLog = false);
 
 //double PolyInterpolation(double x, QVector<double> *xi, QVector<double> *yi, int order);
 

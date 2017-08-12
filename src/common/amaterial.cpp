@@ -460,6 +460,8 @@ bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog
     {
         sum += ScatterElements.at(i).Mass * ScatterElements.at(i).StatWeight;
         sumStatWeight += ScatterElements.at(i).StatWeight;
+
+        if (ScatterElements.at(i).Energy.isEmpty()) return false; //not yet finished editing?
     }
 
     if (sumStatWeight > 0)

@@ -2538,7 +2538,7 @@ with the relative numeric fractions of 90 to 1.</string>
            </widget>
            <widget class="QWidget" name="tab_5">
             <attribute name="title">
-             <string>Ellastic scattering</string>
+             <string>Elastic scattering</string>
             </attribute>
             <widget class="QCheckBox" name="cbEnableScatter">
              <property name="geometry">
@@ -2550,7 +2550,7 @@ with the relative numeric fractions of 90 to 1.</string>
               </rect>
              </property>
              <property name="text">
-              <string>Ellastic scattering</string>
+              <string>Elastic scattering</string>
              </property>
             </widget>
             <widget class="QFrame" name="frScatter">
@@ -2685,7 +2685,7 @@ with the relative numeric fractions of 90 to 1.</string>
                </rect>
               </property>
               <property name="text">
-               <string>Show total ellastic scattering cross-section</string>
+               <string>Show total elastic scattering cross-section</string>
               </property>
              </widget>
              <widget class="QLabel" name="label_54">
@@ -2698,7 +2698,7 @@ with the relative numeric fractions of 90 to 1.</string>
                </rect>
               </property>
               <property name="text">
-               <string>MFP for ellastic scattering at</string>
+               <string>MFP for elastic scattering at</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2776,7 +2776,7 @@ with the relative numeric fractions of 90 to 1.</string>
             <widget class="QPushButton" name="pbUpdateElements">
              <property name="geometry">
               <rect>
-               <x>190</x>
+               <x>130</x>
                <y>4</y>
                <width>131</width>
                <height>23</height>
@@ -2784,6 +2784,32 @@ with the relative numeric fractions of 90 to 1.</string>
              </property>
              <property name="text">
               <string>...updateElements</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="pbConfigureAutoElastic">
+             <property name="geometry">
+              <rect>
+               <x>305</x>
+               <y>2</y>
+               <width>111</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Configure auto</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="labAutoLoadElastic">
+             <property name="geometry">
+              <rect>
+               <x>289</x>
+               <y>5</y>
+               <width>15</width>
+               <height>18</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>--</string>
              </property>
             </widget>
            </widget>

@@ -14,6 +14,7 @@
 #include "acommonfunctions.h"
 #include "guiutils.h"
 #include "ainternetbrowser.h"
+#include "aelasticcrosssectionautoloadconfig.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -71,16 +72,24 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     LastSelectedParticle = 0;
 
     RedIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::red);
+    QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
+    ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
+    ui->labAutoLoadElastic->setVisible(false);
 
     QString str = "Open XCOM page by clicking the button below.\n"
                   "Select the material composition and generate the file (use cm2/g units).\n"
                   "Copy the entire page including the header to a text file.\n"
                   "Import the file by clicking \"Import from XCOM\" button.";
     ui->pbImportXCOM->setToolTip(str);
+
+    ElasticAutoConfig = new AElasticCrossSectionAutoloadConfig(this);
+    connect(ElasticAutoConfig, &AElasticCrossSectionAutoloadConfig::AutoEnableChanged, this, &MaterialInspectorWindow::onAutoLoadChanged);
+    ElasticAutoConfig->readFromJson(MW->GlobSet->ElasticAutoSettings);
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
-{
+{    
+    delete ElasticAutoConfig;
     delete ui;
 }
 
@@ -1236,7 +1245,18 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
         }
 //      qDebug()<<xx<<yy;
       y->append(yy);
-    }
+  }
+}
+
+void MaterialInspectorWindow::WriteElasticAutoToJson(QJsonObject &json)
+{
+    json = QJsonObject();
+    ElasticAutoConfig->writeToJson(json);
+}
+
+void MaterialInspectorWindow::onAutoLoadChanged(bool enabled)
+{
+    ui->labAutoLoadElastic->setVisible(enabled);
 }
 
 void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
@@ -1428,6 +1448,7 @@ bool MaterialInspectorWindow::event(QEvent * e)
 */
       case QEvent::Hide :
         if (MW->WindowNavigator) MW->WindowNavigator->HideWindowTriggered("mat");
+        if (ElasticAutoConfig->isVisible()) ElasticAutoConfig->hide();
         break;
       case QEvent::Show :
         if (MW->WindowNavigator) MW->WindowNavigator->ShowWindowTriggered("mat");
@@ -2399,10 +2420,22 @@ void MaterialInspectorWindow::onShowElementCrossClicked(int index)
 
 void MaterialInspectorWindow::onLoadElementCrossClicked(int index)
 {
+    if (ElasticAutoConfig->isAutoloadEnabled())
+    {
+        bool fOK = autoLoadElasticCrossSection(index);
+        if (fOK) return;
+    }
+
     QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
     if (fileName.isEmpty()) return;
 
     MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    doLoadElementElasticCrossSection(index, fileName);
+}
+
+bool MaterialInspectorWindow::doLoadElementElasticCrossSection(int index, QString fileName)
+{
     QVector<double> x, y;
     int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
     if (res == 0)
@@ -2423,9 +2456,9 @@ void MaterialInspectorWindow::onLoadElementCrossClicked(int index)
 
         int particleId = ui->cobParticle->currentIndex();
         AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-        if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
+        if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return false;
         NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-        if (t.Type != NeutralTerminatorStructure::EllasticScattering) return;
+        if (t.Type != NeutralTerminatorStructure::EllasticScattering) return false;
         AEllasticScatterElements& el = t.ScatterElements[index];
         el.Energy = x;
         el.CrossSection = y;
@@ -2433,7 +2466,9 @@ void MaterialInspectorWindow::onLoadElementCrossClicked(int index)
         on_pbWasModified_clicked();
 
         on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+        return true;
     }
+    return false;
 }
 
 void MaterialInspectorWindow::onDelElementCrossClicked(int index)
@@ -2657,6 +2692,41 @@ void MaterialInspectorWindow::on_twElements_cellChanged(int row, int column)
     on_pbWasModified_clicked();
 }
 
+bool MaterialInspectorWindow::autoLoadElasticCrossSection(int iElement)
+{
+    if (!ElasticAutoConfig->isAutoloadEnabled()) return false;
+
+    int particleId = ui->cobParticle->currentIndex();
+    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return false;
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    const QVector<NeutralTerminatorStructure> &Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    if (Terminators.isEmpty()) return false;
+
+    NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
+    if ( term.Type != NeutralTerminatorStructure::EllasticScattering) return false;
+
+    if (iElement >= term.ScatterElements.size()) return false;
+
+    AEllasticScatterElements &el = term.ScatterElements[iElement];
+
+    QString Mass = QString::number(el.Mass);
+    bool fOK;
+    Mass.toInt(&fOK);
+    if (!fOK)
+    {
+        qDebug() << "Not an int!";
+        return false;
+    }
+
+    QString fileName = ElasticAutoConfig->getFileName(el.Name, Mass);
+    if (fileName.isEmpty()) return false;
+    if ( !QFileInfo(fileName).exists() ) return false;
+    qDebug() << "Autoload cross-section from file: " <<fileName;
+
+    doLoadElementElasticCrossSection(iElement, fileName);
+}
+
 void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
 {
     on_ledMFPenergyEllastic_editingFinished(); //to update properties
@@ -2686,4 +2756,10 @@ void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
     graphOver->SetLineColor(kRed);
     graphOver->SetLineWidth(1);
     MW->GraphWindow->Draw(graphOver, "L same");
+}
+
+void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
+{
+   ElasticAutoConfig->setStarter(MW->GlobSet->LastOpenDir);
+   ElasticAutoConfig->showNormal();
 }

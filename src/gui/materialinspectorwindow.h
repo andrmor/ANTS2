@@ -7,6 +7,8 @@ class QTextStream;
 class MainWindow;
 class DetectorClass;
 class TGraph;
+class AElasticCrossSectionAutoloadConfig;
+class QJsonObject;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -30,6 +32,11 @@ public:
     void setLogLog(bool flag);
 
     void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, QVector<double>* y);
+
+    void WriteElasticAutoToJson(QJsonObject& json);
+
+public slots:
+    void onAutoLoadChanged(bool enabled);
 
 protected:
     bool event(QEvent * e);
@@ -119,10 +126,14 @@ private slots:
 
     //new auto-generated, not cathegorized
 
+    void on_pbConfigureAutoElastic_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
     DetectorClass* Detector;
+
+    AElasticCrossSectionAutoloadConfig* ElasticAutoConfig;
 
     QIcon RedIcon;
 
@@ -138,6 +149,9 @@ private:
     bool importXCOM(QTextStream &in, int particleId);
     bool isAllSameYield(double val);
     void updateNeutronReactionIndication();
+
+    bool autoLoadElasticCrossSection(int iElement);
+    bool doLoadElementElasticCrossSection(int index, QString fileName);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

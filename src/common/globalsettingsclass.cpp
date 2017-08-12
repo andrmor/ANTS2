@@ -158,6 +158,8 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["PerformAutomaticGeometryCheck"] = PerformAutomaticGeometryCheck;
   js["NumThreads"] = NumThreads;
 
+  js["ElasticAutoSettings"] = ElasticAutoSettings;
+
   js["RecTreeSave_IncludePMsignals"] = RecTreeSave_IncludePMsignals;
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
   js["RecTreeSave_IncludeTrue"] = RecTreeSave_IncludeTrue;
@@ -216,6 +218,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "GlobScript", GlobScript);
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
+
+    parseJson(js, "ElasticAutoSettings", ElasticAutoSettings);
 
     parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
     parseJson(js, "DefaultFontFamily_ScriptWindow", DefaultFontFamily_ScriptWindow);

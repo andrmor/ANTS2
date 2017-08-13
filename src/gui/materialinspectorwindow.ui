@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>946</width>
+    <width>484</width>
     <height>597</height>
    </rect>
   </property>
@@ -2009,7 +2009,7 @@ with the relative numeric fractions of 90 to 1.</string>
             </rect>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -3217,7 +3217,7 @@ with the relative numeric fractions of 90 to 1.</string>
     </property>
     <column>
      <property name="text">
-      <string> </string>
+      <string/>
      </property>
     </column>
    </widget>
@@ -3262,7 +3262,7 @@ with the relative numeric fractions of 90 to 1.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>946</width>
+     <width>484</width>
      <height>21</height>
     </rect>
    </property>

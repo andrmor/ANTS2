@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
+    <width>946</width>
     <height>597</height>
    </rect>
   </property>
@@ -3203,6 +3203,37 @@ with the relative numeric fractions of 90 to 1.</string>
      <zorder>gbSecondary</zorder>
     </widget>
    </widget>
+   <widget class="QTreeWidget" name="treeWidget">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>200</y>
+      <width>411</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="columnCount">
+     <number>1</number>
+    </property>
+    <column>
+     <property name="text">
+      <string> </string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>400</y>
+      <width>161</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
    <zorder>line_6</zorder>
    <zorder>line</zorder>
    <zorder>label</zorder>
@@ -3223,13 +3254,15 @@ with the relative numeric fractions of 90 to 1.</string>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
    <zorder>pbUpdateInteractionIndication</zorder>
+   <zorder>treeWidget</zorder>
+   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>484</width>
+     <width>946</width>
      <height>21</height>
     </rect>
    </property>

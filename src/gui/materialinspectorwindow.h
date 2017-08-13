@@ -128,6 +128,8 @@ private slots:
 
     void on_pbConfigureAutoElastic_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

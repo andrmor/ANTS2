@@ -2726,6 +2726,7 @@ bool MaterialInspectorWindow::autoLoadElasticCrossSection(int iElement)
     qDebug() << "Autoload cross-section from file: " <<fileName;
 
     doLoadElementElasticCrossSection(iElement, fileName);
+    return true;
 }
 
 void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
@@ -2763,4 +2764,63 @@ void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 {
    ElasticAutoConfig->setStarter(MW->GlobSet->LastOpenDir);
    ElasticAutoConfig->showNormal();
+}
+
+void MaterialInspectorWindow::on_pushButton_clicked()
+{
+    QLineEdit* leName = new QLineEdit("B", this);
+    QLineEdit* leFraction = new QLineEdit("4", this);
+    QPushButton* pbAuto = new QPushButton("Auto", this);
+    QPushButton* pbDel = new QPushButton("X", this);
+    pbDel->setMaximumWidth(25);
+    QLabel* lab1 = new QLabel("Element:", this);
+    QLabel* lab2 = new QLabel("Fraction:", this);
+
+    QHBoxLayout* lay = new QHBoxLayout();
+    lay->setContentsMargins(0,0,0,0);
+    lay->setSpacing(2);
+    lay->addWidget(lab1);
+    lay->addWidget(leName);
+    lay->addWidget(lab2);
+    lay->addWidget(leFraction);
+    lay->addWidget(pbAuto);
+    lay->addWidget(pbDel);
+
+    QWidget* w = new QWidget(this);
+    w->setLayout(lay);
+
+    QTreeWidgetItem* twi = new QTreeWidgetItem(ui->treeWidget);
+    ui->treeWidget->setItemWidget(twi, 0, w);
+
+
+
+    QLabel* labIso = new QLabel("B", this);
+    QLabel* labAb = new QLabel(" Abundancy", this);
+    QLabel* labCS = new QLabel("% CS", this);
+    QLineEdit* leMass = new QLineEdit("10", this);
+    QLineEdit* leAb = new QLineEdit("19.9", this);
+    QPushButton* pbShow = new QPushButton("Show", this);
+    QPushButton* pbLoad = new QPushButton("Load", this);
+    QPushButton* pbDel1 = new QPushButton("X", this);
+    pbDel1->setMaximumWidth(25);
+
+    lay = new QHBoxLayout();
+    lay->setContentsMargins(0,0,0,0);
+    lay->setSpacing(2);
+    lay->addWidget(labIso);
+    lay->addWidget(leMass);
+    lay->addWidget(labAb);
+    lay->addWidget(leAb);
+    lay->addWidget(labCS);
+    lay->addWidget(pbShow);
+    lay->addWidget(pbLoad);
+    lay->addWidget(pbDel1);
+    w = new QWidget(this);
+    w->setLayout(lay);
+
+    QTreeWidgetItem* twi2 = new QTreeWidgetItem();
+    twi->addChild(twi2);
+    ui->treeWidget->setItemWidget(twi2, 0, w);
+    twi->setExpanded(true);
+
 }

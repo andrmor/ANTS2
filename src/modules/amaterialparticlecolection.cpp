@@ -342,7 +342,7 @@ void AMaterialParticleCollection::CopyTmpToMaterialCollection()
   //*MaterialCollectionData[index] = tmpMaterial; //updating material properties
   QJsonObject js;
   tmpMaterial.writeToJson(js, &ParticleCollection);
-  SaveJsonToFile(js,"TMPjson.json");
+  //SaveJsonToFile(js,"TMPjson.json");
   MaterialCollectionData[index]->readFromJson(js, this);
 
   //now update pointers!

@@ -687,7 +687,7 @@ void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    tmpMaterial.MatParticle[particleId].InteractionDataX.resize(0);    //***ADD cleanUp
+    tmpMaterial.MatParticle[particleId].InteractionDataX.resize(0);
     tmpMaterial.MatParticle[particleId].InteractionDataF.resize(0);
 
     QFile file(fileName);
@@ -2324,6 +2324,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
     ui->cbEnableScatter->setChecked(tmpMaterial.MatParticle[particleId].bEllasticEnabled);
 
     ui->twElements->clearContents();
+    ui->twElements->setRowCount(0);
 
     if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
 

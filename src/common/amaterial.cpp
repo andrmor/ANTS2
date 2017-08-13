@@ -124,9 +124,6 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
   QJsonArray jParticleEntries;
   for (int ip=0; ip<ParticleCollection->size(); ip++)
     {
-      //default properties?
-      //if (MatParticle[ip].TrackingAllowed && MatParticle[ip].MaterialIsTransparent && MatParticle[ip].InteractionDataF.isEmpty()) continue; //skip
-      //writing info on this particle
       QJsonObject jMatParticle;
 
       QJsonObject jparticle;
@@ -140,63 +137,61 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
       jMatParticle["DataString"] = MatParticle[ip].DataString;
       jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
       jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
-      if (MatParticle[ip].InteractionDataF.size() > 0)
-        {
-            QJsonArray iar;
-            writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
-            jMatParticle["TotalInteraction"] = iar;
-            //gamma-specific data
-            if ((*ParticleCollection)[ip]->type == AParticle::_gamma_)
+
+      QJsonArray iar;
+      writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
+      jMatParticle["TotalInteraction"] = iar;
+      //gamma-specific data
+      if ((*ParticleCollection)[ip]->type == AParticle::_gamma_)
+      {
+          QJsonArray jgamma;
+          int iTerminators = MatParticle[ip].Terminators.size();
+          for (int iTerm=0; iTerm<iTerminators; iTerm++)
+          {
+              QJsonObject jterm;
+              jterm["ReactionType"] = MatParticle[ip].Terminators[iTerm].Type;
+              QJsonArray ar;
+              writeTwoQVectorsToJArray(MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy, MatParticle[ip].Terminators[iTerm].PartialCrossSection, ar);
+              jterm["InteractionData"] = ar;
+              jgamma.append(jterm);
+          }
+          jMatParticle["GammaTerminators"] = jgamma;
+      }
+      //neutron-specific data
+      if ((*ParticleCollection)[ip]->type == AParticle::_neutron_)
+      {
+          QJsonArray jneutron;
+          int iTerminators = MatParticle[ip].Terminators.size();
+          for (int iTerm=0; iTerm<iTerminators; iTerm++)
+          {
+              QJsonObject jterm;
+              jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
+              jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
+              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::EllasticScattering)
               {
-                QJsonArray jgamma;
-                int iTerminators = MatParticle[ip].Terminators.size();
-                for (int iTerm=0; iTerm<iTerminators; iTerm++)
-                  {
-                    QJsonObject jterm;
-                    jterm["ReactionType"] = MatParticle[ip].Terminators[iTerm].Type;
-                    QJsonArray ar;
-                    writeTwoQVectorsToJArray(MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy, MatParticle[ip].Terminators[iTerm].PartialCrossSection, ar);
-                    jterm["InteractionData"] = ar;
-                    jgamma.append(jterm);
-                  }
-                jMatParticle["GammaTerminators"] = jgamma;
+                  QJsonArray ellAr;
+                  for (int i=0; i<MatParticle[ip].Terminators[iTerm].ScatterElements.size(); i++)
+                      ellAr << MatParticle[ip].Terminators[iTerm].ScatterElements[i].writeToJson();
+                  jterm["ScatterElements"] = ellAr;
               }
-            //neutron-specific data
-            if ((*ParticleCollection)[ip]->type == AParticle::_neutron_)
+              //going through secondary particles
+              QJsonArray jsecondaries;
+              for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )
               {
-                QJsonArray jneutron;
-                int iTerminators = MatParticle[ip].Terminators.size();
-                for (int iTerm=0; iTerm<iTerminators; iTerm++)
-                  {
-                    QJsonObject jterm;
-                    jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
-                    jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
-                    if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::EllasticScattering)
-                    {
-                        QJsonArray ellAr;
-                        for (int i=0; i<MatParticle[ip].Terminators[iTerm].ScatterElements.size(); i++)
-                            ellAr << MatParticle[ip].Terminators[iTerm].ScatterElements[i].writeToJson();
-                        jterm["ScatterElements"] = ellAr;
-                    }
-                    //going through secondary particles
-                    QJsonArray jsecondaries;
-                    for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )
-                      {
-                        QJsonObject jsecpart;
-                        int pa = MatParticle[ip].Terminators[iTerm].GeneratedParticles[is];
-                        QJsonObject jj;
-                        (*ParticleCollection)[pa]->writeToJson(jj);
-                        jsecpart["SecParticle"] = jj;
-                        jsecpart["energy"] = MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is];
-                        jsecondaries.append(jsecpart);
-                      }
-                    jterm["Secondaries"] = jsecondaries;
-                    jneutron.append(jterm);
-                  }
-                jMatParticle["NeutronTerminators"] = jneutron;
+                  QJsonObject jsecpart;
+                  int pa = MatParticle[ip].Terminators[iTerm].GeneratedParticles[is];
+                  QJsonObject jj;
+                  (*ParticleCollection)[pa]->writeToJson(jj);
+                  jsecpart["SecParticle"] = jj;
+                  jsecpart["energy"] = MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is];
+                  jsecondaries.append(jsecpart);
               }
-        }
-      else jMatParticle["MatIsTransparent"] = true; //if tracking allowed, but total interaction is NOT defined, make material transparent
+              jterm["Secondaries"] = jsecondaries;
+              jneutron.append(jterm);
+          }
+          jMatParticle["NeutronTerminators"] = jneutron;
+      }
+
       //appending this particle entry to the json array
       jParticleEntries.append(jMatParticle);
     }

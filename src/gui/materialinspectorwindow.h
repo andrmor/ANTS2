@@ -9,6 +9,7 @@ class DetectorClass;
 class TGraph;
 class AElasticCrossSectionAutoloadConfig;
 class QJsonObject;
+class AElasticScatterElement;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -44,12 +45,14 @@ protected:
 private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
-    void on_twElements_cellChanged(int row, int column);
 
     //on user input
-    void onShowElementCrossClicked(int index);
-    void onLoadElementCrossClicked(int index);
-    void onDelElementCrossClicked(int index);
+    void onShowElementCrossClicked(const AElasticScatterElement *element);
+    void onLoadElementCrossClicked(AElasticScatterElement *element);
+    void onIsotopeDelClicked(const AElasticScatterElement *element);
+    void onAutoIsotopesClicked(AElasticScatterElement *element);
+    void onDelElementClicked(AElasticScatterElement *element);
+    void onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction);
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
@@ -128,7 +131,6 @@ private slots:
 
     void on_pbConfigureAutoElastic_clicked();
 
-    void on_pushButton_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -152,8 +154,9 @@ private:
     bool isAllSameYield(double val);
     void updateNeutronReactionIndication();
 
-    bool autoLoadElasticCrossSection(int iElement);
-    bool doLoadElementElasticCrossSection(int index, QString fileName);
+    bool autoLoadElasticCrossSection(AElasticScatterElement *element);
+    bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
+    int findElement(const AElasticScatterElement *element) const;
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

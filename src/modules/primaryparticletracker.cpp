@@ -269,7 +269,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                       //        qDebug() << "Skipping capture - it is disabled";
                                       continue;
                                   }
-                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::EllasticScattering)
+                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::ElasticScattering)
                                   if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bEllasticEnabled )
                                   {
                                       //        qDebug() << "Skipping ellastic - it is disabled";
@@ -442,9 +442,9 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 energyHistory = depo;
                                 break; //switch-break
                               }
-                            case (NeutralTerminatorStructure::EllasticScattering): //4
+                            case (NeutralTerminatorStructure::ElasticScattering): //4
                               {
-                                const QVector<AEllasticScatterElements> &elements = term.ScatterElements;
+                                const QVector<AElasticScatterElement> &elements = term.ScatterElements;
 
                                 //selecting element according to its contribution to the total cross-section
                                 //        qDebug() << "Def elements:" << elements.size();
@@ -455,7 +455,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     //        qDebug() << "rnd:"<<rnd;
                                     for (; iselected<elements.size(); iselected++)
                                       {
-                                        const AEllasticScatterElements& el = elements.at(iselected);
+                                        const AElasticScatterElement& el = elements.at(iselected);
                                         const double normalizedSW = el.StatWeight / term.sumStatWeight;
                                         const double crossSection = GetInterpolatedValue(energy,
                                                                                          &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,

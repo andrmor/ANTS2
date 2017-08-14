@@ -65,18 +65,22 @@ public:
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 };
 
-class AEllasticScatterElements
+class AElasticScatterElement
 {
 public:
     QString Name;
-    double Mass;
-    double StatWeight;
+    int Mass;
+    double Abundancy;   // [0, 1]
+    double Fraction;
+    double StatWeight;  // = Abundancy * Fraction
     QVector<double> Energy;
     QVector<double> CrossSection;
 
-    AEllasticScatterElements(QString ElementName, int Mass, double StatWeight) :
-        Name(ElementName), Mass(Mass), StatWeight(StatWeight) {}
-    AEllasticScatterElements() {}
+    AElasticScatterElement(QString ElementName, int Mass, double Abundancy, double Fraction) :
+        Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), StatWeight(Abundancy*Fraction) {}
+    AElasticScatterElement() {}
+
+    bool operator==(const AElasticScatterElement& other) const;
 
     void writeToJson(QJsonObject& json);
     const QJsonObject writeToJson();
@@ -89,7 +93,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
                     ComptonScattering = 1,
                     Capture = 2,
                     PairProduction = 3,
-                    EllasticScattering = 4};  //must keep the numbers - directly used in json config files
+                    ElasticScattering = 4};  //must keep the numbers - directly used in json config files
   ReactionType Type;
 
   QVector<double> PartialCrossSection;
@@ -103,7 +107,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<double> GeneratedParticleEnergies;
 
   //for ellastic
-  QVector<AEllasticScatterElements> ScatterElements;
+  QVector<AElasticScatterElement> ScatterElements;
   bool isNameInUse(QString name, int ExceptIndex = -1) const;
 
   bool UpdateRuntimeForScatterElements(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match

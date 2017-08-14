@@ -703,7 +703,7 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
       if (numTerm == 0 ) return "No capture or ellastic data defined";
 
       //confirming all terminators type is "capture" or "ellastic"
-      if (mp->bEllasticEnabled && mp->Terminators[numTerm-1].Type != NeutralTerminatorStructure::EllasticScattering)
+      if (mp->bEllasticEnabled && mp->Terminators[numTerm-1].Type != NeutralTerminatorStructure::ElasticScattering)
           return "Last terminator is expected to be ellastic scattering, but it is not";
       for (int i=0; i<numTerm; i++)
         {
@@ -712,7 +712,7 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
           {
               if (
                       (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture) &&
-                      (mp->Terminators[i].Type != NeutralTerminatorStructure::EllasticScattering)
+                      (mp->Terminators[i].Type != NeutralTerminatorStructure::ElasticScattering)
                  )
                   return "Capture or ellastic scattering terminator expected, but wrongtype received";
           }
@@ -727,7 +727,7 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
             {
               //qDebug() << "Checking term #"<<iTerm;
               const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
-              if (term.Type == NeutralTerminatorStructure::EllasticScattering)
+              if (term.Type == NeutralTerminatorStructure::ElasticScattering)
               {
                   if (term.ScatterElements.isEmpty())
                       return QString("No elements defined for neutron ellastic scattering for ") + mat->name;
@@ -880,7 +880,7 @@ void AMaterialParticleCollection::RecalculateCaptureCrossSections(int particleId
 
   int numReactions = Terminators.size();
   if (numReactions>0)
-      if (Terminators.last().Type = NeutralTerminatorStructure::EllasticScattering) //last reserved for scattering
+      if (Terminators.last().Type = NeutralTerminatorStructure::ElasticScattering) //last reserved for scattering
           numReactions--;
   int dataPoints = tmpMaterial.MatParticle[particleId].InteractionDataF.size();
 

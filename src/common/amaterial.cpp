@@ -167,7 +167,7 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
               QJsonObject jterm;
               jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
               jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
-              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::EllasticScattering)
+              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::ElasticScattering)
               {
                   QJsonArray ellAr;
                   for (int i=0; i<MatParticle[ip].Terminators[iTerm].ScatterElements.size(); i++)
@@ -342,7 +342,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
                   MatParticle[ip].Terminators[iTerm].ScatterElements.clear();
                   for (int i=0; i<ellAr.size(); i++)
                   {
-                      AEllasticScatterElements el;
+                      AElasticScatterElement el;
                       QJsonObject js = ellAr[i].toObject();
                       if ( el.readFromJson(js) )
                          MatParticle[ip].Terminators[iTerm].ScatterElements << el;
@@ -383,11 +383,23 @@ bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mi
   return true;
 }
 
-void AEllasticScatterElements::writeToJson(QJsonObject &json)
+bool AElasticScatterElement::operator==(const AElasticScatterElement &other) const
+{
+    if (Name != other.Name) return false;
+    if (Mass != other.Mass) return false;
+    if (Abundancy != other.Abundancy) return false;
+    if (Fraction != other.Fraction) return false;
+    if (Energy != other.Energy) return false;
+    if (CrossSection != other.CrossSection) return false;
+    return true;
+}
+
+void AElasticScatterElement::writeToJson(QJsonObject &json)
 {
     json["Name"] = Name;
     json["Mass"] = Mass;
-    json["StatWeight"] = StatWeight;
+    json["Abundancy"] = Abundancy;
+    json["Fraction"] = Fraction;
 
     QJsonArray ar;
     for (int i=0; i<Energy.size(); i++)
@@ -399,20 +411,24 @@ void AEllasticScatterElements::writeToJson(QJsonObject &json)
     json["CrossSection"] = ar;
 }
 
-const QJsonObject AEllasticScatterElements::writeToJson()
+const QJsonObject AElasticScatterElement::writeToJson()
 {
     QJsonObject json;
     writeToJson(json);
     return json;
 }
 
-bool AEllasticScatterElements::readFromJson(QJsonObject &json)
+bool AElasticScatterElement::readFromJson(QJsonObject &json)
 {
-    if (!isContainAllKeys(json, QStringList()<<"Name"<<"Mass"<<"StatWeight")) return false;
+    //if (!isContainAllKeys(json, QStringList()<<"Name"<<"Mass"<<"StatWeight")) return false;
 
     parseJson(json, "Name", Name);
     parseJson(json, "Mass", Mass);
-    parseJson(json, "StatWeight", StatWeight);
+    Abundancy = 1.0;
+    parseJson(json, "Abundancy", Abundancy);
+    parseJson(json, "Fraction", Fraction);
+    parseJson(json, "StatWeight", Fraction);
+    StatWeight = Abundancy * Fraction;
 
     Energy.clear();
     CrossSection.clear();
@@ -441,7 +457,7 @@ bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex) cons
 
 bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog)
 {
-    if (Type != EllasticScattering) return true;
+    if (Type != ElasticScattering) return true;
 
     PartialCrossSectionEnergy.clear();
     PartialCrossSection.clear();

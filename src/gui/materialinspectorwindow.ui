@@ -2009,7 +2009,7 @@ with the relative numeric fractions of 90 to 1.</string>
             </rect>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -2558,7 +2558,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <rect>
                <x>0</x>
                <y>20</y>
-               <width>421</width>
+               <width>429</width>
                <height>231</height>
               </rect>
              </property>
@@ -2580,41 +2580,6 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="text">
                <string>Add new element</string>
               </property>
-             </widget>
-             <widget class="QTableWidget" name="twElements">
-              <property name="geometry">
-               <rect>
-                <x>6</x>
-                <y>6</y>
-                <width>409</width>
-                <height>141</height>
-               </rect>
-              </property>
-              <column>
-               <property name="text">
-                <string>Element</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Mass</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Molar fraction</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Cross-section</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string/>
-               </property>
-              </column>
              </widget>
              <widget class="QComboBox" name="cobUnitsForEllastic">
               <property name="geometry">
@@ -2771,6 +2736,24 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
+             </widget>
+             <widget class="QTreeWidget" name="twElastic">
+              <property name="geometry">
+               <rect>
+                <x>5</x>
+                <y>5</y>
+                <width>418</width>
+                <height>142</height>
+               </rect>
+              </property>
+              <property name="columnCount">
+               <number>1</number>
+              </property>
+              <column>
+               <property name="text">
+                <string/>
+               </property>
+              </column>
              </widget>
             </widget>
             <widget class="QPushButton" name="pbUpdateElements">
@@ -3203,37 +3186,6 @@ with the relative numeric fractions of 90 to 1.</string>
      <zorder>gbSecondary</zorder>
     </widget>
    </widget>
-   <widget class="QTreeWidget" name="treeWidget">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>200</y>
-      <width>411</width>
-      <height>192</height>
-     </rect>
-    </property>
-    <property name="columnCount">
-     <number>1</number>
-    </property>
-    <column>
-     <property name="text">
-      <string/>
-     </property>
-    </column>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>630</x>
-      <y>400</y>
-      <width>161</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PushButton</string>
-    </property>
-   </widget>
    <zorder>line_6</zorder>
    <zorder>line</zorder>
    <zorder>label</zorder>
@@ -3254,8 +3206,6 @@ with the relative numeric fractions of 90 to 1.</string>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
    <zorder>pbUpdateInteractionIndication</zorder>
-   <zorder>treeWidget</zorder>
-   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

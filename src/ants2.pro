@@ -253,7 +253,8 @@ SOURCES += main.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
     common/amonitorconfig.cpp \
     common/apeakfinder.cpp \
-    gui/aelasticcrosssectionautoloadconfig.cpp
+    gui/aelasticcrosssectionautoloadconfig.cpp \
+    gui/aelasticdelegates.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -362,7 +363,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/MainWindowTools/amonitordelegateform.h \
     common/amonitorconfig.h \
     common/apeakfinder.h \
-    gui/aelasticcrosssectionautoloadconfig.h
+    gui/aelasticcrosssectionautoloadconfig.h \
+    gui/aelasticdelegates.h
 
 # --- SIM ---
 ants2_SIM {

@@ -13,18 +13,23 @@ class AElasticElementDelegate : public QWidget
 {
     Q_OBJECT
 public:
-    AElasticElementDelegate(AElasticScatterElement* element);
+    AElasticElementDelegate(AElasticScatterElement* element, bool* bClearInProgress);
+
+    const AElasticScatterElement* getElement() const {return element;}
 
 private:
     AElasticScatterElement *element;
+    bool* bClearInProgress;
 
     QLineEdit* leName;
     QLineEdit* ledFraction;
 
+    QPushButton* pbAuto;
+    QPushButton* pbDel;
+
 private slots:
     void onAutoClicked();
     void onDelClicked();
-
     void onChanged();
 
 signals:
@@ -32,16 +37,22 @@ signals:
     void DelClicked(AElasticScatterElement *element);
     void RequestUpdateIsotopes(const AElasticScatterElement* element, const QString newName, double newFraction);
 
+private:
+    void blockDelegate();
+
 };
 
 class AElasticIsotopeDelegate : public QWidget
 {
     Q_OBJECT
 public:
-    AElasticIsotopeDelegate(AElasticScatterElement* element);
+    AElasticIsotopeDelegate(AElasticScatterElement* element, bool* bClearInProgress);
+
+    const AElasticScatterElement* getElement() const {return element;}
 
 private:
     AElasticScatterElement *element;
+    bool* bClearInProgress;
 
     QLineEdit* leiMass;
     QLineEdit* ledAbund;

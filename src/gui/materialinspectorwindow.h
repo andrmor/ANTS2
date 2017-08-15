@@ -34,10 +34,9 @@ public:
 
     void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, QVector<double>* y);
 
-    void WriteElasticAutoToJson(QJsonObject& json);
+    //void WriteElasticAutoToJson(QJsonObject& json);
 
-public slots:
-    void onAutoLoadChanged(bool enabled);
+    bool bClearInProgress;
 
 protected:
     bool event(QEvent * e);
@@ -132,12 +131,14 @@ private slots:
     void on_pbConfigureAutoElastic_clicked();
 
 
+    void on_pbAddNewIsotope_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
     DetectorClass* Detector;
 
-    AElasticCrossSectionAutoloadConfig* ElasticAutoConfig;
+    AElasticCrossSectionAutoloadConfig* ElasticConfig;
 
     QIcon RedIcon;
 
@@ -157,6 +158,7 @@ private:
     bool autoLoadElasticCrossSection(AElasticScatterElement *element);
     bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
     int findElement(const AElasticScatterElement *element) const;
+    void doAddNewIsotope(int Index, QString name, double fraction);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

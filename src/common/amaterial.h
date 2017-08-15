@@ -4,6 +4,8 @@
 #include <QVector>
 #include <QString>
 
+#include "aelasticscatterelement.h"
+
 class QJsonObject;
 class AParticle;
 class AOpticalOverride;
@@ -63,28 +65,6 @@ public:
   void clear();
   void writeToJson(QJsonObject &json, QVector<AParticle*>* ParticleCollection); //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
-};
-
-class AElasticScatterElement
-{
-public:
-    QString Name;
-    int Mass;
-    double Abundancy;   // [0, 1]
-    double Fraction;
-    double StatWeight;  // = Abundancy * Fraction
-    QVector<double> Energy;
-    QVector<double> CrossSection;
-
-    AElasticScatterElement(QString ElementName, int Mass, double Abundancy, double Fraction) :
-        Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), StatWeight(Abundancy*Fraction) {}
-    AElasticScatterElement() {}
-
-    bool operator==(const AElasticScatterElement& other) const;
-
-    void writeToJson(QJsonObject& json);
-    const QJsonObject writeToJson();
-    bool readFromJson(QJsonObject& json);        
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles

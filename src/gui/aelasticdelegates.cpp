@@ -10,13 +10,13 @@
 #include <QIntValidator>
 #include <QDebug>
 
-AElasticElementDelegate::AElasticElementDelegate(AElasticScatterElement *element) :
-    element(element)
+AElasticElementDelegate::AElasticElementDelegate(AElasticScatterElement *element, bool *bClearInProgress) :
+    element(element), bClearInProgress(bClearInProgress)
 {
     leName = new QLineEdit(element->Name);
     ledFraction = new QLineEdit(QString::number(element->Fraction, 'g', 4));
-    QPushButton* pbAuto = new QPushButton("Auto");
-    QPushButton* pbDel = new QPushButton("X");
+    pbAuto = new QPushButton("Auto");
+    pbDel = new QPushButton("X");
     pbDel->setMaximumWidth(25);
 
     QHBoxLayout* lay = new QHBoxLayout();
@@ -46,26 +46,39 @@ AElasticElementDelegate::AElasticElementDelegate(AElasticScatterElement *element
 
 void AElasticElementDelegate::onAutoClicked()
 {
+    if (*bClearInProgress) return;
     emit AutoClicked(element);
 }
 
 void AElasticElementDelegate::onDelClicked()
 {
+    if (*bClearInProgress) return;
     emit DelClicked(element);
 }
 
 void AElasticElementDelegate::onChanged()
 {
+    if (*bClearInProgress) return;
     QString newName = leName->text();
     double newFraction = ledFraction->text().toDouble();
 
     if (newName == element->Name && newFraction == element->Fraction ) return; //nothing changed
 
+    blockDelegate();
     emit RequestUpdateIsotopes(element, newName, newFraction);
 }
 
-AElasticIsotopeDelegate::AElasticIsotopeDelegate(AElasticScatterElement *element) :
-    element(element)
+void AElasticElementDelegate::blockDelegate()
+{
+    //disable components so they cannot start new events if focus changed by user (e.g. finished edit by clicking on auto)
+//    leName->setEnabled(false);
+//    ledFraction->setEnabled(false);
+//    pbAuto->setEnabled(false);
+//    pbDel->setEnabled(false);
+}
+
+AElasticIsotopeDelegate::AElasticIsotopeDelegate(AElasticScatterElement *element, bool* bClearInProgress) :
+    element(element), bClearInProgress(bClearInProgress)
 {
     leiMass = new QLineEdit( QString::number(element->Mass) );
     ledAbund = new QLineEdit( QString::number(element->Abundancy*100.0, 'g', 4) );    
@@ -138,22 +151,27 @@ void AElasticIsotopeDelegate::updateToolTip()
 
 void AElasticIsotopeDelegate::onShowClicked()
 {
+    if (*bClearInProgress) return;
     emit ShowClicked(element);
 }
 
 void AElasticIsotopeDelegate::onLoadClicked()
 {
+    if (*bClearInProgress) return;
     emit LoadClicked(element);
     updateButtons();
 }
 
 void AElasticIsotopeDelegate::onDelClicked()
 {
+    if (*bClearInProgress) return;
     emit DelClicked(element);
 }
 
 void AElasticIsotopeDelegate::onChanged()
 {
+    if (*bClearInProgress) return;
+    qDebug() << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     int newMass = leiMass->text().toInt();
     double newAb = ledAbund->text().toDouble();
 

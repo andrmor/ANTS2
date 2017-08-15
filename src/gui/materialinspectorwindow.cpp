@@ -43,6 +43,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->setupUi(this);
     this->move(15,15);
     this->setFixedSize(this->size());
+    bClearInProgress = false;
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
@@ -56,7 +57,6 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->pbUpdateTmpMaterial->setVisible(false);
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
     ui->cobTotalInteractionLoadEnergyUnits->setCurrentIndex(1);
-    ui->cobUnitsForEllastic->setCurrentIndex(1);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -73,9 +73,9 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     LastSelectedParticle = 0;
 
     RedIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::red);
-    QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
-    ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
-    ui->labAutoLoadElastic->setVisible(false);
+    //QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
+    //ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
+    //ui->labAutoLoadElastic->setVisible(false);
 
     QString str = "Open XCOM page by clicking the button below.\n"
                   "Select the material composition and generate the file (use cm2/g units).\n"
@@ -83,14 +83,12 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
                   "Import the file by clicking \"Import from XCOM\" button.";
     ui->pbImportXCOM->setToolTip(str);
 
-    ElasticAutoConfig = new AElasticCrossSectionAutoloadConfig(this);
-    connect(ElasticAutoConfig, &AElasticCrossSectionAutoloadConfig::AutoEnableChanged, this, &MaterialInspectorWindow::onAutoLoadChanged);
-    ElasticAutoConfig->readFromJson(MW->GlobSet->ElasticAutoSettings);
+    ElasticConfig = new AElasticCrossSectionAutoloadConfig(MW->GlobSet, this);
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
 {    
-    delete ElasticAutoConfig;
+    delete ElasticConfig;
     delete ui;
 }
 
@@ -1249,16 +1247,11 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
   }
 }
 
-void MaterialInspectorWindow::WriteElasticAutoToJson(QJsonObject &json)
-{
-    json = QJsonObject();
-    ElasticAutoConfig->writeToJson(json);
-}
-
-void MaterialInspectorWindow::onAutoLoadChanged(bool enabled)
-{
-    ui->labAutoLoadElastic->setVisible(enabled);
-}
+//void MaterialInspectorWindow::WriteElasticAutoToJson(QJsonObject &json)
+//{
+//    json = QJsonObject();
+//    ElasticAutoConfig->writeToJson(json);
+//}
 
 void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 {
@@ -1449,7 +1442,7 @@ bool MaterialInspectorWindow::event(QEvent * e)
 */
       case QEvent::Hide :
         if (MW->WindowNavigator) MW->WindowNavigator->HideWindowTriggered("mat");
-        if (ElasticAutoConfig->isVisible()) ElasticAutoConfig->hide();
+        if (ElasticConfig->isVisible()) ElasticConfig->hide();
         break;
       case QEvent::Show :
         if (MW->WindowNavigator) MW->WindowNavigator->ShowWindowTriggered("mat");
@@ -2340,7 +2333,7 @@ void MaterialInspectorWindow::onShowElementCrossClicked(const AElasticScatterEle
 
 void MaterialInspectorWindow::onLoadElementCrossClicked(AElasticScatterElement *element)
 {
-    if (ElasticAutoConfig->isAutoloadEnabled())
+    if (ElasticConfig->isAutoloadEnabled())
     {
         bool fOK = autoLoadElasticCrossSection(element);
         if (fOK) return;
@@ -2361,7 +2354,7 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
     if (res == 0)
     {
         double Multiplier;
-        switch (ui->cobUnitsForEllastic->currentIndex())
+        switch (ElasticConfig->getCrossSectionLoadOption())
         {
           case (0): {Multiplier = 1.0e-6; break;} //meV
           case (1): {Multiplier = 1.0e-3; break;} //eV
@@ -2401,7 +2394,8 @@ void MaterialInspectorWindow::on_pbAddNewElement_clicked()
     AElasticScatterElement e;
     e.Name = "Undefined";
     e.Mass = 777;
-    e.StatWeight = 1.0;
+    e.Fraction = 1;
+    e.Abundancy = 1.0;
     t.ScatterElements << e;
 
     on_pbUpdateElements_clicked();
@@ -2527,7 +2521,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
 bool MaterialInspectorWindow::autoLoadElasticCrossSection(AElasticScatterElement *element)
 {
     QString Mass = QString::number(element->Mass);
-    QString fileName = ElasticAutoConfig->getFileName(element->Name, Mass);
+    QString fileName = ElasticConfig->getFileName(element->Name, Mass);
     if (fileName.isEmpty()) return false;
     if ( !QFileInfo(fileName).exists() ) return false;
     qDebug() << "Autoload cross-section from file: " <<fileName;
@@ -2569,15 +2563,19 @@ void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
 
 void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 {
-   ElasticAutoConfig->setStarter(MW->GlobSet->LastOpenDir);
-   ElasticAutoConfig->showNormal();
+   ElasticConfig->setStarterDir(MW->GlobSet->LastOpenDir);
+   ElasticConfig->showNormal();
 }
 
 //--------------------------------------------------
 
 void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 {
+    qDebug() << "--->Update started";
+    bClearInProgress = true;
     ui->twElastic->clear();
+    bClearInProgress = false;
+    qDebug() << " -->cleared";
 
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2598,26 +2596,27 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         if (!ElItem || prevElName != el.Name)
         {
             //new element
-            AElasticElementDelegate* elDel = new AElasticElementDelegate(&el);
+            AElasticElementDelegate* elDel = new AElasticElementDelegate(&el, &bClearInProgress);
             ElItem = new QTreeWidgetItem(ui->twElastic);
             ui->twElastic->setItemWidget(ElItem, 0, elDel);
             QObject::connect(elDel, &AElasticElementDelegate::AutoClicked, this, &MaterialInspectorWindow::onAutoIsotopesClicked, Qt::QueuedConnection);
             QObject::connect(elDel, &AElasticElementDelegate::DelClicked, this, &MaterialInspectorWindow::onDelElementClicked, Qt::QueuedConnection);
-            QObject::connect(elDel, &AElasticElementDelegate::RequestUpdateIsotopes, this, &MaterialInspectorWindow::onRequestUpdateIsotopes, Qt::QueuedConnection);
+            QObject::connect(elDel, &AElasticElementDelegate::RequestUpdateIsotopes, this, &MaterialInspectorWindow::onRequestUpdateIsotopes, Qt::QueuedConnection);            
         }
         //new isotope
-        AElasticIsotopeDelegate* isotopDel = new AElasticIsotopeDelegate(&el);
+        AElasticIsotopeDelegate* isotopDel = new AElasticIsotopeDelegate(&el, &bClearInProgress);
         QTreeWidgetItem* twi = new QTreeWidgetItem();
         ElItem->addChild(twi);
         ui->twElastic->setItemWidget(twi, 0, isotopDel);
+        prevElName = el.Name;
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
     }
 
-
     ui->twElastic->expandAll();
+   qDebug() << "Update done!";
 }
 
 void MaterialInspectorWindow::onIsotopeDelClicked(const AElasticScatterElement *element)
@@ -2655,7 +2654,45 @@ int MaterialInspectorWindow::findElement(const AElasticScatterElement *element) 
 
 void MaterialInspectorWindow::onAutoIsotopesClicked(AElasticScatterElement *element)
 {
+    int iThisElement = findElement(element);
+    if (iThisElement == -1) return;
 
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+
+    QString ElementName = t.ScatterElements.at(iThisElement).Name;
+    double Fraction = t.ScatterElements.at(iThisElement).Fraction;
+    const QVector<QPair<int, double> > isotopes = ElasticConfig->getIsotopes(ElementName);
+
+    if (isotopes.isEmpty())
+    {
+        message("Data for element " + ElementName + " not found!", this);
+        return;
+    }
+    qDebug() << isotopes;
+
+    //removing defined isotopes
+    for (;iThisElement<t.ScatterElements.size();) //no increment!
+    {
+        if (t.ScatterElements.at(iThisElement).Name != ElementName) break;
+        qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
+        t.ScatterElements.removeAt(iThisElement);
+        qDebug() << "====== elements left:"<<t.ScatterElements.size();
+    }
+
+    //adding elements
+    for (int i=0; i<isotopes.size(); i++)
+    {
+        qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
+        AElasticScatterElement se(ElementName, isotopes.at(i).first, isotopes.at(i).second, Fraction);
+        t.ScatterElements.insert(iThisElement+i, se);
+    }
+    qDebug() << "Auto click processing finished, updating...";
+    on_pbWasModified_clicked();
+    on_pbUpdateElements_clicked();
+    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+    qDebug() << "...update after auto click finished!";
 }
 
 void MaterialInspectorWindow::onDelElementClicked(AElasticScatterElement *element)
@@ -2700,6 +2737,105 @@ void MaterialInspectorWindow::onRequestUpdateIsotopes(const AElasticScatterEleme
             t.ScatterElements[iElement].CrossSection.clear();
         }
     }
+    on_pbWasModified_clicked();
+    on_pbUpdateElements_clicked();
+
+    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+}
+
+void MaterialInspectorWindow::on_pbAddNewIsotope_clicked()
+{
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    //if scatter not defined yet, add new element
+    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty())
+    {
+        on_pbAddNewElement_clicked();
+        return;
+    }
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty())
+    {
+        on_pbAddNewElement_clicked();
+        return;
+    }
+
+    //if only one element, add new isotope
+    bool bOnlyOneElement = true;
+    for (int i=0; i<t.ScatterElements.size(); i++)
+        if (t.ScatterElements.at(i).Name != t.ScatterElements.at(0).Name)
+        {
+            bOnlyOneElement = false;
+            break;
+        }
+    if (bOnlyOneElement)
+    {
+        doAddNewIsotope(t.ScatterElements.size(), t.ScatterElements.at(0).Name, t.ScatterElements.at(0).Fraction);
+        return;
+    }
+
+    //checking which element is selected
+    QTreeWidgetItem* item = ui->twElastic->currentItem();
+    if (!item)
+    {
+        message("Select an element to which a new isotope should be added", this);
+        return;
+    }
+    QWidget* w = ui->twElastic->itemWidget(item, 0);
+    if (!w) return; //paranoid
+
+    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
+    AElasticIsotopeDelegate* isoDel = dynamic_cast<AElasticIsotopeDelegate*>(w);
+    if (!elDel && !isoDel)
+    {
+        qWarning() << "Something went wrong...";
+        return;
+    }
+
+    const AElasticScatterElement* element = 0;
+    if (elDel)
+    {
+        //qDebug() << "This is element!";
+        element = elDel->getElement();
+    }
+    else if (isoDel)
+    {
+        //qDebug() << "This is isotope!";
+        element = isoDel->getElement();
+    }
+    if (!element)
+    {
+        qWarning() << "Something went wrong...";
+        return;
+    }
+
+    int iElement = findElement(element);
+    if (iElement == -1)
+    {
+        qWarning() << "Something went wrong...";
+        return;
+    }
+
+    int iToInsert = iElement;
+    do
+    {
+        iToInsert++;
+        if (iToInsert == t.ScatterElements.size() ) break;
+    }
+    while (t.ScatterElements.at(iToInsert).Name == t.ScatterElements.at(iElement).Name);
+
+    //qDebug() << "Inserting in position:"<< iToInsert;
+    doAddNewIsotope(iToInsert, t.ScatterElements.at(iElement).Name, t.ScatterElements.at(iElement).Fraction);
+}
+
+void MaterialInspectorWindow::doAddNewIsotope(int Index, QString name, double fraction)
+{
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+    t.ScatterElements.insert(Index, AElasticScatterElement(name, 777, 0, fraction));
+
     on_pbWasModified_clicked();
     on_pbUpdateElements_clicked();
 

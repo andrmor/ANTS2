@@ -2025,7 +2025,7 @@ with the relative numeric fractions of 90 to 1.</string>
               </rect>
              </property>
              <property name="text">
-              <string>Neutron capture</string>
+              <string>Simulate neutron capture</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -2545,12 +2545,12 @@ with the relative numeric fractions of 90 to 1.</string>
               <rect>
                <x>12</x>
                <y>4</y>
-               <width>191</width>
+               <width>221</width>
                <height>17</height>
               </rect>
              </property>
              <property name="text">
-              <string>Elastic scattering</string>
+              <string>Simulate elastic scattering</string>
              </property>
             </widget>
             <widget class="QFrame" name="frScatter">
@@ -2571,60 +2571,14 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbAddNewElement">
               <property name="geometry">
                <rect>
-                <x>11</x>
+                <x>108</x>
                 <y>150</y>
-                <width>131</width>
+                <width>100</width>
                 <height>23</height>
                </rect>
               </property>
               <property name="text">
-               <string>Add new element</string>
-              </property>
-             </widget>
-             <widget class="QComboBox" name="cobUnitsForEllastic">
-              <property name="geometry">
-               <rect>
-                <x>316</x>
-                <y>150</y>
-                <width>98</width>
-                <height>22</height>
-               </rect>
-              </property>
-              <item>
-               <property name="text">
-                <string>meV - barns</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>eV - barns</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>keV - barns</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>MeV - barns</string>
-               </property>
-              </item>
-             </widget>
-             <widget class="QLabel" name="label_34">
-              <property name="geometry">
-               <rect>
-                <x>152</x>
-                <y>154</y>
-                <width>160</width>
-                <height>13</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Cross-section are loaded as:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <string>Add element</string>
               </property>
              </widget>
              <widget class="Line" name="line_3">
@@ -2749,11 +2703,27 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="columnCount">
                <number>1</number>
               </property>
+              <attribute name="headerVisible">
+               <bool>false</bool>
+              </attribute>
               <column>
                <property name="text">
                 <string/>
                </property>
               </column>
+             </widget>
+             <widget class="QPushButton" name="pbAddNewIsotope">
+              <property name="geometry">
+               <rect>
+                <x>218</x>
+                <y>150</y>
+                <width>100</width>
+                <height>23</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Add isotope</string>
+              </property>
              </widget>
             </widget>
             <widget class="QPushButton" name="pbUpdateElements">
@@ -2772,27 +2742,14 @@ with the relative numeric fractions of 90 to 1.</string>
             <widget class="QPushButton" name="pbConfigureAutoElastic">
              <property name="geometry">
               <rect>
-               <x>305</x>
+               <x>243</x>
                <y>2</y>
-               <width>111</width>
+               <width>181</width>
                <height>23</height>
               </rect>
              </property>
              <property name="text">
-              <string>Configure auto</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="labAutoLoadElastic">
-             <property name="geometry">
-              <rect>
-               <x>289</x>
-               <y>5</y>
-               <width>15</width>
-               <height>18</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>--</string>
+              <string>Configure load settings</string>
              </property>
             </widget>
            </widget>

@@ -621,7 +621,7 @@ void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
 void MainWindow::on_pbGunLoadSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   qDebug()<<fileName;
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();

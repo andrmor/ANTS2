@@ -25,7 +25,7 @@ AElasticElementDelegate::AElasticElementDelegate(AElasticScatterElement *element
         lay->setSpacing(2);
         lay->addWidget( new QLabel("Element:") );
         lay->addWidget(leName);
-        lay->addWidget( new QLabel("  Fraction:") );
+        lay->addWidget( new QLabel("  Molar proportion:") );
         lay->addWidget(ledFraction);
         lay->addItem( new QSpacerItem(100, 0, QSizePolicy::Expanding, QSizePolicy::Expanding ) );
         lay->addWidget(pbAuto);
@@ -64,17 +64,7 @@ void AElasticElementDelegate::onChanged()
 
     if (newName == element->Name && newFraction == element->Fraction ) return; //nothing changed
 
-    blockDelegate();
     emit RequestUpdateIsotopes(element, newName, newFraction);
-}
-
-void AElasticElementDelegate::blockDelegate()
-{
-    //disable components so they cannot start new events if focus changed by user (e.g. finished edit by clicking on auto)
-//    leName->setEnabled(false);
-//    ledFraction->setEnabled(false);
-//    pbAuto->setEnabled(false);
-//    pbDel->setEnabled(false);
 }
 
 AElasticIsotopeDelegate::AElasticIsotopeDelegate(AElasticScatterElement *element, bool* bClearInProgress) :
@@ -171,7 +161,6 @@ void AElasticIsotopeDelegate::onDelClicked()
 void AElasticIsotopeDelegate::onChanged()
 {
     if (*bClearInProgress) return;
-    qDebug() << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     int newMass = leiMass->text().toInt();
     double newAb = ledAbund->text().toDouble();
 

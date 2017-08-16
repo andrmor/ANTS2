@@ -2670,29 +2670,30 @@ void MaterialInspectorWindow::onAutoIsotopesClicked(AElasticScatterElement *elem
         message("Data for element " + ElementName + " not found!", this);
         return;
     }
-    qDebug() << isotopes;
+    //      qDebug() << isotopes;
 
     //removing defined isotopes
     for (;iThisElement<t.ScatterElements.size();) //no increment!
     {
         if (t.ScatterElements.at(iThisElement).Name != ElementName) break;
-        qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
+        //      qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
         t.ScatterElements.removeAt(iThisElement);
-        qDebug() << "====== elements left:"<<t.ScatterElements.size();
+        //      qDebug() << "====== elements left:"<<t.ScatterElements.size();
     }
 
     //adding elements
     for (int i=0; i<isotopes.size(); i++)
     {
-        qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
+        //      qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
         AElasticScatterElement se(ElementName, isotopes.at(i).first, isotopes.at(i).second, Fraction);
+        autoLoadElasticCrossSection(&se);
         t.ScatterElements.insert(iThisElement+i, se);
     }
-    qDebug() << "Auto click processing finished, updating...";
+    //      qDebug() << "Auto click processing finished, updating...";
     on_pbWasModified_clicked();
     on_pbUpdateElements_clicked();
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-    qDebug() << "...update after auto click finished!";
+    //      qDebug() << "...update after auto click finished!";
 }
 
 void MaterialInspectorWindow::onDelElementClicked(AElasticScatterElement *element)

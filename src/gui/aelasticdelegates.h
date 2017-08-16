@@ -37,9 +37,6 @@ signals:
     void DelClicked(AElasticScatterElement *element);
     void RequestUpdateIsotopes(const AElasticScatterElement* element, const QString newName, double newFraction);
 
-private:
-    void blockDelegate();
-
 };
 
 class AElasticIsotopeDelegate : public QWidget

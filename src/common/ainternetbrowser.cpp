@@ -57,6 +57,7 @@ void AInternetBrowser::replyFinished(QNetworkReply *reply)
 {
   qDebug() << "Reply received!";
   replyReceived = reply->readAll();
+  qDebug() << replyReceived;
   fWait = false;
 }
 

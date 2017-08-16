@@ -248,6 +248,8 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     if (tmpMaterial.atomicDensity > 0) ui->ledAtomicDensity->setText(str);
     else ui->ledAtomicDensity->setText("");
 
+    ui->leMaterialComposition->setText( tmpMaterial.Composition );
+
     str.setNum(tmpMaterial.n, 'g');
     ui->ledN->setText(str);
     str.setNum(tmpMaterial.abs, 'g');
@@ -348,6 +350,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
   ui->pbShowTotalInteraction->setEnabled(true);
 
   const AParticle::ParticleType type = Detector->MpCollection->getParticleType(particleId);
+
   if (type == AParticle::_charged_)
   {
      //charged particle
@@ -415,8 +418,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->frGamma1->setEnabled( mp.Terminators.size() != 0 );
           ui->cbPairProduction->setChecked( mp.Terminators.size()>2 );
           ui->pbShowTotalInteraction->setEnabled( mp.InteractionDataX.size()>0 );
-          ui->pbShowXCOMdata->setEnabled( !mp.DataSource.isEmpty() );
-          ui->leXCOMcomposition->setText( mp.DataString );
+          ui->pbShowXCOMdata->setEnabled( !mp.DataSource.isEmpty() );          
           on_ledGammaDiagnosticsEnergy_editingFinished();
       }
       else
@@ -443,6 +445,8 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
     tmpMaterial.PriScintDecayTime = ui->ledPriT->text().toDouble();
+
+    tmpMaterial.Composition = ui->leMaterialComposition->text();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     if (ui->cbSameYieldForAll->isChecked())
@@ -2218,12 +2222,12 @@ TGraph *MaterialInspectorWindow::constructInterpolationGraph(QVector<double> X, 
 
 void MaterialInspectorWindow::on_pbXCOMauto_clicked()
 {
-  QString str = ui->leXCOMcomposition->text().simplified();
+  QString str = ui->leMaterialComposition->text().simplified();
   str.replace(" ", "");
   if (str.isEmpty()) return;
 
   QStringList elList = str.split(QRegExp("\\+"));
-    //qDebug() << elList<<elList.size();
+  qDebug() << elList<<elList.size();
 
   QString compo;
   for (QString el : elList)
@@ -2236,22 +2240,23 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
       else
         compo += wList.at(0) + " 1";
     }
-    //qDebug() << compo;
+  qDebug() << compo;
 
   QString pack = "Formulae="+compo+"&Name="+str+"&Energies="+"&Output=on";
-  QString Url = "http://physics.nist.gov/cgi-bin/Xcom/xcom3_3-t";
+  QString Url = "https://physics.nist.gov/cgi-bin/Xcom/xcom3_3-t";
   QString Reply;
 
   AInternetBrowser b(3000); //  *** !!! absoluite value - 3s timeout
   MW->WindowNavigator->BusyOn();
   bool fOK = b.Post(Url, pack, Reply);
+  qDebug() << "Post result:"<<fOK;
   MW->WindowNavigator->BusyOff();
   if (!fOK)
     {
       message("Operation failed:\n"+b.GetLastError(), this);
       return;
     }
-  //qDebug() << Reply;
+  qDebug() << Reply;
 
   if (Reply.contains("Error: Unable to parse formula"))
     {
@@ -2275,7 +2280,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
   fOK = importXCOM(in, particleId);
 
   if (fOK)
-    MW->MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leXCOMcomposition->text();
+    MW->MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leMaterialComposition->text();
 
   on_pbUpdateInteractionIndication_clicked();
   on_pbWasModified_clicked();
@@ -2900,4 +2905,136 @@ void MaterialInspectorWindow::on_twElastic_itemCollapsed(QTreeWidgetItem *item)
         elDel->getElement()->bExpanded = false;
         return;
     }
+}
+
+void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
+{
+    QString str = ui->leMaterialComposition->text().simplified();
+    str.replace(" ", "");
+    if (str.isEmpty())
+    {
+        message("Material composition is empty!");
+        ui->twProperties->setCurrentIndex(0);
+        return;
+    }
+
+    QStringList elList = str.split(QRegExp("\\+"));
+
+    QVector< QPair< QString, double> > Records;
+
+    for (QString el : elList)
+      {
+        QStringList wList = el.split(":");
+        if (wList.isEmpty() || wList.size() > 2)
+        {
+            message("Format error in composition!");
+            ui->twProperties->setCurrentIndex(0);
+            return;
+        }
+        QString Formula = wList.first();
+
+        double Fraction;
+        if (wList.size() == 1) Fraction = 1.0;
+        else
+        {
+            QString fr = wList.last();
+            bool bOK;
+            Fraction = fr.toDouble(&bOK);
+            if (!bOK)
+            {
+                message("Format error in composition!");
+                ui->twProperties->setCurrentIndex(0);
+                return;
+            }
+        }
+
+        Records << QPair<QString,double>(Formula, Fraction);
+      }
+    qDebug() << Records;
+
+    QMap<QString,double> map;
+    for (QPair<QString,double> pair : Records)
+    {
+        QString Formula = pair.first + ":"; //":" is end signal
+        if (!Formula[0].isLetter() && !Formula[0].isUpper())
+        {
+            message("Format error in composition!\nRemember to respect Upper/lower register for elements");
+            ui->twProperties->setCurrentIndex(0);
+            return;
+        }
+        double weight = pair.second;
+
+        qDebug() << Formula;
+        bool bReadingElementName = true;
+        QString tmp = Formula[0];
+        QString Element;
+        for (int i=1; i<Formula.size(); i++)
+        {
+            QChar c = Formula[i];
+            if (bReadingElementName)
+            {
+                if (c.isLetter() && c.isLower()) //continue to acquire the name
+                {
+                    tmp += c;
+                    continue;
+                }
+                else if (c == ':' || c.isDigit() || (c.isLetter() && c.isUpper()))
+                {
+                    if (tmp.isEmpty())
+                    {
+                        message("Format error in composition: unrecognized character");
+                        ui->twProperties->setCurrentIndex(0);
+                        return;
+                    }
+                    Element = tmp;
+                    if (c == ":")
+                    {
+                        if (map.contains(Element)) map[Element] += weight * 1.0;
+                        else map[Element] = weight * 1.0;
+                        break;
+                    }
+                    tmp = QString(c);
+                    if (c.isDigit()) bReadingElementName = false;
+                }
+                else
+                {
+                    message("Format error in composition: unrecognized character");
+                    ui->twProperties->setCurrentIndex(0);
+                    return;
+                }
+            }
+            else
+            {
+                //reading number
+                if (c.isDigit())
+                {
+                    tmp += c;
+                    continue;
+                }
+                else if (c==':' || c.isLetter())
+                {
+                    if (c.isLower())
+                    {
+                        message("Format error in composition: lower rgister after on element start");
+                        ui->twProperties->setCurrentIndex(0);
+                        return;
+                    }
+                    double number = tmp.toDouble();
+                    if (map.contains(Element)) map[Element] += weight * number;
+                    else map[Element] = weight * number;
+                    if (c==':') break;
+                    tmp = QString(c);
+                    bReadingElementName = true;
+                }
+                else
+                {
+                    message("Format error in composition: unrecognized character");
+                    ui->twProperties->setCurrentIndex(0);
+                    return;
+                }
+            }
+        }
+
+    }
+    qDebug() << map;
 }

@@ -253,7 +253,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>130</y>
+      <y>150</y>
       <width>75</width>
       <height>61</height>
      </rect>
@@ -325,11 +325,98 @@ indication</string>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
+    <widget class="QWidget" name="tab_6">
+     <attribute name="title">
+      <string>Density and composition</string>
+     </attribute>
+     <widget class="QLabel" name="label_22">
+      <property name="geometry">
+       <rect>
+        <x>273</x>
+        <y>29</y>
+        <width>31</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>g/cm3</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="ledDensity">
+      <property name="geometry">
+       <rect>
+        <x>196</x>
+        <y>27</y>
+        <width>70</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Used by all reactions except neutron capture</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_21">
+      <property name="geometry">
+       <rect>
+        <x>93</x>
+        <y>28</y>
+        <width>96</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Material density:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leMaterialComposition">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>442</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Elemental composition with the relative molar fractions.
+Can be used to automatically configure gamma interaction cross-sections and neutron scattering data.</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_34">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>140</y>
+        <width>311</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Example: H2O:10 + NaCl:0.1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_64">
+      <property name="geometry">
+       <rect>
+        <x>27</x>
+        <y>88</y>
+        <width>161</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Chemical composition (optional):</string>
+      </property>
+     </widget>
+    </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Optical + primary scintillation</string>
+      <string>Optical</string>
      </attribute>
      <widget class="QGroupBox" name="gbPrimary">
       <property name="geometry">
@@ -1154,7 +1241,7 @@ resolution:</string>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Interactions</string>
+      <string>Interaction</string>
      </attribute>
      <widget class="QFrame" name="fEnDepProps">
       <property name="enabled">
@@ -1163,9 +1250,9 @@ resolution:</string>
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>65</y>
+        <y>36</y>
         <width>451</width>
-        <height>316</height>
+        <height>341</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -1202,7 +1289,7 @@ resolution:</string>
          <x>8</x>
          <y>27</y>
          <width>439</width>
-         <height>285</height>
+         <height>310</height>
         </rect>
        </property>
        <property name="currentIndex">
@@ -1366,8 +1453,8 @@ resolution:</string>
         <widget class="QLineEdit" name="leMFP_2">
          <property name="geometry">
           <rect>
-           <x>260</x>
-           <y>210</y>
+           <x>267</x>
+           <y>237</y>
            <width>81</width>
            <height>20</height>
           </rect>
@@ -1379,8 +1466,8 @@ resolution:</string>
         <widget class="QLabel" name="label_50">
          <property name="geometry">
           <rect>
-           <x>199</x>
-           <y>213</y>
+           <x>206</x>
+           <y>240</y>
            <width>54</width>
            <height>13</height>
           </rect>
@@ -1395,8 +1482,8 @@ resolution:</string>
         <widget class="QLabel" name="label_51">
          <property name="geometry">
           <rect>
-           <x>345</x>
-           <y>212</y>
+           <x>352</x>
+           <y>239</y>
            <width>46</width>
            <height>13</height>
           </rect>
@@ -1408,8 +1495,8 @@ resolution:</string>
         <widget class="QLabel" name="label_52">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>212</y>
+           <x>27</x>
+           <y>239</y>
            <width>101</width>
            <height>16</height>
           </rect>
@@ -1421,8 +1508,8 @@ resolution:</string>
         <widget class="QLineEdit" name="ledMFPenergy_2">
          <property name="geometry">
           <rect>
-           <x>120</x>
-           <y>210</y>
+           <x>127</x>
+           <y>237</y>
            <width>70</width>
            <height>20</height>
           </rect>
@@ -1454,7 +1541,7 @@ resolution:</string>
            <x>0</x>
            <y>4</y>
            <width>436</width>
-           <height>284</height>
+           <height>305</height>
           </rect>
          </property>
          <property name="frameShape">
@@ -1629,8 +1716,8 @@ resolution:</string>
            <property name="geometry">
             <rect>
              <x>7</x>
-             <y>99</y>
-             <width>410</width>
+             <y>102</y>
+             <width>416</width>
              <height>93</height>
             </rect>
            </property>
@@ -1643,9 +1730,9 @@ resolution:</string>
            <widget class="QPushButton" name="pbXCOMauto">
             <property name="geometry">
              <rect>
-              <x>323</x>
+              <x>117</x>
               <y>30</y>
-              <width>80</width>
+              <width>285</width>
               <height>23</height>
              </rect>
             </property>
@@ -1653,7 +1740,7 @@ resolution:</string>
              <string>Automatic extraction from the XCOM database using the material composition in the text field to the left.</string>
             </property>
             <property name="text">
-             <string>Request</string>
+             <string>Automatic request using material composition</string>
             </property>
            </widget>
            <widget class="QPushButton" name="pbNistPage">
@@ -1673,20 +1760,6 @@ resolution:</string>
             </property>
             <property name="flat">
              <bool>false</bool>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="leXCOMcomposition">
-            <property name="geometry">
-             <rect>
-              <x>118</x>
-              <y>32</y>
-              <width>199</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Example: H2O:9 + NaCl:0.1 - configures a mixture of two compounds (H2O and NaCl)
-with the relative numeric fractions of 90 to 1.</string>
             </property>
            </widget>
            <widget class="QPushButton" name="pbImportXCOM">
@@ -1728,22 +1801,6 @@ with the relative numeric fractions of 90 to 1.</string>
             </property>
             <property name="text">
              <string>Log data</string>
-            </property>
-           </widget>
-           <widget class="Line" name="line_9">
-            <property name="geometry">
-             <rect>
-              <x>237</x>
-              <y>41</y>
-              <width>118</width>
-              <height>3</height>
-             </rect>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
            <widget class="QLabel" name="label_59">
@@ -1791,21 +1848,12 @@ with the relative numeric fractions of 90 to 1.</string>
              <string>Load from custom text file</string>
             </property>
            </widget>
-           <zorder>line_9</zorder>
-           <zorder>pbXCOMauto</zorder>
-           <zorder>pbNistPage</zorder>
-           <zorder>leXCOMcomposition</zorder>
-           <zorder>pbImportXCOM</zorder>
-           <zorder>pbShowXCOMdata</zorder>
-           <zorder>label_59</zorder>
-           <zorder>line_2</zorder>
-           <zorder>pbLoadThisScenarioCrossSection</zorder>
           </widget>
           <widget class="QFrame" name="frGamma1">
            <property name="geometry">
             <rect>
              <x>5</x>
-             <y>210</y>
+             <y>225</y>
              <width>416</width>
              <height>63</height>
             </rect>
@@ -2003,9 +2051,9 @@ with the relative numeric fractions of 90 to 1.</string>
            <property name="geometry">
             <rect>
              <x>1</x>
-             <y>2</y>
+             <y>1</y>
              <width>436</width>
-             <height>279</height>
+             <height>304</height>
             </rect>
            </property>
            <property name="currentIndex">
@@ -2037,7 +2085,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <x>2</x>
                <y>21</y>
                <width>420</width>
-               <height>234</height>
+               <height>257</height>
               </rect>
              </property>
              <property name="frameShape">
@@ -2130,7 +2178,7 @@ with the relative numeric fractions of 90 to 1.</string>
                 <x>12</x>
                 <y>88</y>
                 <width>404</width>
-                <height>115</height>
+                <height>130</height>
                </rect>
               </property>
               <property name="frameShape">
@@ -2143,7 +2191,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>362</x>
-                 <y>90</y>
+                 <y>102</y>
                  <width>30</width>
                  <height>16</height>
                 </rect>
@@ -2166,7 +2214,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>10</x>
-                 <y>88</y>
+                 <y>100</y>
                  <width>100</width>
                  <height>23</height>
                 </rect>
@@ -2179,7 +2227,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>293</x>
-                 <y>51</y>
+                 <y>60</y>
                  <width>106</width>
                  <height>23</height>
                 </rect>
@@ -2205,7 +2253,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>120</x>
-                 <y>88</y>
+                 <y>100</y>
                  <width>111</width>
                  <height>22</height>
                 </rect>
@@ -2215,7 +2263,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>242</x>
-                 <y>90</y>
+                 <y>102</y>
                  <width>71</width>
                  <height>16</height>
                 </rect>
@@ -2230,7 +2278,7 @@ with the relative numeric fractions of 90 to 1.</string>
                  <x>8</x>
                  <y>43</y>
                  <width>277</width>
-                 <height>43</height>
+                 <height>52</height>
                 </rect>
                </property>
               </widget>
@@ -2277,7 +2325,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <property name="geometry">
                 <rect>
                  <x>317</x>
-                 <y>89</y>
+                 <y>101</y>
                  <width>40</width>
                  <height>20</height>
                 </rect>
@@ -2310,7 +2358,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>358</x>
-                <y>212</y>
+                <y>232</y>
                 <width>46</width>
                 <height>13</height>
                </rect>
@@ -2323,7 +2371,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>294</x>
-                <y>209</y>
+                <y>229</y>
                 <width>60</width>
                 <height>20</height>
                </rect>
@@ -2336,7 +2384,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>3</x>
-                <y>208</y>
+                <y>228</y>
                 <width>181</width>
                 <height>20</height>
                </rect>
@@ -2352,7 +2400,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>263</x>
-                <y>212</y>
+                <y>232</y>
                 <width>28</width>
                 <height>13</height>
                </rect>
@@ -2368,7 +2416,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>186</x>
-                <y>209</y>
+                <y>229</y>
                 <width>60</width>
                 <height>20</height>
                </rect>
@@ -2504,7 +2552,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>250</x>
-                <y>210</y>
+                <y>230</y>
                 <width>25</width>
                 <height>16</height>
                </rect>
@@ -2559,7 +2607,7 @@ with the relative numeric fractions of 90 to 1.</string>
                <x>0</x>
                <y>20</y>
                <width>429</width>
-               <height>231</height>
+               <height>261</height>
               </rect>
              </property>
              <property name="frameShape">
@@ -2571,8 +2619,8 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbAddNewElement">
               <property name="geometry">
                <rect>
-                <x>50</x>
-                <y>150</y>
+                <x>123</x>
+                <y>180</y>
                 <width>100</width>
                 <height>23</height>
                </rect>
@@ -2585,7 +2633,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>12</x>
-                <y>171</y>
+                <y>201</y>
                 <width>398</width>
                 <height>13</height>
                </rect>
@@ -2598,7 +2646,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>60</x>
-                <y>181</y>
+                <y>211</y>
                 <width>291</width>
                 <height>23</height>
                </rect>
@@ -2611,7 +2659,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>6</x>
-                <y>206</y>
+                <y>236</y>
                 <width>181</width>
                 <height>20</height>
                </rect>
@@ -2627,7 +2675,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>253</x>
-                <y>208</y>
+                <y>238</y>
                 <width>25</width>
                 <height>16</height>
                </rect>
@@ -2640,7 +2688,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>297</x>
-                <y>207</y>
+                <y>237</y>
                 <width>60</width>
                 <height>20</height>
                </rect>
@@ -2653,7 +2701,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>361</x>
-                <y>210</y>
+                <y>240</y>
                 <width>46</width>
                 <height>13</height>
                </rect>
@@ -2666,7 +2714,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>189</x>
-                <y>207</y>
+                <y>237</y>
                 <width>60</width>
                 <height>20</height>
                </rect>
@@ -2679,7 +2727,7 @@ with the relative numeric fractions of 90 to 1.</string>
               <property name="geometry">
                <rect>
                 <x>266</x>
-                <y>210</y>
+                <y>240</y>
                 <width>28</width>
                 <height>13</height>
                </rect>
@@ -2697,7 +2745,7 @@ with the relative numeric fractions of 90 to 1.</string>
                 <x>5</x>
                 <y>5</y>
                 <width>418</width>
-                <height>142</height>
+                <height>172</height>
                </rect>
               </property>
               <property name="columnCount">
@@ -2715,8 +2763,8 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbAddNewIsotope">
               <property name="geometry">
                <rect>
-                <x>160</x>
-                <y>150</y>
+                <x>225</x>
+                <y>180</y>
                 <width>100</width>
                 <height>23</height>
                </rect>
@@ -2728,14 +2776,27 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbShowStatisticsOnElastic">
               <property name="geometry">
                <rect>
-                <x>310</x>
-                <y>150</y>
+                <x>347</x>
+                <y>180</y>
                 <width>75</width>
                 <height>23</height>
                </rect>
               </property>
               <property name="text">
                <string>Info</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="pbAutoFillCompositionForScatter">
+              <property name="geometry">
+               <rect>
+                <x>5</x>
+                <y>180</y>
+                <width>91</width>
+                <height>23</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Auto fill</string>
               </property>
              </widget>
             </widget>
@@ -2775,8 +2836,8 @@ with the relative numeric fractions of 90 to 1.</string>
      <widget class="QComboBox" name="cobParticle">
       <property name="geometry">
        <rect>
-        <x>88</x>
-        <y>37</y>
+        <x>97</x>
+        <y>7</y>
         <width>120</width>
         <height>22</height>
        </rect>
@@ -2785,8 +2846,8 @@ with the relative numeric fractions of 90 to 1.</string>
      <widget class="Line" name="lineClear">
       <property name="geometry">
        <rect>
-        <x>140</x>
-        <y>49</y>
+        <x>149</x>
+        <y>19</y>
         <width>16</width>
         <height>18</height>
        </rect>
@@ -2804,8 +2865,8 @@ with the relative numeric fractions of 90 to 1.</string>
      <widget class="QCheckBox" name="cbTrackingAllowed">
       <property name="geometry">
        <rect>
-        <x>225</x>
-        <y>40</y>
+        <x>234</x>
+        <y>10</y>
         <width>191</width>
         <height>17</height>
        </rect>
@@ -2829,8 +2890,8 @@ with the relative numeric fractions of 90 to 1.</string>
      <widget class="QLabel" name="label_15">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>41</y>
+        <x>19</x>
+        <y>11</y>
         <width>67</width>
         <height>13</height>
        </rect>
@@ -2851,8 +2912,8 @@ with the relative numeric fractions of 90 to 1.</string>
      <widget class="Line" name="line_16">
       <property name="geometry">
        <rect>
-        <x>181</x>
-        <y>47</y>
+        <x>190</x>
+        <y>17</y>
         <width>50</width>
         <height>3</height>
        </rect>
@@ -2880,48 +2941,6 @@ with the relative numeric fractions of 90 to 1.</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="label_22">
-      <property name="geometry">
-       <rect>
-        <x>274</x>
-        <y>10</y>
-        <width>31</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>g/cm3</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="ledDensity">
-      <property name="geometry">
-       <rect>
-        <x>197</x>
-        <y>8</y>
-        <width>70</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Used by all reactions except neutron capture</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_21">
-      <property name="geometry">
-       <rect>
-        <x>94</x>
-        <y>9</y>
-        <width>96</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Material density:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
      <zorder>laBackground_2</zorder>
      <zorder>fEnDepProps</zorder>
      <zorder>lineClear</zorder>
@@ -2929,13 +2948,10 @@ with the relative numeric fractions of 90 to 1.</string>
      <zorder>line_16</zorder>
      <zorder>cobParticle</zorder>
      <zorder>cbTrackingAllowed</zorder>
-     <zorder>label_22</zorder>
-     <zorder>ledDensity</zorder>
-     <zorder>label_21</zorder>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Secondary scintillation</string>
+      <string>Secondary scint</string>
      </attribute>
      <widget class="QGroupBox" name="gbSecondary">
       <property name="geometry">
@@ -3491,7 +3507,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>262</x>
-     <y>337</y>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>329</x>
@@ -3539,7 +3555,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>262</x>
-     <y>337</y>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>439</x>
@@ -3714,8 +3730,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>237</x>
-     <y>226</y>
+     <x>246</x>
+     <y>196</y>
     </hint>
     <hint type="destinationlabel">
      <x>473</x>
@@ -3731,7 +3747,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>185</x>
-     <y>394</y>
+     <y>364</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
@@ -3747,7 +3763,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>443</x>
-     <y>427</y>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -3763,7 +3779,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>154</x>
-     <y>509</y>
+     <y>491</y>
     </hint>
     <hint type="destinationlabel">
      <x>470</x>
@@ -3779,7 +3795,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>254</x>
-     <y>424</y>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>465</x>
@@ -3843,7 +3859,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>81</x>
-     <y>259</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
      <x>478</x>
@@ -3970,8 +3986,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>343</x>
-     <y>217</y>
+     <x>352</x>
+     <y>187</y>
     </hint>
     <hint type="destinationlabel">
      <x>359</x>
@@ -3986,8 +4002,8 @@ with the relative numeric fractions of 90 to 1.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>115</x>
-     <y>226</y>
+     <x>124</x>
+     <y>196</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
@@ -4003,7 +4019,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>63</x>
-     <y>304</y>
+     <y>274</y>
     </hint>
     <hint type="destinationlabel">
      <x>452</x>
@@ -4019,7 +4035,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>81</x>
-     <y>303</y>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -4035,7 +4051,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>76</x>
-     <y>303</y>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>425</x>
@@ -4051,7 +4067,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>132</x>
-     <y>301</y>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>140</x>
@@ -4067,7 +4083,7 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>115</x>
-     <y>304</y>
+     <y>274</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
@@ -4083,11 +4099,43 @@ with the relative numeric fractions of 90 to 1.</string>
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>303</y>
+     <y>273</y>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>
      <y>68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leMaterialComposition</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>213</x>
+     <y>290</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>79</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leMaterialComposition</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>85</y>
     </hint>
    </hints>
   </connection>

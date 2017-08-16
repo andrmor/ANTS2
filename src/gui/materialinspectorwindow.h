@@ -138,6 +138,8 @@ private slots:
 
     void on_twElastic_itemCollapsed(QTreeWidgetItem *item);
 
+    void on_pbAutoFillCompositionForScatter_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

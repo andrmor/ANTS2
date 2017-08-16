@@ -7,7 +7,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
-AMonitor::AMonitor() : time(0), xy(0), angle(0), wave(0), energy(0) {}
+AMonitor::AMonitor() : name("Undefined"), time(0), xy(0), angle(0), wave(0), energy(0) {}
 
 AMonitor::AMonitor(const AGeoObject *MonitorGeoObject) : time(0), xy(0), angle(0), wave(0), energy(0)
 {
@@ -26,6 +26,11 @@ void AMonitor::clearData()
     delete angle; angle = 0;
     delete wave; wave = 0;
     delete energy; energy = 0;
+}
+
+int AMonitor::getHits() const
+{
+    return xy->GetEntries();
 }
 
 void AMonitor::fillForParticle(double x, double y, double Time, double Angle, double Energy)
@@ -54,6 +59,8 @@ bool AMonitor::readFromGeoObject(const AGeoObject *MonitorRecord)
       }
 
     config = mon->config;
+
+    name = MonitorRecord->Name;
 
     initXYHist();
     initTimeHist();

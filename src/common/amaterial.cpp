@@ -452,5 +452,5 @@ bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog
 
     //        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
     //        qDebug() << "Cross-section-->" <<PartialCrossSection;
-    return true;
+    return bCalculateCrossSections;
 }

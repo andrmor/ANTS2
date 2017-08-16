@@ -714,7 +714,7 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
                       (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture) &&
                       (mp->Terminators[i].Type != NeutralTerminatorStructure::ElasticScattering)
                  )
-                  return "Capture or ellastic scattering terminator expected, but wrongtype received";
+                  return "Capture or ellastic scattering terminator expected, but wrong type received";
           }
           else if ( mp->Terminators[i].Type != NeutralTerminatorStructure::Capture )
               return "Capture terminator expected, but wrong type received";
@@ -734,40 +734,38 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
                   if (term.MeanElementMass == 0)
                       return QString("Mean element weight is zero for neutron ellastic scattering for ") + mat->name;
               }
+            }
+
+          if (mp->Terminators.last().PartialCrossSectionEnergy.isEmpty())
+              return QString("Not all elastic scaterring cross-sections are defined for ") + mat->name;
+
+          //check abundances
+          QString elscerr = CheckElasticScatterElements(mat, iPart, 0);
+          if (!elscerr.isEmpty()) return elscerr;
       }
 
-          //check partial cross-section
-//          QVector<double>* e  = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
-//          QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
-//          //            qDebug() << "---"<<interSize<<e->size()<<cs->size();
-//          if (e->size() != interSize || cs->size() != interSize) return 7;
-//          for (int i=0; i<interSize; i++) if (mp->InteractionDataX[i] != e->at(i)) return "Mismatch in total";
-
-          //checking generated particles and their initial energies
-//          QVector<int>* gp = &mp->Terminators[iTerm].GeneratedParticles;
-//          if (gp->isEmpty()) return 71;
-//          QVector<double>* gpE = &mp->Terminators[iTerm].GeneratedParticleEnergies;
-//          if (gp->isEmpty()) return 72;
-//          int numPart = gp->size();
-//          if (numPart != gpE->size()) return 73;
-//          //checking particle/energy pairs one by one
-//          for (int iGP=0; iGP<numPart; iGP++)
-//            {
-//              int part = gp->at(iGP);
-//              if (part<0 || part>ParticleCollection.size()-1) return 74;  //unknown particle
-
-//              //test that all materials where this particle can be tracked (not-trasparent),
-//              //have initial energy within the total interaction energy range
-//              int energy = gpE->at(iGP);
-
-//              ConflictingMaterialIndex = AMaterialParticleCollection::CheckParticleEnergyInRange(part, energy);
-//              if (ConflictingMaterialIndex != -1)
-//                {
-//                  ConflictingParticleIndex = part;
-//                  return 76;
-//                }
-//            }
-        }
+      if (mp->bCaptureEnabled)
+      {
+          for (int iTerm=0; iTerm<numTerm; iTerm++)
+          {
+              const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
+              if (term.Type != NeutralTerminatorStructure::Capture) continue;
+              //checking generated particles and their initial energies
+              const QVector<int>* gp = &term.GeneratedParticles;
+              if (!gp->isEmpty())
+              {
+                  const QVector<double>* gpE = &term.GeneratedParticleEnergies;
+                  if (gp->isEmpty()) return "Error in energy of generated particles after capture";
+                  int numPart = gp->size();
+                  if (numPart != gpE->size()) return "Error in energy of generated particles after capture";
+                  for (int iGP=0; iGP<numPart; iGP++)
+                    {
+                      int part = gp->at(iGP);
+                      if (part<0 || part>ParticleCollection.size()-1) return "Unknown generated particle after capture";  //unknown particle
+                    }
+              }
+          }
+      }
     }
 
   return ""; //passed all tests
@@ -797,6 +795,65 @@ QString AMaterialParticleCollection::CheckTmpMaterial() const
       if (!err.isEmpty()) return err;
     }
   return "";
+}
+
+QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial *mat, int iPart, QString *Report) const
+{
+    QString error, Text;
+
+    if (iPart<0 || iPart>=mat->MatParticle.size()) return "Wrong particle index";
+    if (mat->MatParticle[iPart].Terminators.isEmpty()) return "No terminators defined";
+
+    const NeutralTerminatorStructure& t = mat->MatParticle[iPart].Terminators.last();
+    if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty()) Text = "Elastic scattering elements/isotopes not defined";
+    else
+    {
+        QVector< QVector<int> > ElementsAndIsotopes; // [Element][Isotope]
+        QString LastElementName = t.ScatterElements.first().Name;
+        QVector<int> isotopes;
+        isotopes << 0;
+        for (int iRecord = 1; iRecord<t.ScatterElements.size(); iRecord++)
+        {
+            if (t.ScatterElements.at(iRecord).Name != LastElementName)
+            {
+                //new element
+                ElementsAndIsotopes.append(isotopes);
+                isotopes.clear();
+                LastElementName = t.ScatterElements.at(iRecord).Name;
+            }
+            isotopes << iRecord;
+        }
+        ElementsAndIsotopes.append(isotopes);
+
+        for (int iElementRecord=0; iElementRecord<ElementsAndIsotopes.size(); iElementRecord++)
+        {
+            int iElement = ElementsAndIsotopes.at(iElementRecord).first();
+            Text += t.ScatterElements.at(iElement).Name + ":\n";
+            double sumAbund = 0;
+            QString tmp;
+            for (int iIsotopeRecord=0; iIsotopeRecord<ElementsAndIsotopes.at(iElementRecord).size(); iIsotopeRecord++)
+            {
+                int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
+                sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
+                tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
+                double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
+                tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
+                double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
+                tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4);
+                tmp += "\n";
+            }
+            if (sumAbund != 100.0)
+            {
+                Text += " Error: sum of abundances should be 100%\n";
+                if (error.isEmpty())
+                    error = QString("Elastic scattering of neutrons in ") + t.ScatterElements.at(iElement).Name + ":\nsum of abundances is not equal to 100%";
+            }
+            else Text += tmp;
+            tmp += "\n";
+        }
+    }
+    if (Report) *Report = Text;
+    return error;
 }
 
 void AMaterialParticleCollection::registerNewParticle()

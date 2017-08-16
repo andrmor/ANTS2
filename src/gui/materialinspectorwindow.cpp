@@ -2367,11 +2367,25 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
             y[i] *= 1.0e-24;     //to cm2
         }
 
+        if (ElasticConfig->isEnergyRangeLimited())
+        {
+            const double EnMin = ElasticConfig->getMinEnergy() * 1.0e-6; //meV -> keV
+            const double EnMax = ElasticConfig->getMaxEnergy() * 1.0e-6; //meV -> keV
+            QVector<double> xtmp, ytmp;
+            xtmp = x;  ytmp = y;
+            x.clear(); y.clear();
+            for (int i=0; i<xtmp.size(); i++)
+            {
+                const double& xx = xtmp.at(i);
+                if (xx<EnMin || xx>EnMax) continue;
+                x << xx; y << ytmp.at(i);
+            }
+        }
+
         element->Energy = x;
         element->CrossSection = y;
         on_pbUpdateElements_clicked();
         on_pbWasModified_clicked();
-
         on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
         return true;
     }
@@ -2571,11 +2585,9 @@ void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 
 void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 {
-    qDebug() << "--->Update started";
     bClearInProgress = true;
     ui->twElastic->clear();
     bClearInProgress = false;
-    qDebug() << " -->cleared";
 
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2617,7 +2629,6 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
     }
 
     ui->twElastic->expandAll();
-   qDebug() << "Update done!";
 }
 
 void MaterialInspectorWindow::onIsotopeDelClicked(const AElasticScatterElement *element)
@@ -2856,50 +2867,10 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
     else
     {
         NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-        if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty()) Text = "No elements/isotopes defined";
+        if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty())
+            Text = "No elements/isotopes defined";
         else
-        {
-            QVector< QVector<int> > ElementsAndIsotopes; // [Element][Isotope]
-            QString LastElementName = t.ScatterElements.first().Name;
-            QVector<int> isotopes;
-            isotopes << 0;
-            for (int iRecord = 1; iRecord<t.ScatterElements.size(); iRecord++)
-            {
-                if (t.ScatterElements.at(iRecord).Name != LastElementName)
-                {
-                    //new element
-                    ElementsAndIsotopes.append(isotopes);
-                    isotopes.clear();
-                    LastElementName = t.ScatterElements.at(iRecord).Name;
-                }
-                isotopes << iRecord;
-            }
-            ElementsAndIsotopes.append(isotopes);
-            qDebug() << ElementsAndIsotopes;
-
-            for (int iElementRecord=0; iElementRecord<ElementsAndIsotopes.size(); iElementRecord++)
-            {
-                int iElement = ElementsAndIsotopes.at(iElementRecord).first();
-                Text += t.ScatterElements.at(iElement).Name + ":\n";
-                double sumAbund = 0;
-                QString tmp;
-                for (int iIsotopeRecord=0; iIsotopeRecord<ElementsAndIsotopes.at(iElementRecord).size(); iIsotopeRecord++)
-                {
-                    int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
-                    sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
-                    tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
-                    double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
-                    tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
-                    double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
-                    tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4);
-                    tmp += "\n";
-                }
-                qDebug() << sumAbund;
-                if (sumAbund != 100.0) Text += " Error: sum of abundances should be 100%\n";
-                else Text += tmp;
-                tmp += "\n";
-            }
-        }
+            MW->MpCollection->CheckElasticScatterElements(&MW->MpCollection->tmpMaterial, particleId, &Text);
     }
     message(Text, this);
 }

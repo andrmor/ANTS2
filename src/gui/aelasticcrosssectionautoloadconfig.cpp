@@ -4,6 +4,7 @@
 #include "globalsettingsclass.h"
 #include "afiletools.h"
 
+#include <QDoubleValidator>
 #include <QFileDialog>
 #include <QDebug>
 
@@ -13,6 +14,11 @@ AElasticCrossSectionAutoloadConfig::AElasticCrossSectionAutoloadConfig(GlobalSet
     ui->setupUi(this);
     ui->frame->setEnabled(false);
     ui->pbUpdateGlobSet->setVisible(false);
+
+    QDoubleValidator* val = new QDoubleValidator(this);
+    val->setBottom(0);
+    ui->ledMinEnergy->setValidator(val);
+    ui->ledMaxEnergy->setValidator(val);
 
     if (GlobSet->ElasticAutoSettings.isEmpty())
     {
@@ -80,9 +86,27 @@ bool AElasticCrossSectionAutoloadConfig::isAutoloadEnabled() const
     return ui->cbAuto->isEnabled();
 }
 
+bool AElasticCrossSectionAutoloadConfig::isEnergyRangeLimited() const
+{
+    return ui->cbOnlyInRange->isChecked();
+}
+
+double AElasticCrossSectionAutoloadConfig::getMinEnergy() const
+{
+    return ui->ledMinEnergy->text().toDouble();
+}
+
+double AElasticCrossSectionAutoloadConfig::getMaxEnergy() const
+{
+    return ui->ledMaxEnergy->text().toDouble();
+}
+
 void AElasticCrossSectionAutoloadConfig::writeToJson(QJsonObject &json) const
 {
     json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();
+    json["OnlyLoadEnergyInRange"] = ui->cbOnlyInRange->isChecked();
+    json["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
+    json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
     json["NaturalAbundanciesFile"] = ui->leNatAbundFile->text();
 
@@ -96,6 +120,9 @@ void AElasticCrossSectionAutoloadConfig::writeToJson(QJsonObject &json) const
 void AElasticCrossSectionAutoloadConfig::readFromJson(QJsonObject &json)
 {    
     JsonToComboBox(json, "CSunits", ui->cobUnitsForEllastic);
+    JsonToCheckbox (json, "OnlyLoadEnergyInRange", ui->cbOnlyInRange);
+    JsonToLineEditDouble(json, "MinEnergy", ui->ledMinEnergy);
+    JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);
 
     JsonToLineEditText(json, "NaturalAbundanciesFile", ui->leNatAbundFile);
 

@@ -22,6 +22,10 @@ public:
     const QString getFileName(QString Element, QString Mass) const;
     int           getCrossSectionLoadOption() const;
     bool          isAutoloadEnabled() const;
+    bool          isEnergyRangeLimited() const;
+    double        getMinEnergy() const;
+    double        getMaxEnergy() const;
+
     const QVector<QPair<int, double> > getIsotopes(QString ElementName) const; //empty vector - element not found; otherewise QVector<mass, abund>
 
     void setStarterDir(const QString starter) {StarterDir = starter;}

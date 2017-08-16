@@ -83,7 +83,7 @@ const QVector<QPair<int, double> > AElasticCrossSectionAutoloadConfig::getIsotop
 
 bool AElasticCrossSectionAutoloadConfig::isAutoloadEnabled() const
 {
-    return ui->cbAuto->isEnabled();
+    return ui->cbAuto->isChecked();
 }
 
 bool AElasticCrossSectionAutoloadConfig::isEnergyRangeLimited() const

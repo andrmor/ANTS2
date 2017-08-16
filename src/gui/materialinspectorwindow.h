@@ -10,6 +10,7 @@ class TGraph;
 class AElasticCrossSectionAutoloadConfig;
 class QJsonObject;
 class AElasticScatterElement;
+class QTreeWidgetItem;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -132,6 +133,10 @@ private slots:
     void on_actionUse_log_log_interpolation_triggered();
 
     //new auto-generated, not cathegorized
+
+    void on_twElastic_itemExpanded(QTreeWidgetItem *item);
+
+    void on_twElastic_itemCollapsed(QTreeWidgetItem *item);
 
 private:
     Ui::MaterialInspectorWindow *ui;

@@ -15,7 +15,7 @@ class AElasticElementDelegate : public QWidget
 public:
     AElasticElementDelegate(AElasticScatterElement* element, bool* bClearInProgress);
 
-    const AElasticScatterElement* getElement() const {return element;}
+    AElasticScatterElement* getElement() const {return element;}
 
 private:
     AElasticScatterElement *element;
@@ -45,7 +45,7 @@ class AElasticIsotopeDelegate : public QWidget
 public:
     AElasticIsotopeDelegate(AElasticScatterElement* element, bool* bClearInProgress);
 
-    const AElasticScatterElement* getElement() const {return element;}
+    AElasticScatterElement* getElement() const {return element;}
 
 private:
     AElasticScatterElement *element;

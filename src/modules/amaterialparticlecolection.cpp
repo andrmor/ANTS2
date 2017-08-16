@@ -839,7 +839,7 @@ QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial
                 double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
                 tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
                 double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
-                tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4);
+                tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4) + " cm-3";
                 tmp += "\n";
             }
             if (sumAbund != 100.0)

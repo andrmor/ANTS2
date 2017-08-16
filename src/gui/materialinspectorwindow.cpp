@@ -2611,6 +2611,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
             AElasticElementDelegate* elDel = new AElasticElementDelegate(&el, &bClearInProgress);
             ElItem = new QTreeWidgetItem(ui->twElastic);
             ui->twElastic->setItemWidget(ElItem, 0, elDel);
+            ElItem->setExpanded(el.bExpanded);
             QObject::connect(elDel, &AElasticElementDelegate::AutoClicked, this, &MaterialInspectorWindow::onAutoIsotopesClicked, Qt::QueuedConnection);
             QObject::connect(elDel, &AElasticElementDelegate::DelClicked, this, &MaterialInspectorWindow::onDelElementClicked, Qt::QueuedConnection);
             QObject::connect(elDel, &AElasticElementDelegate::RequestUpdateIsotopes, this, &MaterialInspectorWindow::onRequestUpdateIsotopes, Qt::QueuedConnection);            
@@ -2620,7 +2621,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         QTreeWidgetItem* twi = new QTreeWidgetItem();
         ElItem->addChild(twi);
         ui->twElastic->setItemWidget(twi, 0, isotopDel);
-        prevElName = el.Name;
+        prevElName = el.Name;        
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
@@ -2628,7 +2629,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
     }
 
-    ui->twElastic->expandAll();
+   //ui->twElastic->expandAll();
 }
 
 void MaterialInspectorWindow::onIsotopeDelClicked(const AElasticScatterElement *element)
@@ -2873,4 +2874,30 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
             MW->MpCollection->CheckElasticScatterElements(&MW->MpCollection->tmpMaterial, particleId, &Text);
     }
     message(Text, this);
+}
+
+void MaterialInspectorWindow::on_twElastic_itemExpanded(QTreeWidgetItem *item)
+{
+    QWidget* w = ui->twElastic->itemWidget(item, 0);
+    if (!w) return;
+
+    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
+    if (elDel)
+    {
+        elDel->getElement()->bExpanded = true;
+        return;
+    }
+}
+
+void MaterialInspectorWindow::on_twElastic_itemCollapsed(QTreeWidgetItem *item)
+{
+    QWidget* w = ui->twElastic->itemWidget(item, 0);
+    if (!w) return;
+
+    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
+    if (elDel)
+    {
+        elDel->getElement()->bExpanded = false;
+        return;
+    }
 }

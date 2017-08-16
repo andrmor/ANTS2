@@ -27,6 +27,8 @@ void AElasticScatterElement::writeToJson(QJsonObject &json)
         ar << el;
     }
     json["CrossSection"] = ar;
+
+    json["Expanded"] = bExpanded;
 }
 
 const QJsonObject AElasticScatterElement::writeToJson()
@@ -59,5 +61,7 @@ bool AElasticScatterElement::readFromJson(QJsonObject &json)
             CrossSection << el[1].toDouble();
         }
     }
+
+    parseJson(json, "Expanded", bExpanded);
     return true;
 }

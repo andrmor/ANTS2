@@ -456,12 +456,11 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     for (; iselected<elements.size(); iselected++)
                                       {
                                         const AElasticScatterElement& el = elements.at(iselected);
-                                        const double normalizedSW = el.StatWeight / term.sumStatWeight;
                                         const double crossSection = GetInterpolatedValue(energy,
                                                                                          &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
                                                                                          MpCollection->fLogLogInterpolation);
                                         // fraction of this element in the total cross section:
-                                        const double thisOne = (crossSection * normalizedSW) / TotalCrossSection;
+                                        const double thisOne = (crossSection * el.MolarFraction_runtime) / TotalCrossSection;
                                         //        qDebug() << "--checking element"<<iselected<<"fraction in total cross-section:"<<thisOne;
                                         if (rnd < thisOne) break;
                                         rnd -= thisOne;

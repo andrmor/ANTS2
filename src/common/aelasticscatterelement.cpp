@@ -42,11 +42,10 @@ bool AElasticScatterElement::readFromJson(QJsonObject &json)
 
     parseJson(json, "Name", Name);
     parseJson(json, "Mass", Mass);
-    Abundancy = 1.0;
+    Abundancy = 100.0;
     parseJson(json, "Abundancy", Abundancy);
     parseJson(json, "Fraction", Fraction);
     parseJson(json, "StatWeight", Fraction);
-    StatWeight = Abundancy * Fraction;
 
     Energy.clear();
     CrossSection.clear();

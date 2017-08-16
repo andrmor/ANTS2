@@ -2571,7 +2571,7 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbAddNewElement">
               <property name="geometry">
                <rect>
-                <x>108</x>
+                <x>50</x>
                 <y>150</y>
                 <width>100</width>
                 <height>23</height>
@@ -2715,7 +2715,7 @@ with the relative numeric fractions of 90 to 1.</string>
              <widget class="QPushButton" name="pbAddNewIsotope">
               <property name="geometry">
                <rect>
-                <x>218</x>
+                <x>160</x>
                 <y>150</y>
                 <width>100</width>
                 <height>23</height>
@@ -2723,6 +2723,19 @@ with the relative numeric fractions of 90 to 1.</string>
               </property>
               <property name="text">
                <string>Add isotope</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="pbShowStatisticsOnElastic">
+              <property name="geometry">
+               <rect>
+                <x>310</x>
+                <y>150</y>
+                <width>75</width>
+                <height>23</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Info</string>
               </property>
              </widget>
             </widget>

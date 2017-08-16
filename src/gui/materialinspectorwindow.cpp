@@ -2392,10 +2392,10 @@ void MaterialInspectorWindow::on_pbAddNewElement_clicked()
     NeutralTerminatorStructure& t = Terminators.last();
     t.Type = NeutralTerminatorStructure::ElasticScattering;
     AElasticScatterElement e;
-    e.Name = "Undefined";
+    e.Name = "--";
     e.Mass = 777;
     e.Fraction = 1;
-    e.Abundancy = 1.0;
+    e.Abundancy = 100.0;
     t.ScatterElements << e;
 
     on_pbUpdateElements_clicked();
@@ -2613,6 +2613,7 @@ void MaterialInspectorWindow::on_pbUpdateElements_clicked()
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
         QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
+        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
     }
 
     ui->twElastic->expandAll();
@@ -2841,4 +2842,64 @@ void MaterialInspectorWindow::doAddNewIsotope(int Index, QString name, double fr
     on_pbUpdateElements_clicked();
 
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+}
+
+void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
+{
+    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
+
+    QString Text;
+
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) Text = "No data";
+    else
+    {
+        NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+        if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty()) Text = "No elements/isotopes defined";
+        else
+        {
+            QVector< QVector<int> > ElementsAndIsotopes; // [Element][Isotope]
+            QString LastElementName = t.ScatterElements.first().Name;
+            QVector<int> isotopes;
+            isotopes << 0;
+            for (int iRecord = 1; iRecord<t.ScatterElements.size(); iRecord++)
+            {
+                if (t.ScatterElements.at(iRecord).Name != LastElementName)
+                {
+                    //new element
+                    ElementsAndIsotopes.append(isotopes);
+                    isotopes.clear();
+                    LastElementName = t.ScatterElements.at(iRecord).Name;
+                }
+                isotopes << iRecord;
+            }
+            ElementsAndIsotopes.append(isotopes);
+            qDebug() << ElementsAndIsotopes;
+
+            for (int iElementRecord=0; iElementRecord<ElementsAndIsotopes.size(); iElementRecord++)
+            {
+                int iElement = ElementsAndIsotopes.at(iElementRecord).first();
+                Text += t.ScatterElements.at(iElement).Name + ":\n";
+                double sumAbund = 0;
+                QString tmp;
+                for (int iIsotopeRecord=0; iIsotopeRecord<ElementsAndIsotopes.at(iElementRecord).size(); iIsotopeRecord++)
+                {
+                    int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
+                    sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
+                    tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
+                    double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
+                    tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
+                    double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
+                    tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4);
+                    tmp += "\n";
+                }
+                qDebug() << sumAbund;
+                if (sumAbund != 100.0) Text += " Error: sum of abundances should be 100%\n";
+                else Text += tmp;
+                tmp += "\n";
+            }
+        }
+    }
+    message(Text, this);
 }

@@ -6,20 +6,26 @@
 
 class QJsonObject;
 
-class AElasticScatterElement
+class AElasticScatterElement  //rename to AElasticScatterIsotope ?
 {
 public:
     QString Name;
     int Mass;
-    double Abundancy;   // [0, 1]
-    double Fraction;
-    double StatWeight;  // = Abundancy * Fraction
+    double Abundancy;   // [0, 100] - abundancy of this isotope in %
+    double Fraction;    // Relative quantity of this element in the material - applies to all isotopes of the same element!
+
     QVector<double> Energy;
     QVector<double> CrossSection;
 
+    //runtime properties
+    double MolarFraction_runtime;  // = Abundancy * Fraction / Sum (Abundancy * Fraction) over all elements
+
+    //gui-only
+    bool bExpanded;
+
     AElasticScatterElement(QString ElementName, int Mass, double Abundancy, double Fraction) :
-        Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), StatWeight(Abundancy*Fraction) {}
-    AElasticScatterElement() {}
+        Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), bExpanded(true) {}
+    AElasticScatterElement() : bExpanded(true) {}
 
     bool operator==(const AElasticScatterElement& other) const;
 

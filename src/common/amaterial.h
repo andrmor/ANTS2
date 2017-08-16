@@ -80,7 +80,6 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<double> PartialCrossSectionEnergy;
   double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
   double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
-  double sumStatWeight;     //runtime for neutrons - sum of stat weights of all elements
 
   // for capture
   QVector<int> GeneratedParticles;

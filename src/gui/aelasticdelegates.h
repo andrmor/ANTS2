@@ -57,7 +57,6 @@ private:
     QPushButton* pbShow;
 
     void updateButtons();
-    void updateToolTip();
 
 private slots:
     void onShowClicked();

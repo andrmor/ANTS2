@@ -731,8 +731,6 @@ QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPa
               {
                   if (term.ScatterElements.isEmpty())
                       return QString("No elements defined for neutron ellastic scattering for ") + mat->name;
-                  if (term.sumStatWeight == 0)
-                      return QString("Sum stat weight is zero for neutron ellastic scattering for ") + mat->name;
                   if (term.MeanElementMass == 0)
                       return QString("Mean element weight is zero for neutron ellastic scattering for ") + mat->name;
               }

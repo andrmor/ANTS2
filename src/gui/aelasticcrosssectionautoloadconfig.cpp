@@ -64,7 +64,7 @@ const QVector<QPair<int, double> > AElasticCrossSectionAutoloadConfig::getIsotop
         Element.remove(QRegExp("[0-9]"));
         //qDebug() << Element << Mass << Abundancy;
         tmp.clear();
-        tmp << QPair<int, double>(Mass, 0.01*Abundancy);
+        tmp << QPair<int, double>(Mass, Abundancy);
         if (IsotopeMap.contains(Element)) (IsotopeMap[Element]) << tmp;
         else IsotopeMap[Element] = tmp;
     }

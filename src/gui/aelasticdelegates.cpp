@@ -71,14 +71,13 @@ AElasticIsotopeDelegate::AElasticIsotopeDelegate(AElasticScatterElement *element
     element(element), bClearInProgress(bClearInProgress)
 {
     leiMass = new QLineEdit( QString::number(element->Mass) );
-    ledAbund = new QLineEdit( QString::number(element->Abundancy*100.0, 'g', 4) );    
+    ledAbund = new QLineEdit( QString::number(element->Abundancy, 'g', 4) );
     pbShow = new QPushButton("Show");
     pbLoad = new QPushButton("Load");
     QPushButton* pbDel = new QPushButton("X");
     pbDel->setMaximumWidth(25);
 
     updateButtons();
-    updateToolTip();
 
     QHBoxLayout* lay = new QHBoxLayout();
     {
@@ -131,14 +130,6 @@ void AElasticIsotopeDelegate::updateButtons()
     pbLoad->setStyleSheet(s);
 }
 
-void AElasticIsotopeDelegate::updateToolTip()
-{
-    element->StatWeight = element->Fraction * element->Abundancy;
-    QString str = "Molar fraction of this isotope: ";
-    str += QString::number(element->StatWeight);
-    setToolTip(str);
-}
-
 void AElasticIsotopeDelegate::onShowClicked()
 {
     if (*bClearInProgress) return;
@@ -173,9 +164,7 @@ void AElasticIsotopeDelegate::onChanged()
       element->Energy.clear();
       updateButtons();
     }
-    element->Abundancy = 0.01 * newAb;
-
-    updateToolTip();
+    element->Abundancy = newAb;
 
     emit RequestActivateModifiedStatus();
 }

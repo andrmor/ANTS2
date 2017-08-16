@@ -45,13 +45,15 @@ private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
 
-    //on user input
+    //requests from elastic element delegates
     void onShowElementCrossClicked(const AElasticScatterElement *element);
     void onLoadElementCrossClicked(AElasticScatterElement *element);
     void onIsotopeDelClicked(const AElasticScatterElement *element);
     void onAutoIsotopesClicked(AElasticScatterElement *element);
     void onDelElementClicked(AElasticScatterElement *element);
     void onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction);
+
+    //on user input    
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
     void on_pbShowTotalInteraction_clicked();
     void on_leName_editingFinished();
@@ -111,6 +113,9 @@ private slots:
     void on_cobTerminationScenarios_activated(int index);
     void on_ledMFPenergyEllastic_editingFinished();
     void on_pbShowTotalEllastic_clicked();
+    void on_pbConfigureAutoElastic_clicked();
+    void on_pbAddNewIsotope_clicked();
+    void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
@@ -127,11 +132,6 @@ private slots:
     void on_actionUse_log_log_interpolation_triggered();
 
     //new auto-generated, not cathegorized
-
-    void on_pbConfigureAutoElastic_clicked();
-
-
-    void on_pbAddNewIsotope_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;

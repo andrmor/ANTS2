@@ -166,6 +166,7 @@ private:
     bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
     int findElement(const AElasticScatterElement *element) const;
     void doAddNewIsotope(int Index, QString name, double fraction);
+    QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

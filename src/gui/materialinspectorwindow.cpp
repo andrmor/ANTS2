@@ -2672,47 +2672,59 @@ int MaterialInspectorWindow::findElement(const AElasticScatterElement *element) 
 
 void MaterialInspectorWindow::onAutoIsotopesClicked(AElasticScatterElement *element)
 {
-    int iThisElement = findElement(element);
-    if (iThisElement == -1) return;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-
-    QString ElementName = t.ScatterElements.at(iThisElement).Name;
-    double Fraction = t.ScatterElements.at(iThisElement).Fraction;
-    const QVector<QPair<int, double> > isotopes = ElasticConfig->getIsotopes(ElementName);
-
-    if (isotopes.isEmpty())
+    //      qDebug() << "Auto click on element processing started";
+    QString error = doAutoConfigureElement(element);
+    if (!error.isEmpty())
     {
-        message("Data for element " + ElementName + " not found!", this);
+        message(error, this);
         return;
     }
-    //      qDebug() << isotopes;
 
-    //removing defined isotopes
-    for (;iThisElement<t.ScatterElements.size();) //no increment!
-    {
-        if (t.ScatterElements.at(iThisElement).Name != ElementName) break;
-        //      qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
-        t.ScatterElements.removeAt(iThisElement);
-        //      qDebug() << "====== elements left:"<<t.ScatterElements.size();
-    }
-
-    //adding elements
-    for (int i=0; i<isotopes.size(); i++)
-    {
-        //      qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
-        AElasticScatterElement se(ElementName, isotopes.at(i).first, isotopes.at(i).second, Fraction);
-        autoLoadElasticCrossSection(&se);
-        t.ScatterElements.insert(iThisElement+i, se);
-    }
     //      qDebug() << "Auto click processing finished, updating...";
     on_pbWasModified_clicked();
     on_pbUpdateElements_clicked();
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
     //      qDebug() << "...update after auto click finished!";
 }
+
+QString MaterialInspectorWindow::doAutoConfigureElement(AElasticScatterElement *element)
+{
+  int iThisElement = findElement(element);
+  if (iThisElement == -1) return "Element not found";
+
+  int particleId = ui->cobParticle->currentIndex();
+  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
+
+  QString ElementName = t.ScatterElements.at(iThisElement).Name;
+  double Fraction = t.ScatterElements.at(iThisElement).Fraction;
+  const QVector<QPair<int, double> > isotopes = ElasticConfig->getIsotopes(ElementName);
+
+  if (isotopes.isEmpty())
+      return QString("Data for element ") + ElementName + " not found!";
+
+  //removing defined isotopes
+  for (;iThisElement<t.ScatterElements.size();) //no increment!
+  {
+      if (t.ScatterElements.at(iThisElement).Name != ElementName) break;
+      //      qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
+      t.ScatterElements.removeAt(iThisElement);
+      //      qDebug() << "====== elements left:"<<t.ScatterElements.size();
+  }
+
+  //adding elements
+  for (int i=0; i<isotopes.size(); i++)
+  {
+      //      qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
+      AElasticScatterElement se(ElementName, isotopes.at(i).first, isotopes.at(i).second, Fraction);
+      se.bExpanded = false;
+      bool bOK = autoLoadElasticCrossSection(&se);
+      t.ScatterElements.insert(iThisElement+i, se);
+      if (!bOK) t.ScatterElements[iThisElement].bExpanded = true;
+  }
+  return "";
+}
+
 
 void MaterialInspectorWindow::onDelElementClicked(AElasticScatterElement *element)
 {
@@ -2857,7 +2869,6 @@ void MaterialInspectorWindow::doAddNewIsotope(int Index, QString name, double fr
 
     on_pbWasModified_clicked();
     on_pbUpdateElements_clicked();
-
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
 }
 
@@ -3037,4 +3048,31 @@ void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
 
     }
     qDebug() << map;
+
+    //filling isotopes
+    int particleId = ui->cobParticle->currentIndex();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    if (Terminators.isEmpty()) Terminators.resize(1);
+    else if ( Terminators.last().Type != NeutralTerminatorStructure::ElasticScattering)
+        Terminators.resize( tmpMaterial.MatParticle[particleId].Terminators.size() + 1 );
+
+    NeutralTerminatorStructure& t = Terminators.last();
+    t.Type = NeutralTerminatorStructure::ElasticScattering;
+
+    QList<QString> Elements = map.keys();
+    for (int iEl = 0; iEl<Elements.size(); iEl++)
+      {
+        QString Element = Elements.at(iEl);
+        double Fraction = map[Element];
+        qDebug() << Element << Fraction;
+
+        t.ScatterElements << AElasticScatterElement(Element, 777, 0, Fraction);
+        doAutoConfigureElement(&t.ScatterElements.last());
+      }
+
+    on_pbUpdateElements_clicked();
+    on_pbWasModified_clicked();
+    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
 }

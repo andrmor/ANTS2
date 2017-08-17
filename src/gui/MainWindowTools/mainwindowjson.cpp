@@ -276,13 +276,13 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
 
 void MainWindow::onRequestSimulationGuiUpdate()
 {
-    //qDebug() << "SimJson->SimGUI";
+    //      qDebug() << "SimJson->SimGUI";
     MainWindow::readSimSettingsFromJson(Config->JSON);
 }
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  //qDebug() << "Read sim from json and update sim gui";
+  //        qDebug() << "Read sim from json and update sim gui";
   if (!json.contains("SimulationConfig"))
     {
       //qWarning() << "Json does not contain sim settings!";

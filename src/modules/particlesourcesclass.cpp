@@ -31,7 +31,7 @@ ParticleSourcesClass::~ParticleSourcesClass()
 void ParticleSourcesClass::clear()
 {
     for (int i=0; i<ParticleSourcesData.size(); i++) delete ParticleSourcesData[i];
-    ParticleSourcesData.resize(0);
+    ParticleSourcesData.clear();
     TotalActivity = 0;
 }
 
@@ -713,10 +713,10 @@ bool ParticleSourcesClass::readFromJson(QJsonObject &json)
       return false;
     }
 
-  int size = ar.size();
-  //qDebug() << "    Sources in json:"<< size;
+  //        qDebug() << "    Sources in json:"<< ar.size();
   ParticleSourcesClass::clear();
-  for (int iSource =0; iSource<size; iSource++)
+
+  for (int iSource =0; iSource<ar.size(); iSource++)
     {
       QJsonObject json = ar[iSource].toObject();
       bool fOK = readSourceFromJson(-1, json);
@@ -727,6 +727,7 @@ bool ParticleSourcesClass::readFromJson(QJsonObject &json)
           return false;
         }
     }
+
   return true;
 }
 

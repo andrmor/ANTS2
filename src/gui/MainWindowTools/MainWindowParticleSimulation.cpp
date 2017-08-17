@@ -723,12 +723,11 @@ void MainWindow::on_pbAddSource_clicked()
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
-{  
+{
   int isource = ui->cobParticleSource->currentIndex();
-  //qDebug() << "________ updates particle sources triggered. Source#:"<<isource;
   if (isource<0)
     {
-      qWarning() << "Attempt to update source with number <0";
+      //qWarning() << "Attempt to update source with number <0";
       return;
     }
 

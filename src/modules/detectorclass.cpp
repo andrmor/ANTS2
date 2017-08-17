@@ -128,7 +128,7 @@ bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
   return BuildDetector();
 }
 
-bool DetectorClass::BuildDetector()
+bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
 {  
     //qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
@@ -162,7 +162,7 @@ bool DetectorClass::BuildDetector()
 
   //request GUI update
   Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
-  Config->AskForSimulationGuiUpdate();
+  if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
   //emit requestClearEventsData();
 
   return fOK;

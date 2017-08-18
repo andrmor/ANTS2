@@ -842,7 +842,7 @@ QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial
                 tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4) + " cm-3";
                 tmp += "\n";
             }
-            if (sumAbund != 100.0)
+            if ( fabs(sumAbund - 100.0) > 0.001 )
             {
                 Text += " Error: sum of abundances should be 100%\n";
                 if (error.isEmpty())

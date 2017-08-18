@@ -2998,11 +2998,11 @@ void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
                         return;
                     }
                     Element = tmp;
-                    if (c == ":")
+                    if (c == ":" || (c.isLetter() && c.isUpper()))
                     {
                         if (map.contains(Element)) map[Element] += weight * 1.0;
                         else map[Element] = weight * 1.0;
-                        break;
+                        if (c == ":") break;
                     }
                     tmp = QString(c);
                     if (c.isDigit()) bReadingElementName = false;

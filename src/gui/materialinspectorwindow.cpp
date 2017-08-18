@@ -2227,7 +2227,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
   if (str.isEmpty()) return;
 
   QStringList elList = str.split(QRegExp("\\+"));
-  qDebug() << elList<<elList.size();
+  //    qDebug() << elList<<elList.size();
 
   QString compo;
   for (QString el : elList)
@@ -2240,23 +2240,23 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
       else
         compo += wList.at(0) + " 1";
     }
-  qDebug() << compo;
+  //    qDebug() << compo;
 
   QString pack = "Formulae="+compo+"&Name="+str+"&Energies="+"&Output=on";
-  QString Url = "https://physics.nist.gov/cgi-bin/Xcom/xcom3_3-t";
+  QString Url = "https://physics.nist.gov/cgi-bin/Xcom/xcom3_3-t";   // xcom site: http -> https changed!
   QString Reply;
 
   AInternetBrowser b(3000); //  *** !!! absoluite value - 3s timeout
   MW->WindowNavigator->BusyOn();
   bool fOK = b.Post(Url, pack, Reply);
-  qDebug() << "Post result:"<<fOK;
+  //    qDebug() << "Post result:"<<fOK;
   MW->WindowNavigator->BusyOff();
   if (!fOK)
     {
       message("Operation failed:\n"+b.GetLastError(), this);
       return;
     }
-  qDebug() << Reply;
+  //    qDebug() << Reply;
 
   if (Reply.contains("Error: Unable to parse formula"))
     {

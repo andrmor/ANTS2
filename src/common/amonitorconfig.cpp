@@ -20,6 +20,7 @@ AMonitorConfig::AMonitorConfig()
 
     xbins = ybins = timeBins = angleBins = waveBins = energyBins = 100;
     timeFrom = timeTo = angleFrom = waveFrom = waveTo = energyFrom = energyTo = 0;
+    energyUnitsInHist = 2; // 0,1,2,3 -> meV, eV, keV, MeV
     angleTo = 90.0;
 }
 
@@ -57,6 +58,7 @@ void AMonitorConfig::writeToJson(QJsonObject &json)
    json["energyBins"] = energyBins;
    json["energyFrom"] = energyFrom;
    json["energyTo"] = energyTo;
+   json["energyUnitsInHist"] = energyUnitsInHist;
 }
 
 void AMonitorConfig::readFromJson(QJsonObject &json)
@@ -93,4 +95,5 @@ void AMonitorConfig::readFromJson(QJsonObject &json)
     parseJson(json, "energyBins", energyBins);
     parseJson(json, "energyFrom", energyFrom);
     parseJson(json, "energyTo", energyTo);
+    parseJson(json, "energyUnitsInHist", energyUnitsInHist);
 }

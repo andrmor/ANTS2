@@ -28,6 +28,7 @@ public:
     int angleBins; double angleFrom; double angleTo;
     int waveBins; double waveFrom; double waveTo;
     int energyBins; double energyFrom; double energyTo;
+    int energyUnitsInHist;
 
     void writeToJson(QJsonObject &json);
     void readFromJson(QJsonObject &json);

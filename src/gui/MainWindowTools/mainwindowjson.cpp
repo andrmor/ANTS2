@@ -344,6 +344,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToLineEditDouble(trj, "MaxStep", ui->ledMaxStep);
   JsonToLineEditDouble(trj, "dE", ui->ledDE);
   JsonToLineEditDouble(trj, "MinEnergy", ui->ledMinEnergy);
+  JsonToLineEditDouble(trj, "MinEnergyNeutrons", ui->ledMinEnergyNeutrons);
   JsonToLineEditDouble(trj, "Safety", ui->ledSafety);
   JsonToSpinBox(trj, "TrackColorAdd", ui->sbParticleTrackColorIndexAdd);
   //Accelerators

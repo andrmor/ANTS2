@@ -479,7 +479,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double va[3];
                                 const double m = elements.at(iselected).Mass; //mass of atom in atomic units
                                 //        qDebug() << "atom - mass:"<<m;
-                                double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);
+                                double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
                                 for (int i=0; i<3; i++)
                                     va[i] = RandGen->Gaus(0, a); //maxwell!
                                 //        qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
@@ -502,12 +502,23 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 double newEnergy = 0.52270e-11 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
                                 //        qDebug() << "new neutron velocity and energy:"<<vnewMod<<newEnergy;
 
-                                AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
-                                ParticleStack->append(tmp);
+                                if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV to compare
+                                {
+                                    AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
+                                    ParticleStack->append(tmp);
+                                    energyHistory = energy - newEnergy;
+                                }
+                                else
+                                {
+                                    qDebug() << "Elastic scattering: Neutron energy" << newEnergy * 1.0e6 <<
+                                                "is below the lower limit (" << SimSet->MinEnergyNeutrons<<
+                                                "meV) - tracking skipped for this neutron";
+                                    energyHistory = energy;
+                                }
 
                                 terminationStatus = EventHistoryStructure::EllasticScattering;
                                 distanceHistory = SoFarShortest;
-                                energyHistory = energy - newEnergy;
+
                                 break; //switch-break
                               }
                             }

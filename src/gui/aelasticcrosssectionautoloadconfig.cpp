@@ -101,6 +101,11 @@ double AElasticCrossSectionAutoloadConfig::getMaxEnergy() const
     return ui->ledMaxEnergy->text().toDouble();
 }
 
+const QString AElasticCrossSectionAutoloadConfig::getNatAbundFileName() const
+{
+    return ui->leNatAbundFile->text();
+}
+
 void AElasticCrossSectionAutoloadConfig::writeToJson(QJsonObject &json) const
 {
     json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();

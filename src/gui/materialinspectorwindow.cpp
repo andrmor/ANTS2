@@ -3076,3 +3076,13 @@ void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
     on_pbWasModified_clicked();
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
 }
+
+#include "amaterialcomposition.h"
+void MaterialInspectorWindow::on_pushButton_clicked()
+{
+    AMaterialComposition mc(ElasticConfig->getNatAbundFileName());
+    QString error = mc.setCompositionString(ui->leMaterialComposition->text());
+
+    if (error.isEmpty()) message(mc.print(), this);
+    else message(error, this);
+}

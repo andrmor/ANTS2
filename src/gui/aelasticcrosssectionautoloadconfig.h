@@ -25,6 +25,7 @@ public:
     bool          isEnergyRangeLimited() const;
     double        getMinEnergy() const;
     double        getMaxEnergy() const;
+    const QString getNatAbundFileName() const;
 
     const QVector<QPair<int, double> > getIsotopes(QString ElementName) const; //empty vector - element not found; otherewise QVector<mass, abund>
 

@@ -255,7 +255,8 @@ SOURCES += main.cpp \
     common/apeakfinder.cpp \
     gui/aelasticcrosssectionautoloadconfig.cpp \
     gui/aelasticdelegates.cpp \
-    common/aelasticscatterelement.cpp
+    common/aelasticscatterelement.cpp \
+    common/amaterialcomposition.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -366,7 +367,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/apeakfinder.h \
     gui/aelasticcrosssectionautoloadconfig.h \
     gui/aelasticdelegates.h \
-    common/aelasticscatterelement.h
+    common/aelasticscatterelement.h \
+    common/amaterialcomposition.h
 
 # --- SIM ---
 ants2_SIM {

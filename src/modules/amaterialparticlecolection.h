@@ -32,7 +32,7 @@ private:
 public:
   //configuration
   void SetWave(bool wavelengthResolved, double waveFrom, double waveTo, double waveStep, int waveNodes);
-  void updateWaveProperties(GeneralSimSettings *SimSet);
+  void UpdateBeforeSimulation(GeneralSimSettings *SimSet);
 
   //info requests
     //materials
@@ -58,6 +58,7 @@ public:
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
+  void UpdateNeutronProperties(int imat);  //update neutron run-time properties
 
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
@@ -68,7 +69,7 @@ public:
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!
   void CopyTmpToMaterialCollection(); //creates a copy of all pointers // true is new material was added to material collection
   void CopyMaterialToTmp(int imat);
-  void RecalculateCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
+  void RecalculateCaptureCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
 
   //json write/read handling
   void writeToJson(QJsonObject &json);
@@ -82,11 +83,13 @@ public:
   int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);
   int findOrCreateParticle(QJsonObject &json);
 
-  int CheckMaterial(AMaterial* mat, int iPart); //0 - check passed, see cpp file for possible error codes
-  int CheckMaterial(int iMat, int iPart); //0 - check passed, see cpp file for possible error codes
-  int CheckMaterial(int iMat); //0 - check passed, see cpp file for possible error codes
-  int CheckTmpMaterial(); //0 - check passed, see cpp file for possible error codes
-  QString getErrorString(int iError);
+  QString CheckMaterial(const AMaterial *mat, int iPart) const; //"" - check passed, otherwise error
+  QString CheckMaterial(int iMat, int iPart) const;       //"" - check passed, otherwise error
+  QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
+  QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
+
+  QString CheckElasticScatterElements(const AMaterial *mat, int iPart, QString* Report) const;
+
 
   int CheckParticleEnergyInRange(int iPart, double Energy); //check all materials - if this particle is tracable and mat is not-tansparent,
   //check that the particle energy is withing the defined energy range of the total interaction.

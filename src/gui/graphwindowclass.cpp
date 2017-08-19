@@ -328,10 +328,6 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   connect(ui->cbRulerTicksLength, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowTicks(bool)));
   connect(ui->cbRulerShowBG, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowContrast(bool)));
 
-  ui->lwBasket->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(ui->lwBasket, SIGNAL(customContextMenuRequested(const QPoint &)),
-          this,           SLOT(contextMenuBasket(const QPoint &)));
-
   ui->fBasket->setVisible(false);
 }
 
@@ -2428,8 +2424,8 @@ void GraphWindowClass::on_pbBasketBackToLast_clicked()
    ui->lwBasket->clearSelection();
 }
 
-void GraphWindowClass::contextMenuBasket(const QPoint &pos)
-{  
+void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
+{
   QMenu BasketMenu;
   int row = -1;
 
@@ -2477,7 +2473,8 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
   BasketMenu.addSeparator();
   QAction* append = BasketMenu.addAction("Append basket file");
   QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
-  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");   
+  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");
+  QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs and histograms from ROOT file");
 
   BasketMenu.addSeparator();
   QAction* clear = BasketMenu.addAction("Clear basket");
@@ -2578,6 +2575,11 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
       AppendBasket();
       UpdateBasketGUI();
     }
+  else if (selectedItem == appendRootHistsAndGraphs)
+  {
+      AppendRootHistsOrGraphs();
+      UpdateBasketGUI();
+  }
   else if (selectedItem == appendTxt)
     {
       qDebug() << "Appending txt file as graph to basket";
@@ -2955,7 +2957,7 @@ void GraphWindowClass::AppendBasket()
                       qWarning() << "Unregistered object type" << type <<"for load basket from file!";
                     }
                 }
-              Basket.append(BasketItemClass(name, drawObjects));
+              if (!drawObjects->isEmpty()) Basket.append(BasketItemClass(name, drawObjects));
 
             }
         }
@@ -2969,6 +2971,59 @@ void GraphWindowClass::AppendBasket()
       message("It is not a proper Basket file!", this);
     }
   f->Close();
+}
+
+void GraphWindowClass::AppendRootHistsOrGraphs()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    TFile* f = new TFile(c_str);
+
+    const int numKeys = f->GetListOfKeys()->GetEntries();
+    qDebug() << "File contains" << numKeys << "TKeys";
+
+    for (int i=0; i<numKeys; i++)
+    {
+        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        QString Type = key->GetClassName();
+        QString Name = key->GetName();
+        qDebug() << i << Type << Name;
+
+        if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
+        {
+            QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
+            TObject *p = 0;
+
+            if (Type=="TH1D") p = (TH1D*)key->ReadObj();
+            else if (Type=="TH1I") p = (TH1I*)key->ReadObj();
+            else if (Type=="TH1F") p = (TH1F*)key->ReadObj();
+            else if (Type=="TH2D") p = (TH2D*)key->ReadObj();
+            else if (Type=="TH2F") p = (TH2F*)key->ReadObj();
+            else if (Type=="TH2I") p = (TH2I*)key->ReadObj();
+
+            else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
+            else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+
+            else if (Type=="TGraph2D") p = (TGraph2D*)key->ReadObj();
+            else if (Type=="TGraph") p = (TGraph*)key->ReadObj();
+            else if (Type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
+
+            if (p)
+            {
+                drawObjects->append(DrawObjectStructure(p, ""));
+                Basket.append(BasketItemClass(Name, drawObjects));
+                qDebug() << "  appended";
+            }
+            else qWarning() << "Unregistered object type" << Type <<"for load basket from file!";
+        }
+        else qDebug() << "  ignored";
+    }
+
+    f->Close();
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()

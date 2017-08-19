@@ -5125,16 +5125,16 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   //general
   QJsonObject gjson = RecJson["General"].toObject();
   JsonToCheckbox(gjson, "ReconstructEnergy", ui->cbReconstructEnergy);
-  JsonToLineEdit(gjson, "InitialEnergy", ui->ledSuggestedEnergy);
+  JsonToLineEditDouble(gjson, "InitialEnergy", ui->ledSuggestedEnergy);
   JsonToCheckbox(gjson, "ReconstructZ", ui->cb3Dreconstruction);
-  JsonToLineEdit(gjson, "InitialZ", ui->ledSuggestedZ);
+  JsonToLineEditDouble(gjson, "InitialZ", ui->ledSuggestedZ);
   ui->cobZ->setCurrentIndex(0); //compatibility
   JsonToComboBox(gjson, "Zstrategy", ui->cobZ);
   JsonToCheckbox(gjson, "IncludePassives", ui->cbIncludePassives);
   JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);  
   ui->cbLimitSearchToVicinity->setChecked(false); //compatibility
   JsonToCheckbox(gjson, "LimitSearchIfTrueIsSet", ui->cbLimitSearchToVicinity);
-  JsonToLineEdit(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
+  JsonToLineEditDouble(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
   JsonToCheckbox(gjson, "LimitSearchGauss", ui->cbGaussWeightInMinimization);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
@@ -5142,10 +5142,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject dynPassJson = RecJson["DynamicPassives"].toObject();
       JsonToCheckbox(dynPassJson, "IgnoreBySignal", ui->cbDynamicPassiveBySignal);
-      JsonToLineEdit(dynPassJson, "SignalLimitLow", ui->ledDynamicPassiveThresholdLow);
-      JsonToLineEdit(dynPassJson, "SignalLimitHigh", ui->ledDynamicPassiveThresholdHigh);
+      JsonToLineEditDouble(dynPassJson, "SignalLimitLow", ui->ledDynamicPassiveThresholdLow);
+      JsonToLineEditDouble(dynPassJson, "SignalLimitHigh", ui->ledDynamicPassiveThresholdHigh);
       JsonToCheckbox(dynPassJson, "IgnoreByDistance", ui->cbDynamicPassiveByDistance);
-      JsonToLineEdit(dynPassJson, "DistanceLimit", ui->ledPassiveRange);
+      JsonToLineEditDouble(dynPassJson, "DistanceLimit", ui->ledPassiveRange);
     }
   else
     {
@@ -5190,27 +5190,27 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   QJsonObject cogjson = ajson["CoGoptions"].toObject();
   JsonToCheckbox(cogjson, "ForceFixedZ", ui->cbForceCoGgiveZof);
   JsonToCheckbox(cogjson, "DoStretch", ui->cbCoGapplyStretch);
-  JsonToLineEdit(cogjson, "StretchX", ui->ledCoGstretchX);
-  JsonToLineEdit(cogjson, "StretchY", ui->ledCoGstretchY);
-  JsonToLineEdit(cogjson, "StretchZ", ui->ledCoGstretchZ);
+  JsonToLineEditDouble(cogjson, "StretchX", ui->ledCoGstretchX);
+  JsonToLineEditDouble(cogjson, "StretchY", ui->ledCoGstretchY);
+  JsonToLineEditDouble(cogjson, "StretchZ", ui->ledCoGstretchZ);
   ui->cbCogIgnoreLow->setChecked(false);
   JsonToCheckbox(cogjson, "IgnoreLow", ui->cbCogIgnoreLow); //compatibility
   JsonToCheckbox(cogjson, "IgnoreBySignal", ui->cbCogIgnoreLow);
-  JsonToLineEdit(cogjson, "IgnoreThreshold", ui->ledCoGignoreLevelLow); //compatibility
-  JsonToLineEdit(cogjson, "IgnoreThresholdLow", ui->ledCoGignoreLevelLow);
+  JsonToLineEditDouble(cogjson, "IgnoreThreshold", ui->ledCoGignoreLevelLow); //compatibility
+  JsonToLineEditDouble(cogjson, "IgnoreThresholdLow", ui->ledCoGignoreLevelLow);
   ui->ledCoGignoreLevelHigh->setText("1e10"); //compatibility
-  JsonToLineEdit(cogjson, "IgnoreThresholdHigh", ui->ledCoGignoreLevelHigh);
+  JsonToLineEditDouble(cogjson, "IgnoreThresholdHigh", ui->ledCoGignoreLevelHigh);
   ui->cbCoGIgnoreFar->setChecked(false); //compatibility
   JsonToCheckbox(cogjson, "IgnoreFar", ui->cbCoGIgnoreFar);
-  JsonToLineEdit(cogjson, "IgnoreDistance", ui->ledCoGignoreThreshold);
+  JsonToLineEditDouble(cogjson, "IgnoreDistance", ui->ledCoGignoreThreshold);
     //MG
   QJsonObject gcpuJson = ajson["CPUgridsOptions"].toObject();
   JsonToComboBox(gcpuJson, "StartOption", ui->cobCGstartOption);
   JsonToComboBox(gcpuJson, "OptimizeWhat", ui->cobCGoptimizeWhat);
   JsonToSpinBox(gcpuJson, "NodesXY", ui->sbCGnodes);
   JsonToSpinBox(gcpuJson, "Iterations", ui->sbCGiter);
-  JsonToLineEdit(gcpuJson, "InitialStep", ui->ledCGstartStep);
-  JsonToLineEdit(gcpuJson, "Reduction", ui->ledCGreduction);
+  JsonToLineEditDouble(gcpuJson, "InitialStep", ui->ledCGstartStep);
+  JsonToLineEditDouble(gcpuJson, "Reduction", ui->ledCGreduction);
   //JsonToCheckbox(gcpuJson, "DynamicPassives", ui->cbDynamicPassives);
   //JsonToComboBox(gcpuJson, "PassiveType", ui->cobDynamicPassiveType);
   //compatibility
@@ -5228,10 +5228,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   JsonToComboBox(rootJson, "StartOption", ui->cobLSstartingXY);
   JsonToComboBox(rootJson, "Minuit2Option", ui->cobMinuit2Option);
   JsonToComboBox(rootJson, "LSorLikelihood", ui->cobLSminimizeWhat);
-  JsonToLineEdit(rootJson, "StartStepX", ui->ledInitialStepX);
-  JsonToLineEdit(rootJson, "StartStepY", ui->ledInitialStepY);
-  JsonToLineEdit(rootJson, "StartStepZ", ui->ledInitialStepZ);
-  JsonToLineEdit(rootJson, "StartStepEnergy", ui->ledInitialStepEnergy);
+  JsonToLineEditDouble(rootJson, "StartStepX", ui->ledInitialStepX);
+  JsonToLineEditDouble(rootJson, "StartStepY", ui->ledInitialStepY);
+  JsonToLineEditDouble(rootJson, "StartStepZ", ui->ledInitialStepZ);
+  JsonToLineEditDouble(rootJson, "StartStepEnergy", ui->ledInitialStepEnergy);
   JsonToSpinBox(rootJson, "MaxCalls", ui->sbLSmaxCalls);
   JsonToCheckbox(rootJson, "LSsuppressConsole", ui->cbLSsuppressConsole);
   //JsonToCheckbox(rootJson, "DynamicPassives", ui->cbDynamicPassives);
@@ -5255,10 +5255,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   QJsonObject cudaJson = ajson["CGonCUDAsettings"].toObject();
   JsonToSpinBox(cudaJson, "ThreadBlockXY", ui->sbCUDAthreadBlockSize);
   JsonToSpinBox(cudaJson, "Iterations", ui->sbCUDAiterations);
-  JsonToLineEdit(cudaJson, "StartStep", ui->ledCUDAstartStep);
-  JsonToLineEdit(cudaJson, "ScaleReduction", ui->ledCUDAscaleReductionFactor);
-  JsonToLineEdit(cudaJson, "StartX", ui->ledCUDAxoffset);
-  JsonToLineEdit(cudaJson, "StartY", ui->ledCUDAyoffset);
+  JsonToLineEditDouble(cudaJson, "StartStep", ui->ledCUDAstartStep);
+  JsonToLineEditDouble(cudaJson, "ScaleReduction", ui->ledCUDAscaleReductionFactor);
+  JsonToLineEditDouble(cudaJson, "StartX", ui->ledCUDAxoffset);
+  JsonToLineEditDouble(cudaJson, "StartY", ui->ledCUDAyoffset);
   JsonToComboBox(cudaJson, "StartOption", ui->cobCUDAoffsetOption);
   JsonToComboBox(cudaJson, "OptimizeMLChi2", ui->cobCUDAminimizeWhat);
   //compatibility
@@ -5277,9 +5277,9 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
                parseJson(cudaJson, "PassiveOption", SignalDistance);
                if (SignalDistance==0) ui->cbDynamicPassiveBySignal->setChecked(true);
                else ui->cbDynamicPassiveByDistance->setChecked(true);
-               JsonToLineEdit(cudaJson, "Threshold", ui->ledDynamicPassiveThresholdLow);
+               JsonToLineEditDouble(cudaJson, "Threshold", ui->ledDynamicPassiveThresholdLow);
                ui->ledDynamicPassiveThresholdHigh->setText("1e10");
-               JsonToLineEdit(cudaJson, "MaxDistance", ui->ledPassiveRange);
+               JsonToLineEditDouble(cudaJson, "MaxDistance", ui->ledPassiveRange);
              }
         }
     }
@@ -5303,8 +5303,8 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   {
     JsonToCheckbox(lnJson, "Active", ui->cbInRecActivate);
     JsonToComboBox(lnJson, "Shape", ui->cobInRecShape);
-    JsonToLineEdit(lnJson, "Size1", ui->ledInRecSize1);
-    JsonToLineEdit(lnJson, "Size2", ui->ledInRecSize2);
+    JsonToLineEditDouble(lnJson, "Size1", ui->ledInRecSize1);
+    JsonToLineEditDouble(lnJson, "Size2", ui->ledInRecSize2);
   }
 
   return true;
@@ -5468,8 +5468,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject njson = FiltJson["EventNumber"].toObject();
       JsonToCheckbox(njson, "Active", ui->cbFilterEventNumber);
-      JsonToLineEdit(njson, "Min", ui->leiFromNE);
-      JsonToLineEdit(njson, "Max", ui->leiToNE);
+      JsonToLineEditDouble(njson, "Min", ui->leiFromNE);
+      JsonToLineEditDouble(njson, "Max", ui->leiToNE);
     }  
 
   ui->cbFilterMultipleScanEvents->setChecked(false);
@@ -5483,8 +5483,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
       JsonToCheckbox(ssjson, "Active", ui->cbFilterSumSignal);
       JsonToCheckbox(ssjson, "UseGains", ui->cbGainsConsideredInFiltering);
       JsonToCheckbox(ssjson, "UsePassives", ui->cbPassivePMsTakenAccount);
-      JsonToLineEdit(ssjson, "Min", ui->ledFilterSumMin);
-      JsonToLineEdit(ssjson, "Max", ui->ledFilterSumMax);
+      JsonToLineEditDouble(ssjson, "Min", ui->ledFilterSumMin);
+      JsonToLineEditDouble(ssjson, "Max", ui->ledFilterSumMax);
     }
 
   flag = FiltJson.contains("IndividualPMSignal"); //indi signal
@@ -5504,8 +5504,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject rejson = FiltJson["ReconstructedEnergy"].toObject();
       JsonToCheckbox(rejson, "Active", ui->cbActivateEnergyFilter);
-      JsonToLineEdit(rejson, "Min", ui->ledEnergyMin);
-      JsonToLineEdit(rejson, "Max", ui->ledEnergyMax);
+      JsonToLineEditDouble(rejson, "Min", ui->ledEnergyMin);
+      JsonToLineEditDouble(rejson, "Max", ui->ledEnergyMax);
     }
 
   flag = FiltJson.contains("LoadedEnergy"); //loaded energy
@@ -5514,8 +5514,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject lejson = FiltJson["LoadedEnergy"].toObject();
       JsonToCheckbox(lejson, "Active", ui->cbActivateLoadedEnergyFilter);
-      JsonToLineEdit(lejson, "Min", ui->ledLoadEnergyMin);
-      JsonToLineEdit(lejson, "Max", ui->ledLoadEnergyMax);
+      JsonToLineEditDouble(lejson, "Min", ui->ledLoadEnergyMin);
+      JsonToLineEditDouble(lejson, "Max", ui->ledLoadEnergyMax);
     }
 
   flag = FiltJson.contains("Chi2"); //chi2
@@ -5524,8 +5524,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject cjson = FiltJson["Chi2"].toObject();
       JsonToCheckbox(cjson, "Active", ui->cbActivateChi2Filter);
-      JsonToLineEdit(cjson, "Min", ui->ledChi2Min);
-      JsonToLineEdit(cjson, "Max", ui->ledChi2Max);
+      JsonToLineEditDouble(cjson, "Min", ui->ledChi2Min);
+      JsonToLineEditDouble(cjson, "Max", ui->ledChi2Max);
     }
 
   ui->cbSpF_LimitToObject->setChecked(false);
@@ -5553,18 +5553,18 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
       int shape = 0;
       parseJson(spfCjson, "Shape", shape);
       JsonToComboBox(spfCjson, "Shape", ui->cobSpFXY);
-      JsonToLineEdit(spfCjson, "SizeX", ui->ledSpFsizeX);
-      JsonToLineEdit(spfCjson, "SizeY", ui->ledSpFsizeY);
-      JsonToLineEdit(spfCjson, "Diameter", ui->ledSpFdiameter);
-      JsonToLineEdit(spfCjson, "Side", ui->ledSpFside);
-      JsonToLineEdit(spfCjson, "Angle", ui->ledSpFangle);
+      JsonToLineEditDouble(spfCjson, "SizeX", ui->ledSpFsizeX);
+      JsonToLineEditDouble(spfCjson, "SizeY", ui->ledSpFsizeY);
+      JsonToLineEditDouble(spfCjson, "Diameter", ui->ledSpFdiameter);
+      JsonToLineEditDouble(spfCjson, "Side", ui->ledSpFside);
+      JsonToLineEditDouble(spfCjson, "Angle", ui->ledSpFangle);
       JsonToCheckbox(spfCjson, "AllZ", ui->cbSpFallZ);
-      JsonToLineEdit(spfCjson, "Zfrom", ui->ledSpFfromZ);
-      JsonToLineEdit(spfCjson, "Zto", ui->ledSpFtoZ);
+      JsonToLineEditDouble(spfCjson, "Zfrom", ui->ledSpFfromZ);
+      JsonToLineEditDouble(spfCjson, "Zto", ui->ledSpFtoZ);
       ui->ledSpF_X0->setText("0"); //compatibility
-      JsonToLineEdit(spfCjson, "X0", ui->ledSpF_X0);
+      JsonToLineEditDouble(spfCjson, "X0", ui->ledSpF_X0);
       ui->ledSpF_Y0->setText("0"); //compatibility
-      JsonToLineEdit(spfCjson, "Y0", ui->ledSpF_Y0);
+      JsonToLineEditDouble(spfCjson, "Y0", ui->ledSpF_Y0);
       ui->cobSpF_cutOutsideInside->setCurrentIndex(0); //compatibility
       JsonToComboBox(spfCjson, "CutOutsideInside", ui->cobSpF_cutOutsideInside);
       if (spfCjson.contains("Polygon"))
@@ -5627,8 +5627,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject knnjson = FiltJson["kNN"].toObject();
       JsonToCheckbox(knnjson, "Active", ui->cbActivateNNfilter);
-      JsonToLineEdit(knnjson, "Min", ui->ledNNmin);
-      JsonToLineEdit(knnjson, "Max", ui->ledNNmax);
+      JsonToLineEditDouble(knnjson, "Min", ui->ledNNmin);
+      JsonToLineEditDouble(knnjson, "Max", ui->ledNNmax);
       JsonToSpinBox(knnjson, "AverageOver", ui->sbNNaverageOver);
     }
 #else

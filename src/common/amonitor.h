@@ -3,6 +3,8 @@
 
 #include "amonitorconfig.h"
 
+#include <QString>
+
 class TH1D;
 class TH2D;
 class AGeoObject;
@@ -54,9 +56,14 @@ public:
   TH1D* getAngle() const   {return angle;}
   TH1D* getEnergy() const  {return energy;}
 
+  int getHits() const;
+  const QString getName() const {return name;}
+
   void appendDataFromAnotherMonitor(AMonitor* from); // used to merge data from several threads
 
 private:
+  QString name;
+
   TH1D* time;
   TH2D* xy;
   TH1D* angle;

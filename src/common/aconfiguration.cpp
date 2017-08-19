@@ -26,6 +26,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       return false;
     }
 
+  // qDebug() << " Loading detector config";
   if (DetConstructor)
     {
       if (json.contains("DetectorConfig"))
@@ -34,7 +35,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           emit Detector->requestClearEventsData();
           QJsonObject DetJson = json["DetectorConfig"].toObject();
           JSON["DetectorConfig"] = DetJson;
-          Detector->BuildDetector(); //if GUI present, update will trigger automatically
+          Detector->BuildDetector(true); //if GUI present, update will trigger automatically //suppress sim gui update, json is stuill old!
         }
       else
         {
@@ -43,6 +44,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
         }
     }
 
+  //qDebug() << "Loading simulation config";
   if (SimSettings)
     {
       if (json.contains("SimulationConfig"))
@@ -59,7 +61,12 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           qWarning() << ErrorString;
         }
     }
+  else
+  {
+      emit requestSimulationGuiUpdate(); //in case new detector was loaded
+  }
 
+  //qDebug() << "Loading reconstruction configuration";
   if (ReconstrSettings)
     {
       if (json.contains("ReconstructionConfig"))

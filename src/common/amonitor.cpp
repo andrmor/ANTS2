@@ -6,8 +6,9 @@
 
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TString.h"
 
-AMonitor::AMonitor() : time(0), xy(0), angle(0), wave(0), energy(0) {}
+AMonitor::AMonitor() : name("Undefined"), time(0), xy(0), angle(0), wave(0), energy(0) {}
 
 AMonitor::AMonitor(const AGeoObject *MonitorGeoObject) : time(0), xy(0), angle(0), wave(0), energy(0)
 {
@@ -28,11 +29,24 @@ void AMonitor::clearData()
     delete energy; energy = 0;
 }
 
+int AMonitor::getHits() const
+{
+    return xy->GetEntries();
+}
+
 void AMonitor::fillForParticle(double x, double y, double Time, double Angle, double Energy)
 {
     xy->Fill(x,y);
     time->Fill(Time);
     angle->Fill(Angle);
+
+    switch (config.energyUnitsInHist)
+    {
+    case 0: Energy *= 1.0e6; break;
+    case 1: Energy *= 1.0e3; break;
+    case 2: break;
+    case 3: Energy *= 1.0e-3;break;
+    }
     energy->Fill(Energy);
 }
 
@@ -54,6 +68,8 @@ bool AMonitor::readFromGeoObject(const AGeoObject *MonitorRecord)
       }
 
     config = mon->config;
+
+    name = MonitorRecord->Name;
 
     initXYHist();
     initTimeHist();
@@ -145,6 +161,18 @@ void AMonitor::initAngleHist()
 void AMonitor::initEnergyHist()
 {
     delete energy;
-    energy = new TH1D("", "", config.energyBins, config.energyFrom, config.energyTo);
-    energy->SetXTitle("Energy, keV");
+
+    double from = config.energyFrom;
+    double to = config.energyTo;
+    TString title = "";
+    switch (config.energyUnitsInHist)
+    {
+    case 0: from *= 1.0e6; to *= 1.0e6; title = "Energy, meV"; break;
+    case 1: from *= 1.0e3; to *= 1.0e3; title = "Energy, eV"; break;
+    case 2: title = "Energy, keV"; break;
+    case 3: from *= 1.0e-3; to *= 1.0e-3; title = "Energy, MeV"; break;
+    }
+
+    energy = new TH1D("", "", config.energyBins, from, to);
+    energy->SetXTitle(title);
 }

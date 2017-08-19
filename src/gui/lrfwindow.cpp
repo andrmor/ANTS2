@@ -537,9 +537,9 @@ void LRFwindow::loadJSON(QJsonObject &json)
   else ui->cob2Dtype->setCurrentIndex(iTmp);
 
   JsonToCheckbox(json, "LRF_compress", ui->cb_compress_r);
-  JsonToLineEdit(json, "Compression_k", ui->led_compression_k);
-  JsonToLineEdit(json, "Compression_r0", ui->led_compression_r0);
-  JsonToLineEdit(json, "Compression_lam", ui->led_compression_lam);
+  JsonToLineEditDouble(json, "Compression_k", ui->led_compression_k);
+  JsonToLineEditDouble(json, "Compression_r0", ui->led_compression_r0);
+  JsonToLineEditDouble(json, "Compression_lam", ui->led_compression_lam);
 
   JsonToSpinBox(json, "Nodes_x", ui->sbSplNodesX);
   JsonToSpinBox(json, "Nodes_y", ui->sbSplNodesY);

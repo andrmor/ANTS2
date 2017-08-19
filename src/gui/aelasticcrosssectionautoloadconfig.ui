@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AElasticCrossSectionAutoloadConfig</class>
+ <widget class="QDialog" name="AElasticCrossSectionAutoloadConfig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>512</width>
+    <height>294</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QFrame" name="frame">
+   <property name="geometry">
+    <rect>
+     <x>13</x>
+     <y>165</y>
+     <width>491</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QLineEdit" name="leEndName">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>90</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>.txt</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>7</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Cross-section file location:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lePreName">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>90</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>elastic</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leSeparatorInName">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>90</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>285</x>
+      <y>92</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mass</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>133</x>
+      <y>92</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Element_name</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leDir">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>30</y>
+      <width>386</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbChangeDir">
+    <property name="geometry">
+     <rect>
+      <x>406</x>
+      <y>28</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Change</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>67</y>
+      <width>141</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>File name structure:</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QCheckBox" name="cbAuto">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>13</x>
+     <y>145</y>
+     <width>361</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Automatically look for elastic cross-section data files</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_34">
+   <property name="geometry">
+    <rect>
+     <x>-12</x>
+     <y>14</y>
+     <width>160</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cross-section are loaded as:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cobUnitsForEllastic">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>10</y>
+     <width>121</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>meV - barns</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>eV - barns</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>keV - barns</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>MeV - barns</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>94</y>
+     <width>261</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Take natural abundancy data from file:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="leNatAbundFile">
+   <property name="geometry">
+    <rect>
+     <x>12</x>
+     <y>115</y>
+     <width>401</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>File format: MassElement     Abundancy%</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbChangeNatAbFile">
+   <property name="geometry">
+    <rect>
+     <x>420</x>
+     <y>113</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Change</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbUpdateGlobSet">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>10</y>
+     <width>111</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>...updateGlobSet</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbOnlyInRange">
+   <property name="geometry">
+    <rect>
+     <x>13</x>
+     <y>44</y>
+     <width>321</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Only load cross-section data for energy in range:</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>70</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Min:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="ledMinEnergy">
+   <property name="geometry">
+    <rect>
+     <x>93</x>
+     <y>67</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>0.001</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>70</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>meV</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="ledMaxEnergy">
+   <property name="geometry">
+    <rect>
+     <x>283</x>
+     <y>67</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>1000</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>70</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Max:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>70</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>meV</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cbAuto</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>151</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>186</x>
+     <y>172</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobUnitsForEllastic</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leNatAbundFile</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>378</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>28</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbAuto</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leDir</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>404</x>
+     <y>24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lePreName</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>436</x>
+     <y>19</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leSeparatorInName</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>272</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>394</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leEndName</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbOnlyInRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledMinEnergy</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>130</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>129</x>
+     <y>74</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbOnlyInRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledMaxEnergy</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>310</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>316</x>
+     <y>72</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledMinEnergy</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>431</x>
+     <y>23</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledMaxEnergy</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>340</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbOnlyInRange</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

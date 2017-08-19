@@ -50,8 +50,9 @@ public:
 
   bool PerformAutomaticGeometryCheck;
 
-  //GUI flags
   bool fOpenImageExternalEditor;
+
+  QJsonObject ElasticAutoSettings;
 
   QString RootStyleScript;
 

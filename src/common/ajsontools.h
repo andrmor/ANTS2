@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QStringList>
 
 class QCheckBox;
 class QSpinBox;
@@ -18,10 +19,12 @@ bool parseJson(const QJsonObject &json, const QString &key, double &var);
 bool parseJson(const QJsonObject &json, const QString &key, float &var);
 bool parseJson(const QJsonObject &json, const QString &key, QString &var);
 bool parseJson(const QJsonObject &json, const QString &key, QJsonArray &var);
+bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj);
 
 void JsonToCheckbox(QJsonObject& json, QString key, QCheckBox* cb);
 void JsonToSpinBox(QJsonObject& json, QString key, QSpinBox* sb);
-void JsonToLineEdit(QJsonObject& json, QString key, QLineEdit* le);
+void JsonToLineEditDouble(QJsonObject& json, QString key, QLineEdit* le);
+void JsonToLineEditText(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
 
 bool writeTwoQVectorsToJArray(QVector<double> &x, QVector<double> &y, QJsonArray &ar);
@@ -34,5 +37,7 @@ bool SaveJsonToFile(QJsonObject &json, QString fileName);
 
 bool writeTH1ItoJsonArr(TH1I *hist, QJsonArray &ja);
 bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja);
+
+bool isContainAllKeys(QJsonObject json, QStringList keys);
 
 #endif // AJSONTOOLS_H

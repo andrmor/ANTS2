@@ -203,6 +203,7 @@ void MainWindow::closeEvent(QCloseEvent *)
    //saving ANTS master-configuration file
    //qDebug()<<"--Saving ANTS configuration";   
    ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   //MIwindow->WriteElasticAutoToJson(GlobSet->ElasticAutoSettings);
    GlobSet->SaveANTSconfiguration();
 
    EventsDataHub->clear();

@@ -171,7 +171,7 @@ public slots:
 
 private slots:
     void Reshape();
-    void contextMenuBasket(const QPoint &pos);
+    void on_lwBasket_customContextMenuRequested(const QPoint &pos);
     void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
 
     void on_cbToolBox_toggled(bool checked);
@@ -282,6 +282,7 @@ private:
     void exportTextForTH2(TH2 *h);
     void SaveBasket();
     void AppendBasket();
+    void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
 };

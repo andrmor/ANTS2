@@ -7,7 +7,7 @@ GeneralSimSettings::GeneralSimSettings()
 {
   SecScintGenMode = 0;
   ErrorString = "";
-  MaxNumTrans = 25;
+  MaxNumTrans = 100;
   fQEaccelerator = false;
   fTracksOnPMsOnly = false;
   fLogsStat = false;
@@ -19,6 +19,7 @@ GeneralSimSettings::GeneralSimSettings()
   TimeTo = TimeBins;
   WaveStep = 1.0;
   bDoPhotonHistoryLog = false;
+  MinEnergyNeutrons = 0.01; //in meV
 }
 
 bool GeneralSimSettings::readFromJson(QJsonObject &Json)
@@ -75,6 +76,7 @@ bool GeneralSimSettings::readFromJson(QJsonObject &Json)
   MaxStep = trjson["MaxStep"].toDouble();
   dE = trjson["dE"].toDouble();
   MinEnergy = trjson["MinEnergy"].toDouble();
+  MinEnergyNeutrons = trjson["MinEnergyNeutrons"].toDouble();
   Safety = trjson["Safety"].toDouble();
   TrackColorAdd = trjson["TrackColorAdd"].toInt();
 

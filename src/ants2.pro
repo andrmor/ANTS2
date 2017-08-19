@@ -19,7 +19,7 @@ win32 {
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -llibSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
@@ -252,7 +252,10 @@ SOURCES += main.cpp \
     common/aroothistappenders.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
     common/amonitorconfig.cpp \
-    common/apeakfinder.cpp
+    common/apeakfinder.cpp \
+    gui/aelasticcrosssectionautoloadconfig.cpp \
+    gui/aelasticdelegates.cpp \
+    common/aelasticscatterelement.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -360,7 +363,10 @@ HEADERS  += common/CorrelationFilters.h \
     common/aroothistappenders.h \
     gui/MainWindowTools/amonitordelegateform.h \
     common/amonitorconfig.h \
-    common/apeakfinder.h
+    common/apeakfinder.h \
+    gui/aelasticcrosssectionautoloadconfig.h \
+    gui/aelasticdelegates.h \
+    common/aelasticscatterelement.h
 
 # --- SIM ---
 ants2_SIM {
@@ -609,4 +615,5 @@ unix {
 #------------
 
 FORMS += \
-    gui/MainWindowTools/amonitordelegateform.ui
+    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/aelasticcrosssectionautoloadconfig.ui

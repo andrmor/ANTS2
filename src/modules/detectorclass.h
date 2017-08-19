@@ -69,7 +69,7 @@ public:
   ~DetectorClass();
 
   bool MakeDetectorFromJson(QJsonObject &json);
-  bool BuildDetector();   // build detector from JSON
+  bool BuildDetector(bool SkipSimGuiUpdate = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
   bool BuildDetector_CallFromScript(); // save current detector to JSON, then call BuildDetector()
   void writeToJson(QJsonObject &json);
 

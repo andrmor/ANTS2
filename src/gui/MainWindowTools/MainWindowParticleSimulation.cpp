@@ -621,7 +621,7 @@ void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
 void MainWindow::on_pbGunLoadSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   qDebug()<<fileName;
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -723,12 +723,11 @@ void MainWindow::on_pbAddSource_clicked()
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
-{  
+{
   int isource = ui->cobParticleSource->currentIndex();
-  //qDebug() << "________ updates particle sources triggered. Source#:"<<isource;
   if (isource<0)
     {
-      qWarning() << "Attempt to update source with number <0";
+      //qWarning() << "Attempt to update source with number <0";
       return;
     }
 

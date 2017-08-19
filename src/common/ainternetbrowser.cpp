@@ -29,6 +29,13 @@ bool AInternetBrowser::Post(QString Url, const QString OutgoingMessage, QString 
 
   QNetworkAccessManager *manager = new QNetworkAccessManager(this);
   QNetworkRequest request(url);
+
+  //added after XCOm site changed to HTTPS
+  QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+  config.setProtocol(QSsl::AnyProtocol);
+  request.setSslConfiguration(config);
+  //
+
   request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
   QObject::connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(replyFinished(QNetworkReply *)));
 
@@ -36,6 +43,7 @@ bool AInternetBrowser::Post(QString Url, const QString OutgoingMessage, QString 
   ReplyMessage.clear();
   QElapsedTimer t;
   t.start();
+  //    qDebug() << "Posting...";
   manager->post(request, OutgoingMessage.toLatin1());
   do
     {
@@ -50,13 +58,20 @@ bool AInternetBrowser::Post(QString Url, const QString OutgoingMessage, QString 
   while (fWait);
 
   ReplyMessage = replyReceived;
+  if (replyReceived.isEmpty())
+  {
+      error = "Check that your system has OpenSSL drivers!\ne.g. for Win32: ssleay32.dll, libssl32.dll and libeay32.dll";
+      return false;
+  }
   return true;
 }
 
 void AInternetBrowser::replyFinished(QNetworkReply *reply)
 {
-  qDebug() << "Reply received!";
+  //    qDebug() << "Reply received!";
   replyReceived = reply->readAll();
+  //    qDebug() << replyReceived;
+  //    qDebug() << "Errors:"<<reply->errorString();
   fWait = false;
 }
 

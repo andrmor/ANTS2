@@ -1728,6 +1728,9 @@ to the basket.</string>
        <height>601</height>
       </rect>
      </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
     </widget>
    </widget>
   </widget>

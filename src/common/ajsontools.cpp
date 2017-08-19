@@ -70,6 +70,16 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonArray &var)
   else return false;
 }
 
+bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj)
+{
+    if (json.contains(key))
+      {
+        obj = json[key].toObject();
+        return true;
+      }
+    else return false;
+}
+
 void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
 {
   if (json.contains(key))
@@ -86,10 +96,16 @@ void JsonToSpinBox(QJsonObject &json, QString key, QSpinBox *sb)
     }
 }
 
-void JsonToLineEdit(QJsonObject &json, QString key, QLineEdit *le)
+void JsonToLineEditDouble(QJsonObject &json, QString key, QLineEdit *le)
 {
   if (json.contains(key))
     le->setText( QString::number(json[key].toDouble()) );
+}
+
+void JsonToLineEditText(QJsonObject &json, QString key, QLineEdit *le)
+{
+    if (json.contains(key))
+      le->setText( json[key].toString() );
 }
 
 void JsonToComboBox(QJsonObject &json, QString key, QComboBox *qb)
@@ -222,4 +238,11 @@ void read2DQVectorFromJArray(QJsonArray &ar, QVector<QVector<double> > &xy)
       for (int i2=0; i2<el.size(); i2++)
         xy[i1].append( el[i2].toDouble());
     }
+}
+
+bool isContainAllKeys(QJsonObject json, QStringList keys)
+{
+    for (QString key : keys)
+        if (!json.contains(key)) return false;
+    return true;
 }

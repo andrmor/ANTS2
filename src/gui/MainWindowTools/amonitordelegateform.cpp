@@ -13,6 +13,8 @@ AMonitorDelegateForm::AMonitorDelegateForm(QStringList particles, QWidget *paren
     ui->cobParticle->addItems(particles);
     ui->pbContentChanged->setVisible(false);
 
+    ui->cobEnergyUnits->setCurrentIndex(2);
+
     //installing double validators for edit boxes
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -84,6 +86,7 @@ bool AMonitorDelegateForm::updateGUI(const AGeoObject *obj)
     ui->ledAngleTo->setText( QString::number(config.angleTo) );
     ui->ledWaveTo->setText( QString::number(config.waveTo) );
     ui->ledEnergyTo->setText( QString::number(config.energyTo) );
+    ui->cobEnergyUnits->setCurrentIndex( config.energyUnitsInHist );
 
     return true;
 }
@@ -153,6 +156,7 @@ void AMonitorDelegateForm::updateObject(AGeoObject *obj)
     config.angleTo = ui->ledAngleTo->text().toDouble();
     config.waveTo = ui->ledWaveTo->text().toDouble();
     config.energyTo = ui->ledEnergyTo->text().toDouble();
+    config.energyUnitsInHist = ui->cobEnergyUnits->currentIndex();
 }
 
 void AMonitorDelegateForm::UpdateVisibility()
@@ -181,6 +185,7 @@ void AMonitorDelegateForm::on_cobMonitoring_currentIndexChanged(int index)
     ui->labWaveTo->setVisible(index == 0);
     ui->ledWaveFrom->setVisible(index == 0);
     ui->ledWaveTo->setVisible(index == 0);
+    ui->labWaveUnits->setVisible(index == 0);
     ui->sbWaveBins->setVisible(index == 0);
 
     ui->labEnergy->setVisible(index == 1);
@@ -189,6 +194,7 @@ void AMonitorDelegateForm::on_cobMonitoring_currentIndexChanged(int index)
     ui->labEnergyTo->setVisible(index == 1);
     ui->ledEnergyFrom->setVisible(index == 1);
     ui->ledEnergyTo->setVisible(index == 1);
+    ui->cobEnergyUnits->setVisible(index == 1);
     ui->sbEnergyBins->setVisible(index == 1);
 }
 

@@ -4,6 +4,8 @@
 #include <QVector>
 #include <QString>
 
+#include "aelasticscatterelement.h"
+
 class QJsonObject;
 class AParticle;
 class AOpticalOverride;
@@ -21,7 +23,8 @@ public:
 
   QString name;
   double density; //in g/cm3
-  double atomicDensity; //in atoms/cm3
+  QString Composition;
+  double atomicDensity; //in atoms/cm3 - for neutron capture only
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
@@ -71,15 +74,23 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
                     ComptonScattering = 1,
                     Capture = 2,
                     PairProduction = 3,
-                    EllasticScattering = 4};  //must keep the numbers - directly used in json config files
+                    ElasticScattering = 4};  //must keep the numbers - directly used in json config files
   ReactionType Type;
 
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-  double branching; //for neutrons - cross sections do not depend on energy, can scale using total
+  double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
+  double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
 
+  // for capture
   QVector<int> GeneratedParticles;
-  QVector<double> GeneratedParticleEnergies;    
+  QVector<double> GeneratedParticleEnergies;
+
+  //for ellastic
+  QVector<AElasticScatterElement> ScatterElements;
+  bool isNameInUse(QString name, int ExceptIndex = -1) const;
+
+  bool UpdateRuntimeForScatterElements(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
@@ -91,6 +102,10 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   double PhYield;         // Photon yield of the primary scintillation
   double IntrEnergyRes; // intrinsic energy resolution
 
+  //for neutrons - separate activation of capture and ellastic scattering is possible
+  bool bCaptureEnabled;
+  bool bEllasticEnabled;
+
   QVector<double> InteractionDataX; //energy in keV
   QVector<double> InteractionDataF; //stopping power (for charged) or total interaction cross-section (neutrals)
 
@@ -99,7 +114,7 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   QString DataSource; //for gamma stores XCOM file if was used
   QString DataString;     //for gamma can be used to store composition
 
-  bool CalculateTotal();  //true - success, false - mismatch in binning of the data
+  bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 };
 
 #endif // AMATERIAL_H

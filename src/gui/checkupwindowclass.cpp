@@ -221,8 +221,6 @@ TriState CheckUpWindowClass::CheckPMs()
 
 TriState CheckUpWindowClass::CheckInteractions()
 {
-    int error;
-
     ui->listInteraction->clear();
 
     //Check all materials and particles interactions
@@ -230,11 +228,11 @@ TriState CheckUpWindowClass::CheckInteractions()
         for(int iPart = 0; iPart < Detector->MpCollection->countParticles(); iPart++)
         {
             AMaterial *mat = (*(MW->MpCollection))[iMat];
-            if( (error = MW->MpCollection->CheckMaterial(iMat, iPart)) )
+            QString errorStr = MW->MpCollection->CheckMaterial(iMat, iPart);
+            if( !errorStr.isEmpty() )
             {
-                QString partname = Detector->MpCollection->getParticleName(iPart);
-                QString errormsg = MW->MpCollection->getErrorString(error);
-                ui->listInteraction->addItem(partname + " particle on " + mat->name + " -> " + errormsg);
+                QString partname = Detector->MpCollection->getParticleName(iPart);                
+                ui->listInteraction->addItem(partname + " particle on " + mat->name + " -> " + errorStr);
             }
         }
 
@@ -254,7 +252,8 @@ TriState CheckUpWindowClass::CheckInteractions()
             const QString partname = Detector->MpCollection->getParticleName(part->ParticleId);
 
             //Check energy range
-            if( (error = MW->MpCollection->CheckParticleEnergyInRange(part->ParticleId, part->energy)) >= 0 )
+            int error = MW->MpCollection->CheckParticleEnergyInRange(part->ParticleId, part->energy);
+            if( error >= 0 )
             {
                 AMaterial *mat = (*(MW->MpCollection))[error];
                 const QString &msg = QString("  [%1] -> %2 particle lacks interaction description on %3 for %4 energy").arg(i).arg(partname, mat->name).arg(part->energy);

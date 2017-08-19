@@ -194,6 +194,11 @@ public slots:
   QVariant GetPMsSortedBySignal(int ievent);
   int GetPMwithMaxSignal(int ievent);
 
+  //monitors
+  int countMonitors();
+  int getMonitorHits(int imonitor);
+  int getMonitorHits(QString monitor);
+
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
   void SetReconstructed(int ievent, double x, double y, double z, double e);

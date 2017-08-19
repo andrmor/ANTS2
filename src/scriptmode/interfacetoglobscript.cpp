@@ -1484,6 +1484,32 @@ int InterfaceToData::GetPMwithMaxSignal(int ievent)
     return iMaxSig;
 }
 
+int InterfaceToData::countMonitors()
+{
+    if (!EventsDataHub->SimStat) return 0;
+    return EventsDataHub->SimStat->Monitors.size();
+}
+
+#include "amonitor.h"
+int InterfaceToData::getMonitorHits(int imonitor)
+{
+    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
+        return std::numeric_limits<int>::quiet_NaN();
+    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
+}
+
+int InterfaceToData::getMonitorHits(QString monitor)
+{
+    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        if (mon->getName() == monitor)
+            return mon->getHits();
+    }
+    return std::numeric_limits<int>::quiet_NaN();
+}
+
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;

@@ -34,10 +34,15 @@ public:
 class AMaterialComposition
 {
 public:
-    AMaterialComposition(QString FileName_NaturalAbundancies);
+    AMaterialComposition();
+
+    void setNaturalAbunances(const QString FileName_NaturalAbundancies);
 
     QString setCompositionString(const QString composition);  // return error string if invalid composition, else returns ""
     QString getCompositionString() const {return ElementCompositionString;}
+
+    int countElements() const {return ElementComposition.size();}
+    AChemicalElement* getElement(int iElement) {return &ElementComposition[iElement];}
 
     const QString print() const;
 

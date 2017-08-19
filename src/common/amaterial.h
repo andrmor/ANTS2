@@ -5,6 +5,7 @@
 #include <QString>
 
 #include "aelasticscatterelement.h"
+#include "amaterialcomposition.h"
 
 class QJsonObject;
 class AParticle;
@@ -38,6 +39,8 @@ public:
   double PriScintDecayTime;
   double SecScintDecayTime;
   QString Comments;
+
+  AMaterialComposition ChemicalComposition;
 
   QVector<MatParticleStructure> MatParticle; //material properties related to individual particles
 

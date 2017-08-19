@@ -5,11 +5,13 @@
 #include <QList>
 #include <QDebug>
 
-AMaterialComposition::AMaterialComposition(QString FileName_NaturalAbundancies) :
-    FileName_NaturalAbundancies(FileName_NaturalAbundancies)
+AMaterialComposition::AMaterialComposition()
 {
     AllPossibleElements<<"H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
+}
 
+void AMaterialComposition::setNaturalAbunances(const QString FileName_NaturalAbundancies)
+{
     QString NaturalAbundances;
     bool bOK = LoadTextFromFile(FileName_NaturalAbundancies, NaturalAbundances);
     if (!bOK) qWarning() << "Cannot load file with natural abundances: " + FileName_NaturalAbundancies;
@@ -43,10 +45,12 @@ QString AMaterialComposition::setCompositionString(const QString composition)
     if (NaturalAbundancies.isEmpty()) return "Configuration error: Table with natural abundancies was not loaded";
 
     QString str = composition.simplified();
+    str.replace(" ","+");
+
     if (str.isEmpty()) return "Material composition is empty!";
 
     //split in records of molecules (molecule:fraction)
-    QStringList elList = str.split(QRegExp("\\+"));
+    QStringList elList = str.split(QRegExp("\\+"), QString::SkipEmptyParts );
     QVector< QPair< QString, double> > Records;
     for (QString el : elList)
       {
@@ -148,6 +152,7 @@ QString AMaterialComposition::setCompositionString(const QString composition)
       }
 
     ElementComposition = tmpElements;
+    ElementCompositionString = composition.simplified();
     return "";
 }
 

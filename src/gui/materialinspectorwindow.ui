@@ -334,9 +334,9 @@ indication</string>
      <widget class="QLabel" name="label_22">
       <property name="geometry">
        <rect>
-        <x>273</x>
-        <y>29</y>
-        <width>31</width>
+        <x>275</x>
+        <y>22</y>
+        <width>91</width>
         <height>16</height>
        </rect>
       </property>
@@ -347,8 +347,8 @@ indication</string>
      <widget class="QLineEdit" name="ledDensity">
       <property name="geometry">
        <rect>
-        <x>196</x>
-        <y>27</y>
+        <x>199</x>
+        <y>21</y>
         <width>70</width>
         <height>20</height>
        </rect>
@@ -360,11 +360,17 @@ indication</string>
      <widget class="QLabel" name="label_21">
       <property name="geometry">
        <rect>
-        <x>93</x>
-        <y>28</y>
-        <width>96</width>
-        <height>16</height>
+        <x>41</x>
+        <y>19</y>
+        <width>151</width>
+        <height>20</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
       </property>
       <property name="text">
        <string>Material density:</string>
@@ -376,9 +382,9 @@ indication</string>
      <widget class="QLineEdit" name="leMaterialComposition">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>110</y>
-        <width>442</width>
+        <x>8</x>
+        <y>80</y>
+        <width>450</width>
         <height>20</height>
        </rect>
       </property>
@@ -386,46 +392,87 @@ indication</string>
        <string>Elemental composition with the relative molar fractions.
 Can be used to automatically configure gamma interaction cross-sections and neutron scattering data.</string>
       </property>
-     </widget>
-     <widget class="QLabel" name="label_34">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>140</y>
-        <width>311</width>
-        <height>16</height>
-       </rect>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
-      <property name="text">
-       <string>Example: H2O:10 + NaCl:0.1</string>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLabel" name="label_64">
       <property name="geometry">
        <rect>
-        <x>27</x>
-        <y>88</y>
-        <width>161</width>
+        <x>9</x>
+        <y>59</y>
+        <width>431</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
-       <string>Chemical composition (optional):</string>
+       <string>Chemical composition (optional unless neutron interactions are to be defined):</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pbModifyChemicalComposition">
       <property name="geometry">
        <rect>
-        <x>150</x>
-        <y>210</y>
-        <width>75</width>
+        <x>7</x>
+        <y>78</y>
+        <width>452</width>
         <height>23</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
-       <string>PushButton</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
      </widget>
+     <widget class="QTreeWidget" name="trwChemicalComposition">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>110</y>
+        <width>391</width>
+        <height>248</height>
+       </rect>
+      </property>
+      <attribute name="headerVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QCheckBox" name="cbShowIsotopes">
+      <property name="geometry">
+       <rect>
+        <x>41</x>
+        <y>363</y>
+        <width>181</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Show isotopes</string>
+      </property>
+     </widget>
+     <zorder>label_22</zorder>
+     <zorder>ledDensity</zorder>
+     <zorder>label_21</zorder>
+     <zorder>label_64</zorder>
+     <zorder>leMaterialComposition</zorder>
+     <zorder>pbModifyChemicalComposition</zorder>
+     <zorder>trwChemicalComposition</zorder>
+     <zorder>cbShowIsotopes</zorder>
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -2070,7 +2117,7 @@ resolution:</string>
             </rect>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">

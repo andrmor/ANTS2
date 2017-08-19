@@ -140,7 +140,11 @@ private slots:
 
     void on_pbAutoFillCompositionForScatter_clicked();
 
-    void on_pushButton_clicked();
+    void on_pbModifyChemicalComposition_clicked();
+
+    void on_cbShowIsotopes_clicked(bool checked);
+
+    void on_leMaterialComposition_cursorPositionChanged(int arg1, int arg2);
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -169,6 +173,7 @@ private:
     int findElement(const AElasticScatterElement *element) const;
     void doAddNewIsotope(int Index, QString name, double fraction);
     QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
+    void ShowTreeWithChemicalComposition();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

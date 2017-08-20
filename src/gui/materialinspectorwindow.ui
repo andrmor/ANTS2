@@ -461,6 +461,12 @@ Can be used to automatically configure gamma interaction cross-sections and neut
         <height>17</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="text">
        <string>Show isotopes</string>
       </property>

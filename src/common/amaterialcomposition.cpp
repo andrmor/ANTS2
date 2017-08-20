@@ -17,6 +17,7 @@ void AMaterialComposition::setNaturalAbunances(const QString FileName_NaturalAbu
     if (!bOK) qWarning() << "Cannot load file with natural abundances: " + FileName_NaturalAbundancies;
     else
     {
+        NaturalAbundancies.clear();
         QStringList SL = NaturalAbundances.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
         for (QString s : SL)
         {
@@ -68,7 +69,7 @@ QString AMaterialComposition::setCompositionString(const QString composition)
         }
         Records << QPair<QString,double>(Formula, Fraction);
       }
-    qDebug() << Records;
+    //      qDebug() << Records;
 
     //reading elements and their relative fractions
     QMap<QString,double> map;
@@ -78,7 +79,7 @@ QString AMaterialComposition::setCompositionString(const QString composition)
         if (!Formula[0].isLetter() && !Formula[0].isUpper()) return "Format error in composition!";
         double weight = pair.second;
 
-        qDebug() << Formula;
+        //      qDebug() << Formula;
         bool bReadingElementName = true;
         QString tmp = Formula[0];
         QString Element;
@@ -130,22 +131,27 @@ QString AMaterialComposition::setCompositionString(const QString composition)
         }
 
     }
-    qDebug() << map;
+    //      qDebug() << map;
 
-    QList<QString> Elements = map.keys();
+    QList<QString> ListOfElements = map.keys();
+    double sumFractions = 0;
     //checking elements
-    for (const QString& el : Elements)
+    for (const QString& el : ListOfElements)
+    {
         if (!AllPossibleElements.contains(el)) return QString("Unknown element: ")+el;
+        sumFractions += map[el];
+    }
+    if (sumFractions == 0) return "No elements defined!";
 
     //filling natural abundancies
-    std::sort(Elements.begin(), Elements.end());
+    std::sort(ListOfElements.begin(), ListOfElements.end());
     QVector<AChemicalElement> tmpElements;
-    for (const QString& ElementName : Elements)
+    for (const QString& ElementName : ListOfElements)
       {
-        double Fraction = map[ElementName];
-        qDebug() << ElementName << Fraction;
+        double MolarFraction = map[ElementName] / sumFractions;
+        //qDebug() << ElementName << MolarFraction;
 
-        AChemicalElement element(ElementName, Fraction);
+        AChemicalElement element(ElementName, MolarFraction);
         QString error = fillIsotopesWithNaturalAbundances(element);
         if (!error.isEmpty()) return error;
         tmpElements << element;
@@ -167,7 +173,7 @@ const QString AMaterialComposition::print() const
 const QString AChemicalElement::print() const
 {
     QString str = "Element: " + Symbol;
-    str += "  Relative fraction: " + QString::number(RelativeFraction) + "\n";
+    str += "  Relative fraction: " + QString::number(MolarFraction) + "\n";
     str += "Isotopes and their abundances (%):\n";
     for (const AIsotope& iso : Isotopes)
         str += "  " + iso.Symbol + "-" + QString::number(iso.Mass) + "   " + QString::number(iso.Abundancy) + "\n";

@@ -142,9 +142,7 @@ private slots:
 
     void on_pbModifyChemicalComposition_clicked();
 
-    void on_cbShowIsotopes_clicked(bool checked);
-
-    void on_leMaterialComposition_cursorPositionChanged(int arg1, int arg2);
+    void on_cbShowIsotopes_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;

@@ -23,10 +23,10 @@ class AChemicalElement
 public:
     QString Symbol;
     QVector<AIsotope> Isotopes;
-    double RelativeFraction;
+    double MolarFraction;
 
-    AChemicalElement(const QString Symbol, double RelativeFraction) : Symbol(Symbol), RelativeFraction(RelativeFraction) {}
-    AChemicalElement() : Symbol("Undefined"), RelativeFraction(0) {}
+    AChemicalElement(const QString Symbol, double MolarFraction) : Symbol(Symbol), MolarFraction(MolarFraction) {}
+    AChemicalElement() : Symbol("Undefined"), MolarFraction(0) {}
 
     const QString print() const;
 };

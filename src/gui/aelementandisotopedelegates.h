@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QPoint>
 
 class QLineEdit;
 class QPushButton;
@@ -14,60 +15,44 @@ class AChemicalElementDelegate : public QWidget
 {
     Q_OBJECT
 public:
-    AChemicalElementDelegate(AChemicalElement* element, bool* bClearInProgress);
+    AChemicalElementDelegate(AChemicalElement* element, bool* bClearInProgress,  bool IsotopesShown);
     AChemicalElement* getElement() const {return element;}
 
 private:
     AChemicalElement *element;
     bool* bClearInProgress;
-
-    QPushButton* pbAddIsotope;
-
-public slots:
-    void onShowIsotopes(bool flag);
+    bool bIsotopesShown;
 
 private slots:
-    void onAddIsotopeClicked();
+    void onMenuRequested(const QPoint &pos);
 
 signals:
-    void AddIsotopeClicked(AChemicalElement *element);
+    void AddIsotopeActivated(AChemicalElement *element);
 
 };
 
-/*
-class AElasticIsotopeDelegate : public QWidget
+class AIsotopeDelegate : public QWidget
 {
     Q_OBJECT
 public:
-    AElasticIsotopeDelegate(AElasticScatterElement* element, bool* bClearInProgress);
-
-    AElasticScatterElement* getElement() const {return element;}
+    AIsotopeDelegate(AChemicalElement* element, int isotopeIndexInElement, bool* bClearInProgress);
 
 private:
-    AElasticScatterElement *element;
+    AChemicalElement *element;
     bool* bClearInProgress;
+    int isotopeIndexInElement;
 
     QLineEdit* leiMass;
     QLineEdit* ledAbund;
-    QPushButton* pbLoad;
-    QPushButton* pbShow;
-
-    void updateButtons();
 
 private slots:
-    void onShowClicked();
-    void onLoadClicked();
-    void onDelClicked();
-
     void onChanged();
+    void onMenuRequested(const QPoint &pos);
 
-signals:
-    void ShowClicked(const AElasticScatterElement *element);
-    void LoadClicked(AElasticScatterElement *element);
-    void DelClicked(const AElasticScatterElement *element);
-    void RequestActivateModifiedStatus();
+signals:    
+    void RemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
+    void IsotopePropertiesChanged(const AChemicalElement* element, const int isotopeIndexInElement);
 
 };
-*/
 
 #endif // AELEMENTANDISOTOPEDELEGATES_H

@@ -17,6 +17,7 @@
 #include "aelasticcrosssectionautoloadconfig.h"
 #include "aelasticdelegates.h"
 #include "amaterialcomposition.h"
+#include "aelementandisotopedelegates.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -3083,7 +3084,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
     QDialog* d = new QDialog(this);
-    d->setWindowTitle("Enter chemical composition (e.g., H2O:9 NaCl:0.2)");
+    d->setWindowTitle("Enter chemical composition");
 
     QVBoxLayout* L = new QVBoxLayout();
         QHBoxLayout* l = new QHBoxLayout();
@@ -3095,15 +3096,15 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         connect(pb, SIGNAL(clicked(bool)), d, SLOT(accept()));
     L->addLayout(l);
     L->addWidget(new QLabel("Examples of valid formatting:"));
-    L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - gives 9 parts of H2O and 0.2 parts of NaCl"));
+    L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
     L->addWidget(new QLabel("C2 H5 OH"));
     L->addWidget(new QLabel("C22H10N205"));
     d->setLayout(L);
 
     while (d->exec() != 0)
     {
-        QString newComp = le->text();
-        qDebug() << newComp;
+        //QString newComp = le->text();
+        //      qDebug() << newComp;
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
         mc.setNaturalAbunances(ElasticConfig->getNatAbundFileName());
@@ -3121,7 +3122,6 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     }
 }
 
-#include "aelementandisotopedelegates.h"
 void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
 {
     bClearInProgress = true;
@@ -3129,44 +3129,37 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
     bClearInProgress = false;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    bool bShowIsotopes = ui->cbShowIsotopes->isChecked();
 
-    qDebug() << "Elements defined:" << tmpMaterial.ChemicalComposition.countElements();
     for (int i=0; i<tmpMaterial.ChemicalComposition.countElements(); i++)
     {
         AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(i);
 
         //new element
-        AChemicalElementDelegate* elDel = new AChemicalElementDelegate(el, &bClearInProgress);
+        AChemicalElementDelegate* elDel = new AChemicalElementDelegate(el, &bClearInProgress, ui->cbShowIsotopes->isChecked());
         QTreeWidgetItem* ElItem = new QTreeWidgetItem(ui->trwChemicalComposition);
         ui->trwChemicalComposition->setItemWidget(ElItem, 0, elDel);
-        //ElItem->setExpanded(el.bExpanded);
+        ElItem->setExpanded(bShowIsotopes);
         //QObject::connect(elDel, &AChemicalElementDelegate::AddIsotopeClicked, this, &MaterialInspectorWindow::onAutoIsotopesClicked, Qt::QueuedConnection);
 
-
-
-            /*
-        //new isotope
-        AElasticIsotopeDelegate* isotopDel = new AElasticIsotopeDelegate(&el, &bClearInProgress);
-        QTreeWidgetItem* twi = new QTreeWidgetItem();
-        ElItem->addChild(twi);
-        ui->twElastic->setItemWidget(twi, 0, isotopDel);
-        prevElName = el.Name;
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
-        */
+        if (bShowIsotopes)
+            for (int index = 0; index <el->Isotopes.size(); index++)
+            {
+                AIsotopeDelegate* isotopDel = new AIsotopeDelegate(el, index, &bClearInProgress);
+                QTreeWidgetItem* twi = new QTreeWidgetItem();
+                ElItem->addChild(twi);
+                ui->trwChemicalComposition->setItemWidget(twi, 0, isotopDel);
+                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
+                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
+                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
+                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
+                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
+            }
     }
 
 }
 
-void MaterialInspectorWindow::on_cbShowIsotopes_clicked(bool checked)
+void MaterialInspectorWindow::on_cbShowIsotopes_clicked()
 {
-
-}
-
-void MaterialInspectorWindow::on_leMaterialComposition_cursorPositionChanged(int arg1, int arg2)
-{
-    qDebug() << "hereeeee";
+    ShowTreeWithChemicalComposition();
 }

@@ -24,7 +24,6 @@ public:
 
   QString name;
   double density; //in g/cm3
-  QString Composition;
   double atomicDensity; //in atoms/cm3 - for neutron capture only
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome

@@ -77,7 +77,6 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
   json["Density"] = density;
   json["ChemicalComposition"] = ChemicalComposition.writeToJson();
   json["IsotopeDensity"] = atomicDensity;
-  json["Composition"] = Composition;
   json["RefractiveIndex"] = n;
   json["BulkAbsorption"] = abs;
   json["RayleighMFP"] = rayleighMFP;
@@ -215,7 +214,6 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   }
   else ChemicalComposition.clear();
   parseJson(json, "IsotopeDensity", atomicDensity);
-  parseJson(json, "Composition", Composition);
   parseJson(json, "RefractiveIndex", n);
   parseJson(json, "BulkAbsorption", abs);
   parseJson(json, "RayleighMFP", rayleighMFP);

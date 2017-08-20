@@ -55,6 +55,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->pbWasModified->setVisible(false);
     ui->pbUpdateInteractionIndication->setVisible(false);
     ui->pbUpdateElements->setVisible(false);
+    ui->labContextMenuHelp->setVisible(false);
 
     ui->pbUpdateTmpMaterial->setVisible(false);
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
@@ -247,13 +248,12 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     str.setNum(tmpMaterial.density, 'g');
     ui->ledDensity->setText(str);
 
+    ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
     ShowTreeWithChemicalComposition();
 
     str.setNum(tmpMaterial.atomicDensity, 'g');
     if (tmpMaterial.atomicDensity > 0) ui->ledAtomicDensity->setText(str);
     else ui->ledAtomicDensity->setText("");
-
-    ui->leMaterialComposition->setText( tmpMaterial.Composition );
 
     str.setNum(tmpMaterial.n, 'g');
     ui->ledN->setText(str);
@@ -450,8 +450,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
     tmpMaterial.PriScintDecayTime = ui->ledPriT->text().toDouble();
-
-    tmpMaterial.Composition = ui->leMaterialComposition->text();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     if (ui->cbSameYieldForAll->isChecked())
@@ -2227,9 +2225,14 @@ TGraph *MaterialInspectorWindow::constructInterpolationGraph(QVector<double> X, 
 
 void MaterialInspectorWindow::on_pbXCOMauto_clicked()
 {
-  QString str = ui->leMaterialComposition->text().simplified();
+  QString str = ui->leChemicalComposition->text().simplified();
   str.replace(" ", "");
-  if (str.isEmpty()) return;
+  if (str.isEmpty())
+  {
+      ui->twProperties->setCurrentIndex(0);
+      message("Enter chemical composition of the material", this);
+      return;
+  }
 
   QStringList elList = str.split(QRegExp("\\+"));
   //    qDebug() << elList<<elList.size();
@@ -2284,8 +2287,7 @@ void MaterialInspectorWindow::on_pbXCOMauto_clicked()
 
   fOK = importXCOM(in, particleId);
 
-  if (fOK)
-    MW->MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leMaterialComposition->text();
+  if (fOK) MW->MpCollection->tmpMaterial.MatParticle[particleId].DataString = ui->leChemicalComposition->text();
 
   on_pbUpdateInteractionIndication_clicked();
   on_pbWasModified_clicked();
@@ -2798,7 +2800,7 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
     on_pbWasModified_clicked();
 }
 
-void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement */*element*/, int /*isotopeIndexInElement*/)
+void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * /*element*/, int /*isotopeIndexInElement*/)
 {
     ShowTreeWithChemicalComposition();
     on_pbWasModified_clicked();
@@ -2950,7 +2952,7 @@ void MaterialInspectorWindow::on_twElastic_itemCollapsed(QTreeWidgetItem *item)
 
 void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
 {
-    QString str = ui->leMaterialComposition->text().simplified();
+    QString str = ui->leChemicalComposition->text().simplified();
     str.replace(" ", "");
     if (str.isEmpty())
     {
@@ -3116,7 +3118,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
     QVBoxLayout* L = new QVBoxLayout();
         QHBoxLayout* l = new QHBoxLayout();
-        QLineEdit* le = new QLineEdit(ui->leMaterialComposition->text(), this);
+        QLineEdit* le = new QLineEdit(ui->leChemicalComposition->text(), this);
         le->setMinimumSize(400,25);
         QPushButton* pb = new QPushButton("Confirm", this);
         l->addWidget(le);
@@ -3143,7 +3145,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
             continue;
         }
 
-        ui->leMaterialComposition->setText(mc.getCompositionString());
+        ui->leChemicalComposition->setText(mc.getCompositionString());
         //message(mc.print(), this);
         ShowTreeWithChemicalComposition();
         break;

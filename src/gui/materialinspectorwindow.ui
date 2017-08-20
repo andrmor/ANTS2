@@ -379,7 +379,7 @@ indication</string>
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
-     <widget class="QLineEdit" name="leMaterialComposition">
+     <widget class="QLineEdit" name="leChemicalComposition">
       <property name="geometry">
        <rect>
         <x>8</x>
@@ -416,7 +416,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
       <property name="geometry">
        <rect>
         <x>7</x>
-        <y>78</y>
+        <y>79</y>
         <width>452</width>
         <height>23</height>
        </rect>
@@ -455,7 +455,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
      <widget class="QCheckBox" name="cbShowIsotopes">
       <property name="geometry">
        <rect>
-        <x>41</x>
+        <x>60</x>
         <y>363</y>
         <width>181</width>
         <height>17</height>
@@ -471,14 +471,42 @@ Can be used to automatically configure gamma interaction cross-sections and neut
        <string>Show isotopes</string>
       </property>
      </widget>
+     <widget class="Line" name="line_9">
+      <property name="geometry">
+       <rect>
+        <x>66</x>
+        <y>348</y>
+        <width>3</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labContextMenuHelp">
+      <property name="geometry">
+       <rect>
+        <x>194</x>
+        <y>361</y>
+        <width>259</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Use context menu to add/remove isotopes</string>
+      </property>
+     </widget>
      <zorder>label_22</zorder>
      <zorder>ledDensity</zorder>
      <zorder>label_21</zorder>
      <zorder>label_64</zorder>
-     <zorder>leMaterialComposition</zorder>
+     <zorder>leChemicalComposition</zorder>
      <zorder>pbModifyChemicalComposition</zorder>
-     <zorder>trwChemicalComposition</zorder>
+     <zorder>line_9</zorder>
      <zorder>cbShowIsotopes</zorder>
+     <zorder>trwChemicalComposition</zorder>
+     <zorder>labContextMenuHelp</zorder>
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -4181,7 +4209,7 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>leMaterialComposition</sender>
+   <sender>leChemicalComposition</sender>
    <signal>editingFinished()</signal>
    <receiver>pbUpdateTmpMaterial</receiver>
    <slot>click()</slot>
@@ -4197,7 +4225,7 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>leMaterialComposition</sender>
+   <sender>leChemicalComposition</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
    <slot>click()</slot>
@@ -4209,6 +4237,22 @@ resolution:</string>
     <hint type="destinationlabel">
      <x>433</x>
      <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbShowIsotopes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>labContextMenuHelp</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>543</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>326</x>
+     <y>540</y>
     </hint>
    </hints>
   </connection>

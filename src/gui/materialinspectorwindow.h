@@ -144,7 +144,7 @@ private slots:
 
     void on_twElastic_itemCollapsed(QTreeWidgetItem *item);
 
-    void on_pbAutoFillCompositionForScatter_clicked();
+    void on_pbAutoFillCompositionForScatter_clicked();   //obsolete
 
     void on_pbModifyChemicalComposition_clicked();
 

@@ -11,6 +11,7 @@ class AMatParticleConfigurator;
 class QJsonObject;
 class AElasticScatterElement;
 class QTreeWidgetItem;
+class AChemicalElement;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -53,6 +54,11 @@ private slots:
     void onAutoIsotopesClicked(AElasticScatterElement *element);
     void onDelElementClicked(AElasticScatterElement *element);
     void onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction);
+
+    //on signals from celegates
+    void onAddIsotope(AChemicalElement *element);
+    void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
+    void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
 
     //on user input    
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update

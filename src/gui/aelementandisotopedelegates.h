@@ -51,7 +51,7 @@ private slots:
 
 signals:    
     void RemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
-    void IsotopePropertiesChanged(const AChemicalElement* element, const int isotopeIndexInElement);
+    void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
 
 };
 

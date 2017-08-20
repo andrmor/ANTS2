@@ -71,6 +71,7 @@ AIsotopeDelegate::AIsotopeDelegate(AChemicalElement *element, int isotopeIndexIn
 
     QDoubleValidator* valD = new QDoubleValidator(this);
     valD->setBottom(0);
+    valD->setTop(100.0);
     ledAbund->setValidator(valD);
     QIntValidator* valI = new QIntValidator(this);
     valI->setBottom(1);

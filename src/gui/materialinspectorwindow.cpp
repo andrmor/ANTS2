@@ -2779,6 +2779,31 @@ void MaterialInspectorWindow::onRequestUpdateIsotopes(const AElasticScatterEleme
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
 }
 
+void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
+{
+    element->Isotopes << AIsotope(element->Symbol, 777, 0);
+    ShowTreeWithChemicalComposition();
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int isotopeIndexInElement)
+{
+    if (element->Isotopes.size()<2)
+    {
+        message("Cannot remove the last isotope!", this);
+        return;
+    }
+    element->Isotopes.removeAt(isotopeIndexInElement);
+    ShowTreeWithChemicalComposition();
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement */*element*/, int /*isotopeIndexInElement*/)
+{
+    ShowTreeWithChemicalComposition();
+    on_pbWasModified_clicked();
+}
+
 void MaterialInspectorWindow::on_pbAddNewIsotope_clicked()
 {
     int particleId = ui->cobParticle->currentIndex();
@@ -3143,7 +3168,7 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
         QTreeWidgetItem* ElItem = new QTreeWidgetItem(ui->trwChemicalComposition);
         ui->trwChemicalComposition->setItemWidget(ElItem, 0, elDel);
         ElItem->setExpanded(bShowIsotopes);
-        //QObject::connect(elDel, &AChemicalElementDelegate::AddIsotopeClicked, this, &MaterialInspectorWindow::onAutoIsotopesClicked, Qt::QueuedConnection);
+        QObject::connect(elDel, &AChemicalElementDelegate::AddIsotopeActivated, this, &MaterialInspectorWindow::onAddIsotope, Qt::QueuedConnection);
 
         if (bShowIsotopes)
             for (int index = 0; index <el->Isotopes.size(); index++)
@@ -3152,8 +3177,8 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
                 QTreeWidgetItem* twi = new QTreeWidgetItem();
                 ElItem->addChild(twi);
                 ui->trwChemicalComposition->setItemWidget(twi, 0, isotopDel);
-                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
-                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
+                QObject::connect(isotopDel, &AIsotopeDelegate::RemoveIsotope, this, &MaterialInspectorWindow::onRemoveIsotope, Qt::QueuedConnection);
+                QObject::connect(isotopDel, &AIsotopeDelegate::IsotopePropertiesChanged, this, &MaterialInspectorWindow::IsotopePropertiesChanged, Qt::QueuedConnection);
                 //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
                 //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
                 //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);

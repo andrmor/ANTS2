@@ -1,7 +1,10 @@
 #include "amaterialcomposition.h"
 
 #include "afiletools.h"
+#include "ajsontools.h"
 
+#include <QJsonObject>
+#include <QJsonArray>
 #include <QList>
 #include <QDebug>
 
@@ -170,6 +173,49 @@ const QString AMaterialComposition::print() const
     return str;
 }
 
+void AMaterialComposition::clear()
+{
+    ElementCompositionString = "";
+    ElementComposition.clear();
+}
+
+void AMaterialComposition::writeToJson(QJsonObject &json) const
+{
+    json["ElementCompositionString"] = ElementCompositionString;
+
+    QJsonArray ar;
+    for (const AChemicalElement& el : ElementComposition)
+    {
+        QJsonObject js;
+        el.writeToJson(js);
+        ar << js;
+    }
+    json["ElementComposition"] = ar;
+}
+
+const QJsonObject AMaterialComposition::writeToJson() const
+{
+    QJsonObject js;
+    writeToJson(js);
+    return js;
+}
+
+void AMaterialComposition::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "ElementCompositionString", ElementCompositionString);
+    QJsonArray ar;
+    parseJson(json, "ElementComposition", ar);
+
+    ElementComposition.clear();
+    for (int i=0; i<ar.size(); i++)
+    {
+        QJsonObject js = ar[i].toObject();
+        AChemicalElement el;
+        el.readFromJson(js);
+        ElementComposition << el;
+    }
+}
+
 const QString AChemicalElement::print() const
 {
     QString str = "Element: " + Symbol;
@@ -178,6 +224,38 @@ const QString AChemicalElement::print() const
     for (const AIsotope& iso : Isotopes)
         str += "  " + iso.Symbol + "-" + QString::number(iso.Mass) + "   " + QString::number(iso.Abundancy) + "\n";
     return str;
+}
+
+void AChemicalElement::writeToJson(QJsonObject &json) const
+{
+    json["Symbol"] = Symbol;
+    json["MolarFraction"] = MolarFraction;
+
+    QJsonArray ar;
+    for (const AIsotope& iso : Isotopes)
+    {
+        QJsonObject js;
+        iso.writeToJson(js);
+        ar << js;
+    }
+    json["Isotopes"] = ar;
+}
+
+void AChemicalElement::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "Symbol", Symbol);
+    parseJson(json, "MolarFraction", MolarFraction);
+    QJsonArray ar;
+    parseJson(json, "Isotopes", ar);
+
+    Isotopes.clear();
+    for (int i=0; i<ar.size(); i++)
+    {
+        QJsonObject js = ar[i].toObject();
+        AIsotope iso;
+        iso.readFromJson(js);
+        Isotopes << iso;
+    }
 }
 
 const QString AMaterialComposition::fillIsotopesWithNaturalAbundances(AChemicalElement& element) const
@@ -190,4 +268,18 @@ const QString AMaterialComposition::fillIsotopesWithNaturalAbundances(AChemicalE
     for (auto& pair : list)
         element.Isotopes << AIsotope(name, pair.first, pair.second);
     return "";
+}
+
+void AIsotope::writeToJson(QJsonObject &json) const
+{
+    json["Symbol"] = Symbol;
+    json["Mass"] = Mass;
+    json["Abundancy"] = Abundancy;
+}
+
+void AIsotope::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "Symbol", Symbol);
+    parseJson(json, "Mass", Mass);
+    parseJson(json, "Abundancy", Abundancy);
 }

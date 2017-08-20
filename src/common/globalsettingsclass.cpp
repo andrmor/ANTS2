@@ -17,8 +17,6 @@
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)
 {
   SaveLoadWindows = true;
-  //AlwaysSaveOnExit = true;
-  //NeverSaveOnExit = false;
   ShowExamplesOnStart = true;
   PerformAutomaticGeometryCheck = true;
 
@@ -95,6 +93,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   ConfigDir = AntsBaseDir + "/Config";
 //  qDebug() << "-conf-"<<ConfigDir;
 
+  //natutal abundances data default filename
+  MaterialsAndParticlesSettings["NaturalAbundanciesFile"] = ExamplesDir+"/"+"IsotopeNaturalAbundances.txt";
+
   //if exists,load file fith ANTS2 settings, otherwise create config dir
   if (!QDir(ConfigDir).exists())
     {
@@ -126,10 +127,6 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   }
 }
 
-GlobalSettingsClass::~GlobalSettingsClass()
-{  
-}
-
 void GlobalSettingsClass::writeToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -158,7 +155,7 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["PerformAutomaticGeometryCheck"] = PerformAutomaticGeometryCheck;
   js["NumThreads"] = NumThreads;
 
-  js["ElasticAutoSettings"] = ElasticAutoSettings;
+  js["MaterialsAndParticlesSettings"] = MaterialsAndParticlesSettings;
 
   js["RecTreeSave_IncludePMsignals"] = RecTreeSave_IncludePMsignals;
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
@@ -219,7 +216,7 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
 
-    parseJson(js, "ElasticAutoSettings", ElasticAutoSettings);
+    parseJson(js, "MaterialsAndParticlesSettings", MaterialsAndParticlesSettings);
 
     parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
     parseJson(js, "DefaultFontFamily_ScriptWindow", DefaultFontFamily_ScriptWindow);

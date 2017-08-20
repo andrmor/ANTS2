@@ -7,7 +7,7 @@ class QTextStream;
 class MainWindow;
 class DetectorClass;
 class TGraph;
-class AElasticCrossSectionAutoloadConfig;
+class AMatParticleConfigurator;
 class QJsonObject;
 class AElasticScatterElement;
 class QTreeWidgetItem;
@@ -149,7 +149,7 @@ private:
     MainWindow* MW;
     DetectorClass* Detector;
 
-    AElasticCrossSectionAutoloadConfig* ElasticConfig;
+    AMatParticleConfigurator* MatParticleOptionsConfigurator;
 
     QIcon RedIcon;
 

@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QPair>
 
+class QJsonObject;
+
 class AIsotope
 {
 public:
@@ -16,6 +18,9 @@ public:
 
     AIsotope(const QString Symbol, int Mass, double Abundancy) : Symbol(Symbol), Mass(Mass), Abundancy(Abundancy) {}
     AIsotope() : Symbol("Undefined"), Mass(777), Abundancy(0) {}
+
+    void writeToJson(QJsonObject &json) const;
+    void readFromJson(const QJsonObject &json);
 };
 
 class AChemicalElement
@@ -29,6 +34,9 @@ public:
     AChemicalElement() : Symbol("Undefined"), MolarFraction(0) {}
 
     const QString print() const;
+
+    void writeToJson(QJsonObject& json) const;
+    void readFromJson(const QJsonObject& json);
 };
 
 class AMaterialComposition
@@ -46,9 +54,14 @@ public:
 
     const QString print() const;
 
+    void clear();
+
+    void writeToJson(QJsonObject& json) const;
+    const QJsonObject writeToJson() const;
+    void readFromJson(const QJsonObject& json);
+
 private:
     QString ElementCompositionString;
-
     QVector<AChemicalElement> ElementComposition;
 
 

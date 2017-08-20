@@ -34,6 +34,7 @@ public:
     AChemicalElement() : Symbol("Undefined"), MolarFraction(0) {}
 
     const QString print() const;
+    int countIsotopes() const {return Isotopes.size();}
 
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
@@ -50,6 +51,7 @@ public:
     QString getCompositionString() const {return ElementCompositionString;}
 
     int countElements() const {return ElementComposition.size();}
+    int countIsotopes() const;
     AChemicalElement* getElement(int iElement) {return &ElementComposition[iElement];}
 
     const QString print() const;

@@ -165,6 +165,14 @@ QString AMaterialComposition::setCompositionString(const QString composition)
     return "";
 }
 
+int AMaterialComposition::countIsotopes() const
+{
+    int count = 0;
+    for (const AChemicalElement& el : ElementComposition)
+        count += el.countIsotopes();
+    return count;
+}
+
 const QString AMaterialComposition::print() const
 {
     QString str = "Composition:" + ElementCompositionString + "\n";

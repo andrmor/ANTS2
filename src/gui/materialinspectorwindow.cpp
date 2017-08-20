@@ -61,6 +61,8 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->cobStoppingPowerUnits->setCurrentIndex(1);
     ui->cobTotalInteractionLoadEnergyUnits->setCurrentIndex(1);
 
+    ui->tabwNeutron->verticalHeader()->setVisible(false);
+
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
@@ -3192,4 +3194,71 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
 void MaterialInspectorWindow::on_cbShowIsotopes_clicked()
 {
     ShowTreeWithChemicalComposition();
+}
+
+void MaterialInspectorWindow::FillNeutronTable()
+{
+    ui->tabwNeutron->clearContents();
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    int numElements = tmpMaterial.ChemicalComposition.countElements();
+    int numIso = tmpMaterial.ChemicalComposition.countIsotopes();
+    ui->tabwNeutron->setRowCount(numIso);
+
+    bool bCapture = ui->cbCapture->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked();
+
+    int numColumns = 1;
+    if (bCapture) numColumns++;
+    if (bElastic) numColumns++;
+    ui->tabwNeutron->setColumnCount(numColumns);
+
+    QTableWidgetItem* twi = new QTableWidgetItem("Elements");
+    twi->setTextAlignment(Qt::AlignCenter);
+    ui->tabwNeutron->setHorizontalHeaderItem(0, twi);
+    if (bCapture)
+    {
+        twi = new QTableWidgetItem("Capture");
+        twi->setTextAlignment(Qt::AlignCenter);
+        ui->tabwNeutron->setHorizontalHeaderItem(1, twi);
+    }
+    if (bElastic)
+    {
+        twi = new QTableWidgetItem("Elastic");
+        twi->setTextAlignment(Qt::AlignCenter);
+        ui->tabwNeutron->setHorizontalHeaderItem(numColumns-1, twi);
+    }
+
+    int row = 0;
+    for (int iElement=0; iElement<numElements; iElement++)
+    {
+        const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
+        for (int iIso=0; iIso<el->countIsotopes(); iIso++)
+        {
+            QString name = el->Isotopes.at(0).Symbol + "-" + QString::number(el->Isotopes.at(0).Mass);
+            QTableWidgetItem* twi = new QTableWidgetItem(name);
+            twi->setTextAlignment(Qt::AlignCenter);
+            ui->tabwNeutron->setItem(row, 0, twi);
+            if (bCapture)
+            {
+
+            }
+            if (bElastic)
+            {
+
+            }
+            row++;
+        }
+    }
+}
+
+void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
+{
+    qDebug() << "menu" << ui->tabwNeutron->currentRow() << ui->tabwNeutron->currentColumn();
+}
+
+void MaterialInspectorWindow::on_pushButton_clicked()
+{
+    FillNeutronTable();
 }

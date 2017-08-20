@@ -150,6 +150,10 @@ private slots:
 
     void on_cbShowIsotopes_clicked();
 
+    void on_tabwNeutron_customContextMenuRequested(const QPoint &pos);
+
+    void on_pushButton_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -178,6 +182,7 @@ private:
     void doAddNewIsotope(int Index, QString name, double fraction);
     QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
     void ShowTreeWithChemicalComposition();
+    void FillNeutronTable();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

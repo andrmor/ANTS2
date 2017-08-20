@@ -201,14 +201,14 @@
    <widget class="QPushButton" name="pbComments">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>20</x>
       <y>543</y>
-      <width>260</width>
+      <width>210</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>View / edit comments</string>
+     <string>Comments for this material</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pbShowUsage">
@@ -409,7 +409,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
        </rect>
       </property>
       <property name="text">
-       <string>Chemical composition (optional unless neutron interactions are to be defined):</string>
+       <string>Chemical composition (optional unless neutron interactions will be simulated):</string>
       </property>
      </widget>
      <widget class="QPushButton" name="pbModifyChemicalComposition">
@@ -2879,19 +2879,6 @@ resolution:</string>
               <string>...updateElements</string>
              </property>
             </widget>
-            <widget class="QPushButton" name="pbConfigureAutoElastic">
-             <property name="geometry">
-              <rect>
-               <x>243</x>
-               <y>2</y>
-               <width>181</width>
-               <height>23</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Configure load settings</string>
-             </property>
-            </widget>
            </widget>
           </widget>
          </widget>
@@ -3238,6 +3225,25 @@ resolution:</string>
      <zorder>gbSecondary</zorder>
     </widget>
    </widget>
+   <widget class="QPushButton" name="pbConfigureAutoElastic">
+    <property name="geometry">
+     <rect>
+      <x>253</x>
+      <y>544</y>
+      <width>210</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Options</string>
+    </property>
+   </widget>
    <zorder>line_6</zorder>
    <zorder>line</zorder>
    <zorder>label</zorder>
@@ -3258,6 +3264,7 @@ resolution:</string>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
    <zorder>pbUpdateInteractionIndication</zorder>
+   <zorder>pbConfigureAutoElastic</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -4180,8 +4187,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>213</x>
-     <y>290</y>
+     <x>215</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
@@ -4196,8 +4203,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
-     <y>283</y>
+     <x>436</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>

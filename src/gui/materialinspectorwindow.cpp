@@ -14,7 +14,7 @@
 #include "acommonfunctions.h"
 #include "guiutils.h"
 #include "ainternetbrowser.h"
-#include "aelasticcrosssectionautoloadconfig.h"
+#include "amatparticleconfigurator.h"
 #include "aelasticdelegates.h"
 #include "amaterialcomposition.h"
 #include "aelementandisotopedelegates.h"
@@ -85,12 +85,12 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
                   "Import the file by clicking \"Import from XCOM\" button.";
     ui->pbImportXCOM->setToolTip(str);
 
-    ElasticConfig = new AElasticCrossSectionAutoloadConfig(MW->GlobSet, this);
+    MatParticleOptionsConfigurator = new AMatParticleConfigurator(MW->GlobSet, this);
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
 {    
-    delete ElasticConfig;
+    delete MatParticleOptionsConfigurator;
     delete ui;
 }
 
@@ -246,6 +246,9 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 
     str.setNum(tmpMaterial.density, 'g');
     ui->ledDensity->setText(str);
+
+    ShowTreeWithChemicalComposition();
+
     str.setNum(tmpMaterial.atomicDensity, 'g');
     if (tmpMaterial.atomicDensity > 0) ui->ledAtomicDensity->setText(str);
     else ui->ledAtomicDensity->setText("");
@@ -1448,7 +1451,7 @@ bool MaterialInspectorWindow::event(QEvent * e)
 */
       case QEvent::Hide :
         if (MW->WindowNavigator) MW->WindowNavigator->HideWindowTriggered("mat");
-        if (ElasticConfig->isVisible()) ElasticConfig->hide();
+        if (MatParticleOptionsConfigurator->isVisible()) MatParticleOptionsConfigurator->hide();
         break;
       case QEvent::Show :
         if (MW->WindowNavigator) MW->WindowNavigator->ShowWindowTriggered("mat");
@@ -2340,7 +2343,7 @@ void MaterialInspectorWindow::onShowElementCrossClicked(const AElasticScatterEle
 
 void MaterialInspectorWindow::onLoadElementCrossClicked(AElasticScatterElement *element)
 {
-    if (ElasticConfig->isAutoloadEnabled())
+    if (MatParticleOptionsConfigurator->isAutoloadEnabled())
     {
         bool fOK = autoLoadElasticCrossSection(element);
         if (fOK) return;
@@ -2361,7 +2364,7 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
     if (res == 0)
     {
         double Multiplier;
-        switch (ElasticConfig->getCrossSectionLoadOption())
+        switch (MatParticleOptionsConfigurator->getCrossSectionLoadOption())
         {
           case (0): {Multiplier = 1.0e-6; break;} //meV
           case (1): {Multiplier = 1.0e-3; break;} //eV
@@ -2374,10 +2377,10 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
             y[i] *= 1.0e-24;     //to cm2
         }
 
-        if (ElasticConfig->isEnergyRangeLimited())
+        if (MatParticleOptionsConfigurator->isEnergyRangeLimited())
         {
-            const double EnMin = ElasticConfig->getMinEnergy() * 1.0e-6; //meV -> keV
-            const double EnMax = ElasticConfig->getMaxEnergy() * 1.0e-6; //meV -> keV
+            const double EnMin = MatParticleOptionsConfigurator->getMinEnergy() * 1.0e-6; //meV -> keV
+            const double EnMax = MatParticleOptionsConfigurator->getMaxEnergy() * 1.0e-6; //meV -> keV
             QVector<double> xtmp, ytmp;
             xtmp = x;  ytmp = y;
             x.clear(); y.clear();
@@ -2542,7 +2545,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
 bool MaterialInspectorWindow::autoLoadElasticCrossSection(AElasticScatterElement *element)
 {
     QString Mass = QString::number(element->Mass);
-    QString fileName = ElasticConfig->getFileName(element->Name, Mass);
+    QString fileName = MatParticleOptionsConfigurator->getFileName(element->Name, Mass);
     if (fileName.isEmpty()) return false;
     if ( !QFileInfo(fileName).exists() ) return false;
     qDebug() << "Autoload cross-section from file: " <<fileName;
@@ -2584,8 +2587,8 @@ void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
 
 void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 {
-   ElasticConfig->setStarterDir(MW->GlobSet->LastOpenDir);
-   ElasticConfig->showNormal();
+   MatParticleOptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
+   MatParticleOptionsConfigurator->showNormal();
 }
 
 //--------------------------------------------------
@@ -2700,7 +2703,7 @@ QString MaterialInspectorWindow::doAutoConfigureElement(AElasticScatterElement *
 
   QString ElementName = t.ScatterElements.at(iThisElement).Name;
   double Fraction = t.ScatterElements.at(iThisElement).Fraction;
-  const QVector<QPair<int, double> > isotopes = ElasticConfig->getIsotopes(ElementName);
+  const QVector<QPair<int, double> > isotopes = MatParticleOptionsConfigurator->getIsotopes(ElementName);
 
   if (isotopes.isEmpty())
       return QString("Data for element ") + ElementName + " not found!";
@@ -3107,7 +3110,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         //      qDebug() << newComp;
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
-        mc.setNaturalAbunances(ElasticConfig->getNatAbundFileName());
+        mc.setNaturalAbunances(MatParticleOptionsConfigurator->getNatAbundFileName());
         QString error = mc.setCompositionString(le->text());
         if (!error.isEmpty())
         {

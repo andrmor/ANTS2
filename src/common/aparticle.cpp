@@ -1,4 +1,5 @@
 #include "aparticle.h"
+#include "ajsontools.h"
 
 #include <QJsonObject>
 
@@ -26,10 +27,17 @@ void AParticle::writeToJson(QJsonObject &json) const
   json["Charge"] = charge;
 }
 
-void AParticle::readFromJson(QJsonObject &json)
+const QJsonObject AParticle::writeToJson() const
 {
-  ParticleName = json["Name"].toString();
+    QJsonObject js;
+    writeToJson(js);
+    return js;
+}
+
+void AParticle::readFromJson(const QJsonObject &json)
+{
+  parseJson(json, "Name", ParticleName);
   type = static_cast<ParticleType>(json["Type"].toInt());
-  mass = json["Mass"].toDouble();
-  charge = json["Charge"].toInt();
+  parseJson(json, "Mass", mass);
+  parseJson(json, "Charge", charge);
 }

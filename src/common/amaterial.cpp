@@ -70,7 +70,7 @@ void AMaterial::clear()
   //Do not touch overrides - handled by loaded (want to keep overrides intact when handling inspector window)
 }
 
-void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCollection)
+void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) //QVector<AParticle *> *ParticleCollection)
 {
   //general data
   json["*MaterialName"] = name;
@@ -123,6 +123,7 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
   //MatParticle properties
   //if a particle has default configuration (TrackingAllowed and MatIsTransparent), skip its record
   QJsonArray jParticleEntries;
+  const QVector<AParticle *> *ParticleCollection = MpCollection->getParticleCollection();
   for (int ip=0; ip<ParticleCollection->size(); ip++)
     {
       QJsonObject jMatParticle;
@@ -142,6 +143,7 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
       QJsonArray iar;
       writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
       jMatParticle["TotalInteraction"] = iar;
+
       //gamma-specific data
       if ((*ParticleCollection)[ip]->type == AParticle::_gamma_)
       {
@@ -175,6 +177,15 @@ void AMaterial::writeToJson(QJsonObject &json, QVector<AParticle *> *ParticleCol
                       ellAr << MatParticle[ip].Terminators[iTerm].ScatterElements[i].writeToJson();
                   jterm["ScatterElements"] = ellAr;
               }
+
+              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::Capture)
+              {
+                  QJsonArray capAr;
+                  for (int i=0; i<MatParticle[ip].Terminators[iTerm].CaptureElements.size(); i++)
+                      capAr << MatParticle[ip].Terminators[iTerm].CaptureElements[i].writeToJson(MpCollection);
+                  jterm["CaptureElements"] = capAr;
+              }
+
               //going through secondary particles
               QJsonArray jsecondaries;
               for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )

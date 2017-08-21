@@ -257,7 +257,8 @@ SOURCES += main.cpp \
     common/aelasticscatterelement.cpp \
     common/amaterialcomposition.cpp \
     gui/aelementandisotopedelegates.cpp \
-    gui/amatparticleconfigurator.cpp
+    gui/amatparticleconfigurator.cpp \
+    common/acaptureelement.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -370,7 +371,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aelasticscatterelement.h \
     common/amaterialcomposition.h \
     gui/aelementandisotopedelegates.h \
-    gui/amatparticleconfigurator.h
+    gui/amatparticleconfigurator.h \
+    common/acaptureelement.h
 
 # --- SIM ---
 ants2_SIM {

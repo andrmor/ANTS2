@@ -2151,7 +2151,7 @@ resolution:</string>
             </rect>
            </property>
            <property name="text">
-            <string>Simulate neutron capture</string>
+            <string>Enable neutron capture</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2167,7 +2167,7 @@ resolution:</string>
             </rect>
            </property>
            <property name="text">
-            <string>Simulate elastic scattering</string>
+            <string>Enable elastic scattering</string>
            </property>
           </widget>
           <widget class="QTableWidget" name="tabwNeutron">
@@ -3298,20 +3298,6 @@ resolution:</string>
         <string>Auto fill</string>
        </property>
       </widget>
-      <zorder>pbAddNewElement</zorder>
-      <zorder>line_3</zorder>
-      <zorder>pbShowTotalEllastic</zorder>
-      <zorder>label_54</zorder>
-      <zorder>label_55</zorder>
-      <zorder>leMFPellastic</zorder>
-      <zorder>label_56</zorder>
-      <zorder>ledMFPenergyEllastic</zorder>
-      <zorder>label_63</zorder>
-      <zorder>twElastic</zorder>
-      <zorder>pbAddNewIsotope</zorder>
-      <zorder>pbShowStatisticsOnElastic</zorder>
-      <zorder>pbAutoFillCompositionForScatter</zorder>
-      <zorder>pbUpdateElements</zorder>
      </widget>
      <widget class="QPushButton" name="pbUpdateElements">
       <property name="geometry">
@@ -3331,8 +3317,8 @@ resolution:</string>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>430</y>
+      <x>480</x>
+      <y>360</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -3362,15 +3348,6 @@ resolution:</string>
    <zorder>twProperties</zorder>
    <zorder>pbUpdateInteractionIndication</zorder>
    <zorder>pbConfigureAutoElastic</zorder>
-   <zorder>twElastic</zorder>
-   <zorder>pbShowStatisticsOnElastic</zorder>
-   <zorder>pbAddNewIsotope</zorder>
-   <zorder>pbAddNewElement</zorder>
-   <zorder>pbAutoFillCompositionForScatter</zorder>
-   <zorder>pbUpdateElements</zorder>
-   <zorder>frScatter</zorder>
-   <zorder>pbUpdateElements</zorder>
-   <zorder>frCapture</zorder>
    <zorder>tabWidget</zorder>
    <zorder>pushButton</zorder>
   </widget>

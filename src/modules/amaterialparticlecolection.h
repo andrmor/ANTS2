@@ -64,6 +64,7 @@ public:
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
   bool RemoveParticle(int particleId, QString* errorText=0);
+  QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
 
   //tmpMaterial - related
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!

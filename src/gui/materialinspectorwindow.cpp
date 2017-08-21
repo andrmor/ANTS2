@@ -2599,6 +2599,8 @@ void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 
 void MaterialInspectorWindow::on_pbUpdateElements_clicked()
 {
+    return;
+
     bClearInProgress = true;
     ui->twElastic->clear();
     bClearInProgress = false;
@@ -3196,25 +3198,49 @@ void MaterialInspectorWindow::on_cbShowIsotopes_clicked()
     ShowTreeWithChemicalComposition();
 }
 
+void flagButton(QPushButton* pb, bool flag)
+{
+    QString toRed = "QPushButton {color: red;}";
+    QString s = pb->styleSheet();
+
+    if (flag)
+    {
+        if (!s.contains(toRed)) s += toRed;
+    }
+    else
+    {
+        if (s.contains(toRed)) s.remove(toRed);
+    }
+
+    pb->setStyleSheet(s);
+}
+
 void MaterialInspectorWindow::FillNeutronTable()
 {
+    EnsureProperNeutronTerminatorTypes();
+
     ui->tabwNeutron->clearContents();
+    ui->tabwNeutron->setRowCount(0);
+    ui->tabwNeutron->setColumnCount(0);
+
+    bool bCapture = ui->cbCapture->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked();
+    if (!bCapture && !bElastic) return;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
     int numIso = tmpMaterial.ChemicalComposition.countIsotopes();
     ui->tabwNeutron->setRowCount(numIso);
-
-    bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked();
 
     int numColumns = 1;
     if (bCapture) numColumns++;
     if (bElastic) numColumns++;
     ui->tabwNeutron->setColumnCount(numColumns);
 
-    QTableWidgetItem* twi = new QTableWidgetItem("Elements");
+    QTableWidgetItem* twi = new QTableWidgetItem("Element");
     twi->setTextAlignment(Qt::AlignCenter);
     ui->tabwNeutron->setHorizontalHeaderItem(0, twi);
     if (bCapture)
@@ -3231,6 +3257,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     }
 
     int row = 0;
+    bool bIgnore = ui->cbIgnoreMissingNeutronData->isChecked();
     for (int iElement=0; iElement<numElements; iElement++)
     {
         const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
@@ -3242,15 +3269,69 @@ void MaterialInspectorWindow::FillNeutronTable()
             ui->tabwNeutron->setItem(row, 0, twi);
             if (bCapture)
             {
-
+                const NeutralTerminatorStructure& t = Terminators.first();
+                QWidget* w = new QWidget();
+                QHBoxLayout* l = new QHBoxLayout();
+                l->setContentsMargins(4,0,2,0);
+                l->setSpacing(2);
+                l->setAlignment(Qt::AlignCenter);
+                QPushButton* pbShow = new QPushButton("Show");
+                pbShow->setEnabled(!t.PartialCrossSectionEnergy.isEmpty());
+                pbShow->setMaximumWidth(50);
+                l->addWidget(pbShow);
+                QPushButton* pbLoad = new QPushButton("Load");
+                if (!bIgnore)
+                    if (t.PartialCrossSectionEnergy.isEmpty())
+                        flagButton(pbLoad, true);
+                pbLoad->setMaximumWidth(50);
+                l->addWidget(pbLoad);
+                QPushButton* pbReaction = new QPushButton("Reactions");
+                l->addWidget(pbReaction);
+                l->addWidget( new QLabel("  ") );
+                w->setLayout(l);
+                ui->tabwNeutron->setCellWidget(row, 1, w);
             }
             if (bElastic)
             {
-
+                QWidget* w = new QWidget();
+                QHBoxLayout* l = new QHBoxLayout();
+                l->setContentsMargins(4,0,2,0);
+                l->setSpacing(2);
+                l->setAlignment(Qt::AlignCenter);
+                QPushButton* pbShow = new QPushButton("Show");
+                pbShow->setMaximumWidth(50);
+                l->addWidget(pbShow);
+                QPushButton* pbLoad = new QPushButton("Load");
+                pbLoad->setMaximumWidth(50);
+                l->addWidget(pbLoad);
+                w->setLayout(l);
+                ui->tabwNeutron->setCellWidget(row, numColumns-1, w);
             }
             row++;
         }
     }
+    ui->tabwNeutron->resizeColumnsToContents();
+    ui->tabwNeutron->resizeRowsToContents();
+}
+
+void MaterialInspectorWindow::EnsureProperNeutronTerminatorTypes()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+
+    if (tmpMaterial.MatParticle.at(particleId).MaterialIsTransparent || !tmpMaterial.MatParticle.at(particleId).TrackingAllowed) return;
+    bool bCapture = ui->cbCapture->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked();
+    if (!bCapture && !bElastic) return;
+
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+    int numProcess = 0;
+    if (bCapture) numProcess++;
+    if (bElastic) numProcess++;
+    Terminators.resize(numProcess);
+
+    Terminators.first().Type = NeutralTerminatorStructure::Capture;
+    Terminators.last().Type  = NeutralTerminatorStructure::ElasticScattering;
 }
 
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
@@ -3259,6 +3340,16 @@ void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QP
 }
 
 void MaterialInspectorWindow::on_pushButton_clicked()
+{
+    FillNeutronTable();
+}
+
+void MaterialInspectorWindow::on_cbCapture_clicked()
+{
+    FillNeutronTable();
+}
+
+void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 {
     FillNeutronTable();
 }

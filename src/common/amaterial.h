@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QString>
 
+#include "acaptureelement.h"
 #include "aelasticscatterelement.h"
 #include "amaterialcomposition.h"
 
@@ -66,7 +67,7 @@ public:
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
 
   void clear();
-  void writeToJson(QJsonObject &json, QVector<AParticle*>* ParticleCollection); //does not save overrides!
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection); //QVector<AParticle*>* ParticleCollection); //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 };
 
@@ -85,6 +86,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
 
   // for capture
+  QVector<ACaptureElement> CaptureElements;
   QVector<int> GeneratedParticles;
   QVector<double> GeneratedParticleEnergies;
 

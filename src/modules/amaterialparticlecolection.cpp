@@ -341,7 +341,7 @@ void AMaterialParticleCollection::CopyTmpToMaterialCollection()
     }
   //*MaterialCollectionData[index] = tmpMaterial; //updating material properties
   QJsonObject js;
-  tmpMaterial.writeToJson(js, &ParticleCollection);
+  tmpMaterial.writeToJson(js, this);
   //SaveJsonToFile(js,"TMPjson.json");
   MaterialCollectionData[index]->readFromJson(js, this);
 
@@ -554,7 +554,7 @@ void AMaterialParticleCollection::CopyMaterialToTmp(int imat)
       return;
     }
   QJsonObject js;
-  MaterialCollectionData[imat]->writeToJson(js, &ParticleCollection);
+  MaterialCollectionData[imat]->writeToJson(js, this);
   tmpMaterial.readFromJson(js, this);
 }
 
@@ -964,7 +964,7 @@ void AMaterialParticleCollection::writeToJson(QJsonObject &json)
   for (int i=0; i<MaterialCollectionData.size(); i++)
     {
       QJsonObject jj;
-      MaterialCollectionData[i]->writeToJson(jj, &ParticleCollection);
+      MaterialCollectionData[i]->writeToJson(jj, this);
       ar.append(jj);
     }
   js["Materials"] = ar;
@@ -991,7 +991,7 @@ void AMaterialParticleCollection::writeMaterialToJson(int imat, QJsonObject &jso
       qWarning() << "Attempt to save non-existent material!";
       return;
     }
-  MaterialCollectionData[imat]->writeToJson(json, &ParticleCollection);
+  MaterialCollectionData[imat]->writeToJson(json, this);
 }
 
 bool AMaterialParticleCollection::readFromJson(QJsonObject &json)

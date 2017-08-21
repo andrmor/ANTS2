@@ -19,7 +19,8 @@ public:
   int charge;
 
   void writeToJson(QJsonObject &json) const;
-  void readFromJson(QJsonObject &json);
+  const QJsonObject writeToJson() const;
+  void readFromJson(const QJsonObject &json);
 };
 
 #endif // APARTICLE_H

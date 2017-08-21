@@ -154,6 +154,10 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_cbCapture_clicked();
+
+    void on_cbEnableScatter_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -183,6 +187,7 @@ private:
     QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
+    void EnsureProperNeutronTerminatorTypes();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

@@ -452,7 +452,7 @@ void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
     for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
     {
         for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateRuntimeForScatterElements(fLogLogInterpolation);
+            term.UpdateRuntimePropertiesForNeutrons(fLogLogInterpolation);
     }
 }
 
@@ -806,6 +806,9 @@ QString AMaterialParticleCollection::CheckTmpMaterial() const
 
 QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial *mat, int iPart, QString *Report) const
 {
+    qDebug() << "Fix me - CheckElasticScatterElements";
+    return "";
+    /*
     QString error, Text;
 
     if (iPart<0 || iPart>=mat->MatParticle.size()) return "Wrong particle index";
@@ -843,7 +846,7 @@ QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial
                 int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
                 sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
                 tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
-                double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
+                double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction;
                 tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
                 double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
                 tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4) + " cm-3";
@@ -861,6 +864,7 @@ QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial
     }
     if (Report) *Report = Text;
     return error;
+    */
 }
 
 void AMaterialParticleCollection::registerNewParticle()

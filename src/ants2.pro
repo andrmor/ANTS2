@@ -253,12 +253,10 @@ SOURCES += main.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
     common/amonitorconfig.cpp \
     common/apeakfinder.cpp \
-    gui/aelasticdelegates.cpp \
-    common/aelasticscatterelement.cpp \
     common/amaterialcomposition.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
-    common/acaptureelement.cpp
+    common/aneutroninteractionelement.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -367,12 +365,10 @@ HEADERS  += common/CorrelationFilters.h \
     gui/MainWindowTools/amonitordelegateform.h \
     common/amonitorconfig.h \
     common/apeakfinder.h \
-    gui/aelasticdelegates.h \
-    common/aelasticscatterelement.h \
     common/amaterialcomposition.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
-    common/acaptureelement.h
+    common/aneutroninteractionelement.h
 
 # --- SIM ---
 ants2_SIM {

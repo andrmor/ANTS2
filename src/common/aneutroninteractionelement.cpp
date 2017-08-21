@@ -1,10 +1,56 @@
-#include "acaptureelement.h"
+#include "aneutroninteractionelement.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDebug>
+
+// --- base ---
+
+void ANeutronInteractionElement::writeToJson(QJsonObject &json) const
+{
+    json["Name"] = Name;
+    json["Mass"] = Mass;
+    json["MolarFraction"] = MolarFraction;
+
+    QJsonArray ar;
+    writeTwoQVectorsToJArray(Energy, CrossSection, ar);
+    json["CrossSection"] = ar;
+}
+
+void ANeutronInteractionElement::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "Name", Name);
+    parseJson(json, "Mass", Mass);
+    parseJson(json, "MolarFraction", MolarFraction);
+
+    Energy.clear();
+    CrossSection.clear();
+    QJsonArray ar = json["CrossSection"].toArray();
+    readTwoQVectorsFromJArray(ar, Energy, CrossSection);
+}
+
+// --- elastic ---
+
+void AElasticScatterElement::writeToJson(QJsonObject &json) const
+{
+   ANeutronInteractionElement::writeToJson(json);
+}
+
+const QJsonObject AElasticScatterElement::writeToJson()
+{
+    QJsonObject json;
+    AElasticScatterElement::writeToJson(json);
+    return json;
+}
+
+void AElasticScatterElement::readFromJson(const QJsonObject &json)
+{
+    ANeutronInteractionElement::readFromJson(json);
+}
+
+// --- capture ---
 
 void ACaptureGeneratedParticle::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
 {
@@ -67,13 +113,7 @@ void ACaptureReaction::readFromJson(const QJsonObject &json, AMaterialParticleCo
 
 void ACaptureElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
 {
-    json["Name"] = Name;
-    json["Mass"] = Mass;
-    json["MolarFraction"] = MolarFraction;
-
-    QJsonArray ar;
-    writeTwoQVectorsToJArray(Energy, CrossSection, ar);
-    json["CrossSection"] = ar;
+    ANeutronInteractionElement::writeToJson(json);
 
     QJsonArray crArr;
     for (const ACaptureReaction& cr : Reactions)
@@ -90,17 +130,10 @@ const QJsonObject ACaptureElement::writeToJson(AMaterialParticleCollection *MpCo
 
 void ACaptureElement::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
-    parseJson(json, "Name", Name);
-    parseJson(json, "Mass", Mass);
-    parseJson(json, "MolarFraction", MolarFraction);
-
-    QJsonArray ar = json["CrossSection"].toArray();
-    Energy.clear();
-    CrossSection.clear();
-    readTwoQVectorsFromJArray(ar, Energy, CrossSection);
+    ANeutronInteractionElement::readFromJson(json);
 
     Reactions.clear();
-    ar = json["Reactions"].toArray();
+    QJsonArray ar = json["Reactions"].toArray();
     for (int i=0; i<ar.size(); i++)
     {
         QJsonObject js = ar[i].toObject();

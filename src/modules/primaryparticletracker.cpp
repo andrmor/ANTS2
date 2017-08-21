@@ -460,7 +460,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                                                                          &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
                                                                                          MpCollection->fLogLogInterpolation);
                                         // fraction of this element in the total cross section:
-                                        const double thisOne = (crossSection * el.MolarFraction_runtime) / TotalCrossSection;
+                                        const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
                                         //        qDebug() << "--checking element"<<iselected<<"fraction in total cross-section:"<<thisOne;
                                         if (rnd < thisOne) break;
                                         rnd -= thisOne;

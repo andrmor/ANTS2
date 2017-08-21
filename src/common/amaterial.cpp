@@ -430,13 +430,8 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
                   {
                       AElasticScatterElement el;
                       QJsonObject js = ellAr[i].toObject();
-                      if ( el.readFromJson(js) )
-                         MatParticle[ip].Terminators[iTerm].ScatterElements << el;
-                      else
-                      {
-                          qCritical() << "Error in neutron ellastic scattering terminator";
-                          exit(1245);
-                      }
+                      el.readFromJson(js);
+                      MatParticle[ip].Terminators[iTerm].ScatterElements << el;
                   }
               }
 
@@ -481,64 +476,49 @@ AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int
     return &ScatterElements[index];
 }
 
-bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog)
-{
-    if (Type != ElasticScattering) return true;
-
-    PartialCrossSectionEnergy.clear();
-    PartialCrossSection.clear();
-    MeanElementMass = 0;
-
-    if (ScatterElements.isEmpty()) return true;
-
-    double sumEffectiveMass = 0;
-    double sumStatWeight = 0;
-    bool bCalculateCrossSections = true; // if for some isotopes energy/crosssections are not defined yet, do not calculate total
-    for (int i=0; i<ScatterElements.size(); i++)
+void NeutralTerminatorStructure::UpdateRuntimePropertiesForNeutrons(bool bUseLogLog)
+{    
+    if (Type == Capture)
     {
-        double StatWeight = ScatterElements.at(i).Fraction * 0.01 * ScatterElements.at(i).Abundancy;
-        sumStatWeight += StatWeight;
-        sumEffectiveMass += ScatterElements.at(i).Mass * StatWeight;
-        if (ScatterElements.at(i).Energy.isEmpty()) bCalculateCrossSections = false; //not yet finished editing
+        //nothing to do here
     }
-
-    if (sumStatWeight <= 0)
+    else if (Type == ElasticScattering && !ScatterElements.isEmpty())
     {
-        qWarning() << "Error in ellastic scattering terminator - sum stat weight is less or equal zero";
-        return false;
-    }
+        qDebug() << "Updaring neutron elastic scattering terminator";
+        MeanElementMass = 0;
+        for (const AElasticScatterElement& el : ScatterElements)
+            MeanElementMass += el.Mass * el.MolarFraction;
+        qDebug() << "Mean elements mass:" << MeanElementMass;
 
-    MeanElementMass = sumEffectiveMass / sumStatWeight;
-    //      qDebug() << "Mean element mass:"<<MeanElementMass;
-
-    for (int iEl=0; iEl<ScatterElements.size(); iEl++)
-    {
-        ScatterElements[iEl].MolarFraction_runtime = ScatterElements.at(iEl).Fraction * 0.01 * ScatterElements.at(iEl).Abundancy / sumStatWeight;
-        //      qDebug() << "Element"<<ScatterElements.at(iEl).Name<<" has molar fraction:"<<ScatterElements.at(iEl).MolarFraction_runtime;
-    }
-
-    if (bCalculateCrossSections)
-    {
-        //init PartialCrossSectionEnergy using the first element
-        //energy binning according to the first element
-        PartialCrossSectionEnergy = ScatterElements.first().Energy;
-        //first element cross-section times its molar fraction
-        for (int i=0; i<ScatterElements.first().CrossSection.size(); i++)
-            PartialCrossSection << ScatterElements.first().CrossSection.at(i) * ScatterElements.first().MolarFraction_runtime;
-        //processing other elements
-        //using interpolation to match energy bins
-        for (int iElement=1; iElement<ScatterElements.size(); iElement++)
+        PartialCrossSectionEnergy.clear();
+        PartialCrossSection.clear();
+        qDebug() << "Scatter elements defined:"<<ScatterElements.size();
+        for (int iElement=0; iElement<ScatterElements.size(); iElement++)
         {
-            for (int iEnergy=0; iEnergy<PartialCrossSectionEnergy.size(); iEnergy++)
+            AElasticScatterElement& se = ScatterElements[iElement];
+            qDebug() << se.Name << "-" << se.Mass;
+            qDebug() << se.Energy.size() << se.CrossSection.size();
+            if (se.Energy.isEmpty()) continue;
+            if (PartialCrossSectionEnergy.isEmpty())
             {
-                const double& energy = PartialCrossSectionEnergy.at(iEnergy);
-                const double cs = GetInterpolatedValue(energy, &ScatterElements.at(iElement).Energy, &ScatterElements.at(iElement).CrossSection, bUseLogLog);
-                PartialCrossSection[iEnergy] += cs * ScatterElements.at(iElement).MolarFraction_runtime;
+                //this is first non-empty element - energy binning will be according to it
+                PartialCrossSectionEnergy = se.Energy;
+                //first element cross-section times its molar fraction
+                for (int i=0; i<se.CrossSection.size(); i++)
+                    PartialCrossSection << se.CrossSection.at(i) * se.MolarFraction;
+            }
+            else
+            {
+                //using interpolation to match already defined energy bins
+                for (int iEnergy=0; iEnergy<PartialCrossSectionEnergy.size(); iEnergy++)
+                {
+                    const double& energy = PartialCrossSectionEnergy.at(iEnergy);
+                    const double cs = GetInterpolatedValue(energy, &se.Energy, &se.CrossSection, bUseLogLog);
+                    PartialCrossSection[iEnergy] += cs * se.MolarFraction;
+                }
             }
         }
+        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
+        qDebug() << "Cross-section-->" <<PartialCrossSection;
     }
-
-    //        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
-    //        qDebug() << "Cross-section-->" <<PartialCrossSection;
-    return bCalculateCrossSections;
 }

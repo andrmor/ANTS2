@@ -4,8 +4,7 @@
 #include <QVector>
 #include <QString>
 
-#include "acaptureelement.h"
-#include "aelasticscatterelement.h"
+#include "aneutroninteractionelement.h"
 #include "amaterialcomposition.h"
 
 class QJsonObject;
@@ -97,7 +96,7 @@ QVector<double> GeneratedParticleEnergies;
   QVector<AElasticScatterElement> ScatterElements;
   AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index
 
-  bool UpdateRuntimeForScatterElements(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
+  void UpdateRuntimePropertiesForNeutrons(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

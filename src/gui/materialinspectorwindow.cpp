@@ -15,7 +15,6 @@
 #include "guiutils.h"
 #include "ainternetbrowser.h"
 #include "amatparticleconfigurator.h"
-#include "aelasticdelegates.h"
 #include "amaterialcomposition.h"
 #include "aelementandisotopedelegates.h"
 
@@ -2449,7 +2448,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
     if (Terminators.isEmpty()) return;
 
     NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
-    term.UpdateRuntimeForScatterElements(MW->MpCollection->fLogLogInterpolation); //update total cross-section and sum stat weights
+    term.UpdateRuntimePropertiesForNeutrons(MW->MpCollection->fLogLogInterpolation); //update total cross-section and sum stat weights
 
     if (
             Terminators.last().Type != NeutralTerminatorStructure::ElasticScattering ||
@@ -2537,7 +2536,9 @@ void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 {
     element->Isotopes << AIsotope(element->Symbol, 777, 0);
+
     ShowTreeWithChemicalComposition();
+    FillNeutronTable();
     on_pbWasModified_clicked();
 }
 
@@ -2549,7 +2550,9 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
         return;
     }
     element->Isotopes.removeAt(isotopeIndexInElement);
+
     ShowTreeWithChemicalComposition();
+    FillNeutronTable();
     on_pbWasModified_clicked();
 }
 
@@ -2622,6 +2625,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     }
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    FillNeutronTable();
     on_pbWasModified_clicked();
 }
 
@@ -2748,7 +2752,7 @@ void MaterialInspectorWindow::FillNeutronTable()
                 }
                 QWidget* w = new QWidget();
                 QHBoxLayout* l = new QHBoxLayout();
-                l->setContentsMargins(4,0,2,0);
+                l->setContentsMargins(6,0,2,0);
                 l->setSpacing(2);
                 l->setAlignment(Qt::AlignCenter);
                 QPushButton* pbShow = new QPushButton("Show");
@@ -2766,6 +2770,9 @@ void MaterialInspectorWindow::FillNeutronTable()
                 l->addWidget( new QLabel("  ") );
                 w->setLayout(l);
                 ui->tabwNeutron->setCellWidget(row, 1, w);
+
+                QObject::connect(pbShow, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "ShowCapture"); });
+                QObject::connect(pbLoad, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "LoadCapture"); });
             }
             if (bElastic)
             {
@@ -2779,7 +2786,7 @@ void MaterialInspectorWindow::FillNeutronTable()
                 }
                 QWidget* w = new QWidget();
                 QHBoxLayout* l = new QHBoxLayout();
-                l->setContentsMargins(4,0,2,0);
+                l->setContentsMargins(6,0,2,0);
                 l->setSpacing(2);
                 l->setAlignment(Qt::AlignCenter);
                 QPushButton* pbShow = new QPushButton("Show");
@@ -2795,8 +2802,8 @@ void MaterialInspectorWindow::FillNeutronTable()
                 w->setLayout(l);
                 ui->tabwNeutron->setCellWidget(row, numColumns-1, w);
 
-                QObject::connect(pbShow, &QPushButton::clicked, this, [iElement, iIso, this]{ onTabwNeutronsActionRequest(iElement, iIso, "ShowElastic"); });
-                QObject::connect(pbLoad, &QPushButton::clicked, this, [iElement, iIso, this]{ onTabwNeutronsActionRequest(iElement, iIso, "LoadElastic"); });
+                QObject::connect(pbShow, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "ShowElastic"); });
+                QObject::connect(pbLoad, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "LoadElastic"); });
             }
             row++;
         }
@@ -2837,8 +2844,10 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     int iIndex = tmpMaterial.ChemicalComposition.getNumberInJointIsotopeList(iEl, iIso);
     qDebug() << "Index:"<<iIndex;
 
-    if (Action == "ShowElastic")
+    if (Action == "ShowElastic" || Action == "ShowCapture")
     {
+
+
         if (iIndex<0 || iIndex>=term.ScatterElements.size())
         {
             message("Bad index!", this);

@@ -40,6 +40,7 @@ class ACaptureElement
 {
 public:
     QString Name;
+    int Mass;
     double MolarFraction;
 
     QVector<double> Energy;
@@ -47,9 +48,9 @@ public:
 
     QVector<ACaptureReaction> Reactions;
 
-    ACaptureElement(QString IsotopeName, double MolarFraction) :
-        Name(IsotopeName), MolarFraction(MolarFraction) {Reactions.resize(1);}
-    ACaptureElement() : Name("Undefined"), MolarFraction(0) {Reactions.resize(1);}
+    ACaptureElement(QString IsotopeName, int Mass, double MolarFraction) :
+        Name(IsotopeName), Mass(Mass), MolarFraction(MolarFraction) {Reactions.resize(1);}
+    ACaptureElement() : Name("Undefined"), Mass(777), MolarFraction(0) {Reactions.resize(1);}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection);

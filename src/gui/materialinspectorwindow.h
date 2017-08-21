@@ -47,15 +47,7 @@ private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
 
-    //requests from elastic element delegates
-    void onShowElementCrossClicked(const AElasticScatterElement *element);
-    void onLoadElementCrossClicked(AElasticScatterElement *element);
-    void onIsotopeDelClicked(const AElasticScatterElement *element);
-    void onAutoIsotopesClicked(AElasticScatterElement *element);
-    void onDelElementClicked(AElasticScatterElement *element);
-    void onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction);
-
-    //on signals from celegates
+    //on signals from delegates
     void onAddIsotope(AChemicalElement *element);
     void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
     void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
@@ -115,13 +107,10 @@ private slots:
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
     void on_pbShowTotalCapture_clicked();
-    void on_pbUpdateElements_clicked();
-    void on_pbAddNewElement_clicked();
     void on_cobTerminationScenarios_activated(int index);
     void on_ledMFPenergyEllastic_editingFinished();
     void on_pbShowTotalEllastic_clicked();
     void on_pbConfigureAutoElastic_clicked();
-    void on_pbAddNewIsotope_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
@@ -140,12 +129,6 @@ private slots:
 
     //new auto-generated, not cathegorized
 
-    void on_twElastic_itemExpanded(QTreeWidgetItem *item);
-
-    void on_twElastic_itemCollapsed(QTreeWidgetItem *item);
-
-    void on_pbAutoFillCompositionForScatter_clicked();   //obsolete
-
     void on_pbModifyChemicalComposition_clicked();
 
     void on_cbShowIsotopes_clicked();
@@ -157,6 +140,8 @@ private slots:
     void on_cbCapture_clicked();
 
     void on_cbEnableScatter_clicked();
+
+    void onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action);
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -182,12 +167,9 @@ private:
 
     bool autoLoadElasticCrossSection(AElasticScatterElement *element);
     bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
-    int findElement(const AElasticScatterElement *element) const;
-    void doAddNewIsotope(int Index, QString name, double fraction);
-    QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    void EnsureProperNeutronTerminatorTypes();
+
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

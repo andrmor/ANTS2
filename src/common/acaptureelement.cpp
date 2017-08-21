@@ -68,6 +68,7 @@ void ACaptureReaction::readFromJson(const QJsonObject &json, AMaterialParticleCo
 void ACaptureElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
 {
     json["Name"] = Name;
+    json["Mass"] = Mass;
     json["MolarFraction"] = MolarFraction;
 
     QJsonArray ar;
@@ -90,6 +91,7 @@ const QJsonObject ACaptureElement::writeToJson(AMaterialParticleCollection *MpCo
 void ACaptureElement::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
     parseJson(json, "Name", Name);
+    parseJson(json, "Mass", Mass);
     parseJson(json, "MolarFraction", MolarFraction);
 
     QJsonArray ar = json["CrossSection"].toArray();

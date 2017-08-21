@@ -546,6 +546,13 @@ bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorT
     return true;
 }
 
+int AMaterialParticleCollection::getNeutronIndex() const
+{
+    for (int i=0; i<ParticleCollection.size(); i++)
+        if (  getParticleType(i) == AParticle::_neutron_) return i;
+    return -1;
+}
+
 void AMaterialParticleCollection::CopyMaterialToTmp(int imat)
 {
   if (imat<0 || imat>MaterialCollectionData.size()-1)

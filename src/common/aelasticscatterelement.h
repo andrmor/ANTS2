@@ -23,8 +23,10 @@ public:
     //gui-only
     bool bExpanded;
 
-    AElasticScatterElement(QString ElementName, int Mass, double Abundancy, double Fraction) :
-        Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), bExpanded(true) {}
+ AElasticScatterElement(QString ElementName, int Mass, double Abundancy, double Fraction) :
+ Name(ElementName), Mass(Mass), Abundancy(Abundancy), Fraction(Fraction), bExpanded(true) {}
+    AElasticScatterElement(QString ElementName, int Mass, double MolarFraction) :
+        Name(ElementName), Mass(Mass), MolarFraction_runtime(MolarFraction), bExpanded(true) {}
     AElasticScatterElement() : bExpanded(true) {}
 
     bool operator==(const AElasticScatterElement& other) const;

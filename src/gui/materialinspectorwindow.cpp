@@ -54,7 +54,6 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->labWasModified->setVisible(false);
     ui->pbWasModified->setVisible(false);
     ui->pbUpdateInteractionIndication->setVisible(false);
-    ui->pbUpdateElements->setVisible(false);
     ui->labContextMenuHelp->setVisible(false);
 
     ui->pbUpdateTmpMaterial->setVisible(false);
@@ -252,6 +251,7 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 
     ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
     ShowTreeWithChemicalComposition();
+    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
 
     str.setNum(tmpMaterial.atomicDensity, 'g');
     if (tmpMaterial.atomicDensity > 0) ui->ledAtomicDensity->setText(str);
@@ -372,10 +372,11 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 
       if (type == AParticle::_neutron_)
       {
-         //neutron
           ui->swNeutral->setCurrentIndex(1);
           ui->cbCapture->setChecked(mp.bCaptureEnabled);
+          ui->cbEnableScatter->setChecked(mp.bEllasticEnabled);
 
+          /*
           //capture
           if (mp.InteractionDataX.isEmpty())
             {
@@ -413,10 +414,10 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           updateNeutronReactionIndication();
           on_ledAtomicDensity_textChanged(ui->ledAtomicDensity->text()); //to update warning
           on_ledMFPenergy_editingFinished();
+          */
 
-          //ellastic
-          on_pbUpdateElements_clicked();
-          on_ledMFPenergyEllastic_editingFinished();
+          FillNeutronTable();
+          on_ledMFPenergyEllastic_editingFinished(); //  !!!
       }
       else if (type == AParticle::_gamma_)
       {
@@ -2322,44 +2323,6 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
       on_pbWasModified_clicked();
 }
 
-void MaterialInspectorWindow::onShowElementCrossClicked(const AElasticScatterElement *element)
-{
-    QVector<double> x,y;
-    for (int i=0; i<element->Energy.size(); i++)
-      {
-        x << 1.0e6 * element->Energy.at(i);         // keV -> meV
-        y << 1.0e24 * element->CrossSection.at(i);  // cm2 to barns
-      }
-
-    MW->GraphWindow->ShowAndFocus();
-    TString title = element->Name.toLocal8Bit() + " - ";
-    title += element->Mass;
-    TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title,
-                                                 "Energy, meV", "Ellastic scattering cross-section, barns",
-                                                 kRed, 2, 1, kRed, 0, 1);
-    MW->GraphWindow->Draw(gr, "AP");
-
-    TGraph* graphOver = constructInterpolationGraph(x, y);
-    graphOver->SetLineColor(kRed);
-    graphOver->SetLineWidth(1);
-    MW->GraphWindow->Draw(graphOver, "L same");
-}
-
-void MaterialInspectorWindow::onLoadElementCrossClicked(AElasticScatterElement *element)
-{
-    if (MatParticleOptionsConfigurator->isAutoloadEnabled())
-    {
-        bool fOK = autoLoadElasticCrossSection(element);
-        if (fOK) return;
-    }
-
-    QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
-    if (fileName.isEmpty()) return;
-
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    doLoadElementElasticCrossSection(element, fileName);
-}
 
 bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName)
 {
@@ -2398,36 +2361,11 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
 
         element->Energy = x;
         element->CrossSection = y;
-        on_pbUpdateElements_clicked();
         on_pbWasModified_clicked();
         on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
         return true;
     }
     return false;
-}
-
-void MaterialInspectorWindow::on_pbAddNewElement_clicked()
-{
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-    if (Terminators.isEmpty())
-        Terminators.resize(1);
-    else if ( Terminators.last().Type != NeutralTerminatorStructure::ElasticScattering)
-        Terminators.resize( tmpMaterial.MatParticle[particleId].Terminators.size() + 1 );
-
-    NeutralTerminatorStructure& t = Terminators.last();
-    t.Type = NeutralTerminatorStructure::ElasticScattering;
-    AElasticScatterElement e;
-    e.Name = "--";
-    e.Mass = 777;
-    e.Fraction = 1;
-    e.Abundancy = 100.0;
-    t.ScatterElements << e;
-
-    on_pbUpdateElements_clicked();
-    on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbShowTotalCapture_clicked()
@@ -2554,8 +2492,7 @@ bool MaterialInspectorWindow::autoLoadElasticCrossSection(AElasticScatterElement
     if ( !QFileInfo(fileName).exists() ) return false;
     qDebug() << "Autoload cross-section from file: " <<fileName;
 
-    doLoadElementElasticCrossSection(element, fileName);
-    return true;
+    return doLoadElementElasticCrossSection(element, fileName);
 }
 
 void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
@@ -2597,194 +2534,6 @@ void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 
 //--------------------------------------------------
 
-void MaterialInspectorWindow::on_pbUpdateElements_clicked()
-{
-    return;
-
-    bClearInProgress = true;
-    ui->twElastic->clear();
-    bClearInProgress = false;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-    ui->cbEnableScatter->setChecked(tmpMaterial.MatParticle[particleId].bEllasticEnabled);
-
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
-
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering) return;
-
-    QTreeWidgetItem* ElItem = 0;
-    QString prevElName;
-    for (int i=0; i<t.ScatterElements.size(); i++)
-    {
-        AElasticScatterElement& el = t.ScatterElements[i];
-
-        if (!ElItem || prevElName != el.Name)
-        {
-            //new element
-            AElasticElementDelegate* elDel = new AElasticElementDelegate(&el, &bClearInProgress);
-            ElItem = new QTreeWidgetItem(ui->twElastic);
-            ui->twElastic->setItemWidget(ElItem, 0, elDel);
-            ElItem->setExpanded(el.bExpanded);
-            QObject::connect(elDel, &AElasticElementDelegate::AutoClicked, this, &MaterialInspectorWindow::onAutoIsotopesClicked, Qt::QueuedConnection);
-            QObject::connect(elDel, &AElasticElementDelegate::DelClicked, this, &MaterialInspectorWindow::onDelElementClicked, Qt::QueuedConnection);
-            QObject::connect(elDel, &AElasticElementDelegate::RequestUpdateIsotopes, this, &MaterialInspectorWindow::onRequestUpdateIsotopes, Qt::QueuedConnection);            
-        }
-        //new isotope
-        AElasticIsotopeDelegate* isotopDel = new AElasticIsotopeDelegate(&el, &bClearInProgress);
-        QTreeWidgetItem* twi = new QTreeWidgetItem();
-        ElItem->addChild(twi);
-        ui->twElastic->setItemWidget(twi, 0, isotopDel);
-        prevElName = el.Name;        
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::DelClicked, this, &MaterialInspectorWindow::onIsotopeDelClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::ShowClicked, this, &MaterialInspectorWindow::onShowElementCrossClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
-        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
-    }
-
-   //ui->twElastic->expandAll();
-}
-
-void MaterialInspectorWindow::onIsotopeDelClicked(const AElasticScatterElement *element)
-{
-    int ret = QMessageBox::question(this, "", QString("Remove isotope ") + element->Name + "-" + QString::number(element->Mass) + "?", QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Yes);
-    if (ret != QMessageBox::Yes) return;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering) return;
-
-    if (t.ScatterElements.removeOne(*element))
-    {
-        on_pbWasModified_clicked();
-        on_pbUpdateElements_clicked();
-
-        on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-    }
-}
-
-int MaterialInspectorWindow::findElement(const AElasticScatterElement *element) const
-{
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return -1;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering) return -1;
-
-    for (int iElement = 0; iElement<t.ScatterElements.size(); iElement++)
-    if (t.ScatterElements[iElement] == *element)  return iElement;
-    return -1;
-}
-
-void MaterialInspectorWindow::onAutoIsotopesClicked(AElasticScatterElement *element)
-{
-    //      qDebug() << "Auto click on element processing started";
-    QString error = doAutoConfigureElement(element);
-    if (!error.isEmpty())
-    {
-        message(error, this);
-        return;
-    }
-
-    //      qDebug() << "Auto click processing finished, updating...";
-    on_pbWasModified_clicked();
-    on_pbUpdateElements_clicked();
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-    //      qDebug() << "...update after auto click finished!";
-}
-
-QString MaterialInspectorWindow::doAutoConfigureElement(AElasticScatterElement *element)
-{
-  int iThisElement = findElement(element);
-  if (iThisElement == -1) return "Element not found";
-
-  int particleId = ui->cobParticle->currentIndex();
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-
-  QString ElementName = t.ScatterElements.at(iThisElement).Name;
-  double Fraction = t.ScatterElements.at(iThisElement).Fraction;
-  const QVector<QPair<int, double> > isotopes = MatParticleOptionsConfigurator->getIsotopes(ElementName);
-
-  if (isotopes.isEmpty())
-      return QString("Data for element ") + ElementName + " not found!";
-
-  //removing defined isotopes
-  for (;iThisElement<t.ScatterElements.size();) //no increment!
-  {
-      if (t.ScatterElements.at(iThisElement).Name != ElementName) break;
-      //      qDebug() << "====== removing:"<< t.ScatterElements.at(iThisElement).Name;
-      t.ScatterElements.removeAt(iThisElement);
-      //      qDebug() << "====== elements left:"<<t.ScatterElements.size();
-  }
-
-  //adding elements
-  for (int i=0; i<isotopes.size(); i++)
-  {
-      //      qDebug() << "+++insering"<<ElementName<<isotopes.at(i).first<< isotopes.at(i).second<< Fraction << "at position"<< iThisElement+i << "Tot num:"<<t.ScatterElements.size();
-      AElasticScatterElement se(ElementName, isotopes.at(i).first, isotopes.at(i).second, Fraction);
-      se.bExpanded = false;
-      bool bOK = autoLoadElasticCrossSection(&se);
-      t.ScatterElements.insert(iThisElement+i, se);
-      if (!bOK) t.ScatterElements[iThisElement].bExpanded = true;
-  }
-  return "";
-}
-
-
-void MaterialInspectorWindow::onDelElementClicked(AElasticScatterElement *element)
-{
-    int iElement = findElement(element);
-    if (iElement == -1) return;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-
-    QString Name = t.ScatterElements.at(iElement).Name;
-    for (;iElement<t.ScatterElements.size();) //no increment!
-    {
-        if (t.ScatterElements.at(iElement).Name != Name) break;
-        t.ScatterElements.removeAt(iElement);
-    }
-    on_pbWasModified_clicked();
-    on_pbUpdateElements_clicked();
-
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-}
-
-void MaterialInspectorWindow::onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction)
-{
-    int iElement = findElement(element);
-    if (iElement == -1) return;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-
-    QString oldName = t.ScatterElements.at(iElement).Name;
-    for (;iElement<t.ScatterElements.size(); iElement++)
-    {
-        if (t.ScatterElements.at(iElement).Name != oldName) break;
-        t.ScatterElements[iElement].Name = name;
-        t.ScatterElements[iElement].Fraction = fraction;
-        if (oldName != name)
-        {
-            t.ScatterElements[iElement].Energy.clear();
-            t.ScatterElements[iElement].CrossSection.clear();
-        }
-    }
-    on_pbWasModified_clicked();
-    on_pbUpdateElements_clicked();
-
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-}
-
 void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 {
     element->Isotopes << AIsotope(element->Symbol, 777, 0);
@@ -2810,104 +2559,6 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
     on_pbWasModified_clicked();
 }
 
-void MaterialInspectorWindow::on_pbAddNewIsotope_clicked()
-{
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-    //if scatter not defined yet, add new element
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty())
-    {
-        on_pbAddNewElement_clicked();
-        return;
-    }
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty())
-    {
-        on_pbAddNewElement_clicked();
-        return;
-    }
-
-    //if only one element, add new isotope
-    bool bOnlyOneElement = true;
-    for (int i=0; i<t.ScatterElements.size(); i++)
-        if (t.ScatterElements.at(i).Name != t.ScatterElements.at(0).Name)
-        {
-            bOnlyOneElement = false;
-            break;
-        }
-    if (bOnlyOneElement)
-    {
-        doAddNewIsotope(t.ScatterElements.size(), t.ScatterElements.at(0).Name, t.ScatterElements.at(0).Fraction);
-        return;
-    }
-
-    //checking which element is selected
-    QTreeWidgetItem* item = ui->twElastic->currentItem();
-    if (!item)
-    {
-        message("Select an element to which a new isotope should be added", this);
-        return;
-    }
-    QWidget* w = ui->twElastic->itemWidget(item, 0);
-    if (!w) return; //paranoid
-
-    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
-    AElasticIsotopeDelegate* isoDel = dynamic_cast<AElasticIsotopeDelegate*>(w);
-    if (!elDel && !isoDel)
-    {
-        qWarning() << "Something went wrong...";
-        return;
-    }
-
-    const AElasticScatterElement* element = 0;
-    if (elDel)
-    {
-        //qDebug() << "This is element!";
-        element = elDel->getElement();
-    }
-    else if (isoDel)
-    {
-        //qDebug() << "This is isotope!";
-        element = isoDel->getElement();
-    }
-    if (!element)
-    {
-        qWarning() << "Something went wrong...";
-        return;
-    }
-
-    int iElement = findElement(element);
-    if (iElement == -1)
-    {
-        qWarning() << "Something went wrong...";
-        return;
-    }
-
-    int iToInsert = iElement;
-    do
-    {
-        iToInsert++;
-        if (iToInsert == t.ScatterElements.size() ) break;
-    }
-    while (t.ScatterElements.at(iToInsert).Name == t.ScatterElements.at(iElement).Name);
-
-    //qDebug() << "Inserting in position:"<< iToInsert;
-    doAddNewIsotope(iToInsert, t.ScatterElements.at(iElement).Name, t.ScatterElements.at(iElement).Fraction);
-}
-
-void MaterialInspectorWindow::doAddNewIsotope(int Index, QString name, double fraction)
-{
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    t.ScatterElements.insert(Index, AElasticScatterElement(name, 777, 0, fraction));
-
-    on_pbWasModified_clicked();
-    on_pbUpdateElements_clicked();
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-}
-
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
     on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
@@ -2926,191 +2577,6 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
             MW->MpCollection->CheckElasticScatterElements(&MW->MpCollection->tmpMaterial, particleId, &Text);
     }
     message(Text, this);
-}
-
-void MaterialInspectorWindow::on_twElastic_itemExpanded(QTreeWidgetItem *item)
-{
-    QWidget* w = ui->twElastic->itemWidget(item, 0);
-    if (!w) return;
-
-    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
-    if (elDel)
-    {
-        elDel->getElement()->bExpanded = true;
-        return;
-    }
-}
-
-void MaterialInspectorWindow::on_twElastic_itemCollapsed(QTreeWidgetItem *item)
-{
-    QWidget* w = ui->twElastic->itemWidget(item, 0);
-    if (!w) return;
-
-    AElasticElementDelegate* elDel = dynamic_cast<AElasticElementDelegate*>(w);
-    if (elDel)
-    {
-        elDel->getElement()->bExpanded = false;
-        return;
-    }
-}
-
-void MaterialInspectorWindow::on_pbAutoFillCompositionForScatter_clicked()
-{
-    QString str = ui->leChemicalComposition->text().simplified();
-    str.replace(" ", "");
-    if (str.isEmpty())
-    {
-        message("Material composition is empty!");
-        ui->twProperties->setCurrentIndex(0);
-        return;
-    }
-
-    QStringList elList = str.split(QRegExp("\\+"));
-
-    QVector< QPair< QString, double> > Records;
-
-    for (QString el : elList)
-      {
-        QStringList wList = el.split(":");
-        if (wList.isEmpty() || wList.size() > 2)
-        {
-            message("Format error in composition!");
-            ui->twProperties->setCurrentIndex(0);
-            return;
-        }
-        QString Formula = wList.first();
-
-        double Fraction;
-        if (wList.size() == 1) Fraction = 1.0;
-        else
-        {
-            QString fr = wList.last();
-            bool bOK;
-            Fraction = fr.toDouble(&bOK);
-            if (!bOK)
-            {
-                message("Format error in composition!");
-                ui->twProperties->setCurrentIndex(0);
-                return;
-            }
-        }
-
-        Records << QPair<QString,double>(Formula, Fraction);
-      }
-    qDebug() << Records;
-
-    QMap<QString,double> map;
-    for (QPair<QString,double> pair : Records)
-    {
-        QString Formula = pair.first + ":"; //":" is end signal
-        if (!Formula[0].isLetter() && !Formula[0].isUpper())
-        {
-            message("Format error in composition!\nRemember to respect Upper/lower register for elements");
-            ui->twProperties->setCurrentIndex(0);
-            return;
-        }
-        double weight = pair.second;
-
-        qDebug() << Formula;
-        bool bReadingElementName = true;
-        QString tmp = Formula[0];
-        QString Element;
-        for (int i=1; i<Formula.size(); i++)
-        {
-            QChar c = Formula[i];
-            if (bReadingElementName)
-            {
-                if (c.isLetter() && c.isLower()) //continue to acquire the name
-                {
-                    tmp += c;
-                    continue;
-                }
-                else if (c == ':' || c.isDigit() || (c.isLetter() && c.isUpper()))
-                {
-                    if (tmp.isEmpty())
-                    {
-                        message("Format error in composition: unrecognized character");
-                        ui->twProperties->setCurrentIndex(0);
-                        return;
-                    }
-                    Element = tmp;
-                    if (c == ":" || (c.isLetter() && c.isUpper()))
-                    {
-                        if (map.contains(Element)) map[Element] += weight * 1.0;
-                        else map[Element] = weight * 1.0;
-                        if (c == ":") break;
-                    }
-                    tmp = QString(c);
-                    if (c.isDigit()) bReadingElementName = false;
-                }
-                else
-                {
-                    message("Format error in composition: unrecognized character");
-                    ui->twProperties->setCurrentIndex(0);
-                    return;
-                }
-            }
-            else
-            {
-                //reading number
-                if (c.isDigit())
-                {
-                    tmp += c;
-                    continue;
-                }
-                else if (c==':' || c.isLetter())
-                {
-                    if (c.isLower())
-                    {
-                        message("Format error in composition: lower rgister after on element start");
-                        ui->twProperties->setCurrentIndex(0);
-                        return;
-                    }
-                    double number = tmp.toDouble();
-                    if (map.contains(Element)) map[Element] += weight * number;
-                    else map[Element] = weight * number;
-                    if (c==':') break;
-                    tmp = QString(c);
-                    bReadingElementName = true;
-                }
-                else
-                {
-                    message("Format error in composition: unrecognized character");
-                    ui->twProperties->setCurrentIndex(0);
-                    return;
-                }
-            }
-        }
-
-    }
-    qDebug() << map;
-
-    //filling isotopes
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-    if (Terminators.isEmpty()) Terminators.resize(1);
-    else if ( Terminators.last().Type != NeutralTerminatorStructure::ElasticScattering)
-        Terminators.resize( tmpMaterial.MatParticle[particleId].Terminators.size() + 1 );
-
-    NeutralTerminatorStructure& t = Terminators.last();
-    t.Type = NeutralTerminatorStructure::ElasticScattering;
-
-    QList<QString> Elements = map.keys();
-    for (int iEl = 0; iEl<Elements.size(); iEl++)
-      {
-        QString Element = Elements.at(iEl);
-        double Fraction = map[Element];
-        qDebug() << Element << Fraction;
-
-        t.ScatterElements << AElasticScatterElement(Element, 777, 0, Fraction);
-        doAutoConfigureElement(&t.ScatterElements.last());
-      }
-
-    on_pbUpdateElements_clicked();
-    on_pbWasModified_clicked();
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
 }
 
 void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
@@ -3154,6 +2620,9 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         ShowTreeWithChemicalComposition();
         break;
     }
+
+    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+    on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
@@ -3217,8 +2686,6 @@ void flagButton(QPushButton* pb, bool flag)
 
 void MaterialInspectorWindow::FillNeutronTable()
 {
-    EnsureProperNeutronTerminatorTypes();
-
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
     ui->tabwNeutron->setColumnCount(0);
@@ -3233,6 +2700,7 @@ void MaterialInspectorWindow::FillNeutronTable()
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
     int numIso = tmpMaterial.ChemicalComposition.countIsotopes();
+    qDebug() << "..Starting update of neutron table.  Total isotopes:"<<numIso;
     ui->tabwNeutron->setRowCount(numIso);
 
     int numColumns = 1;
@@ -3263,25 +2731,33 @@ void MaterialInspectorWindow::FillNeutronTable()
         const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
         for (int iIso=0; iIso<el->countIsotopes(); iIso++)
         {
-            QString name = el->Isotopes.at(0).Symbol + "-" + QString::number(el->Isotopes.at(0).Mass);
+            QString name = el->Isotopes.at(iIso).Symbol + "-" + QString::number(el->Isotopes.at(iIso).Mass);
+            qDebug() << "Updating" <<name;
             QTableWidgetItem* twi = new QTableWidgetItem(name);
             twi->setTextAlignment(Qt::AlignCenter);
             ui->tabwNeutron->setItem(row, 0, twi);
             if (bCapture)
             {
-                const NeutralTerminatorStructure& t = Terminators.first();
+                NeutralTerminatorStructure& t = Terminators.first();
+                ACaptureElement* capEl = t.getCaptureElement(row);
+                qDebug() << "index:"<<row << "Defined capture elements:" << t.CaptureElements.size();
+                if (!capEl)
+                {
+                    message("Critical error - capture element not found!", this);
+                    return;
+                }
                 QWidget* w = new QWidget();
                 QHBoxLayout* l = new QHBoxLayout();
                 l->setContentsMargins(4,0,2,0);
                 l->setSpacing(2);
                 l->setAlignment(Qt::AlignCenter);
                 QPushButton* pbShow = new QPushButton("Show");
-                pbShow->setEnabled(!t.PartialCrossSectionEnergy.isEmpty());
+                pbShow->setEnabled(!capEl->Energy.isEmpty());
                 pbShow->setMaximumWidth(50);
                 l->addWidget(pbShow);
                 QPushButton* pbLoad = new QPushButton("Load");
                 if (!bIgnore)
-                    if (t.PartialCrossSectionEnergy.isEmpty())
+                    if (capEl->Energy.isEmpty())
                         flagButton(pbLoad, true);
                 pbLoad->setMaximumWidth(50);
                 l->addWidget(pbLoad);
@@ -3293,6 +2769,14 @@ void MaterialInspectorWindow::FillNeutronTable()
             }
             if (bElastic)
             {
+                NeutralTerminatorStructure& t = Terminators.last();
+                AElasticScatterElement* scatEl = t.getElasticScatterElement(row);
+                qDebug() << "index:"<<row << "Defined scatter elements:" << t.ScatterElements.size();
+                if (!scatEl)
+                {
+                    message("Critical error - elastic scatter element not found!", this);
+                    return;
+                }
                 QWidget* w = new QWidget();
                 QHBoxLayout* l = new QHBoxLayout();
                 l->setContentsMargins(4,0,2,0);
@@ -3300,38 +2784,26 @@ void MaterialInspectorWindow::FillNeutronTable()
                 l->setAlignment(Qt::AlignCenter);
                 QPushButton* pbShow = new QPushButton("Show");
                 pbShow->setMaximumWidth(50);
+                pbShow->setEnabled(!scatEl->Energy.isEmpty());
                 l->addWidget(pbShow);
                 QPushButton* pbLoad = new QPushButton("Load");
+                if (!bIgnore)
+                    if (scatEl->Energy.isEmpty())
+                        flagButton(pbLoad, true);
                 pbLoad->setMaximumWidth(50);
                 l->addWidget(pbLoad);
                 w->setLayout(l);
                 ui->tabwNeutron->setCellWidget(row, numColumns-1, w);
+
+                QObject::connect(pbShow, &QPushButton::clicked, this, [iElement, iIso, this]{ onTabwNeutronsActionRequest(iElement, iIso, "ShowElastic"); });
+                QObject::connect(pbLoad, &QPushButton::clicked, this, [iElement, iIso, this]{ onTabwNeutronsActionRequest(iElement, iIso, "LoadElastic"); });
             }
             row++;
         }
     }
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
-}
-
-void MaterialInspectorWindow::EnsureProperNeutronTerminatorTypes()
-{
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    int particleId = ui->cobParticle->currentIndex();
-
-    if (tmpMaterial.MatParticle.at(particleId).MaterialIsTransparent || !tmpMaterial.MatParticle.at(particleId).TrackingAllowed) return;
-    bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked();
-    if (!bCapture && !bElastic) return;
-
-    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-    int numProcess = 0;
-    if (bCapture) numProcess++;
-    if (bElastic) numProcess++;
-    Terminators.resize(numProcess);
-
-    Terminators.first().Type = NeutralTerminatorStructure::Capture;
-    Terminators.last().Type  = NeutralTerminatorStructure::ElasticScattering;
+    //connect(this, &MaterialInspectorWindow::tabwNeutronsRequest, this, &MaterialInspectorWindow::test);
 }
 
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
@@ -3352,4 +2824,74 @@ void MaterialInspectorWindow::on_cbCapture_clicked()
 void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 {
     FillNeutronTable();
+}
+
+void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action)
+{
+    qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+    NeutralTerminatorStructure& term = Terminators.last();
+    int iIndex = tmpMaterial.ChemicalComposition.getNumberInJointIsotopeList(iEl, iIso);
+    qDebug() << "Index:"<<iIndex;
+
+    if (Action == "ShowElastic")
+    {
+        if (iIndex<0 || iIndex>=term.ScatterElements.size())
+        {
+            message("Bad index!", this);
+            return;
+        }
+
+        AElasticScatterElement& element = term.ScatterElements[iIndex];
+        qDebug() << "Elastic cross-section show for" << element.Name <<"-"<< element.Mass;
+        QVector<double> x,y;
+        for (int i=0; i<element.Energy.size(); i++)
+          {
+            x << 1.0e6 * element.Energy.at(i);         // keV -> meV
+            y << 1.0e24 * element.CrossSection.at(i);  // cm2 to barns
+          }
+
+        MW->GraphWindow->ShowAndFocus();
+        TString title = element.Name.toLocal8Bit() + " - ";
+        title += element.Mass;
+        TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title,
+                                                     "Energy, meV", "Ellastic scattering cross-section, barns",
+                                                     kRed, 2, 1, kRed, 0, 1);
+        MW->GraphWindow->Draw(gr, "AP");
+
+        TGraph* graphOver = constructInterpolationGraph(x, y);
+        graphOver->SetLineColor(kRed);
+        graphOver->SetLineWidth(1);
+        MW->GraphWindow->Draw(graphOver, "L same");
+    }
+    else if (Action == "LoadElastic")
+    {
+        if (iIndex<0 || iIndex>=term.ScatterElements.size())
+        {
+            message("Bad index!", this);
+            return;
+        }
+
+        AElasticScatterElement* element = &term.ScatterElements[iIndex];
+        qDebug() << "Elastic cross-section load for" << element->Name <<"-"<< element->Mass;
+        if (MatParticleOptionsConfigurator->isAutoloadEnabled())
+        {
+            bool fOK = autoLoadElasticCrossSection(element);
+            if (fOK)
+            {
+                FillNeutronTable();
+                return;
+            }
+        }
+
+        QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        if (fileName.isEmpty()) return;
+        MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+        doLoadElementElasticCrossSection(element, fileName);
+        FillNeutronTable();
+    }
 }

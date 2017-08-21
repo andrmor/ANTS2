@@ -30,6 +30,74 @@ double AMaterial::getAbsorptionCoefficient(int iWave) const
   return absWaveBinned[iWave];
 }
 
+void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
+{
+    int neutronId = MPCollection->getNeutronIndex();
+    if (neutronId == -1) return; //not dfefined in thsi configuration
+
+    QVector<NeutralTerminatorStructure>& Terminators = MatParticle[neutronId].Terminators;
+    Terminators.resize(2);
+    //1 - capture
+    NeutralTerminatorStructure& ct = Terminators.first();
+    ct.Type = NeutralTerminatorStructure::Capture;
+    QVector<ACaptureElement> CaptureElementsNew;
+    for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
+    {
+        AChemicalElement* El = ChemicalComposition.getElement(iEl);
+        for (int iIso=0; iIso<El->countIsotopes(); iIso++)
+        {
+            qDebug() << "capture" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
+            bool bAlreadyExists = false;
+            for (ACaptureElement& capEl : ct.CaptureElements)
+                if (capEl.Name == El->Symbol && capEl.Mass == El->Isotopes.at(iIso).Mass)
+                {
+                    qDebug() << "Found in old list, copying";
+                    bAlreadyExists = true;
+                    CaptureElementsNew << capEl;
+                    break;
+                }
+            if (!bAlreadyExists)
+            {
+                qDebug() << "Not found, creating new record";
+                CaptureElementsNew << ACaptureElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
+            }
+        }
+    }
+    ct.CaptureElements = CaptureElementsNew;
+
+    //2 - elastic scatter
+    NeutralTerminatorStructure& st = Terminators.last();
+    st.Type = NeutralTerminatorStructure::ElasticScattering;
+    QVector<AElasticScatterElement> ScatterElementsNew;
+    for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
+    {
+        AChemicalElement* El = ChemicalComposition.getElement(iEl);
+        for (int iIso=0; iIso<El->countIsotopes(); iIso++)
+        {
+            qDebug() << "scatter" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
+            bool bAlreadyExists = false;
+            for (AElasticScatterElement& scatEl : ct.ScatterElements)
+                if (scatEl.Name == El->Symbol && scatEl.Mass == El->Isotopes.at(iIso).Mass)
+                {
+                    qDebug() << "Found in old list, copying";
+                    bAlreadyExists = true;
+                    ScatterElementsNew << scatEl;
+                    break;
+                }
+            if (!bAlreadyExists)
+            {
+                qDebug() << "Not found, creating new record";
+                ScatterElementsNew << AElasticScatterElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
+            }
+        }
+    }
+    st.ScatterElements = ScatterElementsNew;
+
+
+
+
+}
+
 void AMaterial::clear()
 {
   name = "Undefined";
@@ -401,14 +469,16 @@ bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mi
   return true;
 }
 
-bool NeutralTerminatorStructure::isNameInUse(QString name, int ExceptIndex) const
+ACaptureElement *NeutralTerminatorStructure::getCaptureElement(int index)
 {
-    for (int i=0; i<ScatterElements.size(); i++)
-    {
-        if (i==ExceptIndex) continue;
-        if (ScatterElements.at(i).Name == name) return true;
-    }
-    return false;
+    if (index<0 || index>=CaptureElements.size()) return 0;
+    return &CaptureElements[index];
+}
+
+AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int index)
+{
+    if (index<0 || index>=ScatterElements.size()) return 0;
+    return &ScatterElements[index];
 }
 
 bool NeutralTerminatorStructure::UpdateRuntimeForScatterElements(bool bUseLogLog)

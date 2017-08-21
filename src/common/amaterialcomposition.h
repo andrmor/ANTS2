@@ -53,6 +53,7 @@ public:
     int countElements() const {return ElementComposition.size();}
     int countIsotopes() const;
     AChemicalElement* getElement(int iElement) {return &ElementComposition[iElement];}
+    int getNumberInJointIsotopeList(int iElement, int iIsotope);
 
     const QString print() const;
 

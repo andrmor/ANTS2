@@ -66,6 +66,8 @@ public:
   TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
 
+  void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
+
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection); //QVector<AParticle*>* ParticleCollection); //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
@@ -82,17 +84,18 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-  double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
+double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
   double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
 
   // for capture
   QVector<ACaptureElement> CaptureElements;
-  QVector<int> GeneratedParticles;
-  QVector<double> GeneratedParticleEnergies;
+  ACaptureElement* getCaptureElement(int index);  //0 if wrong index
+QVector<int> GeneratedParticles;
+QVector<double> GeneratedParticleEnergies;
 
   //for ellastic
   QVector<AElasticScatterElement> ScatterElements;
-  bool isNameInUse(QString name, int ExceptIndex = -1) const;
+  AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index
 
   bool UpdateRuntimeForScatterElements(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
 };

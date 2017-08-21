@@ -65,6 +65,7 @@ public:
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
   bool RemoveParticle(int particleId, QString* errorText=0);
   QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
+  int getNeutronIndex() const; //returns -1 if not in the collection
 
   //tmpMaterial - related
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!

@@ -39,7 +39,7 @@ public:
         ANeutronInteractionElement() {}
 
     void writeToJson(QJsonObject& json) const;
-    const QJsonObject writeToJson();
+    const QJsonObject writeToJson() const;
     void readFromJson(const QJsonObject& json);
 };
 
@@ -86,7 +86,7 @@ public:
         ANeutronInteractionElement() {Reactions.resize(1);}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
-    const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection);
+    const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
     void readFromJson(QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 

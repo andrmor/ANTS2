@@ -632,150 +632,7 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
 
 QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
 {
-  if (iPart<0 || iPart>ParticleCollection.size()-1) return QString("Wrong particle index: ") + QString::number(iPart);
-  //qDebug()<<">"<<mat->name<<" - "<<ParticleCollection->at(iPart)->ParticleName;
-
-  const MatParticleStructure* mp = &mat->MatParticle[iPart];
-  //shortcuts - if particle tracking is disabled or material is transparent - no checks
-  if ( ! mp->TrackingAllowed) return "";
-  if ( mp->MaterialIsTransparent) return "";
-
-  const AParticle::ParticleType& pt = ParticleCollection.at(iPart)->type;
-
-  //check TotalInteraction
-  int interSize = mp->InteractionDataX.size();
-  //check needed only for charged particles - they used it (stopping power is provided there)
-  if (pt == AParticle::_charged_)
-  {
-      if (interSize == 0 || mp->InteractionDataF.size() == 0) return "Empty stopping power data";
-      if (interSize<2 || mp->InteractionDataF.size()<2) return "Stopping power data size is less than 2 points";
-      if (interSize != mp->InteractionDataF.size()) return "Mismatch in total interaction (X and F) length";
-      for (int i=1; i<interSize; i++) //protected against length = 0 or 1
-          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i]) return "Stopping power data: total energy binning is not non-decreasing";
-      return ""; //nothing else is needed to be checked
-  }
-
-  if (pt == AParticle::_gamma_)
-    {
-      const int terms = mp->Terminators.size();
-      if (mp->Terminators.isEmpty()) return "Terminators size for gamma";
-      if (terms<2 || terms>3) return "Terminators size for gamma";
-
-      if (terms == 2) //compatibility - no pair production
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering
-            ) return "Interactions types for gamma";
-
-      if (terms == 3)
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering ||
-             mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction
-            ) return "Interactions types for gamma";
-
-      //checking partial crossection for terminators
-      for (int iTerm=0; iTerm<terms; iTerm++)
-        {
-          const QVector<double>*  e = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
-          const QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
-          if (e->size() != interSize || cs->size() != interSize)
-              return "Mismatch between total and partial interaction data size";
-          for (int i=0; i<interSize; i++)
-              if (mp->InteractionDataX[i] != e->at(i))
-                  return "Mismatch in energy of total and partial cross interaction datasets";
-        }
-
-      // confirminf that TotalInteraction is indeed the sum of the partial cross-sections
-      for (int i=0; i<interSize; i++)
-        {
-          double sum = 0;
-          for (int ite=0; ite<terms; ite++)
-              sum += mp->Terminators[ite].PartialCrossSection[i];
-          double delta =  sum - mp->InteractionDataF[i];
-          if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] )
-              return "Total interaction in not equal to sum of partials";
-        }
-
-      //properties for gamma are properly defined!
-      return "";
-    }
-
-  if (pt == AParticle::_neutron_)
-    {
-      if (!mp->bCaptureEnabled && !mp->bEllasticEnabled) return "";
-      if (mp->bCaptureEnabled && mat->atomicDensity == 0) return "Isotope density is not defined";
-
-      int numTerm = mp->Terminators.size();
-      if (numTerm == 0 ) return "No capture or ellastic data defined";
-
-      //confirming all terminators type is "capture" or "ellastic"
-      if (mp->bEllasticEnabled && mp->Terminators[numTerm-1].Type != NeutralTerminatorStructure::ElasticScattering)
-          return "Last terminator is expected to be ellastic scattering, but it is not";
-      for (int i=0; i<numTerm; i++)
-        {
-          //qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
-          if ( i==numTerm-1 )
-          {
-              if (
-                      (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture) &&
-                      (mp->Terminators[i].Type != NeutralTerminatorStructure::ElasticScattering)
-                 )
-                  return "Capture or ellastic scattering terminator expected, but wrong type received";
-          }
-          else if ( mp->Terminators[i].Type != NeutralTerminatorStructure::Capture )
-              return "Capture terminator expected, but wrong type received";
-        }
-
-      //checking all terminator one by one
-      if (mp->bEllasticEnabled)
-      {
-          for (int iTerm=0; iTerm<numTerm; iTerm++)
-            {
-              //qDebug() << "Checking term #"<<iTerm;
-              const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
-              if (term.Type == NeutralTerminatorStructure::ElasticScattering)
-              {
-                  if (term.ScatterElements.isEmpty())
-                      return QString("No elements defined for neutron ellastic scattering for ") + mat->name;
-                  if (term.MeanElementMass == 0)
-                      return QString("Mean element weight is zero for neutron ellastic scattering for ") + mat->name;
-              }
-            }
-
-          if (mp->Terminators.last().PartialCrossSectionEnergy.isEmpty())
-              return QString("Not all elastic scaterring cross-sections are defined for ") + mat->name;
-
-          //check abundances
-          QString elscerr = CheckElasticScatterElements(mat, iPart, 0);
-          if (!elscerr.isEmpty()) return elscerr;
-      }
-
-      if (mp->bCaptureEnabled)
-      {
-          for (int iTerm=0; iTerm<numTerm; iTerm++)
-          {
-              const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
-              if (term.Type != NeutralTerminatorStructure::Capture) continue;
-              //checking generated particles and their initial energies
-              const QVector<int>* gp = &term.GeneratedParticles;
-              if (!gp->isEmpty())
-              {
-                  const QVector<double>* gpE = &term.GeneratedParticleEnergies;
-                  if (gp->isEmpty()) return "Error in energy of generated particles after capture";
-                  int numPart = gp->size();
-                  if (numPart != gpE->size()) return "Error in energy of generated particles after capture";
-                  for (int iGP=0; iGP<numPart; iGP++)
-                    {
-                      int part = gp->at(iGP);
-                      if (part<0 || part>ParticleCollection.size()-1) return "Unknown generated particle after capture";  //unknown particle
-                    }
-              }
-          }
-      }
-    }
-
-  return ""; //passed all tests
+  return mat->CheckMaterial(iPart, this);
 }
 
 QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
@@ -788,7 +645,7 @@ QString AMaterialParticleCollection::CheckMaterial(int iMat) const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-      QString err = AMaterialParticleCollection::CheckMaterial(iMat, iPart);
+      QString err = CheckMaterial(iMat, iPart);
       if (!err.isEmpty()) return err;
     }
   return "";
@@ -798,7 +655,7 @@ QString AMaterialParticleCollection::CheckTmpMaterial() const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-      QString err = AMaterialParticleCollection::CheckMaterial(&tmpMaterial, iPart);
+      QString err = tmpMaterial.CheckMaterial(iPart, this);
       if (!err.isEmpty()) return err;
     }
   return "";

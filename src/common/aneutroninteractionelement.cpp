@@ -38,7 +38,7 @@ void AElasticScatterElement::writeToJson(QJsonObject &json) const
    ANeutronInteractionElement::writeToJson(json);
 }
 
-const QJsonObject AElasticScatterElement::writeToJson()
+const QJsonObject AElasticScatterElement::writeToJson() const
 {
     QJsonObject json;
     AElasticScatterElement::writeToJson(json);
@@ -121,7 +121,7 @@ void AAbsorptionElement::writeToJson(QJsonObject &json, AMaterialParticleCollect
     json["Reactions"] = crArr;
 }
 
-const QJsonObject AAbsorptionElement::writeToJson(AMaterialParticleCollection *MpCollection)
+const QJsonObject AAbsorptionElement::writeToJson(AMaterialParticleCollection *MpCollection) const
 {
     QJsonObject js;
     writeToJson(js, MpCollection);

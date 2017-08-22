@@ -66,10 +66,13 @@ public:
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
+  void updateRuntimeProperties(bool bLogLogInterpolation);
 
   void clear();
-  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection); //QVector<AParticle*>* ParticleCollection); //does not save overrides!
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
+
+  QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles
@@ -78,25 +81,33 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
                     ComptonScattering = 1,
                     Capture = 2,
                     PairProduction = 3,
-                    ElasticScattering = 4};  //must keep the numbers - directly used in json config files
-  ReactionType Type;
+                    ElasticScattering = 4,
+                    Undefined = 5};  //must keep the numbers - directly used in json config files
 
+  ReactionType Type;  
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
-  double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
 
-  // for capture
-  QVector<AAbsorptionElement> AbsorptionElements;
-  AAbsorptionElement* getCaptureElement(int index);  //0 if wrong index
+  // exclusive for neutrons
+  QVector<AAbsorptionElement> AbsorptionElements;  // exclusive for capture
+  QVector<AElasticScatterElement> ScatterElements; // exclusive for ellastic
+
+/// obsolete
+double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
 QVector<int> GeneratedParticles;
 QVector<double> GeneratedParticleEnergies;
+///
 
-  //for ellastic
-  QVector<AElasticScatterElement> ScatterElements;
-  AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index
+  // runtime properties
+  double MeanElementMass;   // average mass (in au) of elements - updated before simulations
 
   void UpdateRuntimePropertiesForNeutrons(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
+
+  AAbsorptionElement* getCaptureElement(int index);  //0 if wrong index
+  AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index
+
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
+  void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

@@ -58,7 +58,7 @@ void ANeutronReactionWidget::on_pbRemove_clicked()
         Reaction->GeneratedParticles.clear();
     else
         Reaction->GeneratedParticles.removeLast();
-    updateParticleList();
+     updateParticleList();
     emit RequestParentResize();
 }
 

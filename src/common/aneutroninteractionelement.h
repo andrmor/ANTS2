@@ -7,6 +7,8 @@
 class QJsonObject;
 class AMaterialParticleCollection;
 
+// --- base class ---
+
 class ANeutronInteractionElement  // basic class for capture and elastic scattering
 {
 public:
@@ -41,18 +43,18 @@ public:
     void readFromJson(const QJsonObject& json);
 };
 
-// --- capture ---
+// --- absorption ---
 
-class ACaptureGeneratedParticle
+class AAbsorptionGeneratedParticle
 {
 public:
     int ParticleId;
     double Energy;    // in keV
     bool bOpositeDirectionWithPrevious;
 
-    ACaptureGeneratedParticle(int ParticleId, double Energy, bool bOpositeDirectionWithPrevious) :
+    AAbsorptionGeneratedParticle(int ParticleId, double Energy, bool bOpositeDirectionWithPrevious) :
     ParticleId(ParticleId), Energy(Energy), bOpositeDirectionWithPrevious(bOpositeDirectionWithPrevious) {}
-    ACaptureGeneratedParticle() : ParticleId(0), Energy(0), bOpositeDirectionWithPrevious(false) {}
+    AAbsorptionGeneratedParticle() : ParticleId(0), Energy(0), bOpositeDirectionWithPrevious(false) {}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
@@ -63,8 +65,9 @@ class ACaptureReaction
 {
 public:
     double Branching;
-    QVector<ACaptureGeneratedParticle> GeneratedParticles;
+    QVector<AAbsorptionGeneratedParticle> GeneratedParticles;
 
+    ACaptureReaction(double Branching) : Branching(Branching) {}
     ACaptureReaction() : Branching(1.0) {}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;

@@ -17,6 +17,7 @@
 #include "amatparticleconfigurator.h"
 #include "amaterialcomposition.h"
 #include "aelementandisotopedelegates.h"
+#include "aneutronreactionsconfigurator.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -2778,6 +2779,7 @@ void MaterialInspectorWindow::FillNeutronTable()
 
                 QObject::connect(pbShow, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "ShowCapture"); });
                 QObject::connect(pbLoad, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "LoadCapture"); });
+                QObject::connect(pbReaction, &QPushButton::clicked, this, [iElement, iIso, this](){ onTabwNeutronsActionRequest(iElement, iIso, "Reactions"); });
             }
             if (bElastic)
             {
@@ -2920,5 +2922,20 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
 
         doLoadCrossSection(element, fileName);
         FillNeutronTable();
+    }
+    // -- Reactions --
+    else if (Action == "Reactions")
+    {
+        QStringList DefinedParticles;
+        MW->MpCollection->OnRequestListOfParticles(DefinedParticles);
+        ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].AbsorptionElements[iIndex], DefinedParticles, this);
+        int res = d->exec();
+        delete d;
+        qDebug() << res;
+        if (res != 0)
+        {
+            FillNeutronTable();
+            on_pbWasModified_clicked();
+        }
     }
 }

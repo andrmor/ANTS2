@@ -76,7 +76,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         {
             qDebug() << "scatter" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
             bool bAlreadyExists = false;
-            for (AElasticScatterElement& scatEl : ct.ScatterElements)
+            for (AElasticScatterElement& scatEl : st.ScatterElements)
                 if (scatEl.Name == El->Symbol && scatEl.Mass == El->Isotopes.at(iIso).Mass)
                 {
                     qDebug() << "Found in old list, copying";
@@ -92,10 +92,6 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         }
     }
     st.ScatterElements = ScatterElementsNew;
-
-
-
-
 }
 
 void AMaterial::clear()

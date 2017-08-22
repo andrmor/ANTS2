@@ -52,7 +52,7 @@ void AElasticScatterElement::readFromJson(const QJsonObject &json)
 
 // --- capture ---
 
-void ACaptureGeneratedParticle::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
+void AAbsorptionGeneratedParticle::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
 {
     if (ParticleId<0 || ParticleId>=MpCollection->countParticles())
     {
@@ -64,14 +64,14 @@ void ACaptureGeneratedParticle::writeToJson(QJsonObject &json, AMaterialParticle
     json["OpositeDirectionWithPrevious"] = bOpositeDirectionWithPrevious;
 }
 
-const QJsonObject ACaptureGeneratedParticle::writeToJson(AMaterialParticleCollection *MpCollection) const
+const QJsonObject AAbsorptionGeneratedParticle::writeToJson(AMaterialParticleCollection *MpCollection) const
 {
     QJsonObject js;
     writeToJson(js, MpCollection);
     return js;
 }
 
-void ACaptureGeneratedParticle::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
+void AAbsorptionGeneratedParticle::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
     QJsonObject jsp = json["Particle"].toObject();
     ParticleId = MpCollection->findOrCreateParticle(jsp);
@@ -84,7 +84,7 @@ void ACaptureReaction::writeToJson(QJsonObject &json, AMaterialParticleCollectio
     json["Branching"] = Branching;
 
     QJsonArray ar;
-    for (const ACaptureGeneratedParticle& p : GeneratedParticles)
+    for (const AAbsorptionGeneratedParticle& p : GeneratedParticles)
         ar << p.writeToJson(MpCollection);
     json["GeneratedParticles"] = ar;
 }
@@ -105,7 +105,7 @@ void ACaptureReaction::readFromJson(const QJsonObject &json, AMaterialParticleCo
     for (int i=0; i<ar.size(); i++)
     {
         QJsonObject js = ar[i].toObject();
-        ACaptureGeneratedParticle jp;
+        AAbsorptionGeneratedParticle jp;
         jp.readFromJson(js, MpCollection);
         GeneratedParticles << jp;
     }

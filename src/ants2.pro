@@ -256,7 +256,9 @@ SOURCES += main.cpp \
     common/amaterialcomposition.cpp \
     gui/aelementandisotopedelegates.cpp \
     gui/amatparticleconfigurator.cpp \
-    common/aneutroninteractionelement.cpp
+    common/aneutroninteractionelement.cpp \
+    gui/aneutronreactionsconfigurator.cpp \
+    gui/aneutronreactionwidget.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -368,7 +370,9 @@ HEADERS  += common/CorrelationFilters.h \
     common/amaterialcomposition.h \
     gui/aelementandisotopedelegates.h \
     gui/amatparticleconfigurator.h \
-    common/aneutroninteractionelement.h
+    common/aneutroninteractionelement.h \
+    gui/aneutronreactionsconfigurator.h \
+    gui/aneutronreactionwidget.h
 
 # --- SIM ---
 ants2_SIM {
@@ -618,4 +622,6 @@ unix {
 
 FORMS += \
     gui/MainWindowTools/amonitordelegateform.ui \
-    gui/amatparticleconfigurator.ui
+    gui/amatparticleconfigurator.ui \
+    gui/aneutronreactionsconfigurator.ui \
+    gui/aneutronreactionwidget.ui

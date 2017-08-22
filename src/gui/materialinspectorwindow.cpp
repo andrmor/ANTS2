@@ -2322,8 +2322,7 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
       on_pbWasModified_clicked();
 }
 
-
-bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName)
+bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
 {
     QVector<double> x, y;
     int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2361,7 +2360,6 @@ bool MaterialInspectorWindow::doLoadElementElasticCrossSection(AElasticScatterEl
         element->Energy = x;
         element->CrossSection = y;
         on_pbWasModified_clicked();
-        on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
         return true;
     }
     return false;
@@ -2483,15 +2481,22 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
     ui->leMFPellastic->setText(QString::number(MeanFreePath, 'g', 4));
 }
 
-bool MaterialInspectorWindow::autoLoadElasticCrossSection(AElasticScatterElement *element)
+bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *element, QString target)
 {
     QString Mass = QString::number(element->Mass);
-    QString fileName = MatParticleOptionsConfigurator->getFileName(element->Name, Mass);
+    QString fileName;
+    if (target == "elastic scattering")
+        fileName = MatParticleOptionsConfigurator->getElasticScatteringFileName(element->Name, Mass);
+    else if (target == "absorption")
+        fileName = MatParticleOptionsConfigurator->getAbsorptionFileName(element->Name, Mass);
+    else qWarning() << "Unknown selector in autoload neutron cross-section";
+
     if (fileName.isEmpty()) return false;
     if ( !QFileInfo(fileName).exists() ) return false;
+
     qDebug() << "Autoload cross-section from file: " <<fileName;
 
-    return doLoadElementElasticCrossSection(element, fileName);
+    return doLoadCrossSection(element, fileName);
 }
 
 void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
@@ -2743,8 +2748,8 @@ void MaterialInspectorWindow::FillNeutronTable()
             if (bCapture)
             {
                 NeutralTerminatorStructure& t = Terminators.first();
-                ACaptureElement* capEl = t.getCaptureElement(row);
-                qDebug() << "index:"<<row << "Defined capture elements:" << t.CaptureElements.size();
+                AAbsorptionElement* capEl = t.getCaptureElement(row);
+                qDebug() << "index:"<<row << "Defined capture elements:" << t.AbsorptionElements.size();
                 if (!capEl)
                 {
                     message("Critical error - capture element not found!", this);
@@ -2840,35 +2845,53 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     int particleId = ui->cobParticle->currentIndex();
     QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
-    NeutralTerminatorStructure& term = Terminators.last();
     int iIndex = tmpMaterial.ChemicalComposition.getNumberInJointIsotopeList(iEl, iIso);
     qDebug() << "Index:"<<iIndex;
 
-    if (Action == "ShowElastic" || Action == "ShowCapture")
+    NeutralTerminatorStructure* term;
+    ANeutronInteractionElement* element;
+    TString yTitle;
+    QString target;
+    if (Action.contains("Elastic"))
     {
-
-
-        if (iIndex<0 || iIndex>=term.ScatterElements.size())
+        term = &Terminators[1];
+        if (iIndex<0 || iIndex>=term->ScatterElements.size())
         {
             message("Bad index!", this);
             return;
         }
+        element = &term->ScatterElements[iIndex];
+        yTitle = "Elastic scattering cross-section, barns";
+        target = "elastic scattering";
+    }
+    else //capture
+    {
+        term = &Terminators[0];
+        if (iIndex<0 || iIndex>=term->AbsorptionElements.size())
+        {
+            message("Bad index!", this);
+            return;
+        }
+        element = &term->AbsorptionElements[iIndex];
+        yTitle = "Absorption cross-section, barns";
+        target = "absorption";
+    }
 
-        AElasticScatterElement& element = term.ScatterElements[iIndex];
-        qDebug() << "Elastic cross-section show for" << element.Name <<"-"<< element.Mass;
+    // -- Show --
+    if (Action.contains("Show"))
+    {
+        qDebug() << "Show ->"<< yTitle << "->" << element->Name <<"-"<< element->Mass;
         QVector<double> x,y;
-        for (int i=0; i<element.Energy.size(); i++)
+        for (int i=0; i<element->Energy.size(); i++)
           {
-            x << 1.0e6 * element.Energy.at(i);         // keV -> meV
-            y << 1.0e24 * element.CrossSection.at(i);  // cm2 to barns
+            x << 1.0e6 * element->Energy.at(i);         // keV -> meV
+            y << 1.0e24 * element->CrossSection.at(i);  // cm2 to barns
           }
 
         MW->GraphWindow->ShowAndFocus();
-        TString title = element.Name.toLocal8Bit() + " - ";
-        title += element.Mass;
-        TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title,
-                                                     "Energy, meV", "Ellastic scattering cross-section, barns",
-                                                     kRed, 2, 1, kRed, 0, 1);
+        TString title = element->Name.toLocal8Bit() + " - ";
+        title += element->Mass;
+        TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title, "Energy, meV", yTitle, kRed, 2, 1, kRed, 0, 1);
         MW->GraphWindow->Draw(gr, "AP");
 
         TGraph* graphOver = constructInterpolationGraph(x, y);
@@ -2876,19 +2899,14 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         graphOver->SetLineWidth(1);
         MW->GraphWindow->Draw(graphOver, "L same");
     }
-    else if (Action == "LoadElastic")
+    // -- Load --
+    else if (Action.contains("Load"))
     {
-        if (iIndex<0 || iIndex>=term.ScatterElements.size())
-        {
-            message("Bad index!", this);
-            return;
-        }
-
-        AElasticScatterElement* element = &term.ScatterElements[iIndex];
-        qDebug() << "Elastic cross-section load for" << element->Name <<"-"<< element->Mass;
+        QString isotope = element->Name  + "-" + element->Mass;
+        qDebug() << "Load" << target << "cross-section for" << isotope;
         if (MatParticleOptionsConfigurator->isAutoloadEnabled())
         {
-            bool fOK = autoLoadElasticCrossSection(element);
+            bool fOK = autoLoadCrossSection(element, target);
             if (fOK)
             {
                 FillNeutronTable();
@@ -2896,11 +2914,11 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
             }
         }
 
-        QString fileName = QFileDialog::getOpenFileName(this, "Load cross-section data", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Load " + target + " cross-section data for " + isotope, MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
         MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
 
-        doLoadElementElasticCrossSection(element, fileName);
+        doLoadCrossSection(element, fileName);
         FillNeutronTable();
     }
 }

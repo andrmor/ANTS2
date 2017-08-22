@@ -87,8 +87,8 @@ double branching;         //for neutrons - assuming relative cross sections do n
   double MeanElementMass;   //runtime for neutrons - average mass (in au) of elements
 
   // for capture
-  QVector<ACaptureElement> CaptureElements;
-  ACaptureElement* getCaptureElement(int index);  //0 if wrong index
+  QVector<AAbsorptionElement> AbsorptionElements;
+  AAbsorptionElement* getCaptureElement(int index);  //0 if wrong index
 QVector<int> GeneratedParticles;
 QVector<double> GeneratedParticleEnergies;
 

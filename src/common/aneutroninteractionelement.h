@@ -72,14 +72,14 @@ public:
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 
-class ACaptureElement : public ANeutronInteractionElement
+class AAbsorptionElement : public ANeutronInteractionElement
 {
 public:
     QVector<ACaptureReaction> Reactions;
 
-    ACaptureElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
+    AAbsorptionElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
         ANeutronInteractionElement(IsotopeSymbol, Mass, MolarFraction) {Reactions.resize(1);}
-    ACaptureElement() :
+    AAbsorptionElement() :
         ANeutronInteractionElement() {Reactions.resize(1);}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;

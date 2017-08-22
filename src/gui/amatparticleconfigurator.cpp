@@ -29,10 +29,17 @@ AMatParticleConfigurator::~AMatParticleConfigurator()
     delete ui;
 }
 
-const QString AMatParticleConfigurator::getFileName(QString Element, QString Mass) const
+const QString AMatParticleConfigurator::getElasticScatteringFileName(QString Element, QString Mass) const
 {
     if (!ui->cbAuto->isEnabled()) return "";
     QString str = ui->leDir->text() + "/" + ui->lePreName->text() + Element + ui->leSeparatorInName->text() + Mass + ui->leEndName->text();
+    return str;
+}
+
+const QString AMatParticleConfigurator::getAbsorptionFileName(QString Element, QString Mass) const
+{
+    if (!ui->cbAuto->isEnabled()) return "";
+    QString str = ui->leDir->text() + "/" + ui->lePreNameAbs->text() + Element + ui->leSeparatorInNameAbs->text() + Mass + ui->leEndNameAbs->text();
     return str;
 }
 
@@ -115,6 +122,9 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["PreName"] = ui->lePreName->text();
     json["MidName"] = ui->leSeparatorInName->text();
     json["EndName"] = ui->leEndName->text();
+    json["PreNameAbs"] = ui->lePreNameAbs->text();
+    json["MidNameAbs"] = ui->leSeparatorInNameAbs->text();
+    json["EndNameAbs"] = ui->leEndNameAbs->text();
 }
 
 void AMatParticleConfigurator::readFromJson(QJsonObject &json)
@@ -131,6 +141,9 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditText(json, "PreName", ui->lePreName);
     JsonToLineEditText(json, "MidName", ui->leSeparatorInName);
     JsonToLineEditText(json, "EndName", ui->leEndName);
+    JsonToLineEditText(json, "PreNameAbs", ui->lePreNameAbs);
+    JsonToLineEditText(json, "MidNameAbs", ui->leSeparatorInNameAbs);
+    JsonToLineEditText(json, "EndNameAbs", ui->leEndNameAbs);
 }
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()

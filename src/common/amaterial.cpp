@@ -40,7 +40,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
     //1 - capture
     NeutralTerminatorStructure& ct = Terminators.first();
     ct.Type = NeutralTerminatorStructure::Capture;
-    QVector<ACaptureElement> CaptureElementsNew;
+    QVector<AAbsorptionElement> CaptureElementsNew;
     for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
     {
         AChemicalElement* El = ChemicalComposition.getElement(iEl);
@@ -48,7 +48,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         {
             qDebug() << "capture" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
             bool bAlreadyExists = false;
-            for (ACaptureElement& capEl : ct.CaptureElements)
+            for (AAbsorptionElement& capEl : ct.AbsorptionElements)
                 if (capEl.Name == El->Symbol && capEl.Mass == El->Isotopes.at(iIso).Mass)
                 {
                     qDebug() << "Found in old list, copying";
@@ -59,11 +59,11 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
             if (!bAlreadyExists)
             {
                 qDebug() << "Not found, creating new record";
-                CaptureElementsNew << ACaptureElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
+                CaptureElementsNew << AAbsorptionElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
             }
         }
     }
-    ct.CaptureElements = CaptureElementsNew;
+    ct.AbsorptionElements = CaptureElementsNew;
 
     //2 - elastic scatter
     NeutralTerminatorStructure& st = Terminators.last();
@@ -249,8 +249,8 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
               if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::Capture)
               {
                   QJsonArray capAr;
-                  for (int i=0; i<MatParticle[ip].Terminators[iTerm].CaptureElements.size(); i++)
-                      capAr << MatParticle[ip].Terminators[iTerm].CaptureElements[i].writeToJson(MpCollection);
+                  for (int i=0; i<MatParticle[ip].Terminators[iTerm].AbsorptionElements.size(); i++)
+                      capAr << MatParticle[ip].Terminators[iTerm].AbsorptionElements[i].writeToJson(MpCollection);
                   jterm["CaptureElements"] = capAr;
               }
 
@@ -464,10 +464,10 @@ bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mi
   return true;
 }
 
-ACaptureElement *NeutralTerminatorStructure::getCaptureElement(int index)
+AAbsorptionElement *NeutralTerminatorStructure::getCaptureElement(int index)
 {
-    if (index<0 || index>=CaptureElements.size()) return 0;
-    return &CaptureElements[index];
+    if (index<0 || index>=AbsorptionElements.size()) return 0;
+    return &AbsorptionElements[index];
 }
 
 AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int index)

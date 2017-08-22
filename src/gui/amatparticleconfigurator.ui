@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>673</width>
-    <height>423</height>
+    <width>506</width>
+    <height>392</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="pbUpdateGlobSet">
    <property name="geometry">
     <rect>
-     <x>440</x>
-     <y>60</y>
+     <x>376</x>
+     <y>61</y>
      <width>111</width>
      <height>23</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>120</y>
+     <x>166</x>
+     <y>121</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -42,8 +42,8 @@
   <widget class="QLineEdit" name="ledMaxEnergy">
    <property name="geometry">
     <rect>
-     <x>343</x>
-     <y>117</y>
+     <x>279</x>
+     <y>118</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -55,8 +55,8 @@
   <widget class="QCheckBox" name="cbOnlyInRange">
    <property name="geometry">
     <rect>
-     <x>73</x>
-     <y>94</y>
+     <x>9</x>
+     <y>95</y>
      <width>321</width>
      <height>17</height>
     </rect>
@@ -71,8 +71,8 @@
   <widget class="QComboBox" name="cobUnitsForEllastic">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>60</y>
+     <x>186</x>
+     <y>61</y>
      <width>121</width>
      <height>22</height>
     </rect>
@@ -104,8 +104,8 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>73</x>
-     <y>195</y>
+     <x>9</x>
+     <y>196</y>
      <width>361</width>
      <height>17</height>
     </rect>
@@ -120,10 +120,10 @@
   <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
-     <x>73</x>
-     <y>215</y>
+     <x>9</x>
+     <y>216</y>
      <width>491</width>
-     <height>121</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -246,21 +246,105 @@
     <property name="geometry">
      <rect>
       <x>13</x>
-      <y>67</y>
-      <width>141</width>
+      <y>69</y>
+      <width>241</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>File name structure:</string>
+     <string>Elastic scattering file name structure:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lePreNameAbs">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>140</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>absorb</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>14</x>
+      <y>119</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Absorption file name structure:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>134</x>
+      <y>142</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Element_name</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leSeparatorInNameAbs">
+    <property name="geometry">
+     <rect>
+      <x>241</x>
+      <y>140</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>286</x>
+      <y>142</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mass</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="leEndNameAbs">
+    <property name="geometry">
+     <rect>
+      <x>371</x>
+      <y>140</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>.txt</string>
     </property>
    </widget>
   </widget>
   <widget class="QLineEdit" name="leNatAbundFile">
    <property name="geometry">
     <rect>
-     <x>72</x>
-     <y>22</y>
+     <x>8</x>
+     <y>23</y>
      <width>401</width>
      <height>20</height>
     </rect>
@@ -275,8 +359,8 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>72</x>
-     <y>1</y>
+     <x>8</x>
+     <y>2</y>
      <width>261</width>
      <height>16</height>
     </rect>
@@ -288,8 +372,8 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>120</y>
+     <x>36</x>
+     <y>121</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -304,8 +388,8 @@
   <widget class="QPushButton" name="pbChangeNatAbFile">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>20</y>
+     <x>416</x>
+     <y>21</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -317,8 +401,8 @@
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
-     <x>420</x>
-     <y>120</y>
+     <x>356</x>
+     <y>121</y>
      <width>47</width>
      <height>13</height>
     </rect>
@@ -330,8 +414,8 @@
   <widget class="QLineEdit" name="ledMinEnergy">
    <property name="geometry">
     <rect>
-     <x>153</x>
-     <y>117</y>
+     <x>89</x>
+     <y>118</y>
      <width>71</width>
      <height>20</height>
     </rect>
@@ -343,8 +427,8 @@
   <widget class="QLabel" name="label_34">
    <property name="geometry">
     <rect>
-     <x>48</x>
-     <y>64</y>
+     <x>-16</x>
+     <y>65</y>
      <width>160</width>
      <height>13</height>
     </rect>
@@ -359,8 +443,8 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>120</y>
+     <x>226</x>
+     <y>121</y>
      <width>47</width>
      <height>13</height>
     </rect>

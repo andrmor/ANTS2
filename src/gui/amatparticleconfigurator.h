@@ -19,7 +19,8 @@ public:
     explicit AMatParticleConfigurator(GlobalSettingsClass *GlobSet, QWidget *parent = 0);
     ~AMatParticleConfigurator();
 
-    const QString getFileName(QString Element, QString Mass) const;
+    const QString getElasticScatteringFileName(QString Element, QString Mass) const;
+    const QString getAbsorptionFileName(QString Element, QString Mass) const;
     int           getCrossSectionLoadOption() const;
     bool          isAutoloadEnabled() const;
     bool          isEnergyRangeLimited() const;
@@ -37,7 +38,6 @@ public:
 private slots:
     void on_pbChangeDir_clicked();
     void on_pbChangeNatAbFile_clicked();
-
     void on_pbUpdateGlobSet_clicked();
 
 private:

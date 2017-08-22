@@ -12,6 +12,7 @@ class QJsonObject;
 class AElasticScatterElement;
 class QTreeWidgetItem;
 class AChemicalElement;
+class ANeutronInteractionElement;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -165,8 +166,8 @@ private:
     bool isAllSameYield(double val);
     void updateNeutronReactionIndication();
 
-    bool autoLoadElasticCrossSection(AElasticScatterElement *element);
-    bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
+    bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering"
+    bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
 

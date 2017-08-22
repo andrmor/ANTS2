@@ -111,7 +111,7 @@ void ACaptureReaction::readFromJson(const QJsonObject &json, AMaterialParticleCo
     }
 }
 
-void ACaptureElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
+void AAbsorptionElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
 {
     ANeutronInteractionElement::writeToJson(json);
 
@@ -121,14 +121,14 @@ void ACaptureElement::writeToJson(QJsonObject &json, AMaterialParticleCollection
     json["Reactions"] = crArr;
 }
 
-const QJsonObject ACaptureElement::writeToJson(AMaterialParticleCollection *MpCollection)
+const QJsonObject AAbsorptionElement::writeToJson(AMaterialParticleCollection *MpCollection)
 {
     QJsonObject js;
     writeToJson(js, MpCollection);
     return js;
 }
 
-void ACaptureElement::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
+void AAbsorptionElement::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
     ANeutronInteractionElement::readFromJson(json);
 

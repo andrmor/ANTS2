@@ -522,10 +522,45 @@ AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int
 }
 
 void NeutralTerminatorStructure::UpdateRuntimePropertiesForNeutrons(bool bUseLogLog)
-{    
-    if (Type == Capture)
+{
+    if (Type == Capture && !AbsorptionElements.isEmpty())
     {
-        //nothing to do here
+        qDebug() << "Updaring runtime properties for neutron absorption terminator";
+        MeanElementMass = 0;
+        for (const AAbsorptionElement& el : AbsorptionElements)
+            MeanElementMass += el.Mass * el.MolarFraction;
+        qDebug() << "Mean elements mass:" << MeanElementMass;
+
+        PartialCrossSectionEnergy.clear();
+        PartialCrossSection.clear();
+        qDebug() << "Absorption elements defined:"<<AbsorptionElements.size();
+        for (int iElement=0; iElement<AbsorptionElements.size(); iElement++)
+        {
+            AAbsorptionElement& se = AbsorptionElements[iElement];
+            qDebug() << se.Name << "-" << se.Mass;
+            qDebug() << se.Energy.size() << se.CrossSection.size();
+            if (se.Energy.isEmpty()) continue;
+            if (PartialCrossSectionEnergy.isEmpty())
+            {
+                //this is first non-empty element - energy binning will be according to it
+                PartialCrossSectionEnergy = se.Energy;
+                //first element cross-section times its molar fraction
+                for (int i=0; i<se.CrossSection.size(); i++)
+                    PartialCrossSection << se.CrossSection.at(i) * se.MolarFraction;
+            }
+            else
+            {
+                //using interpolation to match already defined energy bins
+                for (int iEnergy=0; iEnergy<PartialCrossSectionEnergy.size(); iEnergy++)
+                {
+                    const double& energy = PartialCrossSectionEnergy.at(iEnergy);
+                    const double cs = GetInterpolatedValue(energy, &se.Energy, &se.CrossSection, bUseLogLog);
+                    PartialCrossSection[iEnergy] += cs * se.MolarFraction;
+                }
+            }
+        }
+        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
+        qDebug() << "Cross-section-->" <<PartialCrossSection;
     }
     else if (Type == ElasticScattering && !ScatterElements.isEmpty())
     {

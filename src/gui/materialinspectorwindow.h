@@ -129,6 +129,8 @@ private slots:
 
     void onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action);
 
+    void on_pbMaterialInfo_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

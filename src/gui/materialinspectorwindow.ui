@@ -281,6 +281,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="pbMaterialInfo">
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>info</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -485,17 +498,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          </layout>
         </item>
        </layout>
-       <zorder>label_22</zorder>
-       <zorder>ledDensity</zorder>
-       <zorder>label_21</zorder>
        <zorder>label_64</zorder>
-       <zorder>cbShowIsotopes</zorder>
-       <zorder>trwChemicalComposition</zorder>
-       <zorder>labContextMenuHelp</zorder>
-       <zorder>horizontalSpacer</zorder>
-       <zorder>horizontalSpacer_2</zorder>
-       <zorder>horizontalSpacer_3</zorder>
-       <zorder>horizontalSpacer_4</zorder>
        <zorder>frame_2</zorder>
        <zorder>label_12</zorder>
        <zorder>label_17</zorder>
@@ -2218,10 +2221,6 @@ resolution:</string>
          </widget>
         </item>
        </layout>
-       <zorder>fEnDepProps</zorder>
-       <zorder>label_15</zorder>
-       <zorder>cobParticle</zorder>
-       <zorder>cbTrackingAllowed</zorder>
       </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -2381,20 +2380,6 @@ resolution:</string>
      </layout>
     </item>
    </layout>
-   <zorder>line</zorder>
-   <zorder>label</zorder>
-   <zorder>cobActiveMaterials</zorder>
-   <zorder>label_18</zorder>
-   <zorder>pbAddToActive</zorder>
-   <zorder>pbComments</zorder>
-   <zorder>pbShowUsage</zorder>
-   <zorder>leName</zorder>
-   <zorder>labMatWasModified</zorder>
-   <zorder>pbRename</zorder>
-   <zorder>pbAddNewMaterial</zorder>
-   <zorder>twProperties</zorder>
-   <zorder>pbConfigureAutoElastic</zorder>
-   <zorder>horizontalLayoutWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

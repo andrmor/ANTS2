@@ -294,9 +294,9 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 //                              }
 //                              else
 //                              {
-                                  const double AtDens = Density / (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].MeanElementMass / 1.66054e-24;
+                                  const double AtDens = Density / (*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass() / 1.66054e-24;
                                   MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-                                  //qDebug() << "For ellastic - Effective atomic density:"<<AtDens << "MFP:"<<MeanFreePath;
+                                  //        qDebug() << "For neutron - effective atomic density:"<<AtDens << "MFP:"<<MeanFreePath;
 //                              }
                             }
                           else
@@ -397,8 +397,8 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                                                                            MpCollection->fLogLogInterpolation);
                                           // fraction of this element in the total cross section:
                                           const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-                                          //        qDebug() << "--checking element"<<iselected<<"fraction in total cross-section:"<<thisOne;
-                                          if (rnd < thisOne) break;
+                                                  qDebug() << "--checking element"<<el.Name<<"-"<<el.Mass<<"-> fraction in total cross-section:"<<thisOne;
+                                          if (rnd <= thisOne) break;
                                           rnd -= thisOne;
                                         }
                                     }

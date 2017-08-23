@@ -13,7 +13,7 @@ AMaterialComposition::AMaterialComposition()
     AllPossibleElements<<"H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
 }
 
-void AMaterialComposition::setNaturalAbunances(const QString FileName_NaturalAbundancies)
+void AMaterialComposition::configureNaturalAbunances(const QString FileName_NaturalAbundancies)
 {
     QString NaturalAbundances;
     bool bOK = LoadTextFromFile(FileName_NaturalAbundancies, NaturalAbundances);
@@ -162,6 +162,17 @@ QString AMaterialComposition::setCompositionString(const QString composition)
 
     ElementComposition = tmpElements;
     ElementCompositionString = composition.simplified();
+
+    //calculating mean atom mass
+    MeanAtomMass = 0;
+    for (const AChemicalElement& el : ElementComposition)
+        for (const AIsotope& iso : el.Isotopes)
+        {
+            qDebug() << iso.Symbol << iso.Mass <<" fract:" <<el.MolarFraction <<"aband:"<< iso.Abundancy;
+            MeanAtomMass += iso.Mass * el.MolarFraction * 0.01*iso.Abundancy;
+        }
+    qDebug() << "Mean atom mass is"<< MeanAtomMass;
+
     return "";
 }
 
@@ -211,6 +222,8 @@ void AMaterialComposition::writeToJson(QJsonObject &json) const
         ar << js;
     }
     json["ElementComposition"] = ar;
+
+    json["MeanAtomMass"] = MeanAtomMass;
 }
 
 const QJsonObject AMaterialComposition::writeToJson() const
@@ -234,6 +247,8 @@ void AMaterialComposition::readFromJson(const QJsonObject &json)
         el.readFromJson(js);
         ElementComposition << el;
     }
+
+    parseJson(json, "MeanAtomMass", MeanAtomMass);
 }
 
 const QString AChemicalElement::print() const

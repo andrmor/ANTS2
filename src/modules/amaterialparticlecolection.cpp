@@ -108,16 +108,15 @@ bool AMaterialParticleCollection::isParticleOneOfSecondary(int iParticle, QStrin
   QString tmpStr;
 
   for (int m=0; m<MaterialCollectionData.size(); m++)
-    for (int p=0; p<ParticleCollection.size(); p++)
+      for (int p=0; p<ParticleCollection.size(); p++)
       {
-        if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
-        for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
-          for (int v=0; v<MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-            if (iParticle == MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v])
+          if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
+          for (int iterm=0; iterm<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); iterm++)
+              if (MaterialCollectionData[m]->MatParticle[p].Terminators.at(iterm).isParticleOneOfSecondaries(iParticle))
               {
-                fFound = true;
-                if (!tmpStr.isEmpty()) tmpStr += ",";
-                tmpStr += MaterialCollectionData[m]->name;
+                  fFound = true;
+                  if (!tmpStr.isEmpty()) tmpStr += ",";
+                  tmpStr += MaterialCollectionData[m]->name;
               }
       }
   if (matNames) *matNames = tmpStr;
@@ -505,12 +504,8 @@ bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorT
         for (int p=0; p<ParticleCollection.size(); p++)
         {
             //replacing generated particles
-            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size();s++)
-                for (int v=0; v<MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-                {
-                    int thisParticle = MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v];
-                    if (thisParticle > particleId ) MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v] = thisParticle-1;
-                }
+            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
+                MaterialCollectionData[m]->MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
 
             //shifting down all particles above Id
             if (p > particleId) MaterialCollectionData[m]->MatParticle[p-1] = MaterialCollectionData[m]->MatParticle[p];
@@ -521,12 +516,8 @@ bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorT
     for (int p=0; p<ParticleCollection.size(); p++)
     {
         //replacing generated particles
-        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size();s++)
-            for (int v=0; v<tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-            {
-                int thisParticle = tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles[v];
-                if (thisParticle > particleId ) tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles[v] = thisParticle-1;
-            }
+        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size(); s++)
+            tmpMaterial.MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
 
         //shifting down all particles above Id
         if (p > particleId) tmpMaterial.MatParticle[p-1] = tmpMaterial.MatParticle[p];
@@ -793,31 +784,6 @@ bool AMaterialParticleCollection::DeleteMaterial(int imat)
   generateMaterialsChangedSignal();
 
   return true;
-}
-
-void AMaterialParticleCollection::RecalculateCaptureCrossSections(int particleId)
-{
-  QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-
-  int numReactions = Terminators.size();
-  if (numReactions>0)
-      if (Terminators.last().Type = NeutralTerminatorStructure::ElasticScattering) //last reserved for scattering
-          numReactions--;
-  int dataPoints = tmpMaterial.MatParticle[particleId].InteractionDataF.size();
-
-  for (int iReaction=0; iReaction<numReactions; iReaction++)
-    {
-      NeutralTerminatorStructure& Term = Terminators[iReaction];
-      double branching = Term.branching;
-      Term.PartialCrossSectionEnergy.resize(dataPoints);
-      Term.PartialCrossSection.resize(dataPoints);
-
-      for (int i=0; i<dataPoints; i++)
-        {
-          Term.PartialCrossSection[i] = branching * tmpMaterial.MatParticle[particleId].InteractionDataF[i];
-          Term.PartialCrossSectionEnergy[i] = tmpMaterial.MatParticle[particleId].InteractionDataX[i];
-        }
-    }
 }
 
 void AMaterialParticleCollection::writeToJson(QJsonObject &json)

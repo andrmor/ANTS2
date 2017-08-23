@@ -14,7 +14,7 @@ class AIsotope
 public:
     QString Symbol;
     int Mass;
-    double Abundancy;
+    double Abundancy;  //in %
 
     AIsotope(const QString Symbol, int Mass, double Abundancy) : Symbol(Symbol), Mass(Mass), Abundancy(Abundancy) {}
     AIsotope() : Symbol("Undefined"), Mass(777), Abundancy(0) {}
@@ -45,7 +45,7 @@ class AMaterialComposition
 public:
     AMaterialComposition();
 
-    void setNaturalAbunances(const QString FileName_NaturalAbundancies);
+    void configureNaturalAbunances(const QString FileName_NaturalAbundancies);
 
     QString setCompositionString(const QString composition);  // return error string if invalid composition, else returns ""
     QString getCompositionString() const {return ElementCompositionString;}
@@ -54,6 +54,7 @@ public:
     int countIsotopes() const;
     AChemicalElement* getElement(int iElement) {return &ElementComposition[iElement];}
     int getNumberInJointIsotopeList(int iElement, int iIsotope);
+    double getMeanAtomMass() const {return MeanAtomMass;}
 
     const QString print() const;
 
@@ -66,7 +67,7 @@ public:
 private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;
-
+    double MeanAtomMass;
 
     QSet<QString> AllPossibleElements; //set with all possible element symbols
     QString FileName_NaturalAbundancies;

@@ -539,7 +539,7 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
 {
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this, "Load mass interaction coefficient data.\n"
-                                            "The file should contain 3 colums: energy[keV], photoelectric_data[cm2/g], compton_data[cm2/g]", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files(*)");
+                                            "The file should contain 4 colums: energy[keV], photoelectric_data[cm2/g], compton_data[cm2/g], pair_production_data[cm2/g]", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files(*)");
 
     if (fileName.isEmpty()) return;
     MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -558,11 +558,6 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
     }
 
     tmpMaterial.MatParticle[particleId].Terminators.resize(3); //phot+compt+pair
-    for (int i=0; i<3; i++)
-    {
-        tmpMaterial.MatParticle[particleId].Terminators[i].GeneratedParticleEnergies.clear();
-        tmpMaterial.MatParticle[particleId].Terminators[i].GeneratedParticles.clear();
-    }
 
     tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSectionEnergy = en;
     tmpMaterial.MatParticle[particleId].Terminators[0].PartialCrossSection = phot;
@@ -2234,7 +2229,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         //      qDebug() << newComp;
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
-        mc.setNaturalAbunances(MatParticleOptionsConfigurator->getNatAbundFileName());
+        mc.configureNaturalAbunances(MatParticleOptionsConfigurator->getNatAbundFileName());
         QString error = mc.setCompositionString(le->text());
         if (!error.isEmpty())
         {
@@ -2553,4 +2548,21 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
             on_pbWasModified_clicked();
         }
     }
+}
+
+void MaterialInspectorWindow::on_pbMaterialInfo_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    if (ui->leChemicalComposition->text().isEmpty())
+    {
+        message("Chemical composition is not defined!", this);
+        return;
+    }
+
+    double MAM = tmpMaterial.ChemicalComposition.getMeanAtomMass();
+    QString str = "Mean atom mass: " + QString::number(MAM, 'g', 4) + "\n";
+    double AtDens = tmpMaterial.density / MAM / 1.66054e-24;
+    str += "Atom density: " + QString::number(AtDens, 'g', 4) + "\n";
+    message(str, this);
 }

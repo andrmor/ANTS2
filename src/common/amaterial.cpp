@@ -658,6 +658,31 @@ void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterial
     }
 }
 
+bool NeutralTerminatorStructure::isParticleOneOfSecondaries(int iPart) const
+{
+    if (Type != Capture) return false;
+
+    for (int ie=0; ie<AbsorptionElements.size(); ie++)
+        for (int ir=0; ir<AbsorptionElements.at(ie).Reactions.size(); ir++)
+            for (int ig=0; ig<AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.size(); ig++)
+                if (AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.at(ig).ParticleId == iPart)
+                    return true;
+    return false;
+}
+
+void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
+{
+    if (Type != Capture) return;
+
+    for (int ie=0; ie<AbsorptionElements.size(); ie++)
+        for (int ir=0; ir<AbsorptionElements.at(ie).Reactions.size(); ir++)
+            for (int ig=0; ig<AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.size(); ig++)
+            {
+                int& thisParticle = AbsorptionElements[ie].Reactions[ir].GeneratedParticles[ig].ParticleId;
+                if (thisParticle > iPart) thisParticle--;
+            }
+}
+
 QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
 {
   if (iPart<0 || iPart>=MpCollection->countParticles())

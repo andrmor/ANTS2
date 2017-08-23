@@ -91,12 +91,6 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<AAbsorptionElement> AbsorptionElements;  // exclusive for capture
   QVector<AElasticScatterElement> ScatterElements; // exclusive for ellastic
 
-/// obsolete
-double branching;         //for neutrons - assuming relative cross sections do not depend on energy, can scale using total
-QVector<int> GeneratedParticles;
-QVector<double> GeneratedParticleEnergies;
-///
-
   // runtime properties
   double MeanElementMass;   // average mass (in au) of elements - updated before simulations
 
@@ -107,6 +101,9 @@ QVector<double> GeneratedParticleEnergies;
 
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
   void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);
+
+  bool isParticleOneOfSecondaries(int iPart) const;
+  void prepareForParticleRemove(int iPart);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

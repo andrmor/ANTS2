@@ -6,2304 +6,80 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
-    <height>598</height>
+    <width>494</width>
+    <height>634</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>595</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Material Inspector</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="leName">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>50</y>
-      <width>150</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>Change name in order to add a new material: it inherits all the defined properties of the original material</string>
-    </property>
-    <property name="text">
-     <string>leName</string>
-    </property>
-   </widget>
-   <widget class="Line" name="line">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>30</y>
-      <width>480</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <property name="lineWidth">
-     <number>1</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>72</x>
-      <y>52</y>
-      <width>89</width>
-      <height>14</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Material name:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_12">
-    <property name="geometry">
-     <rect>
-      <x>669</x>
-      <y>51</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TGeo P1, P2, P3:</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="cobActiveMaterials">
-    <property name="geometry">
-     <rect>
-      <x>171</x>
-      <y>8</y>
-      <width>148</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Unconfirmed changes will be lost with material change!</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_18">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>3</y>
-      <width>161</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Inspect defined material:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbAddToActive">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>76</y>
-      <width>150</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>If name was not changed: confirms the changes; If name was changed: adds a new material</string>
-    </property>
-    <property name="text">
-     <string>Update material</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbUpdateTmpMaterial">
-    <property name="geometry">
-     <rect>
-      <x>323</x>
-      <y>40</y>
-      <width>81</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>...update 
- tmpMaterial</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledP1">
-    <property name="geometry">
-     <rect>
-      <x>752</x>
-      <y>50</y>
-      <width>51</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledP2">
-    <property name="geometry">
-     <rect>
-      <x>811</x>
-      <y>50</y>
-      <width>51</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledP3">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>50</y>
-      <width>51</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbWasModified">
-    <property name="geometry">
-     <rect>
-      <x>413</x>
-      <y>50</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>was modified</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbComments">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>543</y>
-      <width>210</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Comments for this material</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbShowUsage">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>7</y>
-      <width>111</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>Objects made of this material will be shown with red colour on the geometry window</string>
-    </property>
-    <property name="text">
-     <string>Show usage</string>
-    </property>
-   </widget>
-   <widget class="Line" name="line_6">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>18</y>
-      <width>118</width>
-      <height>3</height>
-     </rect>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Plain</enum>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbUpdateInteractionIndication">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>150</y>
-      <width>75</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>...update
-iteraction
-indication</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labWasModified">
-    <property name="geometry">
-     <rect>
-      <x>63</x>
-      <y>104</y>
-      <width>353</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; color:#ff0000;&quot;&gt;Properties were modified: Click one of above to confirm&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbRename">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>76</y>
-      <width>150</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Rename</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbAddNewMaterial">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>76</y>
-      <width>150</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>If name was not changed: confirms the changes; If name was changed: adds a new material</string>
-    </property>
-    <property name="text">
-     <string>Add as new material</string>
-    </property>
-   </widget>
-   <widget class="QTabWidget" name="twProperties">
-    <property name="geometry">
-     <rect>
-      <x>8</x>
-      <y>127</y>
-      <width>471</width>
-      <height>411</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="tab_6">
-     <attribute name="title">
-      <string>Density and composition</string>
-     </attribute>
-     <widget class="QLabel" name="label_22">
-      <property name="geometry">
-       <rect>
-        <x>275</x>
-        <y>22</y>
-        <width>91</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>g/cm3</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="ledDensity">
-      <property name="geometry">
-       <rect>
-        <x>199</x>
-        <y>21</y>
-        <width>70</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Used by all reactions except neutron capture</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_21">
-      <property name="geometry">
-       <rect>
-        <x>41</x>
-        <y>19</y>
-        <width>151</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Material density:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="leChemicalComposition">
-      <property name="geometry">
-       <rect>
-        <x>8</x>
-        <y>80</y>
-        <width>450</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="toolTip">
-       <string>Elemental composition with the relative molar fractions.
-Can be used to automatically configure gamma interaction cross-sections and neutron scattering data.</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_64">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>59</y>
-        <width>431</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Chemical composition (optional unless neutron interactions will be simulated):</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pbModifyChemicalComposition">
-      <property name="geometry">
-       <rect>
-        <x>7</x>
-        <y>79</y>
-        <width>452</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="flat">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QTreeWidget" name="trwChemicalComposition">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>110</y>
-        <width>391</width>
-        <height>248</height>
-       </rect>
-      </property>
-      <attribute name="headerVisible">
-       <bool>false</bool>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>1</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="QCheckBox" name="cbShowIsotopes">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>363</y>
-        <width>181</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Show isotopes</string>
-      </property>
-     </widget>
-     <widget class="Line" name="line_9">
-      <property name="geometry">
-       <rect>
-        <x>66</x>
-        <y>348</y>
-        <width>3</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="labContextMenuHelp">
-      <property name="geometry">
-       <rect>
-        <x>194</x>
-        <y>361</y>
-        <width>259</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Use context menu to add/remove isotopes</string>
-      </property>
-     </widget>
-     <zorder>label_22</zorder>
-     <zorder>ledDensity</zorder>
-     <zorder>label_21</zorder>
-     <zorder>label_64</zorder>
-     <zorder>leChemicalComposition</zorder>
-     <zorder>pbModifyChemicalComposition</zorder>
-     <zorder>line_9</zorder>
-     <zorder>cbShowIsotopes</zorder>
-     <zorder>trwChemicalComposition</zorder>
-     <zorder>labContextMenuHelp</zorder>
-    </widget>
-    <widget class="QWidget" name="tab">
-     <attribute name="title">
-      <string>Optical</string>
-     </attribute>
-     <widget class="QGroupBox" name="gbPrimary">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>219</y>
-        <width>431</width>
-        <height>161</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="title">
-       <string>Primary scintillation</string>
-      </property>
-      <widget class="QLabel" name="label_20">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>82</y>
-         <width>71</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>photons / keV</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledPrimaryYield">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>82</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_16">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>82</y>
-         <width>80</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Photon yield:</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="cbSameYieldForAll">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>103</y>
-         <width>141</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Same for all particles</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledIntEnergyRes">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>128</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>Intrinsic energy resolution to be used in particle simulations for this material (the ratio of the FWHM of the distribution and the average number of the emitted photons)</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_58">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>27</x>
-         <y>120</y>
-         <width>110</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Intrinsic energy
-resolution:</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbDeletePrimSpectrum">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>16</y>
-         <width>20</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbLoadPrimSpectrum">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>16</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Load</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbShowPrimSpectrum">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>149</x>
-         <y>16</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Show</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_8">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>53</y>
-         <width>111</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Emission decay time:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledPriT">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>50</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_24">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>53</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_5">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>18</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Emission spectrum:</string>
-       </property>
-      </widget>
-      <widget class="QFrame" name="frYieldSame">
-       <property name="geometry">
-        <rect>
-         <x>287</x>
-         <y>77</y>
-         <width>161</width>
-         <height>31</height>
-        </rect>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <widget class="QComboBox" name="cobYieldForParticle">
-        <property name="geometry">
-         <rect>
-          <x>33</x>
-          <y>4</y>
-          <width>100</width>
-          <height>20</height>
-         </rect>
-        </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_18">
         <property name="font">
          <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_48">
-        <property name="geometry">
-         <rect>
-          <x>8</x>
-          <y>7</y>
-          <width>30</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
-         <string>for:</string>
+         <string>Edit defined material:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <zorder>label_48</zorder>
-       <zorder>cobYieldForParticle</zorder>
-      </widget>
-      <zorder>label_20</zorder>
-      <zorder>label_16</zorder>
-      <zorder>label_58</zorder>
-      <zorder>label_8</zorder>
-      <zorder>label_24</zorder>
-      <zorder>label_5</zorder>
-      <zorder>pbLoadPrimSpectrum</zorder>
-      <zorder>pbShowPrimSpectrum</zorder>
-      <zorder>pbDeletePrimSpectrum</zorder>
-      <zorder>ledPrimaryYield</zorder>
-      <zorder>ledPriT</zorder>
-      <zorder>ledIntEnergyRes</zorder>
-      <zorder>cbSameYieldForAll</zorder>
-      <zorder>frYieldSame</zorder>
-     </widget>
-     <widget class="QGroupBox" name="gbOptical">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>5</y>
-        <width>430</width>
-        <height>196</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="title">
-       <string>Optical properties</string>
-      </property>
-      <widget class="QPushButton" name="pbRemoveRayleigh">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>380</x>
-         <y>139</y>
-         <width>20</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbDeleteABSlambda">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>108</y>
-         <width>20</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>82</y>
-         <width>111</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Bulk absorption:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledAbs">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>80</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledRayleighWave">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>140</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_47">
-       <property name="geometry">
-        <rect>
-         <x>222</x>
-         <y>143</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>mm</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_14">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>108</y>
-         <width>91</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>vs. wavelength:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_57">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>171</y>
-         <width>120</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Reemission probability:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_49">
-       <property name="geometry">
-        <rect>
-         <x>357</x>
-         <y>143</y>
-         <width>25</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>nm</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>20</y>
-         <width>101</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Refractive index:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_23">
-       <property name="geometry">
-        <rect>
-         <x>222</x>
-         <y>82</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>mm-1</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_46">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>140</y>
-         <width>111</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Rayleigh MFP:</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbLoadNlambda">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>48</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Load</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledReemissionProbability">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>170</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>Use to define a waveshifter. Value should be from 0 to 1</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbLoadABSlambda">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>108</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Load</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_13">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>48</y>
-         <width>91</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>vs. wavelength:</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbDeleteNlambda">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>290</x>
-         <y>48</y>
-         <width>20</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbShowNlambda">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>48</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Show</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledRayleigh">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>140</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>Keep empty if there is no Rayleigh scattering in this material</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbShowABSlambda">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>108</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Show</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledN">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>20</y>
-         <width>60</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_76">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>143</y>
-         <width>47</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>at:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QLabel" name="laBackground">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>561</width>
-        <height>681</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <zorder>laBackground</zorder>
-     <zorder>gbPrimary</zorder>
-     <zorder>gbOptical</zorder>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>Interaction</string>
-     </attribute>
-     <widget class="QFrame" name="fEnDepProps">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>36</y>
-        <width>451</width>
-        <height>341</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
-      </property>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cobActiveMaterials">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Unconfirmed changes will be lost with material change!</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbShowUsage">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Objects made of this material will be shown with red colour on the geometry window</string>
+        </property>
+        <property name="text">
+         <string>Show usage</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <widget class="QCheckBox" name="cbTransparentMaterial">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>8</y>
-         <width>341</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Force material to be transparent for this particle</string>
-       </property>
-      </widget>
-      <widget class="QStackedWidget" name="swMainMatParticle">
-       <property name="geometry">
-        <rect>
-         <x>8</x>
-         <y>27</y>
-         <width>439</width>
-         <height>310</height>
-        </rect>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <widget class="QWidget" name="pageCharged">
-        <widget class="QLineEdit" name="leiStopPowerUnits">
-         <property name="geometry">
-          <rect>
-           <x>274</x>
-           <y>106</y>
-           <width>81</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>energy cm2/g</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbImportStoppingPowerFromTrim">
-         <property name="geometry">
-          <rect>
-           <x>46</x>
-           <y>135</y>
-           <width>111</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Import from SRIM</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_31">
-         <property name="geometry">
-          <rect>
-           <x>198</x>
-           <y>90</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>energy</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_32">
-         <property name="geometry">
-          <rect>
-           <x>286</x>
-           <y>88</y>
-           <width>71</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>stop. power</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbShowStoppingPower">
-         <property name="geometry">
-          <rect>
-           <x>46</x>
-           <y>63</y>
-           <width>111</width>
-           <height>31</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadDeDr">
-         <property name="geometry">
-          <rect>
-           <x>46</x>
-           <y>103</y>
-           <width>111</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="cobStoppingPowerUnits">
-         <property name="geometry">
-          <rect>
-           <x>176</x>
-           <y>105</y>
-           <width>81</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <item>
-          <property name="text">
-           <string>eV</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>keV</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>MeV</string>
-          </property>
-         </item>
-        </widget>
-        <widget class="QLabel" name="label_30">
-         <property name="geometry">
-          <rect>
-           <x>56</x>
-           <y>43</y>
-           <width>101</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Stopping power:</string>
-         </property>
-        </widget>
-        <widget class="Line" name="line_7">
-         <property name="geometry">
-          <rect>
-           <x>146</x>
-           <y>115</y>
-           <width>150</width>
-           <height>3</height>
-          </rect>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_33">
-         <property name="geometry">
-          <rect>
-           <x>251</x>
-           <y>77</y>
-           <width>71</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Units:</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="leMFP_2">
-         <property name="geometry">
-          <rect>
-           <x>267</x>
-           <y>237</y>
-           <width>81</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_50">
-         <property name="geometry">
-          <rect>
-           <x>206</x>
-           <y>240</y>
-           <width>54</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>keV is:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_51">
-         <property name="geometry">
-          <rect>
-           <x>352</x>
-           <y>239</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>mm</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_52">
-         <property name="geometry">
-          <rect>
-           <x>27</x>
-           <y>239</y>
-           <width>101</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Projected range for</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledMFPenergy_2">
-         <property name="geometry">
-          <rect>
-           <x>127</x>
-           <y>237</y>
-           <width>70</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>100</string>
-         </property>
-        </widget>
-        <zorder>line_7</zorder>
-        <zorder>leiStopPowerUnits</zorder>
-        <zorder>pbImportStoppingPowerFromTrim</zorder>
-        <zorder>label_31</zorder>
-        <zorder>label_32</zorder>
-        <zorder>pbShowStoppingPower</zorder>
-        <zorder>pbLoadDeDr</zorder>
-        <zorder>cobStoppingPowerUnits</zorder>
-        <zorder>label_30</zorder>
-        <zorder>label_33</zorder>
-        <zorder>label_50</zorder>
-        <zorder>label_51</zorder>
-        <zorder>label_52</zorder>
-        <zorder>ledMFPenergy_2</zorder>
-        <zorder>leMFP_2</zorder>
-       </widget>
-       <widget class="QWidget" name="pageNeutral">
-        <widget class="QStackedWidget" name="swNeutral">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>4</y>
-           <width>436</width>
-           <height>305</height>
-          </rect>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="currentIndex">
-          <number>1</number>
-         </property>
-         <widget class="QWidget" name="pageGamma">
-          <widget class="QFrame" name="fGamma">
-           <property name="geometry">
-            <rect>
-             <x>20</x>
-             <y>19</y>
-             <width>381</width>
-             <height>78</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QPushButton" name="pbShowAllForGamma">
-            <property name="geometry">
-             <rect>
-              <x>241</x>
-              <y>25</y>
-              <width>131</width>
-              <height>30</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Show all in one graph</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_60">
-            <property name="geometry">
-             <rect>
-              <x>69</x>
-              <y>8</y>
-              <width>81</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Photoelectric</string>
-            </property>
-           </widget>
-           <widget class="QCheckBox" name="checkBox_2">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="geometry">
-             <rect>
-              <x>49</x>
-              <y>30</y>
-              <width>16</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_61">
-            <property name="geometry">
-             <rect>
-              <x>69</x>
-              <y>30</y>
-              <width>81</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Compton</string>
-            </property>
-           </widget>
-           <widget class="QCheckBox" name="checkBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="geometry">
-             <rect>
-              <x>49</x>
-              <y>8</y>
-              <width>16</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbShowPhotoelectric">
-            <property name="geometry">
-             <rect>
-              <x>160</x>
-              <y>6</y>
-              <width>60</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Show</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbShowCompton">
-            <property name="geometry">
-             <rect>
-              <x>160</x>
-              <y>28</y>
-              <width>60</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Show</string>
-            </property>
-           </widget>
-           <widget class="QCheckBox" name="cbPairProduction">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="geometry">
-             <rect>
-              <x>49</x>
-              <y>52</y>
-              <width>18</width>
-              <height>17</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbShowPairProduction">
-            <property name="geometry">
-             <rect>
-              <x>160</x>
-              <y>50</y>
-              <width>60</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Show</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_62">
-            <property name="geometry">
-             <rect>
-              <x>70</x>
-              <y>51</y>
-              <width>81</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Pair production</string>
-            </property>
-           </widget>
-          </widget>
-          <widget class="QFrame" name="frame">
-           <property name="geometry">
-            <rect>
-             <x>7</x>
-             <y>102</y>
-             <width>416</width>
-             <height>93</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QPushButton" name="pbXCOMauto">
-            <property name="geometry">
-             <rect>
-              <x>117</x>
-              <y>30</y>
-              <width>285</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Automatic extraction from the XCOM database using the material composition in the text field to the left.</string>
-            </property>
-            <property name="text">
-             <string>Automatic request using material composition</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbNistPage">
-            <property name="geometry">
-             <rect>
-              <x>238</x>
-              <y>6</y>
-              <width>80</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>http://physics.nist.gov/PhysRefData/Xcom/html/xcom1-t.html    Use default cm2/g units!</string>
-            </property>
-            <property name="text">
-             <string>Go to XCOM</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbImportXCOM">
-            <property name="geometry">
-             <rect>
-              <x>117</x>
-              <y>6</y>
-              <width>116</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Import data from XCOM-generated ascii file (8 columns, cm2/g units, headers and shell line names will be disreguarded</string>
-            </property>
-            <property name="text">
-             <string>Import file</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbShowXCOMdata">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="geometry">
-             <rect>
-              <x>323</x>
-              <y>5</y>
-              <width>80</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Show loaded XCOM data</string>
-            </property>
-            <property name="text">
-             <string>Log data</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_59">
-            <property name="geometry">
-             <rect>
-              <x>-2</x>
-              <y>19</y>
-              <width>111</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>From NIST XCOM:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="Line" name="line_2">
-            <property name="geometry">
-             <rect>
-              <x>19</x>
-              <y>58</y>
-              <width>380</width>
-              <height>3</height>
-             </rect>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbLoadThisScenarioCrossSection">
-            <property name="geometry">
-             <rect>
-              <x>73</x>
-              <y>65</y>
-              <width>281</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>Text file with three columns: Energy[keV] Photoelectric[cm2/g] Compton[cm2/g]</string>
-            </property>
-            <property name="text">
-             <string>Load from custom text file</string>
-            </property>
-           </widget>
-          </widget>
-          <widget class="QFrame" name="frGamma1">
-           <property name="geometry">
-            <rect>
-             <x>5</x>
-             <y>225</y>
-             <width>416</width>
-             <height>63</height>
-            </rect>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <widget class="QLabel" name="label_35">
-            <property name="geometry">
-             <rect>
-              <x>9</x>
-              <y>1</y>
-              <width>71</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Energy [keV]:</string>
-            </property>
-           </widget>
-           <widget class="QFrame" name="fGammaDiagnostics">
-            <property name="geometry">
-             <rect>
-              <x>81</x>
-              <y>4</y>
-              <width>225</width>
-              <height>53</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Box</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <widget class="QLabel" name="label_42">
-             <property name="geometry">
-              <rect>
-               <x>-14</x>
-               <y>9</y>
-               <width>121</width>
-               <height>16</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Mass attenuation:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_43">
-             <property name="geometry">
-              <rect>
-               <x>185</x>
-               <y>10</y>
-               <width>46</width>
-               <height>13</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string> cm2/g</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="leoGammaDiagnosticsCoefficient">
-             <property name="geometry">
-              <rect>
-               <x>111</x>
-               <y>7</y>
-               <width>70</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>n.a.</string>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_7">
-             <property name="geometry">
-              <rect>
-               <x>189</x>
-               <y>27</y>
-               <width>21</width>
-               <height>16</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>mm</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="leoMFPgamma">
-             <property name="geometry">
-              <rect>
-               <x>111</x>
-               <y>27</y>
-               <width>70</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_4">
-             <property name="geometry">
-              <rect>
-               <x>58</x>
-               <y>28</y>
-               <width>50</width>
-               <height>16</height>
-              </rect>
-             </property>
-             <property name="toolTip">
-              <string>Mean Free Path</string>
-             </property>
-             <property name="text">
-              <string>MFP:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </widget>
-           <widget class="Line" name="line_11">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>22</y>
-              <width>62</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="ledGammaDiagnosticsEnergy">
-            <property name="geometry">
-             <rect>
-              <x>16</x>
-              <y>20</y>
-              <width>50</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>120</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbGammaDiagnosticsPhComptRation">
-            <property name="geometry">
-             <rect>
-              <x>319</x>
-              <y>20</y>
-              <width>91</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Photo fraction</string>
-            </property>
-           </widget>
-          </widget>
-          <widget class="QPushButton" name="pbShowTotalInteraction">
-           <property name="geometry">
-            <rect>
-             <x>170</x>
-             <y>0</y>
-             <width>80</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Show </string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="pageNeutron">
-          <widget class="QCheckBox" name="cbCapture">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>10</y>
-             <width>175</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Enable neutron capture</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="cbEnableScatter">
-           <property name="geometry">
-            <rect>
-             <x>190</x>
-             <y>10</y>
-             <width>221</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Enable elastic scattering</string>
-           </property>
-          </widget>
-          <widget class="QTableWidget" name="tabwNeutron">
-           <property name="geometry">
-            <rect>
-             <x>6</x>
-             <y>33</y>
-             <width>425</width>
-             <height>247</height>
-            </rect>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::CustomContextMenu</enum>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="cbIgnoreMissingNeutronData">
-           <property name="geometry">
-            <rect>
-             <x>100</x>
-             <y>286</y>
-             <width>331</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Ignore missing data - assume zero cross-sections</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="cbNeutronAutoload">
-           <property name="geometry">
-            <rect>
-             <x>9</x>
-             <y>286</y>
-             <width>70</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Autoload</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </widget>
-        </widget>
-       </widget>
-      </widget>
-     </widget>
-     <widget class="QComboBox" name="cobParticle">
-      <property name="geometry">
-       <rect>
-        <x>97</x>
-        <y>7</y>
-        <width>120</width>
-        <height>22</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="Line" name="lineClear">
-      <property name="geometry">
-       <rect>
-        <x>149</x>
-        <y>19</y>
-        <width>16</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbTrackingAllowed">
-      <property name="geometry">
-       <rect>
-        <x>234</x>
-        <y>10</y>
-        <width>191</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="toolTip">
-       <string>If tracking is NOT allowed, the particle is removed from tracking as soon as it enters a volume with this material</string>
-      </property>
-      <property name="text">
-       <string>Tracking allowed</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_15">
-      <property name="geometry">
-       <rect>
-        <x>19</x>
-        <y>11</y>
-        <width>67</width>
-        <height>13</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>Particle:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="Line" name="line_16">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>17</y>
-        <width>50</width>
-        <height>3</height>
-       </rect>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
       </property>
       <property name="lineWidth">
        <number>1</number>
@@ -2312,533 +88,2320 @@ resolution:</string>
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
-     <widget class="QLabel" name="laBackground_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>561</width>
-        <height>681</height>
-       </rect>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Material name:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="leName">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Change name in order to add a new material: it inherits all the defined properties of the original material</string>
+        </property>
+        <property name="text">
+         <string>leName</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <property name="topMargin">
+       <number>0</number>
       </property>
+      <item>
+       <widget class="QPushButton" name="pbWasModified">
+        <property name="text">
+         <string>was modified</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbUpdateInteractionIndication">
+        <property name="text">
+         <string>...update iteraction indication</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbUpdateTmpMaterial">
+        <property name="text">
+         <string>...update tmpMaterial</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="pbAddToActive">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>If name was not changed: confirms the changes; If name was changed: adds a new material</string>
+        </property>
+        <property name="text">
+         <string>Update material</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbAddNewMaterial">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>If name was not changed: confirms the changes; If name was changed: adds a new material</string>
+        </property>
+        <property name="text">
+         <string>Add as new material</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbRename">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Rename</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="labMatWasModified">
       <property name="text">
-       <string/>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; color:#ff0000;&quot;&gt;Material was modified: Click one of above to confirm&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <zorder>laBackground_2</zorder>
-     <zorder>fEnDepProps</zorder>
-     <zorder>lineClear</zorder>
-     <zorder>label_15</zorder>
-     <zorder>line_16</zorder>
-     <zorder>cobParticle</zorder>
-     <zorder>cbTrackingAllowed</zorder>
-    </widget>
-    <widget class="QWidget" name="tab_3">
-     <attribute name="title">
-      <string>Secondary scint</string>
-     </attribute>
-     <widget class="QGroupBox" name="gbSecondary">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>110</y>
-        <width>341</width>
-        <height>161</height>
-       </rect>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="twProperties">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QPushButton" name="pbDeleteSecSpectrum">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>300</x>
-         <y>130</y>
-         <width>20</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>X</string>
-       </property>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>Density and composition</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_21">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Material density:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="ledDensity">
+            <property name="toolTip">
+             <string>Used by all reactions except neutron capture</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>g/cm3</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_64">
+          <property name="text">
+           <string>Chemical composition (optional unless neutron interactions will be simulated):</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frame_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>452</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QLineEdit" name="leChemicalComposition">
+           <property name="geometry">
+            <rect>
+             <x>1</x>
+             <y>1</y>
+             <width>450</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Elemental composition with the relative molar fractions.
+Can be used to automatically configure gamma interaction cross-sections and neutron scattering data.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pbModifyChemicalComposition">
+           <property name="geometry">
+            <rect>
+             <x>2</x>
+             <y>0</y>
+             <width>452</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QTreeWidget" name="trwChemicalComposition">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <attribute name="headerVisible">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>1</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbShowIsotopes">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show isotopes</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labContextMenuHelp">
+                <property name="text">
+                 <string>Use context menu to add/remove</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+       <zorder>label_22</zorder>
+       <zorder>ledDensity</zorder>
+       <zorder>label_21</zorder>
+       <zorder>label_64</zorder>
+       <zorder>cbShowIsotopes</zorder>
+       <zorder>trwChemicalComposition</zorder>
+       <zorder>labContextMenuHelp</zorder>
+       <zorder>horizontalSpacer</zorder>
+       <zorder>horizontalSpacer_2</zorder>
+       <zorder>horizontalSpacer_3</zorder>
+       <zorder>horizontalSpacer_4</zorder>
+       <zorder>frame_2</zorder>
+       <zorder>label_12</zorder>
+       <zorder>label_17</zorder>
       </widget>
-      <widget class="QLabel" name="label_19">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>101</y>
-         <width>127</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Emission decay time:</string>
-       </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Optical</string>
+       </attribute>
+       <widget class="QGroupBox" name="gbPrimary">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>213</y>
+          <width>431</width>
+          <height>161</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="title">
+         <string>Primary scintillation</string>
+        </property>
+        <widget class="QLabel" name="label_20">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>82</y>
+           <width>71</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>photons / keV</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledPrimaryYield">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>82</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_16">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>82</y>
+           <width>80</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Photon yield:</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cbSameYieldForAll">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>103</y>
+           <width>141</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Same for all particles</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledIntEnergyRes">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>128</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Intrinsic energy resolution to be used in particle simulations for this material (the ratio of the FWHM of the distribution and the average number of the emitted photons)</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_58">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>27</x>
+           <y>120</y>
+           <width>110</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Intrinsic energy
+resolution:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbDeletePrimSpectrum">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>16</y>
+           <width>20</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbLoadPrimSpectrum">
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>16</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbShowPrimSpectrum">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>149</x>
+           <y>16</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>53</y>
+           <width>111</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Emission decay time:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledPriT">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>50</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_24">
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>53</y>
+           <width>46</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>ns</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_5">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>18</y>
+           <width>120</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Emission spectrum:</string>
+         </property>
+        </widget>
+        <widget class="QFrame" name="frYieldSame">
+         <property name="geometry">
+          <rect>
+           <x>287</x>
+           <y>77</y>
+           <width>161</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <widget class="QComboBox" name="cobYieldForParticle">
+          <property name="geometry">
+           <rect>
+            <x>33</x>
+            <y>4</y>
+            <width>100</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_48">
+          <property name="geometry">
+           <rect>
+            <x>8</x>
+            <y>7</y>
+            <width>30</width>
+            <height>13</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>for:</string>
+          </property>
+         </widget>
+         <zorder>label_48</zorder>
+         <zorder>cobYieldForParticle</zorder>
+        </widget>
+        <zorder>label_20</zorder>
+        <zorder>label_16</zorder>
+        <zorder>label_58</zorder>
+        <zorder>label_8</zorder>
+        <zorder>label_24</zorder>
+        <zorder>label_5</zorder>
+        <zorder>pbLoadPrimSpectrum</zorder>
+        <zorder>pbShowPrimSpectrum</zorder>
+        <zorder>pbDeletePrimSpectrum</zorder>
+        <zorder>ledPrimaryYield</zorder>
+        <zorder>ledPriT</zorder>
+        <zorder>ledIntEnergyRes</zorder>
+        <zorder>cbSameYieldForAll</zorder>
+        <zorder>frYieldSame</zorder>
+       </widget>
+       <widget class="QGroupBox" name="gbOptical">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>5</y>
+          <width>430</width>
+          <height>201</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="title">
+         <string>Optical properties</string>
+        </property>
+        <widget class="QPushButton" name="pbRemoveRayleigh">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>380</x>
+           <y>139</y>
+           <width>20</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbDeleteABSlambda">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>108</y>
+           <width>20</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>82</y>
+           <width>111</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Bulk absorption:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledAbs">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>80</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledRayleighWave">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>140</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_47">
+         <property name="geometry">
+          <rect>
+           <x>222</x>
+           <y>143</y>
+           <width>46</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>mm at</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_14">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>108</y>
+           <width>91</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>vs. wavelength:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_57">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>171</y>
+           <width>120</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Reemission probability:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_49">
+         <property name="geometry">
+          <rect>
+           <x>357</x>
+           <y>143</y>
+           <width>25</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>nm</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>20</y>
+           <width>101</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Refractive index:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_23">
+         <property name="geometry">
+          <rect>
+           <x>222</x>
+           <y>82</y>
+           <width>46</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>mm-1</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_46">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>140</y>
+           <width>111</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Rayleigh MFP:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbLoadNlambda">
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>48</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledReemissionProbability">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>170</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Use to define a waveshifter. Value should be from 0 to 1</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbLoadABSlambda">
+         <property name="geometry">
+          <rect>
+           <x>220</x>
+           <y>108</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_13">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>48</y>
+           <width>91</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>vs. wavelength:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbDeleteNlambda">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>48</y>
+           <width>20</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbShowNlambda">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>48</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledRayleigh">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>140</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Keep empty if there is no Rayleigh scattering in this material</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbShowABSlambda">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>108</y>
+           <width>62</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledN">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>20</y>
+           <width>60</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+        </widget>
+       </widget>
       </widget>
-      <widget class="QLineEdit" name="ledW">
-       <property name="geometry">
-        <rect>
-         <x>156</x>
-         <y>10</y>
-         <width>62</width>
-         <height>20</height>
-        </rect>
-       </property>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Interaction</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Particle:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cobParticle"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbTrackingAllowed">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>If tracking is NOT allowed, the particle is removed from tracking as soon as it enters a volume with this material</string>
+            </property>
+            <property name="text">
+             <string>Tracking allowed</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QFrame" name="fEnDepProps">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QCheckBox" name="cbTransparentMaterial">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Force material to be transparent for this particle</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QStackedWidget" name="swMainMatParticle">
+             <property name="currentIndex">
+              <number>1</number>
+             </property>
+             <widget class="QWidget" name="pageCharged">
+              <widget class="QLineEdit" name="leiStopPowerUnits">
+               <property name="geometry">
+                <rect>
+                 <x>274</x>
+                 <y>106</y>
+                 <width>81</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>energy cm2/g</string>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbImportStoppingPowerFromTrim">
+               <property name="geometry">
+                <rect>
+                 <x>46</x>
+                 <y>135</y>
+                 <width>111</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Import from SRIM</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_31">
+               <property name="geometry">
+                <rect>
+                 <x>198</x>
+                 <y>90</y>
+                 <width>46</width>
+                 <height>13</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>energy</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_32">
+               <property name="geometry">
+                <rect>
+                 <x>286</x>
+                 <y>88</y>
+                 <width>71</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>stop. power</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbShowStoppingPower">
+               <property name="geometry">
+                <rect>
+                 <x>46</x>
+                 <y>63</y>
+                 <width>111</width>
+                 <height>31</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Show</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbLoadDeDr">
+               <property name="geometry">
+                <rect>
+                 <x>46</x>
+                 <y>103</y>
+                 <width>111</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Load</string>
+               </property>
+              </widget>
+              <widget class="QComboBox" name="cobStoppingPowerUnits">
+               <property name="geometry">
+                <rect>
+                 <x>176</x>
+                 <y>105</y>
+                 <width>81</width>
+                 <height>22</height>
+                </rect>
+               </property>
+               <item>
+                <property name="text">
+                 <string>eV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>keV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>MeV</string>
+                </property>
+               </item>
+              </widget>
+              <widget class="QLabel" name="label_30">
+               <property name="geometry">
+                <rect>
+                 <x>56</x>
+                 <y>43</y>
+                 <width>101</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Stopping power:</string>
+               </property>
+              </widget>
+              <widget class="Line" name="line_7">
+               <property name="geometry">
+                <rect>
+                 <x>146</x>
+                 <y>115</y>
+                 <width>150</width>
+                 <height>3</height>
+                </rect>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_33">
+               <property name="geometry">
+                <rect>
+                 <x>251</x>
+                 <y>77</y>
+                 <width>71</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Units:</string>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="leMFP_2">
+               <property name="geometry">
+                <rect>
+                 <x>267</x>
+                 <y>237</y>
+                 <width>81</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_50">
+               <property name="geometry">
+                <rect>
+                 <x>206</x>
+                 <y>240</y>
+                 <width>54</width>
+                 <height>13</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>keV is:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_51">
+               <property name="geometry">
+                <rect>
+                 <x>352</x>
+                 <y>239</y>
+                 <width>46</width>
+                 <height>13</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>mm</string>
+               </property>
+              </widget>
+              <widget class="QLabel" name="label_52">
+               <property name="geometry">
+                <rect>
+                 <x>27</x>
+                 <y>239</y>
+                 <width>101</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Projected range for</string>
+               </property>
+              </widget>
+              <widget class="QLineEdit" name="ledMFPenergy_2">
+               <property name="geometry">
+                <rect>
+                 <x>127</x>
+                 <y>237</y>
+                 <width>70</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>100</string>
+               </property>
+              </widget>
+              <zorder>line_7</zorder>
+              <zorder>leiStopPowerUnits</zorder>
+              <zorder>pbImportStoppingPowerFromTrim</zorder>
+              <zorder>label_31</zorder>
+              <zorder>label_32</zorder>
+              <zorder>pbShowStoppingPower</zorder>
+              <zorder>pbLoadDeDr</zorder>
+              <zorder>cobStoppingPowerUnits</zorder>
+              <zorder>label_30</zorder>
+              <zorder>label_33</zorder>
+              <zorder>label_50</zorder>
+              <zorder>label_51</zorder>
+              <zorder>label_52</zorder>
+              <zorder>ledMFPenergy_2</zorder>
+              <zorder>leMFP_2</zorder>
+             </widget>
+             <widget class="QWidget" name="pageNeutral">
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>6</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QStackedWidget" name="swNeutral">
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="currentIndex">
+                  <number>1</number>
+                 </property>
+                 <widget class="QWidget" name="pageGamma">
+                  <widget class="QFrame" name="fGamma">
+                   <property name="geometry">
+                    <rect>
+                     <x>20</x>
+                     <y>19</y>
+                     <width>381</width>
+                     <height>78</height>
+                    </rect>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <widget class="QPushButton" name="pbShowAllForGamma">
+                    <property name="geometry">
+                     <rect>
+                      <x>241</x>
+                      <y>25</y>
+                      <width>131</width>
+                      <height>30</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Show all in one graph</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_60">
+                    <property name="geometry">
+                     <rect>
+                      <x>69</x>
+                      <y>8</y>
+                      <width>81</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Photoelectric</string>
+                    </property>
+                   </widget>
+                   <widget class="QCheckBox" name="checkBox_2">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                     <rect>
+                      <x>49</x>
+                      <y>30</y>
+                      <width>16</width>
+                      <height>17</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_61">
+                    <property name="geometry">
+                     <rect>
+                      <x>69</x>
+                      <y>30</y>
+                      <width>81</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Compton</string>
+                    </property>
+                   </widget>
+                   <widget class="QCheckBox" name="checkBox">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                     <rect>
+                      <x>49</x>
+                      <y>8</y>
+                      <width>16</width>
+                      <height>17</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbShowPhotoelectric">
+                    <property name="geometry">
+                     <rect>
+                      <x>160</x>
+                      <y>6</y>
+                      <width>60</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Show</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbShowCompton">
+                    <property name="geometry">
+                     <rect>
+                      <x>160</x>
+                      <y>28</y>
+                      <width>60</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Show</string>
+                    </property>
+                   </widget>
+                   <widget class="QCheckBox" name="cbPairProduction">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                     <rect>
+                      <x>49</x>
+                      <y>52</y>
+                      <width>18</width>
+                      <height>17</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbShowPairProduction">
+                    <property name="geometry">
+                     <rect>
+                      <x>160</x>
+                      <y>50</y>
+                      <width>60</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Show</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_62">
+                    <property name="geometry">
+                     <rect>
+                      <x>70</x>
+                      <y>51</y>
+                      <width>81</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Pair production</string>
+                    </property>
+                   </widget>
+                  </widget>
+                  <widget class="QFrame" name="frame">
+                   <property name="geometry">
+                    <rect>
+                     <x>7</x>
+                     <y>102</y>
+                     <width>416</width>
+                     <height>93</height>
+                    </rect>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Box</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <widget class="QPushButton" name="pbXCOMauto">
+                    <property name="geometry">
+                     <rect>
+                      <x>117</x>
+                      <y>30</y>
+                      <width>285</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="toolTip">
+                     <string>Automatic extraction from the XCOM database using the material composition in the text field to the left.</string>
+                    </property>
+                    <property name="text">
+                     <string>Automatic request using material composition</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbNistPage">
+                    <property name="geometry">
+                     <rect>
+                      <x>238</x>
+                      <y>6</y>
+                      <width>80</width>
+                      <height>22</height>
+                     </rect>
+                    </property>
+                    <property name="toolTip">
+                     <string>http://physics.nist.gov/PhysRefData/Xcom/html/xcom1-t.html    Use default cm2/g units!</string>
+                    </property>
+                    <property name="text">
+                     <string>Go to XCOM</string>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbImportXCOM">
+                    <property name="geometry">
+                     <rect>
+                      <x>117</x>
+                      <y>6</y>
+                      <width>116</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="toolTip">
+                     <string>Import data from XCOM-generated ascii file (8 columns, cm2/g units, headers and shell line names will be disreguarded</string>
+                    </property>
+                    <property name="text">
+                     <string>Import file</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbShowXCOMdata">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                     <rect>
+                      <x>323</x>
+                      <y>5</y>
+                      <width>80</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="toolTip">
+                     <string>Show loaded XCOM data</string>
+                    </property>
+                    <property name="text">
+                     <string>Log data</string>
+                    </property>
+                   </widget>
+                   <widget class="QLabel" name="label_59">
+                    <property name="geometry">
+                     <rect>
+                      <x>-2</x>
+                      <y>19</y>
+                      <width>111</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>From NIST XCOM:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                   <widget class="Line" name="line_2">
+                    <property name="geometry">
+                     <rect>
+                      <x>19</x>
+                      <y>58</y>
+                      <width>380</width>
+                      <height>3</height>
+                     </rect>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbLoadThisScenarioCrossSection">
+                    <property name="geometry">
+                     <rect>
+                      <x>73</x>
+                      <y>65</y>
+                      <width>281</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="toolTip">
+                     <string>Text file with three columns: Energy[keV] Photoelectric[cm2/g] Compton[cm2/g]</string>
+                    </property>
+                    <property name="text">
+                     <string>Load from custom text file</string>
+                    </property>
+                   </widget>
+                  </widget>
+                  <widget class="QFrame" name="frGamma1">
+                   <property name="geometry">
+                    <rect>
+                     <x>5</x>
+                     <y>200</y>
+                     <width>416</width>
+                     <height>63</height>
+                    </rect>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::NoFrame</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <widget class="QLabel" name="label_35">
+                    <property name="geometry">
+                     <rect>
+                      <x>9</x>
+                      <y>1</y>
+                      <width>71</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Energy [keV]:</string>
+                    </property>
+                   </widget>
+                   <widget class="QFrame" name="fGammaDiagnostics">
+                    <property name="geometry">
+                     <rect>
+                      <x>81</x>
+                      <y>4</y>
+                      <width>225</width>
+                      <height>53</height>
+                     </rect>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::Box</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <widget class="QLabel" name="label_42">
+                     <property name="geometry">
+                      <rect>
+                       <x>-14</x>
+                       <y>9</y>
+                       <width>121</width>
+                       <height>16</height>
+                      </rect>
+                     </property>
+                     <property name="text">
+                      <string>Mass attenuation:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                    <widget class="QLabel" name="label_43">
+                     <property name="geometry">
+                      <rect>
+                       <x>185</x>
+                       <y>10</y>
+                       <width>46</width>
+                       <height>13</height>
+                      </rect>
+                     </property>
+                     <property name="text">
+                      <string> cm2/g</string>
+                     </property>
+                    </widget>
+                    <widget class="QLineEdit" name="leoGammaDiagnosticsCoefficient">
+                     <property name="geometry">
+                      <rect>
+                       <x>111</x>
+                       <y>7</y>
+                       <width>70</width>
+                       <height>20</height>
+                      </rect>
+                     </property>
+                     <property name="text">
+                      <string>n.a.</string>
+                     </property>
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                    <widget class="QLabel" name="label_7">
+                     <property name="geometry">
+                      <rect>
+                       <x>189</x>
+                       <y>27</y>
+                       <width>21</width>
+                       <height>16</height>
+                      </rect>
+                     </property>
+                     <property name="text">
+                      <string>mm</string>
+                     </property>
+                    </widget>
+                    <widget class="QLineEdit" name="leoMFPgamma">
+                     <property name="geometry">
+                      <rect>
+                       <x>111</x>
+                       <y>27</y>
+                       <width>70</width>
+                       <height>20</height>
+                      </rect>
+                     </property>
+                     <property name="readOnly">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                    <widget class="QLabel" name="label_4">
+                     <property name="geometry">
+                      <rect>
+                       <x>58</x>
+                       <y>28</y>
+                       <width>50</width>
+                       <height>16</height>
+                      </rect>
+                     </property>
+                     <property name="toolTip">
+                      <string>Mean Free Path</string>
+                     </property>
+                     <property name="text">
+                      <string>MFP:</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </widget>
+                   <widget class="Line" name="line_11">
+                    <property name="geometry">
+                     <rect>
+                      <x>20</x>
+                      <y>22</y>
+                      <width>62</width>
+                      <height>16</height>
+                     </rect>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Plain</enum>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                   <widget class="QLineEdit" name="ledGammaDiagnosticsEnergy">
+                    <property name="geometry">
+                     <rect>
+                      <x>16</x>
+                      <y>20</y>
+                      <width>50</width>
+                      <height>20</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>120</string>
+                    </property>
+                   </widget>
+                   <widget class="QPushButton" name="pbGammaDiagnosticsPhComptRation">
+                    <property name="geometry">
+                     <rect>
+                      <x>319</x>
+                      <y>20</y>
+                      <width>91</width>
+                      <height>23</height>
+                     </rect>
+                    </property>
+                    <property name="text">
+                     <string>Photo fraction</string>
+                    </property>
+                   </widget>
+                  </widget>
+                  <widget class="QPushButton" name="pbShowTotalInteraction">
+                   <property name="geometry">
+                    <rect>
+                     <x>170</x>
+                     <y>0</y>
+                     <width>80</width>
+                     <height>23</height>
+                    </rect>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Show </string>
+                   </property>
+                  </widget>
+                 </widget>
+                 <widget class="QWidget" name="pageNeutron">
+                  <layout class="QVBoxLayout" name="verticalLayout_6">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <item>
+                      <widget class="QCheckBox" name="cbCapture">
+                       <property name="text">
+                        <string>Enable neutron capture</string>
+                       </property>
+                       <property name="checked">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="cbEnableScatter">
+                       <property name="text">
+                        <string>Enable elastic scattering</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <widget class="QTableWidget" name="tabwNeutron">
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::CustomContextMenu</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <item>
+                      <widget class="QCheckBox" name="cbNeutronAutoload">
+                       <property name="text">
+                        <string>Autoload</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="cbIgnoreMissingNeutronData">
+                       <property name="text">
+                        <string>Ignore missing data - assume zero cross-sections</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pbShowStatisticsOnElastic">
+                       <property name="text">
+                        <string>Info</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+       <zorder>fEnDepProps</zorder>
+       <zorder>label_15</zorder>
+       <zorder>cobParticle</zorder>
+       <zorder>cbTrackingAllowed</zorder>
       </widget>
-      <widget class="QLineEdit" name="ledSecYield">
-       <property name="geometry">
-        <rect>
-         <x>156</x>
-         <y>70</y>
-         <width>62</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledSecT">
-       <property name="geometry">
-        <rect>
-         <x>156</x>
-         <y>100</y>
-         <width>62</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>11</y>
-         <width>121</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Energy per e/ion pair:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="ledEDriftVelocity">
-       <property name="geometry">
-        <rect>
-         <x>156</x>
-         <y>40</y>
-         <width>62</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbShowSecSpectrum">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>156</x>
-         <y>130</y>
-         <width>64</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Show</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_45">
-       <property name="geometry">
-        <rect>
-         <x>229</x>
-         <y>42</y>
-         <width>71</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>cm/us</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_6">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>41</y>
-         <width>81</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>e drift velocity:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_9">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>71</y>
-         <width>111</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Photons per electron:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_26">
-       <property name="geometry">
-        <rect>
-         <x>229</x>
-         <y>14</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>eV</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_25">
-       <property name="geometry">
-        <rect>
-         <x>229</x>
-         <y>103</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_11">
-       <property name="geometry">
-        <rect>
-         <x>28</x>
-         <y>132</y>
-         <width>111</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Emission spectrum:</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pbLoadSecSpectrum">
-       <property name="geometry">
-        <rect>
-         <x>230</x>
-         <y>130</y>
-         <width>62</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Load</string>
-       </property>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>Secondary scint</string>
+       </attribute>
+       <widget class="QGroupBox" name="gbSecondary">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>30</y>
+          <width>323</width>
+          <height>149</height>
+         </rect>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>350</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Energy per e/ion pair:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="ledW"/>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_26">
+           <property name="text">
+            <string>eV</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>e drift velocity:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="ledEDriftVelocity"/>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_45">
+           <property name="text">
+            <string>cm/us</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Photons per electron:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="ledSecYield"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Emission decay time:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="ledSecT"/>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="label_25">
+           <property name="text">
+            <string>ns</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Emission spectrum:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="QPushButton" name="pbShowSecSpectrum">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Show</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbLoadSecSpectrum">
+             <property name="text">
+              <string>Load</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="2">
+          <widget class="QPushButton" name="pbDeleteSecSpectrum">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
-     <widget class="QLabel" name="laBackground_3">
-      <property name="geometry">
-       <rect>
-        <x>-1</x>
-        <y>1</y>
-        <width>561</width>
-        <height>681</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <zorder>laBackground_3</zorder>
-     <zorder>gbSecondary</zorder>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="pbConfigureAutoElastic">
-    <property name="geometry">
-     <rect>
-      <x>253</x>
-      <y>544</y>
-      <width>210</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Options</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbShowStatisticsOnElastic">
-    <property name="geometry">
-     <rect>
-      <x>970</x>
-      <y>530</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Info</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_56">
-    <property name="geometry">
-     <rect>
-      <x>930</x>
-      <y>490</y>
-      <width>46</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>mm</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledMFPenergyEllastic">
-    <property name="geometry">
-     <rect>
-      <x>758</x>
-      <y>487</y>
-      <width>60</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>25</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_63">
-    <property name="geometry">
-     <rect>
-      <x>835</x>
-      <y>490</y>
-      <width>28</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>is:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_54">
-    <property name="geometry">
-     <rect>
-      <x>575</x>
-      <y>486</y>
-      <width>181</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>MFP for elastic scattering at</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbShowTotalEllastic">
-    <property name="geometry">
-     <rect>
-      <x>629</x>
-      <y>461</y>
-      <width>291</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Show total elastic scattering cross-section</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="leMFPellastic">
-    <property name="geometry">
-     <rect>
-      <x>866</x>
-      <y>487</y>
-      <width>60</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_55">
-    <property name="geometry">
-     <rect>
-      <x>820</x>
-      <y>490</y>
-      <width>25</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>meV</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_40">
-    <property name="geometry">
-     <rect>
-      <x>970</x>
-      <y>430</y>
-      <width>46</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>mm</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="ledMFPenergy">
-    <property name="geometry">
-     <rect>
-      <x>798</x>
-      <y>427</y>
-      <width>60</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>25</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_38">
-    <property name="geometry">
-     <rect>
-      <x>875</x>
-      <y>430</y>
-      <width>28</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>is:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="leMFP">
-    <property name="geometry">
-     <rect>
-      <x>906</x>
-      <y>427</y>
-      <width>60</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_37">
-    <property name="geometry">
-     <rect>
-      <x>615</x>
-      <y>426</y>
-      <width>181</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Mean free path for capture at</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_44">
-    <property name="geometry">
-     <rect>
-      <x>862</x>
-      <y>428</y>
-      <width>25</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>meV</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pbShowTotalCapture">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>400</y>
-      <width>131</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Show</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labIsotopeDensityNotSet">
-    <property name="geometry">
-     <rect>
-      <x>910</x>
-      <y>390</y>
-      <width>15</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>--</string>
-    </property>
-   </widget>
-   <zorder>line_6</zorder>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QPushButton" name="pbComments">
+        <property name="text">
+         <string>Comments for this material</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbConfigureAutoElastic">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Options</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
    <zorder>line</zorder>
    <zorder>label</zorder>
-   <zorder>label_12</zorder>
    <zorder>cobActiveMaterials</zorder>
    <zorder>label_18</zorder>
    <zorder>pbAddToActive</zorder>
-   <zorder>pbUpdateTmpMaterial</zorder>
-   <zorder>ledP1</zorder>
-   <zorder>ledP2</zorder>
-   <zorder>ledP3</zorder>
-   <zorder>pbWasModified</zorder>
    <zorder>pbComments</zorder>
    <zorder>pbShowUsage</zorder>
    <zorder>leName</zorder>
-   <zorder>labWasModified</zorder>
+   <zorder>labMatWasModified</zorder>
    <zorder>pbRename</zorder>
    <zorder>pbAddNewMaterial</zorder>
    <zorder>twProperties</zorder>
-   <zorder>pbUpdateInteractionIndication</zorder>
    <zorder>pbConfigureAutoElastic</zorder>
-   <zorder>pbShowStatisticsOnElastic</zorder>
-   <zorder>label_56</zorder>
-   <zorder>ledMFPenergyEllastic</zorder>
-   <zorder>label_63</zorder>
-   <zorder>label_54</zorder>
-   <zorder>pbShowTotalEllastic</zorder>
-   <zorder>leMFPellastic</zorder>
-   <zorder>label_55</zorder>
-   <zorder>label_40</zorder>
-   <zorder>ledMFPenergy</zorder>
-   <zorder>label_38</zorder>
-   <zorder>leMFP</zorder>
-   <zorder>label_37</zorder>
-   <zorder>label_44</zorder>
-   <zorder>pbShowTotalCapture</zorder>
-   <zorder>labIsotopeDensityNotSet</zorder>
+   <zorder>horizontalLayoutWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>484</width>
+     <width>494</width>
      <height>21</height>
     </rect>
    </property>
@@ -2917,9 +2480,6 @@ resolution:</string>
   <tabstop>ledSecYield</tabstop>
   <tabstop>ledSecT</tabstop>
   <tabstop>pbShowSecSpectrum</tabstop>
-  <tabstop>ledP1</tabstop>
-  <tabstop>ledP2</tabstop>
-  <tabstop>ledP3</tabstop>
   <tabstop>pbShowNlambda</tabstop>
   <tabstop>pbLoadNlambda</tabstop>
   <tabstop>pbDeleteNlambda</tabstop>
@@ -2929,13 +2489,10 @@ resolution:</string>
   <tabstop>pbShowPrimSpectrum</tabstop>
   <tabstop>pbLoadPrimSpectrum</tabstop>
   <tabstop>pbDeletePrimSpectrum</tabstop>
-  <tabstop>pbUpdateTmpMaterial</tabstop>
   <tabstop>pbLoadSecSpectrum</tabstop>
   <tabstop>pbDeleteSecSpectrum</tabstop>
   <tabstop>cbTrackingAllowed</tabstop>
-  <tabstop>leMFP</tabstop>
   <tabstop>pbImportXCOM</tabstop>
-  <tabstop>ledMFPenergy</tabstop>
   <tabstop>cobParticle</tabstop>
   <tabstop>leiStopPowerUnits</tabstop>
   <tabstop>pbShowStoppingPower</tabstop>
@@ -2949,7 +2506,6 @@ resolution:</string>
   <tabstop>ledGammaDiagnosticsEnergy</tabstop>
   <tabstop>leoGammaDiagnosticsCoefficient</tabstop>
   <tabstop>pbGammaDiagnosticsPhComptRation</tabstop>
-  <tabstop>pbWasModified</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -2962,54 +2518,6 @@ resolution:</string>
     <hint type="sourcelabel">
      <x>268</x>
      <y>197</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledN</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>213</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledAbs</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>235</x>
-     <y>273</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPriT</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>235</x>
-     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>323</x>
@@ -3082,54 +2590,6 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledP1</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>752</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>334</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledP2</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>811</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>334</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledP3</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>870</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>339</x>
-     <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>leName</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
@@ -3141,7 +2601,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>
-     <y>73</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3157,55 +2617,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
-     <y>73</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledN</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>191</x>
-     <y>205</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>444</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledAbs</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>191</x>
-     <y>267</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>448</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPriT</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>186</x>
-     <y>458</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>452</x>
-     <y>93</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3221,7 +2633,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
-     <y>73</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3237,7 +2649,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>473</x>
-     <y>73</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3253,7 +2665,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>484</x>
-     <y>73</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3269,55 +2681,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>487</x>
-     <y>73</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledP1</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>752</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>440</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledP2</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>811</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>459</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledP3</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>870</x>
-     <y>90</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>453</x>
-     <y>93</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3338,54 +2702,6 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledRayleigh</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>219</x>
-     <y>323</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>344</x>
-     <y>100</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledRayleighWave</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>340</x>
-     <y>325</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>337</x>
-     <y>99</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledRayleigh</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>332</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>480</x>
-     <y>71</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cbTransparentMaterial</sender>
    <signal>clicked()</signal>
    <receiver>pbWasModified</receiver>
@@ -3397,119 +2713,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>478</x>
-     <y>79</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledReemissionProbability</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>354</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>486</x>
-     <y>77</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledReemissionProbability</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>183</x>
-     <y>359</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>349</x>
-     <y>84</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledIntEnergyRes</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>189</x>
-     <y>529</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>453</x>
-     <y>93</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbSameYieldForAll</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>frYieldSame</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>299</x>
-     <y>501</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>340</x>
-     <y>495</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbSameYieldForAll</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>217</x>
-     <y>500</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>361</x>
-     <y>72</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbSameYieldForAll</sender>
-   <signal>clicked()</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>199</x>
-     <y>503</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>429</x>
-     <y>87</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledPrimaryYield</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>226</x>
-     <y>480</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>381</x>
-     <y>75</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3525,7 +2729,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>359</x>
-     <y>79</y>
+     <y>120</y>
     </hint>
    </hints>
   </connection>
@@ -3557,7 +2761,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
-     <y>87</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3573,7 +2777,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>425</x>
-     <y>84</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3589,7 +2793,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
-     <y>69</y>
+     <y>110</y>
     </hint>
    </hints>
   </connection>
@@ -3605,7 +2809,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>
-     <y>68</y>
+     <y>109</y>
     </hint>
    </hints>
   </connection>
@@ -3621,7 +2825,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
-     <y>79</y>
+     <y>120</y>
     </hint>
    </hints>
   </connection>
@@ -3637,7 +2841,7 @@ resolution:</string>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
-     <y>85</y>
+     <y>113</y>
     </hint>
    </hints>
   </connection>
@@ -3654,6 +2858,262 @@ resolution:</string>
     <hint type="destinationlabel">
      <x>326</x>
      <y>540</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledPrimaryYield</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>226</x>
+     <y>480</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>381</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSameYieldForAll</sender>
+   <signal>clicked()</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>503</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>429</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSameYieldForAll</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>500</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>361</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSameYieldForAll</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frYieldSame</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>501</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>495</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledIntEnergyRes</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>189</x>
+     <y>529</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>453</x>
+     <y>93</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledPriT</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>186</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>452</x>
+     <y>93</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledPriT</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>323</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledReemissionProbability</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>354</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>486</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledRayleigh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>332</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>480</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledRayleighWave</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>340</x>
+     <y>325</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledRayleigh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>219</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>344</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledAbs</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>267</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>448</x>
+     <y>93</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledN</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>444</x>
+     <y>93</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledReemissionProbability</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>359</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledAbs</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>235</x>
+     <y>273</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>323</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledN</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>323</x>
+     <y>97</y>
     </hint>
    </hints>
   </connection>

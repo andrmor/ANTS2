@@ -85,10 +85,9 @@ private slots:
     void on_ledRayleigh_editingFinished();
     void on_pbRemoveRayleigh_clicked();
     void on_pbShowUsage_clicked();
-    void on_ledMFPenergy_editingFinished();
     void on_pbNistPage_clicked();
     void on_pbRename_clicked();
-    void on_ledMFPenergy_2_editingFinished();
+    void on_ledMFPenergy_2_editingFinished();  //fix me!!! no button
     void on_pbAddNewMaterial_clicked();
     void on_ledIntEnergyRes_editingFinished();
     void on_cbTransparentMaterial_clicked();
@@ -99,9 +98,8 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_pbShowTotalCapture_clicked();
-    void on_ledMFPenergyEllastic_editingFinished();
-    void on_pbShowTotalEllastic_clicked();
+    void on_ledMFPenergyEllastic_editingFinished();  // fix me!!! no button
+    void on_pbShowTotalEllastic_clicked();    //fix me!!!  no button also...
     void on_pbConfigureAutoElastic_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
@@ -138,7 +136,7 @@ private:
 
     AMatParticleConfigurator* MatParticleOptionsConfigurator;
 
-    QIcon RedIcon;
+    //QIcon RedIcon;
 
     bool flagDisreguardChange;
     bool fLockTable;
@@ -157,6 +155,7 @@ private:
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
 
+    void SetWasModified(bool flag);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

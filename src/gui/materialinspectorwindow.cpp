@@ -44,14 +44,15 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     Detector = detector;
     ui->setupUi(this);
     this->move(15,15);
-    this->setFixedSize(this->size());
+    //this->setFixedSize(this->size());
+    this->setFixedWidth(this->width());
     bClearInProgress = false;
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
     this->setWindowFlags( windowFlags );
 
-    ui->labWasModified->setVisible(false);
+    SetWasModified(false);
     ui->pbWasModified->setVisible(false);
     ui->pbUpdateInteractionIndication->setVisible(false);
     ui->labContextMenuHelp->setVisible(false);
@@ -66,16 +67,16 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
     foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
-    QString styleGrey = "QLabel { background-color: #F0F0F0; }";  //setting grey background color
-    ui->laBackground->setStyleSheet(styleGrey);
-    ui->laBackground_2->setStyleSheet(styleGrey);
-    ui->laBackground_3->setStyleSheet(styleGrey);
+    //QString styleGrey = "QLabel { background-color: #F0F0F0; }";  //setting grey background color
+    //ui->laBackground->setStyleSheet(styleGrey);
+    //ui->laBackground_2->setStyleSheet(styleGrey);
+    //ui->laBackground_3->setStyleSheet(styleGrey);
 
     flagDisreguardChange = false;
     fLockTable = false;
     LastSelectedParticle = 0;
 
-    RedIcon = createColorCircleIcon(ui->labIsotopeDensityNotSet->size(), Qt::red);
+    //RedIcon = createColorCircleIcon(ui->labIsotopeDensityNotSet->size(), Qt::red);
     //QIcon YellowIcon = createColorCircleIcon(ui->labNeutra_TotalInteractiondataMissing->size(), Qt::yellow);
     //ui->labAutoLoadElastic->setPixmap(YellowIcon.pixmap(16,16));
     //ui->labAutoLoadElastic->setVisible(false);
@@ -93,6 +94,13 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
 {    
     delete MatParticleOptionsConfigurator;
     delete ui;
+}
+
+void MaterialInspectorWindow::SetWasModified(bool flag)
+{
+  QString s = "  ";
+  if (flag) s = "<html><head/><body><p><span style=\" font-size:10pt; color:#ff0000;\">Material was modified: Click one of above to confirm</span></p></body></html>";
+  ui->labMatWasModified->setText(s);
 }
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
@@ -149,7 +157,7 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     MW->UpdateMaterialListEdit();
 
     ui->cobActiveMaterials->setCurrentIndex(index);
-    ui->labWasModified->setVisible(false);
+    SetWasModified(false);
 
     MW->ReconstructDetector(true);
 }
@@ -186,7 +194,7 @@ void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
 //    ui->cobParticle->setCurrentIndex(indexToSet);
 //    on_pbUpdateInteractionIndication_clicked();
 
-    ui->labWasModified->setVisible(false);
+    SetWasModified(false);
     ui->pbRename->setText("Rename "+ui->cobActiveMaterials->currentText());
 }
 
@@ -275,12 +283,6 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     ui->ledSecT->setText(str);    
     str.setNum(tmpMaterial.e_driftVelocity, 'g');
     ui->ledEDriftVelocity->setText(str);
-    str.setNum(tmpMaterial.p1, 'g');
-    ui->ledP1->setText(str);
-    str.setNum(tmpMaterial.p2, 'g');
-    ui->ledP2->setText(str);
-    str.setNum(tmpMaterial.p3, 'g');
-    ui->ledP3->setText(str);
 
     int tmp = LastSelectedParticle;
     ui->cobParticle->clear();    
@@ -459,12 +461,8 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.SecYield = ui->ledSecYield->text().toDouble();
     tmpMaterial.SecScintDecayTime = ui->ledSecT->text().toDouble();   
     tmpMaterial.e_driftVelocity = ui->ledEDriftVelocity->text().toDouble();
-    tmpMaterial.p1 = ui->ledP1->text().toDouble();
-    tmpMaterial.p2 = ui->ledP2->text().toDouble();
-    tmpMaterial.p3 = ui->ledP3->text().toDouble();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
-    on_ledMFPenergy_editingFinished();              //neutron/capture - update mean free path
     on_ledMFPenergy_2_editingFinished();            //charged - update projected range
     on_ledMFPenergyEllastic_editingFinished();      //neutron/ellastic - update mean free path
 }
@@ -1213,7 +1211,7 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
 void MaterialInspectorWindow::on_pbWasModified_clicked()
 {
   if (flagDisreguardChange) return;
-  ui->labWasModified->setVisible(true);
+  SetWasModified(true);
 
   UpdateActionButtons();
 }
@@ -1331,7 +1329,7 @@ void MaterialInspectorWindow::on_cbTrackingAllowed_toggled(bool checked)
   font.setBold(checked);
   ui->cbTrackingAllowed->setFont(font);
 
-  ui->lineClear->setVisible(checked);
+  //ui->lineClear->setVisible(checked);
   ui->fEnDepProps->setVisible(checked);  
 }
 
@@ -1436,7 +1434,7 @@ void MaterialInspectorWindow::on_pbComments_clicked()
   dialog->exec();
 
   MW->MpCollection->tmpMaterial.Comments = text->document()->toPlainText();
-  ui->labWasModified->setVisible(true);
+  SetWasModified(true);
   delete dialog;
 }
 
@@ -1507,42 +1505,6 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
 
 }
 
-void MaterialInspectorWindow::on_ledMFPenergy_editingFinished()
-{
-    int particleId = ui->cobParticle->currentIndex();
-    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
-
-    if (ui->ledMFPenergy->text().isEmpty())
-      {
-        ui->leMFP->setText("");
-        return;
-      }
-
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-    double energy = ui->ledMFPenergy->text().toDouble() * 1.0e-6; //energy meV -> keV
-
-    if ( tmpMaterial.MatParticle[particleId].InteractionDataX.size() < 2)
-      {
-        ui->leMFP->setText("n.a.");
-        return;
-      }
-    if (energy<tmpMaterial.MatParticle[particleId].InteractionDataX.first() || energy > tmpMaterial.MatParticle[particleId].InteractionDataX.last())
-      {
-        ui->leMFP->setText("out range");
-        return;
-      }
-
-//    int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
-//    double CrossSection = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
-//    //qDebug()<<CrossSection;
-//    double AtomicDensity = tmpMaterial.atomicDensity;
-//    double MeanFreePath = 10.0/CrossSection/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-//    QString str;
-//    str.setNum(MeanFreePath, 'g', 4);
-//    ui->leMFP->setText(str);
-}
-
 void MaterialInspectorWindow::on_pbNistPage_clicked()
 {
     QDesktopServices::openUrl(QUrl("http://physics.nist.gov/PhysRefData/Xcom/html/xcom1-t.html", QUrl::TolerantMode));
@@ -1571,6 +1533,7 @@ void MaterialInspectorWindow::on_pbRename_clicked()
 
 void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 {
+  /*
   int particleId = ui->cobParticle->currentIndex();
   if (MW->MpCollection->getParticleType(particleId) != AParticle::_charged_) return;
 
@@ -1623,6 +1586,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
   QString str;
   str.setNum(range, 'g', 4);
   ui->leMFP_2->setText(str);
+  */
 }
 
 void MaterialInspectorWindow::on_actionSave_material_triggered()
@@ -2088,13 +2052,9 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
     return false;
 }
 
-void MaterialInspectorWindow::on_pbShowTotalCapture_clicked()
-{
-    ShowTotalInteraction();
-}
-
 void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
 {
+  /*
     int particleId = ui->cobParticle->currentIndex();
     if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
 
@@ -2137,6 +2097,7 @@ void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
 
     double MeanFreePath = 10.0/CrossSection/AtDens;
     ui->leMFPellastic->setText(QString::number(MeanFreePath, 'g', 4));
+    */
 }
 
 bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *element, QString target)
@@ -2326,7 +2287,6 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
                 //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
             }
     }
-
 }
 
 void MaterialInspectorWindow::on_cbShowIsotopes_clicked()

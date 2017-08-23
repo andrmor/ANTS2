@@ -2494,6 +2494,9 @@ void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 
 void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action)
 {
+    if (MW->GlobSet->MaterialsAndParticlesSettings.isEmpty())
+        on_pbConfigureAutoElastic_clicked();
+
     qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();

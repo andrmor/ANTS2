@@ -14,6 +14,7 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
     ui->setupUi(this);
     ui->frame->setEnabled(false);
     ui->pbUpdateGlobSet->setVisible(false);
+    ui->cobUnitsForEllastic->setCurrentIndex(1);
 
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);

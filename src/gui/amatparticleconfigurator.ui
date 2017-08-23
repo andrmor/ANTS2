@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>506</width>
-    <height>392</height>
+    <height>349</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="pbUpdateGlobSet">
    <property name="geometry">
     <rect>
-     <x>376</x>
-     <y>61</y>
+     <x>380</x>
+     <y>90</y>
      <width>111</width>
      <height>23</height>
     </rect>
@@ -71,11 +71,17 @@
   <widget class="QComboBox" name="cobUnitsForEllastic">
    <property name="geometry">
     <rect>
-     <x>186</x>
-     <y>61</y>
-     <width>121</width>
+     <x>239</x>
+     <y>58</y>
+     <width>252</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
    <item>
     <property name="text">
@@ -105,13 +111,13 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>196</y>
+     <y>150</y>
      <width>361</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>Automatically look for elastic cross-section data files</string>
+    <string>Automatically look for neutron coss-section files</string>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -121,7 +127,7 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>216</y>
+     <y>170</y>
      <width>491</width>
      <height>171</height>
     </rect>
@@ -155,7 +161,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Cross-section file location:</string>
+     <string>Path to cross-section files:</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lePreName">
@@ -388,7 +394,7 @@
   <widget class="QPushButton" name="pbChangeNatAbFile">
    <property name="geometry">
     <rect>
-     <x>416</x>
+     <x>418</x>
      <y>21</y>
      <width>75</width>
      <height>23</height>
@@ -427,17 +433,17 @@
   <widget class="QLabel" name="label_34">
    <property name="geometry">
     <rect>
-     <x>-16</x>
-     <y>65</y>
-     <width>160</width>
-     <height>13</height>
+     <x>12</x>
+     <y>60</y>
+     <width>223</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Cross-section are loaded as:</string>
+    <string>Neutron cross-section are loaded as:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -467,7 +473,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>183</x>
-     <y>199</y>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>242</x>
@@ -518,8 +524,8 @@
      <y>67</y>
     </hint>
     <hint type="destinationlabel">
-     <x>482</x>
-     <y>72</y>
+     <x>486</x>
+     <y>101</y>
     </hint>
    </hints>
   </connection>
@@ -534,8 +540,8 @@
      <y>123</y>
     </hint>
     <hint type="destinationlabel">
-     <x>503</x>
-     <y>63</y>
+     <x>490</x>
+     <y>92</y>
     </hint>
    </hints>
   </connection>
@@ -550,8 +556,8 @@
      <y>127</y>
     </hint>
     <hint type="destinationlabel">
-     <x>502</x>
-     <y>71</y>
+     <x>490</x>
+     <y>100</y>
     </hint>
    </hints>
   </connection>
@@ -562,12 +568,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>200</y>
+     <x>369</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
-     <x>524</x>
-     <y>76</y>
+     <x>490</x>
+     <y>105</y>
     </hint>
    </hints>
   </connection>
@@ -578,12 +584,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>178</x>
-     <y>317</y>
+     <x>134</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
-     <x>475</x>
-     <y>80</y>
+     <x>479</x>
+     <y>109</y>
     </hint>
    </hints>
   </connection>
@@ -594,12 +600,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
-     <y>310</y>
+     <x>289</x>
+     <y>264</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>75</y>
+     <x>490</x>
+     <y>104</y>
     </hint>
    </hints>
   </connection>
@@ -610,12 +616,12 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>516</x>
-     <y>311</y>
+     <x>491</x>
+     <y>265</y>
     </hint>
     <hint type="destinationlabel">
-     <x>538</x>
-     <y>67</y>
+     <x>490</x>
+     <y>96</y>
     </hint>
    </hints>
   </connection>

@@ -1,7 +1,7 @@
 #--------------ANTS2--------------
-ANTS2_MAJOR = 3
-ANTS2_MINOR = 14
-ANTS2_VERSION = 2220
+ANTS2_MAJOR = 4
+ANTS2_MINOR = 0
+ANTS2_VERSION = 2230
 
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -19,7 +19,7 @@ win32 {
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -llibSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -lSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------

@@ -67,6 +67,15 @@ void ANeutronReactionsConfigurator::on_pbRemove_clicked()
 
 void ANeutronReactionsConfigurator::on_pbConfirm_clicked()
 {
+    double totBranching = 0;
+    for (int i=0; i<Element_LocalCopy.Reactions.size(); i++)
+        totBranching += Element_LocalCopy.Reactions.at(i).Branching;
+    if (totBranching != 1.0)
+    {
+        message("Branching sum of all reactions should be 100%", this);
+        return;
+    }
+
     *Element = Element_LocalCopy;
     accept();
 }

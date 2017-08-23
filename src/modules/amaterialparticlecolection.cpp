@@ -228,7 +228,6 @@ void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double
   MaterialCollectionData[index]->name = name;
 
   MaterialCollectionData[index]->density = density;
-  MaterialCollectionData[index]->atomicDensity = atomicDensity;
   MaterialCollectionData[index]->n = n;
   MaterialCollectionData[index]->abs = abs;
 
@@ -250,7 +249,6 @@ void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
   tmpMaterial.density = 0;
-  tmpMaterial.atomicDensity = -1;
   tmpMaterial.p1 = 0;
   tmpMaterial.p2 = 0;
   tmpMaterial.p3 = 0;

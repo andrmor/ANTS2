@@ -105,7 +105,7 @@ void AMaterial::clear()
 {
   name = "Undefined";
   n = 1;
-  density = atomicDensity = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
+  density = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
   e_driftVelocity = W = SecYield = PriScintDecayTime = SecScintDecayTime = 0;
   rayleighWave = 500.0;
   Comments = "";
@@ -147,7 +147,6 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["*MaterialName"] = name;
   json["Density"] = density;
   json["ChemicalComposition"] = ChemicalComposition.writeToJson();
-  json["IsotopeDensity"] = atomicDensity;
   json["RefractiveIndex"] = n;
   json["BulkAbsorption"] = abs;
   json["RayleighMFP"] = rayleighMFP;
@@ -309,7 +308,6 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       ChemicalComposition.readFromJson(ccjson);
   }
   else ChemicalComposition.clear();
-  parseJson(json, "IsotopeDensity", atomicDensity);
   parseJson(json, "RefractiveIndex", n);
   parseJson(json, "BulkAbsorption", abs);
   parseJson(json, "RayleighMFP", rayleighMFP);

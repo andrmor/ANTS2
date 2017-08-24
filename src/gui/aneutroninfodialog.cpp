@@ -117,6 +117,13 @@ void ANeutronInfoDialog::updateIsotopeTable()
     ui->tabwIso->setRowCount(mat->ChemicalComposition.countIsotopes());
 
     double energy = ui->ledEnergy->text().toDouble() * 1.0e-6;
+    double totCS_abs  = -1.0;
+    if (bShowAbs) totCS_abs  = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
+    double totCS_scat = -1.0;
+    if (bShowScat) totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
+    qDebug() << totCS_abs << totCS_scat;
+
+
     int row = 0;
     for (int iElement=0; iElement<mat->ChemicalComposition.countElements(); iElement++)
     {
@@ -129,23 +136,35 @@ void ANeutronInfoDialog::updateIsotopeTable()
             twi->setTextAlignment(Qt::AlignCenter);
             ui->tabwIso->setItem(row, 0, twi);
 
-            double cs = 0; //from total crosssection of term!
-            double cs_abs = 0;
-            double cs_scat = 0;
+            QString s = "-off-";
             if (bShowAbs)
             {
-                QString s = "-off-";
                 if (!termAb.AbsorptionElements.at(row).Energy.isEmpty())
                 {
-                    cs_abs = GetInterpolatedValue(energy, &termAb.AbsorptionElements.at(row).Energy, &termAb.AbsorptionElements.at(row).CrossSection, bLogLog);
-                    s = QString::number(cs_abs, 'g', 4);
+                    double cs_abs = GetInterpolatedValue(energy, &termAb.AbsorptionElements.at(row).Energy, &termAb.AbsorptionElements.at(row).CrossSection, bLogLog);
+                    double fraction = cs_abs * termAb.AbsorptionElements.at(row).MolarFraction / totCS_abs * 100.0;
+                    s = QString::number(fraction, 'g', 4);
                 }
-                twi = new QTableWidgetItem(s);
-                twi->setTextAlignment(Qt::AlignCenter);
-                ui->tabwIso->setItem(row, 1, twi);
-
-
+                else s = "not def";
             }
+            twi = new QTableWidgetItem(s);
+            twi->setTextAlignment(Qt::AlignCenter);
+            ui->tabwIso->setItem(row, 1, twi);
+
+            s = "-off-";
+            if (bShowScat)
+            {
+                if (!termSc.ScatterElements.at(row).Energy.isEmpty())
+                {
+                    double cs_scat = GetInterpolatedValue(energy, &termSc.ScatterElements.at(row).Energy, &termSc.ScatterElements.at(row).CrossSection, bLogLog);
+                    double fraction = cs_scat * termSc.ScatterElements.at(row).MolarFraction/ totCS_scat * 100.0;
+                    s = QString::number(fraction, 'g', 4);
+                }
+                else s = "not def";
+            }
+            twi = new QTableWidgetItem(s);
+            twi->setTextAlignment(Qt::AlignCenter);
+            ui->tabwIso->setItem(row, 2, twi);
 
             row++;
         }
@@ -238,8 +257,8 @@ void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const Q
     GraphWindow->ShowAndFocus();
     TGraph* gr = GraphWindow->ConstructTGraph(x, y, mat->name.toLocal8Bit(),
                                               "Energy, meV", xTitle,
-                                              kRed, 2, 1, kRed, 0, 1);
-    GraphWindow->Draw(gr, "AP");
+                                              kRed, 2, 1, kRed, 1, 2);
+    GraphWindow->Draw(gr, "AL");
 
 //    TGraph* graphOver = constructInterpolationGraph(x, y);
 //    graphOver->SetLineColor(kRed);

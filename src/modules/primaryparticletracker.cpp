@@ -404,7 +404,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                         }
                                     }
                                     const AAbsorptionElement& el = elements.at(iselected);
-                                    qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
+                                    //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
 
                                     // no choose which of the reaction was activated
@@ -497,7 +497,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                       }
                                 }
                                 //selected element iselected
-                                        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
+                                //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
                                 //performing ellastic scattering in this element
                                 // "energy" is the neutron energy in keV

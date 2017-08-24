@@ -224,7 +224,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       readXYwindow("LRF", lrfwindow, false, json);
       readXYwindow("newLRF", (QMainWindow*)newLrfWindow, true, json);
       readXYwindow("Navi", WindowNavigator, false, json);
-      readXYwindow("Material", MIwindow, false, json);
+      readXYwindow("Material", MIwindow, true, json);
       readXYwindow("ExLoad", ELwindow, false, json);
       readXYwindow("Geom", GeometryWindow, true, json);
       readXYwindow("Graph", GraphWindow, true, json);

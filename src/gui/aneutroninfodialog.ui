@@ -340,6 +340,9 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tabwIso">
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>150</number>
+     </attribute>
      <column>
       <property name="text">
        <string>Isotope</string>
@@ -347,17 +350,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Total</string>
+       <string>To absorption, %</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Absorption</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Elastic scattering</string>
+       <string>To elastic scattering, %</string>
       </property>
      </column>
     </widget>

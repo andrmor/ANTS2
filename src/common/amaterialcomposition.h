@@ -67,7 +67,7 @@ public:
 private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;
-    double MeanAtomMass;
+    double MeanAtomMass; //mean atom mass of the material (in au)
 
     QSet<QString> AllPossibleElements; //set with all possible element symbols
     QString FileName_NaturalAbundancies;

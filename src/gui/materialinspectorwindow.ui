@@ -1318,10 +1318,10 @@ resolution:</string>
              </font>
             </property>
             <property name="text">
-             <string>Particle:</string>
+             <string>Interaction properties for:</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -1350,6 +1350,19 @@ resolution:</string>
          </layout>
         </item>
         <item>
+         <widget class="QCheckBox" name="cbTransparentMaterial">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Force material to be transparent for this particle</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QFrame" name="fEnDepProps">
           <property name="enabled">
            <bool>true</bool>
@@ -1364,19 +1377,6 @@ resolution:</string>
            <number>1</number>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QCheckBox" name="cbTransparentMaterial">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Force material to be transparent for this particle</string>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QStackedWidget" name="swMainMatParticle">
              <property name="currentIndex">

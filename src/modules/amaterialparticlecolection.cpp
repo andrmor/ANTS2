@@ -449,7 +449,7 @@ void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
     for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
     {
         for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateRuntimePropertiesForNeutrons(fLogLogInterpolation);
+            term.UpdateNeutronCrossSections(fLogLogInterpolation);
     }
 }
 

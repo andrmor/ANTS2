@@ -91,10 +91,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<AAbsorptionElement> AbsorptionElements;  // exclusive for capture
   QVector<AElasticScatterElement> ScatterElements; // exclusive for ellastic
 
-  // runtime properties
-  double MeanElementMass;   // average mass (in au) of elements - updated before simulations
-
-  void UpdateRuntimePropertiesForNeutrons(bool bUseLogLog);   //updates mean element mass, sum stat weight and interpolates cross sections of elements to match
+  void UpdateNeutronCrossSections(bool bUseLogLog);   //
 
   AAbsorptionElement* getCaptureElement(int index);  //0 if wrong index
   AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index

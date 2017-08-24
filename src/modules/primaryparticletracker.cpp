@@ -397,13 +397,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                                                                            MpCollection->fLogLogInterpolation);
                                           // fraction of this element in the total cross section:
                                           const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-                                                  qDebug() << "--checking element"<<el.Name<<"-"<<el.Mass<<"-> fraction in total cross-section:"<<thisOne;
+                                          //        qDebug() << "--Absorption->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+                                          //        qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
                                           if (rnd <= thisOne) break;
                                           rnd -= thisOne;
                                         }
                                     }
                                     const AAbsorptionElement& el = elements.at(iselected);
-                                    qDebug() << "Absorption triggered for isotope:"<<el.Name<<"-"<<el.Mass;
+                                    qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
 
                                     // no choose which of the reaction was activated
@@ -420,7 +421,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                               rnd -= thisBranching;
                                             }
                                         }
-                                        qDebug() << "Reaction #" << iReaction << "triggered";
+                                        //qDebug() << "Reaction #" << iReaction << "triggered";
                                         const ACaptureReaction& reaction = el.Reactions.at(iReaction);
 
                                         //generating particles if defined
@@ -489,13 +490,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                                                                          MpCollection->fLogLogInterpolation);
                                         // fraction of this element in the total cross section:
                                         const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-                                        //        qDebug() << "--checking element"<<iselected<<"fraction in total cross-section:"<<thisOne;
+                                        //      qDebug() << "--Scatter->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+                                        //      qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
                                         if (rnd < thisOne) break;
                                         rnd -= thisOne;
                                       }
                                 }
                                 //selected element iselected
-                                //        qDebug() << "selected element:"<<iselected << elements.at(iselected).Name;
+                                        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
                                 //performing ellastic scattering in this element
                                 // "energy" is the neutron energy in keV

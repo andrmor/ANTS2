@@ -37,33 +37,34 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
 
     QVector<NeutralTerminatorStructure>& Terminators = MatParticle[neutronId].Terminators;
     Terminators.resize(2);
-    //1 - capture
+    //1 - absorption
     NeutralTerminatorStructure& ct = Terminators.first();
     ct.Type = NeutralTerminatorStructure::Capture;
-    QVector<AAbsorptionElement> CaptureElementsNew;
+    QVector<AAbsorptionElement> AbsorptionElementsNew;
     for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
     {
         AChemicalElement* El = ChemicalComposition.getElement(iEl);
         for (int iIso=0; iIso<El->countIsotopes(); iIso++)
         {
-            qDebug() << "capture" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
+            qDebug() << "==Creating AAbsorprionElement for " << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
             bool bAlreadyExists = false;
-            for (AAbsorptionElement& capEl : ct.AbsorptionElements)
-                if (capEl.Name == El->Symbol && capEl.Mass == El->Isotopes.at(iIso).Mass)
+            for (AAbsorptionElement& absEl : ct.AbsorptionElements)
+                if (absEl.Name == El->Symbol && absEl.Mass == El->Isotopes.at(iIso).Mass)
                 {
                     qDebug() << "Found in old list, copying";
                     bAlreadyExists = true;
-                    CaptureElementsNew << capEl;
+                    absEl.MolarFraction = El->MolarFraction*0.01 * El->Isotopes.at(iIso).Abundancy; //updating molar fraction
+                    AbsorptionElementsNew << absEl;
                     break;
                 }
             if (!bAlreadyExists)
             {
                 qDebug() << "Not found, creating new record";
-                CaptureElementsNew << AAbsorptionElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
-            }
+                AbsorptionElementsNew << AAbsorptionElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
+            }            
         }
     }
-    ct.AbsorptionElements = CaptureElementsNew;
+    ct.AbsorptionElements = AbsorptionElementsNew;
 
     //2 - elastic scatter
     NeutralTerminatorStructure& st = Terminators.last();
@@ -81,6 +82,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
                 {
                     qDebug() << "Found in old list, copying";
                     bAlreadyExists = true;
+                    scatEl.MolarFraction = El->MolarFraction*0.01 * El->Isotopes.at(iIso).Abundancy; //updating molar fraction
                     ScatterElementsNew << scatEl;
                     break;
                 }
@@ -98,7 +100,7 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
 {
     for (int iP=0; iP<MatParticle.size(); iP++)
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
-           MatParticle[iP].Terminators[iTerm].UpdateRuntimePropertiesForNeutrons(bLogLogInterpolation);
+           MatParticle[iP].Terminators[iTerm].UpdateNeutronCrossSections(bLogLogInterpolation);
 }
 
 void AMaterial::clear()
@@ -519,24 +521,19 @@ AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int
     return &ScatterElements[index];
 }
 
-void NeutralTerminatorStructure::UpdateRuntimePropertiesForNeutrons(bool bUseLogLog)
+void NeutralTerminatorStructure::UpdateNeutronCrossSections(bool bUseLogLog)
 {
+    qDebug() << "Updating neutron cross-section data...";
     if (Type == Capture && !AbsorptionElements.isEmpty())
-    {
-        qDebug() << "Updaring runtime properties for neutron absorption terminator";
-        MeanElementMass = 0;
-        for (const AAbsorptionElement& el : AbsorptionElements)
-            MeanElementMass += el.Mass * el.MolarFraction;
-        qDebug() << "Mean elements mass:" << MeanElementMass;
-
+    {        
         PartialCrossSectionEnergy.clear();
         PartialCrossSection.clear();
-        qDebug() << "Absorption elements defined:"<<AbsorptionElements.size();
+        //      qDebug() << "Absorption elements defined:"<<AbsorptionElements.size();
         for (int iElement=0; iElement<AbsorptionElements.size(); iElement++)
         {
             AAbsorptionElement& se = AbsorptionElements[iElement];
-            qDebug() << se.Name << "-" << se.Mass;
-            qDebug() << se.Energy.size() << se.CrossSection.size();
+            //      qDebug() << se.Name << "-" << se.Mass << "  with molar fraction:"<<se.MolarFraction;
+            //      qDebug() << "size of cross-section dataset"<<se.Energy.size() << se.CrossSection.size();
             if (se.Energy.isEmpty()) continue;
             if (PartialCrossSectionEnergy.isEmpty())
             {
@@ -557,25 +554,17 @@ void NeutralTerminatorStructure::UpdateRuntimePropertiesForNeutrons(bool bUseLog
                 }
             }
         }
-        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
-        qDebug() << "Cross-section-->" <<PartialCrossSection;
     }
     else if (Type == ElasticScattering && !ScatterElements.isEmpty())
     {
-        qDebug() << "Updaring neutron elastic scattering terminator";
-        MeanElementMass = 0;
-        for (const AElasticScatterElement& el : ScatterElements)
-            MeanElementMass += el.Mass * el.MolarFraction;
-        qDebug() << "Mean elements mass:" << MeanElementMass;
-
         PartialCrossSectionEnergy.clear();
         PartialCrossSection.clear();
-        qDebug() << "Scatter elements defined:"<<ScatterElements.size();
+        //      qDebug() << "Scatter elements defined:"<<ScatterElements.size();
         for (int iElement=0; iElement<ScatterElements.size(); iElement++)
         {
             AElasticScatterElement& se = ScatterElements[iElement];
-            qDebug() << se.Name << "-" << se.Mass;
-            qDebug() << se.Energy.size() << se.CrossSection.size();
+            //      qDebug() << se.Name << "-" << se.Mass << "  with molar fraction:"<<se.MolarFraction;
+            //      qDebug() << "size of cross-section dataset"<<se.Energy.size() << se.CrossSection.size();
             if (se.Energy.isEmpty()) continue;
             if (PartialCrossSectionEnergy.isEmpty())
             {
@@ -596,9 +585,8 @@ void NeutralTerminatorStructure::UpdateRuntimePropertiesForNeutrons(bool bUseLog
                 }
             }
         }
-        qDebug() << "Energy-->" <<PartialCrossSectionEnergy;
-        qDebug() << "Cross-section-->" <<PartialCrossSection;
     }
+    qDebug() << "...done!";
 }
 
 void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
@@ -772,8 +760,6 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
           const NeutralTerminatorStructure& term = mp->Terminators[1];
           if (term.ScatterElements.isEmpty())
               return QString("No elements defined for neutron ellastic scattering");
-          if (term.MeanElementMass == 0)
-              return QString("Mean element weight is zero for neutron ellastic scattering");
 
           if (term.PartialCrossSection.isEmpty())
               return QString("Total elastic scaterring cross-section is not defined");

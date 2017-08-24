@@ -2024,35 +2024,6 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
     return doLoadCrossSection(element, fileName);
 }
 
-void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
-{
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
-    NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering) return;
-
-    if (t.ScatterElements.isEmpty()) return;
-
-    QVector<double> x,y;
-    for (int i=0; i<t.PartialCrossSectionEnergy.size(); i++)
-      {
-        x << 1.0e6 * t.PartialCrossSectionEnergy.at(i);         // keV -> meV
-        y << 1.0e24 * t.PartialCrossSection.at(i);  // cm2 to barns
-      }
-
-    MW->GraphWindow->ShowAndFocus();
-    TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, tmpMaterial.name.toLocal8Bit(),
-                                                 "Energy, meV", "Ellastic scattering cross-section, barns",
-                                                 kRed, 2, 1, kRed, 0, 1);
-    MW->GraphWindow->Draw(gr, "AP");
-
-    TGraph* graphOver = constructInterpolationGraph(x, y);
-    graphOver->SetLineColor(kRed);
-    graphOver->SetLineWidth(1);
-    MW->GraphWindow->Draw(graphOver, "L same");
-}
-
 void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 {
    MatParticleOptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);

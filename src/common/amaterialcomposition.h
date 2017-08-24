@@ -53,6 +53,7 @@ public:
     int countElements() const {return ElementComposition.size();}
     int countIsotopes() const;
     AChemicalElement* getElement(int iElement) {return &ElementComposition[iElement];}
+    const AChemicalElement* getElement(int iElement) const {return &ElementComposition[iElement];}
     int getNumberInJointIsotopeList(int iElement, int iIsotope);
     double getMeanAtomMass() const {return MeanAtomMass;}
 

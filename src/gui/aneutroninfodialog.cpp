@@ -109,7 +109,48 @@ void ANeutronInfoDialog::update()
 
 void ANeutronInfoDialog::updateIsotopeTable()
 {
+    ui->tabwIso->clearContents();
 
+    const NeutralTerminatorStructure& termAb = mat->MatParticle.at(ipart).Terminators.at(0);
+    const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
+
+    ui->tabwIso->setRowCount(mat->ChemicalComposition.countIsotopes());
+
+    double energy = ui->ledEnergy->text().toDouble() * 1.0e-6;
+    int row = 0;
+    for (int iElement=0; iElement<mat->ChemicalComposition.countElements(); iElement++)
+    {
+        const AChemicalElement* el = mat->ChemicalComposition.getElement(iElement);
+        for (int iIso=0; iIso<el->countIsotopes(); iIso++)
+        {
+            QString name = el->Symbol + "-" + QString::number(el->Isotopes.at(iIso).Mass);
+            qDebug() << "-----"<<name;
+            QTableWidgetItem* twi = new QTableWidgetItem(name);
+            twi->setTextAlignment(Qt::AlignCenter);
+            ui->tabwIso->setItem(row, 0, twi);
+
+            double cs = 0; //from total crosssection of term!
+            double cs_abs = 0;
+            double cs_scat = 0;
+            if (bShowAbs)
+            {
+                QString s = "-off-";
+                if (!termAb.AbsorptionElements.at(row).Energy.isEmpty())
+                {
+                    cs_abs = GetInterpolatedValue(energy, &termAb.AbsorptionElements.at(row).Energy, &termAb.AbsorptionElements.at(row).CrossSection, bLogLog);
+                    s = QString::number(cs_abs, 'g', 4);
+                }
+                twi = new QTableWidgetItem(s);
+                twi->setTextAlignment(Qt::AlignCenter);
+                ui->tabwIso->setItem(row, 1, twi);
+
+
+            }
+
+            row++;
+        }
+    }
+    ui->tabwIso->resizeRowsToContents();
 }
 
 void ANeutronInfoDialog::on_pbClose_clicked()

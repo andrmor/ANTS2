@@ -289,6 +289,18 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tabwMain">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>90</height>
+      </size>
+     </property>
      <row>
       <property name="text">
        <string>Cross-section, barns</string>
@@ -327,10 +339,10 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="tabwIso">
      <column>
       <property name="text">
-       <string>New Column</string>
+       <string>Isotope</string>
       </property>
      </column>
      <column>

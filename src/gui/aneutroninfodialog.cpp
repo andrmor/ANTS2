@@ -21,6 +21,12 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
     ui->ledEnergy->setValidator(val);
 
     update();
+
+    ui->ledEnergy->setFocus();
+    ui->pbClose->setAutoDefault(false);
+    ui->pbAbs->setAutoDefault(false);
+    ui->pbScatter->setAutoDefault(false);
+    ui->pbTotal->setAutoDefault(false);
 }
 
 ANeutronInfoDialog::~ANeutronInfoDialog()
@@ -175,6 +181,7 @@ void ANeutronInfoDialog::updateIsotopeTable()
 void ANeutronInfoDialog::on_pbClose_clicked()
 {
     accept();
+    hide();
 }
 
 void ANeutronInfoDialog::on_pbTotal_clicked()

@@ -48,6 +48,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     //this->setFixedSize(this->size());
     this->setFixedWidth(this->width());
     bClearInProgress = false;
+    NeutronInfoDialog = 0;
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
@@ -92,7 +93,14 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
-{    
+{
+    if (NeutronInfoDialog)
+    {
+        ANeutronInfoDialog* NeutronInfoDialogCopy = NeutronInfoDialog;
+        NeutronInfoDialog = 0;
+        delete NeutronInfoDialogCopy;
+    }
+
     delete MatParticleOptionsConfigurator;
     delete ui;
 }
@@ -2063,10 +2071,26 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
-    ANeutronInfoDialog* d = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
+    NeutronInfoDialog = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
                                                     ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
-    d->exec();
-    delete d;
+
+    NeutronInfoDialog->setWindowFlags(NeutronInfoDialog->windowFlags() | Qt::WindowStaysOnTopHint);
+    NeutronInfoDialog->show();
+    MW->WindowNavigator->DisableAllButGraphWindow(true);
+    NeutronInfoDialog->setEnabled(true);
+    do
+    {
+        qApp->processEvents();
+        if (!NeutronInfoDialog) return;
+    }
+    while (NeutronInfoDialog->isVisible());
+
+    if (NeutronInfoDialog)
+    {
+        delete NeutronInfoDialog;
+        MW->WindowNavigator->DisableAllButGraphWindow(false);
+    }
+    NeutronInfoDialog = 0;
 }
 
 void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()

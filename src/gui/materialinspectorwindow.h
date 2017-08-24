@@ -13,6 +13,7 @@ class AElasticScatterElement;
 class QTreeWidgetItem;
 class AChemicalElement;
 class ANeutronInteractionElement;
+class ANeutronInfoDialog;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -135,6 +136,8 @@ private:
     DetectorClass* Detector;
 
     AMatParticleConfigurator* MatParticleOptionsConfigurator;
+
+    ANeutronInfoDialog* NeutronInfoDialog;
 
     //QIcon RedIcon;
 

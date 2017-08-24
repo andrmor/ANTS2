@@ -35,9 +35,10 @@ public:
   void TriggerHideButton();
   void TriggerShowButton();
 
-  //global control :)
   void BusyOn();
   void BusyOff(bool fShowTime = false);
+
+  void DisableAllButGraphWindow(bool trueStart_falseStop);
 
 #ifdef Q_OS_WIN32
   QWinTaskbarButton *taskButton;

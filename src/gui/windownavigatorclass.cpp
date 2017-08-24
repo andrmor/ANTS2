@@ -301,19 +301,28 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
 
-  //geometry window
-  if (MW->GraphWindow) MW->GraphWindow->OnBusyOff();
+  MW->GraphWindow->OnBusyOff();
 
-  if (MW->GeometryWindow) MW->GeometryWindow->onBusyOff();
+  MW->GeometryWindow->onBusyOff();
 
   //output window
   MW->Owindow->setEnabled(true);
 
   emit BusyStatusChanged(false);
 
-
-  //MW->DisableRootUpdate = false; //--//
   MW->startRootUpdate(); //--//
+}
+
+void WindowNavigatorClass::DisableAllButGraphWindow(bool trueStart_falseStop)
+{
+    MW->setEnabled(!trueStart_falseStop);
+    MW->Rwindow->setEnabled(!trueStart_falseStop);
+    MW->lrfwindow->setEnabled(!trueStart_falseStop);
+    MW->MIwindow->setEnabled(!trueStart_falseStop);
+    MW->ELwindow->setEnabled(!trueStart_falseStop);
+    MW->GeometryWindow->setEnabled(!trueStart_falseStop);
+    MW->Owindow->setEnabled(!trueStart_falseStop);
+    MW->ScriptWindow->setEnabled(!trueStart_falseStop);
 }
 
 void WindowNavigatorClass::on_pbMaxAll_clicked()

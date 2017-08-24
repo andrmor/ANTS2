@@ -258,7 +258,8 @@ SOURCES += main.cpp \
     gui/amatparticleconfigurator.cpp \
     common/aneutroninteractionelement.cpp \
     gui/aneutronreactionsconfigurator.cpp \
-    gui/aneutronreactionwidget.cpp
+    gui/aneutronreactionwidget.cpp \
+    gui/aneutroninfodialog.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -372,7 +373,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/amatparticleconfigurator.h \
     common/aneutroninteractionelement.h \
     gui/aneutronreactionsconfigurator.h \
-    gui/aneutronreactionwidget.h
+    gui/aneutronreactionwidget.h \
+    gui/aneutroninfodialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -624,4 +626,5 @@ FORMS += \
     gui/MainWindowTools/amonitordelegateform.ui \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
-    gui/aneutronreactionwidget.ui
+    gui/aneutronreactionwidget.ui \
+    gui/aneutroninfodialog.ui

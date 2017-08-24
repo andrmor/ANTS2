@@ -98,7 +98,6 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_ledMFPenergyEllastic_editingFinished();  // fix me!!! no button
     void on_pbShowTotalEllastic_clicked();    //fix me!!!  no button also...
     void on_pbConfigureAutoElastic_clicked();
     void on_pbShowStatisticsOnElastic_clicked();

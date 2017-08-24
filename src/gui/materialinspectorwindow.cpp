@@ -18,6 +18,7 @@
 #include "amaterialcomposition.h"
 #include "aelementandisotopedelegates.h"
 #include "aneutronreactionsconfigurator.h"
+#include "aneutroninfodialog.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -369,48 +370,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->cbCapture->setChecked(mp.bCaptureEnabled);
           ui->cbEnableScatter->setChecked(mp.bEllasticEnabled);
 
-          /*
-          //capture
-          if (mp.InteractionDataX.isEmpty())
-            {
-              ui->frReaction->setEnabled(false);
-              ui->pbShowTotalCapture->setEnabled(false);
-              ui->pbAddNewTerminationScenario->setEnabled(false);
-              ui->ledMFPenergy->setEnabled(false);
-              ui->ledBranching->setText("n.a.");
-              ui->labNeutra_TotalInteractiondataMissing->setPixmap(RedIcon.pixmap(16,16));
-              updateNeutronReactionIndication();
-            }
-          else
-            {
-              if (mp.Terminators.isEmpty())
-                {
-                  ui->ledBranching->setText("n.a.");
-                  ui->frReaction->setEnabled(false);
-                  updateNeutronReactionIndication();
-                }
-              else ui->frReaction->setEnabled(true);
-              ui->pbShowTotalCapture->setEnabled(true);
-              ui->pbAddNewTerminationScenario->setEnabled(true);
-              ui->ledMFPenergy->setEnabled(true);
-              ui->labNeutra_TotalInteractiondataMissing->setPixmap(QIcon().pixmap(16,16));
-            }
-          int old = ui->cobTerminationScenarios->currentIndex();
-          ui->cobTerminationScenarios->clear();
-          for (int i=0; i<mp.Terminators.size(); i++)
-          {
-              if (mp.Terminators.at(i).Type != NeutralTerminatorStructure::Capture) break; //last is reserved for scatter
-              ui->cobTerminationScenarios->addItem(QString::number(i));
-          }
-          if (old>-1 && old<ui->cobTerminationScenarios->count())
-              ui->cobTerminationScenarios->setCurrentIndex(old);
-          updateNeutronReactionIndication();
-          on_ledAtomicDensity_textChanged(ui->ledAtomicDensity->text()); //to update warning
-          on_ledMFPenergy_editingFinished();
-          */
-
           FillNeutronTable();
-          on_ledMFPenergyEllastic_editingFinished(); //  !!!
       }
       else if (type == AParticle::_gamma_)
       {
@@ -464,7 +424,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
     on_ledMFPenergy_2_editingFinished();            //charged - update projected range
-    on_ledMFPenergyEllastic_editingFinished();      //neutron/ellastic - update mean free path
 }
 
 void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
@@ -2047,54 +2006,6 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
     return false;
 }
 
-void MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished()
-{
-  /*
-    int particleId = ui->cobParticle->currentIndex();
-    if (MW->MpCollection->getParticleType(particleId) != AParticle::_neutron_) return;
-
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    const QVector<NeutralTerminatorStructure> &Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-
-    if (Terminators.isEmpty()) return;
-
-    NeutralTerminatorStructure& term = tmpMaterial.MatParticle[particleId].Terminators.last();
-    term.UpdateRuntimePropertiesForNeutrons(MW->MpCollection->fLogLogInterpolation); //update total cross-section and sum stat weights
-
-    if (
-            Terminators.last().Type != NeutralTerminatorStructure::ElasticScattering ||
-            Terminators.last().ScatterElements.isEmpty() ||
-            Terminators.last().MeanElementMass == 0 ||
-            Terminators.last().PartialCrossSectionEnergy.isEmpty()
-        )
-    {
-        ui->leMFPellastic->setText("n.a.");
-        return;
-    }
-
-    const double energy = ui->ledMFPenergyEllastic->text().toDouble() * 1.0e-6;  // meV -> keV
-
-    //qDebug() << energy << term.PartialCrossSectionEnergy.first() << term.PartialCrossSectionEnergy.last();
-    if (energy<term.PartialCrossSectionEnergy.first() || energy > term.PartialCrossSectionEnergy.last())
-      {
-        ui->leMFP->setText("out range");
-        return;
-      }
-
-    double AtDens = tmpMaterial.density / term.MeanElementMass / 1.66054e-24;
-    //qDebug() << "Atomic density of the composition:"<<AtDens;
-
-    const double CrossSection = GetInterpolatedValue(energy,
-                                                 &term.PartialCrossSectionEnergy,
-                                                 &term.PartialCrossSection,
-                                                 MW->MpCollection->fLogLogInterpolation);
-    //qDebug()<<"energy and cross-section:"<<energy<<CrossSection;
-
-    double MeanFreePath = 10.0/CrossSection/AtDens;
-    ui->leMFPellastic->setText(QString::number(MeanFreePath, 'g', 4));
-    */
-}
-
 bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *element, QString target)
 {
     QString Mass = QString::number(element->Mass);
@@ -2115,8 +2026,6 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
 
 void MaterialInspectorWindow::on_pbShowTotalEllastic_clicked()
 {
-    on_ledMFPenergyEllastic_editingFinished(); //to update properties
-
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) return;
@@ -2183,22 +2092,10 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
-    on_ledMFPenergyEllastic_editingFinished(); //there runtime properties are updated too
-
-    QString Text;
-
-    int particleId = ui->cobParticle->currentIndex();
-    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    if (tmpMaterial.MatParticle[particleId].Terminators.isEmpty()) Text = "No data";
-    else
-    {
-        NeutralTerminatorStructure& t = tmpMaterial.MatParticle[particleId].Terminators.last();
-        if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty())
-            Text = "No elements/isotopes defined";
-        else
-            MW->MpCollection->CheckElasticScatterElements(&MW->MpCollection->tmpMaterial, particleId, &Text);
-    }
-    message(Text, this);
+    ANeutronInfoDialog* d = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
+                                                    ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
+    d->exec();
+    delete d;
 }
 
 void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
@@ -2429,7 +2326,8 @@ void MaterialInspectorWindow::FillNeutronTable()
     }
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
-    //connect(this, &MaterialInspectorWindow::tabwNeutronsRequest, this, &MaterialInspectorWindow::test);
+
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 }
 
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)

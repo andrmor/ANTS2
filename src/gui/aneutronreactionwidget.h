@@ -9,7 +9,7 @@ namespace Ui {
 class ANeutronReactionWidget;
 }
 
-class ACaptureReaction;
+class ADecayScenario;
 class AAbsorptionGeneratedParticle;
 class QComboBox;
 class QLineEdit;
@@ -20,7 +20,7 @@ class ANeutronReactionWidget : public QFrame
     Q_OBJECT
 
 public:
-    explicit ANeutronReactionWidget(ACaptureReaction* Reaction, QStringList DefinedParticles, QWidget *parent = 0);
+    explicit ANeutronReactionWidget(ADecayScenario* Reaction, QStringList DefinedParticles, QWidget *parent = 0);
     ~ANeutronReactionWidget();
 
 private slots:
@@ -32,7 +32,7 @@ private slots:
 
 private:
     Ui::ANeutronReactionWidget *ui;
-    ACaptureReaction* Reaction;
+    ADecayScenario* Reaction;
     QStringList DefinedParticles;
 
     void updateParticleList();

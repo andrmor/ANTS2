@@ -34,7 +34,7 @@ private:
     AAbsorptionElement  Element_LocalCopy;
     QStringList DefinedParticles;
 
-    void updateReactions();
+    void updateDecayScenarios();
 };
 
 #endif // ANEUTRONREACTIONSCONFIGURATOR_H

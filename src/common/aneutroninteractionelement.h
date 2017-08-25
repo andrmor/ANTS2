@@ -61,14 +61,14 @@ public:
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 
-class ACaptureReaction
+class ADecayScenario
 {
 public:
     double Branching;
     QVector<AAbsorptionGeneratedParticle> GeneratedParticles;
 
-    ACaptureReaction(double Branching) : Branching(Branching) {}
-    ACaptureReaction() : Branching(1.0) {}
+    ADecayScenario(double Branching) : Branching(Branching) {}
+    ADecayScenario() : Branching(1.0) {}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
@@ -78,12 +78,12 @@ public:
 class AAbsorptionElement : public ANeutronInteractionElement
 {
 public:
-    QVector<ACaptureReaction> Reactions;
+    QVector<ADecayScenario> DecayScenarios;
 
     AAbsorptionElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
-        ANeutronInteractionElement(IsotopeSymbol, Mass, MolarFraction) {Reactions.resize(1);}
+        ANeutronInteractionElement(IsotopeSymbol, Mass, MolarFraction) {}
     AAbsorptionElement() :
-        ANeutronInteractionElement() {Reactions.resize(1);}
+        ANeutronInteractionElement() {}
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;

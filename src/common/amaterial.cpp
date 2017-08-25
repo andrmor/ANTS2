@@ -39,7 +39,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
     Terminators.resize(2);
     //1 - absorption
     NeutralTerminatorStructure& ct = Terminators.first();
-    ct.Type = NeutralTerminatorStructure::Capture;
+    ct.Type = NeutralTerminatorStructure::Absorption;
     QVector<AAbsorptionElement> AbsorptionElementsNew;
     for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
     {
@@ -524,7 +524,7 @@ AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int
 void NeutralTerminatorStructure::UpdateNeutronCrossSections(bool bUseLogLog)
 {
     qDebug() << "Updating neutron cross-section data...";
-    if (Type == Capture && !AbsorptionElements.isEmpty())
+    if (Type == Absorption && !AbsorptionElements.isEmpty())
     {        
         PartialCrossSectionEnergy.clear();
         PartialCrossSection.clear();
@@ -603,7 +603,7 @@ void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticl
             ellAr << ScatterElements[i].writeToJson();
         json["ScatterElements"] = ellAr;
     }
-    else if (Type == Capture)
+    else if (Type == Absorption)
     {
         QJsonArray capAr;
         for (int i=0; i<AbsorptionElements.size(); i++)
@@ -632,7 +632,7 @@ void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterial
             ScatterElements << el;
         }
     }
-    else if (Type == Capture)
+    else if (Type == Absorption)
     {
         QJsonArray ar = json["AbsorptionElements"].toArray();
         AbsorptionElements.clear();
@@ -648,25 +648,25 @@ void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterial
 
 bool NeutralTerminatorStructure::isParticleOneOfSecondaries(int iPart) const
 {
-    if (Type != Capture) return false;
+    if (Type != Absorption) return false;
 
     for (int ie=0; ie<AbsorptionElements.size(); ie++)
-        for (int ir=0; ir<AbsorptionElements.at(ie).Reactions.size(); ir++)
-            for (int ig=0; ig<AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.size(); ig++)
-                if (AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.at(ig).ParticleId == iPart)
+        for (int ir=0; ir<AbsorptionElements.at(ie).DecayScenarios.size(); ir++)
+            for (int ig=0; ig<AbsorptionElements.at(ie).DecayScenarios.at(ir).GeneratedParticles.size(); ig++)
+                if (AbsorptionElements.at(ie).DecayScenarios.at(ir).GeneratedParticles.at(ig).ParticleId == iPart)
                     return true;
     return false;
 }
 
 void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
 {
-    if (Type != Capture) return;
+    if (Type != Absorption) return;
 
     for (int ie=0; ie<AbsorptionElements.size(); ie++)
-        for (int ir=0; ir<AbsorptionElements.at(ie).Reactions.size(); ir++)
-            for (int ig=0; ig<AbsorptionElements.at(ie).Reactions.at(ir).GeneratedParticles.size(); ig++)
+        for (int ir=0; ir<AbsorptionElements.at(ie).DecayScenarios.size(); ir++)
+            for (int ig=0; ig<AbsorptionElements.at(ie).DecayScenarios.at(ir).GeneratedParticles.size(); ig++)
             {
-                int& thisParticle = AbsorptionElements[ie].Reactions[ir].GeneratedParticles[ig].ParticleId;
+                int& thisParticle = AbsorptionElements[ie].DecayScenarios[ir].GeneratedParticles[ig].ParticleId;
                 if (thisParticle > iPart) thisParticle--;
             }
 }
@@ -750,7 +750,7 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
       if (numTerm != 2 ) return "Wrong number of terminators for neutrons";
 
       //confirming terminators type is "capture" or "ellastic"
-      if (mp->Terminators[0].Type != NeutralTerminatorStructure::Capture ||
+      if (mp->Terminators[0].Type != NeutralTerminatorStructure::Absorption ||
           mp->Terminators[1].Type != NeutralTerminatorStructure::ElasticScattering)
           return "Wrong terminator types for neutrons";
 

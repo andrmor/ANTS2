@@ -19,7 +19,7 @@ ANeutronReactionsConfigurator::ANeutronReactionsConfigurator(AAbsorptionElement 
 
     Element_LocalCopy = *Element;
 
-    updateReactions();
+    updateDecayScenarios();
 }
 
 ANeutronReactionsConfigurator::~ANeutronReactionsConfigurator()
@@ -29,18 +29,18 @@ ANeutronReactionsConfigurator::~ANeutronReactionsConfigurator()
 
 void ANeutronReactionsConfigurator::on_pbAdd_clicked()
 {
-    Element_LocalCopy.Reactions << ACaptureReaction(0);
-    updateReactions();
+    Element_LocalCopy.DecayScenarios << ( Element_LocalCopy.DecayScenarios.isEmpty() ? ADecayScenario(1) : ADecayScenario(0) );
+    updateDecayScenarios();
 }
 
 void ANeutronReactionsConfigurator::on_pbRemove_clicked()
 {
-    int numReact = Element_LocalCopy.Reactions.size();
+    int numReact = Element_LocalCopy.DecayScenarios.size();
     if (numReact<1) return;
     if (numReact==1)
     {
-        Element_LocalCopy.Reactions.clear();
-        updateReactions();
+        Element_LocalCopy.DecayScenarios.clear();
+        updateDecayScenarios();
         return;
     }
     else
@@ -56,8 +56,8 @@ void ANeutronReactionsConfigurator::on_pbRemove_clicked()
         {
             if (ui->lwReactions->item(i) == thisItem)
             {
-                Element_LocalCopy.Reactions.removeAt(i);
-                updateReactions();
+                Element_LocalCopy.DecayScenarios.removeAt(i);
+                updateDecayScenarios();
                 return;
             }
         }
@@ -67,13 +67,16 @@ void ANeutronReactionsConfigurator::on_pbRemove_clicked()
 
 void ANeutronReactionsConfigurator::on_pbConfirm_clicked()
 {
-    double totBranching = 0;
-    for (int i=0; i<Element_LocalCopy.Reactions.size(); i++)
-        totBranching += Element_LocalCopy.Reactions.at(i).Branching;
-    if (totBranching != 1.0)
+    if (!Element_LocalCopy.DecayScenarios.isEmpty())
     {
-        message("Branching sum of all reactions should be 100%", this);
-        return;
+        double totBranching = 0;
+        for (int i=0; i<Element_LocalCopy.DecayScenarios.size(); i++)
+            totBranching += Element_LocalCopy.DecayScenarios.at(i).Branching;
+        if (totBranching != 1.0)
+        {
+            message("Branching sum of all reactions should be 100%", this);
+            return;
+        }
     }
 
     *Element = Element_LocalCopy;
@@ -82,20 +85,28 @@ void ANeutronReactionsConfigurator::on_pbConfirm_clicked()
 
 void ANeutronReactionsConfigurator::onResizeRequest()
 {
-    updateReactions();
+    updateDecayScenarios();
 }
 
-void ANeutronReactionsConfigurator::updateReactions()
+void ANeutronReactionsConfigurator::updateDecayScenarios()
 {
    ui->lwReactions->clear();
 
-   for (int i=0; i<Element_LocalCopy.Reactions.size(); i++)
+   for (int i=0; i<Element_LocalCopy.DecayScenarios.size(); i++)
    {
-       ANeutronReactionWidget* del = new ANeutronReactionWidget(&Element_LocalCopy.Reactions[i], DefinedParticles);
+       ANeutronReactionWidget* del = new ANeutronReactionWidget(&Element_LocalCopy.DecayScenarios[i], DefinedParticles);
        QObject::connect(del, &ANeutronReactionWidget::RequestParentResize, this, &ANeutronReactionsConfigurator::onResizeRequest);
        QListWidgetItem* lwi = new QListWidgetItem;
        lwi->setSizeHint( del->sizeHint() );
        ui->lwReactions->addItem(lwi);
        ui->lwReactions->setItemWidget(lwi, del);
+   }
+
+   if (Element_LocalCopy.DecayScenarios.isEmpty())
+   {
+       QListWidgetItem* lwi = new QListWidgetItem("No decay scenarios are defined");
+       lwi->setTextAlignment(Qt::AlignCenter);
+       lwi->setTextColor(Qt::green);
+       ui->lwReactions->addItem(lwi);
    }
 }

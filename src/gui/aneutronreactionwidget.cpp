@@ -11,11 +11,12 @@
 #include <QLabel>
 #include <QDebug>
 
-ANeutronReactionWidget::ANeutronReactionWidget(ACaptureReaction* Reaction, QStringList DefinedParticles, QWidget *parent) :
+ANeutronReactionWidget::ANeutronReactionWidget(ADecayScenario* Reaction, QStringList DefinedParticles, QWidget *parent) :
     QFrame(parent), ui(new Ui::ANeutronReactionWidget), Reaction(Reaction), DefinedParticles(DefinedParticles)
 {
     ui->setupUi(this);
     setFrameShape(QFrame::Box);
+    setContentsMargins(0,0,0,0);
 
     QDoubleValidator* val = new QDoubleValidator();
     val->setBottom(0);
@@ -82,6 +83,7 @@ AGeneratedParticleDelegate::AGeneratedParticleDelegate(AAbsorptionGeneratedParti
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(6,2,6,2);
         combP = new QComboBox();
+        combP->setMinimumHeight(20);
         combP->addItems(DefinedParticles);
         combP->setCurrentIndex(ParticleRecord->ParticleId);
         l->addWidget(combP);

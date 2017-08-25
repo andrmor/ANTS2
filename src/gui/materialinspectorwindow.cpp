@@ -2136,6 +2136,10 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     }
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+
+    if (MatParticleOptionsConfigurator->isAutoloadEnabled())
+        autoloadMissingCrossSectionData();
+
     FillNeutronTable();
     on_pbWasModified_clicked();
 }
@@ -2214,7 +2218,7 @@ void MaterialInspectorWindow::FillNeutronTable()
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
     int numIso = tmpMaterial.ChemicalComposition.countIsotopes();
-    qDebug() << "..Starting update of neutron table.  Total isotopes:"<<numIso;
+    //      qDebug() << "..Starting update of neutron table.  Total isotopes:"<<numIso;
     ui->tabwNeutron->setRowCount(numIso);
 
     int numColumns = 1;
@@ -2246,18 +2250,18 @@ void MaterialInspectorWindow::FillNeutronTable()
         for (int iIso=0; iIso<el->countIsotopes(); iIso++)
         {
             QString name = el->Isotopes.at(iIso).Symbol + "-" + QString::number(el->Isotopes.at(iIso).Mass);
-            qDebug() << "Updating" <<name;
+            //      qDebug() << "Updating" <<name;
             QTableWidgetItem* twi = new QTableWidgetItem(name);
             twi->setTextAlignment(Qt::AlignCenter);
             ui->tabwNeutron->setItem(row, 0, twi);
             if (bCapture)
             {
                 NeutralTerminatorStructure& t = Terminators.first();
-                AAbsorptionElement* capEl = t.getCaptureElement(row);
-                qDebug() << "index:"<<row << "Defined capture elements:" << t.AbsorptionElements.size();
-                if (!capEl)
+                AAbsorptionElement* absEl = t.getCaptureElement(row);
+                //      qDebug() << "index:"<<row << "Defined absorption elements:" << t.AbsorptionElements.size();
+                if (!absEl)
                 {
-                    message("Critical error - capture element not found!", this);
+                    message("Critical error - absorption element not found!", this);
                     return;
                 }
                 QWidget* w = new QWidget();
@@ -2265,19 +2269,22 @@ void MaterialInspectorWindow::FillNeutronTable()
                 l->setContentsMargins(6,0,2,0);
                 l->setSpacing(2);
                 l->setAlignment(Qt::AlignCenter);
-                QPushButton* pbShow = new QPushButton("Show");
-                pbShow->setEnabled(!capEl->Energy.isEmpty());
-                pbShow->setMaximumWidth(50);
-                l->addWidget(pbShow);
-                QPushButton* pbLoad = new QPushButton("Load");
-                if (!bIgnore)
-                    if (capEl->Energy.isEmpty())
+                  QPushButton* pbShow = new QPushButton("Show");
+                  pbShow->setEnabled(!absEl->Energy.isEmpty());
+                  pbShow->setMaximumWidth(50);
+                  l->addWidget(pbShow);
+                  QPushButton* pbLoad = new QPushButton("Load");
+                  if (!bIgnore)
+                    if (absEl->Energy.isEmpty())
                         flagButton(pbLoad, true);
-                pbLoad->setMaximumWidth(50);
-                l->addWidget(pbLoad);
-                QPushButton* pbReaction = new QPushButton("Reactions");
-                l->addWidget(pbReaction);
-                l->addWidget( new QLabel("  ") );
+                  pbLoad->setMaximumWidth(50);
+                  l->addWidget(pbLoad);
+                  QPushButton* pbReaction = new QPushButton("Reactions");
+                  l->addWidget(pbReaction);
+                  QLabel* lab = new QLabel("  ");
+                  QIcon YellowIcon = createColorCircleIcon( QSize(12,12), ( absEl->DecayScenarios.isEmpty() ? Qt::white : Qt::yellow ) );
+                  lab->setPixmap(YellowIcon.pixmap(16,16));
+                  l->addWidget( lab );
                 w->setLayout(l);
                 ui->tabwNeutron->setCellWidget(row, 1, w);
 
@@ -2289,7 +2296,7 @@ void MaterialInspectorWindow::FillNeutronTable()
             {
                 NeutralTerminatorStructure& t = Terminators.last();
                 AElasticScatterElement* scatEl = t.getElasticScatterElement(row);
-                qDebug() << "index:"<<row << "Defined scatter elements:" << t.ScatterElements.size();
+                //      qDebug() << "index:"<<row << "Defined scatter elements:" << t.ScatterElements.size();
                 if (!scatEl)
                 {
                     message("Critical error - elastic scatter element not found!", this);
@@ -2325,6 +2332,36 @@ void MaterialInspectorWindow::FillNeutronTable()
     tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 }
 
+void MaterialInspectorWindow::autoloadMissingCrossSectionData()
+{
+    bool bCapture = ui->cbCapture->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked();
+    if (!bCapture && !bElastic) return;
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
+
+    if (Terminators.size() != 2)
+    {
+        qWarning() << "Terminators size is not equal to two!";
+        return;
+    }
+    NeutralTerminatorStructure& termAbs = Terminators[0];
+    NeutralTerminatorStructure& termScat = Terminators[1];
+
+    if (bCapture)
+    {
+        for (int iEl = 0; iEl<termAbs.AbsorptionElements.size(); iEl++)
+            autoLoadCrossSection( &termAbs.AbsorptionElements[iEl], "absorption");
+    }
+    if (bElastic)
+    {
+        for (int iEl = 0; iEl<termScat.ScatterElements.size(); iEl++)
+            autoLoadCrossSection( &termScat.ScatterElements[iEl], "elastic scattering");
+    }
+}
+
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
 {
     qDebug() << "menu" << ui->tabwNeutron->currentRow() << ui->tabwNeutron->currentColumn();
@@ -2345,13 +2382,13 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     if (MW->GlobSet->MaterialsAndParticlesSettings.isEmpty())
         on_pbConfigureAutoElastic_clicked();
 
-    qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
+    //      qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
     int iIndex = tmpMaterial.ChemicalComposition.getNumberInJointIsotopeList(iEl, iIso);
-    qDebug() << "Index:"<<iIndex;
+    //      qDebug() << "Index:"<<iIndex;
 
     NeutralTerminatorStructure* term;
     ANeutronInteractionElement* element;
@@ -2385,7 +2422,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     // -- Show --
     if (Action.contains("Show"))
     {
-        qDebug() << "Show ->"<< yTitle << "->" << element->Name <<"-"<< element->Mass;
+        //      qDebug() << "Show ->"<< yTitle << "->" << element->Name <<"-"<< element->Mass;
         QVector<double> x,y;
         for (int i=0; i<element->Energy.size(); i++)
           {
@@ -2408,7 +2445,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     else if (Action.contains("Load"))
     {
         QString isotope = element->Name  + "-" + element->Mass;
-        qDebug() << "Load" << target << "cross-section for" << isotope;
+        //      qDebug() << "Load" << target << "cross-section for" << isotope;
         if (MatParticleOptionsConfigurator->isAutoloadEnabled())
         {
             bool fOK = autoLoadCrossSection(element, target);
@@ -2434,7 +2471,6 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].AbsorptionElements[iIndex], DefinedParticles, this);
         int res = d->exec();
         delete d;
-        qDebug() << res;
         if (res != 0)
         {
             FillNeutronTable();

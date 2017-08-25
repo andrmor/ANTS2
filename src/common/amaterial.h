@@ -78,7 +78,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 {
   enum ReactionType {Photoelectric = 0,
                     ComptonScattering = 1,
-                    Capture = 2,
+                    Absorption = 2,
                     PairProduction = 3,
                     ElasticScattering = 4,
                     Undefined = 5};  //must keep the numbers - directly used in json config files

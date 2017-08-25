@@ -263,7 +263,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           //for neutrons have additional flags to suppress capture and ellastic
                           if (ParticleType == AParticle::_neutron_)
                           {
-                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture)
+                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
                                   if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bCaptureEnabled )
                                   {
                                       //        qDebug() << "Skipping capture - it is disabled";
@@ -336,7 +336,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           const NeutralTerminatorStructure& term = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators.at(SoFarShortestId);
                           switch ( term.Type)
                             {
-                            case (NeutralTerminatorStructure::Photoelectric): //0 - Photoelectric
+                            case (NeutralTerminatorStructure::Photoelectric): //0
                               {
                                 //                           qDebug()<<"Photoelectric";
                                 AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, energy, ParticleId, MatId, counter, eventId);
@@ -347,7 +347,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 energyHistory = energy;
                                 break; //switch-break
                               }
-                            case (NeutralTerminatorStructure::ComptonScattering): //1 - Compton
+                            case (NeutralTerminatorStructure::ComptonScattering): //1
                               {
                                 //                           qDebug()<<"Compton";
                                 GammaStructure G0;
@@ -377,7 +377,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 energyHistory = tc->dE;
                                 break;//switch-break
                               }                            
-                            case (NeutralTerminatorStructure::Capture): //2 - capture
+                            case (NeutralTerminatorStructure::Absorption): //2
                               {
                                 //                           qDebug()<<"------ capture triggered!";
                                 //nothing is added to the EnergyVector, but the result of capture can be generation of secondary particles
@@ -406,52 +406,68 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     const AAbsorptionElement& el = elements.at(iselected);
                                     //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
-
-                                    // no choose which of the reaction was activated
-                                    if (!el.Reactions.isEmpty())
+                                    // post-capture effect
+                                    if (el.DecayScenarios.isEmpty())
                                     {
-                                        int iReaction = 0;
-                                        if (el.Reactions.size() > 1)
+                                        //      qDebug() << "No decay scenarios following neutron capture are defined";
+                                    }
+                                    else
+                                    {
+                                        // choose which of the decay scenarios was triggered
+                                        int iScenario = 0;
+                                        if (el.DecayScenarios.size() > 1)
                                         {
                                           double rnd = RandGen->Rndm();
-                                          for (; iReaction<el.Reactions.size(); iReaction++)
+                                          for (; iScenario<el.DecayScenarios.size(); iScenario++)
                                             {
-                                              const double& thisBranching = el.Reactions.at(iReaction).Branching;
+                                              const double& thisBranching = el.DecayScenarios.at(iScenario).Branching;
                                               if (rnd < thisBranching) break;
                                               rnd -= thisBranching;
                                             }
                                         }
-                                        //qDebug() << "Reaction #" << iReaction << "triggered";
-                                        const ACaptureReaction& reaction = el.Reactions.at(iReaction);
+                                        //      qDebug() << "Decay scenario #" << iScenario << "was triggered";
+                                        const ADecayScenario& reaction = el.DecayScenarios.at(iScenario);
 
                                         //generating particles if defined
-                                        if (!reaction.GeneratedParticles.isEmpty())
+                                        if (reaction.GeneratedParticles.isEmpty())
+                                        {
+                                            //      qDebug() << "In this scenario there is no emission of secondary particles";
+                                        }
+                                        else
                                         {
                                             double vv[3]; //generated direction of the particle
                                             for (int igp=0; igp<reaction.GeneratedParticles.size(); igp++)
                                             {
                                                 const int&   ParticleId = reaction.GeneratedParticles.at(igp).ParticleId;
                                                 const double& energy    = reaction.GeneratedParticles.at(igp).Energy;
+                                                //      qDebug() << "  generating particle with Id"<<ParticleId << "and energy"<<energy;
                                                 if (igp>0 && reaction.GeneratedParticles.at(igp).bOpositeDirectionWithPrevious)
                                                 {
                                                     vv[0] = -vv[0]; vv[1] = -vv[1]; vv[2] = -vv[2];
+                                                    //      qDebug() << "   opposite direction of the previous";
+                                                }                                               
+                                                else
+                                                {
+                                                    GenerateRandomDirection(vv);
+                                                    //      qDebug() << "   in random direction";
                                                 }
-                                                else GenerateRandomDirection(vv);
                                                 AParticleOnStack* pp = new AParticleOnStack(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
                                                 ParticleStack->append(pp);
                                             }
                                         }
                                     }
-                                    //else no reactions are defined for this isotope - assume absorption with no emission of secondaries
                                 }
-                                //else nothing to do - no AbsorptionElements (i.e. isotopes which can absorb) are defined
+                                else
+                                {
+                                    qWarning() << "No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
+                                }
 
                                 terminationStatus = EventHistoryStructure::Capture;//5
                                 distanceHistory = SoFarShortest;
                                 energyHistory = 0;
                                 break; //switch-break
                               }
-                            case (NeutralTerminatorStructure::PairProduction): //3 - PairProduction
+                            case (NeutralTerminatorStructure::PairProduction): //3
                               {
                                 //                           qDebug()<<"pair";
                                 const double depo = energy - 1022.0; //directly deposited energy (kinetic energies), assuming electron and positron do not travel far

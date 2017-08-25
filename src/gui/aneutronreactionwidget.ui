@@ -86,6 +86,12 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item alignment="Qt::AlignHCenter">
        <widget class="QLabel" name="label_2">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>21</height>
+         </size>
+        </property>
         <property name="text">
          <string>Absorption without secondary particle generation</string>
         </property>

@@ -139,8 +139,6 @@ private:
 
     ANeutronInfoDialog* NeutronInfoDialog;
 
-    //QIcon RedIcon;
-
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
@@ -153,10 +151,11 @@ private:
     bool importXCOM(QTextStream &in, int particleId);
     bool isAllSameYield(double val);
 
-    bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering"
+    bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering" - replace with dynamic_cast!!!
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
+    void autoloadMissingCrossSectionData();
 
     void SetWasModified(bool flag);
 };

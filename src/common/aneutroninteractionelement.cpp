@@ -79,7 +79,7 @@ void AAbsorptionGeneratedParticle::readFromJson(const QJsonObject &json, AMateri
     parseJson(json, "OpositeDirectionWithPrevious", bOpositeDirectionWithPrevious);
 }
 
-void ACaptureReaction::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
+void ADecayScenario::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
 {
     json["Branching"] = Branching;
 
@@ -89,14 +89,14 @@ void ACaptureReaction::writeToJson(QJsonObject &json, AMaterialParticleCollectio
     json["GeneratedParticles"] = ar;
 }
 
-const QJsonObject ACaptureReaction::writeToJson(AMaterialParticleCollection *MpCollection) const
+const QJsonObject ADecayScenario::writeToJson(AMaterialParticleCollection *MpCollection) const
 {
     QJsonObject js;
     writeToJson(js, MpCollection);
     return js;
 }
 
-void ACaptureReaction::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
+void ADecayScenario::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
     parseJson(json, "Branching", Branching);
 
@@ -116,9 +116,9 @@ void AAbsorptionElement::writeToJson(QJsonObject &json, AMaterialParticleCollect
     ANeutronInteractionElement::writeToJson(json);
 
     QJsonArray crArr;
-    for (const ACaptureReaction& cr : Reactions)
+    for (const ADecayScenario& cr : DecayScenarios)
         crArr << cr.writeToJson(MpCollection);
-    json["Reactions"] = crArr;
+    json["DecayScenarios"] = crArr;
 }
 
 const QJsonObject AAbsorptionElement::writeToJson(AMaterialParticleCollection *MpCollection) const
@@ -132,13 +132,13 @@ void AAbsorptionElement::readFromJson(QJsonObject &json, AMaterialParticleCollec
 {
     ANeutronInteractionElement::readFromJson(json);
 
-    Reactions.clear();
-    QJsonArray ar = json["Reactions"].toArray();
+    DecayScenarios.clear();
+    QJsonArray ar = json["DecayScenarios"].toArray();
     for (int i=0; i<ar.size(); i++)
     {
         QJsonObject js = ar[i].toObject();
-        ACaptureReaction r;
+        ADecayScenario r;
         r.readFromJson(js, MpCollection);
-        Reactions << r;
+        DecayScenarios << r;
     }
 }

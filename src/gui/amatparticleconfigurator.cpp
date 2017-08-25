@@ -104,6 +104,11 @@ double AMatParticleConfigurator::getMaxEnergy() const
     return ui->ledMaxEnergy->text().toDouble();
 }
 
+bool AMatParticleConfigurator::isEmptyAllowed() const
+{
+    return ui->cbCanIgnore->isChecked();
+}
+
 const QString AMatParticleConfigurator::getNatAbundFileName() const
 {
     return ui->leNatAbundFile->text();
@@ -117,6 +122,8 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
     json["NaturalAbundanciesFile"] = ui->leNatAbundFile->text();
+
+    json["CanLeaveEmpty"] = ui->cbCanIgnore->isChecked();
 
     json["AutoLoad"] = ui->cbAuto->isChecked();
     json["Dir"] = ui->leDir->text();
@@ -136,6 +143,8 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);
 
     JsonToLineEditText(json, "NaturalAbundanciesFile", ui->leNatAbundFile);
+
+    JsonToCheckbox(json, "CanLeaveEmpty", ui->cbCanIgnore);
 
     JsonToCheckbox(json, "AutoLoad", ui->cbAuto);
     JsonToLineEditText(json, "Dir", ui->leDir);

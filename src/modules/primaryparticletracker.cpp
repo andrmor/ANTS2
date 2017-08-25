@@ -379,7 +379,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }                            
                             case (NeutralTerminatorStructure::Absorption): //2
                               {
-                                //                           qDebug()<<"------ capture triggered!";
+                                //      qDebug()<<"------ neutron absorption triggered!";
                                 //nothing is added to the EnergyVector, but the result of capture can be generation of secondary particles
                                 //first select which of the isotopes captured neutron
                                 const QVector<AAbsorptionElement> &elements = term.AbsorptionElements;
@@ -389,22 +389,46 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     if (elements.size() > 1)
                                     {
                                       double rnd = RandGen->Rndm();
-                                      for (; iselected<elements.size(); iselected++)
+
+                                      //this procedure is vulnerable to rounding errors - sum of individual crossections vs interpolated sum crossection
+//                                      const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+//                                      for (; iselected<max; iselected++)
+//                                        {
+//                                          const AAbsorptionElement& el = elements.at(iselected);
+//                                          double crossSection = 0;  // will be zero if this element has no cross-section ("Can leave empty option is activated")
+//                                          if (!elements.at(iselected).Energy.isEmpty())
+//                                              crossSection = GetInterpolatedValue(energy,
+//                                                                                  &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
+//                                                                                  MpCollection->fLogLogInterpolation);
+//                                          // fraction of this element in the total cross section:
+//                                          const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
+//                                          //        qDebug() << "--Absorption->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+//                                          //        qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
+//                                          if (rnd <= thisOne) break;
+//                                          rnd -= thisOne;
+//                                        }
+
+                                      // slow but more accurate
+                                      QVector<double> mfcs(elements.size(), 0);
+                                      double trueSum = 0;
+                                      for (int i=0; i<elements.size(); i++)
+                                      {
+                                          if (!elements.at(i).Energy.isEmpty())
+                                          {
+                                              mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
+                                              trueSum += mfcs.at(i);
+                                          }
+                                      }
+                                      const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+                                      for (; iselected<max; iselected++)
                                         {
-                                          const AAbsorptionElement& el = elements.at(iselected);
-                                          const double crossSection = GetInterpolatedValue(energy,
-                                                                                           &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
-                                                                                           MpCollection->fLogLogInterpolation);
-                                          // fraction of this element in the total cross section:
-                                          const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-                                          //        qDebug() << "--Absorption->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
-                                          //        qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
+                                          const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
                                           if (rnd <= thisOne) break;
                                           rnd -= thisOne;
                                         }
                                     }
                                     const AAbsorptionElement& el = elements.at(iselected);
-                                    //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
+                                          qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
                                     // post-capture effect
                                     if (el.DecayScenarios.isEmpty())
@@ -459,7 +483,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 }
                                 else
                                 {
-                                    qWarning() << "No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
+                                    qWarning() << "||| No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
                                 }
 
                                 terminationStatus = EventHistoryStructure::Capture;//5
@@ -489,31 +513,55 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::ElasticScattering): //4
                               {
+                                //      qDebug()<<"------ elastic scattering triggered!";
                                 const QVector<AElasticScatterElement> &elements = term.ScatterElements;
 
                                 //selecting element according to its contribution to the total cross-section
-                                //        qDebug() << "Def elements:" << elements.size();
+                                //      qDebug() << "Def elements:" << elements.size();
                                 int iselected = 0;
                                 if (elements.size() > 1)
                                 {
                                     double rnd = RandGen->Rndm();
-                                    //        qDebug() << "rnd:"<<rnd;
-                                    for (; iselected<elements.size(); iselected++)
-                                      {
-                                        const AElasticScatterElement& el = elements.at(iselected);
-                                        const double crossSection = GetInterpolatedValue(energy,
-                                                                                         &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
-                                                                                         MpCollection->fLogLogInterpolation);
-                                        // fraction of this element in the total cross section:
-                                        const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-                                        //      qDebug() << "--Scatter->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
-                                        //      qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
-                                        if (rnd < thisOne) break;
+
+//                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+//                                    //this procedure is vulnerable to rounding errors - sum of individual crossections vs interpolated sum crossection
+//                                    for (; iselected<max; iselected++)
+//                                      {
+//                                        const AElasticScatterElement& el = elements.at(iselected);
+//                                        double crossSection = 0;  // will be zero if this element has no cross-section ("Can leave empty option is activated")
+//                                        if (!elements.at(iselected).Energy.isEmpty())
+//                                            crossSection = GetInterpolatedValue(energy,
+//                                                                                &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
+//                                                                                MpCollection->fLogLogInterpolation);
+//                                        // fraction of this element in the total cross section:
+//                                        const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
+//                                              qDebug() << "--Scatter->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+//                                              qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
+//                                        if (rnd < thisOne) break;
+//                                        rnd -= thisOne;
+//                                      }
+
+                                    // slow but more accurate
+                                    QVector<double> mfcs(elements.size(), 0);
+                                    double trueSum = 0;
+                                    for (int i=0; i<elements.size(); i++)
+                                    {
+                                        if (!elements.at(i).Energy.isEmpty())
+                                        {
+                                            mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
+                                            trueSum += mfcs[i];
+                                        }
+                                    }
+                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+                                    for (; iselected<max; iselected++)
+                                    {
+                                        const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
+                                        if (rnd <= thisOne) break;
                                         rnd -= thisOne;
-                                      }
+                                    }
                                 }
                                 //selected element iselected
-                                //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
+                                        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
                                 //performing ellastic scattering in this element
                                 // "energy" is the neutron energy in keV

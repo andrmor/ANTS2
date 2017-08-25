@@ -135,7 +135,7 @@ private:
     MainWindow* MW;
     DetectorClass* Detector;
 
-    AMatParticleConfigurator* MatParticleOptionsConfigurator;
+    AMatParticleConfigurator* OptionsConfigurator;
 
     ANeutronInfoDialog* NeutronInfoDialog;
 

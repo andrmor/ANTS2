@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>506</width>
-    <height>349</height>
+    <height>380</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -462,6 +462,19 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
+  <widget class="QCheckBox" name="cbCanIgnore">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>347</y>
+     <width>491</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Can leave cross-sections empty - they will be assumed zero over all energy range</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -622,6 +635,22 @@
     <hint type="destinationlabel">
      <x>490</x>
      <y>96</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbCanIgnore</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateGlobSet</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>352</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>431</x>
+     <y>93</y>
     </hint>
    </hints>
   </connection>

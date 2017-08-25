@@ -89,7 +89,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
                   "Import the file by clicking \"Import from XCOM\" button.";
     ui->pbImportXCOM->setToolTip(str);
 
-    MatParticleOptionsConfigurator = new AMatParticleConfigurator(MW->GlobSet, this);
+    OptionsConfigurator = new AMatParticleConfigurator(MW->GlobSet, this);
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
@@ -101,7 +101,7 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
         delete NeutronInfoDialogCopy;
     }
 
-    delete MatParticleOptionsConfigurator;
+    delete OptionsConfigurator;
     delete ui;
 }
 
@@ -1217,7 +1217,7 @@ bool MaterialInspectorWindow::event(QEvent * e)
 */
       case QEvent::Hide :
         if (MW->WindowNavigator) MW->WindowNavigator->HideWindowTriggered("mat");
-        if (MatParticleOptionsConfigurator->isVisible()) MatParticleOptionsConfigurator->hide();
+        if (OptionsConfigurator->isVisible()) OptionsConfigurator->hide();
         break;
       case QEvent::Show :
         if (MW->WindowNavigator) MW->WindowNavigator->ShowWindowTriggered("mat");
@@ -1978,7 +1978,7 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
     if (res == 0)
     {
         double Multiplier;
-        switch (MatParticleOptionsConfigurator->getCrossSectionLoadOption())
+        switch (OptionsConfigurator->getCrossSectionLoadOption())
         {
           case (0): {Multiplier = 1.0e-6; break;} //meV
           case (1): {Multiplier = 1.0e-3; break;} //eV
@@ -1991,10 +1991,10 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
             y[i] *= 1.0e-24;     //to cm2
         }
 
-        if (MatParticleOptionsConfigurator->isEnergyRangeLimited())
+        if (OptionsConfigurator->isEnergyRangeLimited())
         {
-            const double EnMin = MatParticleOptionsConfigurator->getMinEnergy() * 1.0e-6; //meV -> keV
-            const double EnMax = MatParticleOptionsConfigurator->getMaxEnergy() * 1.0e-6; //meV -> keV
+            const double EnMin = OptionsConfigurator->getMinEnergy() * 1.0e-6; //meV -> keV
+            const double EnMax = OptionsConfigurator->getMaxEnergy() * 1.0e-6; //meV -> keV
             QVector<double> xtmp, ytmp;
             xtmp = x;  ytmp = y;
             x.clear(); y.clear();
@@ -2019,9 +2019,9 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
     QString Mass = QString::number(element->Mass);
     QString fileName;
     if (target == "elastic scattering")
-        fileName = MatParticleOptionsConfigurator->getElasticScatteringFileName(element->Name, Mass);
+        fileName = OptionsConfigurator->getElasticScatteringFileName(element->Name, Mass);
     else if (target == "absorption")
-        fileName = MatParticleOptionsConfigurator->getAbsorptionFileName(element->Name, Mass);
+        fileName = OptionsConfigurator->getAbsorptionFileName(element->Name, Mass);
     else qWarning() << "Unknown selector in autoload neutron cross-section";
 
     if (fileName.isEmpty()) return false;
@@ -2034,8 +2034,8 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
 
 void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
 {
-   MatParticleOptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
-   MatParticleOptionsConfigurator->showNormal();
+   OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
+   OptionsConfigurator->showNormal();
 }
 
 //--------------------------------------------------
@@ -2121,7 +2121,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         //      qDebug() << newComp;
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
-        mc.configureNaturalAbunances(MatParticleOptionsConfigurator->getNatAbundFileName());
+        mc.configureNaturalAbunances(OptionsConfigurator->getNatAbundFileName());
         QString error = mc.setCompositionString(le->text());
         if (!error.isEmpty())
         {
@@ -2137,7 +2137,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
 
-    if (MatParticleOptionsConfigurator->isAutoloadEnabled())
+    if (OptionsConfigurator->isAutoloadEnabled())
         autoloadMissingCrossSectionData();
 
     FillNeutronTable();
@@ -2243,7 +2243,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     }
 
     int row = 0;
-    bool bIgnore = ui->cbIgnoreMissingNeutronData->isChecked();
+    bool bIgnore = OptionsConfigurator->isEmptyAllowed();
     for (int iElement=0; iElement<numElements; iElement++)
     {
         const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
@@ -2446,7 +2446,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     {
         QString isotope = element->Name  + "-" + element->Mass;
         //      qDebug() << "Load" << target << "cross-section for" << isotope;
-        if (MatParticleOptionsConfigurator->isAutoloadEnabled())
+        if (OptionsConfigurator->isAutoloadEnabled())
         {
             bool fOK = autoLoadCrossSection(element, target);
             if (fOK)

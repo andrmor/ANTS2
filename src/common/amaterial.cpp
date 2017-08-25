@@ -765,7 +765,9 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
               return QString("Total elastic scaterring cross-section is not defined");
 
           //check molar fractions and cross-sections
-          qDebug() << "Fix me - check of molar fractions and cross-sections";
+          qDebug() << "Fix me - material check for elastic";
+
+          //molar fractions and cross-sections
       }
 
       if (mp->bCaptureEnabled)
@@ -773,6 +775,13 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
           for (int iTerm=0; iTerm<numTerm; iTerm++)
           {
               const NeutralTerminatorStructure& term = mp->Terminators[0];
+
+              if (term.AbsorptionElements.isEmpty())
+                  return QString("No elements defined for neutron absorption");
+
+              if (term.PartialCrossSection.isEmpty())
+                  return QString("Total absorption cross-section is not defined");
+
 //              const QVector<int>* gp = &term.GeneratedParticles;
 //              if (!gp->isEmpty())
 //              {
@@ -786,7 +795,7 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
 //                      if (part<0 || part>ParticleCollection.size()-1) return "Unknown generated particle after capture";  //unknown particle
 //                    }
 //              }
-              qDebug() << "Fix me - check for capture";
+              qDebug() << "Fix me - materiack check for absorption";
           }
       }
     }

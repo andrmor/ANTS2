@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QVector>
+#include <QTableWidgetItem>
 
 namespace Ui {
 class ANeutronInfoDialog;
@@ -31,6 +32,8 @@ private slots:
 
     void on_pbScatter_clicked();
 
+    void onIsotopeTable_ColumnSelected(int column);
+
 private:
     Ui::ANeutronInfoDialog *ui;
     const AMaterial* mat;
@@ -43,6 +46,15 @@ private:
     void update();
     void updateIsotopeTable();
     void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, TString& xTitle);
+};
+
+class ATableWidgetDoubleItem : public QTableWidgetItem
+{
+public:
+    ATableWidgetDoubleItem(QString text);
+
+    public:
+        bool operator< (const QTableWidgetItem &other) const;
 };
 
 #endif // ANEUTRONINFODIALOG_H

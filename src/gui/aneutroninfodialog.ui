@@ -313,6 +313,12 @@
        <height>90</height>
       </size>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
      <row>
       <property name="text">
        <string>Cross-section, barns</string>
@@ -352,8 +358,20 @@
    </item>
    <item>
     <widget class="QTableWidget" name="tabwIso">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectItems</enum>
+     </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
       <number>150</number>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
      </attribute>
      <column>
       <property name="text">

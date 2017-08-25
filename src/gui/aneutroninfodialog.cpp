@@ -27,6 +27,8 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
     ui->pbAbs->setAutoDefault(false);
     ui->pbScatter->setAutoDefault(false);
     ui->pbTotal->setAutoDefault(false);
+
+    QObject::connect(ui->tabwIso->horizontalHeader(), &QHeaderView::sectionClicked, this, &ANeutronInfoDialog::onIsotopeTable_ColumnSelected);
 }
 
 ANeutronInfoDialog::~ANeutronInfoDialog()
@@ -115,6 +117,8 @@ void ANeutronInfoDialog::update()
 
 void ANeutronInfoDialog::updateIsotopeTable()
 {
+    qDebug() << "Updating isotope table";
+
     ui->tabwIso->clearContents();
 
     const NeutralTerminatorStructure& termAb = mat->MatParticle.at(ipart).Terminators.at(0);
@@ -127,7 +131,7 @@ void ANeutronInfoDialog::updateIsotopeTable()
     if (bShowAbs) totCS_abs  = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
     double totCS_scat = -1.0;
     if (bShowScat) totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
-    qDebug() << totCS_abs << totCS_scat;
+    //      qDebug() << totCS_abs << totCS_scat;
 
 
     int row = 0;
@@ -137,7 +141,7 @@ void ANeutronInfoDialog::updateIsotopeTable()
         for (int iIso=0; iIso<el->countIsotopes(); iIso++)
         {
             QString name = el->Symbol + "-" + QString::number(el->Isotopes.at(iIso).Mass);
-            qDebug() << "-----"<<name;
+            //      qDebug() << "-----"<<name;
             QTableWidgetItem* twi = new QTableWidgetItem(name);
             twi->setTextAlignment(Qt::AlignCenter);
             ui->tabwIso->setItem(row, 0, twi);
@@ -151,11 +155,10 @@ void ANeutronInfoDialog::updateIsotopeTable()
                     double fraction = cs_abs * termAb.AbsorptionElements.at(row).MolarFraction / totCS_abs * 100.0;
                     s = QString::number(fraction, 'g', 4);
                 }
-                else s = "not def";
+                else s = "0";
             }
-            twi = new QTableWidgetItem(s);
-            twi->setTextAlignment(Qt::AlignCenter);
-            ui->tabwIso->setItem(row, 1, twi);
+            ATableWidgetDoubleItem* twdi = new ATableWidgetDoubleItem(s);
+            ui->tabwIso->setItem(row, 1, twdi);
 
             s = "-off-";
             if (bShowScat)
@@ -166,11 +169,10 @@ void ANeutronInfoDialog::updateIsotopeTable()
                     double fraction = cs_scat * termSc.ScatterElements.at(row).MolarFraction/ totCS_scat * 100.0;
                     s = QString::number(fraction, 'g', 4);
                 }
-                else s = "not def";
+                else s = "0";
             }
-            twi = new QTableWidgetItem(s);
-            twi->setTextAlignment(Qt::AlignCenter);
-            ui->tabwIso->setItem(row, 2, twi);
+            twdi = new ATableWidgetDoubleItem(s);
+            ui->tabwIso->setItem(row, 2, twdi);
 
             row++;
         }
@@ -273,6 +275,25 @@ void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const Q
 //    MW->GraphWindow->Draw(graphOver, "L same");
 }
 
+void ANeutronInfoDialog::onIsotopeTable_ColumnSelected(int column)
+{
+    ui->tabwIso->sortByColumn(column);
+}
 
+ATableWidgetDoubleItem::ATableWidgetDoubleItem(QString text) :
+    QTableWidgetItem(text)
+{
+    setTextAlignment(Qt::AlignCenter);
+}
 
+bool ATableWidgetDoubleItem::operator< (const QTableWidgetItem &other) const
+{
+    bool bOK;
+    double val = text().toDouble(&bOK);
+    if (!bOK) return true;
 
+    double otherVal = other.text().toDouble(&bOK);
+    if (!bOK) return true;
+
+    return val > otherVal;
+}

@@ -32,6 +32,7 @@ double AMaterial::getAbsorptionCoefficient(int iWave) const
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
 {
+    qDebug() << "Updating neutron data";
     int neutronId = MPCollection->getNeutronIndex();
     if (neutronId == -1) return; //not dfefined in thsi configuration
 
@@ -46,12 +47,12 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         AChemicalElement* El = ChemicalComposition.getElement(iEl);
         for (int iIso=0; iIso<El->countIsotopes(); iIso++)
         {
-            qDebug() << "==Creating AAbsorprionElement for " << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
+            //      qDebug() << "==Creating AAbsorprionElement for " << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
             bool bAlreadyExists = false;
             for (AAbsorptionElement& absEl : ct.AbsorptionElements)
                 if (absEl.Name == El->Symbol && absEl.Mass == El->Isotopes.at(iIso).Mass)
                 {
-                    qDebug() << "Found in old list, copying";
+                    //      qDebug() << "Found in old list, copying";
                     bAlreadyExists = true;
                     absEl.MolarFraction = El->MolarFraction*0.01 * El->Isotopes.at(iIso).Abundancy; //updating molar fraction
                     AbsorptionElementsNew << absEl;
@@ -59,7 +60,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
                 }
             if (!bAlreadyExists)
             {
-                qDebug() << "Not found, creating new record";
+                //      qDebug() << "Not found, creating new record";
                 AbsorptionElementsNew << AAbsorptionElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
             }            
         }
@@ -75,12 +76,12 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         AChemicalElement* El = ChemicalComposition.getElement(iEl);
         for (int iIso=0; iIso<El->countIsotopes(); iIso++)
         {
-            qDebug() << "scatter" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
+            //      qDebug() << "scatter" << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
             bool bAlreadyExists = false;
             for (AElasticScatterElement& scatEl : st.ScatterElements)
                 if (scatEl.Name == El->Symbol && scatEl.Mass == El->Isotopes.at(iIso).Mass)
                 {
-                    qDebug() << "Found in old list, copying";
+                    //      qDebug() << "Found in old list, copying";
                     bAlreadyExists = true;
                     scatEl.MolarFraction = El->MolarFraction*0.01 * El->Isotopes.at(iIso).Abundancy; //updating molar fraction
                     ScatterElementsNew << scatEl;
@@ -88,7 +89,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
                 }
             if (!bAlreadyExists)
             {
-                qDebug() << "Not found, creating new record";
+                //      qDebug() << "Not found, creating new record";
                 ScatterElementsNew << AElasticScatterElement(El->Isotopes.at(iIso).Symbol, El->Isotopes.at(iIso).Mass, El->MolarFraction*0.01*El->Isotopes.at(iIso).Abundancy);
             }
         }

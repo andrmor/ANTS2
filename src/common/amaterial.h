@@ -115,14 +115,15 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   //for neutrons - separate activation of capture and ellastic scattering is possible
   bool bCaptureEnabled;
   bool bEllasticEnabled;
+  bool bAllowAbsentCsData;
 
   QVector<double> InteractionDataX; //energy in keV
   QVector<double> InteractionDataF; //stopping power (for charged) or total interaction cross-section (neutrals)
 
   QVector<NeutralTerminatorStructure> Terminators;
 
-  QString DataSource; //for gamma stores XCOM file if was used
-  QString DataString;     //for gamma can be used to store composition
+  QString DataSource;     //for gamma  - stores XCOM file if was used
+  QString DataString;     //for gamma  - can be used to store composition   obsolete!!!
 
   bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 };

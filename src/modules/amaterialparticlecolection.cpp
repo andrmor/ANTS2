@@ -650,69 +650,6 @@ QString AMaterialParticleCollection::CheckTmpMaterial() const
   return "";
 }
 
-QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial *mat, int iPart, QString *Report) const
-{
-    qDebug() << "Fix me - CheckElasticScatterElements";
-    return "";
-    /*
-    QString error, Text;
-
-    if (iPart<0 || iPart>=mat->MatParticle.size()) return "Wrong particle index";
-    if (mat->MatParticle[iPart].Terminators.isEmpty()) return "No terminators defined";
-
-    const NeutralTerminatorStructure& t = mat->MatParticle[iPart].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty()) Text = "Elastic scattering elements/isotopes not defined";
-    else
-    {
-        QVector< QVector<int> > ElementsAndIsotopes; // [Element][Isotope]
-        QString LastElementName = t.ScatterElements.first().Name;
-        QVector<int> isotopes;
-        isotopes << 0;
-        for (int iRecord = 1; iRecord<t.ScatterElements.size(); iRecord++)
-        {
-            if (t.ScatterElements.at(iRecord).Name != LastElementName)
-            {
-                //new element
-                ElementsAndIsotopes.append(isotopes);
-                isotopes.clear();
-                LastElementName = t.ScatterElements.at(iRecord).Name;
-            }
-            isotopes << iRecord;
-        }
-        ElementsAndIsotopes.append(isotopes);
-
-        for (int iElementRecord=0; iElementRecord<ElementsAndIsotopes.size(); iElementRecord++)
-        {
-            int iElement = ElementsAndIsotopes.at(iElementRecord).first();
-            Text += t.ScatterElements.at(iElement).Name + ":\n";
-            double sumAbund = 0;
-            QString tmp;
-            for (int iIsotopeRecord=0; iIsotopeRecord<ElementsAndIsotopes.at(iElementRecord).size(); iIsotopeRecord++)
-            {
-                int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
-                sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
-                tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
-                double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction;
-                tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
-                double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
-                tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4) + " cm-3";
-                tmp += "\n";
-            }
-            if ( fabs(sumAbund - 100.0) > 0.001 )
-            {
-                Text += " Error: sum of abundances should be 100%\n";
-                if (error.isEmpty())
-                    error = QString("Elastic scattering of neutrons in ") + t.ScatterElements.at(iElement).Name + ":\nsum of abundances is not equal to 100%";
-            }
-            else Text += tmp;
-            tmp += "\n";
-        }
-    }
-    if (Report) *Report = Text;
-    return error;
-    */
-}
-
 void AMaterialParticleCollection::registerNewParticle()
 {
   if (MaterialCollectionData.size()>0)

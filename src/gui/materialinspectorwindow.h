@@ -130,6 +130,8 @@ private slots:
 
     void on_pbMaterialInfo_clicked();
 
+    void on_cbAllowAbsentCsData_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

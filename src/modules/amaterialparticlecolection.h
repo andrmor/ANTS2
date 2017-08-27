@@ -89,9 +89,6 @@ public:
   QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
   QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
 
-  QString CheckElasticScatterElements(const AMaterial *mat, int iPart, QString* Report) const;
-
-
   int CheckParticleEnergyInRange(int iPart, double Energy); //check all materials - if this particle is tracable and mat is not-tansparent,
   //check that the particle energy is withing the defined energy range of the total interaction.
   //if not in range, the first material index with such a problem is returned.

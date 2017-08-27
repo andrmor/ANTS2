@@ -212,6 +212,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       jMatParticle["DataString"] = MatParticle[ip].DataString;
       jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
       jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
+      jMatParticle["AllowAbsentCsData"] = MatParticle[ip].bAllowAbsentCsData;
 
       QJsonArray iar;
       writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
@@ -382,6 +383,8 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       MatParticle[ip].bEllasticEnabled = false; //compatibility
       parseJson(jMatParticle, "CaptureEnabled", MatParticle[ip].bCaptureEnabled);
       parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bEllasticEnabled);
+      MatParticle[ip].bAllowAbsentCsData = false;
+      parseJson(jMatParticle, "AllowAbsentCsData", MatParticle[ip].bAllowAbsentCsData);
 
       if (jMatParticle.contains("TotalInteraction"))
         {
@@ -408,81 +411,11 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       {
           if (jMatParticle.contains("NeutronTerminators"))
           {
-              qWarning() << "File with incompatible standard for neutron interaction data detected - converting to tramsparent medium";
+              qWarning() << "This config file contains old (incompatible) standard for neutron interaction data - material is seto to transparent for neutrons!";
               //making material transparent
               MatParticle[ip].MaterialIsTransparent = true;
           }
       }
-
-
-//      if (jMatParticle.contains("GammaTerminators"))
-//        { //gamma-specific data
-//          QJsonArray jgamma = jMatParticle["GammaTerminators"].toArray();
-//          int numTerms = jgamma.size();
-//          MatParticle[ip].Terminators.resize(numTerms);
-//          for (int iTerm=0; iTerm<numTerms; iTerm++)
-//            {
-//              QJsonObject jterm = jgamma[iTerm].toObject();
-//              //parseJson(jterm, "ReactionType", MatParticle[ip].Terminators[iTerm].Type);
-//              if (jterm.contains("ReactionType"))
-//                  MatParticle[ip].Terminators[iTerm].Type = static_cast<NeutralTerminatorStructure::ReactionType>(jterm["ReactionType"].toInt());
-//              QJsonArray ar = jterm["InteractionData"].toArray();
-//              readTwoQVectorsFromJArray(ar, MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy, MatParticle[ip].Terminators[iTerm].PartialCrossSection);
-//            }
-//        }
-
-//      if (jMatParticle.contains("NeutronTerminators"))
-//        { //neutron-specific data
-//          QJsonArray jneutron = jMatParticle["NeutronTerminators"].toArray();
-//          int numTerms = jneutron.size();
-//          MatParticle[ip].Terminators.resize(numTerms);
-//          //qDebug() << "Terminators:"<<numTerms;
-//          for (int iTerm=0; iTerm<numTerms; iTerm++)
-//            {
-//              QJsonObject jterm = jneutron[iTerm].toObject();
-//              parseJson(jterm, "Branching", MatParticle[ip].Terminators[iTerm].branching);
-//              MatParticle[ip].Terminators[iTerm].Type = static_cast<NeutralTerminatorStructure::ReactionType>(jterm["ReactionType"].toInt());
-//              //going through secondary particles
-//              QJsonArray jsecondaries = jterm["Secondaries"].toArray();
-//              int numSecondaries = jsecondaries.size();
-//              //qDebug() << "Secondaries"<<numSecondaries;
-//              MatParticle[ip].Terminators[iTerm].GeneratedParticles.resize(numSecondaries);
-//              MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies.resize(numSecondaries);
-//              for (int is=0; is<numSecondaries;is++ )
-//                {
-//                  QJsonObject jsecpart = jsecondaries[is].toObject();
-
-//                  QJsonObject jsp = jsecpart["SecParticle"].toObject();
-//                  int isp = MpCollection->findOrCreateParticle(jsp);
-//                  //qDebug() << "Secondary:"<<isp;
-//                  MatParticle[ip].Terminators[iTerm].GeneratedParticles[is] = isp;
-//                  parseJson(jsecpart, "energy", MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is]);
-//                }
-
-//              if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::Capture)
-//                {
-//                  //using branchings to calculate partical cross sections (can be changed in the future!)
-//                  MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy = MatParticle[ip].InteractionDataX;
-//                  MatParticle[ip].Terminators[iTerm].PartialCrossSection.resize(0);
-//                  for (int i=0; i<MatParticle[ip].InteractionDataF.size(); i++)
-//                    MatParticle[ip].Terminators[iTerm].PartialCrossSection.append(MatParticle[ip].Terminators[iTerm].branching * MatParticle[ip].InteractionDataF[i]);
-//                }
-
-//              if (jterm.contains("ScatterElements"))
-//              {
-//                  QJsonArray ellAr = jterm["ScatterElements"].toArray();
-//                  MatParticle[ip].Terminators[iTerm].ScatterElements.clear();
-//                  for (int i=0; i<ellAr.size(); i++)
-//                  {
-//                      AElasticScatterElement el;
-//                      QJsonObject js = ellAr[i].toObject();
-//                      el.readFromJson(js);
-//                      MatParticle[ip].Terminators[iTerm].ScatterElements << el;
-//                  }
-//              }
-
-//            }
-//        }
     }
   return true;
 }
@@ -765,10 +698,19 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
           if (term.PartialCrossSection.isEmpty())
               return QString("Total elastic scaterring cross-section is not defined");
 
-          //check molar fractions and cross-sections
-          qDebug() << "Fix me - material check for elastic";
+          for (int i=0; i<term.ScatterElements.size(); i++)
+            {
+                const AElasticScatterElement& se = term.ScatterElements.at(i);
 
-          //molar fractions and cross-sections
+                QString isoName = se.Name+"-"+QString::number(se.Mass);
+
+                if (!mp->bAllowAbsentCsData)
+                    if (se.Energy.isEmpty())
+                        return isoName + " has no cross-section data for elastic scaterring";
+
+                if (se.Energy.size() != se.CrossSection.size())
+                    return isoName + " - mismatch in cross-section data for elastic scattering";
+            }
       }
 
       if (mp->bCaptureEnabled)
@@ -783,20 +725,34 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
               if (term.PartialCrossSection.isEmpty())
                   return QString("Total absorption cross-section is not defined");
 
-//              const QVector<int>* gp = &term.GeneratedParticles;
-//              if (!gp->isEmpty())
-//              {
-//                  const QVector<double>* gpE = &term.GeneratedParticleEnergies;
-//                  if (gp->isEmpty()) return "Error in energy of generated particles after capture";
-//                  int numPart = gp->size();
-//                  if (numPart != gpE->size()) return "Error in energy of generated particles after capture";
-//                  for (int iGP=0; iGP<numPart; iGP++)
-//                    {
-//                      int part = gp->at(iGP);
-//                      if (part<0 || part>ParticleCollection.size()-1) return "Unknown generated particle after capture";  //unknown particle
-//                    }
-//              }
-              qDebug() << "Fix me - materiack check for absorption";
+              for (int i=0; i<term.AbsorptionElements.size(); i++)
+                {
+                    const AAbsorptionElement& ae = term.AbsorptionElements.at(i);
+
+                    QString isoName = ae.Name+"-"+QString::number(ae.Mass);
+
+                    if (!mp->bAllowAbsentCsData)
+                        if (ae.Energy.isEmpty())
+                            return isoName + " has no cross-section data for absorption";
+
+                    if (ae.Energy.size() != ae.CrossSection.size())
+                        return isoName + " - mismatch in cross-section data for absorption";
+
+                    double branching = 0;
+                    for (int iDS=0; iDS<ae.DecayScenarios.size(); iDS++)
+                    {
+                        const ADecayScenario& ds = ae.DecayScenarios.at(iDS);
+                        branching += ds.Branching;
+                        for (int ip=0; ip<ds.GeneratedParticles.size(); ip++)
+                        {
+                            int partId = ds.GeneratedParticles.at(ip).ParticleId;
+                            if (partId<0 || partId>=MpCollection->countParticles())
+                                return "Unknown generated particle after capture for " + isoName;
+                        }
+                    }
+                    if ( !ae.DecayScenarios.isEmpty() && fabs(branching - 100.0) > 0.001)
+                        return "Sum of branching factors does not sum to 100% for " + isoName;
+                }
           }
       }
     }

@@ -377,6 +377,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->swNeutral->setCurrentIndex(1);
           ui->cbCapture->setChecked(mp.bCaptureEnabled);
           ui->cbEnableScatter->setChecked(mp.bEllasticEnabled);
+          ui->cbAllowAbsentCsData->setChecked(mp.bAllowAbsentCsData);
 
           FillNeutronTable();
       }
@@ -2243,7 +2244,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     }
 
     int row = 0;
-    bool bIgnore = OptionsConfigurator->isEmptyAllowed();
+    bool bIgnore = tmpMaterial.MatParticle[particleId].bAllowAbsentCsData;
     for (int iElement=0; iElement<numElements; iElement++)
     {
         const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
@@ -2494,4 +2495,14 @@ void MaterialInspectorWindow::on_pbMaterialInfo_clicked()
     double AtDens = tmpMaterial.density / MAM / 1.66054e-24;
     str += "Atom density: " + QString::number(AtDens, 'g', 4) + "\n";
     message(str, this);
+}
+
+void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    tmpMaterial.MatParticle[particleId].bAllowAbsentCsData = ui->cbAllowAbsentCsData->isChecked();
+
+    FillNeutronTable();
+    on_pbWasModified_clicked();
 }

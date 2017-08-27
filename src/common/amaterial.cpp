@@ -32,7 +32,7 @@ double AMaterial::getAbsorptionCoefficient(int iWave) const
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
 {
-    qDebug() << "Updating neutron data";
+    //      qDebug() << "Updating neutron data";
     int neutronId = MPCollection->getNeutronIndex();
     if (neutronId == -1) return; //not dfefined in thsi configuration
 
@@ -457,7 +457,7 @@ AElasticScatterElement *NeutralTerminatorStructure::getElasticScatterElement(int
 
 void NeutralTerminatorStructure::UpdateNeutronCrossSections(bool bUseLogLog)
 {
-    qDebug() << "Updating neutron cross-section data...";
+    //      qDebug() << "Updating neutron cross-section data...";
     if (Type == Absorption && !AbsorptionElements.isEmpty())
     {        
         PartialCrossSectionEnergy.clear();
@@ -520,7 +520,7 @@ void NeutralTerminatorStructure::UpdateNeutronCrossSections(bool bUseLogLog)
             }
         }
     }
-    qDebug() << "...done!";
+    //      qDebug() << "...done!";
 }
 
 void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const

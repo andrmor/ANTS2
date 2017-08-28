@@ -2491,9 +2491,9 @@ void MaterialInspectorWindow::on_pbMaterialInfo_clicked()
     }
 
     double MAM = tmpMaterial.ChemicalComposition.getMeanAtomMass();
-    QString str = "Mean atom mass: " + QString::number(MAM, 'g', 4) + "\n";
+    QString str = "Mean atom mass: " + QString::number(MAM, 'g', 4) + " a.u.\n";
     double AtDens = tmpMaterial.density / MAM / 1.66054e-24;
-    str += "Atom density: " + QString::number(AtDens, 'g', 4) + "\n";
+    str += "Atom density: " + QString::number(AtDens, 'g', 4) + " cm-3\n";
     message(str, this);
 }
 
@@ -2505,4 +2505,47 @@ void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
 
     FillNeutronTable();
     on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
+{
+    QDialog* d = new QDialog(this);
+
+    QVBoxLayout* l = new QVBoxLayout();
+        QString s = "ANTS2 was designed to simularte detectors for thermal neutrons only.\n";
+        s += "Only two processes are considered: absorption and elastic scattering.\n";
+        s += "Absorption can be followed with decay of the atom which captured the neutron.\n";
+        s += "In this case the user can configure an arbitrary number of decay reactions and\n";
+        s += "configure the secondary particles and their energies.\n\n";
+
+        s += "The cross-section files can be downloaded, e.g., from IAEA site:\n";
+        s += "https://www-nds.iaea.org/exfor/endf.htm\n\n";
+        s += "For elastic cross-section, select N,EL reaction\n";
+        s += "For total absorption, use N,NON reaction\n";
+        s += "As 'Quantity' parameter, provide SIG\n";
+        s += "Note that one data request can contain several isotopes, reactions and libraries selected.";
+        QLabel* lab = new QLabel(s);
+        l->addWidget(lab);
+        QPushButton* pbS = new QPushButton("Go to IAEA site");
+        l->addWidget(pbS);
+        QPushButton* pbClose = new QPushButton("Close");
+        l->addWidget(pbClose);
+        pbClose->setDefault(true);
+     d->setLayout(l);
+
+     QFont f = lab->font();
+     f.setPointSize(f.pointSize()+2);
+     lab->setFont(f);
+
+     connect(pbS, &QPushButton::clicked, []()
+     {
+         QDesktopServices::openUrl( QUrl("https://www-nds.iaea.org/exfor/endf.htm") );
+     });
+     connect(pbClose, SIGNAL(clicked(bool)), d, SLOT(accept()));
+
+
+     d->exec();
+
+
+
 }

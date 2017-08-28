@@ -221,7 +221,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -2194,6 +2194,13 @@ resolution:</string>
                       <widget class="QCheckBox" name="cbAllowAbsentCsData">
                        <property name="text">
                         <string>Assume zero value for absent cross-section data</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pbHelpNeutron">
+                       <property name="text">
+                        <string>Help</string>
                        </property>
                       </widget>
                      </item>

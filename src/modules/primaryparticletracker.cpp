@@ -286,18 +286,10 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           double MeanFreePath;
                           if (ParticleType == AParticle::_neutron_)
                             { //for capture using atomic density and cross-section in barns
-//                              if ( (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
-//                              {
-//                                const double &AtomicDensity = (*MpCollection)[MatId]->atomicDensity;
-//                                MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-//                                //qDebug()<<"For capture - Isotope density:"<<AtomicDensity<< "MFP:"<<MeanFreePath;
-//                              }
-//                              else
-//                              {
-                                  const double AtDens = Density / (*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass() / 1.66054e-24;
-                                  MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-                                  //        qDebug() << "For neutron - effective atomic density:"<<AtDens << "MFP:"<<MeanFreePath;
-//                              }
+                              const double AtDens = Density / (*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass() / 1.66054e-24;
+                              MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
+                              //        qDebug() <<"Density:"<<Density <<"MAM:"<<(*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass()<<"Effective atomic density:"<<AtDens;
+                              //        qDebug() <<"Energy:"<<energy<<"CS:"<< InteractionCoefficient<< "MFP:"<<MeanFreePath;
                             }
                           else
                             {
@@ -428,7 +420,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                         }
                                     }
                                     const AAbsorptionElement& el = elements.at(iselected);
-                                          qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
+                                    //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
                                     // post-capture effect
                                     if (el.DecayScenarios.isEmpty())
@@ -561,7 +553,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     }
                                 }
                                 //selected element iselected
-                                        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
+                                //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
                                 //performing ellastic scattering in this element
                                 // "energy" is the neutron energy in keV

@@ -132,6 +132,8 @@ private slots:
 
     void on_cbAllowAbsentCsData_clicked();
 
+    void on_pbHelpNeutron_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

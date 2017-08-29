@@ -432,6 +432,26 @@ void ParticleSourcesClass::onIsParticleInUse(int particleId, bool& fAnswer, QStr
     if (SourceName) *SourceName = "";
 }
 
+void ParticleSourcesClass::onIsParticleInUse1(int particleId, bool &bInUse, QString &SourceNames)
+{
+  bInUse = false;
+  SourceNames.clear();
+
+  for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
+    {
+      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      for (int ip = 0; ip<ps->GunParticles.size(); ip++)
+        {
+          if ( particleId == ps->GunParticles[ip]->ParticleId )
+            {
+              bInUse = true;
+              if (!SourceNames.isEmpty()) SourceNames += ", ";
+              SourceNames += ps->name;
+            }
+        }
+    }
+}
+
 void ParticleSourcesClass::onRequestRegisterParticleRemove(int particleId)
 {
     for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
@@ -445,6 +465,17 @@ void ParticleSourcesClass::onRequestRegisterParticleRemove(int particleId)
     QJsonObject json;
     writeToJson(json);
     emit RequestUpdateSourcesInConfig(json);
+}
+
+void ParticleSourcesClass::RemoveParticle(int particleId)
+{
+  for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
+    {
+      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      for (int ip = 0; ip<ps->GunParticles.size(); ip++)
+          if ( ps->GunParticles[ip]->ParticleId > particleId)
+              ps->GunParticles[ip]->ParticleId--;
+    }
 }
 
 double ParticleSourcesClass::getTotalActivity()

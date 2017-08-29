@@ -2653,7 +2653,13 @@ void ATypeMonitorObject::writeToJson(QJsonObject &json)
 
 void ATypeMonitorObject::readFromJson(QJsonObject &json)
 {
-    config.readFromJson(json);
+  config.readFromJson(json);
+}
+
+bool ATypeMonitorObject::isParticleInUse(int partId) const
+{
+   if (config.PhotonOrParticle == 0) return false;
+   return (config.ParticleIndex == partId);
 }
 
 bool ATypeObject::isUpperLightguide() const

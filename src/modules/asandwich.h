@@ -101,7 +101,11 @@ signals:
 public slots:
   void onMaterialsChanged(const QStringList MaterialList);
 
-private:  
+  void onIsParticleInUse1(int particleId, bool &bInUse, QString& MonitorNames);
+  void onRequestRegisterParticleRemove(int particleId); //should NOT be used to remove one of particles in use! use onIspareticleInUse first
+  void onRequestRemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+
+private:
   void clearModel();
   void enforceCommonProperties();
   void importFromOldStandardJson(QJsonObject& json, bool fPrScintCont);

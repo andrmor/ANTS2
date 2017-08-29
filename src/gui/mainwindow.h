@@ -462,7 +462,6 @@ private:
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
     void ViewChangeRelFactors(QString options);    
-    void RemoveParticle(int Id);
 
 private slots:
     void timerTimeout(); //timer-based update of Root events

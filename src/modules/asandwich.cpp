@@ -1446,3 +1446,64 @@ void ASandwich::onMaterialsChanged(const QStringList MaterialList)
   emit RequestGuiUpdate();  
 }
 
+void ASandwich::onIsParticleInUse1(int particleId, bool &bInUse, QString &MonitorNames)
+{
+  bInUse = false;
+  MonitorNames.clear();
+
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+        {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+        }
+      const ATypeMonitorObject* mon = static_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+
+      if (mon->isParticleInUse(particleId))
+        {
+          bInUse = true;
+          if (!MonitorNames.isEmpty()) MonitorNames += ", ";
+          MonitorNames += monObj->Name;
+        }
+    }
+}
+
+void ASandwich::onRequestRegisterParticleRemove(int particleId)
+{
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+      {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+      }
+
+      ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
+
+      if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+    }
+
+  //QJsonObject json;
+  //writeToJson(json);
+  //emit RequestUpdateSourcesInConfig(json);
+}
+
+void ASandwich::onRequestRemoveParticle(int particleId)
+{
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+      {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+      }
+
+      ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
+
+      if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+    }
+}

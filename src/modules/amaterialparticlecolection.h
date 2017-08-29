@@ -63,7 +63,7 @@ public:
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
-  bool RemoveParticle(int particleId, QString* errorText=0);
+  bool RemoveParticle1(int particleId, QString* errorText=0);
   QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
   int getNeutronIndex() const; //returns -1 if not in the collection
 
@@ -94,6 +94,9 @@ public:
   //if not in range, the first material index with such a problem is returned.
   // -1 is returned if there are no errors
 
+  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames);
+  void RemoveParticle(int particleId);  // should NOT be used directly - use RemoveParticle method of AConfiguration
+
 private:
   int ConflictingMaterialIndex; //used by CheckMaterial function
   int ConflictingParticleIndex; //used by CheckMaterial function
@@ -112,8 +115,10 @@ signals:
   void MaterialsChanged(const QStringList);
   void ParticleCollectionChanged();
   void IsParticleInUseBySources(int particleId, bool& fInUse, QString* SourceName);
+  void IsParticleInUseByMonitors(int particleId, bool& fInUse, QString* MonitorName);
   void RequestRegisterParticleRemove(int particleId);
   void RequestClearParticleStack();
+  void RequestUpdateDetectorJsonInConfig();
 
 };
 

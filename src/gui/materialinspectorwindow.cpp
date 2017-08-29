@@ -440,7 +440,7 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
   QString fileName;
   fileName = QFileDialog::getOpenFileName(this, "Load dE/dr data", MW->GlobSet->LastOpenDir, "Data files (*.dat)");
 
-  if (!fileName.isEmpty()) return;
+  if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
 
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -462,9 +462,9 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
   double Multiplier;
   switch (ui->cobStoppingPowerUnits->currentIndex())
     {
-    case (0): {Multiplier = 0.001; break;}
-    case (1): {Multiplier = 1.0; break;}
-    case (2): {Multiplier = 1000.0; break;}
+    case (0): {Multiplier = 0.001; break;}  //eV  -> keV
+    case (1): {Multiplier = 1.0; break;}    //keV -> keV
+    case (2): {Multiplier = 1000.0; break;} //MeV -> keV
     default: {Multiplier = 1.0;}    //just to avoid warning
     }
 
@@ -476,12 +476,16 @@ void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
       QString line = in.readLine();
       QStringList fields = line.split(rx);
 
-      //*** TO ADD error control
-      double x = fields[0].toDouble();
-      double f = fields[1].toDouble();
+      if (fields.size() != 2) continue;
 
-      tmpMaterial.MatParticle[particleId].InteractionDataX.append(x);
-      tmpMaterial.MatParticle[particleId].InteractionDataF.append(f*Multiplier);
+      bool bOK;
+      double x = fields[0].toDouble(&bOK);
+      if (!bOK) continue;
+      double f = fields[1].toDouble(&bOK);
+      if (!bOK) continue;
+
+      tmpMaterial.MatParticle[particleId].InteractionDataX.append(x * Multiplier);
+      tmpMaterial.MatParticle[particleId].InteractionDataF.append(f);
     }
   file.close();
   ui->pbShowStoppingPower->setEnabled(true);

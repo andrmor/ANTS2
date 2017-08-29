@@ -14,6 +14,7 @@
 #include "aqtmessageredirector.h"
 #include "particlesourcesclass.h"
 #include "anetworkmodule.h"
+#include "asandwich.h"
 
 // SIM
 #ifdef SIM
@@ -63,13 +64,19 @@ int main(int argc, char *argv[])
     DetectorClass Detector(&Config);
     Config.SetDetector(&Detector);
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, &Config, &AConfiguration::UpdateParticlesJson);
+    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::RequestUpdateDetectorJsonInConfig, &Detector, &DetectorClass::updateDetectorJsonInConfig);
     QObject::connect(&Detector, &DetectorClass::requestClearEventsData, &EventsDataHub, &EventsDataClass::clear);
     //qDebug() << "___> Detector created";
 
 #ifdef SIM
     ASimulationManager SimulationManager(&EventsDataHub, &Detector);
+    Config.SetParticleSources(SimulationManager.ParticleSources);
+    //in remove particle -> monitors
+    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::RequestRegisterParticleRemove, Detector.Sandwich, &ASandwich::onRequestRegisterParticleRemove);
+    //in remove particle -> sources
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::IsParticleInUseBySources, SimulationManager.ParticleSources, &ParticleSourcesClass::onIsParticleInUse);
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::RequestRegisterParticleRemove, SimulationManager.ParticleSources, &ParticleSourcesClass::onRequestRegisterParticleRemove);
+
     QObject::connect(SimulationManager.ParticleSources, &ParticleSourcesClass::RequestUpdateSourcesInConfig, &Config, &AConfiguration::UpdateSourcesJson);
     //qDebug() << "___> Simulation manager created";
 #endif

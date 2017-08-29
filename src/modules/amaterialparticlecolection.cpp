@@ -477,7 +477,7 @@ bool AMaterialParticleCollection::UpdateParticle(int particleId, QString name, A
   return true;
 }
 
-bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorText)
+bool AMaterialParticleCollection::RemoveParticle1(int particleId, QString *errorText)
 {
     QString s;
     if (isParticleOneOfSecondary(particleId, &s))
@@ -493,6 +493,13 @@ bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorT
     {
         if (errorText)
             *errorText = "This particle is currently in use by the particle source:\n" + s;
+        return false;
+    }
+    emit IsParticleInUseByMonitors(particleId, fInUse, &s);
+    if (fInUse)
+    {
+        if (errorText)
+            *errorText = "This particle is currently in use by the monitor:\n" + s;
         return false;
     }
 
@@ -524,14 +531,17 @@ bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorT
     }
 
     //shifting all Ids in the particle sources
-    emit RequestRegisterParticleRemove(particleId);   //also requests update of sources in JSON and simulation gui update
+    emit RequestRegisterParticleRemove(particleId);   //affects monitors and sources; also requests update of sources in JSON and simulation gui update
     //requesting to clear ParticleStack if in use in GUI
     emit RequestClearParticleStack();
 
     //removing
     delete ParticleCollection[particleId];
     ParticleCollection.remove(particleId);
-    emit ParticleCollectionChanged();
+
+    emit RequestUpdateDetectorJsonInConfig();  //emit ParticleCollectionChanged();
+
+
     return true;
 }
 
@@ -948,6 +958,56 @@ void AMaterialParticleCollection::OnRequestListOfParticles(QStringList &definedP
 {
     definedParticles.clear();
     for (int i=0; i<ParticleCollection.size(); i++)
-        definedParticles << ParticleCollection.at(i)->ParticleName;
+      definedParticles << ParticleCollection.at(i)->ParticleName;
 }
 
+void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames)
+{
+  bInUse = false;
+  MaterialNames.clear();
+
+  for (int m=0; m<MaterialCollectionData.size(); m++)
+      for (int p=0; p<ParticleCollection.size(); p++)
+      {
+          if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
+          for (int iterm=0; iterm<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); iterm++)
+              if (MaterialCollectionData[m]->MatParticle[p].Terminators.at(iterm).isParticleOneOfSecondaries(particleId))
+              {
+                  bInUse = true;
+                  if (!MaterialNames.isEmpty()) MaterialNames += ", ";
+                  MaterialNames += MaterialCollectionData[m]->name;
+              }
+      }
+}
+
+void AMaterialParticleCollection::RemoveParticle(int particleId)
+{
+    //shifting down all affected particle indexes
+    for (int m=0; m<MaterialCollectionData.size(); m++)
+    {
+        for (int p=0; p<ParticleCollection.size(); p++)
+        {
+            //replacing generated particles
+            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
+                MaterialCollectionData[m]->MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
+
+            //shifting down all particles above Id
+            if (p > particleId) MaterialCollectionData[m]->MatParticle[p-1] = MaterialCollectionData[m]->MatParticle[p];
+        }
+        MaterialCollectionData[m]->MatParticle.resize(ParticleCollection.size()-1);
+    }
+    //same with the tmpMaterial
+    for (int p=0; p<ParticleCollection.size(); p++)
+    {
+        //replacing generated particles
+        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size(); s++)
+            tmpMaterial.MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
+
+        //shifting down all particles above Id
+        if (p > particleId) tmpMaterial.MatParticle[p-1] = tmpMaterial.MatParticle[p];
+    }
+
+    //removing
+    delete ParticleCollection[particleId];
+    ParticleCollection.remove(particleId);
+}

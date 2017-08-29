@@ -4521,7 +4521,7 @@ of the refracted beam:</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabParticles">
        <attribute name="title">

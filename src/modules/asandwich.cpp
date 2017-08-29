@@ -488,7 +488,15 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     }
     else
     {
-        TGeoMedium* med = (*MaterialCollection)[obj->Material]->GeoMed;
+        int iMat = obj->Material;
+        if (obj->ObjectType->isMonitor())
+          {
+            if (obj->Container)
+              iMat = obj->Container->Material;
+            else qWarning() << "Monitor without container detected!";
+            //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
+          }
+        TGeoMedium* med = (*MaterialCollection)[iMat]->GeoMed;
 
         //creating volume
         if (obj->ObjectType->isComposite())

@@ -93,7 +93,6 @@ public:
 
 public slots:
   void onRequestRegisterGeoManager();
-  void updateDetectorJsonInConfig();
 
 private:
   //reads

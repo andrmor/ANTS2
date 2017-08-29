@@ -141,15 +141,9 @@ public:
   TVector3 GenerateRandomDirection();  
   void checkLimitedToMaterial(ParticleSourceStructure *s);
 
+  //for remove particle from configuration
   void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIspareticleInUse first
-
-public slots:
-  void onIsParticleInUse(int particleId, bool& fAnswer, QString* SourceName);
-  void onIsParticleInUse1(int particleId, bool& bInUse, QString& SourceNames);
-  void onRequestRegisterParticleRemove(int particleId); //should NOT be used to remove one of particles in use! use onIspareticleInUse first  
-
-signals:
-  void RequestUpdateSourcesInConfig(QJsonObject &sourcesJson);
+  void IsParticleInUse(int particleId, bool& bInUse, QString& SourceNames);
 
 private:  
   //external resources - pointers

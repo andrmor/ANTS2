@@ -196,7 +196,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QObject::connect(Rwindow, SIGNAL(StopRequested()), ReconstructionManager, SLOT(requestStop()));
 
-    QObject::connect(MpCollection, &AMaterialParticleCollection::RequestClearParticleStack, this, &MainWindow::on_pbClearAllStack_clicked);
     QObject::connect(Config, &AConfiguration::RequestClearParticleStack, this, &MainWindow::on_pbClearAllStack_clicked);
 
 #ifdef ANTS_FANN

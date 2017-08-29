@@ -362,16 +362,16 @@ const QString AConfiguration::RemoveParticle(int particleId)
   Detector->MpCollection->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is a secondary particle defined in neutron capture.\nIt appears in the following material(s):\n"+s;
 
-  ParticleSources->onIsParticleInUse1(particleId, bInUse, s);
+  ParticleSources->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is in use by the particle source(s):\n" + s;
 
-  Detector->Sandwich->onIsParticleInUse1(particleId, bInUse, s);
+  Detector->Sandwich->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is currently in use by the monitor(s):\n" + s;
 
   //this particle is not in use, so can be removed
   Detector->MpCollection->RemoveParticle(particleId);
   ParticleSources->RemoveParticle(particleId);
-  Detector->Sandwich->onRequestRemoveParticle(particleId);
+  Detector->Sandwich->RemoveParticle(particleId);
 
   //updating JSON config
     //detector - MpCollection and Monitors

@@ -413,26 +413,7 @@ TVector3 ParticleSourcesClass::GenerateRandomDirection()
   return TVector3(a*scale, b*scale, -1.0 + 8.0 * r2 );
 }
 
-void ParticleSourcesClass::onIsParticleInUse(int particleId, bool& fAnswer, QString *SourceName)
-{
-    for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
-      {
-        ParticleSourceStructure* ps = ParticleSourcesData[isource];
-        for (int ip = 0; ip<ps->GunParticles.size(); ip++)
-          {
-            if ( particleId == ps->GunParticles[ip]->ParticleId )
-              {
-                fAnswer = true;
-                if (SourceName) *SourceName = ps->name;
-                return;
-              }
-          }
-      }
-    fAnswer = false;
-    if (SourceName) *SourceName = "";
-}
-
-void ParticleSourcesClass::onIsParticleInUse1(int particleId, bool &bInUse, QString &SourceNames)
+void ParticleSourcesClass::IsParticleInUse(int particleId, bool &bInUse, QString &SourceNames)
 {
   bInUse = false;
   SourceNames.clear();
@@ -450,21 +431,6 @@ void ParticleSourcesClass::onIsParticleInUse1(int particleId, bool &bInUse, QStr
             }
         }
     }
-}
-
-void ParticleSourcesClass::onRequestRegisterParticleRemove(int particleId)
-{
-    for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
-      {
-        ParticleSourceStructure* ps = ParticleSourcesData[isource];
-        for (int ip = 0; ip<ps->GunParticles.size(); ip++)
-            if ( ps->GunParticles[ip]->ParticleId > particleId)
-                ps->GunParticles[ip]->ParticleId--;
-      }
-
-    QJsonObject json;
-    writeToJson(json);
-    emit RequestUpdateSourcesInConfig(json);
 }
 
 void ParticleSourcesClass::RemoveParticle(int particleId)

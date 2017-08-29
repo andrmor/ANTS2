@@ -102,27 +102,6 @@ const AParticle *AMaterialParticleCollection::getParticle(int particleIndex) con
   return ParticleCollection.at(particleIndex);
 }
 
-bool AMaterialParticleCollection::isParticleOneOfSecondary(int iParticle, QString *matNames) const
-{
-  bool fFound = false;
-  QString tmpStr;
-
-  for (int m=0; m<MaterialCollectionData.size(); m++)
-      for (int p=0; p<ParticleCollection.size(); p++)
-      {
-          if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
-          for (int iterm=0; iterm<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); iterm++)
-              if (MaterialCollectionData[m]->MatParticle[p].Terminators.at(iterm).isParticleOneOfSecondaries(iParticle))
-              {
-                  fFound = true;
-                  if (!tmpStr.isEmpty()) tmpStr += ",";
-                  tmpStr += MaterialCollectionData[m]->name;
-              }
-      }
-  if (matNames) *matNames = tmpStr;
-  return fFound;
-}
-
 void AMaterialParticleCollection::clearMaterialCollection()
 {
   for (int i=0; i<MaterialCollectionData.size(); i++)
@@ -475,74 +454,6 @@ bool AMaterialParticleCollection::UpdateParticle(int particleId, QString name, A
   p->mass = mass;
   emit ParticleCollectionChanged();
   return true;
-}
-
-bool AMaterialParticleCollection::RemoveParticle1(int particleId, QString *errorText)
-{
-    QString s;
-    if (isParticleOneOfSecondary(particleId, &s))
-    {
-        if (errorText)
-            *errorText = "This particle is a secondary particle defined in neutron capture\nIt appears in the following materials:\n"+s;
-        return false;
-    }
-
-    bool fInUse = true;
-    emit IsParticleInUseBySources(particleId, fInUse, &s);
-    if (fInUse)
-    {
-        if (errorText)
-            *errorText = "This particle is currently in use by the particle source:\n" + s;
-        return false;
-    }
-    emit IsParticleInUseByMonitors(particleId, fInUse, &s);
-    if (fInUse)
-    {
-        if (errorText)
-            *errorText = "This particle is currently in use by the monitor:\n" + s;
-        return false;
-    }
-
-    //not in use, can remove!
-
-    //shifting all Id down so it is possible to remove this (Id) particle
-    for (int m=0; m<MaterialCollectionData.size(); m++)
-    {
-        for (int p=0; p<ParticleCollection.size(); p++)
-        {
-            //replacing generated particles
-            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
-                MaterialCollectionData[m]->MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
-
-            //shifting down all particles above Id
-            if (p > particleId) MaterialCollectionData[m]->MatParticle[p-1] = MaterialCollectionData[m]->MatParticle[p];
-        }
-        MaterialCollectionData[m]->MatParticle.resize(ParticleCollection.size()-1);
-    }
-    //same with the tmpMaterial
-    for (int p=0; p<ParticleCollection.size(); p++)
-    {
-        //replacing generated particles
-        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size(); s++)
-            tmpMaterial.MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
-
-        //shifting down all particles above Id
-        if (p > particleId) tmpMaterial.MatParticle[p-1] = tmpMaterial.MatParticle[p];
-    }
-
-    //shifting all Ids in the particle sources
-    emit RequestRegisterParticleRemove(particleId);   //affects monitors and sources; also requests update of sources in JSON and simulation gui update
-    //requesting to clear ParticleStack if in use in GUI
-    emit RequestClearParticleStack();
-
-    //removing
-    delete ParticleCollection[particleId];
-    ParticleCollection.remove(particleId);
-
-    emit RequestUpdateDetectorJsonInConfig();  //emit ParticleCollectionChanged();
-
-
-    return true;
 }
 
 int AMaterialParticleCollection::getNeutronIndex() const

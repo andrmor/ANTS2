@@ -49,7 +49,6 @@ public:
   int getParticleCharge(int particleIndex) const;
   double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
-  bool isParticleOneOfSecondary(int iParticle, QString* matNames = 0) const; //optional matNames - if provided,returns there a list of materials where this particle is secondary
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal=false);
@@ -63,7 +62,6 @@ public:
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
-  bool RemoveParticle1(int particleId, QString* errorText=0);
   QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
   int getNeutronIndex() const; //returns -1 if not in the collection
 
@@ -114,11 +112,6 @@ public slots:
 signals:
   void MaterialsChanged(const QStringList);
   void ParticleCollectionChanged();
-  void IsParticleInUseBySources(int particleId, bool& fInUse, QString* SourceName);
-  void IsParticleInUseByMonitors(int particleId, bool& fInUse, QString* MonitorName);
-  void RequestRegisterParticleRemove(int particleId);
-  void RequestClearParticleStack();
-  void RequestUpdateDetectorJsonInConfig();
 
 };
 

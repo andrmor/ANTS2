@@ -49,7 +49,7 @@ void ANeutronInfoDialog::update()
     if (!bOK) return; //because triggeres on_change
 
     energy *= 1.0e-6; // meV -> keV
-    qDebug() << energy;
+    //      qDebug() << "Energy:" << energy;
 
     if (!mat) return;
     if (mat->MatParticle.isEmpty()) return;
@@ -117,7 +117,7 @@ void ANeutronInfoDialog::update()
 
 void ANeutronInfoDialog::updateIsotopeTable()
 {
-    qDebug() << "Updating isotope table";
+    //      qDebug() << "Updating isotope table";
 
     ui->tabwIso->clearContents();
 
@@ -149,10 +149,10 @@ void ANeutronInfoDialog::updateIsotopeTable()
             QString s = "-off-";
             if (bShowAbs)
             {
-                if (!termAb.AbsorptionElements.at(row).Energy.isEmpty())
+                if (!termAb.IsotopeRecords.at(row).Energy.isEmpty())
                 {
-                    double cs_abs = GetInterpolatedValue(energy, &termAb.AbsorptionElements.at(row).Energy, &termAb.AbsorptionElements.at(row).CrossSection, bLogLog);
-                    double fraction = cs_abs * termAb.AbsorptionElements.at(row).MolarFraction / totCS_abs * 100.0;
+                    double cs_abs = GetInterpolatedValue(energy, &termAb.IsotopeRecords.at(row).Energy, &termAb.IsotopeRecords.at(row).CrossSection, bLogLog);
+                    double fraction = cs_abs * termAb.IsotopeRecords.at(row).MolarFraction / totCS_abs * 100.0;
                     s = QString::number(fraction, 'g', 4);
                 }
                 else s = "0";
@@ -163,10 +163,10 @@ void ANeutronInfoDialog::updateIsotopeTable()
             s = "-off-";
             if (bShowScat)
             {
-                if (!termSc.ScatterElements.at(row).Energy.isEmpty())
+                if (!termSc.IsotopeRecords.at(row).Energy.isEmpty())
                 {
-                    double cs_scat = GetInterpolatedValue(energy, &termSc.ScatterElements.at(row).Energy, &termSc.ScatterElements.at(row).CrossSection, bLogLog);
-                    double fraction = cs_scat * termSc.ScatterElements.at(row).MolarFraction/ totCS_scat * 100.0;
+                    double cs_scat = GetInterpolatedValue(energy, &termSc.IsotopeRecords.at(row).Energy, &termSc.IsotopeRecords.at(row).CrossSection, bLogLog);
+                    double fraction = cs_scat * termSc.IsotopeRecords.at(row).MolarFraction/ totCS_scat * 100.0;
                     s = QString::number(fraction, 'g', 4);
                 }
                 else s = "0";

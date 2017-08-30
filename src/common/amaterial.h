@@ -88,13 +88,11 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<double> PartialCrossSectionEnergy;
 
   // exclusive for neutrons
-  QVector<AAbsorptionElement> AbsorptionElements;  // exclusive for capture
-  QVector<AElasticScatterElement> ScatterElements; // exclusive for ellastic
+  QVector<ANeutronInteractionElement> IsotopeRecords;
 
   void UpdateNeutronCrossSections(bool bUseLogLog);   //
 
-  AAbsorptionElement* getCaptureElement(int index);  //0 if wrong index
-  AElasticScatterElement* getElasticScatterElement(int index);  //0 if wrong index
+  ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
   void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);

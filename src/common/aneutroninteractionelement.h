@@ -7,44 +7,6 @@
 class QJsonObject;
 class AMaterialParticleCollection;
 
-// --- base class ---
-
-class ANeutronInteractionElement  // basic class for capture and elastic scattering
-{
-public:
-    ANeutronInteractionElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
-        Name(IsotopeSymbol), Mass(Mass), MolarFraction(MolarFraction) {}
-    ANeutronInteractionElement() : Name("Undefined"), Mass(777), MolarFraction(0) {}
-
-    QString Name;
-    int Mass;
-    double MolarFraction;
-
-    QVector<double> Energy;
-    QVector<double> CrossSection;
-
-protected:
-    void writeToJson(QJsonObject& json) const;  // not to be used directly!!!
-    void readFromJson(const QJsonObject& json); // not to be used directly!!!
-};
-
-// --- elastic ---
-
-class AElasticScatterElement  : public ANeutronInteractionElement
-{
-public:
-    AElasticScatterElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
-        ANeutronInteractionElement(IsotopeSymbol, Mass, MolarFraction) {}
-    AElasticScatterElement() :
-        ANeutronInteractionElement() {}
-
-    void writeToJson(QJsonObject& json) const;
-    const QJsonObject writeToJson() const;
-    void readFromJson(const QJsonObject& json);
-};
-
-// --- absorption ---
-
 class AAbsorptionGeneratedParticle
 {
 public:
@@ -75,19 +37,25 @@ public:
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 
-class AAbsorptionElement : public ANeutronInteractionElement
+class ANeutronInteractionElement  // basic class for capture and elastic scattering
 {
 public:
-    QVector<ADecayScenario> DecayScenarios;
+    ANeutronInteractionElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
+        Name(IsotopeSymbol), Mass(Mass), MolarFraction(MolarFraction) {}
+    ANeutronInteractionElement() : Name("Undefined"), Mass(777), MolarFraction(0) {}
 
-    AAbsorptionElement(QString IsotopeSymbol, int Mass, double MolarFraction) :
-        ANeutronInteractionElement(IsotopeSymbol, Mass, MolarFraction) {}
-    AAbsorptionElement() :
-        ANeutronInteractionElement() {}
+    QString Name;
+    int Mass;
+    double MolarFraction;
+
+    QVector<double> Energy;
+    QVector<double> CrossSection;
+
+    QVector<ADecayScenario> DecayScenarios;  // only for absorption
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
-    void readFromJson(QJsonObject& json, AMaterialParticleCollection *MpCollection);
+    void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 
 #endif // ANEUTRONINTERACTIONELEMENT_H

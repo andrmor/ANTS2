@@ -374,7 +374,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 //      qDebug()<<"------ neutron absorption triggered!";
                                 //nothing is added to the EnergyVector, but the result of capture can be generation of secondary particles
                                 //first select which of the isotopes captured neutron
-                                const QVector<AAbsorptionElement> &elements = term.AbsorptionElements;
+                                const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
                                 if (!elements.isEmpty())
                                 {
                                     int iselected = 0;
@@ -419,7 +419,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                           rnd -= thisOne;
                                         }
                                     }
-                                    const AAbsorptionElement& el = elements.at(iselected);
+                                    const ANeutronInteractionElement& el = elements.at(iselected);
                                     //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
 
                                     // post-capture effect
@@ -506,7 +506,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                             case (NeutralTerminatorStructure::ElasticScattering): //4
                               {
                                 //      qDebug()<<"------ elastic scattering triggered!";
-                                const QVector<AElasticScatterElement> &elements = term.ScatterElements;
+                                const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
 
                                 //selecting element according to its contribution to the total cross-section
                                 //      qDebug() << "Def elements:" << elements.size();

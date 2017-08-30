@@ -6,7 +6,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 
-ANeutronReactionsConfigurator::ANeutronReactionsConfigurator(AAbsorptionElement *element, QStringList DefinedParticles, QWidget *parent) :
+ANeutronReactionsConfigurator::ANeutronReactionsConfigurator(ANeutronInteractionElement *element, QStringList DefinedParticles, QWidget *parent) :
     QDialog(parent), ui(new Ui::ANeutronReactionsConfigurator), Element(element), DefinedParticles(DefinedParticles)
 {
     ui->setupUi(this);

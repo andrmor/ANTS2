@@ -2262,8 +2262,8 @@ void MaterialInspectorWindow::FillNeutronTable()
             if (bCapture)
             {
                 NeutralTerminatorStructure& t = Terminators.first();
-                AAbsorptionElement* absEl = t.getCaptureElement(row);
-                //      qDebug() << "index:"<<row << "Defined absorption elements:" << t.AbsorptionElements.size();
+                ANeutronInteractionElement* absEl = t.getNeutronInteractionElement(row);
+                //      qDebug() << "index:"<<row << "Defined absorption elements:" << t.IsotopeRecords.size();
                 if (!absEl)
                 {
                     message("Critical error - absorption element not found!", this);
@@ -2300,8 +2300,8 @@ void MaterialInspectorWindow::FillNeutronTable()
             if (bElastic)
             {
                 NeutralTerminatorStructure& t = Terminators.last();
-                AElasticScatterElement* scatEl = t.getElasticScatterElement(row);
-                //      qDebug() << "index:"<<row << "Defined scatter elements:" << t.ScatterElements.size();
+                ANeutronInteractionElement* scatEl = t.getNeutronInteractionElement(row);
+                //      qDebug() << "index:"<<row << "Defined scatter elements:" << t.IsotopeRecords.size();
                 if (!scatEl)
                 {
                     message("Critical error - elastic scatter element not found!", this);
@@ -2357,13 +2357,13 @@ void MaterialInspectorWindow::autoloadMissingCrossSectionData()
 
     if (bCapture)
     {
-        for (int iEl = 0; iEl<termAbs.AbsorptionElements.size(); iEl++)
-            autoLoadCrossSection( &termAbs.AbsorptionElements[iEl], "absorption");
+        for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
+            autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
     }
     if (bElastic)
     {
-        for (int iEl = 0; iEl<termScat.ScatterElements.size(); iEl++)
-            autoLoadCrossSection( &termScat.ScatterElements[iEl], "elastic scattering");
+        for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
+            autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
     }
 }
 
@@ -2402,24 +2402,24 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     if (Action.contains("Elastic"))
     {
         term = &Terminators[1];
-        if (iIndex<0 || iIndex>=term->ScatterElements.size())
+        if (iIndex<0 || iIndex>=term->IsotopeRecords.size())
         {
             message("Bad index!", this);
             return;
         }
-        element = &term->ScatterElements[iIndex];
+        element = &term->IsotopeRecords[iIndex];
         yTitle = "Elastic scattering cross-section, barns";
         target = "elastic scattering";
     }
     else //capture
     {
         term = &Terminators[0];
-        if (iIndex<0 || iIndex>=term->AbsorptionElements.size())
+        if (iIndex<0 || iIndex>=term->IsotopeRecords.size())
         {
             message("Bad index!", this);
             return;
         }
-        element = &term->AbsorptionElements[iIndex];
+        element = &term->IsotopeRecords[iIndex];
         yTitle = "Absorption cross-section, barns";
         target = "absorption";
     }
@@ -2473,7 +2473,7 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
     {
         QStringList DefinedParticles;
         MW->MpCollection->OnRequestListOfParticles(DefinedParticles);
-        ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].AbsorptionElements[iIndex], DefinedParticles, this);
+        ANeutronReactionsConfigurator* d = new ANeutronReactionsConfigurator(&Terminators[0].IsotopeRecords[iIndex], DefinedParticles, this);
         int res = d->exec();
         delete d;
         if (res != 0)

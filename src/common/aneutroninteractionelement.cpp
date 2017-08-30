@@ -6,52 +6,6 @@
 #include <QJsonArray>
 #include <QDebug>
 
-// --- base ---
-
-void ANeutronInteractionElement::writeToJson(QJsonObject &json) const
-{
-    json["Name"] = Name;
-    json["Mass"] = Mass;
-    json["MolarFraction"] = MolarFraction;
-
-    QJsonArray ar;
-    writeTwoQVectorsToJArray(Energy, CrossSection, ar);
-    json["CrossSection"] = ar;
-}
-
-void ANeutronInteractionElement::readFromJson(const QJsonObject &json)
-{
-    parseJson(json, "Name", Name);
-    parseJson(json, "Mass", Mass);
-    parseJson(json, "MolarFraction", MolarFraction);
-
-    Energy.clear();
-    CrossSection.clear();
-    QJsonArray ar = json["CrossSection"].toArray();
-    readTwoQVectorsFromJArray(ar, Energy, CrossSection);
-}
-
-// --- elastic ---
-
-void AElasticScatterElement::writeToJson(QJsonObject &json) const
-{
-   ANeutronInteractionElement::writeToJson(json);
-}
-
-const QJsonObject AElasticScatterElement::writeToJson() const
-{
-    QJsonObject json;
-    AElasticScatterElement::writeToJson(json);
-    return json;
-}
-
-void AElasticScatterElement::readFromJson(const QJsonObject &json)
-{
-    ANeutronInteractionElement::readFromJson(json);
-}
-
-// --- capture ---
-
 void AAbsorptionGeneratedParticle::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCollection) const
 {
     if (ParticleId<0 || ParticleId>=MpCollection->countParticles())
@@ -111,9 +65,15 @@ void ADecayScenario::readFromJson(const QJsonObject &json, AMaterialParticleColl
     }
 }
 
-void AAbsorptionElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
+void ANeutronInteractionElement::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const
 {
-    ANeutronInteractionElement::writeToJson(json);
+    json["Name"] = Name;
+    json["Mass"] = Mass;
+    json["MolarFraction"] = MolarFraction;
+
+    QJsonArray ar;
+    writeTwoQVectorsToJArray(Energy, CrossSection, ar);
+    json["CrossSection"] = ar;
 
     QJsonArray crArr;
     for (const ADecayScenario& cr : DecayScenarios)
@@ -121,19 +81,26 @@ void AAbsorptionElement::writeToJson(QJsonObject &json, AMaterialParticleCollect
     json["DecayScenarios"] = crArr;
 }
 
-const QJsonObject AAbsorptionElement::writeToJson(AMaterialParticleCollection *MpCollection) const
+const QJsonObject ANeutronInteractionElement::writeToJson(AMaterialParticleCollection *MpCollection) const
 {
-    QJsonObject js;
-    writeToJson(js, MpCollection);
-    return js;
+    QJsonObject json;
+    writeToJson(json, MpCollection);
+    return json;
 }
 
-void AAbsorptionElement::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpCollection)
+void ANeutronInteractionElement::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
-    ANeutronInteractionElement::readFromJson(json);
+    parseJson(json, "Name", Name);
+    parseJson(json, "Mass", Mass);
+    parseJson(json, "MolarFraction", MolarFraction);
+
+    Energy.clear();
+    CrossSection.clear();
+    QJsonArray ar = json["CrossSection"].toArray();
+    readTwoQVectorsFromJArray(ar, Energy, CrossSection);
 
     DecayScenarios.clear();
-    QJsonArray ar = json["DecayScenarios"].toArray();
+    ar = json["DecayScenarios"].toArray();
     for (int i=0; i<ar.size(); i++)
     {
         QJsonObject js = ar[i].toObject();

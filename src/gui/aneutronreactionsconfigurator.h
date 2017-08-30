@@ -17,7 +17,7 @@ class ANeutronReactionsConfigurator : public QDialog
     Q_OBJECT
 
 public:
-    explicit ANeutronReactionsConfigurator(AAbsorptionElement* Element, QStringList DefinedParticles, QWidget *parent = 0);
+    explicit ANeutronReactionsConfigurator(ANeutronInteractionElement* Element, QStringList DefinedParticles, QWidget *parent = 0);
     ~ANeutronReactionsConfigurator();
 
 private slots:
@@ -30,8 +30,8 @@ public slots:
 
 private:
     Ui::ANeutronReactionsConfigurator *ui;
-    AAbsorptionElement* Element;
-    AAbsorptionElement  Element_LocalCopy;
+    ANeutronInteractionElement* Element;
+    ANeutronInteractionElement  Element_LocalCopy;
     QStringList DefinedParticles;
 
     void updateDecayScenarios();

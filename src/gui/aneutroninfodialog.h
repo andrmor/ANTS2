@@ -45,7 +45,7 @@ private:
 
     void update();
     void updateIsotopeTable();
-    void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, TString& xTitle);
+    void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, const TString &xTitle);
 };
 
 class ATableWidgetDoubleItem : public QTableWidgetItem

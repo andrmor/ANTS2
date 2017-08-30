@@ -72,7 +72,7 @@ void ANeutronInfoDialog::update()
     double cs_abs = 0;
     QString s_cs = "-off-";
     QString s_mfp = "-off-";
-    if (bShowAbs)
+    if (bShowAbs && !termAb.PartialCrossSectionEnergy.isEmpty())
     {
         cs_abs = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
         s_cs = QString::number(cs_abs, 'g', 4);
@@ -89,7 +89,7 @@ void ANeutronInfoDialog::update()
     double cs_scat = 0;
     s_cs = "-off-";
     s_mfp = "-off-";
-    if (bShowScat)
+    if (bShowScat && !termSc.PartialCrossSectionEnergy.isEmpty())
     {
         cs_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
         s_cs = QString::number(cs_scat, 'g', 4);
@@ -127,12 +127,15 @@ void ANeutronInfoDialog::updateIsotopeTable()
     ui->tabwIso->setRowCount(mat->ChemicalComposition.countIsotopes());
 
     double energy = ui->ledEnergy->text().toDouble() * 1.0e-6;
-    double totCS_abs  = -1.0;
-    if (bShowAbs) totCS_abs  = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
-    double totCS_scat = -1.0;
-    if (bShowScat) totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
+    double totCS_abs  = 0;
+    if (bShowAbs)
+      if (!termAb.PartialCrossSectionEnergy.isEmpty())
+        totCS_abs  = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
+    double totCS_scat = 0;
+    if (bShowScat)
+      if (!termSc.PartialCrossSectionEnergy.isEmpty())
+        totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
     //      qDebug() << totCS_abs << totCS_scat;
-
 
     int row = 0;
     for (int iElement=0; iElement<mat->ChemicalComposition.countElements(); iElement++)
@@ -252,7 +255,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
     drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Ellastic scattering cross-section, barns"));
 }
 
-void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const QVector<double>& cs, TString &xTitle)
+void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const QVector<double>& cs, const TString &xTitle)
 {
     if (energy.isEmpty()) return;
 

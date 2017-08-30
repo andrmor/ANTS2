@@ -84,7 +84,7 @@ QString AMaterialComposition::setCompositionString(const QString composition)
 
         //      qDebug() << Formula;
         bool bReadingElementName = true;
-        QString tmp = Formula[0];
+        QString tmp = Formula.at(0);
         QString Element;
         for (int i=1; i<Formula.size(); i++)
         {
@@ -100,11 +100,11 @@ QString AMaterialComposition::setCompositionString(const QString composition)
                 {
                     if (tmp.isEmpty()) return "Format error in composition: unrecognized character";
                     Element = tmp;
-                    if (c == ":" || (c.isLetter() && c.isUpper()))
+                    if (c == ':' || (c.isLetter() && c.isUpper()))
                     {
                         if (map.contains(Element)) map[Element] += weight * 1.0;
                         else map[Element] = weight * 1.0;
-                        if (c == ":") break;
+                        if (c == ':') break;
                     }
                     tmp = QString(c);
                     if (c.isDigit()) bReadingElementName = false;

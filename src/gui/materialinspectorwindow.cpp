@@ -2436,7 +2436,8 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
           }
 
         MW->GraphWindow->ShowAndFocus();
-        TString title = element->Name.toLocal8Bit() + " - ";
+        TString title = element->Name.toLocal8Bit().data();
+        title += " - ";
         title += element->Mass;
         TGraph* gr = MW->GraphWindow->ConstructTGraph(x, y, title, "Energy, meV", yTitle, kRed, 2, 1, kRed, 0, 1);
         MW->GraphWindow->Draw(gr, "AP");

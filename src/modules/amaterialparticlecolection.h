@@ -49,7 +49,6 @@ public:
   int getParticleCharge(int particleIndex) const;
   double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
-  bool isParticleOneOfSecondary(int iParticle, QString* matNames = 0) const; //optional matNames - if provided,returns there a list of materials where this particle is secondary
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal=false);
@@ -63,13 +62,13 @@ public:
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
-  bool RemoveParticle(int particleId, QString* errorText=0);
+  QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
+  int getNeutronIndex() const; //returns -1 if not in the collection
 
   //tmpMaterial - related
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!
   void CopyTmpToMaterialCollection(); //creates a copy of all pointers // true is new material was added to material collection
   void CopyMaterialToTmp(int imat);
-  void RecalculateCaptureCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
 
   //json write/read handling
   void writeToJson(QJsonObject &json);
@@ -88,13 +87,13 @@ public:
   QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
   QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
 
-  QString CheckElasticScatterElements(const AMaterial *mat, int iPart, QString* Report) const;
-
-
   int CheckParticleEnergyInRange(int iPart, double Energy); //check all materials - if this particle is tracable and mat is not-tansparent,
   //check that the particle energy is withing the defined energy range of the total interaction.
   //if not in range, the first material index with such a problem is returned.
   // -1 is returned if there are no errors
+
+  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames);
+  void RemoveParticle(int particleId);  // should NOT be used directly - use RemoveParticle method of AConfiguration
 
 private:
   int ConflictingMaterialIndex; //used by CheckMaterial function
@@ -113,9 +112,6 @@ public slots:
 signals:
   void MaterialsChanged(const QStringList);
   void ParticleCollectionChanged();
-  void IsParticleInUseBySources(int particleId, bool& fInUse, QString* SourceName);
-  void RequestRegisterParticleRemove(int particleId);
-  void RequestClearParticleStack();
 
 };
 

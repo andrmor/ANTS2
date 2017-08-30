@@ -102,28 +102,6 @@ const AParticle *AMaterialParticleCollection::getParticle(int particleIndex) con
   return ParticleCollection.at(particleIndex);
 }
 
-bool AMaterialParticleCollection::isParticleOneOfSecondary(int iParticle, QString *matNames) const
-{
-  bool fFound = false;
-  QString tmpStr;
-
-  for (int m=0; m<MaterialCollectionData.size(); m++)
-    for (int p=0; p<ParticleCollection.size(); p++)
-      {
-        if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
-        for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
-          for (int v=0; v<MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-            if (iParticle == MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v])
-              {
-                fFound = true;
-                if (!tmpStr.isEmpty()) tmpStr += ",";
-                tmpStr += MaterialCollectionData[m]->name;
-              }
-      }
-  if (matNames) *matNames = tmpStr;
-  return fFound;
-}
-
 void AMaterialParticleCollection::clearMaterialCollection()
 {
   for (int i=0; i<MaterialCollectionData.size(); i++)
@@ -228,7 +206,6 @@ void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double
   MaterialCollectionData[index]->name = name;
 
   MaterialCollectionData[index]->density = density;
-  MaterialCollectionData[index]->atomicDensity = atomicDensity;
   MaterialCollectionData[index]->n = n;
   MaterialCollectionData[index]->abs = abs;
 
@@ -250,7 +227,6 @@ void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
   tmpMaterial.density = 0;
-  tmpMaterial.atomicDensity = -1;
   tmpMaterial.p1 = 0;
   tmpMaterial.p2 = 0;
   tmpMaterial.p3 = 0;
@@ -341,7 +317,7 @@ void AMaterialParticleCollection::CopyTmpToMaterialCollection()
     }
   //*MaterialCollectionData[index] = tmpMaterial; //updating material properties
   QJsonObject js;
-  tmpMaterial.writeToJson(js, &ParticleCollection);
+  tmpMaterial.writeToJson(js, this);
   //SaveJsonToFile(js,"TMPjson.json");
   MaterialCollectionData[index]->readFromJson(js, this);
 
@@ -452,7 +428,7 @@ void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
     for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
     {
         for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateRuntimeForScatterElements(fLogLogInterpolation);
+            term.UpdateNeutronCrossSections(fLogLogInterpolation);
     }
 }
 
@@ -480,70 +456,11 @@ bool AMaterialParticleCollection::UpdateParticle(int particleId, QString name, A
   return true;
 }
 
-bool AMaterialParticleCollection::RemoveParticle(int particleId, QString *errorText)
+int AMaterialParticleCollection::getNeutronIndex() const
 {
-    QString s;
-    if (isParticleOneOfSecondary(particleId, &s))
-    {
-        if (errorText)
-            *errorText = "This particle is a secondary particle defined in neutron capture\nIt appears in the following materials:\n"+s;
-        return false;
-    }
-
-    bool fInUse = true;
-    emit IsParticleInUseBySources(particleId, fInUse, &s);
-    if (fInUse)
-    {
-        if (errorText)
-            *errorText = "This particle is currently in use by the particle source:\n" + s;
-        return false;
-    }
-
-    //not in use, can remove!
-
-    //shifting all Id down so it is possible to remove this (Id) particle
-    for (int m=0; m<MaterialCollectionData.size(); m++)
-    {
-        for (int p=0; p<ParticleCollection.size(); p++)
-        {
-            //replacing generated particles
-            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size();s++)
-                for (int v=0; v<MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-                {
-                    int thisParticle = MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v];
-                    if (thisParticle > particleId ) MaterialCollectionData[m]->MatParticle[p].Terminators[s].GeneratedParticles[v] = thisParticle-1;
-                }
-
-            //shifting down all particles above Id
-            if (p > particleId) MaterialCollectionData[m]->MatParticle[p-1] = MaterialCollectionData[m]->MatParticle[p];
-        }
-        MaterialCollectionData[m]->MatParticle.resize(ParticleCollection.size()-1);
-    }
-    //same with the tmpMaterial
-    for (int p=0; p<ParticleCollection.size(); p++)
-    {
-        //replacing generated particles
-        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size();s++)
-            for (int v=0; v<tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles.size();v++)
-            {
-                int thisParticle = tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles[v];
-                if (thisParticle > particleId ) tmpMaterial.MatParticle[p].Terminators[s].GeneratedParticles[v] = thisParticle-1;
-            }
-
-        //shifting down all particles above Id
-        if (p > particleId) tmpMaterial.MatParticle[p-1] = tmpMaterial.MatParticle[p];
-    }
-
-    //shifting all Ids in the particle sources
-    emit RequestRegisterParticleRemove(particleId);   //also requests update of sources in JSON and simulation gui update
-    //requesting to clear ParticleStack if in use in GUI
-    emit RequestClearParticleStack();
-
-    //removing
-    delete ParticleCollection[particleId];
-    ParticleCollection.remove(particleId);
-    emit ParticleCollectionChanged();
-    return true;
+    for (int i=0; i<ParticleCollection.size(); i++)
+        if (  getParticleType(i) == AParticle::_neutron_) return i;
+    return -1;
 }
 
 void AMaterialParticleCollection::CopyMaterialToTmp(int imat)
@@ -554,7 +471,7 @@ void AMaterialParticleCollection::CopyMaterialToTmp(int imat)
       return;
     }
   QJsonObject js;
-  MaterialCollectionData[imat]->writeToJson(js, &ParticleCollection);
+  MaterialCollectionData[imat]->writeToJson(js, this);
   tmpMaterial.readFromJson(js, this);
 }
 
@@ -625,150 +542,7 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
 
 QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
 {
-  if (iPart<0 || iPart>ParticleCollection.size()-1) return QString("Wrong particle index: ") + QString::number(iPart);
-  //qDebug()<<">"<<mat->name<<" - "<<ParticleCollection->at(iPart)->ParticleName;
-
-  const MatParticleStructure* mp = &mat->MatParticle[iPart];
-  //shortcuts - if particle tracking is disabled or material is transparent - no checks
-  if ( ! mp->TrackingAllowed) return "";
-  if ( mp->MaterialIsTransparent) return "";
-
-  const AParticle::ParticleType& pt = ParticleCollection.at(iPart)->type;
-
-  //check TotalInteraction
-  int interSize = mp->InteractionDataX.size();
-  //check needed only for charged particles - they used it (stopping power is provided there)
-  if (pt == AParticle::_charged_)
-  {
-      if (interSize == 0 || mp->InteractionDataF.size() == 0) return "Empty stopping power data";
-      if (interSize<2 || mp->InteractionDataF.size()<2) return "Stopping power data size is less than 2 points";
-      if (interSize != mp->InteractionDataF.size()) return "Mismatch in total interaction (X and F) length";
-      for (int i=1; i<interSize; i++) //protected against length = 0 or 1
-          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i]) return "Stopping power data: total energy binning is not non-decreasing";
-      return ""; //nothing else is needed to be checked
-  }
-
-  if (pt == AParticle::_gamma_)
-    {
-      const int terms = mp->Terminators.size();
-      if (mp->Terminators.isEmpty()) return "Terminators size for gamma";
-      if (terms<2 || terms>3) return "Terminators size for gamma";
-
-      if (terms == 2) //compatibility - no pair production
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering
-            ) return "Interactions types for gamma";
-
-      if (terms == 3)
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering ||
-             mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction
-            ) return "Interactions types for gamma";
-
-      //checking partial crossection for terminators
-      for (int iTerm=0; iTerm<terms; iTerm++)
-        {
-          const QVector<double>*  e = &mp->Terminators[iTerm].PartialCrossSectionEnergy;
-          const QVector<double>* cs = &mp->Terminators[iTerm].PartialCrossSection;
-          if (e->size() != interSize || cs->size() != interSize)
-              return "Mismatch between total and partial interaction data size";
-          for (int i=0; i<interSize; i++)
-              if (mp->InteractionDataX[i] != e->at(i))
-                  return "Mismatch in energy of total and partial cross interaction datasets";
-        }
-
-      // confirminf that TotalInteraction is indeed the sum of the partial cross-sections
-      for (int i=0; i<interSize; i++)
-        {
-          double sum = 0;
-          for (int ite=0; ite<terms; ite++)
-              sum += mp->Terminators[ite].PartialCrossSection[i];
-          double delta =  sum - mp->InteractionDataF[i];
-          if ( fabs(delta) > 0.0001*mp->InteractionDataF[i] )
-              return "Total interaction in not equal to sum of partials";
-        }
-
-      //properties for gamma are properly defined!
-      return "";
-    }
-
-  if (pt == AParticle::_neutron_)
-    {
-      if (!mp->bCaptureEnabled && !mp->bEllasticEnabled) return "";
-      if (mp->bCaptureEnabled && mat->atomicDensity == 0) return "Isotope density is not defined";
-
-      int numTerm = mp->Terminators.size();
-      if (numTerm == 0 ) return "No capture or ellastic data defined";
-
-      //confirming all terminators type is "capture" or "ellastic"
-      if (mp->bEllasticEnabled && mp->Terminators[numTerm-1].Type != NeutralTerminatorStructure::ElasticScattering)
-          return "Last terminator is expected to be ellastic scattering, but it is not";
-      for (int i=0; i<numTerm; i++)
-        {
-          //qDebug() << "Term #"<<i<<"Type."<<(int)mp->Terminators[i].Type;
-          if ( i==numTerm-1 )
-          {
-              if (
-                      (mp->Terminators[i].Type != NeutralTerminatorStructure::Capture) &&
-                      (mp->Terminators[i].Type != NeutralTerminatorStructure::ElasticScattering)
-                 )
-                  return "Capture or ellastic scattering terminator expected, but wrong type received";
-          }
-          else if ( mp->Terminators[i].Type != NeutralTerminatorStructure::Capture )
-              return "Capture terminator expected, but wrong type received";
-        }
-
-      //checking all terminator one by one
-      if (mp->bEllasticEnabled)
-      {
-          for (int iTerm=0; iTerm<numTerm; iTerm++)
-            {
-              //qDebug() << "Checking term #"<<iTerm;
-              const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
-              if (term.Type == NeutralTerminatorStructure::ElasticScattering)
-              {
-                  if (term.ScatterElements.isEmpty())
-                      return QString("No elements defined for neutron ellastic scattering for ") + mat->name;
-                  if (term.MeanElementMass == 0)
-                      return QString("Mean element weight is zero for neutron ellastic scattering for ") + mat->name;
-              }
-            }
-
-          if (mp->Terminators.last().PartialCrossSectionEnergy.isEmpty())
-              return QString("Not all elastic scaterring cross-sections are defined for ") + mat->name;
-
-          //check abundances
-          QString elscerr = CheckElasticScatterElements(mat, iPart, 0);
-          if (!elscerr.isEmpty()) return elscerr;
-      }
-
-      if (mp->bCaptureEnabled)
-      {
-          for (int iTerm=0; iTerm<numTerm; iTerm++)
-          {
-              const NeutralTerminatorStructure& term = mp->Terminators[iTerm];
-              if (term.Type != NeutralTerminatorStructure::Capture) continue;
-              //checking generated particles and their initial energies
-              const QVector<int>* gp = &term.GeneratedParticles;
-              if (!gp->isEmpty())
-              {
-                  const QVector<double>* gpE = &term.GeneratedParticleEnergies;
-                  if (gp->isEmpty()) return "Error in energy of generated particles after capture";
-                  int numPart = gp->size();
-                  if (numPart != gpE->size()) return "Error in energy of generated particles after capture";
-                  for (int iGP=0; iGP<numPart; iGP++)
-                    {
-                      int part = gp->at(iGP);
-                      if (part<0 || part>ParticleCollection.size()-1) return "Unknown generated particle after capture";  //unknown particle
-                    }
-              }
-          }
-      }
-    }
-
-  return ""; //passed all tests
+  return mat->CheckMaterial(iPart, this);
 }
 
 QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
@@ -781,7 +555,7 @@ QString AMaterialParticleCollection::CheckMaterial(int iMat) const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-      QString err = AMaterialParticleCollection::CheckMaterial(iMat, iPart);
+      QString err = CheckMaterial(iMat, iPart);
       if (!err.isEmpty()) return err;
     }
   return "";
@@ -791,69 +565,10 @@ QString AMaterialParticleCollection::CheckTmpMaterial() const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
-      QString err = AMaterialParticleCollection::CheckMaterial(&tmpMaterial, iPart);
+      QString err = tmpMaterial.CheckMaterial(iPart, this);
       if (!err.isEmpty()) return err;
     }
   return "";
-}
-
-QString AMaterialParticleCollection::CheckElasticScatterElements(const AMaterial *mat, int iPart, QString *Report) const
-{
-    QString error, Text;
-
-    if (iPart<0 || iPart>=mat->MatParticle.size()) return "Wrong particle index";
-    if (mat->MatParticle[iPart].Terminators.isEmpty()) return "No terminators defined";
-
-    const NeutralTerminatorStructure& t = mat->MatParticle[iPart].Terminators.last();
-    if (t.Type != NeutralTerminatorStructure::ElasticScattering || t.ScatterElements.isEmpty()) Text = "Elastic scattering elements/isotopes not defined";
-    else
-    {
-        QVector< QVector<int> > ElementsAndIsotopes; // [Element][Isotope]
-        QString LastElementName = t.ScatterElements.first().Name;
-        QVector<int> isotopes;
-        isotopes << 0;
-        for (int iRecord = 1; iRecord<t.ScatterElements.size(); iRecord++)
-        {
-            if (t.ScatterElements.at(iRecord).Name != LastElementName)
-            {
-                //new element
-                ElementsAndIsotopes.append(isotopes);
-                isotopes.clear();
-                LastElementName = t.ScatterElements.at(iRecord).Name;
-            }
-            isotopes << iRecord;
-        }
-        ElementsAndIsotopes.append(isotopes);
-
-        for (int iElementRecord=0; iElementRecord<ElementsAndIsotopes.size(); iElementRecord++)
-        {
-            int iElement = ElementsAndIsotopes.at(iElementRecord).first();
-            Text += t.ScatterElements.at(iElement).Name + ":\n";
-            double sumAbund = 0;
-            QString tmp;
-            for (int iIsotopeRecord=0; iIsotopeRecord<ElementsAndIsotopes.at(iElementRecord).size(); iIsotopeRecord++)
-            {
-                int iIsotope =  ElementsAndIsotopes.at(iElementRecord).at(iIsotopeRecord);
-                sumAbund += t.ScatterElements.at(iIsotope).Abundancy;
-                tmp += QString("  ") + t.ScatterElements.at(iIsotope).Name + "-" + QString::number(t.ScatterElements.at(iIsotope).Mass);
-                double MolarFraction = t.ScatterElements.at(iIsotope).MolarFraction_runtime;
-                tmp += " --> Molar fraction: " + QString::number(MolarFraction, 'g', 4);
-                double AtDensity = MolarFraction * tmpMaterial.density / t.ScatterElements.at(iIsotope).Mass / 1.66054e-24;
-                tmp += " Atomic density: " + QString::number(AtDensity, 'g', 4) + " cm-3";
-                tmp += "\n";
-            }
-            if ( fabs(sumAbund - 100.0) > 0.001 )
-            {
-                Text += " Error: sum of abundances should be 100%\n";
-                if (error.isEmpty())
-                    error = QString("Elastic scattering of neutrons in ") + t.ScatterElements.at(iElement).Name + ":\nsum of abundances is not equal to 100%";
-            }
-            else Text += tmp;
-            tmp += "\n";
-        }
-    }
-    if (Report) *Report = Text;
-    return error;
 }
 
 void AMaterialParticleCollection::registerNewParticle()
@@ -929,31 +644,6 @@ bool AMaterialParticleCollection::DeleteMaterial(int imat)
   return true;
 }
 
-void AMaterialParticleCollection::RecalculateCaptureCrossSections(int particleId)
-{
-  QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
-
-  int numReactions = Terminators.size();
-  if (numReactions>0)
-      if (Terminators.last().Type = NeutralTerminatorStructure::ElasticScattering) //last reserved for scattering
-          numReactions--;
-  int dataPoints = tmpMaterial.MatParticle[particleId].InteractionDataF.size();
-
-  for (int iReaction=0; iReaction<numReactions; iReaction++)
-    {
-      NeutralTerminatorStructure& Term = Terminators[iReaction];
-      double branching = Term.branching;
-      Term.PartialCrossSectionEnergy.resize(dataPoints);
-      Term.PartialCrossSection.resize(dataPoints);
-
-      for (int i=0; i<dataPoints; i++)
-        {
-          Term.PartialCrossSection[i] = branching * tmpMaterial.MatParticle[particleId].InteractionDataF[i];
-          Term.PartialCrossSectionEnergy[i] = tmpMaterial.MatParticle[particleId].InteractionDataX[i];
-        }
-    }
-}
-
 void AMaterialParticleCollection::writeToJson(QJsonObject &json)
 {
   writeParticleCollectionToJson(json);
@@ -964,7 +654,7 @@ void AMaterialParticleCollection::writeToJson(QJsonObject &json)
   for (int i=0; i<MaterialCollectionData.size(); i++)
     {
       QJsonObject jj;
-      MaterialCollectionData[i]->writeToJson(jj, &ParticleCollection);
+      MaterialCollectionData[i]->writeToJson(jj, this);
       ar.append(jj);
     }
   js["Materials"] = ar;
@@ -991,7 +681,7 @@ void AMaterialParticleCollection::writeMaterialToJson(int imat, QJsonObject &jso
       qWarning() << "Attempt to save non-existent material!";
       return;
     }
-  MaterialCollectionData[imat]->writeToJson(json, &ParticleCollection);
+  MaterialCollectionData[imat]->writeToJson(json, this);
 }
 
 bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
@@ -1179,6 +869,56 @@ void AMaterialParticleCollection::OnRequestListOfParticles(QStringList &definedP
 {
     definedParticles.clear();
     for (int i=0; i<ParticleCollection.size(); i++)
-        definedParticles << ParticleCollection.at(i)->ParticleName;
+      definedParticles << ParticleCollection.at(i)->ParticleName;
 }
 
+void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames)
+{
+  bInUse = false;
+  MaterialNames.clear();
+
+  for (int m=0; m<MaterialCollectionData.size(); m++)
+      for (int p=0; p<ParticleCollection.size(); p++)
+      {
+          if ( MaterialCollectionData[m]->MatParticle.size() == 0) continue;
+          for (int iterm=0; iterm<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); iterm++)
+              if (MaterialCollectionData[m]->MatParticle[p].Terminators.at(iterm).isParticleOneOfSecondaries(particleId))
+              {
+                  bInUse = true;
+                  if (!MaterialNames.isEmpty()) MaterialNames += ", ";
+                  MaterialNames += MaterialCollectionData[m]->name;
+              }
+      }
+}
+
+void AMaterialParticleCollection::RemoveParticle(int particleId)
+{
+    //shifting down all affected particle indexes
+    for (int m=0; m<MaterialCollectionData.size(); m++)
+    {
+        for (int p=0; p<ParticleCollection.size(); p++)
+        {
+            //replacing generated particles
+            for (int s=0; s<MaterialCollectionData[m]->MatParticle[p].Terminators.size(); s++)
+                MaterialCollectionData[m]->MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
+
+            //shifting down all particles above Id
+            if (p > particleId) MaterialCollectionData[m]->MatParticle[p-1] = MaterialCollectionData[m]->MatParticle[p];
+        }
+        MaterialCollectionData[m]->MatParticle.resize(ParticleCollection.size()-1);
+    }
+    //same with the tmpMaterial
+    for (int p=0; p<ParticleCollection.size(); p++)
+    {
+        //replacing generated particles
+        for (int s=0; s<tmpMaterial.MatParticle[p].Terminators.size(); s++)
+            tmpMaterial.MatParticle[p].Terminators[s].prepareForParticleRemove(particleId);
+
+        //shifting down all particles above Id
+        if (p > particleId) tmpMaterial.MatParticle[p-1] = tmpMaterial.MatParticle[p];
+    }
+
+    //removing
+    delete ParticleCollection[particleId];
+    ParticleCollection.remove(particleId);
+}

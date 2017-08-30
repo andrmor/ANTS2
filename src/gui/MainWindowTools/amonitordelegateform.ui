@@ -1066,7 +1066,7 @@ changed</string>
             </size>
            </property>
            <property name="text">
-            <string> </string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -1116,7 +1116,7 @@ changed</string>
          <item>
           <widget class="QLineEdit" name="ledEnergyFrom">
            <property name="toolTip">
-            <string>in keV</string>
+            <string/>
            </property>
            <property name="text">
             <string>0</string>
@@ -1133,7 +1133,7 @@ changed</string>
          <item>
           <widget class="QLineEdit" name="ledEnergyTo">
            <property name="toolTip">
-            <string>in keV</string>
+            <string/>
            </property>
            <property name="text">
             <string>0</string>

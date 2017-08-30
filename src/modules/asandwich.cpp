@@ -488,7 +488,15 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     }
     else
     {
-        TGeoMedium* med = (*MaterialCollection)[obj->Material]->GeoMed;
+        int iMat = obj->Material;
+        if (obj->ObjectType->isMonitor())
+          {
+            if (obj->Container)
+              iMat = obj->Container->Material;
+            else qWarning() << "Monitor without container detected!";
+            //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
+          }
+        TGeoMedium* med = (*MaterialCollection)[iMat]->GeoMed;
 
         //creating volume
         if (obj->ObjectType->isComposite())
@@ -1446,3 +1454,43 @@ void ASandwich::onMaterialsChanged(const QStringList MaterialList)
   emit RequestGuiUpdate();  
 }
 
+void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)
+{
+  bInUse = false;
+  MonitorNames.clear();
+
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+        {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+        }
+      const ATypeMonitorObject* mon = static_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+
+      if (mon->isParticleInUse(particleId))
+        {
+          bInUse = true;
+          if (!MonitorNames.isEmpty()) MonitorNames += ", ";
+          MonitorNames += monObj->Name;
+        }
+    }
+}
+
+void ASandwich::RemoveParticle(int particleId)
+{
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+      {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+      }
+
+      ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
+
+      if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+    }
+}

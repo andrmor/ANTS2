@@ -7,10 +7,13 @@ class QTextStream;
 class MainWindow;
 class DetectorClass;
 class TGraph;
-class AElasticCrossSectionAutoloadConfig;
+class AMatParticleConfigurator;
 class QJsonObject;
 class AElasticScatterElement;
 class QTreeWidgetItem;
+class AChemicalElement;
+class ANeutronInteractionElement;
+class ANeutronInfoDialog;
 
 namespace Ui {
 class MaterialInspectorWindow;
@@ -46,13 +49,10 @@ private slots:
     // both user and code control - potential problems
     void on_leName_textChanged(const QString &arg1);
 
-    //requests from elastic element delegates
-    void onShowElementCrossClicked(const AElasticScatterElement *element);
-    void onLoadElementCrossClicked(AElasticScatterElement *element);
-    void onIsotopeDelClicked(const AElasticScatterElement *element);
-    void onAutoIsotopesClicked(AElasticScatterElement *element);
-    void onDelElementClicked(AElasticScatterElement *element);
-    void onRequestUpdateIsotopes(const AElasticScatterElement *element, QString name, double fraction);
+    //on signals from delegates
+    void onAddIsotope(AChemicalElement *element);
+    void onRemoveIsotope(AChemicalElement* element, int isotopeIndexInElement);
+    void IsotopePropertiesChanged(const AChemicalElement* element, int isotopeIndexInElement);
 
     //on user input    
     void on_pbUpdateInteractionIndication_clicked();  // interaction indication update
@@ -63,14 +63,9 @@ private slots:
     void on_pbUpdateTmpMaterial_clicked();
     void on_pbLoadDeDr_clicked();
     void on_pbLoadThisScenarioCrossSection_clicked();
-    void on_pbAddNewTerminationScenario_clicked();
-    void on_pbAddNewSecondary_clicked();
-    void on_ledBranching_editingFinished();
     void on_pbShowStoppingPower_clicked();
     void on_pbImportStoppingPowerFromTrim_clicked();
     void on_pbImportXCOM_clicked();
-    void on_pbLoadTotalInteractionCoefficient_clicked();
-    void on_pbNeutronClear_clicked();
     void on_pbLoadPrimSpectrum_clicked();
     void on_pbShowPrimSpectrum_clicked();
     void on_pbDeletePrimSpectrum_clicked();
@@ -91,13 +86,9 @@ private slots:
     void on_ledRayleigh_editingFinished();
     void on_pbRemoveRayleigh_clicked();
     void on_pbShowUsage_clicked();
-    void on_ledMFPenergy_editingFinished();
     void on_pbNistPage_clicked();
-    void on_pbRemoveSecondary_clicked();
-    void on_ledInitialEnergy_editingFinished();
-    void on_cobSecondaryParticleToAdd_activated(int index);
     void on_pbRename_clicked();
-    void on_ledMFPenergy_2_editingFinished();
+    void on_ledMFPenergy_2_editingFinished();  //fix me!!! no button
     void on_pbAddNewMaterial_clicked();
     void on_ledIntEnergyRes_editingFinished();
     void on_cbTransparentMaterial_clicked();
@@ -108,22 +99,13 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_pbShowTotalCapture_clicked();
-    void on_pbUpdateElements_clicked();
-    void on_pbAddNewElement_clicked();
-    void on_cobTerminationScenarios_activated(int index);
-    void on_ledMFPenergyEllastic_editingFinished();
-    void on_pbShowTotalEllastic_clicked();
     void on_pbConfigureAutoElastic_clicked();
-    void on_pbAddNewIsotope_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
     void on_ledRayleigh_textChanged(const QString &arg1);
-    void on_lwGeneratedParticlesEnergies_currentRowChanged(int currentRow);
     void on_cbTrackingAllowed_toggled(bool checked);
     void on_ledPrimaryYield_textChanged(const QString &arg1);
-    void on_ledAtomicDensity_textChanged(const QString &arg1);
 
     //menu actions
     void on_actionSave_material_triggered();
@@ -134,20 +116,32 @@ private slots:
 
     //new auto-generated, not cathegorized
 
-    void on_twElastic_itemExpanded(QTreeWidgetItem *item);
+    void on_pbModifyChemicalComposition_clicked();
 
-    void on_twElastic_itemCollapsed(QTreeWidgetItem *item);
+    void on_cbShowIsotopes_clicked();
 
-    void on_pbAutoFillCompositionForScatter_clicked();
+    void on_tabwNeutron_customContextMenuRequested(const QPoint &pos);
+
+    void on_cbCapture_clicked();
+
+    void on_cbEnableScatter_clicked();
+
+    void onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action);
+
+    void on_pbMaterialInfo_clicked();
+
+    void on_cbAllowAbsentCsData_clicked();
+
+    void on_pbHelpNeutron_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
     DetectorClass* Detector;
 
-    AElasticCrossSectionAutoloadConfig* ElasticConfig;
+    AMatParticleConfigurator* OptionsConfigurator;
 
-    QIcon RedIcon;
+    ANeutronInfoDialog* NeutronInfoDialog;
 
     bool flagDisreguardChange;
     bool fLockTable;
@@ -160,13 +154,14 @@ private:
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
     bool importXCOM(QTextStream &in, int particleId);
     bool isAllSameYield(double val);
-    void updateNeutronReactionIndication();
 
-    bool autoLoadElasticCrossSection(AElasticScatterElement *element);
-    bool doLoadElementElasticCrossSection(AElasticScatterElement *element, QString fileName);
-    int findElement(const AElasticScatterElement *element) const;
-    void doAddNewIsotope(int Index, QString name, double fraction);
-    QString doAutoConfigureElement(AElasticScatterElement *element); //returns error message, empty if success
+    bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering" - replace with dynamic_cast!!!
+    bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
+    void ShowTreeWithChemicalComposition();
+    void FillNeutronTable();
+    void autoloadMissingCrossSectionData();
+
+    void SetWasModified(bool flag);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

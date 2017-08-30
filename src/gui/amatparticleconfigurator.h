@@ -1,5 +1,5 @@
-#ifndef AELASTICCROSSSECTIONAUTOLOADCONFIG_H
-#define AELASTICCROSSSECTIONAUTOLOADCONFIG_H
+#ifndef AMATPARTICLECONFIGURATOR_H
+#define AMATPARTICLECONFIGURATOR_H
 
 #include <QDialog>
 #include <QString>
@@ -8,23 +8,25 @@ class QJsonObject;
 class GlobalSettingsClass;
 
 namespace Ui {
-class AElasticCrossSectionAutoloadConfig;
+class AMatParticleConfigurator;
 }
 
-class AElasticCrossSectionAutoloadConfig : public QDialog
+class AMatParticleConfigurator : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit AElasticCrossSectionAutoloadConfig(GlobalSettingsClass *GlobSet, QWidget *parent = 0);
-    ~AElasticCrossSectionAutoloadConfig();
+    explicit AMatParticleConfigurator(GlobalSettingsClass *GlobSet, QWidget *parent = 0);
+    ~AMatParticleConfigurator();
 
-    const QString getFileName(QString Element, QString Mass) const;
+    const QString getElasticScatteringFileName(QString Element, QString Mass) const;
+    const QString getAbsorptionFileName(QString Element, QString Mass) const;
     int           getCrossSectionLoadOption() const;
     bool          isAutoloadEnabled() const;
     bool          isEnergyRangeLimited() const;
     double        getMinEnergy() const;
     double        getMaxEnergy() const;
+    const QString getNatAbundFileName() const;
 
     const QVector<QPair<int, double> > getIsotopes(QString ElementName) const; //empty vector - element not found; otherewise QVector<mass, abund>
 
@@ -35,16 +37,13 @@ public:
 
 private slots:
     void on_pbChangeDir_clicked();
-
+    void on_pbChangeNatAbFile_clicked();
     void on_pbUpdateGlobSet_clicked();
 
-    void on_pbChangeNatAbFile_clicked();
-
 private:
-    Ui::AElasticCrossSectionAutoloadConfig *ui;
+    Ui::AMatParticleConfigurator *ui;
     GlobalSettingsClass* GlobSet;
     QString StarterDir;
-
 };
 
-#endif // AELASTICCROSSSECTIONAUTOLOADCONFIG_H
+#endif // AMATPARTICLECONFIGURATOR_H

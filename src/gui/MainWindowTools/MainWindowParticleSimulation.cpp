@@ -1091,7 +1091,6 @@ void MainWindow::on_pbRefreshStack_clicked()
   ui->teParticleStack->clear();
   int elements = ParticleStack.size();
 
-
   if (ui->cbHideStackText->isChecked())
   {
      QString str;
@@ -1159,7 +1158,7 @@ void MainWindow::on_pbRemoveFromStack_clicked()
 void MainWindow::on_pbClearAllStack_clicked()
 {
     //qDebug() << "Clear particle stack triggered";
-    EventsDataHub->clear();
+    //EventsDataHub->clear();
 
     for (int i=0; i<ParticleStack.size(); i++)
         delete ParticleStack[i];

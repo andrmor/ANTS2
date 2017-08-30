@@ -302,6 +302,8 @@ public:
 
     AMonitorConfig config;
 
+    bool isParticleInUse(int partId) const;
+
     //runtime
     int index;  //index of monitor to fill and acess statistics
 };

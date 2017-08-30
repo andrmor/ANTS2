@@ -384,7 +384,7 @@ void DetectorClass::constructDetector()
 void DetectorClass::onRequestRegisterGeoManager()
 {
     if (GeoManager)
-        emit newGeoManager(GeoManager);
+      emit newGeoManager(GeoManager);
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

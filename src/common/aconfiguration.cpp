@@ -4,16 +4,16 @@
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
+#include "particlesourcesclass.h"
+#include "asandwich.h"
 
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
 #include <QApplication>
 
-AConfiguration::AConfiguration(QObject *parent) : QObject(parent)
-{
-
-}
+AConfiguration::AConfiguration(QObject *parent) :
+  QObject(parent), Detector(0), ParticleSources(0) {}
 
 //to do: //add messenger for warnings
 bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
@@ -354,3 +354,39 @@ void AConfiguration::AskChangeGuiBusy(bool flag)
     qApp->processEvents();
 }
 
+const QString AConfiguration::RemoveParticle(int particleId)
+{
+  QString s;
+  bool bInUse = true;
+
+  Detector->MpCollection->IsParticleInUse(particleId, bInUse, s);
+  if (bInUse) return "This particle is a secondary particle defined in neutron capture.\nIt appears in the following material(s):\n"+s;
+
+  ParticleSources->IsParticleInUse(particleId, bInUse, s);
+  if (bInUse) return "This particle is in use by the particle source(s):\n" + s;
+
+  Detector->Sandwich->IsParticleInUse(particleId, bInUse, s);
+  if (bInUse) return "This particle is currently in use by the monitor(s):\n" + s;
+
+  //this particle is not in use, so can be removed
+  Detector->MpCollection->RemoveParticle(particleId);
+  ParticleSources->RemoveParticle(particleId);
+  Detector->Sandwich->RemoveParticle(particleId);
+
+  //updating JSON config
+    //detector - MpCollection and Monitors
+  Detector->writeToJson(JSON);
+    //particle sources
+  QJsonObject sj = JSON["SimulationConfig"].toObject();
+    QJsonObject pj = sj["ParticleSourcesConfig"].toObject();
+       ParticleSources->writeToJson(pj);
+    sj["ParticleSourcesConfig"] = pj;
+  JSON["SimulationConfig"] = sj;
+
+  //updating gui if present
+  emit requestDetectorGuiUpdate();
+  emit requestSimulationGuiUpdate();
+  emit RequestClearParticleStack(); //clear defined ParticleStack in GUI
+
+  return "";
+}

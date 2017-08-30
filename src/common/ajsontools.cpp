@@ -189,7 +189,7 @@ bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja)
   else return false;
 }
 
-bool writeTwoQVectorsToJArray(QVector<double> &x, QVector<double> &y, QJsonArray &ar)
+bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y, QJsonArray &ar)
 {
   if (x.size() != y.size())
     {

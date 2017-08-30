@@ -71,6 +71,7 @@ public:
   bool MakeDetectorFromJson(QJsonObject &json);
   bool BuildDetector(bool SkipSimGuiUpdate = false);   // build detector from JSON //on load config, set SkipSimGuiUpdate = true since json is still old!
   bool BuildDetector_CallFromScript(); // save current detector to JSON, then call BuildDetector()
+
   void writeToJson(QJsonObject &json);
 
   bool makeSandwichDetector();
@@ -92,6 +93,7 @@ public:
 
 public slots:
   void onRequestRegisterGeoManager();
+
 private:
   //reads
   void readWorldFixedFromJson(QJsonObject &json);

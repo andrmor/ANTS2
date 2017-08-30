@@ -8,6 +8,7 @@
 #include "aparticleonstack.h"
 #include "particlesourcesclass.h"
 #include "amessage.h"
+#include "aconfiguration.h"
 
 //Qt
 #include <QMessageBox>
@@ -160,12 +161,7 @@ void MainWindow::on_pbRemoveParticle_clicked()
         message("Select one of the defined particles", this);
         return;
     }
-    MainWindow::RemoveParticle(Id);
-}
 
-//--------------remove particle----------------
-void MainWindow::RemoveParticle(int Id)
-{
   switch( QMessageBox::information( this, "", "Remove particle " + MpCollection->getParticleName(Id) + " ?",
                                         "Yes", "Cancel", 0, 1 ) )
     {
@@ -173,8 +169,6 @@ void MainWindow::RemoveParticle(int Id)
       default: return;
     }
 
-  QString err;
-  bool fOK = MpCollection->RemoveParticle(Id, &err);
-  if (!fOK) message(err, this);
-  //all updates are automatic, including GUI!
+  QString err = Config->RemoveParticle(Id); //all updates are automatic, including GUI
+  if (!err.isEmpty()) message(err, this);
 }

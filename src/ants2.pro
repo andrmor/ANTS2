@@ -1,7 +1,7 @@
 #--------------ANTS2--------------
-ANTS2_MAJOR = 3
-ANTS2_MINOR = 14
-ANTS2_VERSION = 2220
+ANTS2_MAJOR = 4
+ANTS2_MINOR = 0
+ANTS2_VERSION = 2230
 
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -19,7 +19,7 @@ win32 {
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -llibSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -lSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
@@ -253,9 +253,13 @@ SOURCES += main.cpp \
     gui/MainWindowTools/amonitordelegateform.cpp \
     common/amonitorconfig.cpp \
     common/apeakfinder.cpp \
-    gui/aelasticcrosssectionautoloadconfig.cpp \
-    gui/aelasticdelegates.cpp \
-    common/aelasticscatterelement.cpp
+    common/amaterialcomposition.cpp \
+    gui/aelementandisotopedelegates.cpp \
+    gui/amatparticleconfigurator.cpp \
+    common/aneutroninteractionelement.cpp \
+    gui/aneutronreactionsconfigurator.cpp \
+    gui/aneutronreactionwidget.cpp \
+    gui/aneutroninfodialog.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -364,9 +368,13 @@ HEADERS  += common/CorrelationFilters.h \
     gui/MainWindowTools/amonitordelegateform.h \
     common/amonitorconfig.h \
     common/apeakfinder.h \
-    gui/aelasticcrosssectionautoloadconfig.h \
-    gui/aelasticdelegates.h \
-    common/aelasticscatterelement.h
+    common/amaterialcomposition.h \
+    gui/aelementandisotopedelegates.h \
+    gui/amatparticleconfigurator.h \
+    common/aneutroninteractionelement.h \
+    gui/aneutronreactionsconfigurator.h \
+    gui/aneutronreactionwidget.h \
+    gui/aneutroninfodialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -616,4 +624,7 @@ unix {
 
 FORMS += \
     gui/MainWindowTools/amonitordelegateform.ui \
-    gui/aelasticcrosssectionautoloadconfig.ui
+    gui/amatparticleconfigurator.ui \
+    gui/aneutronreactionsconfigurator.ui \
+    gui/aneutronreactionwidget.ui \
+    gui/aneutroninfodialog.ui

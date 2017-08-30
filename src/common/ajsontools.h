@@ -27,7 +27,7 @@ void JsonToLineEditDouble(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToLineEditText(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
 
-bool writeTwoQVectorsToJArray(QVector<double> &x, QVector<double> &y, QJsonArray &ar);
+bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y, QJsonArray &ar);
 void readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y);
 bool write2DQVectorToJArray(QVector< QVector<double> > &xy, QJsonArray &ar);
 void read2DQVectorFromJArray(QJsonArray &ar, QVector<QVector<double> > &xy);

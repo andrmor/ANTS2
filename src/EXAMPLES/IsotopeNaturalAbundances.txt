@@ -1,3 +1,4 @@
+# format: massElementSymbol NaturalBundancyIn%
 Hydrogen	
 1H	99.9885
 2H	0.0115

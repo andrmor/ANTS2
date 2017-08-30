@@ -245,7 +245,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                 }
               //================ END: charged particle =================
               else
-              //================ Neutral particle - photoeffect/compton/capture =================
+              //================ Neutral particle =================
                 {
                   //how many processes?
                   const int numProcesses = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators.size();
@@ -254,7 +254,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                     {
                       double SoFarShortestId = 0;
                       double SoFarShortest = 1.0e10;
-                      double TotalCrossSection; //used by neutrons - ellastic scattering
+                      double TotalCrossSection; //used by neutrons - ellastic scattering or absorption
                       for (int iProcess=0; iProcess<numProcesses; iProcess++)
                         {
                           //        qDebug()<<"---Process #:"<<iProcess;
@@ -263,7 +263,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           //for neutrons have additional flags to suppress capture and ellastic
                           if (ParticleType == AParticle::_neutron_)
                           {
-                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture)
+                              if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
                                   if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bCaptureEnabled )
                                   {
                                       //        qDebug() << "Skipping capture - it is disabled";
@@ -286,18 +286,10 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           double MeanFreePath;
                           if (ParticleType == AParticle::_neutron_)
                             { //for capture using atomic density and cross-section in barns
-                              if ( (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Capture )
-                              {
-                                const double &AtomicDensity = (*MpCollection)[MatId]->atomicDensity;
-                                MeanFreePath = 10.0/InteractionCoefficient/AtomicDensity;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-                                //qDebug()<<"For capture - Isotope density:"<<AtomicDensity<< "MFP:"<<MeanFreePath;
-                              }
-                              else
-                              {
-                                  const double AtDens = Density / (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].MeanElementMass / 1.66054e-24;
-                                  MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-                                  //qDebug() << "For ellastic - Effective atomic density:"<<AtDens << "MFP:"<<MeanFreePath;
-                              }
+                              const double AtDens = Density / (*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass() / 1.66054e-24;
+                              MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
+                              //        qDebug() <<"Density:"<<Density <<"MAM:"<<(*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass()<<"Effective atomic density:"<<AtDens;
+                              //        qDebug() <<"Energy:"<<energy<<"CS:"<< InteractionCoefficient<< "MFP:"<<MeanFreePath;
                             }
                           else
                             {
@@ -336,7 +328,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                           const NeutralTerminatorStructure& term = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators.at(SoFarShortestId);
                           switch ( term.Type)
                             {
-                            case (NeutralTerminatorStructure::Photoelectric): //0 - Photoelectric
+                            case (NeutralTerminatorStructure::Photoelectric): //0
                               {
                                 //                           qDebug()<<"Photoelectric";
                                 AEnergyDepositionCell* tc = new AEnergyDepositionCell(r, 0, time, energy, ParticleId, MatId, counter, eventId);
@@ -347,7 +339,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 energyHistory = energy;
                                 break; //switch-break
                               }
-                            case (NeutralTerminatorStructure::ComptonScattering): //1 - Compton
+                            case (NeutralTerminatorStructure::ComptonScattering): //1
                               {
                                 //                           qDebug()<<"Compton";
                                 GammaStructure G0;
@@ -377,52 +369,121 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 energyHistory = tc->dE;
                                 break;//switch-break
                               }                            
-                            case (NeutralTerminatorStructure::Capture): //2 - capture
+                            case (NeutralTerminatorStructure::Absorption): //2
                               {
-                                //                           qDebug()<<"------ capture triggered!";
-                                //nothing is added to the EnergyVector, the result of capture is generation of secondary particles!
-                                int numGenParticles = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[SoFarShortestId].GeneratedParticles.size();
+                                //      qDebug()<<"------ neutron absorption triggered!";
+                                //nothing is added to the EnergyVector, but the result of capture can be generation of secondary particles
+                                //first select which of the isotopes captured neutron
+                                const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
+                                if (!elements.isEmpty())
+                                {
+                                    int iselected = 0;
+                                    if (elements.size() > 1)
+                                    {
+                                      double rnd = RandGen->Rndm();
 
-                                if (numGenParticles>0)
-                                  {
-                                    //adding first particle to the stack
-                                    double vv[3]; //random direction
-                                    GenerateRandomDirection(vv);
-                                    const int  &Particle1 = term.GeneratedParticles[0];
-                                    const double &energy1 = term.GeneratedParticleEnergies[0];
-                                    //                         qDebug()<<"Adding to stack particle with id: "<<Particle1<<" energy:"<<energy1;
-                                    AParticleOnStack* pp = new AParticleOnStack(Particle1, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy1, counter);
-                                    ParticleStack->append(pp);
+                                      //this procedure is vulnerable to rounding errors - sum of individual crossections vs interpolated sum crossection
+//                                      const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+//                                      for (; iselected<max; iselected++)
+//                                        {
+//                                          const AAbsorptionElement& el = elements.at(iselected);
+//                                          double crossSection = 0;  // will be zero if this element has no cross-section ("Can leave empty option is activated")
+//                                          if (!elements.at(iselected).Energy.isEmpty())
+//                                              crossSection = GetInterpolatedValue(energy,
+//                                                                                  &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
+//                                                                                  MpCollection->fLogLogInterpolation);
+//                                          // fraction of this element in the total cross section:
+//                                          const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
+//                                          //        qDebug() << "--Absorption->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+//                                          //        qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
+//                                          if (rnd <= thisOne) break;
+//                                          rnd -= thisOne;
+//                                        }
 
-                                    // adding second particle
-                                    //  for the moment, the creation rule is: opposite direction to the first particle    <- POSSIBLE UPGRADE ***
-                                    if (numGenParticles > 1)
+                                      // slow but more accurate
+                                      QVector<double> mfcs(elements.size(), 0);
+                                      double trueSum = 0;
+                                      for (int i=0; i<elements.size(); i++)
                                       {
-                                        const int  &Particle2 = term.GeneratedParticles[1];
-                                        const double &energy2 = term.GeneratedParticleEnergies[1];
-                                        //                                 qDebug()<<"Adding to stack particle with id: "<<Particle2<<" energy:"<<energy2;
-                                        pp = new AParticleOnStack(Particle2, r[0], r[1], r[2], -vv[0], -vv[1], -vv[2], time, energy2, counter);
-                                        ParticleStack->append(pp);
+                                          if (!elements.at(i).Energy.isEmpty())
+                                          {
+                                              mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
+                                              trueSum += mfcs.at(i);
+                                          }
                                       }
-                                    if (numGenParticles > 2)
-                                      for (int ipart=2; ipart<numGenParticles; ipart++)
+                                      const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+                                      for (; iselected<max; iselected++)
                                         {
-                                          //                                   //all particle after 2nd - random direction
-                                          GenerateRandomDirection(vv);
-                                          const int  &Particle = term.GeneratedParticles[ipart];
-                                          const double &energy = term.GeneratedParticleEnergies[ipart];
-                                          //                             qDebug()<<"Adding to stack particle with id: "<<Particle<<" energy:"<<energy;
-                                          AParticleOnStack* pp = new AParticleOnStack(Particle, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
-                                          ParticleStack->append(pp);
+                                          const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
+                                          if (rnd <= thisOne) break;
+                                          rnd -= thisOne;
                                         }
-                                  }
+                                    }
+                                    const ANeutronInteractionElement& el = elements.at(iselected);
+                                    //      qDebug() << "Absorption triggered for"<<el.Name<<"-"<<el.Mass;
+
+                                    // post-capture effect
+                                    if (el.DecayScenarios.isEmpty())
+                                    {
+                                        //      qDebug() << "No decay scenarios following neutron capture are defined";
+                                    }
+                                    else
+                                    {
+                                        // choose which of the decay scenarios was triggered
+                                        int iScenario = 0;
+                                        if (el.DecayScenarios.size() > 1)
+                                        {
+                                          double rnd = RandGen->Rndm();
+                                          for (; iScenario<el.DecayScenarios.size(); iScenario++)
+                                            {
+                                              const double& thisBranching = el.DecayScenarios.at(iScenario).Branching;
+                                              if (rnd < thisBranching) break;
+                                              rnd -= thisBranching;
+                                            }
+                                        }
+                                        //      qDebug() << "Decay scenario #" << iScenario << "was triggered";
+                                        const ADecayScenario& reaction = el.DecayScenarios.at(iScenario);
+
+                                        //generating particles if defined
+                                        if (reaction.GeneratedParticles.isEmpty())
+                                        {
+                                            //      qDebug() << "In this scenario there is no emission of secondary particles";
+                                        }
+                                        else
+                                        {
+                                            double vv[3]; //generated direction of the particle
+                                            for (int igp=0; igp<reaction.GeneratedParticles.size(); igp++)
+                                            {
+                                                const int&   ParticleId = reaction.GeneratedParticles.at(igp).ParticleId;
+                                                const double& energy    = reaction.GeneratedParticles.at(igp).Energy;
+                                                //      qDebug() << "  generating particle with Id"<<ParticleId << "and energy"<<energy;
+                                                if (igp>0 && reaction.GeneratedParticles.at(igp).bOpositeDirectionWithPrevious)
+                                                {
+                                                    vv[0] = -vv[0]; vv[1] = -vv[1]; vv[2] = -vv[2];
+                                                    //      qDebug() << "   opposite direction of the previous";
+                                                }                                               
+                                                else
+                                                {
+                                                    GenerateRandomDirection(vv);
+                                                    //      qDebug() << "   in random direction";
+                                                }
+                                                AParticleOnStack* pp = new AParticleOnStack(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
+                                                ParticleStack->append(pp);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    qWarning() << "||| No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
+                                }
 
                                 terminationStatus = EventHistoryStructure::Capture;//5
                                 distanceHistory = SoFarShortest;
                                 energyHistory = 0;
                                 break; //switch-break
                               }
-                            case (NeutralTerminatorStructure::PairProduction): //3 - PairProduction
+                            case (NeutralTerminatorStructure::PairProduction): //3
                               {
                                 //                           qDebug()<<"pair";
                                 const double depo = energy - 1022.0; //directly deposited energy (kinetic energies), assuming electron and positron do not travel far
@@ -444,30 +505,55 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::ElasticScattering): //4
                               {
-                                const QVector<AElasticScatterElement> &elements = term.ScatterElements;
+                                //      qDebug()<<"------ elastic scattering triggered!";
+                                const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
 
                                 //selecting element according to its contribution to the total cross-section
-                                //        qDebug() << "Def elements:" << elements.size();
+                                //      qDebug() << "Def elements:" << elements.size();
                                 int iselected = 0;
                                 if (elements.size() > 1)
                                 {
                                     double rnd = RandGen->Rndm();
-                                    //        qDebug() << "rnd:"<<rnd;
-                                    for (; iselected<elements.size(); iselected++)
-                                      {
-                                        const AElasticScatterElement& el = elements.at(iselected);
-                                        const double crossSection = GetInterpolatedValue(energy,
-                                                                                         &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
-                                                                                         MpCollection->fLogLogInterpolation);
-                                        // fraction of this element in the total cross section:
-                                        const double thisOne = (crossSection * el.MolarFraction_runtime) / TotalCrossSection;
-                                        //        qDebug() << "--checking element"<<iselected<<"fraction in total cross-section:"<<thisOne;
-                                        if (rnd < thisOne) break;
+
+//                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+//                                    //this procedure is vulnerable to rounding errors - sum of individual crossections vs interpolated sum crossection
+//                                    for (; iselected<max; iselected++)
+//                                      {
+//                                        const AElasticScatterElement& el = elements.at(iselected);
+//                                        double crossSection = 0;  // will be zero if this element has no cross-section ("Can leave empty option is activated")
+//                                        if (!elements.at(iselected).Energy.isEmpty())
+//                                            crossSection = GetInterpolatedValue(energy,
+//                                                                                &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
+//                                                                                MpCollection->fLogLogInterpolation);
+//                                        // fraction of this element in the total cross section:
+//                                        const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
+//                                              qDebug() << "--Scatter->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
+//                                              qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
+//                                        if (rnd < thisOne) break;
+//                                        rnd -= thisOne;
+//                                      }
+
+                                    // slow but more accurate
+                                    QVector<double> mfcs(elements.size(), 0);
+                                    double trueSum = 0;
+                                    for (int i=0; i<elements.size(); i++)
+                                    {
+                                        if (!elements.at(i).Energy.isEmpty())
+                                        {
+                                            mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
+                                            trueSum += mfcs[i];
+                                        }
+                                    }
+                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+                                    for (; iselected<max; iselected++)
+                                    {
+                                        const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
+                                        if (rnd <= thisOne) break;
                                         rnd -= thisOne;
-                                      }
+                                    }
                                 }
                                 //selected element iselected
-                                //        qDebug() << "selected element:"<<iselected << elements.at(iselected).Name;
+                                //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
                                 //performing ellastic scattering in this element
                                 // "energy" is the neutron energy in keV

@@ -880,6 +880,8 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
 
 bool AGeoObject::isMaterialInUse(int imat)
 {
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material
+
     if (Material == imat) return true;
 
     for (int i=0; i<HostedObjects.size(); i++)
@@ -2653,7 +2655,13 @@ void ATypeMonitorObject::writeToJson(QJsonObject &json)
 
 void ATypeMonitorObject::readFromJson(QJsonObject &json)
 {
-    config.readFromJson(json);
+  config.readFromJson(json);
+}
+
+bool ATypeMonitorObject::isParticleInUse(int partId) const
+{
+   if (config.PhotonOrParticle == 0) return false;
+   return (config.ParticleIndex == partId);
 }
 
 bool ATypeObject::isUpperLightguide() const

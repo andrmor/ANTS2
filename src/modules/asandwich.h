@@ -79,6 +79,10 @@ public:
   void writeToJson(QJsonObject& json);
   void readFromJson(QJsonObject& json);
 
+  // for particle remove - handled by AConfiguration!
+  void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);
+  void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+
   ASandwich::SlabState SandwichState;
   QStringList Materials;  // list of currently defined materials
   ASlabXYModel* DefaultXY;
@@ -101,7 +105,7 @@ signals:
 public slots:
   void onMaterialsChanged(const QStringList MaterialList);
 
-private:  
+private:
   void clearModel();
   void enforceCommonProperties();
   void importFromOldStandardJson(QJsonObject& json, bool fPrScintCont);

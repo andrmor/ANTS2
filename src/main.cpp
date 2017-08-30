@@ -14,6 +14,7 @@
 #include "aqtmessageredirector.h"
 #include "particlesourcesclass.h"
 #include "anetworkmodule.h"
+#include "asandwich.h"
 
 // SIM
 #ifdef SIM
@@ -68,9 +69,7 @@ int main(int argc, char *argv[])
 
 #ifdef SIM
     ASimulationManager SimulationManager(&EventsDataHub, &Detector);
-    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::IsParticleInUseBySources, SimulationManager.ParticleSources, &ParticleSourcesClass::onIsParticleInUse);
-    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::RequestRegisterParticleRemove, SimulationManager.ParticleSources, &ParticleSourcesClass::onRequestRegisterParticleRemove);
-    QObject::connect(SimulationManager.ParticleSources, &ParticleSourcesClass::RequestUpdateSourcesInConfig, &Config, &AConfiguration::UpdateSourcesJson);
+    Config.SetParticleSources(SimulationManager.ParticleSources);
     //qDebug() << "___> Simulation manager created";
 #endif
 
@@ -99,8 +98,6 @@ int main(int argc, char *argv[])
 
     //SUPPRESS WARNINGS about ssl - only needed it on MSVC2012
     QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
-
-
 
     //qDebug() << "___> Selecting application type";
 #ifdef GUI

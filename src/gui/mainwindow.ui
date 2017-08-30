@@ -10215,7 +10215,7 @@ double events:</string>
             <widget class="QLabel" name="label_185">
              <property name="geometry">
               <rect>
-               <x>130</x>
+               <x>169</x>
                <y>2</y>
                <width>31</width>
                <height>16</height>
@@ -10249,7 +10249,7 @@ double events:</string>
               <rect>
                <x>42</x>
                <y>1</y>
-               <width>41</width>
+               <width>80</width>
                <height>20</height>
               </rect>
              </property>
@@ -10260,7 +10260,7 @@ double events:</string>
             <widget class="QLabel" name="label_186">
              <property name="geometry">
               <rect>
-               <x>87</x>
+               <x>126</x>
                <y>0</y>
                <width>21</width>
                <height>21</height>

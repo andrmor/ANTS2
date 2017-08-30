@@ -10,7 +10,6 @@ class GlobalSettingsClass
 {
 public:
   GlobalSettingsClass(ANetworkModule* NetModule);
-  ~GlobalSettingsClass();
 
   void SaveANTSconfiguration();
   void LoadANTSconfiguration();
@@ -52,7 +51,7 @@ public:
 
   bool fOpenImageExternalEditor;
 
-  QJsonObject ElasticAutoSettings;
+  QJsonObject MaterialsAndParticlesSettings;
 
   QString RootStyleScript;
 

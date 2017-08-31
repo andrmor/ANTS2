@@ -530,9 +530,6 @@ private slots:
     void on_cbGunPhotonTracks_toggled(bool checked);
     void on_cbBuilPhotonTrackstester_toggled(bool checked);
 
-public:
-    QString getQuickSlotMessage(int i);
-
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);

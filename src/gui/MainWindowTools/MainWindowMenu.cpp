@@ -396,47 +396,35 @@ void MainWindow::on_actionLoad_last_config_triggered()
 
 void MainWindow::on_actionQuick_save_1_hovered()
 {
-    ui->actionQuick_save_1->setToolTip(getQuickSlotMessage(1));
+    ui->actionQuick_save_1->setToolTip(ELwindow->getQuickSlotMessage(1));
 }
 
 void MainWindow::on_actionQuick_save_2_hovered()
 {
-    ui->actionQuick_save_2->setToolTip(getQuickSlotMessage(2));
+    ui->actionQuick_save_2->setToolTip(ELwindow->getQuickSlotMessage(2));
 }
 
 void MainWindow::on_actionQuick_save_3_hovered()
 {
-    ui->actionQuick_save_3->setToolTip(getQuickSlotMessage(3));
+    ui->actionQuick_save_3->setToolTip(ELwindow->getQuickSlotMessage(3));
 }
 
 void MainWindow::on_actionQuick_load_1_hovered()
 {
-    ui->actionQuick_load_1->setToolTip(getQuickSlotMessage(1));
+    ui->actionQuick_load_1->setToolTip(ELwindow->getQuickSlotMessage(1));
 }
 
 void MainWindow::on_actionQuick_load_2_hovered()
 {
-    ui->actionQuick_load_2->setToolTip(getQuickSlotMessage(2));
+    ui->actionQuick_load_2->setToolTip(ELwindow->getQuickSlotMessage(2));
 }
 
 void MainWindow::on_actionQuick_load_3_hovered()
 {
-    ui->actionQuick_load_3->setToolTip(getQuickSlotMessage(3));
+    ui->actionQuick_load_3->setToolTip(ELwindow->getQuickSlotMessage(3));
 }
 
 void MainWindow::on_actionLoad_last_config_hovered()
 {
-    ui->actionLoad_last_config->setToolTip(getQuickSlotMessage(0));
-}
-
-QString MainWindow::getQuickSlotMessage(int i)
-{
-    QString fileName = GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
-    QString s;
-    if (i==0) s = "Save on exit configuration file not found";
-    else      s = "Quick save slot # " + QString::number(i) + " is empty";
-    QFileInfo fi(fileName);
-    if (fi.exists())
-        s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
-    return s;
+    ui->actionLoad_last_config->setToolTip(ELwindow->getQuickSlotMessage(0));
 }

@@ -114,6 +114,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
   clearWorkers(); //just rebuild them all everytime, it's easier
   threadCount = std::max(threadCount, 1);
+  simSettings.MaxNumberOfTracks /= threadCount;
   for(int i = 0; i < threadCount; i++)
     {
       TString workerName = "simulationWorker"+TString::Itoa(i, 10);

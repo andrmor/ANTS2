@@ -106,7 +106,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       TrackHolderClass *track;
       if (BuildTracks)
         {
-          if (Tracks->size()<1000)   //***!!! absolute number
+          if (Tracks->size() < SimSet->MaxNumberOfTracks)
             {
               track = new TrackHolderClass();
               track->UserIndex = 22;

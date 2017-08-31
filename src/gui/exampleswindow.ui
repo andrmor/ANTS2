@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>446</height>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>123</x>
-      <y>423</y>
+      <y>410</y>
       <width>231</width>
       <height>17</height>
      </rect>
@@ -31,7 +31,7 @@
     <property name="geometry">
      <rect>
       <x>1</x>
-      <y>289</y>
+      <y>271</y>
       <width>457</width>
       <height>20</height>
      </rect>
@@ -53,7 +53,7 @@
     <property name="geometry">
      <rect>
       <x>4</x>
-      <y>55</y>
+      <y>30</y>
       <width>451</width>
       <height>233</height>
      </rect>
@@ -89,7 +89,7 @@
        <x>129</x>
        <y>204</y>
        <width>191</width>
-       <height>26</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="font">
@@ -201,7 +201,7 @@
     <property name="geometry">
      <rect>
       <x>1</x>
-      <y>36</y>
+      <y>6</y>
       <width>457</width>
       <height>20</height>
      </rect>
@@ -213,7 +213,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Examples</string>
+     <string>Detector examples</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -223,7 +223,7 @@
     <property name="geometry">
      <rect>
       <x>4</x>
-      <y>308</y>
+      <y>292</y>
       <width>451</width>
       <height>111</height>
      </rect>
@@ -414,32 +414,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pbNew">
-    <property name="geometry">
-     <rect>
-      <x>133</x>
-      <y>6</y>
-      <width>191</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Create new detector</string>
-    </property>
-   </widget>
-   <widget class="Line" name="line_6">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>29</y>
-      <width>460</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="Line" name="line_7">
     <property name="geometry">
      <rect>
@@ -610,6 +584,89 @@
     </property>
    </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>458</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionQuick_save_1"/>
+    <addaction name="actionQuick_save_2"/>
+    <addaction name="actionQuick_save_3"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuick_load_1"/>
+    <addaction name="actionQuick_load_2"/>
+    <addaction name="actionQuick_load_3"/>
+   </widget>
+   <widget class="QMenu" name="menuNew">
+    <property name="title">
+     <string>New</string>
+    </property>
+    <addaction name="actionCreate_new_detector"/>
+   </widget>
+   <addaction name="menuNew"/>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionQuick_save_1">
+   <property name="text">
+    <string>Quick save 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_2">
+   <property name="text">
+    <string>Quick save 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_3">
+   <property name="text">
+    <string>Quick save 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_1">
+   <property name="text">
+    <string>Quick load 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_2">
+   <property name="text">
+    <string>Quick load 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_3">
+   <property name="text">
+    <string>Quick load 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_detector">
+   <property name="text">
+    <string>Create new detector</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

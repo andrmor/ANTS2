@@ -33,6 +33,8 @@ public:
   void QuickSave(int i);
   void QuickLoad(int i, QWidget* parent);
 
+  QString getQuickSlotMessage(int i);
+
 private slots:
   void on_cbDoNotShowExamplesOnStart_toggled(bool checked);
 
@@ -50,16 +52,28 @@ private slots:
 
   void on_pbLoadSettings_clicked();
 
-  void on_pbNew_clicked();
-
-  void on_pbQuickLoad1_clicked();
-  void on_pbQuickLoad2_clicked();
-  void on_pbQuickLoad3_clicked();
   void on_pbLoadLast_clicked();
 
   void on_pbQuickSave1_clicked();
   void on_pbQuickSave2_clicked();
   void on_pbQuickSave3_clicked();
+
+  void on_actionQuick_save_1_triggered();
+  void on_actionQuick_save_2_triggered();
+  void on_actionQuick_save_3_triggered();
+
+  void on_actionQuick_load_1_triggered();
+  void on_actionQuick_load_2_triggered();
+  void on_actionQuick_load_3_triggered();
+
+  void on_actionQuick_save_1_hovered();
+  void on_actionQuick_save_2_hovered();
+  void on_actionQuick_save_3_hovered();
+  void on_actionQuick_load_1_hovered();
+  void on_actionQuick_load_2_hovered();
+  void on_actionQuick_load_3_hovered();
+
+  void on_actionCreate_new_detector_triggered();
 
 protected:
     bool event(QEvent *event);

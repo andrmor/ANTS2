@@ -2049,6 +2049,10 @@ void MaterialInspectorWindow::onAddIsotope(AChemicalElement *element)
 {
     element->Isotopes << AIsotope(element->Symbol, 777, 0);
 
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
     on_pbWasModified_clicked();
@@ -2063,6 +2067,10 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
     }
     element->Isotopes.removeAt(isotopeIndexInElement);
 
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+
     ShowTreeWithChemicalComposition();
     FillNeutronTable();
     on_pbWasModified_clicked();
@@ -2070,7 +2078,12 @@ void MaterialInspectorWindow::onRemoveIsotope(AChemicalElement *element, int iso
 
 void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * /*element*/, int /*isotopeIndexInElement*/)
 {
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.ChemicalComposition.CalculateMeanAtomMass();
+    tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
+
     ShowTreeWithChemicalComposition();
+    FillNeutronTable();
     on_pbWasModified_clicked();
 }
 
@@ -2358,12 +2371,14 @@ void MaterialInspectorWindow::autoloadMissingCrossSectionData()
     if (bCapture)
     {
         for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
-            autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
+            if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
+                autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
     }
     if (bElastic)
     {
         for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
-            autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
+            if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
+                autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
     }
 }
 
@@ -2512,6 +2527,14 @@ void MaterialInspectorWindow::on_cbAllowAbsentCsData_clicked()
     on_pbWasModified_clicked();
 }
 
+void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
+{
+    autoloadMissingCrossSectionData();
+
+    FillNeutronTable();
+    on_pbWasModified_clicked();
+}
+
 void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
 {
     QDialog* d = new QDialog(this);
@@ -2548,9 +2571,5 @@ void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
      });
      connect(pbClose, SIGNAL(clicked(bool)), d, SLOT(accept()));
 
-
      d->exec();
-
-
-
 }

@@ -164,6 +164,13 @@ QString AMaterialComposition::setCompositionString(const QString composition)
     ElementCompositionString = composition.simplified();
 
     //calculating mean atom mass
+    CalculateMeanAtomMass();
+
+    return "";
+}
+
+void AMaterialComposition::CalculateMeanAtomMass()
+{
     MeanAtomMass = 0;
     for (const AChemicalElement& el : ElementComposition)
         for (const AIsotope& iso : el.Isotopes)
@@ -172,8 +179,6 @@ QString AMaterialComposition::setCompositionString(const QString composition)
             MeanAtomMass += iso.Mass * el.MolarFraction * 0.01*iso.Abundancy;
         }
     qDebug() << "Mean atom mass is"<< MeanAtomMass;
-
-    return "";
 }
 
 int AMaterialComposition::countIsotopes() const

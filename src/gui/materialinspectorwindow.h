@@ -134,6 +134,8 @@ private slots:
 
     void on_pbHelpNeutron_clicked();
 
+    void on_pbAutoLoadMissingNeutronCrossSections_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

@@ -640,7 +640,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
 
     //Grids require specific title - they are recognized by it
     if (obj->ObjectType->isGrid()) vol->SetTitle("G");
-    if (obj->ObjectType->isMonitor()) vol->SetTitle("M");
+    else if (obj->ObjectType->isMonitor()) vol->SetTitle("M");
     else vol->SetTitle("-");
 }
 

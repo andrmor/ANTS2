@@ -65,6 +65,8 @@ public:
     const QJsonObject writeToJson() const;
     void readFromJson(const QJsonObject& json);
 
+    void CalculateMeanAtomMass();
+
 private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;

@@ -75,7 +75,7 @@ void ANeutronInfoDialog::update()
     if (bShowAbs && !termAb.PartialCrossSectionEnergy.isEmpty())
     {
         cs_abs = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
-        s_cs = QString::number(cs_abs, 'g', 4);
+        s_cs = QString::number(cs_abs*1.0e24, 'g', 4);  //in barns
         double mfp = 10.0/cs_abs/AtDens;
         s_mfp = QString::number(mfp, 'g', 4);
     }
@@ -92,7 +92,7 @@ void ANeutronInfoDialog::update()
     if (bShowScat && !termSc.PartialCrossSectionEnergy.isEmpty())
     {
         cs_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
-        s_cs = QString::number(cs_scat, 'g', 4);
+        s_cs = QString::number(cs_scat*1.0e24, 'g', 4);  //in barns
         double mfp = 10.0/cs_scat/AtDens;
         s_mfp = QString::number(mfp, 'g', 4);
     }
@@ -104,7 +104,7 @@ void ANeutronInfoDialog::update()
     ui->tabwMain->setItem(1, 2, twi);
 
     double cs = cs_abs + cs_scat;
-    twi = new QTableWidgetItem(QString::number(cs, 'g', 4));
+    twi = new QTableWidgetItem(QString::number(cs*1.0e24, 'g', 4));
     twi->setTextAlignment(Qt::AlignCenter);
     ui->tabwMain->setItem(0, 0, twi);
     double mfp = 10.0/cs/AtDens;

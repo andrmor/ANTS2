@@ -34,7 +34,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
 {
     //      qDebug() << "Updating neutron data";
     int neutronId = MPCollection->getNeutronIndex();
-    if (neutronId == -1) return; //not dfefined in thsi configuration
+    if (neutronId == -1) return; //not dfefined in this configuration
 
     QVector<NeutralTerminatorStructure>& Terminators = MatParticle[neutronId].Terminators;
     Terminators.resize(2);
@@ -47,7 +47,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
         QVector<ANeutronInteractionElement> NewIsotopeRecords;
         for (int iEl=0; iEl<ChemicalComposition.countElements(); iEl++)
         {
-            AChemicalElement* El = ChemicalComposition.getElement(iEl);
+            const AChemicalElement* El = ChemicalComposition.getElement(iEl);
             for (int iIso=0; iIso<El->countIsotopes(); iIso++)
             {
                 //      qDebug() << "==Creating ANeutronInteractionElement for " << El->Symbol << El->Isotopes.at(iIso).Mass << ":";
@@ -668,8 +668,10 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
                                 return "Unknown generated particle after capture for " + isoName;
                         }
                     }
-                    if ( !ae.DecayScenarios.isEmpty() && fabs(branching - 100.0) > 0.001)
+                    if ( !ae.DecayScenarios.isEmpty() && fabs(branching - 1.0) > 0.001)
+                    {
                         return "Sum of branching factors does not sum to 100% for " + isoName;
+                    }
                 }
           }
       }

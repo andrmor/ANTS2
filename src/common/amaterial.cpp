@@ -34,7 +34,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
 {
     //      qDebug() << "Updating neutron data";
     int neutronId = MPCollection->getNeutronIndex();
-    if (neutronId == -1) return; //not dfefined in thsi configuration
+    if (neutronId == -1) return; //not dfefined in this configuration
 
     QVector<NeutralTerminatorStructure>& Terminators = MatParticle[neutronId].Terminators;
     Terminators.resize(2);

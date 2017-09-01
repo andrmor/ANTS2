@@ -2155,10 +2155,10 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
 
-    if (OptionsConfigurator->isAutoloadEnabled())
-        autoloadMissingCrossSectionData();
+    if (OptionsConfigurator->isAutoloadEnabled()) autoloadMissingCrossSectionData();
 
-    FillNeutronTable();
+    if (ui->cobParticle->currentIndex() == MW->MpCollection->getNeutronIndex()) FillNeutronTable(); //fill table if neutron is selected
+
     on_pbWasModified_clicked();
 }
 
@@ -2222,6 +2222,7 @@ void flagButton(QPushButton* pb, bool flag)
 
 void MaterialInspectorWindow::FillNeutronTable()
 {
+    //      qDebug() << "Filling neutron table";
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
     ui->tabwNeutron->setColumnCount(0);
@@ -2352,33 +2353,40 @@ void MaterialInspectorWindow::FillNeutronTable()
 
 void MaterialInspectorWindow::autoloadMissingCrossSectionData()
 {
-    bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked();
-    if (!bCapture && !bElastic) return;
-
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    int particleId = ui->cobParticle->currentIndex();
-    QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
-    if (Terminators.size() != 2)
+    //for neutron
+    int neutronId = MW->MpCollection->getNeutronIndex();
+    if (neutronId != -1) //otherwise not dfefined in this configuration
     {
-        qWarning() << "Terminators size is not equal to two!";
-        return;
-    }
-    NeutralTerminatorStructure& termAbs = Terminators[0];
-    NeutralTerminatorStructure& termScat = Terminators[1];
+        MatParticleStructure& mp = tmpMaterial.MatParticle[neutronId];
 
-    if (bCapture)
-    {
-        for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
-            if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
-                autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
-    }
-    if (bElastic)
-    {
-        for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
-            if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
-                autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
+        bool bCapture = mp.bCaptureEnabled;
+        bool bElastic = mp.bEllasticEnabled;
+        if (!bCapture && !bElastic) return;
+
+        QVector<NeutralTerminatorStructure>& Terminators = mp.Terminators;
+
+        if (Terminators.size() != 2)
+        {
+            qWarning() << "||| Terminators size is not equal to two!";
+            return;
+        }
+        NeutralTerminatorStructure& termAbs = Terminators[0];
+        NeutralTerminatorStructure& termScat = Terminators[1];
+
+        if (bCapture)
+        {
+            for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
+                if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
+                    autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
+        }
+        if (bElastic)
+        {
+            for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
+                if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
+                    autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
+        }
     }
 }
 

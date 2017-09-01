@@ -1,6 +1,6 @@
 {
     "DetectorConfig": {
-        "ANTS2build": 1802,
+        "ANTS2build": 2230,
         "DummyPMs": [
             {
                 "DummyPM": {
@@ -1202,11 +1202,110 @@
                 {
                     "*MaterialName": "Air",
                     "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
                     "Density": 0.0012041,
                     "ElDriftVelo": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 1,
+                                "Name": "proton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 3,
+                                "Name": "triton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
                     "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
                     "W": 0
@@ -1700,9 +1799,102 @@
                             0.0002002
                         ]
                     ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
                     "Density": 2.5,
                     "ElDriftVelo": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 1,
+                                "Name": "proton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 3,
+                                "Name": "triton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
                     "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1.45,
                     "RefractiveIndexWave": [
@@ -2191,6 +2383,8 @@
                             1.51108
                         ]
                     ],
+                    "SecScintSpectrum": [
+                    ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
                     "W": 0
@@ -2198,9 +2392,60 @@
                 {
                     "*MaterialName": "Aluminium",
                     "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 4.450631538595432e-308
+                    },
+                    "Comments": "",
                     "Density": 2.7,
                     "ElDriftVelo": 0,
                     "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
                         {
                             "*Particle": {
                                 "Charge": 1,
@@ -2208,9 +2453,16 @@
                                 "Name": "proton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
                             "TrackingAllowed": false
                         },
                         {
@@ -2220,15 +2472,30 @@
                                 "Name": "triton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
                             "TrackingAllowed": false
                         }
                     ],
+                    "PrimScintSpectrum": [
+                    ],
                     "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1.78,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
                     "W": 0
@@ -2236,22 +2503,39 @@
                 {
                     "*MaterialName": "Teflon",
                     "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 5.413644456490975e+67
+                    },
+                    "Comments": "",
                     "Density": 2.2,
                     "ElDriftVelo": 0,
-                    "PrimScint_Tau": 0,
-                    "ReemissionProb": 0,
-                    "RefractiveIndex": 1.37,
-                    "SecScint_PhYield": 0,
-                    "SecScint_Tau": 0,
-                    "W": 0
-                },
-                {
-                    "*MaterialName": "HeCF4-4b6b",
-                    "BulkAbsorption": 0,
-                    "Density": 0.0229,
-                    "ElDriftVelo": 2,
-                    "IsotopeDensity": 3.2e+20,
                     "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
                         {
                             "*Particle": {
                                 "Charge": 0,
@@ -2259,35 +2543,2656 @@
                                 "Name": "neutron",
                                 "Type": 2
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 1,
+                                "Name": "proton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 3,
+                                "Name": "triton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "RefractiveIndex": 1.37,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 0,
+                    "SecScint_Tau": 0,
+                    "W": 0
+                },
+                {
+                    "*MaterialName": "HeCF4-4b6b",
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 98.93,
+                                        "Mass": 12,
+                                        "Symbol": "C"
+                                    },
+                                    {
+                                        "Abundancy": 1.07,
+                                        "Mass": 13,
+                                        "Symbol": "C"
+                                    }
+                                ],
+                                "MolarFraction": 0.17647058823529413,
+                                "Symbol": "C"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 100,
+                                        "Mass": 19,
+                                        "Symbol": "F"
+                                    }
+                                ],
+                                "MolarFraction": 0.7058823529411765,
+                                "Symbol": "F"
+                            },
+                            {
+                                "Isotopes": [
+                                    {
+                                        "Abundancy": 100,
+                                        "Mass": 3,
+                                        "Symbol": "He"
+                                    }
+                                ],
+                                "MolarFraction": 0.11764705882352941,
+                                "Symbol": "He"
+                            }
+                        ],
+                        "ElementCompositionString": "He:4 + CF4:6",
+                        "MeanAtomMass": 15.884241176470589
+                    },
+                    "Comments": "",
+                    "Density": 0.0229,
+                    "ElDriftVelo": 2,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": false,
-                            "NeutronTerminators": [
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
                                 {
-                                    "Branching": 1,
-                                    "ReactionType": 2,
-                                    "Secondaries": [
+                                    "InteractionData": [
+                                        [
+                                            1e-08,
+                                            3.153189938025992e-20
+                                        ],
+                                        [
+                                            1.10304e-08,
+                                            3.0023058148034995e-20
+                                        ],
+                                        [
+                                            1.21669e-08,
+                                            2.858645305619438e-20
+                                        ],
+                                        [
+                                            1.34206e-08,
+                                            2.721855465381694e-20
+                                        ],
+                                        [
+                                            1.48034e-08,
+                                            2.5916068783393454e-20
+                                        ],
+                                        [
+                                            1.6328600000000002e-08,
+                                            2.4675936585943186e-20
+                                        ],
+                                        [
+                                            1.80111e-08,
+                                            2.3495216849544785e-20
+                                        ],
+                                        [
+                                            1.9866900000000003e-08,
+                                            2.2370968364213166e-20
+                                        ],
+                                        [
+                                            2.19139e-08,
+                                            2.1300485215849565e-20
+                                        ],
+                                        [
+                                            2.41719e-08,
+                                            2.0281179139525084e-20
+                                        ],
+                                        [
+                                            2.66625e-08,
+                                            1.931081481166942e-20
+                                        ],
+                                        [
+                                            2.94097e-08,
+                                            1.8386686322430714e-20
+                                        ],
+                                        [
+                                            3.2440000000000005e-08,
+                                            1.7506911293469987e-20
+                                        ],
+                                        [
+                                            3.5782499999999996e-08,
+                                            1.6669136758264796e-20
+                                        ],
+                                        [
+                                            3.94694e-08,
+                                            1.5871597987897806e-20
+                                        ],
+                                        [
+                                            4.35362e-08,
+                                            1.5112059665216215e-20
+                                        ],
+                                        [
+                                            4.8022100000000004e-08,
+                                            1.43889923569896e-20
+                                        ],
+                                        [
+                                            5.29701e-08,
+                                            1.3700396043199696e-20
+                                        ],
+                                        [
+                                            5.8428e-08,
+                                            1.3044858939226531e-20
+                                        ],
+                                        [
+                                            6.444820000000001e-08,
+                                            1.2420616321445197e-20
+                                        ],
+                                        [
+                                            7.10888e-08,
+                                            1.1826256406805175e-20
+                                        ],
+                                        [
+                                            7.84136e-08,
+                                            1.1260402707821605e-20
+                                        ],
+                                        [
+                                            8.64931e-08,
+                                            1.0721584620861238e-20
+                                        ],
+                                        [
+                                            9.54051e-08,
+                                            1.0208543307032382e-20
+                                        ],
+                                        [
+                                            1.05235e-07,
+                                            9.72005522305986e-21
+                                        ],
+                                        [
+                                            1.16078e-07,
+                                            9.254943883115743e-21
+                                        ],
+                                        [
+                                            1.2803900000000003e-07,
+                                            8.81207986310645e-21
+                                        ],
+                                        [
+                                            1.41232e-07,
+                                            8.390416092568566e-21
+                                        ],
+                                        [
+                                            1.5578400000000001e-07,
+                                            7.988929028454631e-21
+                                        ],
+                                        [
+                                            1.71835e-07,
+                                            7.606653954794401e-21
+                                        ],
+                                        [
+                                            1.8954000000000002e-07,
+                                            7.242661449046293e-21
+                                        ],
+                                        [
+                                            2.0907e-07,
+                                            6.896092676974798e-21
+                                        ],
+                                        [
+                                            2.30612e-07,
+                                            6.566112334513859e-21
+                                        ],
+                                        [
+                                            2.5437399999999997e-07,
+                                            6.251920412350926e-21
+                                        ],
+                                        [
+                                            2.80584e-07,
+                                            5.9527521963318974e-21
+                                        ],
+                                        [
+                                            3.09494e-07,
+                                            5.66791355995523e-21
+                                        ],
+                                        [
+                                            3.4138300000000003e-07,
+                                            5.396698613019013e-21
+                                        ],
+                                        [
+                                            3.76558e-07,
+                                            5.138460288868573e-21
+                                        ],
+                                        [
+                                            4.1535800000000003e-07,
+                                            4.892575050878086e-21
+                                        ],
+                                        [
+                                            4.5815500000000004e-07,
+                                            4.658454656822105e-21
+                                        ],
+                                        [
+                                            5.05362e-07,
+                                            4.435546158944886e-21
+                                        ],
+                                        [
+                                            5.57433e-07,
+                                            4.223296609685198e-21
+                                        ],
+                                        [
+                                            6.14869e-07,
+                                            4.0212118855577684e-21
+                                        ],
+                                        [
+                                            6.78223e-07,
+                                            3.828786098318466e-21
+                                        ],
+                                        [
+                                            7.48105e-07,
+                                            3.645572183887958e-21
+                                        ],
+                                        [
+                                            8.25188e-07,
+                                            3.4711348428746395e-21
+                                        ],
+                                        [
+                                            9.10213e-07,
+                                            3.3050387762224806e-21
+                                        ],
+                                        [
+                                            1.0039999999999998e-06,
+                                            3.1468839793628578e-21
+                                        ],
+                                        [
+                                            1.10745e-06,
+                                            2.9962939771397034e-21
+                                        ],
+                                        [
+                                            1.2215500000000002e-06,
+                                            2.8529275888668786e-21
+                                        ],
+                                        [
+                                            1.34742e-06,
+                                            2.7164083399699146e-21
+                                        ],
+                                        [
+                                            1.48625e-06,
+                                            2.5864185794037907e-21
+                                        ],
+                                        [
+                                            1.6393899999999999e-06,
+                                            2.4626524212704153e-21
+                                        ],
+                                        [
+                                            1.80831e-06,
+                                            2.34481574439513e-21
+                                        ],
+                                        [
+                                            1.99463e-06,
+                                            2.2326144277619495e-21
+                                        ],
+                                        [
+                                            2.2001600000000003e-06,
+                                            2.1257778799784552e-21
+                                        ],
+                                        [
+                                            2.42685e-06,
+                                            2.0240472745874478e-21
+                                        ],
+                                        [
+                                            2.67691e-06,
+                                            1.927199079213684e-21
+                                        ],
+                                        [
+                                            2.95273e-06,
+                                            1.8349744676736638e-21
+                                        ],
+                                        [
+                                            3.2569700000000003e-06,
+                                            1.7471616726084437e-21
+                                        ],
+                                        [
+                                            3.59256e-06,
+                                            1.6635606914816995e-21
+                                        ],
+                                        [
+                                            3.962720000000001e-06,
+                                            1.5839479926452838e-21
+                                        ],
+                                        [
+                                            4.37103e-06,
+                                            1.5081588679168008e-21
+                                        ],
+                                        [
+                                            4.82141e-06,
+                                            1.4359815504438155e-21
+                                        ],
+                                        [
+                                            5.31819e-06,
+                                            1.3672630970514844e-21
+                                        ],
+                                        [
+                                            5.86616e-06,
+                                            1.3018387998661024e-21
+                                        ],
+                                        [
+                                            6.4705900000000005e-06,
+                                            1.2395439512362608e-21
+                                        ],
+                                        [
+                                            7.1373e-06,
+                                            1.180225608145807e-21
+                                        ],
+                                        [
+                                            7.87271e-06,
+                                            1.1237437689137883e-21
+                                        ],
+                                        [
+                                            8.68389e-06,
+                                            1.0699666673616616e-21
+                                        ],
+                                        [
+                                            9.57865e-06,
+                                            1.0187625371130852e-21
+                                        ],
+                                        [
+                                            1.05656e-05,
+                                            9.700090239111679e-22
+                                        ],
+                                        [
+                                            1.16543e-05,
+                                            9.235873028454125e-22
+                                        ],
+                                        [
+                                            1.28551e-05,
+                                            8.79387960782306e-22
+                                        ],
+                                        [
+                                            1.41796e-05,
+                                            8.373027611966455e-22
+                                        ],
+                                        [
+                                            1.56406e-05,
+                                            7.9723052639895995e-22
+                                        ],
+                                        [
+                                            1.72522e-05,
+                                            7.590771377368553e-22
+                                        ],
+                                        [
+                                            1.90298e-05,
+                                            7.227484764202727e-22
+                                        ],
+                                        [
+                                            2.0990600000000002e-05,
+                                            6.88157482560291e-22
+                                        ],
+                                        [
+                                            2.31534e-05,
+                                            6.552229788309114e-22
+                                        ],
+                                        [
+                                            2.5241900000000003e-05,
+                                            6.275261835737007e-22
+                                        ],
+                                        [
+                                            2.5300000000000002e-05,
+                                            6.268038221785941e-22
+                                        ],
+                                        [
+                                            2.79068e-05,
+                                            5.968046470692691e-22
+                                        ],
+                                        [
+                                            3.07823e-05,
+                                            5.682407829690592e-22
+                                        ],
+                                        [
+                                            3.3954e-05,
+                                            5.410428173249448e-22
+                                        ],
+                                        [
+                                            3.74525e-05,
+                                            5.151472199598076e-22
+                                        ],
+                                        [
+                                            4.13115e-05,
+                                            4.9048928427535285e-22
+                                        ],
+                                        [
+                                            4.55681e-05,
+                                            4.67012538977897e-22
+                                        ],
+                                        [
+                                            5.02633e-05,
+                                            4.44658159843248e-22
+                                        ],
+                                        [
+                                            5.54423e-05,
+                                            4.2337438146881363e-22
+                                        ],
+                                        [
+                                            6.11549e-05,
+                                            4.031082619885108e-22
+                                        ],
+                                        [
+                                            6.74561e-05,
+                                            3.8381156548380656e-22
+                                        ],
+                                        [
+                                            7.440660000000001e-05,
+                                            3.654384090726822e-22
+                                        ],
+                                        [
+                                            8.20732e-05,
+                                            3.4794408638779655e-22
+                                        ],
+                                        [
+                                            9.116839999999999e-05,
+                                            3.30200196370379e-22
+                                        ],
+                                        [
+                                            0.000101266,
+                                            3.1335795402541077e-22
+                                        ],
+                                        [
+                                            0.00011248900000000001,
+                                            2.973560103126597e-22
+                                        ],
+                                        [
+                                            0.000124079,
+                                            2.8311812783866983e-22
+                                        ],
+                                        [
+                                            0.00013686400000000002,
+                                            2.695608421261484e-22
+                                        ],
+                                        [
+                                            0.000150966,
+                                            2.5665330173995672e-22
+                                        ],
+                                        [
+                                            0.00016652100000000001,
+                                            2.4436304306510064e-22
+                                        ],
+                                        [
+                                            0.00018367900000000001,
+                                            2.326617877964902e-22
+                                        ],
+                                        [
+                                            0.000202604,
+                                            2.2152046558134456e-22
+                                        ],
+                                        [
+                                            0.00022348000000000002,
+                                            2.1091480753805017e-22
+                                        ],
+                                        [
+                                            0.00024650700000000003,
+                                            2.008192786376796e-22
+                                        ],
+                                        [
+                                            0.000271906,
+                                            1.912089320326061e-22
+                                        ],
+                                        [
+                                            0.000299923,
+                                            1.8206276335610893e-22
+                                        ],
+                                        [
+                                            0.000330826,
+                                            1.7335700626442991e-22
+                                        ],
+                                        [
+                                            0.000364913,
+                                            1.650687265564034e-22
+                                        ],
+                                        [
+                                            0.000402512,
+                                            1.5717554368323228e-22
+                                        ],
+                                        [
+                                            0.000443986,
+                                            1.496589343896972e-22
+                                        ],
+                                        [
+                                            0.000489733,
+                                            1.4249789943334597e-22
+                                        ],
+                                        [
+                                            0.0005401939999999999,
+                                            1.3567702058133976e-22
+                                        ],
+                                        [
+                                            0.000595854,
+                                            1.291800979853438e-22
+                                        ],
+                                        [
+                                            0.0006572489999999999,
+                                            1.2299229977971632e-22
+                                        ],
+                                        [
+                                            0.000724969,
+                                            1.1710042838882852e-22
+                                        ],
+                                        [
+                                            0.000799668,
+                                            1.1149015437975763e-22
+                                        ],
+                                        [
+                                            0.0008820630000000001,
+                                            1.0614790590900774e-22
+                                        ],
+                                        [
+                                            0.000979764,
+                                            1.020696688138489e-22
+                                        ]
+                                    ],
+                                    "IsotopeRecords": [
                                         {
-                                            "SecParticle": {
-                                                "Charge": 1,
-                                                "Mass": 1,
-                                                "Name": "proton",
-                                                "Type": 1
-                                            },
-                                            "energy": 573
+                                            "CrossSection": [
+                                                [
+                                                    1e-08,
+                                                    1.7044e-25
+                                                ],
+                                                [
+                                                    1.10304e-08,
+                                                    1.62284e-25
+                                                ],
+                                                [
+                                                    1.21669e-08,
+                                                    1.5451799999999998e-25
+                                                ],
+                                                [
+                                                    1.34206e-08,
+                                                    1.47124e-25
+                                                ],
+                                                [
+                                                    1.48034e-08,
+                                                    1.4008399999999997e-25
+                                                ],
+                                                [
+                                                    1.6328600000000002e-08,
+                                                    1.3338099999999998e-25
+                                                ],
+                                                [
+                                                    1.80111e-08,
+                                                    1.2699799999999998e-25
+                                                ],
+                                                [
+                                                    1.9866900000000003e-08,
+                                                    1.20921e-25
+                                                ],
+                                                [
+                                                    2.19139e-08,
+                                                    1.15134e-25
+                                                ],
+                                                [
+                                                    2.41719e-08,
+                                                    1.0962499999999999e-25
+                                                ],
+                                                [
+                                                    2.66625e-08,
+                                                    1.04379e-25
+                                                ],
+                                                [
+                                                    2.94097e-08,
+                                                    9.938409999999999e-26
+                                                ],
+                                                [
+                                                    3.2440000000000005e-08,
+                                                    9.462829999999999e-26
+                                                ],
+                                                [
+                                                    3.5782499999999996e-08,
+                                                    9.009989999999999e-26
+                                                ],
+                                                [
+                                                    3.94694e-08,
+                                                    8.578829999999999e-26
+                                                ],
+                                                [
+                                                    4.35362e-08,
+                                                    8.16829e-26
+                                                ],
+                                                [
+                                                    4.8022100000000004e-08,
+                                                    7.7774e-26
+                                                ],
+                                                [
+                                                    5.29701e-08,
+                                                    7.405209999999999e-26
+                                                ],
+                                                [
+                                                    5.8428e-08,
+                                                    7.050829999999999e-26
+                                                ],
+                                                [
+                                                    6.444820000000001e-08,
+                                                    6.7134e-26
+                                                ],
+                                                [
+                                                    7.10888e-08,
+                                                    6.392119999999999e-26
+                                                ],
+                                                [
+                                                    7.84136e-08,
+                                                    6.08621e-26
+                                                ],
+                                                [
+                                                    8.64931e-08,
+                                                    5.79494e-26
+                                                ],
+                                                [
+                                                    9.54051e-08,
+                                                    5.5176e-26
+                                                ],
+                                                [
+                                                    1.05235e-07,
+                                                    5.25353e-26
+                                                ],
+                                                [
+                                                    1.16078e-07,
+                                                    5.00209e-26
+                                                ],
+                                                [
+                                                    1.2803900000000003e-07,
+                                                    4.76269e-26
+                                                ],
+                                                [
+                                                    1.41232e-07,
+                                                    4.5347299999999995e-26
+                                                ],
+                                                [
+                                                    1.5578400000000001e-07,
+                                                    4.3176799999999996e-26
+                                                ],
+                                                [
+                                                    1.71835e-07,
+                                                    4.11102e-26
+                                                ],
+                                                [
+                                                    1.8954000000000002e-07,
+                                                    3.9142399999999997e-26
+                                                ],
+                                                [
+                                                    2.0907e-07,
+                                                    3.72687e-26
+                                                ],
+                                                [
+                                                    2.30612e-07,
+                                                    3.5484699999999996e-26
+                                                ],
+                                                [
+                                                    2.5437399999999997e-07,
+                                                    3.378599999999999e-26
+                                                ],
+                                                [
+                                                    2.80584e-07,
+                                                    3.21685e-26
+                                                ],
+                                                [
+                                                    3.09494e-07,
+                                                    3.06284e-26
+                                                ],
+                                                [
+                                                    3.4138300000000003e-07,
+                                                    2.9161999999999996e-26
+                                                ],
+                                                [
+                                                    3.76558e-07,
+                                                    2.77657e-26
+                                                ],
+                                                [
+                                                    4.1535800000000003e-07,
+                                                    2.64362e-26
+                                                ],
+                                                [
+                                                    4.5815500000000004e-07,
+                                                    2.5170199999999997e-26
+                                                ],
+                                                [
+                                                    5.05362e-07,
+                                                    2.39648e-26
+                                                ],
+                                                [
+                                                    5.57433e-07,
+                                                    2.2817e-26
+                                                ],
+                                                [
+                                                    6.14869e-07,
+                                                    2.1724099999999997e-26
+                                                ],
+                                                [
+                                                    6.78223e-07,
+                                                    2.06835e-26
+                                                ],
+                                                [
+                                                    7.48105e-07,
+                                                    1.96926e-26
+                                                ],
+                                                [
+                                                    8.25188e-07,
+                                                    1.87491e-26
+                                                ],
+                                                [
+                                                    9.10213e-07,
+                                                    1.78506e-26
+                                                ],
+                                                [
+                                                    1.0039999999999998e-06,
+                                                    1.6995199999999997e-26
+                                                ],
+                                                [
+                                                    1.10745e-06,
+                                                    1.61806e-26
+                                                ],
+                                                [
+                                                    1.2215500000000002e-06,
+                                                    1.5404899999999998e-26
+                                                ],
+                                                [
+                                                    1.34742e-06,
+                                                    1.46663e-26
+                                                ],
+                                                [
+                                                    1.48625e-06,
+                                                    1.3963e-26
+                                                ],
+                                                [
+                                                    1.6393899999999999e-06,
+                                                    1.3293299999999997e-26
+                                                ],
+                                                [
+                                                    1.80831e-06,
+                                                    1.2655599999999999e-26
+                                                ],
+                                                [
+                                                    1.99463e-06,
+                                                    1.20484e-26
+                                                ],
+                                                [
+                                                    2.2001600000000003e-06,
+                                                    1.1470199999999998e-26
+                                                ],
+                                                [
+                                                    2.42685e-06,
+                                                    1.0919599999999999e-26
+                                                ],
+                                                [
+                                                    2.67691e-06,
+                                                    1.03954e-26
+                                                ],
+                                                [
+                                                    2.95273e-06,
+                                                    9.896149999999998e-27
+                                                ],
+                                                [
+                                                    3.2569700000000003e-06,
+                                                    9.420809999999999e-27
+                                                ],
+                                                [
+                                                    3.59256e-06,
+                                                    8.9682e-27
+                                                ],
+                                                [
+                                                    3.962720000000001e-06,
+                                                    8.537239999999999e-27
+                                                ],
+                                                [
+                                                    4.37103e-06,
+                                                    8.126889999999998e-27
+                                                ],
+                                                [
+                                                    4.82141e-06,
+                                                    7.736179999999999e-27
+                                                ],
+                                                [
+                                                    5.31819e-06,
+                                                    7.36418e-27
+                                                ],
+                                                [
+                                                    5.86616e-06,
+                                                    7.009999999999999e-27
+                                                ],
+                                                [
+                                                    6.4705900000000005e-06,
+                                                    6.67281e-27
+                                                ],
+                                                [
+                                                    7.1373e-06,
+                                                    6.351779999999999e-27
+                                                ],
+                                                [
+                                                    7.87271e-06,
+                                                    6.0461799999999995e-27
+                                                ],
+                                                [
+                                                    8.68389e-06,
+                                                    5.7552599999999995e-27
+                                                ],
+                                                [
+                                                    9.57865e-06,
+                                                    5.478349999999999e-27
+                                                ],
+                                                [
+                                                    1.05656e-05,
+                                                    5.21479e-27
+                                                ],
+                                                [
+                                                    1.16543e-05,
+                                                    4.96395e-27
+                                                ],
+                                                [
+                                                    1.28551e-05,
+                                                    4.72527e-27
+                                                ],
+                                                [
+                                                    1.41796e-05,
+                                                    4.49817e-27
+                                                ],
+                                                [
+                                                    1.56406e-05,
+                                                    4.28214e-27
+                                                ],
+                                                [
+                                                    1.72522e-05,
+                                                    4.0766799999999994e-27
+                                                ],
+                                                [
+                                                    1.90298e-05,
+                                                    3.8813099999999994e-27
+                                                ],
+                                                [
+                                                    2.0990600000000002e-05,
+                                                    3.6955899999999996e-27
+                                                ],
+                                                [
+                                                    2.31534e-05,
+                                                    3.51907e-27
+                                                ],
+                                                [
+                                                    2.5241900000000003e-05,
+                                                    3.3709e-27
+                                                ],
+                                                [
+                                                    2.5300000000000002e-05,
+                                                    3.36705e-27
+                                                ],
+                                                [
+                                                    2.79068e-05,
+                                                    3.20687e-27
+                                                ],
+                                                [
+                                                    3.07823e-05,
+                                                    3.0546599999999996e-27
+                                                ],
+                                                [
+                                                    3.3954e-05,
+                                                    2.9099899999999996e-27
+                                                ],
+                                                [
+                                                    3.74525e-05,
+                                                    2.77244e-27
+                                                ],
+                                                [
+                                                    4.13115e-05,
+                                                    2.6415899999999998e-27
+                                                ],
+                                                [
+                                                    4.55681e-05,
+                                                    2.5170799999999998e-27
+                                                ],
+                                                [
+                                                    5.02633e-05,
+                                                    2.3985299999999997e-27
+                                                ],
+                                                [
+                                                    5.54423e-05,
+                                                    2.2856299999999998e-27
+                                                ],
+                                                [
+                                                    6.11549e-05,
+                                                    2.1780699999999995e-27
+                                                ],
+                                                [
+                                                    6.74561e-05,
+                                                    2.07559e-27
+                                                ],
+                                                [
+                                                    7.440660000000001e-05,
+                                                    1.9779099999999996e-27
+                                                ],
+                                                [
+                                                    8.20732e-05,
+                                                    1.88476e-27
+                                                ],
+                                                [
+                                                    9.116839999999999e-05,
+                                                    1.7896299999999997e-27
+                                                ],
+                                                [
+                                                    0.000101266,
+                                                    1.69908e-27
+                                                ],
+                                                [
+                                                    0.00011248900000000001,
+                                                    1.6127599999999998e-27
+                                                ],
+                                                [
+                                                    0.000124079,
+                                                    1.5359299999999998e-27
+                                                ],
+                                                [
+                                                    0.00013686400000000002,
+                                                    1.4625799999999999e-27
+                                                ],
+                                                [
+                                                    0.000150966,
+                                                    1.39263e-27
+                                                ],
+                                                [
+                                                    0.00016652100000000001,
+                                                    1.32597e-27
+                                                ],
+                                                [
+                                                    0.00018367900000000001,
+                                                    1.2624899999999999e-27
+                                                ],
+                                                [
+                                                    0.000202604,
+                                                    1.2020799999999998e-27
+                                                ],
+                                                [
+                                                    0.00022348000000000002,
+                                                    1.14458e-27
+                                                ],
+                                                [
+                                                    0.00024650700000000003,
+                                                    1.0898399999999999e-27
+                                                ],
+                                                [
+                                                    0.000271906,
+                                                    1.0377199999999999e-27
+                                                ],
+                                                [
+                                                    0.000299923,
+                                                    9.88062e-28
+                                                ],
+                                                [
+                                                    0.000330826,
+                                                    9.40738e-28
+                                                ],
+                                                [
+                                                    0.000364913,
+                                                    8.956809999999999e-28
+                                                ],
+                                                [
+                                                    0.000402512,
+                                                    8.528249999999999e-28
+                                                ],
+                                                [
+                                                    0.000443986,
+                                                    8.12048e-28
+                                                ],
+                                                [
+                                                    0.000489733,
+                                                    7.732039999999999e-28
+                                                ],
+                                                [
+                                                    0.0005401939999999999,
+                                                    7.362259999999999e-28
+                                                ],
+                                                [
+                                                    0.000595854,
+                                                    7.010299999999999e-28
+                                                ],
+                                                [
+                                                    0.0006572489999999999,
+                                                    6.674279999999999e-28
+                                                ],
+                                                [
+                                                    0.000724969,
+                                                    6.35447e-28
+                                                ],
+                                                [
+                                                    0.000799668,
+                                                    6.05047e-28
+                                                ],
+                                                [
+                                                    0.0008820630000000001,
+                                                    5.761249999999999e-28
+                                                ],
+                                                [
+                                                    0.000979764,
+                                                    5.466579999999999e-28
+                                                ]
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 12,
+                                            "MolarFraction": 0.1745823529411765,
+                                            "Name": "C"
                                         },
                                         {
-                                            "SecParticle": {
-                                                "Charge": 1,
-                                                "Mass": 3,
-                                                "Name": "triton",
-                                                "Type": 1
-                                            },
-                                            "energy": 191
+                                            "CrossSection": [
+                                                [
+                                                    1e-08,
+                                                    6.87708e-26
+                                                ],
+                                                [
+                                                    1.10304e-08,
+                                                    6.54801e-26
+                                                ],
+                                                [
+                                                    1.21669e-08,
+                                                    6.234679999999999e-26
+                                                ],
+                                                [
+                                                    1.34206e-08,
+                                                    5.93635e-26
+                                                ],
+                                                [
+                                                    1.48034e-08,
+                                                    5.65229e-26
+                                                ],
+                                                [
+                                                    1.6328600000000002e-08,
+                                                    5.38182e-26
+                                                ],
+                                                [
+                                                    1.80111e-08,
+                                                    5.12429e-26
+                                                ],
+                                                [
+                                                    1.9866900000000003e-08,
+                                                    4.8790899999999994e-26
+                                                ],
+                                                [
+                                                    2.19139e-08,
+                                                    4.64562e-26
+                                                ],
+                                                [
+                                                    2.41719e-08,
+                                                    4.42333e-26
+                                                ],
+                                                [
+                                                    2.66625e-08,
+                                                    4.2116699999999997e-26
+                                                ],
+                                                [
+                                                    2.94097e-08,
+                                                    4.01013e-26
+                                                ],
+                                                [
+                                                    3.2440000000000005e-08,
+                                                    3.81825e-26
+                                                ],
+                                                [
+                                                    3.5782499999999996e-08,
+                                                    3.63554e-26
+                                                ],
+                                                [
+                                                    3.94694e-08,
+                                                    3.46158e-26
+                                                ],
+                                                [
+                                                    4.35362e-08,
+                                                    3.29594e-26
+                                                ],
+                                                [
+                                                    4.8022100000000004e-08,
+                                                    3.1382199999999995e-26
+                                                ],
+                                                [
+                                                    5.29701e-08,
+                                                    2.98806e-26
+                                                ],
+                                                [
+                                                    5.8428e-08,
+                                                    2.84507e-26
+                                                ],
+                                                [
+                                                    6.444820000000001e-08,
+                                                    2.70894e-26
+                                                ],
+                                                [
+                                                    7.10888e-08,
+                                                    2.5793099999999997e-26
+                                                ],
+                                                [
+                                                    7.84136e-08,
+                                                    2.45589e-26
+                                                ],
+                                                [
+                                                    8.64931e-08,
+                                                    2.33837e-26
+                                                ],
+                                                [
+                                                    9.54051e-08,
+                                                    2.22648e-26
+                                                ],
+                                                [
+                                                    1.05235e-07,
+                                                    2.1199399999999998e-26
+                                                ],
+                                                [
+                                                    1.16078e-07,
+                                                    2.0185e-26
+                                                ],
+                                                [
+                                                    1.2803900000000003e-07,
+                                                    1.92191e-26
+                                                ],
+                                                [
+                                                    1.41232e-07,
+                                                    1.8299499999999998e-26
+                                                ],
+                                                [
+                                                    1.5578400000000001e-07,
+                                                    1.7423799999999998e-26
+                                                ],
+                                                [
+                                                    1.71835e-07,
+                                                    1.6590099999999998e-26
+                                                ],
+                                                [
+                                                    1.8954000000000002e-07,
+                                                    1.5796199999999998e-26
+                                                ],
+                                                [
+                                                    2.0907e-07,
+                                                    1.50404e-26
+                                                ],
+                                                [
+                                                    2.30612e-07,
+                                                    1.43207e-26
+                                                ],
+                                                [
+                                                    2.5437399999999997e-07,
+                                                    1.36354e-26
+                                                ],
+                                                [
+                                                    2.80584e-07,
+                                                    1.29829e-26
+                                                ],
+                                                [
+                                                    3.09494e-07,
+                                                    1.2361699999999998e-26
+                                                ],
+                                                [
+                                                    3.4138300000000003e-07,
+                                                    1.1770199999999999e-26
+                                                ],
+                                                [
+                                                    3.76558e-07,
+                                                    1.1206999999999999e-26
+                                                ],
+                                                [
+                                                    4.1535800000000003e-07,
+                                                    1.0670699999999999e-26
+                                                ],
+                                                [
+                                                    4.5815500000000004e-07,
+                                                    1.01601e-26
+                                                ],
+                                                [
+                                                    5.05362e-07,
+                                                    9.67393e-27
+                                                ],
+                                                [
+                                                    5.57433e-07,
+                                                    9.211029999999999e-27
+                                                ],
+                                                [
+                                                    6.14869e-07,
+                                                    8.770269999999999e-27
+                                                ],
+                                                [
+                                                    6.78223e-07,
+                                                    8.350599999999999e-27
+                                                ],
+                                                [
+                                                    7.48105e-07,
+                                                    7.951019999999999e-27
+                                                ],
+                                                [
+                                                    8.25188e-07,
+                                                    7.570559999999999e-27
+                                                ],
+                                                [
+                                                    9.10213e-07,
+                                                    7.2083e-27
+                                                ],
+                                                [
+                                                    1.0039999999999998e-06,
+                                                    6.86338e-27
+                                                ],
+                                                [
+                                                    1.10745e-06,
+                                                    6.534959999999999e-27
+                                                ],
+                                                [
+                                                    1.2215500000000002e-06,
+                                                    6.22225e-27
+                                                ],
+                                                [
+                                                    1.34742e-06,
+                                                    5.92451e-27
+                                                ],
+                                                [
+                                                    1.48625e-06,
+                                                    5.641019999999999e-27
+                                                ],
+                                                [
+                                                    1.6393899999999999e-06,
+                                                    5.37109e-27
+                                                ],
+                                                [
+                                                    1.80831e-06,
+                                                    5.11408e-27
+                                                ],
+                                                [
+                                                    1.99463e-06,
+                                                    4.869369999999999e-27
+                                                ],
+                                                [
+                                                    2.2001600000000003e-06,
+                                                    4.636359999999999e-27
+                                                ],
+                                                [
+                                                    2.42685e-06,
+                                                    4.4145099999999994e-27
+                                                ],
+                                                [
+                                                    2.67691e-06,
+                                                    4.20327e-27
+                                                ],
+                                                [
+                                                    2.95273e-06,
+                                                    4.00214e-27
+                                                ],
+                                                [
+                                                    3.2569700000000003e-06,
+                                                    3.81064e-27
+                                                ],
+                                                [
+                                                    3.59256e-06,
+                                                    3.62829e-27
+                                                ],
+                                                [
+                                                    3.962720000000001e-06,
+                                                    3.4546799999999994e-27
+                                                ],
+                                                [
+                                                    4.37103e-06,
+                                                    3.28937e-27
+                                                ],
+                                                [
+                                                    4.82141e-06,
+                                                    3.13197e-27
+                                                ],
+                                                [
+                                                    5.31819e-06,
+                                                    2.9821e-27
+                                                ],
+                                                [
+                                                    5.86616e-06,
+                                                    2.8394e-27
+                                                ],
+                                                [
+                                                    6.4705900000000005e-06,
+                                                    2.7035399999999996e-27
+                                                ],
+                                                [
+                                                    7.1373e-06,
+                                                    2.57417e-27
+                                                ],
+                                                [
+                                                    7.87271e-06,
+                                                    2.4509899999999998e-27
+                                                ],
+                                                [
+                                                    8.68389e-06,
+                                                    2.3337099999999998e-27
+                                                ],
+                                                [
+                                                    9.57865e-06,
+                                                    2.22204e-27
+                                                ],
+                                                [
+                                                    1.05656e-05,
+                                                    2.11572e-27
+                                                ],
+                                                [
+                                                    1.16543e-05,
+                                                    2.01448e-27
+                                                ],
+                                                [
+                                                    1.28551e-05,
+                                                    1.91808e-27
+                                                ],
+                                                [
+                                                    1.41796e-05,
+                                                    1.8263e-27
+                                                ],
+                                                [
+                                                    1.56406e-05,
+                                                    1.7389099999999997e-27
+                                                ],
+                                                [
+                                                    1.72522e-05,
+                                                    1.6557e-27
+                                                ],
+                                                [
+                                                    1.90298e-05,
+                                                    1.5764699999999998e-27
+                                                ],
+                                                [
+                                                    2.0990600000000002e-05,
+                                                    1.5010399999999999e-27
+                                                ],
+                                                [
+                                                    2.31534e-05,
+                                                    1.4292099999999998e-27
+                                                ],
+                                                [
+                                                    2.5241900000000003e-05,
+                                                    1.3688099999999999e-27
+                                                ],
+                                                [
+                                                    2.5300000000000002e-05,
+                                                    1.36724e-27
+                                                ],
+                                                [
+                                                    2.79068e-05,
+                                                    1.3018099999999999e-27
+                                                ],
+                                                [
+                                                    3.07823e-05,
+                                                    1.23952e-27
+                                                ],
+                                                [
+                                                    3.3954e-05,
+                                                    1.1802099999999999e-27
+                                                ],
+                                                [
+                                                    3.74525e-05,
+                                                    1.1237399999999999e-27
+                                                ],
+                                                [
+                                                    4.13115e-05,
+                                                    1.0699699999999999e-27
+                                                ],
+                                                [
+                                                    4.55681e-05,
+                                                    1.0187699999999999e-27
+                                                ],
+                                                [
+                                                    5.02633e-05,
+                                                    9.70032e-28
+                                                ],
+                                                [
+                                                    5.54423e-05,
+                                                    9.23631e-28
+                                                ],
+                                                [
+                                                    6.11549e-05,
+                                                    8.794619999999999e-28
+                                                ],
+                                                [
+                                                    6.74561e-05,
+                                                    8.37419e-28
+                                                ],
+                                                [
+                                                    7.440660000000001e-05,
+                                                    7.973989999999999e-28
+                                                ],
+                                                [
+                                                    8.20732e-05,
+                                                    7.59294e-28
+                                                ],
+                                                [
+                                                    9.052970000000001e-05,
+                                                    7.230029999999999e-28
+                                                ],
+                                                [
+                                                    9.98577e-05,
+                                                    6.88426e-28
+                                                ],
+                                                [
+                                                    0.000110147,
+                                                    6.55483e-28
+                                                ],
+                                                [
+                                                    0.000121496,
+                                                    6.24107e-28
+                                                ],
+                                                [
+                                                    0.000134014,
+                                                    5.942449999999999e-28
+                                                ],
+                                                [
+                                                    0.00014782300000000002,
+                                                    5.658279999999999e-28
+                                                ],
+                                                [
+                                                    0.00016305400000000001,
+                                                    5.38782e-28
+                                                ],
+                                                [
+                                                    0.00017985499999999998,
+                                                    5.13017e-28
+                                                ],
+                                                [
+                                                    0.00019838600000000002,
+                                                    4.8846e-28
+                                                ],
+                                                [
+                                                    0.000218827,
+                                                    4.65062e-28
+                                                ],
+                                                [
+                                                    0.000241375,
+                                                    4.42782e-28
+                                                ],
+                                                [
+                                                    0.000266245,
+                                                    4.2157799999999995e-28
+                                                ],
+                                                [
+                                                    0.000293678,
+                                                    4.0141099999999996e-28
+                                                ],
+                                                [
+                                                    0.000323938,
+                                                    3.8223599999999994e-28
+                                                ],
+                                                [
+                                                    0.00035731600000000005,
+                                                    3.63976e-28
+                                                ],
+                                                [
+                                                    0.000394132,
+                                                    3.46555e-28
+                                                ],
+                                                [
+                                                    0.000434743,
+                                                    3.2995e-28
+                                                ],
+                                                [
+                                                    0.000479537,
+                                                    3.14141e-28
+                                                ],
+                                                [
+                                                    0.000528947,
+                                                    2.9909499999999997e-28
+                                                ],
+                                                [
+                                                    0.000583448,
+                                                    2.84792e-28
+                                                ],
+                                                [
+                                                    0.000643565,
+                                                    2.7121099999999996e-28
+                                                ],
+                                                [
+                                                    0.0007148839999999999,
+                                                    2.57345e-28
+                                                ],
+                                                [
+                                                    0.0007885430000000001,
+                                                    2.4501099999999998e-28
+                                                ],
+                                                [
+                                                    0.000869792,
+                                                    2.33268e-28
+                                                ],
+                                                [
+                                                    0.000959413,
+                                                    2.2209199999999995e-28
+                                                ]
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 13,
+                                            "MolarFraction": 0.0018882352941176472,
+                                            "Name": "C"
+                                        },
+                                        {
+                                            "CrossSection": [
+                                                [
+                                                    1e-08,
+                                                    4.81784e-25
+                                                ],
+                                                [
+                                                    1.10304e-08,
+                                                    4.587309999999999e-25
+                                                ],
+                                                [
+                                                    1.21669e-08,
+                                                    4.3678e-25
+                                                ],
+                                                [
+                                                    1.34206e-08,
+                                                    4.1588e-25
+                                                ],
+                                                [
+                                                    1.48034e-08,
+                                                    3.95979e-25
+                                                ],
+                                                [
+                                                    1.6328600000000002e-08,
+                                                    3.77031e-25
+                                                ],
+                                                [
+                                                    1.80111e-08,
+                                                    3.5898999999999997e-25
+                                                ],
+                                                [
+                                                    1.9866900000000003e-08,
+                                                    3.41812e-25
+                                                ],
+                                                [
+                                                    2.19139e-08,
+                                                    3.25456e-25
+                                                ],
+                                                [
+                                                    2.41719e-08,
+                                                    3.09883e-25
+                                                ],
+                                                [
+                                                    2.66625e-08,
+                                                    2.95055e-25
+                                                ],
+                                                [
+                                                    2.94097e-08,
+                                                    2.80936e-25
+                                                ],
+                                                [
+                                                    3.2440000000000005e-08,
+                                                    2.6749299999999996e-25
+                                                ],
+                                                [
+                                                    3.5782499999999996e-08,
+                                                    2.54693e-25
+                                                ],
+                                                [
+                                                    3.94694e-08,
+                                                    2.4250599999999997e-25
+                                                ],
+                                                [
+                                                    4.35362e-08,
+                                                    2.30902e-25
+                                                ],
+                                                [
+                                                    4.8022100000000004e-08,
+                                                    2.19853e-25
+                                                ],
+                                                [
+                                                    5.29701e-08,
+                                                    2.0933299999999996e-25
+                                                ],
+                                                [
+                                                    5.8428e-08,
+                                                    1.9931599999999998e-25
+                                                ],
+                                                [
+                                                    6.444820000000001e-08,
+                                                    1.8977899999999998e-25
+                                                ],
+                                                [
+                                                    7.10888e-08,
+                                                    1.8069799999999999e-25
+                                                ],
+                                                [
+                                                    7.84136e-08,
+                                                    1.72051e-25
+                                                ],
+                                                [
+                                                    8.64931e-08,
+                                                    1.6381799999999998e-25
+                                                ],
+                                                [
+                                                    9.54051e-08,
+                                                    1.55979e-25
+                                                ],
+                                                [
+                                                    1.05235e-07,
+                                                    1.48516e-25
+                                                ],
+                                                [
+                                                    1.16078e-07,
+                                                    1.41409e-25
+                                                ],
+                                                [
+                                                    1.2803900000000003e-07,
+                                                    1.34642e-25
+                                                ],
+                                                [
+                                                    1.41232e-07,
+                                                    1.282e-25
+                                                ],
+                                                [
+                                                    1.5578400000000001e-07,
+                                                    1.22065e-25
+                                                ],
+                                                [
+                                                    1.71835e-07,
+                                                    1.16224e-25
+                                                ],
+                                                [
+                                                    1.8954000000000002e-07,
+                                                    1.10663e-25
+                                                ],
+                                                [
+                                                    2.0907e-07,
+                                                    1.05368e-25
+                                                ],
+                                                [
+                                                    2.30612e-07,
+                                                    1.0032599999999999e-25
+                                                ],
+                                                [
+                                                    2.5437399999999997e-07,
+                                                    9.552489999999998e-26
+                                                ],
+                                                [
+                                                    2.80584e-07,
+                                                    9.095399999999998e-26
+                                                ],
+                                                [
+                                                    3.09494e-07,
+                                                    8.66017e-26
+                                                ],
+                                                [
+                                                    3.4138300000000003e-07,
+                                                    8.245779999999999e-26
+                                                ],
+                                                [
+                                                    3.76558e-07,
+                                                    7.851209999999999e-26
+                                                ],
+                                                [
+                                                    4.1535800000000003e-07,
+                                                    7.475519999999999e-26
+                                                ],
+                                                [
+                                                    4.5815500000000004e-07,
+                                                    7.117809999999999e-26
+                                                ],
+                                                [
+                                                    5.05362e-07,
+                                                    6.77722e-26
+                                                ],
+                                                [
+                                                    5.57433e-07,
+                                                    6.452919999999998e-26
+                                                ],
+                                                [
+                                                    6.14869e-07,
+                                                    6.14415e-26
+                                                ],
+                                                [
+                                                    6.78223e-07,
+                                                    5.85014e-26
+                                                ],
+                                                [
+                                                    7.48105e-07,
+                                                    5.57021e-26
+                                                ],
+                                                [
+                                                    8.25188e-07,
+                                                    5.303669999999999e-26
+                                                ],
+                                                [
+                                                    9.10213e-07,
+                                                    5.04988e-26
+                                                ],
+                                                [
+                                                    1.0039999999999998e-06,
+                                                    4.8082399999999996e-26
+                                                ],
+                                                [
+                                                    1.10745e-06,
+                                                    4.5781599999999995e-26
+                                                ],
+                                                [
+                                                    1.2215500000000002e-06,
+                                                    4.35909e-26
+                                                ],
+                                                [
+                                                    1.34742e-06,
+                                                    4.15051e-26
+                                                ],
+                                                [
+                                                    1.48625e-06,
+                                                    3.9519e-26
+                                                ],
+                                                [
+                                                    1.6393899999999999e-06,
+                                                    3.7628e-26
+                                                ],
+                                                [
+                                                    1.80831e-06,
+                                                    3.58275e-26
+                                                ],
+                                                [
+                                                    1.99463e-06,
+                                                    3.41131e-26
+                                                ],
+                                                [
+                                                    2.2001600000000003e-06,
+                                                    3.24807e-26
+                                                ],
+                                                [
+                                                    2.42685e-06,
+                                                    3.0926499999999997e-26
+                                                ],
+                                                [
+                                                    2.67691e-06,
+                                                    2.9446599999999997e-26
+                                                ],
+                                                [
+                                                    2.95273e-06,
+                                                    2.80376e-26
+                                                ],
+                                                [
+                                                    3.2569700000000003e-06,
+                                                    2.6696e-26
+                                                ],
+                                                [
+                                                    3.59256e-06,
+                                                    2.54185e-26
+                                                ],
+                                                [
+                                                    3.962720000000001e-06,
+                                                    2.42022e-26
+                                                ],
+                                                [
+                                                    4.37103e-06,
+                                                    2.30441e-26
+                                                ],
+                                                [
+                                                    4.82141e-06,
+                                                    2.1941399999999997e-26
+                                                ],
+                                                [
+                                                    5.31819e-06,
+                                                    2.0891499999999998e-26
+                                                ],
+                                                [
+                                                    5.86616e-06,
+                                                    1.98918e-26
+                                                ],
+                                                [
+                                                    6.4705900000000005e-06,
+                                                    1.8939999999999996e-26
+                                                ],
+                                                [
+                                                    7.1373e-06,
+                                                    1.8033699999999997e-26
+                                                ],
+                                                [
+                                                    7.87271e-06,
+                                                    1.7170699999999998e-26
+                                                ],
+                                                [
+                                                    8.68389e-06,
+                                                    1.6349099999999998e-26
+                                                ],
+                                                [
+                                                    9.57865e-06,
+                                                    1.5566699999999997e-26
+                                                ],
+                                                [
+                                                    1.05656e-05,
+                                                    1.48218e-26
+                                                ],
+                                                [
+                                                    1.16543e-05,
+                                                    1.4112599999999998e-26
+                                                ],
+                                                [
+                                                    1.28551e-05,
+                                                    1.3437299999999998e-26
+                                                ],
+                                                [
+                                                    1.41796e-05,
+                                                    1.2794299999999999e-26
+                                                ],
+                                                [
+                                                    1.56406e-05,
+                                                    1.2181999999999999e-26
+                                                ],
+                                                [
+                                                    1.72522e-05,
+                                                    1.1599099999999998e-26
+                                                ],
+                                                [
+                                                    1.90298e-05,
+                                                    1.1044099999999999e-26
+                                                ],
+                                                [
+                                                    2.0990600000000002e-05,
+                                                    1.05156e-26
+                                                ],
+                                                [
+                                                    2.31534e-05,
+                                                    1.00125e-26
+                                                ],
+                                                [
+                                                    2.5241900000000003e-05,
+                                                    9.589359999999999e-27
+                                                ],
+                                                [
+                                                    2.5300000000000002e-05,
+                                                    9.578339999999999e-27
+                                                ],
+                                                [
+                                                    2.79068e-05,
+                                                    9.120059999999999e-27
+                                                ],
+                                                [
+                                                    3.07823e-05,
+                                                    8.68373e-27
+                                                ],
+                                                [
+                                                    3.3954e-05,
+                                                    8.26834e-27
+                                                ],
+                                                [
+                                                    3.74525e-05,
+                                                    7.872909999999999e-27
+                                                ],
+                                                [
+                                                    4.13115e-05,
+                                                    7.49653e-27
+                                                ],
+                                                [
+                                                    4.55681e-05,
+                                                    7.13829e-27
+                                                ],
+                                                [
+                                                    5.02633e-05,
+                                                    6.7973e-27
+                                                ],
+                                                [
+                                                    5.54423e-05,
+                                                    6.472649999999999e-27
+                                                ],
+                                                [
+                                                    6.11549e-05,
+                                                    6.163439999999999e-27
+                                                ],
+                                                [
+                                                    6.74561e-05,
+                                                    5.86885e-27
+                                                ],
+                                                [
+                                                    7.440660000000001e-05,
+                                                    5.5881999999999995e-27
+                                                ],
+                                                [
+                                                    8.20732e-05,
+                                                    5.32087e-27
+                                                ],
+                                                [
+                                                    9.052970000000001e-05,
+                                                    5.06633e-27
+                                                ],
+                                                [
+                                                    9.98577e-05,
+                                                    4.823909999999999e-27
+                                                ],
+                                                [
+                                                    0.000110147,
+                                                    4.593039999999999e-27
+                                                ],
+                                                [
+                                                    0.000121496,
+                                                    4.3732199999999995e-27
+                                                ],
+                                                [
+                                                    0.000134014,
+                                                    4.16396e-27
+                                                ],
+                                                [
+                                                    0.00014782300000000002,
+                                                    3.96476e-27
+                                                ],
+                                                [
+                                                    0.00016305400000000001,
+                                                    3.7750799999999996e-27
+                                                ],
+                                                [
+                                                    0.00017985499999999998,
+                                                    3.5944299999999995e-27
+                                                ],
+                                                [
+                                                    0.00019838600000000002,
+                                                    3.42242e-27
+                                                ],
+                                                [
+                                                    0.000218827,
+                                                    3.2586799999999995e-27
+                                                ],
+                                                [
+                                                    0.000241375,
+                                                    3.10281e-27
+                                                ],
+                                                [
+                                                    0.000266245,
+                                                    2.9543899999999997e-27
+                                                ],
+                                                [
+                                                    0.000293678,
+                                                    2.8130899999999997e-27
+                                                ],
+                                                [
+                                                    0.000323938,
+                                                    2.6784999999999995e-27
+                                                ],
+                                                [
+                                                    0.00035731600000000005,
+                                                    2.5503e-27
+                                                ],
+                                                [
+                                                    0.000394132,
+                                                    2.4282299999999997e-27
+                                                ],
+                                                [
+                                                    0.000434743,
+                                                    2.3119299999999997e-27
+                                                ],
+                                                [
+                                                    0.000479537,
+                                                    2.20127e-27
+                                                ],
+                                                [
+                                                    0.000528947,
+                                                    2.09609e-27
+                                                ],
+                                                [
+                                                    0.000583448,
+                                                    1.9959499999999998e-27
+                                                ],
+                                                [
+                                                    0.000643565,
+                                                    1.90037e-27
+                                                ],
+                                                [
+                                                    0.000709876,
+                                                    1.8093399999999997e-27
+                                                ],
+                                                [
+                                                    0.00078302,
+                                                    1.72275e-27
+                                                ],
+                                                [
+                                                    0.0008637,
+                                                    1.6402499999999997e-27
+                                                ],
+                                                [
+                                                    0.000952693,
+                                                    1.5616899999999998e-27
+                                                ]
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 19,
+                                            "MolarFraction": 0.7058823529411765,
+                                            "Name": "F"
+                                        },
+                                        {
+                                            "CrossSection": [
+                                                [
+                                                    1e-08,
+                                                    2.6801799999999997e-19
+                                                ],
+                                                [
+                                                    1.10304e-08,
+                                                    2.55193e-19
+                                                ],
+                                                [
+                                                    1.21669e-08,
+                                                    2.42982e-19
+                                                ],
+                                                [
+                                                    1.34206e-08,
+                                                    2.31355e-19
+                                                ],
+                                                [
+                                                    1.48034e-08,
+                                                    2.20284e-19
+                                                ],
+                                                [
+                                                    1.6328600000000002e-08,
+                                                    2.0974299999999998e-19
+                                                ],
+                                                [
+                                                    1.80111e-08,
+                                                    1.9970699999999999e-19
+                                                ],
+                                                [
+                                                    1.9866900000000003e-08,
+                                                    1.9015099999999997e-19
+                                                ],
+                                                [
+                                                    2.19139e-08,
+                                                    1.8105199999999998e-19
+                                                ],
+                                                [
+                                                    2.41719e-08,
+                                                    1.7238799999999998e-19
+                                                ],
+                                                [
+                                                    2.66625e-08,
+                                                    1.6413999999999998e-19
+                                                ],
+                                                [
+                                                    2.94097e-08,
+                                                    1.56285e-19
+                                                ],
+                                                [
+                                                    3.2440000000000005e-08,
+                                                    1.4880699999999998e-19
+                                                ],
+                                                [
+                                                    3.5782499999999996e-08,
+                                                    1.4168599999999998e-19
+                                                ],
+                                                [
+                                                    3.94694e-08,
+                                                    1.3490699999999998e-19
+                                                ],
+                                                [
+                                                    4.35362e-08,
+                                                    1.28451e-19
+                                                ],
+                                                [
+                                                    4.8022100000000004e-08,
+                                                    1.2230499999999998e-19
+                                                ],
+                                                [
+                                                    5.29701e-08,
+                                                    1.16452e-19
+                                                ],
+                                                [
+                                                    5.8428e-08,
+                                                    1.1088e-19
+                                                ],
+                                                [
+                                                    6.444820000000001e-08,
+                                                    1.05574e-19
+                                                ],
+                                                [
+                                                    7.10888e-08,
+                                                    1.0052199999999999e-19
+                                                ],
+                                                [
+                                                    7.84136e-08,
+                                                    9.571229999999999e-20
+                                                ],
+                                                [
+                                                    8.64931e-08,
+                                                    9.113239999999999e-20
+                                                ],
+                                                [
+                                                    9.54051e-08,
+                                                    8.67716e-20
+                                                ],
+                                                [
+                                                    1.05235e-07,
+                                                    8.26195e-20
+                                                ],
+                                                [
+                                                    1.16078e-07,
+                                                    7.86661e-20
+                                                ],
+                                                [
+                                                    1.2803900000000003e-07,
+                                                    7.49018e-20
+                                                ],
+                                                [
+                                                    1.41232e-07,
+                                                    7.13177e-20
+                                                ],
+                                                [
+                                                    1.5578400000000001e-07,
+                                                    6.79051e-20
+                                                ],
+                                                [
+                                                    1.71835e-07,
+                                                    6.46558e-20
+                                                ],
+                                                [
+                                                    1.8954000000000002e-07,
+                                                    6.15619e-20
+                                                ],
+                                                [
+                                                    2.0907e-07,
+                                                    5.861609999999999e-20
+                                                ],
+                                                [
+                                                    2.30612e-07,
+                                                    5.58113e-20
+                                                ],
+                                                [
+                                                    2.5437399999999997e-07,
+                                                    5.3140699999999995e-20
+                                                ],
+                                                [
+                                                    2.80584e-07,
+                                                    5.05978e-20
+                                                ],
+                                                [
+                                                    3.09494e-07,
+                                                    4.817669999999999e-20
+                                                ],
+                                                [
+                                                    3.4138300000000003e-07,
+                                                    4.5871399999999996e-20
+                                                ],
+                                                [
+                                                    3.76558e-07,
+                                                    4.36764e-20
+                                                ],
+                                                [
+                                                    4.1535800000000003e-07,
+                                                    4.15864e-20
+                                                ],
+                                                [
+                                                    4.5815500000000004e-07,
+                                                    3.95964e-20
+                                                ],
+                                                [
+                                                    5.05362e-07,
+                                                    3.770169999999999e-20
+                                                ],
+                                                [
+                                                    5.57433e-07,
+                                                    3.5897599999999997e-20
+                                                ],
+                                                [
+                                                    6.14869e-07,
+                                                    3.41799e-20
+                                                ],
+                                                [
+                                                    6.78223e-07,
+                                                    3.2544299999999996e-20
+                                                ],
+                                                [
+                                                    7.48105e-07,
+                                                    3.0986999999999997e-20
+                                                ],
+                                                [
+                                                    8.25188e-07,
+                                                    2.9504299999999996e-20
+                                                ],
+                                                [
+                                                    9.10213e-07,
+                                                    2.8092499999999996e-20
+                                                ],
+                                                [
+                                                    1.0039999999999998e-06,
+                                                    2.6748199999999998e-20
+                                                ],
+                                                [
+                                                    1.10745e-06,
+                                                    2.5468199999999998e-20
+                                                ],
+                                                [
+                                                    1.2215500000000002e-06,
+                                                    2.4249599999999997e-20
+                                                ],
+                                                [
+                                                    1.34742e-06,
+                                                    2.30892e-20
+                                                ],
+                                                [
+                                                    1.48625e-06,
+                                                    2.1984299999999998e-20
+                                                ],
+                                                [
+                                                    1.6393899999999999e-06,
+                                                    2.0932299999999998e-20
+                                                ],
+                                                [
+                                                    1.80831e-06,
+                                                    1.9930699999999998e-20
+                                                ],
+                                                [
+                                                    1.99463e-06,
+                                                    1.8977e-20
+                                                ],
+                                                [
+                                                    2.2001600000000003e-06,
+                                                    1.80689e-20
+                                                ],
+                                                [
+                                                    2.42685e-06,
+                                                    1.72042e-20
+                                                ],
+                                                [
+                                                    2.67691e-06,
+                                                    1.6380999999999998e-20
+                                                ],
+                                                [
+                                                    2.95273e-06,
+                                                    1.55971e-20
+                                                ],
+                                                [
+                                                    3.2569700000000003e-06,
+                                                    1.4850699999999998e-20
+                                                ],
+                                                [
+                                                    3.59256e-06,
+                                                    1.41401e-20
+                                                ],
+                                                [
+                                                    3.962720000000001e-06,
+                                                    1.3463399999999998e-20
+                                                ],
+                                                [
+                                                    4.37103e-06,
+                                                    1.28192e-20
+                                                ],
+                                                [
+                                                    4.82141e-06,
+                                                    1.22057e-20
+                                                ],
+                                                [
+                                                    5.31819e-06,
+                                                    1.16216e-20
+                                                ],
+                                                [
+                                                    5.86616e-06,
+                                                    1.10655e-20
+                                                ],
+                                                [
+                                                    6.4705900000000005e-06,
+                                                    1.0535999999999999e-20
+                                                ],
+                                                [
+                                                    7.1373e-06,
+                                                    1.0031799999999999e-20
+                                                ],
+                                                [
+                                                    7.87271e-06,
+                                                    9.551709999999998e-21
+                                                ],
+                                                [
+                                                    8.68389e-06,
+                                                    9.09461e-21
+                                                ],
+                                                [
+                                                    9.57865e-06,
+                                                    8.659379999999998e-21
+                                                ],
+                                                [
+                                                    1.05656e-05,
+                                                    8.244979999999999e-21
+                                                ],
+                                                [
+                                                    1.16543e-05,
+                                                    7.850399999999999e-21
+                                                ],
+                                                [
+                                                    1.28551e-05,
+                                                    7.47471e-21
+                                                ],
+                                                [
+                                                    1.41796e-05,
+                                                    7.11699e-21
+                                                ],
+                                                [
+                                                    1.56406e-05,
+                                                    6.77638e-21
+                                                ],
+                                                [
+                                                    1.72522e-05,
+                                                    6.452079999999999e-21
+                                                ],
+                                                [
+                                                    1.90298e-05,
+                                                    6.143289999999999e-21
+                                                ],
+                                                [
+                                                    2.0990600000000002e-05,
+                                                    5.84927e-21
+                                                ],
+                                                [
+                                                    2.31534e-05,
+                                                    5.5693299999999996e-21
+                                                ],
+                                                [
+                                                    2.5241900000000003e-05,
+                                                    5.3339099999999995e-21
+                                                ],
+                                                [
+                                                    2.5300000000000002e-05,
+                                                    5.32777e-21
+                                                ],
+                                                [
+                                                    2.79068e-05,
+                                                    5.0727799999999996e-21
+                                                ],
+                                                [
+                                                    3.07823e-05,
+                                                    4.8299899999999994e-21
+                                                ],
+                                                [
+                                                    3.3954e-05,
+                                                    4.59881e-21
+                                                ],
+                                                [
+                                                    3.74525e-05,
+                                                    4.378699999999999e-21
+                                                ],
+                                                [
+                                                    4.13115e-05,
+                                                    4.1691099999999995e-21
+                                                ],
+                                                [
+                                                    4.55681e-05,
+                                                    3.9695599999999995e-21
+                                                ],
+                                                [
+                                                    5.02633e-05,
+                                                    3.77955e-21
+                                                ],
+                                                [
+                                                    5.54423e-05,
+                                                    3.5986399999999995e-21
+                                                ],
+                                                [
+                                                    6.11549e-05,
+                                                    3.42638e-21
+                                                ],
+                                                [
+                                                    6.74561e-05,
+                                                    3.26236e-21
+                                                ],
+                                                [
+                                                    7.440660000000001e-05,
+                                                    3.1061899999999997e-21
+                                                ],
+                                                [
+                                                    8.20732e-05,
+                                                    2.9574899999999997e-21
+                                                ],
+                                                [
+                                                    9.052970000000001e-05,
+                                                    2.8159e-21
+                                                ],
+                                                [
+                                                    9.98577e-05,
+                                                    2.68108e-21
+                                                ],
+                                                [
+                                                    0.000110147,
+                                                    2.5527199999999997e-21
+                                                ],
+                                                [
+                                                    0.000121496,
+                                                    2.4304899999999995e-21
+                                                ],
+                                                [
+                                                    0.000134014,
+                                                    2.31411e-21
+                                                ],
+                                                [
+                                                    0.00014782300000000002,
+                                                    2.2033e-21
+                                                ],
+                                                [
+                                                    0.00016305400000000001,
+                                                    2.09779e-21
+                                                ],
+                                                [
+                                                    0.00017985499999999998,
+                                                    1.9973399999999997e-21
+                                                ],
+                                                [
+                                                    0.00019838600000000002,
+                                                    1.90169e-21
+                                                ],
+                                                [
+                                                    0.000218827,
+                                                    1.81064e-21
+                                                ],
+                                                [
+                                                    0.000241375,
+                                                    1.72397e-21
+                                                ],
+                                                [
+                                                    0.000266245,
+                                                    1.64146e-21
+                                                ],
+                                                [
+                                                    0.000293678,
+                                                    1.5629399999999999e-21
+                                                ],
+                                                [
+                                                    0.000323938,
+                                                    1.4882e-21
+                                                ],
+                                                [
+                                                    0.00035731600000000005,
+                                                    1.4170499999999998e-21
+                                                ],
+                                                [
+                                                    0.000394132,
+                                                    1.3492899999999999e-21
+                                                ],
+                                                [
+                                                    0.000434743,
+                                                    1.28477e-21
+                                                ],
+                                                [
+                                                    0.000479537,
+                                                    1.2233e-21
+                                                ],
+                                                [
+                                                    0.000528947,
+                                                    1.16475e-21
+                                                ],
+                                                [
+                                                    0.000583448,
+                                                    1.10898e-21
+                                                ],
+                                                [
+                                                    0.000643565,
+                                                    1.0558599999999998e-21
+                                                ],
+                                                [
+                                                    0.000709876,
+                                                    1.0052799999999998e-21
+                                                ],
+                                                [
+                                                    0.00078302,
+                                                    9.57118e-22
+                                                ],
+                                                [
+                                                    0.0008637,
+                                                    9.112589999999999e-22
+                                                ],
+                                                [
+                                                    0.000952693,
+                                                    8.675819999999999e-22
+                                                ]
+                                            ],
+                                            "DecayScenarios": [
+                                                {
+                                                    "Branching": 1,
+                                                    "GeneratedParticles": [
+                                                        {
+                                                            "Energy": 573,
+                                                            "OpositeDirectionWithPrevious": false,
+                                                            "Particle": {
+                                                                "Charge": 1,
+                                                                "Mass": 1,
+                                                                "Name": "proton",
+                                                                "Type": 1
+                                                            }
+                                                        },
+                                                        {
+                                                            "Energy": 191,
+                                                            "OpositeDirectionWithPrevious": true,
+                                                            "Particle": {
+                                                                "Charge": 1,
+                                                                "Mass": 3,
+                                                                "Name": "triton",
+                                                                "Type": 1
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "Mass": 3,
+                                            "MolarFraction": 0.11764705882352942,
+                                            "Name": "He"
                                         }
-                                    ]
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                        {
+                                            "CrossSection": [
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 12,
+                                            "MolarFraction": 0.1745823529411765,
+                                            "Name": "C"
+                                        },
+                                        {
+                                            "CrossSection": [
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 13,
+                                            "MolarFraction": 0.0018882352941176472,
+                                            "Name": "C"
+                                        },
+                                        {
+                                            "CrossSection": [
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 19,
+                                            "MolarFraction": 0.7058823529411765,
+                                            "Name": "F"
+                                        },
+                                        {
+                                            "CrossSection": [
+                                            ],
+                                            "DecayScenarios": [
+                                            ],
+                                            "Mass": 3,
+                                            "MolarFraction": 0.11764705882352942,
+                                            "Name": "He"
+                                        }
+                                    ],
+                                    "ReactionType": 4
                                 }
                             ],
-                            "PrimScintPhYield": 0,
                             "TotalInteraction": [
                                 [
                                     2.7524e-07,
@@ -2699,6 +5604,11 @@
                                 "Name": "proton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": false,
                             "PrimScintPhYield": 2.4,
@@ -3273,6 +6183,11 @@
                                 "Name": "triton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": false,
                             "PrimScintPhYield": 2.4,
@@ -4192,8 +7107,14 @@
                         ]
                     ],
                     "PrimScint_Tau": 15,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 15,
                     "W": 0.0334
@@ -4201,9 +7122,60 @@
                 {
                     "*MaterialName": "MSGC",
                     "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
                     "Density": 1,
                     "ElDriftVelo": 1e+10,
                     "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
                         {
                             "*Particle": {
                                 "Charge": 1,
@@ -4211,9 +7183,16 @@
                                 "Name": "proton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
                             "TrackingAllowed": false
                         },
                         {
@@ -4223,15 +7202,28 @@
                                 "Name": "triton",
                                 "Type": 1
                             },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
                             "TrackingAllowed": false
                         }
                     ],
+                    "PrimScintSpectrum": [
+                    ],
                     "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
                     "SecScintSpectrum": [
                         [
                             200,
@@ -4725,11 +7717,110 @@
                 {
                     "*MaterialName": "WireOVR",
                     "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 5.096433827566453e+160
+                    },
+                    "Comments": "",
                     "Density": 1,
                     "ElDriftVelo": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 1,
+                                "Name": "proton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 1,
+                                "Mass": 3,
+                                "Name": "triton",
+                                "Type": 1
+                            },
+                            "AllowAbsentCsData": true,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "EllasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        }
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
                     "PrimScint_Tau": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
                     "ReemissionProb": 0,
                     "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
                     "W": 0
@@ -4948,7 +8039,8 @@
                     "Shape": 1,
                     "SiPM": false,
                     "SizeX": 25,
-                    "SizeY": 25
+                    "SizeY": 25,
+                    "SizeZ": 0.01
                 },
                 "PDEproperties": {
                     "PDE": 0.15,
@@ -5857,10 +8949,46 @@
             "dX": 1,
             "dY": 0,
             "dZ": 0
+        },
+        "ReconstructionWindow": {
+            "Blur": {
+                "BlurSigma": 1,
+                "BlurSigmaZ": 1,
+                "BlurType": 0,
+                "BlurWidth": 1,
+                "BlurWidthZ": 1
+            },
+            "ChPerPhePeaks": {
+                "Bins": 300,
+                "From": -50,
+                "MaxPeaks": 30,
+                "Sigma": 8,
+                "Threshold": 0.02,
+                "To": 250
+            },
+            "ChPerPheStat": {
+                "Bins": 100,
+                "ENF": 1,
+                "Lower": 3,
+                "MaxRange": 1000,
+                "MinRange": 0,
+                "Upper": 500
+            },
+            "PlotXYsettings": {
+                "PlotXYbinsX": 200,
+                "PlotXYbinsY": 200,
+                "PlotXYfromX": -60,
+                "PlotXYfromY": -60,
+                "PlotXYfromZ": -5,
+                "PlotXYoptionZ": 0,
+                "PlotXYtoX": 60,
+                "PlotXYtoY": 60,
+                "PlotXYtoZ": 5
+            }
         }
     },
     "ReconstructionConfig": {
-        "ANTS2build": 1802,
+        "ANTS2build": 2230,
         "ActiveLRF": {
             "countPMs": 19,
             "groupping_option": "Individual",
@@ -6887,32 +10015,17 @@
                 }
             }
         ],
-        "GuiMisc": {
-            "Blur": {
-                "BlurSigma": 1,
-                "BlurType": 0,
-                "BlurWidth": 1
-            },
-            "PlotXYsettings": {
-                "PlotXYbinsX": 200,
-                "PlotXYbinsY": 200,
-                "PlotXYfromX": -60,
-                "PlotXYfromY": -60,
-                "PlotXYfromZ": -5,
-                "PlotXYoptionZ": 0,
-                "PlotXYtoX": 60,
-                "PlotXYtoY": 60,
-                "PlotXYtoZ": 5
-            }
-        },
         "LRFmakeJson": {
-            "ANTS2build": 1802,
             "AdjustGains": true,
             "Compression_k": 5,
             "Compression_lam": 50,
             "Compression_r0": 150,
             "DataSelector": 0,
+            "EnergyNormalization": 1,
             "FitOnlyLast": false,
+            "ForceInZ": 0,
+            "ForceNonIncreasingInR": false,
+            "ForceNonNegative": false,
             "ForceZeroDeriv": true,
             "GroupToMake": 0,
             "GroupingOption": "Individual",
@@ -6929,6 +10042,8 @@
             "UseGroupping": false
         },
         "LRFmoduleSelected": 0,
+        "LRFv3makeJson": {
+        },
         "ReconstructionOptions": [
             {
                 "AlgorithmOptions": {
@@ -6974,6 +10089,13 @@
                         "StartStepX": 1,
                         "StartStepY": 1,
                         "StartStepZ": 1
+                    },
+                    "kNNrecSet": {
+                        "calibScheme": 0,
+                        "numNeighbours": 50,
+                        "numTrees": 4,
+                        "useNeighbours": 10,
+                        "weightMode": 0
                     }
                 },
                 "DynamicPassives": {
@@ -6987,6 +10109,9 @@
                     "IncludePassives": false,
                     "InitialEnergy": 1,
                     "InitialZ": 0,
+                    "LimitSearchGauss": false,
+                    "LimitSearchIfTrueIsSet": false,
+                    "RangeForLimitSearchIfTrueSet": 1,
                     "ReconstructEnergy": true,
                     "ReconstructZ": false,
                     "WeightedChi2": true,
@@ -7145,7 +10270,7 @@
         ]
     },
     "SimulationConfig": {
-        "ANTS2build": 1802,
+        "ANTS2build": 2230,
         "DoGuiUpdate": true,
         "GeneralSimConfig": {
             "AcceleratorConfig": {
@@ -7168,7 +10293,7 @@
                 "NumPhotsLRFunity": 500000,
                 "UseLRFs": false
             },
-            "MaxNumberOfTracks": 10000,
+            "MaxNumberOfTracks": 100,
             "SecScintConfig": {
                 "Type": 2
             },
@@ -7181,6 +10306,7 @@
             "TrackingConfig": {
                 "MaxStep": 0.01,
                 "MinEnergy": 0.01,
+                "MinEnergyNeutrons": 0.01,
                 "MinStep": 0.001,
                 "Safety": 1e-10,
                 "TrackColorAdd": 0,
@@ -7240,6 +10366,7 @@
                 "DoS1": false,
                 "DoS2": true,
                 "EventsToDo": 1,
+                "IgnoreNoDepoEvents": true,
                 "IgnoreNoHitsEvents": false,
                 "ParticleTracks": true
             }

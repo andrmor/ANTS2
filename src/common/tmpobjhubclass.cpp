@@ -4,6 +4,7 @@
 #include <QDebug>
 
 #include "TH1.h"
+#include "TTree.h"
 
 RootDrawObj::RootDrawObj()
 {
@@ -105,4 +106,48 @@ TmpObjHubClass::TmpObjHubClass()
 TmpObjHubClass::~TmpObjHubClass()
 {
   Clear();
+}
+
+ATreeCollection::~ATreeCollection()
+{
+    clearAll();
+}
+
+bool ATreeCollection::addTree(QString name, TTree *tree)
+{
+    if ( findIndexOf(name) != -1) return false;
+    Trees.append(ATreeCollectionRecord(name, tree));
+}
+
+TTree *ATreeCollection::getTree(QString name)
+{
+    int index = findIndexOf(name);
+    if (index == -1) return 0;
+
+    return Trees[index].tree;
+}
+
+int ATreeCollection::findIndexOf(QString name)
+{
+    for (int i=0; i<Trees.size(); i++)
+      if (Trees.at(i).name == name) return i;
+    return -1; //not found
+}
+
+void ATreeCollection::remove(QString name)
+{
+    for (int i=0; i<Trees.size(); i++)
+      if (Trees.at(i).name == name)
+      {
+          delete Trees[i].tree;
+          Trees.removeAt(i);
+          return;
+      }
+}
+
+void ATreeCollection::clearAll()
+{
+    for (int i=0; i<Trees.size(); i++)
+        delete Trees[i].tree;
+    Trees.clear();
 }

@@ -163,6 +163,9 @@ int main(int argc, char *argv[])
         InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
+        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        GenScriptWindow.SetInterfaceObject(tree, "tree");
+
         InterfaceToTexter* txt = new InterfaceToTexter(&GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
@@ -248,6 +251,8 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(graph, "graph");
         InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
         SM.SetInterfaceObject(hist, "hist");
+        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        SM.SetInterfaceObject(tree, "tree");
 
         int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
         if (errorLineNum > -1)

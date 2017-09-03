@@ -167,10 +167,10 @@ void AMonitor::initEnergyHist()
     TString title = "";
     switch (config.energyUnitsInHist)
     {
-    case 0: from *= 1.0e6; to *= 1.0e6; title = "Energy, meV"; break;
-    case 1: from *= 1.0e3; to *= 1.0e3; title = "Energy, eV"; break;
+    case 0: title = "Energy, meV"; break;
+    case 1: title = "Energy, eV"; break;
     case 2: title = "Energy, keV"; break;
-    case 3: from *= 1.0e-3; to *= 1.0e-3; title = "Energy, MeV"; break;
+    case 3: title = "Energy, MeV"; break;
     }
 
     energy = new TH1D("", "", config.energyBins, from, to);

@@ -9,6 +9,7 @@
 class TObject;
 class TrackHolderClass;
 class TH1D;
+class TTree;
 
 class RootDrawObj
 {
@@ -37,6 +38,30 @@ public:
    void removeAllGraphs();
 };
 
+class ATreeCollectionRecord
+{
+public:
+    QString name;
+    TTree* tree;
+
+    ATreeCollectionRecord(QString name, TTree* tree) : name(name), tree(tree) {}
+    ATreeCollectionRecord() : name("Undefined"), tree(0) {}
+};
+
+class ATreeCollection
+{
+public:
+    ATreeCollection(){}
+    ~ATreeCollection();
+
+    QVector<ATreeCollectionRecord> Trees;
+
+    bool addTree(QString name, TTree* tree);
+    TTree* getTree(QString name);
+    int findIndexOf(QString name); //returns -1 if not found
+    void remove(QString name);
+    void clearAll();
+};
 
 //=================================================================
 class TmpObjHubClass : public QObject
@@ -47,6 +72,7 @@ public:
   ~TmpObjHubClass();
 
   ScriptDrawCollection ScriptDrawObjects;
+  ATreeCollection Trees;
 
   double PreEnAdd, PreEnMulti;
 

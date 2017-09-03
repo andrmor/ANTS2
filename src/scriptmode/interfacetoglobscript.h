@@ -457,6 +457,26 @@ private:
   TmpObjHubClass *TmpHub;
 };
 
+// ---- T R E E ---- (TTree of ROOT)
+class AInterfaceToTree : public AScriptInterface
+{
+  Q_OBJECT
+
+public:
+   AInterfaceToTree(TmpObjHubClass *TmpHub);
+   ~AInterfaceToTree() {}
+
+public slots:
+   QString OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
+   QString GetTreeHeader(QString TreeName);
+   QVariant GetBranch(QString TreeName, QString BranchName);
+   void CloseTree(QString TreeName);
+
+private:
+   TmpObjHubClass *TmpHub;
+};
+
+// ---- M A T H ----
 class MathInterfaceClass : public AScriptInterface
 {
   Q_OBJECT

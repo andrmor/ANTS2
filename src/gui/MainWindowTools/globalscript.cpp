@@ -80,6 +80,9 @@ void MainWindow::createScriptWindow()
     InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
+    AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
+    ScriptWindow->SetInterfaceObject(tree, "tree");
+
     InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 

@@ -55,6 +55,10 @@
 #include "TF2.h"
 #include "TGraph.h"
 #include "TF1.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TBranch.h"
+#include "TLeaf.h"
 
 /*
 bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString& Name, int& Index)
@@ -3351,3 +3355,270 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
 
 
 // ------------- End of New LRF module interface ------------
+
+AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) : TmpHub(TmpHub)
+{}
+
+QString AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
+{
+    if (TmpHub->Trees.findIndexOf(TreeName) !=-1) return "Tree with that name already exists!";
+
+    TFile *f = TFile::Open(FileName.toLocal8Bit().data(), "READ");
+    if (!f)
+    {
+        return "Cannot open file";
+    }
+    TTree *t = 0;
+    f->GetObject(TreeNameInFile.toLocal8Bit().data(), t);
+    if (!t)
+    {
+        return "Cannot read this tree from file";
+    }
+    t->Print();
+
+    TmpHub->Trees.addTree(TreeName, t);
+    return "";
+}
+
+QString AInterfaceToTree::GetTreeHeader(QString TreeName)
+{
+    return "";
+}
+
+QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
+{
+    int index = TmpHub->Trees.findIndexOf(TreeName);
+    if (index == -1)
+    {
+        qDebug() << "Tree not found";
+        return QVariant();
+    }
+
+    TTree *t = TmpHub->Trees.getTree(TreeName);
+    if (!t)
+    {
+        qDebug() << "Tree with this name does not exist!";
+        return QVariant();
+    }
+
+    TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
+    if (!branch)
+    {
+        qDebug() << "Branch with that name does not exist!";
+        return QVariant();
+    }
+
+    int numEntries = branch->GetEntries();
+    qDebug() << "The branch contains:" << numEntries << "elements";
+
+    QList< QVariant > varList;
+//    for (int i=0; i<v1.size(); i++)
+//      {
+//        QList<QVariant> ll;
+//        ll.append(v1[i]);
+//        if (columns > 1) ll.append(v2[i]);
+//        if (columns == 3) ll.append(v3[i]);
+
+//        QVariant r = ll;
+//        varList << r;
+//      }
+//    return varList;
+
+    QString type = branch->GetClassName();
+    qDebug() << "Element type:" << type;
+    if (type == "vector<double>")
+    {
+        std::vector<double> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "vector<float>")
+    {
+        std::vector<float> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "vector<int>")
+    {
+        std::vector<int> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "")
+    {
+        //have to use another system
+        QString title = branch->GetTitle();  //  can be, e.g., "blabla/D" or "signal[19]/F"
+
+        if (title.contains("["))
+        {
+            qDebug() << "Array of data"<<title;
+            QRegExp selector("\\[(.*)\\]");
+            selector.indexIn(title);
+            QStringList List = selector.capturedTexts();
+            if (List.size()!=2)
+            {
+               qDebug() << "Cannot extract the length of the array";
+               return QVariant();
+            }
+            else
+            {
+               QString s = List.at(1);
+               bool fOK = false;
+               int numInArray = s.toInt(&fOK);
+               if (!fOK)
+               {
+                  qDebug() << "Cannot extract the length of the array";
+                  return QVariant();
+               }
+               qDebug() << "in the array there are"<<numInArray<<"elements";
+
+               //type dependent too!
+               if (title.contains("/I"))
+               {
+                   qDebug() << "It is an array with ints";
+                   int *array = new int[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else if (title.contains("/D"))
+               {
+                   qDebug() << "It is an array with doubles";
+                   double *array = new double[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else if (title.contains("/F"))
+               {
+                   qDebug() << "It is an array with floats";
+                   float *array = new float[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else
+               {
+                   qDebug() << "Cannot extract the type of the array";
+                   return QVariant();
+               }
+            }
+        }
+        else if (title.contains("/I"))
+        {
+            qDebug() << "Int data - scalar";
+            int v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else if (title.contains("/D"))
+        {
+            qDebug() << "Double data - scalar";
+            double v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else if (title.contains("/F"))
+        {
+            qDebug() << "Float data - scalar";
+            float v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else
+        {
+            qDebug() << "Unsupported data type of the branch - title is:"<<title;
+        }
+
+    }
+    else
+    {
+        qWarning() << type << " - this type of tree branch is not supported";
+    }
+
+    t->ResetBranchAddresses();
+    return varList;
+}
+
+void AInterfaceToTree::CloseTree(QString TreeName)
+{
+   int index = TmpHub->Trees.findIndexOf(TreeName);
+   if (index == -1) return;
+
+   TmpHub->Trees.remove(TreeName);
+}

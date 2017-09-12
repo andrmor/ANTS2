@@ -440,15 +440,15 @@ void MainWindow::on_cobGunSourceType_currentIndexChanged(int index)
     default:
     case 0: s <<""<<""<<"";
       break;
-    case 1: s <<"Size"<<""<<"";
+    case 1: s <<"Length:"<<""<<"";
       break;
-    case 2: s <<"SizeX"<<"SizeY"<<"";
+    case 2: s <<"Size X:"<<"Size Y:"<<"";
       break;
-    case 3: s <<"Radius"<<""<<"";
+    case 3: s <<"Diameter:"<<""<<"";
       break;
-    case 4: s <<"SizeX"<<"SizeY"<<"SizeZ";
+    case 4: s <<"Size X:"<<"Size Y:"<<"Size Z:";
       break;
-    case 5: s <<"Radius"<<""<<"Height";
+    case 5: s <<"Diameter:"<<""<<"Height:";
     }
   ui->lGun1DSize->setText(s[0]);
   ui->lGun2DSize->setText(s[1]);
@@ -758,9 +758,9 @@ void MainWindow::on_pbUpdateSources_clicked()
   ps->Phi = ui->ledGunPhi->text().toDouble();
   ps->Theta = ui->ledGunTheta->text().toDouble();
   ps->Psi = ui->ledGunPsi->text().toDouble();
-  ps->size1 = ui->ledGun1DSize->text().toDouble();
-  ps->size2 = ui->ledGun2DSize->text().toDouble();
-  ps->size3 = ui->ledGun3DSize->text().toDouble();
+  ps->size1 = 0.5 * ui->ledGun1DSize->text().toDouble();
+  ps->size2 = 0.5 * ui->ledGun2DSize->text().toDouble();
+  ps->size3 = 0.5 * ui->ledGun3DSize->text().toDouble();
   ps->CollPhi = ui->ledGunCollPhi->text().toDouble();
   ps->CollTheta = ui->ledGunCollTheta->text().toDouble();
   ps->Spread = ui->ledGunSpread->text().toDouble();
@@ -853,9 +853,9 @@ void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
     ui->ledGunPhi->setText(QString::number(ps->Phi));
     ui->ledGunTheta->setText(QString::number(ps->Theta));
     ui->ledGunPsi->setText(QString::number(ps->Psi));
-    ui->ledGun1DSize->setText(QString::number(ps->size1));
-    ui->ledGun2DSize->setText(QString::number(ps->size2));
-    ui->ledGun3DSize->setText(QString::number(ps->size3));
+    ui->ledGun1DSize->setText(QString::number(2.0 * ps->size1));
+    ui->ledGun2DSize->setText(QString::number(2.0 * ps->size2));
+    ui->ledGun3DSize->setText(QString::number(2.0 * ps->size3));
     ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
     ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
     ui->ledGunSpread->setText(QString::number(ps->Spread));
@@ -875,18 +875,6 @@ void MainWindow::clearParticleSourcesIndication()
     ui->fParticleSources->setEnabled(false);
     ui->frSelectSource->setEnabled(false);
 }
-
-//void MainWindow::on_pbGunShowSource_clicked()
-//{
-//   int isource = ui->cobParticleSource->currentIndex();
-//   if (isource < 0) return;
-//   if (isource >= ParticleSources->size())
-//     {
-//       message("Source number is out of bounds!",this);
-//       return;
-//     }
-//   MainWindow::ShowSource(isource, true);
-//}
 
 void MainWindow::on_pbGunShowSource_toggled(bool checked)
 {

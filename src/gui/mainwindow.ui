@@ -16476,7 +16476,7 @@ on stack</string>
   </action>
   <action name="actionGlobal_script">
    <property name="text">
-    <string>Global script</string>
+    <string>Open script window</string>
    </property>
   </action>
   <action name="actionNew_detector">

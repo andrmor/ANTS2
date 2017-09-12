@@ -221,7 +221,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -2620,22 +2620,6 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>leName</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>176</x>
-     <y>78</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>163</x>
-     <y>121</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>ledDensity</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
@@ -2786,8 +2770,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>106</x>
-     <y>305</y>
+     <x>122</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2802,8 +2786,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>305</y>
+     <x>466</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2818,8 +2802,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>140</x>
-     <y>305</y>
+     <x>156</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
@@ -2834,8 +2818,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>458</x>
-     <y>305</y>
+     <x>466</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>

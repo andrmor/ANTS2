@@ -1,5 +1,3 @@
-#ifdef ANTS_FANN //############################################################
-
 #include "neuralnetworkswindow.h"
 #include "ui_neuralnetworkswindow.h"
 #include <QMessageBox>
@@ -768,4 +766,3 @@ static QString pFile; QString file=QFileDialog::getSaveFileName(this,
   outfile.open(QIODevice::Append|QIODevice::Text);
   QTextStream out(&outfile); out << ui->ptOutput->toPlainText() << endl;
 } }
-#endif //######################################################################

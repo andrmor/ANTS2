@@ -1,5 +1,3 @@
-#ifdef ANTS_FANN //############################################################
-
 #include "neuralnetworkswindow.h"
 #include "neuralnetworksmodule.h"
 #include "eventsdataclass.h"
@@ -621,5 +619,3 @@ double *energy){ int nIn=nInputs(), iX, iP; double coleff=1, norm=1, val;
  *energy=isRecE()?FVOut.back()*coleff : RecSet->SuggestedEnergy;
  return true;
 }
-
-#endif //######################################################################

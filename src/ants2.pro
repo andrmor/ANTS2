@@ -26,6 +26,7 @@ linux-g++ || unix {
 linux-g++ || unix {
     QMAKE_CXXFLAGS += -march=native
 }
+
 #---EIGEN---
 ants2_eigen3 {
      DEFINES += USE_EIGEN
@@ -44,7 +45,6 @@ ants2_eigen3 {
      HEADERS += SplineLibrary/bs3fit.h \
                 SplineLibrary/tps3fit.h
 }
-
 ants2_matrix { # use matrix algebra for TP splines
     DEFINES += TPS3M
     SOURCES += SplineLibrary/tpspline3m.cpp \
@@ -87,6 +87,12 @@ ants2_fann {
         DEFINES += NOMINMAX
      }
      linux-g++ || unix { LIBS += -lfann }
+
+    HEADERS += modules/neuralnetworksmodule.h
+    SOURCES += modules/neuralnetworksmodule.cpp
+
+    HEADERS += gui/neuralnetworkswindow.h
+    SOURCES += gui/neuralnetworkswindow.cpp
 }
 #---------
 
@@ -186,8 +192,7 @@ SOURCES += main.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/reconstructionmanagerclass.cpp \
-    modules/processorclass.cpp \
-    modules/neuralnetworksmodule.cpp \
+    modules/processorclass.cpp \    
     modules/nnmoduleclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
@@ -287,8 +292,7 @@ HEADERS  += common/CorrelationFilters.h \
     modules/pms.h \
     modules/particlesourcesclass.h \
     modules/nnmoduleclass.h \
-    modules/flatfield.h \
-    modules/neuralnetworksmodule.h \
+    modules/flatfield.h \    
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
@@ -428,8 +432,7 @@ ants2_GUI {
     gui/reconstructionwindow.cpp \
     gui/windownavigatorclass.cpp \
     gui/MainWindowTools/MainWindowDiskIO.cpp \
-    gui/MainWindowTools/MainWindowPhotonSource.cpp \
-    gui/neuralnetworkswindow.cpp \
+    gui/MainWindowTools/MainWindowPhotonSource.cpp \    
     gui/MainWindowTools/MainWindowParticleSimulation.cpp \
     gui/MainWindowTools/MainWindowDetectorConstructor.cpp \
     gui/MainWindowTools/MainWindowMenu.cpp \
@@ -482,8 +485,7 @@ HEADERS  += gui/mainwindow.h \
     gui/guiutils.h \
     gui/lrfwindow.h \
     gui/reconstructionwindow.h \
-    gui/windownavigatorclass.h \
-    gui/neuralnetworkswindow.h \
+    gui/windownavigatorclass.h \    
     gui/exampleswindow.h \
     gui/detectoraddonswindow.h \
     gui/checkupwindowclass.h \

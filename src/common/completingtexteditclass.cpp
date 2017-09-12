@@ -169,6 +169,8 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             tc = this->textCursor();
             tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
             tc.insertText("\n" + spacer + onRight);
+            tc.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+            tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, startingSpaces);
             this->setTextCursor(tc);
             return;
         }

@@ -467,8 +467,8 @@ public:
    ~AInterfaceToTree() {}
 
 public slots:
-   QString OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
-   QString GetTreeHeader(QString TreeName);
+   void OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
+   QString PrintBranches(QString TreeName);
    QVariant GetBranch(QString TreeName, QString BranchName);
    void CloseTree(QString TreeName);
 

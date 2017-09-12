@@ -1479,6 +1479,12 @@ void MaterialInspectorWindow::on_pbNistPage_clicked()
 
 void MaterialInspectorWindow::on_pbRename_clicked()
 {
+  if (!ui->labMatWasModified->text().simplified().isEmpty())
+    {
+      message("Material properties were modified!\nUpdate, add as new or cancel changes before renaming");
+      return;
+    }
+
   QString name = ui->leName->text();
   int aMat = ui->cobActiveMaterials->currentIndex();
   if (aMat<0) return;

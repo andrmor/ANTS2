@@ -3359,30 +3359,75 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
 AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) : TmpHub(TmpHub)
 {}
 
-QString AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
+void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
 {
-    if (TmpHub->Trees.findIndexOf(TreeName) !=-1) return "Tree with that name already exists!";
+    if (TmpHub->Trees.findIndexOf(TreeName) !=-1)
+    {
+        abort("Tree with name " + TreeName + " already exists!");
+        return;
+    }
 
     TFile *f = TFile::Open(FileName.toLocal8Bit().data(), "READ");
     if (!f)
     {
-        return "Cannot open file";
+        abort("Cannot open file " + FileName);
+        return;
     }
     TTree *t = 0;
     f->GetObject(TreeNameInFile.toLocal8Bit().data(), t);
     if (!t)
     {
-        return "Cannot read this tree from file";
+        abort("Tree " + TreeNameInFile + " not found in file " + FileName);
+        return;
     }
     t->Print();
 
     TmpHub->Trees.addTree(TreeName, t);
-    return "";
+    return;
 }
 
-QString AInterfaceToTree::GetTreeHeader(QString TreeName)
+QString AInterfaceToTree::PrintBranches(QString TreeName)
 {
-    return "";
+    int index = TmpHub->Trees.findIndexOf(TreeName);
+    if (index == -1)
+    {
+        abort("Tree with name " + TreeName + " does not exist!");
+        return "";
+    }
+    TTree *t = TmpHub->Trees.getTree(TreeName);
+    if (!t)
+    {
+        abort("Tree " + TreeName + " not found!");
+        return "";
+    }
+
+    QString s = "Thee ";
+    s += TreeName;
+    s += " has the following branches (-> data_type):<br>";
+    for (int i=0; i<t->GetNbranches(); i++)
+    {
+        TObjArray* lb = t->GetListOfBranches();
+        const TBranch* b = (const TBranch*)(lb->At(i));
+        QString name = b->GetName();
+        s += name;
+        s += " -> ";
+        QString type = b->GetClassName();
+        if (type.isEmpty())
+        {
+            QString title = b->GetTitle();
+            title.remove(name);
+            title.remove("/");
+            s += title;
+        }
+        else
+        {
+            type.replace("<", "(");
+            type.replace(">", ")");
+            s += type;
+        }
+        s += "<br>";
+    }
+    return s;
 }
 
 QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
@@ -3390,21 +3435,21 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
     int index = TmpHub->Trees.findIndexOf(TreeName);
     if (index == -1)
     {
-        qDebug() << "Tree not found";
+        abort("Tree with name " + TreeName + " does not exist!");
         return QVariant();
     }
 
     TTree *t = TmpHub->Trees.getTree(TreeName);
     if (!t)
     {
-        qDebug() << "Tree with this name does not exist!";
+        abort("Tree " + TreeName + " not found!");
         return QVariant();
     }
 
     TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
     if (!branch)
     {
-        qDebug() << "Branch with that name does not exist!";
+        abort("Tree " + TreeName + " does not have branch " + BranchName);
         return QVariant();
     }
 
@@ -3412,18 +3457,6 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
     qDebug() << "The branch contains:" << numEntries << "elements";
 
     QList< QVariant > varList;
-//    for (int i=0; i<v1.size(); i++)
-//      {
-//        QList<QVariant> ll;
-//        ll.append(v1[i]);
-//        if (columns > 1) ll.append(v2[i]);
-//        if (columns == 3) ll.append(v3[i]);
-
-//        QVariant r = ll;
-//        varList << r;
-//      }
-//    return varList;
-
     QString type = branch->GetClassName();
     qDebug() << "Element type:" << type;
     if (type == "vector<double>")
@@ -3487,7 +3520,7 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
             QStringList List = selector.capturedTexts();
             if (List.size()!=2)
             {
-               qDebug() << "Cannot extract the length of the array";
+               abort("Cannot extract the length of the array");
                return QVariant();
             }
             else
@@ -3497,7 +3530,7 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
                int numInArray = s.toInt(&fOK);
                if (!fOK)
                {
-                  qDebug() << "Cannot extract the length of the array";
+                  abort("Cannot extract the length of the array");
                   return QVariant();
                }
                qDebug() << "in the array there are"<<numInArray<<"elements";
@@ -3559,7 +3592,7 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
                }
                else
                {
-                   qDebug() << "Cannot extract the type of the array";
+                   abort("Cannot extract the type of the array");
                    return QVariant();
                }
             }
@@ -3602,13 +3635,15 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
         }
         else
         {
-            qDebug() << "Unsupported data type of the branch - title is:"<<title;
+            abort("Unsupported data type of the branch - title is: "+title);
+            return QVariant();
         }
 
     }
     else
     {
-        qWarning() << type << " - this type of tree branch is not supported";
+        abort("Tree branch type " + type + " is not supported");
+        return QVariant();
     }
 
     t->ResetBranchAddresses();

@@ -193,7 +193,7 @@ void AMaterialParticleCollection::AddNewMaterial(QString name)
     MaterialCollectionData.last()->name = name;
 }
 
-void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double atomicDensity, double n, double abs, double PriScintDecayTime,
+void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime,
                                              double W, double SecYield, double SecScintDecayTime, double e_driftVelocity,
                                              double p1, double p2, double p3)
 {

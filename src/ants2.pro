@@ -8,8 +8,7 @@ CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (
 CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
-
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 #---CERN ROOT---
 win32 {
@@ -23,9 +22,6 @@ linux-g++ || unix {
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
-linux-g++ || unix {
-    QMAKE_CXXFLAGS += -march=native
-}
 
 #---EIGEN---
 ants2_eigen3 {
@@ -574,12 +570,19 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
-#---Windows-specific compilation mode and warning suppression
+#---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
   QMAKE_CXXFLAGS_RELEASE -= -O2
   QMAKE_CXXFLAGS_RELEASE *= -Od
+}
+linux-g++ || unix {
+    QMAKE_CXXFLAGS += -march=native
+}
+#------------
 
+#---Windows-specific compilation mode and warning suppression
+win32 {
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
   #DEFINES += WINDOWSBIN                #enable for compilation in Windows binary-only mode

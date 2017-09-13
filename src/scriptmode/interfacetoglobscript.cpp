@@ -1130,6 +1130,8 @@ InterfaceToData::InterfaceToData(AConfiguration *Config, ReconstructionManagerCl
   H["SetReconstructed"] = "For event number ievent set reconstructed x,y,z and energy.\n"
                           "The function automatically sets status ReconstructionOK and GoodEvent to true for this event.\n"
                           "After all events are reconstructed, SetReconstructionReady() has to be called!";
+
+  H["GetStatistics"] = "Returns (if available) an array with GoodEvents, Average_Chi2, Average_XY_deviation";
 }
 
 double InterfaceToData::GetPMsignal(int ievent, int ipm)
@@ -1678,6 +1680,17 @@ void InterfaceToData::PurgeBad()
 void InterfaceToData::Purge(int LeaveOnePer)
 {
   EventsDataHub->Purge(LeaveOnePer);
+}
+
+QVariant InterfaceToData::GetStatistics(int igroup)
+{
+  int GoodEvents;
+  double AvChi2, AvDeviation;
+  EventsDataHub->prepareStatisticsForEvents(Config->GetDetector()->LRFs->isAllLRFsDefined(), GoodEvents, AvChi2, AvDeviation, igroup);
+
+  QVariantList l;
+  l << GoodEvents << AvChi2 << AvDeviation;
+  return l;
 }
 
 //----------------------------------

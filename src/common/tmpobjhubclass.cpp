@@ -117,6 +117,7 @@ bool ATreeCollection::addTree(QString name, TTree *tree)
 {
     if ( findIndexOf(name) != -1) return false;
     Trees.append(ATreeCollectionRecord(name, tree));
+    return true;
 }
 
 TTree *ATreeCollection::getTree(QString name)

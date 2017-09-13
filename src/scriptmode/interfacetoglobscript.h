@@ -236,6 +236,9 @@ public slots:
   void PurgeBad();
   void Purge(int LeaveOnePer);
 
+  //Statistics
+  QVariant GetStatistics(int igroup);
+
 private:
   AConfiguration* Config;
   ReconstructionManagerClass* RManager;

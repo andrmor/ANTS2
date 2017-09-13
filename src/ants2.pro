@@ -8,8 +8,7 @@ CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (
 CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
-
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 #---CERN ROOT---
 win32 {
@@ -23,9 +22,7 @@ linux-g++ || unix {
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
-linux-g++ || unix {
-    QMAKE_CXXFLAGS += -march=native
-}
+
 #---EIGEN---
 ants2_eigen3 {
      DEFINES += USE_EIGEN
@@ -44,7 +41,6 @@ ants2_eigen3 {
      HEADERS += SplineLibrary/bs3fit.h \
                 SplineLibrary/tps3fit.h
 }
-
 ants2_matrix { # use matrix algebra for TP splines
     DEFINES += TPS3M
     SOURCES += SplineLibrary/tpspline3m.cpp \
@@ -87,6 +83,12 @@ ants2_fann {
         DEFINES += NOMINMAX
      }
      linux-g++ || unix { LIBS += -lfann }
+
+    HEADERS += modules/neuralnetworksmodule.h
+    SOURCES += modules/neuralnetworksmodule.cpp
+
+    HEADERS += gui/neuralnetworkswindow.h
+    SOURCES += gui/neuralnetworkswindow.cpp
 }
 #---------
 
@@ -186,8 +188,7 @@ SOURCES += main.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/reconstructionmanagerclass.cpp \
-    modules/processorclass.cpp \
-    modules/neuralnetworksmodule.cpp \
+    modules/processorclass.cpp \    
     modules/nnmoduleclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
@@ -287,8 +288,7 @@ HEADERS  += common/CorrelationFilters.h \
     modules/pms.h \
     modules/particlesourcesclass.h \
     modules/nnmoduleclass.h \
-    modules/flatfield.h \
-    modules/neuralnetworksmodule.h \
+    modules/flatfield.h \    
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
@@ -428,8 +428,7 @@ ants2_GUI {
     gui/reconstructionwindow.cpp \
     gui/windownavigatorclass.cpp \
     gui/MainWindowTools/MainWindowDiskIO.cpp \
-    gui/MainWindowTools/MainWindowPhotonSource.cpp \
-    gui/neuralnetworkswindow.cpp \
+    gui/MainWindowTools/MainWindowPhotonSource.cpp \    
     gui/MainWindowTools/MainWindowParticleSimulation.cpp \
     gui/MainWindowTools/MainWindowDetectorConstructor.cpp \
     gui/MainWindowTools/MainWindowMenu.cpp \
@@ -482,8 +481,7 @@ HEADERS  += gui/mainwindow.h \
     gui/guiutils.h \
     gui/lrfwindow.h \
     gui/reconstructionwindow.h \
-    gui/windownavigatorclass.h \
-    gui/neuralnetworkswindow.h \
+    gui/windownavigatorclass.h \    
     gui/exampleswindow.h \
     gui/detectoraddonswindow.h \
     gui/checkupwindowclass.h \
@@ -572,12 +570,19 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
-#---Windows-specific compilation mode and warning suppression
+#---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
   QMAKE_CXXFLAGS_RELEASE -= -O2
   QMAKE_CXXFLAGS_RELEASE *= -Od
+}
+linux-g++ || unix {
+    QMAKE_CXXFLAGS += -march=native
+}
+#------------
 
+#---Windows-specific compilation mode and warning suppression
+win32 {
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
   #DEFINES += WINDOWSBIN                #enable for compilation in Windows binary-only mode

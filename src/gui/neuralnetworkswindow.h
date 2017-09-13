@@ -1,5 +1,3 @@
-#ifdef ANTS_FANN //############################################################
-
 #ifndef NEURALNETWORKSWINDOW_H
 #define NEURALNETWORKSWINDOW_H
 
@@ -98,5 +96,3 @@ signals: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 };
 
 #endif // NEURALNETWORKSWINDOW_H
-
-#endif//############################################################

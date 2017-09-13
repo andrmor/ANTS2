@@ -69,7 +69,7 @@ bool MainWindow::startupDetector()
 
       //Generate MaterialCollection
       MpCollection->AddNewMaterial();
-      MpCollection->UpdateMaterial(MpCollection->countMaterials()-1, "Air", 1.2041e-3, 0, 1, 0, 5, 100, 2, 5, 1, 0, 0, 0);
+      MpCollection->UpdateMaterial(MpCollection->countMaterials()-1, "Air", 1.2041e-3, 1, 0, 5, 100, 2, 5, 1, 0, 0, 0);
       AddDefaultPMtype();
       MainWindow::on_pbRefreshMaterials_clicked();
       MainWindow::on_pbRefreshOverrides_clicked();

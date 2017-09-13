@@ -283,6 +283,25 @@ QVariant CoreInterfaceClass::loadArray(QString fileName, int columns)
   return l;
 }
 
+QString CoreInterfaceClass::loadText(QString fileName)
+{
+  if (!QFileInfo(fileName).exists())
+  {
+    //abort("File does not exist: " + fileName);
+    qWarning() << "File does not exist: " << fileName;
+    return "";
+  }
+
+  QString str;
+  bool bOK = LoadTextFromFile(fileName, str);
+  if (!bOK)
+    {
+      qWarning() << "Error reading file: " << fileName;
+      return "";
+    }
+  return str;
+}
+
 QString CoreInterfaceClass::GetWorkDir()
 {
   return ScriptManager->LastOpenDir;

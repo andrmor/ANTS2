@@ -2398,7 +2398,7 @@ void MaterialInspectorWindow::autoloadMissingCrossSectionData()
 
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
 {
-    qDebug() << "menu" << ui->tabwNeutron->currentRow() << ui->tabwNeutron->currentColumn();
+    qDebug() << "Menu not implemented" << ui->tabwNeutron->currentRow() << ui->tabwNeutron->currentColumn()<<pos;
 }
 
 void MaterialInspectorWindow::on_cbCapture_clicked()

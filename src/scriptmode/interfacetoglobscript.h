@@ -194,11 +194,6 @@ public slots:
   QVariant GetPMsSortedBySignal(int ievent);
   int GetPMwithMaxSignal(int ievent);
 
-  //monitors
-  int countMonitors();
-  int getMonitorHits(int imonitor);
-  int getMonitorHits(QString monitor);
-
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
   void SetReconstructed(int ievent, double x, double y, double z, double e);
@@ -311,6 +306,13 @@ public slots:
 
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName);
+
+  //monitors
+  int countMonitors();
+  //int getMonitorHits(int imonitor);
+  int getMonitorHits(QString monitor);
+
+  QVariant getMonitorTime(QString monitor);
 
 signals:
   void requestStopSimulation();
@@ -448,6 +450,9 @@ public slots:
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
 
   void AddPoint(QString GraphName, double x, double y);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
+  void AddPoints(QString GraphName, QVariant xyArray);
+
   void Draw(QString GraphName, QString options);
 
   bool Delete(QString GraphName);

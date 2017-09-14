@@ -17,6 +17,7 @@
 #include "modules/lrf_v3/arepository.h"
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
+#include "amonitor.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -1113,6 +1114,55 @@ bool InterfaceToSim::SaveAsText(QString fileName)
 {
   return EventsDataHub->saveSimulationAsText(fileName);
 }
+
+int InterfaceToSim::countMonitors()
+{
+    if (!EventsDataHub->SimStat) return 0;
+    return EventsDataHub->SimStat->Monitors.size();
+}
+
+//int InterfaceToSim::getMonitorHits(int imonitor)
+//{
+//    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
+//        return std::numeric_limits<int>::quiet_NaN();
+//    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
+//}
+
+int InterfaceToSim::getMonitorHits(QString monitor)
+{
+    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        if (mon->getName() == monitor)
+            return mon->getHits();
+    }
+    return std::numeric_limits<int>::quiet_NaN();
+}
+
+QVariant InterfaceToSim::getMonitorTime(QString monitor)
+{
+    QVariantList vl;
+    if (!EventsDataHub->SimStat) return vl;
+    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        if (mon->getName() == monitor)
+        {
+            const TH1D* h = mon->getTime();
+            const TAxis* axis = h->GetXaxis();
+            for (int i=1; i<axis->GetNbins()+1; i++)
+            {
+                QVariantList el;
+                el << axis->GetBinCenter(i);
+                el << h->GetBinContent(i);
+                vl.push_back(el);
+            }
+        }
+    }
+    return vl;
+}
+
 #endif
 
 //----------------------------------
@@ -1488,32 +1538,6 @@ int InterfaceToData::GetPMwithMaxSignal(int ievent)
         }
     }
     return iMaxSig;
-}
-
-int InterfaceToData::countMonitors()
-{
-    if (!EventsDataHub->SimStat) return 0;
-    return EventsDataHub->SimStat->Monitors.size();
-}
-
-#include "amonitor.h"
-int InterfaceToData::getMonitorHits(int imonitor)
-{
-    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
-        return std::numeric_limits<int>::quiet_NaN();
-    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
-}
-
-int InterfaceToData::getMonitorHits(QString monitor)
-{
-    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
-    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-    {
-        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-        if (mon->getName() == monitor)
-            return mon->getHits();
-    }
-    return std::numeric_limits<int>::quiet_NaN();
 }
 
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
@@ -2209,6 +2233,98 @@ void InterfaceToGraphs::AddPoint(QString GraphName, double x, double y)
     {
       abort("Graph "+GraphName+" not found!");
       return;
+  }
+}
+
+void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
+{
+    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
+    if (index == -1)
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+      }
+
+    QString typeX = xArray.typeName();
+    QString typeY = yArray.typeName();
+    if (typeX != "QVariantList" || typeY != "QVariantList")
+    {
+        qWarning() << "arrays are expected in graph.AddPoints()";
+        return;
+    }
+
+    QVariantList vx = xArray.toList();
+    QVariantList vy = yArray.toList();
+    QJsonArray X = QJsonArray::fromVariantList(vx);
+    QJsonArray Y = QJsonArray::fromVariantList(vy);
+    if (X.isEmpty() || Y.isEmpty() || X.size()!=Y.size())
+    {
+        qWarning() << "Empty or mismatch in add array to graph";
+        return;
+    }
+
+    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    if (r.type == "TGraph")
+      {
+        TGraph* gr = static_cast<TGraph*>(r.Obj);
+
+        for (int i=0; i<X.size(); i++)
+            if (X[i].isDouble() && Y[i].isDouble())
+            {
+                double x = X[i].toDouble();
+                double y = Y[i].toDouble();
+                gr->SetPoint(gr->GetN(), x, y);
+            }
+      }
+    else
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+    }
+}
+
+void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xyArray)
+{
+    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
+    if (index == -1)
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+      }
+
+    QString typeArr = xyArray.typeName();
+    if (typeArr != "QVariantList")
+    {
+        qWarning() << "arrays are expected in graph.AddPoints()";
+        return;
+    }
+
+    QVariantList xy = xyArray.toList();
+    QJsonArray XYarr = QJsonArray::fromVariantList(xy);
+
+    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    if (r.type == "TGraph")
+      {
+        TGraph* gr = static_cast<TGraph*>(r.Obj);
+
+        for (int i=0; i<XYarr.size(); i++)
+        {
+           QJsonArray el = XYarr[i].toArray();
+           if (el.size() == 2)
+           {
+               if (el[0].isDouble() && el[1].isDouble())
+               {
+                   double x = el[0].toDouble();
+                   double y = el[1].toDouble();
+                   gr->SetPoint(gr->GetN(), x, y);
+               }
+           }
+        }
+      }
+    else
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
     }
 }
 

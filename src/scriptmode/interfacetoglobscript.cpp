@@ -1009,6 +1009,13 @@ InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsData
   H["GetSeed"] = "Get random generator seed";
   H["SaveAsTree"] = "Save simulation results as a ROOT tree file";
   H["SaveAsText"] = "Save simulation results as an ASCII file";
+
+  H["getMonitorTime"] = "returns array of arrays: [time, value]";
+  H["getMonitorWave"] = "returns array of arrays: [wave index, value]";
+  H["getMonitorEnergy"] = "returns array of arrays: [energy, value]";
+  H["getMonitorAngular"] = "returns array of arrays: [angle, value]";
+  H["getMonitorXY"] = "returns array of arrays: [x, y, value]";
+  H["getMonitorHits"] = "returns the number of detected hits by the monitor with the given name";
 }
 
 void InterfaceToSim::ForceStop()

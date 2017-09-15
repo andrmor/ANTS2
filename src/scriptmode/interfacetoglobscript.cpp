@@ -1140,29 +1140,80 @@ int InterfaceToSim::getMonitorHits(QString monitor)
     return std::numeric_limits<int>::quiet_NaN();
 }
 
-QVariant InterfaceToSim::getMonitorTime(QString monitor)
+QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
 {
-    QVariantList vl;
-    if (!EventsDataHub->SimStat) return vl;
-    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-    {
-        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-        if (mon->getName() == monitor)
-        {
-            const TH1D* h = mon->getTime();
-            const TAxis* axis = h->GetXaxis();
-            for (int i=1; i<axis->GetNbins()+1; i++)
-            {
-                QVariantList el;
-                el << axis->GetBinCenter(i);
-                el << h->GetBinContent(i);
-                vl.push_back(el);
-            }
-        }
-    }
-    return vl;
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH1D* h;
+          if      (whichOne == "time")   h = mon->getTime();
+          else if (whichOne == "angle")  h = mon->getAngle();
+          else if (whichOne == "wave")   h = mon->getWave();
+          else if (whichOne == "energy") h = mon->getEnergy();
+
+          TAxis* axis = h->GetXaxis();
+          for (int i=1; i<axis->GetNbins()+1; i++)
+          {
+              QVariantList el;
+              el << axis->GetBinCenter(i);
+              el << h->GetBinContent(i);
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
 }
 
+QVariant InterfaceToSim::getMonitorTime(QString monitor)
+{
+    return getMonitorData1D(monitor, "time");
+}
+
+QVariant InterfaceToSim::getMonitorAngular(QString monitor)
+{
+  return getMonitorData1D(monitor, "angle");
+}
+
+QVariant InterfaceToSim::getMonitorWave(QString monitor)
+{
+  return getMonitorData1D(monitor, "wave");
+}
+
+QVariant InterfaceToSim::getMonitorEnergy(QString monitor)
+{
+  return getMonitorData1D(monitor, "energy");
+}
+
+QVariant InterfaceToSim::getMonitorXY(QString monitor)
+{
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH2D* h = mon->getXY();
+
+          TAxis* axisX = h->GetXaxis();
+          TAxis* axisY = h->GetYaxis();
+          for (int ix=1; ix<axisX->GetNbins()+1; ix++)
+            for (int iy=1; iy<axisY->GetNbins()+1; iy++)
+          {
+              QVariantList el;
+              el << axisX->GetBinCenter(ix);
+              el << axisY->GetBinCenter(iy);
+              el << h->GetBinContent( h->GetBin(ix,iy) );
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
+}
 #endif
 
 //----------------------------------

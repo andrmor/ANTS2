@@ -313,6 +313,10 @@ public slots:
   int getMonitorHits(QString monitor);
 
   QVariant getMonitorTime(QString monitor);
+  QVariant getMonitorAngular(QString monitor);
+  QVariant getMonitorWave(QString monitor);
+  QVariant getMonitorEnergy(QString monitor);
+  QVariant getMonitorXY(QString monitor);
 
 signals:
   void requestStopSimulation();
@@ -324,6 +328,8 @@ private:
 
   int RecNumThreads;
   bool fGuiPresent;
+
+  QVariant getMonitorData1D(QString monitor, QString whichOne);
 };
 #endif
 

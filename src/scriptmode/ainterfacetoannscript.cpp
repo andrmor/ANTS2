@@ -53,7 +53,7 @@ void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 QString AInterfaceToANNScript::train()
 {
   if (Input.isEmpty() || Output.isEmpty()) return "Training data empty";
-  if (Input.size() != Output.size()) return "Training data mismatch";
+  if (Input.size() != Output.size()) return "Training data size mismatch";
 
   //.....
 

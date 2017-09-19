@@ -26,6 +26,10 @@
   #include "ainterfacetoknnscript.h"
 #endif
 
+#ifdef ANTS_FANN
+  #include "ainterfacetoannscript.h"
+#endif
+
 #include <QDebug>
 
 void MainWindow::createScriptWindow()
@@ -95,6 +99,11 @@ void MainWindow::createScriptWindow()
 #ifdef ANTS_FLANN
     AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
     ScriptWindow->SetInterfaceObject(knn, "knn");
+#endif
+
+#ifdef ANTS_FANN
+    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    ScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 
     // Interfaces which rely on MainWindow

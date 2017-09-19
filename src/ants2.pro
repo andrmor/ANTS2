@@ -6,7 +6,7 @@ ANTS2_VERSION = 2230
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
-#CONFIG += ants2_fann        #enables FANN (fast neural network) library
+CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
@@ -84,11 +84,15 @@ ants2_fann {
      }
      linux-g++ || unix { LIBS += -lfann }
 
+     #main module
     HEADERS += modules/neuralnetworksmodule.h
     SOURCES += modules/neuralnetworksmodule.cpp
-
+      #gui only
     HEADERS += gui/neuralnetworkswindow.h
     SOURCES += gui/neuralnetworkswindow.cpp
+      #interface to script module
+    HEADERS += scriptmode/ainterfacetoannscript.h
+    SOURCES += scriptmode/ainterfacetoannscript.cpp
 }
 #---------
 

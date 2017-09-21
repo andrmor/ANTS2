@@ -560,15 +560,31 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 // vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
                                 double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
                                 // vn[i] = vnMod * v[i]
-                                //        qDebug() << energy << vnMod;
+                                //        qDebug() << "Neutron energy: "<<energy << "keV   Velocity:" << vnMod << " m/s";
                                 // va[] is randomly generated from Gauss(0, sqrt(kT/m)
-                                double va[3];
+                                double va[3];                                
                                 const double m = elements.at(iselected).Mass; //mass of atom in atomic units
                                 //        qDebug() << "atom - mass:"<<m;
                                 double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
-                                for (int i=0; i<3; i++)
-                                    va[i] = RandGen->Gaus(0, a); //maxwell!
-                                //        qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
+                                bool bCannotCollide;
+                                do
+                                {
+                                    for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
+                                    //        qDebug() << "  Speed of atom in lab frame, m/s"<<va[0]<<va[1]<<va[2];
+                                    //calculating projection on the neutron direction
+                                    double proj = 0;
+                                    for (int i=0; i<3; i++) proj += v[i] * va[i];
+                                    //        qDebug() << "  Projection:"<<proj<<"m/s";
+                                    // proj has "+" if atom moves in the same direction as the neutron, "-" if opposite
+                                    if (proj > vnMod)
+                                    {
+                                        bCannotCollide = true;
+                                                qDebug() << "  Generating again - cannot collide!";
+                                    }
+                                    else bCannotCollide = false;
+                                }
+                                while (bCannotCollide);
+
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++)

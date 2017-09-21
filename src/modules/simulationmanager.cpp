@@ -1368,6 +1368,7 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
     totalEventCount = cjs["EventsToDo"].toInt();
     fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
     AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
+    TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
     fDoS1 = cjs["DoS1"].toBool();
     fDoS2 = cjs["DoS2"].toBool();
     fBuildParticleTracks = cjs["ParticleTracks"].toBool();
@@ -1444,8 +1445,10 @@ void ParticleSourceSimulator::simulate()
         int ParticleRunsThisEvent = 1;
         if (fAllowMultiple)
         {
-            ParticleRunsThisEvent = RandGen->Poisson(AverageNumParticlesPerEvent);
-            if(ParticleRunsThisEvent == 0) ParticleRunsThisEvent = 1;
+            if (TypeParticlesPerEvent == 0) ParticleRunsThisEvent = std::round(AverageNumParticlesPerEvent);
+            else                            ParticleRunsThisEvent = RandGen->Poisson(AverageNumParticlesPerEvent);
+
+            if(ParticleRunsThisEvent < 1) ParticleRunsThisEvent = 1;
         }
         //qDebug()<<"----particle runs this event: "<<ParticleRunsThisEvent;
 

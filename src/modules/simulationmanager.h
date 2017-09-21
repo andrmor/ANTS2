@@ -337,6 +337,7 @@ private:
     bool fDoS2;
     bool fAllowMultiple; //multiple particles per event?
     int AverageNumParticlesPerEvent;
+    int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
 };

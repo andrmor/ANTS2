@@ -38,6 +38,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
   cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
   cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
+  cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
   cjs["DoS1"] = ui->cbGunDoS1->isChecked();
   cjs["DoS2"] = ui->cbGunDoS2->isChecked();
   cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
@@ -673,7 +674,7 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
    if (val<0)
      {
        message("Average number of particles per event should be more than 0", this);
-       ui->ledGunAverageNumPartperEvent->setText("0.01");
+       ui->ledGunAverageNumPartperEvent->setText("1");
      }
 }
 

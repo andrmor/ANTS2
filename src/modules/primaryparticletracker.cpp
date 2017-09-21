@@ -573,18 +573,18 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     //        qDebug() << "  Speed of atom in lab frame, m/s"<<va[0]<<va[1]<<va[2];
                                     //calculating projection on the neutron direction
                                     double proj = 0;
-                                    for (int i=0; i<3; i++) proj += v[i] * va[i];
+                                    for (int i=0; i<3; i++) proj += v[i] * va[i];  //v[i] is the direction vector of neutron (unitary length)
                                     //        qDebug() << "  Projection:"<<proj<<"m/s";
                                     // proj has "+" if atom moves in the same direction as the neutron, "-" if opposite
                                     if (proj > vnMod)
                                     {
                                         bCannotCollide = true;
-                                                qDebug() << "  Generating again - cannot collide!";
+                                        //        qDebug() << "  Rejected - generating atom velocity again";
                                     }
                                     else bCannotCollide = false;
                                 }
                                 while (bCannotCollide);
-
+                                //transition to the center of mass frame
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++)

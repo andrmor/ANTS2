@@ -567,6 +567,8 @@ if (scj.contains("CustomDistrib"))
   JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
   JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
   JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
+  ui->cobPartPerEvent->setCurrentIndex(0);
+  JsonToComboBox(csjs, "TypeParticlesPerEvent", ui->cobPartPerEvent);
   JsonToCheckbox(csjs, "DoS1", ui->cbGunDoS1);
   JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
   JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);

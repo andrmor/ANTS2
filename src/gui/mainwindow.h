@@ -631,6 +631,8 @@ private slots:
 
     void on_actionLoad_last_config_hovered();
 
+    void on_cobPartPerEvent_currentIndexChanged(int index);
+
 public slots:
     void on_cobSF_chi2Vs_activated(int index);
     void on_pbRebuildDetector_clicked();

@@ -366,6 +366,71 @@ double InterfaceToInteractionScript::Deposition_startZ(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[2];
 }
 
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "TGeoNode.h"
+#include "detectorclass.h"
+QString InterfaceToInteractionScript::Deposition_volumeName(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return "";
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return "";
+    }
+
+  if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return "";
+  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+  TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
+  if (node) return QString(node->GetName());
+  else return "";
+}
+
+int InterfaceToInteractionScript::Deposition_volumeIndex(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return -1;
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return -1;
+    }
+
+  if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return -1;
+  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+  TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
+  if (node) return node->GetNumber();
+  else return -1;
+}
+
+double InterfaceToInteractionScript::Deposition_energy(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return 0;
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return 0;
+    }
+
+  double energy = 0;
+  for (int ien=0; ien<PR.at(i).Deposition.at(m).ByMaterial.size(); ien++)
+    energy += PR.at(i).Deposition.at(m).ByMaterial.at(ien).Energy;
+  return energy;
+}
+
 int InterfaceToInteractionScript::Deposition_countNodes(int i, int m)
 {
   if (i<0 || i>PR.size()-1)

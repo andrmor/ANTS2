@@ -195,6 +195,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                   bool flagDone = false;
                   do
                     {
+                      //    qDebug() << "energy"<<energy;
                       //dE/dx [keV/mm] = Density[g/cm3] * [cm2/g*keV] * 0.1  //0.1 since local units are mm, not cm
                       const double dEdX = 0.1*Density * GetInterpolatedValue(energy, &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX,
                                                                    &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataF,
@@ -202,7 +203,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                       //recommended step: (RecFraction - suggested decrease of energy per step)
                       double RecStep = SimSet->dE * energy/dEdX; //*** TO DO zero control
-                      //                   qDebug()<<dEdX<<RecStep;
+                      //    qDebug()<<dEdX<<RecStep;
                       //vs absolute limits?
                       if (RecStep > SimSet->MaxStep) RecStep = SimSet->MaxStep;
                       if (RecStep < SimSet->MinStep) RecStep = SimSet->MinStep;

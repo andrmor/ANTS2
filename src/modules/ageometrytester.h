@@ -24,6 +24,7 @@ class AGeometryTesterReportRecord
 {
 public:
    QString volName;
+   int nodeIndex;
    int matIndex;
    double startX, startY, startZ;
 };

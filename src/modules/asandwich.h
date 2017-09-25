@@ -60,7 +60,8 @@ public:
   // populate TGeoManager
   void addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent,
                                 TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection,
-                                QList<APMandDummy>* PMsAndDumPMs);
+                                QList<APMandDummy>* PMsAndDumPMs,
+                                int forcedNodeNumber = 0);
 
   void clearGridRecords();
   void clearMonitorRecords();
@@ -112,7 +113,10 @@ private:
   void importOldLightguide(QJsonObject& json, bool upper);
   void importOldMask(QJsonObject &json);
   void importOldGrid(QJsonObject &json);
-  void positionArrayElement(int ix, int iy, int iz, AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QList<APMandDummy> *PMsAndDumPMs);
+  void positionArrayElement(int ix, int iy, int iz,
+                            AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                            int arrayIndex = 0);
 };
 
 #endif // ASANDWICH_H

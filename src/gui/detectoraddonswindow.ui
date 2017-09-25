@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabwidAddOns">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabWorldTree">
        <attribute name="title">

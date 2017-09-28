@@ -99,11 +99,10 @@ void OutputWindow::SetCurrentEvent(int iev)
 
 void OutputWindow::on_pbShowPMtime_clicked()
 {      
-    if (!EventsDataHub->LastSimSet.fTimeResolved) return;
     if (EventsDataHub->TimedEvents.isEmpty()) return;
 
     int CurrentEvent = ui->sbEvent->value();
-    if (CurrentEvent>EventsDataHub->TimedEvents.size()-1)
+    if (CurrentEvent >= EventsDataHub->TimedEvents.size())
       {
         message("Invalid event number!", this);
         return;
@@ -112,7 +111,6 @@ void OutputWindow::on_pbShowPMtime_clicked()
     int bins = EventsDataHub->LastSimSet.TimeBins;
     double from = EventsDataHub->LastSimSet.TimeFrom;
     double to   = EventsDataHub->LastSimSet.TimeTo;
-//    double step = (to-from)/bins;
 
     int ipm = ui->sbPMnumberToShowTime->value();
     if (ipm>MW->PMs->count()-1)

@@ -152,8 +152,12 @@ public slots:
   int countPMs();
   int GetNumEvents();
   int countEvents();
+  int countTimedEvents();
+  int countTimeBins();
   double GetPMsignal(int ievent, int ipm);
   void SetPMsignal(int ievent, int ipm, double value);
+  double GetPMsignalTimed(int ievent, int ipm, int iTimeBin);
+  QVariant GetPMsignalVsTime(int ievent, int ipm);
 
   // Reconstructed values
     //assuming there is only one group, and single point reconstruction
@@ -523,6 +527,7 @@ public slots:
   double gauss(double mean, double sigma);
   double poisson(double mean);
   double maxwell(double a);  // a is sqrt(kT/m)
+  double exponential(double tau);
 
 private:
   TRandom2* RandGen;

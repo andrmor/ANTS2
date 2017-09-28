@@ -24,8 +24,8 @@ public:
 public slots:
     void ClearData();
     void ClearTracks();
-    bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time);
-    bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time);
+    bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent = false);
+    bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time, bool AddToPreviousEvent = false);
 
     void SetBuildTracks(bool flag) {bBuildTracks = flag;}
     void SetTrackColor(int color) {TrackColor = color;}
@@ -89,6 +89,7 @@ private:
     void normalizeVector(double *arr);
     bool initTracer();
     void processTracks();
+    void handleEventData(bool AddToPreviousEvent);
 };
 
 #endif // AINTERFACETOPHOTONSCRIPT_H

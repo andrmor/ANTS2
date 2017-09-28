@@ -1278,6 +1278,57 @@ void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
     EventsDataHub->Events[ievent][ipm] = value;
 }
 
+double InterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (iTimeBin<0 || iTimeBin >= numTimeBins)
+      {
+        abort("Wrong time bin "+QString::number(ievent)+" Time bins available: "+QString::number(numTimeBins));
+        return 0;
+      }
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    return EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).at(ipm);
+}
+
+QVariant InterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (numTimeBins == 0) return QVariantList();
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).first().size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    QVariantList aa;
+    for (int i=0; i<numTimeBins; i++)
+        aa << EventsDataHub->TimedEvents.at(ievent).at(i).at(ipm);
+    return aa;
+}
+
 int InterfaceToData::GetNumPMs()
 {
   if (EventsDataHub->Events.isEmpty()) return 0;
@@ -1298,6 +1349,17 @@ int InterfaceToData::GetNumEvents()
 int InterfaceToData::countEvents()
 {
     return EventsDataHub->Events.size();
+}
+
+int InterfaceToData::countTimedEvents()
+{
+    return EventsDataHub->TimedEvents.size();
+}
+
+int InterfaceToData::countTimeBins()
+{
+    if (EventsDataHub->TimedEvents.isEmpty()) return 0;
+    return EventsDataHub->TimedEvents.first().size();
 }
 
 bool InterfaceToData::checkEventNumber(int ievent)
@@ -3205,6 +3267,7 @@ MathInterfaceClass::MathInterfaceClass(TRandom2* RandGen)
   H["gauss"] = "Returns a random value sampled from Gaussian distribution with mean and sigma given by the user";
   H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
   H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
+  H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
 }
 
 void MathInterfaceClass::setRandomGen(TRandom2 *RandGen)
@@ -3339,6 +3402,12 @@ double MathInterfaceClass::maxwell(double a)
       v2 += v;
     }
   return std::sqrt(v2);
+}
+
+double MathInterfaceClass::exponential(double tau)
+{
+    if (!RandGen) return 0;
+    return RandGen->Exp(tau);
 }
 
 // ------------- End of MATH -------------

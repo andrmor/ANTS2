@@ -603,6 +603,10 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                     RandomDir();
                     navigator->SetCurrentDirection(p->v);
                     //qDebug() << "After:"<<p->WaveIndex;
+
+                    if (SimSet->fTimeResolved)
+                        p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+
                     OneEvent->SimStat->Reemission++;
                     if (SimSet->bDoPhotonHistoryLog)
                       PhLog.append( APhotonHistoryLog(R, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Reemission, MatIndexFrom) );

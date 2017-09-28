@@ -32,7 +32,6 @@
 #include <QApplication>
 #include <QLocale>
 #include <QDebug>
-#include <TThread.h>
 #include <QThread>
 #include <QFile>
 #include <QFileInfo>
@@ -43,6 +42,10 @@
 #include "TApplication.h"
 #include "TObject.h"
 #include "TH1.h"
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+#include "TThread.h"
+#endif
 
 #include "amessage.h"
 
@@ -56,8 +59,10 @@ int main(int argc, char *argv[])
     char *rootargv[] = {(char*)"qqq"};
     TApplication RootApp("My ROOT", &rootargc, rootargv);
     //qDebug() << "___> Root App created";
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
     TThread::Initialize();
     //qDebug() << "___> TThread initialized";
+#endif
     EventsDataClass EventsDataHub;
 
     //qDebug() << "___> EventsDataHub created";

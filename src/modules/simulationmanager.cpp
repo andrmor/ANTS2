@@ -24,14 +24,18 @@
 
 #include <QVector>
 #include <QTime>
-#include <TGeoManager.h>
-#include <TRandom2.h>
-#include <TThread.h>
 #include <QDebug>
 
+#include "TGeoManager.h"
+#include "TRandom2.h"
 #include "TH1D.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+#include "TThread.h"
+#else
+#include <thread>
+#endif
 
-//static method to give to TThread which will run simulation
+//static method to give to TThread or std::thread which will run simulation
 //Needs to return something, otherwise root always starts detached thread
 static void *SimulationManagerRunWorker(void *workerSimulator)
 {
@@ -97,7 +101,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   usPerEvent = 0;
   fStopRequested = false;
 
-  bool fRunTThreads = threadCount > 0;
+  bool fRunThreads = threadCount > 0;
   simSettings.readFromJson(jsSimSet);
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
@@ -142,14 +146,19 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       workers.append(worker);
     }
 
-  if(fRunTThreads)
+  if(fRunThreads)
     {
       backgroundWorker = 0;
       //Assumes that detector always adds default navigator. Otherwise we need to add it ourselves!
       detector->GeoManager->SetMaxThreads(workers.count());
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
       //Create any missing TThreads, they are all the same, they only differ in run() call
       while(workers.count() > threads.count())
         threads.append(new TThread(&SimulationManagerRunWorker));
+#else
+      for (int i=0; i<workers.size(); i++)
+         threads.append(new std::thread(&SimulationManagerRunWorker, workers[i]));
+#endif
     }
   else  backgroundWorker = workers.last();
   simState = SSetup;
@@ -275,7 +284,8 @@ void ASimulatorRunner::simulate()
         backgroundWorker->simulate();                   // *** Andr
     }
     else
-    {        
+    {
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
         for(int i = 0; i < workers.count(); i++)
         {
             //qDebug()<<"Launching thread"<<(i+1);
@@ -288,7 +298,16 @@ void ASimulatorRunner::simulate()
             //qDebug()<<"Asking thread"<<(i+1)<<" to join...";
             threads[i]->Join();
             //qDebug() <<"Thread"<<(i+1)<<"joined";
-        }       
+        }
+#else
+        //std::thread -> start on construction
+        for (int i=0; i < workers.count(); i++)
+          {
+            qDebug() << "Asking thread"<<(i+1)<<" to join...";
+            threads[i]->join();
+            qDebug() <<"Thread"<<(i+1)<<"joined";
+          }
+#endif
     }
     simState = SFinished;
 

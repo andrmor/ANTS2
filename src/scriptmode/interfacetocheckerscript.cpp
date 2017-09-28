@@ -237,6 +237,16 @@ int InterfaceToInteractionScript::isSecondary(int i)
   return PR.at(i).History->isSecondary();
 }
 
+int InterfaceToInteractionScript::getParent(int i)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return -1;
+    }
+  return PR.at(i).History->SecondaryOf;
+}
+
 int InterfaceToInteractionScript::MaterialsCrossed_count(int i)
 {
   if (i<0 || i>PR.size()-1)

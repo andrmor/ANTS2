@@ -195,7 +195,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                   bool flagDone = false;
                   do
                     {
-                      //    qDebug() << "energy"<<energy;
+                      //    qDebug() << "-->On step start energy:"<<energy;
                       //dE/dx [keV/mm] = Density[g/cm3] * [cm2/g*keV] * 0.1  //0.1 since local units are mm, not cm
                       const double dEdX = 0.1*Density * GetInterpolatedValue(energy, &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX,
                                                                    &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataF,
@@ -223,12 +223,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                       RecStep = navigator->GetStep();
                       //energy loss?
                       double dE = dEdX*RecStep;
-                      //                   qDebug()<<"     "<<RecStep<<dE;
+                      //                   qDebug()<<"     Step:"<<RecStep<<" would result in dE of"<<dE;
                       if (dE > energy) dE = energy;
                       energy -= dE;
+                      //qDebug() << "     New energy:"<<energy<<"  (min energy:"<<SimSet->MinEnergy<<")";
                       //all energy dissipated?
                       if (energy < SimSet->MinEnergy)
                         {
+                          //qDebug() << "  Dissipated below low limit!";
                           flagDone = true;
                           terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
                           dE += energy;

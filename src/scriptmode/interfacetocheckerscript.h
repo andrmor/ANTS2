@@ -68,6 +68,7 @@ public slots:
   int particleId(int i);
   int sernum(int i);
   int isSecondary(int i);
+  int getParent(int i);
 
   // MaterialCrossed - info from DepositionHistory
   int MaterialsCrossed_count(int i);

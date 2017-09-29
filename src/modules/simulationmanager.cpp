@@ -236,16 +236,6 @@ QString ASimulatorRunner::getErrorMessages() const
     return msg;
 }
 
-#if 0 //Not needed since we create only the necessary workers
-const Simulator *SimulationManager::getLastWorker() const
-{
-    for(int i = workers.count()-1; i >= 0; i--)
-        if(workers[i]->getEventCount() > 0)
-            return workers[i];
-    return 0;
-}
-#endif
-
 void ASimulatorRunner::clearWorkers()
 {
     for(int i = 0; i < workers.count(); i++)
@@ -308,6 +298,9 @@ void ASimulatorRunner::simulate()
             qDebug() <<"Thread"<<(i+1)<<"joined";
           }
 #endif
+
+       for (int i=0; i<threads.size(); i++) delete threads[i];
+       threads.clear();
     }
     simState = SFinished;
 

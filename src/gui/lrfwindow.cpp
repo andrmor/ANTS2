@@ -84,6 +84,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
   LRFwindow::on_pbShrink_clicked();
   ui->fSingleGroup->setEnabled(false);
+  updateWarningForEnergyScan();
 }
 
 LRFwindow::~LRFwindow()
@@ -1586,4 +1587,19 @@ void LRFwindow::on_cb_diff_clicked()
     bool dif  = ui->cb_diff->isChecked();
 
     if (data && dif) ui->cb_data->setChecked(false);
+}
+
+void LRFwindow::on_cbEnergyScalling_toggled(bool)
+{
+    updateWarningForEnergyScan();
+}
+
+void LRFwindow::on_cb_data_selector_currentIndexChanged(int)
+{
+    updateWarningForEnergyScan();
+}
+
+void LRFwindow::updateWarningForEnergyScan()
+{
+  ui->pbWarningEnergyWithScan->setVisible( ui->cbEnergyScalling->isChecked() && ui->cb_data_selector->currentIndex()==0 );
 }

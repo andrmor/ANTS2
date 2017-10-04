@@ -2018,6 +2018,22 @@ only events passing all event filters are used to calculate LRFs.</string>
       </property>
      </widget>
     </widget>
+    <widget class="QPushButton" name="pbWarningEnergyWithScan">
+     <property name="geometry">
+      <rect>
+       <x>219</x>
+       <y>70</y>
+       <width>21</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>If there are events with multiple energy deposition points, filter such events out before making the fit!</string>
+     </property>
+     <property name="text">
+      <string>!</string>
+     </property>
+    </widget>
     <zorder>fSingleGroup</zorder>
     <zorder>line_6</zorder>
     <zorder>lwLRFhistory</zorder>
@@ -2082,6 +2098,7 @@ only events passing all event filters are used to calculate LRFs.</string>
     <zorder>label_25</zorder>
     <zorder>line_15</zorder>
     <zorder>frAdvancedLrfConstrains</zorder>
+    <zorder>pbWarningEnergyWithScan</zorder>
    </widget>
    <widget class="QPushButton" name="pbStopLRFmake">
     <property name="enabled">

@@ -1,0 +1,25 @@
+//make simulation time-resolved
+config.Replace( ".TimeResolved", true) 
+config.Replace( ".TimeBins", 7)  // all timed PM signals are binned tothis number of bins!
+config.Replace( ".TimeFrom", 0) // ns ->
+config.Replace( ".TimeTo", 1200) // -> ns
+
+photon.ClearData() //clear all events
+
+//emitting isotropically 3 times 10000 photons from xyz=0,0,0 (wavelength unresolved)
+//at time of 200 ns and 700 ns
+//"true" at the end is essential - if last event exists, add all PM signals to this event
+photon.TracePhotonsIsotropic(10000,  0,0,0,   -1,   200,   true)
+photon.TracePhotonsIsotropic(10000,  0,0,0,   -1,   700,   true)
+photon.TracePhotonsIsotropic(10000,  0,0,0,   -1,   700,   true)
+
+//how to retrieve data
+   var i = events.GetPMsignalTimed(0, 0, 1) //slow
+   core.print(i)
+//better retrieve all timed data for a given event and pm#:
+graph.NewGraph("g")
+var ary = events.GetPMsignalVsTime(0, 0)  //event 0, PM#0
+var arx = []
+for (var i=0; i<ary.length; i++) arx.push(i)
+graph.AddPoints("g", arx, ary)
+graph.Draw("g", "")

@@ -1,6 +1,7 @@
 #include "ainterfacetoannscript.h"
 
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QDebug>
 
 AInterfaceToANNScript::AInterfaceToANNScript()
@@ -28,6 +29,34 @@ void AInterfaceToANNScript::newNetwork()
   clear();
 
   //.....
+}
+
+QString AInterfaceToANNScript::configure(QVariant configObject)
+{
+  qDebug() << configObject.typeName();
+  if ( QString(configObject.typeName()) != "QVariantMap")  //critical error!
+  {
+      abort("ANN script: configure function requirs an object-type argument");
+      return "";
+  }
+
+  QVariantMap map = configObject.toMap();
+  QJsonObject conf = QJsonObject::fromVariantMap(map);
+  qDebug() << "User config:"<<conf;
+
+  if (!conf.contains("norm"))
+    {
+      abort("Normalization type - ('norm' key) has to be defined in ANN config");
+      return "";
+    }
+  QString norm = conf["norm"].toString();
+  qDebug() << "Norm:"<<norm;
+  int val = conf["val"].toInt();
+  qDebug() << val;
+
+  //.....
+
+  return "Anything useful you want to communicate back: e.g. warnings etc";
 }
 
 void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)

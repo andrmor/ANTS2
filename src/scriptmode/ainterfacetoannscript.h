@@ -18,6 +18,8 @@ public slots:
   void clear();
   void newNetwork();
 
+  QString configure(QVariant configObject);
+
   void addTrainingInput(QVariant arrayOfArrays);
   void addTrainingOutput(QVariant arrayOfArrays);
 

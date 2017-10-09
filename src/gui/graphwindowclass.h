@@ -162,6 +162,7 @@ public slots:
     void DoSaveGraph(QString name);
     void AddCurrentToBasket(QString name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
+    void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
     void on_pbAddLegend_clicked();
     void ExportTH2AsText(QString fileName); //for temporary script command
 

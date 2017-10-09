@@ -3014,6 +3014,11 @@ void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, 
   MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
 }
 
+void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
+{
+  MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+}
+
 void InterfaceToGraphWin::AddToBasket(QString Title)
 {
   MW->GraphWindow->AddCurrentToBasket(Title);

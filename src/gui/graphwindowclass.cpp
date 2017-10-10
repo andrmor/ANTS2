@@ -2194,7 +2194,11 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
 
 void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
 {
-  if (!text.isEmpty()) ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
+  if (!text.isEmpty())
+  {
+      ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
+      UpdateRootCanvas();
+  }
 }
 
 void GraphWindowClass::ExportTH2AsText(QString fileName)
@@ -3275,7 +3279,8 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   QStringList sl = Text.split("\n");
   for (QString s : sl) la->AddText(s.toLatin1());
 
-  DrawWithoutFocus(la, "same");
+  DrawWithoutFocus(la, "same", true, false); //it seems the Paveltext is owned by drawn object - registration causes crash if used with non-registered object (e.g. script)
+
 //  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
 //  {
 //     RegisterTObject(la);

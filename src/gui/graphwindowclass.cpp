@@ -2194,11 +2194,7 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
 
 void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
 {
-  if (!text.isEmpty())
-  {
-      ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
-      UpdateRootCanvas();
-  }
+  if (!text.isEmpty()) ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
 }
 
 void GraphWindowClass::ExportTH2AsText(QString fileName)

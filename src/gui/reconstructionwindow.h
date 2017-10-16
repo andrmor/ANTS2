@@ -532,6 +532,8 @@ private slots:
 
   void on_pbClearAllFilters_clicked();
 
+  void on_cobCGstartOption_currentIndexChanged(int index);
+
 protected:
     bool event(QEvent *event);
 

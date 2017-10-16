@@ -407,7 +407,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
           return false;
       }
       //if start option is scan, scanData should exist
-      if (Alg == 1 && RecS.CGstartOption == 2 && EventsDataHub->isScanEmpty())
+      if (Alg == 1 && RecS.CGstartOption == 3 && EventsDataHub->isScanEmpty())
       {
           ErrorString = "Start option is set to 'True XY' but scan data are empty";
           return false;

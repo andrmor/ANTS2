@@ -1047,23 +1047,44 @@ void CGonCPUreconstructorClass::execute()
 
           double CenterX, CenterY;
           //starting coordinates
-          if (RecSet->CGstartOption == 1)
-            { //starting from XY of the centre of the PM with max signal
-             CenterX = PMs->X(rec->iPMwithMaxSignal);
-             CenterY = PMs->Y(rec->iPMwithMaxSignal);
-            }
-          else if (RecSet->CGstartOption == 2 && !EventsDataHub->isScanEmpty())
-            {
-              //starting from true XY
-              CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
-              CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
-            }
-          else
-            { //start from CoG data
+//          if (RecSet->CGstartOption == 1)
+//            { //starting from XY of the centre of the PM with max signal
+//             CenterX = PMs->X(rec->iPMwithMaxSignal);
+//             CenterY = PMs->Y(rec->iPMwithMaxSignal);
+//            }
+//          else if (RecSet->CGstartOption == 3 && !EventsDataHub->isScanEmpty())
+//            {
+//              //starting from true XY
+//              CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
+//              CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
+//            }
+//          else
+//            { //start from CoG data
+//              CenterX = rec->xCoG;
+//              CenterY = rec->yCoG;
+//            }
+          switch (RecSet->CGstartOption)
+          {
+          case 0:   //start from CoG data
               CenterX = rec->xCoG;
               CenterY = rec->yCoG;
-            }
-          //qDebug() << "Center option:"<<RecSet->CGstartOption<<"Center xy:"<< CenterX<<CenterY;
+              break;
+          case 1:  //starting from XY of the centre of the PM with max signal
+              CenterX = PMs->X(rec->iPMwithMaxSignal);
+              CenterY = PMs->Y(rec->iPMwithMaxSignal);
+              break;
+          case 2:  // given X and Y
+              CenterX = RecSet->CGstartX;
+              CenterY = RecSet->CGstartY;
+              break;
+          case 3:  //starting from scan XY
+              CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
+              CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
+              break;
+          default:
+              qWarning() << "Unknown start option for contracting grids on CPU";
+          }
+          //    qDebug() << "Center option:"<<RecSet->CGstartOption<<"Center xy:"<< CenterX<<CenterY;
 
           int Nodes = RecSet->CGnodesXY;
           double Step = RecSet->CGinitialStep;

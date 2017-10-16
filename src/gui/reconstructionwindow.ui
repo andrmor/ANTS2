@@ -7855,13 +7855,16 @@ Individual sensors can belong to multiple groups!</string>
             <property name="geometry">
              <rect>
               <x>18</x>
-              <y>8</y>
+              <y>10</y>
               <width>98</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Grid nodes (X by Y):</string>
+             <string>Grid nodes:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLabel" name="label_138">
@@ -7893,14 +7896,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_136">
             <property name="geometry">
              <rect>
-              <x>37</x>
-              <y>41</y>
-              <width>80</width>
-              <height>16</height>
+              <x>25</x>
+              <y>39</y>
+              <width>91</width>
+              <height>20</height>
              </rect>
             </property>
             <property name="text">
              <string>Initial grid step:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QSpinBox" name="sbCGiter">
@@ -7922,7 +7928,7 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_154">
             <property name="geometry">
              <rect>
-              <x>224</x>
+              <x>220</x>
               <y>10</y>
               <width>60</width>
               <height>16</height>
@@ -7931,54 +7937,9 @@ Individual sensors can belong to multiple groups!</string>
             <property name="text">
              <string>Iterations:</string>
             </property>
-           </widget>
-           <widget class="QFrame" name="fCGred">
-            <property name="geometry">
-             <rect>
-              <x>196</x>
-              <y>39</y>
-              <width>138</width>
-              <height>22</height>
-             </rect>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <widget class="QLineEdit" name="ledCGreduction">
-             <property name="geometry">
-              <rect>
-               <x>89</x>
-               <y>0</y>
-               <width>40</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="toolTip">
-              <string>After each iteration, grid step is divided by this value</string>
-             </property>
-             <property name="text">
-              <string>8</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_169">
-             <property name="geometry">
-              <rect>
-               <x>6</x>
-               <y>1</y>
-               <width>81</width>
-               <height>16</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Scale reduction: </string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
            </widget>
            <widget class="QComboBox" name="cobCGstartOption">
             <property name="geometry">
@@ -8001,7 +7962,7 @@ Individual sensors can belong to multiple groups!</string>
             </item>
             <item>
              <property name="text">
-              <string>Given XY coordinates</string>
+              <string>Given coordinates</string>
              </property>
             </item>
             <item>
@@ -8147,6 +8108,38 @@ Individual sensors can belong to multiple groups!</string>
             <zorder>label_208</zorder>
             <zorder>ledCPUoffsetY</zorder>
             <zorder>ledCPUoffsetX</zorder>
+           </widget>
+           <widget class="QLineEdit" name="ledCGreduction">
+            <property name="geometry">
+             <rect>
+              <x>285</x>
+              <y>39</y>
+              <width>40</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>After each iteration, grid step is divided by this value</string>
+            </property>
+            <property name="text">
+             <string>8</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_169">
+            <property name="geometry">
+             <rect>
+              <x>182</x>
+              <y>40</y>
+              <width>100</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Scale reduction:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </widget>
           <widget class="QWidget" name="page">
@@ -8464,6 +8457,9 @@ Individual sensors can belong to multiple groups!</string>
              <property name="text">
               <string>Initial grid step:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledCUDAstartStep">
              <property name="geometry">
@@ -8650,54 +8646,6 @@ Individual sensors can belong to multiple groups!</string>
               </property>
              </widget>
             </widget>
-            <widget class="QFrame" name="fCUDAredFactor">
-             <property name="geometry">
-              <rect>
-               <x>189</x>
-               <y>34</y>
-               <width>150</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <widget class="QLineEdit" name="ledCUDAscaleReductionFactor">
-              <property name="geometry">
-               <rect>
-                <x>90</x>
-                <y>0</y>
-                <width>40</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="toolTip">
-               <string>After each iteration, grid step is divided by this value</string>
-              </property>
-              <property name="text">
-               <string>8</string>
-              </property>
-             </widget>
-             <widget class="QLabel" name="label_125">
-              <property name="geometry">
-               <rect>
-                <x>5</x>
-                <y>1</y>
-                <width>83</width>
-                <height>16</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Scale reduction: </string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </widget>
             <widget class="QComboBox" name="cobCUDAminimizeWhat">
              <property name="geometry">
               <rect>
@@ -8729,6 +8677,38 @@ Individual sensors can belong to multiple groups!</string>
              </property>
              <property name="text">
               <string>Optimization:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="ledCUDAscaleReductionFactor">
+             <property name="geometry">
+              <rect>
+               <x>278</x>
+               <y>34</y>
+               <width>40</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>After each iteration, grid step is divided by this value</string>
+             </property>
+             <property name="text">
+              <string>8</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_125">
+             <property name="geometry">
+              <rect>
+               <x>174</x>
+               <y>33</y>
+               <width>101</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Scale reduction: </string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -15370,8 +15350,8 @@ in minimization</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>223</x>
-     <y>314</y>
+     <x>201</x>
+     <y>312</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -15386,8 +15366,8 @@ in minimization</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>307</x>
-     <y>316</y>
+     <x>282</x>
+     <y>314</y>
     </hint>
     <hint type="destinationlabel">
      <x>490</x>

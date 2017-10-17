@@ -1086,6 +1086,8 @@ void CGonCPUreconstructorClass::execute()
           double bestEnergy = -1.0;
           //rec->Points[0].r[2] = rec->zCoG;
 
+          //  qDebug() << "Step?"<<Step<<"Nodes?"<<Nodes;
+
           for (int iter = 0; iter<RecSet->CGiterations; iter++)
             {              
               for (int iz = 0; iz<NodesZ; iz++)

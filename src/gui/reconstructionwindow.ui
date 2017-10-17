@@ -7512,7 +7512,7 @@ Individual sensors can belong to multiple groups!</string>
            <enum>QFrame::NoFrame</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="pageCoG">
            <widget class="QCheckBox" name="cbCoGapplyStretch">
@@ -7839,7 +7839,7 @@ Individual sensors can belong to multiple groups!</string>
              </rect>
             </property>
             <property name="toolTip">
-             <string>Treads per block  = square of this value (&lt;512 for old cards)</string>
+             <string>Number of grid nodes in X and Y directions (in Z too if Z reconstruction is on)</string>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -7975,7 +7975,7 @@ Individual sensors can belong to multiple groups!</string>
             <property name="geometry">
              <rect>
               <x>76</x>
-              <y>89</y>
+              <y>90</y>
               <width>71</width>
               <height>20</height>
              </rect>
@@ -8135,7 +8135,7 @@ Individual sensors can belong to multiple groups!</string>
              </rect>
             </property>
             <property name="text">
-             <string>Scale reduction:</string>
+             <string>Step reduction:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

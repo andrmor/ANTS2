@@ -617,8 +617,7 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
             return AbsTriggered;
           }
 
-        //else if (DoRayleigh)
-        //otherwise doing Rayleigh
+        if (DoRayleigh)
           {
             //qDebug()<<"Scattering was triggered";
             //interaction position

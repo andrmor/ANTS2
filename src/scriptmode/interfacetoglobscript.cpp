@@ -882,10 +882,10 @@ void InterfaceToTexter::init(bool fTransparent)
 
   X = msgX;
   Y = msgY;
-  W = msgW;
-  H = msgH;
+  WW = msgW;
+  HH = msgH;
 
-  D->setGeometry(X, Y, W, H);
+  D->setGeometry(X, Y, WW, HH);
   D->setWindowTitle("Script msg");
 
   if (fTransparent)
@@ -957,8 +957,8 @@ void InterfaceToTexter::Move(double x, double y)
 
 void InterfaceToTexter::Resize(double w, double h)
 {
-  W = msgW = w; H = msgH = h;
-  D->resize(W, H);
+  WW = msgW = w; HH = msgH = h;
+  D->resize(WW, HH);
 }
 
 void InterfaceToTexter::Show()
@@ -1161,6 +1161,7 @@ QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
           else if (whichOne == "angle")  h = mon->getAngle();
           else if (whichOne == "wave")   h = mon->getWave();
           else if (whichOne == "energy") h = mon->getEnergy();
+          else return vl;
 
           TAxis* axis = h->GetXaxis();
           for (int i=1; i<axis->GetNbins()+1; i++)

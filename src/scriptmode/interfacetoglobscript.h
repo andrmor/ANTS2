@@ -547,7 +547,7 @@ public:
 
   QDialog *D;
   double X, Y;
-  double W, H;
+  double WW, HH;
 
   QPlainTextEdit* e;
   bool bEnabled;

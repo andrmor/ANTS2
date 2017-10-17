@@ -117,6 +117,8 @@ CorrelationFilterStructure *CorrelationFilterStructure::createFromJson(QJsonObje
     else
       {
         qWarning("Unknown cut type!");
+        delete X;
+        delete Y;
         return 0;
       }
     int CutOption;

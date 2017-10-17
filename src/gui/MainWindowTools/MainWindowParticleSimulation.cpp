@@ -136,11 +136,12 @@ void MainWindow::ShowSource(int isource, bool clear)
            {
              if (j==i) continue;
              //third k
-             int k;
-             for (k=0; k<3; k++) if (k!=i && k!=j) break;
+             int k = 0;
+             for (; k<2; k++)
+               if (k!=i && k!=j) break;
              for (int s=-1; s<2; s+=2)
                {
-                //qDebug()<<"i j k shift"<<i<<j<<k<<s;
+                //  qDebug()<<"i j k shift"<<i<<j<<k<<s;
                 Int_t track_index = Detector->GeoManager->AddTrack(1,22);
                 TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
                 track->AddPoint(X0-V[i][0]-V[j][0]+V[k][0]*s, Y0-V[i][1]-V[j][1]+V[k][1]*s, Z0-V[i][2]-V[j][2]+V[k][2]*s, 0);

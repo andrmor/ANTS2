@@ -861,7 +861,7 @@ void GenericScriptWindowClass::updateJsonTree()
 
       QJsonObject json = inter->Config->JSON;
       QJsonObject::const_iterator it;
-      for (it = json.begin(); it != json.end(); it++)
+      for (it = json.begin(); it != json.end(); ++it)
         {
            QString key = it.key();
            QTreeWidgetItem *TopKey = new QTreeWidgetItem(trwJson);
@@ -892,7 +892,7 @@ void GenericScriptWindowClass::updateJsonTree()
 void GenericScriptWindowClass::fillSubObject(QTreeWidgetItem *parent, const QJsonObject &obj)
 {
   QJsonObject::const_iterator it;
-  for (it = obj.begin(); it != obj.end(); it++)
+  for (it = obj.begin(); it != obj.end(); ++it)
     {
       QTreeWidgetItem *item = new QTreeWidgetItem(parent);
       item->setText(0, it.key());

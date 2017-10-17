@@ -8,14 +8,18 @@
 #include <QVector>
 #include <QJsonObject>
 
+#include "neuralnetworksmodule.h"
+
 class AInterfaceToANNScript : public AScriptInterface
 {
   Q_OBJECT
-public:
+public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
   AInterfaceToANNScript();
   ~AInterfaceToANNScript();
 
-public slots:
+public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
   void clearTrainingData();
   void newNetwork();
 
@@ -30,13 +34,18 @@ public slots:
 
   QVariant process(QVariant arrayOfArrays);
 
-private:
+private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  cFANNWrapper afann;
+
   QVector< QVector<float> > Input;
   QVector< QVector<float> > Output;
 
   QJsonObject Config;
 
   bool convertQVariantToVectorOfVectors(QVariant* var, QVector< QVector<float> >* vec , int fixedSize = -1);
+
+
 };
 
 #endif // AINTERFACETOANNSCRIPT_H

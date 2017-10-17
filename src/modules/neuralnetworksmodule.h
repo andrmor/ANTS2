@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <cstdio>
 
+#include <cfloat>   // float types limits
+
 class pms;
 class APmGroupsManager;
 class reconstructor;

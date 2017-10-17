@@ -1,21 +1,24 @@
 #include "ainterfacetoannscript.h"
 
 #include <QJsonArray>
+//#include <QJsonObject>
 #include <QDebug>
 
 AInterfaceToANNScript::AInterfaceToANNScript()
 {
+  resetConfigToDefault();
+
   //.....
 }
 
 AInterfaceToANNScript::~AInterfaceToANNScript()
 {
-  clear();
+  clearTrainingData();
 
   //.....
 }
 
-void AInterfaceToANNScript::clear()
+void AInterfaceToANNScript::clearTrainingData()
 {
   Input.clear(); Input.squeeze();
   Output.clear(); Output.squeeze();
@@ -25,9 +28,49 @@ void AInterfaceToANNScript::clear()
 
 void AInterfaceToANNScript::newNetwork()
 {
-  clear();
+  clearTrainingData();
 
   //.....
+}
+
+QString AInterfaceToANNScript::configure(QVariant configObject)
+{
+  qDebug() << configObject.typeName();
+  if ( QString(configObject.typeName()) != "QVariantMap")  //critical error!
+  {
+      abort("ANN script: configure function requirs an object-type argument");
+      return "";
+  }
+
+  QVariantMap map = configObject.toMap();
+  Config = QJsonObject::fromVariantMap(map);
+  qDebug() << "User config:"<<Config;
+
+  if (!Config.contains("norm"))
+    {
+      abort("Normalization type - ('norm' key) has to be defined in ANN config");
+      return "";
+    }
+  QString norm = Config["norm"].toString();
+  qDebug() << "Norm:"<<norm;
+  int val = Config["val"].toInt();
+  qDebug() << val;
+
+  //.....
+
+  return "Anything useful you want to communicate back: e.g. warnings etc";
+}
+
+void AInterfaceToANNScript::resetConfigToDefault()
+{
+  Config = QJsonObject();
+  Config["norm"] = "Default";
+}
+
+QVariant AInterfaceToANNScript::getConfig()
+{
+  const QVariantMap res = Config.toVariantMap();
+  return res;
 }
 
 void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)

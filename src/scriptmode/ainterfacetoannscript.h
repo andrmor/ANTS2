@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QVector>
+#include <QJsonObject>
 
 class AInterfaceToANNScript : public AScriptInterface
 {
@@ -15,8 +16,12 @@ public:
   ~AInterfaceToANNScript();
 
 public slots:
-  void clear();
+  void clearTrainingData();
   void newNetwork();
+
+  QString configure(QVariant configObject);
+  void resetConfigToDefault();
+  QVariant getConfig();
 
   void addTrainingInput(QVariant arrayOfArrays);
   void addTrainingOutput(QVariant arrayOfArrays);
@@ -28,6 +33,8 @@ public slots:
 private:
   QVector< QVector<float> > Input;
   QVector< QVector<float> > Output;
+
+  QJsonObject Config;
 
   bool convertQVariantToVectorOfVectors(QVariant* var, QVector< QVector<float> >* vec , int fixedSize = -1);
 };

@@ -68,41 +68,27 @@ QString AInterfaceToANNScript::configure(QVariant configObject)
 void AInterfaceToANNScript::resetConfigToDefault()
 {
   Config = QJsonObject();
-  Config["type"] = "cascade";
-
-  Config["trainAlgorithm"]="FANN_TRAIN_RPROP";
-  Config["outputActivationFunc"]="FANN_SIGMOID";
-  Config["errorFunction"]="FANN_ERRORFUNC_LINEAR";
-
-  Config["stopFunction"]="FANN_STOPFUNC_BIT";
-  Config["bitFailLimit"]="0.1"; // no default.
-
-  Config["cascade_outputChangeFraction"]="0.01"; // default
-  Config["cascade_candidateChangeFraction"]="0.01"; // default
-
-  Config["cascade_outputStagnationEpochs"]="12"; // default
-  Config["cascade_minOutEpochs"]="50"; // default
-  Config["cascade_maxOutEpochs"]="150"; // default
-
-  Config["cascade_candidateStagnationEpochs"]="12"; // default
-  Config["cascade_minCandEpochs"]="50"; // default
-  Config["cascade_maxCandEpochs"]="150"; // default
-
-  Config["cascade_candidateLimit"]="1000"; // default
-  Config["cascade_candidateGroups"]="2"; // default
-
-  Config["cascade_weightMultiplier"]="0.4"; // default
-
-//  std::vector<fann_type> step = {0.25, 0.5, 0.75, 1.};
-  // std::vector<fann_type> step = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.};
-//  sClass.cascade_setActivationSteepness(step); // default is 0.25, 0.5, 0.75, 1
-
-//  vector<fann_activationfunc_enum> act={FANN_SIGMOID, FANN_SIGMOID_SYMMETRIC,
-//   FANN_GAUSSIAN, FANN_GAUSSIAN_SYMMETRIC, FANN_ELLIOT, FANN_ELLIOT_SYMMETRIC};
-  // for (auto const& i: cFANNWrapper::trainActivationFunctions) act.push_back(i.first);
-//  sClass.cascade_setActivationFunctions(act);
-
-
+  Config["type"]="CASCADE";
+  Config["trainAlgorithm"]="RETRO PROPAGATION";
+  Config["outputActivationFunc"]="SIGMOID";
+  Config["errorFunction"]="LINEAR";
+  Config["stopFunction"]="BIT";
+  //...........................................................................
+  Config["bitFailLimit"]=0.1; // no default.
+  Config["cascade_outputChangeFraction"]=0.01; // default
+  Config["cascade_candidateChangeFraction"]=0.01; // default
+  Config["cascade_outputStagnationEpochs"]=12; // default
+  Config["cascade_minOutEpochs"]=50; // default
+  Config["cascade_maxOutEpochs"]=150; // default
+  Config["cascade_candidateStagnationEpochs"]=12; // default
+  Config["cascade_minCandEpochs"]=50; // default
+  Config["cascade_maxCandEpochs"]=150; // default
+  Config["cascade_candidateLimit"]=1000; // default
+  Config["cascade_candidateGroups"]=2; // default
+  Config["cascade_weightMultiplier"]=0.4; // default
+  Config["cascade_setActivationSteepness"]=QJsonArray({ 0.25, 0.5, 0.75, 1. });
+  Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID SYMMETRIC",
+   "GAUSSIAN","GAUSSIAN SYMMETRIC","ELLIOT","ELLIOT SYMMETRIC"});
 }
 
 /*===========================================================================*/
@@ -112,6 +98,7 @@ QVariant AInterfaceToANNScript::getConfig()
   return res;
 }
 
+/*===========================================================================*/
 void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
 {
   //unpacking data
@@ -119,29 +106,60 @@ void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
   if ( !convertQVariantToVectorOfVectors(&arrayOfArrays, &Input, fixedSize) ) return;
   qDebug() << "New training input is set to:" << Input;
 
-  //.....
 }
 
+/*===========================================================================*/
 void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 {
   //unpacking data
   int fixedSize = Output.isEmpty() ? -1 : Output.first().size();
   if ( !convertQVariantToVectorOfVectors(&arrayOfArrays, &Output, fixedSize) ) return;
   qDebug() << "New training output is set to:" << Output;
-
-  //.....
 }
 
+/*===========================================================================*/
 QString AInterfaceToANNScript::train()
 {
   if (Input.isEmpty() || Output.isEmpty()) return "Training data empty";
   if (Input.size() != Output.size()) return "Training data size mismatch";
 
-  //.....
+  if (Config["type"].toString()=="CASCADE"){
+      afann.createCascade(Input.first().size(),Output.first().size());
+
+      afann.cascade_outputChangeFraction(Config["cascade_outputChangeFraction"].toDouble());
+      afann.cascade_candidateChangeFraction(Config["cascade_candidateChangeFraction"].toDouble());
+      afann.cascade_outputStagnationEpochs(Config["cascade_outputStagnationEpochs"].toInt());
+      afann.cascade_minOutEpochs(Config["cascade_minOutEpochs"].toInt());
+      afann.cascade_maxOutEpochs(Config["cascade_maxOutEpochs"].toInt());
+      afann.cascade_candidateStagnationEpochs(Config["cascade_candidateStagnationEpochs"].toInt());
+      afann.cascade_minCandEpochs(Config["cascade_minCandEpochs"].toInt());
+      afann.cascade_maxCandEpochs(Config["cascade_maxCandEpochs"].toInt());
+      afann.cascade_candidateLimit(Config["cascade_candidateLimit"].toInt());
+      afann.cascade_candidateGroups(Config["cascade_candidateGroups"].toInt());
+      afann.cascade_weightMultiplier(Config["cascade_weightMultiplier"].toDouble());
+
+      //  Config["cascade_setActivationSteepness"] = QJsonArray({ 0.25, 0.5, 0.75, 1. });
+      //  Config["cascade_setActivationFunctions"]=QJsonArray({"FANN_SIGMOID",
+      //   "FANN_SIGMOID_SYMMETRIC","FANN_GAUSSIAN","FANN_GAUSSIAN_SYMMETRIC",
+      //   "FANN_ELLIOT","FANN_ELLIOT_SYMMETRIC"});
+
+  }
+
+  afann.trainAlgorithm(NeuralNetworksModule::trainAlgorithms
+   .option(Config["trainAlgorithm"].toString().toStdString()));
+  afann.outputActivationFunc(NeuralNetworksModule::activationFunctions
+   .option(Config["outputActivationFunc"].toString().toStdString()));
+  afann.errorFunction(NeuralNetworksModule::trainErrorFunctions
+   .option(Config["errorFunction"].toString().toStdString()));
+  afann.stopFunction(NeuralNetworksModule::trainStopFunctions
+   .option(Config["stopFunction"].toString().toStdString()));
+
+  afann.bitFailLimit(Config["bitFailLimit"].toDouble());
 
   return ""; //success
 }
 
+/*===========================================================================*/
 QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays)
 {
   //unpacking data
@@ -165,6 +183,7 @@ QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays)
   return l;
 }
 
+/*===========================================================================*/
 bool AInterfaceToANNScript::convertQVariantToVectorOfVectors(QVariant *var, QVector<QVector<float> > *vec, int fixedSize)
 {
   if ( QString(var->typeName()) != "QVariantList")

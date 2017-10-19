@@ -1,11 +1,14 @@
 #include "ainterfacetoannscript.h"
+#include "ajsontools.h"
+#include "apositionenergyrecords.h"
 
 #include <QJsonArray>
 //#include <QJsonObject>
 #include <QDebug>
 
 /*===========================================================================*/
-AInterfaceToANNScript::AInterfaceToANNScript()
+AInterfaceToANNScript::AInterfaceToANNScript(EventsDataClass *EventsDataHub) :
+    EventsDataHub(EventsDataHub)
 {
   resetConfigToDefault();
 }
@@ -68,6 +71,11 @@ QString AInterfaceToANNScript::configure(QVariant configObject)
 void AInterfaceToANNScript::resetConfigToDefault()
 {
   Config = QJsonObject();
+
+  Config["trainingInput"]="DIRECT"; //can be "EVENTS"
+  Config["trainingOutput"]="DIRECT"; //can be "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
+  Config["currentSensorGroup"]=0;
+  //...........................................................................
   Config["type"]="CASCADE";
   Config["trainAlgorithm"]="RETRO PROPAGATION";
   Config["outputActivationFunc"]="SIGMOID";
@@ -120,8 +128,67 @@ void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 /*===========================================================================*/
 QString AInterfaceToANNScript::train()
 {
-  if (Input.isEmpty() || Output.isEmpty()) return "Training data empty";
-  if (Input.size() != Output.size()) return "Training data size mismatch";
+  QString InputSource  = "DIRECT";
+  QString OutputSource = "DIRECT";
+  int CurrentSensorGroup = 0;
+  parseJson(Config, "trainingInput", InputSource);
+  parseJson(Config, "trainingOutput", OutputSource);
+  parseJson(Config, "currentSensorGroup", CurrentSensorGroup);
+
+  //check consistency of the training data
+    //input data
+  int InputDataSize = -1;
+  if (InputSource  == "DIRECT")
+  {
+     InputDataSize = Input.size();
+  }
+  else if (InputSource == "EVENTS")
+  {
+      InputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+  }
+  else return "Unknown data source for training input";
+    //output data
+  int OutputDataSize = -1;
+  if (OutputSource == "DIRECT")
+  {
+      OutputDataSize = Output.size();
+  }
+  else if (OutputSource == "SCAN_POSITIONS")
+  {
+      if (EventsDataHub->Scan.isEmpty()) OutputDataSize = 0;
+      else OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+  }
+  else if (OutputSource == "RECONSTRUCTED_POSITIONS")
+  {
+      OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+  }
+  else return "Unknown data source for training output";
+    //additional watchdogs
+  if (InputDataSize  == 0) return "Training input is empty";
+  if (OutputDataSize == 0) return "Training output is empty";
+  if (InputDataSize !=  OutputDataSize) return "Training data size mismatch";
+
+  // --------------------------
+
+  //in the case of InputSource == "EVENTS"
+  //input vector for event iEvent is EventsDataHub->Events.at(iEvent)   (size is equal to the number of PMTs)
+  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+
+  //in the case of OutputSource == "SCAN_POSITIONS"
+  //the output training vector for event iEvent is EventsDataHub->Scan.at(iEvent)->Points.at(0).r - it is double[3]
+  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+    //not a misstype - we use ReconstructionData container for event filters
+  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+
+  //in the case of OutputSource == "RECONSTRUCTED_POSITIONS"
+  //the output training vector for event iEvent is EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->Points.at(0).r - it is double[3]
+  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+
+
+  // --------------------------
+
 
   if (Config["type"].toString()=="CASCADE"){
       afann.createCascade(Input.first().size(),Output.first().size());

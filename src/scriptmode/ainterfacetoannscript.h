@@ -2,20 +2,20 @@
 #define AINTERFACETOANNSCRIPT_H
 
 #include "ascriptinterface.h"
+#include "neuralnetworksmodule.h"
+#include "eventsdataclass.h"
 
 #include <QObject>
 #include <QVariant>
 #include <QVector>
 #include <QJsonObject>
 
-#include "neuralnetworksmodule.h"
-
 class AInterfaceToANNScript : public AScriptInterface
 {
   Q_OBJECT
 public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-  AInterfaceToANNScript();
+  AInterfaceToANNScript(EventsDataClass* EventsDataHub);
   ~AInterfaceToANNScript();
 
 public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -36,6 +36,7 @@ public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+  EventsDataClass* EventsDataHub;
   cFANNWrapper afann;
 
   QVector< QVector<float> > Input;

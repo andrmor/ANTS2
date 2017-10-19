@@ -102,7 +102,7 @@ void MainWindow::createScriptWindow()
 #endif
 
 #ifdef ANTS_FANN
-    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    AInterfaceToANNScript* ann = new AInterfaceToANNScript(EventsDataHub);
     ScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 

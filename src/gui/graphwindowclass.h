@@ -286,6 +286,7 @@ private:
     void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
+    double runScaleDialog();
 };
 
 #endif // GRAPHWINDOWCLASS_H

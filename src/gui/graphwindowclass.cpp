@@ -1962,6 +1962,48 @@ void GraphWindowClass::ShowProjection(QString type)
    delete hWeights;
 }
 
+double GraphWindowClass::runScaleDialog()
+{
+  QDialog* D = new QDialog(this);
+
+  QDoubleValidator* vali = new QDoubleValidator(D);
+  QVBoxLayout* l = new QVBoxLayout(D);
+  QHBoxLayout* l1 = new QHBoxLayout();
+    QLabel* lab1 = new QLabel("Multiply by ");
+    QLineEdit* leM = new QLineEdit("1.0");
+    leM->setValidator(vali);
+    l1->addWidget(lab1);
+    l1->addWidget(leM);
+    QLabel* lab2 = new QLabel(" and divide by ");
+    QLineEdit* leD = new QLineEdit("1.0");
+    leD->setValidator(vali);
+    l1->addWidget(lab2);
+    l1->addWidget(leD);
+  l->addLayout(l1);
+    QPushButton* pb = new QPushButton("Scale");
+    connect(pb, &QPushButton::clicked, D, &QDialog::accept);
+  l->addWidget(pb);
+
+  int ret = D->exec();
+  double res = 1.0;
+  if (ret == QDialog::Accepted)
+    {
+      double Mult = leM->text().toDouble();
+      double Div = leD->text().toDouble();
+      if (Div == 0)
+        {
+          message("Cannot divide by 0!", this);
+        }
+      else
+        {
+          res = Mult / Div;
+        }
+    }
+
+  delete D;
+  return res;
+}
+
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2694,9 +2736,11 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
              message("Not implemented for this object", this);
              return;
            }
-          bool fIn;
-          double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
-          if (!fIn) return;
+
+          //double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
+          //if (!fIn) return;
+          double sf = runScaleDialog();
+          if (sf == 1.0) return;
 
           if (name == "TGraph")
             {

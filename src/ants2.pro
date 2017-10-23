@@ -264,7 +264,8 @@ SOURCES += main.cpp \
     common/aneutroninteractionelement.cpp \
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
-    gui/aneutroninfodialog.cpp
+    gui/aneutroninfodialog.cpp \
+    scriptmode/ainterfacetodeposcript.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -378,7 +379,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aneutroninteractionelement.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
-    gui/aneutroninfodialog.h
+    gui/aneutroninfodialog.h \
+    scriptmode/ainterfacetodeposcript.h
 
 # --- SIM ---
 ants2_SIM {
@@ -458,7 +460,6 @@ ants2_GUI {
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
-    scriptmode/interfacetocheckerscript.cpp \
     gui/MainWindowTools/mainwindowscatterfit.cpp \
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
@@ -500,7 +501,6 @@ HEADERS  += gui/mainwindow.h \
     gui/graphicsruler.h \
     gui/credits.h \
     gui/globalsettingswindowclass.h \
-    scriptmode/interfacetocheckerscript.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
     gui/MainWindowTools/ageotreewidget.h \

@@ -19,7 +19,7 @@ struct EventHistoryStructure
                           AllEnergyDisspated = 2,
                           Photoelectric = 3,
                           ComptonScattering = 4,
-                          Capture = 5,
+                          NeutronAbsorption = 5,
                           ErrorDuringTracking = 6,
                           CreatedOutside = 7,   // created outside defined geometry
                           FoundUntrackableMaterial = 8,
@@ -40,6 +40,12 @@ struct EventHistoryStructure
     bool isSecondary() const {return SecondaryOf > -1;}
 
     QList<MaterialHistoryStructure> Deposition;
+
+    //utilities
+    static QStringList getAllDefinedTerminationTypes() {return QStringList({"NotFinished", "Escaped", "AllEnergyDisspated", "Photoelectric",
+                                                                            "ComptonScattering", "NeutronAbsorption", "ErrorDuringTracking",
+                                                                            "CreatedOutside", "FoundUntrackableMaterial", "PairProduction",
+                                                                            "EllasticScattering", "StoppedOnMonitor"});}
 };
 
 struct GeneratedPhotonsHistoryStructure

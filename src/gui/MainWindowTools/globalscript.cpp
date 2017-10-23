@@ -7,7 +7,7 @@
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "scriptinterfaces.h"
-#include "interfacetocheckerscript.h"
+#include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
@@ -114,7 +114,7 @@ void MainWindow::createScriptWindow()
     InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
     ScriptWindow->SetInterfaceObject(grwin, "grwin");
 
-    InterfaceToInteractionScript* depo = new InterfaceToInteractionScript(this, EventsDataHub);
+    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo"); 
 
     AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);

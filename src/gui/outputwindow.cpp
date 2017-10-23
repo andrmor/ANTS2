@@ -346,7 +346,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::AllEnergyDisspated:       s += "stopped"; break;
       case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
       case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
-      case EventHistoryStructure::Capture:                  s += "capture"; break;
+      case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
       case EventHistoryStructure::EllasticScattering:       s += "elastic"; break;
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
@@ -1401,7 +1401,7 @@ void OutputWindow::on_pbShowSelected_clicked()
           //if (Detector->ParticleCollection.at( EventsDataHub->EventHistory[i]->ParticleId )->type == AParticle::_neutron_ )
           if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ )
           {
-              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::Capture) continue;
+              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::NeutronAbsorption) continue;
               //last medium?
               if (EventsDataHub->EventHistory[i]->Deposition[EventsDataHub->EventHistory[i]->Deposition.size()-1].MaterialId != materialId) continue;
               interactions++;

@@ -481,7 +481,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     qWarning() << "||| No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
                                 }
 
-                                terminationStatus = EventHistoryStructure::Capture;//5
+                                terminationStatus = EventHistoryStructure::NeutronAbsorption;//5
                                 distanceHistory = SoFarShortest;
                                 energyHistory = 0;
                                 break; //switch-break

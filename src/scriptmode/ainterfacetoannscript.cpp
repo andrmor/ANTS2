@@ -36,6 +36,7 @@ void AInterfaceToANNScript::newNetwork()
 }
 
 /*===========================================================================*/
+//! Config.
 QString AInterfaceToANNScript::configure(QVariant configObject)
 {
   qDebug() << configObject.typeName();
@@ -54,30 +55,31 @@ QString AInterfaceToANNScript::configure(QVariant configObject)
    return "";
   }
 
-  QString norm = Config["norm"].toString();
-  qDebug() << "Norm:"<<norm;
-  int val = Config["val"].toInt();
-  double val2 = Config["afloat"].toDouble();
+  if (!Config.contains("trainingInput")){
+   abort("FANN Type - ('trainingInput' key) has to be defined in ANN config");
+   return "";
+  }
 
-  qDebug() << val;
-  qDebug() << val2;
+  if (!Config.contains("trainingOutput")){
+   abort("FANN Type - ('trainingOutput' key) has to be defined in ANN config");
+   return "";
+  }
 
-  //.....
-
-  return "Anything useful you want to communicate back: e.g. warnings etc";
+  return "Config OK!";
 }
 
 /*===========================================================================*/
+//! Default config.
 void AInterfaceToANNScript::resetConfigToDefault()
 {
   Config = QJsonObject();
 
-  Config["trainingInput"]="DIRECT"; //can be "EVENTS"
-  Config["trainingOutput"]="DIRECT"; //can be "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
+  Config["trainingInput"]="DIRECT"; // can be "EVENTS" (from )
+  Config["trainingOutput"]="DIRECT"; // can be "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
   Config["currentSensorGroup"]=0;
   //...........................................................................
   Config["type"]="CASCADE";
-  Config["trainAlgorithm"]="RETRO PROPAGATION";
+  Config["trainAlgorithm"]="RETRO_PROPAGATION";
   Config["outputActivationFunc"]="SIGMOID";
   Config["errorFunction"]="LINEAR";
   Config["stopFunction"]="BIT";
@@ -95,8 +97,8 @@ void AInterfaceToANNScript::resetConfigToDefault()
   Config["cascade_candidateGroups"]=2; // default
   Config["cascade_weightMultiplier"]=0.4; // default
   Config["cascade_setActivationSteepness"]=QJsonArray({ 0.25, 0.5, 0.75, 1. });
-  Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID SYMMETRIC",
-   "GAUSSIAN","GAUSSIAN SYMMETRIC","ELLIOT","ELLIOT SYMMETRIC"});
+  Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID_SYMMETRIC",
+   "GAUSSIAN","GAUSSIAN_SYMMETRIC","ELLIOT","ELLIOT_SYMMETRIC"});
 }
 
 /*===========================================================================*/
@@ -107,6 +109,8 @@ QVariant AInterfaceToANNScript::getConfig()
 }
 
 /*===========================================================================*/
+//! Adding training Input from script. Note that for each input there most
+//! be a correspondent output command in the script.
 void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
 {
   //unpacking data
@@ -117,6 +121,8 @@ void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
 }
 
 /*===========================================================================*/
+//! Adding training from from script. Note that for each output there most
+//! be a correspondent input command in the script.
 void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 {
   //unpacking data
@@ -128,41 +134,39 @@ void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 /*===========================================================================*/
 QString AInterfaceToANNScript::train()
 {
-  QString InputSource  = "DIRECT";
-  QString OutputSource = "DIRECT";
-  int CurrentSensorGroup = 0;
-  parseJson(Config, "trainingInput", InputSource);
-  parseJson(Config, "trainingOutput", OutputSource);
-  parseJson(Config, "currentSensorGroup", CurrentSensorGroup);
 
-  //check consistency of the training data
-    //input data
+QString InputSource=Config["trainingInput"].toString();
+QString OutputSource=Config["trainingOutput"].toString();
+int CurrentSensorGroup=Config["currentSensorGroup"].toInt();
+
+  // Input data: check consistency of the training data
   int InputDataSize = -1;
-  if (InputSource  == "DIRECT")
-  {
+  if (InputSource  == "DIRECT"){
      InputDataSize = Input.size();
-  }
-  else if (InputSource == "EVENTS")
-  {
+  } else if (InputSource == "EVENTS"){
       InputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  }
-  else return "Unknown data source for training input";
-    //output data
+
+      /// Fill 'Input' here?
+
+  } else return "Unknown data source for training input";
+
+  // Output data: check consistency of the training data
   int OutputDataSize = -1;
-  if (OutputSource == "DIRECT")
-  {
+  if (OutputSource == "DIRECT") {
       OutputDataSize = Output.size();
-  }
-  else if (OutputSource == "SCAN_POSITIONS")
-  {
+  } else if (OutputSource == "SCAN_POSITIONS"){
       if (EventsDataHub->Scan.isEmpty()) OutputDataSize = 0;
       else OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  }
-  else if (OutputSource == "RECONSTRUCTED_POSITIONS")
-  {
+
+      /// Fill 'output' here? (just for the else case)
+
+  } else if (OutputSource == "RECONSTRUCTED_POSITIONS"){
       OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  }
-  else return "Unknown data source for training output";
+
+      /// Fill 'output' here?
+      ///
+  } else return "Unknown data source for training output";
+
     //additional watchdogs
   if (InputDataSize  == 0) return "Training input is empty";
   if (OutputDataSize == 0) return "Training output is empty";
@@ -223,7 +227,13 @@ QString AInterfaceToANNScript::train()
 
   afann.bitFailLimit(Config["bitFailLimit"].toDouble());
 
-  return ""; //success
+
+  /// Need to create the train file here ... mem file? ask Andrei <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+  if (Config["type"].toString()=="CASCADE")
+      afann.trainCascade(1000,1,0.5); //! >>>>>>>>>>>>> This 2 inputs should be options !!!!!!!!!!!!
+
+  return "OK"; //success
 }
 
 /*===========================================================================*/

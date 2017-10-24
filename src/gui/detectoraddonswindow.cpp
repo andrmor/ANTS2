@@ -1070,6 +1070,7 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
        QString s;
        s += "<pre>";
        s += " " + r.volName;
+       s += " (#" + QString::number(r.nodeIndex) + ")";
        s += " of ";
        TColor* rc = gROOT->GetColor(r.matIndex+1);
        int red = 255*rc->GetRed();

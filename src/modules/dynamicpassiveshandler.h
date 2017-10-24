@@ -42,7 +42,8 @@ private:
     double MaxDistance;
     double MaxDistance2;
 
-    int CenterOption; //for PassiveType by distance: 0 - CoG, 1 - maximum signal PM
+    int CenterOption; //for PassiveType by distance: 0 - CoG, 1 - maximum signal PM, 2 - given XY, 3-scan
+    double StartX, StartY;
 };
 
 #endif // DYNAMICPASSIVESHANDLER_H

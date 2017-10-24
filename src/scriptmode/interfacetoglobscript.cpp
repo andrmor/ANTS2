@@ -17,6 +17,7 @@
 #include "modules/lrf_v3/arepository.h"
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
+#include "amonitor.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -881,10 +882,10 @@ void InterfaceToTexter::init(bool fTransparent)
 
   X = msgX;
   Y = msgY;
-  W = msgW;
-  H = msgH;
+  WW = msgW;
+  HH = msgH;
 
-  D->setGeometry(X, Y, W, H);
+  D->setGeometry(X, Y, WW, HH);
   D->setWindowTitle("Script msg");
 
   if (fTransparent)
@@ -956,8 +957,8 @@ void InterfaceToTexter::Move(double x, double y)
 
 void InterfaceToTexter::Resize(double w, double h)
 {
-  W = msgW = w; H = msgH = h;
-  D->resize(W, H);
+  WW = msgW = w; HH = msgH = h;
+  D->resize(WW, HH);
 }
 
 void InterfaceToTexter::Show()
@@ -1008,6 +1009,13 @@ InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsData
   H["GetSeed"] = "Get random generator seed";
   H["SaveAsTree"] = "Save simulation results as a ROOT tree file";
   H["SaveAsText"] = "Save simulation results as an ASCII file";
+
+  H["getMonitorTime"] = "returns array of arrays: [time, value]";
+  H["getMonitorWave"] = "returns array of arrays: [wave index, value]";
+  H["getMonitorEnergy"] = "returns array of arrays: [energy, value]";
+  H["getMonitorAngular"] = "returns array of arrays: [angle, value]";
+  H["getMonitorXY"] = "returns array of arrays: [x, y, value]";
+  H["getMonitorHits"] = "returns the number of detected hits by the monitor with the given name";
 }
 
 void InterfaceToSim::ForceStop()
@@ -1113,6 +1121,107 @@ bool InterfaceToSim::SaveAsText(QString fileName)
 {
   return EventsDataHub->saveSimulationAsText(fileName);
 }
+
+int InterfaceToSim::countMonitors()
+{
+    if (!EventsDataHub->SimStat) return 0;
+    return EventsDataHub->SimStat->Monitors.size();
+}
+
+//int InterfaceToSim::getMonitorHits(int imonitor)
+//{
+//    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
+//        return std::numeric_limits<int>::quiet_NaN();
+//    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
+//}
+
+int InterfaceToSim::getMonitorHits(QString monitor)
+{
+    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        if (mon->getName() == monitor)
+            return mon->getHits();
+    }
+    return std::numeric_limits<int>::quiet_NaN();
+}
+
+QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
+{
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH1D* h;
+          if      (whichOne == "time")   h = mon->getTime();
+          else if (whichOne == "angle")  h = mon->getAngle();
+          else if (whichOne == "wave")   h = mon->getWave();
+          else if (whichOne == "energy") h = mon->getEnergy();
+          else return vl;
+
+          TAxis* axis = h->GetXaxis();
+          for (int i=1; i<axis->GetNbins()+1; i++)
+          {
+              QVariantList el;
+              el << axis->GetBinCenter(i);
+              el << h->GetBinContent(i);
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
+}
+
+QVariant InterfaceToSim::getMonitorTime(QString monitor)
+{
+    return getMonitorData1D(monitor, "time");
+}
+
+QVariant InterfaceToSim::getMonitorAngular(QString monitor)
+{
+  return getMonitorData1D(monitor, "angle");
+}
+
+QVariant InterfaceToSim::getMonitorWave(QString monitor)
+{
+  return getMonitorData1D(monitor, "wave");
+}
+
+QVariant InterfaceToSim::getMonitorEnergy(QString monitor)
+{
+  return getMonitorData1D(monitor, "energy");
+}
+
+QVariant InterfaceToSim::getMonitorXY(QString monitor)
+{
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH2D* h = mon->getXY();
+
+          TAxis* axisX = h->GetXaxis();
+          TAxis* axisY = h->GetYaxis();
+          for (int ix=1; ix<axisX->GetNbins()+1; ix++)
+            for (int iy=1; iy<axisY->GetNbins()+1; iy++)
+          {
+              QVariantList el;
+              el << axisX->GetBinCenter(ix);
+              el << axisY->GetBinCenter(iy);
+              el << h->GetBinContent( h->GetBin(ix,iy) );
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
+}
 #endif
 
 //----------------------------------
@@ -1170,6 +1279,57 @@ void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
     EventsDataHub->Events[ievent][ipm] = value;
 }
 
+double InterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (iTimeBin<0 || iTimeBin >= numTimeBins)
+      {
+        abort("Wrong time bin "+QString::number(ievent)+" Time bins available: "+QString::number(numTimeBins));
+        return 0;
+      }
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    return EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).at(ipm);
+}
+
+QVariant InterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (numTimeBins == 0) return QVariantList();
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).first().size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    QVariantList aa;
+    for (int i=0; i<numTimeBins; i++)
+        aa << EventsDataHub->TimedEvents.at(ievent).at(i).at(ipm);
+    return aa;
+}
+
 int InterfaceToData::GetNumPMs()
 {
   if (EventsDataHub->Events.isEmpty()) return 0;
@@ -1190,6 +1350,17 @@ int InterfaceToData::GetNumEvents()
 int InterfaceToData::countEvents()
 {
     return EventsDataHub->Events.size();
+}
+
+int InterfaceToData::countTimedEvents()
+{
+    return EventsDataHub->TimedEvents.size();
+}
+
+int InterfaceToData::countTimeBins()
+{
+    if (EventsDataHub->TimedEvents.isEmpty()) return 0;
+    return EventsDataHub->TimedEvents.first().size();
 }
 
 bool InterfaceToData::checkEventNumber(int ievent)
@@ -1488,32 +1659,6 @@ int InterfaceToData::GetPMwithMaxSignal(int ievent)
         }
     }
     return iMaxSig;
-}
-
-int InterfaceToData::countMonitors()
-{
-    if (!EventsDataHub->SimStat) return 0;
-    return EventsDataHub->SimStat->Monitors.size();
-}
-
-#include "amonitor.h"
-int InterfaceToData::getMonitorHits(int imonitor)
-{
-    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
-        return std::numeric_limits<int>::quiet_NaN();
-    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
-}
-
-int InterfaceToData::getMonitorHits(QString monitor)
-{
-    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
-    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-    {
-        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-        if (mon->getName() == monitor)
-            return mon->getHits();
-    }
-    return std::numeric_limits<int>::quiet_NaN();
 }
 
 void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
@@ -2209,6 +2354,98 @@ void InterfaceToGraphs::AddPoint(QString GraphName, double x, double y)
     {
       abort("Graph "+GraphName+" not found!");
       return;
+  }
+}
+
+void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
+{
+    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
+    if (index == -1)
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+      }
+
+    QString typeX = xArray.typeName();
+    QString typeY = yArray.typeName();
+    if (typeX != "QVariantList" || typeY != "QVariantList")
+    {
+        qWarning() << "arrays are expected in graph.AddPoints()";
+        return;
+    }
+
+    QVariantList vx = xArray.toList();
+    QVariantList vy = yArray.toList();
+    QJsonArray X = QJsonArray::fromVariantList(vx);
+    QJsonArray Y = QJsonArray::fromVariantList(vy);
+    if (X.isEmpty() || Y.isEmpty() || X.size()!=Y.size())
+    {
+        qWarning() << "Empty or mismatch in add array to graph";
+        return;
+    }
+
+    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    if (r.type == "TGraph")
+      {
+        TGraph* gr = static_cast<TGraph*>(r.Obj);
+
+        for (int i=0; i<X.size(); i++)
+            if (X[i].isDouble() && Y[i].isDouble())
+            {
+                double x = X[i].toDouble();
+                double y = Y[i].toDouble();
+                gr->SetPoint(gr->GetN(), x, y);
+            }
+      }
+    else
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+    }
+}
+
+void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xyArray)
+{
+    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
+    if (index == -1)
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
+      }
+
+    QString typeArr = xyArray.typeName();
+    if (typeArr != "QVariantList")
+    {
+        qWarning() << "arrays are expected in graph.AddPoints()";
+        return;
+    }
+
+    QVariantList xy = xyArray.toList();
+    QJsonArray XYarr = QJsonArray::fromVariantList(xy);
+
+    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    if (r.type == "TGraph")
+      {
+        TGraph* gr = static_cast<TGraph*>(r.Obj);
+
+        for (int i=0; i<XYarr.size(); i++)
+        {
+           QJsonArray el = XYarr[i].toArray();
+           if (el.size() == 2)
+           {
+               if (el[0].isDouble() && el[1].isDouble())
+               {
+                   double x = el[0].toDouble();
+                   double y = el[1].toDouble();
+                   gr->SetPoint(gr->GetN(), x, y);
+               }
+           }
+        }
+      }
+    else
+      {
+        abort("Graph "+GraphName+" not found!");
+        return;
     }
 }
 
@@ -2778,6 +3015,11 @@ void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, 
   MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
 }
 
+void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
+{
+  MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+}
+
 void InterfaceToGraphWin::AddToBasket(QString Title)
 {
   MW->GraphWindow->AddCurrentToBasket(Title);
@@ -3031,6 +3273,7 @@ MathInterfaceClass::MathInterfaceClass(TRandom2* RandGen)
   H["gauss"] = "Returns a random value sampled from Gaussian distribution with mean and sigma given by the user";
   H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
   H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
+  H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
 }
 
 void MathInterfaceClass::setRandomGen(TRandom2 *RandGen)
@@ -3165,6 +3408,12 @@ double MathInterfaceClass::maxwell(double a)
       v2 += v;
     }
   return std::sqrt(v2);
+}
+
+double MathInterfaceClass::exponential(double tau)
+{
+    if (!RandGen) return 0;
+    return RandGen->Exp(tau);
 }
 
 // ------------- End of MATH -------------

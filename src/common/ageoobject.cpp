@@ -3097,6 +3097,7 @@ TGeoShape* AGeoScaledShape::generateBaseTGeoShape(QString BaseShapeGenerationStr
           if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
         }
       else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
+      delete Ashape;
     }
   else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
 
@@ -3169,6 +3170,7 @@ bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)
   if (!fOK)
     {
       qWarning() << "AGeoScaledShape from TShape: error reading base TShape";
+      delete AShape;
       return false;
     }
   BaseShapeGenerationString = AShape->getGenerationString();

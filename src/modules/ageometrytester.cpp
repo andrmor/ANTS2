@@ -20,7 +20,8 @@ void AGeometryTester::Test(double *start, double *direction)
 
        TGeoVolume* vol = navigator->GetCurrentVolume();
 
-       r.volName = vol->GetName();
+       r.volName = vol->GetName();       
+       r.nodeIndex = navigator->GetCurrentNode()->GetNumber();
        r.matIndex = vol->GetMaterial()->GetIndex();
 
        r.startX = navigator->GetCurrentPoint()[0];

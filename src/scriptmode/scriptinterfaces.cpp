@@ -753,7 +753,31 @@ void InterfaceToAddObjScript::RemoveRecursive(QString Object)
 
 void InterfaceToAddObjScript::RemoveAllExceptWorld()
 {
-    Detector->Sandwich->clearWorld();
+  Detector->Sandwich->clearWorld();
+}
+
+void InterfaceToAddObjScript::EnableObject(QString Object)
+{
+  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+  if (!obj)
+  {
+      abort("Cannot find object "+Object);
+      return;
+  }
+
+  obj->enableUp();
+}
+
+void InterfaceToAddObjScript::DisableObject(QString Object)
+{
+  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+  if (!obj)
+  {
+      abort("Cannot find object "+Object);
+      return;
+  }
+
+  obj->fActive = false;
 }
 
 //--------------------------------------------------------------

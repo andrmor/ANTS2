@@ -5090,3 +5090,11 @@ void MainWindow::on_cobParticleSource_activated(int /*index*/)
 {
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
+
+void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
+{
+    QString s;
+    if (index == 0) s = "# of particles per event:";
+    else            s = "average particles per event:";
+    ui->labPartPerEvent->setText(s);
+}

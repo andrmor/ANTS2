@@ -466,7 +466,8 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
 
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
-                                         QList<APMandDummy> *PMsAndDumPMs)
+                                         QList<APMandDummy> *PMsAndDumPMs,
+                                         int forcedNodeNumber)
 {
     //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
     if (!obj->fActive) return;
@@ -565,7 +566,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
             parent->AddNode(vol, MonitorCounter, lTrans);
           }
-        else parent->AddNode(vol, 0, lTrans);
+        else parent->AddNode(vol, forcedNodeNumber, lTrans);
     }    
 
     //positioning of hosted items is different for lightguides, arrays and normal items!
@@ -620,22 +621,24 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         for (int i=0; i<obj->HostedObjects.size(); i++)
           {
             AGeoObject* el = obj->HostedObjects[i];
+            int iCounter = 0;
             for (int ix = 0; ix<array->numX; ix++)
              for (int iy = 0; iy<array->numY; iy++)
                for (int iz = 0; iz<array->numZ; iz++)
                 {
                   if ( !el->ObjectType->isHandlingSet() )
-                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
                   else
                       for (int i=0; i<el->HostedObjects.size(); i++)
-                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                  iCounter++;
                 }
           }
       }
     else
     {
         for (int i=0; i<obj->HostedObjects.size(); i++)
-            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
     }
 
     //Grids require specific title - they are recognized by it
@@ -656,7 +659,8 @@ void ASandwich::clearMonitorRecords()
 }
 
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
-                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QList<APMandDummy> *PMsAndDumPMs)
+                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                                     int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
@@ -675,7 +679,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[1] = v[1];
     el->Position[2] = v[2];
 
-    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs);
+    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
     //recovering original position/orientation
     el->Position[0] = tmpX;

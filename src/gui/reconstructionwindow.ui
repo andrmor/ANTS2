@@ -3345,7 +3345,7 @@
    <widget class="QPushButton" name="pbUpdateReconConfig">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>350</x>
       <y>300</y>
       <width>210</width>
       <height>23</height>
@@ -7839,7 +7839,7 @@ Individual sensors can belong to multiple groups!</string>
              </rect>
             </property>
             <property name="toolTip">
-             <string>Treads per block  = square of this value (&lt;512 for old cards)</string>
+             <string>Number of grid nodes in X and Y directions (in Z too if Z reconstruction is on)</string>
             </property>
             <property name="minimum">
              <number>1</number>
@@ -7855,13 +7855,16 @@ Individual sensors can belong to multiple groups!</string>
             <property name="geometry">
              <rect>
               <x>18</x>
-              <y>8</y>
+              <y>10</y>
               <width>98</width>
               <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Grid nodes (X by Y):</string>
+             <string>Grid nodes:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QLabel" name="label_138">
@@ -7893,14 +7896,17 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_136">
             <property name="geometry">
              <rect>
-              <x>37</x>
-              <y>41</y>
-              <width>80</width>
-              <height>16</height>
+              <x>25</x>
+              <y>39</y>
+              <width>91</width>
+              <height>20</height>
              </rect>
             </property>
             <property name="text">
              <string>Initial grid step:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
            <widget class="QSpinBox" name="sbCGiter">
@@ -7922,7 +7928,7 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_154">
             <property name="geometry">
              <rect>
-              <x>224</x>
+              <x>220</x>
               <y>10</y>
               <width>60</width>
               <height>16</height>
@@ -7931,61 +7937,16 @@ Individual sensors can belong to multiple groups!</string>
             <property name="text">
              <string>Iterations:</string>
             </property>
-           </widget>
-           <widget class="QFrame" name="fCGred">
-            <property name="geometry">
-             <rect>
-              <x>196</x>
-              <y>39</y>
-              <width>138</width>
-              <height>22</height>
-             </rect>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <widget class="QLineEdit" name="ledCGreduction">
-             <property name="geometry">
-              <rect>
-               <x>89</x>
-               <y>0</y>
-               <width>40</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="toolTip">
-              <string>After each iteration, grid step is divided by this value</string>
-             </property>
-             <property name="text">
-              <string>8</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_169">
-             <property name="geometry">
-              <rect>
-               <x>6</x>
-               <y>1</y>
-               <width>81</width>
-               <height>16</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Scale reduction: </string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
            </widget>
            <widget class="QComboBox" name="cobCGstartOption">
             <property name="geometry">
              <rect>
-              <x>174</x>
+              <x>152</x>
               <y>90</y>
-              <width>151</width>
+              <width>174</width>
               <height>22</height>
              </rect>
             </property>
@@ -8001,6 +7962,11 @@ Individual sensors can belong to multiple groups!</string>
             </item>
             <item>
              <property name="text">
+              <string>Given coordinates</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Scan XY</string>
              </property>
             </item>
@@ -8008,14 +7974,14 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_168">
             <property name="geometry">
              <rect>
-              <x>17</x>
-              <y>91</y>
-              <width>151</width>
-              <height>16</height>
+              <x>76</x>
+              <y>90</y>
+              <width>71</width>
+              <height>20</height>
              </rect>
             </property>
             <property name="text">
-             <string>Search starts centered on:</string>
+             <string>Start at:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -8024,9 +7990,9 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QComboBox" name="cobCGoptimizeWhat">
             <property name="geometry">
              <rect>
-              <x>174</x>
+              <x>152</x>
               <y>66</y>
-              <width>151</width>
+              <width>174</width>
               <height>22</height>
              </rect>
             </property>
@@ -8044,14 +8010,132 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_173">
             <property name="geometry">
              <rect>
-              <x>18</x>
+              <x>-42</x>
               <y>71</y>
-              <width>150</width>
+              <width>190</width>
               <height>13</height>
              </rect>
             </property>
             <property name="text">
              <string>Optimization:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QFrame" name="fCPUoffsets">
+            <property name="geometry">
+             <rect>
+              <x>150</x>
+              <y>114</y>
+              <width>180</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QLineEdit" name="ledCPUoffsetX">
+             <property name="geometry">
+              <rect>
+               <x>24</x>
+               <y>0</y>
+               <width>41</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_203">
+             <property name="geometry">
+              <rect>
+               <x>3</x>
+               <y>1</y>
+               <width>21</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>X=</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="ledCPUoffsetY">
+             <property name="geometry">
+              <rect>
+               <x>110</x>
+               <y>0</y>
+               <width>41</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_207">
+             <property name="geometry">
+              <rect>
+               <x>69</x>
+               <y>1</y>
+               <width>41</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>mm  Y=</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_208">
+             <property name="geometry">
+              <rect>
+               <x>157</x>
+               <y>3</y>
+               <width>46</width>
+               <height>13</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>mm</string>
+             </property>
+            </widget>
+            <zorder>label_203</zorder>
+            <zorder>label_207</zorder>
+            <zorder>label_208</zorder>
+            <zorder>ledCPUoffsetY</zorder>
+            <zorder>ledCPUoffsetX</zorder>
+           </widget>
+           <widget class="QLineEdit" name="ledCGreduction">
+            <property name="geometry">
+             <rect>
+              <x>285</x>
+              <y>39</y>
+              <width>40</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>After each iteration, grid step is divided by this value</string>
+            </property>
+            <property name="text">
+             <string>8</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_169">
+            <property name="geometry">
+             <rect>
+              <x>182</x>
+              <y>40</y>
+              <width>100</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Step reduction:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -8373,6 +8457,9 @@ Individual sensors can belong to multiple groups!</string>
              <property name="text">
               <string>Initial grid step:</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
             <widget class="QLineEdit" name="ledCUDAstartStep">
              <property name="geometry">
@@ -8442,7 +8529,7 @@ Individual sensors can belong to multiple groups!</string>
               </rect>
              </property>
              <property name="text">
-              <string>Search starts centered on:</string>
+              <string>Start at:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -8559,54 +8646,6 @@ Individual sensors can belong to multiple groups!</string>
               </property>
              </widget>
             </widget>
-            <widget class="QFrame" name="fCUDAredFactor">
-             <property name="geometry">
-              <rect>
-               <x>189</x>
-               <y>34</y>
-               <width>150</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <widget class="QLineEdit" name="ledCUDAscaleReductionFactor">
-              <property name="geometry">
-               <rect>
-                <x>90</x>
-                <y>0</y>
-                <width>40</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="toolTip">
-               <string>After each iteration, grid step is divided by this value</string>
-              </property>
-              <property name="text">
-               <string>8</string>
-              </property>
-             </widget>
-             <widget class="QLabel" name="label_125">
-              <property name="geometry">
-               <rect>
-                <x>5</x>
-                <y>1</y>
-                <width>83</width>
-                <height>16</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Scale reduction: </string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </widget>
             <widget class="QComboBox" name="cobCUDAminimizeWhat">
              <property name="geometry">
               <rect>
@@ -8638,6 +8677,38 @@ Individual sensors can belong to multiple groups!</string>
              </property>
              <property name="text">
               <string>Optimization:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="ledCUDAscaleReductionFactor">
+             <property name="geometry">
+              <rect>
+               <x>278</x>
+               <y>34</y>
+               <width>40</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>After each iteration, grid step is divided by this value</string>
+             </property>
+             <property name="text">
+              <string>8</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_125">
+             <property name="geometry">
+              <rect>
+               <x>174</x>
+               <y>33</y>
+               <width>101</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Scale reduction: </string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -14275,8 +14346,8 @@ in minimization</string>
      <y>94</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14291,8 +14362,8 @@ in minimization</string>
      <y>125</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14307,8 +14378,8 @@ in minimization</string>
      <y>104</y>
     </hint>
     <hint type="destinationlabel">
-     <x>363</x>
-     <y>334</y>
+     <x>393</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14323,8 +14394,8 @@ in minimization</string>
      <y>126</y>
     </hint>
     <hint type="destinationlabel">
-     <x>387</x>
-     <y>330</y>
+     <x>417</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14339,8 +14410,8 @@ in minimization</string>
      <y>126</y>
     </hint>
     <hint type="destinationlabel">
-     <x>411</x>
-     <y>331</y>
+     <x>441</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14355,8 +14426,8 @@ in minimization</string>
      <y>212</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14371,8 +14442,8 @@ in minimization</string>
      <y>237</y>
     </hint>
     <hint type="destinationlabel">
-     <x>372</x>
-     <y>330</y>
+     <x>402</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14387,8 +14458,8 @@ in minimization</string>
      <y>260</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14403,8 +14474,8 @@ in minimization</string>
      <y>283</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14419,8 +14490,8 @@ in minimization</string>
      <y>213</y>
     </hint>
     <hint type="destinationlabel">
-     <x>426</x>
-     <y>330</y>
+     <x>456</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14435,8 +14506,8 @@ in minimization</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>446</x>
-     <y>330</y>
+     <x>476</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14451,8 +14522,8 @@ in minimization</string>
      <y>296</y>
     </hint>
     <hint type="destinationlabel">
-     <x>461</x>
-     <y>330</y>
+     <x>491</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14467,8 +14538,8 @@ in minimization</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>481</x>
-     <y>330</y>
+     <x>511</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14483,8 +14554,8 @@ in minimization</string>
      <y>317</y>
     </hint>
     <hint type="destinationlabel">
-     <x>499</x>
-     <y>330</y>
+     <x>529</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14499,8 +14570,8 @@ in minimization</string>
      <y>182</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14515,8 +14586,8 @@ in minimization</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14531,8 +14602,8 @@ in minimization</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14547,8 +14618,8 @@ in minimization</string>
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>463</x>
-     <y>330</y>
+     <x>493</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14563,8 +14634,8 @@ in minimization</string>
      <y>248</y>
     </hint>
     <hint type="destinationlabel">
-     <x>450</x>
-     <y>330</y>
+     <x>480</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14579,8 +14650,8 @@ in minimization</string>
      <y>301</y>
     </hint>
     <hint type="destinationlabel">
-     <x>435</x>
-     <y>330</y>
+     <x>465</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14595,8 +14666,8 @@ in minimization</string>
      <y>277</y>
     </hint>
     <hint type="destinationlabel">
-     <x>423</x>
-     <y>330</y>
+     <x>453</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14611,8 +14682,8 @@ in minimization</string>
      <y>215</y>
     </hint>
     <hint type="destinationlabel">
-     <x>443</x>
-     <y>330</y>
+     <x>473</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14627,8 +14698,8 @@ in minimization</string>
      <y>242</y>
     </hint>
     <hint type="destinationlabel">
-     <x>400</x>
-     <y>330</y>
+     <x>430</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14643,8 +14714,8 @@ in minimization</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>330</y>
+     <x>404</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14659,8 +14730,8 @@ in minimization</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14675,8 +14746,8 @@ in minimization</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14691,8 +14762,8 @@ in minimization</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>401</x>
-     <y>330</y>
+     <x>431</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14707,8 +14778,8 @@ in minimization</string>
      <y>295</y>
     </hint>
     <hint type="destinationlabel">
-     <x>453</x>
-     <y>330</y>
+     <x>483</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14723,8 +14794,8 @@ in minimization</string>
      <y>323</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14739,8 +14810,8 @@ in minimization</string>
      <y>320</y>
     </hint>
     <hint type="destinationlabel">
-     <x>429</x>
-     <y>330</y>
+     <x>459</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14755,8 +14826,8 @@ in minimization</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14771,8 +14842,8 @@ in minimization</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14787,8 +14858,8 @@ in minimization</string>
      <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14803,8 +14874,8 @@ in minimization</string>
      <y>246</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14819,8 +14890,8 @@ in minimization</string>
      <y>276</y>
     </hint>
     <hint type="destinationlabel">
-     <x>451</x>
-     <y>330</y>
+     <x>481</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14835,8 +14906,8 @@ in minimization</string>
      <y>302</y>
     </hint>
     <hint type="destinationlabel">
-     <x>377</x>
-     <y>330</y>
+     <x>407</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14851,8 +14922,8 @@ in minimization</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>471</x>
-     <y>330</y>
+     <x>501</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14867,8 +14938,8 @@ in minimization</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>458</x>
-     <y>330</y>
+     <x>488</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14915,8 +14986,8 @@ in minimization</string>
      <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>483</x>
-     <y>330</y>
+     <x>513</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14931,8 +15002,8 @@ in minimization</string>
      <y>231</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>341</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -14947,8 +15018,8 @@ in minimization</string>
      <y>270</y>
     </hint>
     <hint type="destinationlabel">
-     <x>511</x>
-     <y>330</y>
+     <x>541</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15011,8 +15082,8 @@ in minimization</string>
      <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>337</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15027,8 +15098,8 @@ in minimization</string>
      <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>336</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15043,8 +15114,8 @@ in minimization</string>
      <y>290</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>341</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15059,8 +15130,8 @@ in minimization</string>
      <y>178</y>
     </hint>
     <hint type="destinationlabel">
-     <x>360</x>
-     <y>330</y>
+     <x>390</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15235,8 +15306,8 @@ in minimization</string>
      <y>207</y>
     </hint>
     <hint type="destinationlabel">
-     <x>492</x>
-     <y>337</y>
+     <x>522</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15251,8 +15322,8 @@ in minimization</string>
      <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>401</x>
-     <y>334</y>
+     <x>431</x>
+     <y>322</y>
     </hint>
    </hints>
   </connection>
@@ -15267,8 +15338,40 @@ in minimization</string>
      <y>279</y>
     </hint>
     <hint type="destinationlabel">
-     <x>374</x>
-     <y>343</y>
+     <x>404</x>
+     <y>322</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCPUoffsetX</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>201</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledCPUoffsetY</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>282</x>
+     <y>314</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>490</x>
+     <y>309</y>
     </hint>
    </hints>
   </connection>

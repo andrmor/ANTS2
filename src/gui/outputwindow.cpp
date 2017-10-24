@@ -99,11 +99,10 @@ void OutputWindow::SetCurrentEvent(int iev)
 
 void OutputWindow::on_pbShowPMtime_clicked()
 {      
-    if (!EventsDataHub->LastSimSet.fTimeResolved) return;
     if (EventsDataHub->TimedEvents.isEmpty()) return;
 
     int CurrentEvent = ui->sbEvent->value();
-    if (CurrentEvent>EventsDataHub->TimedEvents.size()-1)
+    if (CurrentEvent >= EventsDataHub->TimedEvents.size())
       {
         message("Invalid event number!", this);
         return;
@@ -112,7 +111,6 @@ void OutputWindow::on_pbShowPMtime_clicked()
     int bins = EventsDataHub->LastSimSet.TimeBins;
     double from = EventsDataHub->LastSimSet.TimeFrom;
     double to   = EventsDataHub->LastSimSet.TimeTo;
-//    double step = (to-from)/bins;
 
     int ipm = ui->sbPMnumberToShowTime->value();
     if (ipm>MW->PMs->count()-1)
@@ -348,7 +346,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::AllEnergyDisspated:       s += "stopped"; break;
       case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
       case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
-      case EventHistoryStructure::Capture:                  s += "capture"; break;
+      case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
       case EventHistoryStructure::EllasticScattering:       s += "elastic"; break;
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
@@ -536,9 +534,9 @@ void OutputWindow::RefreshData()
   //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
 
   updateSignalLabels(MaxSignal);
-  addPMitems(fHaveData, CurrentEvent, MaxSignal, Passives); //add icons with PMs to the scene
+  addPMitems(fHaveData, EventsDataHub->Events.at(CurrentEvent), MaxSignal, Passives); //add icons with PMs to the scene
   if (ui->cbShowPMsignals->isChecked())
-    addTextitems(fHaveData, CurrentEvent, MaxSignal, Passives); //add icons with signal text to the scene
+    addTextitems(fHaveData, EventsDataHub->Events.at(CurrentEvent), MaxSignal, Passives); //add icons with signal text to the scene
   updateSignalScale();
 
   //Monitors
@@ -588,7 +586,7 @@ void OutputWindow::updateMonitors()
     }
 }
 
-void OutputWindow::addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addPMitems(bool fHaveData, const QVector<float>& vector, double MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -601,7 +599,7 @@ void OutputWindow::addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal
       QBrush brush(Qt::white);
 
       double sig = 0;
-      if (fHaveData) sig = EventsDataHub->Events[CurrentEvent][ipm];
+      if (fHaveData) sig = vector.at(ipm);
 
       if (sig > 0)
         {
@@ -624,7 +622,8 @@ void OutputWindow::addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal
         }
 
       const pm &PM = MW->PMs->at(ipm);
-      if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
+      if (Passives)
+          if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
 
       QGraphicsItem* tmp;
       if (MW->PMs->getType(PM.type)->Shape == 0)
@@ -657,24 +656,19 @@ void OutputWindow::addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal
 
       tmp->setRotation(-PM.psi);
       tmp->setTransform(QTransform().translate(PM.x*GVscale, -PM.y*GVscale)); //minus!!!!
-
-      //grItems.append(tmp);
     }
 }
 
-void OutputWindow::addTextitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextitems(bool fHaveData, const QVector<float>& vector, double MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
-      //QGraphicsTextItem *io = scene->addText("dummy");
-
       const pm &PM = MW->PMs->at(ipm);
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 
-
       double sig = 0;
-      if (fHaveData) sig = EventsDataHub->Events[CurrentEvent][ipm];
+      if (fHaveData) sig = vector.at(ipm);
       //qDebug()<<"sig="<<sig;
       QString text = QString::number(sig, 'g', 6);
       //text = "<CENTER>" + text + "</CENTER>";
@@ -682,14 +676,13 @@ void OutputWindow::addTextitems(bool fHaveData, int CurrentEvent, double MaxSign
       //color correction for dark blue
       QGraphicsSimpleTextItem *io = scene->addSimpleText(text);
 
-      if (sig != 0 && sig < 0.15*MaxSignal || Passives->isPassive(ipm))
-      //  text = "<font color=\"white\">" + text + "</font>";
+      if (
+              ( sig != 0 && sig < 0.15*MaxSignal )
+           ||
+              ( Passives && Passives->isPassive(ipm) )
+         )
         io->setBrush(Qt::white);
-      //if (Passives->isPassive(ipm)) text = "<font color=\"white\">" + text + "</font>";
 
-      //io->setHtml(text);
-      //double x = ( PM.x - 0.75*size  )*GVscale;
-      //qDebug() << "text"<<text<<io->boundingRect().width() ;
       int wid = (io->boundingRect().width()-6)/6;
       double x = ( PM.x -wid*size*0.125 -0.1*size )*GVscale;
       double y = (-PM.y - 0.3*size  ) *GVscale; //minus y to invert the scale!!!
@@ -698,8 +691,6 @@ void OutputWindow::addTextitems(bool fHaveData, int CurrentEvent, double MaxSign
 
       if (ui->cbViewFromBelow->isChecked()) io->setZValue(-PM.z+0.001);
       else io->setZValue(PM.z+0.001);
-
-      //grItems.append(io);
     }
 }
 
@@ -1410,7 +1401,7 @@ void OutputWindow::on_pbShowSelected_clicked()
           //if (Detector->ParticleCollection.at( EventsDataHub->EventHistory[i]->ParticleId )->type == AParticle::_neutron_ )
           if (MW->Detector->MpCollection->getParticleType( EventsDataHub->EventHistory[i]->ParticleId ) == AParticle::_neutron_ )
           {
-              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::Capture) continue;
+              if (EventsDataHub->EventHistory[i]->Termination != EventHistoryStructure::NeutronAbsorption) continue;
               //last medium?
               if (EventsDataHub->EventHistory[i]->Deposition[EventsDataHub->EventHistory[i]->Deposition.size()-1].MaterialId != materialId) continue;
               interactions++;
@@ -1597,4 +1588,28 @@ void OutputWindow::on_pbShowProperties_clicked()
 void OutputWindow::on_cobMonitor_activated(int)
 {
     updateMonitors();
+}
+
+void OutputWindow::on_pbShowAverageOverAll_clicked()
+{
+    if (EventsDataHub->isEmpty()) return;
+
+    QVector<float> sums(MW->PMs->count(), 0);
+    double f = 1.0/EventsDataHub->Events.size();
+
+    for (int iev=0; iev<EventsDataHub->Events.size(); iev++)
+        for (int ipm=0; ipm<MW->PMs->count(); ipm++)
+            sums[ipm] += f * EventsDataHub->Events.at(iev).at(ipm);
+
+    scene->clear();
+    double MaxSignal = 1.0e-10;
+    for (int i=0; i<MW->PMs->count(); i++)
+       if ( sums.at(i) > MaxSignal) MaxSignal = sums.at(i);
+    if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
+
+    updateSignalLabels(MaxSignal);
+    addPMitems(true, sums, MaxSignal, 0); //add icons with PMs to the scene
+    if (ui->cbShowPMsignals->isChecked())
+      addTextitems(true, sums, MaxSignal, 0); //add icons with signal text to the scene
+    updateSignalScale();
 }

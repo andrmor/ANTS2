@@ -4999,6 +4999,8 @@ void ReconstructionWindow::updateReconSettings()
   // ContrGrids
   QJsonObject gcpuJson;
         gcpuJson["StartOption"] = ui->cobCGstartOption->currentIndex();
+        gcpuJson["StartX"] = ui->ledCPUoffsetX->text().toFloat();
+        gcpuJson["StartY"] = ui->ledCPUoffsetY->text().toFloat();
         gcpuJson["OptimizeWhat"] = ui->cobCGoptimizeWhat->currentIndex();
         gcpuJson["NodesXY"] = ui->sbCGnodes->value();
         gcpuJson["Iterations"] = ui->sbCGiter->value();
@@ -5206,6 +5208,8 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
     //MG
   QJsonObject gcpuJson = ajson["CPUgridsOptions"].toObject();
   JsonToComboBox(gcpuJson, "StartOption", ui->cobCGstartOption);
+  JsonToLineEditDouble(gcpuJson, "StartX", ui->ledCPUoffsetX);
+  JsonToLineEditDouble(gcpuJson, "StartY", ui->ledCPUoffsetY);
   JsonToComboBox(gcpuJson, "OptimizeWhat", ui->cobCGoptimizeWhat);
   JsonToSpinBox(gcpuJson, "NodesXY", ui->sbCGnodes);
   JsonToSpinBox(gcpuJson, "Iterations", ui->sbCGiter);
@@ -6623,4 +6627,9 @@ void ReconstructionWindow::on_pbClearAllFilters_clicked()
     ui->cbActivateNNfilter->setChecked(false);
 
     ReconstructionWindow::on_pbUpdateFilters_clicked();
+}
+
+void ReconstructionWindow::on_cobCGstartOption_currentIndexChanged(int index)
+{
+    ui->fCPUoffsets->setVisible(index == 2);
 }

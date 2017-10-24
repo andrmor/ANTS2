@@ -94,7 +94,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabText">
        <attribute name="title">
@@ -572,6 +572,20 @@
          </property>
          <property name="checked">
           <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbShowAverageOverAll">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>101</width>
+           <height>61</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show average
+over all events</string>
          </property>
         </widget>
        </widget>

@@ -41,7 +41,8 @@ public:
   bool   fCogForceFixedZ;
 
   //Multigrid
-  int    CGstartOption; //0 - cog, 1 - PM with max signal
+  int    CGstartOption; //0 - cog, 1 - PM with max signal, 2 - given X and Y, 3 - Scan position
+  double CGstartX, CGstartY;
   int    CGoptimizeWhat;  //0 - Chi2, 1 -ML
   int    CGnodesXY, CGiterations;
   double CGinitialStep, CGreduction;

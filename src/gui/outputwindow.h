@@ -91,6 +91,8 @@ private slots:
 
     void on_cobMonitor_activated(int index);
 
+    void on_pbShowAverageOverAll_clicked();
+
 protected:
     bool event(QEvent *event);   
 
@@ -113,8 +115,8 @@ private:
 
     void clearGrItems();
     void updateSignalLabels(double MaxSignal);
-    void addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
-    void addTextitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
+    void addPMitems(bool fHaveData, const QVector<float> &vector, double MaxSignal, DynamicPassivesHandler *Passives);
+    void addTextitems(bool fHaveData, const QVector<float> &vector, double MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);

@@ -38,6 +38,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
   cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
   cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
+  cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
   cjs["DoS1"] = ui->cbGunDoS1->isChecked();
   cjs["DoS2"] = ui->cbGunDoS2->isChecked();
   cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
@@ -135,11 +136,12 @@ void MainWindow::ShowSource(int isource, bool clear)
            {
              if (j==i) continue;
              //third k
-             int k;
-             for (k=0; k<3; k++) if (k!=i && k!=j) break;
+             int k = 0;
+             for (; k<2; k++)
+               if (k!=i && k!=j) break;
              for (int s=-1; s<2; s+=2)
                {
-                //qDebug()<<"i j k shift"<<i<<j<<k<<s;
+                //  qDebug()<<"i j k shift"<<i<<j<<k<<s;
                 Int_t track_index = Detector->GeoManager->AddTrack(1,22);
                 TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
                 track->AddPoint(X0-V[i][0]-V[j][0]+V[k][0]*s, Y0-V[i][1]-V[j][1]+V[k][1]*s, Z0-V[i][2]-V[j][2]+V[k][2]*s, 0);
@@ -673,7 +675,7 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
    if (val<0)
      {
        message("Average number of particles per event should be more than 0", this);
-       ui->ledGunAverageNumPartperEvent->setText("0.01");
+       ui->ledGunAverageNumPartperEvent->setText("1");
      }
 }
 

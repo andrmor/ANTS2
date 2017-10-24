@@ -4,7 +4,15 @@
 #include <QDebug>
 #include <limits>
 
-AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModule(knnModule) {}
+AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModule(knnModule)
+{
+    H["getNeighbours"] = "Returns array of [eventIndex, distance] - there will be numNeighbours elements";
+    H["SetSignalNormalizationType"] = "Set pre-processing of event signal before setting as calibration or processing by knn:\n"
+            "0 - no normalization, 1 - sum signals is normalized to 1, 2 - sum in quadrature of all signals is normalized to 1";
+    H["filterByDistance"] = "Filters currently available events according to the distance to the calibration events. "
+            "Average distance is calculated over numNeighbours, cut is performed in respect of the average distance = distanceLimit, "
+            "filterOutEventsWithSmallerDistance option sets which events to cut - with smaller or large value than the limit.";
+}
 
 QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
 {    
@@ -36,14 +44,16 @@ void AInterfaceToKnnScript::clearCalibrationEvents()
   knnModule->ScriptInterfacer->clearCalibration();
 }
 
-bool AInterfaceToKnnScript::setGoodScanEventsAsCalibration()
+QString AInterfaceToKnnScript::setGoodScanEventsAsCalibration()
 {
-  return knnModule->ScriptInterfacer->setCalibration(true);
+  knnModule->ScriptInterfacer->setCalibration(true);
+  return knnModule->ScriptInterfacer->ErrorString;
 }
 
-bool AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
+QString AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
 {
-  return knnModule->ScriptInterfacer->setCalibration(false);
+  knnModule->ScriptInterfacer->setCalibration(false);
+  return knnModule->ScriptInterfacer->ErrorString;
 }
 
 int AInterfaceToKnnScript::countCalibrationEvents()
@@ -83,5 +93,10 @@ QVariant AInterfaceToKnnScript::getCalibrationEventXYZE(int ievent)
 
 QVariant AInterfaceToKnnScript::getCalibrationEventSignals(int ievent)
 {
-  return knnModule->ScriptInterfacer->getCalibrationEventSignals(ievent);
+    return knnModule->ScriptInterfacer->getCalibrationEventSignals(ievent);
+}
+
+QString AInterfaceToKnnScript::getErrorString()
+{
+    return knnModule->ScriptInterfacer->ErrorString;
 }

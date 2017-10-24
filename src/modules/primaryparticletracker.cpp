@@ -195,6 +195,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                   bool flagDone = false;
                   do
                     {
+                      //    qDebug() << "-->On step start energy:"<<energy;
                       //dE/dx [keV/mm] = Density[g/cm3] * [cm2/g*keV] * 0.1  //0.1 since local units are mm, not cm
                       const double dEdX = 0.1*Density * GetInterpolatedValue(energy, &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX,
                                                                    &(*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataF,
@@ -202,7 +203,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
                       //recommended step: (RecFraction - suggested decrease of energy per step)
                       double RecStep = SimSet->dE * energy/dEdX; //*** TO DO zero control
-                      //                   qDebug()<<dEdX<<RecStep;
+                      //    qDebug()<<dEdX<<RecStep;
                       //vs absolute limits?
                       if (RecStep > SimSet->MaxStep) RecStep = SimSet->MaxStep;
                       if (RecStep < SimSet->MinStep) RecStep = SimSet->MinStep;
@@ -222,12 +223,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                       RecStep = navigator->GetStep();
                       //energy loss?
                       double dE = dEdX*RecStep;
-                      //                   qDebug()<<"     "<<RecStep<<dE;
+                      //                   qDebug()<<"     Step:"<<RecStep<<" would result in dE of"<<dE;
                       if (dE > energy) dE = energy;
                       energy -= dE;
+                      //qDebug() << "     New energy:"<<energy<<"  (min energy:"<<SimSet->MinEnergy<<")";
                       //all energy dissipated?
                       if (energy < SimSet->MinEnergy)
                         {
+                          //qDebug() << "  Dissipated below low limit!";
                           flagDone = true;
                           terminationStatus = EventHistoryStructure::AllEnergyDisspated;//2;
                           dE += energy;
@@ -478,7 +481,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     qWarning() << "||| No absorption elements are defined for"<<(*MpCollection)[MatId]->name;
                                 }
 
-                                terminationStatus = EventHistoryStructure::Capture;//5
+                                terminationStatus = EventHistoryStructure::NeutronAbsorption;//5
                                 distanceHistory = SoFarShortest;
                                 energyHistory = 0;
                                 break; //switch-break
@@ -560,15 +563,31 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                 // vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
                                 double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
                                 // vn[i] = vnMod * v[i]
-                                //        qDebug() << energy << vnMod;
+                                //        qDebug() << "Neutron energy: "<<energy << "keV   Velocity:" << vnMod << " m/s";
                                 // va[] is randomly generated from Gauss(0, sqrt(kT/m)
-                                double va[3];
+                                double va[3];                                
                                 const double m = elements.at(iselected).Mass; //mass of atom in atomic units
                                 //        qDebug() << "atom - mass:"<<m;
                                 double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
-                                for (int i=0; i<3; i++)
-                                    va[i] = RandGen->Gaus(0, a); //maxwell!
-                                //        qDebug() << "Speed of atom in lab, m/s"<<va[0]<<va[1]<<va[2];
+                                bool bCannotCollide;
+                                do
+                                {
+                                    for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
+                                    //        qDebug() << "  Speed of atom in lab frame, m/s"<<va[0]<<va[1]<<va[2];
+                                    //calculating projection on the neutron direction
+                                    double proj = 0;
+                                    for (int i=0; i<3; i++) proj += v[i] * va[i];  //v[i] is the direction vector of neutron (unitary length)
+                                    //        qDebug() << "  Projection:"<<proj<<"m/s";
+                                    // proj has "+" if atom moves in the same direction as the neutron, "-" if opposite
+                                    if (proj > vnMod)
+                                    {
+                                        bCannotCollide = true;
+                                        //        qDebug() << "  Rejected - generating atom velocity again";
+                                    }
+                                    else bCannotCollide = false;
+                                }
+                                while (bCannotCollide);
+                                //transition to the center of mass frame
                                 const double sumM = m + 1.0;
                                 double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
                                 for (int i=0; i<3; i++)

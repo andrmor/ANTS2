@@ -36,6 +36,8 @@ void DynamicPassivesHandler::init(ReconstructionSettings *RecSet, int ThisPmGrou
       ThresholdHigh = RecSet->SignalThresholdHigh;
       MaxDistance2 = RecSet->MaxDistanceSquare;
       CenterOption = RecSet->CGstartOption;
+      StartX = RecSet->CGstartX;
+      StartY = RecSet->CGstartY;
       break;
     case 2:
       fByThreshold = RecSet->fUseDynamicPassivesSignal;
@@ -82,9 +84,14 @@ void DynamicPassivesHandler::init(ReconstructionSettings *RecSet, int ThisPmGrou
             ThresholdLow = RecSet->SignalThresholdLow;
             ThresholdHigh = RecSet->SignalThresholdHigh;
             MaxDistance2 = RecSet->MaxDistanceSquare;
-            CenterOption = RecSet->RMstartOption;
-            parseJson(json, "StartOption", CenterOption);
+            //CenterOption = RecSet->RMstartOption;
+            //parseJson(json, "StartOption", CenterOption);
         }
+
+        parseJson(json, "StartOption", CenterOption);
+        parseJson(json, "StartX", StartX);
+        parseJson(json, "StartY", StartY);
+
         //qDebug() << "Dyn pass manager: Cuda dyn passives reports:"<<fByThreshold<<fByDistance<<ThresholdLow<<ThresholdHigh<<MaxDistance2<<CenterOption;
         break;
       }
@@ -110,19 +117,40 @@ void DynamicPassivesHandler::calculateDynamicPassives(int ievent, const AReconRe
   double X0=0, Y0=0;
   if (fByDistance)
     {
-      //some inits
-      if (CenterOption == 0)
-        {
-          //qDebug()<<"using cog";
+//      if (CenterOption == 0)
+//        {
+//          //qDebug()<<"using cog";
+//          X0 = rec->xCoG;
+//          Y0 = rec->yCoG;
+//        }
+//      else
+//        {
+//          //qDebug()<<"using max sig pm";
+//          X0 = PMs->X(rec->iPMwithMaxSignal);
+//          Y0 = PMs->Y(rec->iPMwithMaxSignal);
+//        }
+
+      switch (CenterOption)
+      {
+      case 0:   //start from CoG data
           X0 = rec->xCoG;
           Y0 = rec->yCoG;
-        }
-      else
-        {
-          //qDebug()<<"using max sig pm";
+          break;
+      case 1:  //starting from XY of the centre of the PM with max signal
           X0 = PMs->X(rec->iPMwithMaxSignal);
           Y0 = PMs->Y(rec->iPMwithMaxSignal);
-        }
+          break;
+      case 2:  // given X and Y
+          X0 = StartX;
+          Y0 = StartY;
+          break;
+      case 3:  //starting from scan XY
+          X0 = EventsDataHub->Scan[ievent]->Points[0].r[0];
+          Y0 = EventsDataHub->Scan[ievent]->Points[0].r[1];
+          break;
+      default:
+          qWarning() << "Unknown center option in dynamic passives";
+      }
     }
 
   for (int ipm=0; ipm < numPMs; ipm++)

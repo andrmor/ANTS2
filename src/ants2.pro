@@ -1,12 +1,12 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 0
+ANTS2_MINOR = 1
 ANTS2_VERSION = 2230
 
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
-#CONFIG += ants2_fann        #enables FANN (fast neural network) library
+CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
@@ -84,11 +84,15 @@ ants2_fann {
      }
      linux-g++ || unix { LIBS += -lfann }
 
+     #main module
     HEADERS += modules/neuralnetworksmodule.h
     SOURCES += modules/neuralnetworksmodule.cpp
-
+      #gui only
     HEADERS += gui/neuralnetworkswindow.h
     SOURCES += gui/neuralnetworkswindow.cpp
+      #interface to script module
+    HEADERS += scriptmode/ainterfacetoannscript.h
+    SOURCES += scriptmode/ainterfacetoannscript.cpp
 }
 #---------
 
@@ -260,7 +264,8 @@ SOURCES += main.cpp \
     common/aneutroninteractionelement.cpp \
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
-    gui/aneutroninfodialog.cpp
+    gui/aneutroninfodialog.cpp \
+    scriptmode/ainterfacetodeposcript.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -374,7 +379,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aneutroninteractionelement.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
-    gui/aneutroninfodialog.h
+    gui/aneutroninfodialog.h \
+    scriptmode/ainterfacetodeposcript.h
 
 # --- SIM ---
 ants2_SIM {
@@ -454,7 +460,6 @@ ants2_GUI {
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
-    scriptmode/interfacetocheckerscript.cpp \
     gui/MainWindowTools/mainwindowscatterfit.cpp \
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
@@ -496,7 +501,6 @@ HEADERS  += gui/mainwindow.h \
     gui/graphicsruler.h \
     gui/credits.h \
     gui/globalsettingswindowclass.h \
-    scriptmode/interfacetocheckerscript.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
     gui/MainWindowTools/ageotreewidget.h \

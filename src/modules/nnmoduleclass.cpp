@@ -704,7 +704,7 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
     }
   else
     {
-      if (EventsDataHub->isReconstructionReady())
+      if (!EventsDataHub->isReconstructionReady())
         {
           ErrorString = "Reconstruction was not performed!";
           return false;

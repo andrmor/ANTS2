@@ -7,7 +7,7 @@
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "scriptinterfaces.h"
-#include "interfacetocheckerscript.h"
+#include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
@@ -24,6 +24,10 @@
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
+#endif
+
+#ifdef ANTS_FANN
+  #include "ainterfacetoannscript.h"
 #endif
 
 #include <QDebug>
@@ -97,6 +101,11 @@ void MainWindow::createScriptWindow()
     ScriptWindow->SetInterfaceObject(knn, "knn");
 #endif
 
+#ifdef ANTS_FANN
+    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    ScriptWindow->SetInterfaceObject(ann, "ann");
+#endif
+
     // Interfaces which rely on MainWindow
 
     InterfaceToGeoWin* geowin = new InterfaceToGeoWin(this, TmpHub);
@@ -105,7 +114,7 @@ void MainWindow::createScriptWindow()
     InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
     ScriptWindow->SetInterfaceObject(grwin, "grwin");
 
-    InterfaceToInteractionScript* depo = new InterfaceToInteractionScript(this, EventsDataHub);
+    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo"); 
 
     AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);

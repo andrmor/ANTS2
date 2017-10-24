@@ -100,6 +100,9 @@ public slots:
   void RemoveRecursive(QString Object);
   void RemoveAllExceptWorld();
 
+  void EnableObject(QString Object);
+  void DisableObject(QString Object);
+
   void UpdateGeometry(bool CheckOverlaps = true);
 
 signals:

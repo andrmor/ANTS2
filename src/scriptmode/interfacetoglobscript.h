@@ -152,8 +152,12 @@ public slots:
   int countPMs();
   int GetNumEvents();
   int countEvents();
+  int countTimedEvents();
+  int countTimeBins();
   double GetPMsignal(int ievent, int ipm);
   void SetPMsignal(int ievent, int ipm, double value);
+  double GetPMsignalTimed(int ievent, int ipm, int iTimeBin);
+  QVariant GetPMsignalVsTime(int ievent, int ipm);
 
   // Reconstructed values
     //assuming there is only one group, and single point reconstruction
@@ -193,11 +197,6 @@ public slots:
   //raw signal values
   QVariant GetPMsSortedBySignal(int ievent);
   int GetPMwithMaxSignal(int ievent);
-
-  //monitors
-  int countMonitors();
-  int getMonitorHits(int imonitor);
-  int getMonitorHits(QString monitor);
 
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
@@ -312,6 +311,17 @@ public slots:
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName);
 
+  //monitors
+  int countMonitors();
+  //int getMonitorHits(int imonitor);
+  int getMonitorHits(QString monitor);
+
+  QVariant getMonitorTime(QString monitor);
+  QVariant getMonitorAngular(QString monitor);
+  QVariant getMonitorWave(QString monitor);
+  QVariant getMonitorEnergy(QString monitor);
+  QVariant getMonitorXY(QString monitor);
+
 signals:
   void requestStopSimulation();
 
@@ -322,6 +332,8 @@ private:
 
   int RecNumThreads;
   bool fGuiPresent;
+
+  QVariant getMonitorData1D(QString monitor, QString whichOne);
 };
 #endif
 
@@ -448,6 +460,9 @@ public slots:
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
 
   void AddPoint(QString GraphName, double x, double y);
+  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
+  void AddPoints(QString GraphName, QVariant xyArray);
+
   void Draw(QString GraphName, QString options);
 
   bool Delete(QString GraphName);
@@ -512,6 +527,7 @@ public slots:
   double gauss(double mean, double sigma);
   double poisson(double mean);
   double maxwell(double a);  // a is sqrt(kT/m)
+  double exponential(double tau);
 
 private:
   TRandom2* RandGen;
@@ -531,7 +547,7 @@ public:
 
   QDialog *D;
   double X, Y;
-  double W, H;
+  double WW, HH;
 
   QPlainTextEdit* e;
   bool bEnabled;
@@ -584,6 +600,7 @@ public slots:
   void SetLog(bool Xaxis, bool Yaxis);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
+  void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
 
   //basket operation
   void AddToBasket(QString Title);

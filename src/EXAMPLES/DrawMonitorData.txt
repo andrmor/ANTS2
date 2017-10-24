@@ -1,0 +1,31 @@
+
+
+//graph.NewGraph("g")
+//graph.AddPoints("g", sim.getMonitorTime("m1"))
+//graph.Draw("g", "same")
+
+var data = sim.getMonitorXY("m1")
+if (data.length == 0) core.abort("no data")
+
+var xSize = 1
+var xmin = data[0][0]
+var ymin = data[0][1]
+for (var i=1; i<data.length; i++)
+{
+       var thisX = data[i][0]
+       if (thisX != XX) break
+       xSize++
+}
+var xmax = data[data.length-1][0]
+var ymax = data[data.length-1][1]
+var ySize = data.length / xSize
+
+core.print("Xsize: " + xSize + " Ysize: " + ySize)
+core.print("xmin: " + xmin + " xmax: " + xmax)
+core.print("ymin: " + ymin + " ymax: " + ymax)
+
+hist.NewHist2D("h", xSize, xmin, xmax, ySize, ymin, ymax)
+hist.SetTitles("h", "x, mm", "y, mm")
+for (var i=0; i<data.length; i++)
+       hist.Fill2D("h", data[i][0], data[i][1], data[i][2])
+hist.Draw("h", "colz")

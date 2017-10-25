@@ -12658,7 +12658,7 @@ in minimization</string>
      </font>
     </property>
     <property name="toolTip">
-     <string>Switch off all event filters</string>
+     <string>Switch off all event filters, excpet script pass filter.</string>
     </property>
     <property name="text">
      <string>C</string>

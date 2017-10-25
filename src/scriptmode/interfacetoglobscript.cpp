@@ -1535,6 +1535,12 @@ bool InterfaceToData::IsReconstructedGoodEvent(int igroup, int ievent)
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->GoodEvent;
 }
 
+bool InterfaceToData::IsReconstructed_ScriptFilterPassed(int igroup, int ievent)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return 0;
+  return !EventsDataHub->ReconstructionData.at(igroup).at(ievent)->fScriptFiltered;
+}
+
 int InterfaceToData::countReconstructedGroups()
 {
     return EventsDataHub->ReconstructionData.size();
@@ -1696,6 +1702,12 @@ void InterfaceToData::SetReconstructedEnergy(int ievent, double e)
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].energy = e;
 }
 
+void InterfaceToData::SetReconstructed_ScriptFilterPass(int ievent, bool flag)
+{
+  if (!checkSetReconstructionDataRequest(ievent)) return;
+  EventsDataHub->ReconstructionData[0][ievent]->fScriptFiltered = !flag;
+}
+
 void InterfaceToData::SetReconstructedGoodEvent(int ievent, bool good)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
@@ -1770,6 +1782,12 @@ void InterfaceToData::SetReconstructedGoodEvent(int igroup, int ievent, int ipoi
 {
     if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = good;
+}
+
+void InterfaceToData::SetReconstructed_ScriptFilterPass(int igroup, int ievent, bool flag)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return;
+  EventsDataHub->ReconstructionData[igroup][ievent]->fScriptFiltered = !flag;
 }
 
 void InterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK)

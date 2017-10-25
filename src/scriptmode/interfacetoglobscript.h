@@ -176,6 +176,7 @@ public slots:
   double GetRho2(int igroup, int ievent, int ipoint, int iPM);
   double GetReconstructedEnergy(int igroup, int ievent, int ipoint);
   bool IsReconstructedGoodEvent(int igroup, int ievent);
+  bool IsReconstructed_ScriptFilterPassed(int igroup, int ievent);
     //counters - return -1 when invalid parameters
   int countReconstructedGroups();
   int countReconstructedEvents(int igroup);
@@ -205,6 +206,7 @@ public slots:
   void SetReconstructedY(int ievent, double y);
   void SetReconstructedZ(int ievent, double z);
   void SetReconstructedEnergy(int ievent, double e);
+  void SetReconstructed_ScriptFilterPass(int ievent, bool flag);
   void SetReconstructedGoodEvent(int ievent, bool good);
   void SetReconstructedAllEventsGood(bool flag);
   void SetReconstructionOK(int ievent, bool OK);
@@ -217,7 +219,8 @@ public slots:
   void SetReconstructedY(int igroup, int ievent, int ipoint, double y);
   void SetReconstructedZ(int igroup, int ievent, int ipoint, double z);
   void SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e);
-  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);  
+  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);
+  void SetReconstructed_ScriptFilterPass(int igroup, int ievent, bool flag);
   void SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK);
     //set when reconstruction is ready for all events! - otherwise GUI will complain
   void SetReconstructionReady();

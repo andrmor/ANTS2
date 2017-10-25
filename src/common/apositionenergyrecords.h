@@ -86,6 +86,7 @@ struct AReconRecord : ABaseScanAndReconRecord
 {
   //pos+energy+Good  - see Base
   double chi2;
+  bool fScriptFiltered;
   bool ReconstructionOK; // false = reconstruction failed
   int EventId; //serial number, should be kept if a part of data is purged
 
@@ -93,7 +94,7 @@ struct AReconRecord : ABaseScanAndReconRecord
   double xCoG, yCoG, zCoG;
   int iPMwithMaxSignal;
 
-  AReconRecord() {xCoG=0; yCoG=0; zCoG=0; iPMwithMaxSignal=0; chi2=0; }  //by default there is one point
+  AReconRecord() : xCoG(0), yCoG(0), zCoG(0), iPMwithMaxSignal(0), chi2(0), fScriptFiltered(false) {}  //by default there is one point
   void CopyTo(AReconRecord* target) //copy all data to another ReconstructionStructure
     {
       if (target == this) return;
@@ -115,6 +116,7 @@ struct AReconRecord : ABaseScanAndReconRecord
       target->EventId = EventId;
       target->chi2 = chi2;
       target->ReconstructionOK = ReconstructionOK;
+      target->fScriptFiltered = fScriptFiltered;
     }
 };
 

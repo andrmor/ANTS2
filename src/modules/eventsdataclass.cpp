@@ -389,7 +389,6 @@ void EventsDataClass::createDefaultReconstructionData(int igroup)
     {
         AReconRecord* r = new AReconRecord();
         r->EventId = ievent;
-        r->chi2 = 0;
         r->ReconstructionOK = false;
         ReconstructionData[igroup].append(r);
     }
@@ -412,7 +411,9 @@ void EventsDataClass::resetReconstructionData(int numGroups)
           for (int i=0; i<Events.size(); i++)
             {
               ReconstructionData[igroup][i]->Points.Reinitialize(1);  //in case it was reconstructed before as a double event
-              ReconstructionData[igroup][i]->chi2 = 0; //obsolete?
+              ReconstructionData[igroup][i]->chi2 = 0;
+              ReconstructionData[igroup][i]->ReconstructionOK = false;
+              ReconstructionData[igroup][i]->fScriptFiltered = false;
             }
         }
       ReconstructionData[igroup].squeeze();

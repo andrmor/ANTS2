@@ -342,9 +342,9 @@ GraphWindowClass::~GraphWindowClass()
   delete scene;
   delete gvOver;
 
-  RasterWindow->setParent(0);
-  delete RasterWindow;
-  delete QWinContainer;
+  //RasterWindow->setParent(0);
+  //delete RasterWindow;
+  //delete QWinContainer;
 }
 
 TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<double> *y,

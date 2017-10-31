@@ -8,8 +8,8 @@
 void cSeparateValues(vector<string>& keys, string& text, string sep, string no){
 unsigned S0=0, S=0, i, ni; // values separated by 'sep' (excluding '[no]sep')
  while ((i=text.find(sep,S))!=(unsigned)string::npos){
-  if (!no.empty() && (ni=text.rfind(no,i))!=(unsigned)string::npos)
-   if(i==no.length()+ni) goto skip; keys.push_back(text.substr(S0,i-S0));
+  if (!no.empty() && (ni=text.rfind(no,i))!=(unsigned)string::npos){
+   if (i==no.length()+ni) goto skip; } keys.push_back(text.substr(S0,i-S0));
   S0=i+sep.length(); skip:S=i+sep.length(); // guides.
  } keys.push_back(text.substr(S0,text.length()-S0));
 }
@@ -551,7 +551,7 @@ double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
 /*===========================================================================*/
 NeuralNetworksModule::NeuralNetworksModule(pms* Pms, APmGroupsManager *PMgroups, EventsDataClass* eventsDataHub, QObject *parent)
 :QObject(parent),PMs(Pms),PMgroups(PMgroups), FNorm(nsToSum),FTrainOutput(NULL),FEnergyDims(-1),
-FSpaceDims(-1),FMaxEpochsStag(1),FnEpochsStag(0), EventsDataHub(eventsDataHub), RecSet(NULL) { } //ANDR
+FSpaceDims(-1),FMaxEpochsStag(1),FnEpochsStag(0), RecSet(NULL), EventsDataHub(eventsDataHub) { } //ANDR
 
 /*===========================================================================*/
 bool NeuralNetworksModule::checkPMsDimension(){

@@ -6,22 +6,67 @@
 //#include <QJsonObject>
 #include <QDebug>
 
+#include <fstream>
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/*                           NeuralNetworksScript                            */
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
 /*===========================================================================*/
-AInterfaceToANNScript::AInterfaceToANNScript(EventsDataClass *EventsDataHub) :
-    EventsDataHub(EventsDataHub)
-{
-  resetConfigToDefault();
+int NeuralNetworksScript::userCallback(fann_train_data* train, unsigned max_epochs,
+unsigned epochs_between_reports, float desired_error, unsigned epochs){
+double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
+ testData(&TrainMSE,&TrainFailBit,&TestMSE,&TestFailBit);
+
+ if (TrainMSE<FTrainMSE && TrainFailBit<FTrainFailBit
+  && TestMSE<FTestMSE && TestFailBit<FTestFailBit){ //+++++++++++++++++++++++++
+   FTrainMSE=TrainMSE; FTrainFailBit=TrainFailBit;
+   FTestMSE=TestMSE; FTestFailBit=TestFailBit;
+   FnEpochsStag=0;
+
+      save("best.fann");
+
+ } else { FnEpochsStag++; }
+ if (FMaxEpochsStag>0 && FnEpochsStag>FMaxEpochsStag){ //++++++++++++++++++++++
+   qDebug() << "Train stopped";
+   return -1; // exit
+ } else { //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   qDebug() << "Epochs = " << cString(epochs).c_str();
+   qDebug() << "Hidden Neurons,Layers = " << cString(nHiddenNeurons()).c_str()
+            << ", " << cString(nHiddenLayers()).c_str();
+   if (nHiddenLayers()>0){ // In case we have hidden layers ...................
+    qDebug() << "\tActivation steepness = " << cString(activationSteepness(nHiddenLayers(),0)).c_str();
+    qDebug() << "\tActivation function = " << FANN_ACTIVATIONFUNC_NAMES[activationFunction(nHiddenLayers(),0)];
+   } //........................................................................
+   qDebug() << "\tTrain Data: MSE = " << cString(TrainMSE).c_str()
+            << (isDataTest()?(" ("+cString(TestMSE)+")").c_str():"");
+   qDebug() << "\tbit fail = " << cString(TrainFailBit).c_str()
+            << (isDataTest()?(" ("+cString(TestFailBit)+")").c_str():"");
+   //..........................................................................
+   if (FnEpochsStag==0) qDebug () << ">>> Train is improving...";
+   else qDebug() << ">>> Train is stagnated!";
+ } //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ return cFANNWrapper::userCallback(train,max_epochs,
+  epochs_between_reports,desired_error,epochs);
 }
 
 /*===========================================================================*/
-AInterfaceToANNScript::~AInterfaceToANNScript()
-{
+void NeuralNetworksScript::init_train(){
+ FTrainMSE=FTrainFailBit=FTestMSE=FTestFailBit=DBL_MAX;
+ FnEpochsStag=0; cFANNWrapper::clear();
+}
+
+/*===========================================================================*/
+AInterfaceToANNScript::AInterfaceToANNScript(EventsDataClass *EventsDataHub) :
+EventsDataHub(EventsDataHub){ resetConfigToDefault(); }
+
+/*===========================================================================*/
+AInterfaceToANNScript::~AInterfaceToANNScript(){
   clearTrainingData();
 }
 
 /*===========================================================================*/
-void AInterfaceToANNScript::clearTrainingData()
-{
+void AInterfaceToANNScript::clearTrainingData(){
   Input.clear(); Input.squeeze();
   Output.clear(); Output.squeeze();
 
@@ -29,19 +74,17 @@ void AInterfaceToANNScript::clearTrainingData()
 
 /*===========================================================================*/
 //! Reset the training data.
-void AInterfaceToANNScript::newNetwork()
-{
+void AInterfaceToANNScript::newNetwork(){
   clearTrainingData();
   qDebug() << "New NN created.";
 }
 
 /*===========================================================================*/
 //! Config.
-QString AInterfaceToANNScript::configure(QVariant configObject)
-{
+QString AInterfaceToANNScript::configure(QVariant configObject){
   qDebug() << configObject.typeName();
-  if ( QString(configObject.typeName()) != "QVariantMap")  //critical error!
-  {
+
+  if ( QString(configObject.typeName()) != "QVariantMap"){  // ++++++++++++++++
       abort("ANN script: configure function requirs an object-type argument");
       return "";
   }
@@ -50,17 +93,17 @@ QString AInterfaceToANNScript::configure(QVariant configObject)
   Config = QJsonObject::fromVariantMap(map);
   qDebug() << "User config:" << Config;
 
-  if (!Config.contains("type")){
+  if (!Config.contains("type")){ //++++++++++++++++++++++++++++++++++++++++++++
    abort("FANN Type - ('type' key) has to be defined in ANN config");
    return "";
   }
 
-  if (!Config.contains("trainingInput")){
+  if (!Config.contains("trainingInput")){ //+++++++++++++++++++++++++++++++++++
    abort("FANN Type - ('trainingInput' key) has to be defined in ANN config");
    return "";
   }
 
-  if (!Config.contains("trainingOutput")){
+  if (!Config.contains("trainingOutput")){ //++++++++++++++++++++++++++++++++++
    abort("FANN Type - ('trainingOutput' key) has to be defined in ANN config");
    return "";
   }
@@ -70,16 +113,16 @@ QString AInterfaceToANNScript::configure(QVariant configObject)
 
 /*===========================================================================*/
 //! Default config.
-void AInterfaceToANNScript::resetConfigToDefault()
-{
+void AInterfaceToANNScript::resetConfigToDefault(){
   Config = QJsonObject();
 
-  Config["trainingInput"]="DIRECT"; // can be "EVENTS" (from )
-  Config["trainingOutput"]="DIRECT"; // can be "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
+  Config["trainingInput"]="EVENTS"; // can be "DIRECT","EVENTS" (from )
+  Config["trainingOutput"]="SCAN_POSITIONS"; // can be "DIRECT", "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
   Config["currentSensorGroup"]=0;
+  Config["trainingTestPer"]=0.5;
   //...........................................................................
   Config["type"]="CASCADE";
-  Config["trainAlgorithm"]="RETRO_PROPAGATION";
+  Config["trainAlgorithm"]="RETRO PROPAGATION";
   Config["outputActivationFunc"]="SIGMOID";
   Config["errorFunction"]="LINEAR";
   Config["stopFunction"]="BIT";
@@ -97,13 +140,12 @@ void AInterfaceToANNScript::resetConfigToDefault()
   Config["cascade_candidateGroups"]=2; // default
   Config["cascade_weightMultiplier"]=0.4; // default
   Config["cascade_setActivationSteepness"]=QJsonArray({ 0.25, 0.5, 0.75, 1. });
-  Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID_SYMMETRIC",
-   "GAUSSIAN","GAUSSIAN_SYMMETRIC","ELLIOT","ELLIOT_SYMMETRIC"});
+  Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID SYMMETRIC",
+   "GAUSSIAN","GAUSSIAN SYMMETRIC","ELLIOT","ELLIOT SYMMETRIC"});
 }
 
 /*===========================================================================*/
-QVariant AInterfaceToANNScript::getConfig()
-{
+QVariant AInterfaceToANNScript::getConfig(){
   const QVariantMap res = Config.toVariantMap();
   return res;
 }
@@ -111,8 +153,7 @@ QVariant AInterfaceToANNScript::getConfig()
 /*===========================================================================*/
 //! Adding training Input from script. Note that for each input there most
 //! be a correspondent output command in the script.
-void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
-{
+void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays){
   //unpacking data
   int fixedSize = Input.isEmpty() ? -1 : Input.first().size();
   if ( !convertQVariantToVectorOfVectors(&arrayOfArrays, &Input, fixedSize) ) return;
@@ -123,8 +164,7 @@ void AInterfaceToANNScript::addTrainingInput(QVariant arrayOfArrays)
 /*===========================================================================*/
 //! Adding training from from script. Note that for each output there most
 //! be a correspondent input command in the script.
-void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
-{
+void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays){
   //unpacking data
   int fixedSize = Output.isEmpty() ? -1 : Output.first().size();
   if ( !convertQVariantToVectorOfVectors(&arrayOfArrays, &Output, fixedSize) ) return;
@@ -132,109 +172,157 @@ void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays)
 }
 
 /*===========================================================================*/
-QString AInterfaceToANNScript::train()
-{
+//! Set cascade's specific settings.
+void AInterfaceToANNScript::setConfig_cascade(){
 
-QString InputSource=Config["trainingInput"].toString();
-QString OutputSource=Config["trainingOutput"].toString();
-int CurrentSensorGroup=Config["currentSensorGroup"].toInt();
+ // !!!!!!!!!!!!!!!!!!!!!!!!!!! replace EventsDataHub->Events.at(0).size() by a parameter !!!!!!
+ afann.createCascade(EventsDataHub->Events.at(0).size(),1);
 
-  // Input data: check consistency of the training data
+ //.......................................................................
+ afann.cascade_outputChangeFraction(Config["cascade_outputChangeFraction"].toDouble());
+ afann.cascade_candidateChangeFraction(Config["cascade_candidateChangeFraction"].toDouble());
+ afann.cascade_outputStagnationEpochs(Config["cascade_outputStagnationEpochs"].toInt());
+ afann.cascade_minOutEpochs(Config["cascade_minOutEpochs"].toInt());
+ afann.cascade_maxOutEpochs(Config["cascade_maxOutEpochs"].toInt());
+ afann.cascade_candidateStagnationEpochs(Config["cascade_candidateStagnationEpochs"].toInt());
+ afann.cascade_minCandEpochs(Config["cascade_minCandEpochs"].toInt());
+ afann.cascade_maxCandEpochs(Config["cascade_maxCandEpochs"].toInt());
+ afann.cascade_candidateLimit(Config["cascade_candidateLimit"].toInt());
+ afann.cascade_candidateGroups(Config["cascade_candidateGroups"].toInt());
+ afann.cascade_weightMultiplier(Config["cascade_weightMultiplier"].toDouble());
+
+ //.......................................................................
+ QVector<QVariant> qStp=Config["cascade_setActivationSteepness"].toArray().toVariantList().toVector();
+ cFANNWrapper::cActivationSteepness stp(qStp.size());
+ for (int s=0; s<qStp.size(); ++s) stp[s]=qStp[s].toDouble();
+ afann.cascade_setActivationSteepness(stp);
+
+ //.......................................................................
+ cFANNWrapper::cActivationFunctions act=NeuralNetworksModule::activationFunctions
+  .QOption(Config["cascade_setActivationFunctions"]);
+ afann.cascade_setActivationFunctions(act);
+}
+
+/*===========================================================================*/
+//! Set common settings.
+void AInterfaceToANNScript::setConfig_commom(){
+ afann.trainAlgorithm(NeuralNetworksModule::trainAlgorithms
+  .option(Config["trainAlgorithm"].toString().toStdString()));
+ afann.outputActivationFunc(NeuralNetworksModule::activationFunctions
+  .option(Config["outputActivationFunc"].toString().toStdString()));
+ afann.errorFunction(NeuralNetworksModule::trainErrorFunctions
+  .option(Config["errorFunction"].toString().toStdString()));
+ afann.stopFunction(NeuralNetworksModule::trainStopFunctions
+  .option(Config["stopFunction"].toString().toStdString()));
+
+ //...........................................................................
+ afann.bitFailLimit(Config["bitFailLimit"].toDouble());
+}
+
+/*===========================================================================*/
+//! Normalize vector 'data' to 'to' (note that the vector contents are changed)
+void AInterfaceToANNScript::norm(QVector<float> &data, double to){
+float sum=0, norm; for (float &d: data) sum+=d;
+ norm=to/sum; for (float &d: data) d*=norm;
+}
+
+/*===========================================================================*/
+//void AInterfaceToANNScript::create_train(QVector<QVector<float>> &in,
+//QVector<QVector<float>> &out){
+
+//}
+
+/*===========================================================================*/
+// in the case of InputSource == "EVENTS"
+// input vector for event iEvent is EventsDataHub->Events.at(iEvent)   (size is equal to the number of PMTs)
+// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+
+// in the case of OutputSource == "SCAN_POSITIONS"
+// the output training vector for event iEvent is EventsDataHub->Scan.at(iEvent)->Points.at(0).r - it is double[3]
+// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+// not a misstype - we use ReconstructionData container for event filters
+// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+
+// in the case of OutputSource == "RECONSTRUCTED_POSITIONS"
+// the output training vector for event iEvent is EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->Points.at(0).r - it is double[3]
+// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
+// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
+QString AInterfaceToANNScript::train() { try {
+
+ //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ QString InputSource=Config["trainingInput"].toString();
+ QString OutputSource=Config["trainingOutput"].toString();
+ int CurrentSensorGroup=Config["currentSensorGroup"].toInt();
+ const QVector<AReconRecord*> &rec_=EventsDataHub->ReconstructionData.at(CurrentSensorGroup);
+ QVector<QVector<float>> *in_=NULL;
+ QVector<float> data;
+
+  // Input data: check consistency of the training data +++++++++++++++++++++++
   int InputDataSize = -1;
   if (InputSource  == "DIRECT"){
-     InputDataSize = Input.size();
+      in_=&Input;
+      InputDataSize = Input.size();
   } else if (InputSource == "EVENTS"){
+      in_=&EventsDataHub->Events;
       InputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-
-      /// Fill 'Input' here?
-
   } else return "Unknown data source for training input";
 
-  // Output data: check consistency of the training data
+  // Output data: check consistency of the training data ++++++++++++++++++++++
   int OutputDataSize = -1;
   if (OutputSource == "DIRECT") {
       OutputDataSize = Output.size();
   } else if (OutputSource == "SCAN_POSITIONS"){
       if (EventsDataHub->Scan.isEmpty()) OutputDataSize = 0;
       else OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-
-      /// Fill 'output' here? (just for the else case)
-
   } else if (OutputSource == "RECONSTRUCTED_POSITIONS"){
       OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-
-      /// Fill 'output' here?
-      ///
   } else return "Unknown data source for training output";
 
-    //additional watchdogs
+  //additional watchdogs ++++++++++++++++++++++++++++++++++++++++++++++++++++++
   if (InputDataSize  == 0) return "Training input is empty";
   if (OutputDataSize == 0) return "Training output is empty";
   if (InputDataSize !=  OutputDataSize) return "Training data size mismatch";
 
-  // --------------------------
+  //???????????????????????????????????????????????????????????????????????????
 
-  //in the case of InputSource == "EVENTS"
-  //input vector for event iEvent is EventsDataHub->Events.at(iEvent)   (size is equal to the number of PMTs)
-  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-
-  //in the case of OutputSource == "SCAN_POSITIONS"
-  //the output training vector for event iEvent is EventsDataHub->Scan.at(iEvent)->Points.at(0).r - it is double[3]
-  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-    //not a misstype - we use ReconstructionData container for event filters
-  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-
-  //in the case of OutputSource == "RECONSTRUCTED_POSITIONS"
-  //the output training vector for event iEvent is EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->Points.at(0).r - it is double[3]
-  //use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-  //total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-
-
-  // --------------------------
-
-
-  if (Config["type"].toString()=="CASCADE"){
-      afann.createCascade(Input.first().size(),Output.first().size());
-
-      afann.cascade_outputChangeFraction(Config["cascade_outputChangeFraction"].toDouble());
-      afann.cascade_candidateChangeFraction(Config["cascade_candidateChangeFraction"].toDouble());
-      afann.cascade_outputStagnationEpochs(Config["cascade_outputStagnationEpochs"].toInt());
-      afann.cascade_minOutEpochs(Config["cascade_minOutEpochs"].toInt());
-      afann.cascade_maxOutEpochs(Config["cascade_maxOutEpochs"].toInt());
-      afann.cascade_candidateStagnationEpochs(Config["cascade_candidateStagnationEpochs"].toInt());
-      afann.cascade_minCandEpochs(Config["cascade_minCandEpochs"].toInt());
-      afann.cascade_maxCandEpochs(Config["cascade_maxCandEpochs"].toInt());
-      afann.cascade_candidateLimit(Config["cascade_candidateLimit"].toInt());
-      afann.cascade_candidateGroups(Config["cascade_candidateGroups"].toInt());
-      afann.cascade_weightMultiplier(Config["cascade_weightMultiplier"].toDouble());
-
-      //  Config["cascade_setActivationSteepness"] = QJsonArray({ 0.25, 0.5, 0.75, 1. });
-      //  Config["cascade_setActivationFunctions"]=QJsonArray({"FANN_SIGMOID",
-      //   "FANN_SIGMOID_SYMMETRIC","FANN_GAUSSIAN","FANN_GAUSSIAN_SYMMETRIC",
-      //   "FANN_ELLIOT","FANN_ELLIOT_SYMMETRIC"});
-
+  /// GOOD FOR SCAN, FLOOD, ...
+  FILE * outnn;
+  outnn = fopen ("test.fann","w");
+  fprintf(outnn,"%d %d %d\n",InputDataSize,in_->at(0).size(),1);
+  for (int i, evt=0; evt<rec_.size(); ++evt) if (rec_.at(evt)->GoodEvent){
+   for (norm(data=in_->at(evt)), i=0; i<data.size(); ++i) fprintf(outnn,"%f ",data[i]);
+   fprintf(outnn,"\n%f\n",EventsDataHub->Scan.at(evt)->Points.at(0).r[2]);
   }
-
-  afann.trainAlgorithm(NeuralNetworksModule::trainAlgorithms
-   .option(Config["trainAlgorithm"].toString().toStdString()));
-  afann.outputActivationFunc(NeuralNetworksModule::activationFunctions
-   .option(Config["outputActivationFunc"].toString().toStdString()));
-  afann.errorFunction(NeuralNetworksModule::trainErrorFunctions
-   .option(Config["errorFunction"].toString().toStdString()));
-  afann.stopFunction(NeuralNetworksModule::trainStopFunctions
-   .option(Config["stopFunction"].toString().toStdString()));
-
-  afann.bitFailLimit(Config["bitFailLimit"].toDouble());
+   fclose(outnn);
 
 
-  /// Need to create the train file here ... mem file? ask Andrei <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  //???????????????????????????????????????????????????????????????????????????
+
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  afann.init_train(); // reset treain data, etc
+  if (Config["type"].toString()=="CASCADE") setConfig_cascade();
+  setConfig_commom();
+
+  //...........................................................................
+  afann.loadTrain("test.fann",Config["trainingTestPer"].toDouble());
+//   afann.saveDataTrain("train.fann"); // optional, useful for debug
+//   afann.saveDataTest("test.fann"); // optional, useful for debug.
+
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   if (Config["type"].toString()=="CASCADE")
-      afann.trainCascade(1000,1,0.5); //! >>>>>>>>>>>>> This 2 inputs should be options !!!!!!!!!!!!
+   afann.trainCascade(100,1,0.5); //! >>>>>>>>>>>>> This 2 inputs should be options !!!!!!!!!!!!
+
+  // re-load the best configuration!
+  afann.load("best.fann");
 
   return "OK"; //success
-}
+
+ } catch (Exception &err){ return err.Message().c_str();
+ } catch (exception &err){ return err.what();
+ } catch (...){ return strerror(errno);
+} }
 
 /*===========================================================================*/
 QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays)

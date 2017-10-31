@@ -133,7 +133,7 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                           cStaticMapChoices                               */
-/*         Francisco Neves @ 2014.08.21 ( Last modified 2014.08.24 )         */
+/*         Francisco Neves @ 2014.08.21 ( Last modified 2017.10.30 )         */
 /*        Cross check version with mathetic library (Francisco Neves).       */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 // Inherit to implement a list of choices (set at the constructor)
@@ -166,6 +166,7 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     Type_ option(string name_);
     string name(Type_ opt_);
     //......................................................................
+    vector<Type_> QOption(const QJsonValueRef &obj);
     inline Type_ QOption(const QString &name_){ return option(name_.toStdString()); }
     inline int getQNameIdx(QString name_){ return getNameIdx(name_.toStdString()); }
     void load_options(unsigned g, QComboBox *combo);
@@ -206,8 +207,8 @@ bool cStaticMapChoices<Type_,nOptions_>::nameContains(string name_, int g){
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 template <class Type_, unsigned nOptions_>
 bool cStaticMapChoices<Type_,nOptions_>::idxContains(unsigned n, int g){
- for (unsigned i=0; i<FOptions[n].MGroup.size(); ++i) // single option
-  if (FOptions[n].MGroup[i]==g) return true; return false;
+ for (unsigned i=0; i<FOptions[n].MGroup.size(); ++i){ // single option
+  if (FOptions[n].MGroup[i]==g) return true; } return false;
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -221,31 +222,40 @@ bool cStaticMapChoices<Type_,nOptions_>::optionContains(Type_ opt_, int g){
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 template <class Type_, unsigned nOptions_>
 Type_ cStaticMapChoices<Type_,nOptions_>::option(string name_){
- for (unsigned n=0; n<nOptions_; ++n) if (name_==FOptions[n].MName)
-  return FOptions[n].MOption; throw Exception("Unknown Option",
+ for (unsigned n=0; n<nOptions_; ++n){ if (name_==FOptions[n].MName)
+  return FOptions[n].MOption; } throw Exception("Unknown Option",
    "cStaticMapChoices::option(string)",name_);
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 template <class Type_, unsigned nOptions_>
 string cStaticMapChoices<Type_,nOptions_>::name(Type_ opt_){
- for (unsigned n=0; n<nOptions_; ++n) if (opt_==FOptions[n].MOption)
-  return FOptions[n].MName; throw Exception("Unknown Option",
+ for (unsigned n=0; n<nOptions_; ++n){ if (opt_==FOptions[n].MOption)
+  return FOptions[n].MName; } throw Exception("Unknown Option",
    "cStaticMapChoices::option(string)",cString(opt_));
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 template <class Type_, unsigned nOptions_>
+vector<Type_> cStaticMapChoices<Type_,nOptions_>::QOption(const QJsonValueRef &obj){
+QVector<QVariant> qVal=obj.toArray().toVariantList().toVector();
+vector<Type_> val(qVal.size()); // will return a copy of this.
+ for (int v=0; v<qVal.size(); ++v) val[v]=QOption(qVal[v].toString());
+ return val;
+}
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
+template <class Type_, unsigned nOptions_>
 int cStaticMapChoices<Type_,nOptions_>::getNameIdx(string name_){
- for (unsigned n=0; n<nOptions_; ++n) if (name_==FOptions[n].MName)
-  return n; return -1;
+ for (unsigned n=0; n<nOptions_; ++n){ if (name_==FOptions[n].MName)
+  return n; } return -1;
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 template <class Type_, unsigned nOptions_>
 int cStaticMapChoices<Type_,nOptions_>::getOptionIdx(Type_ opt_){
- for (unsigned n=0; n<nOptions_; ++n) if (opt_==FOptions[n].MOption)
-  return n; return -1;
+ for (unsigned n=0; n<nOptions_; ++n){ if (opt_==FOptions[n].MOption)
+  return n; } return -1;
 }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -254,8 +264,8 @@ cStaticMapChoices<Type_,nOptions_>::load_options(unsigned g, QComboBox *combo){
 unsigned i; QString curr=combo->currentText(); combo->blockSignals(true);
  for (combo->clear(), i=0; i<nOptions_; ++i){ // add 'g' group.
   if (idxContains(i,g)) combo->addItem(FOptions[i].MName.c_str()); }
- for (i=0; i<combo->count(); ++i) // keep current text if available.
-  if (combo->itemText(i)==curr){ combo->setCurrentIndex(i); break; }
+ for (i=0; (int)i<combo->count(); ++i){  // keep current text if available.
+  if (combo->itemText(i)==curr){ combo->setCurrentIndex(i); break; } }
  combo->blockSignals(false);
 }
 
@@ -270,7 +280,7 @@ unsigned i; combo->blockSignals(true);
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                                cFANNWrapper                               */
-/*         Francisco Neves @ 2012.12.07 ( Last modified 2014.12.15 )         */
+/*         Francisco Neves @ 2012.12.07 ( Last modified 2017.10.30 )         */
 /*        Cross check version with mathetic library (Francisco Neves).       */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -413,14 +423,14 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     inline double qprop_mu(){ return fann_get_quickprop_mu(FANN); }
     inline void qprop_mu(double v){ return fann_set_quickprop_mu(FANN,v); }
     // SAR propagation ........................................................
-    inline double sarprop_weightDecayShit(){ return 0; /*fann_get_sarprop_weight_decay_shift(FANN)*/; }
-    inline void sarprop_weightDecayShit(double){ /*fann_set_sarprop_weight_decay_shift(FANN,v); V2.1.0*/ }
-    inline double sarprop_stepErrorThresholdFactor(){ return 0/*fann_get_sarprop_step_error_threshold_factor(FANN) V2.1.0*/; }
-    inline void sarprop_stepErrorThresholdFactor(double){ /*fann_set_sarprop_step_error_threshold_factor(FANN,v) V2.1.0*/; }
-    inline double sarprop_stepErrorShift(){ return 0/*fann_get_sarprop_step_error_shift(FANN) V2.1.0*/; }
-    inline void sarprop_stepErrorShift(double){ /*fann_set_sarprop_step_error_shift(FANN,v) V2.1.0*/; }
-    inline double sarprop_temperature(){ return 0/*fann_get_sarprop_temperature(FANN) V2.1.0*/; }
-    inline void sarprop_temperature(double){ /*fann_set_sarprop_temperature(FANN,v) V2.1.0*/; }
+    inline double sarprop_weightDecayShit(){ return fann_get_sarprop_weight_decay_shift(FANN); }
+    inline void sarprop_weightDecayShit(double v){ fann_set_sarprop_weight_decay_shift(FANN,v); }
+    inline double sarprop_stepErrorThresholdFactor(){ return fann_get_sarprop_step_error_threshold_factor(FANN); }
+    inline void sarprop_stepErrorThresholdFactor(double v){ fann_set_sarprop_step_error_threshold_factor(FANN,v); }
+    inline double sarprop_stepErrorShift(){ return fann_get_sarprop_step_error_shift(FANN); }
+    inline void sarprop_stepErrorShift(double v){ fann_set_sarprop_step_error_shift(FANN,v); }
+    inline double sarprop_temperature(){ return fann_get_sarprop_temperature(FANN); }
+    inline void sarprop_temperature(double v){ fann_set_sarprop_temperature(FANN,v); }
     // cascade training .......................................................
     inline double cascade_outputChangeFraction(){ return fann_get_cascade_output_change_fraction(FANN); }
     inline void cascade_outputChangeFraction(double v){ fann_set_cascade_output_change_fraction(FANN,v); }
@@ -436,12 +446,12 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     inline void cascade_candidateLimit(fann_type v){ fann_set_cascade_candidate_limit(FANN,v); }
     inline unsigned cascade_maxOutEpochs(){ return fann_get_cascade_max_out_epochs(FANN); }
     inline void cascade_maxOutEpochs(unsigned v){ fann_set_cascade_max_out_epochs(FANN,v); }
-    inline unsigned cascade_minOutEpochs(){ return 0/*fann_get_cascade_min_out_epochs(FANN) V2.2.0*/; }
-    inline void cascade_minOutEpochs(unsigned){ /*fann_set_cascade_min_out_epochs(FANN,v) V2.2.0*/; }
+    inline unsigned cascade_minOutEpochs(){ return fann_get_cascade_min_out_epochs(FANN); }
+    inline void cascade_minOutEpochs(unsigned v){ fann_set_cascade_min_out_epochs(FANN,v); }
     inline unsigned cascade_maxCandEpochs(){ return fann_get_cascade_max_cand_epochs(FANN); }
     inline void cascade_maxCandEpochs(unsigned v){ fann_set_cascade_max_cand_epochs(FANN,v); }
-    inline unsigned cascade_minCandEpochs(){ return 0/*fann_get_cascade_min_cand_epochs(FANN) V2.2.0*/; }
-    inline void cascade_minCandEpochs(unsigned){ /*fann_set_cascade_min_cand_epochs(FANN,v) V2.2.0*/; }
+    inline unsigned cascade_minCandEpochs(){ return fann_get_cascade_min_cand_epochs(FANN); }
+    inline void cascade_minCandEpochs(unsigned v){ fann_set_cascade_min_cand_epochs(FANN,v); }
     inline unsigned cascade_numCandidates(){ return fann_get_cascade_num_candidates(FANN); }
     inline unsigned cascade_nActivationFunctions(){ return fann_get_cascade_activation_functions_count(FANN); }
     void cascade_getActivationFunctions(cActivationFunctions &f);
@@ -473,7 +483,7 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                           NeuralNetworksModule                            */
-/*             ( Last modified by Francisco Neves @ 2015.04.27 )             */
+/*             ( Last modified by Francisco Neves @ 2017.10.30 )             */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class NeuralNetworksWindow;
 class NeuralNetworksModule : public QObject, public cFANNWrapper{

@@ -58,6 +58,7 @@ public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   void addTrainingOutput(QVariant arrayOfArrays);
   QString train();
   QVariant process(QVariant arrayOfArrays);
+  QVariant processEvents(int firstEvent, int lastEvent);
 };
 
 #endif // AINTERFACETOANNSCRIPT_H

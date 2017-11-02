@@ -348,6 +348,26 @@ QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays)
   return l;
 }
 
+QVariant AInterfaceToANNScript::processEvents(int firstEvent, int lastEvent)
+{
+  requestPrint("Working..."); //this is waht you asked for printout
+
+  // Use EventsDataHub->Events, without checking for good (all events in the range from firstEvent, until and including lastEvent):
+
+
+  //packing the results to send back to the script
+  QVector< QVector<float> > dummy; dummy << QVector<float>(5,0) << QVector<float>(5,1) << QVector<float>(5, 2);
+  QVariantList l;
+  for (int i=0; i<dummy.size(); i++)
+    {
+      const QVector<float>& thisOne = dummy.at(i);
+      QVariantList ll;
+      for (int ii=0; ii<thisOne.size(); ii++) ll << thisOne.at(ii);
+      l << QVariant(ll);
+    }
+  return l;
+}
+
 /*===========================================================================*/
 bool AInterfaceToANNScript::convertQVariantToVectorOfVectors(QVariant *var, QVector<QVector<float> > *vec, int fixedSize)
 {

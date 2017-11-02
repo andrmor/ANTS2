@@ -28,11 +28,13 @@ public slots:
 
 signals:
   void AbortScriptEvaluation(QString);      //abort request is automatically linked to abort slot of core unit
+  void PrintText(QString);
 
 protected:
   QHash<QString, QString> H;
 
   void abort(QString message = "Aborted!") {emit AbortScriptEvaluation(message);}
+  void requestPrint(QString text) {emit PrintText(text);} // print this text using "core" module
 };
 
 #endif // ASCRIPTINTERFACE_H

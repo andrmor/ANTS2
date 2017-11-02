@@ -121,6 +121,10 @@ void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
     int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");
     if (index != -1)
         QObject::connect(interfaceObject, "2AbortScriptEvaluation(QString)", this, SLOT(AbortEvaluation(QString)));  //1-slot, 2-signal
+
+    index = interfaceObject->metaObject()->indexOfSignal("PrintText(QString)");
+    if (index != -1)
+        QObject::connect(interfaceObject, "2PrintText(QString)", this, SIGNAL(showMessage(QString)));  //1-slot, 2-signal
 }
 
 int AScriptManager::FindSyntaxError(QString script)

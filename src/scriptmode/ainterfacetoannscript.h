@@ -9,6 +9,7 @@
 #include <QVariant>
 #include <QVector>
 #include <QJsonObject>
+#include <QApplication>
 
 class NeuralNetworksScript;
 class AInterfaceToANNScript;
@@ -19,17 +20,21 @@ class AInterfaceToANNScript;
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class NeuralNetworksScript : public cFANNWrapper{
 private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    bool FStop;
     string FOutFile;
     unsigned FnEpochsStag, FMaxEpochsStag;
     double FTrainMSE, FTrainFailBit, FTestMSE, FTestFailBit;
-public:
     AInterfaceToANNScript* FParent; // used by ::requestPrint.
 protected: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
    int userCallback(fann_train_data* train, unsigned max_epochs,
     unsigned epochs_between_reports, float desired_error, unsigned epochs);
 public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
    explicit NeuralNetworksScript(AInterfaceToANNScript *parent);
+   //..........................................................................
+   inline void stop_Train(){ FStop=true; }
    void init_train(string outFile);
+   //..........................................................................
+   void run(QVector<float> &in, QVector<float> &out);
 };
 
 

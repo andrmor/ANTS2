@@ -17,8 +17,10 @@
 int NeuralNetworksScript::userCallback(fann_train_data* train, unsigned max_epochs,
 unsigned epochs_between_reports, float desired_error, unsigned epochs){
 double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
+ qApp->processEvents();
+ if (FStop) return -1; // user stop it, nothing to do!
+ //............................................................................
  testData(&TrainMSE,&TrainFailBit,&TestMSE,&TestFailBit);
-
 
  FParent->requestPrint("dow !!!!!");
 
@@ -60,8 +62,16 @@ NeuralNetworksScript::NeuralNetworksScript(AInterfaceToANNScript *parent)
 //! Must be called before starting trainning.
 void NeuralNetworksScript::init_train(string outFile){
  FTrainMSE=FTrainFailBit=FTestMSE=FTestFailBit=DBL_MAX;
- FnEpochsStag=0; FOutFile=outFile;
+ FnEpochsStag=0; FStop=false; FOutFile=outFile;
  cFANNWrapper::clear();
+}
+
+/*===========================================================================*/
+//! Interface between ANTS QVector and FANNWrapper std vector.
+void NeuralNetworksScript::run(QVector<float> &in, QVector<float> &out){
+cLayer std_in=in.toStdVector(), std_out;
+ cFANNWrapper::run(std_in,std_out);
+ out.fromStdVector(std_out);
 }
 
 /*===========================================================================*/
@@ -75,8 +85,8 @@ AInterfaceToANNScript::~AInterfaceToANNScript(){
 
 /*===========================================================================*/
 void AInterfaceToANNScript::ForceStop(){
-    /// Not working when the *stop* button is clicked. Waiting for Andrei ...
- qDebug() << "Waiting for NN to stop ... ";
+ requestPrint("Waiting for NN to stop ... ");
+ afann.stop_Train();
 }
 
 /*===========================================================================*/
@@ -336,46 +346,66 @@ QString AInterfaceToANNScript::train(QString FANN_File) { try {
 } }
 
 /*===========================================================================*/
-QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays)
-{
-  //unpacking data
+QVariant AInterfaceToANNScript::process(QVariant arrayOfArrays) {
+
+  if (!afann.isFANN()){ // need to load a valid FANN structure ++++++++++++++++
+   abort("No valid FANN is available!");
+   return QVariantList();
+  }
+
+  //unpacking data ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   QVector< QVector<float> > Data;
   int fixedSize = Input.isEmpty() ? -1 : Input.first().size();
   if ( !convertQVariantToVectorOfVectors(&arrayOfArrays, &Data, fixedSize) ) return QVariant();
-  qDebug() << "received to process:" << Data;
+  qDebug() << "received to process: " << Data.size() << " events";
 
-  //.....
+  if (Data.size()==0) return QVariantList(); // nothing to do.
+  else if ((int)afann.nInputs()!=Data[0].size()){ //+++++++++++++++++++++++++++
+   abort("Loaded FANN and input data have different dimensions!");
+   return QVariantList();
+  }
 
-  //packing the results to send back to the script
-  QVector< QVector<float> > dummy; dummy << QVector<float>(5,0) << QVector<float>(5,1) << QVector<float>(5, 2);
-  QVariantList l;
-  for (int i=0; i<dummy.size(); i++)
-    {
-      const QVector<float>& thisOne = dummy.at(i);
-      QVariantList ll;
-      for (int ii=0; ii<thisOne.size(); ii++) ll << thisOne.at(ii);
-      l << QVariant(ll);
-    }
+  QVector<QVector<float>> res(Data.size()); // Process ++++++++++++++++++++++++
+  for (int d=0; d<Data.size(); ++d){
+    norm(Data[d]); afann.run(Data[d],res[d]);
+  }
+
+  QVariantList l; // Pack the result back  ++++++++++++++++++++++++++++++++++++
+  for (int i=0; i<res.size(); i++){
+   const QVector<float>& thisOne = res.at(i); QVariantList ll;
+   for (int ii=0; ii<thisOne.size(); ii++) ll << thisOne.at(ii);
+   l << QVariant(ll);
+  }
   return l;
 }
 
-QVariant AInterfaceToANNScript::processEvents(int firstEvent, int lastEvent)
-{
-  requestPrint("Working..."); //this is waht you asked for printout
+/*===========================================================================*/
+//! all events in the range from firstEvent, until and including lastEvent
+QVariant AInterfaceToANNScript::processEvents(int firstEvent, int lastEvent){
 
-  // Use EventsDataHub->Events, without checking for good (all events in the range from firstEvent, until and including lastEvent):
+  if (!afann.isFANN()){ // need to load a valid FANN structure ++++++++++++++++
+   abort("No valid FANN is available!");
+   return QVariantList();
+  }
 
+  if (lastEvent<firstEvent) return QVariantList(); // nothing to do.
+  else if ((int)afann.nInputs()!=EventsDataHub->Events.at(0).size()){ //+++++++
+   abort("Loaded FANN and input data have different dimensions!");
+   return QVariantList();
+  }
 
-  //packing the results to send back to the script
-  QVector< QVector<float> > dummy; dummy << QVector<float>(5,0) << QVector<float>(5,1) << QVector<float>(5, 2);
-  QVariantList l;
-  for (int i=0; i<dummy.size(); i++)
-    {
-      const QVector<float>& thisOne = dummy.at(i);
-      QVariantList ll;
-      for (int ii=0; ii<thisOne.size(); ii++) ll << thisOne.at(ii);
-      l << QVariant(ll);
-    }
+  QVector<QVector<float>> res(lastEvent-firstEvent+1); // Process +++++++++++++
+  for (int d=firstEvent; d<=lastEvent; ++d){
+    QVector<float> Data=EventsDataHub->Events.at(d);
+    norm(Data); afann.run(Data,res[d-firstEvent]);
+  }
+
+  QVariantList l; // packing the results to send back to the script +++++++++++
+  for (int i=0; i<res.size(); i++){
+   const QVector<float>& thisOne = res.at(i); QVariantList ll;
+   for (int ii=0; ii<thisOne.size(); ii++) ll << thisOne.at(ii);
+   l << QVariant(ll);
+  }
   return l;
 }
 

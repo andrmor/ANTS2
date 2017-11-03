@@ -280,7 +280,7 @@ unsigned i; combo->blockSignals(true);
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                                cFANNWrapper                               */
-/*         Francisco Neves @ 2012.12.07 ( Last modified 2017.10.30 )         */
+/*         Francisco Neves @ 2012.12.07 ( Last modified 2017.11.02 )         */
 /*        Cross check version with mathetic library (Francisco Neves).       */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 

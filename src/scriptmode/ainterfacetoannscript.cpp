@@ -13,19 +13,21 @@
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /*===========================================================================*/
+//! TODO: exit (-1) when stopped is true (from AInterfaceToANNScript::ForceStop)
 int NeuralNetworksScript::userCallback(fann_train_data* train, unsigned max_epochs,
 unsigned epochs_between_reports, float desired_error, unsigned epochs){
 double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
  testData(&TrainMSE,&TrainFailBit,&TestMSE,&TestFailBit);
 
+
+ FParent->requestPrint("dow !!!!!");
+
  if (TrainMSE<FTrainMSE && TrainFailBit<FTrainFailBit
   && TestMSE<FTestMSE && TestFailBit<FTestFailBit){ //+++++++++++++++++++++++++
    FTrainMSE=TrainMSE; FTrainFailBit=TrainFailBit;
    FTestMSE=TestMSE; FTestFailBit=TestFailBit;
-   FnEpochsStag=0;
-
-      save("best.fann");
-
+   // Save best config up do now and reset stagnation flag.
+   save(FOutFile); FnEpochsStag=0;
  } else { FnEpochsStag++; }
  if (FMaxEpochsStag>0 && FnEpochsStag>FMaxEpochsStag){ //++++++++++++++++++++++
    qDebug() << "Train stopped";
@@ -51,14 +53,20 @@ double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
 }
 
 /*===========================================================================*/
-void NeuralNetworksScript::init_train(){
+NeuralNetworksScript::NeuralNetworksScript(AInterfaceToANNScript *parent)
+:FMaxEpochsStag(20),FParent(parent){ }
+
+/*===========================================================================*/
+//! Must be called before starting trainning.
+void NeuralNetworksScript::init_train(string outFile){
  FTrainMSE=FTrainFailBit=FTestMSE=FTestFailBit=DBL_MAX;
- FnEpochsStag=0; cFANNWrapper::clear();
+ FnEpochsStag=0; FOutFile=outFile;
+ cFANNWrapper::clear();
 }
 
 /*===========================================================================*/
 AInterfaceToANNScript::AInterfaceToANNScript(EventsDataClass *EventsDataHub) :
-EventsDataHub(EventsDataHub){ resetConfigToDefault(); }
+EventsDataHub(EventsDataHub),afann(this){ resetConfigToDefault(); }
 
 /*===========================================================================*/
 AInterfaceToANNScript::~AInterfaceToANNScript(){
@@ -66,10 +74,15 @@ AInterfaceToANNScript::~AInterfaceToANNScript(){
 }
 
 /*===========================================================================*/
+void AInterfaceToANNScript::ForceStop(){
+    /// Not working when the *stop* button is clicked. Waiting for Andrei ...
+ qDebug() << "Waiting for NN to stop ... ";
+}
+
+/*===========================================================================*/
 void AInterfaceToANNScript::clearTrainingData(){
   Input.clear(); Input.squeeze();
   Output.clear(); Output.squeeze();
-
 }
 
 /*===========================================================================*/
@@ -115,7 +128,7 @@ QString AInterfaceToANNScript::configure(QVariant configObject){
 //! Default config.
 void AInterfaceToANNScript::resetConfigToDefault(){
   Config = QJsonObject();
-
+  //...........................................................................
   Config["trainingInput"]="EVENTS"; // can be "DIRECT","EVENTS" (from )
   Config["trainingOutput"]="SCAN_POSITIONS"; // can be "DIRECT", "RECONSTRUCTED_POSITIONS", "SCAN_POSITIONS"
   Config["currentSensorGroup"]=0;
@@ -123,11 +136,13 @@ void AInterfaceToANNScript::resetConfigToDefault(){
   //...........................................................................
   Config["type"]="CASCADE";
   Config["trainAlgorithm"]="RETRO PROPAGATION";
-  Config["outputActivationFunc"]="SIGMOID";
+  Config["outputActivationFunc"]="LINEAR";
   Config["errorFunction"]="LINEAR";
   Config["stopFunction"]="BIT";
-  //...........................................................................
   Config["bitFailLimit"]=0.1; // no default.
+  //...........................................................................
+  Config["cascade_maxNeurons"]=100;
+  Config["cascade_trainError"]=1.E-5;
   Config["cascade_outputChangeFraction"]=0.01; // default
   Config["cascade_candidateChangeFraction"]=0.01; // default
   Config["cascade_outputStagnationEpochs"]=12; // default
@@ -139,7 +154,7 @@ void AInterfaceToANNScript::resetConfigToDefault(){
   Config["cascade_candidateLimit"]=1000; // default
   Config["cascade_candidateGroups"]=2; // default
   Config["cascade_weightMultiplier"]=0.4; // default
-  Config["cascade_setActivationSteepness"]=QJsonArray({ 0.25, 0.5, 0.75, 1. });
+  Config["cascade_setActivationSteepness"]=QJsonArray({ 0.2, 0.4, 0.6, 0.8, 1. });
   Config["cascade_setActivationFunctions"]=QJsonArray({"SIGMOID","SIGMOID SYMMETRIC",
    "GAUSSIAN","GAUSSIAN SYMMETRIC","ELLIOT","ELLIOT SYMMETRIC"});
 }
@@ -173,11 +188,9 @@ void AInterfaceToANNScript::addTrainingOutput(QVariant arrayOfArrays){
 
 /*===========================================================================*/
 //! Set cascade's specific settings.
+//! TODO: replace EventsDataHub->Events.at(0).size() by a parameter !!!!!!
 void AInterfaceToANNScript::setConfig_cascade(){
-
- // !!!!!!!!!!!!!!!!!!!!!!!!!!! replace EventsDataHub->Events.at(0).size() by a parameter !!!!!!
  afann.createCascade(EventsDataHub->Events.at(0).size(),1);
-
  //.......................................................................
  afann.cascade_outputChangeFraction(Config["cascade_outputChangeFraction"].toDouble());
  afann.cascade_candidateChangeFraction(Config["cascade_candidateChangeFraction"].toDouble());
@@ -190,13 +203,11 @@ void AInterfaceToANNScript::setConfig_cascade(){
  afann.cascade_candidateLimit(Config["cascade_candidateLimit"].toInt());
  afann.cascade_candidateGroups(Config["cascade_candidateGroups"].toInt());
  afann.cascade_weightMultiplier(Config["cascade_weightMultiplier"].toDouble());
-
  //.......................................................................
  QVector<QVariant> qStp=Config["cascade_setActivationSteepness"].toArray().toVariantList().toVector();
  cFANNWrapper::cActivationSteepness stp(qStp.size());
  for (int s=0; s<qStp.size(); ++s) stp[s]=qStp[s].toDouble();
  afann.cascade_setActivationSteepness(stp);
-
  //.......................................................................
  cFANNWrapper::cActivationFunctions act=NeuralNetworksModule::activationFunctions
   .QOption(Config["cascade_setActivationFunctions"]);
@@ -227,10 +238,12 @@ float sum=0, norm; for (float &d: data) sum+=d;
 }
 
 /*===========================================================================*/
-//void AInterfaceToANNScript::create_train(QVector<QVector<float>> &in,
-//QVector<QVector<float>> &out){
-
-//}
+QString AInterfaceToANNScript::load(QString FANN_File){
+ afann.load(FANN_File.toStdString());
+ if (afann.isFANN()) return "Ok"; else {
+  abort("Fail to load File: "+FANN_File);
+  return "Failed";
+} }
 
 /*===========================================================================*/
 // in the case of InputSource == "EVENTS"
@@ -248,8 +261,7 @@ float sum=0, norm; for (float &d: data) sum+=d;
 // the output training vector for event iEvent is EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->Points.at(0).r - it is double[3]
 // use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
 // total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-QString AInterfaceToANNScript::train() { try {
-
+QString AInterfaceToANNScript::train(QString FANN_File) { try {
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  QString InputSource=Config["trainingInput"].toString();
  QString OutputSource=Config["trainingOutput"].toString();
@@ -258,32 +270,33 @@ QString AInterfaceToANNScript::train() { try {
  QVector<QVector<float>> *in_=NULL;
  QVector<float> data;
 
-  // Input data: check consistency of the training data +++++++++++++++++++++++
-  int InputDataSize = -1;
-  if (InputSource  == "DIRECT"){
-      in_=&Input;
-      InputDataSize = Input.size();
-  } else if (InputSource == "EVENTS"){
-      in_=&EventsDataHub->Events;
-      InputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  } else return "Unknown data source for training input";
+ // Input data: check consistency of the training data ++++++++++++++++++++++++
+ int InputDataSize = -1;
+ if (InputSource  == "DIRECT"){
+  in_=&Input;
+  InputDataSize = Input.size();
+ } else if (InputSource == "EVENTS"){
+  in_=&EventsDataHub->Events;
+  InputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+ } else return "Unknown data source for training input";
 
-  // Output data: check consistency of the training data ++++++++++++++++++++++
-  int OutputDataSize = -1;
-  if (OutputSource == "DIRECT") {
-      OutputDataSize = Output.size();
-  } else if (OutputSource == "SCAN_POSITIONS"){
-      if (EventsDataHub->Scan.isEmpty()) OutputDataSize = 0;
-      else OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  } else if (OutputSource == "RECONSTRUCTED_POSITIONS"){
-      OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
-  } else return "Unknown data source for training output";
+ // Output data: check consistency of the training data ++++++++++++++++++++++
+ int OutputDataSize = -1;
+ if (OutputSource == "DIRECT") {
+  OutputDataSize = Output.size();
+ } else if (OutputSource == "SCAN_POSITIONS"){
+  if (EventsDataHub->Scan.isEmpty()) OutputDataSize = 0;
+  else OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+ } else if (OutputSource == "RECONSTRUCTED_POSITIONS"){
+  OutputDataSize = EventsDataHub->countGoodEvents(CurrentSensorGroup);
+ } else return "Unknown data source for training output";
 
-  //additional watchdogs ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  if (InputDataSize  == 0) return "Training input is empty";
-  if (OutputDataSize == 0) return "Training output is empty";
-  if (InputDataSize !=  OutputDataSize) return "Training data size mismatch";
+ //additional watchdogs ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ if (InputDataSize  == 0) return "Training input is empty";
+ if (OutputDataSize == 0) return "Training output is empty";
+ if (InputDataSize !=  OutputDataSize) return "Training data size mismatch";
 
+  //???????????????????????????????????????????????????????????????????????????
   //???????????????????????????????????????????????????????????????????????????
 
   /// GOOD FOR SCAN, FLOOD, ...
@@ -296,11 +309,11 @@ QString AInterfaceToANNScript::train() { try {
   }
    fclose(outnn);
 
-
+  //???????????????????????????????????????????????????????????????????????????
   //???????????????????????????????????????????????????????????????????????????
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  afann.init_train(); // reset treain data, etc
+  afann.init_train(FANN_File.toStdString()); // reset treain data, etc
   if (Config["type"].toString()=="CASCADE") setConfig_cascade();
   setConfig_commom();
 
@@ -311,12 +324,10 @@ QString AInterfaceToANNScript::train() { try {
 
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-  if (Config["type"].toString()=="CASCADE")
-   afann.trainCascade(100,1,0.5); //! >>>>>>>>>>>>> This 2 inputs should be options !!!!!!!!!!!!
+  if (Config["type"].toString()=="CASCADE") afann.trainCascade(
+   Config["cascade_maxNeurons"].toInt(),1,Config["cascade_trainError"].toDouble());
 
-  // re-load the best configuration!
-  afann.load("best.fann");
-
+  afann.load(FANN_File.toStdString()); // re-load the best configuration!
   return "OK"; //success
 
  } catch (Exception &err){ return err.Message().c_str();

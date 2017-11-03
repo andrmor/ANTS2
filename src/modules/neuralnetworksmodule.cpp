@@ -280,9 +280,10 @@ void cFANNWrapper::createCascade(unsigned nInputs, unsigned nOutputs){
 void cFANNWrapper::load(string file){ 
  clear(); // Force cleanup of all structrures.
  FANN=fann_create_from_file(file.c_str());
- fann_set_callback(FANN,(fann_callback_type)&FUserCallback);
- fann_set_user_data(FANN,this);
-}
+ if (FANN){ // Only Set on success!! ..........................................
+  fann_set_callback(FANN,(fann_callback_type)&FUserCallback);
+  fann_set_user_data(FANN,this);
+} }
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 // Check success using '::isFANN'.

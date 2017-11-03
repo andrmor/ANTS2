@@ -10,25 +10,32 @@
 #include <QVector>
 #include <QJsonObject>
 
+class NeuralNetworksScript;
+class AInterfaceToANNScript;
+
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                           NeuralNetworksScript                            */
-/*             ( Last modified by Francisco Neves @ 2017.10.30 )             */
+/*             ( Last modified by Francisco Neves @ 2017.11.03 )             */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class NeuralNetworksScript : public cFANNWrapper{
 private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    string FOutFile;
     unsigned FnEpochsStag, FMaxEpochsStag;
     double FTrainMSE, FTrainFailBit, FTestMSE, FTestFailBit;
+public:
+    AInterfaceToANNScript* FParent; // used by ::requestPrint.
 protected: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
    int userCallback(fann_train_data* train, unsigned max_epochs,
     unsigned epochs_between_reports, float desired_error, unsigned epochs);
 public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   explicit NeuralNetworksScript():FMaxEpochsStag(20){ }
-   void init_train();
+   explicit NeuralNetworksScript(AInterfaceToANNScript *parent);
+   void init_train(string outFile);
 };
 
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                          AInterfaceToANNScript                            */
+/*             ( Last modified by Francisco Neves @ 2017.11.03 )             */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class AInterfaceToANNScript : public AScriptInterface{
   Q_OBJECT
@@ -42,21 +49,26 @@ private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   void setConfig_cascade();
   void setConfig_commom();
   void norm(QVector<float> &data, double to=1.);
-
-  /// void create_train(QVector<QVector<float>> &in, QVector<QVector<float>> &out);
-
+protected: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  friend class NeuralNetworksScript; // enable use of ::requestPrint
 public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   AInterfaceToANNScript(EventsDataClass* EventsDataHub);
   ~AInterfaceToANNScript();
+  //...........................................................................
+  void ForceStop(); // inherited from AScriptInterface
 public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   void newNetwork();
   void clearTrainingData();
   QVariant getConfig();
   void resetConfigToDefault();
   QString configure(QVariant configObject);
+  //...........................................................................
   void addTrainingInput(QVariant arrayOfArrays);
   void addTrainingOutput(QVariant arrayOfArrays);
-  QString train();
+  //...........................................................................
+  QString load(QString FANN_File);
+  QString train(QString FANN_File);
+  //...........................................................................
   QVariant process(QVariant arrayOfArrays);
   QVariant processEvents(int firstEvent, int lastEvent);
 };

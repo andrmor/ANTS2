@@ -16,7 +16,7 @@ class AInterfaceToANNScript;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                           NeuralNetworksScript                            */
-/*             ( Last modified by Francisco Neves @ 2017.11.03 )             */
+/*             ( Last modified by Francisco Neves @ 2017.11.06 )             */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class NeuralNetworksScript : public cFANNWrapper{
 private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

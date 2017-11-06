@@ -48,11 +48,13 @@
 #endif
 
 #include "amessage.h"
+#include <locale>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QLocale::setDefault(QLocale("en_US"));
+    std::locale::global(std::locale("en_US.UTF-8"));
 
     AConfiguration Config;
     int rootargc=1;

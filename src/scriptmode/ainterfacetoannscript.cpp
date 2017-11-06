@@ -16,14 +16,11 @@
 //! TODO: exit (-1) when stopped is true (from AInterfaceToANNScript::ForceStop)
 int NeuralNetworksScript::userCallback(fann_train_data* train, unsigned max_epochs,
 unsigned epochs_between_reports, float desired_error, unsigned epochs){
-double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
+double TrainMSE, TrainFailBit, TestMSE, TestFailBit; string mess, rMess;
  qApp->processEvents();
  if (FStop) return -1; // user stop it, nothing to do!
  //............................................................................
  testData(&TrainMSE,&TrainFailBit,&TestMSE,&TestFailBit);
-
- FParent->requestPrint("dow !!!!!");
-
  if (TrainMSE<FTrainMSE && TrainFailBit<FTrainFailBit
   && TestMSE<FTestMSE && TestFailBit<FTestFailBit){ //+++++++++++++++++++++++++
    FTrainMSE=TrainMSE; FTrainFailBit=TrainFailBit;
@@ -32,23 +29,24 @@ double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
    save(FOutFile); FnEpochsStag=0;
  } else { FnEpochsStag++; }
  if (FMaxEpochsStag>0 && FnEpochsStag>FMaxEpochsStag){ //++++++++++++++++++++++
+   FParent->requestPrint("Train stopped");
    qDebug() << "Train stopped";
    return -1; // exit
  } else { //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   qDebug() << "Epochs = " << cString(epochs).c_str();
-   qDebug() << "Hidden Neurons,Layers = " << cString(nHiddenNeurons()).c_str()
-            << ", " << cString(nHiddenLayers()).c_str();
+   mess+=("Epochs = "+cString(epochs)+"\n");
+   mess+=("Hidden Neurons,Layers = "+cString(nHiddenNeurons())+", "+cString(nHiddenLayers())+"\n");
    if (nHiddenLayers()>0){ // In case we have hidden layers ...................
-    qDebug() << "\tActivation steepness = " << cString(activationSteepness(nHiddenLayers(),0)).c_str();
-    qDebug() << "\tActivation function = " << FANN_ACTIVATIONFUNC_NAMES[activationFunction(nHiddenLayers(),0)];
+    mess+=("\tActivation steepness = "+cString(activationSteepness(nHiddenLayers(),0))+"\n");
+    mess+=("\tActivation function = "+string(FANN_ACTIVATIONFUNC_NAMES[activationFunction(nHiddenLayers(),0)])+"\n");
    } //........................................................................
-   qDebug() << "\tTrain Data: MSE = " << cString(TrainMSE).c_str()
-            << (isDataTest()?(" ("+cString(TestMSE)+")").c_str():"");
-   qDebug() << "\tbit fail = " << cString(TrainFailBit).c_str()
-            << (isDataTest()?(" ("+cString(TestFailBit)+")").c_str():"");
+   rMess+=("\tTrain Data: MSE = "+cString(TrainMSE)+(isDataTest()?(" ("+cString(TestMSE)+")"):"")+"\n");
+   rMess+=("\tbit fail = "+cString(TrainFailBit)+(isDataTest()?(" ("+cString(TestFailBit)+")"):"")+"\n");
    //..........................................................................
-   if (FnEpochsStag==0) qDebug () << ">>> Train is improving...";
-   else qDebug() << ">>> Train is stagnated!";
+   if (FnEpochsStag==0) rMess+=">>> Train is improving...\n";
+   else rMess+=">>> Train is stagnated!\n";
+   mess+=rMess; qDebug() << mess.c_str();
+   FParent->requestPrint(rMess.c_str());
+   qApp->processEvents();
  } //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  return cFANNWrapper::userCallback(train,max_epochs,
   epochs_between_reports,desired_error,epochs);
@@ -71,7 +69,7 @@ void NeuralNetworksScript::init_train(string outFile){
 void NeuralNetworksScript::run(QVector<float> &in, QVector<float> &out){
 cLayer std_in=in.toStdVector(), std_out;
  cFANNWrapper::run(std_in,std_out);
- out.fromStdVector(std_out);
+ out=QVector<float>::fromStdVector(std_out);
 }
 
 /*===========================================================================*/

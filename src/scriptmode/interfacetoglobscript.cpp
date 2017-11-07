@@ -1261,6 +1261,21 @@ double InterfaceToData::GetPMsignal(int ievent, int ipm)
   return EventsDataHub->Events.at(ievent).at(ipm);
 }
 
+QVariant InterfaceToData::GetPMsignals(int ievent)
+{
+  int numEvents = GetNumEvents();
+  if (ievent<0 || ievent>=numEvents)
+    {
+      abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+      return 0;
+    }
+
+  const QVector< float >& sigs = EventsDataHub->Events.at(ievent);
+  QVariantList l;
+  for (float f : sigs) l << QVariant(f);
+  return l;
+}
+
 void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
 {
     int numEvents = GetNumEvents();

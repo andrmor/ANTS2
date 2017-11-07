@@ -40,7 +40,7 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*                          AInterfaceToANNScript                            */
-/*             ( Last modified by Francisco Neves @ 2017.11.03 )             */
+/*             ( Last modified by Francisco Neves @ 2017.11.07 )             */
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 class AInterfaceToANNScript : public AScriptInterface{
   Q_OBJECT
@@ -50,6 +50,7 @@ private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   QVector< QVector<float> > Input;
   QVector< QVector<float> > Output;
   QJsonObject Config;
+  QString buildNN(QString from, cFANNWrapper::cActivationFunctions &funcs, cFANNWrapper::cActivationSteepness &steps);
   bool convertQVariantToVectorOfVectors(QVariant* var, QVector< QVector<float> >* vec , int fixedSize = -1);
   void setConfig_cascade();
   void setConfig_commom();
@@ -63,8 +64,8 @@ public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   void ForceStop(); // inherited from AScriptInterface
 public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   void newNetwork();
-  void clearTrainingData();
   QVariant getConfig();
+  void clearTrainingData();
   void resetConfigToDefault();
   QString configure(QVariant configObject);
   //...........................................................................

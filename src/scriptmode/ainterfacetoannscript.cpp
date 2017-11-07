@@ -149,6 +149,11 @@ void AInterfaceToANNScript::resetConfigToDefault(){
   Config["stopFunction"]="BIT";
   Config["bitFailLimit"]=0.1; // no default.
   //...........................................................................
+  Config["learningRate"]=0.7; // default
+  Config["learningMomentum"]=0; // default [0..1] is recomended.
+  Config["hiddenActivationSteepness"]=0.5; // default (all hidden layers/neurons)
+  Config["outputActivationSteepness"]=0.5; // default (all output neurons)
+  //...........................................................................
   Config["cascade_maxNeurons"]=100;
   Config["cascade_trainError"]=1.E-5;
   Config["cascade_outputChangeFraction"]=0.01; // default
@@ -233,9 +238,24 @@ void AInterfaceToANNScript::setConfig_commom(){
   .option(Config["errorFunction"].toString().toStdString()));
  afann.stopFunction(NeuralNetworksModule::trainStopFunctions
   .option(Config["stopFunction"].toString().toStdString()));
+ afann.bitFailLimit(Config["bitFailLimit"].toDouble());
 
  //...........................................................................
- afann.bitFailLimit(Config["bitFailLimit"].toDouble());
+ afann.learningRate(Config["learningRate"].toDouble());
+ afann.learningMomentum(Config["learningMomentum"].toDouble());
+ afann.hiddenActivationSteepness(Config["hiddenActivationSteepness"].toDouble());
+ afann.outputActivationSteepness(Config["outputActivationSteepness"].toDouble());
+
+ /// TODO ... Define the best way to set per layer definitions .... TODO
+ /// OPTION: TYPE = SIZE:STEPNESS:AFUNCT + 4:: + 6:: ...? (the number of which will define the number of hiden layers)
+ // inline fann_type activationSteepness(unsigned layer, unsigned neuron){ return fann_get_activation_steepness(FANN,layer,neuron); }
+ // inline void activationSteepness(unsigned layer, unsigned neuron, fann_type v){ fann_set_activation_steepness(FANN,v,layer,neuron); }
+ // inline void layerActivationSteepness(unsigned layer, fann_type v){ fann_set_activation_steepness_layer(FANN,v,layer); }
+ // inline fann_activationfunc_enum activationFunction(unsigned layer, unsigned neuron){ return fann_get_activation_function(FANN,layer,neuron); }
+ // inline void activationFunction(unsigned layer, unsigned neuron, fann_activationfunc_enum f){ fann_set_activation_function(FANN,f,layer,neuron); }
+ // inline void layerActivationFunc(unsigned layer, fann_activationfunc_enum f){ fann_set_activation_function_layer(FANN,f,layer); }
+ // inline void hiddenActivationFunc(fann_activationfunc_enum f){ fann_set_activation_function_hidden(FANN,f); }
+
 }
 
 /*===========================================================================*/
@@ -254,21 +274,6 @@ QString AInterfaceToANNScript::load(QString FANN_File){
 } }
 
 /*===========================================================================*/
-// in the case of InputSource == "EVENTS"
-// input vector for event iEvent is EventsDataHub->Events.at(iEvent)   (size is equal to the number of PMTs)
-// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-
-// in the case of OutputSource == "SCAN_POSITIONS"
-// the output training vector for event iEvent is EventsDataHub->Scan.at(iEvent)->Points.at(0).r - it is double[3]
-// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-// not a misstype - we use ReconstructionData container for event filters
-// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
-
-// in the case of OutputSource == "RECONSTRUCTED_POSITIONS"
-// the output training vector for event iEvent is EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->Points.at(0).r - it is double[3]
-// use only those events which are bool true: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).at(iEvent)->GoodEvent
-// total number of events to make the for cyckle is: EventsDataHub->ReconstructionData.at(CurrentSensorGroup).size()
 QString AInterfaceToANNScript::train(QString FANN_File) { try {
  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  QString InputSource=Config["trainingInput"].toString();
@@ -408,8 +413,14 @@ QVariant AInterfaceToANNScript::processEvents(int firstEvent, int lastEvent){
 }
 
 /*===========================================================================*/
-bool AInterfaceToANNScript::convertQVariantToVectorOfVectors(QVariant *var, QVector<QVector<float> > *vec, int fixedSize)
-{
+QString AInterfaceToANNScript::buildNN(QString from,
+cFANNWrapper::cActivationFunctions &funcs, cFANNWrapper::cActivationSteepness &steps){
+ // TODO: ONGOING:
+}
+
+/*===========================================================================*/
+bool AInterfaceToANNScript::convertQVariantToVectorOfVectors(QVariant *var,
+QVector<QVector<float> > *vec, int fixedSize) {
   if ( QString(var->typeName()) != "QVariantList")
   {
       abort("ANN script: array (or array of arrays) is required as an argument");

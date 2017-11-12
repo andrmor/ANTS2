@@ -193,11 +193,27 @@ void MainWindow::clearEnergyVector()
     EnergyVector.clear();
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
-{   
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+   qDebug() << "<-MainWindow close event received";
    ShutDown = true;
+
+   if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
+       if (timesTriedToExit < 6)
+       {
+           qDebug() << "Reconstruction manager is busy, terminating...";
+           ReconstructionManager->requestStop();
+           SimulationManager->StopSimulation();
+           qApp->processEvents();
+           QThread::usleep(100);
+           QTimer::singleShot(100, this, SLOT(close()));
+           timesTriedToExit++;
+           event->ignore();
+           return;
+       }
+
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
-   //qDebug() << "<-MainWindow close event received";
+
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
@@ -208,22 +224,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    EventsDataHub->clear();
 
-//   bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it
-//   if (DoSaveConfiguration)
-//     {
-//       if (!GlobSet->AlwaysSaveOnExit) //then give the choice
-//         {
-//           QMessageBox *msgBox = new QMessageBox( this );
-//           msgBox->setWindowTitle("Session settings");
-//           msgBox->setText("Remember this session settings?");
-//           msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-//           msgBox->setDefaultButton(QMessageBox::Yes);
-
-//           if (msgBox->exec() == QMessageBox::No) DoSaveConfiguration = false;
-//           if (msgBox) delete msgBox;
-//         }
-//     }
-//   if (DoSaveConfiguration)
    ELwindow->QuickSave(0);
 
    //if checked, save windows' status
@@ -5076,7 +5076,7 @@ void MainWindow::on_bpResults_clicked()
 
 void MainWindow::ShowGeometrySlot()
 {
-   ShowGeometry(false, false);
+    ShowGeometry(false, false);
 }
 
 void MainWindow::on_bpResults_2_clicked()

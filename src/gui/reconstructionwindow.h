@@ -562,6 +562,7 @@ private:
   bool ForbidUpdate;
   bool TMPignore;
   bool bFilteringStarted;
+  QWidget* WidgetFocusedBeforeBusyOn;
 
   double lastChi2;
 

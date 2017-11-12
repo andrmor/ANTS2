@@ -1153,6 +1153,8 @@ void ReconstructionWindow::updateFiltersGui()
 void ReconstructionWindow::on_pbUpdateFilters_clicked()
 {
   //qDebug() << "UpdateFilterButton pressed";
+  if (MW->ShutDown) return;
+
   if (bFilteringStarted) //without this on-Editing-finished is triggered when disable kick in and cursor is in one of the edit boxes
   {
       //qDebug() << "Igonred, already filetring";
@@ -1302,7 +1304,9 @@ void ReconstructionWindow::SetProgress(int val)
 
 void ReconstructionWindow::onBusyOn()
 {
-  //qDebug() << "Busy ON!";
+  //qDebug() << "RW -> Busy ON!";
+  WidgetFocusedBeforeBusyOn = focusWidget();
+
   ui->twData->setEnabled(false);
   ui->twOptions->setEnabled(false);
   ui->bsAnalyzeScan->setEnabled(false);
@@ -1310,12 +1314,15 @@ void ReconstructionWindow::onBusyOn()
 
 void ReconstructionWindow::onBusyOff()
 {
-  //qDebug() << "Busy OFF!";
+  //qDebug() << "RW -> Busy OFF!";
   ui->twData->setEnabled(true);
   ui->twOptions->setEnabled(true);
   ui->bsAnalyzeScan->setEnabled(true);
   ui->pbStopReconstruction->setEnabled(false);
   ui->pbStopReconstruction->setChecked(false);
+
+  if (WidgetFocusedBeforeBusyOn  && !MW->ShutDown) WidgetFocusedBeforeBusyOn->setFocus();
+  WidgetFocusedBeforeBusyOn = 0;
 }
 
 void ReconstructionWindow::on_sbZshift_valueChanged(int arg1)

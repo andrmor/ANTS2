@@ -88,6 +88,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryDrawDisabled = false;
     fStartedFromGUI = false;
     fSimDataNotSaved = false;
+    timesTriedToExit = 0;
     //aliases to use in GUI
     MpCollection = Detector->MpCollection; // just an alias
     PMs = Detector->PMs;                               // just an alias

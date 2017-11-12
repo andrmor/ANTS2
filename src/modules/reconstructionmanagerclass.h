@@ -48,6 +48,8 @@ public:
   bool reconstructAll(QJsonObject &json, int numThreads, bool fShow = true); //fShow=true -> send signal to show reconstructed positions if Geom window is visible
   void filterEvents(QJsonObject &json, int NumThreads);
 
+  bool isBusy() const {return bBusy;}
+
   QString getErrorString() {return ErrorString;}
   double getUsPerEvent() {return usPerEvent;}
 
@@ -71,6 +73,8 @@ private:
   int CurrentGroup;
   QVector<AEventFilteringSettings> FiltSet;
   int NumThreads;
+
+  bool bBusy;
 
   std::atomic<bool> fDoingCopyLRFs;
  

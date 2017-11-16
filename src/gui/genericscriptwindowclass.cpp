@@ -2,7 +2,8 @@
 #include "ui_genericscriptwindowclass.h"
 #include "ahighlighters.h"
 #include "completingtexteditclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
+#include "coreinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
@@ -274,9 +275,9 @@ void GenericScriptWindowClass::SetInterfaceObject(QObject *interfaceObject, QStr
         // populating help for main, math and core units
         trwHelp->clear();
         fillHelper(interfaceObject, "", "Global object functions");
-        CoreInterfaceClass core(0); //dummy to extract methods
+        AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core", "Core object functions");
-        MathInterfaceClass math(0); //dummy to extract methods
+        AInterfaceToMath math(0); //dummy to extract methods
         fillHelper(&math, "math", "Basic mathematics: wrapper for std double functions");
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }

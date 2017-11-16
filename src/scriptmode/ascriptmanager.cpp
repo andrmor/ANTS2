@@ -1,7 +1,7 @@
 #include "ascriptmanager.h"
-//#include "interfacetoglobscript.h"
 #include "ainterfacetomessagewindow.h"
-#include "scriptinterfaces.h"
+//#include "scriptinterfaces.h"
+#include "coreinterfaces.h"
 
 #include <QScriptEngine>
 #include <QDebug>
@@ -98,14 +98,14 @@ void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
         if (interfaceObject)
            engine->setGlobalObject(obj); //do not replace the global object for global script - in effect (non zero pointer) only for local scripts
         // registering service object
-        QObject* coreObj = new CoreInterfaceClass(this);
+        QObject* coreObj = new AInterfaceToCore(this);
         QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
         QString coreName = "core";
         engine->globalObject().setProperty(coreName, coreVal);
         interfaces.append(coreObj);  //CORE OBJECT IS FIRST in interfaces!
         interfaceNames.append(coreName);
         //registering math module
-        QObject* mathObj = new MathInterfaceClass(RandGen);
+        QObject* mathObj = new AInterfaceToMath(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         QString mathName = "math";
         engine->globalObject().setProperty(mathName, mathVal);

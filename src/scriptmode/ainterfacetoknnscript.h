@@ -1,7 +1,7 @@
 #ifndef AINTERFACETOKNNSCRIPT_H
 #define AINTERFACETOKNNSCRIPT_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 
 class NNmoduleClass;
 

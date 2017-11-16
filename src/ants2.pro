@@ -220,7 +220,6 @@ SOURCES += main.cpp \
     CUDA/cudamanagerclass.cpp \
     scriptmode/interfacetoglobscript.cpp \
     scriptmode/scriptminimizer.cpp \
-    scriptmode/scriptinterfaces.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
     scriptmode/ascriptmanager.cpp \
@@ -266,7 +265,9 @@ SOURCES += main.cpp \
     gui/aneutronreactionwidget.cpp \
     gui/aneutroninfodialog.cpp \
     scriptmode/ainterfacetodeposcript.cpp \
-    scriptmode/ainterfacetomessagewindow.cpp
+    scriptmode/ainterfacetomessagewindow.cpp \
+    scriptmode/coreinterfaces.cpp \
+    scriptmode/localscriptinterfaces.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -323,7 +324,6 @@ HEADERS  += common/CorrelationFilters.h \
     CUDA/cudamanagerclass.h \
     scriptmode/interfacetoglobscript.h \
     scriptmode/scriptminimizer.h \
-    scriptmode/scriptinterfaces.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
     scriptmode/ascriptmanager.h \
@@ -382,7 +382,9 @@ HEADERS  += common/CorrelationFilters.h \
     gui/aneutronreactionwidget.h \
     gui/aneutroninfodialog.h \
     scriptmode/ainterfacetodeposcript.h \
-    scriptmode/ainterfacetomessagewindow.h
+    scriptmode/ainterfacetomessagewindow.h \
+    scriptmode/coreinterfaces.h \
+    scriptmode/localscriptinterfaces.h
 
 # --- SIM ---
 ants2_SIM {

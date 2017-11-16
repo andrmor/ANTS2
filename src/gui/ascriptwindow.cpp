@@ -2,7 +2,8 @@
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
 #include "completingtexteditclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
+#include "coreinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
@@ -246,10 +247,10 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         // populating help for main, math and core units
         trwHelp->clear();
         //fillHelper(interfaceObject, "", "Global object functions"); //forbidden to override master object now.
-        CoreInterfaceClass core(0); //dummy to extract methods
+        AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core", "Core object functions");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
-        MathInterfaceClass math(0); //dummy to extract methods
+        AInterfaceToMath math(0); //dummy to extract methods
         fillHelper(&math, "math", "Basic mathematics: wrapper for std double functions");
         newFunctions << getCustomCommandsOfObject(&math, "math", false);
         trwHelp->expandItem(trwHelp->itemAt(0,0));

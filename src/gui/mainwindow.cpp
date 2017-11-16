@@ -38,7 +38,7 @@
 #include "acommonfunctions.h"
 #include "aenergydepositioncell.h"
 #include "tmpobjhubclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "apreprocessingsettings.h"
 #include "aconfiguration.h"
 #include "ascriptwindow.h"

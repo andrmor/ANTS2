@@ -1,7 +1,7 @@
 #ifndef AINTERFACETODEPOSCRIPT_H
 #define AINTERFACETODEPOSCRIPT_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "ahistoryrecords.h"
 
 #include <QVector>

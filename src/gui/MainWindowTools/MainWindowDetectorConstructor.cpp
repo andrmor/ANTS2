@@ -17,7 +17,7 @@
 #include "aslablistwidget.h"
 #include "ageoobject.h"
 #include "ageotreewidget.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "aconfiguration.h"
 
 //Qt

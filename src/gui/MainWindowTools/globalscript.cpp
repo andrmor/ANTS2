@@ -7,7 +7,7 @@
 #include "interfacetoglobscript.h"
 #include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"

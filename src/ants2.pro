@@ -265,7 +265,8 @@ SOURCES += main.cpp \
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
     gui/aneutroninfodialog.cpp \
-    scriptmode/ainterfacetodeposcript.cpp
+    scriptmode/ainterfacetodeposcript.cpp \
+    scriptmode/ainterfacetomessagewindow.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -380,7 +381,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
     gui/aneutroninfodialog.h \
-    scriptmode/ainterfacetodeposcript.h
+    scriptmode/ainterfacetodeposcript.h \
+    scriptmode/ainterfacetomessagewindow.h
 
 # --- SIM ---
 ants2_SIM {

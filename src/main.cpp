@@ -26,6 +26,7 @@
 #include "mainwindow.h"
 #include "exampleswindow.h"
 #include "genericscriptwindowclass.h"
+#include "ainterfacetomessagewindow.h"
 #endif
 
 //Qt
@@ -131,8 +132,7 @@ int main(int argc, char *argv[])
     {
         GenericScriptWindowClass GenScriptWindow(Detector.RandGen);
 
-        InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-        GenScriptWindow.SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+        GenScriptWindow.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
 
         InterfaceToConfig* conf = new InterfaceToConfig(&Config);
         GenScriptWindow.SetInterfaceObject(conf, "config");
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
         AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
         GenScriptWindow.SetInterfaceObject(tree, "tree");
 
-        InterfaceToTexter* txt = new InterfaceToTexter(&GenScriptWindow);
+        AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(&GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window
@@ -229,9 +229,8 @@ int main(int argc, char *argv[])
 
         qDebug() << "Script from file:"<<fileName;
 
-        AScriptManager SM(Detector.RandGen);
-        InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-        SM.SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+        AScriptManager SM(Detector.RandGen);        
+        SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         InterfaceToConfig* conf = new InterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);

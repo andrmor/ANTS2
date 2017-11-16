@@ -5,6 +5,7 @@
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"
 #include "interfacetoglobscript.h"
+#include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
 #include "scriptinterfaces.h"
 #include "ainterfacetodeposcript.h"
@@ -43,8 +44,7 @@ void MainWindow::createScriptWindow()
 
     // interface objects are owned after this by the ScriptManager!
 
-    InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-    ScriptWindow->SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+    ScriptWindow->SetInterfaceObject(0); //initialization
 
     InterfaceToConfig* conf = new InterfaceToConfig(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
@@ -87,7 +87,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
 
-    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
+    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();

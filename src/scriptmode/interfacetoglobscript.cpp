@@ -36,10 +36,10 @@
 
 #include <QVariant>
 #include <QThread>
-#include <QPlainTextEdit>
-#include <QVBoxLayout>
+//#include <QPlainTextEdit>
+//#include <QVBoxLayout>
 #include <QDateTime>
-#include <QDialog>
+//#include <QDialog>
 #include <QApplication>
 #include <QVector3D>
 #include <QJsonDocument>
@@ -845,157 +845,6 @@ bool InterfaceToConfig::Load(QString FileName)
 bool InterfaceToConfig::Save(QString FileName)
 {
     return SaveJsonToFile(Config->JSON, FileName);
-}
-
-//void InterfaceToGlobScript::ShowOutputWindow(bool flag, int tab)
-//{
-//  if (flag)
-//    {
-//      MW->Owindow->showNormal();
-//      MW->Owindow->raise();
-//    }
-//  else MW->Owindow->hide();
-
-//  if (tab>-1 && tab<4) MW->Owindow->SetTab(tab);
-//  qApp->processEvents();
-//}
-
-//-----------------------------------
-static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-InterfaceToTexter::InterfaceToTexter(QMainWindow* parent) : D(0), Parent(parent)
-{
-  bEnabled = true;
-  bActivated = false;
-  init(false);
-}
-
-void InterfaceToTexter::init(bool fTransparent)
-{
-  D = new QDialog(Parent);
-  QObject::connect(D, &QDialog::finished, this, &InterfaceToTexter::Hide);
-
-  QVBoxLayout* l = new QVBoxLayout;
-  e = new QPlainTextEdit();
-  e->setReadOnly(true);
-  l->addWidget(e);
-  D->setLayout(l);
-
-  X = msgX;
-  Y = msgY;
-  WW = msgW;
-  HH = msgH;
-
-  D->setGeometry(X, Y, WW, HH);
-  D->setWindowTitle("Script msg");
-
-  if (fTransparent)
-    {
-      D->setWindowFlags(Qt::FramelessWindowHint);
-      D->setAttribute(Qt::WA_TranslucentBackground);
-
-      e->setStyleSheet("background: rgba(0,0,255,0%)");
-      e->setFrameStyle(QFrame::NoFrame);
-    }
-}
-
-
-InterfaceToTexter::~InterfaceToTexter()
-{
-  //qDebug() << "Msg destructor";
-  deleteDialog();
-}
-
-void InterfaceToTexter::SetTransparent(bool flag)
-{
-  QString text = e->document()->toPlainText();
-  delete D;
-  D = 0;
-  init(flag);
-  e->setPlainText(text);
-}
-
-void InterfaceToTexter::Append(QString txt)
-{
-  e->appendHtml(txt);
-}
-
-void InterfaceToTexter::Clear()
-{
-  e->clear();
-}
-
-void InterfaceToTexter::Show(QString txt, int ms)
-{
-  if (!bEnabled) return;
-  e->clear();
-  e->appendHtml(txt);
-
-  if (ms == -1)
-    {
-      D->show();
-      D->raise();
-      bActivated = true;
-      return;
-    }
-
-  D->show();
-  D->raise();
-  bActivated = true;
-  QTime t;
-  t.restart();
-  do qApp->processEvents();
-  while (t.elapsed()<ms);
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::Move(double x, double y)
-{
-  X = msgX = x; Y = msgY = y;
-  D->move(X, Y);
-}
-
-void InterfaceToTexter::Resize(double w, double h)
-{
-  WW = msgW = w; HH = msgH = h;
-  D->resize(WW, HH);
-}
-
-void InterfaceToTexter::Show()
-{
-  if (!bEnabled) return;
-  D->show();
-  D->raise();
-  bActivated = true;
-}
-
-void InterfaceToTexter::Hide()
-{
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::SetFontSize(int size)
-{
-  QFont f = e->font();
-  f.setPointSize(size);
-  e->setFont(f);
-}
-
-void InterfaceToTexter::deleteDialog()
-{
-   delete D;
-   D = 0;
-}
-
-void InterfaceToTexter::hide()
-{
-    if (D) D->hide();
-}
-
-void InterfaceToTexter::restore()
-{
-    if (D) D->show();
 }
 
 #ifdef SIM

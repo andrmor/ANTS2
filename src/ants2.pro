@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 1
+ANTS2_MINOR = 2
 ANTS2_VERSION = 2230
 
 #Optional libraries

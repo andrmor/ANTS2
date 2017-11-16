@@ -53,7 +53,7 @@ void CoGReconstructorClass::execute()
       AReconRecord* rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
       const QVector< float >* PMsignals = &EventsDataHub->Events[iev];
 
-      rec->fScriptFiltered = true;
+      rec->fScriptFiltered = false;
 
       //first have to get PM with max signal, it might be used for PM selection (fCoGIgnoreFar)
       rec->iPMwithMaxSignal = 0;

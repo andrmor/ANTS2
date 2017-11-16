@@ -1,6 +1,5 @@
 #include "ascriptmanager.h"
 #include "ainterfacetomessagewindow.h"
-//#include "scriptinterfaces.h"
 #include "coreinterfaces.h"
 
 #include <QScriptEngine>

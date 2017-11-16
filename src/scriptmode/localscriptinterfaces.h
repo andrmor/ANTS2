@@ -5,10 +5,8 @@
 
 #include <QVector>
 #include <QList>
-//#include <QVariant>
 #include <QJsonArray>
 #include <QString>
-//#include <QStringList>
 
 class AGeoObject;
 class DetectorClass;

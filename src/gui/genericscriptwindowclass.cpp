@@ -4,6 +4,7 @@
 #include "completingtexteditclass.h"
 #include "localscriptinterfaces.h"
 #include "coreinterfaces.h"
+#include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
@@ -295,7 +296,7 @@ void GenericScriptWindowClass::SetInterfaceObject(QObject *interfaceObject, QStr
     completer->setModel(createCompletitionModel(functions+constants));
 
     //special "needs" of particular interface objects
-    if ( dynamic_cast<InterfaceToHistD*>(interfaceObject) || dynamic_cast<InterfaceToGraphs*>(interfaceObject)) //"graph" or "hist"
+    if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 }
 

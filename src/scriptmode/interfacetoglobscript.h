@@ -22,8 +22,6 @@ class DetectorClass;
 class EventsDataClass;
 class GeometryWindowClass;
 class GraphWindowClass;
-class TObject;
-class QDialog;
 class pms;
 class TF2;
 class AConfiguration;
@@ -31,7 +29,6 @@ class ReconstructionManagerClass;
 class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
-class TRandom2;
 class QJsonValue;
 
 // ====== interfaces which do not require GUI ======
@@ -399,76 +396,6 @@ private:
   LRF::ARepository *repo; //alias
 };
 
-// ---- H I S T O G R A M S ---- (TH1D of ROOT)
-class InterfaceToHistD : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToHistD(TmpObjHubClass *TmpHub);
-  ~InterfaceToHistD(){}
-
-  virtual bool InitOnRun();
-
-public slots:
-  void NewHist(QString HistName, int bins, double start, double stop);
-  void NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
-
-  void SetTitles(QString HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
-  void SetLineProperties(QString HistName, int LineColor, int LineStyle, int LineWidth);
-
-  void Fill(QString HistName, double val, double weight);
-  void Fill2D(QString HistName, double x, double y, double weight);
-
-  void Draw(QString HistName, QString options);
-
-  void Smooth(QString HistName, int times);
-  QVariant FitGauss(QString HistName, QString options="");
-  QVariant FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options="");
-
-  bool Delete(QString HistName);
-  void DeleteAllHist();
-
-signals:
-  void RequestDraw(TObject* obj, QString options, bool fFocus);
-
-private:  
-  TmpObjHubClass *TmpHub;
-};
-
-// ---- G R A P H S ---- (TGraph of ROOT)
-class InterfaceToGraphs : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToGraphs(TmpObjHubClass *TmpHub);
-  ~InterfaceToGraphs(){}
-
-  virtual bool InitOnRun();
-
-public slots:
-  void NewGraph(QString GraphName);
-  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
-  void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
-  void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
-
-  void AddPoint(QString GraphName, double x, double y);
-  void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
-  void AddPoints(QString GraphName, QVariant xyArray);
-
-  void Draw(QString GraphName, QString options);
-
-  bool Delete(QString GraphName);
-  void DeleteAllGraph();
-
-signals:
-  void RequestDraw(TObject* obj, QString options, bool fFocus);
-
-private:
-  TmpObjHubClass *TmpHub;
-};
-
 // ---- T R E E ---- (TTree of ROOT)
 class AInterfaceToTree : public AScriptInterface
 {
@@ -488,8 +415,7 @@ private:
    TmpObjHubClass *TmpHub;
 };
 
-#ifdef GUI
-// =============== GUI mode only ===============
+#ifdef GUI // =============== GUI mode only ===============
 
 // -- GRAPH WINDOW --
 class InterfaceToGraphWin : public AScriptInterface
@@ -602,5 +528,6 @@ private:
   DetectorClass* Detector;
 };
 #endif // GUI
+
 #endif // INTERFACETOGLOBSCRIPT
 

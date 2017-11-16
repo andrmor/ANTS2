@@ -8,6 +8,7 @@
 #include "aconfiguration.h"
 #include "ascriptmanager.h"
 #include "interfacetoglobscript.h"
+#include "histgraphinterfaces.h"
 #include "scriptminimizer.h"
 #include "globalsettingsclass.h"
 #include "afiletools.h"
@@ -162,10 +163,10 @@ int main(int argc, char *argv[])
         AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
         GenScriptWindow.SetInterfaceObject(pmS, "pms");
 
-        InterfaceToGraphs* graph = new InterfaceToGraphs(&TmpHub);
+        AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         GenScriptWindow.SetInterfaceObject(graph, "graph");
 
-        InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
+        AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
         AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
@@ -251,9 +252,9 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(newLrf, "newLrf");
         AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
         SM.SetInterfaceObject(pmS, "pms");
-        InterfaceToGraphs* graph = new InterfaceToGraphs(&TmpHub);
+        AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         SM.SetInterfaceObject(graph, "graph");
-        InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
+        AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.SetInterfaceObject(hist, "hist");
         AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
         SM.SetInterfaceObject(tree, "tree");

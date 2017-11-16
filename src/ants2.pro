@@ -267,7 +267,8 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetodeposcript.cpp \
     scriptmode/ainterfacetomessagewindow.cpp \
     scriptmode/coreinterfaces.cpp \
-    scriptmode/localscriptinterfaces.cpp
+    scriptmode/localscriptinterfaces.cpp \
+    scriptmode/histgraphinterfaces.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -384,7 +385,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ainterfacetodeposcript.h \
     scriptmode/ainterfacetomessagewindow.h \
     scriptmode/coreinterfaces.h \
-    scriptmode/localscriptinterfaces.h
+    scriptmode/localscriptinterfaces.h \
+    scriptmode/histgraphinterfaces.h
 
 # --- SIM ---
 ants2_SIM {

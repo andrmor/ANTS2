@@ -7,6 +7,7 @@
 #include "interfacetoglobscript.h"
 #include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
+#include "histgraphinterfaces.h"
 #include "localscriptinterfaces.h"
 #include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
@@ -78,10 +79,10 @@ void MainWindow::createScriptWindow()
     AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
     ScriptWindow->SetInterfaceObject(pmS, "pms");
 
-    InterfaceToGraphs* graph = new InterfaceToGraphs(TmpHub);
+    AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
     ScriptWindow->SetInterfaceObject(graph, "graph");
 
-    InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
+    AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
     AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);

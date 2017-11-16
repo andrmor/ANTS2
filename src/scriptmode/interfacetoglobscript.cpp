@@ -34,12 +34,10 @@
 #include "graphwindowclass.h"
 #endif
 
+#include <QFile>
 #include <QVariant>
 #include <QThread>
-//#include <QPlainTextEdit>
-//#include <QVBoxLayout>
 #include <QDateTime>
-//#include <QDialog>
 #include <QApplication>
 #include <QVector3D>
 #include <QJsonDocument>

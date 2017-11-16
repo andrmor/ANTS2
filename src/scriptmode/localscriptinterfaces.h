@@ -3,6 +3,7 @@
 
 #include "ascriptinterface.h"
 
+#include <QVariant>
 #include <QVector>
 #include <QList>
 #include <QJsonArray>

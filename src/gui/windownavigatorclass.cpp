@@ -14,6 +14,7 @@
 #include "globalsettingsclass.h"
 #include "ascriptwindow.h"
 
+#include <QTime>
 #include <QDebug>
 
 #ifdef Q_OS_WIN32

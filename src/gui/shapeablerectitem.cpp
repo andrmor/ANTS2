@@ -71,6 +71,34 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
   }
 }
 
+double ShapeableRectItem::getTrueAngle(double mmPerPixelInX, double mmPerPixelInY) const
+{
+    double baseAngle = this->rotation();
+
+    //transforming to the system used by the line tool
+    if (baseAngle > 180.0) baseAngle = baseAngle - 360.0;
+    baseAngle = -baseAngle;
+
+    //taking into account distortions: converting from apparent to true
+    if (mmPerPixelInX != mmPerPixelInY)
+        baseAngle = atan( tan(baseAngle*3.1415926535/180.0)*mmPerPixelInY/mmPerPixelInX ) *180.0/3.1415926535;
+
+    return baseAngle;
+}
+
+void ShapeableRectItem::setTrueAngle(double angle, double mmPerPixelInX, double mmPerPixelInY)
+{
+    //transforming from the system used by the line tool
+    double apparentAngle = -angle;
+    if (apparentAngle < 0) apparentAngle = 360.0 + apparentAngle;
+
+    //taking into account distortions: converting from true to apparent
+    if (mmPerPixelInX != mmPerPixelInY)
+        apparentAngle = atan( tan(apparentAngle*3.1415926535/180.0)*mmPerPixelInX/mmPerPixelInY)*180.0/3.1415926535;
+
+    this->setRotation(apparentAngle);
+}
+
 void ShapeableRectItem::setForegroundColor(const QColor &color)
 {
   this->foregroundColor = color;

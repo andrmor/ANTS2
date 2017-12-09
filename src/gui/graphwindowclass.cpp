@@ -1672,8 +1672,8 @@ void GraphWindowClass::selBoxGeometryChanged()
     double scaleY = RasterWindow->getYperPixel();
 
     const ShapeableRectItem *SelBox = scene->getSelBox();
-    ui->ledAngle->setText(QString::number(SelBox->rotation(), 'f', 1));
-    QRectF rect = SelBox->rect();//-0.5*DX, -0.5*DY, DX, DY);
+    ui->ledAngle->setText(QString::number(SelBox->getTrueAngle(scaleX, scaleY), 'f', 1));
+    QRectF rect = SelBox->rect();
     ui->ledWidth->setText(QString::number(rect.width()*scaleX, 'f', 2));
     ui->ledHeight->setText(QString::number(rect.height()*scaleY, 'f', 2));
 
@@ -1705,7 +1705,7 @@ void GraphWindowClass::selBoxControlsUpdated()
 
     ShapeableRectItem *SelBox = scene->getSelBox();
     SelBox->setRect(-0.5*DX, -0.5*DY, DX, DY);
-    SelBox->setRotation(angle);
+    SelBox->setTrueAngle(angle, scaleX, scaleY);
 
     int ix, iy;
     RasterWindow->XYtoPixel(x0, y0, ix, iy);
@@ -1830,11 +1830,13 @@ void GraphWindowClass::ShowProjection(QString type)
   ui->cbToolBox->setChecked(false);
   if (DrawObjects.isEmpty()) return;
 
-  //qDebug()<<"ShowProjection clicked: "<< type;
+  selBoxControlsUpdated();
+
+  //  qDebug()<<"ShowProjection clicked: "<< type;
   TObject* obj = DrawObjects.first().getPointer();
   QString PlotType = obj->ClassName();
-  //QString opt = DrawObjects.first().getOptions();
-  //qDebug()<<"  Class name/PlotOptions/opt:"<<PlotType<<opt;
+
+  //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().getOptions();
 
   if (PlotType != "TH2D" && PlotType != "TH2F") return;
 
@@ -1842,18 +1844,23 @@ void GraphWindowClass::ShowProjection(QString type)
 
   int nBinsX = h->GetXaxis()->GetNbins();
   int nBinsY = h->GetYaxis()->GetNbins();
-//  qDebug() <<  nBinsX << nBinsY;
+  //  qDebug() << "Bins in X and Y" << nBinsX << nBinsY;
 
   double x0 = ui->ledXcenter->text().toDouble();
-  double y0 = ui->ledYcenter->text().toDouble();
+  double y0 = ui->ledYcenter->text().toDouble();  
   double dx = 0.5*ui->ledWidth->text().toDouble();
   double dy = 0.5*ui->ledHeight->text().toDouble();
+  //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
 
-  double angle = ui->ledAngle->text().toDouble()*3.1415926/180.;
+  const ShapeableRectItem *SelBox = scene->getSelBox();
+  double scaleX = RasterWindow->getXperPixel();
+  double scaleY = RasterWindow->getYperPixel();
+  double angle = SelBox->getTrueAngle(scaleX, scaleY);
+  //    qDebug() << "True angle"<<angle;
+  angle *= 3.1415926535/180.0;
+
   double cosa = cos(angle);
   double sina = sin(angle);
-
-  //QVector<DrawObjectStructure> tmpMaster = DrawObjects; //pointers are copied!
 
   if (hProjection) delete hProjection;
   TH1D* hWeights = 0;
@@ -1902,29 +1909,24 @@ void GraphWindowClass::ShowProjection(QString type)
     }
   else return;
 
-//not here - ranges are explicitly given
-//#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-//  hProjection->SetBit(TH1::kCanRebin);
-//#endif
-
-
   for (int iy = 1; iy<nBinsY+1; iy++)
     for (int ix = 1; ix<nBinsX+1; ix++)
       {
         double x = h->GetXaxis()->GetBinCenter(ix);
         double y = h->GetYaxis()->GetBinCenter(iy);
-//        qDebug() << ix << x << "    " << iy << y;
+        //    qDebug() << "ix, x" << ix << x << "  iy, y " << iy << y;
 
         //transforming to the selection box coordinates
         x -= x0;
         y -= y0;
 
-        double nx =  x*cosa - y*sina;
-        double ny =  x*sina + y*cosa;
-//        qDebug () << "new coords: "<< nx << ny;
+        // ooposite direction!
+        double nx =  x*cosa + y*sina;
+        double ny = -x*sina + y*cosa;
+        //    qDebug () << "new coords: "<< nx << ny;
 
         //is it within the borders?
-        if (  (nx < -dx || nx > dx) || (ny < -dy || ny > dy)  )
+        if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
           {
             //outside!
             //h->SetBinContent(ix, iy, 0);
@@ -1948,17 +1950,14 @@ void GraphWindowClass::ShowProjection(QString type)
           }
       }
 
-
    if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
    else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");   
    if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
 
-   //DrawWithoutFocus(hProjection);  //using backdoor not to overrite the original histogram!!!
    DrawObjects.clear();
    DrawObjects.append(DrawObjectStructure(hProjection, ""));
    RedrawAll();
 
-   //MasterDrawObjects = tmpMaster;
    delete hWeights;
 }
 

@@ -30,6 +30,9 @@ public:
     QColor getForegroundColor() const { return foregroundColor; }
     QColor getBackgroundColor() const { return backgroundColor; }
 
+    double getTrueAngle(double mmPerPixelInX, double mmPerPixelInY) const; //in degrees
+    void   setTrueAngle(double angle, double mmPerPixelInX, double mmPerPixelInY); //in degrees
+
     void setRect(qreal ax, qreal ay, qreal w, qreal h) { setRect(QRectF(ax, ay, w, h)); }
     void setRect(const QRectF &rect);
     void setBorderPx(float borderPx) { this->borderPx = borderPx; }

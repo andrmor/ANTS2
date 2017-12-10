@@ -75,15 +75,17 @@ double ShapeableRectItem::getTrueAngle(double mmPerPixelInX, double mmPerPixelIn
 {
     double baseAngle = this->rotation();
 
+
+    double standardAngle;
     //transforming to the system used by the line tool
-    if (baseAngle > 180.0) baseAngle = baseAngle - 360.0;
-    baseAngle = -baseAngle;
+    if (baseAngle > 180.0) standardAngle = 360 - baseAngle;
+    else standardAngle = -baseAngle;
+
 
     //taking into account distortions: converting from apparent to true
-    if (mmPerPixelInX != mmPerPixelInY)
-        baseAngle = atan( tan(baseAngle*3.1415926535/180.0)*mmPerPixelInY/mmPerPixelInX ) *180.0/3.1415926535;
+    double trueAngle = atan( tan(standardAngle*3.1415926535/180.0)*mmPerPixelInY/mmPerPixelInX ) *180.0/3.1415926535;
 
-    return baseAngle;
+    return trueAngle;
 }
 
 void ShapeableRectItem::setTrueAngle(double angle, double mmPerPixelInX, double mmPerPixelInY)

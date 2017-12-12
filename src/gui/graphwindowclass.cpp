@@ -138,7 +138,7 @@ public:
         ruler.setP2Pixel(event->scenePos());
         break;
       case ToolSelBox:
-        selBox.setRect(0, 0, 0, 0);
+        selBox.setRect(0, 0);
         selBox.setPos(event->scenePos());
         break;
     }
@@ -1668,14 +1668,16 @@ void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
 
 void GraphWindowClass::selBoxGeometryChanged()
 {
+    ShapeableRectItem *SelBox = scene->getSelBox();
+
     double scaleX = RasterWindow->getXperPixel();
     double scaleY = RasterWindow->getYperPixel();
+    SelBox->setScale(scaleX, scaleY); //needed?
 
-    const ShapeableRectItem *SelBox = scene->getSelBox();
-    ui->ledAngle->setText(QString::number(SelBox->getTrueAngle(scaleX, scaleY), 'f', 1));
-    QRectF rect = SelBox->rect();
-    ui->ledWidth->setText(QString::number(rect.width()*scaleX, 'f', 2));
-    ui->ledHeight->setText(QString::number(rect.height()*scaleY, 'f', 2));
+    ui->ledAngle->setText(QString::number(SelBox->getTrueAngle(), 'f', 1));
+    //QPolygonF rect = SelBox->rect();
+    ui->ledWidth->setText(QString::number( SelBox->getTrueWidth()));   //rect.width()*scaleX, 'f', 2));
+    ui->ledHeight->setText(QString::number( SelBox->getTrueHeight())); //rect.height()*scaleY, 'f', 2));
 
     double x0, y0;
     RasterWindow->PixelToXY(SelBox->pos().x(), SelBox->pos().y(), x0, y0);
@@ -1699,13 +1701,14 @@ void GraphWindowClass::selBoxControlsUpdated()
     double scaleY = RasterWindow->getYperPixel();
   //  qDebug() << "Scales: " << scaleX << scaleY;
 
-    double DX = dx/scaleX;
-    double DY = dy/scaleY;
+    //  double DX = dx/scaleX;
+    //  double DY = dy/scaleY;
   //  qDebug() << "width/height in pixels:"<< DX << DY;
 
     ShapeableRectItem *SelBox = scene->getSelBox();
-    SelBox->setRect(-0.5*DX, -0.5*DY, DX, DY);
-    SelBox->setTrueAngle(angle, scaleX, scaleY);
+    SelBox->setScale(scaleX, scaleY);
+    SelBox->setTrueAngle(angle);
+    SelBox->setRect(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
 
     int ix, iy;
     RasterWindow->XYtoPixel(x0, y0, ix, iy);
@@ -1713,6 +1716,7 @@ void GraphWindowClass::selBoxControlsUpdated()
     SelBox->setPos(ix, iy);
     //SelBox->setTransform(QTransform().translate(ix, iy));
 
+    scene->update(scene->sceneRect());
     gvOver->update();
 }
 
@@ -1853,9 +1857,9 @@ void GraphWindowClass::ShowProjection(QString type)
   //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
 
   const ShapeableRectItem *SelBox = scene->getSelBox();
-  double scaleX = RasterWindow->getXperPixel();
-  double scaleY = RasterWindow->getYperPixel();
-  double angle = SelBox->getTrueAngle(scaleX, scaleY);
+  //double scaleX = RasterWindow->getXperPixel();
+  //double scaleY = RasterWindow->getYperPixel();
+  double angle = SelBox->getTrueAngle();
   //    qDebug() << "True angle"<<angle;
   angle *= 3.1415926535/180.0;
 

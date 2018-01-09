@@ -138,7 +138,7 @@ public:
         ruler.setP2Pixel(event->scenePos());
         break;
       case ToolSelBox:
-        selBox.setRect(0, 0);
+        selBox.setTrueRect(0, 0);
         selBox.setPos(event->scenePos());
         break;
     }
@@ -197,11 +197,13 @@ public slots:
       case ToolSelBox:
       {
         //Square of side 1/4 the screen
-        qreal w = width()*0.25, h = height()*0.25;
-        selBox.setRect(QRectF(-w*0.5, -h*0.5, w, h));
-        selBox.setPos(width()*0.5, height()*0.5);
-        selBox.setRotation(0);
-        //emit selBox.geometryChanged();
+        //qreal w = width()*0.25, h = height()*0.25;
+        //selBox.setRect(QRectF(-w*0.5, -h*0.5, w, h));
+        //selBox.setPos(width()*0.5, height()*0.5);
+        //selBox.setRotation(0);
+
+        double w = 0.5 * width(), h = 0.5 * height();
+        emit selBox.requestResetGeometry(w, h);
         break;
       }
       case ToolActive:
@@ -323,6 +325,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 
   //toolbox graphics scene
   connect(scene->getSelBox(), SIGNAL(geometryChanged()), this, SLOT(selBoxGeometryChanged()));
+  connect(scene->getSelBox(), SIGNAL(requestResetGeometry(double, double)), this, SLOT(selBoxResetGeometry(double, double)));
   connect(ui->cbSelBoxShowBG, SIGNAL(toggled(bool)), scene->getSelBox(), SLOT(setShowContrast(bool)));
   connect(scene->getRuler(), SIGNAL(geometryChanged()), this, SLOT(rulerGeometryChanged()));
   connect(ui->cbRulerTicksLength, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowTicks(bool)));
@@ -1663,21 +1666,24 @@ void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
   {
     scene->setActiveTool((ToolboxScene::Tool)index);
     scene->moveToolToVisible();
+
+    scene->update(scene->sceneRect());
+    gvOver->update();
   }
 }
 
 void GraphWindowClass::selBoxGeometryChanged()
 {
+    qDebug() << "selBoxGeometryChanged";
     ShapeableRectItem *SelBox = scene->getSelBox();
 
     double scaleX = RasterWindow->getXperPixel();
     double scaleY = RasterWindow->getYperPixel();
-    SelBox->setScale(scaleX, scaleY); //needed?
+    SelBox->setScale(scaleX, scaleY);
 
-    ui->ledAngle->setText(QString::number(SelBox->getTrueAngle(), 'f', 1));
-    //QPolygonF rect = SelBox->rect();
-    ui->ledWidth->setText(QString::number( SelBox->getTrueWidth()));   //rect.width()*scaleX, 'f', 2));
-    ui->ledHeight->setText(QString::number( SelBox->getTrueHeight())); //rect.height()*scaleY, 'f', 2));
+    ui->ledAngle->setText(QString::number( SelBox->getTrueAngle(), 'f', 2 ));
+    ui->ledWidth->setText(QString::number( SelBox->getTrueWidth(), 'f', 2 ));
+    ui->ledHeight->setText(QString::number( SelBox->getTrueHeight(), 'f', 2 ));
 
     double x0, y0;
     RasterWindow->PixelToXY(SelBox->pos().x(), SelBox->pos().y(), x0, y0);
@@ -1685,6 +1691,25 @@ void GraphWindowClass::selBoxGeometryChanged()
     ui->ledYcenter->setText(QString::number(y0, 'f', 2));
 
     gvOver->update();
+}
+
+void GraphWindowClass::selBoxResetGeometry(double halfW, double halfH)
+{
+    double xc, yc; //center
+    RasterWindow->PixelToXY(halfW, halfH, xc, yc);
+    double x0, y0; //corner
+    RasterWindow->PixelToXY(0, 0, x0, y0);
+
+    double trueW = 0.5 * fabs(x0 - xc);
+    double trueH = 0.5 * fabs(y0 - yc);
+
+    ShapeableRectItem *SelBox = scene->getSelBox();
+    SelBox->setTrueRect(trueW, trueH);
+    SelBox->setPos(halfW, halfH);
+    SelBox->setTrueAngle(0);
+
+    selBoxGeometryChanged();
+    selBoxControlsUpdated();
 }
 
 void GraphWindowClass::selBoxControlsUpdated()
@@ -1708,7 +1733,7 @@ void GraphWindowClass::selBoxControlsUpdated()
     ShapeableRectItem *SelBox = scene->getSelBox();
     SelBox->setScale(scaleX, scaleY);
     SelBox->setTrueAngle(angle);
-    SelBox->setRect(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
+    SelBox->setTrueRect(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
 
     int ix, iy;
     RasterWindow->XYtoPixel(x0, y0, ix, iy);

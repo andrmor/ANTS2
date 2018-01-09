@@ -71,7 +71,7 @@ struct ABaseScanAndReconRecord
    bool GoodEvent; //true - good event  (for scan - bad event = noise event)
 };
 
-struct AScanRecord : ABaseScanAndReconRecord
+struct AScanRecord : public ABaseScanAndReconRecord
 {
   //pos+energy+Good  - see Base
   int EventType; //type of noise event
@@ -82,7 +82,7 @@ struct AScanRecord : ABaseScanAndReconRecord
   AScanRecord() {GoodEvent = true;}  //by default there is one point //good event by defaut
 };
 
-struct AReconRecord : ABaseScanAndReconRecord
+struct AReconRecord : public ABaseScanAndReconRecord
 {
   //pos+energy+Good  - see Base
   double chi2;

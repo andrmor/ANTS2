@@ -70,7 +70,7 @@ QPointF ShapeableRectItem::makePoint(double trueX, double trueY)
     this->update();
 }
 
-void ShapeableRectItem::setRect(double trueWidth, double trueHeight)   //qreal ax, qreal ay, qreal w, qreal h)
+void ShapeableRectItem::setTrueRect(double trueWidth, double trueHeight)   //qreal ax, qreal ay, qreal w, qreal h)
 {
     //HalfWidth1 = 0.5*TrueWidth/mmPerPixelInX;
     //HalfHeight1 = 0.5*TrueHeight/mmPerPixelInY;

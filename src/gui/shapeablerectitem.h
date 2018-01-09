@@ -36,8 +36,10 @@ public:
     double getTrueWidth() const {return TrueWidth;}
     double getTrueHeight() const {return TrueHeight;}
 
+    void setTrueRect(double trueWidth, double trueHeight);
+
+    //apparent shape
     void setRect(const QPolygonF &rect);
-    void setRect(double trueWidth, double trueHeight); //qreal ax, qreal ay, qreal w, qreal h);
 
     void setBorderPx(float borderPx) { this->borderPx = borderPx; }
     //  void setPixmap(const QPixmap *value) { pixmap = value; }
@@ -55,6 +57,7 @@ public slots:
 
 signals:
     void geometryChanged();
+    void requestResetGeometry(double screenWidth, double screenHeight);
 
 private:
     double mmPerPixelInX, mmPerPixelInY;
@@ -82,6 +85,7 @@ private:
     QColor backgroundColor;
     int backgroundWidth;
     QPointF makePoint(double trueX, double trueY);
+
 };
 
 #endif // SHAPEABLERECTITEM_H

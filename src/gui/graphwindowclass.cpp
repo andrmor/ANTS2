@@ -2517,8 +2517,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* setLine = 0;
   QAction* setMarker = 0;
   QAction* drawMenu = 0;
+  QAction* drawIntegral = 0;
 
-  if(temp)
+  if (temp)
     {
       //menu triggered at a valid item
       row = ui->lwBasket->row(temp);
@@ -2538,7 +2539,10 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
               if (Basket.at(row).Type == "TH2D")
                  uniMap = BasketMenu.addAction("Use as unif. correction map");
       if (Basket.at(row).Type.startsWith("TH1"))
+      {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
+             drawIntegral = BasketMenu.addAction("Draw integral");
+      }
       BasketMenu.addSeparator();      
       del = BasketMenu.addAction("Delete");
       BasketMenu.addSeparator();
@@ -2823,6 +2827,31 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           ui->cbShowLegend->setChecked(true);
           RedrawAll();
       }
+  }
+  else if (selectedItem == drawIntegral)
+  {
+      TH1* h = static_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      int bins = h->GetNbinsX();
+
+      double* edges = new double[bins+1];
+      for (int i=0; i<h->GetNbinsX()+2; i++)
+          edges[i] = h->GetBinLowEdge(i+1);
+      //    for (int i=0; i<bins+1; i++) qDebug() << edges[i];
+
+      QString title = "Integral of " + Basket[row].Name;
+
+      TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+
+      QString Xtitle = h->GetXaxis()->GetTitle();
+      if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+      double prev = 0;
+      for (int i=1; i<h->GetNbinsX()+1; i++)
+        {
+          prev += h->GetBinContent(i);
+          hi->SetBinContent(i, prev);
+        }
+      Draw(hi, "");
   }
 }
 

@@ -71,14 +71,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(DetectorClass *Detector,
-                        EventsDataClass *EventsDataHub,
-                        TApplication *RootApp,
-                        ASimulationManager *SimulationManager,
-                        ReconstructionManagerClass *ReconstructionManager,
-                        ANetworkModule *Net,
-                        TmpObjHubClass *TmpHub,
-                        GlobalSettingsClass *GlobSet);
+    MainWindow(DetectorClass *Detector,
+               EventsDataClass *EventsDataHub,
+               TApplication *RootApp,
+               ASimulationManager *SimulationManager,
+               ReconstructionManagerClass *ReconstructionManager,
+               ANetworkModule *Net,
+               TmpObjHubClass *TmpHub,
+               GlobalSettingsClass *GlobSet);
     ~MainWindow();
 
     // Pointers to external resources

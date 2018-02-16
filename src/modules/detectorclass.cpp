@@ -37,7 +37,7 @@ static void autoLoadPlugins() {
   //qDebug() << "Loading plugins from 'plugins' directory";
   QDir plugins_dir(qApp->applicationDirPath());
   if(!plugins_dir.cd("plugins")) {
-    qDebug()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
+    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
     return;
   }
 

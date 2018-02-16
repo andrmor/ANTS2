@@ -10,6 +10,9 @@ ANTS2_VERSION = 2230
 #CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
+DEBUG_VERBOSITY = 0          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+                             # after change, qmake and rebuild (or qmake + maky any change in main.cpp to trigger recompile)
+
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
@@ -386,7 +389,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ainterfacetomessagewindow.h \
     scriptmode/coreinterfaces.h \
     scriptmode/localscriptinterfaces.h \
-    scriptmode/histgraphinterfaces.h
+    scriptmode/histgraphinterfaces.h \
+    common/amessageoutput.h
 
 # --- SIM ---
 ants2_SIM {
@@ -603,6 +607,8 @@ win32 {
 DEFINES += ANTS2_MINOR=\"$$ANTS2_MINOR\"
 DEFINES += ANTS2_MAJOR=\"$$ANTS2_MAJOR\"
 DEFINES += ANTS2_VERSION=\"$$ANTS2_VERSION\"
+DEFINES += DEBUG_VERBOSITY=\"$$DEBUG_VERBOSITY\"
+
 win32 {
   DEFINES += BUILDTIME=\\\"$$system('echo %time%')\\\"
   DEFINES += BUILDDATE=\\\"$$system('echo %date%')\\\"

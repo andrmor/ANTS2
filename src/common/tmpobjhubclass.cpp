@@ -93,14 +93,14 @@ void TmpObjHubClass::ClearTmpHistsSigma2()
 
 void TmpObjHubClass::Clear()
 {
-    qDebug() << ">>> TMPHub: Clear requested";
+    //  qDebug() << ">>> TMPHub: Clear requested";
     ClearTracks();
     ClearTmpHistsPeaks();
     ClearTmpHistsSigma2();
     FoundPeaks.clear();
     ChPerPhEl_Peaks.clear();
     ChPerPhEl_Sigma2.clear();
-    qDebug() << ">>> TMPHub: Clear done!";
+    //  qDebug() << ">>> TMPHub: Clear done!";
 }
 
 TmpObjHubClass::TmpObjHubClass()

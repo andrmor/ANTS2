@@ -2837,16 +2837,14 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           return;
       }
       int bins = h->GetNbinsX();
-      qDebug() << "#bins:"<<bins;
 
       double* edges = new double[bins+1];
-      for (int i=0; i<h->GetNbinsX()+2; i++)
+      for (int i=0; i<bins+1; i++)
           edges[i] = h->GetBinLowEdge(i+1);
 
-      for (int i=0; i<bins+1; i++) qDebug() << edges[i];
+      //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
 
       QString title = "Integral of " + Basket[row].Name;
-
       TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
       delete [] edges;
 

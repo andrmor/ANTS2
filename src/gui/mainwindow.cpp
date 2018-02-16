@@ -164,14 +164,13 @@ void MainWindow::ClearData()
 
 void MainWindow::onRequestUpdateGuiForClearData()
 {
+    qDebug() << ">>> Main window: OnClear signal received";
     // local
     clearGeoMarkers();
     clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    //ui->pbStopScan->setChecked(false);
-    //ui->pbStopScan->setEnabled(false);
     ui->pbExportDeposition->setEnabled(false);
     ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
@@ -181,10 +180,8 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->fReloadRequired->setVisible(false);
     LoadedEventFiles.clear();
     ui->lwLoadedEventsFiles->clear();
-    //ui->pbReloadExpData->setEnabled(false);
     LoadedTreeFiles.clear();
-    //ui->pbReloadTreeData->setEnabled(false);
-    //   qDebug()  << "Clear done";
+    qDebug()  << ">>> Main window: Clear done";
 }
 
 void MainWindow::clearEnergyVector()

@@ -58,7 +58,7 @@ FChanged(false),FXYZAutoScale(true)
  ui->cbNNOutFunction->setCurrentIndex(NeuralNetworksModule::activationFunctions.getNameIdx("LINEAR"));
 
  ui->cbNNTrainAlg->setCurrentIndex(NeuralNetworksModule::trainAlgorithms.getNameIdx("RETRO PROPAGATION"));
-
+qDebug() << NeuralNetworksModule::trainErrorFunctions.getNameIdx("LINEAR");
  ui->cbNNTrainError->setCurrentIndex(NeuralNetworksModule::trainErrorFunctions.getNameIdx("LINEAR"));
 
  ui->cbNNTrainStop->setCurrentIndex(NeuralNetworksModule::trainStopFunctions.getNameIdx("BIT"));

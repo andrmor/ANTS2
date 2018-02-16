@@ -2830,23 +2830,31 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == drawIntegral)
   {
-      TH1* h = static_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      if (!h)
+      {
+          message("This operation requires TH1 ROOT object", this);
+          return;
+      }
       int bins = h->GetNbinsX();
+      qDebug() << "#bins:"<<bins;
 
       double* edges = new double[bins+1];
       for (int i=0; i<h->GetNbinsX()+2; i++)
           edges[i] = h->GetBinLowEdge(i+1);
-      //    for (int i=0; i<bins+1; i++) qDebug() << edges[i];
+
+      for (int i=0; i<bins+1; i++) qDebug() << edges[i];
 
       QString title = "Integral of " + Basket[row].Name;
 
       TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+      delete [] edges;
 
       QString Xtitle = h->GetXaxis()->GetTitle();
       if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
 
       double prev = 0;
-      for (int i=1; i<h->GetNbinsX()+1; i++)
+      for (int i=1; i<bins+1; i++)
         {
           prev += h->GetBinContent(i);
           hi->SetBinContent(i, prev);

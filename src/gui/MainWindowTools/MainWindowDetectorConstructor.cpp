@@ -51,7 +51,8 @@ void MainWindow::ReconstructDetector(bool fKeepData)
 
 bool MainWindow::startupDetector()
 {
-  MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots  
+  MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
+  qDebug() << "-->DetectorSandwich initialized";
   if (QFile(GlobSet->ExamplesDir + "/StartupDetector.json").exists())
     {
       Config->LoadConfig(GlobSet->ExamplesDir + "/StartupDetector.json");

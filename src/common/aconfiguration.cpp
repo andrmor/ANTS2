@@ -26,13 +26,14 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       return false;
     }
 
-  // qDebug() << " Loading detector config";
+  qDebug() << " Loading detector config";
   if (DetConstructor)
     {
       if (json.contains("DetectorConfig"))
         {          
-          //qDebug() << ">>> Loading detector configuration...";
+          qDebug() << ">>> Loading detector configuration...";
           emit Detector->requestClearEventsData();
+          qDebug() << ">>> DataHub cleared";
           QJsonObject DetJson = json["DetectorConfig"].toObject();
           JSON["DetectorConfig"] = DetJson;
           Detector->BuildDetector(true); //if GUI present, update will trigger automatically //suppress sim gui update, json is stuill old!

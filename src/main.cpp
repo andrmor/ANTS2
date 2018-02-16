@@ -60,32 +60,32 @@ int main(int argc, char *argv[])
     int rootargc=1;
     char *rootargv[] = {(char*)"qqq"};
     TApplication RootApp("My ROOT", &rootargc, rootargv);
-    //qDebug() << "___> Root App created";
+    qDebug() << "___> Root App created";
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
     TThread::Initialize();
-    //qDebug() << "___> TThread initialized";
+    qDebug() << "___> TThread initialized";
 #endif
     EventsDataClass EventsDataHub;
 
-    //qDebug() << "___> EventsDataHub created";
+    qDebug() << "___> EventsDataHub created";
     DetectorClass Detector(&Config);
     Config.SetDetector(&Detector);
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, &Config, &AConfiguration::UpdateParticlesJson);
     QObject::connect(&Detector, &DetectorClass::requestClearEventsData, &EventsDataHub, &EventsDataClass::clear);
-    //qDebug() << "___> Detector created";
+    qDebug() << "___> Detector created";
 
 #ifdef SIM
     ASimulationManager SimulationManager(&EventsDataHub, &Detector);
     Config.SetParticleSources(SimulationManager.ParticleSources);
-    //qDebug() << "___> Simulation manager created";
+    qDebug() << "___> Simulation manager created";
 #endif
 
     ReconstructionManagerClass ReconstructionManager(&EventsDataHub, Detector.PMs, Detector.PMgroups, Detector.LRFs, &Detector.GeoManager);
-    //qDebug() << "___> Reconstruction manager created";
+    qDebug() << "___> Reconstruction manager created";
 
     TmpObjHubClass TmpHub;
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
-    //qDebug() << "___> Tmp objects hub created";
+    qDebug() << "___> Tmp objects hub created";
 
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
@@ -93,11 +93,11 @@ int main(int argc, char *argv[])
       //in GlobSetWindow init now:
       //Network.StartRootHttpServer();  //does nothing if compilation flag is not set
       //Network.StartWebSocketServer(1234);
-    //qDebug() << "___> Network module created";
+    qDebug() << "___> Network module created";
 
     GlobalSettingsClass GlobSet(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
-    //qDebug() << "___> Global settings object created";
+    qDebug() << "___> Global settings object created";
 
     Config.UpdateLRFmakeJson(); //compatibility    
     TH1::AddDirectory(false);  //a histograms objects will not be automatically created in root directory (TDirectory); special case is in TreeView and ResolutionVsArea
@@ -106,16 +106,16 @@ int main(int argc, char *argv[])
     //SUPPRESS WARNINGS about ssl - only needed it on MSVC2012
     QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
 
-    //qDebug() << "___> Selecting application type";
+    qDebug() << "___> Selecting application type";
 #ifdef GUI
     if(argc == 1)
     {
         //GUI application
-        //qDebug() << "___> Creating MainWindow";
+        qDebug() << "___> Creating MainWindow";
         MainWindow w(&Detector, &EventsDataHub, &RootApp, &SimulationManager, &ReconstructionManager, &Network, &TmpHub, &GlobSet);  //Network - still need to set script manager!
-        //qDebug() << "___> Showing MainWindow...";
+        qDebug() << "___> Showing MainWindow...";
         w.show();
-        //qDebug() << "___> Done!";
+        qDebug() << "___> Done!";
 
         //overrides the saved status of examples window
         if (GlobSet.ShowExamplesOnStart)
@@ -124,9 +124,9 @@ int main(int argc, char *argv[])
             w.ELwindow->raise();//making sure examples window is on top
         }
         else w.ELwindow->hide();
-        //qDebug() << "___> Examples window shown/hidden";
+        qDebug() << "___> Examples window shown/hidden";
 
-        //qDebug() << "___> All done: starting application.";
+        qDebug() << "___> All done: starting application.";
         return a.exec();
     }
     else if (argc == 2 && (QString(argv[1])=="-b" || QString(argv[1])=="--batch") )

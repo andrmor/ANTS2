@@ -14,6 +14,7 @@
 #include "graphicsruler.h"
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
+#include "atoolboxscene.h"
 
 //Qt
 #include <QtGui>
@@ -68,181 +69,6 @@
 #include "TPaveLabel.h"
 #include "TPavesText.h"
 
-class ToolboxScene : public QGraphicsScene
-{
-public:
-  enum ToolDrag { ToolDragDisabled, ToolDragActivated, ToolDragStarted };
-  enum Tool { ToolNone = -1, ToolRuler = 0, ToolSelBox = 1, ToolActive };
-
-  ToolboxScene(QObject *parent = 0) : QGraphicsScene(parent)
-  {
-    activeTool = ToolNone;
-    toolDrag = ToolDragDisabled;
-
-    for(Tool t = (Tool)0; t < ToolActive; t = (Tool)(t+1))
-      getTool(t)->setPos(1000000, 1000000);
-  }
-
-  ~ToolboxScene()
-  {
-    QGraphicsItem *toolptr = getTool();
-    if(toolptr) removeItem(toolptr);
-  }
-
-  GraphicsRuler *getRuler() { return &ruler; }
-  ShapeableRectItem *getSelBox() { return &selBox; }
-  QGraphicsItem *getTool(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: qWarning()<<"ToolboxScene::getTool(): unknown Tool!";
-      case ToolNone: return 0;
-      case ToolRuler: return &ruler;
-      case ToolSelBox: return &selBox;
-      case ToolActive: return getTool(this->activeTool);
-    }
-  }
-
-  void setActiveTool(Tool tool)
-  {
-    if(tool >= ToolActive || tool < ToolNone)
-    {
-      qWarning() << "ToolboxScene::setActiveTool: Unknown Tool, using None";
-      tool = ToolNone;
-    }
-    QGraphicsItem *toolptr = getTool();
-    if(toolptr) removeItem(toolptr);
-    this->activeTool = tool;
-    toolptr = getTool(tool);
-    if(toolptr) addItem(toolptr);
-  }
-
-  virtual void mousePressEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(event->button() != Qt::LeftButton)
-      return QGraphicsScene::mousePressEvent(event);
-
-    if(event->modifiers() == Qt::ControlModifier)
-    {
-      if(toolDrag != ToolDragDisabled)
-        return QGraphicsScene::mousePressEvent(event);
-    }
-    else if(toolDrag != ToolDragActivated)
-      return QGraphicsScene::mousePressEvent(event);
-
-    switch(activeTool)
-    {
-      case ToolNone: case ToolActive: break;
-      case ToolRuler:
-        ruler.setP1Pixel(event->scenePos());
-        ruler.setP2Pixel(event->scenePos());
-        break;
-      case ToolSelBox:
-        selBox.setTrueRect(0, 0);
-        selBox.setPos(event->scenePos());
-        break;
-    }
-    toolDrag = ToolDragStarted;
-  }
-
-  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(toolDrag != ToolDragStarted)
-      return QGraphicsScene::mouseMoveEvent(event);
-
-    switch(activeTool)
-    {
-      case ToolNone: case ToolActive: break;
-      case ToolRuler:
-        ruler.setP2Pixel(event->scenePos());
-        break;
-      case ToolSelBox:
-      {
-        QPointF p1 = event->buttonDownScenePos(Qt::LeftButton);
-        QPointF diff = event->scenePos()-p1;
-        selBox.setRect(QRectF(-abs(diff.x())*0.5,-abs(diff.y())*0.5, abs(diff.x()), abs(diff.y())));
-        selBox.setPos(diff*0.5 + p1);
-        break;
-      }
-    }
-  }
-
-  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(toolDrag != ToolDragStarted)
-      QGraphicsScene::mouseReleaseEvent(event);
-    toolDrag = ToolDragDisabled;
-  }
-
-public slots:
-  void activateItemDrag()
-  {
-    toolDrag = ToolDragActivated;
-  }
-
-  void resetTool(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: case ToolNone: break;
-      case ToolRuler:
-      {
-        //Occupy half the screen
-        ruler.setP1Pixel(QPointF(width()*0.25, height()*0.5));
-        ruler.setP2Pixel(QPointF(width()*0.75, height()*0.5));
-        ruler.setTickLength(width()*0.5/20);
-        //emit ruler.geometryChanged();
-        break;
-      }
-      case ToolSelBox:
-      {
-        //Square of side 1/4 the screen
-        //qreal w = width()*0.25, h = height()*0.25;
-        //selBox.setRect(QRectF(-w*0.5, -h*0.5, w, h));
-        //selBox.setPos(width()*0.5, height()*0.5);
-        //selBox.setRotation(0);
-
-        double w = 0.5 * width(), h = 0.5 * height();
-        emit selBox.requestResetGeometry(w, h);
-        break;
-      }
-      case ToolActive:
-        resetTool(this->activeTool);
-        break;
-    }
-    toolGeometryChanged(tool);
-  }
-
-  void moveToolToVisible(Tool tool = ToolActive)
-  {
-    QRectF s = sceneRect();
-    QGraphicsItem *item = getTool(tool);
-    if(!item) return;
-    QRectF itemRect = item->boundingRect();
-    itemRect.moveTo(item->pos());
-    if(!s.intersects(itemRect))
-      resetTool(tool);
-    toolGeometryChanged(tool);
-  }
-
-private:
-  void toolGeometryChanged(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: case ToolNone: break;
-      case ToolRuler: emit ruler.geometryChanged(); break;
-      case ToolSelBox: emit selBox.geometryChanged(); break;
-      case ToolActive: toolGeometryChanged(this->activeTool); break;
-    }
-  }
-
-  Tool activeTool;
-  ShapeableRectItem selBox;
-  GraphicsRuler ruler;
-  ToolDrag toolDrag;
-};
-
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   QMainWindow(parent),
   ui(new Ui::GraphWindowClass)
@@ -259,10 +85,8 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   gvOver = 0;  
   CurrentBasketItem = -1;
   BasketMode = 0;
-  old_option = "";
   fFirstTime = false;
   LastOptStat = 1111;
-  LastDistributionShown = "";
 
   hProjection = 0;
 
@@ -272,11 +96,6 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   ui->swToolBox->setVisible(false);
   ui->swToolBox->setCurrentIndex(0);
   ui->sProjBins->setEnabled(false);
-
-  /*this->setMouseTracking(true);
-  ui->centralwidget->setMouseTracking(true);
-  ui->fUIbox->setMouseTracking(true);
-  ui->swToolBar->setMouseTracking(true);*/
 
   //window flags
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -305,31 +124,28 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 
   QMargins margins = RasterWindow->frameMargins();
   QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
- // QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3, 3, 600, 600);
   QWinContainer->setVisible(true);
 
   //connecting signals-slots
-  connect(RasterWindow, SIGNAL(LeftMouseButtonReleased()), this, SLOT(UpdateControls()));
+  connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
 
   //overlay to show selection box, later scale tool too
   gvOver = new QGraphicsView(this);
   gvOver->setFrameStyle(0);
   gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //
-  scene = new ToolboxScene(this);
+
+  scene = new AToolboxScene(this);
   gvOver->setScene(scene);
   gvOver->hide();
-  //gvOver->setMouseTracking(true);
-    //
 
   //toolbox graphics scene
-  connect(scene->getSelBox(), SIGNAL(geometryChanged()), this, SLOT(selBoxGeometryChanged()));
-  connect(scene->getSelBox(), SIGNAL(requestResetGeometry(double, double)), this, SLOT(selBoxResetGeometry(double, double)));
-  connect(ui->cbSelBoxShowBG, SIGNAL(toggled(bool)), scene->getSelBox(), SLOT(setShowContrast(bool)));
-  connect(scene->getRuler(), SIGNAL(geometryChanged()), this, SLOT(rulerGeometryChanged()));
-  connect(ui->cbRulerTicksLength, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowTicks(bool)));
-  connect(ui->cbRulerShowBG, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowContrast(bool)));
+  connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
+  connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
+  connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
+  connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
+  connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
+  connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
 
   ui->fBasket->setVisible(false);
 }
@@ -1640,7 +1456,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     int imode = ui->cobToolBox->currentIndex();
     if(checked)
     {
-      scene->setActiveTool((ToolboxScene::Tool)imode);
+      scene->setActiveTool((AToolboxScene::Tool)imode);
       startOverlayMode();
     }
     else
@@ -1664,7 +1480,7 @@ void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
 {
   if (ui->cbToolBox->isChecked())
   {
-    scene->setActiveTool((ToolboxScene::Tool)index);
+    scene->setActiveTool((AToolboxScene::Tool)index);
     scene->moveToolToVisible();
 
     scene->update(scene->sceneRect());
@@ -1747,7 +1563,7 @@ void GraphWindowClass::selBoxControlsUpdated()
 
 void GraphWindowClass::on_pbSelBoxToCenter_clicked()
 {
-  scene->resetTool(ToolboxScene::ToolSelBox);
+  scene->resetTool(AToolboxScene::ToolSelBox);
 }
 
 void GraphWindowClass::on_pbSelBoxFGColor_clicked()
@@ -1826,7 +1642,7 @@ void GraphWindowClass::on_pbRulerBGColor_clicked()
 
 void GraphWindowClass::on_pbResetRuler_clicked()
 {
-  scene->resetTool(ToolboxScene::ToolRuler);
+  scene->resetTool(AToolboxScene::ToolRuler);
 }
 
 void GraphWindowClass::on_pbXprojection_clicked()

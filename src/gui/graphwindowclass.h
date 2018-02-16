@@ -11,7 +11,7 @@ class TH1D;
 class TGraph;
 class TGraph2D;
 class QGraphicsView;
-class ToolboxScene;
+class AToolboxScene;
 class QListWidgetItem;
 class TObject;
 
@@ -260,7 +260,7 @@ private:
     double TG_X0, TG_Y0;
 
     QGraphicsView* gvOver;
-    ToolboxScene* scene;
+    AToolboxScene* scene;
 
     void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 

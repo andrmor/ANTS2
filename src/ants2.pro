@@ -10,7 +10,7 @@ ANTS2_VERSION = 2230
 #CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
-DEBUG_VERBOSITY = 0          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after change, qmake and rebuild (or qmake + maky any change in main.cpp to trigger recompile)
 
 #---CERN ROOT---
@@ -271,7 +271,8 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetomessagewindow.cpp \
     scriptmode/coreinterfaces.cpp \
     scriptmode/localscriptinterfaces.cpp \
-    scriptmode/histgraphinterfaces.cpp
+    scriptmode/histgraphinterfaces.cpp \
+    gui/GraphWindowTools/atoolboxscene.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -390,7 +391,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/coreinterfaces.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
-    common/amessageoutput.h
+    common/amessageoutput.h \
+    gui/GraphWindowTools/atoolboxscene.h
 
 # --- SIM ---
 ants2_SIM {
@@ -557,6 +559,7 @@ INCLUDEPATH += modules/lrf_v3/gui
 }
 
 INCLUDEPATH += gui/MainWindowTools
+INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += SplineLibrary
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2

@@ -7,21 +7,19 @@
 #include "graphwindowclass.h"
 #include "windownavigatorclass.h"
 #include "reconstructionmanagerclass.h"
-#include "nnmoduleclass.h"
 #include "globalsettingsclass.h"
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "graphwindowclass.h"
 
-//Qt
 #include <QDebug>
 
-//root
 #include "TColor.h"
 #include "TLine.h"
 #include "TH1D.h"
 
 #ifdef ANTS_FLANN
+ #include "nnmoduleclass.h"
  #include "flann/flann.hpp"
 #endif
 

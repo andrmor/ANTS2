@@ -71,6 +71,9 @@ ants2_flann {
         INCLUDEPATH += C:/FLANN/include
      }
 
+    HEADERS += modules/nnmoduleclass.h
+    SOURCES += modules/nnmoduleclass.cpp
+
     HEADERS += scriptmode/ainterfacetoknnscript.h
     SOURCES += scriptmode/ainterfacetoknnscript.cpp
 }
@@ -195,8 +198,7 @@ SOURCES += main.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/reconstructionmanagerclass.cpp \
-    modules/processorclass.cpp \    
-    modules/nnmoduleclass.cpp \
+    modules/processorclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
@@ -298,8 +300,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
     modules/pms.h \
-    modules/particlesourcesclass.h \
-    modules/nnmoduleclass.h \
+    modules/particlesourcesclass.h \    
     modules/flatfield.h \    
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \

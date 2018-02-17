@@ -1521,7 +1521,7 @@ void GraphWindowClass::selBoxResetGeometry(double halfW, double halfH)
     double trueH = 0.5 * fabs(y0 - yc);
 
     ShapeableRectItem *SelBox = scene->getSelBox();
-    SelBox->setTrueRect(trueW, trueH);
+    SelBox->setTrueRectangle(trueW, trueH);
     SelBox->setPos(halfW, halfH);
     SelBox->setTrueAngle(0);
 
@@ -1550,7 +1550,7 @@ void GraphWindowClass::selBoxControlsUpdated()
     ShapeableRectItem *SelBox = scene->getSelBox();
     SelBox->setScale(scaleX, scaleY);
     SelBox->setTrueAngle(angle);
-    SelBox->setTrueRect(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
+    SelBox->setTrueRectangle(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
 
     int ix, iy;
     RasterWindow->XYtoPixel(x0, y0, ix, iy);

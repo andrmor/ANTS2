@@ -6,6 +6,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsTextItem>
 #include <QPainter>
+#include <QGraphicsScene>
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846264338327	/* pi */
@@ -17,18 +18,20 @@ ShapeableRectItem::ShapeableRectItem(QGraphicsItem *parent) :
 {
   this->showContrast = false;
   this->backgroundWidth = 6;
-  this->borderPx = 10;
   mmPerPixelInX = mmPerPixelInY = 1.0;
   trueAngle = 0;
   TrueHeight = TrueWidth = 100;
+
+  cornerDetectionMax = 20;
+  sideDetectionMax = 1.5;
+
   this->setRotation(0);
   this->setAcceptHoverEvents(true);
-  //    this->pixmap = 0;
 
   // If we own these objects, then changes made to QPainter *painter in ::paint won't take effect
-  this->rectangle = new QGraphicsPolygonItem();
+  this->Polygon = new QGraphicsPolygonItem();
   QBrush brush(Qt::transparent);
-  rectangle->setBrush(brush);
+  Polygon->setBrush(brush);
 
   // We don't care how these are drawn, but if we don't own them they don't get drawn in correct pos
   // Tried moving and transforming *this object before painting units, but nothing works.
@@ -48,15 +51,15 @@ ShapeableRectItem::ShapeableRectItem(QGraphicsItem *parent) :
 
 ShapeableRectItem::~ShapeableRectItem()
 {
-    delete this->rectangle;
+    delete this->Polygon;
     delete this->xunits;
     delete this->yunits;
     delete this->units;
 }
 
-void ShapeableRectItem::setRect(const QPolygonF &rect)
+void ShapeableRectItem::setPolygon_Apparent(const QPolygonF &rect)
 {
-    rectangle->setPolygon(rect);
+    Polygon->setPolygon(rect);
 
     //xunits->setPos(rect.right()-xunits->boundingRect().width(), rect.bottom());
     yunits->setPos(rect.at(0));
@@ -69,7 +72,7 @@ void ShapeableRectItem::setRect(const QPolygonF &rect)
 
 QPointF ShapeableRectItem::makePoint(double trueX, double trueY)
 {
-    double angle = trueAngle * 3.1415926535/180.0;
+    double angle = trueAngle * M_PI/180.0;
     double cosA = cos(angle);
     double sinA = sin(angle);
 
@@ -114,12 +117,8 @@ double ShapeableRectItem::ApparentAngleFromTrue(double trueAngle)
     return apparentAngle;
 }
 
-void ShapeableRectItem::setTrueRect(double trueWidth, double trueHeight)   //qreal ax, qreal ay, qreal w, qreal h)
+void ShapeableRectItem::setTrueRectangle(double trueWidth, double trueHeight)
 {
-    //HalfWidth1 = 0.5*TrueWidth/mmPerPixelInX;
-    //HalfHeight1 = 0.5*TrueHeight/mmPerPixelInY;
-    //setRect(QRectF(-HalfWidth1, -HalfHeight1, 2.0*HalfWidth1, 2.0*HalfHeight1));
-
     TrueWidth = trueWidth;
     TrueHeight = trueHeight;
 
@@ -130,12 +129,12 @@ void ShapeableRectItem::setTrueRect(double trueWidth, double trueHeight)   //qre
     vec << makePoint(-0.5*trueWidth, +0.5*trueHeight);
 
     QPolygonF poly(vec);
-    setRect(poly);
+    setPolygon_Apparent(poly);
 }
 
 QPainterPath ShapeableRectItem::shape() const
 {
-    return rectangle->shape();
+    return Polygon->shape();
 }
 
 void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -146,27 +145,21 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
   {
     QPen pen(backgroundColor);
     pen.setWidth(backgroundWidth);
-    rectangle->setPen(pen);
-    rectangle->paint(painter, option, widget);
+    Polygon->setPen(pen);
+    Polygon->paint(painter, option, widget);
   }
 
   QPen pen(foregroundColor);
   pen.setWidth(1);
-  rectangle->setPen(pen);
-  rectangle->paint(painter, option, widget);
+  Polygon->setPen(pen);
+  Polygon->paint(painter, option, widget);
 
-  QLine lx( QPoint(rect().at(2).x(), rect().at(2).y()), QPoint(rect().at(3).x(), rect().at(3).y()));
+  QLine lx( QPoint(getPolygon().at(2).x(), getPolygon().at(2).y()), QPoint(getPolygon().at(3).x(), getPolygon().at(3).y()));
   pen.setWidth(3);
   painter->setPen(pen);
   painter->drawLine(lx);
-  QLine ly( QPoint(rect().at(0).x(), rect().at(0).y()), QPoint(rect().at(3).x(), rect().at(3).y()));
+  QLine ly( QPoint(getPolygon().at(0).x(), getPolygon().at(0).y()), QPoint(getPolygon().at(3).x(), getPolygon().at(3).y()));
   painter->drawLine(ly);
-
-//  if(pixmap)
-//  {
-//    QRect target(rect().left(), rect().top(), rect().width(), rect().height());
-//    painter->drawPixmap(target, *pixmap);
-//  }
 }
 
 void ShapeableRectItem::setScale(double mmPerPixelInX, double mmPerPixelInY)
@@ -197,23 +190,11 @@ void ShapeableRectItem::setBackgroundColor(const QColor &color)
   update();
 }
 
-ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
+ShapeableRectItem::Location ShapeableRectItem::getMouseLocationOnBox(QPointF mpos) const
 {
-    QPolygonF p = this->rect();  // ***!!!
+    QPolygonF p = this->getPolygon();
     int loc = Center;
 
-//    if(mpos.x()-borderPx < rect.x())
-//        loc |= Left;
-//    else if(mpos.x()+borderPx > rect.x()+rect.width())
-//        loc |= Right;
-
-//    if(mpos.y()-borderPx < rect.y())
-//        loc |= Top;
-//    else if(mpos.y()+borderPx > rect.y()+rect.height())
-//        loc |= Bottom;
-
-    double cornermax = 20;
-    double sidemax = 4;
     QVector<bool> corner(4, false); //corners: TL, TR, BR, BL corners
     QVector<bool> side(4, false);   //on side: T, R, B, L
 
@@ -223,7 +204,7 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
     for (int i=0; i<4; i++)
     {
         double lm = QLineF(mpos, p.at(i)).length();
-        if (lm < cornermax)
+        if (lm < cornerDetectionMax)
         {
             bFoundCorner = true;
             corner[i] = true;
@@ -235,7 +216,8 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
         double sum = QLineF(p.at(i), mpos).length() + QLineF(mpos, p.at(ii)).length();
         double base = QLineF(p.at(i), p.at(ii)).length();
 
-        side[i] = ( fabs(sum-base) < sidemax );
+        side[i] = ( fabs(sum-base) < sideDetectionMax );
+        //  qDebug() << i << sum << base << side[i];
     }
 
     if (bFoundCorner)
@@ -260,49 +242,33 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
 
 double ShapeableRectItem::ClipAngleToRange0to360(double angle)
 {
-    //qreal rot = fmod(angle, 359.999999999999999999);
     double a = fmod(angle, 360.0);
     if (a < 0) a += 360.0;
     if (a > 359.9999999999999999999) a = 0;
     return a;
-
-    //return rot < 0 ? rot + 360.0 : rot;
 }
 
 double ShapeableRectItem::ClipAngleToRangeMinus180to180(double angle)
 {
-    //qreal rot = fmod(angle, 359.999999999999999999);
     double a = fmod(angle, 360.0);
     if (a < -180.0) a += 360.0;
     if (a > +180.0) a -= 360.0;
     return a;
 }
 
-//static ShapeableRectItem::Location rotateLocation(ShapeableRectItem::Location loc, qreal angle)
-//{
-//    int x = (clipangle(angle)+45)/90;
-//    return (ShapeableRectItem::Location)(((loc << x) & 0xf) | (((loc<<x) & ~0xf) >> 4));
-//}
+void ShapeableRectItem::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    if (event->delta()>0) setTrueRectangle( TrueWidth * 1.1, TrueHeight * 1.1);
+    else                  setTrueRectangle( TrueWidth / 1.1, TrueHeight / 1.1);
 
-//void ShapeableRectItem::wheelEvent(QGraphicsSceneWheelEvent *event)
-//{
-//    QRectF newRect = rect();
-//    double scale;
-//    if(event->delta() > 0)
-//        scale = 1+0.1/120*event->delta();
-//    else
-//        scale = 1/(1-0.1/120*event->delta());
-//    newRect.setWidth(newRect.width()*scale);
-//    newRect.setHeight(newRect.height()*scale);
-//    newRect.setX(-0.5*newRect.width());
-//    newRect.setY(-0.5*newRect.height());
-//    this->setRect(newRect);
-//    emit geometryChanged();
-//}
+    update(boundingRect());
+    scene()->update(scene()->sceneRect());
+    emit geometryChanged();
+}
 
 void ShapeableRectItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    switch ( getLocation(event->pos()) )
+    switch ( getMouseLocationOnBox(event->pos()) )
     {
         case TopRight: case BottomLeft:
         case TopLeft: case BottomRight:
@@ -322,15 +288,13 @@ void ShapeableRectItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void ShapeableRectItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    this->mousePress = getLocation(event->pos());
+    this->mousePress = getMouseLocationOnBox(event->pos());
     this->pressedPoint = event->scenePos();
     this->posOnPress = pos();
-    this->rectOnPress = rect();
 
-    apparentMouseAngleOnPress = 0;
+    double apparentMouseAngleOnPress = 0;
     if (event->pos().x() != event->pos().y() || event->pos().x() != 0)
     apparentMouseAngleOnPress = atan2(event->pos().y(), event->pos().x()) *180.0/M_PI;
-    apparentBoxAngleOnPress = ApparentAngleFromTrue( getTrueAngle() );
 
     trueMouseAngleOnPress = TrueAngleFromApparent(apparentMouseAngleOnPress);
     trueBoxAngleOnPress = getTrueAngle();
@@ -340,10 +304,8 @@ void ShapeableRectItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    //QPolygonF newRect = rectOnPress;
-    QPointF delta = event->scenePos()-pressedPoint;
-    //QPointF projectedDelta = delta*QTransform().rotate(-rotation());
-    //double ang = rotation()*M_PI/180.0;
+    QPointF delta = event->scenePos() - pressedPoint;
+
     switch(this->mousePress)
     {
         case Center:    //Move box
@@ -364,31 +326,27 @@ void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             trueAngle = ClipAngleToRangeMinus180to180(newTrueAngle);
 
             setTrueAngle(trueAngle);
-            setTrueRect(TrueWidth, TrueHeight);
+            setTrueRectangle(TrueWidth, TrueHeight);
             break;
         }
-
-//        case Top: // ***!!!
-//            //newRect.setHeight(newRect.height()-projectedDelta.y()*2);
-//        case Bottom:
-//            setPos(QPointF(-projectedDelta.y()*sin(ang)*0.5, projectedDelta.y()*cos(ang)*0.5)+posOnPress);
-//            newRect.setHeight(newRect.height()+projectedDelta.y());
-//            newRect.moveCenter(QPointF(0, 0));
-//            this->setRect(newRect);
-//            break;
-
-//        case Left:
-//            newRect.setWidth(newRect.width()-projectedDelta.x()*2);
-//        case Right:
-//            setPos(QPointF(projectedDelta.x()*cos(ang)*0.5, projectedDelta.x()*sin(ang)*0.5)+posOnPress);
-//            newRect.setWidth(newRect.width()+projectedDelta.x());
-//            newRect.moveCenter(QPointF(0, 0));
-//            this->setRect(newRect);
-//            break;
+        case Top:      //Resize box
+        case Bottom:
+        {
+            double trueY = event->pos().y() * mmPerPixelInY;
+            setTrueRectangle(TrueWidth, 2.0*fabs(trueY));
+            break;
+        }
+        case Left:
+        case Right:
+        {
+            double trueX = event->pos().x() * mmPerPixelInX;
+            setTrueRectangle(2.0*fabs(trueX), TrueHeight);
+            break;
+        }
     }
 
-    update(boundingRect()); //forces update of the scene inside affected area
-
+    update(boundingRect());
+    scene()->update(scene()->sceneRect());
     emit geometryChanged();
 }
 

@@ -65,7 +65,7 @@ void AToolboxScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         ruler.setP2Pixel(event->scenePos());
         break;
     case ToolSelBox:
-        selBox.setTrueRect(0, 0);
+        selBox.setTrueRectangle(0, 0);
         selBox.setPos(event->scenePos());
         break;
     }
@@ -87,7 +87,7 @@ void AToolboxScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
       {
         QPointF p1 = event->buttonDownScenePos(Qt::LeftButton);
         QPointF diff = event->scenePos()-p1;
-        selBox.setRect(QRectF(-abs(diff.x())*0.5,-abs(diff.y())*0.5, abs(diff.x()), abs(diff.y())));
+        selBox.setPolygon_Apparent(QRectF(-abs(diff.x())*0.5,-abs(diff.y())*0.5, abs(diff.x()), abs(diff.y())));
         selBox.setPos(diff*0.5 + p1);
         break;
       }

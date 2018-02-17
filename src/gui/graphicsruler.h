@@ -8,6 +8,8 @@
 class GraphicsRuler : public QObject, public QGraphicsItem
 {
     Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
+
 public:
     explicit GraphicsRuler(QGraphicsItem *parent = 0);
 

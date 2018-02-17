@@ -178,9 +178,12 @@ private slots:
     void on_cbToolBox_toggled(bool checked);
     void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
+
+    //selBox
     void selBoxGeometryChanged();
     void selBoxResetGeometry(double halfW, double halfH);
     void selBoxControlsUpdated();
+
     void on_pbSelBoxToCenter_clicked();
     void on_pbSelBoxFGColor_clicked();
     void on_pbSelBoxBGColor_clicked();

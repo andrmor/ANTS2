@@ -6,7 +6,7 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsTextItem>
 #include <QPainter>
-#include <QGraphicsScene>
+//#include <QGraphicsScene>
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846264338327	/* pi */
@@ -59,6 +59,8 @@ ShapeableRectItem::~ShapeableRectItem()
 
 void ShapeableRectItem::setPolygon_Apparent(const QPolygonF &rect)
 {
+    prepareGeometryChange();
+
     Polygon->setPolygon(rect);
 
     //xunits->setPos(rect.right()-xunits->boundingRect().width(), rect.bottom());
@@ -261,8 +263,8 @@ void ShapeableRectItem::wheelEvent(QGraphicsSceneWheelEvent *event)
     if (event->delta()>0) setTrueRectangle( TrueWidth * 1.1, TrueHeight * 1.1);
     else                  setTrueRectangle( TrueWidth / 1.1, TrueHeight / 1.1);
 
-    update(boundingRect());
-    scene()->update(scene()->sceneRect());
+    //update(boundingRect());
+    //scene()->update(scene()->sceneRect());
     emit geometryChanged();
 }
 
@@ -329,6 +331,7 @@ void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             setTrueRectangle(TrueWidth, TrueHeight);
             break;
         }
+
         case Top:      //Resize box
         case Bottom:
         {
@@ -345,8 +348,8 @@ void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         }
     }
 
-    update(boundingRect());
-    scene()->update(scene()->sceneRect());
+    //update(boundingRect());
+    //scene()->update(scene()->sceneRect());
     emit geometryChanged();
 }
 

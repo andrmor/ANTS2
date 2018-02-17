@@ -1507,6 +1507,7 @@ void GraphWindowClass::selBoxGeometryChanged()
     ui->ledYcenter->setText(QString::number(y0, 'f', 2));
 
     //SelBox->update(SelBox->boundingRect());
+    scene->update(scene->sceneRect());
     gvOver->update();
 }
 

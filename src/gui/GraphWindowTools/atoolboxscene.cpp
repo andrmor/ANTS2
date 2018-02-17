@@ -148,7 +148,7 @@ void AToolboxScene::moveToolToVisible(AToolboxScene::Tool tool)
     itemRect.moveTo(item->pos());
     if(!s.intersects(itemRect))
     {
-        qDebug() << itemRect << "no intersection";
+        //  qDebug() << itemRect << "no intersection";
         resetTool(tool);
     }
     toolGeometryChanged(tool);

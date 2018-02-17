@@ -34,8 +34,16 @@ ShapeableRectItem::ShapeableRectItem(QGraphicsItem *parent) :
   // Tried moving and transforming *this object before painting units, but nothing works.
   // They're ALWAYS where *this was in the beggining of ::paint()
   this->xunits = new QGraphicsTextItem("X", this);
+  this->xunits->setAcceptHoverEvents(false);
+  this->xunits->setAcceptTouchEvents(false);
+
   this->yunits = new QGraphicsTextItem("Y", this);
+  this->yunits->setAcceptHoverEvents(false);
+  this->yunits->setAcceptTouchEvents(false);
+
   this->units = new QGraphicsTextItem("0", this);
+  this->units->setAcceptHoverEvents(false);
+  this->units->setAcceptTouchEvents(false);
 }
 
 ShapeableRectItem::~ShapeableRectItem()
@@ -172,7 +180,7 @@ void ShapeableRectItem::setBackgroundColor(const QColor &color)
 
 ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
 {
-    //QRectF rect = this->rect();  // ***!!!
+    QPolygonF p = this->rect();  // ***!!!
     int loc = Center;
 
 //    if(mpos.x()-borderPx < rect.x())
@@ -184,6 +192,49 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
 //        loc |= Top;
 //    else if(mpos.y()+borderPx > rect.y()+rect.height())
 //        loc |= Bottom;
+
+    double cornermax = 20;
+    double sidemax = 4;
+    QVector<bool> corner(4, false); //corners: TL, TR, BR, BL corners
+    QVector<bool> side(4, false);   //on side: T, R, B, L
+
+    qDebug() << "\n";
+    int ii = 0;
+    bool bFoundCorner = false;
+    for (int i=0; i<4; i++)
+    {
+        double lm = QLineF(mpos, p.at(i)).length();
+        if (lm < cornermax)
+        {
+            bFoundCorner = true;
+            corner[i] = true;
+            break;
+        }
+
+        ii++;
+        if (ii == 4) ii = 0;
+        double sum = QLineF(p.at(i), mpos).length() + QLineF(mpos, p.at(ii)).length();
+        double base = QLineF(p.at(i), p.at(ii)).length();
+
+        side[i] = ( fabs(sum-base) < sidemax );
+    }
+
+    if (bFoundCorner)
+    {
+        if (corner.at(0)) loc = Top | Left;
+        else if (corner.at(1)) loc = Top | Right;
+        else if (corner.at(2)) loc = Bottom | Right;
+        else if (corner.at(3)) loc = Bottom | Left;
+    }
+    else
+    {
+        //keeping Raimundo's way of doing - it was used for the corner detection as well
+        if (side.at(3))     loc |= Left;
+        else if(side.at(1)) loc |= Right;
+
+        if (side.at(0))     loc |= Top;
+        else if(side.at(2)) loc |= Bottom;
+    }
 
     return (Location)loc;
 }
@@ -231,7 +282,7 @@ void ShapeableRectItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
             setCursor(Qt::SizeHorCursor);
             break;
         case Center:
-            setCursor(Qt::ArrowCursor);
+            setCursor(Qt::ClosedHandCursor);
             break;
     }
 }

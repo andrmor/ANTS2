@@ -58,7 +58,7 @@ void EventsDataClass::clearResolutionTree()
 
 void EventsDataClass::clear()
 {
-  qDebug() << "--->EventsDatHub: Clear";
+  //    qDebug() << "--->EventsDatHub: Clear";
   Events.clear();
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;
@@ -75,11 +75,11 @@ void EventsDataClass::clear()
   squeeze();
   //preprocessing settings clear is triggered when detector is made with different number of PMs than before
 
-  qDebug() << "--->EventsDatHub: requesting main window GUI and TmpHub updates";
+  //    qDebug() << "--->EventsDatHub: requesting main window GUI and TmpHub updates";
   emit cleared();                      //to MainWindow and tmpHub
-  qDebug() << "--->EventsDatHub: requesting Recon window GUI update";
+  //    qDebug() << "--->EventsDatHub: requesting Recon window GUI update";
   emit requestEventsGuiUpdate();       //to ReconWindow
-  qDebug() << "--->EventsDatHub: done";
+  //    qDebug() << "--->EventsDatHub: done";
 }
 
 void EventsDataClass::onRequestStopLoad()

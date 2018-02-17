@@ -52,7 +52,7 @@ void MainWindow::ReconstructDetector(bool fKeepData)
 bool MainWindow::startupDetector()
 {
   MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
-  qDebug() << "-->DetectorSandwich initialized";
+  //    qDebug() << "-->DetectorSandwich initialized";
   if (QFile(GlobSet->ExamplesDir + "/StartupDetector.json").exists())
     {
       Config->LoadConfig(GlobSet->ExamplesDir + "/StartupDetector.json");
@@ -61,7 +61,7 @@ bool MainWindow::startupDetector()
   else
     {
       //startup detector file not found, to avoid crash initializing make-shift detector
-      qDebug() << "!!! Startup detector NOT found!";
+      qWarning() << "!!! Startup detector NOT found!";
 
       //dummy detector - in case startup detector json not found
       //generating a dummy detector

@@ -164,8 +164,7 @@ void MainWindow::ClearData()
 
 void MainWindow::onRequestUpdateGuiForClearData()
 {
-    qDebug() << ">>> Main window: OnClear signal received";
-    // local
+    //  qDebug() << ">>> Main window: OnClear signal received";
     clearGeoMarkers();
     clearEnergyVector();
     ui->leoLoadedEvents->setText("");
@@ -181,7 +180,7 @@ void MainWindow::onRequestUpdateGuiForClearData()
     LoadedEventFiles.clear();
     ui->lwLoadedEventsFiles->clear();
     LoadedTreeFiles.clear();
-    qDebug()  << ">>> Main window: Clear done";
+    //  qDebug()  << ">>> Main window: Clear done";
 }
 
 void MainWindow::clearEnergyVector()
@@ -192,7 +191,7 @@ void MainWindow::clearEnergyVector()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-   qDebug() << "<-MainWindow close event received";
+   //   qDebug() << "<-MainWindow close event received";
    ShutDown = true;
 
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)

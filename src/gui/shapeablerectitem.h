@@ -25,12 +25,12 @@ public:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
     QPolygonF rect() const { return rectangle->polygon(); }
-    float getBorderPx() const { return borderPx; }
+    float  getBorderPx() const { return borderPx; }
     //  const QPixmap *getPixmap() const { return pixmap; }
     QColor getForegroundColor() const { return foregroundColor; }
     QColor getBackgroundColor() const { return backgroundColor; }
 
-    void   setScale(double mmPerPixelInX, double mmPerPixelInY) {this->mmPerPixelInX = mmPerPixelInX; this->mmPerPixelInY = mmPerPixelInY;}
+    void   setScale(double mmPerPixelInX, double mmPerPixelInY);
     double getTrueAngle() const; //in degrees
     void   setTrueAngle(double angle); //in degrees
     double getTrueWidth() const {return TrueWidth;}
@@ -39,13 +39,15 @@ public:
     void   setTrueRect(double trueWidth, double trueHeight);
 
     //apparent shape
-    void setRect(const QPolygonF &rect);
+    void   setRect(const QPolygonF &rect);
 
-    void setBorderPx(float borderPx) { this->borderPx = borderPx; }
+    void   setBorderPx(float borderPx) { this->borderPx = borderPx; }
     //  void setPixmap(const QPixmap *value) { pixmap = value; }
-    void setForegroundColor(const QColor &color);
-    void setBackgroundColor(const QColor &color);
+    void   setForegroundColor(const QColor &color);
+    void   setBackgroundColor(const QColor &color);
 
+    static double ClipAngleToRange0to360(double angle);
+    static double ClipAngleToRangeMinus180to180(double angle);
 protected:
     //virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
     virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
@@ -53,19 +55,19 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
-    void setShowContrast(bool show);
+    void    setShowContrast(bool show);
 
 signals:
-    void geometryChanged();
-    void requestResetGeometry(double screenWidth, double screenHeight);
+    void    geometryChanged();
+    void    requestResetGeometry(double screenWidth, double screenHeight);
 
 private:
-    double mmPerPixelInX, mmPerPixelInY;
-    double trueAngle;
+    double  mmPerPixelInX, mmPerPixelInY;
+    double  trueAngle;
 
-    double TrueWidth, TrueHeight;  //in true space
+    double  TrueWidth, TrueHeight;  //in true space
 
-    void commonConstructor();
+    void    commonConstructor();
     Location getLocation(QPointF mpos) const;
 
     Location mousePress;

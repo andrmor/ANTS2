@@ -83,17 +83,19 @@ double ShapeableRectItem::TrueAngleFromApparent(double apparentAngle)
     //transforming to the system used by the line tool
     double standardAngle = ( apparentAngle > 180.0 ? 360 - apparentAngle : -apparentAngle );
 
-    double trueAngle = standardAngle;
+    double trueAngle = ClipAngleToRangeMinus180to180( standardAngle );
+
+    bool bAbove90 =      (trueAngle >  90.0);
+    bool bBelowMinus90 = (trueAngle < -90.0);
+
     //taking into account distortions: converting from apparent to true
     if (mmPerPixelInX != mmPerPixelInY)
         trueAngle = atan( tan(standardAngle*M_PI/180.0) * mmPerPixelInY/mmPerPixelInX ) *180.0/M_PI;
 
-    //if (standardAngle < -90) trueAngle = 180.0 + trueAngle;
-    //if (standardAngle > +90) trueAngle = 180.0 - trueAngle;
+    if (bAbove90)      trueAngle += 180.0;
+    if (bBelowMinus90) trueAngle -= 180.0;
 
-    //qDebug() << "apparent->true: " << apparentAngle << trueAngle;
-    qDebug() << "standard->true: " << standardAngle << trueAngle;
-
+    //  qDebug() << "standard->true: " << standardAngle << trueAngle;
     return trueAngle;
 }
 
@@ -109,7 +111,6 @@ double ShapeableRectItem::ApparentAngleFromTrue(double trueAngle)
         apparentAngle = atan( tan(standardAngle*3.1415926535/180.0)*mmPerPixelInX/mmPerPixelInY)*180.0/3.1415926535;
 
     //qDebug() << "true->apparent: " << trueAngle << apparentAngle;
-
     return apparentAngle;
 }
 
@@ -166,6 +167,12 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 //    QRect target(rect().left(), rect().top(), rect().width(), rect().height());
 //    painter->drawPixmap(target, *pixmap);
 //  }
+}
+
+void ShapeableRectItem::setScale(double mmPerPixelInX, double mmPerPixelInY)
+{
+    this->mmPerPixelInX = mmPerPixelInX;
+    this->mmPerPixelInY = mmPerPixelInY;
 }
 
 double ShapeableRectItem::getTrueAngle() const
@@ -251,17 +258,31 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
     return (Location)loc;
 }
 
-static qreal clipangle(qreal angle)
+double ShapeableRectItem::ClipAngleToRange0to360(double angle)
 {
-    qreal rot = fmod(angle, 359.999999999999999999);
-    return rot < 0 ? rot + 360 : rot;
+    //qreal rot = fmod(angle, 359.999999999999999999);
+    double a = fmod(angle, 360.0);
+    if (a < 0) a += 360.0;
+    if (a > 359.9999999999999999999) a = 0;
+    return a;
+
+    //return rot < 0 ? rot + 360.0 : rot;
 }
 
-static ShapeableRectItem::Location rotateLocation(ShapeableRectItem::Location loc, qreal angle)
+double ShapeableRectItem::ClipAngleToRangeMinus180to180(double angle)
 {
-    int x = (clipangle(angle)+45)/90;
-    return (ShapeableRectItem::Location)(((loc << x) & 0xf) | (((loc<<x) & ~0xf) >> 4));
+    //qreal rot = fmod(angle, 359.999999999999999999);
+    double a = fmod(angle, 360.0);
+    if (a < -180.0) a += 360.0;
+    if (a > +180.0) a -= 360.0;
+    return a;
 }
+
+//static ShapeableRectItem::Location rotateLocation(ShapeableRectItem::Location loc, qreal angle)
+//{
+//    int x = (clipangle(angle)+45)/90;
+//    return (ShapeableRectItem::Location)(((loc << x) & 0xf) | (((loc<<x) & ~0xf) >> 4));
+//}
 
 //void ShapeableRectItem::wheelEvent(QGraphicsSceneWheelEvent *event)
 //{
@@ -281,7 +302,7 @@ static ShapeableRectItem::Location rotateLocation(ShapeableRectItem::Location lo
 
 void ShapeableRectItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    switch(rotateLocation(getLocation(event->pos()), rotation()))
+    switch ( getLocation(event->pos()) )
     {
         case TopRight: case BottomLeft:
         case TopLeft: case BottomRight:
@@ -326,29 +347,26 @@ void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     switch(this->mousePress)
     {
         case Center:    //Move box
-            setPos(delta+posOnPress);
+            setPos(delta + posOnPress);
             break;
 
-        case TopLeft: case TopRight: case BottomLeft: case BottomRight: //Rotate box
+        case TopLeft:   //Rotate box
+        case TopRight:
+        case BottomLeft:
+        case BottomRight:
         {
-            //double mouseAngle = atan2(event->scenePos().y()-posOnPress.y(), event->scenePos().x()-posOnPress.x());
             double mouseAngle = 0;
             if ( event->scenePos().y() != event->scenePos().x() || event->scenePos().y() != 0)
                 mouseAngle = atan2(event->pos().y(), event->pos().x()) * 180.0/M_PI;
-            clipangle(mouseAngle);
-
-            //double newApparentAngle = clipangle( apparentBoxAngleOnPress + (mouseAngle - apparentMouseAngleOnPress) );
-            //double trueAngle = apparentToTrueAngle(newApparentAngle);
-            //qDebug() << "Box rotation, angles-> mouse:"<< mouseAngle << "Box, new apparent:"<<newApparentAngle<<"Box true:"<<trueAngle;
+            ClipAngleToRange0to360(mouseAngle);
 
             double newTrueAngle = trueBoxAngleOnPress + TrueAngleFromApparent(mouseAngle) - trueMouseAngleOnPress;
-            qDebug() << "moOnP"<<trueMouseAngleOnPress<<"truMouse"<<TrueAngleFromApparent(mouseAngle)<<"appMouse"<<mouseAngle;
-            trueAngle = clipangle(newTrueAngle);
+            trueAngle = ClipAngleToRangeMinus180to180(newTrueAngle);
 
             setTrueAngle(trueAngle);
             setTrueRect(TrueWidth, TrueHeight);
-
-        } break;
+            break;
+        }
 
 //        case Top: // ***!!!
 //            //newRect.setHeight(newRect.height()-projectedDelta.y()*2);

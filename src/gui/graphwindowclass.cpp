@@ -3336,3 +3336,27 @@ void GraphWindowClass::on_pbFWHM_clicked()
     }
     else message("Fit failed!", this);
 }
+
+void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu Menu;
+
+    QAction* alignXWithRuler =Menu.addAction("Align X axis with the Ruler tool");
+    QAction* alignYWithRuler =Menu.addAction("Align Y axis with the Ruler tool");
+
+    QAction* selectedItem = Menu.exec(ui->ledAngle->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    double angle = scene->getRuler()->getAngle() *180.0/M_PI;
+
+    if (selectedItem == alignXWithRuler)
+      {
+        ui->ledAngle->setText( QString::number(angle, 'g', 4) );
+        selBoxControlsUpdated();
+      }
+    else if (selectedItem == alignYWithRuler)
+      {
+        ui->ledAngle->setText( QString::number(angle - 90.0, 'g', 4) );
+        selBoxControlsUpdated();
+      }
+}

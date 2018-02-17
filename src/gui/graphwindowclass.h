@@ -244,6 +244,8 @@ private slots:
     void on_pbRemoveText_clicked();
     void on_pbFWHM_clicked();
 
+    void on_ledAngle_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;

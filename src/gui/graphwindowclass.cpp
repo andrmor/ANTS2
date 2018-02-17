@@ -1490,7 +1490,7 @@ void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
 
 void GraphWindowClass::selBoxGeometryChanged()
 {
-    qDebug() << "selBoxGeometryChanged";
+    //qDebug() << "selBoxGeometryChanged";
     ShapeableRectItem *SelBox = scene->getSelBox();
 
     double scaleX = RasterWindow->getXperPixel();
@@ -1506,6 +1506,7 @@ void GraphWindowClass::selBoxGeometryChanged()
     ui->ledXcenter->setText(QString::number(x0, 'f', 2));
     ui->ledYcenter->setText(QString::number(y0, 'f', 2));
 
+    //SelBox->update(SelBox->boundingRect());
     gvOver->update();
 }
 

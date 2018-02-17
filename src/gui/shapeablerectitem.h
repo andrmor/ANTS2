@@ -36,7 +36,7 @@ public:
     double getTrueWidth() const {return TrueWidth;}
     double getTrueHeight() const {return TrueHeight;}
 
-    void setTrueRect(double trueWidth, double trueHeight);
+    void   setTrueRect(double trueWidth, double trueHeight);
 
     //apparent shape
     void setRect(const QPolygonF &rect);
@@ -71,8 +71,12 @@ private:
     Location mousePress;
     QPointF pressedPoint;
     QPointF posOnPress;
-    qreal angleOnPress;
+    qreal apparentMouseAngleOnPress;             // angle of mouse cursor as vector from center (on LMB press)
+    double apparentBoxAngleOnPress;    // projection box apparent orientation angle (on LMB press)
     QPolygonF rectOnPress;
+
+    double  trueMouseAngleOnPress;
+    double  trueBoxAngleOnPress;
 
     float borderPx;
         //const QPixmap *pixmap;
@@ -85,6 +89,8 @@ private:
     QColor backgroundColor;
     int backgroundWidth;
     QPointF makePoint(double trueX, double trueY);
+    double  TrueAngleFromApparent(double apparentAngle);
+    double  ApparentAngleFromTrue(double trueAngle);
 
 };
 

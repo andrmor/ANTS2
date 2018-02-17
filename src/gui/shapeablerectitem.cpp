@@ -33,15 +33,15 @@ ShapeableRectItem::ShapeableRectItem(QGraphicsItem *parent) :
   // We don't care how these are drawn, but if we don't own them they don't get drawn in correct pos
   // Tried moving and transforming *this object before painting units, but nothing works.
   // They're ALWAYS where *this was in the beggining of ::paint()
-  this->xunits = new QGraphicsTextItem("X", this);
+  this->xunits = new QGraphicsTextItem("+X", this);
   this->xunits->setAcceptHoverEvents(false);
   this->xunits->setAcceptTouchEvents(false);
 
-  this->yunits = new QGraphicsTextItem("Y", this);
+  this->yunits = new QGraphicsTextItem("+Y", this);
   this->yunits->setAcceptHoverEvents(false);
   this->yunits->setAcceptTouchEvents(false);
 
-  this->units = new QGraphicsTextItem("0", this);
+  this->units = new QGraphicsTextItem("-X", this);
   this->units->setAcceptHoverEvents(false);
   this->units->setAcceptTouchEvents(false);
 }
@@ -76,6 +76,41 @@ QPointF ShapeableRectItem::makePoint(double trueX, double trueY)
     return QPointF( (trueX*cosA + trueY*sinA)/mmPerPixelInX, ( -trueX*sinA + trueY*cosA)/mmPerPixelInY );
 
     this->update();
+}
+
+double ShapeableRectItem::TrueAngleFromApparent(double apparentAngle)
+{
+    //transforming to the system used by the line tool
+    double standardAngle = ( apparentAngle > 180.0 ? 360 - apparentAngle : -apparentAngle );
+
+    double trueAngle = standardAngle;
+    //taking into account distortions: converting from apparent to true
+    if (mmPerPixelInX != mmPerPixelInY)
+        trueAngle = atan( tan(standardAngle*M_PI/180.0) * mmPerPixelInY/mmPerPixelInX ) *180.0/M_PI;
+
+    //if (standardAngle < -90) trueAngle = 180.0 + trueAngle;
+    //if (standardAngle > +90) trueAngle = 180.0 - trueAngle;
+
+    //qDebug() << "apparent->true: " << apparentAngle << trueAngle;
+    qDebug() << "standard->true: " << standardAngle << trueAngle;
+
+    return trueAngle;
+}
+
+double ShapeableRectItem::ApparentAngleFromTrue(double trueAngle)
+{
+    //transforming from the system used by the line tool
+    double standardAngle = -trueAngle;
+    if (standardAngle < 0) standardAngle += 360.0;
+
+    double apparentAngle = standardAngle;
+    //taking into account distortions: converting from true to apparent
+    if (mmPerPixelInX != mmPerPixelInY)
+        apparentAngle = atan( tan(standardAngle*3.1415926535/180.0)*mmPerPixelInX/mmPerPixelInY)*180.0/3.1415926535;
+
+    //qDebug() << "true->apparent: " << trueAngle << apparentAngle;
+
+    return apparentAngle;
 }
 
 void ShapeableRectItem::setTrueRect(double trueWidth, double trueHeight)   //qreal ax, qreal ay, qreal w, qreal h)
@@ -119,6 +154,13 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
   rectangle->setPen(pen);
   rectangle->paint(painter, option, widget);
 
+  QLine lx( QPoint(rect().at(2).x(), rect().at(2).y()), QPoint(rect().at(3).x(), rect().at(3).y()));
+  pen.setWidth(3);
+  painter->setPen(pen);
+  painter->drawLine(lx);
+  QLine ly( QPoint(rect().at(0).x(), rect().at(0).y()), QPoint(rect().at(3).x(), rect().at(3).y()));
+  painter->drawLine(ly);
+
 //  if(pixmap)
 //  {
 //    QRect target(rect().left(), rect().top(), rect().width(), rect().height());
@@ -129,41 +171,11 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 double ShapeableRectItem::getTrueAngle() const
 {
     return trueAngle;
-
-    /*
-    double baseAngle = this->rotation();
-
-    //  qDebug() << "Apparent angle:"<<baseAngle;
-
-    double standardAngle;
-    //transforming to the system used by the line tool
-    if (baseAngle > 180.0) standardAngle = 360 - baseAngle;
-    else standardAngle = -baseAngle;
-
-    //  qDebug() << "Standard angle:"<<standardAngle;
-
-    //taking into account distortions: converting from apparent to true
-    double trueAngle = atan( tan(standardAngle*3.1415926535/180.0)*mmPerPixelInY/mmPerPixelInX ) *180.0/3.1415926535;
-    //  qDebug() << "True angle:"<<trueAngle;
-
-    return trueAngle;
-    */
 }
 
 void ShapeableRectItem::setTrueAngle(double angle)
 {
-    //transforming from the system used by the line tool
-//    double apparentAngle = -angle;
-//    if (apparentAngle < 0) apparentAngle = 360.0 + apparentAngle;
-//    trueAngle = apparentAngle;
-
     trueAngle = angle;
-
-    //taking into account distortions: converting from true to apparent
-    //if (mmPerPixelInX != mmPerPixelInY)
-    //    apparentAngle = atan( tan(apparentAngle*3.1415926535/180.0)*mmPerPixelInX/mmPerPixelInY)*180.0/3.1415926535;
-
-    //this->setRotation(0);//apparentAngle);
 }
 
 void ShapeableRectItem::setForegroundColor(const QColor &color)
@@ -198,7 +210,7 @@ ShapeableRectItem::Location ShapeableRectItem::getLocation(QPointF mpos) const
     QVector<bool> corner(4, false); //corners: TL, TR, BR, BL corners
     QVector<bool> side(4, false);   //on side: T, R, B, L
 
-    qDebug() << "\n";
+    //  qDebug() << "\n";
     int ii = 0;
     bool bFoundCorner = false;
     for (int i=0; i<4; i++)
@@ -293,26 +305,50 @@ void ShapeableRectItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     this->pressedPoint = event->scenePos();
     this->posOnPress = pos();
     this->rectOnPress = rect();
-    this->angleOnPress = atan2(event->pos().y(), event->pos().x());
+
+    apparentMouseAngleOnPress = 0;
+    if (event->pos().x() != event->pos().y() || event->pos().x() != 0)
+    apparentMouseAngleOnPress = atan2(event->pos().y(), event->pos().x()) *180.0/M_PI;
+    apparentBoxAngleOnPress = ApparentAngleFromTrue( getTrueAngle() );
+
+    trueMouseAngleOnPress = TrueAngleFromApparent(apparentMouseAngleOnPress);
+    trueBoxAngleOnPress = getTrueAngle();
+
+    //qDebug() << "On press angles -> mouse:"<<apparentMouseAngleOnPress<<" Box true:"<<getTrueAngle()<<" Box apparent:"<<apparentBoxAngleOnPress;
 }
 
 void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    QPolygonF newRect = rectOnPress;
+    //QPolygonF newRect = rectOnPress;
     QPointF delta = event->scenePos()-pressedPoint;
-    QPointF projectedDelta = delta*QTransform().rotate(-rotation());
-    double ang = rotation()*M_PI/180.0;
+    //QPointF projectedDelta = delta*QTransform().rotate(-rotation());
+    //double ang = rotation()*M_PI/180.0;
     switch(this->mousePress)
     {
-        case Center:
+        case Center:    //Move box
             setPos(delta+posOnPress);
             break;
 
-            // ***!!!
-//        case TopLeft: case TopRight: case BottomLeft: case BottomRight: {
-//            double newAngle = atan2(event->scenePos().y()-posOnPress.y(), event->scenePos().x()-posOnPress.x());
-//            setRotation(clipangle((newAngle-angleOnPress)*180.0/M_PI));
-//        } break;
+        case TopLeft: case TopRight: case BottomLeft: case BottomRight: //Rotate box
+        {
+            //double mouseAngle = atan2(event->scenePos().y()-posOnPress.y(), event->scenePos().x()-posOnPress.x());
+            double mouseAngle = 0;
+            if ( event->scenePos().y() != event->scenePos().x() || event->scenePos().y() != 0)
+                mouseAngle = atan2(event->pos().y(), event->pos().x()) * 180.0/M_PI;
+            clipangle(mouseAngle);
+
+            //double newApparentAngle = clipangle( apparentBoxAngleOnPress + (mouseAngle - apparentMouseAngleOnPress) );
+            //double trueAngle = apparentToTrueAngle(newApparentAngle);
+            //qDebug() << "Box rotation, angles-> mouse:"<< mouseAngle << "Box, new apparent:"<<newApparentAngle<<"Box true:"<<trueAngle;
+
+            double newTrueAngle = trueBoxAngleOnPress + TrueAngleFromApparent(mouseAngle) - trueMouseAngleOnPress;
+            qDebug() << "moOnP"<<trueMouseAngleOnPress<<"truMouse"<<TrueAngleFromApparent(mouseAngle)<<"appMouse"<<mouseAngle;
+            trueAngle = clipangle(newTrueAngle);
+
+            setTrueAngle(trueAngle);
+            setTrueRect(TrueWidth, TrueHeight);
+
+        } break;
 
 //        case Top: // ***!!!
 //            //newRect.setHeight(newRect.height()-projectedDelta.y()*2);
@@ -332,6 +368,9 @@ void ShapeableRectItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //            this->setRect(newRect);
 //            break;
     }
+
+    update(boundingRect()); //forces update of the scene inside affected area
+
     emit geometryChanged();
 }
 

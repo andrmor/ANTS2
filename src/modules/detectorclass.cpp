@@ -179,9 +179,6 @@ void DetectorClass::writeToJson(QJsonObject &json)
     //qDebug() << "Det->JSON";
     QJsonObject js;
 
-    int versionNumber = ANTS2_VERSION;
-    js["ANTS2build"] = versionNumber;
-
     MpCollection->writeToJson(js);          //Particles+Material (including overrides)
     writeWorldFixedToJson(js);              //Fixed world size - if activated
     Sandwich->writeToJson(js);

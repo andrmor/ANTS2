@@ -249,8 +249,7 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
 
   QJsonObject js;
 
-  int versionNumber = ANTS2_VERSION;
-  js["ANTS2build"] = versionNumber;
+  //js["ANTS2build"] = versionNumber;
 
   SimGeneralConfigToJson(js);         //general sim settings
   if (ui->twSourcePhotonsParticles->currentIndex() == 0)

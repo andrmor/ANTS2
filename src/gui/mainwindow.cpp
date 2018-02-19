@@ -3883,7 +3883,6 @@ void MainWindow::on_actionCredits_triggered()
 
 void MainWindow::on_actionVersion_triggered()
 {
-  int versionNumber = ANTS2_VERSION;
   int minVer = ANTS2_MINOR;
   QString miv = QString::number(minVer);
   if (miv.length() == 1) miv = "0"+miv;
@@ -3893,7 +3892,6 @@ void MainWindow::on_actionVersion_triggered()
 
   QString out = "ANTS2\n"
                 "   version:  " + mav + "." + miv + "\n"
-                "   build number:  " + QString::number(versionNumber)+"\n"
                 "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
                 "\n"
                 "Qt version:  " + qv + "\n"
@@ -4008,6 +4006,7 @@ void MainWindow::on_cbBuilPhotonTrackstester_toggled(bool checked)
 
 void MainWindow::on_pbSimulate_clicked()
 {
+  ELwindow->QuickSave(0);
   //ui->tabwidMain->setCurrentIndex(1);
   //ui->twSourcePhotonsParticles->setCurrentIndex(0);
   fStartedFromGUI = true;
@@ -4019,6 +4018,7 @@ void MainWindow::on_pbSimulate_clicked()
 
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {  
+  ELwindow->QuickSave(0);
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
   //watchdog on particle sources, can be transferred later to check-upwindow

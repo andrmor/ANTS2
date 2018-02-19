@@ -394,7 +394,7 @@
       <string>Load configuration saved on last exit</string>
      </property>
      <property name="text">
-      <string>Load last on exit</string>
+      <string>Load autosafe</string>
      </property>
     </widget>
     <widget class="QLabel" name="labLastOnExit">

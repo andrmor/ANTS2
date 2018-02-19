@@ -116,8 +116,6 @@ void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as
   ReconstructionWindow::updateFilterSettings();
 
   QJsonObject js = MW->Config->JSON["ReconstructionConfig"].toObject();
-  int versionNumber = ANTS2_VERSION;
-  js["ANTS2build"] = versionNumber;
 
   //ReconstructionWindow::writePMrelatedInfoToJson(js);
   MW->Detector->PMgroups->writeSensorGroupsToJson(js);
@@ -5652,8 +5650,10 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
   return fOK;
 }
 
+#include <exampleswindow.h>
 void ReconstructionWindow::on_pbReconstructAll_clicked()
 {
+  MW->ELwindow->QuickSave(0);
   ReconstructionWindow::writeToJson(MW->Config->JSON);
   ReconstructAll(true);
 }

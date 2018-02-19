@@ -1,7 +1,6 @@
 #--------------ANTS2--------------
-ANTS2_MAJOR = 4
-ANTS2_MINOR = 2
-ANTS2_VERSION = 2230
+ANTS2_MAJOR = 5
+ANTS2_MINOR = 3
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -610,7 +609,6 @@ win32 {
 #---Additional defines---
 DEFINES += ANTS2_MINOR=\"$$ANTS2_MINOR\"
 DEFINES += ANTS2_MAJOR=\"$$ANTS2_MAJOR\"
-DEFINES += ANTS2_VERSION=\"$$ANTS2_VERSION\"
 DEFINES += DEBUG_VERBOSITY=\"$$DEBUG_VERBOSITY\"
 
 win32 {

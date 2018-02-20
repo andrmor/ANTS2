@@ -391,10 +391,10 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>Load configuration saved on last exit</string>
+      <string>Load configuration auto-saved on last exit/simulation/reconstruction</string>
      </property>
      <property name="text">
-      <string>Load autosafe</string>
+      <string>Load autosave</string>
      </property>
     </widget>
     <widget class="QLabel" name="labLastOnExit">

@@ -9,8 +9,8 @@ ANTS2_MINOR = 3
 #CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
-DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
-                             # after change, qmake and rebuild (or qmake + maky any change in main.cpp to trigger recompile)
+DEBUG_VERBOSITY = 0          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+                             # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
 #---CERN ROOT---
 win32 {

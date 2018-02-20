@@ -44,12 +44,12 @@ ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDa
 
 #ifdef ANTS_FANN
   ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
-  //qDebug() << "->NeuralNetworks module created";
+  qDebug() << "->NeuralNetworks module created";
 #endif
 
 #ifdef ANTS_FLANN
   KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
-  //qDebug() << "->Nearest neighbour module created";
+  qDebug() << "->Nearest neighbour module created";
 #endif
 }
 

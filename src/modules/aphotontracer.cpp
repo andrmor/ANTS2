@@ -8,6 +8,7 @@
 #include "agridelementrecord.h"
 #include "aphoton.h"
 #include "atrackrecords.h"
+#include "amonitor.h"
 
 //Qt
 #include <QDebug>
@@ -343,6 +344,34 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
            if (SimSet->bDoPhotonHistoryLog) PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Grid_ShiftIn) );
            break;
          }
+       case 'M': //monitor
+         {
+           const int iMon = NodeAfterInterface->GetNumber();
+           //qDebug() << "Monitor hit!" << ThisVolume->GetName() << "Number:"<<iMon;// << MatIndexFrom<<MatIndexTo;
+           if (p->SimStat->Monitors.at(iMon)->isForPhotons())
+             {
+               Double_t local[3];
+               const Double_t *global = navigator->GetCurrentPoint();
+               navigator->MasterToLocal(global, local);
+               //qDebug()<<local[0]<<local[1];
+               //qDebug() << "Monitors:"<<p->SimStat->Monitors.size();
+               if ( (local[2]>0 && p->SimStat->Monitors.at(iMon)->isUpperSensitive()) || (local[2]<0 && p->SimStat->Monitors.at(iMon)->isLowerSensitive()) )
+               {
+                   //angle?
+                   if (!fHaveNormal) N = navigator->FindNormal(kFALSE);
+                   double cosAngle = 0;
+                   for (int i=0; i<3; i++) cosAngle += N[i] * p->v[i];
+                   p->SimStat->Monitors[iMon]->fillForPhoton(local[0], local[1], p->time, 180.0/3.1415926535*TMath::ACos(cosAngle), p->waveIndex);
+                   if (p->SimStat->Monitors.at(iMon)->isStopsTracking())
+                   {
+                       OneEvent->SimStat->KilledByMonitor++;
+                       if (SimSet->bDoPhotonHistoryLog) PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::KilledByMonitor) );
+                       goto force_stop_tracing; //finished with this photon
+                   }
+               }
+             }
+           break;
+         }
        default:
          {
            //other volumes have title '-'
@@ -574,6 +603,10 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                     RandomDir();
                     navigator->SetCurrentDirection(p->v);
                     //qDebug() << "After:"<<p->WaveIndex;
+
+                    if (SimSet->fTimeResolved)
+                        p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+
                     OneEvent->SimStat->Reemission++;
                     if (SimSet->bDoPhotonHistoryLog)
                       PhLog.append( APhotonHistoryLog(R, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Reemission, MatIndexFrom) );
@@ -584,8 +617,7 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
             return AbsTriggered;
           }
 
-        //else if (DoRayleigh)
-        //otherwise doing Rayleigh
+        if (DoRayleigh)
           {
             //qDebug()<<"Scattering was triggered";
             //interaction position

@@ -18,13 +18,10 @@
   class ASimulationManager;
 #endif
 
-class QPlainTextEdit;
 class DetectorClass;
 class EventsDataClass;
 class GeometryWindowClass;
 class GraphWindowClass;
-class TObject;
-class QDialog;
 class pms;
 class TF2;
 class AConfiguration;
@@ -32,17 +29,7 @@ class ReconstructionManagerClass;
 class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
-class TRandom2;
 class QJsonValue;
-
-class InterfaceToGlobScript : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToGlobScript() {}
-  ~InterfaceToGlobScript() {}
-};
 
 // ====== interfaces which do not require GUI ======
 
@@ -152,8 +139,13 @@ public slots:
   int countPMs();
   int GetNumEvents();
   int countEvents();
+  int countTimedEvents();
+  int countTimeBins();
   double GetPMsignal(int ievent, int ipm);
+  QVariant GetPMsignals(int ievent);
   void SetPMsignal(int ievent, int ipm, double value);
+  double GetPMsignalTimed(int ievent, int ipm, int iTimeBin);
+  QVariant GetPMsignalVsTime(int ievent, int ipm);
 
   // Reconstructed values
     //assuming there is only one group, and single point reconstruction
@@ -172,6 +164,7 @@ public slots:
   double GetRho2(int igroup, int ievent, int ipoint, int iPM);
   double GetReconstructedEnergy(int igroup, int ievent, int ipoint);
   bool IsReconstructedGoodEvent(int igroup, int ievent);
+  bool IsReconstructed_ScriptFilterPassed(int igroup, int ievent);
     //counters - return -1 when invalid parameters
   int countReconstructedGroups();
   int countReconstructedEvents(int igroup);
@@ -201,6 +194,7 @@ public slots:
   void SetReconstructedY(int ievent, double y);
   void SetReconstructedZ(int ievent, double z);
   void SetReconstructedEnergy(int ievent, double e);
+  void SetReconstructed_ScriptFilterPass(int ievent, bool flag);
   void SetReconstructedGoodEvent(int ievent, bool good);
   void SetReconstructedAllEventsGood(bool flag);
   void SetReconstructionOK(int ievent, bool OK);
@@ -213,7 +207,8 @@ public slots:
   void SetReconstructedY(int igroup, int ievent, int ipoint, double y);
   void SetReconstructedZ(int igroup, int ievent, int ipoint, double z);
   void SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e);
-  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);  
+  void SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good);
+  void SetReconstructed_ScriptFilterPass(int igroup, int ievent, bool flag);
   void SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK);
     //set when reconstruction is ready for all events! - otherwise GUI will complain
   void SetReconstructionReady();
@@ -230,6 +225,9 @@ public slots:
   //Purges
   void PurgeBad();
   void Purge(int LeaveOnePer);
+
+  //Statistics
+  QVariant GetStatistics(int igroup);
 
 private:
   AConfiguration* Config;
@@ -304,6 +302,17 @@ public slots:
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName);
 
+  //monitors
+  int countMonitors();
+  //int getMonitorHits(int imonitor);
+  int getMonitorHits(QString monitor);
+
+  QVariant getMonitorTime(QString monitor);
+  QVariant getMonitorAngular(QString monitor);
+  QVariant getMonitorWave(QString monitor);
+  QVariant getMonitorEnergy(QString monitor);
+  QVariant getMonitorXY(QString monitor);
+
 signals:
   void requestStopSimulation();
 
@@ -314,6 +323,8 @@ private:
 
   int RecNumThreads;
   bool fGuiPresent;
+
+  QVariant getMonitorData1D(QString monitor, QString whichOne);
 };
 #endif
 
@@ -385,155 +396,26 @@ private:
   LRF::ARepository *repo; //alias
 };
 
-// ---- H I S T O G R A M S ---- (TH1D of ROOT)
-class InterfaceToHistD : public AScriptInterface
+// ---- T R E E ---- (TTree of ROOT)
+class AInterfaceToTree : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToHistD(TmpObjHubClass *TmpHub);
-  ~InterfaceToHistD(){}
-
-  virtual bool InitOnRun();
+   AInterfaceToTree(TmpObjHubClass *TmpHub);
+   ~AInterfaceToTree() {}
 
 public slots:
-  void NewHist(QString HistName, int bins, double start, double stop);
-  void NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
-
-  void SetTitles(QString HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
-  void SetLineProperties(QString HistName, int LineColor, int LineStyle, int LineWidth);
-
-  void Fill(QString HistName, double val, double weight);
-  void Fill2D(QString HistName, double x, double y, double weight);
-
-  void Draw(QString HistName, QString options);
-
-  void Smooth(QString HistName, int times);
-  QVariant FitGauss(QString HistName, QString options="");
-  QVariant FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options="");
-
-  bool Delete(QString HistName);
-  void DeleteAllHist();
-
-signals:
-  void RequestDraw(TObject* obj, QString options, bool fFocus);
-
-private:  
-  TmpObjHubClass *TmpHub;
-};
-
-// ---- G R A P H S ---- (TGraph of ROOT)
-class InterfaceToGraphs : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToGraphs(TmpObjHubClass *TmpHub);
-  ~InterfaceToGraphs(){}
-
-  virtual bool InitOnRun();
-
-public slots:
-  void NewGraph(QString GraphName);
-  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
-  void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
-  void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
-
-  void AddPoint(QString GraphName, double x, double y);
-  void Draw(QString GraphName, QString options);
-
-  bool Delete(QString GraphName);
-  void DeleteAllGraph();
-
-signals:
-  void RequestDraw(TObject* obj, QString options, bool fFocus);
+   void OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
+   QString PrintBranches(QString TreeName);
+   QVariant GetBranch(QString TreeName, QString BranchName);
+   void CloseTree(QString TreeName);
 
 private:
-  TmpObjHubClass *TmpHub;
+   TmpObjHubClass *TmpHub;
 };
 
-class MathInterfaceClass : public AScriptInterface
-{
-  Q_OBJECT
-  Q_PROPERTY(double pi READ pi)
-  double pi() const { return 3.141592653589793238462643383279502884; }
-
-public:
-  MathInterfaceClass(TRandom2* RandGen);
-  void setRandomGen(TRandom2* RandGen);
-
-public slots:
-  double abs(double val);
-  double acos(double val);
-  double asin(double val);
-  double atan(double val);
-  double atan2(double y, double x);
-  double ceil(double val);
-  double cos(double val);
-  double exp(double val);
-  double floor(double val);
-  double log(double val);
-  double max(double val1, double val2);
-  double min(double val1, double val2);
-  double pow(double val, double power);
-  double sin(double val);
-  double sqrt(double val);
-  double tan(double val);
-  double round(double val);
-  double random();
-  double gauss(double mean, double sigma);
-  double poisson(double mean);
-  double maxwell(double a);  // a is sqrt(kT/m)
-
-private:
-  TRandom2* RandGen;
-};
-
-#ifdef GUI
-// =============== GUI mode only ===============
-
-// MESSAGE window
-class InterfaceToTexter : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToTexter(QMainWindow* parent);
-  ~InterfaceToTexter();
-
-  QDialog *D;
-  double X, Y;
-  double W, H;
-
-  QPlainTextEdit* e;
-  bool bEnabled;
-
-public slots:
-  void Enable(bool flag) {bEnabled = flag;}
-  void Append(QString txt);
-  void Clear();
-  void Show();
-  void Hide();
-  void Show(QString txt, int ms = -1);
-  void SetTransparent(bool flag);
-
-  void Move(double x, double y);
-  void Resize(double w, double h);
-
-  void SetFontSize(int size);
-
-public:
-  void deleteDialog();
-  bool isActive() {return bActivated;}
-  void hide();     //does not affect bActivated status
-  void restore();  //does not affect bActivated status
-
-private:
-  QMainWindow* Parent;
-  bool bActivated;
-
-  void init(bool fTransparent);
-};
+#ifdef GUI // =============== GUI mode only ===============
 
 // -- GRAPH WINDOW --
 class InterfaceToGraphWin : public AScriptInterface
@@ -556,6 +438,7 @@ public slots:
   void SetLog(bool Xaxis, bool Yaxis);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
+  void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
 
   //basket operation
   void AddToBasket(QString Title);
@@ -645,5 +528,6 @@ private:
   DetectorClass* Detector;
 };
 #endif // GUI
+
 #endif // INTERFACETOGLOBSCRIPT
 

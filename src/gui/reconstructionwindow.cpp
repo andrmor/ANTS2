@@ -35,6 +35,7 @@
 #include "alrfwindow.h" //For new LRF module
 #include "arepository.h"
 #include "amaterialparticlecolection.h"
+#include "tmpobjhubclass.h"
 
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
@@ -106,8 +107,6 @@ ReconstructionWindow::~ReconstructionWindow()
       MW->GainWindow = 0;
       //qDebug() << "  --<Deleted";
     }
-  for (int ipm=0; ipm<sigmaHists.size(); ipm++) delete sigmaHists[ipm];
-  sigmaHists.clear();
   //qDebug() << " -<Destructor of Reconstruction window finished";
 }
 
@@ -117,8 +116,6 @@ void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as
   ReconstructionWindow::updateFilterSettings();
 
   QJsonObject js = MW->Config->JSON["ReconstructionConfig"].toObject();
-  int versionNumber = ANTS2_VERSION;
-  js["ANTS2build"] = versionNumber;
 
   //ReconstructionWindow::writePMrelatedInfoToJson(js);
   MW->Detector->PMgroups->writeSensorGroupsToJson(js);
@@ -1051,23 +1048,22 @@ void ReconstructionWindow::updateRedStatusOfRecOptions()
 void ReconstructionWindow::updateFiltersGui()
 {
   //Update UI
-  //ui->fEventNumberFilter->setEnabled(ui->cbFilterEventNumber->isChecked());
-  //ui->fEnergyFilter->setEnabled(ui->cbActivateEnergyFilter->isChecked());
-  //ui->fLoadedEnergyFilter->setEnabled(ui->cbActivateLoadedEnergyFilter->isChecked());
-  //ui->fChi2Filter->setEnabled(ui->cbActivateChi2Filter->isChecked());
   ui->fCustomSpatFilter->setEnabled(ui->cbSpFcustom->isChecked());
   ui->fSpFz->setEnabled(!ui->cbSpFallZ->isChecked());
-  //ui->fFilterSumSignal->setEnabled(ui->cbFilterSumSignal->isChecked());
-  //ui->fFilterIndividualSignal->setEnabled(ui->cbFilterIndividualSignals->isChecked());
     //warning icons
   bool masterWarningFlag = false;
   QIcon no;
-  if (ui->cbFilterEventNumber->isChecked() || ui->cbFilterEventNumber->isChecked())
+  if (ui->cbFilterEventNumber->isChecked() || ui->cbFilterMultipleScanEvents->isChecked())
     {
       ui->twData->tabBar()->setTabIcon(0, YellowIcon);
-      masterWarningFlag = true;
+      //ui->twData->tabBar()->setTabTextColor(0, QColor(237, 160, 59));
+      //masterWarningFlag = true;
     }
-  else ui->twData->tabBar()->setTabIcon(0, no);
+  else
+    {
+      //ui->twData->tabBar()->setTabTextColor(0, Qt::black);
+      ui->twData->tabBar()->setTabIcon(0, no);
+    }
   if (ui->cbFilterSumSignal->isChecked() || ui->cbFilterIndividualSignals->isChecked())
     {
       ui->twData->tabBar()->setTabIcon(1, YellowIcon);
@@ -1155,6 +1151,8 @@ void ReconstructionWindow::updateFiltersGui()
 void ReconstructionWindow::on_pbUpdateFilters_clicked()
 {
   //qDebug() << "UpdateFilterButton pressed";
+  if (MW->ShutDown) return;
+
   if (bFilteringStarted) //without this on-Editing-finished is triggered when disable kick in and cursor is in one of the edit boxes
   {
       //qDebug() << "Igonred, already filetring";
@@ -1304,7 +1302,9 @@ void ReconstructionWindow::SetProgress(int val)
 
 void ReconstructionWindow::onBusyOn()
 {
-  //qDebug() << "Busy ON!";
+  //qDebug() << "RW -> Busy ON!";
+  WidgetFocusedBeforeBusyOn = focusWidget();
+
   ui->twData->setEnabled(false);
   ui->twOptions->setEnabled(false);
   ui->bsAnalyzeScan->setEnabled(false);
@@ -1312,12 +1312,15 @@ void ReconstructionWindow::onBusyOn()
 
 void ReconstructionWindow::onBusyOff()
 {
-  //qDebug() << "Busy OFF!";
+  //qDebug() << "RW -> Busy OFF!";
   ui->twData->setEnabled(true);
   ui->twOptions->setEnabled(true);
   ui->bsAnalyzeScan->setEnabled(true);
   ui->pbStopReconstruction->setEnabled(false);
   ui->pbStopReconstruction->setChecked(false);
+
+  if (WidgetFocusedBeforeBusyOn  && !MW->ShutDown) WidgetFocusedBeforeBusyOn->setFocus();
+  WidgetFocusedBeforeBusyOn = 0;
 }
 
 void ReconstructionWindow::on_sbZshift_valueChanged(int arg1)
@@ -2107,8 +2110,9 @@ void ReconstructionWindow::onUpdateGainsIndication()
     if (ui->leiPMnumberForGains->text() != "")
       {
         iCurrentPM = ui->leiPMnumberForGains->text().toInt();
-        //if (PMs->at(icurrent).group != igroup) icurrent = -1;
-        if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1;
+             //if (PMs->at(icurrent).group != igroup) icurrent = -1;
+          //if (!PMgroups->isPmInCurrentGroupFast(iCurrentPM)) iCurrentPM = -1; //cannot do it with confgurations with no PMs
+        if (!PMgroups->isPmBelongsToGroup(iCurrentPM, CurrentGroup)) iCurrentPM = -1;
         else ui->ledGain->setText(QString::number(PMgroups->getGain(iCurrentPM, CurrentGroup)));
       }
 
@@ -3012,8 +3016,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList1->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr1->currentText() == "Loaded energy")
-       p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr1->currentText() == "True or loaded energy")
+       p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Reconstructed energy")
        p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr1->currentText() == "Chi2")
@@ -3048,8 +3052,8 @@ void ReconstructionWindow::on_pbCorrUpdateTMP_clicked()
        ExtractNumbersFromQString(ui->leCorrList2->text(), &Channels);
        p = new CU_SumChannels(Channels, EventsDataHub, PMgroups, ThisPMgroup);
      }
-   else if (ui->cobCorr2->currentText() == "Loaded energy")
-      p = new CU_LoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
+   else if (ui->cobCorr2->currentText() == "True or loaded energy")
+      p = new CU_TrueOrLoadedEnergy(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Reconstructed energy")
       p = new CU_RecE(QList<int>(), EventsDataHub, PMgroups, ThisPMgroup);
    else if (ui->cobCorr2->currentText() == "Chi2")
@@ -3360,14 +3364,14 @@ void ReconstructionWindow::on_cbActivateCorrelationFilters_toggled(bool checked)
 
 void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
 {
-  if (!EventsDataHub->fLoadedEventsHaveEnergyInfo)
+  if (!EventsDataHub->fLoadedEventsHaveEnergyInfo && EventsDataHub->isScanEmpty())
   {
-      message("Loaded data does not contain energy info!", this);
+      message("There are no energy data!", this);
       return;
   }
 
-  auto hist1D = new TH1D("hist1ShLoEnSp","Loaded energy spectrum", MW->GlobSet->BinsX, 0, 0);
-  hist1D->SetXTitle("Loaded energy");
+  auto hist1D = new TH1D("hist1ShLoEnSp","True/loaded energy", MW->GlobSet->BinsX, 0, 0);
+  hist1D->SetXTitle("True or loaded energy");
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   hist1D->SetBit(TH1::kCanRebin);
 #endif
@@ -3375,7 +3379,7 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
   bool DoFiltering = false;
   if (!EventsDataHub->isReconstructionDataEmpty()) DoFiltering = true;
 
-  int ienergy = MW->PMs->count(); //index of the energy channel
+//  int ienergy = MW->PMs->count(); //index of the energy channel
 //  qDebug()<<"Energy channel="<<ienergy;
 
   for (int i=0; i < EventsDataHub->Events.size(); i++)
@@ -3383,7 +3387,8 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
        if (DoFiltering)
          if (!EventsDataHub->ReconstructionData[0][i]->GoodEvent) continue;
 
-       hist1D->Fill(EventsDataHub->Events[i][ienergy]);
+       //hist1D->Fill(EventsDataHub->Events[i][ienergy]);
+       hist1D->Fill(EventsDataHub->Scan.at(i)->Points.at(0).energy);
     }
 
   MW->GraphWindow->Draw(hist1D);
@@ -3655,12 +3660,12 @@ void ReconstructionWindow::on_pbSetPresprocessingForGains_clicked()
 
 void ReconstructionWindow::on_pbGotoPreprocessAdjust_clicked()
 {
-  if (ChPerPhEl.size() != PMs->count())
+  if (MW->TmpHub->ChPerPhEl_Sigma2.size() != PMs->count())
   {
       message("Data not yet ready", this);
       return;
   }
-  MW->SetMultipliersUsingChPhEl(ChPerPhEl);
+  MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Sigma2);
 }
 
 void ReconstructionWindow::on_pbPurgeEvents_clicked()
@@ -4999,6 +5004,8 @@ void ReconstructionWindow::updateReconSettings()
   // ContrGrids
   QJsonObject gcpuJson;
         gcpuJson["StartOption"] = ui->cobCGstartOption->currentIndex();
+        gcpuJson["StartX"] = ui->ledCPUoffsetX->text().toFloat();
+        gcpuJson["StartY"] = ui->ledCPUoffsetY->text().toFloat();
         gcpuJson["OptimizeWhat"] = ui->cobCGoptimizeWhat->currentIndex();
         gcpuJson["NodesXY"] = ui->sbCGnodes->value();
         gcpuJson["Iterations"] = ui->sbCGiter->value();
@@ -5125,16 +5132,16 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   //general
   QJsonObject gjson = RecJson["General"].toObject();
   JsonToCheckbox(gjson, "ReconstructEnergy", ui->cbReconstructEnergy);
-  JsonToLineEdit(gjson, "InitialEnergy", ui->ledSuggestedEnergy);
+  JsonToLineEditDouble(gjson, "InitialEnergy", ui->ledSuggestedEnergy);
   JsonToCheckbox(gjson, "ReconstructZ", ui->cb3Dreconstruction);
-  JsonToLineEdit(gjson, "InitialZ", ui->ledSuggestedZ);
+  JsonToLineEditDouble(gjson, "InitialZ", ui->ledSuggestedZ);
   ui->cobZ->setCurrentIndex(0); //compatibility
   JsonToComboBox(gjson, "Zstrategy", ui->cobZ);
   JsonToCheckbox(gjson, "IncludePassives", ui->cbIncludePassives);
   JsonToCheckbox(gjson, "WeightedChi2", ui->cbWeightedChi2);  
   ui->cbLimitSearchToVicinity->setChecked(false); //compatibility
   JsonToCheckbox(gjson, "LimitSearchIfTrueIsSet", ui->cbLimitSearchToVicinity);
-  JsonToLineEdit(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
+  JsonToLineEditDouble(gjson, "RangeForLimitSearchIfTrueSet", ui->ledLimitSearchRange);  
   JsonToCheckbox(gjson, "LimitSearchGauss", ui->cbGaussWeightInMinimization);
 
   //Dynamic passives - before algorithms for compatibility: CUDA settings can overrite them if old file is loaded
@@ -5142,10 +5149,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject dynPassJson = RecJson["DynamicPassives"].toObject();
       JsonToCheckbox(dynPassJson, "IgnoreBySignal", ui->cbDynamicPassiveBySignal);
-      JsonToLineEdit(dynPassJson, "SignalLimitLow", ui->ledDynamicPassiveThresholdLow);
-      JsonToLineEdit(dynPassJson, "SignalLimitHigh", ui->ledDynamicPassiveThresholdHigh);
+      JsonToLineEditDouble(dynPassJson, "SignalLimitLow", ui->ledDynamicPassiveThresholdLow);
+      JsonToLineEditDouble(dynPassJson, "SignalLimitHigh", ui->ledDynamicPassiveThresholdHigh);
       JsonToCheckbox(dynPassJson, "IgnoreByDistance", ui->cbDynamicPassiveByDistance);
-      JsonToLineEdit(dynPassJson, "DistanceLimit", ui->ledPassiveRange);
+      JsonToLineEditDouble(dynPassJson, "DistanceLimit", ui->ledPassiveRange);
     }
   else
     {
@@ -5190,27 +5197,29 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   QJsonObject cogjson = ajson["CoGoptions"].toObject();
   JsonToCheckbox(cogjson, "ForceFixedZ", ui->cbForceCoGgiveZof);
   JsonToCheckbox(cogjson, "DoStretch", ui->cbCoGapplyStretch);
-  JsonToLineEdit(cogjson, "StretchX", ui->ledCoGstretchX);
-  JsonToLineEdit(cogjson, "StretchY", ui->ledCoGstretchY);
-  JsonToLineEdit(cogjson, "StretchZ", ui->ledCoGstretchZ);
+  JsonToLineEditDouble(cogjson, "StretchX", ui->ledCoGstretchX);
+  JsonToLineEditDouble(cogjson, "StretchY", ui->ledCoGstretchY);
+  JsonToLineEditDouble(cogjson, "StretchZ", ui->ledCoGstretchZ);
   ui->cbCogIgnoreLow->setChecked(false);
   JsonToCheckbox(cogjson, "IgnoreLow", ui->cbCogIgnoreLow); //compatibility
   JsonToCheckbox(cogjson, "IgnoreBySignal", ui->cbCogIgnoreLow);
-  JsonToLineEdit(cogjson, "IgnoreThreshold", ui->ledCoGignoreLevelLow); //compatibility
-  JsonToLineEdit(cogjson, "IgnoreThresholdLow", ui->ledCoGignoreLevelLow);
+  JsonToLineEditDouble(cogjson, "IgnoreThreshold", ui->ledCoGignoreLevelLow); //compatibility
+  JsonToLineEditDouble(cogjson, "IgnoreThresholdLow", ui->ledCoGignoreLevelLow);
   ui->ledCoGignoreLevelHigh->setText("1e10"); //compatibility
-  JsonToLineEdit(cogjson, "IgnoreThresholdHigh", ui->ledCoGignoreLevelHigh);
+  JsonToLineEditDouble(cogjson, "IgnoreThresholdHigh", ui->ledCoGignoreLevelHigh);
   ui->cbCoGIgnoreFar->setChecked(false); //compatibility
   JsonToCheckbox(cogjson, "IgnoreFar", ui->cbCoGIgnoreFar);
-  JsonToLineEdit(cogjson, "IgnoreDistance", ui->ledCoGignoreThreshold);
+  JsonToLineEditDouble(cogjson, "IgnoreDistance", ui->ledCoGignoreThreshold);
     //MG
   QJsonObject gcpuJson = ajson["CPUgridsOptions"].toObject();
   JsonToComboBox(gcpuJson, "StartOption", ui->cobCGstartOption);
+  JsonToLineEditDouble(gcpuJson, "StartX", ui->ledCPUoffsetX);
+  JsonToLineEditDouble(gcpuJson, "StartY", ui->ledCPUoffsetY);
   JsonToComboBox(gcpuJson, "OptimizeWhat", ui->cobCGoptimizeWhat);
   JsonToSpinBox(gcpuJson, "NodesXY", ui->sbCGnodes);
   JsonToSpinBox(gcpuJson, "Iterations", ui->sbCGiter);
-  JsonToLineEdit(gcpuJson, "InitialStep", ui->ledCGstartStep);
-  JsonToLineEdit(gcpuJson, "Reduction", ui->ledCGreduction);
+  JsonToLineEditDouble(gcpuJson, "InitialStep", ui->ledCGstartStep);
+  JsonToLineEditDouble(gcpuJson, "Reduction", ui->ledCGreduction);
   //JsonToCheckbox(gcpuJson, "DynamicPassives", ui->cbDynamicPassives);
   //JsonToComboBox(gcpuJson, "PassiveType", ui->cobDynamicPassiveType);
   //compatibility
@@ -5228,10 +5237,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   JsonToComboBox(rootJson, "StartOption", ui->cobLSstartingXY);
   JsonToComboBox(rootJson, "Minuit2Option", ui->cobMinuit2Option);
   JsonToComboBox(rootJson, "LSorLikelihood", ui->cobLSminimizeWhat);
-  JsonToLineEdit(rootJson, "StartStepX", ui->ledInitialStepX);
-  JsonToLineEdit(rootJson, "StartStepY", ui->ledInitialStepY);
-  JsonToLineEdit(rootJson, "StartStepZ", ui->ledInitialStepZ);
-  JsonToLineEdit(rootJson, "StartStepEnergy", ui->ledInitialStepEnergy);
+  JsonToLineEditDouble(rootJson, "StartStepX", ui->ledInitialStepX);
+  JsonToLineEditDouble(rootJson, "StartStepY", ui->ledInitialStepY);
+  JsonToLineEditDouble(rootJson, "StartStepZ", ui->ledInitialStepZ);
+  JsonToLineEditDouble(rootJson, "StartStepEnergy", ui->ledInitialStepEnergy);
   JsonToSpinBox(rootJson, "MaxCalls", ui->sbLSmaxCalls);
   JsonToCheckbox(rootJson, "LSsuppressConsole", ui->cbLSsuppressConsole);
   //JsonToCheckbox(rootJson, "DynamicPassives", ui->cbDynamicPassives);
@@ -5255,10 +5264,10 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   QJsonObject cudaJson = ajson["CGonCUDAsettings"].toObject();
   JsonToSpinBox(cudaJson, "ThreadBlockXY", ui->sbCUDAthreadBlockSize);
   JsonToSpinBox(cudaJson, "Iterations", ui->sbCUDAiterations);
-  JsonToLineEdit(cudaJson, "StartStep", ui->ledCUDAstartStep);
-  JsonToLineEdit(cudaJson, "ScaleReduction", ui->ledCUDAscaleReductionFactor);
-  JsonToLineEdit(cudaJson, "StartX", ui->ledCUDAxoffset);
-  JsonToLineEdit(cudaJson, "StartY", ui->ledCUDAyoffset);
+  JsonToLineEditDouble(cudaJson, "StartStep", ui->ledCUDAstartStep);
+  JsonToLineEditDouble(cudaJson, "ScaleReduction", ui->ledCUDAscaleReductionFactor);
+  JsonToLineEditDouble(cudaJson, "StartX", ui->ledCUDAxoffset);
+  JsonToLineEditDouble(cudaJson, "StartY", ui->ledCUDAyoffset);
   JsonToComboBox(cudaJson, "StartOption", ui->cobCUDAoffsetOption);
   JsonToComboBox(cudaJson, "OptimizeMLChi2", ui->cobCUDAminimizeWhat);
   //compatibility
@@ -5277,9 +5286,9 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
                parseJson(cudaJson, "PassiveOption", SignalDistance);
                if (SignalDistance==0) ui->cbDynamicPassiveBySignal->setChecked(true);
                else ui->cbDynamicPassiveByDistance->setChecked(true);
-               JsonToLineEdit(cudaJson, "Threshold", ui->ledDynamicPassiveThresholdLow);
+               JsonToLineEditDouble(cudaJson, "Threshold", ui->ledDynamicPassiveThresholdLow);
                ui->ledDynamicPassiveThresholdHigh->setText("1e10");
-               JsonToLineEdit(cudaJson, "MaxDistance", ui->ledPassiveRange);
+               JsonToLineEditDouble(cudaJson, "MaxDistance", ui->ledPassiveRange);
              }
         }
     }
@@ -5303,8 +5312,8 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   {
     JsonToCheckbox(lnJson, "Active", ui->cbInRecActivate);
     JsonToComboBox(lnJson, "Shape", ui->cobInRecShape);
-    JsonToLineEdit(lnJson, "Size1", ui->ledInRecSize1);
-    JsonToLineEdit(lnJson, "Size2", ui->ledInRecSize2);
+    JsonToLineEditDouble(lnJson, "Size1", ui->ledInRecSize1);
+    JsonToLineEditDouble(lnJson, "Size2", ui->ledInRecSize2);
   }
 
   return true;
@@ -5468,8 +5477,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject njson = FiltJson["EventNumber"].toObject();
       JsonToCheckbox(njson, "Active", ui->cbFilterEventNumber);
-      JsonToLineEdit(njson, "Min", ui->leiFromNE);
-      JsonToLineEdit(njson, "Max", ui->leiToNE);
+      JsonToLineEditDouble(njson, "Min", ui->leiFromNE);
+      JsonToLineEditDouble(njson, "Max", ui->leiToNE);
     }  
 
   ui->cbFilterMultipleScanEvents->setChecked(false);
@@ -5483,8 +5492,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
       JsonToCheckbox(ssjson, "Active", ui->cbFilterSumSignal);
       JsonToCheckbox(ssjson, "UseGains", ui->cbGainsConsideredInFiltering);
       JsonToCheckbox(ssjson, "UsePassives", ui->cbPassivePMsTakenAccount);
-      JsonToLineEdit(ssjson, "Min", ui->ledFilterSumMin);
-      JsonToLineEdit(ssjson, "Max", ui->ledFilterSumMax);
+      JsonToLineEditDouble(ssjson, "Min", ui->ledFilterSumMin);
+      JsonToLineEditDouble(ssjson, "Max", ui->ledFilterSumMax);
     }
 
   flag = FiltJson.contains("IndividualPMSignal"); //indi signal
@@ -5504,8 +5513,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject rejson = FiltJson["ReconstructedEnergy"].toObject();
       JsonToCheckbox(rejson, "Active", ui->cbActivateEnergyFilter);
-      JsonToLineEdit(rejson, "Min", ui->ledEnergyMin);
-      JsonToLineEdit(rejson, "Max", ui->ledEnergyMax);
+      JsonToLineEditDouble(rejson, "Min", ui->ledEnergyMin);
+      JsonToLineEditDouble(rejson, "Max", ui->ledEnergyMax);
     }
 
   flag = FiltJson.contains("LoadedEnergy"); //loaded energy
@@ -5514,8 +5523,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject lejson = FiltJson["LoadedEnergy"].toObject();
       JsonToCheckbox(lejson, "Active", ui->cbActivateLoadedEnergyFilter);
-      JsonToLineEdit(lejson, "Min", ui->ledLoadEnergyMin);
-      JsonToLineEdit(lejson, "Max", ui->ledLoadEnergyMax);
+      JsonToLineEditDouble(lejson, "Min", ui->ledLoadEnergyMin);
+      JsonToLineEditDouble(lejson, "Max", ui->ledLoadEnergyMax);
     }
 
   flag = FiltJson.contains("Chi2"); //chi2
@@ -5524,8 +5533,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject cjson = FiltJson["Chi2"].toObject();
       JsonToCheckbox(cjson, "Active", ui->cbActivateChi2Filter);
-      JsonToLineEdit(cjson, "Min", ui->ledChi2Min);
-      JsonToLineEdit(cjson, "Max", ui->ledChi2Max);
+      JsonToLineEditDouble(cjson, "Min", ui->ledChi2Min);
+      JsonToLineEditDouble(cjson, "Max", ui->ledChi2Max);
     }
 
   ui->cbSpF_LimitToObject->setChecked(false);
@@ -5553,18 +5562,18 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
       int shape = 0;
       parseJson(spfCjson, "Shape", shape);
       JsonToComboBox(spfCjson, "Shape", ui->cobSpFXY);
-      JsonToLineEdit(spfCjson, "SizeX", ui->ledSpFsizeX);
-      JsonToLineEdit(spfCjson, "SizeY", ui->ledSpFsizeY);
-      JsonToLineEdit(spfCjson, "Diameter", ui->ledSpFdiameter);
-      JsonToLineEdit(spfCjson, "Side", ui->ledSpFside);
-      JsonToLineEdit(spfCjson, "Angle", ui->ledSpFangle);
+      JsonToLineEditDouble(spfCjson, "SizeX", ui->ledSpFsizeX);
+      JsonToLineEditDouble(spfCjson, "SizeY", ui->ledSpFsizeY);
+      JsonToLineEditDouble(spfCjson, "Diameter", ui->ledSpFdiameter);
+      JsonToLineEditDouble(spfCjson, "Side", ui->ledSpFside);
+      JsonToLineEditDouble(spfCjson, "Angle", ui->ledSpFangle);
       JsonToCheckbox(spfCjson, "AllZ", ui->cbSpFallZ);
-      JsonToLineEdit(spfCjson, "Zfrom", ui->ledSpFfromZ);
-      JsonToLineEdit(spfCjson, "Zto", ui->ledSpFtoZ);
+      JsonToLineEditDouble(spfCjson, "Zfrom", ui->ledSpFfromZ);
+      JsonToLineEditDouble(spfCjson, "Zto", ui->ledSpFtoZ);
       ui->ledSpF_X0->setText("0"); //compatibility
-      JsonToLineEdit(spfCjson, "X0", ui->ledSpF_X0);
+      JsonToLineEditDouble(spfCjson, "X0", ui->ledSpF_X0);
       ui->ledSpF_Y0->setText("0"); //compatibility
-      JsonToLineEdit(spfCjson, "Y0", ui->ledSpF_Y0);
+      JsonToLineEditDouble(spfCjson, "Y0", ui->ledSpF_Y0);
       ui->cobSpF_cutOutsideInside->setCurrentIndex(0); //compatibility
       JsonToComboBox(spfCjson, "CutOutsideInside", ui->cobSpF_cutOutsideInside);
       if (spfCjson.contains("Polygon"))
@@ -5627,8 +5636,8 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
     {
       QJsonObject knnjson = FiltJson["kNN"].toObject();
       JsonToCheckbox(knnjson, "Active", ui->cbActivateNNfilter);
-      JsonToLineEdit(knnjson, "Min", ui->ledNNmin);
-      JsonToLineEdit(knnjson, "Max", ui->ledNNmax);
+      JsonToLineEditDouble(knnjson, "Min", ui->ledNNmin);
+      JsonToLineEditDouble(knnjson, "Max", ui->ledNNmax);
       JsonToSpinBox(knnjson, "AverageOver", ui->sbNNaverageOver);
     }
 #else
@@ -5641,8 +5650,10 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
   return fOK;
 }
 
+#include <exampleswindow.h>
 void ReconstructionWindow::on_pbReconstructAll_clicked()
 {
+  MW->ELwindow->QuickSave(0);
   ReconstructionWindow::writeToJson(MW->Config->JSON);
   ReconstructAll(true);
 }
@@ -5805,11 +5816,14 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
   MW->WindowNavigator->BusyOn();
   qApp->processEvents();
 
-  int numPMs = MW->Detector->PMs->count();
-  for (int ipm=0; ipm<sigmaHists.size(); ipm++) delete sigmaHists[ipm];
-  sigmaHists.clear();
-  QVector<TH1D*> numberHists;
-  //will be used to calculate sigma vs distance to PM center
+  const int numPMs = MW->Detector->PMs->count();
+  const double minRange = ui->ledMinRangeChanPerPhEl->text().toDouble();
+  const double minRange2 = minRange * minRange;
+  const double maxRange = ui->ledMaxRangeChanPerPhEl->text().toDouble();
+  const double maxRange2 = maxRange * maxRange;
+  MW->TmpHub->ClearTmpHistsSigma2();
+  QVector<TH1D*> numberHists; //will be used to calculate sigma vs distance to PM center
+
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       TString s = "sigma";
@@ -5817,58 +5831,54 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
       TString n = "num";
       n += ipm;
       TH1D* tmp1 = new TH1D(s, "sigma", ui->pbBinsChansPerPhEl->value(), 0,0);
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-      tmp1->SetBit(TH1::kCanRebin);
-#endif
-      sigmaHists.append(tmp1);
+
+      MW->TmpHub->SigmaHists.append(tmp1);
       tmp1->GetXaxis()->SetTitle("Average signal");
       tmp1->GetYaxis()->SetTitle("Sigma square");
       TH1D* tmp2 = new TH1D(n, "number", ui->pbBinsChansPerPhEl->value(), 0,0); //it seems both  hists update axis synchronously. Same result if fix max range
       numberHists.append(tmp2);
     }
 
-  //filling hists - go through all events, each will populate data all PMs
+  //filling hists - go through all events, each will populate data for all PMs
   for (int iev=0; iev<EventsDataHub->Events.size(); iev++)
     {
-      if (iev%1000 == 0)
+      if (iev % 1000 == 0)
         {
           int ipr = 100.0*iev/EventsDataHub->Events.size();
           SetProgress(ipr);
         }
       if (!EventsDataHub->ReconstructionData[0][iev]->GoodEvent) continue; //respecting the filters
+      if (EventsDataHub->ReconstructionData[0][iev]->Points.size()>1) continue; //ignoring multiple events in reconstruction
 
-      //double x = EventsDataHub->ReconstructionData[iev]->Points[0].r[0]; //only single events! !!!***
-      //double y = EventsDataHub->ReconstructionData[iev]->Points[0].r[1];
-      double e = EventsDataHub->ReconstructionData[0][iev]->Points[0].energy;
+      const double& x = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[0];
+      const double& y = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[1];
+      double e = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].energy;
       if (e < 1e-10) e = 1.0;
       for (int ipm=0; ipm<numPMs; ipm++)
         {
-           //double x0 = MW->Detector->PMs->X(ipm);
-           //double y0 = MW->Detector->PMs->Y(ipm);
-           //double r = sqrt( (x-x0)*(x-x0) + (y-y0)*(y-y0) );
-           //if (r>15) continue;
+           double x0 = MW->Detector->PMs->X(ipm);
+           double y0 = MW->Detector->PMs->Y(ipm);
+           double r2 = (x-x0)*(x-x0) + (y-y0)*(y-y0);
+           if ( r2 < minRange2  ||  r2 > maxRange2 ) continue;
 
-           double AvSig = Detector->LRFs->getLRF(ipm, EventsDataHub->ReconstructionData[0][iev]->Points[0].r);
-           //double AvSig = MW->Detector->SensLRF->getLRF(ipm, EventsDataHub->Scan[iev]->Points[0].r); //for test: use true
+           double AvSig = Detector->LRFs->getLRF(ipm, EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r);
            double sig = EventsDataHub->Events[iev][ipm];
            double delta2 = sig/e - AvSig; //take energy into account
            delta2 *= delta2;
 
-           sigmaHists[ipm]->Fill(AvSig, delta2);
+           MW->TmpHub->SigmaHists[ipm]->Fill(AvSig, delta2);
            numberHists[ipm]->Fill(AvSig, 1.0);
         }
     }
 
   //calculating sigmas
-  int MinEntries = 5;
+  const int MinEntries = 5;
   for (int ipm=0; ipm<numPMs; ipm++)
     {
-      //qDebug() << sigmaHists[ipm]->GetXaxis()->GetNbins() << numberHists[ipm]->GetXaxis()->GetNbins();
-      //*sigmaHists[ipm] = *sigmaHists[ipm] / *numberHists[ipm];
       for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()-1; i++) //ignoring under and over bins
         {
-          if (numberHists[ipm]->GetBinContent(i) < MinEntries) sigmaHists[ipm]->SetBinContent(i, 0);
-          else sigmaHists[ipm]->SetBinContent(i, sigmaHists[ipm]->GetBinContent(i)/numberHists[ipm]->GetBinContent(i));
+          if (numberHists[ipm]->GetBinContent(i) < MinEntries) MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, 0);
+          else MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, MW->TmpHub->SigmaHists[ipm]->GetBinContent(i)/numberHists[ipm]->GetBinContent(i));
         }
     }
 
@@ -5882,12 +5892,12 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
 {
   int ipm = ui->sbChanPerPhElPM->value();
-  if (ipm> sigmaHists.size()-1)
+  if (ipm >= MW->TmpHub->SigmaHists.size())
     {
       message("Wrong PM number or data not ready!", this);
       return;
     }
-  MW->GraphWindow->Draw(sigmaHists[ipm], "", true, false);
+  MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
 }
 
 void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
@@ -5898,12 +5908,12 @@ void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
        return;
      }
 
-   if (ChPerPhEl.isEmpty())
+   if (MW->TmpHub->ChPerPhEl_Sigma2.isEmpty())
      {
        ui->ledChansPerPhEl->setText("");
        return;
      }
-   ui->ledChansPerPhEl->setText( QString::number(ChPerPhEl[arg1], 'g', 3) );
+   ui->ledChansPerPhEl->setText( QString::number(MW->TmpHub->ChPerPhEl_Sigma2[arg1], 'g', 3) );
    if (MW->GraphWindow->isVisible()) on_pbChanPerPhElShow_clicked();
 }
 
@@ -5912,13 +5922,13 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
   int ipm = ui->sbChanPerPhElPM->value();
   int numPMs = MW->Detector->PMs->count();
 
-  if (sigmaHists.size() != numPMs)
+  if (MW->TmpHub->SigmaHists.size() != numPMs)
     {
       message("There is no data - use 'Prepare data...' first!", this);
       return;
     }
 
-  if (ChPerPhEl.size()<numPMs) ChPerPhEl.resize(numPMs);
+  if (MW->TmpHub->ChPerPhEl_Sigma2.size()<numPMs) MW->TmpHub->ChPerPhEl_Sigma2.resize(numPMs);
 
   if (ui->cbExtractChPerPhElForAll->isChecked())
     {
@@ -5933,20 +5943,23 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
               message("Fit failed!", this);
               return;
           }
-          ChPerPhEl[ipm] = ChanelsPerPhEl;
-          MW->Owindow->OutText(QString::number(ipm)+" "+QString::number(ChPerPhEl[ipm], 'g', 3));
+          MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
+          QString txt = QString::number(ipm)+" "+QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3);
+          if (MW->TmpHub->ChPerPhEl_Peaks.size() == MW->TmpHub->ChPerPhEl_Sigma2.size())
+              txt += "  from peaks: "+QString::number(MW->TmpHub->ChPerPhEl_Peaks[ipm], 'g', 3);
+          MW->Owindow->OutText(txt);
         }
     }
   else
     {
       //doing only for one selected PM
-      if (ipm > sigmaHists.size()-1)
+      if (ipm > MW->TmpHub->SigmaHists.size()-1)
         {
           message("Wrong PM number or data not ready!", this);
           return;
         }
 
-      MW->GraphWindow->Draw(sigmaHists[ipm], "", true, false);
+      MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
       double ChanelsPerPhEl = extractChPerPHEl(ipm);
       if (ChanelsPerPhEl < 0)
       {
@@ -5955,10 +5968,10 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
       }
       MW->GraphWindow->UpdateRootCanvas();
 
-      ChPerPhEl[ipm] = ChanelsPerPhEl;
+      MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
     }
 
-  if (ipm<ChPerPhEl.size()) ui->ledChansPerPhEl->setText( QString::number(ChPerPhEl[ipm], 'g', 3) );
+  if (ipm<MW->TmpHub->ChPerPhEl_Sigma2.size()) ui->ledChansPerPhEl->setText( QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3) );
   else ui->ledChansPerPhEl->setText("");
 }
 
@@ -5969,7 +5982,7 @@ double ReconstructionWindow::extractChPerPHEl(int ipm)
 
   double upperLim = ui->ledUpperLimitForChanPerPhEl->text().toDouble();
   double lowerLim = ui->ledLowerLimitForChanPerPhEl->text().toDouble();
-  TFitResultPtr fit = sigmaHists[ipm]->Fit("pol1", "S", "", lowerLim, upperLim);
+  TFitResultPtr fit = MW->TmpHub->SigmaHists[ipm]->Fit("pol1", "S", "", lowerLim, upperLim);
 
   if (!fit.Get())
     {
@@ -6436,4 +6449,194 @@ void ReconstructionWindow::on_cbSpF_LimitToObject_toggled(bool /*checked*/)
 void ReconstructionWindow::on_pbUpdateGuiSettingsInJSON_clicked()
 {
     updateGUIsettingsInConfig();
+}
+
+static Int_t npeaks = 10;
+Double_t fpeaks(Double_t *x, Double_t *par)
+{
+   Double_t result = par[0] + par[1]*x[0];
+   for (Int_t p=0;p<npeaks;p++) {
+      Double_t norm  = par[3*p+2];
+      Double_t mean  = par[3*p+3];
+      Double_t sigma = par[3*p+4];
+      result += norm*TMath::Gaus(x[0],mean,sigma);
+   }
+   return result;
+}
+
+void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
+{
+    if (EventsDataHub->isEmpty())
+      {
+        message("There are no signal data!", this);
+        return;
+      }
+
+    MW->TmpHub->ClearTmpHistsPeaks();
+    MW->TmpHub->ChPerPhEl_Sigma2.clear();
+
+    for (int ipm=0; ipm<PMs->count(); ipm++)
+    {
+        TH1D* h = new TH1D("", "", ui->sbFromPeaksBins->value(), ui->ledFromPeaksFrom->text().toDouble(),ui->ledFromPeaksTo->text().toDouble());
+        h->SetXTitle("Signal");
+
+      for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
+            h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
+
+      MW->TmpHub->PeakHists << h;
+      if (ipm==0) MW->GraphWindow->Draw(h, "", true, false);
+    }
+}
+
+#include "apeakfinder.h"
+#include "TGraph.h"
+#include "TLine.h"
+
+void ReconstructionWindow::on_pbFrindPeaks_clicked()
+{
+  if (MW->TmpHub->PeakHists.size() != PMs->count())
+  {
+      message("Signal data not ready!", this);
+      return;
+  }
+
+  MW->TmpHub->FoundPeaks.clear();
+  MW->TmpHub->ChPerPhEl_Peaks.clear();
+
+  QVector<int> failedPMs;
+  for (int ipm=0; ipm<PMs->count(); ipm++)
+  {
+      APeakFinder f(MW->TmpHub->PeakHists.at(ipm));
+      QVector<double> peaks = f.findPeaks(ui->ledFromPeaksSigma->text().toDouble(), ui->ledFromPeaksThreshold->text().toDouble(), ui->sbFromPeaksMaxPeaks->value(), true);
+
+      std::sort(peaks.begin(), peaks.end());
+
+      MW->TmpHub->FoundPeaks << peaks;
+
+      if (peaks.size() < 2)
+      {
+          failedPMs << ipm;
+          MW->TmpHub->ChPerPhEl_Peaks << -1;
+          continue;
+      }
+
+      TGraph g;
+      for (int i=0; i<peaks.size(); i++)
+         g.SetPoint(i, i, peaks.at(i));
+
+      double constant, slope;
+      int ifail;
+      g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+      if ( ifail != 0 )
+      {
+          failedPMs << ipm;
+          MW->TmpHub->ChPerPhEl_Peaks << -1;
+          continue;
+      }
+      else MW->TmpHub->ChPerPhEl_Peaks.append(slope);
+    }
+
+  on_pbFromPeaksShow_clicked();
+  if (!failedPMs.isEmpty())
+  {
+      QString s = "Peaks < 2 or failed fit for PM#:";
+      for (int i : failedPMs) s += " " + QString::number(i);
+      message(s, this);
+  }
+}
+
+void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
+{
+    if (MW->TmpHub->ChPerPhEl_Peaks.size() != PMs->count())
+    {
+        message("Data not ready", this);
+        return;
+    }
+    MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
+}
+
+void ReconstructionWindow::on_pbFromPeaksPedestals_clicked()
+{
+  if (MW->TmpHub->FoundPeaks.size() != PMs->count())
+  {
+      message("Data not ready", this);
+      return;
+  }
+  QVector<double> Pedestals;
+  for (int i=0; i<PMs->count(); i++)
+    {
+      if (MW->TmpHub->FoundPeaks.at(i).isEmpty())
+        {
+          message(QString("PM# ") + QString::number(i) +  " has no detected peaks!", this);
+          return;
+        }
+      Pedestals << MW->TmpHub->FoundPeaks.at(i).first();
+    }
+
+  MW->CorrectPreprocessingAdds(Pedestals);
+}
+
+void ReconstructionWindow::on_pbFromPeaksShow_clicked()
+{
+  int ipm = ui->sbFrompeakPM->value();
+  int numPMs = PMs->count();
+
+  if (MW->TmpHub->PeakHists.size() != numPMs) return;
+  if (ipm >= MW->TmpHub->PeakHists.size()) return;
+  if (!MW->TmpHub->PeakHists.at(ipm)) return;
+
+  TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
+
+
+  if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
+  MW->GraphWindow->DrawWithoutFocus(h, "", true, true);
+
+  if (MW->TmpHub->FoundPeaks.size() == numPMs)
+    {
+      const QVector<double> &peaks = MW->TmpHub->FoundPeaks.at(ipm);
+      for (int i=0; i<peaks.size(); i++)
+        {
+          TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          l->SetLineColor(kRed);
+          l->SetLineWidth(2);
+          l->SetLineStyle(2);
+          MW->GraphWindow->DrawWithoutFocus(l, "same", false, true);
+        }
+      MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(MW->TmpHub->ChPerPhEl_Peaks.at(ipm)));
+    }
+  MW->GraphWindow->UpdateRootCanvas();
+  MW->GraphWindow->LastDistributionShown = "SignalPeaks";
+}
+
+void ReconstructionWindow::on_sbFrompeakPM_valueChanged(int arg1)
+{
+    if (arg1 >= PMs->count())
+      {
+        if (PMs->count() == 0) return;
+        ui->sbFrompeakPM->setValue(PMs->count()-1);
+        return; //update on_change
+      }
+    if (MW->GraphWindow->LastDistributionShown == "SignalPeaks") on_pbFromPeaksShow_clicked();
+}
+
+void ReconstructionWindow::on_pbClearAllFilters_clicked()
+{
+    ui->cbFilterEventNumber->setChecked(false);
+    ui->cbFilterMultipleScanEvents->setChecked(false);
+    ui->cbFilterSumSignal->setChecked(false);
+    ui->cbFilterIndividualSignals->setChecked(false);
+    ui->cbActivateEnergyFilter->setChecked(false);
+    ui->cbActivateLoadedEnergyFilter->setChecked(false);
+    ui->cbActivateChi2Filter->setChecked(false);
+    ui->cbSpF_LimitToObject->setChecked(false);
+    ui->cbSpFcustom->setChecked(false);
+    ui->cbActivateCorrelationFilters->setChecked(false);
+    ui->cbActivateNNfilter->setChecked(false);
+
+    ReconstructionWindow::on_pbUpdateFilters_clicked();
+}
+
+void ReconstructionWindow::on_cobCGstartOption_currentIndexChanged(int index)
+{
+    ui->fCPUoffsets->setVisible(index == 2);
 }

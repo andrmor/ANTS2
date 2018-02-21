@@ -66,9 +66,9 @@ GeometryWindowClass::~GeometryWindowClass()
 {
   delete ui;
 
-  RasterWindow->setParent(0);
-  delete RasterWindow;
-  delete QWinContainer;
+  //RasterWindow->setParent(0);
+  //delete RasterWindow;
+  //delete QWinContainer;
 }
 
 void GeometryWindowClass::ShowAndFocus()

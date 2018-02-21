@@ -153,6 +153,8 @@ QScriptValue AScriptValueConverter::fromJson(const QJsonValue &json, QScriptEngi
     } break;
     case QJsonValue::Undefined: return QScriptValue::UndefinedValue;
   }
+
+  return QScriptValue::UndefinedValue; //ANDR - added to remove compilation warning
 }
 
 /*void AScriptValueConverter::fromJson(const QJsonValue &json, QScriptValue &dest)

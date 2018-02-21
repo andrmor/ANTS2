@@ -14,8 +14,8 @@
 #include "globalsettingsclass.h"
 #include "ascriptwindow.h"
 
-#include <QDebug>
 #include <QTime>
+#include <QDebug>
 
 #ifdef Q_OS_WIN32
 #include <QtWinExtras>
@@ -46,6 +46,9 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   GraphOn = false;
   ScriptOn = false;
   MainChangeExplicitlyRequested = false;
+#ifdef Q_OS_WIN32
+  taskButton = 0;
+#endif
 
   time = new QTime();
 
@@ -57,18 +60,6 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
 //  int ix = desktop->availableGeometry(MW).width(); //use the same screen where is the main window (one can use screen index directly, -1=default)
 //  this->move(ix - 120, 50);
 
-#ifdef Q_OS_WIN32
-  taskButton = 0;
-  QTimer::singleShot(1000,this,SLOT(SetupWindowsTaskbar())); //without signal/slot it does not work somehow...
-
-  QWinJumpList* jumplist = new QWinJumpList(this);
-  //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
-  jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet->AntsBaseDir));
-  jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet->LastOpenDir));
-  jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
-  //jumplist->tasks()->addSeparator();
-  jumplist->tasks()->setVisible(true);
-#endif
 }
 
 WindowNavigatorClass::~WindowNavigatorClass()
@@ -80,82 +71,94 @@ WindowNavigatorClass::~WindowNavigatorClass()
 void WindowNavigatorClass::SetupWindowsTaskbar()
 {
 #ifdef Q_OS_WIN32
-  taskButton = new QWinTaskbarButton(MW);
-  taskButton->setWindow(MW->windowHandle());
-  taskProgress = taskButton->progress();
-  taskProgress->setVisible(false);
-  taskProgress->setValue(0);
+    if (taskButton) return;
 
-  QWidget *widget = MW;
-  QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(widget);
-  thumbbar->setWindow(widget->windowHandle());
+    QWinJumpList* jumplist = new QWinJumpList(this);
+    //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
+    jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet->AntsBaseDir));
+    jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet->LastOpenDir));
+    if (!MW->GlobSet->LibScripts.isEmpty())
+        jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
+    //jumplist->tasks()->addSeparator();
+    jumplist->tasks()->setVisible(true);
 
-  QWinThumbnailToolButton *maxAll = new QWinThumbnailToolButton(thumbbar);
-  maxAll->setToolTip("Show all active");
-  maxAll->setIcon(style()->standardIcon(QStyle::SP_TitleBarMaxButton));
-  maxAll->setDismissOnClick(true);
-  connect(maxAll, SIGNAL(clicked()), this, SLOT(on_pbMaxAll_clicked()));
+    //qDebug() << "Handle" << MW->windowHandle();  //Handle is only created on MW show !!!
 
-  QWinThumbnailToolButton *Main = new QWinThumbnailToolButton(thumbbar);
-  Main->setToolTip("Main window");
-  QPixmap pix(20, 20);
-  pix.fill(Qt::transparent);
-  QPainter painter( &pix );
-  painter.setFont( QFont("Arial", 15) );
-  painter.drawText( 2, 17, "M" );
-  Main->setIcon(QIcon(pix));
-  connect(Main, SIGNAL(clicked()), this, SLOT(on_pbMain_clicked()));
+    taskButton = new QWinTaskbarButton(MW);
+    taskButton->setWindow(MW->windowHandle());
+    taskProgress = taskButton->progress();
+    taskProgress->setVisible(false);
+    taskProgress->setValue(0);
 
-  QWinThumbnailToolButton *Rec = new QWinThumbnailToolButton(thumbbar);
-  Rec->setToolTip("Reconstruction window");
-  pix.fill(Qt::transparent);
-  painter.drawText( 4, 17, "R" );
-  Rec->setIcon(QIcon(pix));
-  connect(Rec, SIGNAL(clicked()), this, SLOT(on_pbRecon_clicked()));
+    QWinThumbnailToolBar *thumbbar = new QWinThumbnailToolBar(MW);
+    thumbbar->setWindow(MW->windowHandle());
 
-  QWinThumbnailToolButton *Out = new QWinThumbnailToolButton(thumbbar);
-  Out->setToolTip("Output window");
-  pix.fill(Qt::transparent);
-  painter.drawText( 2, 17, "O" );
-  Out->setIcon(QIcon(pix));
-  connect(Out, SIGNAL(clicked()), this, SLOT(on_pbOut_clicked()));
+    QWinThumbnailToolButton *maxAll = new QWinThumbnailToolButton(thumbbar);
+    maxAll->setToolTip("Show all active");
+    maxAll->setIcon(style()->standardIcon(QStyle::SP_TitleBarMaxButton));
+    //maxAll->setDismissOnClick(true);
+    connect(maxAll, SIGNAL(clicked()), this, SLOT(on_pbMaxAll_clicked()));
 
-  QWinThumbnailToolButton *Geo = new QWinThumbnailToolButton(thumbbar);
-  Geo->setToolTip("Geometry window");
-  pix.fill(Qt::transparent);
-  painter.drawText( 2, 17, "G" );
-  Geo->setIcon(QIcon(pix));
-  connect(Geo, SIGNAL(clicked()), this, SLOT(on_pbGeometry_clicked()));
+    QWinThumbnailToolButton *Main = new QWinThumbnailToolButton(thumbbar);
+    Main->setToolTip("Main window");
+    QPixmap pix(20, 20);
+    pix.fill(Qt::transparent);
+    QPainter painter( &pix );
+    painter.setFont( QFont("Arial", 15) );
+    painter.drawText( 2, 17, "M" );
+    Main->setIcon(QIcon(pix));
+    connect(Main, SIGNAL(clicked()), this, SLOT(on_pbMain_clicked()));
 
-//  QWinThumbnailToolButton *lrf = new QWinThumbnailToolButton(thumbbar);
-//  lrf->setToolTip("LRF window");
-//  pix.fill(Qt::transparent);
-//  painter.drawText( 4, 17, "L" );
-//  lrf->setIcon(QIcon(pix));
-//  connect(lrf, SIGNAL(clicked()), this, SLOT(on_pbLRF_clicked()));
+    QWinThumbnailToolButton *Rec = new QWinThumbnailToolButton(thumbbar);
+    Rec->setToolTip("Reconstruction window");
+    pix.fill(Qt::transparent);
+    painter.drawText( 4, 17, "R" );
+    Rec->setIcon(QIcon(pix));
+    connect(Rec, SIGNAL(clicked()), this, SLOT(on_pbRecon_clicked()));
 
-  QWinThumbnailToolButton *scr = new QWinThumbnailToolButton(thumbbar);
-  scr->setToolTip("Script window");
-  pix.fill(Qt::transparent);
-  painter.drawText( 4, 17, "S" );
-  scr->setIcon(QIcon(pix));
-  connect(scr, SIGNAL(clicked()), this, SLOT(on_pbScript_clicked()));
+    QWinThumbnailToolButton *Out = new QWinThumbnailToolButton(thumbbar);
+    Out->setToolTip("Output window");
+    pix.fill(Qt::transparent);
+    painter.drawText( 2, 17, "O" );
+    Out->setIcon(QIcon(pix));
+    connect(Out, SIGNAL(clicked()), this, SLOT(on_pbOut_clicked()));
 
-  QWinThumbnailToolButton *ex = new QWinThumbnailToolButton(thumbbar);
-  ex->setToolTip("Examples/Load window");
-  pix.fill(Qt::transparent);
-  painter.drawText( 4, 17, "E" );
-  ex->setIcon(QIcon(pix));
-  connect(ex, SIGNAL(clicked()), this, SLOT(on_pbExamples_clicked()));
+    QWinThumbnailToolButton *Geo = new QWinThumbnailToolButton(thumbbar);
+    Geo->setToolTip("Geometry window");
+    pix.fill(Qt::transparent);
+    painter.drawText( 2, 17, "G" );
+    Geo->setIcon(QIcon(pix));
+    connect(Geo, SIGNAL(clicked()), this, SLOT(on_pbGeometry_clicked()));
 
-  thumbbar->addButton(maxAll);
-  thumbbar->addButton(ex);
-  thumbbar->addButton(Main);
-  thumbbar->addButton(Rec);
-  thumbbar->addButton(Geo);
-  thumbbar->addButton(Out);  
-//  thumbbar->addButton(lrf);
-  thumbbar->addButton(scr);
+    //  QWinThumbnailToolButton *lrf = new QWinThumbnailToolButton(thumbbar);
+    //  lrf->setToolTip("LRF window");
+    //  pix.fill(Qt::transparent);
+    //  painter.drawText( 4, 17, "L" );
+    //  lrf->setIcon(QIcon(pix));
+    //  connect(lrf, SIGNAL(clicked()), this, SLOT(on_pbLRF_clicked()));
+
+    QWinThumbnailToolButton *scr = new QWinThumbnailToolButton(thumbbar);
+    scr->setToolTip("Script window");
+    pix.fill(Qt::transparent);
+    painter.drawText( 4, 17, "S" );
+    scr->setIcon(QIcon(pix));
+    connect(scr, SIGNAL(clicked()), this, SLOT(on_pbScript_clicked()));
+
+    QWinThumbnailToolButton *ex = new QWinThumbnailToolButton(thumbbar);
+    ex->setToolTip("Examples/Load window");
+    pix.fill(Qt::transparent);
+    painter.drawText( 4, 17, "E" );
+    ex->setIcon(QIcon(pix));
+    connect(ex, SIGNAL(clicked()), this, SLOT(on_pbExamples_clicked()));
+
+    thumbbar->addButton(maxAll);
+    thumbbar->addButton(ex);
+    thumbbar->addButton(Main);
+    thumbbar->addButton(Rec);
+    thumbbar->addButton(Geo);
+    thumbbar->addButton(Out);
+    //  thumbbar->addButton(lrf);
+    thumbbar->addButton(scr);
 
 #endif
 }
@@ -300,19 +303,28 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
 
-  //geometry window
-  if (MW->GraphWindow) MW->GraphWindow->OnBusyOff();
+  MW->GraphWindow->OnBusyOff();
 
-  if (MW->GeometryWindow) MW->GeometryWindow->onBusyOff();
+  MW->GeometryWindow->onBusyOff();
 
   //output window
   MW->Owindow->setEnabled(true);
 
   emit BusyStatusChanged(false);
 
-
-  //MW->DisableRootUpdate = false; //--//
   MW->startRootUpdate(); //--//
+}
+
+void WindowNavigatorClass::DisableAllButGraphWindow(bool trueStart_falseStop)
+{
+    MW->setEnabled(!trueStart_falseStop);
+    MW->Rwindow->setEnabled(!trueStart_falseStop);
+    MW->lrfwindow->setEnabled(!trueStart_falseStop);
+    MW->MIwindow->setEnabled(!trueStart_falseStop);
+    MW->ELwindow->setEnabled(!trueStart_falseStop);
+    MW->GeometryWindow->setEnabled(!trueStart_falseStop);
+    MW->Owindow->setEnabled(!trueStart_falseStop);
+    MW->ScriptWindow->setEnabled(!trueStart_falseStop);
 }
 
 void WindowNavigatorClass::on_pbMaxAll_clicked()

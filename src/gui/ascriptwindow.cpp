@@ -2,7 +2,9 @@
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
 #include "completingtexteditclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
+#include "coreinterfaces.h"
+#include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
@@ -246,10 +248,10 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         // populating help for main, math and core units
         trwHelp->clear();
         //fillHelper(interfaceObject, "", "Global object functions"); //forbidden to override master object now.
-        CoreInterfaceClass core(0); //dummy to extract methods
+        AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core", "Core object functions");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
-        MathInterfaceClass math(0); //dummy to extract methods
+        AInterfaceToMath math(0); //dummy to extract methods
         fillHelper(&math, "math", "Basic mathematics: wrapper for std double functions");
         newFunctions << getCustomCommandsOfObject(&math, "math", false);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
@@ -271,7 +273,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     completitionModel->setStringList(functions);
 
     //special "needs" of particular interface objects
-    if ( dynamic_cast<InterfaceToHistD*>(interfaceObject) || dynamic_cast<InterfaceToGraphs*>(interfaceObject)) //"graph" or "hist"
+    if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 
     trwHelp->collapseAll();
@@ -700,7 +702,7 @@ void AScriptWindow::updateJsonTree()
 
       QJsonObject json = inter->Config->JSON;
       QJsonObject::const_iterator it;
-      for (it = json.begin(); it != json.end(); it++)
+      for (it = json.begin(); it != json.end(); ++it)
         {
            QString key = it.key();
            QTreeWidgetItem *TopKey = new QTreeWidgetItem(trwJson);
@@ -731,7 +733,7 @@ void AScriptWindow::updateJsonTree()
 void AScriptWindow::fillSubObject(QTreeWidgetItem *parent, const QJsonObject &obj)
 {
   QJsonObject::const_iterator it;
-  for (it = obj.begin(); it != obj.end(); it++)
+  for (it = obj.begin(); it != obj.end(); ++it)
     {
       QTreeWidgetItem *item = new QTreeWidgetItem(parent);
       item->setText(0, it.key());

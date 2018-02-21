@@ -40,15 +40,16 @@ ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDa
     EventsDataHub(eventsDataHub), PMs(PMs), PMgroups(PMgroups), LRFs(LRFs), PGeoManager(PGeoManager)
 {
   NumThreads = 1;
+  bBusy = false;
 
 #ifdef ANTS_FANN
   ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
-  //qDebug() << "->NeuralNetworks module created";
+  qDebug() << "->NeuralNetworks module created";
 #endif
 
 #ifdef ANTS_FLANN
   KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
-  //qDebug() << "->Nearest neighbour module created";
+  qDebug() << "->Nearest neighbour module created";
 #endif
 }
 
@@ -67,7 +68,7 @@ ReconstructionManagerClass::~ReconstructionManagerClass()
 
 bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
 {
-   //qDebug() << "==> Reconstruct all events triggered";
+   //qDebug() << "==> Reconstruct all events triggered";    
   bool fOK = ReconstructionManagerClass::fillSettingsAndVerify(json, true);
   if (!fOK)
     {
@@ -86,6 +87,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
   timer.start();
 
   QList<ProcessorClass*> todo;
+  bBusy = true;
   for (CurrentGroup=0; CurrentGroup<RecSet.size(); CurrentGroup++)
   {
       todo.clear();
@@ -128,6 +130,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
               {
                   ErrorString = "Neural network reconstruction is not implemented for multi-group configurations";
                   PMgroups->clearActiveSensorGroups();
+                  bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
@@ -139,6 +142,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
 #else
               ErrorString = "FANN was not configured in .pro";
               PMgroups->clearActiveSensorGroups();
+              bBusy = false;
               emit ReconstructionFinished(false, fShow);
               return false;
 #endif
@@ -153,6 +157,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
               {
                   ErrorString = cm.getLastError();//"CUDA module reports an error during reconstruction";
                   PMgroups->clearActiveSensorGroups();
+                  bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
@@ -160,6 +165,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
 #else
               ErrorString = "CUDA was not configured in .pro";
               PMgroups->clearActiveSensorGroups();
+              bBusy = false;
               emit ReconstructionFinished(false, fShow);
               return false;
 #endif
@@ -172,6 +178,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
               {
                   ErrorString = "kNN reconstruction is not implemented for multi-group configurations";
                   PMgroups->clearActiveSensorGroups();
+                  bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
@@ -182,6 +189,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
               {
                   ErrorString = "kNN module reports error in reconstruction";
                   PMgroups->clearActiveSensorGroups();
+                  bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
@@ -194,6 +202,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
 #else
               ErrorString = "kNN was not configured in .pro";
               PMgroups->clearActiveSensorGroups();
+              bBusy = false;
               emit ReconstructionFinished(false, fShow);
               return false;
 #endif
@@ -206,6 +215,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
           default:
               ErrorString = "Unsupported algorithm or threading option";
               PMgroups->clearActiveSensorGroups();
+              bBusy = false;
               emit ReconstructionFinished(false, fShow);
               return false;
           }
@@ -215,6 +225,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
           //EventsDataHub->createDefaultReconstructionData(); // to do clear properly
           EventsDataHub->resetReconstructionData(RecSet.size()); // to do clear properly
           PMgroups->clearActiveSensorGroups();
+          bBusy = false;
           emit ReconstructionFinished(false, fShow);
           return false;
       }
@@ -245,6 +256,8 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
           fOK = run(todo);
       }
   }
+
+  bBusy = false;
 
   PMgroups->clearActiveSensorGroups();
   EventsDataHub->RecSettings = RecSet;
@@ -310,6 +323,8 @@ void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorCl
 void ReconstructionManagerClass::doFilters()
 {
     QList<ProcessorClass*> todo;
+
+    bBusy = true;
     for (CurrentGroup=0; CurrentGroup<FiltSet.size(); CurrentGroup++)
     {
         //qDebug() << "...Running multithread filters for sensor group"<<CurrentGroup;
@@ -323,6 +338,7 @@ void ReconstructionManagerClass::doFilters()
         singleThreadEventFilters();
         //qDebug() << "...done!";
     }
+    bBusy = false;
 }
 
 bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs)
@@ -407,7 +423,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
           return false;
       }
       //if start option is scan, scanData should exist
-      if (Alg == 1 && RecS.CGstartOption == 2 && EventsDataHub->isScanEmpty())
+      if (Alg == 1 && RecS.CGstartOption == 3 && EventsDataHub->isScanEmpty())
       {
           ErrorString = "Start option is set to 'True XY' but scan data are empty";
           return false;

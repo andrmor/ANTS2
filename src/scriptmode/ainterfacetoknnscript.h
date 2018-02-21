@@ -1,7 +1,7 @@
 #ifndef AINTERFACETOKNNSCRIPT_H
 #define AINTERFACETOKNNSCRIPT_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 
 class NNmoduleClass;
 
@@ -22,8 +22,8 @@ public slots:
   // Clear all calibration data
   void clearCalibrationEvents();
   // Define calibration data (overrides old)
-  bool setGoodScanEventsAsCalibration();
-  bool setGoodReconstructedEventsAsCalibration();
+  QString setGoodScanEventsAsCalibration();
+  QString setGoodReconstructedEventsAsCalibration();
   // Request calibration data
   int countCalibrationEvents();
   double getCalibrationEventX(int ievent);
@@ -32,6 +32,8 @@ public slots:
   double getCalibrationEventEnergy(int ievent);
   QVariant getCalibrationEventXYZE(int ievent);
   QVariant getCalibrationEventSignals(int ievent);
+
+  QString getErrorString();
 
 private:
   NNmoduleClass *knnModule;

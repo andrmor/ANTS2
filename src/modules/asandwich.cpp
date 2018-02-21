@@ -4,6 +4,7 @@
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
+//#include "amonitor.h"
 
 #include <QDebug>
 
@@ -242,7 +243,6 @@ void ASandwich::convertObjToGrid(AGeoObject *obj)
   elObj->color = 1;
   obj->addObjectFirst(elObj);
   elObj->updateGridElementShape();
-
 }
 
 void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, double p2)
@@ -466,7 +466,8 @@ void ASandwich::shapeGrid(AGeoObject *obj, int shape, double p0, double p1, doub
 
 void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TGeoManager* GeoManager,
                                          AMaterialParticleCollection* MaterialCollection,
-                                         QList<APMandDummy> *PMsAndDumPMs)
+                                         QList<APMandDummy> *PMsAndDumPMs,
+                                         int forcedNodeNumber)
 {
     //qDebug() << "Processing TGeo creation for object"<<obj->Name<<" which must be in"<<parent->GetName();
     if (!obj->fActive) return;
@@ -488,7 +489,15 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
     }
     else
     {
-        TGeoMedium* med = (*MaterialCollection)[obj->Material]->GeoMed;
+        int iMat = obj->Material;
+        if (obj->ObjectType->isMonitor())
+          {
+            if (obj->Container)
+              iMat = obj->Container->Material;
+            else qWarning() << "Monitor without container detected!";
+            //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
+          }
+        TGeoMedium* med = (*MaterialCollection)[iMat]->GeoMed;
 
         //creating volume
         if (obj->ObjectType->isComposite())
@@ -533,7 +542,8 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             vol = new TGeoVolume(obj->Name.toLatin1().data(), obj->Shape->createGeoShape(), med);
         }
         else
-        {   //if (obj->ObjectType == AGeoObject::NormalObject) + world + slab now            
+        {
+            //qDebug() << obj->Name << obj->Shape->getGenerationString();
             vol = new TGeoVolume(obj->Name.toLocal8Bit().data(), obj->Shape->createGeoShape(), med);
         }
 
@@ -549,7 +559,14 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
             GridRecords.append(obj->createGridRecord());
             parent->AddNode(vol, GridCounter, lTrans);            
           }
-        else parent->AddNode(vol, 0, lTrans);
+        else if (obj->ObjectType->isMonitor())
+          {
+            int MonitorCounter = MonitorsRecords.size();
+            MonitorsRecords.append(obj);
+            (static_cast<ATypeMonitorObject*>(obj->ObjectType))->index = MonitorCounter;
+            parent->AddNode(vol, MonitorCounter, lTrans);
+          }
+        else parent->AddNode(vol, forcedNodeNumber, lTrans);
     }    
 
     //positioning of hosted items is different for lightguides, arrays and normal items!
@@ -604,26 +621,29 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         for (int i=0; i<obj->HostedObjects.size(); i++)
           {
             AGeoObject* el = obj->HostedObjects[i];
+            int iCounter = 0;
             for (int ix = 0; ix<array->numX; ix++)
              for (int iy = 0; iy<array->numY; iy++)
                for (int iz = 0; iz<array->numZ; iz++)
                 {
                   if ( !el->ObjectType->isHandlingSet() )
-                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                      positionArrayElement(ix, iy, iz, el, obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
                   else
                       for (int i=0; i<el->HostedObjects.size(); i++)
-                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+                          positionArrayElement(ix, iy, iz, el->HostedObjects[i], obj, vol, GeoManager, MaterialCollection, PMsAndDumPMs, iCounter);
+                  iCounter++;
                 }
           }
       }
     else
     {
         for (int i=0; i<obj->HostedObjects.size(); i++)
-            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs);
+            addTGeoVolumeRecursively(obj->HostedObjects[i], vol, GeoManager, MaterialCollection, PMsAndDumPMs, forcedNodeNumber);
     }
 
     //Grids require specific title - they are recognized by it
     if (obj->ObjectType->isGrid()) vol->SetTitle("G");
+    else if (obj->ObjectType->isMonitor()) vol->SetTitle("M");
     else vol->SetTitle("-");
 }
 
@@ -633,8 +653,14 @@ void ASandwich::clearGridRecords()
     GridRecords.clear();
 }
 
+void ASandwich::clearMonitorRecords()
+{
+    MonitorsRecords.clear(); //dno delete - it is just pointers to world tree objects
+}
+
 void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGeoObject* arrayObj,
-                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QList<APMandDummy> *PMsAndDumPMs)
+                                     TGeoVolume* parent, TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                                     int arrayIndex)
 {
     ATypeArrayObject* array = static_cast<ATypeArrayObject*>(arrayObj->ObjectType);
 
@@ -653,7 +679,7 @@ void ASandwich::positionArrayElement(int ix, int iy, int iz, AGeoObject* el, AGe
     el->Position[1] = v[1];
     el->Position[2] = v[2];
 
-    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs);
+    addTGeoVolumeRecursively(el, parent, GeoManager, MaterialCollection, PMsAndDumPMs, arrayIndex);
 
     //recovering original position/orientation
     el->Position[0] = tmpX;
@@ -1432,3 +1458,43 @@ void ASandwich::onMaterialsChanged(const QStringList MaterialList)
   emit RequestGuiUpdate();  
 }
 
+void ASandwich::IsParticleInUse(int particleId, bool &bInUse, QString &MonitorNames)
+{
+  bInUse = false;
+  MonitorNames.clear();
+
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+        {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+        }
+      const ATypeMonitorObject* mon = static_cast<const ATypeMonitorObject*>(monObj->ObjectType);
+
+      if (mon->isParticleInUse(particleId))
+        {
+          bInUse = true;
+          if (!MonitorNames.isEmpty()) MonitorNames += ", ";
+          MonitorNames += monObj->Name;
+        }
+    }
+}
+
+void ASandwich::RemoveParticle(int particleId)
+{
+  for (int iMon=0; iMon<MonitorsRecords.size(); iMon++ )
+    {
+      const AGeoObject* monObj = MonitorsRecords.at(iMon);
+      if (!monObj->ObjectType->isMonitor())
+      {
+          qWarning() << "Attempt to access as monitor non-monitor AGeoObject";
+          continue;
+      }
+
+      ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(monObj->ObjectType);
+
+      if ( mon->config.ParticleIndex > particleId ) mon->config.ParticleIndex--;
+    }
+}

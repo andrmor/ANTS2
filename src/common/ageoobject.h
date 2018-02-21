@@ -1,6 +1,8 @@
 #ifndef AGEOOBJECT_H
 #define AGEOOBJECT_H
 
+#include "amonitorconfig.h"
+
 #include <QString>
 #include <QStringList>
 #include <QJsonObject>
@@ -73,6 +75,9 @@ public:
   void  updateGridElementShape();
   AGridElementRecord* createGridRecord();
 
+  //for monitor
+  void updateMonitorShape();
+
   // the following checks are always done DOWN the chain
   // for global effect, the check has to be performed on World (Top) object
   AGeoObject* findObjectByName(const QString name);  
@@ -122,6 +127,7 @@ public:
   static QString GenerateRandomGuideName();
   static QString GenerateRandomGroupName();
   static QString GenerateRandomStackName();
+  static QString GenerateRandomMonitorName();
 
   static bool CheckPointsForArb8(QList<QPair<double, double> > V );
 
@@ -156,6 +162,7 @@ public:
     bool isArray() const            {return Type == "Array";}
     bool isGrid() const             {return Type == "Grid";}
     bool isGridElement() const      {return Type == "GridElement";}
+    bool isMonitor() const          {return Type == "Monitor";}
 
     virtual void writeToJson(QJsonObject& json) { json["Type"] = Type; } // virtual: CALL THIS, then save additional properties the concrete type has
     virtual void readFromJson(QJsonObject& json) = 0;  // virtual: read additional properties the concrete type has
@@ -284,6 +291,21 @@ public:
     int shape; //0 : rectanglar-2wires, 1 : rectangular-crossed,  2 : hexagonal
     double size1, size2; //half sizes for rectangular, size1 is size of hexagon
     double dz; //half size in z
+};
+class ATypeMonitorObject : public ATypeObject
+{
+public:
+    ATypeMonitorObject() {Type = "Monitor"; Handling = "Standard";}
+
+    virtual void writeToJson(QJsonObject& json);
+    virtual void readFromJson(QJsonObject& json);
+
+    AMonitorConfig config;
+
+    bool isParticleInUse(int partId) const;
+
+    //runtime
+    int index;  //index of monitor to fill and acess statistics
 };
 
 

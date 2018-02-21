@@ -35,9 +35,10 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   QJsonObject masterjs;
     // control options
   QJsonObject cjs;
-  cjs["EventsToDo"] = ui->sbGunEvents->value();
+  cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
   cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
   cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
+  cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
   cjs["DoS1"] = ui->cbGunDoS1->isChecked();
   cjs["DoS2"] = ui->cbGunDoS2->isChecked();
   cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
@@ -135,11 +136,12 @@ void MainWindow::ShowSource(int isource, bool clear)
            {
              if (j==i) continue;
              //third k
-             int k;
-             for (k=0; k<3; k++) if (k!=i && k!=j) break;
+             int k = 0;
+             for (; k<2; k++)
+               if (k!=i && k!=j) break;
              for (int s=-1; s<2; s+=2)
                {
-                //qDebug()<<"i j k shift"<<i<<j<<k<<s;
+                //  qDebug()<<"i j k shift"<<i<<j<<k<<s;
                 Int_t track_index = Detector->GeoManager->AddTrack(1,22);
                 TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
                 track->AddPoint(X0-V[i][0]-V[j][0]+V[k][0]*s, Y0-V[i][1]-V[j][1]+V[k][1]*s, Z0-V[i][2]-V[j][2]+V[k][2]*s, 0);
@@ -440,15 +442,15 @@ void MainWindow::on_cobGunSourceType_currentIndexChanged(int index)
     default:
     case 0: s <<""<<""<<"";
       break;
-    case 1: s <<"Size"<<""<<"";
+    case 1: s <<"Length:"<<""<<"";
       break;
-    case 2: s <<"SizeX"<<"SizeY"<<"";
+    case 2: s <<"Size X:"<<"Size Y:"<<"";
       break;
-    case 3: s <<"Radius"<<""<<"";
+    case 3: s <<"Diameter:"<<""<<"";
       break;
-    case 4: s <<"SizeX"<<"SizeY"<<"SizeZ";
+    case 4: s <<"Size X:"<<"Size Y:"<<"Size Z:";
       break;
-    case 5: s <<"Radius"<<""<<"Height";
+    case 5: s <<"Diameter:"<<""<<"Height:";
     }
   ui->lGun1DSize->setText(s[0]);
   ui->lGun2DSize->setText(s[1]);
@@ -621,7 +623,7 @@ void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
 void MainWindow::on_pbGunLoadSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   qDebug()<<fileName;
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -673,7 +675,7 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
    if (val<0)
      {
        message("Average number of particles per event should be more than 0", this);
-       ui->ledGunAverageNumPartperEvent->setText("0.01");
+       ui->ledGunAverageNumPartperEvent->setText("1");
      }
 }
 
@@ -723,12 +725,11 @@ void MainWindow::on_pbAddSource_clicked()
 }
 
 void MainWindow::on_pbUpdateSources_clicked()
-{  
+{
   int isource = ui->cobParticleSource->currentIndex();
-  //qDebug() << "________ updates particle sources triggered. Source#:"<<isource;
   if (isource<0)
     {
-      qWarning() << "Attempt to update source with number <0";
+      //qWarning() << "Attempt to update source with number <0";
       return;
     }
 
@@ -759,9 +760,9 @@ void MainWindow::on_pbUpdateSources_clicked()
   ps->Phi = ui->ledGunPhi->text().toDouble();
   ps->Theta = ui->ledGunTheta->text().toDouble();
   ps->Psi = ui->ledGunPsi->text().toDouble();
-  ps->size1 = ui->ledGun1DSize->text().toDouble();
-  ps->size2 = ui->ledGun2DSize->text().toDouble();
-  ps->size3 = ui->ledGun3DSize->text().toDouble();
+  ps->size1 = 0.5 * ui->ledGun1DSize->text().toDouble();
+  ps->size2 = 0.5 * ui->ledGun2DSize->text().toDouble();
+  ps->size3 = 0.5 * ui->ledGun3DSize->text().toDouble();
   ps->CollPhi = ui->ledGunCollPhi->text().toDouble();
   ps->CollTheta = ui->ledGunCollTheta->text().toDouble();
   ps->Spread = ui->ledGunSpread->text().toDouble();
@@ -854,9 +855,9 @@ void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
     ui->ledGunPhi->setText(QString::number(ps->Phi));
     ui->ledGunTheta->setText(QString::number(ps->Theta));
     ui->ledGunPsi->setText(QString::number(ps->Psi));
-    ui->ledGun1DSize->setText(QString::number(ps->size1));
-    ui->ledGun2DSize->setText(QString::number(ps->size2));
-    ui->ledGun3DSize->setText(QString::number(ps->size3));
+    ui->ledGun1DSize->setText(QString::number(2.0 * ps->size1));
+    ui->ledGun2DSize->setText(QString::number(2.0 * ps->size2));
+    ui->ledGun3DSize->setText(QString::number(2.0 * ps->size3));
     ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
     ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
     ui->ledGunSpread->setText(QString::number(ps->Spread));
@@ -876,18 +877,6 @@ void MainWindow::clearParticleSourcesIndication()
     ui->fParticleSources->setEnabled(false);
     ui->frSelectSource->setEnabled(false);
 }
-
-//void MainWindow::on_pbGunShowSource_clicked()
-//{
-//   int isource = ui->cobParticleSource->currentIndex();
-//   if (isource < 0) return;
-//   if (isource >= ParticleSources->size())
-//     {
-//       message("Source number is out of bounds!",this);
-//       return;
-//     }
-//   MainWindow::ShowSource(isource, true);
-//}
 
 void MainWindow::on_pbGunShowSource_toggled(bool checked)
 {
@@ -1092,7 +1081,6 @@ void MainWindow::on_pbRefreshStack_clicked()
   ui->teParticleStack->clear();
   int elements = ParticleStack.size();
 
-
   if (ui->cbHideStackText->isChecked())
   {
      QString str;
@@ -1160,7 +1148,7 @@ void MainWindow::on_pbRemoveFromStack_clicked()
 void MainWindow::on_pbClearAllStack_clicked()
 {
     //qDebug() << "Clear particle stack triggered";
-    EventsDataHub->clear();
+    //EventsDataHub->clear();
 
     for (int i=0; i<ParticleStack.size(); i++)
         delete ParticleStack[i];

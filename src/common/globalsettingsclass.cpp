@@ -17,8 +17,6 @@
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)
 {
   SaveLoadWindows = true;
-  AlwaysSaveOnExit = true;
-  NeverSaveOnExit = false;
   ShowExamplesOnStart = true;
   PerformAutomaticGeometryCheck = true;
 
@@ -95,6 +93,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   ConfigDir = AntsBaseDir + "/Config";
 //  qDebug() << "-conf-"<<ConfigDir;
 
+  //natutal abundances data default filename
+  MaterialsAndParticlesSettings["NaturalAbundanciesFile"] = ExamplesDir+"/"+"IsotopeNaturalAbundances.txt";
+
   //if exists,load file fith ANTS2 settings, otherwise create config dir
   if (!QDir(ConfigDir).exists())
     {
@@ -104,16 +105,7 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   else
      LoadANTSconfiguration();
 
-  //running root TStyle script
-  /*
-  GenericScriptWindowClass* ScriptWin = new GenericScriptWindowClass(0);
-  InterfaceToGStyleScript* GStyleInterface  = new  InterfaceToGStyleScript() ; //deleted by the sw
-  ScriptWin->SetInterfaceObject(GStyleInterface);
-  ScriptWin->SetScript(&RootStyleScript);
-  //ScriptWin->SetRandomGenerator(0); //not needed here anyway
-  QObject::connect(ScriptWin, SIGNAL(success(QString)), ScriptWin, SLOT(deleteLater()));
-  ScriptWin->on_pbRunScript_clicked();
-  */
+  //running root TStyle script  
   if (!RootStyleScript.isEmpty())
   {
       AScriptManager* SM = new AScriptManager(0);
@@ -126,17 +118,13 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   }
 }
 
-GlobalSettingsClass::~GlobalSettingsClass()
-{  
-}
-
 void GlobalSettingsClass::writeToJson(QJsonObject &json)
 {
   QJsonObject js;
   js["SaveLoadWindows"] = SaveLoadWindows;
   js["ShowExamplesOnStart"] = ShowExamplesOnStart;
-  js["AlwaysSaveOnExit"] = AlwaysSaveOnExit;
-  js["NeverSaveOnExit"] = NeverSaveOnExit;
+  //js["AlwaysSaveOnExit"] = AlwaysSaveOnExit;
+  //js["NeverSaveOnExit"] = NeverSaveOnExit;
   js["LastDir"] = LastOpenDir;
   js["PMtypeLib"] = LibPMtypes;
   js["MaterialLib"] = LibMaterials;
@@ -157,6 +145,8 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["MaxNumberOfTracks"] = MaxNumberOfTracks;
   js["PerformAutomaticGeometryCheck"] = PerformAutomaticGeometryCheck;
   js["NumThreads"] = NumThreads;
+
+  js["MaterialsAndParticlesSettings"] = MaterialsAndParticlesSettings;
 
   js["RecTreeSave_IncludePMsignals"] = RecTreeSave_IncludePMsignals;
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
@@ -186,8 +176,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     QJsonObject js = json["ANTS2config"].toObject();
 
     parseJson(js, "SaveLoadWindows", SaveLoadWindows);
-    parseJson(js, "AlwaysSaveOnExit", AlwaysSaveOnExit);
-    parseJson(js, "NeverSaveOnExit", NeverSaveOnExit);
+    //parseJson(js, "AlwaysSaveOnExit", AlwaysSaveOnExit);
+    //parseJson(js, "NeverSaveOnExit", NeverSaveOnExit);
     parseJson(js, "ShowExamplesOnStart", ShowExamplesOnStart);
     parseJson(js, "LastDir", LastOpenDir);
     parseJson(js, "PMtypeLib", LibPMtypes);
@@ -216,6 +206,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "GlobScript", GlobScript);
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
+
+    parseJson(js, "MaterialsAndParticlesSettings", MaterialsAndParticlesSettings);
 
     parseJson(js, "DefaultFontSize_ScriptWindow", DefaultFontSize_ScriptWindow);
     parseJson(js, "DefaultFontFamily_ScriptWindow", DefaultFontFamily_ScriptWindow);

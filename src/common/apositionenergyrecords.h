@@ -23,8 +23,9 @@ class APositionEnergyBuffer
     ~APositionEnergyBuffer(){ delete [] rec; }
 
     //public functions
-    inline APositionEnergyRecord &operator[](int i) const //get record number i
-      { return rec[i]; }
+    inline APositionEnergyRecord &operator[](int i) const { return rec[i]; } //get record number i
+    inline const APositionEnergyRecord &at(int i) const { return rec[i]; }
+
     inline int size() const {return numRecords;}          //get number of points
     inline void Reinitialize(int size)              //resize (data is undefined!)
       {
@@ -70,7 +71,7 @@ struct ABaseScanAndReconRecord
    bool GoodEvent; //true - good event  (for scan - bad event = noise event)
 };
 
-struct AScanRecord : ABaseScanAndReconRecord
+struct AScanRecord : public ABaseScanAndReconRecord
 {
   //pos+energy+Good  - see Base
   int EventType; //type of noise event
@@ -81,10 +82,11 @@ struct AScanRecord : ABaseScanAndReconRecord
   AScanRecord() {GoodEvent = true;}  //by default there is one point //good event by defaut
 };
 
-struct AReconRecord : ABaseScanAndReconRecord
+struct AReconRecord : public ABaseScanAndReconRecord
 {
   //pos+energy+Good  - see Base
   double chi2;
+  bool fScriptFiltered;
   bool ReconstructionOK; // false = reconstruction failed
   int EventId; //serial number, should be kept if a part of data is purged
 
@@ -92,7 +94,8 @@ struct AReconRecord : ABaseScanAndReconRecord
   double xCoG, yCoG, zCoG;
   int iPMwithMaxSignal;
 
-  AReconRecord() {xCoG=0; yCoG=0; zCoG=0; iPMwithMaxSignal=0; chi2=0; }  //by default there is one point
+  AReconRecord() : xCoG(0), yCoG(0), zCoG(0), iPMwithMaxSignal(0), chi2(0), fScriptFiltered(false) {}  //by default there is one point
+
   void CopyTo(AReconRecord* target) //copy all data to another ReconstructionStructure
     {
       if (target == this) return;
@@ -114,6 +117,7 @@ struct AReconRecord : ABaseScanAndReconRecord
       target->EventId = EventId;
       target->chi2 = chi2;
       target->ReconstructionOK = ReconstructionOK;
+      target->fScriptFiltered = fScriptFiltered;
     }
 };
 

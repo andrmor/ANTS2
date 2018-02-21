@@ -34,17 +34,45 @@ SensorLocalCache::SensorLocalCache(int numGoodEvents, bool fDataRecon, bool fSca
     const QVector<float> **goodEvents = new const QVector<float>*[numGoodEvents];
     const double **r = new const double*[numGoodEvents];
     double *factors = new double[numGoodEvents];
-    bool fEnergyFactors = fDataRecon && fScaleByEnergy;
+
+    bool fEnergyFactors = false; // = fDataRecon && fScaleByEnergy;
+    double energy_normalization = 1.0;
+    if (fScaleByEnergy)
+    {
+        if (fDataRecon == 0)                    //0 - Scan, 1 - Reconstr data
+        {
+            fEnergyFactors = !scan->isEmpty();  //paranoid protection
+            if (fEnergyFactors)
+            {
+                double sumEnergy = 0;
+                for (int ievent = 0; ievent < events->size(); ievent++)
+                {
+                    if (!reconData[ievent]->GoodEvent) continue;
+                    sumEnergy += (*scan).at(ievent)->Points.at(0).energy;
+                }
+                energy_normalization = sumEnergy / numGoodEvents;
+            }
+        }
+        else
+            fEnergyFactors = true;
+    }
+
     int i = 0;
     for (int ievent = 0; ievent < events->size(); ievent++)
     {
         if (!reconData[ievent]->GoodEvent) continue;
 
-        if (fDataRecon)     r[i] = reconData[ievent]->Points[0].r;
-        else                r[i] = (*scan)[ievent]->Points[0].r;
+        if (fDataRecon) r[i] = reconData[ievent]->Points[0].r;
+        else            r[i] = (*scan)[ievent]->Points[0].r;
 
-        if (fEnergyFactors) factors[i] = 1./reconData[ievent]->Points[0].energy;
-        else                factors[i] = 1.;
+        if (fEnergyFactors)
+        {
+            if (fDataRecon)
+                factors[i] = 1.0 / reconData[ievent]->Points[0].energy;
+            else
+                factors[i] = energy_normalization / (*scan).at(ievent)->Points.at(0).energy;
+        }
+        else factors[i] = 1.0;
 
         goodEvents[i] = &(*events)[ievent];
         i++;

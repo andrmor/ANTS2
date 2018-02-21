@@ -71,14 +71,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(DetectorClass *Detector,
-                        EventsDataClass *EventsDataHub,
-                        TApplication *RootApp,
-                        ASimulationManager *SimulationManager,
-                        ReconstructionManagerClass *ReconstructionManager,
-                        ANetworkModule *Net,
-                        TmpObjHubClass *TmpHub,
-                        GlobalSettingsClass *GlobSet);
+    MainWindow(DetectorClass *Detector,
+               EventsDataClass *EventsDataHub,
+               TApplication *RootApp,
+               ASimulationManager *SimulationManager,
+               ReconstructionManagerClass *ReconstructionManager,
+               ANetworkModule *Net,
+               TmpObjHubClass *TmpHub,
+               GlobalSettingsClass *GlobSet);
     ~MainWindow();
 
     // Pointers to external resources
@@ -176,6 +176,7 @@ public:
     //gains and ch per ph.el
     void SetMultipliersUsingGains(QVector<double> Gains);
     void SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl);
+    void CorrectPreprocessingAdds(QVector<double> Add);
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
@@ -381,7 +382,7 @@ private slots:
     void on_pbGunShowSource_toggled(bool checked);
 
 protected:
-    void closeEvent(QCloseEvent *);    
+    void closeEvent(QCloseEvent *event);
     bool event(QEvent *event);
 
 private:
@@ -453,6 +454,7 @@ private:
     bool ShowTop;
     bool ColorByMaterial;
     bool fConfigGuiLocked;
+    int timesTriedToExit;
 
     bool populateTable; //for SimLoadConfig - compatability check
 
@@ -461,7 +463,6 @@ private:
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
     void ViewChangeRelFactors(QString options);    
-    void RemoveParticle(int Id);
 
 private slots:
     void timerTimeout(); //timer-based update of Root events
@@ -488,8 +489,6 @@ private slots:
     void on_pbShowRelGains_clicked();
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
-    void on_actionQuicksave_triggered();
-    void on_actionQuickload_triggered();
     void on_pbRemoveParticle_clicked();
     void on_lwGunParticles_currentRowChanged(int currentRow);
     void on_pbSaveParticleSource_clicked();
@@ -535,7 +534,7 @@ private slots:
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);
-private:   
+private:
     ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings);
 signals:
     void StopRequested();
@@ -604,6 +603,36 @@ private slots:
     void on_actionScript_window_triggered();
 
     void on_cobParticleSource_activated(int index);
+
+    void on_actionQuick_save_1_triggered();
+
+    void on_actionQuick_save_2_triggered();
+
+    void on_actionQuick_save_3_triggered();
+
+    void on_actionQuick_load_1_triggered();
+
+    void on_actionQuick_load_2_triggered();
+
+    void on_actionQuick_load_3_triggered();
+
+    void on_actionLoad_last_config_triggered();
+
+    void on_actionQuick_load_1_hovered();
+
+    void on_actionQuick_save_1_hovered();
+
+    void on_actionQuick_save_2_hovered();
+
+    void on_actionQuick_save_3_hovered();
+
+    void on_actionQuick_load_2_hovered();
+
+    void on_actionQuick_load_3_hovered();
+
+    void on_actionLoad_last_config_hovered();
+
+    void on_cobPartPerEvent_currentIndexChanged(int index);
 
 public slots:
     void on_cobSF_chi2Vs_activated(int index);

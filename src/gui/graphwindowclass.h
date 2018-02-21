@@ -11,7 +11,7 @@ class TH1D;
 class TGraph;
 class TGraph2D;
 class QGraphicsView;
-class ToolboxScene;
+class AToolboxScene;
 class QListWidgetItem;
 class TObject;
 
@@ -162,6 +162,7 @@ public slots:
     void DoSaveGraph(QString name);
     void AddCurrentToBasket(QString name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
+    void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
     void on_pbAddLegend_clicked();
     void ExportTH2AsText(QString fileName); //for temporary script command
 
@@ -171,14 +172,18 @@ public slots:
 
 private slots:
     void Reshape();
-    void contextMenuBasket(const QPoint &pos);
+    void on_lwBasket_customContextMenuRequested(const QPoint &pos);
     void on_lwBasket_itemDoubleClicked(QListWidgetItem *item);
 
     void on_cbToolBox_toggled(bool checked);
     void on_cobToolBox_currentIndexChanged(int index);
     void on_pbToolboxDragMode_clicked();
+
+    //selBox
     void selBoxGeometryChanged();
+    void selBoxResetGeometry(double halfW, double halfH);
     void selBoxControlsUpdated();
+
     void on_pbSelBoxToCenter_clicked();
     void on_pbSelBoxFGColor_clicked();
     void on_pbSelBoxBGColor_clicked();
@@ -239,6 +244,8 @@ private slots:
     void on_pbRemoveText_clicked();
     void on_pbFWHM_clicked();
 
+    void on_ledAngle_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;
@@ -258,7 +265,7 @@ private:
     double TG_X0, TG_Y0;
 
     QGraphicsView* gvOver;
-    ToolboxScene* scene;
+    AToolboxScene* scene;
 
     void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 
@@ -282,8 +289,10 @@ private:
     void exportTextForTH2(TH2 *h);
     void SaveBasket();
     void AppendBasket();
+    void AppendRootHistsOrGraphs();
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
+    double runScaleDialog();
 };
 
 #endif // GRAPHWINDOWCLASS_H

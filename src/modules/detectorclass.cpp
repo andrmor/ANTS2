@@ -37,7 +37,7 @@ static void autoLoadPlugins() {
   //qDebug() << "Loading plugins from 'plugins' directory";
   QDir plugins_dir(qApp->applicationDirPath());
   if(!plugins_dir.cd("plugins")) {
-    qDebug()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
+    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
     return;
   }
 
@@ -128,7 +128,7 @@ bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
   return BuildDetector();
 }
 
-bool DetectorClass::BuildDetector()
+bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
 {  
     //qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
@@ -162,7 +162,7 @@ bool DetectorClass::BuildDetector()
 
   //request GUI update
   Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
-  Config->AskForSimulationGuiUpdate();
+  if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
   //emit requestClearEventsData();
 
   return fOK;
@@ -178,9 +178,6 @@ void DetectorClass::writeToJson(QJsonObject &json)
 {
     //qDebug() << "Det->JSON";
     QJsonObject js;
-
-    int versionNumber = ANTS2_VERSION;
-    js["ANTS2build"] = versionNumber;
 
     MpCollection->writeToJson(js);          //Particles+Material (including overrides)
     writeWorldFixedToJson(js);              //Fixed world size - if activated
@@ -362,6 +359,7 @@ void DetectorClass::constructDetector()
   for (int i=0; i<PMs->count(); i++) PMsAndDumPms << APMandDummy(PMs->X(i), PMs->Y(i), PMs->at(i).upperLower);
   for (int i=0; i<PMdummies.size(); i++) PMsAndDumPms << APMandDummy(PMdummies.at(i).r[0], PMdummies.at(i).r[1], PMdummies.at(i).UpperLower);
   Sandwich->clearGridRecords();
+  Sandwich->clearMonitorRecords();
   Sandwich->addTGeoVolumeRecursively(Sandwich->World, top, GeoManager, MpCollection, &PMsAndDumPms);
 
   //for (int i=0; i<Sandwich->GridRecords.size(); i++)
@@ -383,7 +381,7 @@ void DetectorClass::constructDetector()
 void DetectorClass::onRequestRegisterGeoManager()
 {
     if (GeoManager)
-        emit newGeoManager(GeoManager);
+      emit newGeoManager(GeoManager);
 }
 
 bool DetectorClass::readDummyPMsFromJson(QJsonObject &json)

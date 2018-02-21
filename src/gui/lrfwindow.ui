@@ -66,7 +66,7 @@
       <rect>
        <x>19</x>
        <y>95</y>
-       <width>131</width>
+       <width>281</width>
        <height>17</height>
       </rect>
      </property>
@@ -302,7 +302,7 @@
       <rect>
        <x>20</x>
        <y>151</y>
-       <width>231</width>
+       <width>351</width>
        <height>17</height>
       </rect>
      </property>
@@ -315,7 +315,7 @@
       <rect>
        <x>19</x>
        <y>72</y>
-       <width>181</width>
+       <width>361</width>
        <height>17</height>
       </rect>
      </property>
@@ -379,22 +379,25 @@
     <widget class="QLabel" name="label_16">
      <property name="geometry">
       <rect>
-       <x>24</x>
-       <y>177</y>
-       <width>61</width>
-       <height>16</height>
+       <x>4</x>
+       <y>175</y>
+       <width>81</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="text">
       <string>LRF type:</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
     </widget>
     <widget class="QProgressBar" name="pbarLRF">
      <property name="geometry">
       <rect>
-       <x>159</x>
+       <x>155</x>
        <y>284</y>
-       <width>161</width>
+       <width>163</width>
        <height>16</height>
       </rect>
      </property>
@@ -1608,7 +1611,7 @@
     </widget>
     <widget class="QPushButton" name="pbShowErrorVsRadius">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="geometry">
       <rect>
@@ -2015,6 +2018,22 @@ only events passing all event filters are used to calculate LRFs.</string>
       </property>
      </widget>
     </widget>
+    <widget class="QPushButton" name="pbWarningEnergyWithScan">
+     <property name="geometry">
+      <rect>
+       <x>219</x>
+       <y>70</y>
+       <width>21</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>If there are events with multiple energy deposition points, filter such events out before making the fit!</string>
+     </property>
+     <property name="text">
+      <string>!</string>
+     </property>
+    </widget>
     <zorder>fSingleGroup</zorder>
     <zorder>line_6</zorder>
     <zorder>lwLRFhistory</zorder>
@@ -2079,6 +2098,7 @@ only events passing all event filters are used to calculate LRFs.</string>
     <zorder>label_25</zorder>
     <zorder>line_15</zorder>
     <zorder>frAdvancedLrfConstrains</zorder>
+    <zorder>pbWarningEnergyWithScan</zorder>
    </widget>
    <widget class="QPushButton" name="pbStopLRFmake">
     <property name="enabled">
@@ -2086,9 +2106,9 @@ only events passing all event filters are used to calculate LRFs.</string>
     </property>
     <property name="geometry">
      <rect>
-      <x>329</x>
+      <x>327</x>
       <y>281</y>
-      <width>61</width>
+      <width>51</width>
       <height>21</height>
      </rect>
     </property>

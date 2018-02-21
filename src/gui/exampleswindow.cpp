@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QDialog>
 #include <QJsonDocument>
+#include <QDateTime>
 
 ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
   QMainWindow(parent),
@@ -37,7 +38,21 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
 
   ui->cbDoNotShowExamplesOnStart->setChecked(!MW->GlobSet->ShowExamplesOnStart);
 
+  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave0.json";
+  QString s = "Not available";
+  QFileInfo fi(fileName);
+  if (fi.exists())
+      s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
+  ui->labLastOnExit->setText(s);
+
   ExamplesWindow::BuildExampleRecord();
+
+  //menu properties
+  QString mss = ui->menuFile->styleSheet();
+  mss += "; QMenu::tooltip {wakeDelay: 1;}";
+  ui->menuFile->setStyleSheet(mss);
+  ui->menuFile->setToolTipsVisible(true);
+  ui->menuFile->setToolTipDuration(1000);
 }
 
 ExamplesWindow::~ExamplesWindow()
@@ -287,17 +302,6 @@ void ExamplesWindow::on_pbSaveSessings_clicked()
   MW->ELwindow->SaveConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
 }
 
-void ExamplesWindow::on_pbQuickSave_clicked()
-{
-  ExamplesWindow::QuickSave();
-}
-
-void ExamplesWindow::QuickSave()
-{
-  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave.json";
-  MW->ELwindow->SaveConfig(fileName);
-}
-
 void ExamplesWindow::on_pbLoadSettings_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this, "Load configuration", MW->GlobSet->LastOpenDir, "All files (*.*)");
@@ -310,16 +314,24 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
   if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(); 
 }
 
-void ExamplesWindow::on_pbQuickLoad_clicked()
+void ExamplesWindow::on_pbLoadLast_clicked()
 {
-  ExamplesWindow::QuickLoad();
+  QuickLoad(0, this);
 }
 
-void ExamplesWindow::QuickLoad()
-{  
-  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave.json";
+void ExamplesWindow::QuickLoad(int i, QWidget *parent)
+{
+  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+  if (!QFileInfo(fileName).exists())
+  {
+      QString s;
+      if (i==0) s = "Save on exit configuration file not found";
+      else      s = "Quick save slot # " + QString::number(i) + " is empty";
+      message(s, parent);
+      return;
+  }
 
-  MW->GeometryDrawDisabled = true;  
+  MW->GeometryDrawDisabled = true;
   MW->Config->LoadConfig(fileName);
   MW->GeometryDrawDisabled = false;
 
@@ -327,9 +339,102 @@ void ExamplesWindow::QuickLoad()
   if (MW->GeometryWindow->isVisible()) MW->ShowGeometry();
 }
 
-void ExamplesWindow::on_pbNew_clicked()
+QString ExamplesWindow::getQuickSlotMessage(int i)
 {
-  MW->Config->LoadConfig(MW->GlobSet->ExamplesDir + "/Simplest.json");
-  hide();
-  if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(false);
+    QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+    QString s;
+    if (i==0) s = "Save on exit configuration file not found";
+    else      s = "Quick save slot # " + QString::number(i) + " is empty";
+    QFileInfo fi(fileName);
+    if (fi.exists())
+        s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
+    return s;
+}
+
+void ExamplesWindow::on_pbQuickSave1_clicked()
+{
+  QuickSave(1);
+}
+
+void ExamplesWindow::on_pbQuickSave2_clicked()
+{
+  QuickSave(2);
+}
+
+void ExamplesWindow::on_pbQuickSave3_clicked()
+{
+  QuickSave(3);
+}
+
+void ExamplesWindow::QuickSave(int i)
+{
+  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+  MW->ELwindow->SaveConfig(fileName);
+}
+
+void ExamplesWindow::on_actionQuick_save_1_triggered()
+{
+    QuickSave(1);
+}
+
+void ExamplesWindow::on_actionQuick_save_2_triggered()
+{
+    QuickSave(2);
+}
+
+void ExamplesWindow::on_actionQuick_save_3_triggered()
+{
+    QuickSave(3);
+}
+
+void ExamplesWindow::on_actionQuick_load_1_triggered()
+{
+    QuickLoad(1, this);
+}
+
+void ExamplesWindow::on_actionQuick_load_2_triggered()
+{
+    QuickLoad(2, this);
+}
+
+void ExamplesWindow::on_actionQuick_load_3_triggered()
+{
+    QuickLoad(3, this);
+}
+
+void ExamplesWindow::on_actionQuick_save_1_hovered()
+{
+    ui->actionQuick_save_1->setToolTip(getQuickSlotMessage(1));
+}
+
+void ExamplesWindow::on_actionQuick_save_2_hovered()
+{
+    ui->actionQuick_save_2->setToolTip(getQuickSlotMessage(2));
+}
+
+void ExamplesWindow::on_actionQuick_save_3_hovered()
+{
+    ui->actionQuick_save_3->setToolTip(getQuickSlotMessage(3));
+}
+
+void ExamplesWindow::on_actionQuick_load_1_hovered()
+{
+    ui->actionQuick_load_1->setToolTip(getQuickSlotMessage(1));
+}
+
+void ExamplesWindow::on_actionQuick_load_2_hovered()
+{
+    ui->actionQuick_load_2->setToolTip(getQuickSlotMessage(2));
+}
+
+void ExamplesWindow::on_actionQuick_load_3_hovered()
+{
+    ui->actionQuick_load_3->setToolTip(getQuickSlotMessage(3));
+}
+
+void ExamplesWindow::on_actionCreate_new_detector_triggered()
+{
+    MW->Config->LoadConfig(MW->GlobSet->ExamplesDir + "/Simplest.json");
+    hide();
+    if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(false);
 }

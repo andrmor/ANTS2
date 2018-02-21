@@ -14,6 +14,7 @@
 #include "graphicsruler.h"
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
+#include "atoolboxscene.h"
 
 //Qt
 #include <QtGui>
@@ -68,179 +69,6 @@
 #include "TPaveLabel.h"
 #include "TPavesText.h"
 
-class ToolboxScene : public QGraphicsScene
-{
-public:
-  enum ToolDrag { ToolDragDisabled, ToolDragActivated, ToolDragStarted };
-  enum Tool { ToolNone = -1, ToolRuler = 0, ToolSelBox = 1, ToolActive };
-
-  ToolboxScene(QObject *parent = 0) : QGraphicsScene(parent)
-  {
-    activeTool = ToolNone;
-    toolDrag = ToolDragDisabled;
-
-    for(Tool t = (Tool)0; t < ToolActive; t = (Tool)(t+1))
-      getTool(t)->setPos(1000000, 1000000);
-  }
-
-  ~ToolboxScene()
-  {
-    QGraphicsItem *toolptr = getTool();
-    if(toolptr) removeItem(toolptr);
-  }
-
-  GraphicsRuler *getRuler() { return &ruler; }
-  ShapeableRectItem *getSelBox() { return &selBox; }
-  QGraphicsItem *getTool(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: qWarning()<<"ToolboxScene::getTool(): unknown Tool!";
-      case ToolNone: return 0;
-      case ToolRuler: return &ruler;
-      case ToolSelBox: return &selBox;
-      case ToolActive: return getTool(this->activeTool);
-    }
-  }
-
-  void setActiveTool(Tool tool)
-  {
-    if(tool >= ToolActive || tool < ToolNone)
-    {
-      qWarning() << "ToolboxScene::setActiveTool: Unknown Tool, using None";
-      tool = ToolNone;
-    }
-    QGraphicsItem *toolptr = getTool();
-    if(toolptr) removeItem(toolptr);
-    this->activeTool = tool;
-    toolptr = getTool(tool);
-    if(toolptr) addItem(toolptr);
-  }
-
-  virtual void mousePressEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(event->button() != Qt::LeftButton)
-      return QGraphicsScene::mousePressEvent(event);
-
-    if(event->modifiers() == Qt::ControlModifier)
-    {
-      if(toolDrag != ToolDragDisabled)
-        return QGraphicsScene::mousePressEvent(event);
-    }
-    else if(toolDrag != ToolDragActivated)
-      return QGraphicsScene::mousePressEvent(event);
-
-    switch(activeTool)
-    {
-      case ToolNone: case ToolActive: break;
-      case ToolRuler:
-        ruler.setP1Pixel(event->scenePos());
-        ruler.setP2Pixel(event->scenePos());
-        break;
-      case ToolSelBox:
-        selBox.setRect(0, 0, 0, 0);
-        selBox.setPos(event->scenePos());
-        break;
-    }
-    toolDrag = ToolDragStarted;
-  }
-
-  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(toolDrag != ToolDragStarted)
-      return QGraphicsScene::mouseMoveEvent(event);
-
-    switch(activeTool)
-    {
-      case ToolNone: case ToolActive: break;
-      case ToolRuler:
-        ruler.setP2Pixel(event->scenePos());
-        break;
-      case ToolSelBox:
-      {
-        QPointF p1 = event->buttonDownScenePos(Qt::LeftButton);
-        QPointF diff = event->scenePos()-p1;
-        selBox.setRect(QRectF(-abs(diff.x())*0.5,-abs(diff.y())*0.5, abs(diff.x()), abs(diff.y())));
-        selBox.setPos(diff*0.5 + p1);
-        break;
-      }
-    }
-  }
-
-  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-  {
-    if(toolDrag != ToolDragStarted)
-      QGraphicsScene::mouseReleaseEvent(event);
-    toolDrag = ToolDragDisabled;
-  }
-
-public slots:
-  void activateItemDrag()
-  {
-    toolDrag = ToolDragActivated;
-  }
-
-  void resetTool(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: case ToolNone: break;
-      case ToolRuler:
-      {
-        //Occupy half the screen
-        ruler.setP1Pixel(QPointF(width()*0.25, height()*0.5));
-        ruler.setP2Pixel(QPointF(width()*0.75, height()*0.5));
-        ruler.setTickLength(width()*0.5/20);
-        //emit ruler.geometryChanged();
-        break;
-      }
-      case ToolSelBox:
-      {
-        //Square of side 1/4 the screen
-        qreal w = width()*0.25, h = height()*0.25;
-        selBox.setRect(QRectF(-w*0.5, -h*0.5, w, h));
-        selBox.setPos(width()*0.5, height()*0.5);
-        selBox.setRotation(0);
-        //emit selBox.geometryChanged();
-        break;
-      }
-      case ToolActive:
-        resetTool(this->activeTool);
-        break;
-    }
-    toolGeometryChanged(tool);
-  }
-
-  void moveToolToVisible(Tool tool = ToolActive)
-  {
-    QRectF s = sceneRect();
-    QGraphicsItem *item = getTool(tool);
-    if(!item) return;
-    QRectF itemRect = item->boundingRect();
-    itemRect.moveTo(item->pos());
-    if(!s.intersects(itemRect))
-      resetTool(tool);
-    toolGeometryChanged(tool);
-  }
-
-private:
-  void toolGeometryChanged(Tool tool = ToolActive)
-  {
-    switch(tool)
-    {
-      default: case ToolNone: break;
-      case ToolRuler: emit ruler.geometryChanged(); break;
-      case ToolSelBox: emit selBox.geometryChanged(); break;
-      case ToolActive: toolGeometryChanged(this->activeTool); break;
-    }
-  }
-
-  Tool activeTool;
-  ShapeableRectItem selBox;
-  GraphicsRuler ruler;
-  ToolDrag toolDrag;
-};
-
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   QMainWindow(parent),
   ui(new Ui::GraphWindowClass)
@@ -257,10 +85,8 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   gvOver = 0;  
   CurrentBasketItem = -1;
   BasketMode = 0;
-  old_option = "";
   fFirstTime = false;
   LastOptStat = 1111;
-  LastDistributionShown = "";
 
   hProjection = 0;
 
@@ -270,11 +96,6 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   ui->swToolBox->setVisible(false);
   ui->swToolBox->setCurrentIndex(0);
   ui->sProjBins->setEnabled(false);
-
-  /*this->setMouseTracking(true);
-  ui->centralwidget->setMouseTracking(true);
-  ui->fUIbox->setMouseTracking(true);
-  ui->swToolBar->setMouseTracking(true);*/
 
   //window flags
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -303,34 +124,28 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 
   QMargins margins = RasterWindow->frameMargins();
   QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
- // QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3, 3, 600, 600);
   QWinContainer->setVisible(true);
 
   //connecting signals-slots
-  connect(RasterWindow, SIGNAL(LeftMouseButtonReleased()), this, SLOT(UpdateControls()));
+  connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
 
   //overlay to show selection box, later scale tool too
   gvOver = new QGraphicsView(this);
   gvOver->setFrameStyle(0);
   gvOver->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   gvOver->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //
-  scene = new ToolboxScene(this);
+
+  scene = new AToolboxScene(this);
   gvOver->setScene(scene);
   gvOver->hide();
-  //gvOver->setMouseTracking(true);
-    //
 
   //toolbox graphics scene
-  connect(scene->getSelBox(), SIGNAL(geometryChanged()), this, SLOT(selBoxGeometryChanged()));
-  connect(ui->cbSelBoxShowBG, SIGNAL(toggled(bool)), scene->getSelBox(), SLOT(setShowContrast(bool)));
-  connect(scene->getRuler(), SIGNAL(geometryChanged()), this, SLOT(rulerGeometryChanged()));
-  connect(ui->cbRulerTicksLength, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowTicks(bool)));
-  connect(ui->cbRulerShowBG, SIGNAL(toggled(bool)), scene->getRuler(), SLOT(setShowContrast(bool)));
-
-  ui->lwBasket->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(ui->lwBasket, SIGNAL(customContextMenuRequested(const QPoint &)),
-          this,           SLOT(contextMenuBasket(const QPoint &)));
+  connect(scene->getSelBox(), &ShapeableRectItem::geometryChanged, this, &GraphWindowClass::selBoxGeometryChanged);
+  connect(scene->getSelBox(), &ShapeableRectItem::requestResetGeometry, this, &GraphWindowClass::selBoxResetGeometry);
+  connect(ui->cbSelBoxShowBG, &QCheckBox::toggled, scene->getSelBox(), &ShapeableRectItem::setShowContrast);
+  connect(scene->getRuler(), &GraphicsRuler::geometryChanged, this, &GraphWindowClass::rulerGeometryChanged);
+  connect(ui->cbRulerTicksLength, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowTicks);
+  connect(ui->cbRulerShowBG, &QCheckBox::toggled, scene->getRuler(), &GraphicsRuler::setShowContrast);
 
   ui->fBasket->setVisible(false);
 }
@@ -346,9 +161,9 @@ GraphWindowClass::~GraphWindowClass()
   delete scene;
   delete gvOver;
 
-  RasterWindow->setParent(0);
-  delete RasterWindow;
-  delete QWinContainer;
+  //RasterWindow->setParent(0);
+  //delete RasterWindow;
+  //delete QWinContainer;
 }
 
 TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<double> *y,
@@ -1641,7 +1456,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     int imode = ui->cobToolBox->currentIndex();
     if(checked)
     {
-      scene->setActiveTool((ToolboxScene::Tool)imode);
+      scene->setActiveTool((AToolboxScene::Tool)imode);
       startOverlayMode();
     }
     else
@@ -1665,28 +1480,54 @@ void GraphWindowClass::on_cobToolBox_currentIndexChanged(int index)
 {
   if (ui->cbToolBox->isChecked())
   {
-    scene->setActiveTool((ToolboxScene::Tool)index);
+    scene->setActiveTool((AToolboxScene::Tool)index);
     scene->moveToolToVisible();
+
+    scene->update(scene->sceneRect());
+    gvOver->update();
   }
 }
 
 void GraphWindowClass::selBoxGeometryChanged()
 {
+    //qDebug() << "selBoxGeometryChanged";
+    ShapeableRectItem *SelBox = scene->getSelBox();
+
     double scaleX = RasterWindow->getXperPixel();
     double scaleY = RasterWindow->getYperPixel();
+    SelBox->setScale(scaleX, scaleY);
 
-    const ShapeableRectItem *SelBox = scene->getSelBox();
-    ui->ledAngle->setText(QString::number(SelBox->rotation(), 'f', 1));
-    QRectF rect = SelBox->rect();//-0.5*DX, -0.5*DY, DX, DY);
-    ui->ledWidth->setText(QString::number(rect.width()*scaleX, 'f', 2));
-    ui->ledHeight->setText(QString::number(rect.height()*scaleY, 'f', 2));
+    ui->ledAngle->setText(QString::number( SelBox->getTrueAngle(), 'f', 2 ));
+    ui->ledWidth->setText(QString::number( SelBox->getTrueWidth(), 'f', 2 ));
+    ui->ledHeight->setText(QString::number( SelBox->getTrueHeight(), 'f', 2 ));
 
     double x0, y0;
     RasterWindow->PixelToXY(SelBox->pos().x(), SelBox->pos().y(), x0, y0);
     ui->ledXcenter->setText(QString::number(x0, 'f', 2));
     ui->ledYcenter->setText(QString::number(y0, 'f', 2));
 
+    //SelBox->update(SelBox->boundingRect());
+    scene->update(scene->sceneRect());
     gvOver->update();
+}
+
+void GraphWindowClass::selBoxResetGeometry(double halfW, double halfH)
+{
+    double xc, yc; //center
+    RasterWindow->PixelToXY(halfW, halfH, xc, yc);
+    double x0, y0; //corner
+    RasterWindow->PixelToXY(0, 0, x0, y0);
+
+    double trueW = 0.5 * fabs(x0 - xc);
+    double trueH = 0.5 * fabs(y0 - yc);
+
+    ShapeableRectItem *SelBox = scene->getSelBox();
+    SelBox->setTrueRectangle(trueW, trueH);
+    SelBox->setPos(halfW, halfH);
+    SelBox->setTrueAngle(0);
+
+    selBoxGeometryChanged();
+    selBoxControlsUpdated();
 }
 
 void GraphWindowClass::selBoxControlsUpdated()
@@ -1703,13 +1544,14 @@ void GraphWindowClass::selBoxControlsUpdated()
     double scaleY = RasterWindow->getYperPixel();
   //  qDebug() << "Scales: " << scaleX << scaleY;
 
-    double DX = dx/scaleX;
-    double DY = dy/scaleY;
+    //  double DX = dx/scaleX;
+    //  double DY = dy/scaleY;
   //  qDebug() << "width/height in pixels:"<< DX << DY;
 
     ShapeableRectItem *SelBox = scene->getSelBox();
-    SelBox->setRect(-0.5*DX, -0.5*DY, DX, DY);
-    SelBox->setRotation(angle);
+    SelBox->setScale(scaleX, scaleY);
+    SelBox->setTrueAngle(angle);
+    SelBox->setTrueRectangle(dx, dy);      //-0.5*DX, -0.5*DY, DX, DY);
 
     int ix, iy;
     RasterWindow->XYtoPixel(x0, y0, ix, iy);
@@ -1717,12 +1559,13 @@ void GraphWindowClass::selBoxControlsUpdated()
     SelBox->setPos(ix, iy);
     //SelBox->setTransform(QTransform().translate(ix, iy));
 
+    scene->update(scene->sceneRect());
     gvOver->update();
 }
 
 void GraphWindowClass::on_pbSelBoxToCenter_clicked()
 {
-  scene->resetTool(ToolboxScene::ToolSelBox);
+  scene->resetTool(AToolboxScene::ToolSelBox);
 }
 
 void GraphWindowClass::on_pbSelBoxFGColor_clicked()
@@ -1801,7 +1644,7 @@ void GraphWindowClass::on_pbRulerBGColor_clicked()
 
 void GraphWindowClass::on_pbResetRuler_clicked()
 {
-  scene->resetTool(ToolboxScene::ToolRuler);
+  scene->resetTool(AToolboxScene::ToolRuler);
 }
 
 void GraphWindowClass::on_pbXprojection_clicked()
@@ -1834,11 +1677,13 @@ void GraphWindowClass::ShowProjection(QString type)
   ui->cbToolBox->setChecked(false);
   if (DrawObjects.isEmpty()) return;
 
-  //qDebug()<<"ShowProjection clicked: "<< type;
+  selBoxControlsUpdated();
+
+  //  qDebug()<<"ShowProjection clicked: "<< type;
   TObject* obj = DrawObjects.first().getPointer();
   QString PlotType = obj->ClassName();
-  //QString opt = DrawObjects.first().getOptions();
-  //qDebug()<<"  Class name/PlotOptions/opt:"<<PlotType<<opt;
+
+  //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().getOptions();
 
   if (PlotType != "TH2D" && PlotType != "TH2F") return;
 
@@ -1846,18 +1691,23 @@ void GraphWindowClass::ShowProjection(QString type)
 
   int nBinsX = h->GetXaxis()->GetNbins();
   int nBinsY = h->GetYaxis()->GetNbins();
-//  qDebug() <<  nBinsX << nBinsY;
+  //  qDebug() << "Bins in X and Y" << nBinsX << nBinsY;
 
   double x0 = ui->ledXcenter->text().toDouble();
-  double y0 = ui->ledYcenter->text().toDouble();
+  double y0 = ui->ledYcenter->text().toDouble();  
   double dx = 0.5*ui->ledWidth->text().toDouble();
   double dy = 0.5*ui->ledHeight->text().toDouble();
+  //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
 
-  double angle = ui->ledAngle->text().toDouble()*3.1415926/180.;
+  const ShapeableRectItem *SelBox = scene->getSelBox();
+  //double scaleX = RasterWindow->getXperPixel();
+  //double scaleY = RasterWindow->getYperPixel();
+  double angle = SelBox->getTrueAngle();
+  //    qDebug() << "True angle"<<angle;
+  angle *= 3.1415926535/180.0;
+
   double cosa = cos(angle);
   double sina = sin(angle);
-
-  //QVector<DrawObjectStructure> tmpMaster = DrawObjects; //pointers are copied!
 
   if (hProjection) delete hProjection;
   TH1D* hWeights = 0;
@@ -1906,29 +1756,24 @@ void GraphWindowClass::ShowProjection(QString type)
     }
   else return;
 
-//not here - ranges are explicitly given
-//#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-//  hProjection->SetBit(TH1::kCanRebin);
-//#endif
-
-
   for (int iy = 1; iy<nBinsY+1; iy++)
     for (int ix = 1; ix<nBinsX+1; ix++)
       {
         double x = h->GetXaxis()->GetBinCenter(ix);
         double y = h->GetYaxis()->GetBinCenter(iy);
-//        qDebug() << ix << x << "    " << iy << y;
+        //    qDebug() << "ix, x" << ix << x << "  iy, y " << iy << y;
 
         //transforming to the selection box coordinates
         x -= x0;
         y -= y0;
 
-        double nx =  x*cosa - y*sina;
-        double ny =  x*sina + y*cosa;
-//        qDebug () << "new coords: "<< nx << ny;
+        // ooposite direction!
+        double nx =  x*cosa + y*sina;
+        double ny = -x*sina + y*cosa;
+        //    qDebug () << "new coords: "<< nx << ny;
 
         //is it within the borders?
-        if (  (nx < -dx || nx > dx) || (ny < -dy || ny > dy)  )
+        if (  nx < -dx || nx > dx || ny < -dy || ny > dy  )
           {
             //outside!
             //h->SetBinContent(ix, iy, 0);
@@ -1952,18 +1797,57 @@ void GraphWindowClass::ShowProjection(QString type)
           }
       }
 
-
    if (type == "x" || type == "y") hProjection->GetXaxis()->SetTitle("Distance, mm");
    else if (type == "dens") hProjection->GetXaxis()->SetTitle("Density, counts");   
    if (type == "xAv" || type == "yAv") *hProjection = *hProjection / *hWeights;
 
-   //DrawWithoutFocus(hProjection);  //using backdoor not to overrite the original histogram!!!
    DrawObjects.clear();
    DrawObjects.append(DrawObjectStructure(hProjection, ""));
    RedrawAll();
 
-   //MasterDrawObjects = tmpMaster;
    delete hWeights;
+}
+
+double GraphWindowClass::runScaleDialog()
+{
+  QDialog* D = new QDialog(this);
+
+  QDoubleValidator* vali = new QDoubleValidator(D);
+  QVBoxLayout* l = new QVBoxLayout(D);
+  QHBoxLayout* l1 = new QHBoxLayout();
+    QLabel* lab1 = new QLabel("Multiply by ");
+    QLineEdit* leM = new QLineEdit("1.0");
+    leM->setValidator(vali);
+    l1->addWidget(lab1);
+    l1->addWidget(leM);
+    QLabel* lab2 = new QLabel(" and divide by ");
+    QLineEdit* leD = new QLineEdit("1.0");
+    leD->setValidator(vali);
+    l1->addWidget(lab2);
+    l1->addWidget(leD);
+  l->addLayout(l1);
+    QPushButton* pb = new QPushButton("Scale");
+    connect(pb, &QPushButton::clicked, D, &QDialog::accept);
+  l->addWidget(pb);
+
+  int ret = D->exec();
+  double res = 1.0;
+  if (ret == QDialog::Accepted)
+    {
+      double Mult = leM->text().toDouble();
+      double Div = leD->text().toDouble();
+      if (Div == 0)
+        {
+          message("Cannot divide by 0!", this);
+        }
+      else
+        {
+          res = Mult / Div;
+        }
+    }
+
+  delete D;
+  return res;
 }
 
 void GraphWindowClass::EnforceOverlayOff()
@@ -2194,6 +2078,11 @@ void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QSt
 {
   RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
   UpdateRootCanvas();
+}
+
+void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
+{
+  if (!text.isEmpty()) ShowTextPanel(text, bShowFrame, Alignment_0Left1Center2Right);
 }
 
 void GraphWindowClass::ExportTH2AsText(QString fileName)
@@ -2428,8 +2317,8 @@ void GraphWindowClass::on_pbBasketBackToLast_clicked()
    ui->lwBasket->clearSelection();
 }
 
-void GraphWindowClass::contextMenuBasket(const QPoint &pos)
-{  
+void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
+{
   QMenu BasketMenu;
   int row = -1;
 
@@ -2446,8 +2335,9 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
   QAction* setLine = 0;
   QAction* setMarker = 0;
   QAction* drawMenu = 0;
+  QAction* drawIntegral = 0;
 
-  if(temp)
+  if (temp)
     {
       //menu triggered at a valid item
       row = ui->lwBasket->row(temp);
@@ -2467,7 +2357,10 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
               if (Basket.at(row).Type == "TH2D")
                  uniMap = BasketMenu.addAction("Use as unif. correction map");
       if (Basket.at(row).Type.startsWith("TH1"))
+      {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
+             drawIntegral = BasketMenu.addAction("Draw integral");
+      }
       BasketMenu.addSeparator();      
       del = BasketMenu.addAction("Delete");
       BasketMenu.addSeparator();
@@ -2477,7 +2370,8 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
   BasketMenu.addSeparator();
   QAction* append = BasketMenu.addAction("Append basket file");
   QAction* appendTxt = BasketMenu.addAction("Append graph from text file");
-  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");   
+  QAction* appendTxtEr = BasketMenu.addAction("Append graph+errorbars from text file");
+  QAction* appendRootHistsAndGraphs = BasketMenu.addAction("Append graphs and histograms from ROOT file");
 
   BasketMenu.addSeparator();
   QAction* clear = BasketMenu.addAction("Clear basket");
@@ -2578,6 +2472,11 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
       AppendBasket();
       UpdateBasketGUI();
     }
+  else if (selectedItem == appendRootHistsAndGraphs)
+  {
+      AppendRootHistsOrGraphs();
+      UpdateBasketGUI();
+  }
   else if (selectedItem == appendTxt)
     {
       qDebug() << "Appending txt file as graph to basket";
@@ -2687,9 +2586,11 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
              message("Not implemented for this object", this);
              return;
            }
-          bool fIn;
-          double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
-          if (!fIn) return;
+
+          //double sf = QInputDialog::getDouble(this, "Input dialog", "Scaling factor = ", 1.0, -2147483647, 2147483647, 5, &fIn);
+          //if (!fIn) return;
+          double sf = runScaleDialog();
+          if (sf == 1.0) return;
 
           if (name == "TGraph")
             {
@@ -2744,6 +2645,37 @@ void GraphWindowClass::contextMenuBasket(const QPoint &pos)
           ui->cbShowLegend->setChecked(true);
           RedrawAll();
       }
+  }
+  else if (selectedItem == drawIntegral)
+  {
+      TH1* h = dynamic_cast<TH1*>(Basket[row].DrawObjects.first().getPointer());
+      if (!h)
+      {
+          message("This operation requires TH1 ROOT object", this);
+          return;
+      }
+      int bins = h->GetNbinsX();
+
+      double* edges = new double[bins+1];
+      for (int i=0; i<bins+1; i++)
+          edges[i] = h->GetBinLowEdge(i+1);
+
+      //    for (int i=0; i<bins+1; i++) qDebug() << i << "->" << edges[i];
+
+      QString title = "Integral of " + Basket[row].Name;
+      TH1D* hi = new TH1D("integral", title.toLocal8Bit().data(), bins, edges);
+      delete [] edges;
+
+      QString Xtitle = h->GetXaxis()->GetTitle();
+      if (!Xtitle.isEmpty()) hi->GetXaxis()->SetTitle(Xtitle.toLocal8Bit().data());
+
+      double prev = 0;
+      for (int i=1; i<bins+1; i++)
+        {
+          prev += h->GetBinContent(i);
+          hi->SetBinContent(i, prev);
+        }
+      Draw(hi, "");
   }
 }
 
@@ -2955,7 +2887,7 @@ void GraphWindowClass::AppendBasket()
                       qWarning() << "Unregistered object type" << type <<"for load basket from file!";
                     }
                 }
-              Basket.append(BasketItemClass(name, drawObjects));
+              if (!drawObjects->isEmpty()) Basket.append(BasketItemClass(name, drawObjects));
 
             }
         }
@@ -2969,6 +2901,59 @@ void GraphWindowClass::AppendBasket()
       message("It is not a proper Basket file!", this);
     }
   f->Close();
+}
+
+void GraphWindowClass::AppendRootHistsOrGraphs()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    TFile* f = new TFile(c_str);
+
+    const int numKeys = f->GetListOfKeys()->GetEntries();
+    qDebug() << "File contains" << numKeys << "TKeys";
+
+    for (int i=0; i<numKeys; i++)
+    {
+        TKey *key = (TKey*)f->GetListOfKeys()->At(i);
+        QString Type = key->GetClassName();
+        QString Name = key->GetName();
+        qDebug() << i << Type << Name;
+
+        if (Type.startsWith("TH") || Type.startsWith("TProfile") || Type.startsWith("TGraph"))
+        {
+            QVector<DrawObjectStructure>* drawObjects = new QVector<DrawObjectStructure>;
+            TObject *p = 0;
+
+            if (Type=="TH1D") p = (TH1D*)key->ReadObj();
+            else if (Type=="TH1I") p = (TH1I*)key->ReadObj();
+            else if (Type=="TH1F") p = (TH1F*)key->ReadObj();
+            else if (Type=="TH2D") p = (TH2D*)key->ReadObj();
+            else if (Type=="TH2F") p = (TH2F*)key->ReadObj();
+            else if (Type=="TH2I") p = (TH2I*)key->ReadObj();
+
+            else if (Type=="TProfile") p = (TProfile*)key->ReadObj();
+            else if (Type=="TProfile2D") p = (TProfile2D*)key->ReadObj();
+
+            else if (Type=="TGraph2D") p = (TGraph2D*)key->ReadObj();
+            else if (Type=="TGraph") p = (TGraph*)key->ReadObj();
+            else if (Type=="TGraphErrors") p = (TGraphErrors*)key->ReadObj();
+
+            if (p)
+            {
+                drawObjects->append(DrawObjectStructure(p, ""));
+                Basket.append(BasketItemClass(Name, drawObjects));
+                qDebug() << "  appended";
+            }
+            else qWarning() << "Unregistered object type" << Type <<"for load basket from file!";
+        }
+        else qDebug() << "  ignored";
+    }
+
+    f->Close();
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()
@@ -3215,7 +3200,8 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
   QStringList sl = Text.split("\n");
   for (QString s : sl) la->AddText(s.toLatin1());
 
-  Draw(la, "same");
+  DrawWithoutFocus(la, "same", true, false); //it seems the Paveltext is owned by drawn object - registration causes crash if used with non-registered object (e.g. script)
+
 //  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
 //  {
 //     RegisterTObject(la);
@@ -3349,4 +3335,28 @@ void GraphWindowClass::on_pbFWHM_clicked()
         MasterDrawObjects = CopyMasterDrawObjects;
     }
     else message("Fit failed!", this);
+}
+
+void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu Menu;
+
+    QAction* alignXWithRuler =Menu.addAction("Align X axis with the Ruler tool");
+    QAction* alignYWithRuler =Menu.addAction("Align Y axis with the Ruler tool");
+
+    QAction* selectedItem = Menu.exec(ui->ledAngle->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    double angle = scene->getRuler()->getAngle() *180.0/M_PI;
+
+    if (selectedItem == alignXWithRuler)
+      {
+        ui->ledAngle->setText( QString::number(angle, 'g', 4) );
+        selBoxControlsUpdated();
+      }
+    else if (selectedItem == alignYWithRuler)
+      {
+        ui->ledAngle->setText( QString::number(angle - 90.0, 'g', 4) );
+        selBoxControlsUpdated();
+      }
 }

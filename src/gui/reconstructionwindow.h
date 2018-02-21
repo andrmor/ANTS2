@@ -111,7 +111,6 @@ public:
 
   void HideCutShapes(); //hide correlation cut shapes
 
-  //void ShowReconstructionPositionsIfWindowVisible();
   void DotActualPositions();
 
   void SaveIndividualCutOffs(QString fileName);
@@ -125,11 +124,9 @@ public:
   double getSuggestedZ() const;
   double isReconstructEnergy() const;
 
-
   void writeToJson(QJsonObject &json); //all settings
   void updateReconSettings();
   void updateFilterSettings();
-
   bool readFromJson(QJsonObject &json); //all settings except LRF
 
   bool readReconSettingsFromJson(QJsonObject &jsonMaster);
@@ -521,6 +518,22 @@ private slots:
 
   void on_pbRecToTrue_clicked();
 
+  void on_pbPrepareSignalHistograms_clicked();
+
+  void on_pbFromPeaksToPreprocessing_clicked();
+
+  void on_pbFromPeaksShow_clicked();
+
+  void on_pbFrindPeaks_clicked();
+
+  void on_sbFrompeakPM_valueChanged(int arg1);
+
+  void on_pbFromPeaksPedestals_clicked();
+
+  void on_pbClearAllFilters_clicked();
+
+  void on_cobCGstartOption_currentIndexChanged(int index);
+
 protected:
     bool event(QEvent *event);
 
@@ -549,15 +562,13 @@ private:
   bool ForbidUpdate;
   bool TMPignore;
   bool bFilteringStarted;
+  QWidget* WidgetFocusedBeforeBusyOn;
 
   double lastChi2;
 
   Double_t funcParams[4];
 
   QPolygonF polygon; //polygon for custom spatial filter
-
-  QVector<TH1D*> sigmaHists;
-  QVector<double> ChPerPhEl;
 
   QString FilterScript;
 

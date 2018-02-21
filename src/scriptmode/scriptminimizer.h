@@ -1,7 +1,7 @@
 #ifndef SCRIPTMINIMIZER_H
 #define SCRIPTMINIMIZER_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 
 #include <QObject>
 #include <QVector>

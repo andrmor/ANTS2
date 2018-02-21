@@ -1,7 +1,7 @@
-#ifndef INTERFACETOCHECKERSCRIPT_H
-#define INTERFACETOCHECKERSCRIPT_H
+#ifndef AINTERFACETODEPOSCRIPT_H
+#define AINTERFACETODEPOSCRIPT_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "ahistoryrecords.h"
 
 #include <QVector>
@@ -32,14 +32,14 @@ public:
   QVector<MaterialRecord> Deposition; // extracted data per material - from EnergyVector
 };
 
-class InterfaceToInteractionScript : public AScriptInterface
+class AInterfaceToDepoScript : public AScriptInterface
 {
   Q_OBJECT
 public:
-  InterfaceToInteractionScript(MainWindow* MW, EventsDataClass* EventsDataHub);
-  ~InterfaceToInteractionScript(){ClearExtractedData();}
+  AInterfaceToDepoScript(MainWindow* MW, EventsDataClass* EventsDataHub);
+  ~AInterfaceToDepoScript(){ClearExtractedData();}
 
-private: 
+private:
   MainWindow* MW;
   EventsDataClass* EventsDataHub;
   QVector<ParticleRecord> PR;
@@ -61,6 +61,9 @@ public slots:
   //6 - error - undefined termination
   //7 - created outside defined geometry
   //8 - found untrackable material
+  //9 - PairProduction
+  //10- EllasticScattering
+  //11- StoppedOnMonitor
   QString terminationStr(int i);
   double dX(int i);
   double dY(int i);
@@ -68,6 +71,7 @@ public slots:
   int particleId(int i);
   int sernum(int i);
   int isSecondary(int i);
+  int getParent(int i);
 
   // MaterialCrossed - info from DepositionHistory
   int MaterialsCrossed_count(int i);
@@ -81,6 +85,9 @@ public slots:
   double Deposition_startX(int i, int m);
   double Deposition_startY(int i, int m);
   double Deposition_startZ(int i, int m);
+  QString Deposition_volumeName(int i, int m);
+  int Deposition_volumeIndex(int i, int m);
+  double Deposition_energy(int i, int m);
     // +subindex - node index
   int Deposition_countNodes(int i, int m);
   double Deposition_X(int i, int m, int n);
@@ -89,9 +96,11 @@ public slots:
   double Deposition_dE(int i, int m, int n);
   double Deposition_dL(int i, int m, int n);
 
+  QVariantList getAllDefinedTerminatorTypes();
+
 private:
   void populateParticleRecords();
 
 };
 
-#endif // INTERFACETOCHECKERSCRIPT_H
+#endif // AINTERFACETODEPOSCRIPT_H

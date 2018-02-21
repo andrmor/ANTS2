@@ -14,6 +14,7 @@
 
 #include "TString.h"
 #include "TVector3.h"
+#include "RVersion.h"
 
 class DetectorClass;
 class OneEventClass;
@@ -28,7 +29,6 @@ class Simulator;
 class TRandom2;
 class TString;
 class TH1I;
-class TThread;
 class TGeoManager;
 class APhotonTracer;
 class TrackHolderClass;
@@ -37,6 +37,13 @@ class AParticleOnStack;
 struct AEnergyDepositionCell;
 class ASimulatorRunner;
 class GeoMarkerClass;
+
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+class TThread;
+#else
+namespace std { class thread;}
+#endif
+
 
 class ASimulationManager : public QObject
 {
@@ -125,7 +132,11 @@ private:
 
     //Threads
     QVector<Simulator *> workers;
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
     QVector<TThread *> threads;
+#else
+    QVector<std::thread *> threads;
+#endif
     Simulator *backgroundWorker;
 
     //External settings
@@ -175,6 +186,7 @@ public:
     bool wasSuccessful() const { return fSuccess; }
     virtual void updateGeoManager();
     void setSimSettings(const GeneralSimSettings *settings);
+    void initSimStat();
     void setRngSeed(int seed);
     void requestStop();
 
@@ -336,6 +348,7 @@ private:
     bool fDoS2;
     bool fAllowMultiple; //multiple particles per event?
     int AverageNumParticlesPerEvent;
+    int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
 };

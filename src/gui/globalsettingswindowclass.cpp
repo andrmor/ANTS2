@@ -52,9 +52,9 @@ void GlobalSettingsWindowClass::updateGUI()
 
   ui->sbFontSize->setValue(GlobSet->FontSize);
 
-  ui->rbNever->setChecked(GlobSet->NeverSaveOnExit);
-  ui->rbAlways->setChecked(GlobSet->AlwaysSaveOnExit);
-  ui->rbAskMe->setChecked(!GlobSet->NeverSaveOnExit && !GlobSet->AlwaysSaveOnExit);
+  //ui->rbNever->setChecked(GlobSet->NeverSaveOnExit);
+  //ui->rbAlways->setChecked(GlobSet->AlwaysSaveOnExit);
+  //ui->rbAskMe->setChecked(!GlobSet->NeverSaveOnExit && !GlobSet->AlwaysSaveOnExit);
 
   ui->cbOpenImageExternalEditor->setChecked(GlobSet->fOpenImageExternalEditor);
 
@@ -230,14 +230,14 @@ void GlobalSettingsWindowClass::on_sbFontSize_editingFinished()
     MW->setFontSizeAllWindows(GlobSet->FontSize);
 }
 
-void GlobalSettingsWindowClass::on_rbAlways_toggled(bool checked)
+void GlobalSettingsWindowClass::on_rbAlways_toggled(bool /*checked*/)
 {
-  GlobSet->AlwaysSaveOnExit = checked;
+  //GlobSet->AlwaysSaveOnExit = checked;
 }
 
-void GlobalSettingsWindowClass::on_rbNever_toggled(bool checked)
+void GlobalSettingsWindowClass::on_rbNever_toggled(bool /*checked*/)
 {
-  GlobSet->NeverSaveOnExit = checked;
+  //GlobSet->NeverSaveOnExit = checked;
 }
 
 void GlobalSettingsWindowClass::on_cbOpenImageExternalEditor_clicked(bool checked)

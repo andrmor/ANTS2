@@ -1,6 +1,6 @@
 #include "ascriptmanager.h"
-#include "interfacetoglobscript.h"
-#include "scriptinterfaces.h"
+#include "ainterfacetomessagewindow.h"
+#include "coreinterfaces.h"
 
 #include <QScriptEngine>
 #include <QDebug>
@@ -89,20 +89,22 @@ void AScriptManager::AbortEvaluation(QString message)
 
 void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
-    QScriptValue obj = engine->newQObject(interfaceObject, QScriptEngine::QtOwnership);
-    if(name.isEmpty())
+    //qDebug() << "Registering:" << interfaceObject << name;
+    QScriptValue obj = ( interfaceObject ? engine->newQObject(interfaceObject, QScriptEngine::QtOwnership) : QScriptValue() );
+
+    if (name.isEmpty())
       { // empty name means the main module
-        if (!dynamic_cast<InterfaceToGlobScript*>(interfaceObject))
-           engine->setGlobalObject(obj); //do not replace the global object for global script!
+        if (interfaceObject)
+           engine->setGlobalObject(obj); //do not replace the global object for global script - in effect (non zero pointer) only for local scripts
         // registering service object
-        QObject* coreObj = new CoreInterfaceClass(this);
+        QObject* coreObj = new AInterfaceToCore(this);
         QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
         QString coreName = "core";
         engine->globalObject().setProperty(coreName, coreVal);
         interfaces.append(coreObj);  //CORE OBJECT IS FIRST in interfaces!
         interfaceNames.append(coreName);
         //registering math module
-        QObject* mathObj = new MathInterfaceClass(RandGen);
+        QObject* mathObj = new AInterfaceToMath(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         QString mathName = "math";
         engine->globalObject().setProperty(mathName, mathVal);
@@ -114,13 +116,16 @@ void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
         engine->globalObject().setProperty(name, obj);
       }
 
-    interfaces.append(interfaceObject);
-    interfaceNames.append(name);
+    if (interfaceObject)
+      {
+        interfaces.append(interfaceObject);
+        interfaceNames.append(name);
 
-    //connecting abort request from main interface to serviceObj
-    int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");
-    if (index != -1)
-        QObject::connect(interfaceObject, "2AbortScriptEvaluation(QString)", this, SLOT(AbortEvaluation(QString)));  //1-slot, 2-signal
+        //connecting abort request from main interface to serviceObj
+        int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");
+        if (index != -1)
+            QObject::connect(interfaceObject, "2AbortScriptEvaluation(QString)", this, SLOT(AbortEvaluation(QString)));  //1-slot, 2-signal
+      }
 }
 
 int AScriptManager::FindSyntaxError(QString script)
@@ -139,7 +144,7 @@ void AScriptManager::deleteMsgDialog()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
-        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
         if (t)
         {
             t->deleteDialog();
@@ -152,7 +157,7 @@ void AScriptManager::hideMsgDialog()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
-        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
         if (t)
         {
             t->hide();
@@ -165,7 +170,7 @@ void AScriptManager::restoreMsgDialog()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
-        InterfaceToTexter* t = dynamic_cast<InterfaceToTexter*>(interfaces[i]);
+        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
         if (t)
         {
             if (t->isActive()) t->restore();

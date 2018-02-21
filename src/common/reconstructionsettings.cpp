@@ -94,6 +94,9 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   //CGonCPU
   QJsonObject gcpuJson = ajson["CPUgridsOptions"].toObject();
   CGstartOption = gcpuJson["StartOption"].toInt();
+  CGstartX = CGstartY = 0;
+  parseJson(gcpuJson, "StartX", CGstartX);
+  parseJson(gcpuJson, "StartY", CGstartY);
   CGoptimizeWhat = gcpuJson["OptimizeWhat"].toInt();
   CGnodesXY = gcpuJson["NodesXY"].toInt();
   CGiterations = gcpuJson["Iterations"].toInt();

@@ -65,6 +65,7 @@ SensorLRFs::SensorLRFs(int nPMs, QObject *parent) :
   LRFmakeJson["Nodes_y"] = 10;
   LRFmakeJson["StoreError"] = false;
   LRFmakeJson["UseEnergy"] = true;
+  LRFmakeJson["EnergyNormalization"] = 1.0;
   LRFmakeJson["UseGrid"] = true;
   LRFmakeJson["UseGroupping"] = false;
 }
@@ -823,10 +824,7 @@ bool SensorLRFs::makeLRFs(QJsonObject &json, EventsDataClass *EventsDataHub, pms
                             EventsDataHub->ReconstructionData.at(0),
                             &EventsDataHub->Scan,
                             events,
-                            &LRFsettings);
-  //lrfmaker.fFitError = LRFsettings.fFitError;
-  //lrfmaker.fUseGrid = LRFsettings.fUseGrid;
-  //lrfmaker.fFitOnlyLast = LRFsettings.fFitOnlyLast;
+                            &LRFsettings);  
   //qDebug() << "LRFmaker created and initialized";
 
   //making sensor groups (all or a single one)

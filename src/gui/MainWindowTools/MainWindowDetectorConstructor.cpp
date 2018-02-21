@@ -17,7 +17,7 @@
 #include "aslablistwidget.h"
 #include "ageoobject.h"
 #include "ageotreewidget.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "aconfiguration.h"
 
 //Qt
@@ -51,7 +51,8 @@ void MainWindow::ReconstructDetector(bool fKeepData)
 
 bool MainWindow::startupDetector()
 {
-  MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots  
+  MainWindow::initDetectorSandwich(); //create detector sandwich control and link GUI signals/slots
+  //    qDebug() << "-->DetectorSandwich initialized";
   if (QFile(GlobSet->ExamplesDir + "/StartupDetector.json").exists())
     {
       Config->LoadConfig(GlobSet->ExamplesDir + "/StartupDetector.json");
@@ -60,7 +61,7 @@ bool MainWindow::startupDetector()
   else
     {
       //startup detector file not found, to avoid crash initializing make-shift detector
-      qDebug() << "!!! Startup detector NOT found!";
+      qWarning() << "!!! Startup detector NOT found!";
 
       //dummy detector - in case startup detector json not found
       //generating a dummy detector
@@ -69,7 +70,7 @@ bool MainWindow::startupDetector()
 
       //Generate MaterialCollection
       MpCollection->AddNewMaterial();
-      MpCollection->UpdateMaterial(MpCollection->countMaterials()-1, "Air", 1.2041e-3, 0, 1, 0, 5, 100, 2, 5, 1, 0, 0, 0);
+      MpCollection->UpdateMaterial(MpCollection->countMaterials()-1, "Air", 1.2041e-3, 1, 0, 5, 100, 2, 5, 1, 0, 0, 0);
       AddDefaultPMtype();
       MainWindow::on_pbRefreshMaterials_clicked();
       MainWindow::on_pbRefreshOverrides_clicked();

@@ -19,12 +19,14 @@ struct EventHistoryStructure
                           AllEnergyDisspated = 2,
                           Photoelectric = 3,
                           ComptonScattering = 4,
-                          Capture = 5,
+                          NeutronAbsorption = 5,
                           ErrorDuringTracking = 6,
                           CreatedOutside = 7,   // created outside defined geometry
                           FoundUntrackableMaterial = 8,
                           PairProduction = 9,
-                          EllasticScattering = 10};  // keep the numbers - scripts operate with int
+                          EllasticScattering = 10,
+                          StoppedOnMonitor = 11
+                         };  // keep the numbers - scripts operate with int
 
     int ParticleId;
     int index; // this is particle index! - "serial number" of the particle
@@ -38,6 +40,12 @@ struct EventHistoryStructure
     bool isSecondary() const {return SecondaryOf > -1;}
 
     QList<MaterialHistoryStructure> Deposition;
+
+    //utilities
+    static QStringList getAllDefinedTerminationTypes() {return QStringList({"NotFinished", "Escaped", "AllEnergyDisspated", "Photoelectric",
+                                                                            "ComptonScattering", "NeutronAbsorption", "ErrorDuringTracking",
+                                                                            "CreatedOutside", "FoundUntrackableMaterial", "PairProduction",
+                                                                            "EllasticScattering", "StoppedOnMonitor"});}
 };
 
 struct GeneratedPhotonsHistoryStructure

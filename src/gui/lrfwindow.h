@@ -105,6 +105,10 @@ private slots:
 
   void on_pbAxial3DvsZ_clicked();
 
+  void on_cbEnergyScalling_toggled(bool checked);
+
+  void on_cb_data_selector_currentIndexChanged(int index);
+
 protected:
     bool event(QEvent *event);
 
@@ -124,6 +128,7 @@ private:
     void drawRadial();
     bool checkWatchdogs();
     void ShowTransform(int type);
+    void updateWarningForEnergyScan();
 };
 
 #endif // LRFWINDOW_H

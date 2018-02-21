@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>458</height>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>123</x>
-      <y>433</y>
+      <y>410</y>
       <width>231</width>
       <height>17</height>
      </rect>
@@ -31,7 +31,7 @@
     <property name="geometry">
      <rect>
       <x>1</x>
-      <y>289</y>
+      <y>271</y>
       <width>457</width>
       <height>20</height>
      </rect>
@@ -53,7 +53,7 @@
     <property name="geometry">
      <rect>
       <x>4</x>
-      <y>55</y>
+      <y>30</y>
       <width>451</width>
       <height>233</height>
      </rect>
@@ -89,7 +89,7 @@
        <x>129</x>
        <y>204</y>
        <width>191</width>
-       <height>26</height>
+       <height>24</height>
       </rect>
      </property>
      <property name="font">
@@ -201,7 +201,7 @@
     <property name="geometry">
      <rect>
       <x>1</x>
-      <y>36</y>
+      <y>6</y>
       <width>457</width>
       <height>20</height>
      </rect>
@@ -213,7 +213,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Examples</string>
+     <string>Detector examples</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -223,9 +223,9 @@
     <property name="geometry">
      <rect>
       <x>4</x>
-      <y>308</y>
+      <y>292</y>
       <width>451</width>
-      <height>120</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -241,7 +241,7 @@
      <property name="geometry">
       <rect>
        <x>300</x>
-       <y>21</y>
+       <y>19</y>
        <width>150</width>
        <height>17</height>
       </rect>
@@ -257,7 +257,7 @@
      <property name="geometry">
       <rect>
        <x>300</x>
-       <y>38</y>
+       <y>35</y>
        <width>150</width>
        <height>17</height>
       </rect>
@@ -273,7 +273,7 @@
      <property name="geometry">
       <rect>
        <x>300</x>
-       <y>56</y>
+       <y>51</y>
        <width>151</width>
        <height>17</height>
       </rect>
@@ -286,7 +286,7 @@
      <property name="geometry">
       <rect>
        <x>13</x>
-       <y>20</y>
+       <y>17</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -301,49 +301,11 @@
       <string>Load</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pbQuickLoad">
-     <property name="geometry">
-      <rect>
-       <x>13</x>
-       <y>87</y>
-       <width>111</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Quick load</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pbQuickSave">
-     <property name="geometry">
-      <rect>
-       <x>152</x>
-       <y>87</y>
-       <width>111</width>
-       <height>24</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Quick save</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pbSaveSessings">
      <property name="geometry">
       <rect>
        <x>152</x>
-       <y>20</y>
+       <y>17</y>
        <width>111</width>
        <height>41</height>
       </rect>
@@ -362,7 +324,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>71</y>
+       <y>67</y>
        <width>430</width>
        <height>16</height>
       </rect>
@@ -375,7 +337,7 @@
      <property name="geometry">
       <rect>
        <x>277</x>
-       <y>3</y>
+       <y>2</y>
        <width>173</width>
        <height>16</height>
       </rect>
@@ -387,27 +349,11 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="label_8">
-     <property name="geometry">
-      <rect>
-       <x>277</x>
-       <y>90</y>
-       <width>172</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Load/Save using a fixed slot</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
     <widget class="Line" name="line_2">
      <property name="geometry">
       <rect>
        <x>137</x>
-       <y>8</y>
+       <y>7</y>
        <width>3</width>
        <height>62</height>
       </rect>
@@ -420,7 +366,7 @@
      <property name="geometry">
       <rect>
        <x>276</x>
-       <y>8</y>
+       <y>7</y>
        <width>3</width>
        <height>62</height>
       </rect>
@@ -429,52 +375,51 @@
       <enum>Qt::Vertical</enum>
      </property>
     </widget>
-    <widget class="Line" name="line_4">
+    <widget class="QPushButton" name="pbLoadLast">
      <property name="geometry">
       <rect>
-       <x>137</x>
-       <y>88</y>
-       <width>3</width>
+       <x>13</x>
+       <y>81</y>
+       <width>111</width>
        <height>24</height>
       </rect>
      </property>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Load configuration auto-saved on last exit/simulation/reconstruction</string>
+     </property>
+     <property name="text">
+      <string>Load autosave</string>
      </property>
     </widget>
-    <widget class="Line" name="line_5">
+    <widget class="QLabel" name="labLastOnExit">
      <property name="geometry">
       <rect>
-       <x>276</x>
-       <y>88</y>
-       <width>3</width>
-       <height>24</height>
+       <x>138</x>
+       <y>85</y>
+       <width>302</width>
+       <height>16</height>
       </rect>
      </property>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+     <property name="text">
+      <string>Not available</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pbNew">
+   <widget class="Line" name="line_7">
     <property name="geometry">
      <rect>
-      <x>133</x>
-      <y>6</y>
-      <width>191</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Create new detector</string>
-    </property>
-   </widget>
-   <widget class="Line" name="line_6">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>29</y>
-      <width>460</width>
+      <x>490</x>
+      <y>160</y>
+      <width>430</width>
       <height>16</height>
      </rect>
     </property>
@@ -482,7 +427,246 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
+   <widget class="QPushButton" name="pbQuickSave3">
+    <property name="geometry">
+     <rect>
+      <x>633</x>
+      <y>139</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick save 3</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbQuickSave1">
+    <property name="geometry">
+     <rect>
+      <x>633</x>
+      <y>85</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick save 1</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line_4">
+    <property name="geometry">
+     <rect>
+      <x>618</x>
+      <y>87</y>
+      <width>3</width>
+      <height>75</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>754</x>
+      <y>116</y>
+      <width>172</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load/Save using fixed slots</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbQuickLoad2">
+    <property name="geometry">
+     <rect>
+      <x>494</x>
+      <y>112</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick load 2</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbQuickSave2">
+    <property name="geometry">
+     <rect>
+      <x>633</x>
+      <y>112</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick save 2</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbQuickLoad1">
+    <property name="geometry">
+     <rect>
+      <x>494</x>
+      <y>85</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick load 1</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbQuickLoad3">
+    <property name="geometry">
+     <rect>
+      <x>494</x>
+      <y>139</y>
+      <width>111</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Quick load 3</string>
+    </property>
+   </widget>
+   <widget class="Line" name="line_5">
+    <property name="geometry">
+     <rect>
+      <x>757</x>
+      <y>87</y>
+      <width>3</width>
+      <height>75</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>458</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionQuick_save_1"/>
+    <addaction name="actionQuick_save_2"/>
+    <addaction name="actionQuick_save_3"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuick_load_1"/>
+    <addaction name="actionQuick_load_2"/>
+    <addaction name="actionQuick_load_3"/>
+   </widget>
+   <widget class="QMenu" name="menuNew">
+    <property name="title">
+     <string>New</string>
+    </property>
+    <addaction name="actionCreate_new_detector"/>
+   </widget>
+   <addaction name="menuNew"/>
+   <addaction name="menuFile"/>
+  </widget>
+  <action name="actionQuick_save_1">
+   <property name="text">
+    <string>Quick save 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_2">
+   <property name="text">
+    <string>Quick save 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_save_3">
+   <property name="text">
+    <string>Quick save 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_1">
+   <property name="text">
+    <string>Quick load 1</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_2">
+   <property name="text">
+    <string>Quick load 2</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionQuick_load_3">
+   <property name="text">
+    <string>Quick load 3</string>
+   </property>
+   <property name="toolTip">
+    <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_detector">
+   <property name="text">
+    <string>Create new detector</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

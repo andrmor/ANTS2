@@ -4,6 +4,9 @@
 #include <QVector>
 #include <QString>
 
+#include "aneutroninteractionelement.h"
+#include "amaterialcomposition.h"
+
 class QJsonObject;
 class AParticle;
 class AOpticalOverride;
@@ -21,7 +24,6 @@ public:
 
   QString name;
   double density; //in g/cm3
-  double atomicDensity; //in atoms/cm3
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
@@ -35,6 +37,8 @@ public:
   double PriScintDecayTime;
   double SecScintDecayTime;
   QString Comments;
+
+  AMaterialComposition ChemicalComposition;
 
   QVector<MatParticleStructure> MatParticle; //material properties related to individual particles
 
@@ -60,26 +64,41 @@ public:
   TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
 
+  void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
+  void updateRuntimeProperties(bool bLogLogInterpolation);
+
   void clear();
-  void writeToJson(QJsonObject &json, QVector<AParticle*>* ParticleCollection); //does not save overrides!
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
+
+  QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles
 {
   enum ReactionType {Photoelectric = 0,
                     ComptonScattering = 1,
-                    Capture = 2,
+                    Absorption = 2,
                     PairProduction = 3,
-                    EllasticScattering = 4};  //must keep the numbers - directly used in json config files
-  ReactionType Type;
+                    ElasticScattering = 4,
+                    Undefined = 5};  //must keep the numbers - directly used in json config files
 
+  ReactionType Type;  
   QVector<double> PartialCrossSection;
   QVector<double> PartialCrossSectionEnergy;
-  double branching; //for neutrons - cross sections do not depend on energy, can scale using total
 
-  QVector<int> GeneratedParticles;
-  QVector<double> GeneratedParticleEnergies;    
+  // exclusive for neutrons
+  QVector<ANeutronInteractionElement> IsotopeRecords;
+
+  void UpdateNeutronCrossSections(bool bUseLogLog);   //
+
+  ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
+
+  void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection) const;
+  void readFromJson(const QJsonObject &json, AMaterialParticleCollection* MpCollection);
+
+  bool isParticleOneOfSecondaries(int iPart) const;
+  void prepareForParticleRemove(int iPart);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
@@ -91,15 +110,20 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   double PhYield;         // Photon yield of the primary scintillation
   double IntrEnergyRes; // intrinsic energy resolution
 
+  //for neutrons - separate activation of capture and ellastic scattering is possible
+  bool bCaptureEnabled;
+  bool bEllasticEnabled;
+  bool bAllowAbsentCsData;
+
   QVector<double> InteractionDataX; //energy in keV
   QVector<double> InteractionDataF; //stopping power (for charged) or total interaction cross-section (neutrals)
 
   QVector<NeutralTerminatorStructure> Terminators;
 
-  QString DataSource; //for gamma stores XCOM file if was used
-  QString DataString;     //for gamma can be used to store composition
+  QString DataSource;     //for gamma  - stores XCOM file if was used
+  QString DataString;     //for gamma  - can be used to store composition   obsolete!!!
 
-  bool CalculateTotal();  //true - success, false - mismatch in binning of the data
+  bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 };
 
 #endif // AMATERIAL_H

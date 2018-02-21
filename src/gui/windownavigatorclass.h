@@ -27,7 +27,7 @@ public:
   //void setLastProcessedWindow(QString str){LastProcessedWindow = str;}
   void setProgress(int percent);
 
-
+  void SetupWindowsTaskbar(); //Windows only
 
   void ResetAllProgressBars();
 
@@ -35,9 +35,10 @@ public:
   void TriggerHideButton();
   void TriggerShowButton();
 
-  //global control :)
   void BusyOn();
   void BusyOff(bool fShowTime = false);
+
+  void DisableAllButGraphWindow(bool trueStart_falseStop);
 
 #ifdef Q_OS_WIN32
   QWinTaskbarButton *taskButton;
@@ -46,12 +47,11 @@ public:
   
 public slots:
   void HideWindowTriggered(QString w);
-  void ShowWindowTriggered(QString w);
-  void SetupWindowsTaskbar();
+  void ShowWindowTriggered(QString w);  
   void on_pbMaxAll_clicked();
   void ChangeGuiBusyStatus(bool flag);
 
-private slots:
+private slots:   
    void on_pbMinAll_clicked();
    void on_pbMain_clicked();
    void on_pbRecon_clicked();

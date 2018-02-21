@@ -1,31 +1,30 @@
 #--------------ANTS2--------------
-ANTS2_MAJOR = 3
-ANTS2_MINOR = 13
-ANTS2_VERSION = 2197
+ANTS2_MAJOR = 4
+ANTS2_MINOR = 4
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 #CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server --- EXPERIMENTAL FEATURE
+DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+                             # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread
+     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread -llibSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -lSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
-linux-g++ || unix {
-    QMAKE_CXXFLAGS += -march=native
-}
+
 #---EIGEN---
 ants2_eigen3 {
      DEFINES += USE_EIGEN
@@ -44,7 +43,6 @@ ants2_eigen3 {
      HEADERS += SplineLibrary/bs3fit.h \
                 SplineLibrary/tps3fit.h
 }
-
 ants2_matrix { # use matrix algebra for TP splines
     DEFINES += TPS3M
     SOURCES += SplineLibrary/tpspline3m.cpp \
@@ -72,6 +70,9 @@ ants2_flann {
         INCLUDEPATH += C:/FLANN/include
      }
 
+    HEADERS += modules/nnmoduleclass.h
+    SOURCES += modules/nnmoduleclass.cpp
+
     HEADERS += scriptmode/ainterfacetoknnscript.h
     SOURCES += scriptmode/ainterfacetoknnscript.cpp
 }
@@ -87,6 +88,16 @@ ants2_fann {
         DEFINES += NOMINMAX
      }
      linux-g++ || unix { LIBS += -lfann }
+
+     #main module
+    HEADERS += modules/neuralnetworksmodule.h
+    SOURCES += modules/neuralnetworksmodule.cpp
+      #gui only
+    HEADERS += gui/neuralnetworkswindow.h
+    SOURCES += gui/neuralnetworkswindow.cpp
+      #interface to script module
+    HEADERS += scriptmode/ainterfacetoannscript.h
+    SOURCES += scriptmode/ainterfacetoannscript.cpp
 }
 #---------
 
@@ -187,8 +198,6 @@ SOURCES += main.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/reconstructionmanagerclass.cpp \
     modules/processorclass.cpp \
-    modules/neuralnetworksmodule.cpp \
-    modules/nnmoduleclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
@@ -215,7 +224,6 @@ SOURCES += main.cpp \
     CUDA/cudamanagerclass.cpp \
     scriptmode/interfacetoglobscript.cpp \
     scriptmode/scriptminimizer.cpp \
-    scriptmode/scriptinterfaces.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
     scriptmode/ascriptmanager.cpp \
@@ -247,7 +255,25 @@ SOURCES += main.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
-    common/aphotonhistorylog.cpp
+    common/aphotonhistorylog.cpp \
+    common/amonitor.cpp \
+    common/aroothistappenders.cpp \
+    gui/MainWindowTools/amonitordelegateform.cpp \
+    common/amonitorconfig.cpp \
+    common/apeakfinder.cpp \
+    common/amaterialcomposition.cpp \
+    gui/aelementandisotopedelegates.cpp \
+    gui/amatparticleconfigurator.cpp \
+    common/aneutroninteractionelement.cpp \
+    gui/aneutronreactionsconfigurator.cpp \
+    gui/aneutronreactionwidget.cpp \
+    gui/aneutroninfodialog.cpp \
+    scriptmode/ainterfacetodeposcript.cpp \
+    scriptmode/ainterfacetomessagewindow.cpp \
+    scriptmode/coreinterfaces.cpp \
+    scriptmode/localscriptinterfaces.cpp \
+    scriptmode/histgraphinterfaces.cpp \
+    gui/GraphWindowTools/atoolboxscene.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -273,10 +299,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
     modules/pms.h \
-    modules/particlesourcesclass.h \
-    modules/nnmoduleclass.h \
-    modules/flatfield.h \
-    modules/neuralnetworksmodule.h \
+    modules/particlesourcesclass.h \    
+    modules/flatfield.h \    
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
@@ -305,7 +329,6 @@ HEADERS  += common/CorrelationFilters.h \
     CUDA/cudamanagerclass.h \
     scriptmode/interfacetoglobscript.h \
     scriptmode/scriptminimizer.h \
-    scriptmode/scriptinterfaces.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
     scriptmode/ascriptmanager.h \
@@ -350,7 +373,26 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
     scriptmode/ainterfacetophotonscript.h \
-    common/aphotonhistorylog.h
+    common/aphotonhistorylog.h \
+    common/amonitor.h \
+    common/aroothistappenders.h \
+    gui/MainWindowTools/amonitordelegateform.h \
+    common/amonitorconfig.h \
+    common/apeakfinder.h \
+    common/amaterialcomposition.h \
+    gui/aelementandisotopedelegates.h \
+    gui/amatparticleconfigurator.h \
+    common/aneutroninteractionelement.h \
+    gui/aneutronreactionsconfigurator.h \
+    gui/aneutronreactionwidget.h \
+    gui/aneutroninfodialog.h \
+    scriptmode/ainterfacetodeposcript.h \
+    scriptmode/ainterfacetomessagewindow.h \
+    scriptmode/coreinterfaces.h \
+    scriptmode/localscriptinterfaces.h \
+    scriptmode/histgraphinterfaces.h \
+    common/amessageoutput.h \
+    gui/GraphWindowTools/atoolboxscene.h
 
 # --- SIM ---
 ants2_SIM {
@@ -404,8 +446,7 @@ ants2_GUI {
     gui/reconstructionwindow.cpp \
     gui/windownavigatorclass.cpp \
     gui/MainWindowTools/MainWindowDiskIO.cpp \
-    gui/MainWindowTools/MainWindowPhotonSource.cpp \
-    gui/neuralnetworkswindow.cpp \
+    gui/MainWindowTools/MainWindowPhotonSource.cpp \    
     gui/MainWindowTools/MainWindowParticleSimulation.cpp \
     gui/MainWindowTools/MainWindowDetectorConstructor.cpp \
     gui/MainWindowTools/MainWindowMenu.cpp \
@@ -431,7 +472,6 @@ ants2_GUI {
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
-    scriptmode/interfacetocheckerscript.cpp \
     gui/MainWindowTools/mainwindowscatterfit.cpp \
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
@@ -458,8 +498,7 @@ HEADERS  += gui/mainwindow.h \
     gui/guiutils.h \
     gui/lrfwindow.h \
     gui/reconstructionwindow.h \
-    gui/windownavigatorclass.h \
-    gui/neuralnetworkswindow.h \
+    gui/windownavigatorclass.h \    
     gui/exampleswindow.h \
     gui/detectoraddonswindow.h \
     gui/checkupwindowclass.h \
@@ -474,7 +513,6 @@ HEADERS  += gui/mainwindow.h \
     gui/graphicsruler.h \
     gui/credits.h \
     gui/globalsettingswindowclass.h \
-    scriptmode/interfacetocheckerscript.h \
     gui/MainWindowTools/aslablistwidget.h \
     gui/MainWindowTools/arootlineconfigurator.h \
     gui/MainWindowTools/ageotreewidget.h \
@@ -521,6 +559,7 @@ INCLUDEPATH += modules/lrf_v3/gui
 }
 
 INCLUDEPATH += gui/MainWindowTools
+INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += SplineLibrary
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
@@ -548,12 +587,19 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
-#---Windows-specific compilation mode and warning suppression
+#---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  #QMAKE_CXXFLAGS_RELEASE -= -O2
-  #QMAKE_CXXFLAGS_RELEASE *= -Od
+  QMAKE_CXXFLAGS_RELEASE -= -O2
+  QMAKE_CXXFLAGS_RELEASE *= -Od
+}
+linux-g++ || unix {
+    QMAKE_CXXFLAGS += -march=native
+}
+#------------
 
+#---Windows-specific compilation mode and warning suppression
+win32 {
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
   #DEFINES += WINDOWSBIN                #enable for compilation in Windows binary-only mode
@@ -563,7 +609,8 @@ win32 {
 #---Additional defines---
 DEFINES += ANTS2_MINOR=\"$$ANTS2_MINOR\"
 DEFINES += ANTS2_MAJOR=\"$$ANTS2_MAJOR\"
-DEFINES += ANTS2_VERSION=\"$$ANTS2_VERSION\"
+DEFINES += DEBUG_VERBOSITY=\"$$DEBUG_VERBOSITY\"
+
 win32 {
   DEFINES += BUILDTIME=\\\"$$system('echo %time%')\\\"
   DEFINES += BUILDDATE=\\\"$$system('echo %date%')\\\"
@@ -597,3 +644,10 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/amatparticleconfigurator.ui \
+    gui/aneutronreactionsconfigurator.ui \
+    gui/aneutronreactionwidget.ui \
+    gui/aneutroninfodialog.ui

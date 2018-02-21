@@ -1,4 +1,7 @@
 #include "asimulationstatistics.h"
+#include "ageoobject.h"
+#include "amonitor.h"
+#include "aroothistappenders.h"
 
 #include <QDebug>
 
@@ -9,43 +12,50 @@ ASimulationStatistics::ASimulationStatistics(const TString nameID)
 {
     WaveSpectrum = 0;
     TimeSpectrum = 0;
-    CosAngleSpectrum = 0;
+    AngularDistr = 0;
     TransitionSpectrum = 0;
     WaveNodes = 0;
+    numBins = 100;
 
     NameID = nameID;
-    initialize(101);
+    //initialize();
 }
 
 ASimulationStatistics::~ASimulationStatistics()
 {
-    if (WaveSpectrum) delete WaveSpectrum;
-    if (TimeSpectrum) delete TimeSpectrum;
-    if (CosAngleSpectrum) delete CosAngleSpectrum;
-    if (TransitionSpectrum) delete TransitionSpectrum;
+    clearAll();
 }
 
-void ASimulationStatistics::initialize(int nBins)
+void ASimulationStatistics::clearAll()
 {
-    if (nBins == 0) nBins = numBins;
-    else numBins = nBins;
+    if (WaveSpectrum) delete WaveSpectrum; WaveSpectrum = 0;
+    if (TimeSpectrum) delete TimeSpectrum; TimeSpectrum = 0;
+    if (AngularDistr) delete AngularDistr; AngularDistr = 0;
+    if (TransitionSpectrum) delete TransitionSpectrum; TransitionSpectrum = 0;
+    clearMonitors();
+}
+
+void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords, int nBins, int waveNodes)
+{    
+    if (nBins != 0) numBins = nBins;
+    if (waveNodes != 0) WaveNodes = waveNodes;
 
     if (WaveSpectrum) delete WaveSpectrum;
     if (WaveNodes != 0)
-       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum",WaveNodes, 0, WaveNodes-1);
+       WaveSpectrum = new TH1D("iWaveSpectrum"+NameID,"WaveIndex spectrum", WaveNodes, 0, WaveNodes-1);
     else
-       WaveSpectrum = new TH1I("iWaveSpectrum"+NameID,"WaveIndex spectrum",nBins,0,-1);
+       WaveSpectrum = new TH1D("iWaveSpectrum"+NameID,"WaveIndex spectrum",numBins,0,-1);
 
     if (TimeSpectrum) delete TimeSpectrum;
-    TimeSpectrum = new TH1D("TimeSpectrum"+NameID, "Time spectrum",nBins,0,-1);
+    TimeSpectrum = new TH1D("TimeSpectrum"+NameID, "Time spectrum",numBins,0,-1);
 
-    if (CosAngleSpectrum) delete CosAngleSpectrum;
-    CosAngleSpectrum = new TH1I("CosAngleSpectrum"+NameID, "cosAngle spectrum", nBins, 0,-1);
+    if (AngularDistr) delete AngularDistr;
+    AngularDistr = new TH1D("AngularDistr"+NameID, "cosAngle spectrum", numBins, 0, 90.0);
 
     if (TransitionSpectrum) delete TransitionSpectrum;
-    TransitionSpectrum = new TH1I("TransitionsSpectrum"+NameID, "Transitions", nBins, 0,-1);
+    TransitionSpectrum = new TH1D("TransitionsSpectrum"+NameID, "Transitions", numBins, 0,-1);
 
-    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = 0;
+    Absorbed = OverrideLoss = HitPM = HitDummy = Escaped = LossOnGrid = TracingSkipped = MaxCyclesReached = GeneratedOutsideGeometry = KilledByMonitor = 0;
 
     FresnelTransmitted = FresnelReflected = BulkAbsorption = Rayleigh = Reemission = 0;
     OverrideForward = OverrideBack = 0;
@@ -57,12 +67,13 @@ void ASimulationStatistics::initialize(int nBins)
 
     PhotonHistoryLog.clear();
     PhotonHistoryLog.squeeze();
-}
 
-void ASimulationStatistics::setWavelengthBinning(double waveNodes)
-{
-  WaveNodes = waveNodes;
-  initialize();
+    clearMonitors();
+    if (!monitorRecords.isEmpty())
+    {
+        for (int i=0; i<monitorRecords.size(); i++)
+            Monitors.append(new AMonitor(monitorRecords.at(i)));
+    }
 }
 
 bool ASimulationStatistics::isEmpty()
@@ -80,9 +91,9 @@ void ASimulationStatistics::registerTime(double Time)
     TimeSpectrum->Fill(Time);
 }
 
-void ASimulationStatistics::registerAngle(double CosAngle)
+void ASimulationStatistics::registerAngle(double angle)
 {
-    CosAngleSpectrum->Fill(CosAngle);
+    AngularDistr->Fill(angle);
 }
 
 void ASimulationStatistics::registerNumTrans(int NumTransitions)
@@ -90,48 +101,80 @@ void ASimulationStatistics::registerNumTrans(int NumTransitions)
   TransitionSpectrum->Fill(NumTransitions);
 }
 
-void ASimulationStatistics::AppendSimulationStatistics(const ASimulationStatistics* from)
+//static void addTH1(TH1 *first, const TH1 *second)
+//{
+//    if (!first || !second) return;
+//    int bins = second->GetNbinsX();
+//    for(int i = 0; i < bins; i++)
+//        first->Fill(second->GetBinCenter(i), second->GetBinContent(i));
+//}
+
+void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* from)
 {
-  Absorbed += from->Absorbed;
-  OverrideLoss += from->OverrideLoss;
-  HitPM += from->HitPM;
-  HitDummy += from->HitDummy;
-  Escaped += from->Escaped;
-  LossOnGrid += from->LossOnGrid;
-  TracingSkipped += from->TracingSkipped;
-  MaxCyclesReached += from->MaxCyclesReached;
-  GeneratedOutsideGeometry += from->GeneratedOutsideGeometry;
+    appendTH1D(AngularDistr, from->getAngularDistr());
+    appendTH1D(TimeSpectrum, from->getTimeSpectrum());
+    appendTH1D(WaveSpectrum, from->getWaveSpectrum());
+    appendTH1D(TransitionSpectrum, from->getTransitionSpectrum());
 
-  FresnelTransmitted += from->FresnelTransmitted;
-  FresnelReflected += from->FresnelReflected;
-  BulkAbsorption += from->BulkAbsorption;
-  Rayleigh += from->Rayleigh;
-  Reemission += from->Reemission;
+    Absorbed += from->Absorbed;
+    OverrideLoss += from->OverrideLoss;
+    HitPM += from->HitPM;
+    HitDummy += from->HitDummy;
+    Escaped += from->Escaped;
+    LossOnGrid += from->LossOnGrid;
+    TracingSkipped += from->TracingSkipped;
+    MaxCyclesReached += from->MaxCyclesReached;
+    GeneratedOutsideGeometry += from->GeneratedOutsideGeometry;
+    KilledByMonitor += from->KilledByMonitor;
 
-  OverrideBack += from->OverrideBack;
-  OverrideForward += from->OverrideForward;
+    FresnelTransmitted += from->FresnelTransmitted;
+    FresnelReflected += from->FresnelReflected;
+    BulkAbsorption += from->BulkAbsorption;
+    Rayleigh += from->Rayleigh;
+    Reemission += from->Reemission;
 
-  OverrideSimplisticAbsorption += from->OverrideSimplisticAbsorption;
-  OverrideSimplisticReflection += from->OverrideSimplisticReflection;
-  OverrideSimplisticScatter += from->OverrideSimplisticScatter;
+    OverrideBack += from->OverrideBack;
+    OverrideForward += from->OverrideForward;
 
-  OverrideFSNPabs += from->OverrideFSNPabs;
-  OverrideFSNlambert += from->OverrideFSNlambert;
-  OverrideFSNPspecular += from->OverrideFSNPspecular;
+    OverrideSimplisticAbsorption += from->OverrideSimplisticAbsorption;
+    OverrideSimplisticReflection += from->OverrideSimplisticReflection;
+    OverrideSimplisticScatter += from->OverrideSimplisticScatter;
 
-  OverrideMetalAbs += from->OverrideMetalAbs;
-  OverrideMetalReflection += from->OverrideMetalReflection;
+    OverrideFSNPabs += from->OverrideFSNPabs;
+    OverrideFSNlambert += from->OverrideFSNlambert;
+    OverrideFSNPspecular += from->OverrideFSNPspecular;
 
-  OverrideClaudioAbs += from->OverrideClaudioAbs;
-  OverrideClaudioSpec += from->OverrideClaudioSpec;
-  OverrideClaudioLamb += from->OverrideClaudioLamb;
+    OverrideMetalAbs += from->OverrideMetalAbs;
+    OverrideMetalReflection += from->OverrideMetalReflection;
 
-  OverrideWLSabs += from->OverrideWLSabs;
-  OverrideWLSshift += from->OverrideWLSshift;
+    OverrideClaudioAbs += from->OverrideClaudioAbs;
+    OverrideClaudioSpec += from->OverrideClaudioSpec;
+    OverrideClaudioLamb += from->OverrideClaudioLamb;
+
+    OverrideWLSabs += from->OverrideWLSabs;
+    OverrideWLSshift += from->OverrideWLSshift;
+
+    if (Monitors.size() != from->Monitors.size())
+    {
+        qWarning() << "Cannot append monitor data - size mismatch:\n" <<
+                      "Monitors here and in 'from':" << Monitors.size() << from->Monitors.size();
+    }
+    else
+    {
+        for (int i=0; i<Monitors.size(); i++)
+            Monitors[i]->appendDataFromAnotherMonitor(from->Monitors[i]);
+    }
 }
 
 long ASimulationStatistics::countPhotons()
 {
-    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry;
+    return Absorbed + OverrideLoss + HitPM + HitDummy + Escaped + LossOnGrid + TracingSkipped + MaxCyclesReached + GeneratedOutsideGeometry + KilledByMonitor;
+}
+
+void ASimulationStatistics::clearMonitors()
+{
+    for (AMonitor* mon : Monitors)
+        delete mon;
+    Monitors.clear();
 }
 

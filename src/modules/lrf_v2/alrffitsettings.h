@@ -9,7 +9,7 @@ class ALrfFitSettings
 {
 public:
  //general
-  int dataScanRecon;
+  int dataScanRecon;   //0 - Scan, 1 - Reconstr data
   bool fUseGrid;
   bool fForceZeroDeriv;
   bool fForceNonNegative;

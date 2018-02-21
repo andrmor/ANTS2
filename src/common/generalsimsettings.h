@@ -34,6 +34,7 @@ public:
   double MaxStep;
   double dE;
   double MinEnergy;
+  double MinEnergyNeutrons;
   double Safety;
   int    TrackColorAdd;
 

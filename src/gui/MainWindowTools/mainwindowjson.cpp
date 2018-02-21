@@ -175,14 +175,14 @@ void MainWindow::readExtraGuiFromJson(QJsonObject &json)
     {
       JsonToComboBox(js, "Particle", ui->cobParticleToStack);
       JsonToSpinBox(js, "Copies", ui->sbNumCopies);
-      JsonToLineEdit(js, "X", ui->ledParticleStackX);
-      JsonToLineEdit(js, "Y", ui->ledParticleStackY);
-      JsonToLineEdit(js, "Z", ui->ledParticleStackZ);
-      JsonToLineEdit(js, "dX", ui->ledParticleStackVx);
-      JsonToLineEdit(js, "dY", ui->ledParticleStackVy);
-      JsonToLineEdit(js, "dZ", ui->ledParticleStackVz);
-      JsonToLineEdit(js, "Energy", ui->ledParticleStackEnergy);
-      JsonToLineEdit(js, "Time", ui->ledParticleStackTime);
+      JsonToLineEditDouble(js, "X", ui->ledParticleStackX);
+      JsonToLineEditDouble(js, "Y", ui->ledParticleStackY);
+      JsonToLineEditDouble(js, "Z", ui->ledParticleStackZ);
+      JsonToLineEditDouble(js, "dX", ui->ledParticleStackVx);
+      JsonToLineEditDouble(js, "dY", ui->ledParticleStackVy);
+      JsonToLineEditDouble(js, "dZ", ui->ledParticleStackVz);
+      JsonToLineEditDouble(js, "Energy", ui->ledParticleStackEnergy);
+      JsonToLineEditDouble(js, "Time", ui->ledParticleStackTime);
       parseJson(js, "ScriptEV", CheckerScript);
     }
 
@@ -249,8 +249,7 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
 
   QJsonObject js;
 
-  int versionNumber = ANTS2_VERSION;
-  js["ANTS2build"] = versionNumber;
+  //js["ANTS2build"] = versionNumber;
 
   SimGeneralConfigToJson(js);         //general sim settings
   if (ui->twSourcePhotonsParticles->currentIndex() == 0)
@@ -276,13 +275,13 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
 
 void MainWindow::onRequestSimulationGuiUpdate()
 {
-    //qDebug() << "SimJson->SimGUI";
+    //      qDebug() << "SimJson->SimGUI";
     MainWindow::readSimSettingsFromJson(Config->JSON);
 }
 
 bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
 {
-  //qDebug() << "Read sim from json and update sim gui";
+  //        qDebug() << "Read sim from json and update sim gui";
   if (!json.contains("SimulationConfig"))
     {
       //qWarning() << "Json does not contain sim settings!";
@@ -312,16 +311,16 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   // wave
   QJsonObject wj = gjs["WaveConfig"].toObject();
   JsonToCheckbox(wj, "WaveResolved", ui->cbWaveResolved);
-  JsonToLineEdit(wj, "WaveFrom", ui->ledWaveFrom);
-  JsonToLineEdit(wj, "WaveTo", ui->ledWaveTo);
-  JsonToLineEdit(wj, "WaveStep", ui->ledWaveStep);
+  JsonToLineEditDouble(wj, "WaveFrom", ui->ledWaveFrom);
+  JsonToLineEditDouble(wj, "WaveTo", ui->ledWaveTo);
+  JsonToLineEditDouble(wj, "WaveStep", ui->ledWaveStep);
   // time
   QJsonObject tj = gjs["TimeConfig"].toObject();
   JsonToCheckbox(tj, "TimeResolved", ui->cbTimeResolved);
-  JsonToLineEdit(tj, "TimeFrom", ui->ledTimeFrom);
-  JsonToLineEdit(tj, "TimeTo", ui->ledTimeTo);
+  JsonToLineEditDouble(tj, "TimeFrom", ui->ledTimeFrom);
+  JsonToLineEditDouble(tj, "TimeTo", ui->ledTimeTo);
   JsonToSpinBox (tj, "TimeBins", ui->sbTimeBins);
-    //JsonToLineEdit(tj, "TimeWindow", ui->ledTimeOfOneMeasurement); //moved to detector config
+    //JsonToLineEditDouble(tj, "TimeWindow", ui->ledTimeOfOneMeasurement); //moved to detector config
   // Angular
   QJsonObject aj = gjs["AngleConfig"].toObject();
   JsonToCheckbox(aj, "AngResolved", ui->cbAngularSensitive);
@@ -336,15 +335,16 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
       QJsonObject lrfjson = gjs["LrfBasedSim"].toObject();
       JsonToCheckbox(lrfjson, "UseLRFs", ui->cbLRFs);
       JsonToSpinBox (lrfjson, "NumPhotsLRFunity", ui->sbPhotonsForUnitaryLRF);
-      JsonToLineEdit(lrfjson, "NumPhotElLRFunity", ui->ledNumElPerUnitaryLRF);
+      JsonToLineEditDouble(lrfjson, "NumPhotElLRFunity", ui->ledNumElPerUnitaryLRF);
   }
   //Tracking options
   QJsonObject trj = gjs["TrackingConfig"].toObject();
-  JsonToLineEdit(trj, "MinStep", ui->ledMinStep);
-  JsonToLineEdit(trj, "MaxStep", ui->ledMaxStep);
-  JsonToLineEdit(trj, "dE", ui->ledDE);
-  JsonToLineEdit(trj, "MinEnergy", ui->ledMinEnergy);
-  JsonToLineEdit(trj, "Safety", ui->ledSafety);
+  JsonToLineEditDouble(trj, "MinStep", ui->ledMinStep);
+  JsonToLineEditDouble(trj, "MaxStep", ui->ledMaxStep);
+  JsonToLineEditDouble(trj, "dE", ui->ledDE);
+  JsonToLineEditDouble(trj, "MinEnergy", ui->ledMinEnergy);
+  JsonToLineEditDouble(trj, "MinEnergyNeutrons", ui->ledMinEnergyNeutrons);
+  JsonToLineEditDouble(trj, "Safety", ui->ledSafety);
   JsonToSpinBox(trj, "TrackColorAdd", ui->sbParticleTrackColorIndexAdd);
   //Accelerators
   QJsonObject acj = gjs["AcceleratorConfig"].toObject();
@@ -415,8 +415,8 @@ if (scj.contains("CustomDistrib"))
   JsonToSpinBox(ppj, "PhotPerNodeConstant", ui->sbScanNumPhotons);
   JsonToSpinBox(ppj, "PhotPerNodeUniMin", ui->sbScanNumMin);
   JsonToSpinBox(ppj, "PhotPerNodeUniMax", ui->sbScanNumMax);
-  JsonToLineEdit(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
-  JsonToLineEdit(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
+  JsonToLineEditDouble(ppj, "PhotPerNodeGaussMean", ui->ledScanGaussMean);
+  JsonToLineEditDouble(ppj, "PhotPerNodeGaussSigma", ui->ledScanGaussSigma);
   if (ppj.contains("PhotPerNodeCustom"))
     {
       QJsonArray ja = ppj["PhotPerNodeCustom"].toArray();
@@ -445,22 +445,22 @@ if (scj.contains("CustomDistrib"))
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
   JsonToComboBox(wdj, "Direct_Material", ui->cobDirectlyOrFromMaterial);
   JsonToSpinBox (wdj, "WaveIndex", ui->sbWaveIndexPointSource);
-  JsonToLineEdit(wdj, "DecayTime", ui->ledDecayTime);
+  JsonToLineEditDouble(wdj, "DecayTime", ui->ledDecayTime);
   JsonToComboBox(wdj, "Material", ui->cobMatPointSource);
   //Photon direction options
   QJsonObject pdj = pojs["PhotonDirectionOptions"].toObject();
-  JsonToLineEdit(pdj, "FixedX", ui->ledSingleDX);
-  JsonToLineEdit(pdj, "FixedY", ui->ledSingleDY);
-  JsonToLineEdit(pdj, "FixedZ", ui->ledSingleDZ);  
-  JsonToLineEdit(pdj, "Cone", ui->ledConeAngle);
+  JsonToLineEditDouble(pdj, "FixedX", ui->ledSingleDX);
+  JsonToLineEditDouble(pdj, "FixedY", ui->ledSingleDY);
+  JsonToLineEditDouble(pdj, "FixedZ", ui->ledSingleDZ);
+  JsonToLineEditDouble(pdj, "Cone", ui->ledConeAngle);
   ui->cobFixedDirOrCone->setCurrentIndex(0); //compatibility
   JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
   JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
   //bad event config
   QJsonObject bej = pojs["BadEventOptions"].toObject();
   JsonToCheckbox(bej, "BadEvents", ui->cbScanFloodAddNoise);
-  JsonToLineEdit(bej, "Probability", ui->leoScanFloodNoiseProbability);
-  JsonToLineEdit(bej, "SigmaDouble", ui->ledScanFloodNoiseOffset);
+  JsonToLineEditDouble(bej, "Probability", ui->leoScanFloodNoiseProbability);
+  JsonToLineEditDouble(bej, "SigmaDouble", ui->ledScanFloodNoiseOffset);
   MainWindow::PointSource_InitTabWidget();
   if (bej.contains("NoiseArray"))
     {
@@ -481,14 +481,14 @@ if (scj.contains("CustomDistrib"))
     }
   //Single position options
   QJsonObject spj = pojs["SinglePositionOptions"].toObject();
-  JsonToLineEdit(spj, "SingleX", ui->ledSingleX);
-  JsonToLineEdit(spj, "SingleY", ui->ledSingleY);
-  JsonToLineEdit(spj, "SingleZ", ui->ledSingleZ);
+  JsonToLineEditDouble(spj, "SingleX", ui->ledSingleX);
+  JsonToLineEditDouble(spj, "SingleY", ui->ledSingleY);
+  JsonToLineEditDouble(spj, "SingleZ", ui->ledSingleZ);
   //Regular scan options
   QJsonObject rsj = pojs["RegularScanOptions"].toObject();
-  JsonToLineEdit(rsj, "ScanX0", ui->ledOriginX);
-  JsonToLineEdit(rsj, "ScanY0", ui->ledOriginY);
-  JsonToLineEdit(rsj, "ScanZ0", ui->ledOriginZ);
+  JsonToLineEditDouble(rsj, "ScanX0", ui->ledOriginX);
+  JsonToLineEditDouble(rsj, "ScanY0", ui->ledOriginY);
+  JsonToLineEditDouble(rsj, "ScanZ0", ui->ledOriginZ);
   ui->cbSecondAxis->setChecked(false);
   ui->cbThirdAxis->setChecked(false);
   if (rsj.contains("AxesData"))
@@ -497,18 +497,18 @@ if (scj.contains("CustomDistrib"))
       if (ar.size()>0)
         {
           QJsonObject js = ar[0].toObject();
-          JsonToLineEdit(js, "dX", ui->led0X);
-          JsonToLineEdit(js, "dY", ui->led0Y);
-          JsonToLineEdit(js, "dZ", ui->led0Z);
+          JsonToLineEditDouble(js, "dX", ui->led0X);
+          JsonToLineEditDouble(js, "dY", ui->led0Y);
+          JsonToLineEditDouble(js, "dZ", ui->led0Z);
           JsonToSpinBox (js, "Nodes", ui->sb0nodes);
           JsonToComboBox(js, "Option", ui->cob0dir);
         }
       if (ar.size()>1)
         {
           QJsonObject js = ar[1].toObject();
-          JsonToLineEdit(js, "dX", ui->led1X);
-          JsonToLineEdit(js, "dY", ui->led1Y);
-          JsonToLineEdit(js, "dZ", ui->led1Z);
+          JsonToLineEditDouble(js, "dX", ui->led1X);
+          JsonToLineEditDouble(js, "dY", ui->led1Y);
+          JsonToLineEditDouble(js, "dZ", ui->led1Z);
           JsonToSpinBox (js, "Nodes", ui->sb1nodes);
           JsonToComboBox(js, "Option", ui->cob1dir);
           ui->cbSecondAxis->setChecked(true);
@@ -516,9 +516,9 @@ if (scj.contains("CustomDistrib"))
       if (ar.size()>2)
         {
           QJsonObject js = ar[2].toObject();
-          JsonToLineEdit(js, "dX", ui->led2X);
-          JsonToLineEdit(js, "dY", ui->led2Y);
-          JsonToLineEdit(js, "dZ", ui->led2Z);
+          JsonToLineEditDouble(js, "dX", ui->led2X);
+          JsonToLineEditDouble(js, "dY", ui->led2Y);
+          JsonToLineEditDouble(js, "dZ", ui->led2Z);
           JsonToSpinBox (js, "Nodes", ui->sb2nodes);
           JsonToComboBox(js, "Option", ui->cob2dir);
           ui->cbThirdAxis->setChecked(true);
@@ -528,18 +528,18 @@ if (scj.contains("CustomDistrib"))
   QJsonObject fj = pojs["FloodOptions"].toObject();
   JsonToSpinBox (fj, "Nodes", ui->sbScanFloodNodes);
   JsonToComboBox(fj, "Shape", ui->cobScanFloodShape);
-  JsonToLineEdit(fj, "Xfrom", ui->ledScanFloodXfrom);
-  JsonToLineEdit(fj, "Xto", ui->ledScanFloodXto);
-  JsonToLineEdit(fj, "Yfrom", ui->ledScanFloodYfrom);
-  JsonToLineEdit(fj, "Yto", ui->ledScanFloodYto);
-  JsonToLineEdit(fj, "CenterX", ui->ledScanFlood_CenterX);
-  JsonToLineEdit(fj, "CenterY", ui->ledScanFlood_CenterY);
-  JsonToLineEdit(fj, "DiameterOut", ui->ledScanFlood_Radius);
-  JsonToLineEdit(fj, "DiameterIn", ui->ledScanFlood_Radius0);
+  JsonToLineEditDouble(fj, "Xfrom", ui->ledScanFloodXfrom);
+  JsonToLineEditDouble(fj, "Xto", ui->ledScanFloodXto);
+  JsonToLineEditDouble(fj, "Yfrom", ui->ledScanFloodYfrom);
+  JsonToLineEditDouble(fj, "Yto", ui->ledScanFloodYto);
+  JsonToLineEditDouble(fj, "CenterX", ui->ledScanFlood_CenterX);
+  JsonToLineEditDouble(fj, "CenterY", ui->ledScanFlood_CenterY);
+  JsonToLineEditDouble(fj, "DiameterOut", ui->ledScanFlood_Radius);
+  JsonToLineEditDouble(fj, "DiameterIn", ui->ledScanFlood_Radius0);
   JsonToComboBox(fj, "Zoption", ui->cobScanFloodZtype);
-  JsonToLineEdit(fj, "Zfixed", ui->ledScanFloodZ);
-  JsonToLineEdit(fj, "Zfrom", ui->ledScanFloodZfrom);
-  JsonToLineEdit(fj, "Zto", ui->ledScanFloodZto);
+  JsonToLineEditDouble(fj, "Zfixed", ui->ledScanFloodZ);
+  JsonToLineEditDouble(fj, "Zfrom", ui->ledScanFloodZfrom);
+  JsonToLineEditDouble(fj, "Zto", ui->ledScanFloodZto);
   //Custom nodes
   QJsonObject njson = pojs["CustomNodesOptions"].toObject();
   NodesScript.clear();
@@ -565,7 +565,9 @@ if (scj.contains("CustomDistrib"))
   QJsonObject csjs = psjs["SourceControlOptions"].toObject();
   JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
   JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
-  JsonToLineEdit(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
+  JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
+  ui->cobPartPerEvent->setCurrentIndex(0);
+  JsonToComboBox(csjs, "TypeParticlesPerEvent", ui->cobPartPerEvent);
   JsonToCheckbox(csjs, "DoS1", ui->cbGunDoS1);
   JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
   JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);

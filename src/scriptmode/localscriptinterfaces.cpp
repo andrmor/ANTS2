@@ -1,4 +1,4 @@
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "amaterialparticlecolection.h"
 #include "ageoobject.h"
 #include "slab.h"
@@ -7,345 +7,7 @@
 #include "afiletools.h"
 #include "ascriptmanager.h"
 
-#include <QDateTime>
-#include <QFileInfo>
-#include <QFile>
-#include <QDebug>
-#include <QApplication>
-#include <QVector3D>
-#include <QDir>
-#include <QJsonDocument>
-
-CoreInterfaceClass::CoreInterfaceClass(AScriptManager* ScriptManager) :
-    ScriptManager(ScriptManager)
-{
-  Description = "Unit handles general-purpose opeartions: abort script, basic text output and file save/load";
-
-  H["str"] = "Converts double value to string with a given precision";
-  H["print"] = "Print the argument (string) on the script output text field";
-  H["clearText"] = "Clear the script output text field";
-  H["abort"] = "Abort skript execution.\nOptional string argument is a message to be shown on the script output text field";
-  H["save"] = "Add string (second argument) to the file with the name given by the first argument.\n"              
-              "Save is not performed (and false is returned) if the file does not exist\n"
-              "It is a very slow method!\n"
-              "Use \"<br>\" or \"\\n\" to add a line break.\n"
-              "For Windows users: pathes have to use \"/\" character, e.g. c:/tmp/file.txt\n";
-  H["saveArray"] = "Appends an array (or array of arrays) with numeric data to the file.\n"
-                   "Save is not performed (and false is returned) if the file does not exist.\n"
-                   "For Windows users: pathes have to use \"/\" character, e.g. c:/tmp/file.txt\n";
-  H["createFile"] = "Create new or clear an existent file.\n"
-                    "The file is NOT rewritten if the second argument is true (or absent) and the file already exists\n"
-                    "For Windows users: pathes have to use \"/\" character, e.g. c:/tmp/file.txt\n";
-  H["isFileExists"] = "Return true if file exists";
-  H["loadColumn"] = "Load a column with ascii numeric data from the file.\nSecond argument is the column number starting from 0.";
-  H["loadArray"] = "Load an array of numerics (or an array of numeric arrays if columns>1).\nColumns parameter can be from 1 to 3.";
-  H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
-}
-
-#include "QScriptEngine"
-void CoreInterfaceClass::abort(QString message)
-{
-  //qDebug() << "In-script abort triggered!";
-  ScriptManager->AbortEvaluation(message);
-}
-
-QVariant CoreInterfaceClass::evaluate(QString script)
-{
-    QScriptValue val = ScriptManager->engine->evaluate(script);
-    return val.toVariant();
-}
-
-void CoreInterfaceClass::sleep(int ms)
-{
-  if (ms == 0) return;
-  QTime t;
-  t.restart();
-  do qApp->processEvents();
-  while (t.elapsed()<ms);
-}
-
-void CoreInterfaceClass::print(QString text)
-{ 
-    emit ScriptManager->showMessage(text);
-}
-
-void CoreInterfaceClass::clearText()
-{
-    emit ScriptManager->clearText();
-}
-
-QString CoreInterfaceClass::str(double value, int precision)
-{
-    return QString::number(value, 'g', precision);
-}
-
-QString CoreInterfaceClass::GetTimeStamp()
-{
-    return QDateTime::currentDateTime().toString("H:m:s");
-}
-
-QString CoreInterfaceClass::GetDateTimeStamp()
-{
-    return QDateTime::currentDateTime().toString("d/M/yyyy H:m:s");
-}
-
-bool CoreInterfaceClass::save(QString fileName, QString str)
-{
-  if (!QFileInfo(fileName).exists())
-    {
-      //abort("File does not exist: " + fileName);
-      qDebug() << "File does not exist: " << fileName;
-      return false;
-    }
-
-  QFile file(fileName);
-  if ( !file.open(QIODevice::Append ) )
-  {
-      //abort("Cannot open file for appending:" + fileName);
-      qDebug() << "Cannot open file for appending:" << fileName;
-      return false;
-  }
-
-  //qDebug() << str;
-  str.replace("<br>", "\n");
-  QTextStream outstream(&file);
-  outstream << str;
-  return true;
-}
-
-bool CoreInterfaceClass::saveArray(QString fileName, QVariant array)
-{
-    QString type = array.typeName();
-    if (type != "QVariantList")
-    {
-        qDebug() << "Cannot extract array in saveColumns function";
-        //abort("Cannot extract array in saveColumns function");
-        return false;
-    }
-
-    if (!QFileInfo(fileName).exists())
-      {
-        //abort("File does not exist: " + fileName);
-        qDebug() << "File does not exist: " << fileName;
-        return false;
-      }
-
-    QFile file(fileName);
-    if ( !file.open(QIODevice::Append ) )
-    {
-        //abort("Cannot open file for appending:" + fileName);
-        qDebug() << "Cannot open file for appending:" << fileName;
-        return false;
-    }
-
-    QTextStream s(&file);
-
-    QVariantList vl = array.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    //qDebug() << ar.size();
-
-    for (int i=0; i<ar.size(); i++)
-    {
-        //qDebug() << ar[i];
-        if (ar[i].isArray())
-        {
-            QJsonArray el = ar[i].toArray();
-            //qDebug() << "   "<<el;
-            for (int j=0; j<el.size(); j++) s << el[j].toDouble(1e10) << " ";
-        }
-        else
-        {
-            //qDebug() << "   "<< ar[i].toDouble();
-            s << ar[i].toDouble(1e10);
-        }
-        s << "\n";
-    }
-
-    return true;
-}
-
-bool CoreInterfaceClass::saveObject(QString FileName, QVariant Object, bool CanOverride)
-{
-    QString type = Object.typeName();
-    if (type != "QVariantMap")
-    {
-        qDebug() << "Not an object - cannt use saveObject function";
-        //abort("Cannot extract array in saveColumns function");
-        return false;
-    }
-
-    if (QFileInfo(FileName).exists() && !CanOverride)
-    {
-        //abort("File already exists: " + fileName);
-        qDebug() << "File already exists: " << FileName << " Skipping!";
-        return false;
-    }
-
-    QVariantMap mp = Object.toMap();
-    QJsonObject json = QJsonObject::fromVariantMap(mp);
-    QJsonDocument saveDoc(json);
-
-    QFile saveFile(FileName);
-    if (saveFile.open(QIODevice::WriteOnly))
-    {
-        saveFile.write(saveDoc.toJson());
-        saveFile.close();
-    }
-    else
-    {
-        qDebug() << "Cannot open file for writing: " << FileName;
-        return false;
-    }
-    return true;
-}
-
-QVariant CoreInterfaceClass::loadColumn(QString fileName, int column)
-{
-  if (column<0 || column>2)
-    {
-      abort ("Supported loadColumn with column # 0, 1 and 2");
-      return QVariant();
-    }
-
-  if (!QFileInfo(fileName).exists())
-  {
-    //abort("File does not exist: " + fileName);
-    qWarning() << "File does not exist: " << fileName;
-    return QVariant();
-  }
-
-  QVector<double> v1, v2, v3;
-  int res;
-  if (column == 0)
-     res = LoadDoubleVectorsFromFile(fileName, &v1);
-  else if (column == 1)
-     res = LoadDoubleVectorsFromFile(fileName, &v1, &v2);
-  else if (column == 2)
-     res = LoadDoubleVectorsFromFile(fileName, &v1, &v2, &v3);
-
-  if (res != 0)
-      {
-        abort("Error reading from file: "+fileName);
-        return QVariant();
-      }
-  QList<QVariant> l;
-  for (int i=0; i<v1.size(); i++)
-    {
-      if (column == 0) l.append(v1[i]);
-      else if (column == 1) l.append(v2[i]);
-      else if (column == 2) l.append(v3[i]);
-    }
-
-  return l;
-}
-
-QVariant CoreInterfaceClass::loadArray(QString fileName, int columns)
-{
-  if (columns<0 || columns>2)
-    {
-      abort ("Supported 1, 2 and 3 columns");
-      return QVariant();
-    }
-
-  if (!QFileInfo(fileName).exists())
-  {
-    //abort("File does not exist: " + fileName);
-    qWarning() << "File does not exist: " << fileName;
-    return QVariant();
-  }
-
-  QVector<double> v1, v2, v3;
-  int res;
-  if (columns == 1)
-     res = LoadDoubleVectorsFromFile(fileName, &v1);
-  else if (columns == 2)
-     res = LoadDoubleVectorsFromFile(fileName, &v1, &v2);
-  else if (columns == 3)
-     res = LoadDoubleVectorsFromFile(fileName, &v1, &v2, &v3);
-
-  if (res != 0)
-      {
-        abort("Error reading from file: "+fileName);
-        return QVariant();
-      }
-
-  QList< QVariant > l;
-  for (int i=0; i<v1.size(); i++)
-    {
-      QList<QVariant> ll;
-      ll.append(v1[i]);
-      if (columns > 1) ll.append(v2[i]);
-      if (columns == 3) ll.append(v3[i]);
-
-      QVariant r = ll;
-      l << r;
-    }
-  return l;
-}
-
-QString CoreInterfaceClass::GetWorkDir()
-{
-  return ScriptManager->LastOpenDir;
-}
-
-QString CoreInterfaceClass::GetScriptDir()
-{
-  return ScriptManager->LibScripts;
-}
-
-QString CoreInterfaceClass::GetExamplesDir()
-{
-  return ScriptManager->ExamplesDir;
-}
-
-bool CoreInterfaceClass::createFile(QString fileName, bool AbortIfExists)
-{
-  if (QFileInfo(fileName).exists())
-    {
-      if (AbortIfExists)
-        {
-          //abort("File already exists: " + fileName);
-          qDebug() << "File already exists: " << fileName;
-          return false;
-        }
-    }
-
-  //create or clear content of the file
-  QFile file(fileName);
-  if ( !file.open(QIODevice::WriteOnly) )
-  {
-      //abort("Cannot open file: "+fileName);
-      qDebug() << "Cannot open file: " << fileName;
-      return false;
-  }
-  return true;
-}
-
-bool CoreInterfaceClass::isFileExists(QString fileName)
-{
-    return QFileInfo(fileName).exists();
-}
-
-bool CoreInterfaceClass::deleteFile(QString fileName)
-{
-    return QFile(fileName).remove();
-}
-
-bool CoreInterfaceClass::createDir(QString path)
-{
-    QDir dir(path);
-    return dir.mkdir(".");
-}
-
-QString CoreInterfaceClass::getCurrentDir()
-{
-    return QDir::currentPath();
-}
-
-bool CoreInterfaceClass::setCirrentDir(QString path)
-{
-    return QDir::setCurrent(path);
-}
+#include "QVector3D"
 
 #ifdef GUI
 //--------------------------------------------------------------
@@ -734,7 +396,31 @@ void InterfaceToAddObjScript::RemoveRecursive(QString Object)
 
 void InterfaceToAddObjScript::RemoveAllExceptWorld()
 {
-    Detector->Sandwich->clearWorld();
+  Detector->Sandwich->clearWorld();
+}
+
+void InterfaceToAddObjScript::EnableObject(QString Object)
+{
+  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+  if (!obj)
+  {
+      abort("Cannot find object "+Object);
+      return;
+  }
+
+  obj->enableUp();
+}
+
+void InterfaceToAddObjScript::DisableObject(QString Object)
+{
+  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
+  if (!obj)
+  {
+      abort("Cannot find object "+Object);
+      return;
+  }
+
+  obj->fActive = false;
 }
 
 //--------------------------------------------------------------

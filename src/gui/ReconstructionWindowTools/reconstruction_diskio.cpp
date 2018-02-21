@@ -60,6 +60,26 @@ void ReconstructionWindow::writeMiscGUIsettingsToJson(QJsonObject &json)
   bj["BlurSigmaZ"] = ui->ledBlurSigmaZ->text().toDouble();
   js["Blur"] = bj;
 
+  //ChPerPhe - peaks
+  QJsonObject phePj;
+  phePj["Bins"] = ui->sbFromPeaksBins->value();
+  phePj["From"] = ui->ledFromPeaksFrom->text().toDouble();
+  phePj["To"] = ui->ledFromPeaksTo->text().toDouble();
+  phePj["Sigma"] = ui->ledFromPeaksSigma->text().toDouble();
+  phePj["Threshold"] = ui->ledFromPeaksThreshold->text().toDouble();
+  phePj["MaxPeaks"] = ui->sbFromPeaksMaxPeaks->value();
+  js["ChPerPhePeaks"] = phePj;
+
+  //ChPerPhe - stat
+  QJsonObject pheSj;
+  pheSj["Bins"] = ui->pbBinsChansPerPhEl->value();
+  pheSj["MinRange"] = ui->ledMinRangeChanPerPhEl->text().toDouble();
+  pheSj["MaxRange"] = ui->ledMaxRangeChanPerPhEl->text().toDouble();
+  pheSj["Lower"] = ui->ledLowerLimitForChanPerPhEl->text().toDouble();
+  pheSj["Upper"] = ui->ledUpperLimitForChanPerPhEl->text().toDouble();
+  pheSj["ENF"] = ui->ledENFforChanPerPhEl->text().toDouble();
+  js["ChPerPheStat"] = pheSj;
+
   json["ReconstructionWindow"] = js;
 }
 
@@ -72,16 +92,16 @@ void ReconstructionWindow::updateGUIsettingsInConfig()
 
 void ReconstructionWindow::readMiscGUIsettingsFromJson(QJsonObject &json)
 {
-   QJsonObject js1 = json["ReconstructionWindow"].toObject();
+   QJsonObject RWjon = json["ReconstructionWindow"].toObject();
 
    //PlotXY settings
-   QJsonObject js = js1["PlotXYsettings"].toObject();
-   JsonToLineEdit(js, "PlotXYfromX", ui->ledXfrom);
-   JsonToLineEdit(js, "PlotXYfromY", ui->ledYfrom);
-   JsonToLineEdit(js, "PlotXYtoX", ui->ledXto);
-   JsonToLineEdit(js, "PlotXYtoY", ui->ledYto);
-   JsonToLineEdit(js, "PlotXYfromZ", ui->ledZfrom);
-   JsonToLineEdit(js, "PlotXYtoZ", ui->ledZto);
+   QJsonObject js = RWjon["PlotXYsettings"].toObject();
+   JsonToLineEditDouble(js, "PlotXYfromX", ui->ledXfrom);
+   JsonToLineEditDouble(js, "PlotXYfromY", ui->ledYfrom);
+   JsonToLineEditDouble(js, "PlotXYtoX", ui->ledXto);
+   JsonToLineEditDouble(js, "PlotXYtoY", ui->ledYto);
+   JsonToLineEditDouble(js, "PlotXYfromZ", ui->ledZfrom);
+   JsonToLineEditDouble(js, "PlotXYtoZ", ui->ledZto);
    JsonToSpinBox(js, "PlotXYbinsX", ui->sbXbins);
    JsonToSpinBox(js, "PlotXYbinsY", ui->sbYbins);
    JsonToComboBox(js, "PlotXYoptionZ", ui->cobHowToAverageZ);
@@ -95,12 +115,36 @@ void ReconstructionWindow::readMiscGUIsettingsFromJson(QJsonObject &json)
    ui->cbXYsymmetric->setChecked(fSym);
 
    //Blur settings
-   QJsonObject bj = js1["Blur"].toObject();
+   QJsonObject bj = RWjon["Blur"].toObject();
    JsonToComboBox(bj, "BlurType", ui->cobBlurType);
-   JsonToLineEdit(bj, "BlurWidth", ui->ledBlurDelta);
-   JsonToLineEdit(bj, "BlurSigma", ui->ledBlurSigma);
-   JsonToLineEdit(bj, "BlurWidthZ", ui->ledBlurDeltaZ);
-   JsonToLineEdit(bj, "BlurSigmaZ", ui->ledBlurSigmaZ);
+   JsonToLineEditDouble(bj, "BlurWidth", ui->ledBlurDelta);
+   JsonToLineEditDouble(bj, "BlurSigma", ui->ledBlurSigma);
+   JsonToLineEditDouble(bj, "BlurWidthZ", ui->ledBlurDeltaZ);
+   JsonToLineEditDouble(bj, "BlurSigmaZ", ui->ledBlurSigmaZ);
+
+   //ChPerPhe - peaks
+   if (RWjon.contains("ChPerPhePeaks"))
+   {
+       QJsonObject phePj = RWjon["ChPerPhePeaks"].toObject();
+       JsonToSpinBox(phePj, "Bins", ui->sbFromPeaksBins);
+       JsonToLineEditDouble(phePj, "From", ui->ledFromPeaksFrom);
+       JsonToLineEditDouble(phePj, "To", ui->ledFromPeaksTo);
+       JsonToLineEditDouble(phePj, "Sigma", ui->ledFromPeaksSigma);
+       JsonToLineEditDouble(phePj, "Threshold", ui->ledFromPeaksThreshold);
+       JsonToSpinBox(phePj, "MaxPeaks", ui->sbFromPeaksMaxPeaks);
+   }
+
+   //ChPerPhe - peaks
+   if (RWjon.contains("ChPerPheStat"))
+   {
+       QJsonObject pheSj = RWjon["ChPerPheStat"].toObject();
+       JsonToSpinBox(pheSj, "Bins", ui->pbBinsChansPerPhEl);
+       JsonToLineEditDouble(pheSj, "MinRange", ui->ledMinRangeChanPerPhEl);
+       JsonToLineEditDouble(pheSj, "MaxRange", ui->ledMaxRangeChanPerPhEl);
+       JsonToLineEditDouble(pheSj, "Lower", ui->ledLowerLimitForChanPerPhEl);
+       JsonToLineEditDouble(pheSj, "Upper", ui->ledUpperLimitForChanPerPhEl);
+       JsonToLineEditDouble(pheSj, "ENF", ui->ledENFforChanPerPhEl);
+   }
 }
 
 void ReconstructionWindow::on_pbSaveScanTree_clicked()

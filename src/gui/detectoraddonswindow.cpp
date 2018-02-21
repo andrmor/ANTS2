@@ -8,7 +8,7 @@
 #include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "globalsettingsclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "asandwich.h"
 #include "slab.h"
 #include "ageotreewidget.h"
@@ -54,6 +54,8 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
                     "Use Alt + Drag&Drop to change order of item within the same parent.");
   connect(twGeo, SIGNAL(itemExpanded(QTreeWidgetItem*)), twGeo, SLOT(onItemExpanded(QTreeWidgetItem*)));
   connect(twGeo, SIGNAL(itemCollapsed(QTreeWidgetItem*)), twGeo, SLOT(onItemCollapsed(QTreeWidgetItem*)));
+  connect(twGeo, SIGNAL(RequestListOfParticles(QStringList&)), Detector->MpCollection, SLOT(OnRequestListOfParticles(QStringList&)));
+  connect(twGeo, &AGeoTreeWidget::RequestShowMonitor, this, &DetectorAddOnsWindow::OnrequestShowMonitor);
   // Object editor
   QVBoxLayout* l = new QVBoxLayout();
   l->setContentsMargins(0,0,0,0);
@@ -243,9 +245,15 @@ void DetectorAddOnsWindow::ConvertDummyToPM(int idpm)
   Detector->PMdummies.remove(idpm);
 }
 
-void DetectorAddOnsWindow::UpdateGeoTree()
+void DetectorAddOnsWindow::UpdateGeoTree(QString name)
 {
-    twGeo->UpdateGui();
+    twGeo->UpdateGui(name);
+}
+
+void DetectorAddOnsWindow::ShowTab(int tab)
+{
+    if (tab>-1 && tab<ui->tabwidAddOns->count())
+        ui->tabwidAddOns->setCurrentIndex(tab);
 }
 
 void DetectorAddOnsWindow::on_pbConvertAllToPMs_clicked()
@@ -416,6 +424,70 @@ void DetectorAddOnsWindow::ShowObjectRecursive(QString name)
     MW->GeometryWindow->UpdateRootCanvas();
 
     //gGeoManager->SetTopVisible(MW->GeometryWindow->IsWorldVisible());
+}
+
+void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
+{
+    if (!mon->ObjectType->isMonitor())
+    {
+        qWarning() << "This is not a monitor!";
+        return;
+    }
+
+    const ATypeMonitorObject* tmo = static_cast<const ATypeMonitorObject*>(mon->ObjectType);
+    const AMonitorConfig& c = tmo->config;
+
+    double length1 = c.size1;
+    double length2 = c.size2;
+    if (c.shape==1) length2 = length1;
+
+    Detector->GeoManager->ClearTracks();
+    Int_t track_index = Detector->GeoManager->AddTrack(1,22);
+    TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
+
+    double hl[3] = {-length1, 0, 0}; //local coordinates
+    double vl[3] = {0, -length2, 0}; //local coordinates
+    double mhl[3]; //master coordinates (world)
+    double mvl[3]; //master coordinates (world)
+    TGeoRotation Rot = TGeoRotation("Rot", mon->Orientation[0], mon->Orientation[1], mon->Orientation[2]);
+    Rot.LocalToMaster(hl, mhl);
+    Rot.LocalToMaster(vl, mvl);
+
+    const double& x = mon->Position[0];
+    const double& y = mon->Position[1];
+    const double& z = mon->Position[2];
+
+    track->AddPoint(x+mhl[0], y+mhl[1], z+mhl[2], 0);
+    track->AddPoint(x-mhl[0], y-mhl[1], z-mhl[2], 0);
+    track->AddPoint(x, y, z, 0);
+    track->AddPoint(x+mvl[0], y+mvl[1], z+mvl[2], 0);
+    track->AddPoint(x-mvl[0], y-mvl[1], z-mvl[2], 0);
+    track->SetLineWidth(4);
+    track->SetLineColor(kBlack);
+
+    //show orientation
+    double l[3] = {0,0, std::max(length1,length2)}; //local coordinates
+    double m[3]; //master coordinates (world)
+    Rot.LocalToMaster(l, m);
+    if (c.bUpper)
+    {
+        track_index = Detector->GeoManager->AddTrack(1,22);
+        track = Detector->GeoManager->GetTrack(track_index);
+        track->AddPoint(x, y, z, 0);
+        track->AddPoint(x+m[0], y+m[1], z+m[2], 0);
+        track->SetLineWidth(4);
+        track->SetLineColor(kRed);
+    }
+    if (c.bLower)
+    {
+        track_index = Detector->GeoManager->AddTrack(1,22);
+        track = Detector->GeoManager->GetTrack(track_index);
+        track->AddPoint(x, y, z, 0);
+        track->AddPoint(x-m[0], y-m[1], z-m[2], 0);
+        track->SetLineWidth(4);
+        track->SetLineColor(kRed);
+    }
+    MW->ShowTracks();
 }
 
 void DetectorAddOnsWindow::HighlightVolume(QString VolName)
@@ -998,6 +1070,7 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
        QString s;
        s += "<pre>";
        s += " " + r.volName;
+       s += " (#" + QString::number(r.nodeIndex) + ")";
        s += " of ";
        TColor* rc = gROOT->GetColor(r.matIndex+1);
        int red = 255*rc->GetRed();

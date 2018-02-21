@@ -77,6 +77,22 @@ private slots:
     void on_tabwinDiagnose_tabBarClicked(int index);
     void RefreshPMhitsTable();
 
+    void on_pbMonitorShowXY_clicked();
+
+    void on_pbMonitorShowTime_clicked();
+
+    void on_pbShowProperties_clicked();
+
+    void on_pbMonitorShowAngle_clicked();
+
+    void on_pbMonitorShowWave_clicked();
+
+    void on_pbMonitorShowEnergy_clicked();
+
+    void on_cobMonitor_activated(int index);
+
+    void on_pbShowAverageOverAll_clicked();
+
 protected:
     bool event(QEvent *event);   
 
@@ -99,12 +115,13 @@ private:
 
     void clearGrItems();
     void updateSignalLabels(double MaxSignal);
-    void addPMitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
-    void addTextitems(bool fHaveData, int CurrentEvent, double MaxSignal, DynamicPassivesHandler *Passives);
+    void addPMitems  (const QVector<float>* vector, double MaxSignal, DynamicPassivesHandler *Passives);
+    void addTextitems(const QVector<float>* vector, double MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);
     void addParticleHistoryLogLine(int iRec, int level);
+    void updateMonitors();
 };
 
 #endif // OUTPUTWINDOW_H

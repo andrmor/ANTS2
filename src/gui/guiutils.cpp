@@ -19,7 +19,8 @@ QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color)
   pm.fill(Qt::transparent);
   QPainter b(&pm);
   b.setBrush(QBrush(color));
-  b.drawEllipse(0, 0, size.width()-3, size.width()-3);
+  if (color == Qt::white) b.setPen(Qt::white);
+  b.drawEllipse(0, 2, size.width()-5, size.width()-5);  //was -3 -3 before, and no y shift
   return QIcon(pm);
 }
 

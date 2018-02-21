@@ -55,7 +55,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     NetModule(Net), TmpHub(TmpHub), GlobSet(GlobSet),
     ui(new Ui::MainWindow)
 {
-    //qDebug() << "-> Main window constructor started";
+    qDebug() << ">Main window constructor started";
 
     //Inits
     GeometryWindow = 0;
@@ -88,12 +88,13 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryDrawDisabled = false;
     fStartedFromGUI = false;
     fSimDataNotSaved = false;
+    timesTriedToExit = 0;
     //aliases to use in GUI
     MpCollection = Detector->MpCollection; // just an alias
     PMs = Detector->PMs;                               // just an alias
     Config = Detector->Config;                         // just an alias
 
-    //qDebug()<<"-> Creating user interface for the main window";
+    qDebug()<<">Creating user interface for the main window";
     ui->setupUi(this);
     this->setFixedSize(this->size());
     this->move(10,30); //default position    
@@ -113,67 +114,67 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ParticleSources = SimulationManager->ParticleSources;
 
     //interface windows
-    //qDebug()<<"->Creating Examples Window";
+    qDebug()<<">Creating Examples Window";
     QWidget* w = new QWidget();
     ELwindow = new ExamplesWindow(w, this);
     ELwindow->move(100,100);    
-    //qDebug()<<"->Creating Detector Add-ons window";  //created as child window, no delete on mainwin close!
+    qDebug()<<">Creating Detector Add-ons window";  //created as child window, no delete on mainwin close!
     DAwindow = new DetectorAddOnsWindow(this, Detector);
     DAwindow->move(50,50);
-    //qDebug()<<"->Creating Material Inspector Window";
+    qDebug()<<">Creating Material Inspector Window";
     w = new QWidget();
     MIwindow = new MaterialInspectorWindow(w, this, Detector);
     MIwindow->move(50,50);
-    //qDebug()<<"->Creating Output Window";
+    qDebug()<<">Creating Output Window";
     w = new QWidget();
     Owindow = new OutputWindow(w, this, EventsDataHub);
     Owindow->move(600,580);
-    //qDebug()<<"->Creating Reconstruction Window";
+    qDebug()<<">Creating Reconstruction Window";
     w = new QWidget();
     Rwindow = new ReconstructionWindow(w, this, EventsDataHub);
     Rwindow->move(20,250);
-    //qDebug()<<"->Creating LRF Window";
+    qDebug()<<">Creating LRF Window";
     w = new QWidget();
     lrfwindow = new LRFwindow(w, this, EventsDataHub);
     lrfwindow->move(25,25);
-    //qDebug()<<"->Creating New LRF Window";
+    qDebug()<<">Creating New LRF Window";
     w = new QWidget();
     newLrfWindow = new ALrfWindow(w, this, Detector->LRFs->getNewModule());    
 #ifdef ANTS_FANN
-    //qDebug()<<"->Creating NeuralNetworks Window";
+    qDebug()<<">Creating NeuralNetworks Window";
     w = new QWidget();
     NNwindow = new NeuralNetworksWindow(w, this, EventsDataHub);
     NNwindow->move(25,25);
     QObject::connect(Rwindow,SIGNAL(cb3DreconstructionChanged(bool)),NNwindow,SLOT(onReconstruct3D(bool)));
     QObject::connect(Rwindow,SIGNAL(cbReconstructEnergyChanged(bool)),NNwindow,SLOT(onReconstructE(bool)));
 #endif
-    //qDebug()<<"->Creating check-up window"; //created as child window, no delete on mainwin close!
+    qDebug()<<">Creating check-up window"; //created as child window, no delete on mainwin close!
     CheckUpWindow = new CheckUpWindowClass(this, Detector);
     CheckUpWindow->move(50,50);
-    //qDebug()<<"->Creating settings window";
+    qDebug()<<">Creating settings window";
     GlobSetWindow = new GlobalSettingsWindowClass(this);
     GlobSetWindow->move(50,50);
-    //qDebug()<<"->Creating window navigator";
+    qDebug()<<">Creating window navigator";
     w = new QWidget();
     WindowNavigator = new WindowNavigatorClass(w, this);
     WindowNavigator->move(700,50);
-    //qDebug()<<"->Creating Graph Window";
+    qDebug()<<">Creating Graph Window";
     w = new QWidget();
     GraphWindow = new GraphWindowClass(w, this);
     GraphWindow->move(25,25);
-    //qDebug()<<"->Creating Geometry Window";
+    qDebug()<<">Creating Geometry Window";
     w = new QWidget();
     GeometryWindow = new GeometryWindowClass(w, this);
     GeometryWindow->move(25,25);
     createScriptWindow();
-    //qDebug()<<"-> All windows created";
+    qDebug()<<">All windows created";
 
     //root update cycle
     RootUpdateTimer = new QTimer(this);
     RootUpdateTimer->setInterval(100);
     QObject::connect(RootUpdateTimer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
     RootUpdateTimer->start();
-    //qDebug()<<"->Timer to refresh Root events started";
+    qDebug()<<">Timer to refresh Root events started";
 
     // connect Config requests for Gui updates
     QObject::connect(Config, &AConfiguration::requestDetectorGuiUpdate, this, &MainWindow::onRequestDetectorGuiUpdate);
@@ -187,7 +188,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(EventsDataHub, SIGNAL(loaded(int, int)), this, SLOT(updateLoaded(int, int)));
     QObject::connect(this, SIGNAL(RequestStopLoad()), EventsDataHub, SLOT(onRequestStopLoad()));
     QObject::connect(EventsDataHub, SIGNAL(requestClearKNNfilter()), ReconstructionManager, SLOT(onRequestClearKNNfilter()));
-    QObject::connect(EventsDataHub, SIGNAL(requestGuiUpdateForClearData()), this, SLOT(onRequestUpdateGuiForClearData()));
+    QObject::connect(EventsDataHub, &EventsDataClass::cleared, this, &MainWindow::onRequestUpdateGuiForClearData);
     QObject::connect(EventsDataHub, SIGNAL(requestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate())); 
 
     QObject::connect(ReconstructionManager, SIGNAL(ReconstructionFinished(bool, bool)), Rwindow, SLOT(onReconstructionFinished(bool, bool)));
@@ -196,7 +197,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QObject::connect(Rwindow, SIGNAL(StopRequested()), ReconstructionManager, SLOT(requestStop()));
 
-    QObject::connect(MpCollection, &AMaterialParticleCollection::RequestClearParticleStack, this, &MainWindow::on_pbClearAllStack_clicked);
+    QObject::connect(Config, &AConfiguration::RequestClearParticleStack, this, &MainWindow::on_pbClearAllStack_clicked);
 
 #ifdef ANTS_FANN
     QObject::connect(ReconstructionManager->ANNmodule,SIGNAL(status(QString)),NNwindow,SLOT(status(QString)));
@@ -218,9 +219,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     DoNotUpdateGeometry = false; //control
 
-    //qDebug()<<"->Loading default detector...";
+    qDebug()<<">Loading default detector...";
     bool fLoadedDefaultDetector = MainWindow::startupDetector();
-    //qDebug()<<"->Default detector configured";
+    qDebug()<<">Default detector configured";
 
     //Environment
     on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
@@ -236,7 +237,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ScriptWinH = 380;
 
     //GUI updates
-    //qDebug() << "->Running GUI updates";
+    qDebug() << ">Running GUI updates";
     //installing validators for edit boxes
       //double
     QDoubleValidator* dv = new QDoubleValidator(this);
@@ -294,12 +295,19 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->fAngular->setEnabled(ui->cbAngularSensitive->isChecked());    
     ui->fScanSecond->setEnabled(ui->cbSecondAxis->isChecked());
     ui->fScanThird->setEnabled(ui->cbThirdAxis->isChecked());
-    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());
-    //qDebug() << "->GUI updated";
+    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());    
+    qDebug() << ">GUI initialized";
 
     //change font size for all windows
     if (this->font().pointSize() != GlobSet->FontSize) setFontSizeAllWindows(GlobSet->FontSize);
-    //qDebug() << "->Font size adjusted";
+    qDebug() << ">Font size adjusted";
+
+    //menu properties
+    QString mss = ui->menuFile->styleSheet();
+    mss += "; QMenu::tooltip {wakeDelay: 1;}";
+    ui->menuFile->setStyleSheet(mss);
+    ui->menuFile->setToolTipsVisible(true);
+    ui->menuFile->setToolTipDuration(1000);
 
     bool fShowGeom;
     if (GlobSet->SaveLoadWindows)
@@ -314,15 +322,15 @@ MainWindow::MainWindow(DetectorClass *Detector,
     }
     ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
 
-    //qDebug() << "->Init of Output window...";
+    qDebug() << ">Init for Output window";
     Owindow->InitWindow();
     Owindow->resize(Owindow->width()+1, Owindow->height());
     Owindow->resize(Owindow->width()-1, Owindow->height());
 
-    //qDebug() << "->Init of Reconstruction window...";
+    qDebug() << ">Init for Reconstruction window...";
     Rwindow->InitWindow();
 
-    //qDebug()<<"->Showing geometry";
+    qDebug()<<">Showing geometry";
     GeometryWindow->show();
     GeometryWindow->resize(GeometryWindow->width()+1, GeometryWindow->height());
     GeometryWindow->resize(GeometryWindow->width()-1, GeometryWindow->height());
@@ -336,5 +344,5 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     if (!fLoadedDefaultDetector)
       message("Startup detector NOT found, dummy default detector is loaded", this);
-    //qDebug()<<"->Initialization complete";
+    qDebug()<<">Main window initialization complete";
 }

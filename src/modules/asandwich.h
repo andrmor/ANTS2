@@ -4,6 +4,7 @@
 #include <QList>
 #include <QObject>
 #include <QStringList>
+#include <QVector>
 
 class ASlabModel;
 class ASlabXYModel;
@@ -59,9 +60,11 @@ public:
   // populate TGeoManager
   void addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent,
                                 TGeoManager* GeoManager, AMaterialParticleCollection* MaterialCollection,
-                                QList<APMandDummy>* PMsAndDumPMs);
+                                QList<APMandDummy>* PMsAndDumPMs,
+                                int forcedNodeNumber = 0);
 
   void clearGridRecords();
+  void clearMonitorRecords();
 
   void UpdateDetector(); //trigger this to update the detector
   void ChangeState(ASandwich::SlabState State); //triggered by GUI
@@ -77,11 +80,18 @@ public:
   void writeToJson(QJsonObject& json);
   void readFromJson(QJsonObject& json);
 
+  // for particle remove - handled by AConfiguration!
+  void IsParticleInUse(int particleId, bool &bInUse, QString& MonitorNames);
+  void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+
   ASandwich::SlabState SandwichState;
   QStringList Materials;  // list of currently defined materials
   ASlabXYModel* DefaultXY;
   int ZOriginType; //-1 top, 0 mid, 1 bottom (of the slab with fCenter = true)
   QList<AGridElementRecord*> GridRecords;
+
+  // pointers to monitors
+  QVector<const AGeoObject*> MonitorsRecords;
 
   // available after calculation of Z of layers
   double Z_UpperBound, Z_LowerBound;
@@ -96,14 +106,17 @@ signals:
 public slots:
   void onMaterialsChanged(const QStringList MaterialList);
 
-private:  
+private:
   void clearModel();
   void enforceCommonProperties();
   void importFromOldStandardJson(QJsonObject& json, bool fPrScintCont);
   void importOldLightguide(QJsonObject& json, bool upper);
   void importOldMask(QJsonObject &json);
   void importOldGrid(QJsonObject &json);
-  void positionArrayElement(int ix, int iy, int iz, AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent, TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QList<APMandDummy> *PMsAndDumPMs);
+  void positionArrayElement(int ix, int iy, int iz,
+                            AGeoObject *el, AGeoObject *arrayObj, TGeoVolume *parent,
+                            TGeoManager *GeoManager, AMaterialParticleCollection *MaterialCollection, QList<APMandDummy> *PMsAndDumPMs,
+                            int arrayIndex = 0);
 };
 
 #endif // ASANDWICH_H

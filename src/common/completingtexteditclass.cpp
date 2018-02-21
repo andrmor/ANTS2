@@ -34,7 +34,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 {
     QTextCursor tc = this->textCursor();
 
-    if (e->key() == Qt::Key_Tab && (e->modifiers()==0))
+    if (e->key() == Qt::Key_Tab && (e->modifiers()==0) && !(c && c->popup()->isVisible()))
     {
         QString s(" ");
         this->insertPlainText(s.repeated(TabGivesSpaces));
@@ -169,6 +169,8 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             tc = this->textCursor();
             tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
             tc.insertText("\n" + spacer + onRight);
+            tc.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+            tc.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, startingSpaces);
             this->setTextCursor(tc);
             return;
         }
@@ -223,7 +225,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
     }
 
     if (c && c->popup()->isVisible())
-    {        
+    {
         // The following keys are forwarded by the completer to the widget
         switch (e->key())
         {
@@ -231,8 +233,9 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
         case Qt::Key_Return:
         case Qt::Key_Escape:
         case Qt::Key_Tab:
-        case Qt::Key_Backtab:        
-            return; // let the completer do default behavior
+        case Qt::Key_Backtab:
+            e->ignore(); // let the completer do default behavior
+            return;
         default:
             break;
         }

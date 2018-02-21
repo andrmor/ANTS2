@@ -49,7 +49,7 @@ void AInterfaceToPhotonScript::ClearTracks()
     Detector->GeoManager->ClearTracks();
 }
 
-bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time)
+bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent)
 {
     if (!initTracer()) return false;
 
@@ -69,15 +69,13 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
 
     for (int i=0; i<copies; i++) Tracer->TracePhoton(phot);
 
-    Event->HitsToSignal();
-    EventsDataHub->Events.append(Event->PMsignals);
+    handleEventData(AddToPreviousEvent);
 
-    processTracks();
     delete phot;
     return true;
 }
 
-bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time)
+bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time, bool AddToPreviousEvent)
 {
    if (!initTracer()) return false;
 
@@ -107,12 +105,53 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
        Tracer->TracePhoton(phot);
    }
 
-   Event->HitsToSignal();
-   EventsDataHub->Events.append(Event->PMsignals);
+   handleEventData(AddToPreviousEvent);
 
-   processTracks();
    delete phot;
    return true;
+}
+
+void AInterfaceToPhotonScript::handleEventData(bool AddToPreviousEvent)
+{
+    Event->HitsToSignal();
+
+    const bool bTimed = !Event->TimedPMsignals.isEmpty();
+    const bool bAlreadyHaveEvent = !EventsDataHub->Events.isEmpty();
+    bool bDataContainersMatch = false;
+    if (bAlreadyHaveEvent)
+    {
+        if ( EventsDataHub->Events.last().size() == Event->PMsignals.size() )
+        {
+            if (bTimed)
+            {
+                if (EventsDataHub->TimedEvents.last().size() == Event->TimedPMsignals.size()) //matching number of time bins
+                {
+                    if (EventsDataHub->TimedEvents.last().last().size() == Event->TimedPMsignals.last().size()) //matching number of PMs
+                       bDataContainersMatch = true;
+                }
+            }
+            else bDataContainersMatch = true;
+        }
+    }
+    //qDebug() << "timed, alreadyhave, match:"<<bTimed<<bAlreadyHaveEvent<<bDataContainersMatch;
+
+    if ( AddToPreviousEvent && bDataContainersMatch )
+    {
+        for (int i=0; i<Event->PMsignals.size(); i++)
+            EventsDataHub->Events.last()[i] += Event->PMsignals.at(i);
+        if (bTimed)
+            for (int i=0; i<Event->TimedPMsignals.size(); i++)
+                for (int ii=0; ii<Event->TimedPMsignals.at(i).size(); ii++)
+                     EventsDataHub->TimedEvents.last()[i][ii] += Event->TimedPMsignals[i][ii];
+    }
+    else
+    {
+        EventsDataHub->Events.append(Event->PMsignals);
+        if (bTimed) EventsDataHub->TimedEvents.append(Event->TimedPMsignals);
+    }
+
+    processTracks();
+    EventsDataHub->LastSimSet = simSet;
 }
 
 void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
@@ -213,6 +252,11 @@ long AInterfaceToPhotonScript::GetMaxCyclesReached() const
 long AInterfaceToPhotonScript::GetGeneratedOutsideGeometry() const
 {
     return EventsDataHub->SimStat->GeneratedOutsideGeometry;
+}
+
+long AInterfaceToPhotonScript::GetStoppedByMonitor() const
+{
+    return EventsDataHub->SimStat->KilledByMonitor;
 }
 
 long AInterfaceToPhotonScript::GetFresnelTransmitted() const

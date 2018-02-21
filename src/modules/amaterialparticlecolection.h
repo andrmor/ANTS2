@@ -32,7 +32,7 @@ private:
 public:
   //configuration
   void SetWave(bool wavelengthResolved, double waveFrom, double waveTo, double waveStep, int waveNodes);
-  void updateWaveProperties(GeneralSimSettings *SimSet);
+  void UpdateBeforeSimulation(GeneralSimSettings *SimSet);
 
   //info requests
     //materials
@@ -49,26 +49,26 @@ public:
   int getParticleCharge(int particleIndex) const;
   double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
-  bool isParticleOneOfSecondary(int iParticle, QString* matNames = 0) const; //optional matNames - if provided,returns there a list of materials where this particle is secondary
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal=false);
   void AddNewMaterial(QString name);
-  void UpdateMaterial(int index, QString name, double density, double atomicDensity, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3);
+  void UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3);
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
+  void UpdateNeutronProperties(int imat);  //update neutron run-time properties
 
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
   bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
-  bool RemoveParticle(int particleId, QString* errorText=0);
+  QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
+  int getNeutronIndex() const; //returns -1 if not in the collection
 
   //tmpMaterial - related
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!
   void CopyTmpToMaterialCollection(); //creates a copy of all pointers // true is new material was added to material collection
   void CopyMaterialToTmp(int imat);
-  void RecalculateCrossSections(int particleId); //for neutrons - using branchings, calculate cross section vectors
 
   //json write/read handling
   void writeToJson(QJsonObject &json);
@@ -82,16 +82,18 @@ public:
   int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);
   int findOrCreateParticle(QJsonObject &json);
 
-  int CheckMaterial(AMaterial* mat, int iPart); //0 - check passed, see cpp file for possible error codes
-  int CheckMaterial(int iMat, int iPart); //0 - check passed, see cpp file for possible error codes
-  int CheckMaterial(int iMat); //0 - check passed, see cpp file for possible error codes
-  int CheckTmpMaterial(); //0 - check passed, see cpp file for possible error codes
-  QString getErrorString(int iError);
+  QString CheckMaterial(const AMaterial *mat, int iPart) const; //"" - check passed, otherwise error
+  QString CheckMaterial(int iMat, int iPart) const;       //"" - check passed, otherwise error
+  QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
+  QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
 
   int CheckParticleEnergyInRange(int iPart, double Energy); //check all materials - if this particle is tracable and mat is not-tansparent,
   //check that the particle energy is withing the defined energy range of the total interaction.
   //if not in range, the first material index with such a problem is returned.
   // -1 is returned if there are no errors
+
+  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames);
+  void RemoveParticle(int particleId);  // should NOT be used directly - use RemoveParticle method of AConfiguration
 
 private:
   int ConflictingMaterialIndex; //used by CheckMaterial function
@@ -102,15 +104,14 @@ private:
   void clearParticleCollection();
   void registerNewParticle(); //called after a particle was added to particle collection. It updates terminations om MatParticles
   bool readParticleCollectionFromJson(QJsonObject &json);
-
   void generateMaterialsChangedSignal();
+
+public slots:
+  void OnRequestListOfParticles(QStringList &definedParticles);
 
 signals:
   void MaterialsChanged(const QStringList);
   void ParticleCollectionChanged();
-  void IsParticleInUseBySources(int particleId, bool& fInUse, QString* SourceName);
-  void RequestRegisterParticleRemove(int particleId);
-  void RequestClearParticleStack();
 
 };
 

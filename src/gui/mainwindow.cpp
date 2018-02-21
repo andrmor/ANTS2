@@ -38,7 +38,7 @@
 #include "acommonfunctions.h"
 #include "aenergydepositioncell.h"
 #include "tmpobjhubclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "apreprocessingsettings.h"
 #include "aconfiguration.h"
 #include "ascriptwindow.h"
@@ -164,14 +164,12 @@ void MainWindow::ClearData()
 
 void MainWindow::onRequestUpdateGuiForClearData()
 {
-    // local
+    //  qDebug() << ">>> Main window: OnClear signal received";
     clearGeoMarkers();
     clearEnergyVector();
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    //ui->pbStopScan->setChecked(false);
-    //ui->pbStopScan->setEnabled(false);
     ui->pbExportDeposition->setEnabled(false);
     ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
@@ -181,10 +179,8 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->fReloadRequired->setVisible(false);
     LoadedEventFiles.clear();
     ui->lwLoadedEventsFiles->clear();
-    //ui->pbReloadExpData->setEnabled(false);
     LoadedTreeFiles.clear();
-    //ui->pbReloadTreeData->setEnabled(false);
-    //   qDebug()  << "Clear done";
+    //  qDebug()  << ">>> Main window: Clear done";
 }
 
 void MainWindow::clearEnergyVector()
@@ -193,34 +189,38 @@ void MainWindow::clearEnergyVector()
     EnergyVector.clear();
 }
 
-void MainWindow::closeEvent(QCloseEvent *)
-{   
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+   //   qDebug() << "<-MainWindow close event received";
    ShutDown = true;
+
+   if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
+       if (timesTriedToExit < 6)
+       {
+           qDebug() << "Reconstruction manager is busy, terminating...";
+           ReconstructionManager->requestStop();
+           SimulationManager->StopSimulation();
+           qApp->processEvents();
+           QThread::usleep(100);
+           QTimer::singleShot(100, this, SLOT(close()));
+           timesTriedToExit++;
+           event->ignore();
+           return;
+       }
+
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
-   //qDebug() << "<-MainWindow close event received";
+
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
    //qDebug()<<"--Saving ANTS configuration";   
    ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   //MIwindow->WriteElasticAutoToJson(GlobSet->ElasticAutoSettings);
    GlobSet->SaveANTSconfiguration();
 
-   bool DoSaveConfiguration = !GlobSet->NeverSaveOnExit;  //if force skip, do not do it   
-   if (DoSaveConfiguration)
-     {
-       if (!GlobSet->AlwaysSaveOnExit) //then give the choice
-         {
-           QMessageBox *msgBox = new QMessageBox( this );
-           msgBox->setWindowTitle("Session settings");
-           msgBox->setText("Remember this session settings?");
-           msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-           msgBox->setDefaultButton(QMessageBox::Yes);
+   EventsDataHub->clear();
 
-           if (msgBox->exec() == QMessageBox::No) DoSaveConfiguration = false;
-           if (msgBox) delete msgBox;
-         }
-     }
-   if (DoSaveConfiguration) ELwindow->QuickSave();
+   ELwindow->QuickSave(0);
 
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
@@ -380,6 +380,7 @@ bool MainWindow::event(QEvent *event)
    if (event->type() == QEvent::Show)
      {      
 //       qDebug()<<"Main window SHOW event";
+       WindowNavigator->SetupWindowsTaskbar(); // in effect only once on system start
        WindowNavigator->ShowWindowTriggered("main");
        return true;
      }
@@ -3882,7 +3883,6 @@ void MainWindow::on_actionCredits_triggered()
 
 void MainWindow::on_actionVersion_triggered()
 {
-  int versionNumber = ANTS2_VERSION;
   int minVer = ANTS2_MINOR;
   QString miv = QString::number(minVer);
   if (miv.length() == 1) miv = "0"+miv;
@@ -3892,7 +3892,6 @@ void MainWindow::on_actionVersion_triggered()
 
   QString out = "ANTS2\n"
                 "   version:  " + mav + "." + miv + "\n"
-                "   build number:  " + QString::number(versionNumber)+"\n"
                 "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
                 "\n"
                 "Qt version:  " + qv + "\n"
@@ -4007,6 +4006,7 @@ void MainWindow::on_cbBuilPhotonTrackstester_toggled(bool checked)
 
 void MainWindow::on_pbSimulate_clicked()
 {
+  ELwindow->QuickSave(0);
   //ui->tabwidMain->setCurrentIndex(1);
   //ui->twSourcePhotonsParticles->setCurrentIndex(0);
   fStartedFromGUI = true;
@@ -4018,6 +4018,7 @@ void MainWindow::on_pbSimulate_clicked()
 
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {  
+  ELwindow->QuickSave(0);
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
   //watchdog on particle sources, can be transferred later to check-upwindow
@@ -4161,6 +4162,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
     pss->setup(json);
+    pss->initSimStat();
     pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
     return pss;
 }
@@ -4171,6 +4173,7 @@ void MainWindow::on_pbTrackStack_clicked()
     MainWindow::ClearData();
     GeneralSimSettings simSettings;
     ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
+    EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
 
     //============ run stack =========
     bool fOK = pss->standaloneTrackStack(&ParticleStack);
@@ -5069,7 +5072,7 @@ void MainWindow::on_bpResults_clicked()
 
 void MainWindow::ShowGeometrySlot()
 {
-   ShowGeometry(false, false);
+    ShowGeometry(false, false);
 }
 
 void MainWindow::on_bpResults_2_clicked()
@@ -5083,4 +5086,12 @@ void MainWindow::on_bpResults_2_clicked()
 void MainWindow::on_cobParticleSource_activated(int /*index*/)
 {
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
+}
+
+void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
+{
+    QString s;
+    if (index == 0) s = "# of particles per event:";
+    else            s = "average particles per event:";
+    ui->labPartPerEvent->setText(s);
 }

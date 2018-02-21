@@ -8,7 +8,7 @@ class QJsonObject;
 class AParticle //properties of the particles
 {
 public:
-  enum ParticleType { _gamma_ = 0, _charged_, _neutron_};
+  enum ParticleType { _gamma_ = 0, _charged_ = 1, _neutron_ = 2};
 
   AParticle(QString Name, ParticleType Type, int Charge, double Mass);
   AParticle();
@@ -19,7 +19,8 @@ public:
   int charge;
 
   void writeToJson(QJsonObject &json) const;
-  void readFromJson(QJsonObject &json);
+  const QJsonObject writeToJson() const;
+  void readFromJson(const QJsonObject &json);
 };
 
 #endif // APARTICLE_H

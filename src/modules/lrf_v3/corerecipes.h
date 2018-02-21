@@ -24,7 +24,7 @@ public:
   bool apply(ASensorGroup &group, const ARecipeInput &input) const override;
   std::vector<ADetectorID> detectorDepends() const override;
   QJsonObject toJson() const override;
-  const std::string &type() const override { return "FitLayer"; }
+  const std::string type() const override { return "FitLayer"; }
 };
 
 } } //namespace LRF::Recipes

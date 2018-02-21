@@ -31,7 +31,7 @@ ParticleSourcesClass::~ParticleSourcesClass()
 void ParticleSourcesClass::clear()
 {
     for (int i=0; i<ParticleSourcesData.size(); i++) delete ParticleSourcesData[i];
-    ParticleSourcesData.resize(0);
+    ParticleSourcesData.clear();
     TotalActivity = 0;
 }
 
@@ -413,38 +413,35 @@ TVector3 ParticleSourcesClass::GenerateRandomDirection()
   return TVector3(a*scale, b*scale, -1.0 + 8.0 * r2 );
 }
 
-void ParticleSourcesClass::onIsParticleInUse(int particleId, bool& fAnswer, QString *SourceName)
+void ParticleSourcesClass::IsParticleInUse(int particleId, bool &bInUse, QString &SourceNames)
 {
-    for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
-      {
-        ParticleSourceStructure* ps = ParticleSourcesData[isource];
-        for (int ip = 0; ip<ps->GunParticles.size(); ip++)
-          {
-            if ( particleId == ps->GunParticles[ip]->ParticleId )
-              {
-                fAnswer = true;
-                if (SourceName) *SourceName = ps->name;
-                return;
-              }
-          }
-      }
-    fAnswer = false;
-    if (SourceName) *SourceName = "";
+  bInUse = false;
+  SourceNames.clear();
+
+  for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
+    {
+      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      for (int ip = 0; ip<ps->GunParticles.size(); ip++)
+        {
+          if ( particleId == ps->GunParticles[ip]->ParticleId )
+            {
+              bInUse = true;
+              if (!SourceNames.isEmpty()) SourceNames += ", ";
+              SourceNames += ps->name;
+            }
+        }
+    }
 }
 
-void ParticleSourcesClass::onRequestRegisterParticleRemove(int particleId)
+void ParticleSourcesClass::RemoveParticle(int particleId)
 {
-    for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
-      {
-        ParticleSourceStructure* ps = ParticleSourcesData[isource];
-        for (int ip = 0; ip<ps->GunParticles.size(); ip++)
-            if ( ps->GunParticles[ip]->ParticleId > particleId)
-                ps->GunParticles[ip]->ParticleId--;
-      }
-
-    QJsonObject json;
-    writeToJson(json);
-    emit RequestUpdateSourcesInConfig(json);
+  for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
+    {
+      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      for (int ip = 0; ip<ps->GunParticles.size(); ip++)
+          if ( ps->GunParticles[ip]->ParticleId > particleId)
+              ps->GunParticles[ip]->ParticleId--;
+    }
 }
 
 double ParticleSourcesClass::getTotalActivity()
@@ -713,10 +710,10 @@ bool ParticleSourcesClass::readFromJson(QJsonObject &json)
       return false;
     }
 
-  int size = ar.size();
-  //qDebug() << "    Sources in json:"<< size;
+  //        qDebug() << "    Sources in json:"<< ar.size();
   ParticleSourcesClass::clear();
-  for (int iSource =0; iSource<size; iSource++)
+
+  for (int iSource =0; iSource<ar.size(); iSource++)
     {
       QJsonObject json = ar[iSource].toObject();
       bool fOK = readSourceFromJson(-1, json);
@@ -727,6 +724,7 @@ bool ParticleSourcesClass::readFromJson(QJsonObject &json)
           return false;
         }
     }
+
   return true;
 }
 

@@ -84,6 +84,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
   LRFwindow::on_pbShrink_clicked();
   ui->fSingleGroup->setEnabled(false);
+  updateWarningForEnergyScan();
 }
 
 LRFwindow::~LRFwindow()
@@ -431,10 +432,6 @@ void LRFwindow::on_sbPMnoButons_valueChanged(int arg1)
 
 void LRFwindow::writeToJson(QJsonObject &json) const
 {
-  //Version number
-  int versionNumber = ANTS2_VERSION;
-  json["ANTS2build"] = versionNumber;
-
   //General
   json["DataSelector"] = ui->cb_data_selector->currentIndex();
   json["UseGrid"] = ui->cb_use_grid->isChecked();
@@ -537,9 +534,9 @@ void LRFwindow::loadJSON(QJsonObject &json)
   else ui->cob2Dtype->setCurrentIndex(iTmp);
 
   JsonToCheckbox(json, "LRF_compress", ui->cb_compress_r);
-  JsonToLineEdit(json, "Compression_k", ui->led_compression_k);
-  JsonToLineEdit(json, "Compression_r0", ui->led_compression_r0);
-  JsonToLineEdit(json, "Compression_lam", ui->led_compression_lam);
+  JsonToLineEditDouble(json, "Compression_k", ui->led_compression_k);
+  JsonToLineEditDouble(json, "Compression_r0", ui->led_compression_r0);
+  JsonToLineEditDouble(json, "Compression_lam", ui->led_compression_lam);
 
   JsonToSpinBox(json, "Nodes_x", ui->sbSplNodesX);
   JsonToSpinBox(json, "Nodes_y", ui->sbSplNodesY);
@@ -913,7 +910,6 @@ void LRFwindow::on_pbAxial3DvsRandZ_clicked()
 
 void LRFwindow::on_pbShowErrorVsRadius_clicked()
 {
-  //SensorLRF module does not have PMs info!
   if (SensLRF->getIteration() == 0) return;
   MW->GraphWindow->ShowAndFocus();
 
@@ -1587,4 +1583,19 @@ void LRFwindow::on_cb_diff_clicked()
     bool dif  = ui->cb_diff->isChecked();
 
     if (data && dif) ui->cb_data->setChecked(false);
+}
+
+void LRFwindow::on_cbEnergyScalling_toggled(bool)
+{
+    updateWarningForEnergyScan();
+}
+
+void LRFwindow::on_cb_data_selector_currentIndexChanged(int)
+{
+    updateWarningForEnergyScan();
+}
+
+void LRFwindow::updateWarningForEnergyScan()
+{
+  ui->pbWarningEnergyWithScan->setVisible( ui->cbEnergyScalling->isChecked() && ui->cb_data_selector->currentIndex()==0 );
 }

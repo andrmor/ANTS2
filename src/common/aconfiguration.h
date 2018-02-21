@@ -6,6 +6,7 @@
 #include <QJsonArray>
 
 class DetectorClass;
+class ParticleSourcesClass;
 
 class AConfiguration : public QObject
 {
@@ -18,6 +19,7 @@ public:
   QString ErrorString;      // Last detected error (load config)
 
   void SetDetector(DetectorClass* detector) {Detector = detector;}
+  void SetParticleSources(ParticleSourcesClass* particleSources) {ParticleSources = particleSources;}
   DetectorClass* GetDetector() {return Detector;}
 
   // save/load to json
@@ -34,6 +36,9 @@ public:
   void AddCustomNode(double x, double y, double z);
   bool SetCustomNodes(QJsonArray arr);
 
+  //remove particle
+  const QString RemoveParticle(int particleId);  //returns "" on sucess, otherwise gives error string
+
   void AskForAllGuiUpdate();
   void AskForDetectorGuiUpdate();
   void AskForSimulationGuiUpdate();
@@ -48,7 +53,7 @@ public slots:
   void UpdateReconstructionSettings(QJsonObject& jsonRec, int iGroup);
   void UpdateFilterSettings(QJsonObject& jsonFilt, int iGroup);
   void UpdateParticlesJson();
-  void UpdateSourcesJson(QJsonObject& sourcesJson);
+  void UpdateSourcesJson(QJsonObject& sourcesJson);  
 
 signals:
   void requestDetectorGuiUpdate();          //connect in MainWindowInits.cpp
@@ -59,10 +64,19 @@ signals:
   void NewConfigLoaded();                   //connect in MainWindowInits.cpp // update GUI after new detector was loaded - only those things which should not update on each GUI update
   void requestGuiBusyStatusChange(bool);
 
+  //for remove particle
+  void IsParticleInUseByMaterials(int particleId, bool& bInUse, QString& s);
+  void IsParticleInUseBySources(int particleId, bool& bInUse, QString& s);
+  void IsParticleInUseByMonitors(int particleId, bool& bInUse, QString& s);
+  void RequestRemoveParticle(int particleId);
+  void RequestClearParticleStack();
+
 public slots:
 
 private:
-  DetectorClass* Detector;  // Link to the Detector object
+  DetectorClass* Detector;                  // Link to the Detector object
+  ParticleSourcesClass* ParticleSources;    // Link to the ParticleSources object of SimulationManager
+
 };
 
 #endif // ACONFIGURATION_H

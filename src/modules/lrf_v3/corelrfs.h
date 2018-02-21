@@ -110,6 +110,17 @@ public:
   AAxial3D(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
            const AVladimirCompression &compressor, const ATransform &t = ATransform());
 
+#ifdef Q_OS_WIN32
+  void* operator new(size_t i)
+      {
+          return _mm_malloc(i,16);
+      }
+  void operator delete(void* p)
+      {
+          _mm_free(p);
+      }
+#endif
+
   bool inDomain(const APoint &pos) const override;
   double eval(const APoint &pos) const override;
   double sigma(const APoint &pos) const override;
@@ -138,6 +149,17 @@ protected:
 public:
   Axy(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
       const ATransform &t = ATransform());
+
+#ifdef Q_OS_WIN32
+  void* operator new(size_t i)
+      {
+          return _mm_malloc(i,16);
+      }
+  void operator delete(void* p)
+      {
+          _mm_free(p);
+      }
+#endif
 
   bool inDomain(const APoint &pos) const override;
   double eval(const APoint &pos) const override;

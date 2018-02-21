@@ -26,6 +26,7 @@
 #include <QDebug>
 #include <QWindow>
 #include <QMessageBox>
+#include <QDateTime>
 
 void MainWindow::on_actionWindow_navigator_triggered()
 {
@@ -223,7 +224,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       readXYwindow("LRF", lrfwindow, false, json);
       readXYwindow("newLRF", (QMainWindow*)newLrfWindow, true, json);
       readXYwindow("Navi", WindowNavigator, false, json);
-      readXYwindow("Material", MIwindow, false, json);
+      readXYwindow("Material", MIwindow, true, json);
       readXYwindow("ExLoad", ELwindow, false, json);
       readXYwindow("Geom", GeometryWindow, true, json);
       readXYwindow("Graph", GraphWindow, true, json);
@@ -281,6 +282,22 @@ void MainWindow::SetMultipliersUsingChPhEl(QVector<double> ChPerPhEl)
     on_pbUpdatePreprocessingSettings_clicked();
 }
 
+void MainWindow::CorrectPreprocessingAdds(QVector<double> Pedestals)
+{
+  if (Pedestals.size() < PMs->count())
+    {
+      message("Size not valid!", this);
+      return;
+    }
+  for (int ipm=0; ipm<PMs->count(); ipm++)
+      PMs->at(ipm).PreprocessingAdd -= Pedestals.at(ipm);
+
+  int ipm = ui->sbPreprocessigPMnumber->value();
+  ui->ledPreprocessingAdd->setText( QString::number( PMs->at(ipm).PreprocessingAdd) );
+
+  on_pbUpdatePreprocessingSettings_clicked();
+}
+
 void MainWindow::on_actionSave_configuration_triggered()
 {
   QFileDialog fileDialog;
@@ -318,16 +335,6 @@ void MainWindow::on_actionNew_detector_triggered()
   if (GeometryWindow->isVisible()) ShowGeometry(false);
 }
 
-void MainWindow::on_actionQuicksave_triggered()
-{
-   ELwindow->QuickSave();
-}
-
-void MainWindow::on_actionQuickload_triggered()
-{
-   ELwindow->QuickLoad();
-}
-
 void MainWindow::setFontSizeAllWindows(int size)
 {
   QFont font = this->font();
@@ -350,4 +357,74 @@ void MainWindow::on_actionScript_window_triggered()
     ScriptWindow->show();
     ScriptWindow->raise();
     ScriptWindow->activateWindow();
+}
+
+void MainWindow::on_actionQuick_save_1_triggered()
+{
+    ELwindow->QuickSave(1);
+}
+
+void MainWindow::on_actionQuick_save_2_triggered()
+{
+    ELwindow->QuickSave(2);
+}
+
+void MainWindow::on_actionQuick_save_3_triggered()
+{
+    ELwindow->QuickSave(3);
+}
+
+void MainWindow::on_actionQuick_load_1_triggered()
+{
+    ELwindow->QuickLoad(1, this);
+}
+
+void MainWindow::on_actionQuick_load_2_triggered()
+{
+    ELwindow->QuickLoad(2, this);
+}
+
+void MainWindow::on_actionQuick_load_3_triggered()
+{
+    ELwindow->QuickLoad(3, this);
+}
+
+void MainWindow::on_actionLoad_last_config_triggered()
+{
+    ELwindow->QuickLoad(0, this);
+}
+
+void MainWindow::on_actionQuick_save_1_hovered()
+{
+    ui->actionQuick_save_1->setToolTip(ELwindow->getQuickSlotMessage(1));
+}
+
+void MainWindow::on_actionQuick_save_2_hovered()
+{
+    ui->actionQuick_save_2->setToolTip(ELwindow->getQuickSlotMessage(2));
+}
+
+void MainWindow::on_actionQuick_save_3_hovered()
+{
+    ui->actionQuick_save_3->setToolTip(ELwindow->getQuickSlotMessage(3));
+}
+
+void MainWindow::on_actionQuick_load_1_hovered()
+{
+    ui->actionQuick_load_1->setToolTip(ELwindow->getQuickSlotMessage(1));
+}
+
+void MainWindow::on_actionQuick_load_2_hovered()
+{
+    ui->actionQuick_load_2->setToolTip(ELwindow->getQuickSlotMessage(2));
+}
+
+void MainWindow::on_actionQuick_load_3_hovered()
+{
+    ui->actionQuick_load_3->setToolTip(ELwindow->getQuickSlotMessage(3));
+}
+
+void MainWindow::on_actionLoad_last_config_hovered()
+{
+    ui->actionLoad_last_config->setToolTip("Load config on last exit/sim/reconstruct\n" + ELwindow->getQuickSlotMessage(0));
 }

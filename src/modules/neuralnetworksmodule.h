@@ -1,5 +1,3 @@
-#ifdef ANTS_FANN //############################################################
-
 #ifndef NEURALNETWORKSMODULE_H
 #define NEURALNETWORKSMODULE_H
 
@@ -544,5 +542,3 @@ public slots: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 };
 
 #endif // NEURALNETWORKSMODULE_H
-
-#endif //############################################################

@@ -256,6 +256,7 @@ void AGeoObject::readFromJson(QJsonObject &json)
             delete ObjectType;
             ObjectType = newType;
             ObjectType->readFromJson(jj);
+            if (ObjectType->isMonitor()) updateMonitorShape();
         }
         else
             qDebug() << "ObjectType read failed for object:" << Name << ", keeping default type";
@@ -477,6 +478,22 @@ AGridElementRecord *AGeoObject::createGridRecord()
 
   ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(geObj->ObjectType);
   return new AGridElementRecord(GE->shape, GE->size1, GE->size2);
+}
+
+void AGeoObject::updateMonitorShape()
+{
+    if (!ObjectType->isMonitor())
+    {
+        qWarning() << "Attempt to update monitor shape for non-monitor object";
+        return;
+    }
+
+    ATypeMonitorObject* mon = static_cast<ATypeMonitorObject*>(ObjectType);
+    delete Shape;
+    if (mon->config.shape == 0) //rectangular
+        Shape = new AGeoBox(mon->config.size1, mon->config.size2, mon->config.dz);
+    else //round
+        Shape = new AGeoTube(0, mon->config.size1, mon->config.dz);
 }
 
 AGeoObject *AGeoObject::findObjectByName(const QString name)
@@ -863,6 +880,8 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
 
 bool AGeoObject::isMaterialInUse(int imat)
 {
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material
+
     if (Material == imat) return true;
 
     for (int i=0; i<HostedObjects.size(); i++)
@@ -995,6 +1014,13 @@ QString AGeoObject::GenerateRandomStackName()
 {
   QString str = randomString(2, 1);
   str = "Stack_" + str;
+  return str;
+}
+
+QString AGeoObject::GenerateRandomMonitorName()
+{
+  QString str = randomString(2, 1);
+  str = "Monitor_" + str;
   return str;
 }
 
@@ -2621,6 +2647,23 @@ void ATypeGridElementObject::readFromJson(QJsonObject &json)
   parseJson(json, "dz", dz);
 }
 
+void ATypeMonitorObject::writeToJson(QJsonObject &json)
+{
+    ATypeObject::writeToJson(json);
+    config.writeToJson(json);
+}
+
+void ATypeMonitorObject::readFromJson(QJsonObject &json)
+{
+  config.readFromJson(json);
+}
+
+bool ATypeMonitorObject::isParticleInUse(int partId) const
+{
+   if (config.PhotonOrParticle == 0) return false;
+   return (config.ParticleIndex == partId);
+}
+
 bool ATypeObject::isUpperLightguide() const
 {
   if ( Type != "Lightguide") return false;
@@ -2661,6 +2704,8 @@ ATypeObject *ATypeObject::TypeObjectFactory(const QString Type)
         return new ATypeGridObject();
     else if (Type == "GridElement")
         return new ATypeGridElementObject();
+    else if (Type == "Monitor")
+        return new ATypeMonitorObject();
     else
     {
         qCritical() << "Unknown opject type in TypeObjectFactory:"<<Type;
@@ -3052,6 +3097,7 @@ TGeoShape* AGeoScaledShape::generateBaseTGeoShape(QString BaseShapeGenerationStr
           if (!Tshape) qWarning() << "TGeoScaledShape processing: Base shape generation fail!";
         }
       else qWarning() << "TGeoScaledShape processing: failed to construct AGeoShape";
+      delete Ashape;
     }
   else qWarning() << "TGeoScaledShape processing: unknown base shape type "<< shapeType;
 
@@ -3124,6 +3170,7 @@ bool AGeoScaledShape::readFromTShape(TGeoShape *Tshape)
   if (!fOK)
     {
       qWarning() << "AGeoScaledShape from TShape: error reading base TShape";
+      delete AShape;
       return false;
     }
   BaseShapeGenerationString = AShape->getGenerationString();

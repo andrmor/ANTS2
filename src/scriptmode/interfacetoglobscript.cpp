@@ -17,6 +17,7 @@
 #include "modules/lrf_v3/arepository.h"
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
+#include "amonitor.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -33,12 +34,10 @@
 #include "graphwindowclass.h"
 #endif
 
+#include <QFile>
 #include <QVariant>
 #include <QThread>
-#include <QPlainTextEdit>
-#include <QVBoxLayout>
 #include <QDateTime>
-#include <QDialog>
 #include <QApplication>
 #include <QVector3D>
 #include <QJsonDocument>
@@ -48,13 +47,13 @@
 #include "TGeoManager.h"
 #include "TGeoTrack.h"
 #include "TColor.h"
+#include "TAxis.h"
 #include "TH1D.h"
-#include "TH1.h"
 #include "TH2D.h"
-#include "TH2.h"
-#include "TF2.h"
-#include "TGraph.h"
-#include "TF1.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TBranch.h"
+#include "TLeaf.h"
 
 /*
 bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString& Name, int& Index)
@@ -842,157 +841,6 @@ bool InterfaceToConfig::Save(QString FileName)
     return SaveJsonToFile(Config->JSON, FileName);
 }
 
-//void InterfaceToGlobScript::ShowOutputWindow(bool flag, int tab)
-//{
-//  if (flag)
-//    {
-//      MW->Owindow->showNormal();
-//      MW->Owindow->raise();
-//    }
-//  else MW->Owindow->hide();
-
-//  if (tab>-1 && tab<4) MW->Owindow->SetTab(tab);
-//  qApp->processEvents();
-//}
-
-//-----------------------------------
-static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-InterfaceToTexter::InterfaceToTexter(QMainWindow* parent) : D(0), Parent(parent)
-{
-  bEnabled = true;
-  bActivated = false;
-  init(false);
-}
-
-void InterfaceToTexter::init(bool fTransparent)
-{
-  D = new QDialog(Parent);
-  QObject::connect(D, &QDialog::finished, this, &InterfaceToTexter::Hide);
-
-  QVBoxLayout* l = new QVBoxLayout;
-  e = new QPlainTextEdit();
-  e->setReadOnly(true);
-  l->addWidget(e);
-  D->setLayout(l);
-
-  X = msgX;
-  Y = msgY;
-  W = msgW;
-  H = msgH;
-
-  D->setGeometry(X, Y, W, H);
-  D->setWindowTitle("Script msg");
-
-  if (fTransparent)
-    {
-      D->setWindowFlags(Qt::FramelessWindowHint);
-      D->setAttribute(Qt::WA_TranslucentBackground);
-
-      e->setStyleSheet("background: rgba(0,0,255,0%)");
-      e->setFrameStyle(QFrame::NoFrame);
-    }
-}
-
-
-InterfaceToTexter::~InterfaceToTexter()
-{
-  //qDebug() << "Msg destructor";
-  deleteDialog();
-}
-
-void InterfaceToTexter::SetTransparent(bool flag)
-{
-  QString text = e->document()->toPlainText();
-  delete D;
-  D = 0;
-  init(flag);
-  e->setPlainText(text);
-}
-
-void InterfaceToTexter::Append(QString txt)
-{
-  e->appendHtml(txt);
-}
-
-void InterfaceToTexter::Clear()
-{
-  e->clear();
-}
-
-void InterfaceToTexter::Show(QString txt, int ms)
-{
-  if (!bEnabled) return;
-  e->clear();
-  e->appendHtml(txt);
-
-  if (ms == -1)
-    {
-      D->show();
-      D->raise();
-      bActivated = true;
-      return;
-    }
-
-  D->show();
-  D->raise();
-  bActivated = true;
-  QTime t;
-  t.restart();
-  do qApp->processEvents();
-  while (t.elapsed()<ms);
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::Move(double x, double y)
-{
-  X = msgX = x; Y = msgY = y;
-  D->move(X, Y);
-}
-
-void InterfaceToTexter::Resize(double w, double h)
-{
-  W = msgW = w; H = msgH = h;
-  D->resize(W, H);
-}
-
-void InterfaceToTexter::Show()
-{
-  if (!bEnabled) return;
-  D->show();
-  D->raise();
-  bActivated = true;
-}
-
-void InterfaceToTexter::Hide()
-{
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::SetFontSize(int size)
-{
-  QFont f = e->font();
-  f.setPointSize(size);
-  e->setFont(f);
-}
-
-void InterfaceToTexter::deleteDialog()
-{
-   delete D;
-   D = 0;
-}
-
-void InterfaceToTexter::hide()
-{
-    if (D) D->hide();
-}
-
-void InterfaceToTexter::restore()
-{
-    if (D) D->show();
-}
-
 #ifdef SIM
 //----------------------------------
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
@@ -1004,6 +852,13 @@ InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsData
   H["GetSeed"] = "Get random generator seed";
   H["SaveAsTree"] = "Save simulation results as a ROOT tree file";
   H["SaveAsText"] = "Save simulation results as an ASCII file";
+
+  H["getMonitorTime"] = "returns array of arrays: [time, value]";
+  H["getMonitorWave"] = "returns array of arrays: [wave index, value]";
+  H["getMonitorEnergy"] = "returns array of arrays: [energy, value]";
+  H["getMonitorAngular"] = "returns array of arrays: [angle, value]";
+  H["getMonitorXY"] = "returns array of arrays: [x, y, value]";
+  H["getMonitorHits"] = "returns the number of detected hits by the monitor with the given name";
 }
 
 void InterfaceToSim::ForceStop()
@@ -1109,6 +964,107 @@ bool InterfaceToSim::SaveAsText(QString fileName)
 {
   return EventsDataHub->saveSimulationAsText(fileName);
 }
+
+int InterfaceToSim::countMonitors()
+{
+    if (!EventsDataHub->SimStat) return 0;
+    return EventsDataHub->SimStat->Monitors.size();
+}
+
+//int InterfaceToSim::getMonitorHits(int imonitor)
+//{
+//    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
+//        return std::numeric_limits<int>::quiet_NaN();
+//    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
+//}
+
+int InterfaceToSim::getMonitorHits(QString monitor)
+{
+    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        if (mon->getName() == monitor)
+            return mon->getHits();
+    }
+    return std::numeric_limits<int>::quiet_NaN();
+}
+
+QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
+{
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH1D* h;
+          if      (whichOne == "time")   h = mon->getTime();
+          else if (whichOne == "angle")  h = mon->getAngle();
+          else if (whichOne == "wave")   h = mon->getWave();
+          else if (whichOne == "energy") h = mon->getEnergy();
+          else return vl;
+
+          TAxis* axis = h->GetXaxis();
+          for (int i=1; i<axis->GetNbins()+1; i++)
+          {
+              QVariantList el;
+              el << axis->GetBinCenter(i);
+              el << h->GetBinContent(i);
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
+}
+
+QVariant InterfaceToSim::getMonitorTime(QString monitor)
+{
+    return getMonitorData1D(monitor, "time");
+}
+
+QVariant InterfaceToSim::getMonitorAngular(QString monitor)
+{
+  return getMonitorData1D(monitor, "angle");
+}
+
+QVariant InterfaceToSim::getMonitorWave(QString monitor)
+{
+  return getMonitorData1D(monitor, "wave");
+}
+
+QVariant InterfaceToSim::getMonitorEnergy(QString monitor)
+{
+  return getMonitorData1D(monitor, "energy");
+}
+
+QVariant InterfaceToSim::getMonitorXY(QString monitor)
+{
+  QVariantList vl;
+  if (!EventsDataHub->SimStat) return vl;
+  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
+  {
+      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      if (mon->getName() == monitor)
+      {
+          TH2D* h = mon->getXY();
+
+          TAxis* axisX = h->GetXaxis();
+          TAxis* axisY = h->GetYaxis();
+          for (int ix=1; ix<axisX->GetNbins()+1; ix++)
+            for (int iy=1; iy<axisY->GetNbins()+1; iy++)
+          {
+              QVariantList el;
+              el << axisX->GetBinCenter(ix);
+              el << axisY->GetBinCenter(iy);
+              el << h->GetBinContent( h->GetBin(ix,iy) );
+              vl.push_back(el);
+          }
+      }
+  }
+  return vl;
+}
 #endif
 
 //----------------------------------
@@ -1126,6 +1082,8 @@ InterfaceToData::InterfaceToData(AConfiguration *Config, ReconstructionManagerCl
   H["SetReconstructed"] = "For event number ievent set reconstructed x,y,z and energy.\n"
                           "The function automatically sets status ReconstructionOK and GoodEvent to true for this event.\n"
                           "After all events are reconstructed, SetReconstructionReady() has to be called!";
+
+  H["GetStatistics"] = "Returns (if available) an array with GoodEvents, Average_Chi2, Average_XY_deviation";
 }
 
 double InterfaceToData::GetPMsignal(int ievent, int ipm)
@@ -1146,6 +1104,21 @@ double InterfaceToData::GetPMsignal(int ievent, int ipm)
   return EventsDataHub->Events.at(ievent).at(ipm);
 }
 
+QVariant InterfaceToData::GetPMsignals(int ievent)
+{
+  int numEvents = GetNumEvents();
+  if (ievent<0 || ievent>=numEvents)
+    {
+      abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+      return 0;
+    }
+
+  const QVector< float >& sigs = EventsDataHub->Events.at(ievent);
+  QVariantList l;
+  for (float f : sigs) l << QVariant(f);
+  return l;
+}
+
 void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
 {
     int numEvents = GetNumEvents();
@@ -1162,6 +1135,57 @@ void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
       }
 
     EventsDataHub->Events[ievent][ipm] = value;
+}
+
+double InterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (iTimeBin<0 || iTimeBin >= numTimeBins)
+      {
+        abort("Wrong time bin "+QString::number(ievent)+" Time bins available: "+QString::number(numTimeBins));
+        return 0;
+      }
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    return EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).at(ipm);
+}
+
+QVariant InterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
+{
+    int numEvents = countTimedEvents();
+    if (ievent<0 || ievent >= numEvents)
+      {
+        abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+        return 0;
+      }
+
+    int numTimeBins = countTimeBins();
+    if (numTimeBins == 0) return QVariantList();
+
+    int numPMs = EventsDataHub->TimedEvents.at(ievent).first().size();
+    if (ipm<0 || ipm>=numPMs)
+      {
+        abort("Wrong PM number "+QString::number(ipm)+"; PMs in the events data file: "+QString::number(numPMs));
+        return 0;
+      }
+
+    QVariantList aa;
+    for (int i=0; i<numTimeBins; i++)
+        aa << EventsDataHub->TimedEvents.at(ievent).at(i).at(ipm);
+    return aa;
 }
 
 int InterfaceToData::GetNumPMs()
@@ -1184,6 +1208,17 @@ int InterfaceToData::GetNumEvents()
 int InterfaceToData::countEvents()
 {
     return EventsDataHub->Events.size();
+}
+
+int InterfaceToData::countTimedEvents()
+{
+    return EventsDataHub->TimedEvents.size();
+}
+
+int InterfaceToData::countTimeBins()
+{
+    if (EventsDataHub->TimedEvents.isEmpty()) return 0;
+    return EventsDataHub->TimedEvents.first().size();
 }
 
 bool InterfaceToData::checkEventNumber(int ievent)
@@ -1358,6 +1393,12 @@ bool InterfaceToData::IsReconstructedGoodEvent(int igroup, int ievent)
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->GoodEvent;
 }
 
+bool InterfaceToData::IsReconstructed_ScriptFilterPassed(int igroup, int ievent)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return 0;
+  return !EventsDataHub->ReconstructionData.at(igroup).at(ievent)->fScriptFiltered;
+}
+
 int InterfaceToData::countReconstructedGroups()
 {
     return EventsDataHub->ReconstructionData.size();
@@ -1519,6 +1560,12 @@ void InterfaceToData::SetReconstructedEnergy(int ievent, double e)
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].energy = e;
 }
 
+void InterfaceToData::SetReconstructed_ScriptFilterPass(int ievent, bool flag)
+{
+  if (!checkSetReconstructionDataRequest(ievent)) return;
+  EventsDataHub->ReconstructionData[0][ievent]->fScriptFiltered = !flag;
+}
+
 void InterfaceToData::SetReconstructedGoodEvent(int ievent, bool good)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
@@ -1595,6 +1642,12 @@ void InterfaceToData::SetReconstructedGoodEvent(int igroup, int ievent, int ipoi
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = good;
 }
 
+void InterfaceToData::SetReconstructed_ScriptFilterPass(int igroup, int ievent, bool flag)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return;
+  EventsDataHub->ReconstructionData[igroup][ievent]->fScriptFiltered = !flag;
+}
+
 void InterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return;
@@ -1648,6 +1701,17 @@ void InterfaceToData::PurgeBad()
 void InterfaceToData::Purge(int LeaveOnePer)
 {
   EventsDataHub->Purge(LeaveOnePer);
+}
+
+QVariant InterfaceToData::GetStatistics(int igroup)
+{
+  int GoodEvents;
+  double AvChi2, AvDeviation;
+  EventsDataHub->prepareStatisticsForEvents(Config->GetDetector()->LRFs->isAllLRFsDefined(), GoodEvents, AvChi2, AvDeviation, igroup);
+
+  QVariantList l;
+  l << GoodEvents << AvChi2 << AvDeviation;
+  return l;
 }
 
 //----------------------------------
@@ -2072,446 +2136,10 @@ void InterfaceToGeoWin::ShowEnergyVector()
   MW->Rwindow->UpdateSimVizData(0);
 }
 #endif
-//----------------------------------
-InterfaceToGraphs::InterfaceToGraphs(TmpObjHubClass *TmpHub)
-  : TmpHub(TmpHub)
-{
-  H["NewGraph"] = "Creates a new graph (Root TGraph object)";
-  H["SetMarkerProperties"] = "Default marker properties are 1, 20, 1";
-  H["SetLineProperties"] = "Default line properties are 1, 1, 2";
-  H["Draw"] = "Draws the graph (use \"APL\" options if in doubt)";
-}
-
-bool InterfaceToGraphs::InitOnRun()
-{
-  TmpHub->ScriptDrawObjects.clear();
-  return true;
-}
-
-void InterfaceToGraphs::NewGraph(QString GraphName)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index != -1)
-    {
-      abort("Bad new graph name! Object "+GraphName+" already exists");
-      return;
-    }
-
-  TGraph* gr = new TGraph();
-  TmpHub->ScriptDrawObjects.append(gr, GraphName, "TGraph");
-  gr->SetFillColor(0);
-  gr->SetFillStyle(0);
-}
-
-void InterfaceToGraphs::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.MarkerColor = MarkerColor;
-  r.MarkerStyle = MarkerStyle;
-  r.MarkerSize = MarkerSize;
-}
-
-void InterfaceToGraphs::SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.LineColor = LineColor;
-  r.LineStyle = LineStyle;
-  r.LineWidth = LineWidth;
-}
-
-void InterfaceToGraphs::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.Xtitle = X_Title;
-  r.Ytitle = Y_Title;
-}
-
-void InterfaceToGraphs::AddPoint(QString GraphName, double x, double y)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      gr->SetPoint(gr->GetN(), x, y);
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-}
-
-void InterfaceToGraphs::Draw(QString GraphName, QString options)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      if (gr->GetN() == 0) return;
-
-      gr->SetLineColor(r.LineColor);
-      gr->SetLineWidth(r.LineWidth);
-      gr->SetLineStyle(r.LineStyle);
-      gr->SetMarkerColor(r.MarkerColor);
-      gr->SetMarkerSize(r.MarkerSize);
-      gr->SetMarkerStyle(r.MarkerStyle);
-      gr->SetEditable(false);
-      gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
-      emit RequestDraw(gr, options, true);
-
-      gr->GetXaxis()->SetTitle(r.Xtitle.toLatin1().data());
-      gr->GetYaxis()->SetTitle(r.Ytitle.toLatin1().data());
-      emit RequestDraw(0, "", true); //to update canvas so axes titles are visible
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-  }
-}
-
-bool InterfaceToGraphs::Delete(QString GraphName)
-{
-    return TmpHub->ScriptDrawObjects.remove(GraphName);
-}
-
-void InterfaceToGraphs::DeleteAllGraph()
-{
-    TmpHub->ScriptDrawObjects.removeAllGraphs();
-}
 
 //----------------------------------
-InterfaceToHistD::InterfaceToHistD(TmpObjHubClass* TmpHub)
-  : TmpHub(TmpHub)
-{
-    H["FitGauss"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
-            "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
-    H["FitGaussWithInit"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
-                            "\nInitialParValues is an array of initial parameters of the values [Constant,Mean,Sigma]"
-                            "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
-}
 
-bool InterfaceToHistD::InitOnRun()
-{
-  TmpHub->ScriptDrawObjects.clear();
-  return true;
-}
 
-void InterfaceToHistD::NewHist(QString HistName, int bins, double start, double stop)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index != -1)
-    {
-      abort("Bad new hist name! Object "+HistName+" already exists");
-      return;
-    }
-
-  TH1D* hist = new TH1D("", HistName.toLatin1().data(), bins, start, stop);
-  hist->GetYaxis()->SetTitleOffset((Float_t)1.30);
-  TmpHub->ScriptDrawObjects.append(hist, HistName, "TH1D");
-}
-
-void InterfaceToHistD::NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index != -1)
-    {
-      abort("Bad new hist name! Object "+HistName+" already exists");
-      return;
-    }
-
-  TH2D* hist = new TH2D("", HistName.toLatin1().data(), binsX, startX, stopX, binsY, startY, stopY);
-  hist->GetYaxis()->SetTitleOffset((Float_t)1.30);
-  TmpHub->ScriptDrawObjects.append(hist, HistName, "TH2D");
-}
-
-void InterfaceToHistD::SetTitles(QString HistName, QString X_Title, QString Y_Title, QString Z_Title)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.Xtitle = X_Title;
-  r.Ytitle = Y_Title;
-  r.Ztitle = Z_Title;
-}
-
-void InterfaceToHistD::SetLineProperties(QString HistName, int LineColor, int LineStyle, int LineWidth)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.LineColor = LineColor;
-  r.LineStyle = LineStyle;
-  r.LineWidth = LineWidth;
-}
-
-void InterfaceToHistD::Fill(QString HistName, double val, double weight)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->Fill(val, weight);
-    }
-  else
-    {
-      abort("TH1D histogram "+HistName+" not found!");
-      return;
-    }
-}
-
-void InterfaceToHistD::Fill2D(QString HistName, double x, double y, double weight)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->Fill(x, y, weight);
-    }
-  else
-    {
-      abort("TH2D histogram "+HistName+" not found!");
-      return;
-    }
-}
-
-void InterfaceToHistD::Smooth(QString HistName, int times)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->Smooth(times);
-      emit RequestDraw(0, "", true); //to update
-    }
-  else if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->Smooth(times);
-      emit RequestDraw(0, "", true); //to update
-    }
-  else
-    {
-      abort("Object "+HistName+": unknown histogram type!");
-      return;
-  }
-}
-
-QVariant ReturnNanArray(int num)
-{
-    QJsonArray ar;
-    for (int i=0; i<num; i++) ar << std::numeric_limits<double>::quiet_NaN();
-    QJsonValue jv = ar;
-    QVariant res = jv.toVariant();
-    return res;
-}
-
-QVariant InterfaceToHistD::FitGauss(QString HistName, QString options)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-    if (index == -1)
-      {
-        abort("Histogram "+HistName+" not found!");
-        return ReturnNanArray(6);
-      }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type.startsWith("TH1"))
-      {
-        TH1* h = static_cast<TH1*>(r.Obj);
-        TF1 *f1 = new TF1("f1", "gaus");
-        int status = h->Fit(f1, options.toLatin1());
-        if (status != 0) return ReturnNanArray(6);
-
-        emit RequestDraw(0, "", true); //to update
-
-        QJsonArray ar;
-        for (int i=0; i<3; i++) ar << f1->GetParameter(i);
-        for (int i=0; i<3; i++) ar << f1->GetParError(i);
-
-        QJsonValue jv = ar;
-        QVariant res = jv.toVariant();
-        return res;
-      }
-    else
-      {
-        abort("Object "+HistName+": unsupported histogram type!");
-        return ReturnNanArray(6);
-    }
-}
-
-QVariant InterfaceToHistD::FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-    if (index == -1)
-      {
-        abort("Histogram "+HistName+" not found!");
-        return ReturnNanArray(6);
-      }
-
-    QString type = InitialParValues.typeName();
-    if (type != "QVariantList")
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-
-    QVariantList vl = InitialParValues.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    if (ar.size() < 3)
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-    if (!ar[0].isDouble() || !ar[1].isDouble() || !ar[2].isDouble() )
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type.startsWith("TH1"))
-      {
-        TH1* h = static_cast<TH1*>(r.Obj);
-
-        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)");
-        f1->SetParameters(ar[0].toDouble(), ar[1].toDouble(), ar[2].toDouble());
-
-        int status = h->Fit(f1, options.toLatin1());
-        if (status != 0) return ReturnNanArray(6);
-
-        emit RequestDraw(0, "", true); //to update
-
-        QJsonArray ar;
-        for (int i=0; i<3; i++) ar << f1->GetParameter(i);
-        for (int i=0; i<3; i++) ar << f1->GetParError(i);
-
-        QJsonValue jv = ar;
-        QVariant res = jv.toVariant();
-        return res;
-      }
-    else
-      {
-        abort("Object "+HistName+": unsupported histogram type!");
-        return ReturnNanArray(6);
-    }
-}
-
-bool InterfaceToHistD::Delete(QString HistName)
-{
-    return TmpHub->ScriptDrawObjects.remove(HistName);
-}
-
-void InterfaceToHistD::DeleteAllHist()
-{
-    TmpHub->ScriptDrawObjects.removeAllHists();
-}
-
-void InterfaceToHistD::Draw(QString HistName, QString options)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->SetXTitle(r.Xtitle.toLatin1().data());
-      h->SetYTitle(r.Ytitle.toLatin1().data());
-      h->SetLineColor(r.LineColor);
-      h->SetLineWidth(r.LineWidth);
-      h->SetLineStyle(r.LineStyle);
-      emit RequestDraw(h, options, true);
-    }
-  else if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->SetXTitle(r.Xtitle.toLatin1().data());
-      h->SetYTitle(r.Ytitle.toLatin1().data());
-      h->SetZTitle(r.Ztitle.toLatin1().data());
-      h->SetLineColor(r.LineColor);
-      h->SetLineWidth(r.LineWidth);
-      h->SetLineStyle(r.LineStyle);
-      emit RequestDraw(h, options, true);
-    }
-  else
-    {
-      abort("Object "+HistName+": unknown histogram type!");
-      return;
-    }
-}
-
-//----------------------------------
 InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager, AConfiguration *Config, EventsDataClass *EventsDataHub, int RecNumThreads)
  : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads) { }
 
@@ -2733,6 +2361,11 @@ void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
   MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
+}
+
+void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
+{
+  MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
 }
 
 void InterfaceToGraphWin::AddToBasket(QString Title)
@@ -2977,155 +2610,6 @@ void AInterfaceToOutputWin::Hide()
 }
 #endif
 
-// ------------- MATH ------------
-
-MathInterfaceClass::MathInterfaceClass(TRandom2* RandGen)
-{
-  //srand (time(NULL));
-    this->RandGen = RandGen;
-
-  H["random"] = "Returns a random number between 0 and 1.\nGenerator respects the seed set by SetSeed method of the sim module!";
-  H["gauss"] = "Returns a random value sampled from Gaussian distribution with mean and sigma given by the user";
-  H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
-  H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
-}
-
-void MathInterfaceClass::setRandomGen(TRandom2 *RandGen)
-{
-  this->RandGen = RandGen;
-}
-
-double MathInterfaceClass::abs(double val)
-{
-  return std::abs(val);
-}
-
-double MathInterfaceClass::acos(double val)
-{
-  return std::acos(val);
-}
-
-double MathInterfaceClass::asin(double val)
-{
-  return std::asin(val);
-}
-
-double MathInterfaceClass::atan(double val)
-{
-  return std::atan(val);
-}
-
-double MathInterfaceClass::atan2(double y, double x)
-{
-  return std::atan2(y, x);
-}
-
-double MathInterfaceClass::ceil(double val)
-{
-  return std::ceil(val);
-}
-
-double MathInterfaceClass::cos(double val)
-{
-  return std::cos(val);
-}
-
-double MathInterfaceClass::exp(double val)
-{
-  return std::exp(val);
-}
-
-double MathInterfaceClass::floor(double val)
-{
-  return std::floor(val);
-}
-
-double MathInterfaceClass::log(double val)
-{
-  return std::log(val);
-}
-
-double MathInterfaceClass::max(double val1, double val2)
-{
-  return std::max(val1, val2);
-}
-
-double MathInterfaceClass::min(double val1, double val2)
-{
-  return std::min(val1, val2);
-}
-
-double MathInterfaceClass::pow(double val, double power)
-{
-  return std::pow(val, power);
-}
-
-double MathInterfaceClass::sin(double val)
-{
-  return std::sin(val);
-}
-
-double MathInterfaceClass::sqrt(double val)
-{
-  return std::sqrt(val);
-}
-
-double MathInterfaceClass::tan(double val)
-{
-    return std::tan(val);
-}
-
-double MathInterfaceClass::round(double val)
-{
-  int f = std::floor(val);
-  if (val>0)
-    {
-      if (val - f < 0.5) return f;
-      else return f+1;
-    }
-  else
-    {
-      if (val - f < 0.5 ) return f;
-      else return f+1;
-    }
-}
-
-double MathInterfaceClass::random()
-{
-  //return rand()/(double)RAND_MAX;
-
-  if (!RandGen) return 0;
-  return RandGen->Rndm();
-}
-
-double MathInterfaceClass::gauss(double mean, double sigma)
-{
-  if (!RandGen) return 0;
-  return RandGen->Gaus(mean, sigma);
-}
-
-double MathInterfaceClass::poisson(double mean)
-{
-  if (!RandGen) return 0;
-  return RandGen->Poisson(mean);
-}
-
-double MathInterfaceClass::maxwell(double a)
-{
-  if (!RandGen) return 0;
-
-  double v2 = 0;
-  for (int i=0; i<3; i++)
-    {
-      double v = RandGen->Gaus(0, a);
-      v *= v;
-      v2 += v;
-    }
-  return std::sqrt(v2);
-}
-
-// ------------- End of MATH -------------
-
 // ------------- New LRF module interface ------------
 
 ALrfScriptInterface::ALrfScriptInterface(DetectorClass *Detector, EventsDataClass *EventsDataHub) :
@@ -3325,3 +2809,305 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
 
 
 // ------------- End of New LRF module interface ------------
+
+AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) : TmpHub(TmpHub)
+{}
+
+void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
+{
+    if (TmpHub->Trees.findIndexOf(TreeName) !=-1)
+    {
+        abort("Tree with name " + TreeName + " already exists!");
+        return;
+    }
+
+    TFile *f = TFile::Open(FileName.toLocal8Bit().data(), "READ");
+    if (!f)
+    {
+        abort("Cannot open file " + FileName);
+        return;
+    }
+    TTree *t = 0;
+    f->GetObject(TreeNameInFile.toLocal8Bit().data(), t);
+    if (!t)
+    {
+        abort("Tree " + TreeNameInFile + " not found in file " + FileName);
+        return;
+    }
+    t->Print();
+
+    TmpHub->Trees.addTree(TreeName, t);
+    return;
+}
+
+QString AInterfaceToTree::PrintBranches(QString TreeName)
+{
+    int index = TmpHub->Trees.findIndexOf(TreeName);
+    if (index == -1)
+    {
+        abort("Tree with name " + TreeName + " does not exist!");
+        return "";
+    }
+    TTree *t = TmpHub->Trees.getTree(TreeName);
+    if (!t)
+    {
+        abort("Tree " + TreeName + " not found!");
+        return "";
+    }
+
+    QString s = "Thee ";
+    s += TreeName;
+    s += " has the following branches (-> data_type):<br>";
+    for (int i=0; i<t->GetNbranches(); i++)
+    {
+        TObjArray* lb = t->GetListOfBranches();
+        const TBranch* b = (const TBranch*)(lb->At(i));
+        QString name = b->GetName();
+        s += name;
+        s += " -> ";
+        QString type = b->GetClassName();
+        if (type.isEmpty())
+        {
+            QString title = b->GetTitle();
+            title.remove(name);
+            title.remove("/");
+            s += title;
+        }
+        else
+        {
+            type.replace("<", "(");
+            type.replace(">", ")");
+            s += type;
+        }
+        s += "<br>";
+    }
+    return s;
+}
+
+QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
+{
+    int index = TmpHub->Trees.findIndexOf(TreeName);
+    if (index == -1)
+    {
+        abort("Tree with name " + TreeName + " does not exist!");
+        return QVariant();
+    }
+
+    TTree *t = TmpHub->Trees.getTree(TreeName);
+    if (!t)
+    {
+        abort("Tree " + TreeName + " not found!");
+        return QVariant();
+    }
+
+    TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
+    if (!branch)
+    {
+        abort("Tree " + TreeName + " does not have branch " + BranchName);
+        return QVariant();
+    }
+
+    int numEntries = branch->GetEntries();
+    qDebug() << "The branch contains:" << numEntries << "elements";
+
+    QList< QVariant > varList;
+    QString type = branch->GetClassName();
+    qDebug() << "Element type:" << type;
+    if (type == "vector<double>")
+    {
+        std::vector<double> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "vector<float>")
+    {
+        std::vector<float> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "vector<int>")
+    {
+        std::vector<int> *v = 0;
+        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+
+        for (Int_t i = 0; i < numEntries; i++)
+        {
+            Long64_t tentry = t->LoadTree(i);
+            branch->GetEntry(tentry);
+            QList<QVariant> ll;
+            for (UInt_t j = 0; j < v->size(); ++j)
+                ll.append( (*v)[j] );
+            QVariant r = ll;
+            varList << r;
+        }
+    }
+    else if (type == "")
+    {
+        //have to use another system
+        QString title = branch->GetTitle();  //  can be, e.g., "blabla/D" or "signal[19]/F"
+
+        if (title.contains("["))
+        {
+            qDebug() << "Array of data"<<title;
+            QRegExp selector("\\[(.*)\\]");
+            selector.indexIn(title);
+            QStringList List = selector.capturedTexts();
+            if (List.size()!=2)
+            {
+               abort("Cannot extract the length of the array");
+               return QVariant();
+            }
+            else
+            {
+               QString s = List.at(1);
+               bool fOK = false;
+               int numInArray = s.toInt(&fOK);
+               if (!fOK)
+               {
+                  abort("Cannot extract the length of the array");
+                  return QVariant();
+               }
+               qDebug() << "in the array there are"<<numInArray<<"elements";
+
+               //type dependent too!
+               if (title.contains("/I"))
+               {
+                   qDebug() << "It is an array with ints";
+                   int *array = new int[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else if (title.contains("/D"))
+               {
+                   qDebug() << "It is an array with doubles";
+                   double *array = new double[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else if (title.contains("/F"))
+               {
+                   qDebug() << "It is an array with floats";
+                   float *array = new float[numInArray];
+                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
+
+                   for (Int_t i = 0; i < numEntries; i++)
+                   {
+                       Long64_t tentry = t->LoadTree(i);
+                       branch->GetEntry(tentry);
+                       QList<QVariant> ll;
+                       for (int j = 0; j < numInArray; j++)
+                           ll.append( array[j] );
+                       QVariant r = ll;
+                       varList << r;
+                   }
+                   delete [] array;
+               }
+               else
+               {
+                   abort("Cannot extract the type of the array");
+                   return QVariant();
+               }
+            }
+        }
+        else if (title.contains("/I"))
+        {
+            qDebug() << "Int data - scalar";
+            int v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else if (title.contains("/D"))
+        {
+            qDebug() << "Double data - scalar";
+            double v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else if (title.contains("/F"))
+        {
+            qDebug() << "Float data - scalar";
+            float v = 0;
+            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
+            for (Int_t i = 0; i < numEntries; i++)
+            {
+                Long64_t tentry = t->LoadTree(i);
+                branch->GetEntry(tentry);
+                varList.append(v);
+            }
+        }
+        else
+        {
+            abort("Unsupported data type of the branch - title is: "+title);
+            return QVariant();
+        }
+
+    }
+    else
+    {
+        abort("Tree branch type " + type + " is not supported");
+        return QVariant();
+    }
+
+    t->ResetBranchAddresses();
+    return varList;
+}
+
+void AInterfaceToTree::CloseTree(QString TreeName)
+{
+   int index = TmpHub->Trees.findIndexOf(TreeName);
+   if (index == -1) return;
+
+   TmpHub->Trees.remove(TreeName);
+}

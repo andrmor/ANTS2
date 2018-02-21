@@ -22,54 +22,60 @@ bool NormalizeVector(double *arr)
     return true;
 }
 
-double InteractionValue(double energy, QVector<double>* X, QVector<double>* F, bool LogLog)
+double GetInterpolatedValue(double val, const QVector<double>* X, const QVector<double>* F, bool LogLog)
 {
-//  qDebug()<<"data point in arrays X and F:"<<X->size()<<F->size()<<"Min X:"<<X->first()<<"Max X:"<<X->last();
-  //if (degree == 1)   {
+    //      qDebug()<<"data point in arrays X and F:"<<X->size()<<F->size()<<"Min X:"<<X->first()<<"Max X:"<<X->last();
+    if (val < X->first())
+      {
+        qWarning()<<"Interpolation: value is out of the data range:"<<val<< " < " << X->first();
+        return F->first();
+      }
+    if (val > X->last())
+      {
+        qWarning()<<"Interpolation: value is out of the data range:"<<val<< " > " << X->last();
+        return F->last();
+      }
 
-    //linear interpolation of IterationData for current energy
-    QVector<double>::iterator it;
-    it = qLowerBound(X->begin(), X->end(), energy);
+    QVector<double>::const_iterator it;
+    //it = qLowerBound(X->begin(), X->end(), energy);
+    it = std::lower_bound(X->begin(), X->end(), val);
     int index = X->indexOf(*it);
-    //qDebug()<<"energy:"<<energy<<"index"<<index;//<<*it;
+    //      qDebug()<<"energy:"<<energy<<"index"<<index;//<<*it;
     if (index < 1)
-    {
-        qWarning()<<"Interpolation: value out (or on the border) of the interaction data range!";
-        return F->at(index);
-    }
+      {
+        //qWarning()<<"Interpolation: value out (or on the border) of the interaction data range!";
+        return F->first();
+      }
 
-    //interpolating:
     double Less = F->at(index-1);
     double More = F->at(index);
-    //qDebug()<<" Less/More"<<Less<<More;
+    //      qDebug()<<" Less/More"<<Less<<More;
     double EnergyLess = X->at(index-1);
     double EnergyMore = X->at(index);
-    // qDebug()<<" Energy Less/More"<<EnergyLess<<EnergyMore;
-    double InteractValue;
-    if (EnergyLess == EnergyMore) {InteractValue = More;}   //*** ==  To change to safer
+    //      qDebug()<<" Energy Less/More"<<EnergyLess<<EnergyMore;
+
+    double InterpolationValue;
+    if (EnergyLess == EnergyMore) InterpolationValue = More;
     else
       {
         if (LogLog)
           {
+            //Log-log interpolation
             double LogLess = log(Less);
             double LogMore = log(More);
             double LogEnergyLess = log(EnergyLess);
             double LogEnergyMore = log(EnergyMore);
-            InteractValue = LogLess + (LogMore-LogLess)*(log(energy)-LogEnergyLess)/(LogEnergyMore-LogEnergyLess);
-            InteractValue = exp(InteractValue);
+            InterpolationValue = LogLess + (LogMore-LogLess)*(log(val)-LogEnergyLess)/(LogEnergyMore-LogEnergyLess);
+            InterpolationValue = exp(InterpolationValue);
           }
-        else InteractValue = Less + (More-Less)*(energy-EnergyLess)/(EnergyMore-EnergyLess);
+        else
+          {
+            // linear interpolation
+            InterpolationValue = Less + (More-Less)*(val-EnergyLess)/(EnergyMore-EnergyLess);
+          }
       }
-//     qDebug()<<"energy / interValue"<<energy<<InteractValue;
-    return InteractValue;
-// }
-
-  /*
-  else
-   {
-     return PolyInterpolation(energy, X, F, degree+1);
-   }
-   */
+    //      qDebug()<<"energy / interValue"<<energy<<InteractValue;
+    return InterpolationValue;
 }
 
 /*
@@ -219,7 +225,7 @@ void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y,
           else
             {
               //general case
-              yy = InteractionValue(xx, sp_x, sp_y); //reusing interpolation function
+              yy = GetInterpolatedValue(xx, sp_x, sp_y); //reusing interpolation function
             }
         }
 //      qDebug()<<xx<<yy;

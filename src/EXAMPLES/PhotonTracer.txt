@@ -1,3 +1,6 @@
+//enable collection of simulation statistics
+config.Replace( "SimulationConfig.GeneralSimConfig.AcceleratorConfig.LogsStatistics" , true)
+
 //list of available processes and history fields
 var s = photon.PrintAllDefinedProcessTypes()
 s += photon.PrintAllDefinedRecordMemebers()

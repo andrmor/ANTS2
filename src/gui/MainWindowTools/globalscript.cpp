@@ -5,9 +5,11 @@
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"
 #include "interfacetoglobscript.h"
+#include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
-#include "scriptinterfaces.h"
-#include "interfacetocheckerscript.h"
+#include "histgraphinterfaces.h"
+#include "localscriptinterfaces.h"
+#include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
@@ -26,6 +28,10 @@
   #include "ainterfacetoknnscript.h"
 #endif
 
+#ifdef ANTS_FANN
+  #include "ainterfacetoannscript.h"
+#endif
+
 #include <QDebug>
 
 void MainWindow::createScriptWindow()
@@ -39,8 +45,7 @@ void MainWindow::createScriptWindow()
 
     // interface objects are owned after this by the ScriptManager!
 
-    InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-    ScriptWindow->SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+    ScriptWindow->SetInterfaceObject(0); //initialization
 
     InterfaceToConfig* conf = new InterfaceToConfig(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
@@ -74,13 +79,16 @@ void MainWindow::createScriptWindow()
     AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
     ScriptWindow->SetInterfaceObject(pmS, "pms");
 
-    InterfaceToGraphs* graph = new InterfaceToGraphs(TmpHub);
+    AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
     ScriptWindow->SetInterfaceObject(graph, "graph");
 
-    InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
+    AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
-    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
+    AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
+    ScriptWindow->SetInterfaceObject(tree, "tree");
+
+    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
@@ -94,6 +102,11 @@ void MainWindow::createScriptWindow()
     ScriptWindow->SetInterfaceObject(knn, "knn");
 #endif
 
+#ifdef ANTS_FANN
+    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    ScriptWindow->SetInterfaceObject(ann, "ann");
+#endif
+
     // Interfaces which rely on MainWindow
 
     InterfaceToGeoWin* geowin = new InterfaceToGeoWin(this, TmpHub);
@@ -102,7 +115,7 @@ void MainWindow::createScriptWindow()
     InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
     ScriptWindow->SetInterfaceObject(grwin, "grwin");
 
-    InterfaceToInteractionScript* depo = new InterfaceToInteractionScript(this, EventsDataHub);
+    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo"); 
 
     AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);

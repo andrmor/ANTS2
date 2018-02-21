@@ -1,5 +1,3 @@
-#ifdef ANTS_FLANN
-
 #include "nnmoduleclass.h"
 #include "eventsdataclass.h"
 #include "ajsontools.h"
@@ -704,7 +702,7 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
     }
   else
     {
-      if (EventsDataHub->isReconstructionReady())
+      if (!EventsDataHub->isReconstructionReady())
         {
           ErrorString = "Reconstruction was not performed!";
           return false;
@@ -844,7 +842,3 @@ bool AScriptInterfacer::isValidEventIndex(int ievent)
   if (ievent < 0 || ievent >= EventsDataHub->Events.size()) return false;
   return true;
 }
-
-
-#endif
-

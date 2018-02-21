@@ -35,6 +35,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   TableLocked = true; //will be unlocked after table is filled
   TMPignore = false;
   bFilteringStarted = false;
+  WidgetFocusedBeforeBusyOn = 0;
 
   QList<int> List;
   List << 0;
@@ -168,7 +169,8 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   connect(ui->cb3Dreconstruction,SIGNAL(clicked(bool)),this,SIGNAL(cb3DreconstructionChanged(bool)));
 
   //ui->cobReconstructionAlgorithm->setCurrentIndex(0); //update indication
-  ReconstructionWindow::on_cobReconstructionAlgorithm_currentIndexChanged(ui->cobReconstructionAlgorithm->currentIndex());
+  on_cobReconstructionAlgorithm_currentIndexChanged(ui->cobReconstructionAlgorithm->currentIndex());
+  on_cobCGstartOption_currentIndexChanged(ui->cobCGstartOption->currentIndex());
    // qDebug()<<"  Reconstruction Window created";
 
   on_cbLimitNumberEvents_toggled(ui->cbLimitNumberEvents->isChecked());

@@ -53,6 +53,8 @@ void CoGReconstructorClass::execute()
       AReconRecord* rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
       const QVector< float >* PMsignals = &EventsDataHub->Events[iev];
 
+      rec->fScriptFiltered = false;
+
       //first have to get PM with max signal, it might be used for PM selection (fCoGIgnoreFar)
       rec->iPMwithMaxSignal = 0;
       double maxSignal = -1.0e10;
@@ -667,7 +669,6 @@ double Chi2static(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootM
   //RootMinReconstructorClass* Reconstructor = reinterpret_cast<RootMinReconstructorClass*>(intPoint);
   RootMinReconstructorClass* Reconstructor = (RootMinReconstructorClass*)thisvalue;
     //qDebug() << "point:"<<X<< Y<< Z<< energy;
-  //for (int ipm = 0; ipm < Reconstructor->PMsignals->size(); ipm++) //not compatible with loaded energy mode!
   for (int ipm = 0; ipm < Reconstructor->PMs->count(); ipm++)
     if (Reconstructor->DynamicPassives->isActive(ipm))
      {
@@ -900,15 +901,16 @@ void EventFilterClass::execute()
     fFinished = false;
     //qDebug() << Id<<"> Applying basic filters for events from"<<EventsFrom<<" to "<<EventsTo-1;
 
-    bool fMultipleScanEvents = FiltSet->fMultipleScanEvents && !EventsDataHub->isScanEmpty();
-    bool fDoSpatialFilter = FiltSet->fSpF_custom &&
+    const bool fMultipleScanEvents = FiltSet->fMultipleScanEvents && !EventsDataHub->isScanEmpty();
+    const bool fDoSpatialFilter = FiltSet->fSpF_custom &&
                             (
                                (FiltSet->SpF_RecOrScan == 0 && EventsDataHub->fReconstructionDataReady)
                                 ||
                                (FiltSet->SpF_RecOrScan == 1 && !EventsDataHub->isScanEmpty())
                             );
-    bool fDoRecEnergyFilter = FiltSet->fEnergyFilter && EventsDataHub->fReconstructionDataReady;
-    bool fDoChi2Filter = FiltSet->fChi2Filter && EventsDataHub->fReconstructionDataReady;
+    const bool fDoRecEnergyFilter = FiltSet->fEnergyFilter && EventsDataHub->fReconstructionDataReady;
+    const bool fDoLoadedEnergyFilter = FiltSet->fLoadedEnergyFilter && !EventsDataHub->isScanEmpty();
+    const bool fDoChi2Filter = FiltSet->fChi2Filter && EventsDataHub->fReconstructionDataReady;
 
     for (int iev=EventsFrom; iev<EventsTo; iev++)
     {
@@ -917,6 +919,8 @@ void EventFilterClass::execute()
 
         //reconstruction performed and failed -> definitely bad event
         if (EventsDataHub->fReconstructionDataReady && !rec->ReconstructionOK) goto BadEventLabel;
+
+        if (rec->fScriptFiltered) goto BadEventLabel;
 
         if (FiltSet->fEventNumberFilter)
             if (iev < FiltSet->EventNumberFilterMin || iev > FiltSet->EventNumberFilterMax) goto BadEventLabel;
@@ -939,9 +943,10 @@ void EventFilterClass::execute()
                 if (sum < FiltSet->SumCutOffMin || sum > FiltSet->SumCutOffMax) goto BadEventLabel;
         }
 
-        if (FiltSet->fLoadedEnergyFilter)
+        if (fDoLoadedEnergyFilter)
         {
-            double energy = PMsignals->at(PMs->count());  //energy channel is always the last one, pm numbering starts with 0
+            //double energy = PMsignals->at(PMs->count());  //energy channel is always the last one, pm numbering starts with 0
+            const double& energy = EventsDataHub->Scan.at(iev)->Points[0].energy;
             if (energy < FiltSet->LoadedEnergyFilterMin || energy > FiltSet->LoadedEnergyFilterMax) goto BadEventLabel;
         }
 
@@ -1040,46 +1045,63 @@ void CGonCPUreconstructorClass::execute()
     {      
       if (fStopRequested) break;
       AReconRecord *rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
-      if (rec->ReconstructionOK)
+
+      if (rec->ReconstructionOK) // ***!!! possibly remove if CoG start is not selected
         {
           if (RecSet->fUseDynamicPassives) DynamicPassives->calculateDynamicPassives(iev, rec);
 
-          double CenterX, CenterY;
-          //starting coordinates
-          if (RecSet->CGstartOption == 1)
-            { //starting from XY of the centre of the PM with max signal
-             CenterX = PMs->X(rec->iPMwithMaxSignal);
-             CenterY = PMs->Y(rec->iPMwithMaxSignal);
-            }
-          else if (RecSet->CGstartOption == 2 && !EventsDataHub->isScanEmpty())
-            {
-              //starting from true XY
-              CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
-              CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
-            }
-          else
-            { //start from CoG data
+          double CenterX, CenterY, CenterZ; //grid center coordinates
+          switch (RecSet->CGstartOption)
+          {
+          case 0:   //start from CoG data
               CenterX = rec->xCoG;
               CenterY = rec->yCoG;
-            }
-          //qDebug() << "Center option:"<<RecSet->CGstartOption<<"Center xy:"<< CenterX<<CenterY;
+              CenterZ = rec->zCoG;
+              break;
+          case 1:  //starting from XY of the centre of the PM with max signal
+              CenterX = PMs->X(rec->iPMwithMaxSignal);
+              CenterY = PMs->Y(rec->iPMwithMaxSignal);
+              CenterZ = RecSet->SuggestedZ;
+              break;
+          case 2:  // given X and Y
+              CenterX = RecSet->CGstartX;
+              CenterY = RecSet->CGstartY;
+              CenterZ = RecSet->SuggestedZ;
+              break;
+          case 3:  //starting from scan XY
+              CenterX = EventsDataHub->Scan[iev]->Points[0].r[0];
+              CenterY = EventsDataHub->Scan[iev]->Points[0].r[1];
+              CenterZ = EventsDataHub->Scan[iev]->Points[0].r[2];
+              break;
+          default:
+              qWarning() << "Unknown start option for contracting grids on CPU";
+              rec->ReconstructionOK = false;
+              rec->GoodEvent = false;
+              continue;
+          }
+          //    qDebug() << "Center option:"<<RecSet->CGstartOption<<"Center xy:"<< CenterX<<CenterY;
 
-          int Nodes = RecSet->CGnodesXY;
+          int Nodes  = RecSet->CGnodesXY;
+          int NodesZ = RecSet->fReconstructZ ? Nodes : 1;
           double Step = RecSet->CGinitialStep;
           int numPMs = PMs->count();
           double bestResult = 1.e20;
-          double bestX, bestY;         
-          double bestEnergy = -1;
-          rec->Points[0].r[2] = rec->zCoG;
+          double bestX, bestY, bestZ;
+          double bestEnergy = -1.0;
+          //rec->Points[0].r[2] = rec->zCoG;
+
+          //  qDebug() << "Step?"<<Step<<"Nodes?"<<Nodes;
 
           for (int iter = 0; iter<RecSet->CGiterations; iter++)
-            {
-              for (int ix = 0; ix<Nodes; ix++)
+            {              
+              for (int iz = 0; iz<NodesZ; iz++)
+               for (int ix = 0; ix<Nodes; ix++)
                 for (int iy = 0; iy<Nodes; iy++)
                   {
                     //coordinates of this node
-                    rec->Points[0].r[0] = CenterX - (0.5*(Nodes-1) - ix)*Step;
-                    rec->Points[0].r[1] = CenterY - (0.5*(Nodes-1) - iy)*Step;
+                    rec->Points[0].r[0] = CenterX - (0.5*(Nodes-1)  - ix)*Step;
+                    rec->Points[0].r[1] = CenterY - (0.5*(Nodes-1)  - iy)*Step;
+                    rec->Points[0].r[2] = CenterZ - (0.5*(NodesZ-1) - iz)*Step; //if no z rec -> = CenterZ
 
                     //if we have some spatial filtering:
                     if (RecSet->fLimitNodes)
@@ -1115,7 +1137,7 @@ void CGonCPUreconstructorClass::execute()
                                }
                              sumLRFs += LRFhere;
                              //SumSignal += EventsDataHub->Events[iev].at(ipm) / Detector->PMs->at(ipm).relGain;
-                             SumSignal += EventsDataHub->Events[iev].at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
+                             SumSignal += EventsDataHub->Events.at(iev).at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
                             }
                         if (fBadLRFfound) continue; //skip this location
                         rec->Points[0].energy = SumSignal/sumLRFs;//energy cannot be zero here
@@ -1129,12 +1151,14 @@ void CGonCPUreconstructorClass::execute()
                         bestResult = result;
                         bestX = rec->Points[0].r[0];
                         bestY = rec->Points[0].r[1];
+                        bestZ = rec->Points[0].r[2];
                         bestEnergy = rec->Points[0].energy;
                       }
                   }
               //preparing for new iteration
               CenterX = bestX;
               CenterY = bestY;
+              CenterZ = bestZ;
               Step /= RecSet->CGreduction;
             }
 
@@ -1142,12 +1166,12 @@ void CGonCPUreconstructorClass::execute()
             {
               rec->Points[0].r[0] = bestX;
               rec->Points[0].r[1] = bestY;
-              rec->Points[0].r[2] = rec->zCoG;
+              rec->Points[0].r[2] = bestZ;
               rec->Points[0].energy = bestEnergy;
               //alread have "OK and Good" status from CoG
             }
           else
-            {  //not a single good node wos found
+            {  //not a single good node was found
               rec->ReconstructionOK = false;
               rec->GoodEvent = false;
             }

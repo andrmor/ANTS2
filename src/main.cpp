@@ -8,12 +8,15 @@
 #include "aconfiguration.h"
 #include "ascriptmanager.h"
 #include "interfacetoglobscript.h"
+#include "histgraphinterfaces.h"
 #include "scriptminimizer.h"
 #include "globalsettingsclass.h"
 #include "afiletools.h"
 #include "aqtmessageredirector.h"
 #include "particlesourcesclass.h"
 #include "anetworkmodule.h"
+#include "asandwich.h"
+#include "amessageoutput.h"
 
 // SIM
 #ifdef SIM
@@ -25,23 +28,28 @@
 #include "mainwindow.h"
 #include "exampleswindow.h"
 #include "genericscriptwindowclass.h"
+#include "ainterfacetomessagewindow.h"
 #endif
 
 //Qt
 #include <QApplication>
 #include <QLocale>
 #include <QDebug>
-#include <TThread.h>
 #include <QThread>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QLoggingCategory>
+#include <QtMessageHandler>
 
 //Root
 #include "TApplication.h"
 #include "TObject.h"
 #include "TH1.h"
+#include "RVersion.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+#include "TThread.h"
+#endif
 
 #include "amessage.h"
 
@@ -50,36 +58,57 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QLocale::setDefault(QLocale("en_US"));
 
+    //setting up logging
+    int debug_verbosity = DEBUG_VERBOSITY;
+    qDebug() << "Debug verbosity is set to level "<<debug_verbosity;
+    QString FilterRules;
+    switch (debug_verbosity)
+    {
+    case 0:
+        //QT_LOGGING_RULES = "*.debug=false;";
+        FilterRules += "*.debug=false";
+        break;
+    case 2:
+        qInstallMessageHandler(AMessageOutput);
+        break;
+    case 1:
+    default:
+        qInstallMessageHandler(0);
+    }
+    FilterRules += "\nqt.network.ssl.warning=false"; //to suppress warnings about ssl
+    //QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
+    QLoggingCategory::setFilterRules(FilterRules);
+
     AConfiguration Config;
     int rootargc=1;
     char *rootargv[] = {(char*)"qqq"};
     TApplication RootApp("My ROOT", &rootargc, rootargv);
-    //qDebug() << "___> Root App created";
+    qDebug() << "Root App created";
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
     TThread::Initialize();
-    //qDebug() << "___> TThread initialized";
+    qDebug() << "TThread initialized";
+#endif
     EventsDataClass EventsDataHub;
 
-    //qDebug() << "___> EventsDataHub created";
+    qDebug() << "EventsDataHub created";
     DetectorClass Detector(&Config);
     Config.SetDetector(&Detector);
     QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, &Config, &AConfiguration::UpdateParticlesJson);
-    QObject::connect(&Detector, SIGNAL(requestClearEventsData()), &EventsDataHub, SLOT(clear()));
-    //qDebug() << "___> Detector created";
+    QObject::connect(&Detector, &DetectorClass::requestClearEventsData, &EventsDataHub, &EventsDataClass::clear);
+    qDebug() << "Detector created";
 
 #ifdef SIM
     ASimulationManager SimulationManager(&EventsDataHub, &Detector);
-    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::IsParticleInUseBySources, SimulationManager.ParticleSources, &ParticleSourcesClass::onIsParticleInUse);
-    QObject::connect(Detector.MpCollection, &AMaterialParticleCollection::RequestRegisterParticleRemove, SimulationManager.ParticleSources, &ParticleSourcesClass::onRequestRegisterParticleRemove);
-    QObject::connect(SimulationManager.ParticleSources, &ParticleSourcesClass::RequestUpdateSourcesInConfig, &Config, &AConfiguration::UpdateSourcesJson);
-    //qDebug() << "___> Simulation manager created";
+    Config.SetParticleSources(SimulationManager.ParticleSources);
+    qDebug() << "Simulation manager created";
 #endif
 
     ReconstructionManagerClass ReconstructionManager(&EventsDataHub, Detector.PMs, Detector.PMgroups, Detector.LRFs, &Detector.GeoManager);
-    //qDebug() << "___> Reconstruction manager created";
+    qDebug() << "Reconstruction manager created";
 
     TmpObjHubClass TmpHub;
-    //qDebug() << "___> Tmp objects hub created";
-
+    QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
+    qDebug() << "Tmp objects hub created";
 
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
@@ -87,31 +116,25 @@ int main(int argc, char *argv[])
       //in GlobSetWindow init now:
       //Network.StartRootHttpServer();  //does nothing if compilation flag is not set
       //Network.StartWebSocketServer(1234);
-    //qDebug() << "___> Network module created";
+    qDebug() << "Network module created";
 
     GlobalSettingsClass GlobSet(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
-    //qDebug() << "___> Global settings object created";
+    qDebug() << "Global settings object created";
 
     Config.UpdateLRFmakeJson(); //compatibility    
     TH1::AddDirectory(false);  //a histograms objects will not be automatically created in root directory (TDirectory); special case is in TreeView and ResolutionVsArea
                                // see ReconstructionWindow::on_pbTreeView_clicked()
 
-    //SUPPRESS WARNINGS about ssl - only needed it on MSVC2012
-    QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
-
-
-
-    //qDebug() << "___> Selecting application type";
+    qDebug() << "Selecting application type";
 #ifdef GUI
     if(argc == 1)
     {
         //GUI application
-        //qDebug() << "___> Creating MainWindow";
+        qDebug() << "Creating MainWindow";
         MainWindow w(&Detector, &EventsDataHub, &RootApp, &SimulationManager, &ReconstructionManager, &Network, &TmpHub, &GlobSet);  //Network - still need to set script manager!
-        //qDebug() << "___> Showing MainWindow...";
+        qDebug() << "Showing MainWindow";
         w.show();
-        //qDebug() << "___> Done!";
 
         //overrides the saved status of examples window
         if (GlobSet.ShowExamplesOnStart)
@@ -120,17 +143,16 @@ int main(int argc, char *argv[])
             w.ELwindow->raise();//making sure examples window is on top
         }
         else w.ELwindow->hide();
-        //qDebug() << "___> Examples window shown/hidden";
+        qDebug() << "Examples window shown/hidden";
 
-        //qDebug() << "___> All done: starting application.";
+        qDebug() << "Starting QApplication";
         return a.exec();
     }
     else if (argc == 2 && (QString(argv[1])=="-b" || QString(argv[1])=="--batch") )
     {
         GenericScriptWindowClass GenScriptWindow(Detector.RandGen);
 
-        InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-        GenScriptWindow.SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+        GenScriptWindow.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
 
         InterfaceToConfig* conf = new InterfaceToConfig(&Config);
         GenScriptWindow.SetInterfaceObject(conf, "config");
@@ -160,13 +182,16 @@ int main(int argc, char *argv[])
         AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
         GenScriptWindow.SetInterfaceObject(pmS, "pms");
 
-        InterfaceToGraphs* graph = new InterfaceToGraphs(&TmpHub);
+        AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         GenScriptWindow.SetInterfaceObject(graph, "graph");
 
-        InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
+        AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
-        InterfaceToTexter* txt = new InterfaceToTexter(&GenScriptWindow);
+        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        GenScriptWindow.SetInterfaceObject(tree, "tree");
+
+        AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(&GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window
@@ -224,9 +249,8 @@ int main(int argc, char *argv[])
 
         qDebug() << "Script from file:"<<fileName;
 
-        AScriptManager SM(Detector.RandGen);
-        InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-        SM.SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+        AScriptManager SM(Detector.RandGen);        
+        SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         InterfaceToConfig* conf = new InterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
@@ -247,10 +271,12 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(newLrf, "newLrf");
         AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
         SM.SetInterfaceObject(pmS, "pms");
-        InterfaceToGraphs* graph = new InterfaceToGraphs(&TmpHub);
+        AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         SM.SetInterfaceObject(graph, "graph");
-        InterfaceToHistD* hist = new InterfaceToHistD(&TmpHub);
+        AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.SetInterfaceObject(hist, "hist");
+        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        SM.SetInterfaceObject(tree, "tree");
 
         int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
         if (errorLineNum > -1)

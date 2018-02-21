@@ -1,4 +1,4 @@
-#include "interfacetocheckerscript.h"
+#include "ainterfacetodeposcript.h"
 #include "mainwindow.h"
 #include "eventsdataclass.h"
 #include "aenergydepositioncell.h"
@@ -6,9 +6,9 @@
 
 #include <QDebug>
 
-InterfaceToInteractionScript::InterfaceToInteractionScript(MainWindow* MW, EventsDataClass* EventsDataHub)
+AInterfaceToDepoScript::AInterfaceToDepoScript(MainWindow* MW, EventsDataClass* EventsDataHub)
   : MW(MW), EventsDataHub(EventsDataHub)
-{  
+{
   H["ClearStack"] = "Clear particle stack";
   H["AddParticleToStack"] = "Add a particle (or several identical particles) to the stack";
   H["TrackStack"] = "Track all particles from the stack";
@@ -46,16 +46,18 @@ InterfaceToInteractionScript::InterfaceToInteractionScript(MainWindow* MW, Event
   H["Deposition_Z"] = "Returns the Z position for the given particle, material index and node index";
   H["Deposition_dE"] = "Returns the deposited energy for the given particle, material index and node index";
   H["Deposition_dL"] = "Returns the length of the node with the given particle, material index and node index";
+
+  H["getAllDefinedTerminatorTypes"] = "Return array with all defined terminator types. Format of array element is 'index=type'";
 }
 
-void InterfaceToInteractionScript::ClearStack()
+void AInterfaceToDepoScript::ClearStack()
 {
   //qDebug() << "Clear stack triggered";
   MW->on_pbClearAllStack_clicked();
   //qDebug() << "Done";
 }
 
-void InterfaceToInteractionScript::AddParticleToStack(int particleID, double X, double Y, double Z,
+void AInterfaceToDepoScript::AddParticleToStack(int particleID, double X, double Y, double Z,
                                                       double dX, double dY, double dZ,
                                                       double Time, double Energy,
                                                       int numCopies)
@@ -69,7 +71,7 @@ void InterfaceToInteractionScript::AddParticleToStack(int particleID, double X, 
   MW->on_pbRefreshStack_clicked();
 }
 
-void InterfaceToInteractionScript::TrackStack()
+void AInterfaceToDepoScript::TrackStack()
 {
   //qDebug() << "->Track stack triggered";
   ClearExtractedData();
@@ -80,13 +82,13 @@ void InterfaceToInteractionScript::TrackStack()
   //qDebug() << "--->Particle records populated";
 }
 
-void InterfaceToInteractionScript::ClearExtractedData()
+void AInterfaceToDepoScript::ClearExtractedData()
 {
     PR.clear();
 }
 
-void InterfaceToInteractionScript::populateParticleRecords()
-{ 
+void AInterfaceToDepoScript::populateParticleRecords()
+{
   ClearExtractedData();
   if (EventsDataHub->EventHistory.isEmpty())
     {
@@ -111,7 +113,7 @@ void InterfaceToInteractionScript::populateParticleRecords()
       int sernum = pr.History->index;
         //needs at least one entry in EnergyVector with the same serial number
       while (indexEV<MW->EnergyVector.size() && MW->EnergyVector.at(indexEV)->index == sernum)
-        {          
+        {
           MaterialRecord mr;
           // Material ID
           mr.MatId = MW->EnergyVector.at(indexEV)->MaterialId;
@@ -135,7 +137,7 @@ void InterfaceToInteractionScript::populateParticleRecords()
               depo.CellLength = MW->EnergyVector.at(indexEV)->cellLength;
               // adding to the record
               mr.ByMaterial.append(depo);
-              indexEV++;              
+              indexEV++;
             }
           while(indexEV<MW->EnergyVector.size() && MW->EnergyVector.at(indexEV)->index==sernum && MW->EnergyVector.at(indexEV)->MaterialId==mr.MatId);
           pr.Deposition.append(mr);
@@ -144,7 +146,7 @@ void InterfaceToInteractionScript::populateParticleRecords()
     }
 }
 
-int InterfaceToInteractionScript::termination(int i)
+int AInterfaceToDepoScript::termination(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -154,7 +156,7 @@ int InterfaceToInteractionScript::termination(int i)
   return PR.at(i).History->Termination;
 }
 
-QString InterfaceToInteractionScript::terminationStr(int i)
+QString AInterfaceToDepoScript::terminationStr(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -173,11 +175,13 @@ QString InterfaceToInteractionScript::terminationStr(int i)
     case 7:  return "was created outside of the world";
     case 8:  return "entered material with tracking forbidden";
     case 9:  return "pair production";
+    case 10: return "ellastic";
+    case 11: return "stopped by monitor";
     default: return "unknown termination";
     }
 }
 
-double InterfaceToInteractionScript::dX(int i)
+double AInterfaceToDepoScript::dX(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -187,7 +191,7 @@ double InterfaceToInteractionScript::dX(int i)
   return PR.at(i).History->dx;
 }
 
-double InterfaceToInteractionScript::dY(int i)
+double AInterfaceToDepoScript::dY(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -197,7 +201,7 @@ double InterfaceToInteractionScript::dY(int i)
   return PR.at(i).History->dy;
 }
 
-double InterfaceToInteractionScript::dZ(int i)
+double AInterfaceToDepoScript::dZ(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -207,7 +211,7 @@ double InterfaceToInteractionScript::dZ(int i)
   return PR.at(i).History->dz;
 }
 
-int InterfaceToInteractionScript::particleId(int i)
+int AInterfaceToDepoScript::particleId(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -217,7 +221,7 @@ int InterfaceToInteractionScript::particleId(int i)
   return PR.at(i).History->ParticleId;
 }
 
-int InterfaceToInteractionScript::sernum(int i)
+int AInterfaceToDepoScript::sernum(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -227,7 +231,7 @@ int InterfaceToInteractionScript::sernum(int i)
   return PR.at(i).History->index;
 }
 
-int InterfaceToInteractionScript::isSecondary(int i)
+int AInterfaceToDepoScript::isSecondary(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -237,7 +241,17 @@ int InterfaceToInteractionScript::isSecondary(int i)
   return PR.at(i).History->isSecondary();
 }
 
-int InterfaceToInteractionScript::MaterialsCrossed_count(int i)
+int AInterfaceToDepoScript::getParent(int i)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return -1;
+    }
+  return PR.at(i).History->SecondaryOf;
+}
+
+int AInterfaceToDepoScript::MaterialsCrossed_count(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -247,7 +261,7 @@ int InterfaceToInteractionScript::MaterialsCrossed_count(int i)
   return PR.at(i).History->Deposition.size();
 }
 
-int InterfaceToInteractionScript::MaterialsCrossed_matId(int i, int m)
+int AInterfaceToDepoScript::MaterialsCrossed_matId(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -262,7 +276,7 @@ int InterfaceToInteractionScript::MaterialsCrossed_matId(int i, int m)
   return PR.at(i).History->Deposition.at(m).MaterialId;
 }
 
-int InterfaceToInteractionScript::MaterialsCrossed_energy(int i, int m)
+int AInterfaceToDepoScript::MaterialsCrossed_energy(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -277,7 +291,7 @@ int InterfaceToInteractionScript::MaterialsCrossed_energy(int i, int m)
   return PR.at(i).History->Deposition.at(m).DepositedEnergy;
 }
 
-int InterfaceToInteractionScript::MaterialsCrossed_distance(int i, int m)
+int AInterfaceToDepoScript::MaterialsCrossed_distance(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -292,7 +306,7 @@ int InterfaceToInteractionScript::MaterialsCrossed_distance(int i, int m)
   return PR.at(i).History->Deposition.at(m).Distance;
 }
 
-int InterfaceToInteractionScript::Deposition_countMaterials(int i)
+int AInterfaceToDepoScript::Deposition_countMaterials(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -302,7 +316,7 @@ int InterfaceToInteractionScript::Deposition_countMaterials(int i)
   return PR.at(i).Deposition.size();
 }
 
-int InterfaceToInteractionScript::Deposition_matId(int i, int m)
+int AInterfaceToDepoScript::Deposition_matId(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -318,7 +332,7 @@ int InterfaceToInteractionScript::Deposition_matId(int i, int m)
   return PR.at(i).Deposition.at(m).MatId;
 }
 
-double InterfaceToInteractionScript::Deposition_startX(int i, int m)
+double AInterfaceToDepoScript::Deposition_startX(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -334,7 +348,7 @@ double InterfaceToInteractionScript::Deposition_startX(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[0];
 }
 
-double InterfaceToInteractionScript::Deposition_startY(int i, int m)
+double AInterfaceToDepoScript::Deposition_startY(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -350,7 +364,7 @@ double InterfaceToInteractionScript::Deposition_startY(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[1];
 }
 
-double InterfaceToInteractionScript::Deposition_startZ(int i, int m)
+double AInterfaceToDepoScript::Deposition_startZ(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -366,7 +380,72 @@ double InterfaceToInteractionScript::Deposition_startZ(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[2];
 }
 
-int InterfaceToInteractionScript::Deposition_countNodes(int i, int m)
+#include "TGeoManager.h"
+#include "TGeoVolume.h"
+#include "TGeoNode.h"
+#include "detectorclass.h"
+QString AInterfaceToDepoScript::Deposition_volumeName(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return "";
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return "";
+    }
+
+  if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return "";
+  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+  TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
+  if (node) return QString(node->GetName());
+  else return "";
+}
+
+int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return -1;
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return -1;
+    }
+
+  if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return -1;
+  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+  TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
+  if (node) return node->GetNumber();
+  else return -1;
+}
+
+double AInterfaceToDepoScript::Deposition_energy(int i, int m)
+{
+  if (i<0 || i>PR.size()-1)
+    {
+      abort("Attempt to address non-existent particle");
+      return 0;
+    }
+  if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+      abort("Attempt to address non-existent material in deposition");
+      return 0;
+    }
+
+  double energy = 0;
+  for (int ien=0; ien<PR.at(i).Deposition.at(m).ByMaterial.size(); ien++)
+    energy += PR.at(i).Deposition.at(m).ByMaterial.at(ien).Energy;
+  return energy;
+}
+
+int AInterfaceToDepoScript::Deposition_countNodes(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -382,7 +461,7 @@ int InterfaceToInteractionScript::Deposition_countNodes(int i, int m)
   return PR.at(i).Deposition.at(m).ByMaterial.size();
 }
 
-double InterfaceToInteractionScript::Deposition_X(int i, int m, int n)
+double AInterfaceToDepoScript::Deposition_X(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -402,7 +481,7 @@ double InterfaceToInteractionScript::Deposition_X(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[0];
 }
 
-double InterfaceToInteractionScript::Deposition_Y(int i, int m, int n)
+double AInterfaceToDepoScript::Deposition_Y(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -422,7 +501,7 @@ double InterfaceToInteractionScript::Deposition_Y(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[1];
 }
 
-double InterfaceToInteractionScript::Deposition_Z(int i, int m, int n)
+double AInterfaceToDepoScript::Deposition_Z(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -442,7 +521,7 @@ double InterfaceToInteractionScript::Deposition_Z(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[2];
 }
 
-double InterfaceToInteractionScript::Deposition_dE(int i, int m, int n)
+double AInterfaceToDepoScript::Deposition_dE(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -462,7 +541,7 @@ double InterfaceToInteractionScript::Deposition_dE(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).Energy;
 }
 
-double InterfaceToInteractionScript::Deposition_dL(int i, int m, int n)
+double AInterfaceToDepoScript::Deposition_dL(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -481,3 +560,12 @@ double InterfaceToInteractionScript::Deposition_dL(int i, int m, int n)
     }
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).CellLength;
 }
+
+QVariantList AInterfaceToDepoScript::getAllDefinedTerminatorTypes()
+{
+    const QStringList defined = EventHistoryStructure::getAllDefinedTerminationTypes();
+    QVariantList l;
+    for (int i=0; i<defined.size(); ++i) l << QString::number(i)+"="+defined.at(i);
+    return l;
+}
+

@@ -20,8 +20,7 @@ EventsDataClass::EventsDataClass(const TString nameID) //nameaddon to make uniqu
 {
 #ifdef SIM
   SimStat = new ASimulationStatistics(nameID);
-  DetStatNumBins = 100;
-  SimStat->initialize(DetStatNumBins);
+  //SimStat->initialize();
 #endif
   fReconstructionDataReady = false;
   ReconstructionTree = 0;
@@ -59,7 +58,7 @@ void EventsDataClass::clearResolutionTree()
 
 void EventsDataClass::clear()
 {
-  //qDebug() << "--->EventsDatHub: Clear";
+  //    qDebug() << "--->EventsDatHub: Clear";
   Events.clear();
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;
@@ -71,13 +70,16 @@ void EventsDataClass::clear()
 #endif
   clearScan();
   clearReconstruction();
-  clearManifest();  
+  clearManifest();
   emit requestClearKNNfilter(); //save in any configuration
   squeeze();
   //preprocessing settings clear is triggered when detector is made with different number of PMs than before
 
-  emit requestGuiUpdateForClearData(); //to MainWindow
+  //    qDebug() << "--->EventsDatHub: requesting main window GUI and TmpHub updates";
+  emit cleared();                      //to MainWindow and tmpHub
+  //    qDebug() << "--->EventsDatHub: requesting Recon window GUI update";
   emit requestEventsGuiUpdate();       //to ReconWindow
+  //    qDebug() << "--->EventsDatHub: done";
 }
 
 void EventsDataClass::onRequestStopLoad()
@@ -124,10 +126,9 @@ void EventsDataClass::clearManifest()
 }
 
 #ifdef SIM
-void EventsDataClass::setDetStatNumBins(int numBins)
+void EventsDataClass::initializeSimStat(QVector<const AGeoObject*> monitorRecords, int numBins, int waveNodes)
 {
-  DetStatNumBins = numBins;
-  SimStat->initialize(DetStatNumBins);
+  SimStat->initialize(monitorRecords, numBins, waveNodes);
 }
 #endif
 
@@ -391,7 +392,6 @@ void EventsDataClass::createDefaultReconstructionData(int igroup)
     {
         AReconRecord* r = new AReconRecord();
         r->EventId = ievent;
-        r->chi2 = 0;
         r->ReconstructionOK = false;
         ReconstructionData[igroup].append(r);
     }
@@ -414,7 +414,9 @@ void EventsDataClass::resetReconstructionData(int numGroups)
           for (int i=0; i<Events.size(); i++)
             {
               ReconstructionData[igroup][i]->Points.Reinitialize(1);  //in case it was reconstructed before as a double event
-              ReconstructionData[igroup][i]->chi2 = 0; //obsolete?
+              ReconstructionData[igroup][i]->chi2 = 0;
+              ReconstructionData[igroup][i]->ReconstructionOK = false;
+              ReconstructionData[igroup][i]->fScriptFiltered = false;
             }
         }
       ReconstructionData[igroup].squeeze();
@@ -1006,7 +1008,9 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
   APreprocessingSettings PreprocessingSettings;
   QString result = PreprocessingSettings.readFromJson(jsonPreprocessJson, PMs, QFileInfo(fileName).fileName());
   if (result == "-")
-      ;// qDebug() << "Do not perform any preprocessing: settings are not provided";
+    {
+      // qDebug() << "Do not perform any preprocessing: settings are not provided";
+    }
   else if (!result.isEmpty())
     {
       ErrorString = result;
@@ -1021,7 +1025,6 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
       qWarning() << ErrorString;
       return -1;
     }
-
 
   clearReconstruction();
 
@@ -1131,7 +1134,7 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
   if (LoadPosition) UpperBound = std::max(UpperBound, PositionYChannel+1);
   if (LoadZPosition) UpperBound = std::max(UpperBound, PositionZChannel+1);
   int DataSize = PMs->count();
-  if (LoadEnergy) DataSize++;
+  //if (LoadEnergy) DataSize++; NOT ANYMORE!!!
   //position data are NOT added to tmp[][], so they do not influence DataSize
 
   int eventNumber = 0;
@@ -1238,7 +1241,7 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
                       double energy;
                       if (PreprocessingSettings.fActive) energy = (val + PreprocessingSettings.LoadEnAdd) * PreprocessingSettings.LoadEnMulti;
                       else  energy = val;
-                      tmp[t][PMs->count()] = energy;
+                      //tmp[t][PMs->count()] = energy; -- NOT ANYMORE
                       tmpEnergy += energy;
                     }
                   else if (LoadZPosition && i==PositionZChannel) positionZ = val;
@@ -1282,6 +1285,7 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
             if (LoadEnergy || LoadPosition || LoadZPosition)
               {
                 // *** !!! for timed events: the last time_bin's XYZ is copied to Scan!
+                // *** !!! future: could be better strategy to make individual scan for each time bin
                 AScanRecord* sc = new AScanRecord();
                 sc->Points[0].r[0] = positionX;
                 sc->Points[0].r[1] = positionY;

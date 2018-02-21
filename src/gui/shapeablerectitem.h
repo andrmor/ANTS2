@@ -30,9 +30,9 @@ public:
     QColor    getForegroundColor() const { return foregroundColor; }
     QColor    getBackgroundColor() const { return backgroundColor; }
 
-    void      setScale(double mmPerPixelInX, double mmPerPixelInY);
-    double    getTrueAngle() const; //in degrees
-    void      setTrueAngle(double angle); //in degrees
+    void      setScale(double MmPerPixelInX, double MmPerPixelInY) {mmPerPixelInX = MmPerPixelInX; mmPerPixelInY = MmPerPixelInY;}
+    double    getTrueAngle() const {return trueAngle;}        //in degrees
+    void      setTrueAngle(double angle) {trueAngle = angle;} //in degrees
     double    getTrueWidth() const {return TrueWidth;}
     double    getTrueHeight() const {return TrueHeight;}
 
@@ -78,7 +78,7 @@ private:
     QColor    backgroundColor;
     int       backgroundWidth;
 
-    void      commonConstructor();
+    //void      commonConstructor();
     Location  getMouseLocationOnBox(QPointF mpos) const;
     QPointF   makePoint(double trueX, double trueY);
     double    TrueAngleFromApparent(double apparentAngle);

@@ -164,22 +164,6 @@ void ShapeableRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
   painter->drawLine(ly);
 }
 
-void ShapeableRectItem::setScale(double mmPerPixelInX, double mmPerPixelInY)
-{
-    this->mmPerPixelInX = mmPerPixelInX;
-    this->mmPerPixelInY = mmPerPixelInY;
-}
-
-double ShapeableRectItem::getTrueAngle() const
-{
-    return trueAngle;
-}
-
-void ShapeableRectItem::setTrueAngle(double angle)
-{
-    trueAngle = angle;
-}
-
 void ShapeableRectItem::setForegroundColor(const QColor &color)
 {
   this->foregroundColor = color;
@@ -263,8 +247,6 @@ void ShapeableRectItem::wheelEvent(QGraphicsSceneWheelEvent *event)
     if (event->delta()>0) setTrueRectangle( TrueWidth * 1.1, TrueHeight * 1.1);
     else                  setTrueRectangle( TrueWidth / 1.1, TrueHeight / 1.1);
 
-    //update(boundingRect());
-    //scene()->update(scene()->sceneRect());
     emit geometryChanged();
 }
 
@@ -296,7 +278,7 @@ void ShapeableRectItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
     double apparentMouseAngleOnPress = 0;
     if (event->pos().x() != event->pos().y() || event->pos().x() != 0)
-    apparentMouseAngleOnPress = atan2(event->pos().y(), event->pos().x()) *180.0/M_PI;
+      apparentMouseAngleOnPress = atan2(event->pos().y(), event->pos().x()) *180.0/M_PI;
 
     trueMouseAngleOnPress = TrueAngleFromApparent(apparentMouseAngleOnPress);
     trueBoxAngleOnPress = getTrueAngle();

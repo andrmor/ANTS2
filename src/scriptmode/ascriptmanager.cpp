@@ -3,6 +3,7 @@
 #include "coreinterfaces.h"
 
 #include <QScriptEngine>
+#include <QMetaMethod>
 #include <QDebug>
 
 AScriptManager::AScriptManager(TRandom2* RandGen) :
@@ -12,8 +13,8 @@ AScriptManager::AScriptManager(TRandom2* RandGen) :
     engine->setProcessEventsInterval(200);
 
     fEngineIsRunning = false;
-    bestResult = 1e30;
-    numVariables = 0;
+    MiniBestResult = 1e30;
+    MiniNumVariables = 0;
 }
 
 AScriptManager::~AScriptManager()
@@ -44,7 +45,7 @@ QString AScriptManager::Evaluate(QString Script)
             {
               if (!bi->InitOnRun())
                 {
-                  LastError = "Init failed for unit: "+interfaceNames.at(i);
+                  LastError = "Init failed for unit: "+interfaces.at(i)->objectName();
                   return LastError;
                 }
             }
@@ -60,9 +61,88 @@ QString AScriptManager::Evaluate(QString Script)
     return result;
 }
 
-void AScriptManager::CollectGarbage()
+QScriptValue AScriptManager::EvaluateScriptInScript(const QString &script)
+{
+    int line = FindSyntaxError(script);
+    if (line == -1)
+      return engine->evaluate(script);
+
+    AbortEvaluation("Syntax error in script provided to core.evaluate()");
+    return QScriptValue();
+}
+
+bool AScriptManager::isUncaughtException() const
+{
+    return engine->hasUncaughtException();
+}
+
+int AScriptManager::getUncaughtExceptionLineNumber() const
+{
+    return engine->uncaughtExceptionLineNumber();
+}
+
+const QString AScriptManager::getUncaughtExceptionString() const
+{
+    return engine->uncaughtException().toString();
+}
+
+const QString AScriptManager::getFunctionReturnType(const QString& UnitFunction)
+{
+    QStringList f = UnitFunction.split(".");
+    if (f.size() != 2) return "";
+
+    QString unit = f.first();
+    int unitIndex = -1;
+    for (int i=0; i<interfaces.size(); i++)
+        if (interfaces.at(i)->objectName() == unit)
+        {
+            unitIndex = i;
+            break;
+        }
+    if (unitIndex == -1) return "";
+
+    //qDebug() << "Found unit"<<unit<<" with index"<<unitIndex;
+    QString met = f.last();
+    //qDebug() << met;
+    QStringList skob = met.split("(", QString::SkipEmptyParts);
+    if (skob.size()<2) return "";
+    QString funct = skob.first();
+    QString args = skob[1];
+    args.chop(1);
+    //qDebug() << funct << args;
+
+    QString insert;
+    if (!args.isEmpty())
+      {
+        QStringList argl = args.split(",");
+        for (int i=0; i<argl.size(); i++)
+          {
+            QStringList a = argl.at(i).simplified().split(" ");
+            if (!insert.isEmpty()) insert += ",";
+            insert += a.first();
+          }
+      }
+    //qDebug() << insert;
+
+    QString methodName = funct + "(" + insert + ")";
+    //qDebug() << "method name" << methodName;
+    int mi = interfaces.at(unitIndex)->metaObject()->indexOfMethod(methodName.toLatin1().data());
+    //qDebug() << "method index:"<<mi;
+    if (mi == -1) return "";
+
+    QString returnType = interfaces.at(unitIndex)->metaObject()->method(mi).typeName();
+    //qDebug() << returnType;
+    return returnType;
+}
+
+void AScriptManager::collectGarbage()
 {
     engine->collectGarbage();
+}
+
+QScriptValue AScriptManager::getMinimalizationFunction()
+{
+    return engine->globalObject().property(MiniFunctionName);
 }
 
 void AScriptManager::AbortEvaluation(QString message)
@@ -100,16 +180,16 @@ void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
         QObject* coreObj = new AInterfaceToCore(this);
         QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
         QString coreName = "core";
+        coreObj->setObjectName(coreName);
         engine->globalObject().setProperty(coreName, coreVal);
-        interfaces.append(coreObj);  //CORE OBJECT IS FIRST in interfaces!
-        interfaceNames.append(coreName);
+        interfaces.append(coreObj);
         //registering math module
         QObject* mathObj = new AInterfaceToMath(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         QString mathName = "math";
+        mathObj->setObjectName(mathName);
         engine->globalObject().setProperty(mathName, mathVal);
         interfaces.append(mathObj);  //SERVICE OBJECT IS FIRST in interfaces!
-        interfaceNames.append(mathName);
       }
     else
       { // name is not empty - this is one of the secondary modules
@@ -118,8 +198,8 @@ void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 
     if (interfaceObject)
       {
+        interfaceObject->setObjectName(name);
         interfaces.append(interfaceObject);
-        interfaceNames.append(name);
 
         //connecting abort request from main interface to serviceObj
         int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");

@@ -51,7 +51,7 @@ void AInterfaceToCore::abort(QString message)
 
 QVariant AInterfaceToCore::evaluate(QString script)
 {
-    QScriptValue val = ScriptManager->engine->evaluate(script);
+    QScriptValue val = ScriptManager->EvaluateScriptInScript(script);
     return val.toVariant();
 }
 

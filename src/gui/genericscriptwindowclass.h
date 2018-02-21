@@ -126,7 +126,6 @@ private:
     void saveScriptHistory();
     void fillHelper(QObject* obj, QString module, QString helpText = "");  //fill help TreeWidget according to the data in the obj
     //void fillHelper(QScriptValue &val, QString module, QString helpText);
-    QString getFunctionReturnType(QString UnitFunction);
     QString getKeyPath(QTreeWidgetItem *item);    
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
 

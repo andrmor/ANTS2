@@ -23,12 +23,13 @@
 
 SensorLocalCache::SensorLocalCache(int numGoodEvents, bool fDataRecon, bool fScaleByEnergy, const QVector<AReconRecord*> reconData,
                                    const QVector<AScanRecord*> *scan, const QVector< QVector<float> > *events, ALrfFitSettings *LRFsettings) :
+    LRFsettings(LRFsettings),
     numGoodEvents(numGoodEvents), dataSize(0),
     xx(0), minx(1e10), maxx(-1e10),
     yy(0), miny(1e10), maxy(-1e10),
     zz(0), minz(1e10), maxz(-1e10),
-    sigsig(0), gains(0), maxr(0), maxr2(0),
-    LRFsettings(LRFsettings)
+    sigsig(0), gains(0), maxr(0), maxr2(0)
+
 {
     //caching pointers to "Good" events, their positions and energies
     const QVector<float> **goodEvents = new const QVector<float>*[numGoodEvents];

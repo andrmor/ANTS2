@@ -14,7 +14,7 @@
 #include <QMessageBox>
 
 ASlabListWidget::ASlabListWidget(ASandwich* Sandwich, QWidget *parent)
-  : Sandwich(Sandwich), QListWidget(parent)
+  : QListWidget(parent), Sandwich(Sandwich)
 {
   tmpXY = 0;
   DefaultXYdelegate = 0;

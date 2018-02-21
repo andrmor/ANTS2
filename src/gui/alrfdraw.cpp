@@ -109,7 +109,7 @@ bool ALrfDraw::extractOptionsAndVerify(int PMnumber, const QJsonObject &json)
 }
 
 ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, pms *PMs, GraphWindowClass *GraphWindow) :
-  LRFs(LRFs), fUseOldModule(fUseOldModule), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow) {}
+  LRFs(LRFs), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow), fUseOldModule(fUseOldModule) {}
 
 bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
 {

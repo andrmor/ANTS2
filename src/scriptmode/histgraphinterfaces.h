@@ -18,7 +18,8 @@ public:
   AInterfaceToHist(TmpObjHubClass *TmpHub);
   ~AInterfaceToHist(){}
 
-  virtual bool InitOnRun();
+  virtual bool InitOnRun() override;
+  virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   void NewHist(QString HistName, int bins, double start, double stop);
@@ -55,7 +56,8 @@ public:
   AInterfaceToGraph(TmpObjHubClass *TmpHub);
   ~AInterfaceToGraph(){}
 
-  virtual bool InitOnRun();
+  virtual bool InitOnRun() override;
+  virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   void NewGraph(QString GraphName);

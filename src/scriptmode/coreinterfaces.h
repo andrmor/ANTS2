@@ -14,7 +14,12 @@ class AInterfaceToCore : public AScriptInterface
   Q_OBJECT
 
 public:
-  AInterfaceToCore(AScriptManager *ScriptManager);
+  explicit AInterfaceToCore(AScriptManager *ScriptManager);
+  explicit AInterfaceToCore(const AInterfaceToCore& other);
+
+  virtual bool IsMultithreadCapable() const override {return true;}
+
+  void SetScriptManager(AScriptManager *NewScriptManager) {ScriptManager = NewScriptManager;}
 
 public slots:
   //abort execution of the script
@@ -22,8 +27,9 @@ public slots:
 
   QVariant evaluate(QString script);
 
-  //sleep
-  void sleep(int ms);
+  //time
+  void          sleep(int ms);
+  int           elapsedTimeInMilliseconds();
 
   //output part of the script window
   void print(QString text);
@@ -69,6 +75,8 @@ class AInterfaceToMath : public AScriptInterface
 public:
   AInterfaceToMath(TRandom2* RandGen);
   void setRandomGen(TRandom2* RandGen);
+
+  virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   double abs(double val);

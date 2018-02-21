@@ -43,16 +43,23 @@ double ScriptFunctor(const double *p)
   return result;
 }
 
-InterfaceToMinimizerScript::InterfaceToMinimizerScript(AScriptManager *ScriptManager) :
-    ScriptManager(ScriptManager) {}
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
+  ScriptManager(ScriptManager) {}
 
-void InterfaceToMinimizerScript::ForceStop()
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other)
+  : AScriptInterface(other)
+{
+    ScriptManager = 0; // need to be set on copy!
+    Clear();
+}
+
+void AInterfaceToMinimizerScript::ForceStop()
 {    
     //qDebug() << "Abort requested for minimization procedure";
     //qDebug() << "aborted:"<<ScriptManager->fAborted;
 }
 
-void InterfaceToMinimizerScript::Clear()
+void AInterfaceToMinimizerScript::Clear()
 {
   Name.clear();
   Start.clear();
@@ -61,13 +68,13 @@ void InterfaceToMinimizerScript::Clear()
   Max.clear();
 }
 
-void InterfaceToMinimizerScript::SetFunctorName(QString name)
+void AInterfaceToMinimizerScript::SetFunctorName(QString name)
 {
   //FunctorName = FunctName = name;
     ScriptManager->MiniFunctionName = name;
 }
 
-void InterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
+void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
 {
   Name << name;
   Start << start;
@@ -76,7 +83,7 @@ void InterfaceToMinimizerScript::AddVariable(QString name, double start, double 
   Max << max;
 }
 
-void InterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, double step, double min, double max)
+void AInterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, double step, double min, double max)
 {
   int size = Name.size();
   if (varNumber > size-1)
@@ -90,8 +97,14 @@ void InterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, dou
   Max.replace(varNumber, max);
 }
 
-QString InterfaceToMinimizerScript::Run()
+QString AInterfaceToMinimizerScript::Run()
 {
+  if (!ScriptManager)
+    {
+      abort("ScriptManager is not set!");
+      return "";
+    }
+
   //qDebug() << "Optimization run called";
   ScriptManager->MiniNumVariables = Name.size();
   if (ScriptManager->MiniNumVariables == 0)
@@ -108,11 +121,6 @@ QString InterfaceToMinimizerScript::Run()
       abort("Minimization function is not defined!");
       return "";
     }
-
-  //making a copy of det and sim config
-  //QJsonObject json;
-  //MW->writeDetectorToJson(json);
-  //MW->writeSimSettingsToJson(json, true);
 
   //Creating ROOT minimizer
   ROOT::Minuit2::Minuit2Minimizer *RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);//(ROOT::Minuit2::kMigrad);

@@ -20,7 +20,7 @@
 AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
     ScriptManager(ScriptManager)
 {
-  Description = "Unit handles general-purpose opeartions: abort script, basic text output and file save/load";
+  Description = "General-purpose opeartions: abort script, basic text output and file save/load";
 
   H["str"] = "Converts double value to string with a given precision";
   H["print"] = "Print the argument (string) on the script output text field";
@@ -43,9 +43,15 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
 }
 
+AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :
+  AScriptInterface(other)
+{
+   ScriptManager = 0; //to be set after copy!!!
+}
+
 void AInterfaceToCore::abort(QString message)
 {
-  //qDebug() << "In-script abort triggered!";
+  qDebug() << ">Core module: abort triggered!";
   ScriptManager->AbortEvaluation(message);
 }
 
@@ -60,8 +66,17 @@ void AInterfaceToCore::sleep(int ms)
   if (ms == 0) return;
   QTime t;
   t.restart();
-  do qApp->processEvents();
+  do
+    {
+      qApp->processEvents();
+      if (ScriptManager->isEvalAborted()) break;
+    }
   while (t.elapsed()<ms);
+}
+
+int AInterfaceToCore::elapsedTimeInMilliseconds()
+{
+    return ScriptManager->getElapsedTime();
 }
 
 void AInterfaceToCore::print(QString text)

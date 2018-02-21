@@ -75,12 +75,12 @@ GenericScriptWindowClass::GenericScriptWindowClass(TRandom2 *RandGen, QWidget *p
     ui(new Ui::GenericScriptWindowClass)
 {
     ScriptManager = new AScriptManager(RandGen);
-    QObject::connect(ScriptManager, SIGNAL(showMessage(QString)), this, SLOT(ShowText(QString)));
-    QObject::connect(ScriptManager, SIGNAL(clearText()), this, SLOT(ClearText()));
+    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &GenericScriptWindowClass::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &GenericScriptWindowClass::ClearText);
     //retranslators:
-    QObject::connect(ScriptManager, SIGNAL(onStart()), this, SLOT(receivedOnStart()));
-    QObject::connect(ScriptManager, SIGNAL(onAbort()), this, SLOT(receivedOnAbort()));
-    QObject::connect(ScriptManager, SIGNAL(success(QString)), this, SLOT(receivedOnSuccess(QString)));
+    QObject::connect(ScriptManager, &AScriptManager::onStart, this, &GenericScriptWindowClass::receivedOnStart);
+    QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &GenericScriptWindowClass::receivedOnAbort);
+    QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &GenericScriptWindowClass::receivedOnSuccess);
 
     tmpIgnore = false;
     fJsonTreeAlwayVisible = false;
@@ -466,9 +466,9 @@ void GenericScriptWindowClass::on_pbRunScript_clicked()
    ui->pbStop->setVisible(false);
    ui->pbRunScript->setVisible(true);
 
-   if (!ScriptManager->LastError.isEmpty())
+   if (!ScriptManager->getLastError().isEmpty())
    {
-       GenericScriptWindowClass::ReportError("Script error: "+ScriptManager->LastError, -1);
+       GenericScriptWindowClass::ReportError("Script error: "+ScriptManager->getLastError(), -1);
    }
    else if (ScriptManager->isUncaughtException())
    {   //Script has uncaught exception
@@ -816,7 +816,7 @@ void GenericScriptWindowClass::updateJsonTree()
 
   for (int i=0; i<ScriptManager->interfaces.size(); i++)
     {
-      InterfaceToConfig* inter = dynamic_cast<InterfaceToConfig*>(ScriptManager->interfaces[i]);
+      AInterfaceToConfig* inter = dynamic_cast<AInterfaceToConfig*>(ScriptManager->interfaces[i]);
       if (!inter) continue;
 
       QJsonObject json = inter->Config->JSON;

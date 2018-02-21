@@ -34,15 +34,17 @@ class QJsonValue;
 // ====== interfaces which do not require GUI ======
 
 // ---- C O N F I G U R A T I O N ----
-class InterfaceToConfig : public AScriptInterface
+class AInterfaceToConfig : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToConfig(AConfiguration* config);
-  ~InterfaceToConfig(){}
+  AInterfaceToConfig(AConfiguration* config);
+  AInterfaceToConfig(const AInterfaceToConfig &other);
+  ~AInterfaceToConfig(){}
 
 //  virtual bool InitOnRun();
+  virtual bool IsMultithreadCapable() const override {return true;}
 
   AConfiguration* Config;
   QString LastError;
@@ -67,6 +69,8 @@ private:
   void find(const QJsonObject &obj, QStringList Keys, QStringList& Found, QString Path = "");
   bool keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes);
   bool expandKey(QString &Key);
+
+  bool bClonedCopy = false;
 };
 
 // ---- R E C O N S T R U C T I O N ----

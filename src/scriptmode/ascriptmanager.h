@@ -8,6 +8,8 @@
 
 class QScriptEngine;
 class TRandom2;
+class QElapsedTimer;
+class AInterfaceToCore;
 
 class AScriptManager : public QObject
 {
@@ -30,6 +32,7 @@ public:
     bool            isUncaughtException() const;
     int             getUncaughtExceptionLineNumber() const;
     const QString   getUncaughtExceptionString() const;
+    const QString   getLastError() const {return LastError;}
 
     const QString   getFunctionReturnType(const QString& UnitFunction);
     void            collectGarbage();
@@ -40,6 +43,16 @@ public:
     void            hideMsgDialog();
     void            restoreMsgDialog();
 
+    //for multithread-in-scripting
+    AScriptManager* createNewScriptManager(); // *** !!!
+    void            abortEvaluation();
+    QScriptValue    getProperty(const QString& properyName) const;
+    QScriptValue    registerNewVariant(const QVariant &Variant);
+
+    QScriptValue    EvaluationResult;
+
+    qint64          getElapsedTime();
+
 public slots:
     void            AbortEvaluation(QString message = "Aborted!");
 
@@ -47,8 +60,10 @@ public:
     //registered interfaces (units)
     QVector<QObject*> interfaces;
 
+    AInterfaceToCore* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+
     TRandom2*       RandGen;     //math module uses it
-    QString         LastError;
+
 
     //starter dirs
     QString         LibScripts, LastOpenDir, ExamplesDir;
@@ -63,10 +78,17 @@ private:
     bool            fEngineIsRunning;
     bool            fAborted;
 
+    QString         LastError;
+
+    QElapsedTimer*  timer;
+    qint64          timeOfStart;
+    qint64          timerEvalTookMs;
+
 signals:
     void            onStart();
     void            onAbort();
-    void            success(QString eval);
+    void            onFinish(QString eval);
+
     void            showMessage(QString message);
     void            clearText();
 };

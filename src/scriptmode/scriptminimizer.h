@@ -9,15 +9,20 @@
 class MainWindow;
 class AScriptManager;
 
-class InterfaceToMinimizerScript : public AScriptInterface
+class AInterfaceToMinimizerScript : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToMinimizerScript(AScriptManager* ScriptManager);
-  ~InterfaceToMinimizerScript() {}
+  AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
+  AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other);
+  ~AInterfaceToMinimizerScript() {}
 
-  virtual void ForceStop();
+  bool IsMultithreadCapable() const override {return true;}
+
+  void ForceStop() override;
+
+  void SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
 
 public slots:  
   void Clear();

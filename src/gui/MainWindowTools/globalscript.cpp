@@ -23,6 +23,7 @@
 #include "ainterfacetowebsocket.h"
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
+#include "ainterfacetomultithread.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -47,7 +48,10 @@ void MainWindow::createScriptWindow()
 
     ScriptWindow->SetInterfaceObject(0); //initialization
 
-    InterfaceToConfig* conf = new InterfaceToConfig(Config);
+    AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(ScriptWindow->ScriptManager);
+    ScriptWindow->SetInterfaceObject(threads, "threads");
+
+    AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
     ScriptWindow->SetInterfaceObject(conf, "config");
 
@@ -55,7 +59,7 @@ void MainWindow::createScriptWindow()
     connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
     ScriptWindow->SetInterfaceObject(geo, "geo");
 
-    InterfaceToMinimizerScript* mini = new InterfaceToMinimizerScript(ScriptWindow->ScriptManager);
+    AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(ScriptWindow->ScriptManager);
     ScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
     InterfaceToData* dat = new InterfaceToData(Config, ReconstructionManager, EventsDataHub);

@@ -49,12 +49,12 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     }
 
     ScriptManager = new AScriptManager(RandGen);
-    QObject::connect(ScriptManager, SIGNAL(showMessage(QString)), this, SLOT(ShowText(QString)));
-    QObject::connect(ScriptManager, SIGNAL(clearText()), this, SLOT(ClearText()));
+    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
-    QObject::connect(ScriptManager, SIGNAL(onStart()), this, SLOT(receivedOnStart()));
-    QObject::connect(ScriptManager, SIGNAL(onAbort()), this, SLOT(receivedOnAbort()));
-    QObject::connect(ScriptManager, SIGNAL(success(QString)), this, SLOT(receivedOnSuccess(QString)));
+    QObject::connect(ScriptManager, &AScriptManager::onStart, this, &AScriptWindow::receivedOnStart);
+    QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &AScriptWindow::receivedOnAbort);
+    QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
     this->GlobSet = GlobSet;
     //SetStarterDir(GlobSet->LibScripts);
@@ -418,9 +418,9 @@ void AScriptWindow::on_pbRunScript_clicked()
    ui->pbStop->setVisible(false);
    ui->pbRunScript->setVisible(true);
 
-   if (!ScriptManager->LastError.isEmpty())
+   if (!ScriptManager->getLastError().isEmpty())
    {
-       AScriptWindow::ReportError("Script error: "+ScriptManager->LastError, -1);
+       AScriptWindow::ReportError("Script error: "+ScriptManager->getLastError(), -1);
    }
    else if (ScriptManager->isUncaughtException())
    {   //Script has uncaught exception
@@ -655,7 +655,7 @@ void AScriptWindow::updateJsonTree()
 
   for (int i=0; i<ScriptManager->interfaces.size(); i++)
     {
-      InterfaceToConfig* inter = dynamic_cast<InterfaceToConfig*>(ScriptManager->interfaces[i]);
+      AInterfaceToConfig* inter = dynamic_cast<AInterfaceToConfig*>(ScriptManager->interfaces[i]);
       if (!inter) continue;
 
       QJsonObject json = inter->Config->JSON;

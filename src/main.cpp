@@ -154,13 +154,13 @@ int main(int argc, char *argv[])
 
         GenScriptWindow.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
 
-        InterfaceToConfig* conf = new InterfaceToConfig(&Config);
+        AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         GenScriptWindow.SetInterfaceObject(conf, "config");
 
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
         GenScriptWindow.SetInterfaceObject(geo, "geo");
 
-        InterfaceToMinimizerScript* mini = new InterfaceToMinimizerScript(GenScriptWindow.ScriptManager);
+        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(GenScriptWindow.ScriptManager);
         GenScriptWindow.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
         InterfaceToData* dat = new InterfaceToData(&Config, &ReconstructionManager, &EventsDataHub);
@@ -251,11 +251,11 @@ int main(int argc, char *argv[])
 
         AScriptManager SM(Detector.RandGen);        
         SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
-        InterfaceToConfig* conf = new InterfaceToConfig(&Config);
+        AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
         SM.SetInterfaceObject(geo, "geo");
-        InterfaceToMinimizerScript* mini = new InterfaceToMinimizerScript(&SM);
+        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(&SM);
         SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
         InterfaceToData* dat = new InterfaceToData(&Config, &ReconstructionManager, &EventsDataHub);
         SM.SetInterfaceObject(dat, "events");

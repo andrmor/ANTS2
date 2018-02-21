@@ -99,7 +99,7 @@ bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString& Name, int& Index
 }
 */
 
-bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes)
+bool AInterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes)
 {
     Indexes.clear();
     if (Key.contains('['))
@@ -225,7 +225,7 @@ bool InterfaceToConfig::modifyJsonValue(QJsonObject& obj, const QString& path, c
 }
 */
 
-bool InterfaceToConfig::modifyJsonValue(QJsonObject &obj, const QString &path, const QJsonValue &newValue)
+bool AInterfaceToConfig::modifyJsonValue(QJsonObject &obj, const QString &path, const QJsonValue &newValue)
 {
     int indexOfDot = path.indexOf('.');
     QString propertyName = path.left(indexOfDot);
@@ -374,7 +374,7 @@ void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringLi
 }
 */
 
-void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringList &Found, QString Path)
+void AInterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringList &Found, QString Path)
 {
     // script interface replaces ".." or the leading "." with an empty string
     bool fLast = (Keys.size() == 1); //it is the last key in the Keys list
@@ -446,8 +446,14 @@ void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringLi
     }
 }
 
-bool InterfaceToConfig::Replace(QString Key, QVariant val)
+bool AInterfaceToConfig::Replace(QString Key, QVariant val)
 {
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return false;
+    }
+
   LastError = "";
   //qDebug() << Key << val << val.typeName();
   QString type = val.typeName();
@@ -609,8 +615,10 @@ QVariant InterfaceToConfig::GetKeyValue(QString Key)
 }
 */
 
-QVariant InterfaceToConfig::GetKeyValue(QString Key)
+QVariant AInterfaceToConfig::GetKeyValue(QString Key)
 {
+    qDebug() << this << "get "<< Key << "triggered";
+
     LastError = "";
 
     if (!expandKey(Key)) return 0; //aborted anyway
@@ -700,17 +708,23 @@ QVariant InterfaceToConfig::GetKeyValue(QString Key)
 }
 
 
-QString InterfaceToConfig::GetLastError()
+QString AInterfaceToConfig::GetLastError()
 {
     return LastError;
 }
 
-void InterfaceToConfig::RebuildDetector()
+void AInterfaceToConfig::RebuildDetector()
 {
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return;
+    }
+
     Config->GetDetector()->BuildDetector();
 }
 
-bool InterfaceToConfig::expandKey(QString &Key)
+bool AInterfaceToConfig::expandKey(QString &Key)
 {
     if (Key.startsWith(".") || Key.contains(".."))
       {
@@ -801,12 +815,14 @@ bool InterfaceToConfig::expandKey(QString &Key)
 //}
 
 
-void InterfaceToConfig::UpdateGui()
+void AInterfaceToConfig::UpdateGui()
 {
+    if (bClonedCopy) return;
+
     Config->AskForAllGuiUpdate();
 }
 
-InterfaceToConfig::InterfaceToConfig(AConfiguration *config)
+AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config)
 {
   Config = config;
   emit requestReadRasterGeometry();
@@ -819,6 +835,12 @@ InterfaceToConfig::InterfaceToConfig(AConfiguration *config)
 
 }
 
+AInterfaceToConfig::AInterfaceToConfig(const AInterfaceToConfig& other)
+  : AScriptInterface(other)
+{
+    bClonedCopy = true;
+}
+
 //bool InterfaceToConfig::InitOnRun()
 //{
 //  //qDebug() << "InitOnRun triggered for config unit";
@@ -826,8 +848,14 @@ InterfaceToConfig::InterfaceToConfig(AConfiguration *config)
 //  return true;
 //}
 
-bool InterfaceToConfig::Load(QString FileName)
+bool AInterfaceToConfig::Load(QString FileName)
 {
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return false;
+    }
+
   //bool ok = MW->ELwindow->LoadAllConfig(FileName, true, true, true, &Config->JSON);
   bool ok = Config->LoadConfig(FileName, true, true, true);
   if (ok) return true;
@@ -836,7 +864,7 @@ bool InterfaceToConfig::Load(QString FileName)
   return false;
 }
 
-bool InterfaceToConfig::Save(QString FileName)
+bool AInterfaceToConfig::Save(QString FileName)
 {
     return SaveJsonToFile(Config->JSON, FileName);
 }

@@ -23,7 +23,7 @@ void AInterfaceToMultiThread::ForceStop()
 
 void AInterfaceToMultiThread::evaluateScript(const QString script)
 {
-    AScriptManager* sm = MasterScriptManager->createNewScriptManager();
+    AScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
 
     AScriptThreadScr* worker = new AScriptThreadScr(sm, script);
@@ -48,8 +48,9 @@ void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QV
         return;
     }
 
-    AScriptManager* sm = MasterScriptManager->createNewScriptManager();
-    //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
+    AScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
+      qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
+      qDebug() << "Master engine:"<<MasterScriptManager->engine<< "clone:"<<sm->engine;
 
     AScriptThreadFun* worker = new AScriptThreadFun(sm, functionName, arguments);
     startEvaluation(sm, worker);
@@ -59,13 +60,13 @@ void AInterfaceToMultiThread::startEvaluation(AScriptManager* sm, AScriptThreadB
 {
     workers << worker;
 
-    connect(sm, &AScriptManager::showMessage, MasterScriptManager, &AScriptManager::showMessage, Qt::QueuedConnection);
-
     QThread* t = new QThread();
     QObject::connect(t,  &QThread::started, worker, &AScriptThreadBase::Run);
     QObject::connect(sm, &AScriptManager::onFinish, t, &QThread::quit);
     QObject::connect(worker, &AScriptThreadBase::errorFound, this, &AInterfaceToMultiThread::onErrorInTread);
     QObject::connect(t, &QThread::finished, t, &QThread::deleteLater);
+    //sm->setParent(worker);
+    //sm->engine->moveToThread(t);
     worker->moveToThread(t);
     t->start();
 

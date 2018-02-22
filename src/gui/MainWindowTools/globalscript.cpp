@@ -92,7 +92,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
 
-    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow);
+    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow->ScriptManager, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();

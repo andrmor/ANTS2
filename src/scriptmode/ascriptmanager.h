@@ -10,6 +10,8 @@ class QScriptEngine;
 class TRandom2;
 class QElapsedTimer;
 class AInterfaceToCore;
+class QDialog;
+class AInterfaceToMessageWindow;
 
 class AScriptManager : public QObject
 {
@@ -44,7 +46,7 @@ public:
     void            restoreMsgDialog();
 
     //for multithread-in-scripting
-    AScriptManager* createNewScriptManager(); // *** !!!
+    AScriptManager* createNewScriptManager(int threadNumber); // *** !!!
     void            abortEvaluation();
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
@@ -55,6 +57,9 @@ public:
 
 public slots:
     void            AbortEvaluation(QString message = "Aborted!");
+
+    void            onShowMsgDialog(QDialog* D);
+    void            onAppendMsg(AInterfaceToMessageWindow* msg, const QString& text);
 
 public:
     //registered interfaces (units)
@@ -73,8 +78,9 @@ public:
     double          MiniBestResult;
     int             MiniNumVariables;
 
-private:
     QScriptEngine*  engine;
+private:
+
     bool            fEngineIsRunning;
     bool            fAborted;
 
@@ -83,6 +89,8 @@ private:
     QElapsedTimer*  timer;
     qint64          timeOfStart;
     qint64          timerEvalTookMs;
+
+    QVector<QDialog*> ThreadMessangerDialogs;
 
 signals:
     void            onStart();

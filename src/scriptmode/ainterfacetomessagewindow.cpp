@@ -1,4 +1,5 @@
 #include "ainterfacetomessagewindow.h"
+#include "ascriptmanager.h"
 
 #include <QWidget>
 #include <QTime>
@@ -6,31 +7,38 @@
 #include <QDialog>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
+#include <QDebug>
 
-static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-
-AInterfaceToMessageWindow::AInterfaceToMessageWindow(QWidget* parent) : D(0), Parent(parent)
+AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager* ScriptManager, QWidget* parent) :
+   ScriptManager(ScriptManager), D(0), Parent(parent)
 {
   bEnabled = true;
   bActivated = false;
+
   init(false);
+}
+
+AInterfaceToMessageWindow::AInterfaceToMessageWindow(const AInterfaceToMessageWindow &other) :
+   ScriptManager(other.ScriptManager), D(0), Parent(other.Parent)  //not a bug - pointer of MasterScriptManager in the clone!
+{
+    bMasterCopy = false;
+
+    bEnabled = true;
+    bActivated = false;
+
+    init(false);
 }
 
 void AInterfaceToMessageWindow::init(bool fTransparent)
 {
   D = new QDialog(Parent);
-  QObject::connect(D, &QDialog::finished, this, &AInterfaceToMessageWindow::Hide);
+  if (bMasterCopy) QObject::connect(D, &QDialog::finished, this, &AInterfaceToMessageWindow::Hide);
 
   QVBoxLayout* l = new QVBoxLayout;
   e = new QPlainTextEdit();
   e->setReadOnly(true);
   l->addWidget(e);
   D->setLayout(l);
-
-  X = msgX;
-  Y = msgY;
-  WW = msgW;
-  HH = msgH;
 
   D->setGeometry(X, Y, WW, HH);
   D->setWindowTitle("Script msg");
@@ -48,12 +56,15 @@ void AInterfaceToMessageWindow::init(bool fTransparent)
 
 AInterfaceToMessageWindow::~AInterfaceToMessageWindow()
 {
-  //qDebug() << "Msg destructor";
-  deleteDialog();
+  qDebug() << "Msg destructor. Master?"<<bMasterCopy;
+
+  if (bMasterCopy) deleteDialog();
 }
 
 void AInterfaceToMessageWindow::SetTransparent(bool flag)
 {
+  if (!bMasterCopy) return; //cannot call again init()
+
   QString text = e->document()->toPlainText();
   delete D;
   D = 0;
@@ -61,9 +72,17 @@ void AInterfaceToMessageWindow::SetTransparent(bool flag)
   e->setPlainText(text);
 }
 
+void AInterfaceToMessageWindow::SetDialogTitle(const QString &title)
+{
+    D->setWindowTitle(title);
+}
+
 void AInterfaceToMessageWindow::Append(QString txt)
 {
-  e->appendHtml(txt);
+    if (bMasterCopy)
+        e->appendHtml(txt);
+    else
+        emit requestAppendMsg(this, txt);
 }
 
 void AInterfaceToMessageWindow::Clear()
@@ -98,21 +117,30 @@ void AInterfaceToMessageWindow::Show(QString txt, int ms)
 
 void AInterfaceToMessageWindow::Move(double x, double y)
 {
-  X = msgX = x; Y = msgY = y;
+  X = x; Y = y;
   D->move(X, Y);
 }
 
 void AInterfaceToMessageWindow::Resize(double w, double h)
 {
-  WW = msgW = w; HH = msgH = h;
+  WW = w; HH = h;
   D->resize(WW, HH);
 }
 
 void AInterfaceToMessageWindow::Show()
 {
   if (!bEnabled) return;
-  D->show();
-  D->raise();
+
+  if (bMasterCopy)
+  {
+      D->show();
+      D->raise();
+  }
+  else
+  {
+      emit requestShowDialog(D);
+  }
+
   bActivated = true;
 }
 
@@ -131,6 +159,7 @@ void AInterfaceToMessageWindow::SetFontSize(int size)
 
 void AInterfaceToMessageWindow::deleteDialog()
 {
+   qDebug() << "Delete message dialog triggered!" ;
    delete D;
    D = 0;
 }
@@ -145,3 +174,8 @@ void AInterfaceToMessageWindow::restore()
     if (D) D->show();
 }
 
+
+AMessengerDialog::AMessengerDialog(QWidget *parent)
+{
+
+}

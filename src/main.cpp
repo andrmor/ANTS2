@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
         AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
         GenScriptWindow.SetInterfaceObject(tree, "tree");
 
-        AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(&GenScriptWindow);
+        AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(GenScriptWindow.ScriptManager, &GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window

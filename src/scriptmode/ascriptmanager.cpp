@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QScriptValueIterator>
+#include <QDialog>
 
 AScriptManager::AScriptManager(TRandom2* RandGen) :
     RandGen(RandGen)
@@ -16,6 +17,7 @@ AScriptManager::AScriptManager(TRandom2* RandGen) :
     engine->setProcessEventsInterval(200);
 
     fEngineIsRunning = false;
+    fAborted = false;
     MiniBestResult = 1e30;
     MiniNumVariables = 0;
 
@@ -36,6 +38,13 @@ AScriptManager::~AScriptManager()
     }
 
     delete timer;
+
+//    for (QDialog* d : ThreadMessangerDialogs)
+//    {
+//        delete d;
+//        d = 0;
+//    }
+//    ThreadMessangerDialogs.clear();
 }
 
 QString AScriptManager::Evaluate(QString Script)
@@ -181,6 +190,24 @@ void AScriptManager::AbortEvaluation(QString message)
     emit onAbort();
 }
 
+void AScriptManager::onShowMsgDialog(QDialog *D)
+{
+    if (D)
+    {
+        D->show();
+        D->raise();
+    }
+}
+
+#include <QPlainTextEdit>
+void AScriptManager::onAppendMsg(AInterfaceToMessageWindow *msg, const QString &text)
+{
+    if (msg)
+    {
+        msg->e->appendHtml(text);
+    }
+}
+
 void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     //qDebug() << "Registering:" << interfaceObject << name;
@@ -305,6 +332,7 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     {
         if (copiedObjs.contains(obj.objectId()))
         {
+            //qDebug() << "--------------Already have this obj!";
             return copiedObjs.value(obj.objectId());
         }
         copiedObjs.insert(obj.objectId(), copy);
@@ -378,7 +406,8 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     return copy;
 }
 
-AScriptManager *AScriptManager::createNewScriptManager()
+#include <QPlainTextEdit>
+AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
 {
     AScriptManager* sm = new AScriptManager(RandGen);  // *** !!! make new RandGen one!!!
 
@@ -392,8 +421,7 @@ AScriptManager *AScriptManager::createNewScriptManager()
         QObject* copy = AScriptInterfaceFactory::makeCopy(io);
         if (copy)
         {
-            //  qDebug() << "Making avauilable for multi-thread use: "<<io->objectName();
-            sm->SetInterfaceObject(copy, io->objectName());
+            //  qDebug() << "Making available for multi-thread use: "<<io->objectName();
 
             //special for core unit
             AInterfaceToCore* core = dynamic_cast<AInterfaceToCore*>(copy);
@@ -405,8 +433,19 @@ AScriptManager *AScriptManager::createNewScriptManager()
             AInterfaceToMinimizerScript* mini = dynamic_cast<AInterfaceToMinimizerScript*>(copy);
             if (mini)
             {
-                qDebug() << "--this is mini";
+                //qDebug() << "--this is mini";
                 mini->SetScriptManager(sm);
+            }
+            AInterfaceToMessageWindow* msg = dynamic_cast<AInterfaceToMessageWindow*>(copy);
+            if (msg)
+            {
+                msg->SetDialogTitle("Messanger: thread #"+QString::number(threadNumber));
+                msg->Move(msg->X + threadNumber*30, msg->Y + threadNumber*20);
+                ThreadMessangerDialogs << msg->D;
+                qDebug() << "messanger for thread:"<<threadNumber << "Dialog:"<<msg->D;
+
+                connect(msg, &AInterfaceToMessageWindow::requestShowDialog, this, &AScriptManager::onShowMsgDialog, Qt::QueuedConnection);
+                connect(msg, &AInterfaceToMessageWindow::requestAppendMsg, this, &AScriptManager::onAppendMsg, Qt::QueuedConnection);
             }
 
 
@@ -415,6 +454,8 @@ AScriptManager *AScriptManager::createNewScriptManager()
                 if (base)
                     connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
             }
+
+            sm->SetInterfaceObject(copy, io->objectName());
         }
         else
         {
@@ -445,6 +486,9 @@ AScriptManager *AScriptManager::createNewScriptManager()
         }
     }
 
+    connect(sm, &AScriptManager::showMessage, this, &AScriptManager::showMessage, Qt::QueuedConnection);
+
+    qDebug() << "  Scriptmanager created!"<<sm;
     return sm;
 }
 

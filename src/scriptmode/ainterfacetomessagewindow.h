@@ -3,23 +3,42 @@
 
 #include "ascriptinterface.h"
 
+#include <QVector>
+#include <QWidget>
+
+class AScriptManager;
 class QDialog;
 class QPlainTextEdit;
-class QWidget;
+//class QWidget;
+
+class AMessengerDialog : QWidget
+{
+    Q_OBJECT
+
+public:
+    AMessengerDialog(QWidget *parent);
+
+    QPlainTextEdit* e;
+};
+
 
 class AInterfaceToMessageWindow : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  AInterfaceToMessageWindow(QWidget *parent);
+  AInterfaceToMessageWindow(AScriptManager *ScriptManager, QWidget *parent);
+  AInterfaceToMessageWindow(const AInterfaceToMessageWindow& other);
   ~AInterfaceToMessageWindow();
 
+  bool IsMultithreadCapable() const override {return true;}
+
   QDialog *D;
-  double X, Y;
-  double WW, HH;
+  double X = 50, Y = 50;
+  double WW = 300, HH = 500;
 
   QPlainTextEdit* e;
+
   bool bEnabled;
 
 public slots:
@@ -30,6 +49,7 @@ public slots:
   void Hide();
   void Show(QString txt, int ms = -1);
   void SetTransparent(bool flag);
+  void SetDialogTitle(const QString& title);
 
   void Move(double x, double y);
   void Resize(double w, double h);
@@ -43,10 +63,18 @@ public:
   void restore();  //does not affect bActivated status
 
 private:
+  AScriptManager* ScriptManager;
   QWidget* Parent;
   bool bActivated;
 
+  bool bMasterCopy = true;
+  QVector<QDialog*> ThreadDialogs;
+
   void init(bool fTransparent);
+
+signals:
+  void requestShowDialog(QDialog* dialog);
+  void requestAppendMsg(AInterfaceToMessageWindow* msg, const QString& text);
 };
 
 #endif // AINTERFACETOMESSAGEWINDOW_H

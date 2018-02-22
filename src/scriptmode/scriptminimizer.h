@@ -24,17 +24,26 @@ public:
 
   void SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
 
-public slots:  
+public slots:
+
+  void SetHighPrecision(bool flag) {bHighPrecision = flag;}
+  void SetVerbosity(int level) {PrintVerbosity = level;}
+
   void Clear();
   void SetFunctorName(QString name);
   void AddVariable(QString name, double start, double step, double min, double max);
   void ModifyVariable(int varNumber, double start, double step, double min, double max);
-  QString Run();
+  const QString Run();
+
+  void Test();
 
 private:
   AScriptManager* ScriptManager;
   QVector<QString> Name;
   QVector<double> Start, Step, Min, Max;
+
+  bool bHighPrecision = false;
+  int  PrintVerbosity = -1;
 
 };
 

@@ -5,6 +5,9 @@
 
 #include <QObject>
 #include <QVector>
+#include <QVariant>
+
+#include <string>
 
 class MainWindow;
 class AScriptManager;
@@ -12,6 +15,21 @@ class AScriptManager;
 class AInterfaceToMinimizerScript : public AScriptInterface
 {
   Q_OBJECT
+
+  struct AVarRecord
+  {
+      AVarRecord(QString Name, double Start, double Step, double Min, double Max) :
+          Name(Name.toLatin1().data()), Start(Start), Step(Step), Min(Min), Max(Max), bFixed(false) {}
+      AVarRecord(QString Name, double Val) :
+          Name(Name.toLatin1().data()), Value(Val), bFixed(true) {}
+      AVarRecord(){}
+
+      std::string Name;
+      double Start, Step, Min, Max;
+
+      bool bFixed;
+      double Value;
+  };
 
 public:
   AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
@@ -26,21 +44,22 @@ public:
 
 public slots:
 
-  void SetHighPrecision(bool flag) {bHighPrecision = flag;}
-  void SetVerbosity(int level) {PrintVerbosity = level;}
+  void           SetHighPrecision(bool flag) {bHighPrecision = flag;}
+  void           SetVerbosity(int level) {PrintVerbosity = level;}
 
-  void Clear();
-  void SetFunctorName(QString name);
-  void AddVariable(QString name, double start, double step, double min, double max);
-  void ModifyVariable(int varNumber, double start, double step, double min, double max);
-  const QString Run();
+  void           Clear();
+  void           SetFunctorName(QString name);
+  void           AddVariable(QString name, double start, double step, double min, double max);
+  void           AddFixedVariable(QString name, double value);
 
-  void Test();
+  bool           Run();
+
+  const QVariant GetResults() const {return Results;}
 
 private:
   AScriptManager* ScriptManager;
-  QVector<QString> Name;
-  QVector<double> Start, Step, Min, Max;
+  QVector<AVarRecord> Variables;
+  QVariantList    Results;
 
   bool bHighPrecision = false;
   int  PrintVerbosity = -1;

@@ -62,7 +62,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(ScriptWindow->ScriptManager);
     ScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
-    InterfaceToData* dat = new InterfaceToData(Config, ReconstructionManager, EventsDataHub);
+    AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(dat, "events");
 
@@ -75,7 +75,7 @@ void MainWindow::createScriptWindow()
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(rec, "rec");
 
-    InterfaceToLRF* lrf = new InterfaceToLRF(Config, EventsDataHub);
+    AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(lrf, "lrf");
     ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
     ScriptWindow->SetInterfaceObject(newLrf, "newLrf");

@@ -30,16 +30,14 @@ double ScriptFunctor(const double *p) //last parameter contains the pointer to M
 
 
   QScriptValueList input;
-  for (int i=0; i<ScriptManager->MiniNumVariables; i++)
-    input << p[i+1];
+  for (int i=0; i<ScriptManager->MiniNumVariables; i++) input << p[i+1];
 
   QScriptValue sv = ScriptManager->getMinimalizationFunction();
   double result = sv.call(QScriptValue(), input).toNumber();
 
-  //qDebug() << "SM"<<ScriptManager<<"engine"<<ScriptManager->engine<<"sv reports engine:"<<sv.engine();
+  //    qDebug() << "SM"<<ScriptManager<<"engine"<<ScriptManager->engine<<"sv reports engine:"<<sv.engine();
+  //    qDebug() << "Minimization parameter value obtained:"<<result;
 
-
-  //qDebug() << "Minimization parameter value obtained:"<<result;
   return result;
 }
 
@@ -61,11 +59,7 @@ void AInterfaceToMinimizerScript::ForceStop()
 
 void AInterfaceToMinimizerScript::Clear()
 {
-  Name.clear();
-  Start.clear();
-  Step.clear();
-  Min.clear();
-  Max.clear();
+  Variables.clear();
 }
 
 void AInterfaceToMinimizerScript::SetFunctorName(QString name)
@@ -75,48 +69,35 @@ void AInterfaceToMinimizerScript::SetFunctorName(QString name)
 
 void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
 {
-  Name << name;
-  Start << start;
-  Step << step;
-  Min << min;
-  Max << max;
+    Variables << AVarRecord(name, start, step, min, max);
 }
 
-void AInterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, double step, double min, double max)
+void AInterfaceToMinimizerScript::AddFixedVariable(QString name, double value)
 {
-  int size = Name.size();
-  if (varNumber > size-1)
-    {
-      abort("Wrong variable number: " + QString::number(varNumber) + "  There are "+ QString::number(size) +" variables defined");
-      return;
-    }
-  Start.replace(varNumber, start);
-  Step.replace(varNumber, step);
-  Min.replace(varNumber, min);
-  Max.replace(varNumber, max);
+    Variables << AVarRecord(name, value);
 }
 
-const QString AInterfaceToMinimizerScript::Run()
+bool AInterfaceToMinimizerScript::Run()
 {
   if (!ScriptManager)
     {
       abort("ScriptManager is not set!");
-      return "";
+      return false;
     }
 
   //qDebug() << "Optimization run called";
-  ScriptManager->MiniNumVariables = Name.size();
+  ScriptManager->MiniNumVariables = Variables.size();
   if (ScriptManager->MiniNumVariables == 0)
     {
       abort("Variables are not defined!");
-      return "";
+      return false;
     }
 
   QScriptValue sv = ScriptManager->getMinimalizationFunction();
   if (!sv.isFunction())
     {
       abort("Minimization function is not defined!");
-      return "";
+      return false;
     }
 
   //Creating ROOT minimizer
@@ -141,48 +122,34 @@ const QString AInterfaceToMinimizerScript::Run()
   RootMinimizer->SetFixedVariable(0, "p", dPoint);
   //setting up variables   -  start step min max
   for (int i=0; i<ScriptManager->MiniNumVariables; i++)
-      RootMinimizer->SetLimitedVariable(i+1, Name[i].toLatin1().data(),  Start[i], Step[i], Min[i], Max[i]);
+  {
+      if (Variables.at(i).bFixed)
+        RootMinimizer->SetFixedVariable(i+1, Variables.at(i).Name, Variables.at(i).Value);
+      else
+        RootMinimizer->SetLimitedVariable(i+1, Variables.at(i).Name, Variables.at(i).Start, Variables.at(i).Step, Variables.at(i).Min, Variables.at(i).Max);
+  }
 
-  qDebug() << "Minimizer created and configured";
+  //    qDebug() << "Minimizer created and configured";
 
   // do the minimization
-  //fAbort = false;
   bool fOK = RootMinimizer->Minimize();
   fOK = fOK && !ScriptManager->isEvalAborted();
+  //    qDebug()<<"Minimization success? "<<fOK;
 
-  //report results
-  qDebug()<<"Minimization success? "<<fOK;
+  //results
+  Results.clear();
+  if (fOK)
+  {
+      const double *VarVals = RootMinimizer->X();
+      for (int i=0; i<Variables.size(); i++)
+      {
+          //    qDebug() << i << "-->--"<<VarVals[i+1];
+          Results << VarVals[i+1];
+      }
+  }
 
   delete Funct;
   delete RootMinimizer;
 
-  return "Done!";
-}
-
-void AInterfaceToMinimizerScript::Test()
-{
-    qDebug() << "Tesssstttt";
-//    for (int i=0; i<10000; i++)
-//    {
-//        QScriptValue sv = ScriptManager->getMinimalizationFunction();
-//        if (sv.isFunction())
-//        {
-//            qDebug() << "Found";
-//            return;
-//        }
-//    }
-
-    double dPoint;
-    void *thisvalue = ScriptManager;
-    memcpy(&dPoint, &thisvalue, sizeof(void *));
-
-    double p[3];
-    p[0] = dPoint;
-    p[1] = 0;
-    p[2] = 0;
-
-    ScriptManager->MiniNumVariables = Name.size();
-
-    for (int i=0; i<100; i++)
-        ScriptFunctor(p);
+  return fOK;
 }

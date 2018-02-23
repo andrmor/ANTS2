@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(GenScriptWindow.ScriptManager);
         GenScriptWindow.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
-        InterfaceToData* dat = new InterfaceToData(&Config, &ReconstructionManager, &EventsDataHub);
+        AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         GenScriptWindow.SetInterfaceObject(dat, "events");
 
         InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         GenScriptWindow.SetInterfaceObject(rec, "rec");
 
-        InterfaceToLRF* lrf = new InterfaceToLRF(&Config, &EventsDataHub);
+        AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
         GenScriptWindow.SetInterfaceObject(lrf, "lrf");
         ALrfScriptInterface* newLrf = new ALrfScriptInterface(&Detector, &EventsDataHub);
         GenScriptWindow.SetInterfaceObject(newLrf, "newLrf");
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(geo, "geo");
         AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(&SM);
         SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
-        InterfaceToData* dat = new InterfaceToData(&Config, &ReconstructionManager, &EventsDataHub);
+        AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         SM.SetInterfaceObject(dat, "events");
 #ifdef SIM
         InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 #endif
         InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, GlobSet.RecNumTreads);
         SM.SetInterfaceObject(rec, "rec");
-        InterfaceToLRF* lrf = new InterfaceToLRF(&Config, &EventsDataHub);
+        AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
         SM.SetInterfaceObject(lrf, "lrf");
         ALrfScriptInterface* newLrf = new ALrfScriptInterface(&Detector, &EventsDataHub);
         SM.SetInterfaceObject(newLrf, "newLrf");

@@ -442,7 +442,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
                 msg->SetDialogTitle("Messanger: thread #"+QString::number(threadNumber));
                 msg->Move(msg->X + threadNumber*30, msg->Y + threadNumber*20);
                 ThreadMessangerDialogs << msg->D;
-                qDebug() << "messanger for thread:"<<threadNumber << "Dialog:"<<msg->D;
+                //  qDebug() << "messanger for thread:"<<threadNumber << "Dialog:"<<msg->D;
 
                 connect(msg, &AInterfaceToMessageWindow::requestShowDialog, this, &AScriptManager::onShowMsgDialog, Qt::QueuedConnection);
                 connect(msg, &AInterfaceToMessageWindow::requestAppendMsg, this, &AScriptManager::onAppendMsg, Qt::QueuedConnection);
@@ -488,7 +488,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
 
     connect(sm, &AScriptManager::showMessage, this, &AScriptManager::showMessage, Qt::QueuedConnection);
 
-    qDebug() << "  Scriptmanager created!"<<sm;
+    //  qDebug() << "  Scriptmanager created!"<<sm;
     return sm;
 }
 

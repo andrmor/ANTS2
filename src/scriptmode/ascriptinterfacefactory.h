@@ -28,6 +28,15 @@ public:
         const AInterfaceToMinimizerScript* mini = dynamic_cast<const AInterfaceToMinimizerScript*>(other);
         if (mini) return new AInterfaceToMinimizerScript(*mini);
 
+        const AInterfaceToData* events = dynamic_cast<const AInterfaceToData*>(other);
+        if (events) return new AInterfaceToData(*events);
+
+        const AInterfaceToLRF* lrf = dynamic_cast<const AInterfaceToLRF*>(other);
+        if (lrf) return new AInterfaceToLRF(*lrf);
+
+        const AInterfaceToPMs* pms = dynamic_cast<const AInterfaceToPMs*>(other);
+        if (pms) return new AInterfaceToPMs(*pms);
+
         const AInterfaceToHist* hist = dynamic_cast<const AInterfaceToHist*>(other);
         if (hist) return new AInterfaceToHist(*hist);
 
@@ -36,11 +45,6 @@ public:
 
         const AInterfaceToMessageWindow* msg = dynamic_cast<const AInterfaceToMessageWindow*>(other);
         if (msg) return new AInterfaceToMessageWindow(*msg);
-
-#ifdef SPEECH
-        const AInterfaceToSpeech* speech = dynamic_cast<const AInterfaceToSpeech*>(other);
-        if (speech) return new AInterfaceToSpeech(*speech);
-#endif
 
         return 0;
     }

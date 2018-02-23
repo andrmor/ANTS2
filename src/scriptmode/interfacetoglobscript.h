@@ -43,7 +43,6 @@ public:
   AInterfaceToConfig(const AInterfaceToConfig &other);
   ~AInterfaceToConfig(){}
 
-//  virtual bool InitOnRun();
   virtual bool IsMultithreadCapable() const override {return true;}
 
   AConfiguration* Config;
@@ -82,7 +81,7 @@ public:
   InterfaceToReconstructor(ReconstructionManagerClass* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, int RecNumThreads);
   ~InterfaceToReconstructor(){}
 
-  virtual void ForceStop();
+  virtual void ForceStop() override;
 
 public slots:
   void ReconstructEvents(int NumThreads = -1, bool fShow = true);
@@ -130,13 +129,15 @@ signals:
 };
 
 // ---- E V E N T S ----
-class InterfaceToData : public AScriptInterface
+class AInterfaceToData : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToData(AConfiguration* Config, ReconstructionManagerClass* RManager, EventsDataClass* EventsDataHub);
-  ~InterfaceToData(){}
+  AInterfaceToData(AConfiguration* Config, EventsDataClass* EventsDataHub);
+  ~AInterfaceToData(){}
+
+  bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   int GetNumPMs();
@@ -235,7 +236,7 @@ public slots:
 
 private:
   AConfiguration* Config;
-  ReconstructionManagerClass* RManager;
+  //ReconstructionManagerClass* RManager;
   EventsDataClass* EventsDataHub;
 
   bool checkEventNumber(int ievent);
@@ -257,6 +258,8 @@ public:
   AInterfaceToPMs(AConfiguration* Config);
   ~AInterfaceToPMs() {}
 
+  bool IsMultithreadCapable() const override {return true;}
+
 public slots:  
   int CountPM();
 
@@ -265,6 +268,7 @@ public slots:
   double GetPMz(int ipm);
 
   QVariant GetPMtypes();
+  QVariant GetPMpositions() const;
 
   void RemoveAllPMs();
   bool AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
@@ -333,17 +337,21 @@ private:
 #endif
 
 // ---- L R F ----
-class InterfaceToLRF : public AScriptInterface
+class AInterfaceToLRF : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToLRF(AConfiguration* Config, EventsDataClass* EventsDataHub);
+  AInterfaceToLRF(AConfiguration* Config, EventsDataClass* EventsDataHub);
+
+  bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   QString Make();
   double GetLRF(int ipm, double x, double y, double z);
   double GetLRFerror(int ipm, double x, double y, double z);
+
+  QVariant GetAllLRFs(double x, double y, double z);
 
   //iterations  
   int CountIterations();
@@ -354,13 +362,10 @@ public slots:
   QString Save(QString fileName);
   int Load(QString fileName);
 
-  //void ShowVsXY(int ipm, int PointsX, int PointsY);
-
 private:
   AConfiguration* Config;
   EventsDataClass* EventsDataHub;
   SensorLRFs* SensLRF; //alias
-  //TF2 *f2d;
 
   bool getValidIteration(int &iterIndex);
 };

@@ -110,7 +110,7 @@ public slots:
 
   // manifest item handling
   void ClearManifestItems();
-  int CountManifestItems();
+  int  CountManifestItems();
   void AddRoundManisfetItem(double x, double y, double Diameter);
   void AddRectangularManisfetItem(double x, double y, double dX, double dY, double Angle);  
   void SetManifestItemLineProperties(int i, int color, int width, int style);
@@ -195,6 +195,7 @@ public slots:
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
   void SetReconstructed(int ievent, double x, double y, double z, double e);
+  void SetReconstructed(int ievent, double x, double y, double z, double e, double chi2);
   void SetReconstructedX(int ievent, double x);
   void SetReconstructedY(int ievent, double y);
   void SetReconstructedZ(int ievent, double z);

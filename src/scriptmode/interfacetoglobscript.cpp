@@ -1204,6 +1204,18 @@ void AInterfaceToData::SetReconstructed(int ievent, double x, double y, double z
   EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = true;
 }
 
+void AInterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e, double chi2)
+{
+    if (!checkSetReconstructionDataRequest(ievent)) return;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[0] = x;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[1] = y;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[2] = z;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].energy = e;
+    EventsDataHub->ReconstructionData[0][ievent]->chi2 = chi2;
+    EventsDataHub->ReconstructionData[0][ievent]->ReconstructionOK = true;
+    EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = true;
+}
+
 void AInterfaceToData::SetReconstructedX(int ievent, double x)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;

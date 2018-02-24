@@ -1104,7 +1104,7 @@ void GenericScriptWindowClass::closeEvent(QCloseEvent *e)
       return;
     }
 
-  ScriptManager->deleteMsgDialog();
+  ScriptManager->DeleteMsgDialogs();
   saveScriptHistory();
 }
 

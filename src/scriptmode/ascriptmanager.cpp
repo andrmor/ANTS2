@@ -39,12 +39,12 @@ AScriptManager::~AScriptManager()
 
     delete timer;
 
-//    for (QDialog* d : ThreadMessangerDialogs)
-//    {
-//        delete d;
-//        d = 0;
-//    }
-//    ThreadMessangerDialogs.clear();
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+    {
+        delete d;
+        d = 0;
+    }
+    ThreadMessangerDialogs.clear();
 }
 
 QString AScriptManager::Evaluate(QString Script)
@@ -190,24 +190,6 @@ void AScriptManager::AbortEvaluation(QString message)
     emit onAbort();
 }
 
-void AScriptManager::onShowMsgDialog(QDialog *D)
-{
-    if (D)
-    {
-        D->show();
-        D->raise();
-    }
-}
-
-#include <QPlainTextEdit>
-void AScriptManager::onAppendMsg(AInterfaceToMessageWindow *msg, const QString &text)
-{
-    if (msg)
-    {
-        msg->e->appendHtml(text);
-    }
-}
-
 void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     //qDebug() << "Registering:" << interfaceObject << name;
@@ -261,17 +243,17 @@ int AScriptManager::FindSyntaxError(QString script)
       }
 }
 
-void AScriptManager::deleteMsgDialog()
+void AScriptManager::DeleteMsgDialogs()
 {
-    for (int i=0; i<interfaces.size(); i++)
-    {
-        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            t->deleteDialog();
-            return;
-        }
-    }
+//    for (int i=0; i<interfaces.size(); i++)
+//    {
+//        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+//        if (t)
+//        {
+//            t->deleteDialog();
+//            return;
+//        }
+//    }
 }
 
 void AScriptManager::hideMsgDialog()
@@ -279,11 +261,7 @@ void AScriptManager::hideMsgDialog()
     for (int i=0; i<interfaces.size(); i++)
     {
         AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            t->hide();
-            return;
-        }
+        if (t)  t->HideAllWidgets();
     }
 }
 
@@ -292,11 +270,7 @@ void AScriptManager::restoreMsgDialog()
     for (int i=0; i<interfaces.size(); i++)
     {
         AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            if (t->isActive()) t->restore();
-            return;
-        }
+        if (t) t->RestoreAllWidgets();
     }
 }
 
@@ -439,21 +413,34 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
             AInterfaceToMessageWindow* msg = dynamic_cast<AInterfaceToMessageWindow*>(copy);
             if (msg)
             {
-                msg->SetDialogTitle("Messanger: thread #"+QString::number(threadNumber));
-                msg->Move(msg->X + threadNumber*30, msg->Y + threadNumber*20);
-                ThreadMessangerDialogs << msg->D;
-                //  qDebug() << "messanger for thread:"<<threadNumber << "Dialog:"<<msg->D;
+                qDebug() << "Handling messanger widget for thread#"<<threadNumber;
+                while (threadNumber > ThreadMessangerDialogs.size() )
+                    ThreadMessangerDialogs << 0; // paranoic protection
 
-                connect(msg, &AInterfaceToMessageWindow::requestShowDialog, this, &AScriptManager::onShowMsgDialog, Qt::QueuedConnection);
-                connect(msg, &AInterfaceToMessageWindow::requestAppendMsg, this, &AScriptManager::onAppendMsg, Qt::QueuedConnection);
+                bool bIsNew = true;
+                if (threadNumber < ThreadMessangerDialogs.size()) //will reuse old one if exists
+                {
+                    if (ThreadMessangerDialogs[threadNumber])
+                    {
+                        msg->ReplaceDialogWidget( ThreadMessangerDialogs[threadNumber] );
+                        bIsNew = false;
+                    }
+                    else ThreadMessangerDialogs[threadNumber] = msg->GetDialogWidget();
+                }
+                else ThreadMessangerDialogs << msg->GetDialogWidget();
+
+                if (bIsNew)
+                {
+                    msg->SetDialogTitle("Thread #"+QString::number(threadNumber));
+                    msg->Move(50 + threadNumber*30, 50 + threadNumber*20);
+                }
             }
 
+            // *** ??? need it?
+            AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
+            if (base)
+                connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
 
-            {
-                AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-                if (base)
-                    connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
-            }
 
             sm->SetInterfaceObject(copy, io->objectName());
         }

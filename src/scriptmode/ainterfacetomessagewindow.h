@@ -3,24 +3,12 @@
 
 #include "ascriptinterface.h"
 
+#include <QObject>
 #include <QVector>
-#include <QWidget>
+#include <QString>
 
 class AScriptManager;
-class QDialog;
-class QPlainTextEdit;
-//class QWidget;
-
-class AMessengerDialog : QWidget
-{
-    Q_OBJECT
-
-public:
-    AMessengerDialog(QWidget *parent);
-
-    QPlainTextEdit* e;
-};
-
+class AScriptMessengerDialog;
 
 class AInterfaceToMessageWindow : public AScriptInterface
 {
@@ -33,21 +21,16 @@ public:
 
   bool IsMultithreadCapable() const override {return true;}
 
-  QDialog *D;
-  double X = 50, Y = 50;
-  double WW = 300, HH = 500;
-
-  QPlainTextEdit* e;
-
-  bool bEnabled;
+  // for handling with the Scriptmanager of the GUI thread
+  void ReplaceDialogWidget(AScriptMessengerDialog* AnotherDialogWidget);
+  AScriptMessengerDialog* GetDialogWidget();
 
 public slots:
-  void Enable(bool flag) {bEnabled = flag;}
-  void Append(QString txt);
+  void Append(const QString& text);
   void Clear();
   void Show();
   void Hide();
-  void Show(QString txt, int ms = -1);
+  void Show(const QString& text, int ms = -1);
   void SetTransparent(bool flag);
   void SetDialogTitle(const QString& title);
 
@@ -56,25 +39,31 @@ public slots:
 
   void SetFontSize(int size);
 
+signals:
+  void requestAppend(const QString& text);
+  void requestClear();
+  void requestShow();
+  void requestHide();
+  void requestTemporaryShow(int ms);
+  void requestSetTransparency(bool bTransparent);
+  void requestSetTitle(const QString& title);
+  void requestMove(double x, double y);
+  void requestResize(double w, double h);
+  void requestSetFontSize(int size);
+
 public:
-  void deleteDialog();
-  bool isActive() {return bActivated;}
-  void hide();     //does not affect bActivated status
-  void restore();  //does not affect bActivated status
+  void RestoreAllWidgets();  //on script window restore
+  void HideAllWidgets();     //on script window hide
 
 private:
   AScriptManager* ScriptManager;
   QWidget* Parent;
-  bool bActivated;
+  AScriptMessengerDialog* DialogWidget;
 
-  bool bMasterCopy = true;
-  QVector<QDialog*> ThreadDialogs;
+  bool bGUIthread = true;
 
-  void init(bool fTransparent);
+  void connectSignalSlots();
 
-signals:
-  void requestShowDialog(QDialog* dialog);
-  void requestAppendMsg(AInterfaceToMessageWindow* msg, const QString& text);
 };
 
 #endif // AINTERFACETOMESSAGEWINDOW_H

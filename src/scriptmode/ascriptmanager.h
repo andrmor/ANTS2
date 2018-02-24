@@ -1,6 +1,6 @@
 #ifndef ASCRIPTMANAGER_H
 #define ASCRIPTMANAGER_H
-
+#include "ascriptmessengerdialog.h"
 #include <QObject>
 #include <QVector>
 #include <QString>
@@ -41,7 +41,7 @@ public:
 
     QScriptValue    getMinimalizationFunction();
 
-    void            deleteMsgDialog();  //needed in batch mode to force close MSG window if shown
+    void            DeleteMsgDialogs();  //needed in batch mode to force close MSG window if shown
     void            hideMsgDialog();
     void            restoreMsgDialog();
 
@@ -57,9 +57,6 @@ public:
 
 public slots:
     void            AbortEvaluation(QString message = "Aborted!");
-
-    void            onShowMsgDialog(QDialog* D);
-    void            onAppendMsg(AInterfaceToMessageWindow* msg, const QString& text);
 
 public:
     //registered interfaces (units)
@@ -90,7 +87,7 @@ private:
     qint64          timeOfStart;
     qint64          timerEvalTookMs;
 
-    QVector<QDialog*> ThreadMessangerDialogs;
+    QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
 
 signals:
     void            onStart();

@@ -928,12 +928,12 @@ bool AScriptWindow::event(QEvent *e)
                 break;
             case QEvent::Hide :
                 //qDebug() << "Script window: hide event";
-                ScriptManager->hideMsgDialog();
+                ScriptManager->hideMsgDialogs();
                 emit WindowHidden("script");
                 break;
             case QEvent::Show :
                 //qDebug() << "Script window: show event";
-                ScriptManager->restoreMsgDialog();
+                ScriptManager->restoreMsgDialogs();
                 emit WindowShown("script");
                 break;
             default:;
@@ -1213,4 +1213,19 @@ void AScriptWindow::on_actionSelect_font_triggered()
 
   for (AScriptWindowTabItem* tab : ScriptTabs)
       tab->TextEdit->setFont(font);
+}
+
+void AScriptWindow::on_actionShow_all_messenger_windows_triggered()
+{
+    ScriptManager->restoreMsgDialogs();
+}
+
+void AScriptWindow::on_actionHide_all_messenger_windows_triggered()
+{
+    ScriptManager->hideMsgDialogs();
+}
+
+void AScriptWindow::on_actionClear_unused_messenger_windows_triggered()
+{
+    ScriptManager->clearUnusedMsgDialogs();
 }

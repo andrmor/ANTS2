@@ -41,9 +41,9 @@ public:
 
     QScriptValue    getMinimalizationFunction();
 
-    void            DeleteMsgDialogs();  //needed in batch mode to force close MSG window if shown
-    void            hideMsgDialog();
-    void            restoreMsgDialog();
+    void            deleteMsgDialogs();  //needed in batch mode to force close MSG window if shown
+    void            hideMsgDialogs();
+    void            restoreMsgDialogs();
 
     //for multithread-in-scripting
     AScriptManager* createNewScriptManager(int threadNumber); // *** !!!
@@ -57,6 +57,10 @@ public:
 
 public slots:
     void            AbortEvaluation(QString message = "Aborted!");
+
+    void            hideAllMessengerWidgets();
+    void            showAllMessengerWidgets();
+    void            clearUnusedMsgDialogs();
 
 public:
     //registered interfaces (units)

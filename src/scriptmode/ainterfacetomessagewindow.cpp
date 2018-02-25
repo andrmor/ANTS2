@@ -37,11 +37,11 @@ void AInterfaceToMessageWindow::connectSignalSlots()
 
 AInterfaceToMessageWindow::~AInterfaceToMessageWindow()
 {
-  qDebug() << "Msg destructor. Master?"<<bGUIthread;
+  //    qDebug() << "Msg destructor. Master?"<<bGUIthread;
 
   if (bGUIthread)
   {
-      qDebug() << "Delete message dialog for master triggered!";
+      //    qDebug() << "Delete message dialog for master triggered!";
       delete DialogWidget; DialogWidget = 0;
   }
   //Clones - DO NOT delete the dialogs -> they are handled by the ScriptManager of the GUI thread
@@ -110,16 +110,26 @@ void AInterfaceToMessageWindow::SetFontSize(int size)
     emit requestSetFontSize(size);
 }
 
-void AInterfaceToMessageWindow::RestoreAllWidgets()
+void AInterfaceToMessageWindow::ShowAllThreadMessengers()
+{
+    if (bGUIthread) ScriptManager->showAllMessengerWidgets();
+}
+
+void AInterfaceToMessageWindow::HideAllThreadMessengers()
+{
+    if (bGUIthread) ScriptManager->hideAllMessengerWidgets();
+}
+
+void AInterfaceToMessageWindow::RestorelWidget()
 {
     if (bGUIthread)
     {
         if (DialogWidget->IsShown())
             DialogWidget->RestoreWidget();
-    }
+    }        
 }
 
-void AInterfaceToMessageWindow::HideAllWidgets()
+void AInterfaceToMessageWindow::HideWidget()
 {
     if (bGUIthread)
     {

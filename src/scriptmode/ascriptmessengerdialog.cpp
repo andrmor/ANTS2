@@ -17,7 +17,7 @@ AScriptMessengerDialog::AScriptMessengerDialog(QWidget *parent) :
 
 AScriptMessengerDialog::~AScriptMessengerDialog()
 {
-    qDebug() << "destructor for AScriptMessengerDialog";
+    //qDebug() << "destructor for AScriptMessengerDialog";
     delete D; D = 0;
 }
 
@@ -84,6 +84,7 @@ void AScriptMessengerDialog::SetTransparent(bool flag)
 void AScriptMessengerDialog::SetDialogTitle(const QString &title)
 {
     Title = title;
+    D->setWindowTitle(title);
 }
 
 void AScriptMessengerDialog::Move(double x, double y)

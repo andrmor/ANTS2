@@ -39,6 +39,9 @@ public slots:
 
   void SetFontSize(int size);
 
+  void ShowAllThreadMessengers();
+  void HideAllThreadMessengers();
+
 signals:
   void requestAppend(const QString& text);
   void requestClear();
@@ -52,8 +55,8 @@ signals:
   void requestSetFontSize(int size);
 
 public:
-  void RestoreAllWidgets();  //on script window restore
-  void HideAllWidgets();     //on script window hide
+  void RestorelWidget();  //on script window restore
+  void HideWidget();     //on script window hide
 
 private:
   AScriptManager* ScriptManager;

@@ -2,6 +2,7 @@
 #include "ainterfacetomessagewindow.h"
 #include "coreinterfaces.h"
 #include "ascriptinterfacefactory.h"
+#include "ainterfacetomultithread.h"
 
 #include <QScriptEngine>
 #include <QMetaMethod>
@@ -190,6 +191,35 @@ void AScriptManager::AbortEvaluation(QString message)
     emit onAbort();
 }
 
+void AScriptManager::hideAllMessengerWidgets()
+{
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->HideWidget();
+}
+
+void AScriptManager::showAllMessengerWidgets()
+{
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->RestoreWidget();
+}
+
+void AScriptManager::clearUnusedMsgDialogs()
+{
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AInterfaceToMultiThread* t = dynamic_cast<AInterfaceToMultiThread*>(interfaces[i]);
+        if (t)
+        {
+            int numThreads = t->countAll();
+            for (int i=ThreadMessangerDialogs.size()-1; i >= numThreads; i--)
+            {
+                delete ThreadMessangerDialogs[i];
+                ThreadMessangerDialogs.removeAt(i);
+            }
+        }
+    }
+}
+
 void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     //qDebug() << "Registering:" << interfaceObject << name;
@@ -243,7 +273,7 @@ int AScriptManager::FindSyntaxError(QString script)
       }
 }
 
-void AScriptManager::DeleteMsgDialogs()
+void AScriptManager::deleteMsgDialogs()
 {
 //    for (int i=0; i<interfaces.size(); i++)
 //    {
@@ -256,22 +286,28 @@ void AScriptManager::DeleteMsgDialogs()
 //    }
 }
 
-void AScriptManager::hideMsgDialog()
+void AScriptManager::hideMsgDialogs()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
         AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)  t->HideAllWidgets();
+        if (t)  t->HideWidget();
     }
+
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->HideWidget();
 }
 
-void AScriptManager::restoreMsgDialog()
+void AScriptManager::restoreMsgDialogs()
 {
     for (int i=0; i<interfaces.size(); i++)
     {
         AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t) t->RestoreAllWidgets();
+        if (t) t->RestorelWidget();
     }
+
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->RestoreWidget();
 }
 
 // ------------ multithreading -------------
@@ -413,7 +449,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
             AInterfaceToMessageWindow* msg = dynamic_cast<AInterfaceToMessageWindow*>(copy);
             if (msg)
             {
-                qDebug() << "Handling messanger widget for thread#"<<threadNumber;
+                //  qDebug() << "Handling messanger widget for thread#"<<threadNumber;
                 while (threadNumber > ThreadMessangerDialogs.size() )
                     ThreadMessangerDialogs << 0; // paranoic protection
 

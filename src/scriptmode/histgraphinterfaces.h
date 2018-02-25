@@ -9,13 +9,13 @@
 class TmpObjHubClass;
 class TObject;
 
-// ---- H I S T O G R A M S ---- (TH1D of ROOT)
 class AInterfaceToHist : public AScriptInterface
 {
   Q_OBJECT
 
 public:
   AInterfaceToHist(TmpObjHubClass *TmpHub);
+  AInterfaceToHist(const AInterfaceToHist& other);
   ~AInterfaceToHist(){}
 
   virtual bool InitOnRun() override;
@@ -45,6 +45,7 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+  bool bGuiTthread = true;
 };
 
 // ---- G R A P H S ---- (TGraph of ROOT)

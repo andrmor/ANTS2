@@ -25,6 +25,15 @@ AInterfaceToHist::AInterfaceToHist(TmpObjHubClass* TmpHub)
                             "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
 }
 
+AInterfaceToHist::AInterfaceToHist(const AInterfaceToHist &other) :
+    AScriptInterface(other)
+{
+    qDebug() << "Copy!";
+    TmpHub = other.TmpHub;
+
+    bGuiTthread = false;
+}
+
 bool AInterfaceToHist::InitOnRun()
 {
   TmpHub->ScriptDrawObjects.clear();
@@ -33,6 +42,12 @@ bool AInterfaceToHist::InitOnRun()
 
 void AInterfaceToHist::NewHist(QString HistName, int bins, double start, double stop)
 {
+  if (!bGuiTthread)
+  {
+      abort("Threads cannot create/delete/draw histograms!");
+      return;
+  }
+
   int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
   if (index != -1)
     {
@@ -47,6 +62,12 @@ void AInterfaceToHist::NewHist(QString HistName, int bins, double start, double 
 
 void AInterfaceToHist::NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw histograms!");
+        return;
+    }
+
   int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
   if (index != -1)
     {
@@ -264,16 +285,34 @@ QVariant AInterfaceToHist::FitGaussWithInit(QString HistName, QVariant InitialPa
 
 bool AInterfaceToHist::Delete(QString HistName)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw histograms!");
+        return false;
+    }
+
     return TmpHub->ScriptDrawObjects.remove(HistName);
 }
 
 void AInterfaceToHist::DeleteAllHist()
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw histograms!");
+        return;
+    }
+
     TmpHub->ScriptDrawObjects.removeAllHists();
 }
 
 void AInterfaceToHist::Draw(QString HistName, QString options)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw histograms!");
+        return;
+    }
+
   int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
   if (index == -1)
     {

@@ -23,6 +23,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
       virtual ~AVarRecordBase() {}
 
       virtual void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) = 0;
+      virtual void Debug() const = 0;
 
   protected:
       std::string Name;
@@ -37,6 +38,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
     public:
       AVarRecordNormal(QString name, double start, double step);
       void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+      void Debug() const override;
   };
 
   class AVarRecordFixed : public AVarRecordBase
@@ -44,6 +46,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
     public:
       AVarRecordFixed(QString name, double value);
       void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+      void Debug() const override;
   };
 
   class AVarRecordLimited : public AVarRecordBase
@@ -51,6 +54,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
     public:
       AVarRecordLimited(QString name, double start, double step, double min, double max);
       void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+      void Debug() const override;
   };
 
   class AVarRecordLowerLimited : public AVarRecordBase
@@ -58,6 +62,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
     public:
       AVarRecordLowerLimited(QString name, double start, double step, double min);
       void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+      void Debug() const override;
   };
 
   class AVarRecordUpperLimited : public AVarRecordBase
@@ -65,6 +70,7 @@ class AInterfaceToMinimizerScript : public AScriptInterface
     public:
       AVarRecordUpperLimited(QString name, double start, double step, double max);
       void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+      void Debug() const override;
   };
 
 
@@ -89,8 +95,13 @@ public slots:
   void           AddVariable(QString name, double start, double step, double min, double max);
   void           AddVariable(QString name, double start, double step);
   void           AddFixedVariable(QString name, double value);
-  void           AddLowerLimitedVariable(QString name, double value, double step, double lowerBound);
-  void           AddUpperLimitedVariable(QString name, double value, double step, double upperBound);
+  void           AddLowerLimitedVariable(QString name, double value, double step, double lowerLimit);
+  void           AddUpperLimitedVariable(QString name, double value, double step, double upperLimit);
+
+  void           AddAllVariables(QVariant array);
+
+  void           SetSimplex();
+  void           SetMigrad();
 
   bool           Run();
 
@@ -103,6 +114,7 @@ private:
 
   bool            bHighPrecision = false;
   int             PrintVerbosity = -1;
+  int             Method = 0; // 0-Migrad, 1-Simplex
 
 };
 

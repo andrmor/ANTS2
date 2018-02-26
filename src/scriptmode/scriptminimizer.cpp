@@ -48,17 +48,23 @@ AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinim
   : AScriptInterface(other)
 {
     ScriptManager = 0; // need to be set on copy!
-    Clear();
+}
+
+AInterfaceToMinimizerScript::~AInterfaceToMinimizerScript()
+{
+  Clear();
 }
 
 void AInterfaceToMinimizerScript::ForceStop()
 {    
-    //qDebug() << "Abort requested for minimization procedure";
+  //qDebug() << "Abort requested for minimization procedure";
     //qDebug() << "aborted:"<<ScriptManager->fAborted;
 }
 
 void AInterfaceToMinimizerScript::Clear()
 {
+  for (AVarRecordBase* r : Variables)
+    delete r;
   Variables.clear();
 }
 
@@ -69,12 +75,27 @@ void AInterfaceToMinimizerScript::SetFunctorName(QString name)
 
 void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
 {
-    Variables << AVarRecord(name, start, step, min, max);
+  Variables << new AVarRecordLimited(name, start, step, min, max);
+}
+
+void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step)
+{
+  Variables << new AVarRecordNormal(name, start, step);
 }
 
 void AInterfaceToMinimizerScript::AddFixedVariable(QString name, double value)
 {
-    Variables << AVarRecord(name, value);
+  Variables << new AVarRecordFixed(name, value);
+}
+
+void AInterfaceToMinimizerScript::AddLowerLimitedVariable(QString name, double value, double step, double lowerBound)
+{
+  Variables << new AVarRecordLowerLimited(name, value, step, lowerBound);
+}
+
+void AInterfaceToMinimizerScript::AddUpperLimitedVariable(QString name, double value, double step, double upperBound)
+{
+  Variables << new AVarRecordUpperLimited(name, value, step, upperBound);
 }
 
 bool AInterfaceToMinimizerScript::Run()
@@ -120,14 +141,9 @@ bool AInterfaceToMinimizerScript::Run()
   memcpy(&dPoint, &thisvalue, sizeof(void *));
   //We need to fix for the possibility that double isn't enough to store void*
   RootMinimizer->SetFixedVariable(0, "p", dPoint);
-  //setting up variables   -  start step min max
+  //setting up variables   -  start step min max etc
   for (int i=0; i<ScriptManager->MiniNumVariables; i++)
-  {
-      if (Variables.at(i).bFixed)
-        RootMinimizer->SetFixedVariable(i+1, Variables.at(i).Name, Variables.at(i).Value);
-      else
-        RootMinimizer->SetLimitedVariable(i+1, Variables.at(i).Name, Variables.at(i).Start, Variables.at(i).Step, Variables.at(i).Min, Variables.at(i).Max);
-  }
+      Variables[i]->AddToMinimizer(i+1, RootMinimizer);
 
   //    qDebug() << "Minimizer created and configured";
 
@@ -152,4 +168,67 @@ bool AInterfaceToMinimizerScript::Run()
   delete RootMinimizer;
 
   return fOK;
+}
+
+AInterfaceToMinimizerScript::AVarRecordNormal::AVarRecordNormal(QString name, double start, double step)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordNormal::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetVariable(varIndex, Name, Value, Step);
+}
+
+AInterfaceToMinimizerScript::AVarRecordFixed::AVarRecordFixed(QString name, double value)
+{
+  Name = name.toLatin1().data();
+  Value = value;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordFixed::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetFixedVariable(varIndex, Name, Value);
+}
+
+AInterfaceToMinimizerScript::AVarRecordLimited::AVarRecordLimited(QString name, double start, double step, double min, double max)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Min = min;
+  Max = max;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetLimitedVariable(varIndex, Name, Value, Step, Min, Max);
+}
+
+AInterfaceToMinimizerScript::AVarRecordLowerLimited::AVarRecordLowerLimited(QString name, double start, double step, double min)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Min = min;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLowerLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetLowerLimitedVariable(varIndex, Name, Value, Step, Min);
+}
+
+AInterfaceToMinimizerScript::AVarRecordUpperLimited::AVarRecordUpperLimited(QString name, double start, double step, double max)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Max = max;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordUpperLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetUpperLimitedVariable(varIndex, Name, Value, Step, Max);
 }

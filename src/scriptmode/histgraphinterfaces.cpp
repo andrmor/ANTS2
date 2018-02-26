@@ -28,9 +28,7 @@ AInterfaceToHist::AInterfaceToHist(TmpObjHubClass* TmpHub)
 AInterfaceToHist::AInterfaceToHist(const AInterfaceToHist &other) :
     AScriptInterface(other)
 {
-    qDebug() << "Copy!";
     TmpHub = other.TmpHub;
-
     bGuiTthread = false;
 }
 

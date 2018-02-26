@@ -11,36 +11,73 @@
 
 class MainWindow;
 class AScriptManager;
+namespace ROOT { namespace Minuit2 { class Minuit2Minimizer; } }
 
 class AInterfaceToMinimizerScript : public AScriptInterface
 {
   Q_OBJECT
 
-  struct AVarRecord
+  class AVarRecordBase
   {
-      AVarRecord(QString Name, double Start, double Step, double Min, double Max) :
-          Name(Name.toLatin1().data()), Start(Start), Step(Step), Min(Min), Max(Max), bFixed(false) {}
-      AVarRecord(QString Name, double Val) :
-          Name(Name.toLatin1().data()), Value(Val), bFixed(true) {}
-      AVarRecord(){}
+  public:
+      virtual ~AVarRecordBase() {}
 
+      virtual void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) = 0;
+
+  protected:
       std::string Name;
-      double Start, Step, Min, Max;
-
-      bool bFixed;
-      double Value;
+      double      Value;
+      double      Step;
+      double      Min;
+      double      Max;
   };
+
+  class AVarRecordNormal : public AVarRecordBase
+  {
+    public:
+      AVarRecordNormal(QString name, double start, double step);
+      void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+  };
+
+  class AVarRecordFixed : public AVarRecordBase
+  {
+    public:
+      AVarRecordFixed(QString name, double value);
+      void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+  };
+
+  class AVarRecordLimited : public AVarRecordBase
+  {
+    public:
+      AVarRecordLimited(QString name, double start, double step, double min, double max);
+      void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+  };
+
+  class AVarRecordLowerLimited : public AVarRecordBase
+  {
+    public:
+      AVarRecordLowerLimited(QString name, double start, double step, double min);
+      void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+  };
+
+  class AVarRecordUpperLimited : public AVarRecordBase
+  {
+    public:
+      AVarRecordUpperLimited(QString name, double start, double step, double max);
+      void AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer) override;
+  };
+
+
 
 public:
   AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
   AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other);
-  ~AInterfaceToMinimizerScript() {}
+  ~AInterfaceToMinimizerScript();
 
-  bool IsMultithreadCapable() const override {return true;}
+  bool           IsMultithreadCapable() const override {return true;}
+  void           ForceStop() override;
 
-  void ForceStop() override;
-
-  void SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
+  void           SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
 
 public slots:
 
@@ -50,7 +87,10 @@ public slots:
   void           Clear();
   void           SetFunctorName(QString name);
   void           AddVariable(QString name, double start, double step, double min, double max);
+  void           AddVariable(QString name, double start, double step);
   void           AddFixedVariable(QString name, double value);
+  void           AddLowerLimitedVariable(QString name, double value, double step, double lowerBound);
+  void           AddUpperLimitedVariable(QString name, double value, double step, double upperBound);
 
   bool           Run();
 
@@ -58,11 +98,11 @@ public slots:
 
 private:
   AScriptManager* ScriptManager;
-  QVector<AVarRecord> Variables;
+  QVector<AVarRecordBase*> Variables;
   QVariantList    Results;
 
-  bool bHighPrecision = false;
-  int  PrintVerbosity = -1;
+  bool            bHighPrecision = false;
+  int             PrintVerbosity = -1;
 
 };
 

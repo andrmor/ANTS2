@@ -262,19 +262,22 @@ public:
   bool IsMultithreadCapable() const override {return true;}
 
 public slots:  
-  int CountPM();
+  int      CountPM() const;
 
-  double GetPMx(int ipm);
-  double GetPMy(int ipm);
-  double GetPMz(int ipm);
+  double   GetPMx(int ipm);
+  double   GetPMy(int ipm);
+  double   GetPMz(int ipm);
+
+  bool     IsPmCenterWithin(int ipm, double x, double y, double distance_in_square);
+  bool     IsPmCenterWithinFast(int ipm, double x, double y, double distance_in_square) const;
 
   QVariant GetPMtypes();
   QVariant GetPMpositions() const;
 
-  void RemoveAllPMs();
-  bool AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
-  bool AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
-  void SetAllArraysFullyCustom();
+  void     RemoveAllPMs();
+  bool     AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
+  bool     AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
+  void     SetAllArraysFullyCustom();
 
 private:
   AConfiguration* Config;

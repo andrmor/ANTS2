@@ -1263,6 +1263,7 @@ void AInterfaceToData::SetReconstructionOK(int ievent, bool OK)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->ReconstructionOK = OK;
+  if (!OK) EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = false;
 }
 
 void AInterfaceToData::SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
@@ -2165,7 +2166,7 @@ bool AInterfaceToPMs::checkAddPmCommon(int UpperLower, int type)
     return true;
 }
 
-int AInterfaceToPMs::CountPM()
+int AInterfaceToPMs::CountPM() const
 {
     return PMs->count();
 }
@@ -2186,6 +2187,21 @@ double AInterfaceToPMs::GetPMz(int ipm)
 {
   if (!checkValidPM(ipm)) return false;
   return PMs->Z(ipm);
+}
+
+bool AInterfaceToPMs::IsPmCenterWithin(int ipm, double x, double y, double distance_in_square)
+{
+  if (!checkValidPM(ipm)) return false;
+  double dx = x - PMs->at(ipm).x;
+  double dy = y - PMs->at(ipm).y;
+  return ( (dx*dx + dy*dy) < distance_in_square );
+}
+
+bool AInterfaceToPMs::IsPmCenterWithinFast(int ipm, double x, double y, double distance_in_square) const
+{
+  double dx = x - PMs->at(ipm).x;
+  double dy = y - PMs->at(ipm).y;
+  return ( (dx*dx + dy*dy) < distance_in_square );
 }
 
 QVariant AInterfaceToPMs::GetPMtypes()

@@ -416,7 +416,6 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     return copy;
 }
 
-#include <QPlainTextEdit>
 AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
 {
     AScriptManager* sm = new AScriptManager(RandGen);  // *** !!! make new RandGen one!!!
@@ -428,7 +427,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
 
         if (!si->IsMultithreadCapable()) continue;
 
-        QObject* copy = AScriptInterfaceFactory::makeCopy(io);
+        QObject* copy = AScriptInterfaceFactory::makeCopy(io); //cloning script interfaces
         if (copy)
         {
             //  qDebug() << "Making available for multi-thread use: "<<io->objectName();
@@ -468,15 +467,13 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
                 if (bIsNew)
                 {
                     msg->SetDialogTitle("Thread #"+QString::number(threadNumber));
-                    msg->Move(50 + threadNumber*30, 50 + threadNumber*20);
+                    msg->Move(50 + threadNumber*50, 50 + threadNumber*30);
                 }
             }
 
-            // *** ??? need it?
+            // connecting the request for abort script
             AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-            if (base)
-                connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
-
+            if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
 
             sm->SetInterfaceObject(copy, io->objectName());
         }
@@ -494,9 +491,9 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
         it.next();
         //  qDebug() << it.name() << ": " << it.value().toString();
 
-        if (!sm->engine->globalObject().property(it.name()).isValid())
+        if (!sm->engine->globalObject().property(it.name()).isValid()) // if resource with this name does not exist...
         {
-            //do not copy QObjects - the multi-thread friendly ones were already copied
+            //do not copy QObjects - the multi-thread friendly units were already copied
             if (!it.value().isQObject())
             {
                 sm->engine->globalObject().setProperty(it.name(), SC.copy(it.value()));
@@ -509,6 +506,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
         }
     }
 
+    //connect core.print() to the ScriptManager of the GUI thread, as queued!
     connect(sm, &AScriptManager::showMessage, this, &AScriptManager::showMessage, Qt::QueuedConnection);
 
     //  qDebug() << "  Scriptmanager created!"<<sm;

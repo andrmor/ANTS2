@@ -50,6 +50,9 @@ public:
 
     void SetMainSplitterSizes(QList<int> values);
 
+    void onBusyOn();
+    void onBusyOff();
+
     AScriptManager* ScriptManager;
     QStringList functions;
 

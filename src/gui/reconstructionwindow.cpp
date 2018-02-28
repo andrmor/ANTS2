@@ -1305,17 +1305,23 @@ void ReconstructionWindow::onBusyOn()
   //qDebug() << "RW -> Busy ON!";
   WidgetFocusedBeforeBusyOn = focusWidget();
 
-  ui->twData->setEnabled(false);
-  ui->twOptions->setEnabled(false);
-  ui->bsAnalyzeScan->setEnabled(false);
+  QList<QWidget*> list;
+  list << ui->twData << ui->tabWidget << ui->bsAnalyzeScan
+       << ui->pbReconstructAll << ui->pbSaveReconstructionAsRootTree << ui->pbSaveReconstructionAsText << ui->cobCurrentGroup
+       << ui->pbConfigureGroups << ui->pbClearAllFilters;
+  for (QWidget* w : list) w->setEnabled(false);
 }
 
 void ReconstructionWindow::onBusyOff()
 {
   //qDebug() << "RW -> Busy OFF!";
-  ui->twData->setEnabled(true);
-  ui->twOptions->setEnabled(true);
-  ui->bsAnalyzeScan->setEnabled(true);
+
+  QList<QWidget*> list;
+  list << ui->twData << ui->tabWidget << ui->bsAnalyzeScan
+       << ui->pbReconstructAll << ui->pbSaveReconstructionAsRootTree << ui->pbSaveReconstructionAsText << ui->cobCurrentGroup
+       << ui->pbConfigureGroups << ui->pbClearAllFilters;
+  for (QWidget* w : list) w->setEnabled(true);
+
   ui->pbStopReconstruction->setEnabled(false);
   ui->pbStopReconstruction->setChecked(false);
 

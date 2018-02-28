@@ -73,8 +73,6 @@ class AInterfaceToMinimizerScript : public AScriptInterface
       void Debug() const override;
   };
 
-
-
 public:
   AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
   AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other);

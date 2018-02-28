@@ -13,6 +13,7 @@
 #include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "ascriptwindow.h"
+#include "detectoraddonswindow.h"
 
 #include <QTime>
 #include <QDebug>
@@ -259,13 +260,15 @@ void WindowNavigatorClass::BusyOn()
   MW->stopRootUpdate(); //--//
 
   MW->onBusyOn();
+  MW->DAwindow->setEnabled(false);
   MW->Rwindow->onBusyOn();
+  MW->ScriptWindow->onBusyOn();
   MW->lrfwindow->onBusyOn();
   MW->MIwindow->setEnabled(false);
   MW->ELwindow->setEnabled(false);
   if (MW->GainWindow) MW->GainWindow->setEnabled(false);
-  if (MW->GraphWindow) MW->GraphWindow->OnBusyOn();
-  if (MW->GeometryWindow) MW->GeometryWindow->onBusyOn();
+  MW->GraphWindow->setEnabled(false);//OnBusyOn();
+  MW->GeometryWindow->onBusyOn();
   MW->Owindow->setEnabled(false);
 
   emit BusyStatusChanged(true);
@@ -287,9 +290,15 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //main window
   MW->onBusyOff();
 
+  //addon window
+  MW->DAwindow->setEnabled(true);
+
   //reconstruction window
   //MW->Rwindow->setEnabled(true);
   MW->Rwindow->onBusyOff();
+
+  //Script
+  MW->ScriptWindow->onBusyOff();
 
   //lrf window
   MW->lrfwindow->onBusyOff();
@@ -303,7 +312,7 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
 
-  MW->GraphWindow->OnBusyOff();
+  MW->GraphWindow->setEnabled(true);//OnBusyOff();
 
   MW->GeometryWindow->onBusyOff();
 

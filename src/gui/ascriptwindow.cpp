@@ -378,6 +378,16 @@ void AScriptWindow::SetMainSplitterSizes(QList<int> values)
     splMain->setSizes(values);
 }
 
+void AScriptWindow::onBusyOn()
+{
+    ui->pbRunScript->setEnabled(false);
+}
+
+void AScriptWindow::onBusyOff()
+{
+    ui->pbRunScript->setEnabled(true);
+}
+
 void AScriptWindow::ShowText(QString text)
 {
   pteOut->appendHtml(text);

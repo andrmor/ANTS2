@@ -100,6 +100,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::onBusyOn()
 {
+  ui->menuBar->setEnabled(false);
+
   ui->tabConfig->setEnabled(false);
   ui->tabExpdata->setEnabled(false);
   ui->tabTests->setEnabled(false);
@@ -111,6 +113,8 @@ void MainWindow::onBusyOn()
 
 void MainWindow::onBusyOff()
 {
+  ui->menuBar->setEnabled(true);
+
   ui->tabConfig->setEnabled(true);
   ui->tabExpdata->setEnabled(true);
   ui->tabTests->setEnabled(true);

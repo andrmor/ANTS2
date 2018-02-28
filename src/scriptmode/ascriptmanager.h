@@ -61,6 +61,7 @@ public slots:
     void            hideAllMessengerWidgets();
     void            showAllMessengerWidgets();
     void            clearUnusedMsgDialogs();
+    void            closeAllMsgDialogs();
 
 public:
     //registered interfaces (units)

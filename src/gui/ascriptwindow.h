@@ -98,10 +98,10 @@ private slots:
     void on_actionSelect_font_triggered();
 
     void on_actionShow_all_messenger_windows_triggered();
-
     void on_actionHide_all_messenger_windows_triggered();
-
     void on_actionClear_unused_messenger_windows_triggered();
+
+    void on_actionClose_all_messenger_windows_triggered();
 
 private:
     Ui::AScriptWindow *ui;

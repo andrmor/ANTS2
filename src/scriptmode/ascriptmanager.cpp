@@ -220,6 +220,12 @@ void AScriptManager::clearUnusedMsgDialogs()
     }
 }
 
+void AScriptManager::closeAllMsgDialogs()
+{
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->Hide();
+}
+
 void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     //qDebug() << "Registering:" << interfaceObject << name;
@@ -307,7 +313,8 @@ void AScriptManager::restoreMsgDialogs()
     }
 
     for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
-        if (d) d->RestoreWidget();
+        if (d)
+            if (d->IsShown()) d->RestoreWidget();
 }
 
 // ------------ multithreading -------------

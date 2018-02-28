@@ -106,6 +106,12 @@ void AScriptMessengerDialog::SetFontSize(int size)
     e->setFont(f);
 }
 
+void AScriptMessengerDialog::onRejected()
+{
+    bShowStatus = false;
+    Hide();
+}
+
 void AScriptMessengerDialog::init(bool bTransparent)
 {
     D = new QDialog(Parent);
@@ -128,4 +134,6 @@ void AScriptMessengerDialog::init(bool bTransparent)
         e->setStyleSheet("background: rgba(0,0,255,0%)");
         e->setFrameStyle(QFrame::NoFrame);
     }
+
+    connect(D, &QDialog::rejected, this, &AScriptMessengerDialog::onRejected);
 }

@@ -1239,3 +1239,8 @@ void AScriptWindow::on_actionClear_unused_messenger_windows_triggered()
 {
     ScriptManager->clearUnusedMsgDialogs();
 }
+
+void AScriptWindow::on_actionClose_all_messenger_windows_triggered()
+{
+    ScriptManager->closeAllMsgDialogs();
+}

@@ -797,7 +797,8 @@ double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMin
       {
        double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];//X, Y, Z) * energy;
        if (LRFhere <= 0.)
-           return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+           //return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+           return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
 
        sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
      }

@@ -80,11 +80,6 @@ public slots:
   virtual void execute();
 };
 
-struct ASliceRecRecord
-{
-
-};
-
 /// Contracting grids on CPU
 class CGonCPUreconstructorClass : public ProcessorClass
 {

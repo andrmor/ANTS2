@@ -1,7 +1,7 @@
 #ifndef AINTERFACETOPHOTONSCRIPT_H
 #define AINTERFACETOPHOTONSCRIPT_H
 
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "generalsimsettings.h"
 #include <QVector>
 #include <QVariant>

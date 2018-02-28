@@ -50,6 +50,9 @@ public:
 
     void SetMainSplitterSizes(QList<int> values);
 
+    void onBusyOn();
+    void onBusyOff();
+
     AScriptManager* ScriptManager;
     QStringList functions;
 
@@ -94,6 +97,12 @@ private slots:
 
     void on_actionSelect_font_triggered();
 
+    void on_actionShow_all_messenger_windows_triggered();
+
+    void on_actionHide_all_messenger_windows_triggered();
+
+    void on_actionClear_unused_messenger_windows_triggered();
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;
@@ -127,7 +136,6 @@ private:
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
     QString getDesc(const QJsonValue &ref);
     void fillHelper(QObject* obj, QString module, QString helpText = "");  //fill help TreeWidget according to the data in the obj
-    QString getFunctionReturnType(QString UnitFunction);
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);

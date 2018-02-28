@@ -35,6 +35,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   TableLocked = true; //will be unlocked after table is filled
   TMPignore = false;
   bFilteringStarted = false;
+  WidgetFocusedBeforeBusyOn = 0;
 
   QList<int> List;
   List << 0;

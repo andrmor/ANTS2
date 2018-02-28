@@ -16,13 +16,12 @@ class RootDrawObj
   public:
     TObject* Obj;
     QString name; // it is also the title
-    QString type; // object type (e.g. TH1D)
+    QString type; // object type (e.g. "TH1D")
 
     QString Xtitle, Ytitle, Ztitle;
     int MarkerColor, MarkerStyle, MarkerSize, LineColor, LineStyle, LineWidth;
 
     RootDrawObj();
-    ~RootDrawObj();
 };
 
 class ScriptDrawCollection
@@ -33,7 +32,7 @@ public:
    int findIndexOf(QString name); //returns -1 if not found
    bool remove(QString name);
    void append(TObject* obj, QString name, QString type);
-   void clear() {List.clear();}
+   void clear();
    void removeAllHists();
    void removeAllGraphs();
 };

@@ -71,14 +71,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(DetectorClass *Detector,
-                        EventsDataClass *EventsDataHub,
-                        TApplication *RootApp,
-                        ASimulationManager *SimulationManager,
-                        ReconstructionManagerClass *ReconstructionManager,
-                        ANetworkModule *Net,
-                        TmpObjHubClass *TmpHub,
-                        GlobalSettingsClass *GlobSet);
+    MainWindow(DetectorClass *Detector,
+               EventsDataClass *EventsDataHub,
+               TApplication *RootApp,
+               ASimulationManager *SimulationManager,
+               ReconstructionManagerClass *ReconstructionManager,
+               ANetworkModule *Net,
+               TmpObjHubClass *TmpHub,
+               GlobalSettingsClass *GlobSet);
     ~MainWindow();
 
     // Pointers to external resources
@@ -382,7 +382,7 @@ private slots:
     void on_pbGunShowSource_toggled(bool checked);
 
 protected:
-    void closeEvent(QCloseEvent *);    
+    void closeEvent(QCloseEvent *event);
     bool event(QEvent *event);
 
 private:
@@ -454,6 +454,7 @@ private:
     bool ShowTop;
     bool ColorByMaterial;
     bool fConfigGuiLocked;
+    int timesTriedToExit;
 
     bool populateTable; //for SimLoadConfig - compatability check
 

@@ -16568,7 +16568,7 @@ on stack</string>
   </action>
   <action name="actionLoad_last_config">
    <property name="text">
-    <string>Load last config</string>
+    <string>Load autosave</string>
    </property>
    <property name="toolTip">
     <string>This quick save slot is empty</string>

@@ -34,12 +34,10 @@
 #include "graphwindowclass.h"
 #endif
 
+#include <QFile>
 #include <QVariant>
 #include <QThread>
-#include <QPlainTextEdit>
-#include <QVBoxLayout>
 #include <QDateTime>
-#include <QDialog>
 #include <QApplication>
 #include <QVector3D>
 #include <QJsonDocument>
@@ -49,63 +47,15 @@
 #include "TGeoManager.h"
 #include "TGeoTrack.h"
 #include "TColor.h"
+#include "TAxis.h"
 #include "TH1D.h"
-#include "TH1.h"
 #include "TH2D.h"
-#include "TH2.h"
-#include "TF2.h"
-#include "TGraph.h"
-#include "TF1.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TBranch.h"
 #include "TLeaf.h"
 
-/*
-bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString& Name, int& Index)
-{
-  //qDebug() << "Array candidate:"<<Key;
-  if (Key.contains("["))
-    {
-      if (!Key.endsWith("]"))
-        {
-          LastError = "Format error: "+Key;
-          qDebug() << LastError;
-          return false;
-        }
-
-      Name = "";
-      QString indexStr = Key;
-      for (int i=0; i<Key.size(); i++)
-        {
-          QChar c = Key[i];
-          indexStr = indexStr.mid(1);
-          if (c == '[') break;
-          else Name += c;
-        }
-      indexStr.chop(1);
-      //qDebug() << "  Index candidate:"<<indexStr;
-      bool ok;
-      Index = indexStr.toInt(&ok);
-      if (!ok)
-        {
-          LastError = "Index extraction error for "+Key;
-          qDebug() << LastError;
-          return false;
-        }
-    }
-  else
-    { // It is NOT an array
-      Name = Key;
-      Index = -1;
-    }
-
-  //qDebug() << "Extracted Name/Index:"<<Name<<Index;
-  return true;
-}
-*/
-
-bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes)
+bool AInterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes)
 {
     Indexes.clear();
     if (Key.contains('['))
@@ -148,90 +98,7 @@ bool InterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<in
     return true;
 }
 
-/*
-bool InterfaceToConfig::modifyJsonValue(QJsonObject& obj, const QString& path, const QJsonValue& newValue)
-{
-  int indexOfDot = path.indexOf('.');
-  QString propertyName = path.left(indexOfDot);
-  QString subPath = indexOfDot>0 ? path.mid(indexOfDot+1) : QString();
-  //qDebug() << "subPath:"<<subPath;
-
-  QString name;
-  int index;
-  bool ok = keyToNameAndIndex(propertyName, name, index);
-  if (!ok) return false;
-  propertyName = name;
-
-  //qDebug() << "Attempting to extract:"<<propertyName<<index;
-  QJsonValue subValue = obj[propertyName];
-  //qDebug() << "QJsonvalue extraction success?" << (subValue != QJsonValue());
-  if (subValue == QJsonValue())
-    {
-      LastError = "Property not found:"+propertyName;
-      qDebug() << LastError;
-      return false;
-    }
-
-  //updating QJsonObject
-  if(subPath.isEmpty() && index==-1)
-    {
-      subValue = newValue;
-    }
-  else
-    {
-      QJsonObject obj1;
-      if (index == -1)
-        {
-          obj1 = subValue.toObject();
-          bool ok = modifyJsonValue(obj1, subPath, newValue);
-          if (!ok) return false;
-          subValue = obj1;
-        }
-      else
-        {
-          QJsonArray arr = subValue.toArray();
-          if (index<0 || index>arr.size()-1)
-            {
-              LastError = "Wrong array index ("+QString::number(index)+") of "+propertyName+": array size is " + QString::number(arr.size());
-              qDebug() << LastError;
-              return false;
-            }
-          //qDebug() << arr[index].isArray() << subPath.isEmpty();
-          if (arr[index].isArray() && subPath.isEmpty())
-          {
-              arr[index] = newValue;
-              obj[propertyName] = arr;
-              return true;
-          }
-          obj1 = arr[index].toObject();
-          if (obj1.isEmpty() && !subPath.isEmpty())
-            {
-              LastError = "Array element of "+propertyName+"["+QString::number(index)+"] is not QJsonObject!";
-              qDebug() << LastError;
-              return false;
-            }
-          if (subPath.isEmpty())
-          {
-              //qDebug() << index << newValue;
-              arr[index] = newValue;
-              subValue = arr;
-          }
-          else
-          {
-              bool ok = modifyJsonValue(obj1, subPath, newValue);
-              if (!ok) return false;
-              arr[index] = obj1;
-              subValue = arr;
-          }
-        }
-    }
-
-  obj[propertyName] = subValue;
-  return true;
-}
-*/
-
-bool InterfaceToConfig::modifyJsonValue(QJsonObject &obj, const QString &path, const QJsonValue &newValue)
+bool AInterfaceToConfig::modifyJsonValue(QJsonObject &obj, const QString &path, const QJsonValue &newValue)
 {
     int indexOfDot = path.indexOf('.');
     QString propertyName = path.left(indexOfDot);
@@ -312,75 +179,7 @@ bool InterfaceToConfig::modifyJsonValue(QJsonObject &obj, const QString &path, c
     return true;
 }
 
-/*
-void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringList &Found, QString Path)
-{
-  // script interface replaces ".." or the leading "." with an empty string
-  bool fLast = (Keys.size() == 1); //it is the last key in the Keys list
-  if (fLast && Keys.last()=="")
-    { //bad format - Keys have to end with a concrete key
-      LastError = "Bad format - Last object has to be concrete";
-      qDebug() << LastError;
-      return;
-    }
-
-  QString Key = Keys.first();
-  QString Name;
-  int Index;
-  if (Key != "")
-    { //looking for a concrete key
-      if (!keyToNameAndIndex(Key, Name, Index)) return; //format error
-
-      if (obj.contains(Name))
-        { //object does contain the key name! (we do not check here if the index is adequate)
-          Path += "." + Key;
-          if (fLast)
-            { //mission accomplished
-              Found.append(Path.mid(1)); //remove the starting "." in the found path
-              return;
-            }
-          //pass to the next key in the chain
-          Keys.removeFirst();
-          if (Index == -1)
-            find(obj[Name].toObject(), Keys, Found, Path);
-          else
-            find(obj[Name].toArray().at(Index).toObject(), Keys, Found, Path);
-        }
-      else return; //does not contains the given key
-    }
-  else
-    { // "" Key
-      QString Key = Keys.at(1); //this is next key to find
-      if (Key == "") return;  //format problem - cannot be "" followed by ""
-      //does the object contain the next key?
-      if (!keyToNameAndIndex(Key, Name, Index)) return; //format error
-      if  (obj.contains(Name))
-        { //object does contain the key!
-          //we can reuse the function:
-          Keys.removeFirst(); //remove ""
-          find(obj, Keys, Found, Path);
-        }
-      else
-        { //have to check every sub-object
-          foreach(QString oneKey, obj.keys())
-            {
-              QJsonValue Val = obj[oneKey];
-              if (Val.isObject())
-                find(obj[oneKey].toObject(), Keys, Found, Path+"."+oneKey);
-              else if (Val.isArray())
-                {
-                  QJsonArray arr = Val.toArray();
-                  for (int i=0; i<arr.size(); i++)
-                    find(arr[i].toObject(), Keys, Found, Path+"."+oneKey+"["+QString::number(i)+"]");
-                }
-              //else do nothing for other types
-            }
-        }
-  }
-}
-*/
-
-void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringList &Found, QString Path)
+void AInterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringList &Found, QString Path)
 {
     // script interface replaces ".." or the leading "." with an empty string
     bool fLast = (Keys.size() == 1); //it is the last key in the Keys list
@@ -452,8 +251,14 @@ void InterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringLi
     }
 }
 
-bool InterfaceToConfig::Replace(QString Key, QVariant val)
+bool AInterfaceToConfig::Replace(QString Key, QVariant val)
 {
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return false;
+    }
+
   LastError = "";
   //qDebug() << Key << val << val.typeName();
   QString type = val.typeName();
@@ -521,102 +326,10 @@ bool InterfaceToConfig::Replace(QString Key, QVariant val)
   return false;
 }
 
-/*
-QVariant InterfaceToConfig::GetKeyValue(QString Key)
+QVariant AInterfaceToConfig::GetKeyValue(QString Key)
 {
-    LastError = "";
+    qDebug() << this << "get "<< Key << "triggered";
 
-    if (!expandKey(Key)) return 0; //aborted anyway
-    //qDebug() << "Key after expansion:"<<Key;
-
-    QJsonObject obj = Config->JSON;
-    int indexOfDot;
-    QString path = Key;
-    do
-    {
-        indexOfDot = path.indexOf('.');
-        QString propertyName = path.left(indexOfDot);
-        QString path1 = (indexOfDot>0 ? path.mid(indexOfDot+1) : QString());
-        path = path1;
-        //qDebug() << "property, path"<<propertyName<<path;
-
-        QString name;
-        int index;
-        bool ok = keyToNameAndIndex(propertyName, name, index);
-        if (!ok)
-        {
-            abort("Get key value for "+Key+" error");
-            return false;
-        }        
-        propertyName = name;
-        //qDebug() << "Attempting to extract:"<<propertyName<<index;
-        QJsonValue subValue = obj[propertyName];
-        //qDebug() << "QJsonValue extraction success?" << (subValue != QJsonValue());
-        if (subValue == QJsonValue())
-          {
-            LastError = "Property not found:"+propertyName;
-            qDebug() << LastError;
-            return false;
-          }
-
-        //updating QJsonObject
-        if(path.isEmpty() && index==-1)
-          {
-            //here attempt to get value
-            //qDebug() << "QJsonValue to attempt to report back:"<<subValue;
-            QVariant res = subValue.toVariant();
-            //qDebug() << "QVariant:"<<res;
-            return res;
-          }
-        else
-          {
-            if (index == -1) obj = subValue.toObject();
-            else
-              {
-                QJsonArray arr = subValue.toArray();                
-                if (index<0 || index>arr.size()-1)
-                  {
-                    LastError = "Wrong array index ("+QString::number(index)+") of "+propertyName+": array size is " + QString::number(arr.size());
-                    qDebug() << LastError;
-                    return false;
-                  }
-                obj = arr[index].toObject();
-                if (obj.isEmpty())
-                  {
-                    if (arr[index].isArray() && path.isEmpty())
-                    {
-                        QJsonArray ar = arr[index].toArray();
-                        QVariant res = ar.toVariantList();
-                        return res;
-                    }
-
-                    if (path.isEmpty())
-                    {
-                        QVariant res = arr[index].toVariant();
-                        return res;
-                    }
-
-                    LastError = "Array element of "+propertyName+"["+QString::number(index)+"] is not QJsonObject!";
-                    qDebug() << LastError;
-                    return false;
-                  }
-                if (path.isEmpty())
-                {
-                    QVariant res = obj.toVariantMap();
-                    return res;
-                }
-              }
-          }
-    }
-    while (indexOfDot>0);
-
-    abort("Get key value for "+Key+" error");
-    return 0;
-}
-*/
-
-QVariant InterfaceToConfig::GetKeyValue(QString Key)
-{
     LastError = "";
 
     if (!expandKey(Key)) return 0; //aborted anyway
@@ -706,17 +419,23 @@ QVariant InterfaceToConfig::GetKeyValue(QString Key)
 }
 
 
-QString InterfaceToConfig::GetLastError()
+QString AInterfaceToConfig::GetLastError()
 {
     return LastError;
 }
 
-void InterfaceToConfig::RebuildDetector()
+void AInterfaceToConfig::RebuildDetector()
 {
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return;
+    }
+
     Config->GetDetector()->BuildDetector();
 }
 
-bool InterfaceToConfig::expandKey(QString &Key)
+bool AInterfaceToConfig::expandKey(QString &Key)
 {
     if (Key.startsWith(".") || Key.contains(".."))
       {
@@ -750,69 +469,14 @@ bool InterfaceToConfig::expandKey(QString &Key)
     return true;
 }
 
-//void InterfaceToConfig::PedestalSet(int ipm, double offset)
-//{
-//  if (!checkValidPM(ipm)) return;
-
-//  APreprocessingSettings set;
-//  set.readFromJson(Config->JSON, Config->GetDetector()->PMs, "");
-
-//  Config->GetDetector()->PMs->at(ipm).PreprocessingAdd = offset;
-//  set.fActive = true;
-
-//  set.writeToJson(Config->GetDetector()->PreprocessingJson, Config->GetDetector()->PMs);
-//  Config->GetDetector()->writeToJson(Config->JSON);
-//}
-
-//void InterfaceToConfig::PedestalAdd(int ipm, double offset)
-//{
-//  if (!checkValidPM(ipm)) return;
-
-//  APreprocessingSettings set;
-//  set.readFromJson(Config->JSON, Config->GetDetector()->PMs, "");
-
-//  Config->GetDetector()->PMs->at(ipm).PreprocessingAdd += offset;
-//  set.fActive = true;
-
-//  set.writeToJson(Config->GetDetector()->PreprocessingJson, Config->GetDetector()->PMs);
-//  Config->GetDetector()->writeToJson(Config->JSON);
-//}
-
-//void InterfaceToConfig::ScaleSet(int ipm, double factor)
-//{
-//  if (!checkValidPM(ipm)) return;
-
-//  APreprocessingSettings set;
-//  set.readFromJson(Config->JSON, Config->GetDetector()->PMs, "");
-
-//  Config->GetDetector()->PMs->at(ipm).PreprocessingMultiply = factor;
-//  set.fActive = true;
-
-//  set.writeToJson(Config->GetDetector()->PreprocessingJson, Config->GetDetector()->PMs);
-//  Config->GetDetector()->writeToJson(Config->JSON);
-//}
-
-//void InterfaceToConfig::ScaleMultiply(int ipm, double factor)
-//{
-//  if (!checkValidPM(ipm)) return;
-
-//  APreprocessingSettings set;
-//  set.readFromJson(Config->JSON, Config->GetDetector()->PMs, "");
-
-//  Config->GetDetector()->PMs->at(ipm).PreprocessingMultiply *= factor;
-//  set.fActive = true;
-
-//  set.writeToJson(Config->GetDetector()->PreprocessingJson, Config->GetDetector()->PMs);
-//  Config->GetDetector()->writeToJson(Config->JSON);
-//}
-
-
-void InterfaceToConfig::UpdateGui()
+void AInterfaceToConfig::UpdateGui()
 {
+    if (bClonedCopy) return;
+
     Config->AskForAllGuiUpdate();
 }
 
-InterfaceToConfig::InterfaceToConfig(AConfiguration *config)
+AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config)
 {
   Config = config;
   emit requestReadRasterGeometry();
@@ -825,15 +489,20 @@ InterfaceToConfig::InterfaceToConfig(AConfiguration *config)
 
 }
 
-//bool InterfaceToConfig::InitOnRun()
-//{
-//  //qDebug() << "InitOnRun triggered for config unit";
-//  emit requestReadRasterGeometry(); //only GUI
-//  return true;
-//}
-
-bool InterfaceToConfig::Load(QString FileName)
+AInterfaceToConfig::AInterfaceToConfig(const AInterfaceToConfig& other)
+  : AScriptInterface(other)
 {
+    bClonedCopy = true;
+}
+
+bool AInterfaceToConfig::Load(QString FileName)
+{
+  if (bClonedCopy)
+    {
+      abort("Script in threads: cannot modify detector configuration!");
+      return false;
+    }
+
   //bool ok = MW->ELwindow->LoadAllConfig(FileName, true, true, true, &Config->JSON);
   bool ok = Config->LoadConfig(FileName, true, true, true);
   if (ok) return true;
@@ -842,160 +511,9 @@ bool InterfaceToConfig::Load(QString FileName)
   return false;
 }
 
-bool InterfaceToConfig::Save(QString FileName)
+bool AInterfaceToConfig::Save(QString FileName)
 {
     return SaveJsonToFile(Config->JSON, FileName);
-}
-
-//void InterfaceToGlobScript::ShowOutputWindow(bool flag, int tab)
-//{
-//  if (flag)
-//    {
-//      MW->Owindow->showNormal();
-//      MW->Owindow->raise();
-//    }
-//  else MW->Owindow->hide();
-
-//  if (tab>-1 && tab<4) MW->Owindow->SetTab(tab);
-//  qApp->processEvents();
-//}
-
-//-----------------------------------
-static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-InterfaceToTexter::InterfaceToTexter(QMainWindow* parent) : D(0), Parent(parent)
-{
-  bEnabled = true;
-  bActivated = false;
-  init(false);
-}
-
-void InterfaceToTexter::init(bool fTransparent)
-{
-  D = new QDialog(Parent);
-  QObject::connect(D, &QDialog::finished, this, &InterfaceToTexter::Hide);
-
-  QVBoxLayout* l = new QVBoxLayout;
-  e = new QPlainTextEdit();
-  e->setReadOnly(true);
-  l->addWidget(e);
-  D->setLayout(l);
-
-  X = msgX;
-  Y = msgY;
-  WW = msgW;
-  HH = msgH;
-
-  D->setGeometry(X, Y, WW, HH);
-  D->setWindowTitle("Script msg");
-
-  if (fTransparent)
-    {
-      D->setWindowFlags(Qt::FramelessWindowHint);
-      D->setAttribute(Qt::WA_TranslucentBackground);
-
-      e->setStyleSheet("background: rgba(0,0,255,0%)");
-      e->setFrameStyle(QFrame::NoFrame);
-    }
-}
-
-
-InterfaceToTexter::~InterfaceToTexter()
-{
-  //qDebug() << "Msg destructor";
-  deleteDialog();
-}
-
-void InterfaceToTexter::SetTransparent(bool flag)
-{
-  QString text = e->document()->toPlainText();
-  delete D;
-  D = 0;
-  init(flag);
-  e->setPlainText(text);
-}
-
-void InterfaceToTexter::Append(QString txt)
-{
-  e->appendHtml(txt);
-}
-
-void InterfaceToTexter::Clear()
-{
-  e->clear();
-}
-
-void InterfaceToTexter::Show(QString txt, int ms)
-{
-  if (!bEnabled) return;
-  e->clear();
-  e->appendHtml(txt);
-
-  if (ms == -1)
-    {
-      D->show();
-      D->raise();
-      bActivated = true;
-      return;
-    }
-
-  D->show();
-  D->raise();
-  bActivated = true;
-  QTime t;
-  t.restart();
-  do qApp->processEvents();
-  while (t.elapsed()<ms);
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::Move(double x, double y)
-{
-  X = msgX = x; Y = msgY = y;
-  D->move(X, Y);
-}
-
-void InterfaceToTexter::Resize(double w, double h)
-{
-  WW = msgW = w; HH = msgH = h;
-  D->resize(WW, HH);
-}
-
-void InterfaceToTexter::Show()
-{
-  if (!bEnabled) return;
-  D->show();
-  D->raise();
-  bActivated = true;
-}
-
-void InterfaceToTexter::Hide()
-{
-  D->hide();
-  bActivated = false;
-}
-
-void InterfaceToTexter::SetFontSize(int size)
-{
-  QFont f = e->font();
-  f.setPointSize(size);
-  e->setFont(f);
-}
-
-void InterfaceToTexter::deleteDialog()
-{
-   delete D;
-   D = 0;
-}
-
-void InterfaceToTexter::hide()
-{
-    if (D) D->hide();
-}
-
-void InterfaceToTexter::restore()
-{
-    if (D) D->show();
 }
 
 #ifdef SIM
@@ -1128,13 +646,6 @@ int InterfaceToSim::countMonitors()
     return EventsDataHub->SimStat->Monitors.size();
 }
 
-//int InterfaceToSim::getMonitorHits(int imonitor)
-//{
-//    if (!EventsDataHub->SimStat || imonitor<0 || imonitor>EventsDataHub->SimStat->Monitors.size())
-//        return std::numeric_limits<int>::quiet_NaN();
-//    return EventsDataHub->SimStat->Monitors.at(imonitor)->getHits();
-//}
-
 int InterfaceToSim::getMonitorHits(QString monitor)
 {
     if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
@@ -1225,8 +736,8 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
 #endif
 
 //----------------------------------
-InterfaceToData::InterfaceToData(AConfiguration *Config, ReconstructionManagerClass *RManager, EventsDataClass* EventsDataHub)
-  : Config(Config), RManager(RManager), EventsDataHub(EventsDataHub)
+AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* EventsDataHub)
+  : Config(Config), EventsDataHub(EventsDataHub)
 {
   H["GetNumPMs"] = "Number of sensors in the available events dataset. If the dataset is empty, 0 is returned.";
   H["GetNumEvents"] = "Number of available events.";
@@ -1243,7 +754,7 @@ InterfaceToData::InterfaceToData(AConfiguration *Config, ReconstructionManagerCl
   H["GetStatistics"] = "Returns (if available) an array with GoodEvents, Average_Chi2, Average_XY_deviation";
 }
 
-double InterfaceToData::GetPMsignal(int ievent, int ipm)
+double AInterfaceToData::GetPMsignal(int ievent, int ipm)
 {
   int numEvents = GetNumEvents();
   int numPMs = GetNumPMs();
@@ -1261,7 +772,22 @@ double InterfaceToData::GetPMsignal(int ievent, int ipm)
   return EventsDataHub->Events.at(ievent).at(ipm);
 }
 
-void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
+QVariant AInterfaceToData::GetPMsignals(int ievent)
+{
+  int numEvents = GetNumEvents();
+  if (ievent<0 || ievent>=numEvents)
+    {
+      abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
+      return 0;
+    }
+
+  const QVector< float >& sigs = EventsDataHub->Events.at(ievent);
+  QVariantList l;
+  for (float f : sigs) l << QVariant(f);
+  return l;
+}
+
+void AInterfaceToData::SetPMsignal(int ievent, int ipm, double value)
 {
     int numEvents = GetNumEvents();
     int numPMs = GetNumPMs();
@@ -1279,7 +805,7 @@ void InterfaceToData::SetPMsignal(int ievent, int ipm, double value)
     EventsDataHub->Events[ievent][ipm] = value;
 }
 
-double InterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
+double AInterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
 {
     int numEvents = countTimedEvents();
     if (ievent<0 || ievent >= numEvents)
@@ -1305,7 +831,7 @@ double InterfaceToData::GetPMsignalTimed(int ievent, int ipm, int iTimeBin)
     return EventsDataHub->TimedEvents.at(ievent).at(iTimeBin).at(ipm);
 }
 
-QVariant InterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
+QVariant AInterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
 {
     int numEvents = countTimedEvents();
     if (ievent<0 || ievent >= numEvents)
@@ -1330,40 +856,40 @@ QVariant InterfaceToData::GetPMsignalVsTime(int ievent, int ipm)
     return aa;
 }
 
-int InterfaceToData::GetNumPMs()
+int AInterfaceToData::GetNumPMs()
 {
   if (EventsDataHub->Events.isEmpty()) return 0;
   return EventsDataHub->Events.first().size();
 }
 
-int InterfaceToData::countPMs()
+int AInterfaceToData::countPMs()
 {
     if (EventsDataHub->Events.isEmpty()) return 0;
     return EventsDataHub->Events.first().size();
 }
 
-int InterfaceToData::GetNumEvents()
+int AInterfaceToData::GetNumEvents()
 {
     return EventsDataHub->Events.size();
 }
 
-int InterfaceToData::countEvents()
+int AInterfaceToData::countEvents()
 {
     return EventsDataHub->Events.size();
 }
 
-int InterfaceToData::countTimedEvents()
+int AInterfaceToData::countTimedEvents()
 {
     return EventsDataHub->TimedEvents.size();
 }
 
-int InterfaceToData::countTimeBins()
+int AInterfaceToData::countTimeBins()
 {
     if (EventsDataHub->TimedEvents.isEmpty()) return 0;
     return EventsDataHub->TimedEvents.first().size();
 }
 
-bool InterfaceToData::checkEventNumber(int ievent)
+bool AInterfaceToData::checkEventNumber(int ievent)
 { 
   int numEvents = EventsDataHub->Events.size();
   if (ievent<0 || ievent>numEvents-1)
@@ -1374,7 +900,7 @@ bool InterfaceToData::checkEventNumber(int ievent)
   return true;
 }
 
-bool InterfaceToData::checkEventNumber(int igroup, int ievent, int ipoint)
+bool AInterfaceToData::checkEventNumber(int igroup, int ievent, int ipoint)
 {
     int numGroups = EventsDataHub->ReconstructionData.size();
     if (igroup<0 || igroup>numGroups-1)
@@ -1402,7 +928,7 @@ bool InterfaceToData::checkEventNumber(int igroup, int ievent, int ipoint)
     return true;
 }
 
-bool InterfaceToData::checkPM(int ipm)
+bool AInterfaceToData::checkPM(int ipm)
 {
   if (ipm<0 || ipm>Config->GetDetector()->PMs->count()-1)
       {
@@ -1412,7 +938,7 @@ bool InterfaceToData::checkPM(int ipm)
   return true;
 }
 
-bool InterfaceToData::checkSetReconstructionDataRequest(int ievent)
+bool AInterfaceToData::checkSetReconstructionDataRequest(int ievent)
 {
   int numEvents = EventsDataHub->Events.size();
   if (ievent<0 || ievent>numEvents-1)
@@ -1423,7 +949,7 @@ bool InterfaceToData::checkSetReconstructionDataRequest(int ievent)
   return true;
 }
 
-bool InterfaceToData::checkTrueDataRequest(int ievent)
+bool AInterfaceToData::checkTrueDataRequest(int ievent)
 {
   if (EventsDataHub->isScanEmpty())
     {
@@ -1439,57 +965,57 @@ bool InterfaceToData::checkTrueDataRequest(int ievent)
   return true;
 }
 
-double InterfaceToData::GetReconstructedX(int ievent)
+double AInterfaceToData::GetReconstructedX(int ievent)
 {
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[0];
 }
 
-double InterfaceToData::GetReconstructedX(int igroup, int ievent, int ipoint)
+double AInterfaceToData::GetReconstructedX(int igroup, int ievent, int ipoint)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[0];
 }
 
-double InterfaceToData::GetReconstructedY(int ievent)
+double AInterfaceToData::GetReconstructedY(int ievent)
 {
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[1];
 }
 
-double InterfaceToData::GetReconstructedY(int igroup, int ievent, int ipoint)
+double AInterfaceToData::GetReconstructedY(int igroup, int ievent, int ipoint)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[1];
 }
 
-double InterfaceToData::GetReconstructedZ(int ievent)
+double AInterfaceToData::GetReconstructedZ(int ievent)
 {
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].r[2];
 }
 
-double InterfaceToData::GetReconstructedZ(int igroup, int ievent, int ipoint)
+double AInterfaceToData::GetReconstructedZ(int igroup, int ievent, int ipoint)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[2];
 }
 
-double InterfaceToData::GetRho(int ievent, int iPM)
+double AInterfaceToData::GetRho(int ievent, int iPM)
 {
     if (!checkPM(iPM)) return 0;
     if (!checkEventNumber(ievent)) return 0; //anyway aborted
     return sqrt( GetRho2(ievent, iPM) );
 }
 
-double InterfaceToData::GetRho(int igroup, int ievent, int ipoint, int iPM)
+double AInterfaceToData::GetRho(int igroup, int ievent, int ipoint, int iPM)
 {
   if (!checkPM(iPM)) return 0;
   if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].r[2];
 }
 
-double InterfaceToData::GetRho2(int ievent, int iPM)
+double AInterfaceToData::GetRho2(int ievent, int iPM)
 {
   if (!checkPM(iPM)) return 0;
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
@@ -1500,7 +1026,7 @@ double InterfaceToData::GetRho2(int ievent, int iPM)
   return dx2+dy2;
 }
 
-double InterfaceToData::GetRho2(int igroup, int ievent, int ipoint, int iPM)
+double AInterfaceToData::GetRho2(int igroup, int ievent, int ipoint, int iPM)
 {
     if (!checkPM(iPM)) return 0;
     if (!checkEventNumber(igroup, ievent, ipoint)) return 0; //anyway aborted
@@ -1511,109 +1037,115 @@ double InterfaceToData::GetRho2(int igroup, int ievent, int ipoint, int iPM)
     return dx2+dy2;
 }
 
-double InterfaceToData::GetReconstructedEnergy(int ievent)
+double AInterfaceToData::GetReconstructedEnergy(int ievent)
 {
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->Points[0].energy;
 }
 
-double InterfaceToData::GetReconstructedEnergy(int igroup, int ievent, int ipoint)
+double AInterfaceToData::GetReconstructedEnergy(int igroup, int ievent, int ipoint)
 {
     if (!checkEventNumber(igroup, ievent, ipoint)) return 0;
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points[ipoint].energy;
 }
 
-bool InterfaceToData::IsReconstructedGoodEvent(int ievent)
+bool AInterfaceToData::IsReconstructedGoodEvent(int ievent)
 {
   if (!checkEventNumber(ievent)) return 0; //anyway aborted
   return EventsDataHub->ReconstructionData.at(0).at(ievent)->GoodEvent;
 }
 
-bool InterfaceToData::IsReconstructedGoodEvent(int igroup, int ievent)
+bool AInterfaceToData::IsReconstructedGoodEvent(int igroup, int ievent)
 {
     if (!checkEventNumber(igroup, ievent, 0)) return 0;
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->GoodEvent;
 }
 
-int InterfaceToData::countReconstructedGroups()
+bool AInterfaceToData::IsReconstructed_ScriptFilterPassed(int igroup, int ievent)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return 0;
+  return !EventsDataHub->ReconstructionData.at(igroup).at(ievent)->fScriptFiltered;
+}
+
+int AInterfaceToData::countReconstructedGroups()
 {
     return EventsDataHub->ReconstructionData.size();
 }
 
-int InterfaceToData::countReconstructedEvents(int igroup)
+int AInterfaceToData::countReconstructedEvents(int igroup)
 {
     if (igroup<0 || igroup>EventsDataHub->ReconstructionData.size()-1) return -1;
     return EventsDataHub->ReconstructionData.at(igroup).size();
 }
 
-int InterfaceToData::countReconstructedPoints(int igroup, int ievent)
+int AInterfaceToData::countReconstructedPoints(int igroup, int ievent)
 {
     if (igroup<0 || igroup>EventsDataHub->ReconstructionData.size()-1) return -1;
     if (ievent<0 || ievent>EventsDataHub->ReconstructionData.at(igroup).size()-1) return -1;
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points.size();
 }
 
-double InterfaceToData::GetTrueX(int ievent)
+double AInterfaceToData::GetTrueX(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points[0].r[0];
 }
 
-double InterfaceToData::GetTrueY(int ievent)
+double AInterfaceToData::GetTrueY(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points[0].r[1];
 }
 
-double InterfaceToData::GetTrueZ(int ievent)
+double AInterfaceToData::GetTrueZ(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points[0].r[2];
 }
 
-double InterfaceToData::GetTrueEnergy(int ievent)
+double AInterfaceToData::GetTrueEnergy(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points[0].energy;
 }
 
-int InterfaceToData::GetTruePoints(int ievent)
+int AInterfaceToData::GetTruePoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points.size();
 }
 
-bool InterfaceToData::IsTrueGoodEvent(int ievent)
+bool AInterfaceToData::IsTrueGoodEvent(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->GoodEvent;
 }
 
-bool InterfaceToData::GetTrueNumberPoints(int ievent)
+bool AInterfaceToData::GetTrueNumberPoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points.size();
 }
 
-void InterfaceToData::SetScanX(int ievent, double value)
+void AInterfaceToData::SetScanX(int ievent, double value)
 {
     if (!checkTrueDataRequest(ievent)) return; //anyway aborted
     EventsDataHub->Scan.at(ievent)->Points[0].r[0] = value;
 }
 
-void InterfaceToData::SetScanY(int ievent, double value)
+void AInterfaceToData::SetScanY(int ievent, double value)
 {
     if (!checkTrueDataRequest(ievent)) return; //anyway aborted
     EventsDataHub->Scan.at(ievent)->Points[0].r[1] = value;
 }
 
-void InterfaceToData::SetScanZ(int ievent, double value)
+void AInterfaceToData::SetScanZ(int ievent, double value)
 {
     if (!checkTrueDataRequest(ievent)) return; //anyway aborted
     EventsDataHub->Scan.at(ievent)->Points[0].r[2] = value;
 }
 
-void InterfaceToData::SetScanEnergy(int ievent, double value)
+void AInterfaceToData::SetScanEnergy(int ievent, double value)
 {
     if (!checkTrueDataRequest(ievent)) return; //anyway aborted
     EventsDataHub->Scan.at(ievent)->Points[0].energy = value;
@@ -1624,7 +1156,7 @@ bool pairMore (const std::pair<int, float>& p1, const std::pair<int, float>& p2)
     return (p1.second > p2.second);
 }
 
-QVariant InterfaceToData::GetPMsSortedBySignal(int ievent)
+QVariant AInterfaceToData::GetPMsSortedBySignal(int ievent)
 {
     if (!checkEventNumber(ievent)) return 0; //aborted anyway
 
@@ -1643,7 +1175,7 @@ QVariant InterfaceToData::GetPMsSortedBySignal(int ievent)
     return aa;
 }
 
-int InterfaceToData::GetPMwithMaxSignal(int ievent)
+int AInterfaceToData::GetPMwithMaxSignal(int ievent)
 {
     if (!checkEventNumber(ievent)) return 0; //aborted anyway
 
@@ -1661,7 +1193,7 @@ int InterfaceToData::GetPMwithMaxSignal(int ievent)
     return iMaxSig;
 }
 
-void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
+void AInterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[0] = x;
@@ -1672,50 +1204,69 @@ void InterfaceToData::SetReconstructed(int ievent, double x, double y, double z,
   EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = true;
 }
 
-void InterfaceToData::SetReconstructedX(int ievent, double x)
+void AInterfaceToData::SetReconstructed(int ievent, double x, double y, double z, double e, double chi2)
+{
+    if (!checkSetReconstructionDataRequest(ievent)) return;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[0] = x;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[1] = y;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[2] = z;
+    EventsDataHub->ReconstructionData[0][ievent]->Points[0].energy = e;
+    EventsDataHub->ReconstructionData[0][ievent]->chi2 = chi2;
+    EventsDataHub->ReconstructionData[0][ievent]->ReconstructionOK = true;
+    EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = true;
+}
+
+void AInterfaceToData::SetReconstructedX(int ievent, double x)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[0] = x;
 }
 
-void InterfaceToData::SetReconstructedY(int ievent, double y)
+void AInterfaceToData::SetReconstructedY(int ievent, double y)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[1] = y;
 }
 
-void InterfaceToData::SetReconstructedZ(int ievent, double z)
+void AInterfaceToData::SetReconstructedZ(int ievent, double z)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].r[2] = z;
 }
 
-void InterfaceToData::SetReconstructedEnergy(int ievent, double e)
+void AInterfaceToData::SetReconstructedEnergy(int ievent, double e)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->Points[0].energy = e;
 }
 
-void InterfaceToData::SetReconstructedGoodEvent(int ievent, bool good)
+void AInterfaceToData::SetReconstructed_ScriptFilterPass(int ievent, bool flag)
+{
+  if (!checkSetReconstructionDataRequest(ievent)) return;
+  EventsDataHub->ReconstructionData[0][ievent]->fScriptFiltered = !flag;
+}
+
+void AInterfaceToData::SetReconstructedGoodEvent(int ievent, bool good)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->ReconstructionOK = true;
   EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = good;
 }
 
-void InterfaceToData::SetReconstructedAllEventsGood(bool flag)
+void AInterfaceToData::SetReconstructedAllEventsGood(bool flag)
 {
     for (int i=0; i<EventsDataHub->ReconstructionData.at(0).size(); i++)
         EventsDataHub->ReconstructionData[0][i]->GoodEvent = flag;
 }
 
-void InterfaceToData::SetReconstructionOK(int ievent, bool OK)
+void AInterfaceToData::SetReconstructionOK(int ievent, bool OK)
 {
   if (!checkSetReconstructionDataRequest(ievent)) return;
   EventsDataHub->ReconstructionData[0][ievent]->ReconstructionOK = OK;
+  if (!OK) EventsDataHub->ReconstructionData[0][ievent]->GoodEvent = false;
 }
 
-void InterfaceToData::SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
+void AInterfaceToData::SetReconstructed(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[0] = x;
@@ -1726,7 +1277,7 @@ void InterfaceToData::SetReconstructed(int igroup, int ievent, int ipoint, doubl
   EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = true;
 }
 
-void InterfaceToData::SetReconstructedFast(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
+void AInterfaceToData::SetReconstructedFast(int igroup, int ievent, int ipoint, double x, double y, double z, double e)
 {
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[0] = x;
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[1] = y;
@@ -1736,61 +1287,67 @@ void InterfaceToData::SetReconstructedFast(int igroup, int ievent, int ipoint, d
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = true;
 }
 
-void InterfaceToData::AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e)
+void AInterfaceToData::AddReconstructedPoint(int igroup, int ievent, double x, double y, double z, double e)
 {
   if (!checkEventNumber(igroup, ievent, 0)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points.AddPoint(x, y, z, e);
 }
 
-void InterfaceToData::SetReconstructedX(int igroup, int ievent, int ipoint, double x)
+void AInterfaceToData::SetReconstructedX(int igroup, int ievent, int ipoint, double x)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[0] = x;
 }
 
-void InterfaceToData::SetReconstructedY(int igroup, int ievent, int ipoint, double y)
+void AInterfaceToData::SetReconstructedY(int igroup, int ievent, int ipoint, double y)
 {
     if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[1] = y;
 }
 
-void InterfaceToData::SetReconstructedZ(int igroup, int ievent, int ipoint, double z)
+void AInterfaceToData::SetReconstructedZ(int igroup, int ievent, int ipoint, double z)
 {
     if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].r[2] = z;
 }
 
-void InterfaceToData::SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e)
+void AInterfaceToData::SetReconstructedEnergy(int igroup, int ievent, int ipoint, double e)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->Points[ipoint].energy = e;
 }
 
-void InterfaceToData::SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good)
+void AInterfaceToData::SetReconstructedGoodEvent(int igroup, int ievent, int ipoint, bool good)
 {
     if (!checkEventNumber(igroup, ievent, ipoint)) return;
     EventsDataHub->ReconstructionData[igroup][ievent]->GoodEvent = good;
 }
 
-void InterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK)
+void AInterfaceToData::SetReconstructed_ScriptFilterPass(int igroup, int ievent, bool flag)
+{
+  if (!checkEventNumber(igroup, ievent, 0)) return;
+  EventsDataHub->ReconstructionData[igroup][ievent]->fScriptFiltered = !flag;
+}
+
+void AInterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, bool OK)
 {
   if (!checkEventNumber(igroup, ievent, ipoint)) return;
   EventsDataHub->ReconstructionData[igroup][ievent]->ReconstructionOK = OK;
 }
 
-void InterfaceToData::SetReconstructionReady()
+void AInterfaceToData::SetReconstructionReady()
 {
   EventsDataHub->fReconstructionDataReady = true;
   emit RequestEventsGuiUpdate();
 }
 
-void InterfaceToData::ResetReconstructionData(int numGroups)
+void AInterfaceToData::ResetReconstructionData(int numGroups)
 {
     for (int ig=0; ig<numGroups; ig++)
       EventsDataHub->resetReconstructionData(numGroups);
 }
 
-void InterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumEvents)
+void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumEvents)
 {
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
@@ -1801,7 +1358,7 @@ void InterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumEv
   emit RequestEventsGuiUpdate();
 }
 
-void InterfaceToData::LoadEventsAscii(QString fileName, bool Append)
+void AInterfaceToData::LoadEventsAscii(QString fileName, bool Append)
 {
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadEventsFromTxtFile(fileName, Config->JSON, Config->GetDetector()->PMs);
@@ -1812,22 +1369,22 @@ void InterfaceToData::LoadEventsAscii(QString fileName, bool Append)
   emit RequestEventsGuiUpdate();
 }
 
-void InterfaceToData::ClearEvents()
+void AInterfaceToData::ClearEvents()
 {
   EventsDataHub->clear(); //gui update is triggered inside
 }
 
-void InterfaceToData::PurgeBad()
+void AInterfaceToData::PurgeBad()
 {
   EventsDataHub->PurgeFilteredEvents();
 }
 
-void InterfaceToData::Purge(int LeaveOnePer)
+void AInterfaceToData::Purge(int LeaveOnePer)
 {
   EventsDataHub->Purge(LeaveOnePer);
 }
 
-QVariant InterfaceToData::GetStatistics(int igroup)
+QVariant AInterfaceToData::GetStatistics(int igroup)
 {
   int GoodEvents;
   double AvChi2, AvDeviation;
@@ -1839,7 +1396,7 @@ QVariant InterfaceToData::GetStatistics(int igroup)
 }
 
 //----------------------------------
-InterfaceToLRF::InterfaceToLRF(AConfiguration *Config, EventsDataClass *EventsDataHub)
+AInterfaceToLRF::AInterfaceToLRF(AConfiguration *Config, EventsDataClass *EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub) //,f2d(0)
 {
   SensLRF = Config->GetDetector()->LRFs->getOldModule();
@@ -1851,7 +1408,7 @@ InterfaceToLRF::InterfaceToLRF(AConfiguration *Config, EventsDataClass *EventsDa
   //H["ShowVsXY"] = "Plots a 2D histogram of the LRF. Does not work for 3D LRFs!";
 }
 
-QString InterfaceToLRF::Make()
+QString AInterfaceToLRF::Make()
 {
   QJsonObject jsR = Config->JSON["ReconstructionConfig"].toObject();
   SensLRF->LRFmakeJson = jsR["LRFmakeJson"].toObject();
@@ -1861,7 +1418,7 @@ QString InterfaceToLRF::Make()
   else return "";
 }
 
-double InterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
+double AInterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
 {
     //qDebug() << ipm<<x<<y<<z;
     //qDebug() << SensLRF->getIteration()->countPMs();
@@ -1870,11 +1427,26 @@ double InterfaceToLRF::GetLRF(int ipm, double x, double y, double z)
     return SensLRF->getLRF(ipm, x, y, z);
 }
 
-double InterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
+double AInterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
 {
     if (!SensLRF->isAllLRFsDefined()) return 0;
     if (ipm<0 || ipm >= SensLRF->getIteration()->countPMs()) return 0;
     return SensLRF->getLRFErr(ipm, x, y, z);
+}
+
+QVariant AInterfaceToLRF::GetAllLRFs(double x, double y, double z)
+{
+    if (!SensLRF->isAllLRFsDefined())
+    {
+        abort("Not all LRFs are defined!");
+        return 0;
+    }
+
+    QVariantList arr;
+    const int numPMs = SensLRF->getIteration()->countPMs(); //Config->Detector->PMs->count();
+    for (int ipm=0; ipm<numPMs; ipm++)
+        arr << QVariant( SensLRF->getLRF(ipm, x, y, z) );
+    return arr;
 }
 
 //void InterfaceToLRF::ShowVsXY(int ipm, int PointsX, int PointsY)
@@ -1901,30 +1473,30 @@ double InterfaceToLRF::GetLRFerror(int ipm, double x, double y, double z)
 //  MW->GraphWindow->DrawWithoutFocus(f2d, "surf");
 //}
 
-int InterfaceToLRF::CountIterations()
+int AInterfaceToLRF::CountIterations()
 {
   return SensLRF->countIterations();
 }
 
-int InterfaceToLRF::GetCurrent()
+int AInterfaceToLRF::GetCurrent()
 {
   return SensLRF->getCurrentIterIndex();
 }
 
-void InterfaceToLRF::SetCurrent(int iterIndex)
+void AInterfaceToLRF::SetCurrent(int iterIndex)
 {
   if(!getValidIteration(iterIndex)) return;
   SensLRF->setCurrentIter(iterIndex);
   Config->AskForLRFGuiUpdate();
 }
 
-void InterfaceToLRF::SetCurrentName(QString name)
+void AInterfaceToLRF::SetCurrentName(QString name)
 {
     SensLRF->setCurrentIterName(name);
     Config->AskForLRFGuiUpdate();
 }
 
-void InterfaceToLRF::DeleteCurrent()
+void AInterfaceToLRF::DeleteCurrent()
 {
   int iterIndex = -1;
   if(!getValidIteration(iterIndex)) return;
@@ -1932,7 +1504,7 @@ void InterfaceToLRF::DeleteCurrent()
   Config->AskForLRFGuiUpdate();
 }
 
-QString InterfaceToLRF::Save(QString fileName)
+QString AInterfaceToLRF::Save(QString fileName)
 {
   int iterIndex = -1;
   if (!getValidIteration(iterIndex)) return "No data to save";
@@ -1954,7 +1526,7 @@ QString InterfaceToLRF::Save(QString fileName)
   return "";
 }
 
-int InterfaceToLRF::Load(QString fileName)
+int AInterfaceToLRF::Load(QString fileName)
 {
   QFile loadFile(fileName);
   if (!loadFile.open(QIODevice::ReadOnly)) {
@@ -1978,7 +1550,7 @@ int InterfaceToLRF::Load(QString fileName)
   return SensLRF->getCurrentIterIndex();
 }
 
-bool InterfaceToLRF::getValidIteration(int &iterIndex)
+bool AInterfaceToLRF::getValidIteration(int &iterIndex)
 {
   if (iterIndex < -1) {
       abort(QString::number(iterIndex)+" &lt; -1, therefore invalid iteration index.\n");
@@ -2260,538 +1832,10 @@ void InterfaceToGeoWin::ShowEnergyVector()
   MW->Rwindow->UpdateSimVizData(0);
 }
 #endif
-//----------------------------------
-InterfaceToGraphs::InterfaceToGraphs(TmpObjHubClass *TmpHub)
-  : TmpHub(TmpHub)
-{
-  H["NewGraph"] = "Creates a new graph (Root TGraph object)";
-  H["SetMarkerProperties"] = "Default marker properties are 1, 20, 1";
-  H["SetLineProperties"] = "Default line properties are 1, 1, 2";
-  H["Draw"] = "Draws the graph (use \"APL\" options if in doubt)";
-}
-
-bool InterfaceToGraphs::InitOnRun()
-{
-  TmpHub->ScriptDrawObjects.clear();
-  return true;
-}
-
-void InterfaceToGraphs::NewGraph(QString GraphName)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index != -1)
-    {
-      abort("Bad new graph name! Object "+GraphName+" already exists");
-      return;
-    }
-
-  TGraph* gr = new TGraph();
-  TmpHub->ScriptDrawObjects.append(gr, GraphName, "TGraph");
-  gr->SetFillColor(0);
-  gr->SetFillStyle(0);
-}
-
-void InterfaceToGraphs::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.MarkerColor = MarkerColor;
-  r.MarkerStyle = MarkerStyle;
-  r.MarkerSize = MarkerSize;
-}
-
-void InterfaceToGraphs::SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.LineColor = LineColor;
-  r.LineStyle = LineStyle;
-  r.LineWidth = LineWidth;
-}
-
-void InterfaceToGraphs::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.Xtitle = X_Title;
-  r.Ytitle = Y_Title;
-}
-
-void InterfaceToGraphs::AddPoint(QString GraphName, double x, double y)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      gr->SetPoint(gr->GetN(), x, y);
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-  }
-}
-
-void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-    if (index == -1)
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-      }
-
-    QString typeX = xArray.typeName();
-    QString typeY = yArray.typeName();
-    if (typeX != "QVariantList" || typeY != "QVariantList")
-    {
-        qWarning() << "arrays are expected in graph.AddPoints()";
-        return;
-    }
-
-    QVariantList vx = xArray.toList();
-    QVariantList vy = yArray.toList();
-    QJsonArray X = QJsonArray::fromVariantList(vx);
-    QJsonArray Y = QJsonArray::fromVariantList(vy);
-    if (X.isEmpty() || Y.isEmpty() || X.size()!=Y.size())
-    {
-        qWarning() << "Empty or mismatch in add array to graph";
-        return;
-    }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type == "TGraph")
-      {
-        TGraph* gr = static_cast<TGraph*>(r.Obj);
-
-        for (int i=0; i<X.size(); i++)
-            if (X[i].isDouble() && Y[i].isDouble())
-            {
-                double x = X[i].toDouble();
-                double y = Y[i].toDouble();
-                gr->SetPoint(gr->GetN(), x, y);
-            }
-      }
-    else
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-    }
-}
-
-void InterfaceToGraphs::AddPoints(QString GraphName, QVariant xyArray)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-    if (index == -1)
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-      }
-
-    QString typeArr = xyArray.typeName();
-    if (typeArr != "QVariantList")
-    {
-        qWarning() << "arrays are expected in graph.AddPoints()";
-        return;
-    }
-
-    QVariantList xy = xyArray.toList();
-    QJsonArray XYarr = QJsonArray::fromVariantList(xy);
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type == "TGraph")
-      {
-        TGraph* gr = static_cast<TGraph*>(r.Obj);
-
-        for (int i=0; i<XYarr.size(); i++)
-        {
-           QJsonArray el = XYarr[i].toArray();
-           if (el.size() == 2)
-           {
-               if (el[0].isDouble() && el[1].isDouble())
-               {
-                   double x = el[0].toDouble();
-                   double y = el[1].toDouble();
-                   gr->SetPoint(gr->GetN(), x, y);
-               }
-           }
-        }
-      }
-    else
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-    }
-}
-
-void InterfaceToGraphs::Draw(QString GraphName, QString options)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      if (gr->GetN() == 0) return;
-
-      gr->SetLineColor(r.LineColor);
-      gr->SetLineWidth(r.LineWidth);
-      gr->SetLineStyle(r.LineStyle);
-      gr->SetMarkerColor(r.MarkerColor);
-      gr->SetMarkerSize(r.MarkerSize);
-      gr->SetMarkerStyle(r.MarkerStyle);
-      gr->SetEditable(false);
-      gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
-      emit RequestDraw(gr, options, true);
-
-      gr->GetXaxis()->SetTitle(r.Xtitle.toLatin1().data());
-      gr->GetYaxis()->SetTitle(r.Ytitle.toLatin1().data());
-      emit RequestDraw(0, "", true); //to update canvas so axes titles are visible
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-  }
-}
-
-bool InterfaceToGraphs::Delete(QString GraphName)
-{
-    return TmpHub->ScriptDrawObjects.remove(GraphName);
-}
-
-void InterfaceToGraphs::DeleteAllGraph()
-{
-    TmpHub->ScriptDrawObjects.removeAllGraphs();
-}
 
 //----------------------------------
-InterfaceToHistD::InterfaceToHistD(TmpObjHubClass* TmpHub)
-  : TmpHub(TmpHub)
-{
-    H["FitGauss"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
-            "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
-    H["FitGaussWithInit"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
-                            "\nInitialParValues is an array of initial parameters of the values [Constant,Mean,Sigma]"
-                            "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
-}
 
-bool InterfaceToHistD::InitOnRun()
-{
-  TmpHub->ScriptDrawObjects.clear();
-  return true;
-}
 
-void InterfaceToHistD::NewHist(QString HistName, int bins, double start, double stop)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index != -1)
-    {
-      abort("Bad new hist name! Object "+HistName+" already exists");
-      return;
-    }
-
-  TH1D* hist = new TH1D("", HistName.toLatin1().data(), bins, start, stop);
-  hist->GetYaxis()->SetTitleOffset((Float_t)1.30);
-  TmpHub->ScriptDrawObjects.append(hist, HistName, "TH1D");
-}
-
-void InterfaceToHistD::NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index != -1)
-    {
-      abort("Bad new hist name! Object "+HistName+" already exists");
-      return;
-    }
-
-  TH2D* hist = new TH2D("", HistName.toLatin1().data(), binsX, startX, stopX, binsY, startY, stopY);
-  hist->GetYaxis()->SetTitleOffset((Float_t)1.30);
-  TmpHub->ScriptDrawObjects.append(hist, HistName, "TH2D");
-}
-
-void InterfaceToHistD::SetTitles(QString HistName, QString X_Title, QString Y_Title, QString Z_Title)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.Xtitle = X_Title;
-  r.Ytitle = Y_Title;
-  r.Ztitle = Z_Title;
-}
-
-void InterfaceToHistD::SetLineProperties(QString HistName, int LineColor, int LineStyle, int LineWidth)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.LineColor = LineColor;
-  r.LineStyle = LineStyle;
-  r.LineWidth = LineWidth;
-}
-
-void InterfaceToHistD::Fill(QString HistName, double val, double weight)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->Fill(val, weight);
-    }
-  else
-    {
-      abort("TH1D histogram "+HistName+" not found!");
-      return;
-    }
-}
-
-void InterfaceToHistD::Fill2D(QString HistName, double x, double y, double weight)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->Fill(x, y, weight);
-    }
-  else
-    {
-      abort("TH2D histogram "+HistName+" not found!");
-      return;
-    }
-}
-
-void InterfaceToHistD::Smooth(QString HistName, int times)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->Smooth(times);
-      emit RequestDraw(0, "", true); //to update
-    }
-  else if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->Smooth(times);
-      emit RequestDraw(0, "", true); //to update
-    }
-  else
-    {
-      abort("Object "+HistName+": unknown histogram type!");
-      return;
-  }
-}
-
-QVariant ReturnNanArray(int num)
-{
-    QJsonArray ar;
-    for (int i=0; i<num; i++) ar << std::numeric_limits<double>::quiet_NaN();
-    QJsonValue jv = ar;
-    QVariant res = jv.toVariant();
-    return res;
-}
-
-QVariant InterfaceToHistD::FitGauss(QString HistName, QString options)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-    if (index == -1)
-      {
-        abort("Histogram "+HistName+" not found!");
-        return ReturnNanArray(6);
-      }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type.startsWith("TH1"))
-      {
-        TH1* h = static_cast<TH1*>(r.Obj);
-        TF1 *f1 = new TF1("f1", "gaus");
-        int status = h->Fit(f1, options.toLatin1());
-        if (status != 0) return ReturnNanArray(6);
-
-        emit RequestDraw(0, "", true); //to update
-
-        QJsonArray ar;
-        for (int i=0; i<3; i++) ar << f1->GetParameter(i);
-        for (int i=0; i<3; i++) ar << f1->GetParError(i);
-
-        QJsonValue jv = ar;
-        QVariant res = jv.toVariant();
-        return res;
-      }
-    else
-      {
-        abort("Object "+HistName+": unsupported histogram type!");
-        return ReturnNanArray(6);
-    }
-}
-
-QVariant InterfaceToHistD::FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options)
-{
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-    if (index == -1)
-      {
-        abort("Histogram "+HistName+" not found!");
-        return ReturnNanArray(6);
-      }
-
-    QString type = InitialParValues.typeName();
-    if (type != "QVariantList")
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-
-    QVariantList vl = InitialParValues.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    if (ar.size() < 3)
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-    if (!ar[0].isDouble() || !ar[1].isDouble() || !ar[2].isDouble() )
-    {
-        abort("InitialParValues has to be an array of three numeric values");
-        return ReturnNanArray(6);
-    }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type.startsWith("TH1"))
-      {
-        TH1* h = static_cast<TH1*>(r.Obj);
-
-        TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)");
-        f1->SetParameters(ar[0].toDouble(), ar[1].toDouble(), ar[2].toDouble());
-
-        int status = h->Fit(f1, options.toLatin1());
-        if (status != 0) return ReturnNanArray(6);
-
-        emit RequestDraw(0, "", true); //to update
-
-        QJsonArray ar;
-        for (int i=0; i<3; i++) ar << f1->GetParameter(i);
-        for (int i=0; i<3; i++) ar << f1->GetParError(i);
-
-        QJsonValue jv = ar;
-        QVariant res = jv.toVariant();
-        return res;
-      }
-    else
-      {
-        abort("Object "+HistName+": unsupported histogram type!");
-        return ReturnNanArray(6);
-    }
-}
-
-bool InterfaceToHistD::Delete(QString HistName)
-{
-    return TmpHub->ScriptDrawObjects.remove(HistName);
-}
-
-void InterfaceToHistD::DeleteAllHist()
-{
-    TmpHub->ScriptDrawObjects.removeAllHists();
-}
-
-void InterfaceToHistD::Draw(QString HistName, QString options)
-{
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-  if (index == -1)
-    {
-      abort("Histogram "+HistName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TH1D")
-    {
-      TH1D* h = static_cast<TH1D*>(r.Obj);
-      h->SetXTitle(r.Xtitle.toLatin1().data());
-      h->SetYTitle(r.Ytitle.toLatin1().data());
-      h->SetLineColor(r.LineColor);
-      h->SetLineWidth(r.LineWidth);
-      h->SetLineStyle(r.LineStyle);
-      emit RequestDraw(h, options, true);
-    }
-  else if (r.type == "TH2D")
-    {
-      TH2D* h = static_cast<TH2D*>(r.Obj);
-      h->SetXTitle(r.Xtitle.toLatin1().data());
-      h->SetYTitle(r.Ytitle.toLatin1().data());
-      h->SetZTitle(r.Ztitle.toLatin1().data());
-      h->SetLineColor(r.LineColor);
-      h->SetLineWidth(r.LineWidth);
-      h->SetLineStyle(r.LineStyle);
-      emit RequestDraw(h, options, true);
-    }
-  else
-    {
-      abort("Object "+HistName+": unknown histogram type!");
-      return;
-    }
-}
-
-//----------------------------------
 InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager, AConfiguration *Config, EventsDataClass *EventsDataHub, int RecNumThreads)
  : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads) { }
 
@@ -3122,7 +2166,7 @@ bool AInterfaceToPMs::checkAddPmCommon(int UpperLower, int type)
     return true;
 }
 
-int AInterfaceToPMs::CountPM()
+int AInterfaceToPMs::CountPM() const
 {
     return PMs->count();
 }
@@ -3145,6 +2189,21 @@ double AInterfaceToPMs::GetPMz(int ipm)
   return PMs->Z(ipm);
 }
 
+bool AInterfaceToPMs::IsPmCenterWithin(int ipm, double x, double y, double distance_in_square)
+{
+  if (!checkValidPM(ipm)) return false;
+  double dx = x - PMs->at(ipm).x;
+  double dy = y - PMs->at(ipm).y;
+  return ( (dx*dx + dy*dy) < distance_in_square );
+}
+
+bool AInterfaceToPMs::IsPmCenterWithinFast(int ipm, double x, double y, double distance_in_square) const
+{
+  double dx = x - PMs->at(ipm).x;
+  double dy = y - PMs->at(ipm).y;
+  return ( (dx*dx + dy*dy) < distance_in_square );
+}
+
 QVariant AInterfaceToPMs::GetPMtypes()
 {
    QJsonObject obj;
@@ -3153,6 +2212,20 @@ QVariant AInterfaceToPMs::GetPMtypes()
 
    QVariant res = ar.toVariantList();
    return res;
+}
+
+QVariant AInterfaceToPMs::GetPMpositions() const
+{
+    QVariantList arr;
+    const int numPMs = PMs->count();
+    for (int ipm=0; ipm<numPMs; ipm++)
+    {
+        QVariantList el;
+        el << QVariant(PMs->at(ipm).x) << QVariant(PMs->at(ipm).y) << QVariant(PMs->at(ipm).z);
+        arr << QVariant(el);
+    }
+    //  qDebug() << QVariant(arr);
+    return arr;
 }
 
 void AInterfaceToPMs::RemoveAllPMs()
@@ -3261,162 +2334,6 @@ void AInterfaceToOutputWin::Hide()
     MW->Owindow->hide();
 }
 #endif
-
-// ------------- MATH ------------
-
-MathInterfaceClass::MathInterfaceClass(TRandom2* RandGen)
-{
-  //srand (time(NULL));
-    this->RandGen = RandGen;
-
-  H["random"] = "Returns a random number between 0 and 1.\nGenerator respects the seed set by SetSeed method of the sim module!";
-  H["gauss"] = "Returns a random value sampled from Gaussian distribution with mean and sigma given by the user";
-  H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
-  H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
-  H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
-}
-
-void MathInterfaceClass::setRandomGen(TRandom2 *RandGen)
-{
-  this->RandGen = RandGen;
-}
-
-double MathInterfaceClass::abs(double val)
-{
-  return std::abs(val);
-}
-
-double MathInterfaceClass::acos(double val)
-{
-  return std::acos(val);
-}
-
-double MathInterfaceClass::asin(double val)
-{
-  return std::asin(val);
-}
-
-double MathInterfaceClass::atan(double val)
-{
-  return std::atan(val);
-}
-
-double MathInterfaceClass::atan2(double y, double x)
-{
-  return std::atan2(y, x);
-}
-
-double MathInterfaceClass::ceil(double val)
-{
-  return std::ceil(val);
-}
-
-double MathInterfaceClass::cos(double val)
-{
-  return std::cos(val);
-}
-
-double MathInterfaceClass::exp(double val)
-{
-  return std::exp(val);
-}
-
-double MathInterfaceClass::floor(double val)
-{
-  return std::floor(val);
-}
-
-double MathInterfaceClass::log(double val)
-{
-  return std::log(val);
-}
-
-double MathInterfaceClass::max(double val1, double val2)
-{
-  return std::max(val1, val2);
-}
-
-double MathInterfaceClass::min(double val1, double val2)
-{
-  return std::min(val1, val2);
-}
-
-double MathInterfaceClass::pow(double val, double power)
-{
-  return std::pow(val, power);
-}
-
-double MathInterfaceClass::sin(double val)
-{
-  return std::sin(val);
-}
-
-double MathInterfaceClass::sqrt(double val)
-{
-  return std::sqrt(val);
-}
-
-double MathInterfaceClass::tan(double val)
-{
-    return std::tan(val);
-}
-
-double MathInterfaceClass::round(double val)
-{
-  int f = std::floor(val);
-  if (val>0)
-    {
-      if (val - f < 0.5) return f;
-      else return f+1;
-    }
-  else
-    {
-      if (val - f < 0.5 ) return f;
-      else return f+1;
-    }
-}
-
-double MathInterfaceClass::random()
-{
-  //return rand()/(double)RAND_MAX;
-
-  if (!RandGen) return 0;
-  return RandGen->Rndm();
-}
-
-double MathInterfaceClass::gauss(double mean, double sigma)
-{
-  if (!RandGen) return 0;
-  return RandGen->Gaus(mean, sigma);
-}
-
-double MathInterfaceClass::poisson(double mean)
-{
-  if (!RandGen) return 0;
-  return RandGen->Poisson(mean);
-}
-
-double MathInterfaceClass::maxwell(double a)
-{
-  if (!RandGen) return 0;
-
-  double v2 = 0;
-  for (int i=0; i<3; i++)
-    {
-      double v = RandGen->Gaus(0, a);
-      v *= v;
-      v2 += v;
-    }
-  return std::sqrt(v2);
-}
-
-double MathInterfaceClass::exponential(double tau)
-{
-    if (!RandGen) return 0;
-    return RandGen->Exp(tau);
-}
-
-// ------------- End of MATH -------------
 
 // ------------- New LRF module interface ------------
 

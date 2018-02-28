@@ -490,10 +490,9 @@ void OutputWindow::RefreshData()
   int CurrentGroup = MW->Detector->PMgroups->getCurrentGroup();
   if (CurrentEvent > EventsDataHub->Events.size()-1)
     {
-      int iev = EventsDataHub->Events.size()-1;
-      if (iev < 0) iev = 0;
-      CurrentEvent = iev;
-      ui->sbEvent->setValue(iev);
+      CurrentEvent = EventsDataHub->Events.size()-1;
+      if (CurrentEvent < 0) CurrentEvent = 0;
+      ui->sbEvent->setValue(CurrentEvent);
     }
   if (ui->sbPMnumberToShowTime->value() > MW->PMs->count()-1)
     ui->sbPMnumberToShowTime->setValue(0);
@@ -533,10 +532,12 @@ void OutputWindow::RefreshData()
   if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
   //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
 
+
+
   updateSignalLabels(MaxSignal);
-  addPMitems(fHaveData, EventsDataHub->Events.at(CurrentEvent), MaxSignal, Passives); //add icons with PMs to the scene
+  addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
   if (ui->cbShowPMsignals->isChecked())
-    addTextitems(fHaveData, EventsDataHub->Events.at(CurrentEvent), MaxSignal, Passives); //add icons with signal text to the scene
+    addTextitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with signal text to the scene
   updateSignalScale();
 
   //Monitors
@@ -586,7 +587,7 @@ void OutputWindow::updateMonitors()
     }
 }
 
-void OutputWindow::addPMitems(bool fHaveData, const QVector<float>& vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -598,8 +599,7 @@ void OutputWindow::addPMitems(bool fHaveData, const QVector<float>& vector, doub
       //brush
       QBrush brush(Qt::white);
 
-      double sig = 0;
-      if (fHaveData) sig = vector.at(ipm);
+      double sig = ( vector ? vector->at(ipm) : 0 );
 
       if (sig > 0)
         {
@@ -659,7 +659,7 @@ void OutputWindow::addPMitems(bool fHaveData, const QVector<float>& vector, doub
     }
 }
 
-void OutputWindow::addTextitems(bool fHaveData, const QVector<float>& vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -667,8 +667,7 @@ void OutputWindow::addTextitems(bool fHaveData, const QVector<float>& vector, do
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 
-      double sig = 0;
-      if (fHaveData) sig = vector.at(ipm);
+      double sig = ( vector ? vector->at(ipm) : 0 );
       //qDebug()<<"sig="<<sig;
       QString text = QString::number(sig, 'g', 6);
       //text = "<CENTER>" + text + "</CENTER>";
@@ -1608,8 +1607,8 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
 
     updateSignalLabels(MaxSignal);
-    addPMitems(true, sums, MaxSignal, 0); //add icons with PMs to the scene
+    addPMitems(&sums, MaxSignal, 0); //add icons with PMs to the scene
     if (ui->cbShowPMsignals->isChecked())
-      addTextitems(true, sums, MaxSignal, 0); //add icons with signal text to the scene
+      addTextitems(&sums, MaxSignal, 0); //add icons with signal text to the scene
     updateSignalScale();
 }

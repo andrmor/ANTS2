@@ -426,5 +426,5 @@ void MainWindow::on_actionQuick_load_3_hovered()
 
 void MainWindow::on_actionLoad_last_config_hovered()
 {
-    ui->actionLoad_last_config->setToolTip(ELwindow->getQuickSlotMessage(0));
+    ui->actionLoad_last_config->setToolTip("Load config on last exit/sim/reconstruct\n" + ELwindow->getQuickSlotMessage(0));
 }

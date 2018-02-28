@@ -53,6 +53,8 @@ void CoGReconstructorClass::execute()
       AReconRecord* rec = EventsDataHub->ReconstructionData[ThisPmGroup][iev];
       const QVector< float >* PMsignals = &EventsDataHub->Events[iev];
 
+      rec->fScriptFiltered = false;
+
       //first have to get PM with max signal, it might be used for PM selection (fCoGIgnoreFar)
       rec->iPMwithMaxSignal = 0;
       double maxSignal = -1.0e10;
@@ -917,6 +919,8 @@ void EventFilterClass::execute()
 
         //reconstruction performed and failed -> definitely bad event
         if (EventsDataHub->fReconstructionDataReady && !rec->ReconstructionOK) goto BadEventLabel;
+
+        if (rec->fScriptFiltered) goto BadEventLabel;
 
         if (FiltSet->fEventNumberFilter)
             if (iev < FiltSet->EventNumberFilterMin || iev > FiltSet->EventNumberFilterMax) goto BadEventLabel;

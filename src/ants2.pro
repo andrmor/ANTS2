@@ -1,14 +1,16 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 1
-ANTS2_VERSION = 2230
+ANTS2_MINOR = 5
 
 #Optional libraries
-CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
-CONFIG += ants2_fann        #enables FANN (fast neural network) library
+#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
+#CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+
+DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
+                             # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
 #---CERN ROOT---
 win32 {
@@ -67,6 +69,9 @@ ants2_flann {
         LIBS += -LC:/FLANN/lib -lflann
         INCLUDEPATH += C:/FLANN/include
      }
+
+    HEADERS += modules/nnmoduleclass.h
+    SOURCES += modules/nnmoduleclass.cpp
 
     HEADERS += scriptmode/ainterfacetoknnscript.h
     SOURCES += scriptmode/ainterfacetoknnscript.cpp
@@ -192,8 +197,7 @@ SOURCES += main.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/reconstructionmanagerclass.cpp \
-    modules/processorclass.cpp \    
-    modules/nnmoduleclass.cpp \
+    modules/processorclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
@@ -220,7 +224,6 @@ SOURCES += main.cpp \
     CUDA/cudamanagerclass.cpp \
     scriptmode/interfacetoglobscript.cpp \
     scriptmode/scriptminimizer.cpp \
-    scriptmode/scriptinterfaces.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
     scriptmode/ascriptmanager.cpp \
@@ -265,7 +268,14 @@ SOURCES += main.cpp \
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
     gui/aneutroninfodialog.cpp \
-    scriptmode/ainterfacetodeposcript.cpp
+    scriptmode/ainterfacetodeposcript.cpp \
+    scriptmode/ainterfacetomessagewindow.cpp \
+    scriptmode/coreinterfaces.cpp \
+    scriptmode/localscriptinterfaces.cpp \
+    scriptmode/histgraphinterfaces.cpp \
+    gui/GraphWindowTools/atoolboxscene.cpp \
+    scriptmode/ainterfacetomultithread.cpp \
+    scriptmode/ascriptmessengerdialog.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -291,8 +301,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
     modules/pms.h \
-    modules/particlesourcesclass.h \
-    modules/nnmoduleclass.h \
+    modules/particlesourcesclass.h \    
     modules/flatfield.h \    
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
@@ -322,7 +331,6 @@ HEADERS  += common/CorrelationFilters.h \
     CUDA/cudamanagerclass.h \
     scriptmode/interfacetoglobscript.h \
     scriptmode/scriptminimizer.h \
-    scriptmode/scriptinterfaces.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
     scriptmode/ascriptmanager.h \
@@ -380,7 +388,16 @@ HEADERS  += common/CorrelationFilters.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
     gui/aneutroninfodialog.h \
-    scriptmode/ainterfacetodeposcript.h
+    scriptmode/ainterfacetodeposcript.h \
+    scriptmode/ainterfacetomessagewindow.h \
+    scriptmode/coreinterfaces.h \
+    scriptmode/localscriptinterfaces.h \
+    scriptmode/histgraphinterfaces.h \
+    common/amessageoutput.h \
+    gui/GraphWindowTools/atoolboxscene.h \
+    scriptmode/ainterfacetomultithread.h \
+    scriptmode/ascriptinterfacefactory.h \
+    scriptmode/ascriptmessengerdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -547,6 +564,7 @@ INCLUDEPATH += modules/lrf_v3/gui
 }
 
 INCLUDEPATH += gui/MainWindowTools
+INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += SplineLibrary
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
@@ -596,7 +614,8 @@ win32 {
 #---Additional defines---
 DEFINES += ANTS2_MINOR=\"$$ANTS2_MINOR\"
 DEFINES += ANTS2_MAJOR=\"$$ANTS2_MAJOR\"
-DEFINES += ANTS2_VERSION=\"$$ANTS2_VERSION\"
+DEFINES += DEBUG_VERBOSITY=\"$$DEBUG_VERBOSITY\"
+
 win32 {
   DEFINES += BUILDTIME=\\\"$$system('echo %time%')\\\"
   DEFINES += BUILDDATE=\\\"$$system('echo %date%')\\\"

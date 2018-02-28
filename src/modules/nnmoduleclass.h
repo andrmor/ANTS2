@@ -1,8 +1,6 @@
 #ifndef NNMODULECLASS_H
 #define NNMODULECLASS_H
 
-#ifdef ANTS_FLANN
-
 #include "flann/flann.hpp"
 
 #include <QVector>
@@ -154,7 +152,5 @@ private:
   EventsDataClass *EventsDataHub;
   pms* PMs;
 };
-
-#endif // ANTS_FLANN
 
 #endif // NNMODULECLASS_H

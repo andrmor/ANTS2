@@ -8,7 +8,7 @@
 #include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "globalsettingsclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "asandwich.h"
 #include "slab.h"
 #include "ageotreewidget.h"

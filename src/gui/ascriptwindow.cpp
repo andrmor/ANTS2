@@ -2,7 +2,9 @@
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
 #include "completingtexteditclass.h"
-#include "scriptinterfaces.h"
+#include "localscriptinterfaces.h"
+#include "coreinterfaces.h"
+#include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
@@ -47,12 +49,12 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
     }
 
     ScriptManager = new AScriptManager(RandGen);
-    QObject::connect(ScriptManager, SIGNAL(showMessage(QString)), this, SLOT(ShowText(QString)));
-    QObject::connect(ScriptManager, SIGNAL(clearText()), this, SLOT(ClearText()));
+    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
-    QObject::connect(ScriptManager, SIGNAL(onStart()), this, SLOT(receivedOnStart()));
-    QObject::connect(ScriptManager, SIGNAL(onAbort()), this, SLOT(receivedOnAbort()));
-    QObject::connect(ScriptManager, SIGNAL(success(QString)), this, SLOT(receivedOnSuccess(QString)));
+    QObject::connect(ScriptManager, &AScriptManager::onStart, this, &AScriptWindow::receivedOnStart);
+    QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &AScriptWindow::receivedOnAbort);
+    QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
     this->GlobSet = GlobSet;
     //SetStarterDir(GlobSet->LibScripts);
@@ -246,10 +248,10 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         // populating help for main, math and core units
         trwHelp->clear();
         //fillHelper(interfaceObject, "", "Global object functions"); //forbidden to override master object now.
-        CoreInterfaceClass core(0); //dummy to extract methods
+        AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core", "Core object functions");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
-        MathInterfaceClass math(0); //dummy to extract methods
+        AInterfaceToMath math(0); //dummy to extract methods
         fillHelper(&math, "math", "Basic mathematics: wrapper for std double functions");
         newFunctions << getCustomCommandsOfObject(&math, "math", false);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
@@ -271,7 +273,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     completitionModel->setStringList(functions);
 
     //special "needs" of particular interface objects
-    if ( dynamic_cast<InterfaceToHistD*>(interfaceObject) || dynamic_cast<InterfaceToGraphs*>(interfaceObject)) //"graph" or "hist"
+    if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 
     trwHelp->collapseAll();
@@ -376,6 +378,16 @@ void AScriptWindow::SetMainSplitterSizes(QList<int> values)
     splMain->setSizes(values);
 }
 
+void AScriptWindow::onBusyOn()
+{
+    ui->pbRunScript->setEnabled(false);
+}
+
+void AScriptWindow::onBusyOff()
+{
+    ui->pbRunScript->setEnabled(true);
+}
+
 void AScriptWindow::ShowText(QString text)
 {
   pteOut->appendHtml(text);
@@ -416,14 +428,14 @@ void AScriptWindow::on_pbRunScript_clicked()
    ui->pbStop->setVisible(false);
    ui->pbRunScript->setVisible(true);
 
-   if (!ScriptManager->LastError.isEmpty())
+   if (!ScriptManager->getLastError().isEmpty())
    {
-       AScriptWindow::ReportError("Script error: "+ScriptManager->LastError, -1);
+       AScriptWindow::ReportError("Script error: "+ScriptManager->getLastError(), -1);
    }
-   else if (ScriptManager->engine->hasUncaughtException())
+   else if (ScriptManager->isUncaughtException())
    {   //Script has uncaught exception
-       int lineNum = ScriptManager->engine->uncaughtExceptionLineNumber();
-       QString message = ScriptManager->engine->uncaughtException().toString();
+       int lineNum = ScriptManager->getUncaughtExceptionLineNumber();
+       QString message = ScriptManager->getUncaughtExceptionString();
        //qDebug() << "Error message:" << message;
        //QString backtrace = engine.uncaughtExceptionBacktrace().join('\n');
        //qDebug() << "backtrace:" << backtrace;
@@ -432,7 +444,7 @@ void AScriptWindow::on_pbRunScript_clicked()
    else
    {   //success
        //qDebug() << "Script returned:" << result;
-       if (!ScriptManager->fAborted)
+       if (!ScriptManager->isEvalAborted())
          {
             if (ShowEvalResult && result!="undefined") ShowText("Script evaluation result:\n"+result);
             else ShowText("Script evaluation: success");
@@ -444,7 +456,7 @@ void AScriptWindow::on_pbRunScript_clicked()
        ui->pbRunScript->setIcon(QIcon()); //clear red icon
      }
 
-   ScriptManager->CollectGarbage();
+   ScriptManager->collectGarbage();
 }
 
 //void AScriptWindow::abortEvaluation(QString message)
@@ -487,7 +499,7 @@ void AScriptWindow::onF1pressed(QString text)
 
 void AScriptWindow::on_pbStop_clicked()
 {
-  if (ScriptManager->fEngineIsRunning)
+  if (ScriptManager->isEngineRunning())
     {
       qDebug() << "Stop button pressed!";
       ShowText("Sending stop signal...");
@@ -637,48 +649,6 @@ void AScriptWindow::fillHelper(QObject* obj, QString module, QString helpText)
     }
 }
 
-QString AScriptWindow::getFunctionReturnType(QString UnitFunction)
-{
-  QStringList f = UnitFunction.split(".");
-  if (f.size() != 2) return "";
-
-  QString unit = f.first();
-  int unitIndex = ScriptManager->interfaceNames.indexOf(unit);
-  if (unitIndex == -1) return "";
-  //qDebug() << "Found unit"<<unit<<" with index"<<unitIndex;
-  QString met = f.last();
-  //qDebug() << met;
-  QStringList skob = met.split("(", QString::SkipEmptyParts);
-  if (skob.size()<2) return "";
-  QString funct = skob.first();
-  QString args = skob[1];
-  args.chop(1);
-  //qDebug() << funct << args;
-
-  QString insert;
-  if (!args.isEmpty())
-    {
-      QStringList argl = args.split(",");
-      for (int i=0; i<argl.size(); i++)
-        {
-          QStringList a = argl.at(i).simplified().split(" ");
-          if (!insert.isEmpty()) insert += ",";
-          insert += a.first();
-        }
-    }
-  //qDebug() << insert;
-
-  QString methodName = funct + "(" + insert + ")";
-  //qDebug() << "method name" << methodName;
-  int mi = ScriptManager->interfaces.at(unitIndex)->metaObject()->indexOfMethod(methodName.toLatin1().data());
-  //qDebug() << "method index:"<<mi;
-  if (mi == -1) return "";
-
-  QString returnType = ScriptManager->interfaces.at(unitIndex)->metaObject()->method(mi).typeName();
-  //qDebug() << returnType;
-  return returnType;
-}
-
 void AScriptWindow::onJsonTWExpanded(QTreeWidgetItem *item)
 {
    ExpandedItemsInJsonTW << item->text(0);
@@ -695,7 +665,7 @@ void AScriptWindow::updateJsonTree()
 
   for (int i=0; i<ScriptManager->interfaces.size(); i++)
     {
-      InterfaceToConfig* inter = dynamic_cast<InterfaceToConfig*>(ScriptManager->interfaces[i]);
+      AInterfaceToConfig* inter = dynamic_cast<AInterfaceToConfig*>(ScriptManager->interfaces[i]);
       if (!inter) continue;
 
       QJsonObject json = inter->Config->JSON;
@@ -798,7 +768,7 @@ QString AScriptWindow::getDesc(const QJsonValue &ref)
 void AScriptWindow::onFunctionClicked(QTreeWidgetItem *item, int /*column*/)
 {
   pteHelp->clear();
-  //qDebug() << item->text(1);
+  qDebug() << item->text(1);
   //QString returnType = getFunctionReturnType(item->text(0));
   //pteHelp->appendPlainText(returnType+ "  " +item->text(0)+":");
 
@@ -968,12 +938,12 @@ bool AScriptWindow::event(QEvent *e)
                 break;
             case QEvent::Hide :
                 //qDebug() << "Script window: hide event";
-                ScriptManager->hideMsgDialog();
+                ScriptManager->hideMsgDialogs();
                 emit WindowHidden("script");
                 break;
             case QEvent::Show :
                 //qDebug() << "Script window: show event";
-                ScriptManager->restoreMsgDialog();
+                ScriptManager->restoreMsgDialogs();
                 emit WindowShown("script");
                 break;
             default:;
@@ -1253,4 +1223,19 @@ void AScriptWindow::on_actionSelect_font_triggered()
 
   for (AScriptWindowTabItem* tab : ScriptTabs)
       tab->TextEdit->setFont(font);
+}
+
+void AScriptWindow::on_actionShow_all_messenger_windows_triggered()
+{
+    ScriptManager->restoreMsgDialogs();
+}
+
+void AScriptWindow::on_actionHide_all_messenger_windows_triggered()
+{
+    ScriptManager->hideMsgDialogs();
+}
+
+void AScriptWindow::on_actionClear_unused_messenger_windows_triggered()
+{
+    ScriptManager->clearUnusedMsgDialogs();
 }

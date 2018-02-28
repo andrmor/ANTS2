@@ -5,8 +5,10 @@
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"
 #include "interfacetoglobscript.h"
+#include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
-#include "scriptinterfaces.h"
+#include "histgraphinterfaces.h"
+#include "localscriptinterfaces.h"
 #include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
@@ -21,6 +23,7 @@
 #include "ainterfacetowebsocket.h"
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
+#include "ainterfacetomultithread.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -43,10 +46,12 @@ void MainWindow::createScriptWindow()
 
     // interface objects are owned after this by the ScriptManager!
 
-    InterfaceToGlobScript* interObj = new InterfaceToGlobScript();
-    ScriptWindow->SetInterfaceObject(interObj); // dummy interface for now, just used to identify "Global script" mode
+    ScriptWindow->SetInterfaceObject(0); //initialization
 
-    InterfaceToConfig* conf = new InterfaceToConfig(Config);
+    AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(ScriptWindow->ScriptManager);
+    ScriptWindow->SetInterfaceObject(threads, "threads");
+
+    AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
     ScriptWindow->SetInterfaceObject(conf, "config");
 
@@ -54,10 +59,10 @@ void MainWindow::createScriptWindow()
     connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
     ScriptWindow->SetInterfaceObject(geo, "geo");
 
-    InterfaceToMinimizerScript* mini = new InterfaceToMinimizerScript(ScriptWindow->ScriptManager);
+    AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(ScriptWindow->ScriptManager);
     ScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
-    InterfaceToData* dat = new InterfaceToData(Config, ReconstructionManager, EventsDataHub);
+    AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(dat, "events");
 
@@ -70,7 +75,7 @@ void MainWindow::createScriptWindow()
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(rec, "rec");
 
-    InterfaceToLRF* lrf = new InterfaceToLRF(Config, EventsDataHub);
+    AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(lrf, "lrf");
     ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
     ScriptWindow->SetInterfaceObject(newLrf, "newLrf");
@@ -78,16 +83,16 @@ void MainWindow::createScriptWindow()
     AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
     ScriptWindow->SetInterfaceObject(pmS, "pms");
 
-    InterfaceToGraphs* graph = new InterfaceToGraphs(TmpHub);
+    AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
     ScriptWindow->SetInterfaceObject(graph, "graph");
 
-    InterfaceToHistD* hist = new InterfaceToHistD(TmpHub);
+    AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
     AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
 
-    InterfaceToTexter* txt = new InterfaceToTexter(ScriptWindow);
+    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow->ScriptManager, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();

@@ -166,7 +166,17 @@
     <addaction name="separator"/>
     <addaction name="actionSelect_font"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShow_all_messenger_windows"/>
+    <addaction name="actionHide_all_messenger_windows"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_unused_messenger_windows"/>
+   </widget>
    <addaction name="menuFont"/>
+   <addaction name="menuView"/>
   </widget>
   <action name="actionIncrease_font_size">
    <property name="text">
@@ -181,6 +191,21 @@
   <action name="actionSelect_font">
    <property name="text">
     <string>Select font</string>
+   </property>
+  </action>
+  <action name="actionShow_all_messenger_windows">
+   <property name="text">
+    <string>Show all messenger windows</string>
+   </property>
+  </action>
+  <action name="actionHide_all_messenger_windows">
+   <property name="text">
+    <string>Hide all messenger windows</string>
+   </property>
+  </action>
+  <action name="actionClear_unused_messenger_windows">
+   <property name="text">
+    <string>Clear unused messenger windows</string>
    </property>
   </action>
  </widget>

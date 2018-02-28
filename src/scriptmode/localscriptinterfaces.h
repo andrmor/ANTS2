@@ -1,67 +1,17 @@
-#ifndef SCRIPTINTERFACES_H
-#define SCRIPTINTERFACES_H
+#ifndef LOCALSCRIPTINTERFACES_H
+#define LOCALSCRIPTINTERFACES_H
 
 #include "ascriptinterface.h"
 
-#include <QVector>
 #include <QVariant>
+#include <QVector>
+#include <QList>
 #include <QJsonArray>
 #include <QString>
-#include <QStringList>
 
 class AGeoObject;
-class AScriptManager;
 class DetectorClass;
-
-class CoreInterfaceClass : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  CoreInterfaceClass(AScriptManager *ScriptManager);
-
-public slots:
-  //abort execution of the script
-  void abort(QString message = "Aborted!");
-
-  QVariant evaluate(QString script);
-
-  //sleep
-  void sleep(int ms);
-
-  //output part of the script window
-  void print(QString text);
-  void clearText();
-  QString str(double value, int precision);
-
-  //time stamps
-  QString GetTimeStamp();
-  QString GetDateTimeStamp();
-
-  //save to file
-  bool createFile(QString fileName, bool AbortIfExists = true);
-  bool isFileExists(QString fileName);
-  bool deleteFile(QString fileName);
-  bool createDir(QString path);
-  QString getCurrentDir();
-  bool setCirrentDir(QString path);
-  bool save(QString fileName, QString str);
-  bool saveArray(QString fileName, QVariant array);
-  bool saveObject(QString FileName, QVariant Object, bool CanOverride);
-
-  //load from file
-  QVariant loadColumn(QString fileName, int column = 0); //load column of doubles from file and return it as an array
-  QVariant loadArray(QString fileName, int columns);     //load column of doubles from file and return it as an array
-  QString loadText(QString fileName);
-
-  //dirs
-  QString GetWorkDir();
-  QString GetScriptDir();
-  QString GetExamplesDir();
-
-private:
-  AScriptManager* ScriptManager;
-};
+class QVector3D;
 
 class InterfaceToAddObjScript : public AScriptInterface
 {
@@ -141,4 +91,4 @@ public slots:
   void node(double x, double y, double z);
 };
 
-#endif // SCRIPTINTERFACES_H
+#endif // LOCALSCRIPTINTERFACES_H

@@ -13,147 +13,305 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-//static double bestResult = 1e30;
-//static bool fAbort = false;
-//static int numVariables = 0;
-//static QString FunctName = "";
-
-double ScriptFunctor(const double *p)
-//last parameter contains the pointer to MainWindow object
+double ScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
 {
   void *thisvalue;
   memcpy(&thisvalue, &p[0], sizeof(void *));
   AScriptManager* ScriptManager = (AScriptManager*)thisvalue;
 
-  if (ScriptManager->fAborted) return 1e30;
+  if (ScriptManager->isEvalAborted()) return 1e30;
 
-  //QString str;
-  //for (int i=0; i<ScriptManager->numVariables; i++)
-  //  str += QString::number(p[i+1])+"  ";
-  //qDebug() << "Functor call with parameters:"<<str;
+  /*
+    QString str;
+    for (int i=0; i<ScriptManager->MiniNumVariables; i++)
+        str += QString::number(p[i+1])+"  ";
+    qDebug() << "Functor call with parameters:"<<str<<ScriptManager;
+  */
 
   QScriptValueList input;
-  for (int i=0; i<ScriptManager->numVariables; i++)
-    input << p[i+1];
+  for (int i=0; i<ScriptManager->MiniNumVariables; i++) input << p[i+1];
 
-  QScriptValue sv = ScriptManager->engine->globalObject().property(ScriptManager->FunctName);
+  QScriptValue sv = ScriptManager->getMinimalizationFunction();
   double result = sv.call(QScriptValue(), input).toNumber();
 
-  //qDebug() << "Minimization parameter value obtained:"<<result;
+  //    qDebug() << "SM"<<ScriptManager<<"engine"<<ScriptManager->engine<<"sv reports engine:"<<sv.engine();
+  //    qDebug() << "Minimization parameter value obtained:"<<result;
+
   return result;
 }
 
-InterfaceToMinimizerScript::InterfaceToMinimizerScript(AScriptManager *ScriptManager) :
-    ScriptManager(ScriptManager) {}
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
+  ScriptManager(ScriptManager) {}
 
-void InterfaceToMinimizerScript::ForceStop()
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other)
+  : AScriptInterface(other)
+{
+    ScriptManager = 0; // need to be set on copy!
+}
+
+AInterfaceToMinimizerScript::~AInterfaceToMinimizerScript()
+{
+  Clear();
+}
+
+void AInterfaceToMinimizerScript::ForceStop()
 {    
-    //qDebug() << "Abort requested for minimization procedure";
+  //qDebug() << "Abort requested for minimization procedure";
     //qDebug() << "aborted:"<<ScriptManager->fAborted;
 }
 
-void InterfaceToMinimizerScript::Clear()
+void AInterfaceToMinimizerScript::Clear()
 {
-  Name.clear();
-  Start.clear();
-  Step.clear();
-  Min.clear();
-  Max.clear();
+  for (AVarRecordBase* r : Variables)
+    delete r;
+  Variables.clear();
 }
 
-void InterfaceToMinimizerScript::SetFunctorName(QString name)
+void AInterfaceToMinimizerScript::SetFunctorName(QString name)
 {
-  //FunctorName = FunctName = name;
-    ScriptManager->FunctName = name;
+    ScriptManager->MiniFunctionName = name;
 }
 
-void InterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
+void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step, double min, double max)
 {
-  Name << name;
-  Start << start;
-  Step << step;
-  Min << min;
-  Max << max;
+  Variables << new AVarRecordLimited(name, start, step, min, max);
 }
 
-void InterfaceToMinimizerScript::ModifyVariable(int varNumber, double start, double step, double min, double max)
+void AInterfaceToMinimizerScript::AddVariable(QString name, double start, double step)
 {
-  int size = Name.size();
-  if (varNumber > size-1)
+  Variables << new AVarRecordNormal(name, start, step);
+}
+
+void AInterfaceToMinimizerScript::AddFixedVariable(QString name, double value)
+{
+  Variables << new AVarRecordFixed(name, value);
+}
+
+void AInterfaceToMinimizerScript::AddLowerLimitedVariable(QString name, double value, double step, double lowerLimit)
+{
+  Variables << new AVarRecordLowerLimited(name, value, step, lowerLimit);
+}
+
+void AInterfaceToMinimizerScript::AddUpperLimitedVariable(QString name, double value, double step, double upperLimit)
+{
+  Variables << new AVarRecordUpperLimited(name, value, step, upperLimit);
+}
+
+void AInterfaceToMinimizerScript::AddAllVariables(QVariant array)
+{
+  if (array.type() != QMetaType::QVariantList )
+  {
+      abort("DefineAllVariables(): has to be an array containing initializers of the variables");
+      return;
+  }
+
+  Clear();
+
+  QVariantList vl = array.toList();
+  if (vl.isEmpty())
     {
-      abort("Wrong variable number: " + QString::number(varNumber) + "  There are "+ QString::number(size) +" variables defined");
+      abort("DefineAllVariables(): array of initializers is empty");
       return;
     }
-  Start.replace(varNumber, start);
-  Step.replace(varNumber, step);
-  Min.replace(varNumber, min);
-  Max.replace(varNumber, max);
+
+  for (int i=0; i<vl.size(); i++)
+    {
+      //  qDebug() << "Adding variable #"<<i;
+      QVariantList var = vl.at(i).toList();
+      switch (var.size())
+        {
+        case 1:  // fixed
+          Variables << new AVarRecordFixed(QString::number(i), var.at(0).toDouble());
+          break;
+        case 2:  // normal
+          Variables << new AVarRecordNormal(QString::number(i), var.at(0).toDouble(), var.at(1).toDouble());
+          break;
+        case 4:
+          qDebug() << var << var.at(2).isNull();
+          if (var.at(2).isNull()) //upper limited
+            {
+               Variables << new AVarRecordUpperLimited(QString::number(i), var.at(0).toDouble(), var.at(1).toDouble(), var.at(3).toDouble());
+               break;
+            }
+          else if (var.at(3).isNull()) //lower limited
+            {
+               Variables << new AVarRecordLowerLimited(QString::number(i), var.at(0).toDouble(), var.at(1).toDouble(), var.at(2).toDouble());
+               break;
+            }
+          else
+            {
+               Variables << new AVarRecordLimited(QString::number(i), var.at(0).toDouble(), var.at(1).toDouble(), var.at(2).toDouble(), var.at(3).toDouble());
+               break;
+            }
+        default:
+            abort("DefineAllVariables(): variable definition arrays have to be of length 1, 2 or 4");
+            return;
+        }
+        //  Variables.last()->Debug();
+    }
 }
 
-QString InterfaceToMinimizerScript::Run()
+void AInterfaceToMinimizerScript::SetSimplex()
 {
-  //qDebug() << "Optimization run called";
-  ScriptManager->numVariables = Name.size();
-  if (ScriptManager->numVariables == 0)
+  Method = 1;
+}
+
+void AInterfaceToMinimizerScript::SetMigrad()
+{
+  Method = 0;
+}
+
+bool AInterfaceToMinimizerScript::Run()
+{
+  if (!ScriptManager)
     {
-      qDebug() << "No variables defined!";
-      abort("Variables are not defined!");
-      return "";
+      abort("ScriptManager is not set!");
+      return false;
     }
 
-  QScriptValue sv = ScriptManager->engine->globalObject().property(ScriptManager->FunctName);
+  //  qDebug() << "Minimizer Run() started";
+  ScriptManager->MiniNumVariables = Variables.size();
+  if (ScriptManager->MiniNumVariables == 0)
+    {
+      abort("Variables are not defined!");
+      return false;
+    }
+
+  QScriptValue sv = ScriptManager->getMinimalizationFunction();
   if (!sv.isFunction())
     {
-      qDebug() << "Minimization function not defined!";
       abort("Minimization function is not defined!");
-      return "";
+      return false;
     }
 
-  //making a copy of det and sim config
-  //QJsonObject json;
-  //MW->writeDetectorToJson(json);
-  //MW->writeSimSettingsToJson(json, true);
-
-  //Creating ROOT minimizer
-  ROOT::Minuit2::Minuit2Minimizer *RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer(ROOT::Minuit2::kSimplex);//(ROOT::Minuit2::kMigrad);
-  RootMinimizer->SetMaxFunctionCalls(5000);
-  RootMinimizer->SetMaxIterations(5000);
+  ROOT::Minuit2::Minuit2Minimizer *RootMinimizer = new ROOT::Minuit2::Minuit2Minimizer( Method==0 ? ROOT::Minuit2::kMigrad : ROOT::Minuit2::kSimplex );
+  RootMinimizer->SetMaxFunctionCalls(500);
+  RootMinimizer->SetMaxIterations(1000);
   RootMinimizer->SetTolerance(0.001);
-  RootMinimizer->SetPrintLevel(1);
+  RootMinimizer->SetPrintLevel(PrintVerbosity);  
+  RootMinimizer->SetStrategy( bHighPrecision ? 2 : 1 ); // 1 -> standard,  2 -> try to improve minimum (slower)
 
-  // 1 standard
-  // 2 try to improve minimum (slower)
-  RootMinimizer->SetStrategy(2);
-
-  ROOT::Math::Functor *Funct = new ROOT::Math::Functor(&ScriptFunctor, ScriptManager->numVariables+1);
+  ROOT::Math::Functor *Funct = new ROOT::Math::Functor(&ScriptFunctor, ScriptManager->MiniNumVariables+1);
   RootMinimizer->SetFunction(*Funct);
-  //prepare to transfer pointer to ScriptManager - it will the first variable
+
+  //prepare to transfer pointer to ScriptManager - it will the the first variable
   double dPoint;
   void *thisvalue = ScriptManager;
   memcpy(&dPoint, &thisvalue, sizeof(void *));
   //We need to fix for the possibility that double isn't enough to store void*
   RootMinimizer->SetFixedVariable(0, "p", dPoint);
-  //setting up variables   -  start step min max
-  for (int i=0; i<ScriptManager->numVariables; i++)
-      RootMinimizer->SetLimitedVariable(i+1, Name[i].toLatin1().data(),  Start[i], Step[i], Min[i], Max[i]);
 
-  //qDebug() << "Minimizer created and configured";
+  //setting up variables   -  start step min max etc
+  for (int i=0; i<ScriptManager->MiniNumVariables; i++)
+      Variables[i]->AddToMinimizer(i+1, RootMinimizer);
 
-  // do the minimization
-  //fAbort = false;
+  //  qDebug() << "Starting minimization";
   bool fOK = RootMinimizer->Minimize();
-  fOK = fOK && !ScriptManager->fAborted;
+  fOK = fOK && !ScriptManager->isEvalAborted();
+  //  qDebug()<<"Minimization success? "<<fOK;
 
-  //report results
-  qDebug()<<"Minimization success? "<<fOK;
-
-  //loading back settings of det and sim
-  //MW->fSimDataNotSaved = false;
-  //MW->readDetectorFromJson(json);
-  //MW->readSimSettingsFromJson(json);
+  //results
+  Results.clear();
+  if (fOK)
+  {
+      const double *VarVals = RootMinimizer->X();
+      for (int i=0; i<Variables.size(); i++)
+      {
+          //  qDebug() << i << "-->--"<<VarVals[i+1];
+          Results << VarVals[i+1];
+      }
+  }
 
   delete Funct;
   delete RootMinimizer;
 
-  return "Done!";
+  return fOK;
+}
+
+AInterfaceToMinimizerScript::AVarRecordNormal::AVarRecordNormal(QString name, double start, double step)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordNormal::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetVariable(varIndex, Name, Value, Step);
+}
+
+void AInterfaceToMinimizerScript::AVarRecordNormal::Debug() const
+{
+   qDebug() << "Normal"<<Value<<Step;
+}
+
+AInterfaceToMinimizerScript::AVarRecordFixed::AVarRecordFixed(QString name, double value)
+{
+  Name = name.toLatin1().data();
+  Value = value;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordFixed::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetFixedVariable(varIndex, Name, Value);
+}
+
+void AInterfaceToMinimizerScript::AVarRecordFixed::Debug() const
+{
+  qDebug() << "Fixed"<<Value;
+}
+
+AInterfaceToMinimizerScript::AVarRecordLimited::AVarRecordLimited(QString name, double start, double step, double min, double max)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Min = min;
+  Max = max;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetLimitedVariable(varIndex, Name, Value, Step, Min, Max);
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLimited::Debug() const
+{
+  qDebug() << "Limited"<<Value<<Step<<Min<<Max;
+}
+
+AInterfaceToMinimizerScript::AVarRecordLowerLimited::AVarRecordLowerLimited(QString name, double start, double step, double min)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Min = min;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLowerLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetLowerLimitedVariable(varIndex, Name, Value, Step, Min);
+}
+
+void AInterfaceToMinimizerScript::AVarRecordLowerLimited::Debug() const
+{
+  qDebug() << "LowerLimited"<<Value<<Step<<Min;
+}
+
+AInterfaceToMinimizerScript::AVarRecordUpperLimited::AVarRecordUpperLimited(QString name, double start, double step, double max)
+{
+  Name = name.toLatin1().data();
+  Value = start;
+  Step = step;
+  Max = max;
+}
+
+void AInterfaceToMinimizerScript::AVarRecordUpperLimited::AddToMinimizer(int varIndex, ROOT::Minuit2::Minuit2Minimizer *minimizer)
+{
+  minimizer->SetUpperLimitedVariable(varIndex, Name, Value, Step, Max);
+}
+
+void AInterfaceToMinimizerScript::AVarRecordUpperLimited::Debug() const
+{
+  qDebug() << "UpperLimited"<<Value<<Step<<Max;
 }

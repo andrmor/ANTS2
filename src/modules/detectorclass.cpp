@@ -37,7 +37,7 @@ static void autoLoadPlugins() {
   //qDebug() << "Loading plugins from 'plugins' directory";
   QDir plugins_dir(qApp->applicationDirPath());
   if(!plugins_dir.cd("plugins")) {
-    qDebug()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
+    qInfo()<<"LRF_v3 plugin loader: Plugin search not performed since '/plugins' directory not found";
     return;
   }
 
@@ -178,9 +178,6 @@ void DetectorClass::writeToJson(QJsonObject &json)
 {
     //qDebug() << "Det->JSON";
     QJsonObject js;
-
-    int versionNumber = ANTS2_VERSION;
-    js["ANTS2build"] = versionNumber;
 
     MpCollection->writeToJson(js);          //Particles+Material (including overrides)
     writeWorldFixedToJson(js);              //Fixed world size - if activated

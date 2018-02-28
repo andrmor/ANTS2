@@ -105,16 +105,7 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   else
      LoadANTSconfiguration();
 
-  //running root TStyle script
-  /*
-  GenericScriptWindowClass* ScriptWin = new GenericScriptWindowClass(0);
-  InterfaceToGStyleScript* GStyleInterface  = new  InterfaceToGStyleScript() ; //deleted by the sw
-  ScriptWin->SetInterfaceObject(GStyleInterface);
-  ScriptWin->SetScript(&RootStyleScript);
-  //ScriptWin->SetRandomGenerator(0); //not needed here anyway
-  QObject::connect(ScriptWin, SIGNAL(success(QString)), ScriptWin, SLOT(deleteLater()));
-  ScriptWin->on_pbRunScript_clicked();
-  */
+  //running root TStyle script  
   if (!RootStyleScript.isEmpty())
   {
       AScriptManager* SM = new AScriptManager(0);

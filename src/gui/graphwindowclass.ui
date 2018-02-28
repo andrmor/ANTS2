@@ -1236,6 +1236,9 @@ Click-drag-release selects the base line and the range of the fit.</string>
              <height>20</height>
             </rect>
            </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
            <property name="text">
             <string>0</string>
            </property>
@@ -2130,7 +2133,7 @@ to the basket.</string>
    <hints>
     <hint type="sourcelabel">
      <x>42</x>
-     <y>397</y>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>824</x>

@@ -14,15 +14,6 @@ RootDrawObj::RootDrawObj()
   LineColor = 4;   LineStyle = 1;    LineWidth = 1;
 }
 
-RootDrawObj::~RootDrawObj()
-{
-  if (Obj)
-    {
-      delete Obj;
-      //qDebug() << "Deleting" << name << type;
-    }
-}
-
 int ScriptDrawCollection::findIndexOf(QString name)
 {
   for (int i=0; i<List.size(); i++)
@@ -35,6 +26,7 @@ bool ScriptDrawCollection::remove(QString name)
     for (int i=0; i<List.size(); i++)
       if (List.at(i).name == name)
       {
+          delete List[i].Obj;
           List.removeAt(i);
           return true;
       }
@@ -49,13 +41,22 @@ void ScriptDrawCollection::append(TObject *obj, QString name, QString type)
   List.last().type = type;
 }
 
+void ScriptDrawCollection::clear()
+{
+    for (int i=0; i<0; i++) delete List[i].Obj;
+    List.clear();
+}
+
 void ScriptDrawCollection::removeAllHists()
 {
     for (int i=List.size()-1; i>-1; i--)
     {
         QString type = List.at(i).type;
         if (type == "TH1D" || type == "TH2D")
+        {
+            delete List[i].Obj;
             List.removeAt(i);
+        }
     }
 }
 
@@ -65,7 +66,10 @@ void ScriptDrawCollection::removeAllGraphs()
     {
         QString type = List.at(i).type;
         if (type == "TGraph")
+        {
+            delete List[i].Obj;
             List.removeAt(i);
+        }
     }
 }
 
@@ -89,12 +93,14 @@ void TmpObjHubClass::ClearTmpHistsSigma2()
 
 void TmpObjHubClass::Clear()
 {
+    //  qDebug() << ">>> TMPHub: Clear requested";
     ClearTracks();
     ClearTmpHistsPeaks();
     ClearTmpHistsSigma2();
     FoundPeaks.clear();
     ChPerPhEl_Peaks.clear();
     ChPerPhEl_Sigma2.clear();
+    //  qDebug() << ">>> TMPHub: Clear done!";
 }
 
 TmpObjHubClass::TmpObjHubClass()

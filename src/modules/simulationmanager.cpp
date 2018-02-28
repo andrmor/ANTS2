@@ -285,17 +285,17 @@ void ASimulatorRunner::simulate()
         for(int i = 0; i < workers.count(); i++)
         {
 
-            //qDebug()<<"Asking thread"<<(i+1)<<" to join...";
+            //  qDebug()<<"Asking thread"<<(i+1)<<" to join...";
             threads[i]->Join();
-            //qDebug() <<"Thread"<<(i+1)<<"joined";
+            //  qDebug() <<"Thread"<<(i+1)<<"joined";
         }
 #else
         //std::thread -> start on construction
         for (int i=0; i < workers.count(); i++)
           {
-            qDebug() << "Asking thread"<<(i+1)<<" to join...";
+            //  qDebug() << "Asking thread"<<(i+1)<<" to join...";
             threads[i]->join();
-            qDebug() <<"Thread"<<(i+1)<<"joined";
+            //  qDebug() <<"Thread"<<(i+1)<<"joined";
           }
 #endif
 

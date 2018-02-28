@@ -116,8 +116,6 @@ void ReconstructionWindow::writeToJson(QJsonObject &json) //fVerbose - saving as
   ReconstructionWindow::updateFilterSettings();
 
   QJsonObject js = MW->Config->JSON["ReconstructionConfig"].toObject();
-  int versionNumber = ANTS2_VERSION;
-  js["ANTS2build"] = versionNumber;
 
   //ReconstructionWindow::writePMrelatedInfoToJson(js);
   MW->Detector->PMgroups->writeSensorGroupsToJson(js);
@@ -1153,6 +1151,8 @@ void ReconstructionWindow::updateFiltersGui()
 void ReconstructionWindow::on_pbUpdateFilters_clicked()
 {
   //qDebug() << "UpdateFilterButton pressed";
+  if (MW->ShutDown) return;
+
   if (bFilteringStarted) //without this on-Editing-finished is triggered when disable kick in and cursor is in one of the edit boxes
   {
       //qDebug() << "Igonred, already filetring";
@@ -1302,20 +1302,31 @@ void ReconstructionWindow::SetProgress(int val)
 
 void ReconstructionWindow::onBusyOn()
 {
-  //qDebug() << "Busy ON!";
-  ui->twData->setEnabled(false);
-  ui->twOptions->setEnabled(false);
-  ui->bsAnalyzeScan->setEnabled(false);
+  //qDebug() << "RW -> Busy ON!";
+  WidgetFocusedBeforeBusyOn = focusWidget();
+
+  QList<QWidget*> list;
+  list << ui->twData << ui->tabWidget << ui->bsAnalyzeScan
+       << ui->pbReconstructAll << ui->pbSaveReconstructionAsRootTree << ui->pbSaveReconstructionAsText << ui->cobCurrentGroup
+       << ui->pbConfigureGroups << ui->pbClearAllFilters;
+  for (QWidget* w : list) w->setEnabled(false);
 }
 
 void ReconstructionWindow::onBusyOff()
 {
-  //qDebug() << "Busy OFF!";
-  ui->twData->setEnabled(true);
-  ui->twOptions->setEnabled(true);
-  ui->bsAnalyzeScan->setEnabled(true);
+  //qDebug() << "RW -> Busy OFF!";
+
+  QList<QWidget*> list;
+  list << ui->twData << ui->tabWidget << ui->bsAnalyzeScan
+       << ui->pbReconstructAll << ui->pbSaveReconstructionAsRootTree << ui->pbSaveReconstructionAsText << ui->cobCurrentGroup
+       << ui->pbConfigureGroups << ui->pbClearAllFilters;
+  for (QWidget* w : list) w->setEnabled(true);
+
   ui->pbStopReconstruction->setEnabled(false);
   ui->pbStopReconstruction->setChecked(false);
+
+  if (WidgetFocusedBeforeBusyOn  && !MW->ShutDown) WidgetFocusedBeforeBusyOn->setFocus();
+  WidgetFocusedBeforeBusyOn = 0;
 }
 
 void ReconstructionWindow::on_sbZshift_valueChanged(int arg1)
@@ -5645,8 +5656,10 @@ bool ReconstructionWindow::readFilterSettingsFromJson(QJsonObject &jsonMaster)
   return fOK;
 }
 
+#include <exampleswindow.h>
 void ReconstructionWindow::on_pbReconstructAll_clicked()
 {
+  MW->ELwindow->QuickSave(0);
   ReconstructionWindow::writeToJson(MW->Config->JSON);
   ReconstructAll(true);
 }

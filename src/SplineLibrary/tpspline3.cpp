@@ -24,8 +24,10 @@
 #include "tpspline3.h"
 
 TPspline3::TPspline3(double xmin, double xmax, int n_intx, double ymin, double ymax, int n_inty) :
-                    xl(xmin), yl(ymin), xr(xmax), yr(ymax), nintx(n_intx), ninty(n_inty),
-                    bsx(xmin, xmax, n_intx), bsy(ymin, ymax, n_inty)
+                    bsx(xmin, xmax, n_intx), bsy(ymin, ymax, n_inty),
+                    xl(xmin), yl(ymin),
+                    xr(xmax), yr(ymax),
+                    nintx(n_intx), ninty(n_inty)
 {
 	dx = xr-xl; dy = yr-yl;
 	nrec = n_intx*n_inty;

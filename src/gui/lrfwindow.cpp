@@ -432,10 +432,6 @@ void LRFwindow::on_sbPMnoButons_valueChanged(int arg1)
 
 void LRFwindow::writeToJson(QJsonObject &json) const
 {
-  //Version number
-  int versionNumber = ANTS2_VERSION;
-  json["ANTS2build"] = versionNumber;
-
   //General
   json["DataSelector"] = ui->cb_data_selector->currentIndex();
   json["UseGrid"] = ui->cb_use_grid->isChecked();

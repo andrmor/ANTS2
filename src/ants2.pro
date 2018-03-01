@@ -276,7 +276,8 @@ SOURCES += main.cpp \
     gui/GraphWindowTools/atoolboxscene.cpp \
     scriptmode/ainterfacetomultithread.cpp \
     scriptmode/ascriptmessengerdialog.cpp \
-    scriptmode/arootgraphrecord.cpp
+    scriptmode/arootgraphrecord.cpp \
+    scriptmode/aroothistrecord.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -400,7 +401,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ascriptinterfacefactory.h \
     scriptmode/ascriptmessengerdialog.h \
     scriptmode/arootgraphrecord.h \
-    common/arootobjcollection.h
+    common/arootobjcollection.h \
+    scriptmode/aroothistrecord.h
 
 # --- SIM ---
 ants2_SIM {

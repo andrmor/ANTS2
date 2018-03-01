@@ -114,6 +114,7 @@ TmpObjHubClass::~TmpObjHubClass()
   Clear();
 
   Graphs.clear();
+  Hists.clear();
 }
 
 AScriptTreeCollection::~AScriptTreeCollection()

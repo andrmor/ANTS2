@@ -6,6 +6,7 @@
 #include <QMutex>
 
 #include "arootgraphrecord.h"
+#include "aroothistrecord.h"
 
 class TObject;
 

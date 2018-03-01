@@ -7,8 +7,9 @@
 #include <QObject>
 
 #include "arootobjcollection.h"
-//#include "arootgraphrecord.h"
+
 class ARootGraphRecord;
+class ARootHistRecord;
 
 class TObject;
 class TrackHolderClass;
@@ -75,6 +76,7 @@ public:
   ~TmpObjHubClass();
 
   ARootObjCollection<ARootGraphRecord> Graphs;
+  ARootObjCollection<ARootHistRecord>  Hists;
   AScriptDrawCollection ScriptDrawObjects;
   AScriptTreeCollection Trees;
 

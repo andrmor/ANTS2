@@ -1,41 +1,18 @@
 #ifndef AROOTGRAPHCOLLECTION_H
 #define AROOTGRAPHCOLLECTION_H
 
-#include <QMap>
 #include <QVector>
 #include <QString>
 #include <QMutex>
 
 #include <TObject.h>
 
-class AGraphRecord;
-
-class ARootGraphCollection
+class ARootGraphRecord
 {
 public:
-    ARootGraphCollection() {}
-    ~ARootGraphCollection();
-
-    bool          append(TObject* obj, const QString& name, const QString& type);
-    bool          isExist(const QString& name);
-
-    AGraphRecord* getRecord(const QString& name);  // Unlocks mutex on return!
-
-    bool          remove(const QString& name);     // Not multithread-safe: graph can be in use by the GUI
-    void          clear();                         // Not multithread-safe: graph can be in use by the GUI
-
-private:
-    QMap<QString, AGraphRecord*> Collection;
-    QMutex        Mutex;
-
-};
-
-class AGraphRecord
-{
-public:
-    AGraphRecord(TObject* graph, QString  name, QString  type);
-    AGraphRecord(){}
-    ~AGraphRecord(){}   // Do not delete graph object in the destructor! Handled by the collection
+    ARootGraphRecord(TObject* graph, QString  name, QString  type);
+    ARootGraphRecord(){}
+    ~ARootGraphRecord(){}   // Do not delete graph object in the destructor! Handled by the collection
 
     TObject* GetGraphForDrawing();  // unasve for multithread (draw on queued signal), only GUI thread can trigger draw
 

@@ -1,6 +1,7 @@
 #include "histgraphinterfaces.h"
 #include "tmpobjhubclass.h"
-#include "arootgraphcollection.h"
+#include "arootobjcollection.h"
+#include "arootgraphrecord.h"
 
 #include <QJsonArray>
 #include <QJsonValue>
@@ -384,7 +385,7 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
 
 void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -393,7 +394,7 @@ void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, 
 
 void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -402,7 +403,7 @@ void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int 
 
 void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -411,7 +412,7 @@ void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_
 
 void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -428,7 +429,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
         return;
     }
 
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -496,47 +497,16 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
         return;
     }
 
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
         r->AddPoints(xArr, yArr);
-
-
-  /*
-    QVariantList xy = xyArray.toList();
-    QJsonArray XYarr = QJsonArray::fromVariantList(xy);
-
-    AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type == "TGraph")
-      {
-        TGraph* gr = static_cast<TGraph*>(r.Obj);
-
-        for (int i=0; i<XYarr.size(); i++)
-        {
-           QJsonArray el = XYarr[i].toArray();
-           if (el.size() == 2)
-           {
-               if (el[0].isDouble() && el[1].isDouble())
-               {
-                   double x = el[0].toDouble();
-                   double y = el[1].toDouble();
-                   gr->SetPoint(gr->GetN(), x, y);
-               }
-           }
-        }
-      }
-    else
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-    }
-    */
 }
 
 void AInterfaceToGraph::Sort(const QString &GraphName)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -545,7 +515,7 @@ void AInterfaceToGraph::Sort(const QString &GraphName)
 
 void AInterfaceToGraph::Draw(QString GraphName, QString options)
 {
-    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    ARootGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else

@@ -6,7 +6,9 @@
 #include <QVector>
 #include <QObject>
 
-#include "arootgraphcollection.h"
+#include "arootobjcollection.h"
+//#include "arootgraphrecord.h"
+class ARootGraphRecord;
 
 class TObject;
 class TrackHolderClass;
@@ -72,7 +74,7 @@ public:
   TmpObjHubClass();
   ~TmpObjHubClass();
 
-  ARootGraphCollection Graphs;
+  ARootObjCollection<ARootGraphRecord> Graphs;
   AScriptDrawCollection ScriptDrawObjects;
   AScriptTreeCollection Trees;
 

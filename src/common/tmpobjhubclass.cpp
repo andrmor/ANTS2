@@ -6,7 +6,7 @@
 #include "TH1.h"
 #include "TTree.h"
 
-RootDrawObj::RootDrawObj()
+AScriptDrawItem::AScriptDrawItem()
 {
   Obj = 0;
 
@@ -14,14 +14,14 @@ RootDrawObj::RootDrawObj()
   LineColor = 4;   LineStyle = 1;    LineWidth = 1;
 }
 
-int ScriptDrawCollection::findIndexOf(QString name)
+int AScriptDrawCollection::findIndexOf(QString name)
 {
   for (int i=0; i<List.size(); i++)
     if (List.at(i).name == name) return i;
   return -1; //not found
 }
 
-bool ScriptDrawCollection::remove(QString name)
+bool AScriptDrawCollection::remove(QString name)
 {
     for (int i=0; i<List.size(); i++)
       if (List.at(i).name == name)
@@ -33,21 +33,21 @@ bool ScriptDrawCollection::remove(QString name)
     return false; //not found
 }
 
-void ScriptDrawCollection::append(TObject *obj, QString name, QString type)
+void AScriptDrawCollection::append(TObject *obj, QString name, QString type)
 {
-  List.append(RootDrawObj());
+  List.append(AScriptDrawItem());
   List.last().Obj = obj;
   List.last().name = name;
   List.last().type = type;
 }
 
-void ScriptDrawCollection::clear()
+void AScriptDrawCollection::clear()
 {
     for (int i=0; i<0; i++) delete List[i].Obj;
     List.clear();
 }
 
-void ScriptDrawCollection::removeAllHists()
+void AScriptDrawCollection::removeAllHists()
 {
     for (int i=List.size()-1; i>-1; i--)
     {
@@ -60,7 +60,7 @@ void ScriptDrawCollection::removeAllHists()
     }
 }
 
-void ScriptDrawCollection::removeAllGraphs()
+void AScriptDrawCollection::removeAllGraphs()
 {
     for (int i=List.size()-1; i>-1; i--)
     {
@@ -112,21 +112,23 @@ TmpObjHubClass::TmpObjHubClass()
 TmpObjHubClass::~TmpObjHubClass()
 {
   Clear();
+
+  Graphs.clear();
 }
 
-ATreeCollection::~ATreeCollection()
+AScriptTreeCollection::~AScriptTreeCollection()
 {
     clearAll();
 }
 
-bool ATreeCollection::addTree(QString name, TTree *tree)
+bool AScriptTreeCollection::addTree(QString name, TTree *tree)
 {
     if ( findIndexOf(name) != -1) return false;
     Trees.append(ATreeCollectionRecord(name, tree));
     return true;
 }
 
-TTree *ATreeCollection::getTree(QString name)
+TTree *AScriptTreeCollection::getTree(QString name)
 {
     int index = findIndexOf(name);
     if (index == -1) return 0;
@@ -134,14 +136,14 @@ TTree *ATreeCollection::getTree(QString name)
     return Trees[index].tree;
 }
 
-int ATreeCollection::findIndexOf(QString name)
+int AScriptTreeCollection::findIndexOf(QString name)
 {
     for (int i=0; i<Trees.size(); i++)
       if (Trees.at(i).name == name) return i;
     return -1; //not found
 }
 
-void ATreeCollection::remove(QString name)
+void AScriptTreeCollection::remove(QString name)
 {
     for (int i=0; i<Trees.size(); i++)
       if (Trees.at(i).name == name)
@@ -152,7 +154,7 @@ void ATreeCollection::remove(QString name)
       }
 }
 
-void ATreeCollection::clearAll()
+void AScriptTreeCollection::clearAll()
 {
     for (int i=0; i<Trees.size(); i++)
         delete Trees[i].tree;

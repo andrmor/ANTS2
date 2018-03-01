@@ -1,5 +1,6 @@
 #include "histgraphinterfaces.h"
 #include "tmpobjhubclass.h"
+#include "arootgraphcollection.h"
 
 #include <QJsonArray>
 #include <QJsonValue>
@@ -87,7 +88,7 @@ void AInterfaceToHist::SetTitles(QString HistName, QString X_Title, QString Y_Ti
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   r.Xtitle = X_Title;
   r.Ytitle = Y_Title;
   r.Ztitle = Z_Title;
@@ -102,7 +103,7 @@ void AInterfaceToHist::SetLineProperties(QString HistName, int LineColor, int Li
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   r.LineColor = LineColor;
   r.LineStyle = LineStyle;
   r.LineWidth = LineWidth;
@@ -117,7 +118,7 @@ void AInterfaceToHist::Fill(QString HistName, double val, double weight)
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   if (r.type == "TH1D")
     {
       TH1D* h = static_cast<TH1D*>(r.Obj);
@@ -139,7 +140,7 @@ void AInterfaceToHist::Fill2D(QString HistName, double x, double y, double weigh
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   if (r.type == "TH2D")
     {
       TH2D* h = static_cast<TH2D*>(r.Obj);
@@ -161,7 +162,7 @@ void AInterfaceToHist::Smooth(QString HistName, int times)
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   if (r.type == "TH1D")
     {
       TH1D* h = static_cast<TH1D*>(r.Obj);
@@ -199,7 +200,7 @@ QVariant AInterfaceToHist::FitGauss(QString HistName, QString options)
         return ReturnNanArray(6);
       }
 
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
     if (r.type.startsWith("TH1"))
       {
         TH1* h = static_cast<TH1*>(r.Obj);
@@ -253,7 +254,7 @@ QVariant AInterfaceToHist::FitGaussWithInit(QString HistName, QVariant InitialPa
         return ReturnNanArray(6);
     }
 
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
     if (r.type.startsWith("TH1"))
       {
         TH1* h = static_cast<TH1*>(r.Obj);
@@ -318,7 +319,7 @@ void AInterfaceToHist::Draw(QString HistName, QString options)
       return;
     }
 
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+  AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
   if (r.type == "TH1D")
     {
       TH1D* h = static_cast<TH1D*>(r.Obj);
@@ -365,131 +366,101 @@ bool AInterfaceToGraph::InitOnRun()
   return true;
 }
 
-void AInterfaceToGraph::NewGraph(QString GraphName)
+void AInterfaceToGraph::NewGraph(const QString &GraphName)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index != -1)
+    TGraph* gr = new TGraph();
+    bool bOK = TmpHub->Graphs.append(gr, GraphName, "TGraph");
+    if (!bOK)
     {
-      abort("Bad new graph name! Object "+GraphName+" already exists");
-      return;
+        delete gr;
+        abort("Graph "+GraphName+" already exists!");
     }
-
-  TGraph* gr = new TGraph();
-  TmpHub->ScriptDrawObjects.append(gr, GraphName, "TGraph");
-  gr->SetFillColor(0);
-  gr->SetFillStyle(0);
+    else
+    {
+        gr->SetFillColor(0);
+        gr->SetFillStyle(0);
+    }
 }
 
 void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.MarkerColor = MarkerColor;
-  r.MarkerStyle = MarkerStyle;
-  r.MarkerSize = MarkerSize;
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetMarkerProperties(MarkerColor, MarkerStyle, MarkerSize);
 }
 
 void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.LineColor = LineColor;
-  r.LineStyle = LineStyle;
-  r.LineWidth = LineWidth;
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetLineProperties(LineColor, LineStyle, LineWidth);
 }
 
 void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  r.Xtitle = X_Title;
-  r.Ytitle = Y_Title;
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetAxisTitles(X_Title, Y_Title);
 }
 
 void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-    }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      gr->SetPoint(gr->GetN(), x, y);
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-  }
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->AddPoint(x, y);
 }
 
 void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
 {
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-    if (index == -1)
-      {
+    //    QString typeX = xArray.typeName();
+    //    QString typeY = yArray.typeName();
+    //    if (typeX != "QVariantList" || typeY != "QVariantList")
+    //    {
+    //        qWarning() << "arrays are expected in graph.AddPoints()";
+    //        return;
+    //    }
+
+    const QVariantList vx = xArray.toList();
+    const QVariantList vy = yArray.toList();
+    if (vx.isEmpty() || vx.size() != vy.size())
+    {
+        abort("Empty or mismatch in add array to graph " + GraphName);
+        return;
+    }
+
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
         abort("Graph "+GraphName+" not found!");
-        return;
-      }
-
-    QString typeX = xArray.typeName();
-    QString typeY = yArray.typeName();
-    if (typeX != "QVariantList" || typeY != "QVariantList")
-    {
-        qWarning() << "arrays are expected in graph.AddPoints()";
-        return;
-    }
-
-    QVariantList vx = xArray.toList();
-    QVariantList vy = yArray.toList();
-    QJsonArray X = QJsonArray::fromVariantList(vx);
-    QJsonArray Y = QJsonArray::fromVariantList(vy);
-    if (X.isEmpty() || Y.isEmpty() || X.size()!=Y.size())
-    {
-        qWarning() << "Empty or mismatch in add array to graph";
-        return;
-    }
-
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-    if (r.type == "TGraph")
-      {
-        TGraph* gr = static_cast<TGraph*>(r.Obj);
-
-        for (int i=0; i<X.size(); i++)
-            if (X[i].isDouble() && Y[i].isDouble())
-            {
-                double x = X[i].toDouble();
-                double y = Y[i].toDouble();
-                gr->SetPoint(gr->GetN(), x, y);
-            }
-      }
     else
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
+    {
+        QVector<double> xArr(vx.size());
+        QVector<double> yArr(vx.size());
+        bool bValidX, bValidY;
+
+        for (int i=0; i<vx.size(); i++)
+        {
+            double x = vx.at(i).toDouble(&bValidX);
+            double y = vy.at(i).toDouble(&bValidY);
+            if (bValidX && bValidY)
+            {
+                xArr << x;
+                yArr << y;
+            }
+            else
+            {
+                abort("Not numeric value found in AddPoints() for " + GraphName);
+                return;
+            }
+        }
+        r->AddPoints(xArr, yArr);
     }
 }
 
@@ -512,7 +483,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
     QVariantList xy = xyArray.toList();
     QJsonArray XYarr = QJsonArray::fromVariantList(xy);
 
-    RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
+    AScriptDrawItem& r = TmpHub->ScriptDrawObjects.List[index];
     if (r.type == "TGraph")
       {
         TGraph* gr = static_cast<TGraph*>(r.Obj);
@@ -538,50 +509,39 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
     }
 }
 
+void AInterfaceToGraph::Sort(const QString &GraphName)
+{
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->Sort();
+}
+
 void AInterfaceToGraph::Draw(QString GraphName, QString options)
 {
-  int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-  if (index == -1)
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
     {
-      abort("Graph "+GraphName+" not found!");
-      return;
+        TObject* g = r->GetGraphForDrawing();
+        if (!g)
+        {   //paranoic
+            abort("Error: Graph "+GraphName+" was created with empty object!");
+            return;
+        }
+
+        emit RequestDraw(g, options, true);
     }
-
-  RootDrawObj& r = TmpHub->ScriptDrawObjects.List[index];
-  if (r.type == "TGraph")
-    {
-      TGraph* gr = static_cast<TGraph*>(r.Obj);
-      if (gr->GetN() == 0) return;
-
-      gr->SetLineColor(r.LineColor);
-      gr->SetLineWidth(r.LineWidth);
-      gr->SetLineStyle(r.LineStyle);
-      gr->SetMarkerColor(r.MarkerColor);
-      gr->SetMarkerSize(r.MarkerSize);
-      gr->SetMarkerStyle(r.MarkerStyle);
-      gr->SetEditable(false);
-      gr->GetYaxis()->SetTitleOffset((Float_t)1.30);
-      emit RequestDraw(gr, options, true);
-
-      gr->GetXaxis()->SetTitle(r.Xtitle.toLatin1().data());
-      gr->GetYaxis()->SetTitle(r.Ytitle.toLatin1().data());
-      emit RequestDraw(0, "", true); //to update canvas so axes titles are visible
-    }
-  else
-    {
-      abort("Graph "+GraphName+" not found!");
-      return;
-  }
 }
 
 bool AInterfaceToGraph::Delete(QString GraphName)
 {
-    return TmpHub->ScriptDrawObjects.remove(GraphName);
+    return TmpHub->Graphs.remove(GraphName);
 }
 
 void AInterfaceToGraph::DeleteAllGraph()
 {
-    TmpHub->ScriptDrawObjects.removeAllGraphs();
+    TmpHub->Graphs.clear();
 }
-
-// ------------------ END of GRAPH --------------------

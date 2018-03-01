@@ -61,7 +61,7 @@ public:
   virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
-  void NewGraph(QString GraphName);
+  void NewGraph(const QString& GraphName);
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
@@ -70,7 +70,9 @@ public slots:
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 
-  void Draw(QString GraphName, QString options);
+  void Sort(const QString& GraphName);
+
+  void Draw(QString GraphName, QString options = "APL");
 
   bool Delete(QString GraphName);
   void DeleteAllGraph();

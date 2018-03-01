@@ -6,12 +6,14 @@
 #include <QVector>
 #include <QObject>
 
+#include "arootgraphcollection.h"
+
 class TObject;
 class TrackHolderClass;
 class TH1D;
 class TTree;
 
-class RootDrawObj
+class AScriptDrawItem
 {
   public:
     TObject* Obj;
@@ -21,15 +23,15 @@ class RootDrawObj
     QString Xtitle, Ytitle, Ztitle;
     int MarkerColor, MarkerStyle, MarkerSize, LineColor, LineStyle, LineWidth;
 
-    RootDrawObj();
+    AScriptDrawItem();
 };
 
-class ScriptDrawCollection
+class AScriptDrawCollection
 {
 public:
-   QList<RootDrawObj> List;
+   QList<AScriptDrawItem> List;
 
-   int findIndexOf(QString name); //returns -1 if not found
+   int  findIndexOf(QString name); //returns -1 if not found
    bool remove(QString name);
    void append(TObject* obj, QString name, QString type);
    void clear();
@@ -47,19 +49,19 @@ public:
     ATreeCollectionRecord() : name("Undefined"), tree(0) {}
 };
 
-class ATreeCollection
+class AScriptTreeCollection
 {
 public:
-    ATreeCollection(){}
-    ~ATreeCollection();
+    AScriptTreeCollection(){}
+    ~AScriptTreeCollection();
 
     QVector<ATreeCollectionRecord> Trees;
 
-    bool addTree(QString name, TTree* tree);
-    TTree* getTree(QString name);
-    int findIndexOf(QString name); //returns -1 if not found
-    void remove(QString name);
-    void clearAll();
+    bool    addTree(QString name, TTree* tree);
+    TTree*  getTree(QString name);
+    int     findIndexOf(QString name); //returns -1 if not found
+    void    remove(QString name);
+    void    clearAll();
 };
 
 //=================================================================
@@ -70,8 +72,9 @@ public:
   TmpObjHubClass();
   ~TmpObjHubClass();
 
-  ScriptDrawCollection ScriptDrawObjects;
-  ATreeCollection Trees;
+  ARootGraphCollection Graphs;
+  AScriptDrawCollection ScriptDrawObjects;
+  AScriptTreeCollection Trees;
 
   double PreEnAdd, PreEnMulti;
 

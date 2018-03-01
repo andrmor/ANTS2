@@ -420,19 +420,11 @@ void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
 
 void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant yArray)
 {
-    //    QString typeX = xArray.typeName();
-    //    QString typeY = yArray.typeName();
-    //    if (typeX != "QVariantList" || typeY != "QVariantList")
-    //    {
-    //        qWarning() << "arrays are expected in graph.AddPoints()";
-    //        return;
-    //    }
-
     const QVariantList vx = xArray.toList();
     const QVariantList vy = yArray.toList();
     if (vx.isEmpty() || vx.size() != vy.size())
     {
-        abort("Empty or mismatch in add array to graph " + GraphName);
+        abort("Empty array or mismatch in array sizes in AddPoints for graph " + GraphName);
         return;
     }
 
@@ -451,8 +443,9 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
             double y = vy.at(i).toDouble(&bValidY);
             if (bValidX && bValidY)
             {
-                xArr << x;
-                yArr << y;
+                //  qDebug() << i << x << y;
+                xArr[i] = x;
+                yArr[i] = y;
             }
             else
             {
@@ -466,20 +459,51 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
 
 void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
 {
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(GraphName);
-    if (index == -1)
-      {
-        abort("Graph "+GraphName+" not found!");
-        return;
-      }
-
-    QString typeArr = xyArray.typeName();
-    if (typeArr != "QVariantList")
+    const QVariantList v = xyArray.toList();
+    if (v.isEmpty())
     {
-        qWarning() << "arrays are expected in graph.AddPoints()";
+        abort("Empty array in AddPoints for graph " + GraphName);
         return;
     }
 
+    bool bError = false;
+    bool bValidX, bValidY;
+    QVector<double> xArr(v.size()), yArr(v.size());
+    for (int i=0; i<v.size(); i++)
+    {
+        const QVariantList vxy = v.at(i).toList();
+        if (vxy.size() != 2)
+        {
+            bError = true;
+            break;
+        }
+        double x = vxy.at(0).toDouble(&bValidX);
+        double y = vxy.at(1).toDouble(&bValidY);
+        if (bValidX && bValidY)
+        {
+            xArr[i] = x;
+            yArr[i] = y;
+        }
+        else
+        {
+            bError = true;
+            break;
+        }
+    }
+    if (bError)
+    {
+        abort("Invalid array in AddPoints() for graph " + GraphName);
+        return;
+    }
+
+    AGraphRecord* r = TmpHub->Graphs.getRecord(GraphName);
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->AddPoints(xArr, yArr);
+
+
+  /*
     QVariantList xy = xyArray.toList();
     QJsonArray XYarr = QJsonArray::fromVariantList(xy);
 
@@ -507,6 +531,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
         abort("Graph "+GraphName+" not found!");
         return;
     }
+    */
 }
 
 void AInterfaceToGraph::Sort(const QString &GraphName)

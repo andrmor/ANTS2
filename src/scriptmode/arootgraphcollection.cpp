@@ -123,7 +123,10 @@ void AGraphRecord::AddPoints(const QVector<double>& xArr, const QVector<double>&
     {
         TGraph* g = dynamic_cast<TGraph*>(Graph);
         for (int i=0; i<xArr.size(); i++)
+        {
+            //  qDebug() << i << xArr.at(i)<<yArr.at(i);
             g->SetPoint(g->GetN(), xArr.at(i), yArr.at(i));
+        }
     }
 }
 

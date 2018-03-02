@@ -5,13 +5,16 @@
 
 #include "TGraph.h"
 #include "TAxis.h"
+#include "TAttLine.h"
+#include "TAttMarker.h"
+#include "TAttFill.h"
 
-ARootGraphRecord::ARootGraphRecord(TObject *graph, QString name, QString type) :
-    Graph(graph), Name(name), Type(type) {}
+ARootGraphRecord::ARootGraphRecord(TObject *graph, const QString &name, const QString &type) :
+    ARootObjBase(graph, name, type) {}
 
-TObject *ARootGraphRecord::GetGraphForDrawing()
+TObject *ARootGraphRecord::GetObjForDrawing()
 {
-    TGraph* gr = dynamic_cast<TGraph*>(Graph);
+    TGraph* gr = dynamic_cast<TGraph*>(Object);
     if (gr)
     {
         gr->SetFillColor(0);
@@ -31,7 +34,7 @@ TObject *ARootGraphRecord::GetGraphForDrawing()
         gr->GetYaxis()->SetTitle(TitleY.toLatin1().data());
     }
 
-    return Graph;
+    return Object;
 }
 
 void ARootGraphRecord::SetMarkerProperties(int markerColor, int markerStyle, int markerSize)
@@ -51,13 +54,11 @@ void ARootGraphRecord::SetAxisTitles(const QString &titleX, const QString &title
 
 void ARootGraphRecord::AddPoint(double x, double y)
 {
-    if (!Graph) return;
-
     QMutexLocker locker(&Mutex);
 
     if (Type == "TGraph")
     {
-        TGraph* g = dynamic_cast<TGraph*>(Graph);
+        TGraph* g = dynamic_cast<TGraph*>(Object);
         g->SetPoint(g->GetN(), x, y);
     }
 }
@@ -65,13 +66,12 @@ void ARootGraphRecord::AddPoint(double x, double y)
 void ARootGraphRecord::AddPoints(const QVector<double>& xArr, const QVector<double>& yArr)
 {
     if (xArr.size() != yArr.size()) return;
-    if (!Graph) return;
 
     QMutexLocker locker(&Mutex);
 
     if (Type == "TGraph")
     {
-        TGraph* g = dynamic_cast<TGraph*>(Graph);
+        TGraph* g = dynamic_cast<TGraph*>(Object);
         for (int i=0; i<xArr.size(); i++)
         {
             //  qDebug() << i << xArr.at(i)<<yArr.at(i);
@@ -82,13 +82,11 @@ void ARootGraphRecord::AddPoints(const QVector<double>& xArr, const QVector<doub
 
 void ARootGraphRecord::Sort()
 {
-    if (!Graph) return;
-
     QMutexLocker locker(&Mutex);
 
     if (Type == "TGraph")
     {
-        TGraph* g = dynamic_cast<TGraph*>(Graph);
+        TGraph* g = dynamic_cast<TGraph*>(Object);
         g->Sort();
     }
 }

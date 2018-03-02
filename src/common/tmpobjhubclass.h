@@ -75,8 +75,8 @@ public:
   TmpObjHubClass();
   ~TmpObjHubClass();
 
-  ARootObjCollection<ARootGraphRecord> Graphs;
-  ARootObjCollection<ARootHistRecord>  Hists;
+  ARootObjCollection Graphs;
+  ARootObjCollection Hists;
   AScriptDrawCollection ScriptDrawObjects;
   AScriptTreeCollection Trees;
 

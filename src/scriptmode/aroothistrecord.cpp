@@ -4,28 +4,27 @@
 #include "TH2D.h"
 #include "TF1.h"
 
-ARootHistRecord::ARootHistRecord(TObject *hist, const QString &name, QString type) :
-    Hist(hist), Name(name), Type(type) {}
+ARootHistRecord::ARootHistRecord(TObject *hist, const QString &title, const QString &type) :
+     ARootObjBase(hist, title, type) {}
 
-TObject *ARootHistRecord::GetHistForDrawing()
+TObject* ARootHistRecord::GetObjForDrawing()
 {
-    return Hist;
+    return Object;
 }
 
-void ARootHistRecord::SetTitles(QString X_Title, QString Y_Title, QString Z_Title)
+void ARootHistRecord::SetTitles(const QString X_Title, const QString Y_Title, const QString Z_Title)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH1D")
       {
-        TH1D* h = static_cast<TH1D*>(Hist);
+        TH1D* h = static_cast<TH1D*>(Object);
         h->SetXTitle(X_Title.toLatin1().data());
         h->SetYTitle(Y_Title.toLatin1().data());
       }
-    else if (r.type == "TH2D")
+    else if (Type == "TH2D")
       {
-        TH2D* h = static_cast<TH2D*>(r.Obj);
+        TH2D* h = static_cast<TH2D*>(Object);
         h->SetXTitle(X_Title.toLatin1().data());
         h->SetYTitle(Y_Title.toLatin1().data());
         h->SetZTitle(Z_Title.toLatin1().data());
@@ -34,19 +33,18 @@ void ARootHistRecord::SetTitles(QString X_Title, QString Y_Title, QString Z_Titl
 
 void ARootHistRecord::SetLineProperties(int LineColor, int LineStyle, int LineWidth)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH1D")
       {
-        TH1D* h = static_cast<TH1D*>(Hist);
+        TH1D* h = static_cast<TH1D*>(Object);
         h->SetLineColor(LineColor);
         h->SetLineWidth(LineWidth);
         h->SetLineStyle(LineStyle);
       }
-    else if (r.type == "TH2D")
+    else if (Type == "TH2D")
       {
-        TH2D* h = static_cast<TH2D*>(r.Obj);
+        TH2D* h = static_cast<TH2D*>(Object);
         h->SetLineColor(LineColor);
         h->SetLineWidth(LineWidth);
         h->SetLineStyle(LineStyle);
@@ -55,48 +53,44 @@ void ARootHistRecord::SetLineProperties(int LineColor, int LineStyle, int LineWi
 
 void ARootHistRecord::Fill(double val, double weight)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH1D")
       {
-        TH1D* h = static_cast<TH1D*>(Hist);
+        TH1D* h = static_cast<TH1D*>(Object);
         h->Fill(val, weight);
     }
 }
 
 void ARootHistRecord::Fill2D(double x, double y, double weight)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH2D")
       {
-        TH2D* h = static_cast<TH2D*>(Hist);
+        TH2D* h = static_cast<TH2D*>(Object);
         h->Fill(x, y, weight);
     }
 }
 
 void ARootHistRecord::Smooth(int times)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     if (Type == "TH1D")
       {
-        TH1D* h = static_cast<TH1D*>(Hist);
+        TH1D* h = static_cast<TH1D*>(Object);
         h->Smooth(times);
       }
     else if (Type == "TH2D")
       {
-        TH2D* h = static_cast<TH2D*>(Hist);
+        TH2D* h = static_cast<TH2D*>(Object);
         h->Smooth(times);
     }
 }
 
 const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     QVector<double> res;
@@ -104,7 +98,7 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
     if (InitialParValues.size() != 3) return res;
     if (Type.startsWith("TH1"))
       {
-        TH1* h = static_cast<TH1*>(Hist);
+        TH1* h = static_cast<TH1*>(Object);
 
         TF1 *f1 = new TF1("f1","[0]*exp(-0.5*((x-[1])/[2])^2)");
         f1->SetParameters(InitialParValues.at(0), InitialParValues.at(1), InitialParValues.at(2));
@@ -121,13 +115,12 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
 
 const QVector<double> ARootHistRecord::FitGauss(const QString &options)
 {
-    if (!Hist) return;
     QMutexLocker locker(&Mutex);
 
     QVector<double> res;
     if (Type.startsWith("TH1"))
       {
-        TH1* h = static_cast<TH1*>(Hist);
+        TH1* h = static_cast<TH1*>(Object);
         TF1 *f1 = new TF1("f1", "gaus");
         int status = h->Fit(f1, options.toLatin1().data());
         if (status == 0)

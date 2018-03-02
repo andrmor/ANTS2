@@ -277,7 +277,9 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetomultithread.cpp \
     scriptmode/ascriptmessengerdialog.cpp \
     scriptmode/arootgraphrecord.cpp \
-    scriptmode/aroothistrecord.cpp
+    scriptmode/aroothistrecord.cpp \
+    common/arootobjcollection.cpp \
+    common/arootobjbase.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -402,7 +404,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ascriptmessengerdialog.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
-    scriptmode/aroothistrecord.h
+    scriptmode/aroothistrecord.h \
+    common/arootobjbase.h
 
 # --- SIM ---
 ants2_SIM {

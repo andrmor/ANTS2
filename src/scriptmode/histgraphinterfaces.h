@@ -18,7 +18,7 @@ public:
   AInterfaceToHist(const AInterfaceToHist& other);
   ~AInterfaceToHist(){}
 
-  bool           InitOnRun() override;
+  //bool           InitOnRun() override {}
   bool           IsMultithreadCapable() const override {return true;}
 
 public slots:
@@ -58,7 +58,7 @@ public:
   AInterfaceToGraph(TmpObjHubClass *TmpHub);
   ~AInterfaceToGraph(){}
 
-  virtual bool InitOnRun() override;
+  //virtual bool InitOnRun() override {}
   virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:

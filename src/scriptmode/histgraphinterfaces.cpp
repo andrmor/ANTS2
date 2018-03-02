@@ -35,11 +35,7 @@ AInterfaceToHist::AInterfaceToHist(const AInterfaceToHist &other) :
     bGuiTthread = false;
 }
 
-bool AInterfaceToHist::InitOnRun()
-{
-    TmpHub->ScriptDrawObjects.clear();
-    return true;
-}
+
 
 void AInterfaceToHist::NewHist(const QString& HistName, int bins, double start, double stop)
 {
@@ -261,11 +257,7 @@ AInterfaceToGraph::AInterfaceToGraph(TmpObjHubClass *TmpHub)
     H["Draw"] = "Draws the graph (use \"APL\" options if in doubt)";
 }
 
-bool AInterfaceToGraph::InitOnRun()
-{
-    TmpHub->ScriptDrawObjects.clear();
-    return true;
-}
+
 
 void AInterfaceToGraph::NewGraph(const QString &GraphName)
 {

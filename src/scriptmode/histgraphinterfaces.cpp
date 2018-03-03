@@ -35,8 +35,6 @@ AInterfaceToHist::AInterfaceToHist(const AInterfaceToHist &other) :
     bGuiTthread = false;
 }
 
-
-
 void AInterfaceToHist::NewHist(const QString& HistName, int bins, double start, double stop)
 {
     if (!bGuiTthread)
@@ -130,6 +128,166 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
         if (bGuiTthread) emit RequestDraw(0, "", true); //to update
     }
 }
+
+void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
+{
+    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+    {
+        QVariantList VarList = Array.toList();
+        if (VarList.isEmpty())
+        {
+            abort("Array (or array of arrays) is expected as the second argument in hist.FillArr()");
+            return;
+        }
+
+        QVector<double> val(VarList.size()), weight(VarList.size());
+        bool bOK1, bOK2;
+        for (int i=0; i<VarList.size(); i++)
+        {
+            QVariantList element = VarList.at(i).toList();
+            switch (element.size())
+            {
+             case 2:
+               {
+                    double v = element.at(0).toDouble(&bOK1);
+                    double w = element.at(1).toDouble(&bOK2);
+                    if (bOK1 && bOK2)
+                    {
+                        val[i] = v;
+                        weight[i] = w;
+                        continue;  // NEXT
+                    }
+                    break;
+               }
+             case 0:
+               {
+                    double v = VarList.at(i).toDouble(&bOK1);
+                    if (bOK1)
+                    {
+                        val[i] = v;
+                        weight[i] = 1.0;
+                        continue;  // NEXT
+                    }
+                    break;
+               }
+             default:
+               break;
+            }
+
+            abort("hist.FillArr(): the second argument has to be array of values (then weight=1) or arrays of [val, weight]");
+            return;
+        }
+
+        r->FillArr(val, weight);
+    }
+}
+
+void AInterfaceToHist::Fill2DArr(const QString &HistName, const QVariant Array)
+{
+    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+    {
+        QVariantList VarList = Array.toList();
+        if (VarList.isEmpty())
+        {
+            abort("Array of arrays is expected as the second argument in hist.Fill2DArr()");
+            return;
+        }
+
+        QVector<double> xx(VarList.size()), yy(VarList.size()), weight(VarList.size());
+        bool bOK1, bOK2, bOK3;
+        for (int i=0; i<VarList.size(); i++)
+        {
+            QVariantList element = VarList.at(i).toList();
+            switch (element.size())
+            {
+             case 2:
+               {
+                    double x = element.at(0).toDouble(&bOK1);
+                    double y = element.at(1).toDouble(&bOK2);
+                    if (bOK1 && bOK2)
+                    {
+                        xx[i] = x;
+                        yy[i] = y;
+                        weight[i] = 1.0;
+                        continue;  // NEXT
+                    }
+                    break;
+               }
+             case 3:
+               {
+                    double x = element.at(0).toDouble(&bOK1);
+                    double y = element.at(1).toDouble(&bOK2);
+                    double w = element.at(2).toDouble(&bOK3);
+                    if (bOK1 && bOK2 && bOK3)
+                    {
+                        xx[i] = x;
+                        yy[i] = y;
+                        weight[i] = w;
+                        continue;  // NEXT
+                    }
+                    break;
+               }
+             default:
+               break;
+            }
+
+            abort("hist.Fill2DArr(): the second argument has to be array of arrays: [x, y] (then weight is 1) or [x, y, weight]");
+            return;
+        }
+
+        r->Fill2DArr(xx, yy, weight);
+    }
+}
+
+/*
+void AInterfaceToHist::Divide(const QString &HistName, const QString &HistToDivideWith)
+{
+    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
+    if (index == -1)
+      {
+        abort("Histogram "+HistName+" not found!");
+        return;
+      }
+    RootDrawObj& r1 = TmpHub->ScriptDrawObjects.List[index];
+    if (!r1.type.startsWith("TH"))
+    {
+        abort("Histogram "+HistName+" not found!");
+        return;
+    }
+
+    index = TmpHub->ScriptDrawObjects.findIndexOf(HistToDivideWith);
+    if (index == -1)
+      {
+        abort("Histogram "+HistToDivideWith+" not found!");
+        return;
+      }
+    RootDrawObj& r2 = TmpHub->ScriptDrawObjects.List[index];
+    if (!r2.type.startsWith("TH"))
+    {
+        abort("Histogram "+HistToDivideWith+" not found!");
+        return;
+    }
+
+    TH1* h1 = dynamic_cast<TH1*>(r1.Obj);
+    if (h1)
+    {
+        TH1* h2 = dynamic_cast<TH1*>(r2.Obj);
+        if (h2)
+        {
+            bool bOK = h1->Divide(h2);
+            if (bOK) return;
+        }
+    }
+    abort("Division failed!");
+}
+*/
+
 
 QVariant ReturnNanArray(int num)
 {

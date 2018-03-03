@@ -31,6 +31,11 @@ public slots:
   void           Fill(const QString& HistName, double val, double weight);
   void           Fill2D(const QString& HistName, double x, double y, double weight);
 
+  void           FillArr(const QString& HistName, const QVariant Array);
+  void           Fill2DArr(const QString& HistName, const QVariant Array);
+
+//  void           Divide(const QString& HistName, const QString& HistToDivideWith);
+
   void           Draw(const QString& HistName, const QString options = "");
 
   void           Smooth(const QString& HistName, int times);

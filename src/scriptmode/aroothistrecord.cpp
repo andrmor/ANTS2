@@ -73,6 +73,32 @@ void ARootHistRecord::Fill2D(double x, double y, double weight)
     }
 }
 
+void ARootHistRecord::FillArr(const QVector<double>& val, const QVector<double>& weight)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TH1D")
+      {
+        TH1D* h = static_cast<TH1D*>(Object);
+
+        for (int i=0; i<val.size(); i++)
+            h->Fill(val.at(i), weight.at(i));
+    }
+}
+
+void ARootHistRecord::Fill2DArr(const QVector<double> &x, const QVector<double> &y, const QVector<double> &weight)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TH2D")
+      {
+        TH2D* h = static_cast<TH2D*>(Object);
+
+        for (int i=0; i<x.size(); i++)
+            h->Fill(x.at(i), y.at(i), weight.at(i));
+    }
+}
+
 void ARootHistRecord::Smooth(int times)
 {
     QMutexLocker locker(&Mutex);

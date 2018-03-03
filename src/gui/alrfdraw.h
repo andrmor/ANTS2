@@ -13,36 +13,24 @@ class TH2D;
 class ALrfDrawSettings
 {
 public:
-    int datais;             //0-scan, 1-recon data
-    bool plot_lrf;
-    bool draw_second;       //draw second LRF curve
-    bool plot_data;
-    bool plot_diff;   
-    bool fixed_min, fixed_max;
-    double minDraw, maxDraw;
-    int CurrentGroup;
-    bool check_z;
-    double z0, dz;
-    bool scale_by_energy;
-    int FunctionPointsX, FunctionPointsY;   //from glob set
-    int bins;
-    bool showNodePositions;
-
-    ALrfDrawSettings() :
-        datais(1),
-        plot_lrf(true),
-        draw_second(false),
-        plot_data(false),
-        plot_diff(false),
-        fixed_min(false), fixed_max(false),
-        minDraw(0), maxDraw(100),
-        CurrentGroup(0),
-        check_z(false),
-        z0(0), dz(1),
-        scale_by_energy(false),
-        FunctionPointsX(30), FunctionPointsY(30),
-        bins(200),
-        showNodePositions(false) {}
+    int     datais = 1;              //0-scan, 1-recon data
+    bool    plot_lrf = true;
+    bool    draw_second = false;     //draw second LRF curve
+    bool    plot_data = false;
+    bool    plot_diff = false;
+    bool    fixed_min = false;
+    bool    fixed_max = false;
+    double  minDraw = 0;
+    double  maxDraw = 100;
+    int     CurrentGroup = 0;
+    bool    check_z = false;
+    double  z0 = 0;
+    double  dz = 1.0;
+    bool    scale_by_energy = false;
+    int     FunctionPointsX = 30;    //from glob set
+    int     FunctionPointsY = 30;    //from glob set
+    int     bins = 200;
+    bool    showNodePositions = false;
 
     bool ReadFromJson(const QJsonObject &json);
 };
@@ -57,16 +45,16 @@ public:
 
 private:
     ALrfModuleSelector *LRFs;
-    EventsDataClass *EventsDataHub;
-    pms *PMs;
-    GraphWindowClass *GraphWindow;
-    ALrfDrawSettings Options;
-    QString LastError;
+    EventsDataClass    *EventsDataHub;
+    pms                *PMs;
+    GraphWindowClass   *GraphWindow;
+    ALrfDrawSettings    Options;
+    QString             LastError;
 
     bool fUseOldModule;
 
     bool extractOptionsAndVerify(int PMnumber, const QJsonObject &json);
-    void reportError(QString text);
+    void reportError(const QString& text);
 };
 
 #endif // ALRFDRAW_H

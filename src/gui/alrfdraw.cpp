@@ -40,7 +40,7 @@ bool ALrfDrawSettings::ReadFromJson(const QJsonObject &json)
   return true;
 }
 
-void ALrfDraw::reportError(QString text)
+void ALrfDraw::reportError(const QString &text)
 {
     LastError = text;
     qWarning() << "LRF drawing error:"<< text;
@@ -118,8 +118,8 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
   bool fOk = extractOptionsAndVerify(PMnumber, json);
   if (!fOk) return false;
 
-  TF1 *tf1, *tf1bis;
-  TH2D *hist2D;
+  TF1 *tf1, *tf1bis;    //if created, ownership is transferred to the GraphWindow
+  TH2D *hist2D;         //if created, ownership is transferred to the GraphWindow
 
   //only calculations of LRFs, no drawing
   if (Options.plot_lrf)
@@ -216,7 +216,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
         hist2D->GetXaxis()->SetTitle("Radial distance, mm");
         hist2D->GetYaxis()->SetTitle("Signal");
 
-        GraphWindow->DrawWithoutFocus(hist2D, "colz", false);
+        GraphWindow->DrawWithoutFocus(hist2D, "colz");//, false);
       }
 
     //to be on top!
@@ -226,9 +226,9 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
         TString opt = "";
         if (Options.plot_data || Options.plot_diff) opt = "same";
 
-        GraphWindow->DrawWithoutFocus(tf1, opt, false);
+        GraphWindow->DrawWithoutFocus(tf1, opt);//, false);
         if (Options.draw_second && tf1bis)
-          GraphWindow->DrawWithoutFocus(tf1bis, "same", false);
+          GraphWindow->DrawWithoutFocus(tf1bis, "same");//, false);
       }
 
     //Drawing nodes
@@ -261,7 +261,7 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
     int counter = 0;
     double factor = 1.0;
 
-    TF2 *tf2, *tf2bis;
+    TF2 *tf2, *tf2bis;  //if created, ownership is transferred to GraphWindow
 
     if ( Options.plot_data || Options.plot_diff )
       {
@@ -312,7 +312,7 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
 
         tf2->SetNpx(Options.FunctionPointsX);
         tf2->SetNpy(Options.FunctionPointsY);
-        GraphWindow->DrawWithoutFocus(tf2, "surf", false);
+        GraphWindow->DrawWithoutFocus(tf2, "surf");//, false);
 
         if (Options.draw_second)
             {
@@ -327,24 +327,24 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
                   tf2bis->SetLineStyle(9);
                   tf2bis->SetNpx(Options.FunctionPointsX);
                   tf2bis->SetNpy(Options.FunctionPointsY);
-                  GraphWindow->DrawWithoutFocus(tf2bis, "surf same", false);
+                  GraphWindow->DrawWithoutFocus(tf2bis, "surf same");//, false);
               }
             }
       }
 
     if (Options.plot_data)
       {
-        auto tgraph2D = new TGraph2D(ffdata.size(), xx.data(), yy.data(), ffdata.data());
+        TGraph2D* tgraph2D = new TGraph2D(ffdata.size(), xx.data(), yy.data(), ffdata.data());
         tgraph2D->SetMarkerStyle(7);
-        if (Options.plot_lrf) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol", false);
-        else                  GraphWindow->DrawWithoutFocus(tgraph2D, "pcol", false);
+        if (Options.plot_lrf) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
+        else                  GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
       }
     else if (Options.plot_diff)
       {
-        auto tgraph2D = new TGraph2D(ffdiff.size(), xx.data(), yy.data(), ffdiff.data());
+        TGraph2D* tgraph2D = new TGraph2D(ffdiff.size(), xx.data(), yy.data(), ffdiff.data());
         tgraph2D->SetMarkerStyle(7);
-        if (Options.plot_lrf || Options.plot_data) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol", false);
-        else                                       GraphWindow->DrawWithoutFocus(tgraph2D, "pcol", false);
+        if (Options.plot_lrf || Options.plot_data) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
+        else                                       GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
       }
     GraphWindow->UpdateRootCanvas();
 

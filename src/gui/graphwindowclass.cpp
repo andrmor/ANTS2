@@ -500,16 +500,16 @@ QList<double> GraphWindowClass::extractedPolygon()
   return RasterWindow->extractedPolygon;
 }
 
-void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bool RegisterObject)
+void GraphWindowClass::Draw(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
   if (!RasterWindow) return;
   if (!RasterWindow->fCanvas) return;
   GraphWindowClass::ShowAndFocus();
 
-  DrawWithoutFocus(obj, options, DoUpdate, RegisterObject);
+  DrawWithoutFocus(obj, options, DoUpdate, TransferOwnership);
 }
 
-void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool RegisterObject)
+void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool DoUpdate, bool TransferOwnership)
 {
   if (!RasterWindow) return;
   if (!RasterWindow->fCanvas) return;
@@ -602,13 +602,13 @@ void GraphWindowClass::DrawWithoutFocus(TObject *obj, const char *options, bool 
 
   GraphWindowClass::EnforceOverlayOff(); //maybe drawing was triggered when overlay is on and root window is invisible
 
-  if (RegisterObject) RegisterTObject(obj);  //should be skipped only for scripts!
+  if (TransferOwnership) RegisterTObject(obj);  //should be skipped only for scripts!
 
   GraphWindowClass::doDraw(obj, options, DoUpdate);
 
   if (CurrentBasketItem == -1)
     {
-      if (RegisterObject) MasterDrawObjects = DrawObjects; //pointers are copied!
+      if (TransferOwnership) MasterDrawObjects = DrawObjects; //pointers are copied!
       else MasterDrawObjects.clear();
     }
   fFirstTime = false;

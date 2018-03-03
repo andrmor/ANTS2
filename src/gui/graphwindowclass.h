@@ -63,8 +63,8 @@ public:
     QString LastDistributionShown;
 
     //Drawing
-    void Draw(TObject* obj, const char* options = "", bool DoUpdate = true, bool RegisterTObject = true);  //registration should be skipped only for scripts!
-    void DrawWithoutFocus(TObject* obj, const char* options = "", bool DoUpdate = true, bool RegisterTObject = true);  //registration should be skipped only for scripts!
+    void Draw(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
+    void DrawWithoutFocus(TObject* obj, const char* options = "", bool DoUpdate = true, bool TransferOwnership = true);  //registration should be skipped only for scripts!
 
     //canvas control
     void ShowAndFocus();

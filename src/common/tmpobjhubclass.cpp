@@ -3,9 +3,7 @@
 
 #include <QDebug>
 
-#include "TH1.h"
-#include "TTree.h"
-
+#include "TH1D.h"
 
 void TmpObjHubClass::ClearTracks()
 {
@@ -28,26 +26,24 @@ void TmpObjHubClass::ClearTmpHistsSigma2()
 void TmpObjHubClass::Clear()
 {
     //  qDebug() << ">>> TMPHub: Clear requested";
+
+    //do not clear script data
+
     ClearTracks();
     ClearTmpHistsPeaks();
     ClearTmpHistsSigma2();
     FoundPeaks.clear();
     ChPerPhEl_Peaks.clear();
     ChPerPhEl_Sigma2.clear();
-    //  qDebug() << ">>> TMPHub: Clear done!";
-}
 
-TmpObjHubClass::TmpObjHubClass()
-{
-  PreEnAdd = 0;
-  PreEnMulti = 1.0;
+    //  qDebug() << ">>> TMPHub: Clear done!";
 }
 
 TmpObjHubClass::~TmpObjHubClass()
 {
-  Clear();
+    Clear();
 
-  Graphs.clear();
-  Hists.clear();
-  Trees.clear();
+    Graphs.clear();
+    Hists.clear();
+    Trees.clear();
 }

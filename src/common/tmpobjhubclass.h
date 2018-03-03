@@ -1,42 +1,40 @@
 #ifndef TMPOBJHUBCLASS_H
 #define TMPOBJHUBCLASS_H
 
-#include <QList>
-#include <QString>
-#include <QVector>
-#include <QObject>
-
 #include "arootobjcollection.h"
 
-class ARootGraphRecord;
-class ARootHistRecord;
+#include <QObject>
+#include <QVector>
 
-class TObject;
 class TrackHolderClass;
 class TH1D;
-class TTree;
 
 class TmpObjHubClass : public QObject
 {
     Q_OBJECT
+
 public:
-  TmpObjHubClass();
   ~TmpObjHubClass();
 
+  //for script units
   ARootObjCollection Graphs;
   ARootObjCollection Hists;
   ARootObjCollection Trees;
 
-  double PreEnAdd, PreEnMulti;
+  //preprocessing: energy channel
+  double PreEnAdd = 0;
+  double PreEnMulti = 1.0;
 
   QVector<TrackHolderClass*> TrackInfo;
   void ClearTracks();
 
+  //signal->photoelectrons: from peaks
   QVector<TH1D*> PeakHists;
   void ClearTmpHistsPeaks();
   QVector< QVector<double> > FoundPeaks;
   QVector<double> ChPerPhEl_Peaks;
 
+  //signal->photoelectrons: from statistics
   QVector<TH1D*> SigmaHists;
   void ClearTmpHistsSigma2();
   QVector<double> ChPerPhEl_Sigma2;

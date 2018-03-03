@@ -14,7 +14,7 @@ class ARootGraphRecord : public ARootObjBase
 public:
     ARootGraphRecord(TObject* graph, const QString& name, const QString& type);
 
-    TObject* GetObjForDrawing() override;  // unasve for multithread (draw on queued signal), only GUI thread can trigger draw
+    TObject* GetObject() override;  // unasve for multithread (draw on queued signal), only GUI thread can trigger draw
 
     void     SetMarkerProperties(int markerColor, int markerStyle, int markerSize);
     void     SetLineProperties(int lineColor, int lineStyle, int lineWidth);

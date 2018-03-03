@@ -26,7 +26,7 @@ bool ARootObjCollection::remove(const QString &name)
 {
     QMutexLocker locker(&Mutex);
 
-    if (Collection.contains(name)) return false;
+    if (!Collection.contains(name)) return false;
 
     delete Collection[name];
     Collection.remove(name);

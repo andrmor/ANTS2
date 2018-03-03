@@ -243,7 +243,7 @@ void AInterfaceToHist::Draw(const QString &HistName, const QString options)
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
-        emit RequestDraw(r->GetObjForDrawing(), options, true);
+        emit RequestDraw(r->GetObject(), options, true);
 }
 
 // --------------------- End of HIST ------------------------
@@ -412,7 +412,7 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
-        emit RequestDraw(r->GetObjForDrawing(), options, true);
+        emit RequestDraw(r->GetObject(), options, true);
 }
 
 bool AInterfaceToGraph::Delete(QString GraphName)

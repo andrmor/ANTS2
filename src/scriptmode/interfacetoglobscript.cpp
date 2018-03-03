@@ -18,6 +18,7 @@
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
 #include "amonitor.h"
+#include "arootobjbase.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -2532,15 +2533,15 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
   else return QList<int>();
 }
 
-
 // ------------- End of New LRF module interface ------------
 
-AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) : TmpHub(TmpHub)
-{}
+AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) :
+    TmpHub(TmpHub) {}
 
-void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
+void AInterfaceToTree::OpenTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
 {
-    if (TmpHub->Trees.findIndexOf(TreeName) !=-1)
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (r)
     {
         abort("Tree with name " + TreeName + " already exists!");
         return;
@@ -2561,24 +2562,19 @@ void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString Tree
     }
     t->Print();
 
-    TmpHub->Trees.addTree(TreeName, t);
-    return;
+    r = new ARootObjBase(t, TreeName, "TTree");
+    TmpHub->Trees.append(TreeName, r);
 }
 
-QString AInterfaceToTree::PrintBranches(QString TreeName)
+QString AInterfaceToTree::PrintBranches(const QString& TreeName)
 {
-    int index = TmpHub->Trees.findIndexOf(TreeName);
-    if (index == -1)
-    {
-        abort("Tree with name " + TreeName + " does not exist!");
-        return "";
-    }
-    TTree *t = TmpHub->Trees.getTree(TreeName);
-    if (!t)
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (!r)
     {
         abort("Tree " + TreeName + " not found!");
         return "";
     }
+    TTree *t = static_cast<TTree*>(r->GetObject());
 
     QString s = "Thee ";
     s += TreeName;
@@ -2609,21 +2605,15 @@ QString AInterfaceToTree::PrintBranches(QString TreeName)
     return s;
 }
 
-QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
+QVariant AInterfaceToTree::GetBranch(const QString& TreeName, const QString& BranchName)
 {
-    int index = TmpHub->Trees.findIndexOf(TreeName);
-    if (index == -1)
-    {
-        abort("Tree with name " + TreeName + " does not exist!");
-        return QVariant();
-    }
-
-    TTree *t = TmpHub->Trees.getTree(TreeName);
-    if (!t)
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (!r)
     {
         abort("Tree " + TreeName + " not found!");
-        return QVariant();
+        return "";
     }
+    TTree *t = static_cast<TTree*>(r->GetObject());
 
     TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
     if (!branch)
@@ -2829,10 +2819,12 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
     return varList;
 }
 
-void AInterfaceToTree::CloseTree(QString TreeName)
+bool AInterfaceToTree::CloseTree(const QString& TreeName)
 {
-   int index = TmpHub->Trees.findIndexOf(TreeName);
-   if (index == -1) return;
+    return TmpHub->Trees.remove(TreeName);
+}
 
-   TmpHub->Trees.remove(TreeName);
+void AInterfaceToTree::CloseAllTrees()
+{
+    TmpHub->Trees.clear();
 }

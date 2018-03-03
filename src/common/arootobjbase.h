@@ -9,10 +9,9 @@ class ARootObjBase
 {
 public:
     ARootObjBase(TObject* object, const QString&  title, const QString& type);
-
     virtual ~ARootObjBase();
 
-    virtual TObject* GetObjForDrawing() = 0;  // unsave for multithread - only GUI thread should trigger draw
+    virtual TObject* GetObject();
 
 protected:
     TObject* Object = 0;

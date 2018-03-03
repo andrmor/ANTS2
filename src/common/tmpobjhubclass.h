@@ -16,32 +16,6 @@ class TrackHolderClass;
 class TH1D;
 class TTree;
 
-class ATreeCollectionRecord
-{
-public:
-    QString name;
-    TTree* tree;
-
-    ATreeCollectionRecord(QString name, TTree* tree) : name(name), tree(tree) {}
-    ATreeCollectionRecord() : name("Undefined"), tree(0) {}
-};
-
-class AScriptTreeCollection
-{
-public:
-    AScriptTreeCollection(){}
-    ~AScriptTreeCollection();
-
-    QVector<ATreeCollectionRecord> Trees;
-
-    bool    addTree(QString name, TTree* tree);
-    TTree*  getTree(QString name);
-    int     findIndexOf(QString name); //returns -1 if not found
-    void    remove(QString name);
-    void    clearAll();
-};
-
-//=================================================================
 class TmpObjHubClass : public QObject
 {
     Q_OBJECT
@@ -51,7 +25,7 @@ public:
 
   ARootObjCollection Graphs;
   ARootObjCollection Hists;
-  AScriptTreeCollection Trees;
+  ARootObjCollection Trees;
 
   double PreEnAdd, PreEnMulti;
 

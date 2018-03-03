@@ -12,3 +12,8 @@ ARootObjBase::~ARootObjBase()
     qDebug() << "-------------->Destructor for "<<Title << " Obj:"<<Object;
     delete Object;
 }
+
+TObject *ARootObjBase::GetObject()
+{
+    return Object;
+}

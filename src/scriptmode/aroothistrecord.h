@@ -14,7 +14,7 @@ class ARootHistRecord : public ARootObjBase
 public:
     ARootHistRecord(TObject* hist, const QString&  title, const QString& type);
 
-    TObject* GetObjForDrawing() override;  // unsave for multithread (draw on queued signal), only GUI thread can trigger draw
+    TObject* GetObject() override;  // unsave for multithread (draw on queued signal), only GUI thread can trigger draw
 
     void SetTitles(const QString X_Title, const QString Y_Title, const QString Z_Title = "");
     void SetLineProperties(int LineColor, int LineStyle, int LineWidth);

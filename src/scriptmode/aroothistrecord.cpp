@@ -7,7 +7,7 @@
 ARootHistRecord::ARootHistRecord(TObject *hist, const QString &title, const QString &type) :
      ARootObjBase(hist, title, type) {}
 
-TObject* ARootHistRecord::GetObjForDrawing()
+TObject* ARootHistRecord::GetObject()
 {
     return Object;
 }

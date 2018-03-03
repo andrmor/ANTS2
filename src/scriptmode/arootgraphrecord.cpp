@@ -12,7 +12,7 @@
 ARootGraphRecord::ARootGraphRecord(TObject *graph, const QString &name, const QString &type) :
     ARootObjBase(graph, name, type) {}
 
-TObject *ARootGraphRecord::GetObjForDrawing()
+TObject *ARootGraphRecord::GetObject()
 {
     TGraph* gr = dynamic_cast<TGraph*>(Object);
     if (gr)

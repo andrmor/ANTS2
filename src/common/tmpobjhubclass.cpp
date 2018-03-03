@@ -49,49 +49,5 @@ TmpObjHubClass::~TmpObjHubClass()
 
   Graphs.clear();
   Hists.clear();
-}
-
-AScriptTreeCollection::~AScriptTreeCollection()
-{
-    clearAll();
-}
-
-bool AScriptTreeCollection::addTree(QString name, TTree *tree)
-{
-    if ( findIndexOf(name) != -1) return false;
-    Trees.append(ATreeCollectionRecord(name, tree));
-    return true;
-}
-
-TTree *AScriptTreeCollection::getTree(QString name)
-{
-    int index = findIndexOf(name);
-    if (index == -1) return 0;
-
-    return Trees[index].tree;
-}
-
-int AScriptTreeCollection::findIndexOf(QString name)
-{
-    for (int i=0; i<Trees.size(); i++)
-      if (Trees.at(i).name == name) return i;
-    return -1; //not found
-}
-
-void AScriptTreeCollection::remove(QString name)
-{
-    for (int i=0; i<Trees.size(); i++)
-      if (Trees.at(i).name == name)
-      {
-          delete Trees[i].tree;
-          Trees.removeAt(i);
-          return;
-      }
-}
-
-void AScriptTreeCollection::clearAll()
-{
-    for (int i=0; i<Trees.size(); i++)
-        delete Trees[i].tree;
-    Trees.clear();
+  Trees.clear();
 }

@@ -419,10 +419,11 @@ public:
    ~AInterfaceToTree() {}
 
 public slots:
-   void OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
-   QString PrintBranches(QString TreeName);
-   QVariant GetBranch(QString TreeName, QString BranchName);
-   void CloseTree(QString TreeName);
+   void     OpenTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
+   QString  PrintBranches(const QString &TreeName);
+   QVariant GetBranch(const QString &TreeName, const QString &BranchName);
+   bool     CloseTree(const QString &TreeName);
+   void     CloseAllTrees();
 
 private:
    TmpObjHubClass *TmpHub;

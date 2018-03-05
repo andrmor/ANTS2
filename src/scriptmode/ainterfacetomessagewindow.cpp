@@ -15,16 +15,16 @@ AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager* ScriptManag
 }
 
 AInterfaceToMessageWindow::AInterfaceToMessageWindow(const AInterfaceToMessageWindow &other) :
+   AScriptInterface(other),
    ScriptManager(other.ScriptManager), Parent(other.Parent)  //not a bug - pointer of MasterScriptManager in the clone!
 {
-    bGUIthread = false;
     DialogWidget = new AScriptMessengerDialog(other.Parent);
     connectSignalSlots();
 }
 
 void AInterfaceToMessageWindow::connectSignalSlots()
 {
-    Qt::ConnectionType ct = ( bGUIthread ? Qt::DirectConnection : Qt::QueuedConnection );
+    Qt::ConnectionType ct = ( bGuiThread ? Qt::DirectConnection : Qt::QueuedConnection );
 
     connect(this, &AInterfaceToMessageWindow::requestAppend, DialogWidget, &AScriptMessengerDialog::Append, ct);
     connect(this, &AInterfaceToMessageWindow::requestClear, DialogWidget, &AScriptMessengerDialog::Clear, ct);
@@ -42,7 +42,7 @@ AInterfaceToMessageWindow::~AInterfaceToMessageWindow()
 {
   //    qDebug() << "Msg destructor. Master?"<<bGUIthread;
 
-  if (bGUIthread)
+  if (bGuiThread)
   {
       //    qDebug() << "Delete message dialog for master triggered!";
       delete DialogWidget; DialogWidget = 0;
@@ -115,17 +115,17 @@ void AInterfaceToMessageWindow::SetFontSize(int size)
 
 void AInterfaceToMessageWindow::ShowAllThreadMessengers()
 {
-    if (bGUIthread) ScriptManager->showAllMessengerWidgets();
+    if (bGuiThread) ScriptManager->showAllMessengerWidgets();
 }
 
 void AInterfaceToMessageWindow::HideAllThreadMessengers()
 {
-    if (bGUIthread) ScriptManager->hideAllMessengerWidgets();
+    if (bGuiThread) ScriptManager->hideAllMessengerWidgets();
 }
 
 void AInterfaceToMessageWindow::RestorelWidget()
 {
-    if (bGUIthread)
+    if (bGuiThread)
     {
         if (DialogWidget->IsShown())
             DialogWidget->RestoreWidget();
@@ -134,7 +134,7 @@ void AInterfaceToMessageWindow::RestorelWidget()
 
 void AInterfaceToMessageWindow::HideWidget()
 {
-    if (bGUIthread)
+    if (bGuiThread)
     {
         if (DialogWidget->IsShown())
             DialogWidget->Hide();

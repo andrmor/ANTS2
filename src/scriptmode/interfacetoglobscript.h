@@ -69,7 +69,6 @@ private:
   bool keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes);
   bool expandKey(QString &Key);
 
-  bool bClonedCopy = false;
 };
 
 // ---- R E C O N S T R U C T I O N ----
@@ -237,7 +236,6 @@ public slots:
 
 private:
   AConfiguration* Config;
-  //ReconstructionManagerClass* RManager;
   EventsDataClass* EventsDataHub;
 
   bool checkEventNumber(int ievent);

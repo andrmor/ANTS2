@@ -50,7 +50,6 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
-  bool           bGuiTthread = true;
 
 };
 
@@ -89,7 +88,7 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
-  bool           bGuiTthread = true;
+
 };
 
 #endif // HISTGRAPHINTERFACES_H

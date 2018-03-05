@@ -254,9 +254,9 @@ void AInterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringL
 
 bool AInterfaceToConfig::Replace(QString Key, QVariant val)
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
-      abort("Script in threads: cannot modify detector configuration!");
+      abort("Only GUI thread can modify detector configuration!");
       return false;
     }
 
@@ -427,9 +427,9 @@ QString AInterfaceToConfig::GetLastError()
 
 void AInterfaceToConfig::RebuildDetector()
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
-      abort("Script in threads: cannot modify detector configuration!");
+      abort("Only GUI thread can modify detector configuration!");
       return;
     }
 
@@ -472,7 +472,7 @@ bool AInterfaceToConfig::expandKey(QString &Key)
 
 void AInterfaceToConfig::UpdateGui()
 {
-    if (bClonedCopy) return;
+    if (!bGuiThread) return;
 
     Config->AskForAllGuiUpdate();
 }
@@ -493,14 +493,11 @@ AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config) :
 }
 
 AInterfaceToConfig::AInterfaceToConfig(const AInterfaceToConfig& other)
-  : AScriptInterface(other)
-{
-    bClonedCopy = true;
-}
+  : AScriptInterface(other) {}
 
 bool AInterfaceToConfig::Load(QString FileName)
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
       abort("Script in threads: cannot modify detector configuration!");
       return false;
@@ -1344,18 +1341,36 @@ void AInterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, b
 
 void AInterfaceToData::SetReconstructionReady()
 {
+  if (!bGuiThread)
+  {
+      abort("Only GUI thread can do SetReconstructionReady()");
+      return;
+  }
+
   EventsDataHub->fReconstructionDataReady = true;
   emit RequestEventsGuiUpdate();
 }
 
 void AInterfaceToData::ResetReconstructionData(int numGroups)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do ResetReconstructionData()");
+        return;
+    }
+
     for (int ig=0; ig<numGroups; ig++)
       EventsDataHub->resetReconstructionData(numGroups);
 }
 
 void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumEvents)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do LoadEventsTree()");
+        return;
+    }
+
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
   //EventsDataHub->clearReconstruction();
@@ -1367,6 +1382,12 @@ void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumE
 
 void AInterfaceToData::LoadEventsAscii(QString fileName, bool Append)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do LoadEventsAscii()");
+        return;
+    }
+
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadEventsFromTxtFile(fileName, Config->JSON, Config->GetDetector()->PMs);
   //EventsDataHub->clearReconstruction();
@@ -1378,21 +1399,43 @@ void AInterfaceToData::LoadEventsAscii(QString fileName, bool Append)
 
 void AInterfaceToData::ClearEvents()
 {
-  EventsDataHub->clear(); //gui update is triggered inside
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can clear events!");
+        return;
+    }
+
+    EventsDataHub->clear(); //gui update is triggered inside
 }
 
 void AInterfaceToData::PurgeBad()
 {
-  EventsDataHub->PurgeFilteredEvents();
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can purge events!");
+        return;
+    }
+    EventsDataHub->PurgeFilteredEvents();
 }
 
 void AInterfaceToData::Purge(int LeaveOnePer)
 {
-  EventsDataHub->Purge(LeaveOnePer);
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can purge events!");
+        return;
+    }
+    EventsDataHub->Purge(LeaveOnePer);
 }
 
 QVariant AInterfaceToData::GetStatistics(int igroup)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do GetStatistics()");
+        return 0;
+    }
+
   int GoodEvents;
   double AvChi2, AvDeviation;
   EventsDataHub->prepareStatisticsForEvents(Config->GetDetector()->LRFs->isAllLRFsDefined(), GoodEvents, AvChi2, AvDeviation, igroup);

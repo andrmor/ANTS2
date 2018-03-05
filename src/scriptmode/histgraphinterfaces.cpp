@@ -31,15 +31,12 @@ AInterfaceToHist::AInterfaceToHist(TmpObjHubClass* TmpHub)
 }
 
 AInterfaceToHist::AInterfaceToHist(const AInterfaceToHist &other) :
-    AScriptInterface(other)
-{
-    TmpHub = other.TmpHub;
-    bGuiTthread = false;
-}
+    AScriptInterface(other),
+    TmpHub(other.TmpHub) {}
 
 void AInterfaceToHist::NewHist(const QString& HistName, int bins, double start, double stop)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw histograms!");
         return;
@@ -62,7 +59,7 @@ void AInterfaceToHist::NewHist(const QString& HistName, int bins, double start, 
 
 void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw histograms!");
         return;
@@ -127,7 +124,7 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
     else
     {
         r->Smooth(times);
-        if (bGuiTthread) emit RequestDraw(0, "", true); //to update
+        if (bGuiThread) emit RequestDraw(0, "", true); //to update
     }
 }
 
@@ -282,7 +279,7 @@ const QVariant AInterfaceToHist::FitGauss(const QString &HistName, const QString
         const QVector<double> vec = r->FitGauss(options);
         if (vec.isEmpty()) return ReturnNanArray(6);
 
-        if (bGuiTthread) emit RequestDraw(0, "", true); //to update
+        if (bGuiThread) emit RequestDraw(0, "", true); //to update
 
         QJsonArray ar;
         for (int i=0; i<6; i++) ar << vec.at(i);
@@ -331,7 +328,7 @@ const QVariant AInterfaceToHist::FitGaussWithInit(const QString &HistName, const
     const QVector<double> vec = r->FitGaussWithInit(in, options);
     if (vec.isEmpty()) return ReturnNanArray(6);
 
-    if (bGuiTthread) emit RequestDraw(0, "", true); //to update
+    if (bGuiThread) emit RequestDraw(0, "", true); //to update
 
     QJsonArray ar;
     for (int i=0; i<6; i++) ar << vec.at(i);
@@ -343,7 +340,7 @@ const QVariant AInterfaceToHist::FitGaussWithInit(const QString &HistName, const
 
 bool AInterfaceToHist::Delete(const QString &HistName)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw histograms!");
         return false;
@@ -354,7 +351,7 @@ bool AInterfaceToHist::Delete(const QString &HistName)
 
 void AInterfaceToHist::DeleteAllHist()
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
         abort("Threads cannot create/delete/draw histograms!");
     else
         TmpHub->Hists.clear();
@@ -362,7 +359,7 @@ void AInterfaceToHist::DeleteAllHist()
 
 void AInterfaceToHist::Draw(const QString &HistName, const QString options)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw histograms!");
         return;
@@ -389,15 +386,12 @@ AInterfaceToGraph::AInterfaceToGraph(TmpObjHubClass *TmpHub)
 }
 
 AInterfaceToGraph::AInterfaceToGraph(const AInterfaceToGraph &other) :
-    AScriptInterface(other)
-{
-    TmpHub = other.TmpHub;
-    bGuiTthread = false;
-}
+    AScriptInterface(other),
+    TmpHub(other.TmpHub) {}
 
 void AInterfaceToGraph::NewGraph(const QString &GraphName)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw graphs!");
         return;
@@ -550,7 +544,7 @@ void AInterfaceToGraph::Sort(const QString &GraphName)
 
 void AInterfaceToGraph::Draw(QString GraphName, QString options)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw graphs!");
         return;
@@ -565,7 +559,7 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
 
 bool AInterfaceToGraph::Delete(QString GraphName)
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
     {
         abort("Threads cannot create/delete/draw graphs!");
         return false;
@@ -576,7 +570,7 @@ bool AInterfaceToGraph::Delete(QString GraphName)
 
 void AInterfaceToGraph::DeleteAllGraph()
 {
-    if (!bGuiTthread)
+    if (!bGuiThread)
         abort("Threads cannot create/delete/draw graphs!");
     else
         TmpHub->Graphs.clear();

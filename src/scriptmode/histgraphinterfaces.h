@@ -61,6 +61,7 @@ class AInterfaceToGraph : public AScriptInterface
 
 public:
   AInterfaceToGraph(TmpObjHubClass *TmpHub);
+  AInterfaceToGraph(const AInterfaceToGraph& other);
   ~AInterfaceToGraph(){}
 
   //virtual bool InitOnRun() override {}
@@ -88,6 +89,7 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+  bool           bGuiTthread = true;
 };
 
 #endif // HISTGRAPHINTERFACES_H

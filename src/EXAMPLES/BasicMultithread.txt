@@ -1,0 +1,27 @@
+
+var TextBase = "I am thread #"
+
+function report(tn)
+{
+       msg.Show()
+       for (var i=0; i<5; i++)
+       {
+              var text = TextBase + tn + "  step: "+i
+              core.print(text)
+              msg.Append(text)
+              core.sleep(500)
+       }
+       
+       return "Finished #" + tn
+}
+
+threads.evaluateFunction("report", threads.countAll())
+threads.evaluateFunction("report", [threads.countAll()])
+threads.evaluateFunction("report", [threads.countAll()])
+
+threads.waitForAll()
+
+for (var i=0; i<threads.countAll(); i++)
+       core.print("Thread #" + i + " reported result: " + threads.getResult(i))
+
+threads.deleteAll()

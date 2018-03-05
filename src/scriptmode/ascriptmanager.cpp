@@ -281,15 +281,15 @@ int AScriptManager::FindSyntaxError(QString script)
 
 void AScriptManager::deleteMsgDialogs()
 {
-//    for (int i=0; i<interfaces.size(); i++)
-//    {
-//        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-//        if (t)
-//        {
-//            t->deleteDialog();
-//            return;
-//        }
-//    }
+    for (int i=0; i<interfaces.size(); i++)
+    {
+        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+        if (t)
+        {
+            // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+            return;
+        }
+    }
 }
 
 void AScriptManager::hideMsgDialogs()

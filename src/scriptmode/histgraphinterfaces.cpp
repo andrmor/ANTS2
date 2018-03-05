@@ -21,6 +21,8 @@
 AInterfaceToHist::AInterfaceToHist(TmpObjHubClass* TmpHub)
     : TmpHub(TmpHub)
 {
+    Description = "CERN ROOT histograms - TH1D and TH2D";
+
     H["FitGauss"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
                     "\nOptional 'options' parameter is directly forwarded to TH1::Fit()";
     H["FitGaussWithInit"] = "Fit histogram with a Gaussian. The returned result (is successful) contains an array [Constant,Mean,Sigma,ErrConstant,ErrMean,ErrSigma]"
@@ -409,16 +411,29 @@ void AInterfaceToHist::Draw(const QString &HistName, const QString options)
 AInterfaceToGraph::AInterfaceToGraph(TmpObjHubClass *TmpHub)
     : TmpHub(TmpHub)
 {
+    Description = "CERN ROOT graphs - TGraph";
+
     H["NewGraph"] = "Creates a new graph (Root TGraph object)";
     H["SetMarkerProperties"] = "Default marker properties are 1, 20, 1";
     H["SetLineProperties"] = "Default line properties are 1, 1, 2";
     H["Draw"] = "Draws the graph (use \"APL\" options if in doubt)";
 }
 
-
+AInterfaceToGraph::AInterfaceToGraph(const AInterfaceToGraph &other) :
+    AScriptInterface(other)
+{
+    TmpHub = other.TmpHub;
+    bGuiTthread = false;
+}
 
 void AInterfaceToGraph::NewGraph(const QString &GraphName)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return;
+    }
+
     TGraph* gr = new TGraph();
     ARootGraphRecord* rec = new ARootGraphRecord(gr, GraphName, "TGraph");
     bool bOK = TmpHub->Graphs.append(GraphName, rec);
@@ -566,6 +581,12 @@ void AInterfaceToGraph::Sort(const QString &GraphName)
 
 void AInterfaceToGraph::Draw(QString GraphName, QString options)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return;
+    }
+
     ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
@@ -575,10 +596,22 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
 
 bool AInterfaceToGraph::Delete(QString GraphName)
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return false;
+    }
+
     return TmpHub->Graphs.remove(GraphName);
 }
 
 void AInterfaceToGraph::DeleteAllGraph()
 {
+    if (!bGuiTthread)
+    {
+        abort("Threads cannot create/delete/draw graphs!");
+        return;
+    }
+
     TmpHub->Graphs.clear();
 }

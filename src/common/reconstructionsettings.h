@@ -67,6 +67,7 @@ public:
 
   //CUDA
   QJsonObject CGonCUDAsettings;
+  int BufferSize = 500000;
 
   //kNNReconstruction
   QJsonObject kNNrecSet;

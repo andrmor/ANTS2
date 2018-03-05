@@ -151,17 +151,16 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
           {
 #ifdef __USE_ANTS_CUDA__
               CudaManagerClass cm(PMs, PMgroups, LRFs->getOldModule(), EventsDataHub, &RecSet[CurrentGroup], CurrentGroup);
-              QString Method = (*LRFs->getOldModule())[0]->type();//  "Axial" "XY" "Sliced3D" "ComprAxial" "Composite"
-              bool ok = cm.RunCuda(Method);
+              bool ok = cm.RunCuda(1000 * RecSet.at(CurrentGroup).BufferSize);
               if (!ok)
               {
-                  ErrorString = cm.getLastError();//"CUDA module reports an error during reconstruction";
+                  ErrorString = cm.GetLastError();//"CUDA module reports an error during reconstruction";
                   PMgroups->clearActiveSensorGroups();
                   bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
-              qDebug() << "Rate (us/event) reported by cuda manager module:" << cm.getUsPerEvent();
+              qDebug() << "Rate (us/event) reported by cuda manager module:" << cm.GetUsPerEvent();
 #else
               ErrorString = "CUDA was not configured in .pro";
               PMgroups->clearActiveSensorGroups();

@@ -29,32 +29,30 @@ public:
   ~CudaManagerClass();
 
   //run in GUI
-  bool RunCuda(QString method); // 0 -axial; 1 - XY; 2 -sliced3D; 3 - Compressed axial
+  bool           RunCuda(int bufferSize = 500000);
 
-  double getUsPerEvent() {return usPerEvent;}
-  QString getLastError() {return LastError;}
-
-  bool Perform2D(); //run reconstruction using axial or XY LRFs
-  bool PerformSliced();
-
-  //configures
-  void ConfigurePMcenters(); 
-  bool ConfigureEvents();  //also sets up the starting XY
-  bool ConfigureOutputs();
-  void ConfigureLRFs();
-   void ConfigureLRFs_Axial();
-   void ConfigureLRFs_XY();
-   void ConfigureLRFs_Sliced3D();
-   void ConfigureLRFs_Composite();
-
-  //vis data
-  void DataToAntsContainers();
-
-  //clear
-  void Clear();
+  double         GetUsPerEvent() const;
+  const QString& GetLastError() const;
 
 private:
-  //DetectorClass* Detector;
+  bool           Perform2D(int from, int to);
+  bool           PerformSliced(int from, int to);
+
+  void           ConfigurePMcenters();
+  void           ConfigureLRFs();
+  void           ConfigureLRFs_Axial();
+  void           ConfigureLRFs_XY();
+  void           ConfigureLRFs_Sliced3D();
+  void           ConfigureLRFs_Composite();
+
+  bool           ConfigureEvents(int from, int to);  //also configures the starting XY
+  bool           ConfigureOutputs(int bufferSize);
+
+  void           DataToAntsContainers(int from, int to);
+
+  void           Clear();
+
+private:
   pms* PMs;
   APmGroupsManager* PMgroups;
   SensorLRFs* SensLRF;

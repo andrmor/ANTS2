@@ -106,10 +106,13 @@ bool ARootHistRecord::Divide(ARootHistRecord *other)
 
     TH1* h1 = dynamic_cast<TH1*>(Object);
     TH1* h2 = dynamic_cast<TH1*>(other->GetObject());
+
+    bool bOK = false;
     if (h1 && h2)
-        return h1->Divide(h2);
-    else
-        return false;
+         bOK = h1->Divide(h2);
+
+    other->externalUnlock();
+    return bOK;
 }
 
 void ARootHistRecord::Smooth(int times)

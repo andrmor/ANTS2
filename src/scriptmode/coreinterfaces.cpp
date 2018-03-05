@@ -386,6 +386,8 @@ bool AInterfaceToCore::setCirrentDir(QString path)
 
 AInterfaceToMath::AInterfaceToMath(TRandom2* RandGen)
 {
+  Description = "Expanded math module; implemented using std and CERN ROOT functions";
+
   //srand (time(NULL));
     this->RandGen = RandGen;
 

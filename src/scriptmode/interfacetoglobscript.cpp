@@ -477,10 +477,12 @@ void AInterfaceToConfig::UpdateGui()
     Config->AskForAllGuiUpdate();
 }
 
-AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config)
+AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config) :
+    Config(config)
 {
-  Config = config;
   emit requestReadRasterGeometry();
+
+  Description = "Read/change/save/load configuration of the detector/simulator/reconstructor\nToggle Config button to access configuration tree";
 
   H["RebuildDetector"]  = "Force to rebuild detector using the current configuration file.\nNot anymore required after calling config.Replace - it is called automatically if Detector settings were modified.";
   H["Load"]  = "Load ANTS2 configuration file (.json).";
@@ -522,6 +524,8 @@ bool AInterfaceToConfig::Save(QString FileName)
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
   : SimulationManager(SimulationManager), EventsDataHub(EventsDataHub), Config(Config), RecNumThreads(RecNumThreads), fGuiPresent(fGuiPresent)
 {
+  Description = "Access to simulator";
+
   H["RunPhotonSources"] = "Perform simulation with photon sorces.\nPhoton tracks are not shown!";
   H["RunParticleSources"] = "Perform simulation with particle sorces.\nPhoton tracks are not shown!";
   H["SetSeed"] = "Set random generator seed";
@@ -740,6 +744,8 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
 AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub)
 {
+  Description = "Access to PM signals and reconstruction data";
+
   H["GetNumPMs"] = "Number of sensors in the available events dataset. If the dataset is empty, 0 is returned.";
   H["GetNumEvents"] = "Number of available events.";
   H["GetPMsignal"] = "Get signal for the event number ievent and PM number ipm.";
@@ -1402,6 +1408,8 @@ AInterfaceToLRF::AInterfaceToLRF(AConfiguration *Config, EventsDataClass *Events
 {
   SensLRF = Config->GetDetector()->LRFs->getOldModule();
 
+  Description = "Access to LRFs (B-spline module)";
+
   H["Make"] = "Calculates new LRFs";
 
   H["CountIterations"] = "Returns the number of LRF iterations in history.";
@@ -1579,6 +1587,8 @@ bool AInterfaceToLRF::getValidIteration(int &iterIndex)
 InterfaceToGeoWin::InterfaceToGeoWin(MainWindow *MW, TmpObjHubClass* TmpHub)
  : MW(MW), TmpHub(TmpHub)
 {
+  Description = "Access to the Geometry window of GUI";
+
   Detector = MW->Detector;
   H["SaveImage"] = "Save image currently shown on the geometry window to an image file.\nTip: use .png extension";
 }
@@ -1838,7 +1848,10 @@ void InterfaceToGeoWin::ShowEnergyVector()
 
 
 InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager, AConfiguration *Config, EventsDataClass *EventsDataHub, int RecNumThreads)
- : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads) { }
+ : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads)
+{
+    Description = "Event reconstructor";
+}
 
 void InterfaceToReconstructor::ForceStop()
 {
@@ -2011,6 +2024,8 @@ void InterfaceToReconstructor::SetManifestItemLineProperties(int i, int color, i
 InterfaceToGraphWin::InterfaceToGraphWin(MainWindow *MW)
   : MW(MW)
 {
+  Description = "Access to the Graph window of GUI";
+
   H["SaveImage"] = "Save image currently shown on the graph window to an image file.\nTip: use .png extension";
   H["GetAxis"] = "Returns an object with the values presented to user in 'Range' boxes.\n"
                  "They can be accessed with min/max X/Y/Z (e.g. grwin.GetAxis().maxY).\n"
@@ -2122,6 +2137,8 @@ QVariant InterfaceToGraphWin::GetAxis()
 
 AInterfaceToPMs::AInterfaceToPMs(AConfiguration *Config) : Config(Config)
 {
+    Description = "Access to PM positions / add PMs or remove all PMs from the configuration";
+
     PMs = Config->GetDetector()->PMs;
 
     H["SetPMQE"] = "Sets the QE of PM. Forces a call to UpdateAllConfig().";
@@ -2307,9 +2324,10 @@ void AInterfaceToPMs::SetAllArraysFullyCustom()
 }
 
 #ifdef GUI
-AInterfaceToOutputWin::AInterfaceToOutputWin(MainWindow *MW)
+AInterfaceToOutputWin::AInterfaceToOutputWin(MainWindow *MW) :
+    MW(MW)
 {
-    this->MW = MW;
+    Description = "Access to the Output window of GUI";
 }
 
 void AInterfaceToOutputWin::ShowOutputWindow(bool flag, int tab)
@@ -2339,7 +2357,10 @@ void AInterfaceToOutputWin::Hide()
 // ------------- New LRF module interface ------------
 
 ALrfScriptInterface::ALrfScriptInterface(DetectorClass *Detector, EventsDataClass *EventsDataHub) :
-  Detector(Detector), EventsDataHub(EventsDataHub), repo(Detector->LRFs->getNewModule()) {}
+  Detector(Detector), EventsDataHub(EventsDataHub), repo(Detector->LRFs->getNewModule())
+{
+    Description = "Access to new LRF module";
+}
 
 QString ALrfScriptInterface::Make(QString name, QVariantList instructions, bool use_scan_data, bool fit_error, bool scale_by_energy)
 {
@@ -2536,7 +2557,10 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
 // ------------- End of New LRF module interface ------------
 
 AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) :
-    TmpHub(TmpHub) {}
+    TmpHub(TmpHub)
+{
+    Description = "Reader for CERN ROOT Trees";
+}
 
 void AInterfaceToTree::OpenTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
 {

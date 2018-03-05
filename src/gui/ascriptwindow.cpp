@@ -772,7 +772,7 @@ QString AScriptWindow::getDesc(const QJsonValue &ref)
 void AScriptWindow::onFunctionClicked(QTreeWidgetItem *item, int /*column*/)
 {
   pteHelp->clear();
-  qDebug() << item->text(1);
+  //qDebug() << item->text(1);
   //QString returnType = getFunctionReturnType(item->text(0));
   //pteHelp->appendPlainText(returnType+ "  " +item->text(0)+":");
 

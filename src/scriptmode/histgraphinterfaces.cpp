@@ -608,10 +608,7 @@ bool AInterfaceToGraph::Delete(QString GraphName)
 void AInterfaceToGraph::DeleteAllGraph()
 {
     if (!bGuiTthread)
-    {
         abort("Threads cannot create/delete/draw graphs!");
-        return;
-    }
-
-    TmpHub->Graphs.clear();
+    else
+        TmpHub->Graphs.clear();
 }

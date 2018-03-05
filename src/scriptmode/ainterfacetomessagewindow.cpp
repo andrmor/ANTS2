@@ -9,6 +9,9 @@ AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager* ScriptManag
 {
     DialogWidget = new AScriptMessengerDialog(parent);
     connectSignalSlots();
+
+    Description = "Output to script message window.\n"
+                  "If used inside multithread evaluation, every thread has its own window";
 }
 
 AInterfaceToMessageWindow::AInterfaceToMessageWindow(const AInterfaceToMessageWindow &other) :

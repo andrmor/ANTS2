@@ -13,6 +13,11 @@ public:
 
     virtual TObject* GetObject();
 
+    void             externalLock();
+    void             externalUnlock();
+
+    const QString&   getType() const;
+
 protected:
     TObject* Object = 0;
     QString  Title;

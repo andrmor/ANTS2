@@ -34,7 +34,7 @@ public slots:
   void           FillArr(const QString& HistName, const QVariant Array);
   void           Fill2DArr(const QString& HistName, const QVariant Array);
 
-//  void           Divide(const QString& HistName, const QString& HistToDivideWith);
+  void           Divide(const QString& HistName, const QString& HistToDivideWith);
 
   void           Draw(const QString& HistName, const QString options = "");
 

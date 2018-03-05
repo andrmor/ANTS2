@@ -247,49 +247,18 @@ void AInterfaceToHist::Fill2DArr(const QString &HistName, const QVariant Array)
     }
 }
 
-/*
 void AInterfaceToHist::Divide(const QString &HistName, const QString &HistToDivideWith)
 {
-    int index = TmpHub->ScriptDrawObjects.findIndexOf(HistName);
-    if (index == -1)
-      {
-        abort("Histogram "+HistName+" not found!");
-        return;
-      }
-    RootDrawObj& r1 = TmpHub->ScriptDrawObjects.List[index];
-    if (!r1.type.startsWith("TH"))
+    ARootHistRecord* r1 = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r2 = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistToDivideWith));
+    if (!r1) abort("Histogram " + HistName + " not found!");
+    if (!r2) abort("Histogram " + HistToDivideWith + " not found!");
+    else
     {
-        abort("Histogram "+HistName+" not found!");
-        return;
+        bool bOK = r1->Divide(r2);
+        if (!bOK) abort("Histogram division failed: " + HistName + " by " + HistToDivideWith);
     }
-
-    index = TmpHub->ScriptDrawObjects.findIndexOf(HistToDivideWith);
-    if (index == -1)
-      {
-        abort("Histogram "+HistToDivideWith+" not found!");
-        return;
-      }
-    RootDrawObj& r2 = TmpHub->ScriptDrawObjects.List[index];
-    if (!r2.type.startsWith("TH"))
-    {
-        abort("Histogram "+HistToDivideWith+" not found!");
-        return;
-    }
-
-    TH1* h1 = dynamic_cast<TH1*>(r1.Obj);
-    if (h1)
-    {
-        TH1* h2 = dynamic_cast<TH1*>(r2.Obj);
-        if (h2)
-        {
-            bool bOK = h1->Divide(h2);
-            if (bOK) return;
-        }
-    }
-    abort("Division failed!");
 }
-*/
-
 
 QVariant ReturnNanArray(int num)
 {

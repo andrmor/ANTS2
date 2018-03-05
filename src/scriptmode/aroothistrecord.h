@@ -25,6 +25,8 @@ public:
     void FillArr(const QVector<double>& val, const QVector<double>& weight);
     void Fill2DArr(const QVector<double>& x, const QVector<double>& y, const QVector<double>& weight);
 
+    bool Divide(ARootHistRecord* other);
+
     void Smooth(int times);
     const QVector<double> FitGauss(const QString& options = "");
     const QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");

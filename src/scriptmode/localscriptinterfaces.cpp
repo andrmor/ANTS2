@@ -14,6 +14,8 @@
 InterfaceToAddObjScript::InterfaceToAddObjScript(DetectorClass* Detector)
   : Detector(Detector)
 {
+  Description = "Allows to configure detector geometry. Based on CERN ROOT TGeoManager";
+
   QString s = "It is filled with the given material (material index iMat)\n"
               "and positioned inside 'container' object\n"
               "at coordinates (x,y,z) and orientation angles (phi,thetha,psi)\n"

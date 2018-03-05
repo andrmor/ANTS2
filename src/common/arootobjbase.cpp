@@ -17,3 +17,18 @@ TObject *ARootObjBase::GetObject()
 {
     return Object;
 }
+
+void ARootObjBase::externalLock()
+{
+    Mutex.lock();
+}
+
+void ARootObjBase::externalUnlock()
+{
+    Mutex.unlock();
+}
+
+const QString &ARootObjBase::getType() const
+{
+    return Type;
+}

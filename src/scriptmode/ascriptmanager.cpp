@@ -337,9 +337,47 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
 
     if (obj.isUndefined()) return QScriptValue(QScriptValue::UndefinedValue);
     if (obj.isNull())      return QScriptValue(QScriptValue::NullValue);
-    if (obj.isNumber() || obj.isString() || obj.isBool() || obj.isBoolean() || obj.isVariant())
+
+    // too slow access to these values in threads without engine.evaluate
+    //if (obj.isNumber() || obj.isString() || obj.isBool() || obj.isBoolean() || obj.isVariant())
+    //  {
+    //    return engine.newVariant(obj.toVariant());
+    //  }
+
+    if (obj.isNumber())
     {
-        //  qDebug() << "variant" << obj.toVariant();
+        QVariant var = obj.toVariant();
+        if (var.type() ==  QMetaType::Int)
+          {
+            int integerVal = var.toInt();
+            qDebug() << "     Integer:"<<integerVal;
+            return QScriptValue(integerVal);
+          }
+        else
+          {
+            double doubleVal = var.toDouble();
+            qDebug() << "     Double:"<<doubleVal;
+            return QScriptValue(doubleVal);
+          }
+    }
+    if (obj.isString())
+    {
+        qDebug() << "     String:"<< obj.toString();
+        return QScriptValue(obj.toString());
+    }
+    if (obj.isBool())
+      {
+        qDebug() << "     Bool:" << obj.toBool();
+        return QScriptValue(obj.toBool());
+      }
+    if (obj.isBoolean())
+      {
+        qDebug() << "     Boolean:" << obj.toBoolean();
+        return QScriptValue(obj.toBoolean());
+      }
+    if (obj.isVariant())
+    {
+        qDebug() << "    !!!Variant - potentially slow!!! :" << obj.toVariant();
         return engine.newVariant(obj.toVariant());
     }
 
@@ -392,13 +430,19 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     }
     else if (obj.isObject() || obj.isArray())
     {
-        if (obj.isObject()) {
-            if (obj.scriptClass()) {
+        if (obj.isObject())
+        {
+            if (obj.scriptClass())
+            {
                 copy = engine.newObject(obj.scriptClass(), this->copy(obj.data()));
-            } else {
+            }
+            else
+            {
                 copy = engine.newObject();
             }
-        } else {
+        }
+        else
+        {
             copy = engine.newArray();
         }
         copy.setPrototype(this->copy(obj.prototype()));
@@ -410,6 +454,7 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
 
             const QString& name = it.name();
             const QScriptValue& property = it.value();
+            qDebug() << "-----Array memeber"<<it.name()<<it.value().toString();
 
             copy.setProperty(name, this->copy(property));
         }
@@ -496,21 +541,26 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
     while (it.hasNext())
     {
         it.next();
-        //  qDebug() << it.name() << ": " << it.value().toString();
+        qDebug() << "==> Found property " << it.name();// << it.value().toString();
 
         if (!sm->engine->globalObject().property(it.name()).isValid()) // if resource with this name does not exist...
         {
             //do not copy QObjects - the multi-thread friendly units were already copied
             if (!it.value().isQObject())
             {
-                sm->engine->globalObject().setProperty(it.name(), SC.copy(it.value()));
-                //  qDebug() << "Registered:"<<it.name() << "-:->" << sm->engine->globalObject().property(it.name()).toVariant();
+                const QScriptValue sv = SC.copy(it.value());
+                sm->engine->globalObject().setProperty(it.name(), sv);
+                  qDebug() << "    Registered:"<<it.name() << "-:->" << sm->engine->globalObject().property(it.name()).toVariant();
             }
             else
             {
-                //  qDebug() << "Skipping QObject" << it.name();
+                qDebug() << "    Skipped: new property, but it is a QObject";// << it.name();
             }
         }
+        else
+          {
+            qDebug() << "    Skipped: already have this property!";
+          }
     }
 
     //connect core.print() to the ScriptManager of the GUI thread, as queued!

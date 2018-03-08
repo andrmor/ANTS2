@@ -335,7 +335,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->resize(GeometryWindow->width()+1, GeometryWindow->height());
     GeometryWindow->resize(GeometryWindow->width()-1, GeometryWindow->height());
     QThread::msleep(50);
-    MainWindow::ShowGeometry(false);
+    GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
     ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back

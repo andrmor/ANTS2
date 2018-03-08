@@ -316,7 +316,7 @@ void MainWindow::on_actionLoad_configuration_triggered()
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
   Config->LoadConfig(fileName);
-  if (GeometryWindow->isVisible()) ShowGeometry();
+  if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry();
 }
 
 void MainWindow::on_actionNew_detector_triggered()
@@ -332,7 +332,7 @@ void MainWindow::on_actionNew_detector_triggered()
 
   Config->LoadConfig(GlobSet->ExamplesDir + "/Simplest.json");
   if (ELwindow->isVisible()) ELwindow->hide();
-  if (GeometryWindow->isVisible()) ShowGeometry(false);
+  if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
 }
 
 void MainWindow::setFontSizeAllWindows(int size)

@@ -39,6 +39,9 @@ static TVector3 NormViz;
 #include "TAttMarker.h"
 void MainWindow::on_pobTest_clicked()
 {
+    Detector->GeoManager->SetVisLevel(1);
+    return;
+
    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
 

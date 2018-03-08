@@ -421,7 +421,7 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
           }
       }
 
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
     MW->Detector->GeoManager->DrawTracks();
     UpdateRootCanvas();
 }
@@ -462,25 +462,84 @@ void GeometryWindowClass::on_pbShowBar_clicked()
   GeometryWindowClass::resizeEvent(0);
 }
 
+void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
+// default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
+{
+    //qDebug()<<"  ----Showing geometry----"<<GeometryDrawDisabled;
+    if (MW->GeometryDrawDisabled) return;
+
+    //setting this window as active pad in root
+    //with or without activation (focussing) of this window
+    if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
+    else SetAsActiveRootWindow(); //no activation in this mode
+
+    MW->Detector->GeoManager->SetNsegments(MW->GlobSet->NumSegments);
+    int level = ui->sbLimitVisibility->value();
+    if (!ui->cbLimitVisibility->isChecked()) level = -1;
+    MW->Detector->GeoManager->SetVisLevel(level);
+
+    //coloring volumes
+    if (ColorUpdateAllowed)
+      {
+        if (MW->ColorByMaterial) MW->Detector->colorVolumes(1);
+        else MW->Detector->colorVolumes(0);
+      }
+    //top volume visibility
+    if (MW->ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
+    else MW->Detector->GeoManager->SetTopVisible(false);
+
+    //transparency setup
+    int totNodes = MW->Detector->top->GetNdaughters();
+    for (int i=0; i<totNodes; i++)
+      {
+        TGeoNode* thisNode = (TGeoNode*)MW->Detector->top->GetNodes()->At(i);
+        thisNode->GetVolume()->SetTransparency(0);
+      }
+
+    //making contaners visible
+    MW->Detector->top->SetVisContainers(true);
+
+    //DRAW
+    fNeedZoom = true;
+    setHideUpdate(true);
+    ClearRootCanvas();
+    if (SAME)
+      {
+ //       qDebug()<<"keeping";
+        MW->Detector->top->Draw("SAME");
+      }
+    else
+      {
+ //       qDebug()<<"new";
+        //GeometryWindow->ResetView();
+        MW->Detector->top->Draw("");
+      }
+    PostDraw();
+
+    //drawing dots
+    MW->ShowGeoMarkers();
+    UpdateRootCanvas();
+}
+
 void GeometryWindowClass::on_pbShowGeometry_clicked()
 {
   GeometryWindowClass::ShowAndFocus();
   RasterWindow->ForceResize();
   fRecallWindow = false;
 
-  MW->ShowGeometry(false, false); //not doing "same" option! 
+  ShowGeometry(false, false); //not doing "same" option!
 }
 
 void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
 {
   MW->setShowTop(checked);
-  MW->ShowGeometry();
+  ShowGeometry();
 }
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
   MW->setColorByMaterial(checked);
-  MW->ShowGeometry();  
+  ShowGeometry();
   MW->UpdateMaterialListEdit();
 }
 
@@ -497,13 +556,13 @@ void GeometryWindowClass::on_pbShowTracks_clicked()
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
   MW->Detector->GeoManager->ClearTracks();
-  MW->ShowGeometry();
+  ShowGeometry();
 }
 
 void GeometryWindowClass::on_pbClearDots_clicked()
 { 
   MW->clearGeoMarkers();
-  MW->ShowGeometry();
+  ShowGeometry();
 }
 
 void GeometryWindowClass::on_pbSaveAs_clicked()
@@ -620,7 +679,7 @@ void GeometryWindowClass::on_actionSmall_dot_toggled(bool arg1)
   if (arg1)
     {
       GeoMarkerStyle = 1;
-      MW->ShowGeometry();
+      ShowGeometry();
     }
 
   ui->actionSize_1->setEnabled(false);
@@ -632,7 +691,7 @@ void GeometryWindowClass::on_actionLarge_dot_triggered(bool arg1)
   if (arg1)
     {
       GeoMarkerStyle = 8;
-      MW->ShowGeometry();
+      ShowGeometry();
     }
 
   ui->actionSize_1->setEnabled(true);
@@ -644,7 +703,7 @@ void GeometryWindowClass::on_actionSmall_cross_toggled(bool arg1)
   if (arg1)
     {
       GeoMarkerStyle = 6;
-      MW->ShowGeometry();
+      ShowGeometry();
     }
 
   ui->actionSize_1->setEnabled(false);
@@ -656,7 +715,7 @@ void GeometryWindowClass::on_actionLarge_cross_toggled(bool arg1)
   if (arg1)
     {
       GeoMarkerStyle = 2;
-      MW->ShowGeometry();
+      ShowGeometry();
     }
 
   ui->actionSize_1->setEnabled(true);
@@ -666,7 +725,7 @@ void GeometryWindowClass::on_actionLarge_cross_toggled(bool arg1)
 void GeometryWindowClass::on_actionSize_1_triggered()
 {
   GeoMarkerSize++;
-  MW->ShowGeometry();
+  ShowGeometry();
 
   ui->actionSize_2->setEnabled(true);
 }
@@ -678,7 +737,7 @@ void GeometryWindowClass::on_actionSize_2_triggered()
   if (GeoMarkerSize==0) ui->actionSize_2->setEnabled(false);
   else ui->actionSize_2->setEnabled(true);
 
-  MW->ShowGeometry();
+  ShowGeometry();
 }
 
 void GeometryWindowClass::Zoom(bool update)

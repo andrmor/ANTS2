@@ -392,62 +392,6 @@ bool MainWindow::event(QEvent *event)
    return QMainWindow::event(event);
 }
 
-void MainWindow::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
-// default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
-{
-    //qDebug()<<"  ----Showing geometry----"<<GeometryDrawDisabled;
-    if (GeometryDrawDisabled) return;
-
-    //setting this window as active pad in root
-    //with or without activation (focussing) of this window
-    if (ActivateWindow) GeometryWindow->ShowAndFocus(); //window is activated (focused)
-    else GeometryWindow->SetAsActiveRootWindow(); //no activation in this mode
-
-    Detector->GeoManager->SetNsegments(GlobSet->NumSegments);
-
-    //coloring volumes
-    if (ColorUpdateAllowed)
-      {
-        if (ColorByMaterial) Detector->colorVolumes(1);
-        else Detector->colorVolumes(0);
-      }
-    //top volume visibility
-    if (ShowTop) Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
-    else Detector->GeoManager->SetTopVisible(false);
-
-    //transparency setup    
-    int totNodes = Detector->top->GetNdaughters();
-    for (int i=0; i<totNodes; i++)
-      {
-        TGeoNode* thisNode = (TGeoNode*)Detector->top->GetNodes()->At(i);
-        thisNode->GetVolume()->SetTransparency(0);
-      }
-
-    //making contaners visible
-    Detector->top->SetVisContainers(true);
-
-    //DRAW
-    GeometryWindow->fNeedZoom = true;
-    GeometryWindow->setHideUpdate(true);
-    GeometryWindow->ClearRootCanvas();
-    if (SAME)
-      {
- //       qDebug()<<"keeping";
-        Detector->top->Draw("SAME");
-      }
-    else
-      {
- //       qDebug()<<"new";
-        //GeometryWindow->ResetView();
-        Detector->top->Draw("");
-      }    
-    GeometryWindow->PostDraw();
-
-    //drawing dots
-    MainWindow::ShowGeoMarkers();
-    GeometryWindow->UpdateRootCanvas();
-}
-
 void MainWindow::clearGeoMarkers(int All_Rec_True)
 {    
   for (int i=GeoMarkers.size()-1; i>-1; i--)
@@ -2701,7 +2645,7 @@ void MainWindow::clearPreprocessingData()
 void MainWindow::on_pbDeleteLoadedEvents_clicked()
 {
   MainWindow::DeleteLoadedEvents(false);
-  if (GeometryWindow->isVisible()) MainWindow::ShowGeometry(false);
+  if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
 }
 
 void MainWindow::DeleteLoadedEvents(bool KeepFileList)
@@ -4064,7 +4008,7 @@ void MainWindow::simulationFinished()
         QString report = SimulationManager->Runner->getErrorMessages();
         if (report != "Simulation stopped by user") message(report, this);
         //ClearData();
-        if (GeometryWindow->isVisible()) MainWindow::ShowGeometry(false);
+        if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
     }
 
     bool showTracks = false;
@@ -4129,7 +4073,7 @@ void MainWindow::simulationFinished()
     //Additional GUI updates
     if (GeometryWindow->isVisible())
       {
-        MainWindow::ShowGeometry(false);
+        GeometryWindow->ShowGeometry(false);
         if (showTracks) MainWindow::ShowTracks();
       }
       //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
@@ -4226,7 +4170,7 @@ void MainWindow::on_pbTrackStack_clicked()
         //if tracks are visible, show them
         if (GeometryWindow->isVisible())
         {
-            ShowGeometry();
+            GeometryWindow->ShowGeometry();
             if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
         }
         //report data saved in history
@@ -4263,7 +4207,7 @@ void MainWindow::on_pbGenerateLight_clicked()
 
         if (GeometryWindow->isVisible())
         {
-            ShowGeometry();
+            GeometryWindow->ShowGeometry();
             if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
         }
         pss->appendToDataHub(EventsDataHub);
@@ -4382,7 +4326,7 @@ void MainWindow::on_pbShowNodes_clicked()
    for (int i=0; i<CustomScanNodes.size(); i++)
      marks->SetNextPoint(CustomScanNodes[i]->x(), CustomScanNodes[i]->y(), CustomScanNodes[i]->z());
    GeoMarkers.append(marks);
-   ShowGeometry();
+   GeometryWindow->ShowGeometry();
 }
 
 void MainWindow::on_pbRunNodeScript_clicked()
@@ -5076,7 +5020,7 @@ void MainWindow::on_bpResults_clicked()
 
 void MainWindow::ShowGeometrySlot()
 {
-    ShowGeometry(false, false);
+    GeometryWindow->ShowGeometry(false, false);
 }
 
 void MainWindow::on_bpResults_2_clicked()

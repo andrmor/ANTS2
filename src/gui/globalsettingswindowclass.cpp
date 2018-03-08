@@ -6,6 +6,7 @@
 #include "detectorclass.h"
 #include "amessage.h"
 #include "anetworkmodule.h"
+#include "geometrywindowclass.h"
 
 //Qt
 #include <QFileDialog>
@@ -317,7 +318,7 @@ void GlobalSettingsWindowClass::on_sbNumSegments_editingFinished()
 {
     GlobSet->NumSegments = ui->sbNumSegments->value();
     MW->Detector->GeoManager->SetNsegments(GlobSet->NumSegments);
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
 }
 
 void GlobalSettingsWindowClass::on_sbMaxNumTracks_editingFinished()

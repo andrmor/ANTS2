@@ -19,6 +19,7 @@
 #include "aelementandisotopedelegates.h"
 #include "aneutronreactionsconfigurator.h"
 #include "aneutroninfodialog.h"
+#include "geometrywindowclass.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -1462,11 +1463,11 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
   if (flagFound)
     {
       Detector->colorVolumes(2, index);
-      MW->ShowGeometry(true, true, false);
+      MW->GeometryWindow->ShowGeometry(true, true, false);
     }
   else
     {
-      MW->ShowGeometry(false);
+      MW->GeometryWindow->ShowGeometry(false);
       message("Current detector configuration does not have objects referring to material "+name, this);
     }
 

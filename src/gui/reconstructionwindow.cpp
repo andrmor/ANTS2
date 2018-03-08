@@ -271,7 +271,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
             marks->SetNextPoint(result->Points[i].r[0], result->Points[i].r[1], result->Points[i].r[2]);         
           MW->GeoMarkers.append(marks);
         }
-      MW->ShowGeometry(false);  //to clear view
+      MW->GeometryWindow->ShowGeometry(false);  //to clear view
       MW->ShowTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
     }
 }
@@ -323,7 +323,7 @@ void ReconstructionWindow::VisualizeScan(int iev)
 void ReconstructionWindow::on_pbClearPositions_clicked()
 {
     MW->clearGeoMarkers();
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
 }
 
 void ReconstructionWindow::on_pbShowReconstructionPositions_clicked()
@@ -432,7 +432,7 @@ void ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
     MW->ShowTracks();
 }
 
@@ -1940,7 +1940,7 @@ void ReconstructionWindow::MakeActivePassive(QString input, QString mode)
 void ReconstructionWindow::on_pbShowPassivePMs_clicked()
 {
     MW->Detector->GeoManager->ClearTracks();
-    MW->ShowGeometry();
+    MW->GeometryWindow->ShowGeometry();
 
     //cycle by PMs and if passive, add tracks for indication
     for (int ipm=0; ipm<MW->PMs->count(); ipm++)

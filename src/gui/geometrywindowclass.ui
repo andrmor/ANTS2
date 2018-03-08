@@ -35,7 +35,7 @@
        <x>1</x>
        <y>6</y>
        <width>104</width>
-       <height>501</height>
+       <height>551</height>
       </rect>
      </property>
      <property name="currentIndex">
@@ -512,6 +512,57 @@
         <string>Show axes</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="cbLimitVisibility">
+       <property name="geometry">
+        <rect>
+         <x>6</x>
+         <y>479</y>
+         <width>93</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Set how many levels down the geometry hierarchy is shown. See Cern Root documentation for TGeoManager::SetVisLevel</string>
+       </property>
+       <property name="text">
+        <string>Limit visibility</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>501</y>
+         <width>47</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>to level:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QSpinBox" name="sbLimitVisibility">
+       <property name="geometry">
+        <rect>
+         <x>58</x>
+         <y>497</y>
+         <width>42</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>3</number>
+       </property>
+      </widget>
       <zorder>frame_4</zorder>
       <zorder>frame</zorder>
       <zorder>frame_3</zorder>
@@ -530,6 +581,9 @@
       <zorder>line_9</zorder>
       <zorder>line_10</zorder>
       <zorder>cbShowAxes</zorder>
+      <zorder>cbLimitVisibility</zorder>
+      <zorder>label</zorder>
+      <zorder>sbLimitVisibility</zorder>
      </widget>
      <widget class="QWidget" name="page_2">
       <widget class="QPushButton" name="pbShowBar">
@@ -667,5 +721,54 @@
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cbLimitVisibility</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbLimitVisibility</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>517</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>67</x>
+     <y>529</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbLimitVisibility</sender>
+   <signal>clicked()</signal>
+   <receiver>pbShowGeometry</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>509</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>83</x>
+     <y>69</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbLimitVisibility</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbShowGeometry</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>539</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>93</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

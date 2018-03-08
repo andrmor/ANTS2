@@ -8,38 +8,35 @@ if (events.countEvents() == 0) core.abort("There are no events to reconstruct")
 if (pms.CountPM() != 64) core.abort("Load configuration with 64 SiPMs")
 
 //inits of variales used by minimization
+//access of variables outside the function bodies have non-negligible overheads, so try to avoid them if possible
 var lastMiniValue = 1e10
-var PMpositions = pms.GetPMpositions()
 var bActivePMs = []
 for (var i=0; i<64; i++) bActivePMs.push(true)
+var Signals
 
 //function which will be minimized for every event
 function Functor()
 {
-       var iEvent  = math.round( arguments[0] ) //has to be converted to int!
-       var x           = arguments[1]
-       var y           = arguments[2]
-       var z           = arguments[3]
-       var energy = arguments[4]
+       var x           = arguments[0]
+       var y           = arguments[1]
+       var energy = arguments[2]
        
-       var Signals = events.GetPMsignals(iEvent)
-       var LRFs = lrf.GetAllLRFs(x, y, z)
+       var LRFs = lrf.GetAllLRFs(x, y, 0)
       
        var MiniSum = 0
        for (var iPM=0; iPM<64; iPM++)
               if ( bActivePMs[iPM] )
               {
                      var LRF = LRFs[iPM] * energy
-                     if (LRF <= 0) //LRF is not defined in this position
-                            return lastMiniValue + Math.abs(lastMiniValue)*0.25 
+                     if (LRF <= 0) return lastMiniValue + Math.abs(lastMiniValue)*0.25 //LRF is not defined for this position
                      
                      MiniSum -= ( Signals[iPM] * Math.log(LRF) - LRF )
              }
              
       //enable to see detailed printout (very slow and spammy!)
-      /*
-      msg.Append("Ev#" + iEvent + " x: " + x + " y:" + y + " E:" + energy + " -> " + MiniSum)
-      */       
+      /* 
+      msg.Append("x: " + x + " y:" + y + " E:" + energy + " -> " + MiniSum)
+      */
       
       lastMiniValue = MiniSum
       return MiniSum
@@ -51,6 +48,8 @@ function reconstruct(from, to)
        mini.SetHighPrecision(false)
        mini.SetFunctorName("Functor")
        
+        var PMpositions = pms.GetPMpositions()
+       
        //enable to see detailed printout (very slow and spammy!) 
        /*
        msg.Show()
@@ -60,8 +59,13 @@ function reconstruct(from, to)
        
        for (var iEvent = from; iEvent<to; iEvent++)
        {
+              //enable to see detailed printout (very slow and spammy!) 
+              /*
+              msg.Append("Event #" + iEvent)
+              */
+              
                //CoG
-              var Signals = events.GetPMsignals(iEvent)
+              Signals = events.GetPMsignals(iEvent)
               var SumX = 0
               var SumY = 0
               var SumSig = 0
@@ -102,10 +106,8 @@ function reconstruct(from, to)
               lastMiniValue = 1e10
               mini.Clear()
               
-              mini.AddFixedVariable("iEvent", iEvent)
               mini.AddVariable("x", X0, 1)//, -15, 15)
               mini.AddVariable("y", Y0, 1)//, -15, 15)
-              mini.AddFixedVariable("z", 0)
               mini.AddLowerLimitedVariable("energy", 1, 0.1, 0)
        
               var success = mini.Run()
@@ -118,18 +120,18 @@ function reconstruct(from, to)
                      
                      //calculating chi2
                      var Sum = 0
-                     var LRFs = lrf.GetAllLRFs(res[1], res[2], res[3])
+                     var LRFs = lrf.GetAllLRFs(res[0], res[1], 0)
                      for (var iPM=0; iPM<64; iPM++)
                             if ( bActivePMs[iPM] )
                             {
-                                   var LRF = LRFs[iPM] * res[4]
+                                   var LRF = LRFs[iPM] * res[2]
                                    if (LRF <= 0) continue  // *** report error?
                                    var delta = LRF - Signals[iPM]
                                    var sigma2 = LRF // + err*err -> err e.g. lrf.GetLRFerror(iPM, x, y, z)
                                    Sum += delta*delta/sigma2
                            }
                      var chi2 = Sum / DegFreedom
-                     events.SetReconstructed(iEvent, res[1], res[2], res[3], res[4], chi2)
+                     events.SetReconstructed(iEvent, res[0], res[1], 0, res[2], chi2)
               } 
               else events.SetReconstructionOK(iEvent, false)
        }       
@@ -137,18 +139,16 @@ function reconstruct(from, to)
 
 var numEvents = events.GetNumEvents()
 
-/*
-//reconstruct as in GUI
+//reconstruct in c++ module
 var t = core.elapsedTimeInMilliseconds()
 rec.ReconstructEvents(7, false)
-core.print("From GUI (c++): " + (core.elapsedTimeInMilliseconds()-t) + " ms")
-*/
+core.print("<br>c++ module (as in GUI): " + (core.elapsedTimeInMilliseconds()-t) + " ms")
 
 /*
 //reconstruct without threads
 var t = core.elapsedTimeInMilliseconds()
 reconstruct(0, numEvents) 
-core.print("No threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
+core.print("<br>No threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
 */
 
 var numThreads = 7
@@ -166,7 +166,7 @@ while (from < numEvents)
        from = to
 }
 threads.waitForAll()
-core.print("\nUsing " + numThreads + " threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
+core.print("<br>Using " + numThreads + " threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
 threads.deleteAll()
 
 events.SetReconstructionReady()

@@ -333,7 +333,7 @@ public:
 
 QScriptValue ScriptCopier::copy(const QScriptValue& obj)
 {
-    qDebug() << "=====Copy started====="<<obj.isArray();
+    //  qDebug() << "=====Copy started====="<<obj.isArray();
     QScriptEngine& engine = m_toEngine;
 
     if (obj.isUndefined()) return QScriptValue(QScriptValue::UndefinedValue);
@@ -351,34 +351,34 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
         if (var.type() ==  QMetaType::Int)
           {
             int integerVal = var.toInt();
-            qDebug() << "     Integer:"<<integerVal;
+            //  qDebug() << "     Integer:"<<integerVal;
             return QScriptValue(integerVal);
           }
         else
           {
             double doubleVal = var.toDouble();
-            qDebug() << "     Double:"<<doubleVal;
+            //  qDebug() << "     Double:"<<doubleVal;
             return QScriptValue(doubleVal);
           }
     }
     if (obj.isString())
     {
-        qDebug() << "     String:"<< obj.toString();
+        //  qDebug() << "     String:"<< obj.toString();
         return QScriptValue(obj.toString());
     }
     if (obj.isBool())
       {
-        qDebug() << "     Bool:" << obj.toBool();
+        //  qDebug() << "     Bool:" << obj.toBool();
         return QScriptValue(obj.toBool());
       }
     if (obj.isBoolean())
       {
-        qDebug() << "     Boolean:" << obj.toBoolean();
+        //  qDebug() << "     Boolean:" << obj.toBoolean();
         return QScriptValue(obj.toBoolean());
       }
     if (obj.isVariant())
     {
-        qDebug() << "    !!!Variant - potentially slow!!! :" << obj.toVariant();
+        //  qDebug() << "    !!!Variant - potentially slow!!! :" << obj.toVariant();
         return engine.newVariant(obj.toVariant());
     }
 
@@ -388,27 +388,27 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     {
         if (copiedObjs.contains(obj.objectId()))
         {
-            qDebug() << "--------------Already have this obj!";
+            //  qDebug() << "--------------Already have this obj!";
             return copiedObjs.value(obj.objectId());
         }        
         copiedObjs.insert(obj.objectId(), copy);
-        qDebug() << "     -->Added object to list of already defined objects";
+        //  qDebug() << "     -->Added object to list of already defined objects";
     }
 
     if (obj.isQObject())
     {
-        qDebug() << "     QObject";
+        //  qDebug() << "     QObject";
         copy = engine.newQObject(copy, obj.toQObject());
         copy.setPrototype(this->copy(obj.prototype()));
     }
     else if (obj.isQMetaObject())
     {
-        qDebug() << "     QMetaObject";
+        //  qDebug() << "     QMetaObject";
         copy = engine.newQMetaObject(obj.toQMetaObject());
     }
     else if (obj.isFunction())
     {
-        qDebug() << "     Function";
+        //  qDebug() << "     Function";
         // Calling .toString() on a pure JS function returns
         // the function's source code.
         // On a native function however toString() returns
@@ -434,7 +434,7 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     }
     else if (obj.isArray())
     {
-        qDebug() << "      Array";
+        //  qDebug() << "      Array";
         copy = engine.newArray();
 //        QScriptValueIterator itt(copy);
 //        while ( itt.hasNext() )
@@ -450,23 +450,23 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
         {
             it.next();
             const QString& name = it.name();
-            qDebug() << "     -----Sub property:"<<name;
+            //  qDebug() << "     -----Sub property:"<<name;
             if (copy.property(it.name()).isValid())
             {
-                qDebug() << "     -----Already have this sub-member";  //"length" is otherwise added
+                //  qDebug() << "     -----Already have this sub-member";  //"length" is otherwise added
                 continue;
             }
             else
             {
                 const QScriptValue& property = it.value();
-                qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
+                //  qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
                 copy.setProperty(name, this->copy(property));
             }
         }
     }
     else if (obj.isObject())
     {
-        qDebug() << "      Object"<<obj.toString();
+        //  qDebug() << "      Object"<<obj.toString();
         if (obj.scriptClass())
             copy = engine.newObject(obj.scriptClass(), this->copy(obj.data()));
         else
@@ -479,18 +479,18 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
             it.next();
 
             const QString& name = it.name();
-            qDebug() << "     -----Sub property:"<<name;
+            //  qDebug() << "     -----Sub property:"<<name;
 
             if (copy.property(it.name()).isValid())
             {
                 //do not want to intrude to array standard infrastructure
-                qDebug() << "     -----Already have this sub-member";
+                //  qDebug() << "     -----Already have this sub-member";
                 continue;
             }
             else
             {
                 const QScriptValue& property = it.value();
-                qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
+                //  qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
 
                 copy.setProperty(name, this->copy(property));
             }
@@ -578,7 +578,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
     while (it.hasNext())
     {
         it.next();
-        qDebug() << "==> Found property " << it.name() << it.value().toString();
+        //  qDebug() << "==> Found property " << it.name() << it.value().toString();
 
         if (!sm->engine->globalObject().property(it.name()).isValid()) // if resource with this name does not exist...
         {
@@ -587,16 +587,16 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
             {
                 const QScriptValue sv = SC.copy(it.value());
                 sm->engine->globalObject().setProperty(it.name(), sv);
-                  qDebug() << "    Registered:"<<it.name() << "-:->" << sm->engine->globalObject().property(it.name()).toVariant();
+                //  qDebug() << "    Registered:"<<it.name() << "-:->" << sm->engine->globalObject().property(it.name()).toVariant();
             }
             else
             {
-                qDebug() << "    Skipped: new property, but it is a QObject";// << it.name();
+                //  qDebug() << "    Skipped: new property, but it is a QObject";// << it.name();
             }
         }
         else
           {
-            qDebug() << "    Skipped: already have this property!";
+            //  qDebug() << "    Skipped: already have this property!";
           }
     }
 

@@ -1,27 +1,30 @@
 
-var TextBase = "I am thread #"
+var TextBase = "I am "
 
-function report(tn)
+function report( text1, text2 )
 {
        msg.Show()
-       for (var i=0; i<5; i++)
+       for (var i=0; i<4; i++)
        {
-              var text = TextBase + tn + "  step: "+i
-              core.print(text)
-              msg.Append(text)
+              var t = TextBase + text1 + "  step: " + i
+              core.print(t)
+              msg.Append(t)
               core.sleep(500)
-       }
-       
-       return "Finished #" + tn
+       }       
+       return text1 + " "+ text2
 }
 
-threads.evaluateFunction("report", threads.countAll())
-threads.evaluateFunction("report", [threads.countAll()])
-threads.evaluateFunction("report", [threads.countAll()])
-
+var runInNumThreads = 3
+for (var i=0; i<runInNumThreads; i++)
+{
+       var t1 = "thread #" + threads.countAll()
+       var t2 = "has finished"
+       threads.evaluateFunction(report, [t1, t2])
+}
 threads.waitForAll()
 
+core.print("<br>Results repoorted by threads:")
 for (var i=0; i<threads.countAll(); i++)
-       core.print("Thread #" + i + " reported result: " + threads.getResult(i))
+       core.print( threads.getResult(i) )
 
 threads.deleteAll()

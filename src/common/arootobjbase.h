@@ -2,6 +2,7 @@
 #define AROOTOBJBASE_H
 
 #include <QString>
+#include <QMutex>
 
 class TObject;
 

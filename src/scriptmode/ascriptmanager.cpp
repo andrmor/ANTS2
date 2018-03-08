@@ -333,6 +333,7 @@ public:
 
 QScriptValue ScriptCopier::copy(const QScriptValue& obj)
 {
+    qDebug() << "=====Copy started====="<<obj.isArray();
     QScriptEngine& engine = m_toEngine;
 
     if (obj.isUndefined()) return QScriptValue(QScriptValue::UndefinedValue);
@@ -387,23 +388,27 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     {
         if (copiedObjs.contains(obj.objectId()))
         {
-            //qDebug() << "--------------Already have this obj!";
+            qDebug() << "--------------Already have this obj!";
             return copiedObjs.value(obj.objectId());
-        }
+        }        
         copiedObjs.insert(obj.objectId(), copy);
+        qDebug() << "     -->Added object to list of already defined objects";
     }
 
     if (obj.isQObject())
     {
+        qDebug() << "     QObject";
         copy = engine.newQObject(copy, obj.toQObject());
         copy.setPrototype(this->copy(obj.prototype()));
     }
     else if (obj.isQMetaObject())
     {
+        qDebug() << "     QMetaObject";
         copy = engine.newQMetaObject(obj.toQMetaObject());
     }
     else if (obj.isFunction())
     {
+        qDebug() << "     Function";
         // Calling .toString() on a pure JS function returns
         // the function's source code.
         // On a native function however toString() returns
@@ -426,26 +431,47 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
             // Do error handling…
             qDebug() << "-----------------problem---------------";
         }
-
     }
-    else if (obj.isObject() || obj.isArray())
+    else if (obj.isArray())
     {
-        if (obj.isObject())
+        qDebug() << "      Array";
+        copy = engine.newArray();
+//        QScriptValueIterator itt(copy);
+//        while ( itt.hasNext() )
+//        {
+//            itt.next();
+//            qDebug() << "     >>> Array already contain sub property:"<<itt.name();
+//        }
+
+        //copy.setPrototype(this->copy(obj.prototype())); // no - copies all infrastructure!
+
+        QScriptValueIterator it(obj);
+        while ( it.hasNext() )
         {
-            if (obj.scriptClass())
+            it.next();
+            const QString& name = it.name();
+            qDebug() << "     -----Sub property:"<<name;
+            if (copy.property(it.name()).isValid())
             {
-                copy = engine.newObject(obj.scriptClass(), this->copy(obj.data()));
+                qDebug() << "     -----Already have this sub-member";  //"length" is otherwise added
+                continue;
             }
             else
             {
-                copy = engine.newObject();
+                const QScriptValue& property = it.value();
+                qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
+                copy.setProperty(name, this->copy(property));
             }
         }
+    }
+    else if (obj.isObject())
+    {
+        qDebug() << "      Object"<<obj.toString();
+        if (obj.scriptClass())
+            copy = engine.newObject(obj.scriptClass(), this->copy(obj.data()));
         else
-        {
-            copy = engine.newArray();
-        }
-        copy.setPrototype(this->copy(obj.prototype()));
+            copy = engine.newObject();
+        //copy.setPrototype(this->copy(obj.prototype()));
 
         QScriptValueIterator it(obj);
         while ( it.hasNext())
@@ -453,10 +479,21 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
             it.next();
 
             const QString& name = it.name();
-            const QScriptValue& property = it.value();
-            qDebug() << "-----Array memeber"<<it.name()<<it.value().toString();
+            qDebug() << "     -----Sub property:"<<name;
 
-            copy.setProperty(name, this->copy(property));
+            if (copy.property(it.name()).isValid())
+            {
+                //do not want to intrude to array standard infrastructure
+                qDebug() << "     -----Already have this sub-member";
+                continue;
+            }
+            else
+            {
+                const QScriptValue& property = it.value();
+                qDebug() << "     -----New sub-memeber"<<it.name()<<it.value().toString();
+
+                copy.setProperty(name, this->copy(property));
+            }
         }
     }
     else
@@ -541,7 +578,7 @@ AScriptManager *AScriptManager::createNewScriptManager(int threadNumber)
     while (it.hasNext())
     {
         it.next();
-        qDebug() << "==> Found property " << it.name();// << it.value().toString();
+        qDebug() << "==> Found property " << it.name() << it.value().toString();
 
         if (!sm->engine->globalObject().property(it.name()).isValid()) // if resource with this name does not exist...
         {

@@ -18,6 +18,7 @@
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
 #include "amonitor.h"
+#include "arootobjbase.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -253,9 +254,9 @@ void AInterfaceToConfig::find(const QJsonObject &obj, QStringList Keys, QStringL
 
 bool AInterfaceToConfig::Replace(QString Key, QVariant val)
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
-      abort("Script in threads: cannot modify detector configuration!");
+      abort("Only GUI thread can modify detector configuration!");
       return false;
     }
 
@@ -426,9 +427,9 @@ QString AInterfaceToConfig::GetLastError()
 
 void AInterfaceToConfig::RebuildDetector()
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
-      abort("Script in threads: cannot modify detector configuration!");
+      abort("Only GUI thread can modify detector configuration!");
       return;
     }
 
@@ -471,15 +472,17 @@ bool AInterfaceToConfig::expandKey(QString &Key)
 
 void AInterfaceToConfig::UpdateGui()
 {
-    if (bClonedCopy) return;
+    if (!bGuiThread) return;
 
     Config->AskForAllGuiUpdate();
 }
 
-AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config)
+AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config) :
+    Config(config)
 {
-  Config = config;
   emit requestReadRasterGeometry();
+
+  Description = "Read/change/save/load configuration of the detector/simulator/reconstructor\nToggle Config button to access configuration tree";
 
   H["RebuildDetector"]  = "Force to rebuild detector using the current configuration file.\nNot anymore required after calling config.Replace - it is called automatically if Detector settings were modified.";
   H["Load"]  = "Load ANTS2 configuration file (.json).";
@@ -490,14 +493,11 @@ AInterfaceToConfig::AInterfaceToConfig(AConfiguration *config)
 }
 
 AInterfaceToConfig::AInterfaceToConfig(const AInterfaceToConfig& other)
-  : AScriptInterface(other)
-{
-    bClonedCopy = true;
-}
+  : AScriptInterface(other) {}
 
 bool AInterfaceToConfig::Load(QString FileName)
 {
-  if (bClonedCopy)
+  if (!bGuiThread)
     {
       abort("Script in threads: cannot modify detector configuration!");
       return false;
@@ -521,6 +521,8 @@ bool AInterfaceToConfig::Save(QString FileName)
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
   : SimulationManager(SimulationManager), EventsDataHub(EventsDataHub), Config(Config), RecNumThreads(RecNumThreads), fGuiPresent(fGuiPresent)
 {
+  Description = "Access to simulator";
+
   H["RunPhotonSources"] = "Perform simulation with photon sorces.\nPhoton tracks are not shown!";
   H["RunParticleSources"] = "Perform simulation with particle sorces.\nPhoton tracks are not shown!";
   H["SetSeed"] = "Set random generator seed";
@@ -739,6 +741,8 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
 AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub)
 {
+  Description = "Access to PM signals and reconstruction data";
+
   H["GetNumPMs"] = "Number of sensors in the available events dataset. If the dataset is empty, 0 is returned.";
   H["GetNumEvents"] = "Number of available events.";
   H["GetPMsignal"] = "Get signal for the event number ievent and PM number ipm.";
@@ -1337,18 +1341,36 @@ void AInterfaceToData::SetReconstructionOK(int igroup, int ievent, int ipoint, b
 
 void AInterfaceToData::SetReconstructionReady()
 {
+  if (!bGuiThread)
+  {
+      abort("Only GUI thread can do SetReconstructionReady()");
+      return;
+  }
+
   EventsDataHub->fReconstructionDataReady = true;
   emit RequestEventsGuiUpdate();
 }
 
 void AInterfaceToData::ResetReconstructionData(int numGroups)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do ResetReconstructionData()");
+        return;
+    }
+
     for (int ig=0; ig<numGroups; ig++)
       EventsDataHub->resetReconstructionData(numGroups);
 }
 
 void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumEvents)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do LoadEventsTree()");
+        return;
+    }
+
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
   //EventsDataHub->clearReconstruction();
@@ -1360,6 +1382,12 @@ void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumE
 
 void AInterfaceToData::LoadEventsAscii(QString fileName, bool Append)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do LoadEventsAscii()");
+        return;
+    }
+
   if (!Append) EventsDataHub->clear();
   EventsDataHub->loadEventsFromTxtFile(fileName, Config->JSON, Config->GetDetector()->PMs);
   //EventsDataHub->clearReconstruction();
@@ -1371,21 +1399,43 @@ void AInterfaceToData::LoadEventsAscii(QString fileName, bool Append)
 
 void AInterfaceToData::ClearEvents()
 {
-  EventsDataHub->clear(); //gui update is triggered inside
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can clear events!");
+        return;
+    }
+
+    EventsDataHub->clear(); //gui update is triggered inside
 }
 
 void AInterfaceToData::PurgeBad()
 {
-  EventsDataHub->PurgeFilteredEvents();
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can purge events!");
+        return;
+    }
+    EventsDataHub->PurgeFilteredEvents();
 }
 
 void AInterfaceToData::Purge(int LeaveOnePer)
 {
-  EventsDataHub->Purge(LeaveOnePer);
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can purge events!");
+        return;
+    }
+    EventsDataHub->Purge(LeaveOnePer);
 }
 
 QVariant AInterfaceToData::GetStatistics(int igroup)
 {
+    if (!bGuiThread)
+    {
+        abort("Only GUI thread can do GetStatistics()");
+        return 0;
+    }
+
   int GoodEvents;
   double AvChi2, AvDeviation;
   EventsDataHub->prepareStatisticsForEvents(Config->GetDetector()->LRFs->isAllLRFsDefined(), GoodEvents, AvChi2, AvDeviation, igroup);
@@ -1400,6 +1450,8 @@ AInterfaceToLRF::AInterfaceToLRF(AConfiguration *Config, EventsDataClass *Events
   : Config(Config), EventsDataHub(EventsDataHub) //,f2d(0)
 {
   SensLRF = Config->GetDetector()->LRFs->getOldModule();
+
+  Description = "Access to LRFs (B-spline module)";
 
   H["Make"] = "Calculates new LRFs";
 
@@ -1578,6 +1630,8 @@ bool AInterfaceToLRF::getValidIteration(int &iterIndex)
 InterfaceToGeoWin::InterfaceToGeoWin(MainWindow *MW, TmpObjHubClass* TmpHub)
  : MW(MW), TmpHub(TmpHub)
 {
+  Description = "Access to the Geometry window of GUI";
+
   Detector = MW->Detector;
   H["SaveImage"] = "Save image currently shown on the geometry window to an image file.\nTip: use .png extension";
 }
@@ -1837,7 +1891,10 @@ void InterfaceToGeoWin::ShowEnergyVector()
 
 
 InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager, AConfiguration *Config, EventsDataClass *EventsDataHub, int RecNumThreads)
- : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads) { }
+ : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads)
+{
+    Description = "Event reconstructor";
+}
 
 void InterfaceToReconstructor::ForceStop()
 {
@@ -2010,6 +2067,8 @@ void InterfaceToReconstructor::SetManifestItemLineProperties(int i, int color, i
 InterfaceToGraphWin::InterfaceToGraphWin(MainWindow *MW)
   : MW(MW)
 {
+  Description = "Access to the Graph window of GUI";
+
   H["SaveImage"] = "Save image currently shown on the graph window to an image file.\nTip: use .png extension";
   H["GetAxis"] = "Returns an object with the values presented to user in 'Range' boxes.\n"
                  "They can be accessed with min/max X/Y/Z (e.g. grwin.GetAxis().maxY).\n"
@@ -2121,6 +2180,8 @@ QVariant InterfaceToGraphWin::GetAxis()
 
 AInterfaceToPMs::AInterfaceToPMs(AConfiguration *Config) : Config(Config)
 {
+    Description = "Access to PM positions / add PMs or remove all PMs from the configuration";
+
     PMs = Config->GetDetector()->PMs;
 
     H["SetPMQE"] = "Sets the QE of PM. Forces a call to UpdateAllConfig().";
@@ -2306,9 +2367,10 @@ void AInterfaceToPMs::SetAllArraysFullyCustom()
 }
 
 #ifdef GUI
-AInterfaceToOutputWin::AInterfaceToOutputWin(MainWindow *MW)
+AInterfaceToOutputWin::AInterfaceToOutputWin(MainWindow *MW) :
+    MW(MW)
 {
-    this->MW = MW;
+    Description = "Access to the Output window of GUI";
 }
 
 void AInterfaceToOutputWin::ShowOutputWindow(bool flag, int tab)
@@ -2338,7 +2400,10 @@ void AInterfaceToOutputWin::Hide()
 // ------------- New LRF module interface ------------
 
 ALrfScriptInterface::ALrfScriptInterface(DetectorClass *Detector, EventsDataClass *EventsDataHub) :
-  Detector(Detector), EventsDataHub(EventsDataHub), repo(Detector->LRFs->getNewModule()) {}
+  Detector(Detector), EventsDataHub(EventsDataHub), repo(Detector->LRFs->getNewModule())
+{
+    Description = "Access to new LRF module";
+}
 
 QString ALrfScriptInterface::Make(QString name, QVariantList instructions, bool use_scan_data, bool fit_error, bool scale_by_energy)
 {
@@ -2532,15 +2597,18 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
   else return QList<int>();
 }
 
-
 // ------------- End of New LRF module interface ------------
 
-AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) : TmpHub(TmpHub)
-{}
-
-void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString TreeNameInFile)
+AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) :
+    TmpHub(TmpHub)
 {
-    if (TmpHub->Trees.findIndexOf(TreeName) !=-1)
+    Description = "Reader for CERN ROOT Trees";
+}
+
+void AInterfaceToTree::OpenTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
+{
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (r)
     {
         abort("Tree with name " + TreeName + " already exists!");
         return;
@@ -2561,24 +2629,19 @@ void AInterfaceToTree::OpenTree(QString TreeName, QString FileName, QString Tree
     }
     t->Print();
 
-    TmpHub->Trees.addTree(TreeName, t);
-    return;
+    r = new ARootObjBase(t, TreeName, "TTree");
+    TmpHub->Trees.append(TreeName, r);
 }
 
-QString AInterfaceToTree::PrintBranches(QString TreeName)
+QString AInterfaceToTree::PrintBranches(const QString& TreeName)
 {
-    int index = TmpHub->Trees.findIndexOf(TreeName);
-    if (index == -1)
-    {
-        abort("Tree with name " + TreeName + " does not exist!");
-        return "";
-    }
-    TTree *t = TmpHub->Trees.getTree(TreeName);
-    if (!t)
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (!r)
     {
         abort("Tree " + TreeName + " not found!");
         return "";
     }
+    TTree *t = static_cast<TTree*>(r->GetObject());
 
     QString s = "Thee ";
     s += TreeName;
@@ -2609,21 +2672,15 @@ QString AInterfaceToTree::PrintBranches(QString TreeName)
     return s;
 }
 
-QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
+QVariant AInterfaceToTree::GetBranch(const QString& TreeName, const QString& BranchName)
 {
-    int index = TmpHub->Trees.findIndexOf(TreeName);
-    if (index == -1)
-    {
-        abort("Tree with name " + TreeName + " does not exist!");
-        return QVariant();
-    }
-
-    TTree *t = TmpHub->Trees.getTree(TreeName);
-    if (!t)
+    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    if (!r)
     {
         abort("Tree " + TreeName + " not found!");
-        return QVariant();
+        return "";
     }
+    TTree *t = static_cast<TTree*>(r->GetObject());
 
     TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
     if (!branch)
@@ -2829,10 +2886,12 @@ QVariant AInterfaceToTree::GetBranch(QString TreeName, QString BranchName)
     return varList;
 }
 
-void AInterfaceToTree::CloseTree(QString TreeName)
+bool AInterfaceToTree::CloseTree(const QString& TreeName)
 {
-   int index = TmpHub->Trees.findIndexOf(TreeName);
-   if (index == -1) return;
+    return TmpHub->Trees.remove(TreeName);
+}
 
-   TmpHub->Trees.remove(TreeName);
+void AInterfaceToTree::CloseAllTrees()
+{
+    TmpHub->Trees.clear();
 }

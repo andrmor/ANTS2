@@ -63,8 +63,6 @@ private:
   QWidget* Parent;
   AScriptMessengerDialog* DialogWidget;
 
-  bool bGUIthread = true;
-
   void connectSignalSlots();
 
 };

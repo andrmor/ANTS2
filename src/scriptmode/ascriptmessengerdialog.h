@@ -34,6 +34,9 @@ public slots:
     void Resize(double w, double h);
     void SetFontSize(int size);
 
+private slots:
+    void onRejected();  //user closed dialog window
+
 private:
     QWidget* Parent;
 

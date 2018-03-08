@@ -11,7 +11,7 @@ class AScriptInterface : public QObject
 
 public:
   AScriptInterface() {}
-  AScriptInterface(const AScriptInterface& other) : H(other.H), Description(other.Description) {}
+  AScriptInterface(const AScriptInterface& other) : H(other.H), Description(other.Description), bGuiThread(false) {}
 
   virtual bool InitOnRun() {return true;}   // automatically called before script evaluation
   virtual void ForceStop() {}               // called when abort was triggered - used to e.g. abort simulation or reconstruction
@@ -34,8 +34,9 @@ signals:
   void AbortScriptEvaluation(QString);      //abort request is automatically linked to abort slot of core unit
 
 protected:
-  QHash<QString, QString> H;
+  QHash<const QString, QString> H;
   QString Description;
+  bool bGuiThread = true;
 
   void abort(QString message = "Aborted!") {emit AbortScriptEvaluation(message);}
 };

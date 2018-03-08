@@ -43,6 +43,8 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 
     if (e->key() == Qt::Key_Delete && (e->modifiers()==0))
     {
+        //bugs:
+        /*
         tc = this->textCursor();
         int pos = tc.position();
         tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
@@ -68,6 +70,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
             QTextEdit::keyPressEvent(e);
             return;
         }
+        */
     }
 
     if (e->key() == Qt::Key_F1)

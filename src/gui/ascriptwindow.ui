@@ -173,6 +173,7 @@
     <addaction name="actionShow_all_messenger_windows"/>
     <addaction name="actionHide_all_messenger_windows"/>
     <addaction name="separator"/>
+    <addaction name="actionClose_all_messenger_windows"/>
     <addaction name="actionClear_unused_messenger_windows"/>
    </widget>
    <addaction name="menuFont"/>
@@ -195,17 +196,22 @@
   </action>
   <action name="actionShow_all_messenger_windows">
    <property name="text">
-    <string>Show all messenger windows</string>
+    <string>Show all active messenger windows</string>
    </property>
   </action>
   <action name="actionHide_all_messenger_windows">
    <property name="text">
-    <string>Hide all messenger windows</string>
+    <string>Hide all active messenger windows</string>
    </property>
   </action>
   <action name="actionClear_unused_messenger_windows">
    <property name="text">
-    <string>Clear unused messenger windows</string>
+    <string>Delete unused messenger windows</string>
+   </property>
+  </action>
+  <action name="actionClose_all_messenger_windows">
+   <property name="text">
+    <string>Close all messenger windows</string>
    </property>
   </action>
  </widget>

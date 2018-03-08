@@ -18,34 +18,39 @@ public:
   AInterfaceToHist(const AInterfaceToHist& other);
   ~AInterfaceToHist(){}
 
-  virtual bool InitOnRun() override;
-  virtual bool IsMultithreadCapable() const override {return true;}
+  //bool           InitOnRun() override {}
+  bool           IsMultithreadCapable() const override {return true;}
 
 public slots:
-  void NewHist(QString HistName, int bins, double start, double stop);
-  void NewHist2D(QString HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
+  void           NewHist(const QString& HistName, int bins, double start, double stop);
+  void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
-  void SetTitles(QString HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
-  void SetLineProperties(QString HistName, int LineColor, int LineStyle, int LineWidth);
+  void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
+  void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
 
-  void Fill(QString HistName, double val, double weight);
-  void Fill2D(QString HistName, double x, double y, double weight);
+  void           Fill(const QString& HistName, double val, double weight);
+  void           Fill2D(const QString& HistName, double x, double y, double weight);
 
-  void Draw(QString HistName, QString options);
+  void           FillArr(const QString& HistName, const QVariant Array);
+  void           Fill2DArr(const QString& HistName, const QVariant Array);
 
-  void Smooth(QString HistName, int times);
-  QVariant FitGauss(QString HistName, QString options="");
-  QVariant FitGaussWithInit(QString HistName, QVariant InitialParValues, QString options="");
+  void           Divide(const QString& HistName, const QString& HistToDivideWith);
 
-  bool Delete(QString HistName);
-  void DeleteAllHist();
+  void           Draw(const QString& HistName, const QString options = "");
+
+  void           Smooth(const QString& HistName, int times);
+  const QVariant FitGauss(const QString& HistName, const QString options = "");
+  const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
+
+  bool           Delete(const QString& HistName);
+  void           DeleteAllHist();
 
 signals:
-  void RequestDraw(TObject* obj, QString options, bool fFocus);
+  void           RequestDraw(TObject* obj, QString options, bool fFocus);
 
 private:
   TmpObjHubClass *TmpHub;
-  bool bGuiTthread = true;
+
 };
 
 // ---- G R A P H S ---- (TGraph of ROOT)
@@ -55,13 +60,14 @@ class AInterfaceToGraph : public AScriptInterface
 
 public:
   AInterfaceToGraph(TmpObjHubClass *TmpHub);
+  AInterfaceToGraph(const AInterfaceToGraph& other);
   ~AInterfaceToGraph(){}
 
-  virtual bool InitOnRun() override;
+  //virtual bool InitOnRun() override {}
   virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
-  void NewGraph(QString GraphName);
+  void NewGraph(const QString& GraphName);
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
@@ -70,7 +76,9 @@ public slots:
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 
-  void Draw(QString GraphName, QString options);
+  void Sort(const QString& GraphName);
+
+  void Draw(QString GraphName, QString options = "APL");
 
   bool Delete(QString GraphName);
   void DeleteAllGraph();
@@ -80,6 +88,7 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+
 };
 
 #endif // HISTGRAPHINTERFACES_H

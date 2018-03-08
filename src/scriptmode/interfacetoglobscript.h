@@ -69,7 +69,6 @@ private:
   bool keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes);
   bool expandKey(QString &Key);
 
-  bool bClonedCopy = false;
 };
 
 // ---- R E C O N S T R U C T I O N ----
@@ -237,7 +236,6 @@ public slots:
 
 private:
   AConfiguration* Config;
-  //ReconstructionManagerClass* RManager;
   EventsDataClass* EventsDataHub;
 
   bool checkEventNumber(int ievent);
@@ -419,10 +417,11 @@ public:
    ~AInterfaceToTree() {}
 
 public slots:
-   void OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
-   QString PrintBranches(QString TreeName);
-   QVariant GetBranch(QString TreeName, QString BranchName);
-   void CloseTree(QString TreeName);
+   void     OpenTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
+   QString  PrintBranches(const QString &TreeName);
+   QVariant GetBranch(const QString &TreeName, const QString &BranchName);
+   bool     CloseTree(const QString &TreeName);
+   void     CloseAllTrees();
 
 private:
    TmpObjHubClass *TmpHub;

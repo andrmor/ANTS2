@@ -8522,10 +8522,10 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_126">
              <property name="geometry">
               <rect>
-               <x>4</x>
-               <y>90</y>
-               <width>141</width>
-               <height>16</height>
+               <x>94</x>
+               <y>88</y>
+               <width>51</width>
+               <height>20</height>
               </rect>
              </property>
              <property name="text">
@@ -8712,6 +8712,51 @@ Individual sensors can belong to multiple groups!</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_112">
+             <property name="geometry">
+              <rect>
+               <x>9</x>
+               <y>91</y>
+               <width>61</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Buffer:</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="sbBufferGPU">
+             <property name="geometry">
+              <rect>
+               <x>8</x>
+               <y>112</y>
+               <width>51</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>10000</number>
+             </property>
+             <property name="value">
+              <number>500</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_113">
+             <property name="geometry">
+              <rect>
+               <x>62</x>
+               <y>116</y>
+               <width>70</width>
+               <height>13</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>k events</string>
              </property>
             </widget>
            </widget>
@@ -15372,6 +15417,22 @@ in minimization</string>
     <hint type="destinationlabel">
      <x>490</x>
      <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbBufferGPU</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateReconConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>42</x>
+     <y>313</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>311</y>
     </hint>
    </hints>
   </connection>

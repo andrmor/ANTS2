@@ -1,0 +1,172 @@
+
+config.Load(core.GetExamplesDir() + "/NewGenSiPM64.json")
+config.Replace( "ReconstructionConfig.ReconstructionOptions[0].AlgorithmOptions.RootMinimizerOptions.LSorLikelihood", 1 )
+sim.RunPhotonSources()
+
+//watchdogs
+if (events.countEvents() == 0) core.abort("There are no events to reconstruct")
+if (pms.CountPM() != 64) core.abort("Load configuration with 64 SiPMs")
+
+//inits of variales used by minimization
+//access of variables outside the function bodies have non-negligible overheads, so try to avoid them if possible
+var lastMiniValue = 1e10
+var bActivePMs = []
+for (var i=0; i<64; i++) bActivePMs.push(true)
+var Signals
+
+//function which will be minimized for every event
+function Functor()
+{
+       var x           = arguments[0]
+       var y           = arguments[1]
+       var energy = arguments[2]
+       
+       var LRFs = lrf.GetAllLRFs(x, y, 0)
+      
+       var MiniSum = 0
+       for (var iPM=0; iPM<64; iPM++)
+              if ( bActivePMs[iPM] )
+              {
+                     var LRF = LRFs[iPM] * energy
+                     if (LRF <= 0) return lastMiniValue + Math.abs(lastMiniValue)*0.25 //LRF is not defined for this position
+                     
+                     MiniSum -= ( Signals[iPM] * Math.log(LRF) - LRF )
+             }
+             
+      //enable to see detailed printout (very slow and spammy!)
+      /* 
+      msg.Append("x: " + x + " y:" + y + " E:" + energy + " -> " + MiniSum)
+      */
+      
+      lastMiniValue = MiniSum
+      return MiniSum
+}
+
+
+function reconstruct(from, to)
+{
+       mini.SetHighPrecision(false)
+       mini.SetFunctorName("Functor")
+       
+        var PMpositions = pms.GetPMpositions()
+       
+       //enable to see detailed printout (very slow and spammy!) 
+       /*
+       msg.Show()
+       msg.Clear()
+       msg.Resize(800, 400)
+       */
+       
+       for (var iEvent = from; iEvent<to; iEvent++)
+       {
+              //enable to see detailed printout (very slow and spammy!) 
+              /*
+              msg.Append("Event #" + iEvent)
+              */
+              
+               //CoG
+              Signals = events.GetPMsignals(iEvent)
+              var SumX = 0
+              var SumY = 0
+              var SumSig = 0
+              for (var iPM=0; iPM<64; iPM++)
+              {
+                     if (Signals[iPM] < 5) continue
+                     SumSig += Signals[iPM]
+                     SumX += Signals[iPM] * PMpositions[iPM][0]
+                     SumY += Signals[iPM] * PMpositions[iPM][1]
+              }
+              var X0 = 0
+              var Y0 = 0
+              if (SumSig > 0)
+              {
+                     X0 = SumX / SumSig * 1.2  //CoG x
+                     Y0 = SumY / SumSig *1.2    //CoG y
+              }
+              else
+              {
+                      events.SetReconstructionOK(iEvent, false);
+                      continue
+              }
+              
+              //selecting active PMs for statistical reconstruction
+              var numActives = 0
+              for (var iPM=0; iPM<64; iPM++)
+              {
+                     var dx = X0 - PMpositions[iPM][0]
+                     var dy = Y0 - PMpositions[iPM][1]
+                     if (dx*dx + dy*dy < 225)
+                     {
+                             bActivePMs[iPM] = true
+                             numActives++
+                     }
+                     else bActivePMs[iPM] = false
+              }              
+       
+              lastMiniValue = 1e10
+              mini.Clear()
+              
+              mini.AddVariable("x", X0, 1)//, -15, 15)
+              mini.AddVariable("y", Y0, 1)//, -15, 15)
+              mini.AddLowerLimitedVariable("energy", 1, 0.1, 0)
+       
+              var success = mini.Run()
+              if (success)
+              {
+                     var res = mini.GetResults()
+                     
+                     var DegFreedom = numActives - 4 //  numPMs - 1 for each of: sigma,X,Y, Energy
+                     if (DegFreedom<1) DegFreedom = 1
+                     
+                     //calculating chi2
+                     var Sum = 0
+                     var LRFs = lrf.GetAllLRFs(res[0], res[1], 0)
+                     for (var iPM=0; iPM<64; iPM++)
+                            if ( bActivePMs[iPM] )
+                            {
+                                   var LRF = LRFs[iPM] * res[2]
+                                   if (LRF <= 0) continue  // *** report error?
+                                   var delta = LRF - Signals[iPM]
+                                   var sigma2 = LRF // + err*err -> err e.g. lrf.GetLRFerror(iPM, x, y, z)
+                                   Sum += delta*delta/sigma2
+                           }
+                     var chi2 = Sum / DegFreedom
+                     events.SetReconstructed(iEvent, res[0], res[1], 0, res[2], chi2)
+              } 
+              else events.SetReconstructionOK(iEvent, false)
+       }       
+}
+
+var numEvents = events.GetNumEvents()
+
+//reconstruct in c++ module
+var t = core.elapsedTimeInMilliseconds()
+rec.ReconstructEvents(7, false)
+core.print("<br>c++ module (as in GUI): " + (core.elapsedTimeInMilliseconds()-t) + " ms")
+
+/*
+//reconstruct without threads
+var t = core.elapsedTimeInMilliseconds()
+reconstruct(0, numEvents) 
+core.print("<br>No threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
+*/
+
+var numThreads = 7
+threads.deleteAll()
+var blockSize = math.floor( numEvents / numThreads )
+if  (numEvents % numThreads != 0) blockSize++
+t = core.elapsedTimeInMilliseconds()
+var from = 0
+while (from < numEvents)
+{
+       var to = from + blockSize
+       if (to>numEvents) to = numEvents
+       //core.print("Thread in range from " + from + " to " + to )
+       threads.evaluateFunction(reconstruct, [from, to])
+       from = to
+}
+threads.waitForAll()
+core.print("<br>Using " + numThreads + " threads: " + (core.elapsedTimeInMilliseconds()-t) + " ms")
+threads.deleteAll()
+
+events.SetReconstructionReady()

@@ -3,7 +3,7 @@ ANTS2_MAJOR = 4
 ANTS2_MINOR = 5
 
 #Optional libraries
-#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
@@ -275,7 +275,11 @@ SOURCES += main.cpp \
     scriptmode/histgraphinterfaces.cpp \
     gui/GraphWindowTools/atoolboxscene.cpp \
     scriptmode/ainterfacetomultithread.cpp \
-    scriptmode/ascriptmessengerdialog.cpp
+    scriptmode/ascriptmessengerdialog.cpp \
+    scriptmode/arootgraphrecord.cpp \
+    scriptmode/aroothistrecord.cpp \
+    common/arootobjcollection.cpp \
+    common/arootobjbase.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -397,7 +401,11 @@ HEADERS  += common/CorrelationFilters.h \
     gui/GraphWindowTools/atoolboxscene.h \
     scriptmode/ainterfacetomultithread.h \
     scriptmode/ascriptinterfacefactory.h \
-    scriptmode/ascriptmessengerdialog.h
+    scriptmode/ascriptmessengerdialog.h \
+    scriptmode/arootgraphrecord.h \
+    common/arootobjcollection.h \
+    scriptmode/aroothistrecord.h \
+    common/arootobjbase.h
 
 # --- SIM ---
 ants2_SIM {

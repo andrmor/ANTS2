@@ -98,10 +98,10 @@ private slots:
     void on_actionSelect_font_triggered();
 
     void on_actionShow_all_messenger_windows_triggered();
-
     void on_actionHide_all_messenger_windows_triggered();
-
     void on_actionClear_unused_messenger_windows_triggered();
+
+    void on_actionClose_all_messenger_windows_triggered();
 
 private:
     Ui::AScriptWindow *ui;
@@ -135,7 +135,7 @@ private:
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
     QString getDesc(const QJsonValue &ref);
-    void fillHelper(QObject* obj, QString module, QString helpText = "");  //fill help TreeWidget according to the data in the obj
+    void fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);

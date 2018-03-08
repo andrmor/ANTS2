@@ -1,0 +1,30 @@
+
+var TextBase = "I am "
+
+function report( text1, text2 )
+{
+       msg.Show()
+       for (var i=0; i<4; i++)
+       {
+              var t = TextBase + text1 + "  step: " + i
+              core.print(t)
+              msg.Append(t)
+              core.sleep(500)
+       }       
+       return text1 + " "+ text2
+}
+
+var runInNumThreads = 3
+for (var i=0; i<runInNumThreads; i++)
+{
+       var t1 = "thread #" + threads.countAll()
+       var t2 = "has finished"
+       threads.evaluateFunction(report, [t1, t2])
+}
+threads.waitForAll()
+
+core.print("<br>Results repoorted by threads:")
+for (var i=0; i<threads.countAll(); i++)
+       core.print( threads.getResult(i) )
+
+threads.deleteAll()

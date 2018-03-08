@@ -41,7 +41,10 @@ double ScriptFunctor(const double *p) //last parameter contains the pointer to M
 }
 
 AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
-  ScriptManager(ScriptManager) {}
+  ScriptManager(ScriptManager)
+{
+    Description = "Access to CERN ROOT minimizer";
+}
 
 AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other)
   : AScriptInterface(other)

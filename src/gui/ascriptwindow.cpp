@@ -249,16 +249,16 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         trwHelp->clear();
         //fillHelper(interfaceObject, "", "Global object functions"); //forbidden to override master object now.
         AInterfaceToCore core(0); //dummy to extract methods
-        fillHelper(&core, "core", "Core object functions");
+        fillHelper(&core, "core");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
         AInterfaceToMath math(0); //dummy to extract methods
-        fillHelper(&math, "math", "Basic mathematics: wrapper for std double functions");
+        fillHelper(&math, "math");
         newFunctions << getCustomCommandsOfObject(&math, "math", false);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
-        fillHelper(interfaceObject, name, "");
+        fillHelper(interfaceObject, name);
         newFunctions << getCustomCommandsOfObject(interfaceObject, name, false);
     }
 
@@ -612,8 +612,12 @@ void AScriptWindow::on_pbExample_clicked()
     expl->show();
 }
 
-void AScriptWindow::fillHelper(QObject* obj, QString module, QString helpText)
+void AScriptWindow::fillHelper(QObject* obj, QString module)
 {
+  QString UnitDescription;
+  AScriptInterface* io = dynamic_cast<AScriptInterface*>(obj);
+  if (io) UnitDescription = io->getDescription();
+
   QStringList functions = getCustomCommandsOfObject(obj, module, true);
   functions.sort();
 
@@ -623,7 +627,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module, QString helpText)
   f.setBold(true);
   objItem->setFont(0, f);
   //objItem->setBackgroundColor(QColor(0, 0, 255, 80));
-  objItem->setToolTip(0, helpText);
+  objItem->setToolTip(0, UnitDescription);
   for (int i=0; i<functions.size(); i++)
   {
       QStringList sl = functions.at(i).split("_:_");
@@ -768,7 +772,7 @@ QString AScriptWindow::getDesc(const QJsonValue &ref)
 void AScriptWindow::onFunctionClicked(QTreeWidgetItem *item, int /*column*/)
 {
   pteHelp->clear();
-  qDebug() << item->text(1);
+  //qDebug() << item->text(1);
   //QString returnType = getFunctionReturnType(item->text(0));
   //pteHelp->appendPlainText(returnType+ "  " +item->text(0)+":");
 
@@ -1238,4 +1242,9 @@ void AScriptWindow::on_actionHide_all_messenger_windows_triggered()
 void AScriptWindow::on_actionClear_unused_messenger_windows_triggered()
 {
     ScriptManager->clearUnusedMsgDialogs();
+}
+
+void AScriptWindow::on_actionClose_all_messenger_windows_triggered()
+{
+    ScriptManager->closeAllMsgDialogs();
 }

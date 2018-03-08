@@ -5054,6 +5054,7 @@ void ReconstructionWindow::updateReconSettings()
       //cudaJson["Threshold"] = ui->ledCUDAthreshold->text().toFloat();
       //cudaJson["MaxDistance"] = ui->ledCUDAmaxDistance->text().toFloat();
       cudaJson["StarterZ"] = ui->ledSuggestedZ->text().toFloat();
+      cudaJson["Buffer"] = ui->sbBufferGPU->value();
   ajson["CGonCUDAsettings"] = cudaJson;
 
   // kNN
@@ -5226,6 +5227,7 @@ bool ReconstructionWindow::readReconSettingsFromJson(QJsonObject &jsonMaster)
   JsonToSpinBox(gcpuJson, "Iterations", ui->sbCGiter);
   JsonToLineEditDouble(gcpuJson, "InitialStep", ui->ledCGstartStep);
   JsonToLineEditDouble(gcpuJson, "Reduction", ui->ledCGreduction);
+  JsonToSpinBox(gcpuJson, "Buffer", ui->sbBufferGPU);
   //JsonToCheckbox(gcpuJson, "DynamicPassives", ui->cbDynamicPassives);
   //JsonToComboBox(gcpuJson, "PassiveType", ui->cobDynamicPassiveType);
   //compatibility

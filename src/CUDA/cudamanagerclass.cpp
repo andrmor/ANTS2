@@ -385,7 +385,7 @@ bool CudaManagerClass::PerformSliced(int from, int to)
       {
         //finding best z
         int imax = 0;
-        float maxProb, minChi2, Prob, Chi2;
+        float maxProb, minChi2;
 
         if (MLorChi2 == 0) maxProb = RecData[0][iev].Probability;
         else minChi2 = RecData[0][iev].Chi2;
@@ -394,7 +394,7 @@ bool CudaManagerClass::PerformSliced(int from, int to)
           {
             if (MLorChi2 == 0)
               {
-                Prob = RecData[iz][iev].Probability;
+                const float& Prob = RecData[iz][iev].Probability;
                 if (Prob > maxProb)
                   {
                     maxProb = Prob;
@@ -403,7 +403,7 @@ bool CudaManagerClass::PerformSliced(int from, int to)
               }
             else
               {
-                Chi2 = RecData[iz][iev].Chi2;
+                const float& Chi2 = RecData[iz][iev].Chi2;
                 if (Chi2 < minChi2)
                   {
                     minChi2 = Chi2;

@@ -36,6 +36,7 @@
 #endif
 
 #include <QVector>
+#include <QScreen>
 #include <QDebug>
 
 //Root
@@ -207,15 +208,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     //Busy status updates
     QObject::connect(WindowNavigator, SIGNAL(BusyStatusChanged(bool)), newLrfWindow, SLOT(onBusyStatusChanged(bool)));
 
-    //SimManager = new ASimulatorRunner(Detector, EventsDataHub);
     QObject::connect(SimulationManager->Runner, SIGNAL(updateReady(int, double)), this, SLOT(RefreshPhotSimOnTimer(int, double))); //Simulation interface refresh/update stuff
     QObject::connect(SimulationManager, SIGNAL(SimulationFinished()), this, SLOT(simulationFinished())); //Simulation finished
-    //QObject::connect(this, SIGNAL(StopRequested()), SimManager, SLOT(requestStop()), Qt::DirectConnection); //Stop button pressed
-    //SimManager->moveToThread(&simThread); //Move to background thread, as it always runs synchronously even in MT
-    //QObject::connect(&simThread, SIGNAL(started()), SimManager, SLOT(simulate())); //Connect thread to simulation start
-    //simTimerGuiUpdate.setInterval(1000);
-    //QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), SimManager, SLOT(updateGui()), Qt::DirectConnection);
-    //qDebug() << "->Simulation manager module created";
 
     DoNotUpdateGeometry = false; //control
 
@@ -319,6 +313,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     {
         WindowNavigator->show();
         fShowGeom = true;
+        AssureWidgetIsWithingVisibleArea(this);
     }
     ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
 

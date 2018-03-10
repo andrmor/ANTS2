@@ -19,6 +19,7 @@
 #include "aconfiguration.h"
 #include "ascriptwindow.h"
 #include "apmgroupsmanager.h"
+#include "guiutils.h"
 
 //Qt
 #include <QFileDialog>
@@ -196,6 +197,8 @@ void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
   bool fMaxi = false;
   if (js.contains("maximized")) fMaxi = js["maximized"].toBool();
   bool fVis = js["vis"].toBool();
+
+  AssureWidgetIsWithingVisibleArea(w);
 
   if (fVis || fMaxi) w->showNormal();
   if (fMaxi)

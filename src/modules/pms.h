@@ -108,12 +108,12 @@ public:
     inline double X(int ipm) const {return PMs[ipm].x;}
     inline double Y(int ipm) const {return PMs[ipm].y;}
     inline double Z(int ipm) const {return PMs[ipm].z;}
-    int getPixelsX(int ipm);
-    int getPixelsY(int ipm);
+    int getPixelsX(int ipm) const;
+    int getPixelsY(int ipm) const;
     double SizeX(int ipm) const;
     double SizeY(int ipm) const;
     double SizeZ(int ipm) const;
-    bool isSiPM(int ipm);
+    bool isSiPM(int ipm) const;
 
 
     //PDE
@@ -222,11 +222,11 @@ public:
     void setDoADC(bool flag) {fDoADC = flag;}
     void setMeasurementTime(double time) {MeasurementTime = time;}
 
-    bool isDoPHS() {return fDoPHS;}
-    bool isDoMCcrosstalk() {return fDoMCcrosstalk;}
-    bool isDoElNoise() {return fDoElNoise;}
-    bool isDoADC() {return fDoADC;}
-    double getMeasurementTime() {return MeasurementTime;}
+    bool isDoPHS() const {return fDoPHS;}
+    bool isDoMCcrosstalk() const {return fDoMCcrosstalk;}
+    bool isDoElNoise() const {return fDoElNoise;}
+    bool isDoADC() const {return fDoADC;}
+    double getMeasurementTime() const {return MeasurementTime;}
 
     QVector<QPair<double, int> > getPMsSortedByR() const;
 

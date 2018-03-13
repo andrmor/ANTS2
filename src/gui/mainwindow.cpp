@@ -2885,7 +2885,8 @@ void MainWindow::on_pbElCopyGainData_clicked()
 {
    int mode = ui->cobElCopyMode->currentIndex();
    if (mode == 0) return;
-   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 1 - ElNoise, 2 - ADC
+   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 2 - ElNoise, 3 - ADC, 4 - dark counts
+   if (selector == 4) return;
 
    int ipm =  ui->sbElPMnumber->value();
    int typ = PMs->at(ipm).type;
@@ -3592,23 +3593,30 @@ void MainWindow::on_pbLoadRelELfactors_clicked()
 
 void MainWindow::on_pbRandomScaleELaverages_clicked()
 {
+  Detector->PMs->setDoPHS( true );
+
+  bool bUniform = ( ui->cobScaleGainsUniNorm->currentIndex() == 0 );
   double min = ui->ledELavScaleMin->text().toDouble();
   double max = ui->ledELavScaleMax->text().toDouble();
-  if (min >= max) return;
-
-  //ui->cbEnableSPePHS->setChecked(true);
-  Detector->PMs->setDoPHS( true );
+  if (bUniform && min >= max) return;
+  double mean = ui->ledELavScaleMean->text().toDouble();
+  double sigma = ui->ledELavScaleSigma->text().toDouble();
 
   for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double factor = Detector->RandGen->Rndm();
-      factor = min + (max-min)*factor;
+      double factor;
+      if (bUniform)
+        {
+          factor = Detector->RandGen->Rndm();
+          factor = min + (max-min)*factor;
+        }
+      else
+          factor = Detector->RandGen->Gaus(mean, sigma);
 
       PMs->ScaleSPePHS(ipm, factor);
     }
 
   ReconstructDetector(true);
-  //MainWindow::on_pbElUpdateIndication_clicked();
 }
 
 void MainWindow::on_pbSetELaveragesToUnity_clicked()
@@ -5042,4 +5050,11 @@ void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
     if (index == 0) s = "# of particles per event:";
     else            s = "average particles per event:";
     ui->labPartPerEvent->setText(s);
+}
+
+void MainWindow::on_twElectronics_currentChanged(int index)
+{
+    bool bDarkCountTab = ( index == 4 );
+    ui->frPmNumberForElectronics->setEnabled(!bDarkCountTab);
+    ui->pbElCopyGainData->setEnabled(!bDarkCountTab);
 }

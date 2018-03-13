@@ -3,10 +3,10 @@ ANTS2_MAJOR = 4
 ANTS2_MINOR = 5
 
 #Optional libraries
-#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
@@ -485,7 +485,6 @@ ants2_GUI {
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
-    gui/MainWindowTools/mainwindowscatterfit.cpp \
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \

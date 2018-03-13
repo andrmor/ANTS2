@@ -15763,498 +15763,6 @@ on stack</string>
         </widget>
        </widget>
       </widget>
-      <widget class="QWidget" name="tabNausFit">
-       <attribute name="title">
-        <string>Fit</string>
-       </attribute>
-       <widget class="QPushButton" name="pbTestFit">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>100</y>
-          <width>141</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>FIT (NAUS example)</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbSF_SvsL">
-        <property name="geometry">
-         <rect>
-          <x>14</x>
-          <y>25</y>
-          <width>151</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Signal vs parameter</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_64">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>70</y>
-          <width>501</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_parameter">
-        <property name="geometry">
-         <rect>
-          <x>190</x>
-          <y>27</y>
-          <width>270</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>len, 5, 145, 10</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbSF_help">
-        <property name="geometry">
-         <rect>
-          <x>460</x>
-          <y>26</y>
-          <width>25</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>?</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_69">
-        <property name="geometry">
-         <rect>
-          <x>120</x>
-          <y>36</y>
-          <width>118</width>
-          <height>3</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="cobSF_chi2Vs">
-        <property name="geometry">
-         <rect>
-          <x>320</x>
-          <y>180</y>
-          <width>181</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Chi2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Chi2 vs  Albedo and Nteflon</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Chi2 vs  Albedo and Abs</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Chi2 vs  Nteflon and Abs</string>
-         </property>
-        </item>
-       </widget>
-       <widget class="QLabel" name="label_269">
-        <property name="geometry">
-         <rect>
-          <x>320</x>
-          <y>160</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Show:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_270">
-        <property name="geometry">
-         <rect>
-          <x>80</x>
-          <y>140</y>
-          <width>221</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Start value / step / min / max</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_271">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>170</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Albedo</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_272">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>190</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>nTeflon</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_273">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>210</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>LXe abs</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_274">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>230</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Scale</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_albedo">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>168</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.7 / 0.1 / 0.5 / 1</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_nT">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>187</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>1.5 / 0.1 / 1.45 / 1.95</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_abs">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>206</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.0003 / 0.0001 / 0.0002 / 0.001</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_sc">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>226</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>9 / 0.5 / 8 / 15</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_70">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>260</y>
-          <width>501</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbTestFit_simplistic">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>280</y>
-          <width>141</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>FIT (NAUS, simplistic)</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_275">
-        <property name="geometry">
-         <rect>
-          <x>80</x>
-          <y>320</y>
-          <width>221</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Start value / step / min / max</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_TeflonAbs">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>348</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.03 / 0.01 / 0.001 / 0.2</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_276">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>370</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>LXe abs</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_LXeAbs_simpl">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>367</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>0.0003 / 0.0001 / 0.0002 / 0.001</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_277">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>350</y>
-          <width>71</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Teflon abs</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_278">
-        <property name="geometry">
-         <rect>
-          <x>31</x>
-          <y>391</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Scale</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="leSF_sc_simpl">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>387</y>
-          <width>180</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>9 / 0.3 / 5 / 15</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_71">
-        <property name="geometry">
-         <rect>
-          <x>74</x>
-          <y>110</y>
-          <width>118</width>
-          <height>3</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbSF_useUncertExpData">
-        <property name="geometry">
-         <rect>
-          <x>190</x>
-          <y>103</y>
-          <width>241</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Use uncertainties of experimental data</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbSF_useUncertExpData_Simp">
-        <property name="geometry">
-         <rect>
-          <x>186</x>
-          <y>283</y>
-          <width>241</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Use uncertainties of experimental data</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_83">
-        <property name="geometry">
-         <rect>
-          <x>70</x>
-          <y>290</y>
-          <width>118</width>
-          <height>3</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <zorder>line_83</zorder>
-       <zorder>line_71</zorder>
-       <zorder>line_69</zorder>
-       <zorder>pbTestFit</zorder>
-       <zorder>pbSF_SvsL</zorder>
-       <zorder>line_64</zorder>
-       <zorder>leSF_parameter</zorder>
-       <zorder>pbSF_help</zorder>
-       <zorder>cobSF_chi2Vs</zorder>
-       <zorder>label_269</zorder>
-       <zorder>label_270</zorder>
-       <zorder>label_271</zorder>
-       <zorder>label_272</zorder>
-       <zorder>label_273</zorder>
-       <zorder>label_274</zorder>
-       <zorder>leSF_albedo</zorder>
-       <zorder>leSF_nT</zorder>
-       <zorder>leSF_abs</zorder>
-       <zorder>leSF_sc</zorder>
-       <zorder>line_70</zorder>
-       <zorder>pbTestFit_simplistic</zorder>
-       <zorder>label_275</zorder>
-       <zorder>leSF_TeflonAbs</zorder>
-       <zorder>label_276</zorder>
-       <zorder>leSF_LXeAbs_simpl</zorder>
-       <zorder>label_277</zorder>
-       <zorder>label_278</zorder>
-       <zorder>leSF_sc_simpl</zorder>
-       <zorder>cbSF_useUncertExpData</zorder>
-       <zorder>cbSF_useUncertExpData_Simp</zorder>
-      </widget>
      </widget>
      <widget class="QPushButton" name="pbShowCheckUpWindow">
       <property name="geometry">
@@ -16678,22 +16186,6 @@ on stack</string>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
-  <connection>
-   <sender>cbHideStackText</sender>
-   <signal>clicked()</signal>
-   <receiver>pbRefreshStack</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>532</x>
-     <y>102</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>398</x>
-     <y>84</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>ledSiPMdarCountRate</sender>
    <signal>editingFinished()</signal>
@@ -17399,102 +16891,6 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cbGunDoS1</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbDoS1tester</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>364</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>325</x>
-     <y>370</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbDoS1tester</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbGunDoS1</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>340</x>
-     <y>370</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>353</x>
-     <y>546</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunDoS2</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbDoS2tester</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>381</x>
-     <y>566</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>325</x>
-     <y>393</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbDoS2tester</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbGunDoS2</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>345</x>
-     <y>393</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>395</x>
-     <y>566</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunParticleTracks</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbBuildParticleTrackstester</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>522</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>242</x>
-     <y>324</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbBuildParticleTrackstester</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbGunParticleTracks</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>253</x>
-     <y>324</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>522</x>
-     <y>546</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cbFixedTopSize</sender>
    <signal>toggled(bool)</signal>
    <receiver>fFixedWorldSize</receiver>
@@ -17943,102 +17339,6 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledST_si</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>191</x>
-     <y>264</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>418</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledST_i</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>191</x>
-     <y>286</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>420</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledST_sj</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>261</x>
-     <y>264</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>448</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledST_j</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>261</x>
-     <y>286</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>420</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledST_sk</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>331</x>
-     <y>264</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>403</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledST_k</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbST_AngleCos</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>331</x>
-     <y>286</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>447</x>
-     <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cobOpticalOverrideModel</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>swScatterModel</receiver>
@@ -18243,22 +17543,6 @@ on stack</string>
     <hint type="destinationlabel">
      <x>262</x>
      <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobOverrideTesterModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>stackedWidget_3</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>312</x>
-     <y>120</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>267</x>
-     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -20211,6 +19495,230 @@ on stack</string>
     <hint type="destinationlabel">
      <x>437</x>
      <y>442</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_si</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTrackstester</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbGunParticleTracks</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>253</x>
+     <y>324</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>522</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_sj</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>261</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>448</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_i</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_j</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>261</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_sk</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>331</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobOverrideTesterModel</sender>
+   <signal>activated(int)</signal>
+   <receiver>stackedWidget_3</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>312</x>
+     <y>120</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>267</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledST_k</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbST_AngleCos</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>331</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>447</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbGunParticleTracks</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBuildParticleTrackstester</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>522</x>
+     <y>546</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>242</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbHideStackText</sender>
+   <signal>clicked()</signal>
+   <receiver>pbRefreshStack</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>532</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbDoS2tester</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbGunDoS2</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>566</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbGunDoS2</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbDoS2tester</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>566</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>393</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbDoS1tester</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbGunDoS1</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>340</x>
+     <y>370</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>353</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbGunDoS1</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbDoS1tester</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>546</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>

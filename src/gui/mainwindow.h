@@ -154,7 +154,6 @@ public:
     void UpdateTestWavelengthProperties(); //if material properties were updated, need to update indication in the Test tab
 
     void ShowTracks();
-    void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);    
 
     void writeDetectorToJson(QJsonObject &json); //GDML is NOT here
     bool readDetectorFromJson(QJsonObject &json);
@@ -182,6 +181,8 @@ public:
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
     bool GeometryDrawDisabled; //no drawing of th geometry or tracks
     bool fStartedFromGUI;          //flag indicating that an action was run from GUI, e.g. simulation
+    bool ShowTop;
+    bool ColorByMaterial;
 
     bool isWavelengthResolved() const;
     double WaveFrom, WaveTo, WaveStep;
@@ -450,9 +451,7 @@ private:
 
     QString PreprocessingFileName;
 
-    int PreviousNumberPMs;
-    bool ShowTop;
-    bool ColorByMaterial;
+    int PreviousNumberPMs;    
     bool fConfigGuiLocked;
     int timesTriedToExit;
 
@@ -633,6 +632,8 @@ private slots:
     void on_actionLoad_last_config_hovered();
 
     void on_cobPartPerEvent_currentIndexChanged(int index);
+
+    void on_twElectronics_currentChanged(int index);
 
 public slots:
     void on_cobSF_chi2Vs_activated(int index);

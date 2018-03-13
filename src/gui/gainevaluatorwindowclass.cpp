@@ -15,6 +15,7 @@
 #include "acommonfunctions.h"
 #include "detectorclass.h"
 #include "apmgroupsmanager.h"
+#include "geometrywindowclass.h"
 
 //Qt
 #include <QGraphicsScene>
@@ -1225,7 +1226,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
       marks->SetMarkerSize(2);
       marks->SetMarkerStyle(2);
       MW->GeoMarkers.append(marks);     
-      MW->ShowGeometry();
+      MW->GeometryWindow->ShowGeometry();
       //MW->ShowGeoMarkers();
     }
 

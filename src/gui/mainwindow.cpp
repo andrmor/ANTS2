@@ -392,62 +392,6 @@ bool MainWindow::event(QEvent *event)
    return QMainWindow::event(event);
 }
 
-void MainWindow::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
-// default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
-{
-    //qDebug()<<"  ----Showing geometry----"<<GeometryDrawDisabled;
-    if (GeometryDrawDisabled) return;
-
-    //setting this window as active pad in root
-    //with or without activation (focussing) of this window
-    if (ActivateWindow) GeometryWindow->ShowAndFocus(); //window is activated (focused)
-    else GeometryWindow->SetAsActiveRootWindow(); //no activation in this mode
-
-    Detector->GeoManager->SetNsegments(GlobSet->NumSegments);
-
-    //coloring volumes
-    if (ColorUpdateAllowed)
-      {
-        if (ColorByMaterial) Detector->colorVolumes(1);
-        else Detector->colorVolumes(0);
-      }
-    //top volume visibility
-    if (ShowTop) Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
-    else Detector->GeoManager->SetTopVisible(false);
-
-    //transparency setup    
-    int totNodes = Detector->top->GetNdaughters();
-    for (int i=0; i<totNodes; i++)
-      {
-        TGeoNode* thisNode = (TGeoNode*)Detector->top->GetNodes()->At(i);
-        thisNode->GetVolume()->SetTransparency(0);
-      }
-
-    //making contaners visible
-    Detector->top->SetVisContainers(true);
-
-    //DRAW
-    GeometryWindow->fNeedZoom = true;
-    GeometryWindow->setHideUpdate(true);
-    GeometryWindow->ClearRootCanvas();
-    if (SAME)
-      {
- //       qDebug()<<"keeping";
-        Detector->top->Draw("SAME");
-      }
-    else
-      {
- //       qDebug()<<"new";
-        //GeometryWindow->ResetView();
-        Detector->top->Draw("");
-      }    
-    GeometryWindow->PostDraw();
-
-    //drawing dots
-    MainWindow::ShowGeoMarkers();
-    GeometryWindow->UpdateRootCanvas();
-}
-
 void MainWindow::clearGeoMarkers(int All_Rec_True)
 {    
   for (int i=GeoMarkers.size()-1; i>-1; i--)
@@ -2701,7 +2645,7 @@ void MainWindow::clearPreprocessingData()
 void MainWindow::on_pbDeleteLoadedEvents_clicked()
 {
   MainWindow::DeleteLoadedEvents(false);
-  if (GeometryWindow->isVisible()) MainWindow::ShowGeometry(false);
+  if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
 }
 
 void MainWindow::DeleteLoadedEvents(bool KeepFileList)
@@ -2941,7 +2885,8 @@ void MainWindow::on_pbElCopyGainData_clicked()
 {
    int mode = ui->cobElCopyMode->currentIndex();
    if (mode == 0) return;
-   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 1 - ElNoise, 2 - ADC
+   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 2 - ElNoise, 3 - ADC, 4 - dark counts
+   if (selector == 4) return;
 
    int ipm =  ui->sbElPMnumber->value();
    int typ = PMs->at(ipm).type;
@@ -3648,23 +3593,30 @@ void MainWindow::on_pbLoadRelELfactors_clicked()
 
 void MainWindow::on_pbRandomScaleELaverages_clicked()
 {
+  Detector->PMs->setDoPHS( true );
+
+  bool bUniform = ( ui->cobScaleGainsUniNorm->currentIndex() == 0 );
   double min = ui->ledELavScaleMin->text().toDouble();
   double max = ui->ledELavScaleMax->text().toDouble();
-  if (min >= max) return;
-
-  //ui->cbEnableSPePHS->setChecked(true);
-  Detector->PMs->setDoPHS( true );
+  if (bUniform && min >= max) return;
+  double mean = ui->ledELavScaleMean->text().toDouble();
+  double sigma = ui->ledELavScaleSigma->text().toDouble();
 
   for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double factor = Detector->RandGen->Rndm();
-      factor = min + (max-min)*factor;
+      double factor;
+      if (bUniform)
+        {
+          factor = Detector->RandGen->Rndm();
+          factor = min + (max-min)*factor;
+        }
+      else
+          factor = Detector->RandGen->Gaus(mean, sigma);
 
       PMs->ScaleSPePHS(ipm, factor);
     }
 
   ReconstructDetector(true);
-  //MainWindow::on_pbElUpdateIndication_clicked();
 }
 
 void MainWindow::on_pbSetELaveragesToUnity_clicked()
@@ -4064,7 +4016,7 @@ void MainWindow::simulationFinished()
         QString report = SimulationManager->Runner->getErrorMessages();
         if (report != "Simulation stopped by user") message(report, this);
         //ClearData();
-        if (GeometryWindow->isVisible()) MainWindow::ShowGeometry(false);
+        if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
     }
 
     bool showTracks = false;
@@ -4129,7 +4081,7 @@ void MainWindow::simulationFinished()
     //Additional GUI updates
     if (GeometryWindow->isVisible())
       {
-        MainWindow::ShowGeometry(false);
+        GeometryWindow->ShowGeometry(false);
         if (showTracks) MainWindow::ShowTracks();
       }
       //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
@@ -4226,7 +4178,7 @@ void MainWindow::on_pbTrackStack_clicked()
         //if tracks are visible, show them
         if (GeometryWindow->isVisible())
         {
-            ShowGeometry();
+            GeometryWindow->ShowGeometry();
             if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
         }
         //report data saved in history
@@ -4263,7 +4215,7 @@ void MainWindow::on_pbGenerateLight_clicked()
 
         if (GeometryWindow->isVisible())
         {
-            ShowGeometry();
+            GeometryWindow->ShowGeometry();
             if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
         }
         pss->appendToDataHub(EventsDataHub);
@@ -4382,7 +4334,7 @@ void MainWindow::on_pbShowNodes_clicked()
    for (int i=0; i<CustomScanNodes.size(); i++)
      marks->SetNextPoint(CustomScanNodes[i]->x(), CustomScanNodes[i]->y(), CustomScanNodes[i]->z());
    GeoMarkers.append(marks);
-   ShowGeometry();
+   GeometryWindow->ShowGeometry();
 }
 
 void MainWindow::on_pbRunNodeScript_clicked()
@@ -5076,7 +5028,7 @@ void MainWindow::on_bpResults_clicked()
 
 void MainWindow::ShowGeometrySlot()
 {
-    ShowGeometry(false, false);
+    GeometryWindow->ShowGeometry(false, false);
 }
 
 void MainWindow::on_bpResults_2_clicked()
@@ -5098,4 +5050,11 @@ void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
     if (index == 0) s = "# of particles per event:";
     else            s = "average particles per event:";
     ui->labPartPerEvent->setText(s);
+}
+
+void MainWindow::on_twElectronics_currentChanged(int index)
+{
+    bool bDarkCountTab = ( index == 4 );
+    ui->frPmNumberForElectronics->setEnabled(!bDarkCountTab);
+    ui->pbElCopyGainData->setEnabled(!bDarkCountTab);
 }

@@ -1009,7 +1009,7 @@ void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()
       {
         //qDebug() << "--> GDML successfully registered";
         MW->NumberOfPMsHaveChanged();
-        MW->ShowGeometry();
+        MW->GeometryWindow->ShowGeometry();
       }
     else message(Detector->ErrorString, this);
 
@@ -1124,7 +1124,7 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
           Detector->GeoManager->AddTrack(track);
        }
 
-       MW->ShowGeometry(false);
+       MW->GeometryWindow->ShowGeometry(false);
        MW->ShowTracks();
    }
 }

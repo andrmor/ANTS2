@@ -480,7 +480,7 @@ void WindowNavigatorClass::on_pbGeometry_clicked()
     {
       MW->GeometryWindow->showNormal();
       MW->GeometryWindow->raise();
-      MW->ShowGeometry();
+      MW->GeometryWindow->ShowGeometry();
       MW->ShowTracks();
     }
   else MW->GeometryWindow->hide();

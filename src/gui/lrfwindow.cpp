@@ -1409,7 +1409,7 @@ void LRFwindow::on_pbShowSensorGroups_clicked()
 
   MW->clearGeoMarkers();
   MW->GeometryWindow->on_pbTop_clicked();
-  MW->ShowGeometry();
+  MW->GeometryWindow->ShowGeometry();
   MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
 }
 
@@ -1425,7 +1425,7 @@ void LRFwindow::on_pbShowSensorGains_clicked()
 
     MW->clearGeoMarkers();
     MW->GeometryWindow->on_pbTop_clicked();
-    MW->ShowGeometry();
+    MW->GeometryWindow->ShowGeometry();
     MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
 }
 

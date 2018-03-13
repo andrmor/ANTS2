@@ -1745,7 +1745,7 @@ int InterfaceToGeoWin::GetH()
 void InterfaceToGeoWin::ShowGeometry()
 {
   MW->GeometryWindow->readRasterWindowProperties();
-  MW->ShowGeometry(false);
+  MW->GeometryWindow->ShowGeometry(false);
 }
 
 void InterfaceToGeoWin::ShowPMnumbers()
@@ -1767,7 +1767,7 @@ void InterfaceToGeoWin::SetShowOnlyFirstEvents(bool fOn, int number)
 void InterfaceToGeoWin::ShowTruePositions()
 {
   MW->Rwindow->DotActualPositions();
-  MW->ShowGeometry(false, false);
+  MW->GeometryWindow->ShowGeometry(false, false);
 }
 
 void InterfaceToGeoWin::ShowTracks(int num, int OnlyColor)

@@ -42,4 +42,6 @@ class TableDoubleDelegateClass : public QItemDelegate
 void SetWindowFont(QMainWindow *w, int ptsize);
 QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color);
 
+void AssureWidgetIsWithingVisibleArea(QWidget* w);
+
 #endif // GUIUTILS_H

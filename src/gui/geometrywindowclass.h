@@ -53,6 +53,8 @@ public:
 
   bool IsWorldVisible();
 
+  void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
+
 protected:
     void resizeEvent(QResizeEvent *event);
     bool event(QEvent *event);

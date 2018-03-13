@@ -361,40 +361,40 @@ void OneEventClass::HitsToSignal()
 
 void OneEventClass::AddDarkCounts()
 {
-  for (int ipm = 0; ipm< numPMs; ipm++)
+  for (int ipm = 0; ipm < numPMs; ipm++)
     {
-      //Add dark counts for SiPMs
-      if (PMs->isSiPM(ipm))
+      if (PMs->isSiPM(ipm)) //Add dark counts for SiPMs
         {
-          PMtypeClass *typ = PMs->getTypeForPM(ipm);//PMtypeProperties[PMs[ipm].type];
-          int pixelsX =  typ->PixelsX;
-          int pixelsY =  typ->PixelsY;
-          double DarkRate = typ->DarkCountRate; //in Hz
+          const PMtypeClass* typ = PMs->getTypeForPM(ipm);
+          const int&    pixelsX =  typ->PixelsX;
+          const int&    pixelsY =  typ->PixelsY;
+          const double& darkRate = typ->DarkCountRate; //in Hz
+          //   qDebug() << "SiPM dark rate:" << darkRate << "Hz";
 
-          double AverageDarkCounts = PMs->getMeasurementTime() * DarkRate * 1.0e-9;
-            //qDebug() << "Average dark counts:"<<AverageDarkCounts;
+          const int     iTimeBins = SimSet->fTimeResolved ? SimSet->TimeBins : 1;
+          const double  TimeInterval = ( iTimeBins == 1 ? PMs->getMeasurementTime() : (SimSet->TimeTo - SimSet->TimeFrom)/SimSet->TimeBins );
+          //   qDebug() << "Time interval:" << TimeInterval << "ns";
 
-          double DarkFiringProbability = AverageDarkCounts / pixelsX / pixelsY;
-          //          qDebug()<<"Dark firing probability:"<<DarkFiringProbability;
+          const double  averageDarkCounts = darkRate * TimeInterval * 1.0e-9;
+          //   qDebug() << "Average dark counts per time bin:" << averageDarkCounts;
 
-          int iTimeBins = SimSet->fTimeResolved ? SimSet->TimeBins : 1;
+          const double pixelFiringProbability = averageDarkCounts / pixelsX / pixelsY;
+          //   qDebug() << "Firing probability of each pixel per time bin:" << pixelFiringProbability;
 
-          if (DarkFiringProbability<0.05) //*** need better criterium
+          if (pixelFiringProbability < 0.05) //if it is less than 5% assuming there will be no overlap in triggered pixels
             {
               //quick procedure
               for (int iTime = 0; iTime < iTimeBins; iTime++)
                 {
-                  //                  if (TimeResolved) qDebug()<<"Time Bin:"<<iTime;
-                  int DarkCounts = RandGen->Poisson(AverageDarkCounts);
-                  //                  qDebug()<<"Actual dark counts"<<DarkCounts;
+                  int DarkCounts = RandGen->Poisson(averageDarkCounts);
+                  //    qDebug() << "Actual dark counts" << DarkCounts;
                   for (int iev = 0; iev < DarkCounts; iev++)
                     {
-                      //finding the pixel
                       int iX = pixelsX * RandGen->Rndm();
                       if (iX >= pixelsX) iX = pixelsX-1;//protection
                       int iY = pixelsY * RandGen->Rndm();
                       if (iY >= pixelsY) iY = pixelsY-1;
-                      //                      qDebug()<<"Pixels:"<<iX<<iY;
+                      //   qDebug()<<"Pixels:"<<iX<<iY;
                       registerSiPMhit(ipm, iTime, iX, iY);
                     }
                 }
@@ -407,7 +407,7 @@ void OneEventClass::AddDarkCounts()
                   for (int iX = 0; iX<pixelsX; iX++)
                       for (int iY = 0; iY<pixelsY; iY++)
                         {
-                          if (RandGen->Rndm() < DarkFiringProbability)
+                          if (RandGen->Rndm() < pixelFiringProbability)
                               registerSiPMhit(ipm, iTime, iX, iY);
                         }
                 }

@@ -102,8 +102,8 @@ void MainWindow::onRequestDetectorGuiUpdate()
 
   if (GeometryWindow->isVisible())
     {
-      MainWindow::ShowGeometry(false);
-      MainWindow::ShowTracks();
+      GeometryWindow->ShowGeometry(false);
+      ShowTracks();
     }
 }
 

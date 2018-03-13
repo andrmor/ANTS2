@@ -9,6 +9,7 @@
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "apmgroupsmanager.h"
+#include "geometrywindowclass.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -265,7 +266,7 @@ void ReconstructionWindow::AnalyzeScanNode()
     marks1->SetNextPoint(EventsDataHub->Scan[iev]->Points[0].r[0], EventsDataHub->Scan[iev]->Points[0].r[1], EventsDataHub->Scan[iev]->Points[0].r[2]);  
     MW->GeoMarkers.append(marks1);
 
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
 }
 
 bool ReconstructionWindow::BuildResolutionTree(int igroup)

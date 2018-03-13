@@ -1252,9 +1252,9 @@ bool pms::saveUpperLower(const QString &filename)
     return true;
 }
 
-int pms::getPixelsX(int ipm){return PMtypes[PMs[ipm].type]->PixelsX;}
+int pms::getPixelsX(int ipm) const{return PMtypes[PMs[ipm].type]->PixelsX;}
 
-int pms::getPixelsY(int ipm){return PMtypes[PMs[ipm].type]->PixelsY;}
+int pms::getPixelsY(int ipm) const{return PMtypes[PMs[ipm].type]->PixelsY;}
 
 double pms::SizeX(int ipm) const {return PMtypes[PMs[ipm].type]->SizeX;}
 
@@ -1262,13 +1262,13 @@ double pms::SizeY(int ipm) const {return PMtypes[PMs[ipm].type]->SizeY;}
 
 double pms::SizeZ(int ipm) const {return PMtypes[PMs[ipm].type]->SizeZ;}
 
-bool pms::isSiPM(int ipm) {return PMtypes[PMs[ipm].type]->SiPM;}
+bool pms::isSiPM(int ipm) const {return PMtypes[PMs[ipm].type]->SiPM;}
 
 bool pms::isPDEwaveOverriden() const
 {
   if (PDE.size() != numPMs)
     {
-      qWarning() << "PDE size:"<<AngularSensitivity.size();
+      qCritical() << "PDE size:"<<AngularSensitivity.size();
       exit(-1);
     }
   for (int i=0; i<numPMs; i++)

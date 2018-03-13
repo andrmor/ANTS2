@@ -5,6 +5,8 @@
 #include <QLineEdit>
 #include <QWheelEvent>
 #include <QGraphicsScene>
+#include <QApplication>
+#include <QScreen>
 
 void SetWindowFont(QMainWindow *w, int ptsize)
 {
@@ -87,4 +89,20 @@ void myQGraphicsView::mouseReleaseEvent(QMouseEvent *event)
   QGraphicsView::mouseReleaseEvent(event);
   if (CursorMode == 1)
     viewport()->setCursor(Qt::CrossCursor);
+}
+
+void AssureWidgetIsWithingVisibleArea(QWidget *w)
+{
+    QList<QScreen *> listScr = qApp->screens();
+    bool bVis = false;
+    for (QScreen* scr : listScr)
+    {
+        QRect ts = scr->geometry();
+        if (ts.contains(w->x(), w->y()))
+        {
+            bVis = true;
+            break;
+        }
+    }
+    if (!bVis) w->move(50,50);
 }

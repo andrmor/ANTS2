@@ -55,11 +55,11 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
-        <string>Detector</string>
+        <string>Geometry</string>
        </attribute>
        <widget class="QFrame" name="fDisableTab1">
         <property name="geometry">
@@ -208,7 +208,7 @@
           <rect>
            <x>110</x>
            <y>273</y>
-           <width>120</width>
+           <width>137</width>
            <height>20</height>
           </rect>
          </property>
@@ -5015,9 +5015,9 @@ materials</string>
        <widget class="QListWidget" name="lwMaterials">
         <property name="geometry">
          <rect>
-          <x>5</x>
+          <x>2</x>
           <y>18</y>
-          <width>161</width>
+          <width>166</width>
           <height>140</height>
          </rect>
         </property>
@@ -5698,9 +5698,9 @@ back in 2Pi:</string>
        <widget class="QListWidget" name="lwOverrides">
         <property name="geometry">
          <rect>
-          <x>178</x>
+          <x>175</x>
           <y>26</y>
-          <width>356</width>
+          <width>359</width>
           <height>60</height>
          </rect>
         </property>

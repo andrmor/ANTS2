@@ -70,7 +70,7 @@ void MainWindow::createScriptWindow()
     QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
     ScriptWindow->SetInterfaceObject(sim, "sim");
 
-    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, GlobSet->RecNumTreads);
+    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet->RecNumTreads);
     QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(rec, "rec");

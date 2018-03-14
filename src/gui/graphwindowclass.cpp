@@ -261,6 +261,16 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVe
     return gr;
 }
 
+void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+        TLine* l = new TLine(x1, y1, x2, y2);
+        l->SetLineColor(color);
+        l->SetLineWidth(width);
+        l->SetLineStyle(style);
+
+        DrawWithoutFocus(l, "SAME");
+}
+
 void GraphWindowClass::ShowAndFocus()
 {
   RasterWindow->fCanvas->cd();

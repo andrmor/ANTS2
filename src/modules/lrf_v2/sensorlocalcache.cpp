@@ -175,7 +175,7 @@ bool SensorLocalCache::cacheGroup(const std::vector<PMsensor> *sensors, bool adj
 
         for (int ipmIndex = 0; ipmIndex < pmsInGroup; ipmIndex++)
         {
-            fprintf(stderr, "gain %d = %lf\n", (*sensors)[ipmIndex].GetIndex(), gains[ipmIndex]);
+            //fprintf(stderr, "gain %d = %lf\n", (*sensors)[ipmIndex].GetIndex(), gains[ipmIndex]);
             double invgain = 1.0/gains[ipmIndex];
             double *pmsig = &sigsig[numGoodEvents*ipmIndex];
             for (int ipts = 0; ipts < numGoodEvents; ipts++)
@@ -192,7 +192,7 @@ void SensorLocalCache::calcRelativeGains2D(int ngrid, unsigned int pmsCount)
     gains[0] = 1.0;
     char filename[32];
     //qDebug() << "CalcGains: irgp=" << igrp << "; count: " << pmsCount;
-    sprintf(filename, "gains%d.root", igrp);
+    //sprintf(filename, "gains%d.root", igrp);
     TFile *file = new TFile(filename, "recreate");
     TProfile2D hp0("hpgains0", "hpgains0", ngrid, minx, maxx, ngrid, miny, maxy);
     for (int i = 0; i < numGoodEvents; i++)

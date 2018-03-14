@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
         QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
         GenScriptWindow.SetInterfaceObject(sim, "sim");
 
-        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, GlobSet.RecNumTreads);
+        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         GenScriptWindow.SetInterfaceObject(rec, "rec");
 
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
         InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
         SM.SetInterfaceObject(sim, "sim");
 #endif
-        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, GlobSet.RecNumTreads);
+        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
         SM.SetInterfaceObject(rec, "rec");
         AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
         SM.SetInterfaceObject(lrf, "lrf");

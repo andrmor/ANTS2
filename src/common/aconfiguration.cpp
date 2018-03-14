@@ -163,8 +163,8 @@ bool AConfiguration::LoadConfig(QString fileName, bool DetConstructor, bool SimS
 
     if (json.isEmpty())
       {
-        ErrorString = "File does not contain json object:\nWrong file or unsupported old format";
-        qWarning() << "ErrorString";
+        ErrorString = fileName + " is not valid configuration file";
+        qWarning() << ErrorString;
         return false;
       }
     if (jsout) *jsout = json; //for global script mode

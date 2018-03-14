@@ -30,6 +30,7 @@ class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
 class QJsonValue;
+class TmpObjHubClass;
 
 // ====== interfaces which do not require GUI ======
 
@@ -77,7 +78,7 @@ class InterfaceToReconstructor : public AScriptInterface
   Q_OBJECT
 
 public:
-  InterfaceToReconstructor(ReconstructionManagerClass* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, int RecNumThreads);
+  InterfaceToReconstructor(ReconstructionManagerClass* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, TmpObjHubClass* TmpHub, int RecNumThreads);
   ~InterfaceToReconstructor(){}
 
   virtual void ForceStop() override;
@@ -114,11 +115,16 @@ public slots:
   void AddRectangularManisfetItem(double x, double y, double dX, double dY, double Angle);  
   void SetManifestItemLineProperties(int i, int color, int width, int style);
 
+  //signal per ph el extraction
+  const QVariant GetSignalPerPhE_peaks() const;
+  const QVariant GetSignalPerPhE_stat() const;
+
 private:
   ReconstructionManagerClass* RManager;
   AConfiguration* Config;
   EventsDataClass* EventsDataHub;
   APmGroupsManager* PMgroups;
+  TmpObjHubClass* TmpHub;
 
   int RecNumThreads;
 
@@ -451,6 +457,8 @@ public slots:
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
   void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
+
+  void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
 
   //basket operation
   void AddToBasket(QString Title);

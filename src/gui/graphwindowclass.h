@@ -136,6 +136,8 @@ public:
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
 
+    void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
+
     void OnBusyOn();
     void OnBusyOff();
 

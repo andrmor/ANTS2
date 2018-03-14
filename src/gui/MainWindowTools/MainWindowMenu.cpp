@@ -318,7 +318,8 @@ void MainWindow::on_actionLoad_configuration_triggered()
   QString fileName = fileDialog.getOpenFileName(this,"Load configuration", GlobSet->LastOpenDir, "All files (*.*)");
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-  Config->LoadConfig(fileName);
+  bool bOK = Config->LoadConfig(fileName);
+  if (!bOK) message(Config->ErrorString, this);
   if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry();
 }
 

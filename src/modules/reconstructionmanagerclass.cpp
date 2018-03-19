@@ -34,6 +34,7 @@
 #include "TError.h"
 
 ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
+    EventsDataHub(eventsDataHub), Detector(Detector), PMs(Detector->PMs), PMgroups(Detector->PMgroups), LRFs(Detector->LRFs), TmpObjHub(TmpObjHub)
 {
   NumThreads = 1;
   bBusy = false;

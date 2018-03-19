@@ -8,6 +8,7 @@
 #include "apositionenergyrecords.h"
 
 #include <QDebug>
+#include <QApplication>
 
 #include "TH1D.h"
 #include "TFitResultPtr.h"
@@ -116,6 +117,7 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
         {
             int ipr = 100.0 * iev / EventsDataHub.Events.size();
             emit progressChanged(ipr);
+            qApp->processEvents();
         }
         const AReconRecord* rec = EventsDataHub.ReconstructionData.at(0).at(iev);
 
@@ -137,6 +139,7 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
             if ( r2 < minRange2  ||  r2 > maxRange2 ) continue;
 
             double AvSig = Detector.LRFs->getLRF(ipm, x, y, z);
+            if (AvSig <= 0) continue;
             double sig = EventsDataHub.Events.at(iev).at(ipm);
             double delta2 = sig/energy - AvSig;
             delta2 *= delta2;

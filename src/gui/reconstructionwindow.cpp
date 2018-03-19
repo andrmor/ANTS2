@@ -5824,7 +5824,10 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
   ReconstructionManager->Calibrator_Stat->SetRange(ui->ledMinRangeChanPerPhEl->text().toDouble(), ui->ledMaxRangeChanPerPhEl->text().toDouble());
   ReconstructionManager->Calibrator_Stat->SetThresholdSigmaCalc(ui->sbSignalPerPhEl_Sigma_Threshold->value());
 
+  MW->WindowNavigator->BusyOn();
   bool bOK = ReconstructionManager->Calibrator_Stat->PrepareData();
+  MW->WindowNavigator->BusyOff();
+
   if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
   return;
 

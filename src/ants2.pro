@@ -279,7 +279,8 @@ SOURCES += main.cpp \
     scriptmode/arootgraphrecord.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
-    common/arootobjbase.cpp
+    common/arootobjbase.cpp \
+    common/acalibratorsignalperphel.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -405,7 +406,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
     scriptmode/aroothistrecord.h \
-    common/arootobjbase.h
+    common/arootobjbase.h \
+    common/acalibratorsignalperphel.h
 
 # --- SIM ---
 ants2_SIM {

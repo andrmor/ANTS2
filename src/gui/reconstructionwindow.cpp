@@ -5801,6 +5801,22 @@ void ReconstructionWindow::on_pbCopyFromRec_clicked()
     ui->ledCustomTo2->setText(ui->ledYto->text());
 }
 
+double ReconstructionWindow::calculateSignalLimit(int ipm, double range)
+{
+    double x0 = MW->Detector->PMs->X(ipm);
+    double y0 = MW->Detector->PMs->Y(ipm);
+
+    double sig = 0;
+    do
+    {
+        sig = Detector->LRFs->getLRF(ipm, x0+range, y0, 0);
+        range -= 0.1;
+        if (range <= 0) return 0;
+    }
+    while (sig <= 0);
+    return sig;
+}
+
 void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 {
   if (EventsDataHub->isEmpty()) return;
@@ -5838,12 +5854,15 @@ void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
       s += ipm;
       TString n = "num";
       n += ipm;
-      TH1D* tmp1 = new TH1D(s, "sigma", ui->pbBinsChansPerPhEl->value(), 0,0);
+
+      double min = calculateSignalLimit(ipm, minRange);
+      double max = calculateSignalLimit(ipm, maxRange);
+      TH1D* tmp1 = new TH1D(s, "sigma", ui->pbBinsChansPerPhEl->value(), min,max);
 
       MW->TmpHub->SigmaHists.append(tmp1);
       tmp1->GetXaxis()->SetTitle("Average signal");
       tmp1->GetYaxis()->SetTitle("Sigma square");
-      TH1D* tmp2 = new TH1D(n, "number", ui->pbBinsChansPerPhEl->value(), 0,0); //it seems both  hists update axis synchronously. Same result if fix max range
+      TH1D* tmp2 = new TH1D(n, "number", ui->pbBinsChansPerPhEl->value(), min,max);
       numberHists.append(tmp2);
     }
 

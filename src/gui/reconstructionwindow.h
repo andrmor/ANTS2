@@ -618,6 +618,7 @@ private:
   bool IntersectionOfTwoLines(double A1, double B1, double C1, double A2, double B2, double C2, double* result);
 
   void showSensorGroup(int igroup);
+  double calculateSignalLimit(int ipm, double range);
 public slots:
   void RefreshOnTimer(int Progress, double usPerEv); //update timer for reconstruction progress
 

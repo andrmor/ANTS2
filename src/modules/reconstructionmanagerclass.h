@@ -18,13 +18,15 @@
 #include <atomic>
 
 class EventsDataClass;
+class DetectorClass;
 class pms;
 class APmGroupsManager;
 class ALrfModuleSelector;
-class TGeoManager;
+class TmpObjHubClass;
 class DynamicPassivesHandler;
 class ProcessorClass;
 class NNmoduleClass;
+class ACalibratorSignalPerPhEl_Stat;
 #ifdef ANTS_FANN
 class NeuralNetworksModule;
 #endif
@@ -41,8 +43,7 @@ class ReconstructionManagerClass : public QObject
   friend class EventFilterClass;
 
 public:
-  //ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *detector);
-  ReconstructionManagerClass(EventsDataClass *eventsDataHub, pms* PMs, APmGroupsManager* PMgroups, ALrfModuleSelector* LRFs, TGeoManager* *PGeoManager = 0);
+  ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass* Detector, TmpObjHubClass* TmpObjHub);
   ~ReconstructionManagerClass();
 
   bool reconstructAll(QJsonObject &json, int numThreads, bool fShow = true); //fShow=true -> send signal to show reconstructed positions if Geom window is visible
@@ -63,12 +64,16 @@ public:
 #endif
 
   EventsDataClass *EventsDataHub;
+  DetectorClass* Detector;
   pms* PMs;
   APmGroupsManager* PMgroups;
   ALrfModuleSelector* LRFs;
 
+  //Calibrators for signal per photo electron
+  ACalibratorSignalPerPhEl_Stat* Calibrator_Stat; //based on statistics
+
 private:
-  TGeoManager** PGeoManager;  //pointer to pinter, since GeoManager recreated on each detector rebuild
+  TmpObjHubClass* TmpObjHub;
   QVector<ReconstructionSettings> RecSet;
   int CurrentGroup;
   QVector<AEventFilteringSettings> FiltSet;

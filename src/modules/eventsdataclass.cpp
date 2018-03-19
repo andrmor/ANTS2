@@ -132,7 +132,7 @@ void EventsDataClass::initializeSimStat(QVector<const AGeoObject*> monitorRecord
 }
 #endif
 
-bool EventsDataClass::isReconstructionDataEmpty(int igroup)
+bool EventsDataClass::isReconstructionDataEmpty(int igroup) const
 {
     if (ReconstructionData.isEmpty()) return true;
     if (igroup > ReconstructionData.size()-1) return true;
@@ -347,7 +347,7 @@ void EventsDataClass::Purge(int OnePer, int igroup)
   emit requestEventsGuiUpdate();
 }
 
-bool EventsDataClass::isReconstructionReady(int igroup)
+bool EventsDataClass::isReconstructionReady(int igroup) const
 {
     if (igroup<0 || igroup > ReconstructionData.size()-1)
     {
@@ -426,13 +426,13 @@ void EventsDataClass::resetReconstructionData(int numGroups)
   clearReconstructionTree();
 }
 
-int EventsDataClass::getTimeBins()
+int EventsDataClass::getTimeBins() const
 {
   if (TimedEvents.isEmpty()) return 0;
   return TimedEvents[0].size();
 }
 
-int EventsDataClass::getNumPMs()
+int EventsDataClass::getNumPMs() const
 {
     if (Events.isEmpty()) return 0;
     return Events[0].size();

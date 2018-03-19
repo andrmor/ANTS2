@@ -9,6 +9,9 @@
 #include "apositionenergyrecords.h"
 #include "pms.h"
 #include "apmgroupsmanager.h"
+#include "acalibratorsignalperphel.h"
+#include "detectorclass.h"
+#include "tmpobjhubclass.h"
 
 #ifdef ANTS_FLANN
 #include "nnmoduleclass.h"
@@ -30,14 +33,7 @@
 #include "TGeoManager.h"
 #include "TError.h"
 
-
-//ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *detector)
-ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub,
-                                                       pms* PMs,
-                                                       APmGroupsManager* PMgroups,
-                                                       ALrfModuleSelector *LRFs,
-                                                       TGeoManager** PGeoManager) :
-    EventsDataHub(eventsDataHub), PMs(PMs), PMgroups(PMgroups), LRFs(LRFs), PGeoManager(PGeoManager)
+ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
 {
   NumThreads = 1;
   bBusy = false;
@@ -51,6 +47,8 @@ ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDa
   KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
   qDebug() << "->Nearest neighbour module created";
 #endif
+
+  Calibrator_Stat = new ACalibratorSignalPerPhEl_Stat(*EventsDataHub, TmpObjHub->SigmaHists, TmpObjHub->ChPerPhEl_Sigma2, *Detector);
 }
 
 ReconstructionManagerClass::~ReconstructionManagerClass()
@@ -64,6 +62,8 @@ ReconstructionManagerClass::~ReconstructionManagerClass()
   delete ANNmodule;
   //qDebug() << "  NeuralNetworks module deleted";
 #endif
+
+    delete Calibrator_Stat;
 }
 
 bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
@@ -657,8 +657,8 @@ void ReconstructionManagerClass::singleThreadEventFilters()
 #endif
 
   TGeoNavigator* navi = 0;
-  if (FiltS->fSpF_LimitToObj && PGeoManager)
-      navi = (*PGeoManager)->GetCurrentNavigator();
+  if (FiltS->fSpF_LimitToObj)
+      navi = Detector->GeoManager->GetCurrentNavigator();
   else FiltS->fSpF_LimitToObj = false;
 
   // main cycle

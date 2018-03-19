@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
     qDebug() << "Simulation manager created";
 #endif
 
-    ReconstructionManagerClass ReconstructionManager(&EventsDataHub, Detector.PMs, Detector.PMgroups, Detector.LRFs, &Detector.GeoManager);
-    qDebug() << "Reconstruction manager created";
-
     TmpObjHubClass TmpHub;
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
     qDebug() << "Tmp objects hub created";
+
+    ReconstructionManagerClass ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);
+    qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);

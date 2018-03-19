@@ -6,7 +6,7 @@
 #include "ageomarkerclass.h"
 #include "graphwindowclass.h"
 #include "windownavigatorclass.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "globalsettingsclass.h"
 #include "apositionenergyrecords.h"
 #include "amessage.h"

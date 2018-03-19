@@ -1,10 +1,10 @@
-#ifndef RECONSTRUCTIONMANAGERCLASS_H
-#define RECONSTRUCTIONMANAGERCLASS_H
+#ifndef ARECONSTRUCTIONMANAGER_H
+#define ARECONSTRUCTIONMANAGER_H
 
 /////////////////////////////////////
 // Performs reconstruction: CoG, MG and RootMini - multithread; CUDA and ANN - single thread;
-// CoG - preparation phase for all algorithms (multithread)
-// Then recons with selected algorithm
+// CoG - preparation phase for most of algorithms (multithread)
+// Then recon with selected algorithm
 // Chi2 calculation (multithread)
 // Basic filtering  (multithread)
 // Advanced filters: correlation, PrimScint, kNN filters - single thread!
@@ -31,7 +31,7 @@ class ACalibratorSignalPerPhEl_Stat;
 class NeuralNetworksModule;
 #endif
 
-class ReconstructionManagerClass : public QObject
+class AReconstructionManager : public QObject
 {
   Q_OBJECT
   friend class ProcessorClass;
@@ -43,8 +43,8 @@ class ReconstructionManagerClass : public QObject
   friend class EventFilterClass;
 
 public:
-  ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass* Detector, TmpObjHubClass* TmpObjHub);
-  ~ReconstructionManagerClass();
+  AReconstructionManager(EventsDataClass *eventsDataHub, DetectorClass* Detector, TmpObjHubClass* TmpObjHub);
+  ~AReconstructionManager();
 
   bool reconstructAll(QJsonObject &json, int numThreads, bool fShow = true); //fShow=true -> send signal to show reconstructed positions if Geom window is visible
   void filterEvents(QJsonObject &json, int NumThreads);
@@ -109,4 +109,4 @@ signals:
   void RequestShowStatistics(); // emitted after, e.g., refiltering events (show good events)
 };
 
-#endif // RECONSTRUCTIONMANAGERCLASS_H
+#endif // ARECONSTRUCTIONMANAGER_H

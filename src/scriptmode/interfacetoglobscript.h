@@ -25,7 +25,7 @@ class GraphWindowClass;
 class pms;
 class TF2;
 class AConfiguration;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
@@ -78,7 +78,7 @@ class InterfaceToReconstructor : public AScriptInterface
   Q_OBJECT
 
 public:
-  InterfaceToReconstructor(ReconstructionManagerClass* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, TmpObjHubClass* TmpHub, int RecNumThreads);
+  InterfaceToReconstructor(AReconstructionManager* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, TmpObjHubClass* TmpHub, int RecNumThreads);
   ~InterfaceToReconstructor(){}
 
   virtual void ForceStop() override;
@@ -120,7 +120,7 @@ public slots:
   const QVariant GetSignalPerPhE_stat() const;
 
 private:
-  ReconstructionManagerClass* RManager;
+  AReconstructionManager* RManager;
   AConfiguration* Config;
   EventsDataClass* EventsDataHub;
   APmGroupsManager* PMgroups;

@@ -20,7 +20,7 @@
 #include "credits.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "pmtypeclass.h"
 #include "globalsettingswindowclass.h"
 #include "globalsettingsclass.h"

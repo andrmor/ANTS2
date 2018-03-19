@@ -14,7 +14,7 @@
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
 #include "reconstructionwindow.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "windownavigatorclass.h"
 #include "simulationmanager.h"
 #include "lrfwindow.h"

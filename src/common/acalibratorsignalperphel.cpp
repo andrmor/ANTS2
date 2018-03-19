@@ -91,15 +91,21 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
         TString s = "pm #";
         s += ipm;
 
-        double min = calculateSignalLimit(ipm, minRange);
-        double max = calculateSignalLimit(ipm, maxRange);
-        qDebug() << "Signal range for PM#" << ipm << "is set to min:"<<min <<"max:"<< max;
-        TH1D* tmp1 = new TH1D("", s, numBins, min,max);
+        double SigForMin = calculateSignalLimit(ipm, minRange);
+        double SigForMax = calculateSignalLimit(ipm, maxRange);
+
+        //  qDebug() << "Signal range for PM#" << ipm << "is set to min:"<<SigForMax <<"max:"<< SigForMin;
+        if (SigForMin <= SigForMax)
+        {
+            LastError = "Defined spatial range results in expected signal at lower bound smaller than for the upper one";
+            return false;
+        }
+        TH1D* tmp1 = new TH1D("", s, numBins, SigForMax,SigForMin);
 
         DataHists.append(tmp1);
         tmp1->GetXaxis()->SetTitle("Average signal");
         tmp1->GetYaxis()->SetTitle("Sigma square");
-        TH1D* tmp2 = new TH1D("", s, numBins, min,max);
+        TH1D* tmp2 = new TH1D("", s, numBins, SigForMax,SigForMin);
         numberHists.append(tmp2);
     }
 
@@ -143,9 +149,10 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
     //calculating sigmas
     for (int ipm=0; ipm<numPMs; ipm++)
     {
-        for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()-1; i++) //ignoring under and over bins
+        for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()+1; i++) //ignoring under and over bins
         {
             const double numberEventsInBin = numberHists[ipm]->GetBinContent(i);
+            //  qDebug() << ipm << i << numberEventsInBin << sigmaCalculationThreshold;
             if (numberEventsInBin < sigmaCalculationThreshold)
                 DataHists[ipm]->SetBinContent(i, 0);
             else

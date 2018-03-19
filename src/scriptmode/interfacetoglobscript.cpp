@@ -12,7 +12,7 @@
 #include "pmtypeclass.h"
 #include "aconfiguration.h"
 #include "apreprocessingsettings.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "apmgroupsmanager.h"
 #include "modules/lrf_v3/arepository.h"
 #include "modules/lrf_v3/asensor.h"
@@ -1891,7 +1891,7 @@ void InterfaceToGeoWin::ShowEnergyVector()
 //----------------------------------
 
 
-InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager,
+InterfaceToReconstructor::InterfaceToReconstructor(AReconstructionManager *RManager,
                                                    AConfiguration *Config,
                                                    EventsDataClass *EventsDataHub,
                                                    TmpObjHubClass* TmpHub,

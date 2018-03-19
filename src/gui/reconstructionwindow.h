@@ -23,7 +23,7 @@ class EventsDataClass;
 struct CorrelationFilterStructure;
 class QSpinBox;
 class QLineEdit;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class TObject;
 class DetectorClass;
 class APmGroupsManager;
@@ -77,6 +77,7 @@ public:
 
   //GUI updates:
 public slots:
+  void SetProgress(int val);
   void onRequestEventsGuiUpdate();
   void OnEventsDataAdded();
   void onUpdatePMgroupIndication();
@@ -100,7 +101,6 @@ public:
   void ShowFiltering();
 
   void ResetStop(); //reset stop button
-  void SetProgress(int val);
 
   void onBusyOn();
   void onBusyOff();
@@ -542,7 +542,7 @@ private:
 
   //aliases
   EventsDataClass* EventsDataHub;
-  ReconstructionManagerClass* ReconstructionManager; //only pointer!
+  AReconstructionManager* ReconstructionManager; //only pointer!
   DetectorClass* Detector;
   APmGroupsManager* PMgroups;
   pms* PMs;

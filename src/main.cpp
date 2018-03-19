@@ -2,7 +2,7 @@
 
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
 #include "aconfiguration.h"
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
     qDebug() << "Tmp objects hub created";
 
-    ReconstructionManagerClass ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);
+    AReconstructionManager ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);
     qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;

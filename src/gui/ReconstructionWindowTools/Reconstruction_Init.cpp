@@ -8,9 +8,11 @@
 #include "CorrelationFilters.h"
 #include "alrfmoduleselector.h"
 #include "arepository.h"
+#include "areconstructionmanager.h"
+#include "acalibratorsignalperphel.h"
 
 #ifdef ANTS_FLANN
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "nnmoduleclass.h"
 #endif
 
@@ -175,5 +177,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
 
   on_cbLimitNumberEvents_toggled(ui->cbLimitNumberEvents->isChecked());
   on_cobHowToAverageZ_currentIndexChanged(ui->cobHowToAverageZ->currentIndex());
+
+  connect(ReconstructionManager->Calibrator_Stat, &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
 }
 

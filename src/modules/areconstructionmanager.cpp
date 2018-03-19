@@ -1,4 +1,4 @@
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "eventsdataclass.h"
 #include "CorrelationFilters.h"
 #include "alrfmoduleselector.h"
@@ -16,9 +16,11 @@
 #ifdef ANTS_FLANN
 #include "nnmoduleclass.h"
 #endif
+
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
 #endif
+
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
 #endif
@@ -33,7 +35,7 @@
 #include "TGeoManager.h"
 #include "TError.h"
 
-ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
+AReconstructionManager::AReconstructionManager(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
     EventsDataHub(eventsDataHub), Detector(Detector), PMs(Detector->PMs), PMgroups(Detector->PMgroups), LRFs(Detector->LRFs), TmpObjHub(TmpObjHub)
 {
   NumThreads = 1;
@@ -52,7 +54,7 @@ ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDa
   Calibrator_Stat = new ACalibratorSignalPerPhEl_Stat(*EventsDataHub, TmpObjHub->SigmaHists, TmpObjHub->ChPerPhEl_Sigma2, *Detector);
 }
 
-ReconstructionManagerClass::~ReconstructionManagerClass()
+AReconstructionManager::~AReconstructionManager()
 {
 #ifdef ANTS_FLANN
   delete KNNmodule;
@@ -64,13 +66,13 @@ ReconstructionManagerClass::~ReconstructionManagerClass()
   //qDebug() << "  NeuralNetworks module deleted";
 #endif
 
-    delete Calibrator_Stat;
+  delete Calibrator_Stat;
 }
 
-bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
+bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
 {
    //qDebug() << "==> Reconstruct all events triggered";    
-  bool fOK = ReconstructionManagerClass::fillSettingsAndVerify(json, true);
+  bool fOK = AReconstructionManager::fillSettingsAndVerify(json, true);
   if (!fOK)
     {
       qWarning() << "Reconstruction manager reports fail in processing of configuration:\n"
@@ -271,7 +273,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
   return true;
 }
 
-void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorClass*> &todo)
+void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*> &todo)
 // Algorithm options:
 //0 - CoG reconstruction, 1 - MG, 2 - RootMini
 //10 - Calculate Chi2, 11 - process event filters
@@ -320,7 +322,7 @@ void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorCl
   while (from<numEvents);
 }
 
-void ReconstructionManagerClass::doFilters()
+void AReconstructionManager::doFilters()
 {
     QList<ProcessorClass*> todo;
 
@@ -341,7 +343,7 @@ void ReconstructionManagerClass::doFilters()
     bBusy = false;
 }
 
-bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs)
+bool AReconstructionManager::fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs)
 {
   if (EventsDataHub->isEmpty())
     {
@@ -463,7 +465,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
   //filling and checking event filtering settings
   FiltSet.clear();
 
-  bool fOK = ReconstructionManagerClass::configureFilters(jsReconSet);
+  bool fOK = AReconstructionManager::configureFilters(jsReconSet);
   if (!fOK) return false;
 
   if (RecSet.size() != FiltSet.size())
@@ -476,7 +478,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
   return true;
 }
 
-bool ReconstructionManagerClass::configureFilters(QJsonObject &json)
+bool AReconstructionManager::configureFilters(QJsonObject &json)
 {
   //expecting json to be "ReconstructionConfig" object
   if ( !json.contains("FilterOptions") )
@@ -518,12 +520,12 @@ bool ReconstructionManagerClass::configureFilters(QJsonObject &json)
   return true;
 }
 
-void ReconstructionManagerClass::onLRFsCopied()
+void AReconstructionManager::onLRFsCopied()
 {
     fDoingCopyLRFs.store(false);
 }
 
-bool ReconstructionManagerClass::run(QList<ProcessorClass *> reconstructorList)
+bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    
   fStopRequested = false;
   QList<QThread*> threads;  
@@ -595,10 +597,10 @@ bool ReconstructionManagerClass::run(QList<ProcessorClass *> reconstructorList)
   return !fStopRequested;
 }
 
-void ReconstructionManagerClass::filterEvents(QJsonObject &json, int numThreads)
+void AReconstructionManager::filterEvents(QJsonObject &json, int numThreads)
 { 
     //qDebug() << "==>Filter all events triggered";
-  bool fOK = ReconstructionManagerClass::fillSettingsAndVerify(json, false);
+  bool fOK = AReconstructionManager::fillSettingsAndVerify(json, false);
   if (!fOK)
       {
          qWarning() << "Reconstruction manager reports fail in processing of configuration:\n"
@@ -618,7 +620,7 @@ void ReconstructionManagerClass::filterEvents(QJsonObject &json, int numThreads)
   emit RequestShowStatistics();
 }
 
-void ReconstructionManagerClass::assureReconstructionDataContainersExist()
+void AReconstructionManager::assureReconstructionDataContainersExist()
 {
     for (CurrentGroup = 0; CurrentGroup<FiltSet.size(); CurrentGroup++)
     {
@@ -635,7 +637,7 @@ void ReconstructionManagerClass::assureReconstructionDataContainersExist()
     }
 }
 
-void ReconstructionManagerClass::singleThreadEventFilters()
+void AReconstructionManager::singleThreadEventFilters()
 {
   //qDebug() << "Running single thread filters";
   //GoodEvent status already set by multithread filters!
@@ -742,7 +744,7 @@ void ReconstructionManagerClass::singleThreadEventFilters()
   //qDebug() << "Single thread filters done!";
 }
 
-void ReconstructionManagerClass::onRequestClearKNNfilter()
+void AReconstructionManager::onRequestClearKNNfilter()
 {
 #ifdef ANTS_FLANN
    KNNmodule->Filter.clear();

@@ -20,7 +20,7 @@
 #include "genericscriptwindowclass.h"
 #include "eventsdataclass.h"
 #include "dynamicpassiveshandler.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "globalsettingsclass.h"
 #include "arootlineconfigurator.h"
 #include "ageomarkerclass.h"
@@ -36,6 +36,7 @@
 #include "arepository.h"
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
+#include "acalibratorsignalperphel.h"
 
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
@@ -5819,6 +5820,15 @@ double ReconstructionWindow::calculateSignalLimit(int ipm, double range)
 
 void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 {
+  ReconstructionManager->Calibrator_Stat->SetNumBins(ui->pbBinsChansPerPhEl->value());
+  ReconstructionManager->Calibrator_Stat->SetRange(ui->ledMinRangeChanPerPhEl->text().toDouble(), ui->ledMaxRangeChanPerPhEl->text().toDouble());
+  ReconstructionManager->Calibrator_Stat->SetThresholdSigmaCalc(ui->sbSignalPerPhEl_Sigma_Threshold->value());
+
+  bool bOK = ReconstructionManager->Calibrator_Stat->PrepareData();
+  if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
+  return;
+
+
   if (EventsDataHub->isEmpty()) return;
   if (PMgroups->countPMgroups()>1)
     {
@@ -5946,7 +5956,25 @@ void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
 
 void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
 {
-  int ipm = ui->sbChanPerPhElPM->value();
+    ReconstructionManager->Calibrator_Stat->SetENF(ui->ledENFforChanPerPhEl->text().toDouble());
+    ReconstructionManager->Calibrator_Stat->SetSignalLimits(ui->ledLowerLimitForChanPerPhEl->text().toDouble(), ui->ledUpperLimitForChanPerPhEl->text().toDouble());
+
+    int ipm = ui->sbChanPerPhElPM->value();
+    bool bOK;
+
+    if (ui->cbExtractChPerPhElForAll->isChecked())
+        bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl();
+    else
+        bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl(ipm);
+
+    if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
+
+    QString s = "";
+    if (ipm < MW->TmpHub->ChPerPhEl_Sigma2.size()) s = QString::number(MW->TmpHub->ChPerPhEl_Sigma2.at(ipm), 'g', 3);
+    ui->ledChansPerPhEl->setText(s);
+
+    return;
+
   int numPMs = MW->Detector->PMs->count();
 
   if (MW->TmpHub->SigmaHists.size() != numPMs)

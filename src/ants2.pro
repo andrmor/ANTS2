@@ -196,7 +196,6 @@ SOURCES += main.cpp \
     modules/pms.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
-    modules/reconstructionmanagerclass.cpp \
     modules/processorclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
@@ -280,7 +279,8 @@ SOURCES += main.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
     common/arootobjbase.cpp \
-    common/acalibratorsignalperphel.cpp
+    common/acalibratorsignalperphel.cpp \
+    modules/areconstructionmanager.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -311,7 +311,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
-    modules/reconstructionmanagerclass.h \
     modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
@@ -407,7 +406,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/arootobjcollection.h \
     scriptmode/aroothistrecord.h \
     common/arootobjbase.h \
-    common/acalibratorsignalperphel.h
+    common/acalibratorsignalperphel.h \
+    modules/areconstructionmanager.h
 
 # --- SIM ---
 ants2_SIM {

@@ -26,7 +26,7 @@ class ExamplesWindow;
 class CheckUpWindowClass;
 class DetectorAddOnsWindow;
 class pms;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class MaterialInspectorWindow;
 class OutputWindow;
 class QComboBox;
@@ -75,7 +75,7 @@ public:
                EventsDataClass *EventsDataHub,
                TApplication *RootApp,
                ASimulationManager *SimulationManager,
-               ReconstructionManagerClass *ReconstructionManager,
+               AReconstructionManager *ReconstructionManager,
                ANetworkModule *Net,
                TmpObjHubClass *TmpHub,
                GlobalSettingsClass *GlobSet);
@@ -90,7 +90,7 @@ public:
     TApplication *RootApp;
     ASimulationManager* SimulationManager;
     ParticleSourcesClass* ParticleSources;      //alias
-    ReconstructionManagerClass *ReconstructionManager;
+    AReconstructionManager *ReconstructionManager;
     ANetworkModule* NetModule;
     TmpObjHubClass *TmpHub;
     GlobalSettingsClass* GlobSet;

@@ -65,7 +65,7 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
         LastError = "There are no events data";
         return false;
     }
-    if (Detector.PMgroups->countPMgroups()>1)
+    if (Detector.PMgroups->countPMgroups() > 1)
     {
         LastError = "This procedure is implemented only for the case of one PM group";
         return false;
@@ -151,17 +151,21 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
         }
     }
 
-    //calculating sigmas
+    //calculating final sigma2
     for (int ipm=0; ipm<numPMs; ipm++)
     {
-        for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()+1; i++) //ignoring under and over bins
+        const int Bins = numberHists.at(ipm)->GetXaxis()->GetNbins();
+        for (int i = 1; i < Bins+1; i++) //ignoring underflow (#0) and overflow (#Bins+1) bins
         {
-            const double numberEventsInBin = numberHists[ipm]->GetBinContent(i);
-            //  qDebug() << ipm << i << numberEventsInBin << sigmaCalculationThreshold;
+            const double numberEventsInBin = numberHists.at(ipm)->GetBinContent(i);  //it is double in ROOT :)
+            double sigma2 = DataHists.at(ipm)->GetBinContent(i);
+
             if (numberEventsInBin < sigmaCalculationThreshold)
-                DataHists[ipm]->SetBinContent(i, 0);
+                sigma2 = 0;
             else
-                DataHists[ipm]->SetBinContent(i, DataHists.at(ipm)->GetBinContent(i) / numberEventsInBin);
+                sigma2 /= numberEventsInBin;
+
+            DataHists[ipm]->SetBinContent(i, sigma2);
         }
     }
 
@@ -198,7 +202,7 @@ bool ACalibratorSignalPerPhEl_Stat::ExtractSignalPerPhEl(int ipm)
         return false;
     }
 
-    double cutoff = fit->Value(0);
+    //double cutoff = fit->Value(0);
     double ChannelsPerPhEl = fit->Value(1);
     if (enf < 1.0e-10)
     {
@@ -208,7 +212,7 @@ bool ACalibratorSignalPerPhEl_Stat::ExtractSignalPerPhEl(int ipm)
     }
 
     ChannelsPerPhEl /= enf;
-    qDebug() << ipm << "> ChPerPhEl:"<<ChannelsPerPhEl<<" const:"<<cutoff;
+    //  qDebug() << ipm << "> ChPerPhEl:"<<ChannelsPerPhEl<<" const:"<<cutoff;
 
     SignalPerPhEl[ipm] = ChannelsPerPhEl;
     return true;

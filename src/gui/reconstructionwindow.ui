@@ -10979,6 +10979,9 @@ in minimization</string>
              <bold>false</bold>
             </font>
            </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
           </widget>
           <widget class="Line" name="line_87">
            <property name="geometry">
@@ -11035,6 +11038,9 @@ in minimization</string>
            </property>
            <property name="text">
             <string>Perform for all PMs</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
           <widget class="Line" name="line_88">

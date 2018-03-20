@@ -5802,45 +5802,40 @@ void ReconstructionWindow::on_pbCopyFromRec_clicked()
     ui->ledCustomTo2->setText(ui->ledYto->text());
 }
 
-double ReconstructionWindow::calculateSignalLimit(int ipm, double range)
-{
-    double x0 = MW->Detector->PMs->X(ipm);
-    double y0 = MW->Detector->PMs->Y(ipm);
-
-    double sig = 0;
-    do
-    {
-        sig = Detector->LRFs->getLRF(ipm, x0+range, y0, 0);
-        range -= 0.1;
-        if (range <= 0) return 0;
-    }
-    while (sig <= 0);
-    return sig;
-}
-
 void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 {
-  ReconstructionManager->Calibrator_Stat->SetNumBins(ui->pbBinsChansPerPhEl->value());
-  ReconstructionManager->Calibrator_Stat->SetRange(ui->ledMinRangeChanPerPhEl->text().toDouble(), ui->ledMaxRangeChanPerPhEl->text().toDouble());
-  ReconstructionManager->Calibrator_Stat->SetThresholdSigmaCalc(ui->sbSignalPerPhEl_Sigma_Threshold->value());
+  ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+  c->SetNumBins(ui->pbBinsChansPerPhEl->value());
+  c->SetRange(ui->ledMinRangeChanPerPhEl->text().toDouble(), ui->ledMaxRangeChanPerPhEl->text().toDouble());
+  c->SetThresholdSigmaCalc(ui->sbSignalPerPhEl_Sigma_Threshold->value());
 
   MW->WindowNavigator->BusyOn();
-  bool bOK = ReconstructionManager->Calibrator_Stat->PrepareData();
+  bool bOK = c->PrepareData();
   MW->WindowNavigator->BusyOff();
 
-  if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
+  if (!bOK) message(c->GetLastError(), this);
   SetProgress(100);
 }
 
 void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
 {
-  int ipm = ui->sbChanPerPhElPM->value();
-  if (ipm >= MW->TmpHub->SigmaHists.size())
+    int ipm = ui->sbChanPerPhElPM->value();
+    if (ipm >= MW->TmpHub->SigmaHists.size())
     {
-      message("Wrong PM number or data not ready!", this);
-      return;
+        message("Wrong PM number or data not ready!", this);
+        return;
     }
-  MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
+
+    ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+    TH1D* h = c->GetHistogram(ipm);
+
+    if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
+    MW->GraphWindow->DrawWithoutFocus(h, "", true, false);
+
+    const double SigPPe = c->GetSignalPerPhEl(ipm);
+
+    const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe, 'g', 3);
+    MW->GraphWindow->ShowTextPanel(t);
 }
 
 void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
@@ -5862,24 +5857,28 @@ void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
 
 void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
 {
-    ReconstructionManager->Calibrator_Stat->SetENF(ui->ledENFforChanPerPhEl->text().toDouble());
-    ReconstructionManager->Calibrator_Stat->SetSignalLimits(ui->ledLowerLimitForChanPerPhEl->text().toDouble(), ui->ledUpperLimitForChanPerPhEl->text().toDouble());
+    ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+    c->SetENF(ui->ledENFforChanPerPhEl->text().toDouble());
+    c->SetSignalLimits(ui->ledLowerLimitForChanPerPhEl->text().toDouble(), ui->ledUpperLimitForChanPerPhEl->text().toDouble());
 
     int ipm = ui->sbChanPerPhElPM->value();
     bool bOK;
 
     MW->WindowNavigator->BusyOn();
     if (ui->cbExtractChPerPhElForAll->isChecked())
-        bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl();
+        bOK = c->ExtractSignalPerPhEl();
     else
-        bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl(ipm);
+        bOK = c->ExtractSignalPerPhEl(ipm);
     MW->WindowNavigator->BusyOff();
 
-    if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
+    if (!bOK) message(c->GetLastError(), this);
 
+    const double SigPPe = c->GetSignalPerPhEl(ipm);
     QString s = "";
-    if (ipm < MW->TmpHub->ChPerPhEl_Sigma2.size()) s = QString::number(MW->TmpHub->ChPerPhEl_Sigma2.at(ipm), 'g', 3);
+    if (SigPPe > 0) s = QString::number(SigPPe, 'g', 3);
     ui->ledChansPerPhEl->setText(s);
+
+    on_pbChanPerPhElShow_clicked();
 }
 
 bool ReconstructionWindow::IntersectionOfTwoLines(double A1, double B1, double C1, double A2, double B2, double C2, double *result)
@@ -6440,7 +6439,7 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
         }
 
       const double SigPPe = ReconstructionManager->Calibrator_Peaks->GetSignalPerPhEl(ipm);
-      const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe);
+      const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe, 'g', 3);
       MW->GraphWindow->ShowTextPanel(t);
     }
   MW->GraphWindow->UpdateRootCanvas();

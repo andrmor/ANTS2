@@ -76,6 +76,9 @@ public slots:
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
   void AddPoints(QString GraphName, QVariant xyArray);
 
+  void SetYRange(const QString& GraphName, double min, double max);
+  void SetXRange(const QString& GraphName, double min, double max);
+
   void Sort(const QString& GraphName);
 
   void Draw(QString GraphName, QString options = "APL");

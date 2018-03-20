@@ -90,3 +90,33 @@ void ARootGraphRecord::Sort()
         g->Sort();
     }
 }
+
+void ARootGraphRecord::SetYRange(double min, double max)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+        {
+            g->SetMinimum(min);
+            g->SetMaximum(max);
+        }
+    }
+}
+
+void ARootGraphRecord::SetXRange(double min, double max)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+        {
+            TAxis* axis = g->GetXaxis();
+            if (axis) axis->SetLimits(min, max);
+        }
+    }
+}

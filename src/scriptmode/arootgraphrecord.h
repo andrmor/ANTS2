@@ -24,6 +24,8 @@ public:
     void     AddPoint(double x, double y);
     void     AddPoints(const QVector<double> &xArr, const QVector<double> &yArr);
     void     Sort();
+    void     SetYRange(double min, double max);
+    void     SetXRange(double min, double max);
 
 private:
     QString  TitleX, TitleY;

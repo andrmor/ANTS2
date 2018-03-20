@@ -15,6 +15,8 @@
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TF2.h"
+#include "TLine.h"
+#include "TAttLine.h"
 
 bool ALrfDrawSettings::ReadFromJson(const QJsonObject &json)
 {
@@ -238,9 +240,20 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
          bool fOk = LRFs->getNodes(fUseOldModule, PMnumber, GrX);
          if (fOk)
            {
-             QVector <double> GrY(GrX.size(), 0);             
-             auto tgraph = GraphWindow->MakeGraph(&GrX, &GrY, kBlue, "", "", 2, 6, 0, 0, "", true);
-             GraphWindow->Draw(tgraph, "P same", false);
+             //QVector <double> GrY(GrX.size(), 0);
+             //auto tgraph = GraphWindow->MakeGraph(&GrX, &GrY, kBlue, "", "", 2, 6, 0, 0, "", true);
+             //GraphWindow->Draw(tgraph, "P same", false);
+
+             GraphWindow->UpdateRootCanvas();
+             double yMin = GraphWindow->getCanvasMinY();
+             double yMax = GraphWindow->getCanvasMaxY();
+             for (double& x : GrX)
+             {
+                 TLine* l = new TLine(x, yMin, x, yMax);
+                 l->SetLineColor(1);
+                 l->SetLineStyle(9);
+                 GraphWindow->Draw(l, "same", false);
+             }
            }
       }
 

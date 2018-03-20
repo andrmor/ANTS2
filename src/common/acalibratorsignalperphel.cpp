@@ -42,7 +42,7 @@ TH1D *ACalibratorSignalPerPhEl::GetHistogram(int ipm)
 
 double ACalibratorSignalPerPhEl::GetSignalPerPhEl(int ipm) const
 {
-    if (ipm < 0 || ipm >= SignalPerPhEl.size()) return 0;
+    if (ipm < 0 || ipm >= SignalPerPhEl.size()) return -1;
     return SignalPerPhEl.at(ipm);
 }
 

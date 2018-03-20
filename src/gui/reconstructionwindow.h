@@ -534,6 +534,8 @@ private slots:
 
   void on_cobCGstartOption_currentIndexChanged(int index);
 
+  void on_ledFromPeaksThreshold_editingFinished();
+
 protected:
     bool event(QEvent *event);
 

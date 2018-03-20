@@ -6330,6 +6330,7 @@ void ReconstructionWindow::on_pbUpdateGuiSettingsInJSON_clicked()
     updateGUIsettingsInConfig();
 }
 
+/*
 static Int_t npeaks = 10;
 Double_t fpeaks(Double_t *x, Double_t *par)
 {
@@ -6342,6 +6343,7 @@ Double_t fpeaks(Double_t *x, Double_t *par)
    }
    return result;
 }
+*/
 
 void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 {
@@ -6354,33 +6356,17 @@ void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
     MW->WindowNavigator->BusyOff();
 
     if (!bOK) message(c->GetLastError(), this);
-    return;
-
-    if (EventsDataHub->isEmpty())
-      {
-        message("There are no signal data!", this);
-        return;
-      }
-
-    MW->TmpHub->ClearTmpHistsPeaks();
-    MW->TmpHub->ChPerPhEl_Sigma2.clear();
-
-    for (int ipm=0; ipm<PMs->count(); ipm++)
-    {
-        TH1D* h = new TH1D("", "", ui->sbFromPeaksBins->value(), ui->ledFromPeaksFrom->text().toDouble(),ui->ledFromPeaksTo->text().toDouble());
-        h->SetXTitle("Signal");
-
-      for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
-            h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
-
-      MW->TmpHub->PeakHists << h;
-      if (ipm==0) MW->GraphWindow->Draw(h, "", true, false);
-    }
 }
 
-#include "apeakfinder.h"
-#include "TGraph.h"
-#include "TLine.h"
+void ReconstructionWindow::on_ledFromPeaksThreshold_editingFinished()
+{
+    double val = ui->ledFromPeaksThreshold->text().toDouble();
+    if (val<=0 || val >= 1)
+    {
+        ui->ledFromPeaksThreshold->setText("0.05");
+        message("Threshold has to be more than 0 but less than 1. Setting to 0.05", this);
+    }
+}
 
 void ReconstructionWindow::on_pbFrindPeaks_clicked()
 {
@@ -6394,68 +6380,16 @@ void ReconstructionWindow::on_pbFrindPeaks_clicked()
    MW->WindowNavigator->BusyOff();
 
    if (!bOK) message(c->GetLastError(), this);
-   return;
 
-
-  if (MW->TmpHub->PeakHists.size() != PMs->count())
-  {
-      message("Signal data not ready!", this);
-      return;
-  }
-
-  MW->TmpHub->FoundPeaks.clear();
-  MW->TmpHub->ChPerPhEl_Peaks.clear();
-
-  QVector<int> failedPMs;
-  for (int ipm=0; ipm<PMs->count(); ipm++)
-  {
-      APeakFinder f(MW->TmpHub->PeakHists.at(ipm));
-      QVector<double> peaks = f.findPeaks(ui->ledFromPeaksSigma->text().toDouble(), ui->ledFromPeaksThreshold->text().toDouble(), ui->sbFromPeaksMaxPeaks->value(), true);
-
-      std::sort(peaks.begin(), peaks.end());
-
-      MW->TmpHub->FoundPeaks << peaks;
-
-      if (peaks.size() < 2)
-      {
-          failedPMs << ipm;
-          MW->TmpHub->ChPerPhEl_Peaks << -1;
-          continue;
-      }
-
-      TGraph g;
-      for (int i=0; i<peaks.size(); i++)
-         g.SetPoint(i, i, peaks.at(i));
-
-      double constant, slope;
-      int ifail;
-      g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
-      if ( ifail != 0 )
-      {
-          failedPMs << ipm;
-          MW->TmpHub->ChPerPhEl_Peaks << -1;
-          continue;
-      }
-      else MW->TmpHub->ChPerPhEl_Peaks.append(slope);
-    }
-
-  on_pbFromPeaksShow_clicked();
-  if (!failedPMs.isEmpty())
-  {
-      QString s = "Peaks < 2 or failed fit for PM#:";
-      for (int i : failedPMs) s += " " + QString::number(i);
-      message(s, this);
-  }
+   on_pbFromPeaksShow_clicked();
 }
 
 void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
 {
     if (MW->TmpHub->ChPerPhEl_Peaks.size() != PMs->count())
-    {
         message("Data not ready", this);
-        return;
-    }
-    MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
+    else
+        MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
 }
 
 void ReconstructionWindow::on_pbFromPeaksPedestals_clicked()
@@ -6490,9 +6424,8 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 
-
   if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
-  MW->GraphWindow->DrawWithoutFocus(h, "", true, true);
+  MW->GraphWindow->DrawWithoutFocus(h, "");
 
   if (MW->TmpHub->FoundPeaks.size() == numPMs)
     {
@@ -6505,7 +6438,10 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
           l->SetLineStyle(2);
           MW->GraphWindow->DrawWithoutFocus(l, "same", false, true);
         }
-      MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(MW->TmpHub->ChPerPhEl_Peaks.at(ipm)));
+
+      const double SigPPe = ReconstructionManager->Calibrator_Peaks->GetSignalPerPhEl(ipm);
+      const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe);
+      MW->GraphWindow->ShowTextPanel(t);
     }
   MW->GraphWindow->UpdateRootCanvas();
   MW->GraphWindow->LastDistributionShown = "SignalPeaks";

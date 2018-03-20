@@ -614,7 +614,6 @@ private:
   void SetGuiBusyStatusOn();
   void SetGuiBusyStatusOff();
 
-  double extractChPerPHEl(int ipm);
   bool IntersectionOfTwoLines(double A1, double B1, double C1, double A2, double B2, double C2, double* result);
 
   void showSensorGroup(int igroup);

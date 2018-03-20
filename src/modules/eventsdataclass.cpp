@@ -438,7 +438,7 @@ int EventsDataClass::getNumPMs() const
     return Events[0].size();
 }
 
-const QVector<float> *EventsDataClass::getEvent(int iev)
+const QVector<float> *EventsDataClass::getEvent(int iev) const
 {
   return &Events.at(iev);
 }

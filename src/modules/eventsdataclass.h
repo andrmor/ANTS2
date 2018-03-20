@@ -41,7 +41,7 @@ public:
     bool isTimed() const {return !TimedEvents.isEmpty();}
     int getTimeBins() const;
     int getNumPMs() const;
-    const QVector<float> *getEvent(int iev);
+    const QVector<float> *getEvent(int iev) const;
     const QVector<QVector<float> > *getTimedEvent(int iev);
 
 #ifdef SIM

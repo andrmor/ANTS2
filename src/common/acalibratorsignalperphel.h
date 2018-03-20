@@ -75,4 +75,31 @@ private:
     double calculateSignalLimit(int ipm, double range);
 };
 
+class ACalibratorSignalPerPhEl_Peaks : public ACalibratorSignalPerPhEl
+{
+public:
+    ACalibratorSignalPerPhEl_Peaks(const EventsDataClass& EventsDataHub, QVector<TH1D*>& DataHists, QVector<double>& SignalPerPhEl, QVector< QVector<double>>& foundPeaks);
+
+    virtual bool PrepareData() override;
+    virtual bool ExtractSignalPerPhEl() override;
+
+    void         SetNumBins(int bins);
+    void         SetRange(double from, double to);
+
+    void         SetSigma(double sigmaPeakfinder);
+    void         SetThreshold(double thresholdPeakfinder);
+    void         SetMaximumPeaks(int number);
+
+protected:
+    int    numBins = 300;
+    double rangeFrom = -50;
+    double rangeTo = 250;
+
+    double sigma = 8.0;
+    double threshold = 0.02;
+    int    maxNumPeaks = 30;
+
+    QVector< QVector<double>>& FoundPeaks;
+};
+
 #endif // ACALIBRATORSIGNALPERPHEL_H

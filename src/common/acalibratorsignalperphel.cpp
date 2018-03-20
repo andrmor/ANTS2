@@ -1,6 +1,6 @@
 #include "acalibratorsignalperphel.h"
 #include "eventsdataclass.h"
-
+#include "apeakfinder.h"
 #include "detectorclass.h"
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
@@ -13,6 +13,7 @@
 #include "TH1D.h"
 #include "TFitResultPtr.h"
 #include "TFitResult.h"
+#include "TGraph.h"
 
 // ----------------- base ----------------------
 
@@ -278,4 +279,107 @@ double ACalibratorSignalPerPhEl_Stat::calculateSignalLimit(int ipm, double range
     }
     while (sig <= 0);
     return sig;
+}
+
+// ------------ from photoelectron peaks --------------------
+
+ACalibratorSignalPerPhEl_Peaks::ACalibratorSignalPerPhEl_Peaks(const EventsDataClass &EventsDataHub, QVector<TH1D *> &DataHists, QVector<double> &SignalPerPhEl, QVector< QVector<double>>& foundPeaks) :
+    ACalibratorSignalPerPhEl(EventsDataHub, DataHists, SignalPerPhEl), FoundPeaks(foundPeaks) {}
+
+bool ACalibratorSignalPerPhEl_Peaks::PrepareData()
+{
+    if (EventsDataHub.isEmpty())
+      {
+        LastError = "There are no signal data!";
+        return false;
+      }
+
+    ClearData();
+    const int numPMs = EventsDataHub.getNumPMs();
+    const int numEvents = EventsDataHub.Events.size();
+
+    for (int ipm = 0; ipm < numPMs; ipm++)
+    {
+        TH1D* h = new TH1D("", "", numBins, rangeFrom, rangeTo);
+        h->SetXTitle("Signal");
+
+        for (int iev = 0; iev < numEvents; iev++) h->Fill(EventsDataHub.getEvent(iev)->at(ipm));
+        DataHists << h;
+    }
+    return true;
+}
+
+bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl()
+{
+    const int numPMs = EventsDataHub.getNumPMs();
+    if (DataHists.size() != numPMs)
+    {
+        LastError = "Signal data not ready!";
+        return false;
+    }
+
+    FoundPeaks.clear();
+    SignalPerPhEl.clear();
+
+    QVector<int> failedPMs;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+    {
+        APeakFinder f(DataHists.at(ipm));
+        QVector<double> peaks = f.findPeaks(sigma, threshold, maxNumPeaks, true);
+        std::sort(peaks.begin(), peaks.end());
+        FoundPeaks << peaks;
+
+        double constant, slope;
+        int ifail;
+
+        bool bOK = (peaks.size() > 1);
+        if (bOK)
+        {
+            TGraph g;
+            for (int i=0; i<peaks.size(); i++) g.SetPoint(i, i, peaks.at(i));
+
+            g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+
+            if (ifail != 0) bOK = false;
+        }
+
+        if (bOK) SignalPerPhEl << slope;
+        else
+        {
+            failedPMs << ipm;
+            SignalPerPhEl << -1;
+        }
+    }
+
+    if (failedPMs.isEmpty()) return true;
+
+    LastError = "Peaks < 2 or failed fit for PM#:";
+    for (int i : failedPMs) LastError += " " + QString::number(i);
+    return false;
+}
+
+void ACalibratorSignalPerPhEl_Peaks::SetNumBins(int bins)
+{
+    numBins = bins;
+}
+
+void ACalibratorSignalPerPhEl_Peaks::SetRange(double from, double to)
+{
+    rangeFrom = from;
+    rangeTo = to;
+}
+
+void ACalibratorSignalPerPhEl_Peaks::SetSigma(double sigmaPeakfinder)
+{
+    sigma = sigmaPeakfinder;
+}
+
+void ACalibratorSignalPerPhEl_Peaks::SetThreshold(double thresholdPeakfinder)
+{
+    threshold = thresholdPeakfinder;
+}
+
+void ACalibratorSignalPerPhEl_Peaks::SetMaximumPeaks(int number)
+{
+    maxNumPeaks = number;
 }

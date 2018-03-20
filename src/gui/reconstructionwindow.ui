@@ -7598,6 +7598,10 @@ Individual sensors can belong to multiple groups!</string>
               <string>in Y:</string>
              </property>
             </widget>
+            <zorder>label_32</zorder>
+            <zorder>label_33</zorder>
+            <zorder>ledCoGstretchY</zorder>
+            <zorder>ledCoGstretchX</zorder>
            </widget>
            <widget class="QFrame" name="fCoGStretchZ">
             <property name="enabled">
@@ -10460,7 +10464,7 @@ in minimization</string>
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">

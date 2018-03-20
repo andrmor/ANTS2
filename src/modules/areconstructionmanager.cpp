@@ -38,35 +38,37 @@
 AReconstructionManager::AReconstructionManager(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
     EventsDataHub(eventsDataHub), Detector(Detector), PMs(Detector->PMs), PMgroups(Detector->PMgroups), LRFs(Detector->LRFs), TmpObjHub(TmpObjHub)
 {
-  NumThreads = 1;
-  bBusy = false;
+    NumThreads = 1;
+    bBusy = false;
 
 #ifdef ANTS_FANN
-  ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
-  qDebug() << "->NeuralNetworks module created";
+    ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
+    qDebug() << "->NeuralNetworks module created";
 #endif
 
 #ifdef ANTS_FLANN
-  KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
-  qDebug() << "->Nearest neighbour module created";
+    KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
+    qDebug() << "->Nearest neighbour module created";
 #endif
 
-  Calibrator_Stat = new ACalibratorSignalPerPhEl_Stat(*EventsDataHub, TmpObjHub->SigmaHists, TmpObjHub->ChPerPhEl_Sigma2, *Detector);
+    Calibrator_Stat  = new ACalibratorSignalPerPhEl_Stat (*EventsDataHub, TmpObjHub->SigmaHists, TmpObjHub->ChPerPhEl_Sigma2, *Detector);
+    Calibrator_Peaks = new ACalibratorSignalPerPhEl_Peaks(*EventsDataHub, TmpObjHub->PeakHists,  TmpObjHub->ChPerPhEl_Peaks, TmpObjHub->FoundPeaks);
 }
 
 AReconstructionManager::~AReconstructionManager()
 {
+    delete Calibrator_Peaks;
+    delete Calibrator_Stat;
+
 #ifdef ANTS_FLANN
-  delete KNNmodule;
-  //qDebug() << "  Nearest neighbour module deleted";
+    delete KNNmodule;
+    //qDebug() << "  Nearest neighbour module deleted";
 #endif
 
 #ifdef ANTS_FANN
-  delete ANNmodule;
-  //qDebug() << "  NeuralNetworks module deleted";
+    delete ANNmodule;
+    //qDebug() << "  NeuralNetworks module deleted";
 #endif
-
-  delete Calibrator_Stat;
 }
 
 bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, bool fShow)

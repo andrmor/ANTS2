@@ -3449,7 +3449,7 @@ Individual sensors can belong to multiple groups!</string>
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -10500,15 +10500,15 @@ in minimization</string>
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
-            <bold>true</bold>
+            <weight>50</weight>
+            <bold>false</bold>
            </font>
           </property>
           <property name="toolTip">
            <string>Adjust multiplication factors for load ascii data in main window</string>
           </property>
           <property name="text">
-           <string>3. Chan./ Ph.e.  --&gt;  Load pre-processing</string>
+           <string>3. Signal per ph.e. --&gt; Load events preprocessing</string>
           </property>
          </widget>
          <widget class="QSpinBox" name="sbFromPeaksBins">
@@ -10620,7 +10620,7 @@ in minimization</string>
            </font>
           </property>
           <property name="text">
-           <string>2. Find peaks</string>
+           <string>2. Calibrate</string>
           </property>
          </widget>
          <widget class="QLabel" name="label_199">
@@ -11108,12 +11108,12 @@ in minimization</string>
            </property>
            <property name="font">
             <font>
-             <weight>75</weight>
-             <bold>true</bold>
+             <weight>50</weight>
+             <bold>false</bold>
             </font>
            </property>
            <property name="text">
-            <string>3. Adjust &quot;Load ASCII&quot; pre-processing in Main Window</string>
+            <string>3. Signal per ph.e. --&gt; Load data preprocessing</string>
            </property>
           </widget>
           <widget class="Line" name="lineChPhEl">

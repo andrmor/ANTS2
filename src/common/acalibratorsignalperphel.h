@@ -24,9 +24,9 @@ public:
     virtual void   ClearData();
 
     TH1D*          GetHistogram(int ipm);
-    double         GetSignalPerPhEl(int ipm);
+    double         GetSignalPerPhEl(int ipm) const;
 
-    const QString& GetLastError();
+    const QString& GetLastError() const;
 
 protected:
     const EventsDataClass& EventsDataHub;
@@ -36,7 +36,7 @@ protected:
     QString                LastError;
 
 signals:
-    void progressChanged(int percents);
+    void            progressChanged(int percents);
 
 };
 
@@ -81,6 +81,7 @@ public:
     ACalibratorSignalPerPhEl_Peaks(const EventsDataClass& EventsDataHub, QVector<TH1D*>& DataHists, QVector<double>& SignalPerPhEl, QVector< QVector<double>>& foundPeaks);
 
     virtual bool PrepareData() override;
+    virtual bool ExtractSignalPerPhEl(int ipm) override;
     virtual bool ExtractSignalPerPhEl() override;
 
     void         SetNumBins(int bins);
@@ -91,15 +92,18 @@ public:
     void         SetMaximumPeaks(int number);
 
 protected:
-    int    numBins = 300;
-    double rangeFrom = -50;
-    double rangeTo = 250;
+    int          numBins = 300;
+    double       rangeFrom = -50;
+    double       rangeTo = 250;
 
-    double sigma = 8.0;
-    double threshold = 0.02;
-    int    maxNumPeaks = 30;
+    double       sigma = 8.0;
+    double       threshold = 0.02;
+    int          maxNumPeaks = 30;
 
     QVector< QVector<double>>& FoundPeaks;
+
+private:
+    bool         extract(int ipm); //no watchdogs!
 };
 
 #endif // ACALIBRATORSIGNALPERPHEL_H

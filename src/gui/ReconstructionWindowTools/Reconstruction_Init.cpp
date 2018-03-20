@@ -178,6 +178,7 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   on_cbLimitNumberEvents_toggled(ui->cbLimitNumberEvents->isChecked());
   on_cobHowToAverageZ_currentIndexChanged(ui->cobHowToAverageZ->currentIndex());
 
-  connect(ReconstructionManager->Calibrator_Stat, &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
+  connect(ReconstructionManager->Calibrator_Stat,  &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
+  connect(ReconstructionManager->Calibrator_Peaks, &ACalibratorSignalPerPhEl_Stat::progressChanged, this, &ReconstructionWindow::SetProgress);
 }
 

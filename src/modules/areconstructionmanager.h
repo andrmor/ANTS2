@@ -1,14 +1,12 @@
 #ifndef ARECONSTRUCTIONMANAGER_H
 #define ARECONSTRUCTIONMANAGER_H
 
-/////////////////////////////////////
 // Performs reconstruction: CoG, MG and RootMini - multithread; CUDA and ANN - single thread;
 // CoG - preparation phase for most of algorithms (multithread)
 // Then recon with selected algorithm
 // Chi2 calculation (multithread)
 // Basic filtering  (multithread)
 // Advanced filters: correlation, PrimScint, kNN filters - single thread!
-/////////////////////////////////////
 
 #include "reconstructionsettings.h"
 #include "aeventfilteringsettings.h"
@@ -27,6 +25,8 @@ class DynamicPassivesHandler;
 class ProcessorClass;
 class NNmoduleClass;
 class ACalibratorSignalPerPhEl_Stat;
+class ACalibratorSignalPerPhEl_Peaks;
+
 #ifdef ANTS_FANN
 class NeuralNetworksModule;
 #endif
@@ -71,6 +71,7 @@ public:
 
   //Calibrators for signal per photo electron
   ACalibratorSignalPerPhEl_Stat* Calibrator_Stat; //based on statistics
+  ACalibratorSignalPerPhEl_Peaks* Calibrator_Peaks; //based on distinguishable individual photoelectron peaks
 
 private:
   TmpObjHubClass* TmpObjHub;

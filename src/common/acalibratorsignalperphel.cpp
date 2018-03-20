@@ -40,13 +40,13 @@ TH1D *ACalibratorSignalPerPhEl::GetHistogram(int ipm)
     return DataHists[ipm];
 }
 
-double ACalibratorSignalPerPhEl::GetSignalPerPhEl(int ipm)
+double ACalibratorSignalPerPhEl::GetSignalPerPhEl(int ipm) const
 {
     if (ipm < 0 || ipm >= SignalPerPhEl.size()) return 0;
-    return SignalPerPhEl[ipm];
+    return SignalPerPhEl.at(ipm);
 }
 
-const QString &ACalibratorSignalPerPhEl::GetLastError()
+const QString &ACalibratorSignalPerPhEl::GetLastError() const
 {
     return LastError;
 }
@@ -85,6 +85,7 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
     ClearData();
     QVector<TH1D*> numberHists; //will be used to calculate sigma vs distance to PM center
     const int numPMs = Detector.PMs->count();
+    const int numEvents = EventsDataHub.Events.size();
 
     emit progressChanged(0);
 
@@ -112,11 +113,11 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
     }
 
     //filling hists - go through all events, each will populate data for all PMs
-    for (int iev=0; iev<EventsDataHub.Events.size(); iev++)
+    for (int iev = 0; iev < numEvents; iev++)
     {
         if (iev % 1000 == 0)
         {
-            int ipr = 100.0 * iev / EventsDataHub.Events.size();
+            int ipr = 100.0 * iev / numEvents;
             emit progressChanged(ipr);
             qApp->processEvents();
         }
@@ -132,7 +133,7 @@ bool ACalibratorSignalPerPhEl_Stat::PrepareData()
         double energy   = rec->Points[0].energy;
         if (energy < 1e-10) energy = 1.0;
 
-        for (int ipm=0; ipm<numPMs; ipm++)
+        for (int ipm = 0; ipm < numPMs; ipm++)
         {
             double x0 = Detector.PMs->X(ipm);
             double y0 = Detector.PMs->Y(ipm);
@@ -303,10 +304,74 @@ bool ACalibratorSignalPerPhEl_Peaks::PrepareData()
         TH1D* h = new TH1D("", "", numBins, rangeFrom, rangeTo);
         h->SetXTitle("Signal");
 
-        for (int iev = 0; iev < numEvents; iev++) h->Fill(EventsDataHub.getEvent(iev)->at(ipm));
+        for (int iev = 0; iev < numEvents; iev++)
+        {
+            if (iev % 10000 == 0)
+            {
+                int ipr = 100.0 *  (ipm * numEvents + iev) / (numPMs * numEvents);
+                emit progressChanged(ipr);
+                qApp->processEvents();
+            }
+
+            h->Fill(EventsDataHub.getEvent(iev)->at(ipm));
+        }
         DataHists << h;
     }
+
+    progressChanged(100);
     return true;
+}
+
+bool ACalibratorSignalPerPhEl_Peaks::extract(int ipm)
+{
+    APeakFinder f(DataHists.at(ipm));
+    QVector<double> peaks = f.findPeaks(sigma, threshold, maxNumPeaks, true);
+    std::sort(peaks.begin(), peaks.end());
+    FoundPeaks[ipm] = peaks;
+
+    double constant, slope;
+    int ifail;
+
+    bool bOK = (peaks.size() > 1);
+    if (bOK)
+    {
+        TGraph g;
+        for (int i=0; i<peaks.size(); i++) g.SetPoint(i, i, peaks.at(i));
+
+        g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
+
+        if (ifail != 0) bOK = false;
+    }
+
+    if (bOK) SignalPerPhEl[ipm] = slope;
+    else     SignalPerPhEl[ipm] = -1;
+
+    return bOK;
+}
+
+bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl(int ipm)
+{
+    const int numPMs = EventsDataHub.getNumPMs();
+    if (ipm < 0 || ipm >= numPMs)
+    {
+        LastError = "Bad PM index";
+        return false;
+    }
+    if (DataHists.size() != numPMs)
+    {
+        LastError = "Signal data not ready!";
+        return false;
+    }
+
+    if (FoundPeaks.size() != numPMs) FoundPeaks.resize(numPMs);
+    if (SignalPerPhEl.size() != numPMs) SignalPerPhEl.resize(numPMs);
+
+    bool bOK = extract(ipm);
+
+    if (bOK) LastError.clear();
+    else     LastError = "Peak finding failed for PM #" + QString::number(ipm);
+
+    return bOK;
 }
 
 bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl()
@@ -318,44 +383,27 @@ bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl()
         return false;
     }
 
-    FoundPeaks.clear();
-    SignalPerPhEl.clear();
+    FoundPeaks.resize(numPMs);
+    SignalPerPhEl.resize(numPMs);
 
     QVector<int> failedPMs;
     for (int ipm = 0; ipm < numPMs; ipm++)
     {
-        APeakFinder f(DataHists.at(ipm));
-        QVector<double> peaks = f.findPeaks(sigma, threshold, maxNumPeaks, true);
-        std::sort(peaks.begin(), peaks.end());
-        FoundPeaks << peaks;
-
-        double constant, slope;
-        int ifail;
-
-        bool bOK = (peaks.size() > 1);
-        if (bOK)
-        {
-            TGraph g;
-            for (int i=0; i<peaks.size(); i++) g.SetPoint(i, i, peaks.at(i));
-
-            g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
-
-            if (ifail != 0) bOK = false;
-        }
-
-        if (bOK) SignalPerPhEl << slope;
-        else
-        {
-            failedPMs << ipm;
-            SignalPerPhEl << -1;
-        }
+        bool bOK = extract(ipm);
+        if (!bOK) failedPMs << ipm;
     }
 
-    if (failedPMs.isEmpty()) return true;
-
-    LastError = "Peaks < 2 or failed fit for PM#:";
-    for (int i : failedPMs) LastError += " " + QString::number(i);
-    return false;
+    if (failedPMs.isEmpty())
+    {
+        LastError.clear();
+        return true;
+    }
+    else
+    {
+        LastError = "Peaks < 2 or failed fit for PM#:";
+        for (int i : failedPMs) LastError += " " + QString::number(i);
+        return false;
+    }
 }
 
 void ACalibratorSignalPerPhEl_Peaks::SetNumBins(int bins)

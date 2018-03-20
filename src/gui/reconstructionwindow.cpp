@@ -5868,10 +5868,12 @@ void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
     int ipm = ui->sbChanPerPhElPM->value();
     bool bOK;
 
+    MW->WindowNavigator->BusyOn();
     if (ui->cbExtractChPerPhElForAll->isChecked())
         bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl();
     else
         bOK = ReconstructionManager->Calibrator_Stat->ExtractSignalPerPhEl(ipm);
+    MW->WindowNavigator->BusyOff();
 
     if (!bOK) message(ReconstructionManager->Calibrator_Stat->GetLastError(), this);
 
@@ -6343,6 +6345,17 @@ Double_t fpeaks(Double_t *x, Double_t *par)
 
 void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 {
+    ACalibratorSignalPerPhEl_Peaks* c = ReconstructionManager->Calibrator_Peaks;
+    c->SetNumBins(ui->sbFromPeaksBins->value());
+    c->SetRange(ui->ledFromPeaksFrom->text().toDouble(), ui->ledFromPeaksTo->text().toDouble());
+
+    MW->WindowNavigator->BusyOn();
+    bool bOK = c->PrepareData();
+    MW->WindowNavigator->BusyOff();
+
+    if (!bOK) message(c->GetLastError(), this);
+    return;
+
     if (EventsDataHub->isEmpty())
       {
         message("There are no signal data!", this);
@@ -6371,6 +6384,19 @@ void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 
 void ReconstructionWindow::on_pbFrindPeaks_clicked()
 {
+   ACalibratorSignalPerPhEl_Peaks* c = ReconstructionManager->Calibrator_Peaks;
+   c->SetSigma(ui->ledFromPeaksSigma->text().toDouble());
+   c->SetThreshold(ui->ledFromPeaksThreshold->text().toDouble());
+   c->SetMaximumPeaks(ui->sbFromPeaksMaxPeaks->value());
+
+   MW->WindowNavigator->BusyOn();
+   bool bOK = c->ExtractSignalPerPhEl();
+   MW->WindowNavigator->BusyOff();
+
+   if (!bOK) message(c->GetLastError(), this);
+   return;
+
+
   if (MW->TmpHub->PeakHists.size() != PMs->count())
   {
       message("Signal data not ready!", this);

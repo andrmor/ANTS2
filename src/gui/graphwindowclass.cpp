@@ -1692,10 +1692,10 @@ void GraphWindowClass::ShowProjection(QString type)
   //  qDebug()<<"ShowProjection clicked: "<< type;
   TObject* obj = DrawObjects.first().getPointer();
   QString PlotType = obj->ClassName();
-
   //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().getOptions();
-
   if (PlotType != "TH2D" && PlotType != "TH2F") return;
+
+  MW->WindowNavigator->BusyOn(); // -->
 
   TH2* h = static_cast<TH2*>(obj);
 
@@ -1710,12 +1710,9 @@ void GraphWindowClass::ShowProjection(QString type)
   //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
 
   const ShapeableRectItem *SelBox = scene->getSelBox();
-  //double scaleX = RasterWindow->getXperPixel();
-  //double scaleY = RasterWindow->getYperPixel();
   double angle = SelBox->getTrueAngle();
   //    qDebug() << "True angle"<<angle;
   angle *= 3.1415926535/180.0;
-
   double cosa = cos(angle);
   double sina = sin(angle);
 
@@ -1764,7 +1761,11 @@ void GraphWindowClass::ShowProjection(QString type)
       //qDebug() << "Doing density distribution";
       hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
     }
-  else return;
+  else
+    {
+      MW->WindowNavigator->BusyOff(); // <--
+      return;
+    }
 
   for (int iy = 1; iy<nBinsY+1; iy++)
     for (int ix = 1; ix<nBinsX+1; ix++)
@@ -1816,6 +1817,8 @@ void GraphWindowClass::ShowProjection(QString type)
    RedrawAll();
 
    delete hWeights;
+
+   MW->WindowNavigator->BusyOff(); // <--
 }
 
 double GraphWindowClass::runScaleDialog()

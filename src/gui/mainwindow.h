@@ -363,7 +363,6 @@ private slots:
     void on_twSingleScan_currentChanged(int index);
     void on_pbExportDeposition_clicked();
     void on_pbImportDeposition_clicked();
-    void on_pbTestsInterpolation_clicked();
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
     void on_cobSecScintillationGenType_currentIndexChanged(int index);
@@ -496,7 +495,6 @@ private slots:
     void on_pbRemoveMaterial_clicked();
     void on_lwLoadedEventsFiles_itemChanged(QListWidgetItem *item);
     void on_pobTest_clicked();
-    void on_pbCheckDerivatives_clicked();    
     void on_actionGain_evaluation_triggered();
     void on_leiParticleLinkedTo_editingFinished();
     void on_cbLRFs_toggled(bool checked);  

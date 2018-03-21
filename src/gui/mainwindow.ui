@@ -13123,19 +13123,6 @@ multiply to loaded data</string>
      <attribute name="title">
       <string>Tests</string>
      </attribute>
-     <widget class="QPushButton" name="pobTest">
-      <property name="geometry">
-       <rect>
-        <x>144</x>
-        <y>557</y>
-        <width>121</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>TMP Test button 1</string>
-      </property>
-     </widget>
      <widget class="QTabWidget" name="tabWidget_4">
       <property name="geometry">
        <rect>
@@ -13156,7 +13143,7 @@ multiply to loaded data</string>
         <property name="geometry">
          <rect>
           <x>140</x>
-          <y>30</y>
+          <y>40</y>
           <width>231</width>
           <height>31</height>
          </rect>
@@ -13165,186 +13152,151 @@ multiply to loaded data</string>
          <string>Check random generator</string>
         </property>
        </widget>
-       <widget class="QGroupBox" name="groupBox_3">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
+       <widget class="QPushButton" name="pobTest_2">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>160</y>
-          <width>471</width>
-          <height>111</height>
+          <x>250</x>
+          <y>420</y>
+          <width>121</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TMP Test button 2</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pobTest">
+        <property name="geometry">
+         <rect>
+          <x>121</x>
+          <y>420</y>
+          <width>121</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>TMP Test button 1</string>
+        </property>
+       </widget>
+       <widget class="QGroupBox" name="fWaveTests">
+        <property name="geometry">
+         <rect>
+          <x>6</x>
+          <y>161</y>
+          <width>511</width>
+          <height>161</height>
          </rect>
         </property>
         <property name="title">
-         <string>Check LRF derivatives</string>
+         <string>Inspect wavelength-resolved properties - wavelength resolution has to be ON!</string>
         </property>
-        <widget class="QLabel" name="label_187">
+        <widget class="QComboBox" name="cobMaterialForWaveTests">
          <property name="geometry">
           <rect>
-           <x>280</x>
-           <y>14</y>
-           <width>101</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Num calc step,mm</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_177">
-         <property name="geometry">
-          <rect>
-           <x>227</x>
-           <y>17</y>
-           <width>34</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Z,mm</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledDertestY">
-         <property name="geometry">
-          <rect>
-           <x>160</x>
-           <y>33</y>
-           <width>41</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledDertestZ">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>33</y>
-           <width>41</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_154">
-         <property name="geometry">
-          <rect>
-           <x>32</x>
-           <y>14</y>
-           <width>21</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>PM:</string>
-         </property>
-        </widget>
-        <widget class="QSpinBox" name="sbPMnumForDerivatives">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>32</y>
-           <width>51</width>
+           <x>57</x>
+           <y>22</y>
+           <width>161</width>
            <height>22</height>
           </rect>
          </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
         </widget>
-        <widget class="QLabel" name="label_172">
+        <widget class="QPushButton" name="pbTestShowPrimary">
          <property name="geometry">
           <rect>
-           <x>167</x>
-           <y>17</y>
-           <width>34</width>
+           <x>290</x>
+           <y>49</y>
+           <width>101</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Primary</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_126">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>25</y>
+           <width>46</width>
            <height>13</height>
           </rect>
          </property>
          <property name="text">
-          <string>Y,mm</string>
+          <string>Material:</string>
          </property>
         </widget>
-        <widget class="QLineEdit" name="ledDertestX">
+        <widget class="QLabel" name="label_127">
          <property name="geometry">
           <rect>
-           <x>100</x>
-           <y>33</y>
-           <width>41</width>
-           <height>20</height>
+           <x>10</x>
+           <y>50</y>
+           <width>281</width>
+           <height>16</height>
           </rect>
          </property>
          <property name="text">
-          <string>0</string>
+          <string>Show spectra, rebinned to match the wavelength range:</string>
          </property>
         </widget>
-        <widget class="QLabel" name="label_169">
+        <widget class="QPushButton" name="pbTestShowSecondary">
          <property name="geometry">
           <rect>
-           <x>107</x>
-           <y>16</y>
-           <width>34</width>
-           <height>13</height>
+           <x>400</x>
+           <y>49</y>
+           <width>101</width>
+           <height>21</height>
           </rect>
          </property>
          <property name="text">
-          <string>X,mm</string>
+          <string>Secondary</string>
          </property>
         </widget>
-        <widget class="QLineEdit" name="ledDerOffset">
+        <widget class="QLabel" name="label_128">
          <property name="geometry">
           <rect>
-           <x>303</x>
-           <y>30</y>
-           <width>41</width>
-           <height>20</height>
+           <x>338</x>
+           <y>32</y>
+           <width>121</width>
+           <height>16</height>
           </rect>
          </property>
          <property name="text">
-          <string>0.01</string>
+          <string>Disabled = not defined</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbCheckDerivatives">
+        <widget class="QPushButton" name="pbUpdateTestWavelengthProperties">
          <property name="geometry">
           <rect>
-           <x>160</x>
-           <y>70</y>
-           <width>116</width>
-           <height>29</height>
+           <x>237</x>
+           <y>22</y>
+           <width>75</width>
+           <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Check derivatives</string>
+          <string>Update</string>
          </property>
         </widget>
-       </widget>
-       <widget class="QGroupBox" name="groupBox_4">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>380</y>
-          <width>470</width>
-          <height>71</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Interpolation test</string>
-        </property>
-        <widget class="QSpinBox" name="sbTestsInterpolationDegree">
+        <widget class="QLabel" name="label_129">
          <property name="geometry">
           <rect>
-           <x>160</x>
-           <y>27</y>
-           <width>42</width>
+           <x>80</x>
+           <y>80</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Test photon generator:</string>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="sbWaveTestsNumPhotons">
+         <property name="geometry">
+          <rect>
+           <x>200</x>
+           <y>78</y>
+           <width>81</width>
            <height>22</height>
           </rect>
          </property>
@@ -13352,42 +13304,107 @@ multiply to loaded data</string>
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>10</number>
+          <number>100000000</number>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbTestsInterpolation">
+        <widget class="QPushButton" name="pbTestGeneratorSecondary">
          <property name="geometry">
           <rect>
-           <x>230</x>
-           <y>25</y>
-           <width>133</width>
-           <height>27</height>
+           <x>400</x>
+           <y>78</y>
+           <width>101</width>
+           <height>21</height>
           </rect>
          </property>
          <property name="text">
-          <string>Run test</string>
+          <string>Secondary</string>
          </property>
         </widget>
-        <widget class="QLabel" name="label_125">
+        <widget class="QPushButton" name="pbTestGeneratorPrimary">
          <property name="geometry">
           <rect>
-           <x>103</x>
-           <y>32</y>
-           <width>46</width>
-           <height>13</height>
+           <x>290</x>
+           <y>78</y>
+           <width>101</width>
+           <height>21</height>
           </rect>
          </property>
          <property name="text">
-          <string>order:</string>
+          <string>Primary</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_8">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>99</y>
+           <width>494</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_130">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>110</y>
+           <width>141</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Refractive index (rebinned):</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbTestShowRefrIndex">
+         <property name="geometry">
+          <rect>
+           <x>70</x>
+           <y>130</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbTestShowAbs">
+         <property name="geometry">
+          <rect>
+           <x>340</x>
+           <y>130</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Show</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_131">
+         <property name="geometry">
+          <rect>
+           <x>290</x>
+           <y>110</y>
+           <width>181</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Attenuation coefficient (rebinned):</string>
          </property>
         </widget>
        </widget>
-       <widget class="Line" name="line_24">
+       <widget class="Line" name="line_18">
         <property name="geometry">
          <rect>
-          <x>26</x>
-          <y>90</y>
-          <width>481</width>
+          <x>20</x>
+          <y>100</y>
+          <width>491</width>
           <height>16</height>
          </rect>
         </property>
@@ -13395,12 +13412,12 @@ multiply to loaded data</string>
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="Line" name="line_27">
+       <widget class="Line" name="line_20">
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>350</y>
-          <width>481</width>
+          <y>390</y>
+          <width>491</width>
           <height>16</height>
          </rect>
         </property>
@@ -15537,270 +15554,18 @@ on stack</string>
        <zorder>line_19</zorder>
        <zorder>fParticleDepositionChecker</zorder>
       </widget>
-      <widget class="QWidget" name="tabWaveBinChecker">
-       <attribute name="title">
-        <string>WaveBinning</string>
-       </attribute>
-       <widget class="QGroupBox" name="fWaveTests">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>511</width>
-          <height>161</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>Inspect wavelength-resolved properties - wavelength resolution has to be ON!</string>
-        </property>
-        <widget class="QComboBox" name="cobMaterialForWaveTests">
-         <property name="geometry">
-          <rect>
-           <x>57</x>
-           <y>22</y>
-           <width>161</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestShowPrimary">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>49</y>
-           <width>101</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Primary</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_126">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>25</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Material:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_127">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>50</y>
-           <width>281</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show spectra, rebinned to match the wavelength range:</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestShowSecondary">
-         <property name="geometry">
-          <rect>
-           <x>400</x>
-           <y>49</y>
-           <width>101</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Secondary</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_128">
-         <property name="geometry">
-          <rect>
-           <x>338</x>
-           <y>32</y>
-           <width>121</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Disabled = not defined</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbUpdateTestWavelengthProperties">
-         <property name="geometry">
-          <rect>
-           <x>237</x>
-           <y>22</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Update</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_129">
-         <property name="geometry">
-          <rect>
-           <x>80</x>
-           <y>80</y>
-           <width>121</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Test photon generator:</string>
-         </property>
-        </widget>
-        <widget class="QSpinBox" name="sbWaveTestsNumPhotons">
-         <property name="geometry">
-          <rect>
-           <x>200</x>
-           <y>78</y>
-           <width>81</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100000000</number>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestGeneratorSecondary">
-         <property name="geometry">
-          <rect>
-           <x>400</x>
-           <y>78</y>
-           <width>101</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Secondary</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestGeneratorPrimary">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>78</y>
-           <width>101</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Primary</string>
-         </property>
-        </widget>
-        <widget class="Line" name="line_8">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>99</y>
-           <width>494</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_130">
-         <property name="geometry">
-          <rect>
-           <x>50</x>
-           <y>110</y>
-           <width>141</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Refractive index (rebinned):</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestShowRefrIndex">
-         <property name="geometry">
-          <rect>
-           <x>70</x>
-           <y>130</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbTestShowAbs">
-         <property name="geometry">
-          <rect>
-           <x>340</x>
-           <y>130</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_131">
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>110</y>
-           <width>181</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Attenuation coefficient (rebinned):</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
      </widget>
      <widget class="QPushButton" name="pbShowCheckUpWindow">
       <property name="geometry">
        <rect>
         <x>152</x>
-        <y>508</y>
+        <y>528</y>
         <width>231</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
        <string>Show Check-up window</string>
-      </property>
-     </widget>
-     <widget class="Line" name="line_18">
-      <property name="geometry">
-       <rect>
-        <x>125</x>
-        <y>540</y>
-        <width>291</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pobTest_2">
-      <property name="geometry">
-       <rect>
-        <x>273</x>
-        <y>557</y>
-        <width>121</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>TMP Test button 2</string>
       </property>
      </widget>
     </widget>

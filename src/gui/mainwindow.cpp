@@ -3042,66 +3042,6 @@ void MainWindow::on_pbImportDeposition_clicked()
   file.close();
 }
 
-void MainWindow::on_pbTestsInterpolation_clicked()
-{
-  /*
-   int order = ui->sbTestsInterpolationDegree->value() + 1;
-
-   QVector<double> x,y;
-   x.resize(0);
-   y.resize(0);
-
-   for (int i=0; i<10; i++)
-     {
-       double xx = TMath::Pi()*i*0.2;
-       x.append(xx);
-       y.append(sin(xx));
-     }
-
-   ShowGraphWindow();
-   graphRW->ShowGraph(&x, &y, kBlue, "x", "y", 20, 1, 1, 0);
-
-   TVectorD xx;
-   TVectorD yy;
-   xx.ResizeTo(100);
-   yy.ResizeTo(100);
-
-   //if (order == 2) //linear
-   //  {
-       for (int i=0; i<100; i++)
-         {
-           double XX = TMath::Pi()*i*0.02;
-           xx[i] = XX;
-           double YY;
-           if (XX<x.last()) YY = InteractionValue(XX, &x, &y, order-1);
-           else YY = y.last();
-           yy[i] = YY;
-         }
-   //  }
-   */
-   /*
-   else
-     {  //lagrange
-       for (int i=0; i<100; i++)
-         {
-           double XX = TMath::Pi()*i*0.02;
-           xx[i] = XX;
-           double YY = PolyInterpolation(XX, &x, &y, order);
-           yy[i] = YY;
-         }
-     }
-   */
-/*
-   TGraph* graph1 = new TGraph(xx,yy);
-   graph1->SetLineColor(kRed);
-   graph1->SetLineWidth(1);
-   graph1->SetTitle("Integral");
-   graph1->Draw("SAME L");
-
-   graphRW->Update();
-*/
-}
-
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
 {
   if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);

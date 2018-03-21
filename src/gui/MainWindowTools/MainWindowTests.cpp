@@ -838,57 +838,6 @@ void MainWindow::on_pbST_showTracks_clicked()
   ShowTracks();
 }
 
-void MainWindow::on_pbCheckDerivatives_clicked()
-{
-  message("This feature was disabled. If needed, let us know", this);
-  /*
-  if (!SensLRF->isAllLRFsDefined())
-    {
-      message("Not all LRFs are defined!", this);
-      return;
-    }
-
-  int ipm = ui->sbPMnumForDerivatives->value();
-  if (ipm>PMs->count()-1)
-    {
-      message("Wrong PM number!", this);
-      ui->sbPMnumForDerivatives->setValue(0);
-      return;
-    }
-
-  double x = ui->ledDertestX->text().toDouble();
-  double y = ui->ledDertestY->text().toDouble();
-  double z = ui->ledDertestZ->text().toDouble();
-  double offset = ui->ledDerOffset->text().toDouble();
-
-  QString LRFtype = (*SensLRF)[ipm]->type();
-  qDebug()<<"PM#:"<<ipm<<" LRF type:"<<LRFtype;
-  qDebug()<<"x,y"<<x<<y;
-
-
-        double lrfXm = SensLRF->getLRF(ipm,x-offset,y,z);
-        double lrfXp = SensLRF->getLRF(ipm,x+offset,y,z);
-        double lrfYm = SensLRF->getLRF(ipm,x,y-offset,z);
-        double lrfYp = SensLRF->getLRF(ipm,x,y+offset,z);
-        qDebug()<<"LRF xy cross (x-, x+, -y, y+)"<<lrfXm<<lrfXp<<lrfYm<<lrfYp;
-
-        if (lrfXm == 0 || lrfXp == 0 || lrfYm == 0 || lrfYp == 0)
-          {
-            qDebug()<<"-->undefined LRF found!";
-            return;
-          }
-
-        double twoDelta = 2.0*offset;
-        double numDerX = (lrfXp - lrfXm)/twoDelta;
-        double numDerY = (lrfYp - lrfYm)/twoDelta;
-        qDebug()<<"numeric derivatives (x,y):"<<numDerX<<numDerY;
-
-        double anDerX = SensLRF->getLRFDrvX(ipm,x, y, z);
-        double anDerY = SensLRF->getLRFDrvY(ipm,x, y, z);
-        qDebug()<<"module gives derivatives (x,y):"<<anDerX<<anDerY;
-   */
-}
-
 void MainWindow::on_pbShowComptonAngles_clicked()
 {
     int Maxi = ui->sbTmp->value();

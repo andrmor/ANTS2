@@ -37,11 +37,11 @@ public:
     // PM signal data
     QVector< QVector <float> > Events; //[event][pm]  - remember, if events energy is loaded, one MORE CHANNEL IS ADDED: last channel is numPMs+1
     QVector< QVector < QVector <float> > > TimedEvents; //event timebin pm
-    bool isEmpty() {return Events.isEmpty();}
-    bool isTimed() {return !TimedEvents.isEmpty();}
-    int getTimeBins();
-    int getNumPMs();
-    const QVector<float> *getEvent(int iev);
+    bool isEmpty() const {return Events.isEmpty();}
+    bool isTimed() const {return !TimedEvents.isEmpty();}
+    int getTimeBins() const;
+    int getNumPMs() const;
+    const QVector<float> *getEvent(int iev) const;
     const QVector<QVector<float> > *getTimedEvent(int iev);
 
 #ifdef SIM
@@ -59,8 +59,8 @@ public:
     QVector< QVector<AReconRecord*> > ReconstructionData;  // [sensor_group] : [event]
     //QVector<bool> fReconstructionDataReady; // true if reconstruction was already performed for the group
     bool fReconstructionDataReady; // true if reconstruction was already performed for the group
-    bool isReconstructionDataEmpty(int igroup = 0);  // container is empty
-    bool isReconstructionReady(int igroup = 0);  // reconstruction was not yet performed
+    bool isReconstructionDataEmpty(int igroup = 0) const;  // container is empty
+    bool isReconstructionReady(int igroup = 0) const;  // reconstruction was not yet performed
     void clearReconstruction();
     void clearReconstruction(int igroup);
     void createDefaultReconstructionData(int igroup = 0); //recreates new container - clears data completely!

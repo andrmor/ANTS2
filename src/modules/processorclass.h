@@ -56,7 +56,6 @@ signals:
   void lrfsCopied();
 
 protected:
-  //ReconstructionManagerClass *RecManager;
   int EventsFrom, EventsTo;
   double calculateChi2NoDegFree(int iev, AReconRecord *rec);
   double calculateMLfactor(int iev, AReconRecord *rec);

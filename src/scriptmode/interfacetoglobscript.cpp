@@ -12,13 +12,14 @@
 #include "pmtypeclass.h"
 #include "aconfiguration.h"
 #include "apreprocessingsettings.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "apmgroupsmanager.h"
 #include "modules/lrf_v3/arepository.h"
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
 #include "amonitor.h"
 #include "arootobjbase.h"
+#include "tmpobjhubclass.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -1890,8 +1891,13 @@ void InterfaceToGeoWin::ShowEnergyVector()
 //----------------------------------
 
 
-InterfaceToReconstructor::InterfaceToReconstructor(ReconstructionManagerClass *RManager, AConfiguration *Config, EventsDataClass *EventsDataHub, int RecNumThreads)
- : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub), PMgroups(RManager->PMgroups), RecNumThreads(RecNumThreads)
+InterfaceToReconstructor::InterfaceToReconstructor(AReconstructionManager *RManager,
+                                                   AConfiguration *Config,
+                                                   EventsDataClass *EventsDataHub,
+                                                   TmpObjHubClass* TmpHub,
+                                                   int RecNumThreads)
+ : RManager(RManager), Config(Config), EventsDataHub(EventsDataHub),
+   PMgroups(RManager->PMgroups), TmpHub(TmpHub), RecNumThreads(RecNumThreads)
 {
     Description = "Event reconstructor";
 }
@@ -2062,6 +2068,24 @@ void InterfaceToReconstructor::SetManifestItemLineProperties(int i, int color, i
     EventsDataHub->Manifest[i]->LineWidth = width;
 }
 
+const QVariant InterfaceToReconstructor::GetSignalPerPhE_peaks() const
+{
+    QVariantList vl;
+    const int numPMs = TmpHub->ChPerPhEl_Peaks.size();
+    for (int i=0; i<numPMs; i++)
+        vl.append(TmpHub->ChPerPhEl_Peaks.at(i));
+    return vl;
+}
+
+const QVariant InterfaceToReconstructor::GetSignalPerPhE_stat() const
+{
+    QVariantList vl;
+    const int numPMs = TmpHub->ChPerPhEl_Sigma2.size();
+    for (int i=0; i<numPMs; i++)
+        vl.append(TmpHub->ChPerPhEl_Sigma2.at(i));
+    return vl;
+}
+
 #ifdef GUI
 //----------------------------------
 InterfaceToGraphWin::InterfaceToGraphWin(MainWindow *MW)
@@ -2120,7 +2144,12 @@ void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, 
 
 void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
 {
-  MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+    MW->GraphWindow->AddText(text, Showframe, Alignment_0Left1Center2Right);
+}
+
+void InterfaceToGraphWin::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+    MW->GraphWindow->AddLine(x1, y1, x2, y2, color, width, style);
 }
 
 void InterfaceToGraphWin::AddToBasket(QString Title)

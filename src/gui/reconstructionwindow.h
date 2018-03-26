@@ -23,7 +23,7 @@ class EventsDataClass;
 struct CorrelationFilterStructure;
 class QSpinBox;
 class QLineEdit;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class TObject;
 class DetectorClass;
 class APmGroupsManager;
@@ -77,6 +77,7 @@ public:
 
   //GUI updates:
 public slots:
+  void SetProgress(int val);
   void onRequestEventsGuiUpdate();
   void OnEventsDataAdded();
   void onUpdatePMgroupIndication();
@@ -100,7 +101,6 @@ public:
   void ShowFiltering();
 
   void ResetStop(); //reset stop button
-  void SetProgress(int val);
 
   void onBusyOn();
   void onBusyOff();
@@ -534,6 +534,8 @@ private slots:
 
   void on_cobCGstartOption_currentIndexChanged(int index);
 
+  void on_ledFromPeaksThreshold_editingFinished();
+
 protected:
     bool event(QEvent *event);
 
@@ -542,7 +544,7 @@ private:
 
   //aliases
   EventsDataClass* EventsDataHub;
-  ReconstructionManagerClass* ReconstructionManager; //only pointer!
+  AReconstructionManager* ReconstructionManager; //only pointer!
   DetectorClass* Detector;
   APmGroupsManager* PMgroups;
   pms* PMs;
@@ -614,10 +616,10 @@ private:
   void SetGuiBusyStatusOn();
   void SetGuiBusyStatusOff();
 
-  double extractChPerPHEl(int ipm);
   bool IntersectionOfTwoLines(double A1, double B1, double C1, double A2, double B2, double C2, double* result);
 
   void showSensorGroup(int igroup);
+
 public slots:
   void RefreshOnTimer(int Progress, double usPerEv); //update timer for reconstruction progress
 

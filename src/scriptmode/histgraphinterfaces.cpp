@@ -533,6 +533,24 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
         r->AddPoints(xArr, yArr);
 }
 
+void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double max)
+{
+    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetYRange(min, max);
+}
+
+void AInterfaceToGraph::SetXRange(const QString &GraphName, double min, double max)
+{
+    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetXRange(min, max);
+}
+
 void AInterfaceToGraph::Sort(const QString &GraphName)
 {
     ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));

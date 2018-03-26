@@ -26,7 +26,7 @@ class ExamplesWindow;
 class CheckUpWindowClass;
 class DetectorAddOnsWindow;
 class pms;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class MaterialInspectorWindow;
 class OutputWindow;
 class QComboBox;
@@ -75,7 +75,7 @@ public:
                EventsDataClass *EventsDataHub,
                TApplication *RootApp,
                ASimulationManager *SimulationManager,
-               ReconstructionManagerClass *ReconstructionManager,
+               AReconstructionManager *ReconstructionManager,
                ANetworkModule *Net,
                TmpObjHubClass *TmpHub,
                GlobalSettingsClass *GlobSet);
@@ -90,7 +90,7 @@ public:
     TApplication *RootApp;
     ASimulationManager* SimulationManager;
     ParticleSourcesClass* ParticleSources;      //alias
-    ReconstructionManagerClass *ReconstructionManager;
+    AReconstructionManager *ReconstructionManager;
     ANetworkModule* NetModule;
     TmpObjHubClass *TmpHub;
     GlobalSettingsClass* GlobSet;
@@ -363,7 +363,6 @@ private slots:
     void on_twSingleScan_currentChanged(int index);
     void on_pbExportDeposition_clicked();
     void on_pbImportDeposition_clicked();
-    void on_pbTestsInterpolation_clicked();
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
     void on_cobSecScintillationGenType_currentIndexChanged(int index);
@@ -496,7 +495,6 @@ private slots:
     void on_pbRemoveMaterial_clicked();
     void on_lwLoadedEventsFiles_itemChanged(QListWidgetItem *item);
     void on_pobTest_clicked();
-    void on_pbCheckDerivatives_clicked();    
     void on_actionGain_evaluation_triggered();
     void on_leiParticleLinkedTo_editingFinished();
     void on_cbLRFs_toggled(bool checked);  
@@ -574,13 +572,9 @@ private slots:
     void on_lwOverrides_itemClicked(QListWidgetItem *item);
     void on_pbST_uniform_clicked();
     void on_pbST_RvsAngle_clicked();
-    void on_pbTestFit_clicked();
     void on_pbST_ReflectionVsParameter_clicked();
     void on_pbST_VsParameterHelp_clicked();
     void on_cobST_ShowWhatRef_activated(int index);
-    void on_pbSF_SvsL_clicked();
-    void on_pbSF_help_clicked();
-    void on_pbTestFit_simplistic_clicked();
     void on_actionGlobal_script_triggered();
     void on_pbLockGui_clicked();
     void on_pbUnlockGui_clicked();
@@ -600,43 +594,25 @@ private slots:
     void on_pobTest_2_clicked();
     void on_bpResults_2_clicked();
     void on_actionScript_window_triggered();
-
     void on_cobParticleSource_activated(int index);
-
     void on_actionQuick_save_1_triggered();
-
     void on_actionQuick_save_2_triggered();
-
     void on_actionQuick_save_3_triggered();
-
     void on_actionQuick_load_1_triggered();
-
     void on_actionQuick_load_2_triggered();
-
     void on_actionQuick_load_3_triggered();
-
     void on_actionLoad_last_config_triggered();
-
     void on_actionQuick_load_1_hovered();
-
     void on_actionQuick_save_1_hovered();
-
     void on_actionQuick_save_2_hovered();
-
     void on_actionQuick_save_3_hovered();
-
     void on_actionQuick_load_2_hovered();
-
     void on_actionQuick_load_3_hovered();
-
     void on_actionLoad_last_config_hovered();
-
     void on_cobPartPerEvent_currentIndexChanged(int index);
-
     void on_twElectronics_currentChanged(int index);
 
 public slots:
-    void on_cobSF_chi2Vs_activated(int index);
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector
     void onRequestSimulationGuiUpdate();   // called to update GUI related to simulations

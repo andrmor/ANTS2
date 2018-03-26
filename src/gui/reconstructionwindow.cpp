@@ -20,7 +20,7 @@
 #include "genericscriptwindowclass.h"
 #include "eventsdataclass.h"
 #include "dynamicpassiveshandler.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "globalsettingsclass.h"
 #include "arootlineconfigurator.h"
 #include "ageomarkerclass.h"
@@ -36,6 +36,7 @@
 #include "arepository.h"
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
+#include "acalibratorsignalperphel.h"
 
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
@@ -5803,109 +5804,38 @@ void ReconstructionWindow::on_pbCopyFromRec_clicked()
 
 void ReconstructionWindow::on_pbAnalyzeChanPerPhEl_clicked()
 {
-  if (EventsDataHub->isEmpty()) return;
-  if (PMgroups->countPMgroups()>1)
-    {
-      message("This procedure is implemented only for the case of one PM group");
-      return;
-    }
-  if (!EventsDataHub->isReconstructionReady())
-    {
-      message("Reconstruction is not ready!", this);
-      return;
-    }
-  if (!Detector->LRFs->isAllLRFsDefined())
-    {
-      message("LRFs are not ready!", this);
-      return;
-    }
+  ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+  c->SetNumBins(ui->pbBinsChansPerPhEl->value());
+  c->SetRange(ui->ledMinRangeChanPerPhEl->text().toDouble(), ui->ledMaxRangeChanPerPhEl->text().toDouble());
+  c->SetThresholdSigmaCalc(ui->sbSignalPerPhEl_Sigma_Threshold->value());
 
-  SetProgress(0);
   MW->WindowNavigator->BusyOn();
-  qApp->processEvents();
+  bool bOK = c->PrepareData();
+  MW->WindowNavigator->BusyOff();
 
-  const int numPMs = MW->Detector->PMs->count();
-  const double minRange = ui->ledMinRangeChanPerPhEl->text().toDouble();
-  const double minRange2 = minRange * minRange;
-  const double maxRange = ui->ledMaxRangeChanPerPhEl->text().toDouble();
-  const double maxRange2 = maxRange * maxRange;
-  MW->TmpHub->ClearTmpHistsSigma2();
-  QVector<TH1D*> numberHists; //will be used to calculate sigma vs distance to PM center
-
-  for (int ipm=0; ipm<numPMs; ipm++)
-    {
-      TString s = "sigma";
-      s += ipm;
-      TString n = "num";
-      n += ipm;
-      TH1D* tmp1 = new TH1D(s, "sigma", ui->pbBinsChansPerPhEl->value(), 0,0);
-
-      MW->TmpHub->SigmaHists.append(tmp1);
-      tmp1->GetXaxis()->SetTitle("Average signal");
-      tmp1->GetYaxis()->SetTitle("Sigma square");
-      TH1D* tmp2 = new TH1D(n, "number", ui->pbBinsChansPerPhEl->value(), 0,0); //it seems both  hists update axis synchronously. Same result if fix max range
-      numberHists.append(tmp2);
-    }
-
-  //filling hists - go through all events, each will populate data for all PMs
-  for (int iev=0; iev<EventsDataHub->Events.size(); iev++)
-    {
-      if (iev % 1000 == 0)
-        {
-          int ipr = 100.0*iev/EventsDataHub->Events.size();
-          SetProgress(ipr);
-        }
-      if (!EventsDataHub->ReconstructionData[0][iev]->GoodEvent) continue; //respecting the filters
-      if (EventsDataHub->ReconstructionData[0][iev]->Points.size()>1) continue; //ignoring multiple events in reconstruction
-
-      const double& x = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[0];
-      const double& y = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r[1];
-      double e = EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].energy;
-      if (e < 1e-10) e = 1.0;
-      for (int ipm=0; ipm<numPMs; ipm++)
-        {
-           double x0 = MW->Detector->PMs->X(ipm);
-           double y0 = MW->Detector->PMs->Y(ipm);
-           double r2 = (x-x0)*(x-x0) + (y-y0)*(y-y0);
-           if ( r2 < minRange2  ||  r2 > maxRange2 ) continue;
-
-           double AvSig = Detector->LRFs->getLRF(ipm, EventsDataHub->ReconstructionData.at(0).at(iev)->Points[0].r);
-           double sig = EventsDataHub->Events[iev][ipm];
-           double delta2 = sig/e - AvSig; //take energy into account
-           delta2 *= delta2;
-
-           MW->TmpHub->SigmaHists[ipm]->Fill(AvSig, delta2);
-           numberHists[ipm]->Fill(AvSig, 1.0);
-        }
-    }
-
-  //calculating sigmas
-  const int MinEntries = 5;
-  for (int ipm=0; ipm<numPMs; ipm++)
-    {
-      for (int i=1; i<numberHists[ipm]->GetXaxis()->GetNbins()-1; i++) //ignoring under and over bins
-        {
-          if (numberHists[ipm]->GetBinContent(i) < MinEntries) MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, 0);
-          else MW->TmpHub->SigmaHists[ipm]->SetBinContent(i, MW->TmpHub->SigmaHists[ipm]->GetBinContent(i)/numberHists[ipm]->GetBinContent(i));
-        }
-    }
-
-  for (int ipm=0; ipm<numberHists.size(); ipm++) delete numberHists[ipm];
-  numberHists.clear();
-
+  if (!bOK) message(c->GetLastError(), this);
   SetProgress(100);
-  MW->WindowNavigator->BusyOff(false);
 }
 
 void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
 {
-  int ipm = ui->sbChanPerPhElPM->value();
-  if (ipm >= MW->TmpHub->SigmaHists.size())
+    int ipm = ui->sbChanPerPhElPM->value();
+    if (ipm >= MW->TmpHub->SigmaHists.size())
     {
-      message("Wrong PM number or data not ready!", this);
-      return;
+        message("Wrong PM number or data not ready!", this);
+        return;
     }
-  MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
+
+    ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+    TH1D* h = c->GetHistogram(ipm);
+
+    if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
+    MW->GraphWindow->DrawWithoutFocus(h, "", true, false);
+
+    const double SigPPe = c->GetSignalPerPhEl(ipm);
+
+    const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe, 'g', 3);
+    MW->GraphWindow->ShowTextPanel(t);
 }
 
 void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
@@ -5927,88 +5857,28 @@ void ReconstructionWindow::on_sbChanPerPhElPM_valueChanged(int arg1)
 
 void ReconstructionWindow::on_pbExtractChansPerPhEl_clicked()
 {
-  int ipm = ui->sbChanPerPhElPM->value();
-  int numPMs = MW->Detector->PMs->count();
+    ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
+    c->SetENF(ui->ledENFforChanPerPhEl->text().toDouble());
+    c->SetSignalLimits(ui->ledLowerLimitForChanPerPhEl->text().toDouble(), ui->ledUpperLimitForChanPerPhEl->text().toDouble());
 
-  if (MW->TmpHub->SigmaHists.size() != numPMs)
-    {
-      message("There is no data - use 'Prepare data...' first!", this);
-      return;
-    }
+    int ipm = ui->sbChanPerPhElPM->value();
+    bool bOK;
 
-  if (MW->TmpHub->ChPerPhEl_Sigma2.size()<numPMs) MW->TmpHub->ChPerPhEl_Sigma2.resize(numPMs);
+    MW->WindowNavigator->BusyOn();
+    if (ui->cbExtractChPerPhElForAll->isChecked())
+        bOK = c->ExtractSignalPerPhEl();
+    else
+        bOK = c->ExtractSignalPerPhEl(ipm);
+    MW->WindowNavigator->BusyOff();
 
-  if (ui->cbExtractChPerPhElForAll->isChecked())
-    {
-      MW->Owindow->OutText("---------");
-      MW->Owindow->OutText("#PM   Channels_per_photoelectron");
-      //doing for all PMs
-      for (int ipm=0; ipm<numPMs; ipm++)
-        {
-          double ChanelsPerPhEl = extractChPerPHEl(ipm);
-          if (ChanelsPerPhEl < 0)
-          {
-              message("Fit failed!", this);
-              return;
-          }
-          MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
-          QString txt = QString::number(ipm)+" "+QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3);
-          if (MW->TmpHub->ChPerPhEl_Peaks.size() == MW->TmpHub->ChPerPhEl_Sigma2.size())
-              txt += "  from peaks: "+QString::number(MW->TmpHub->ChPerPhEl_Peaks[ipm], 'g', 3);
-          MW->Owindow->OutText(txt);
-        }
-    }
-  else
-    {
-      //doing only for one selected PM
-      if (ipm > MW->TmpHub->SigmaHists.size()-1)
-        {
-          message("Wrong PM number or data not ready!", this);
-          return;
-        }
+    if (!bOK) message(c->GetLastError(), this);
 
-      MW->GraphWindow->Draw(MW->TmpHub->SigmaHists[ipm], "", true, false);
-      double ChanelsPerPhEl = extractChPerPHEl(ipm);
-      if (ChanelsPerPhEl < 0)
-      {
-          message("Fit failed!", this);
-          return;
-      }
-      MW->GraphWindow->UpdateRootCanvas();
+    const double SigPPe = c->GetSignalPerPhEl(ipm);
+    QString s = "";
+    if (SigPPe > 0) s = QString::number(SigPPe, 'g', 3);
+    ui->ledChansPerPhEl->setText(s);
 
-      MW->TmpHub->ChPerPhEl_Sigma2[ipm] = ChanelsPerPhEl;
-    }
-
-  if (ipm<MW->TmpHub->ChPerPhEl_Sigma2.size()) ui->ledChansPerPhEl->setText( QString::number(MW->TmpHub->ChPerPhEl_Sigma2[ipm], 'g', 3) );
-  else ui->ledChansPerPhEl->setText("");
-}
-
-double ReconstructionWindow::extractChPerPHEl(int ipm)
-{
-  int numPMs = MW->Detector->PMs->count();
-  if (ipm<0 || ipm>numPMs-1) return -1;
-
-  double upperLim = ui->ledUpperLimitForChanPerPhEl->text().toDouble();
-  double lowerLim = ui->ledLowerLimitForChanPerPhEl->text().toDouble();
-  TFitResultPtr fit = MW->TmpHub->SigmaHists[ipm]->Fit("pol1", "S", "", lowerLim, upperLim);
-
-  if (!fit.Get())
-    {
-      qWarning() << "Fit failed!";
-      return -1;
-    }
-
-  double cutoff = fit->Value(0);
-  double ChannelsPerPhEl = fit->Value(1);
-  double ENF = ui->ledENFforChanPerPhEl->text().toDouble();
-  if (ENF <= 0)
-    {
-      qWarning() << "ENF is zero or negative, ignoring!";
-    }
-  else ChannelsPerPhEl /= ENF;
-  qDebug() << ipm << "> ChPerPhEl:"<<ChannelsPerPhEl<<" const:"<<cutoff;
-
-  return ChannelsPerPhEl;
+    on_pbChanPerPhElShow_clicked();
 }
 
 bool ReconstructionWindow::IntersectionOfTwoLines(double A1, double B1, double C1, double A2, double B2, double C2, double *result)
@@ -6459,6 +6329,7 @@ void ReconstructionWindow::on_pbUpdateGuiSettingsInJSON_clicked()
     updateGUIsettingsInConfig();
 }
 
+/*
 static Int_t npeaks = 10;
 Double_t fpeaks(Double_t *x, Double_t *par)
 {
@@ -6471,96 +6342,53 @@ Double_t fpeaks(Double_t *x, Double_t *par)
    }
    return result;
 }
+*/
 
 void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
 {
-    if (EventsDataHub->isEmpty())
-      {
-        message("There are no signal data!", this);
-        return;
-      }
+    ACalibratorSignalPerPhEl_Peaks* c = ReconstructionManager->Calibrator_Peaks;
+    c->SetNumBins(ui->sbFromPeaksBins->value());
+    c->SetRange(ui->ledFromPeaksFrom->text().toDouble(), ui->ledFromPeaksTo->text().toDouble());
 
-    MW->TmpHub->ClearTmpHistsPeaks();
-    MW->TmpHub->ChPerPhEl_Sigma2.clear();
+    MW->WindowNavigator->BusyOn();
+    bool bOK = c->PrepareData();
+    MW->WindowNavigator->BusyOff();
 
-    for (int ipm=0; ipm<PMs->count(); ipm++)
+    if (!bOK) message(c->GetLastError(), this);
+}
+
+void ReconstructionWindow::on_ledFromPeaksThreshold_editingFinished()
+{
+    double val = ui->ledFromPeaksThreshold->text().toDouble();
+    if (val<=0 || val >= 1)
     {
-        TH1D* h = new TH1D("", "", ui->sbFromPeaksBins->value(), ui->ledFromPeaksFrom->text().toDouble(),ui->ledFromPeaksTo->text().toDouble());
-        h->SetXTitle("Signal");
-
-      for (int iev = 0; iev < EventsDataHub->Events.size(); iev++)
-            h->Fill(EventsDataHub->getEvent(iev)->at(ipm));
-
-      MW->TmpHub->PeakHists << h;
-      if (ipm==0) MW->GraphWindow->Draw(h, "", true, false);
+        ui->ledFromPeaksThreshold->setText("0.05");
+        message("Threshold has to be more than 0 but less than 1. Setting to 0.05", this);
     }
 }
 
-#include "apeakfinder.h"
-#include "TGraph.h"
-#include "TLine.h"
-
 void ReconstructionWindow::on_pbFrindPeaks_clicked()
 {
-  if (MW->TmpHub->PeakHists.size() != PMs->count())
-  {
-      message("Signal data not ready!", this);
-      return;
-  }
+   ACalibratorSignalPerPhEl_Peaks* c = ReconstructionManager->Calibrator_Peaks;
+   c->SetSigma(ui->ledFromPeaksSigma->text().toDouble());
+   c->SetThreshold(ui->ledFromPeaksThreshold->text().toDouble());
+   c->SetMaximumPeaks(ui->sbFromPeaksMaxPeaks->value());
 
-  MW->TmpHub->FoundPeaks.clear();
-  MW->TmpHub->ChPerPhEl_Peaks.clear();
+   MW->WindowNavigator->BusyOn();
+   bool bOK = c->ExtractSignalPerPhEl();
+   MW->WindowNavigator->BusyOff();
 
-  QVector<int> failedPMs;
-  for (int ipm=0; ipm<PMs->count(); ipm++)
-  {
-      APeakFinder f(MW->TmpHub->PeakHists.at(ipm));
-      QVector<double> peaks = f.findPeaks(ui->ledFromPeaksSigma->text().toDouble(), ui->ledFromPeaksThreshold->text().toDouble(), ui->sbFromPeaksMaxPeaks->value(), true);
+   if (!bOK) message(c->GetLastError(), this);
 
-      std::sort(peaks.begin(), peaks.end());
-
-      MW->TmpHub->FoundPeaks << peaks;
-
-      if (peaks.size() < 2)
-      {
-          failedPMs << ipm;
-          MW->TmpHub->ChPerPhEl_Peaks << -1;
-          continue;
-      }
-
-      TGraph g;
-      for (int i=0; i<peaks.size(); i++)
-         g.SetPoint(i, i, peaks.at(i));
-
-      double constant, slope;
-      int ifail;
-      g.LeastSquareLinearFit(peaks.size(), constant, slope, ifail);
-      if ( ifail != 0 )
-      {
-          failedPMs << ipm;
-          MW->TmpHub->ChPerPhEl_Peaks << -1;
-          continue;
-      }
-      else MW->TmpHub->ChPerPhEl_Peaks.append(slope);
-    }
-
-  on_pbFromPeaksShow_clicked();
-  if (!failedPMs.isEmpty())
-  {
-      QString s = "Peaks < 2 or failed fit for PM#:";
-      for (int i : failedPMs) s += " " + QString::number(i);
-      message(s, this);
-  }
+   on_pbFromPeaksShow_clicked();
 }
 
 void ReconstructionWindow::on_pbFromPeaksToPreprocessing_clicked()
 {
     if (MW->TmpHub->ChPerPhEl_Peaks.size() != PMs->count())
-    {
         message("Data not ready", this);
-        return;
-    }
-    MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
+    else
+        MW->SetMultipliersUsingChPhEl(MW->TmpHub->ChPerPhEl_Peaks);
 }
 
 void ReconstructionWindow::on_pbFromPeaksPedestals_clicked()
@@ -6595,9 +6423,8 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 
-
   if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
-  MW->GraphWindow->DrawWithoutFocus(h, "", true, true);
+  MW->GraphWindow->DrawWithoutFocus(h, "");
 
   if (MW->TmpHub->FoundPeaks.size() == numPMs)
     {
@@ -6610,7 +6437,10 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
           l->SetLineStyle(2);
           MW->GraphWindow->DrawWithoutFocus(l, "same", false, true);
         }
-      MW->GraphWindow->ShowTextPanel(QString("Channels per ph.e.: ")+QString::number(MW->TmpHub->ChPerPhEl_Peaks.at(ipm)));
+
+      const double SigPPe = ReconstructionManager->Calibrator_Peaks->GetSignalPerPhEl(ipm);
+      const QString t = SigPPe < 0 ? "Calibration failed" : "Channels per ph.e.: " + QString::number(SigPPe, 'g', 3);
+      MW->GraphWindow->ShowTextPanel(t);
     }
   MW->GraphWindow->UpdateRootCanvas();
   MW->GraphWindow->LastDistributionShown = "SignalPeaks";

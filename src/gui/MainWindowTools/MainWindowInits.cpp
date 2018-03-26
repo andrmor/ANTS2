@@ -20,7 +20,7 @@
 #include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "particlesourcesclass.h"
 #include "globalsettingsclass.h"
 #include "globalsettingswindowclass.h"
@@ -47,7 +47,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        EventsDataClass *EventsDataHub,
                        TApplication *RootApp,
                        ASimulationManager *SimulationManager,
-                       ReconstructionManagerClass *ReconstructionManager,
+                       AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
                        TmpObjHubClass *TmpHub,
                        GlobalSettingsClass *GlobSet) :

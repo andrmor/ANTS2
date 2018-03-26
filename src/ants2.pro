@@ -3,10 +3,10 @@ ANTS2_MAJOR = 4
 ANTS2_MINOR = 5
 
 #Optional libraries
-#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
@@ -196,7 +196,6 @@ SOURCES += main.cpp \
     modules/pms.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
-    modules/reconstructionmanagerclass.cpp \
     modules/processorclass.cpp \
     modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
@@ -279,7 +278,9 @@ SOURCES += main.cpp \
     scriptmode/arootgraphrecord.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
-    common/arootobjbase.cpp
+    common/arootobjbase.cpp \
+    common/acalibratorsignalperphel.cpp \
+    modules/areconstructionmanager.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -310,7 +311,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
-    modules/reconstructionmanagerclass.h \
     modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
@@ -405,7 +405,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
     scriptmode/aroothistrecord.h \
-    common/arootobjbase.h
+    common/arootobjbase.h \
+    common/acalibratorsignalperphel.h \
+    modules/areconstructionmanager.h
 
 # --- SIM ---
 ants2_SIM {
@@ -485,7 +487,6 @@ ants2_GUI {
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
-    gui/MainWindowTools/mainwindowscatterfit.cpp \
     gui/MainWindowTools/globalscript.cpp \
     gui/MainWindowTools/aslablistwidget.cpp \
     gui/MainWindowTools/arootlineconfigurator.cpp \

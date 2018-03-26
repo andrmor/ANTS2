@@ -307,11 +307,16 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
   QString fileName = QFileDialog::getOpenFileName(this, "Load configuration", MW->GlobSet->LastOpenDir, "All files (*.*)");
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-  MW->GeometryDrawDisabled = true;
-  MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
-  MW->GeometryDrawDisabled = false;
-  this->close();
-  if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+
+  MW->GeometryDrawDisabled = true; //->
+  bool bOK = MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
+  if (!bOK) message(MW->Config->ErrorString, this);
+  else
+  {
+      this->close();
+      if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+  }
+  MW->GeometryDrawDisabled = false; //<-
 }
 
 void ExamplesWindow::on_pbLoadLast_clicked()

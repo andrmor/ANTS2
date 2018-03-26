@@ -261,6 +261,16 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVe
     return gr;
 }
 
+void GraphWindowClass::AddLine(double x1, double y1, double x2, double y2, int color, int width, int style)
+{
+        TLine* l = new TLine(x1, y1, x2, y2);
+        l->SetLineColor(color);
+        l->SetLineWidth(width);
+        l->SetLineStyle(style);
+
+        DrawWithoutFocus(l, "SAME");
+}
+
 void GraphWindowClass::ShowAndFocus()
 {
   RasterWindow->fCanvas->cd();
@@ -331,7 +341,7 @@ double GraphWindowClass::getCanvasMaxY()
     return RasterWindow->getCanvasMaxY();
 }
 
-double GraphWindowClass::getMinX(bool *ok = 0)
+double GraphWindowClass::getMinX(bool *ok)
 {
     if (!ui->ledXfrom->isEnabled()) {
         if(ok) *ok = false;
@@ -340,7 +350,7 @@ double GraphWindowClass::getMinX(bool *ok = 0)
     return ui->ledXfrom->text().toDouble(ok);
 }
 
-double GraphWindowClass::getMaxX(bool *ok = 0)
+double GraphWindowClass::getMaxX(bool *ok)
 {
     if (!ui->ledXto->isEnabled()) {
         if(ok) *ok = false;
@@ -349,7 +359,7 @@ double GraphWindowClass::getMaxX(bool *ok = 0)
     return ui->ledXto->text().toDouble(ok);
 }
 
-double GraphWindowClass::getMinY(bool *ok = 0)
+double GraphWindowClass::getMinY(bool *ok)
 {
     if (!ui->ledYfrom->isEnabled()) {
         if(ok) *ok = false;
@@ -358,7 +368,7 @@ double GraphWindowClass::getMinY(bool *ok = 0)
     return ui->ledYfrom->text().toDouble(ok);
 }
 
-double GraphWindowClass::getMaxY(bool *ok = 0)
+double GraphWindowClass::getMaxY(bool *ok)
 {
     if (!ui->ledYto->isEnabled()) {
         if(ok) *ok = false;
@@ -367,7 +377,7 @@ double GraphWindowClass::getMaxY(bool *ok = 0)
     return ui->ledYto->text().toDouble(ok);
 }
 
-double GraphWindowClass::getMinZ(bool *ok = 0)
+double GraphWindowClass::getMinZ(bool *ok)
 {
     if (!ui->ledZfrom->isEnabled()) {
         if(ok) *ok = false;
@@ -376,7 +386,7 @@ double GraphWindowClass::getMinZ(bool *ok = 0)
     return ui->ledZfrom->text().toDouble(ok);
 }
 
-double GraphWindowClass::getMaxZ(bool *ok = 0)
+double GraphWindowClass::getMaxZ(bool *ok)
 {
     if (!ui->ledZto->isEnabled()) {
         if(ok) *ok = false;
@@ -1682,10 +1692,10 @@ void GraphWindowClass::ShowProjection(QString type)
   //  qDebug()<<"ShowProjection clicked: "<< type;
   TObject* obj = DrawObjects.first().getPointer();
   QString PlotType = obj->ClassName();
-
   //  qDebug()<<"  Class name/PlotOptions/opt:" << PlotType << DrawObjects.first().getOptions();
-
   if (PlotType != "TH2D" && PlotType != "TH2F") return;
+
+  MW->WindowNavigator->BusyOn(); // -->
 
   TH2* h = static_cast<TH2*>(obj);
 
@@ -1700,12 +1710,9 @@ void GraphWindowClass::ShowProjection(QString type)
   //  qDebug() << "Center:"<<x0<<y0<<"dx, dy:"<<dx<<dy;
 
   const ShapeableRectItem *SelBox = scene->getSelBox();
-  //double scaleX = RasterWindow->getXperPixel();
-  //double scaleY = RasterWindow->getYperPixel();
   double angle = SelBox->getTrueAngle();
   //    qDebug() << "True angle"<<angle;
   angle *= 3.1415926535/180.0;
-
   double cosa = cos(angle);
   double sina = sin(angle);
 
@@ -1754,7 +1761,11 @@ void GraphWindowClass::ShowProjection(QString type)
       //qDebug() << "Doing density distribution";
       hProjection = new TH1D("DensDistr","Density distribution", ui->sProjBins->value(), 0, 0);
     }
-  else return;
+  else
+    {
+      MW->WindowNavigator->BusyOff(); // <--
+      return;
+    }
 
   for (int iy = 1; iy<nBinsY+1; iy++)
     for (int ix = 1; ix<nBinsX+1; ix++)
@@ -1806,6 +1817,8 @@ void GraphWindowClass::ShowProjection(QString type)
    RedrawAll();
 
    delete hWeights;
+
+   MW->WindowNavigator->BusyOff(); // <--
 }
 
 double GraphWindowClass::runScaleDialog()

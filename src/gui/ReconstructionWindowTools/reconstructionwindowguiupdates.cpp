@@ -1,7 +1,7 @@
 #include "reconstructionwindow.h"
 #include "ui_reconstructionwindow.h"
 #include "eventsdataclass.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "mainwindow.h"
 #include "outputwindow.h"
 #include "detectorclass.h"

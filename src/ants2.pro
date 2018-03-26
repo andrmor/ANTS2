@@ -4,10 +4,11 @@ ANTS2_MINOR = 5
 
 #Optional libraries
 CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
-#CONFIG += ants2_fann        #enables FANN (fast neural network) library
+CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
+CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_Python      #enable Python scripting
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -161,10 +162,28 @@ ants2_cuda {
      }
 }
 
+#---ROOT server---
 ants2_RootServer{
   DEFINES += USE_ROOT_HTML
 }
+#----------
 
+#---Python---
+ants2_Python{
+    DEFINES += __USE_ANTS_PYTHON__
+
+    win32:{
+            INCLUDEPATH += c:/Python33/include
+            LIBS += -Lc:/Python33/libs -lPython33
+
+            INCLUDEPATH += C:/PythonQt3.2/src
+            INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
+
+            LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
+    }
+
+
+}
 #----------
 
 #Modular compilation flags
@@ -225,7 +244,6 @@ SOURCES += main.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
-    scriptmode/ascriptmanager.cpp \
     gui/MainWindowTools/slab.cpp \
     modules/lrf_v3/arecipe.cpp \
     modules/lrf_v3/alrftypemanager.cpp \
@@ -280,7 +298,11 @@ SOURCES += main.cpp \
     common/arootobjcollection.cpp \
     common/arootobjbase.cpp \
     common/acalibratorsignalperphel.cpp \
-    modules/areconstructionmanager.cpp
+    modules/areconstructionmanager.cpp \
+    scriptmode/ajavascriptmanager.cpp \
+    scriptmode/ascriptmanager.cpp \
+    scriptmode/apythonscriptmanager.cpp \
+    gui/MainWindowTools/pythonscript.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \
@@ -337,7 +359,6 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/scriptminimizer.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
-    scriptmode/ascriptmanager.h \
     scriptmode/ascriptinterface.h \
     modules/asandwich.h \
     gui/MainWindowTools/slab.h \
@@ -407,7 +428,10 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aroothistrecord.h \
     common/arootobjbase.h \
     common/acalibratorsignalperphel.h \
-    modules/areconstructionmanager.h
+    modules/areconstructionmanager.h \
+    scriptmode/ajavascriptmanager.h \
+    scriptmode/ascriptmanager.h \
+    scriptmode/apythonscriptmanager.h
 
 # --- SIM ---
 ants2_SIM {

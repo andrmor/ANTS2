@@ -9,7 +9,10 @@
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
 #include "aconfiguration.h"
+
 #include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
+
 #include "globalsettingsclass.h"
 #include "afiletools.h"
 
@@ -36,8 +39,8 @@
 #include <QJsonArray>
 #include <QMessageBox>
 
-AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QWidget *parent) :
-    QMainWindow(parent),
+AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, QWidget *parent) :
+    QMainWindow(parent), ScriptManager(ScriptManager),
     ui(new Ui::AScriptWindow)
 {
     if (parent)
@@ -48,7 +51,6 @@ AScriptWindow::AScriptWindow(GlobalSettingsClass *GlobSet, TRandom2 *RandGen, QW
         this->setWindowFlags( windowFlags );
     }
 
-    ScriptManager = new AScriptManager(RandGen);
     QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
     QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
@@ -1241,10 +1243,12 @@ void AScriptWindow::on_actionHide_all_messenger_windows_triggered()
 
 void AScriptWindow::on_actionClear_unused_messenger_windows_triggered()
 {
-    ScriptManager->clearUnusedMsgDialogs();
+    AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+    if (JSM) JSM->clearUnusedMsgDialogs();
 }
 
 void AScriptWindow::on_actionClose_all_messenger_windows_triggered()
 {
-    ScriptManager->closeAllMsgDialogs();
+    AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+    if (JSM) JSM->closeAllMsgDialogs();
 }

@@ -1,7 +1,7 @@
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
 #include "anetworkmodule.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 #include "amessage.h"
 
 #ifdef GUI
@@ -108,7 +108,7 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   //running root TStyle script  
   if (!RootStyleScript.isEmpty())
   {
-      AScriptManager* SM = new AScriptManager(0);
+      AJavaScriptManager* SM = new AJavaScriptManager(0);
 #ifdef GUI
       InterfaceToGStyleScript* GStyleInterface  = new  InterfaceToGStyleScript(); //deleted by the SM
       SM->SetInterfaceObject(GStyleInterface);

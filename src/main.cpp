@@ -6,7 +6,7 @@
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
 #include "aconfiguration.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 #include "interfacetoglobscript.h"
 #include "histgraphinterfaces.h"
 #include "scriptminimizer.h"
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 
         qDebug() << "Script from file:"<<fileName;
 
-        AScriptManager SM(Detector.RandGen);        
+        AJavaScriptManager SM(Detector.RandGen);        
         SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");

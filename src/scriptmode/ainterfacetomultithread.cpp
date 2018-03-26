@@ -1,12 +1,12 @@
 #include "ainterfacetomultithread.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #include <QThread>
 #include <QDebug>
 #include <QApplication>
 #include <QScriptEngine>
 
-AInterfaceToMultiThread::AInterfaceToMultiThread(AScriptManager *ScriptManager) :
+AInterfaceToMultiThread::AInterfaceToMultiThread(AJavaScriptManager *ScriptManager) :
   MasterScriptManager(ScriptManager)
 {
   Description = "Allows to evaluate script or function in a new thread.\n"
@@ -23,7 +23,7 @@ void AInterfaceToMultiThread::ForceStop()
 
 void AInterfaceToMultiThread::evaluateScript(const QString script)
 {
-    AScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
+    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
 
     AScriptThreadScr* worker = new AScriptThreadScr(sm, script);
@@ -48,7 +48,7 @@ void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QV
         return;
     }
 
-    AScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
+    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
     //  qDebug() << "Master engine:"<<MasterScriptManager->engine<< "clone:"<<sm->engine;
 
@@ -56,13 +56,13 @@ void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QV
     startEvaluation(sm, worker);
 }
 
-void AInterfaceToMultiThread::startEvaluation(AScriptManager* sm, AScriptThreadBase *worker)
+void AInterfaceToMultiThread::startEvaluation(AJavaScriptManager* sm, AScriptThreadBase *worker)
 {
     workers << worker;
 
     QThread* t = new QThread();
     QObject::connect(t,  &QThread::started, worker, &AScriptThreadBase::Run);
-    QObject::connect(sm, &AScriptManager::onFinish, t, &QThread::quit);
+    QObject::connect(sm, &AJavaScriptManager::onFinish, t, &QThread::quit);
     QObject::connect(worker, &AScriptThreadBase::errorFound, this, &AInterfaceToMultiThread::onErrorInTread);
     QObject::connect(t, &QThread::finished, t, &QThread::deleteLater);
     worker->moveToThread(t);
@@ -172,7 +172,7 @@ bool AInterfaceToMultiThread::deleteOne(int IndexOfWorker)
    return true;
 }
 
-AScriptThreadBase::AScriptThreadBase(AScriptManager *ScriptManager) : ScriptManager(ScriptManager) {}
+AScriptThreadBase::AScriptThreadBase(AJavaScriptManager *ScriptManager) : ScriptManager(ScriptManager) {}
 
 AScriptThreadBase::~AScriptThreadBase()
 {
@@ -191,7 +191,7 @@ const QVariant AScriptThreadBase::resultToQVariant(const QScriptValue &result) c
     return result.toVariant();
 }
 
-AScriptThreadScr::AScriptThreadScr(AScriptManager *ScriptManager, const QString &Script) :
+AScriptThreadScr::AScriptThreadScr(AJavaScriptManager *ScriptManager, const QString &Script) :
     AScriptThreadBase(ScriptManager), Script(Script) {bRunning = true;}
 
 void AScriptThreadScr::Run()
@@ -213,7 +213,7 @@ void AScriptThreadScr::Run()
     bRunning = false;
 }
 
-AScriptThreadFun::AScriptThreadFun(AScriptManager *ScriptManager, const QString &Function, const QVariant &Arguments) :
+AScriptThreadFun::AScriptThreadFun(AJavaScriptManager *ScriptManager, const QString &Function, const QVariant &Arguments) :
     AScriptThreadBase(ScriptManager), Function(Function), Arguments(Arguments) {bRunning = true;}
 
 void AScriptThreadFun::Run()

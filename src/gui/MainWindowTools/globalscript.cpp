@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "ajavascriptmanager.h"
 #include "ui_mainwindow.h"
 #include "genericscriptwindowclass.h"
 #include "detectorclass.h"
@@ -38,17 +39,18 @@
 void MainWindow::createScriptWindow()
 {
     QWidget* w = new QWidget();
-    ScriptWindow = new AScriptWindow(GlobSet, Detector->RandGen, w);
+    AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
+    ScriptWindow = new AScriptWindow(SM, GlobSet, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
     connect(ScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
     connect(ScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
-    NetModule->SetScriptManager(ScriptWindow->ScriptManager);
+    NetModule->SetScriptManager(SM);
 
     // interface objects are owned after this by the ScriptManager!
 
     ScriptWindow->SetInterfaceObject(0); //initialization
 
-    AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(ScriptWindow->ScriptManager);
+    AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(SM);
     ScriptWindow->SetInterfaceObject(threads, "threads");
 
     AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
@@ -59,7 +61,7 @@ void MainWindow::createScriptWindow()
     connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
     ScriptWindow->SetInterfaceObject(geo, "geo");
 
-    AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(ScriptWindow->ScriptManager);
+    AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(SM);
     ScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
     AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
@@ -92,7 +94,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
 
-    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(ScriptWindow->ScriptManager, ScriptWindow);
+    AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();

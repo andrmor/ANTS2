@@ -18,7 +18,7 @@ class QLineEdit;
 class TObject;
 class QThread;
 class TRandom2;
-class AScriptManager;
+class AJavaScriptManager;
 
 namespace Ui {
 class GenericScriptWindowClass;
@@ -47,7 +47,7 @@ public:
     void ReportError(QString error, int line = 0);   //0 - no line is highligted   
     void HighlightErrorLine(int line);    
 
-    AScriptManager* ScriptManager;
+    AJavaScriptManager* ScriptManager;
     AHighlighterScriptWindow* highlighter;
 
     QStringList ScriptHistory;

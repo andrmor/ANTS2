@@ -17,7 +17,6 @@ class QFrame;
 class QLineEdit;
 class TObject;
 class QThread;
-class TRandom2;
 class AScriptManager;
 class AScriptWindowTabItem;
 class GlobalSettingsClass;
@@ -31,7 +30,7 @@ class AScriptWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AScriptWindow(GlobalSettingsClass* GlobSet, TRandom2* RandGen, QWidget *parent = 0);
+    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, QWidget *parent = 0);
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");

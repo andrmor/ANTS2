@@ -1,5 +1,5 @@
 #include "anetworkmodule.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #include "awebsocketserver.h"
 #ifdef USE_ROOT_HTML
@@ -29,7 +29,7 @@ ANetworkModule::~ANetworkModule()
 #endif
 }
 
-void ANetworkModule::SetScriptManager(AScriptManager* man)
+void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
 {
   ScriptManager = man;
 }

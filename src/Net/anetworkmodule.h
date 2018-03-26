@@ -6,7 +6,7 @@
 class AWebSocketServer;
 class ARootHttpServer;
 class TObject;
-class AScriptManager;
+class AJavaScriptManager;
 
 class ANetworkModule : public QObject
 {
@@ -16,7 +16,7 @@ public:
     ~ANetworkModule();
 
     void SetDebug(bool flag) {fDebug = flag;}
-    void SetScriptManager(AScriptManager* man);
+    void SetScriptManager(AJavaScriptManager* man);
 
     bool isWebSocketServerRunning() const {return (bool)WebSocketServer;}
     int getWebSocketPort() const;
@@ -45,7 +45,7 @@ signals:
   void RootServerStarted();
 
 private:
-  AScriptManager* ScriptManager;
+  AJavaScriptManager* ScriptManager;
   bool fDebug;
   QString JSROOT;
   unsigned int RootServerPort;

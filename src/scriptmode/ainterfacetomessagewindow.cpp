@@ -1,10 +1,10 @@
 #include "ainterfacetomessagewindow.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 #include "ascriptmessengerdialog.h"
 
 #include <QDebug>
 
-AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager* ScriptManager, QWidget* parent) :
+AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager *ScriptManager, QWidget* parent) :
     ScriptManager(ScriptManager), Parent(parent)
 {
     DialogWidget = new AScriptMessengerDialog(parent);
@@ -115,12 +115,20 @@ void AInterfaceToMessageWindow::SetFontSize(int size)
 
 void AInterfaceToMessageWindow::ShowAllThreadMessengers()
 {
-    if (bGuiThread) ScriptManager->showAllMessengerWidgets();
+    if (bGuiThread)
+      {
+        AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+        if (JSM) JSM->showAllMessengerWidgets();
+      }
 }
 
 void AInterfaceToMessageWindow::HideAllThreadMessengers()
 {
-    if (bGuiThread) ScriptManager->hideAllMessengerWidgets();
+    if (bGuiThread)
+      {
+        AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+        if (JSM) JSM->hideAllMessengerWidgets();
+      }
 }
 
 void AInterfaceToMessageWindow::RestorelWidget()

@@ -10,7 +10,7 @@
 #include <string>
 
 class MainWindow;
-class AScriptManager;
+class AJavaScriptManager;
 namespace ROOT { namespace Minuit2 { class Minuit2Minimizer; } }
 
 class AInterfaceToMinimizerScript : public AScriptInterface
@@ -74,14 +74,14 @@ class AInterfaceToMinimizerScript : public AScriptInterface
   };
 
 public:
-  AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
+  AInterfaceToMinimizerScript(AJavaScriptManager* ScriptManager);
   AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other);
   ~AInterfaceToMinimizerScript();
 
   bool           IsMultithreadCapable() const override {return true;}
   void           ForceStop() override;
 
-  void           SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
+  void           SetScriptManager(AJavaScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
 
 public slots:
 
@@ -106,7 +106,7 @@ public slots:
   const QVariant GetResults() const {return Results;}
 
 private:
-  AScriptManager* ScriptManager;
+  AJavaScriptManager* ScriptManager;
   QVector<AVarRecordBase*> Variables;
   QVariantList    Results;
 

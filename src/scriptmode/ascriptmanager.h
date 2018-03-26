@@ -1,98 +1,75 @@
 #ifndef ASCRIPTMANAGER_H
 #define ASCRIPTMANAGER_H
-#include "ascriptmessengerdialog.h"
+
 #include <QObject>
 #include <QVector>
 #include <QString>
-#include <QScriptValue>
+#include <QVariant>
 
-class QScriptEngine;
 class TRandom2;
-class QElapsedTimer;
 class AInterfaceToCore;
-class QDialog;
-class AInterfaceToMessageWindow;
+class QElapsedTimer;
 
 class AScriptManager : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    AScriptManager(TRandom2 *RandGen);
-    ~AScriptManager();    
+  AScriptManager(TRandom2 *RandGen);
+  virtual ~AScriptManager();
 
-    //configuration
-    void            SetInterfaceObject(QObject* interfaceObject, QString name = "");
+  //configuration
+  virtual void      SetInterfaceObject(QObject* interfaceObject, QString name = "") = 0;
 
-    //run
-    int             FindSyntaxError(QString script); //returns line number of the first syntax error; -1 if no errors found
-    QString         Evaluate(QString Script);
-    QScriptValue    EvaluateScriptInScript(const QString& script);
+  //run
+  virtual int       FindSyntaxError(const QString & /*script*/ ) {return -1;} //returns line number of the first syntax error; -1 if no errors found
+  virtual QString   Evaluate(const QString &Script) = 0;
+  virtual QVariant  EvaluateScriptInScript(const QString& script) = 0;
 
-    bool            isEngineRunning() const {return fEngineIsRunning;}
-    bool            isEvalAborted() const {return fAborted;}
-    bool            isUncaughtException() const;
-    int             getUncaughtExceptionLineNumber() const;
-    const QString   getUncaughtExceptionString() const;
-    const QString   getLastError() const {return LastError;}
+  virtual bool      isUncaughtException() const {return false;}
+  virtual int       getUncaughtExceptionLineNumber() const {return -1;}
+  virtual const QString getUncaughtExceptionString() const {return "";}
 
-    const QString   getFunctionReturnType(const QString& UnitFunction);
-    void            collectGarbage();
+  virtual void      collectGarbage(){}
+  virtual void      abortEvaluation() = 0;
 
-    QScriptValue    getMinimalizationFunction();
+  virtual void      hideMsgDialogs();
+  virtual void      restoreMsgDialogs();
 
-    void            deleteMsgDialogs();  //needed in batch mode to force close MSG window if shown
-    void            hideMsgDialogs();
-    void            restoreMsgDialogs();
 
-    //for multithread-in-scripting
-    AScriptManager* createNewScriptManager(int threadNumber); // *** !!!
-    void            abortEvaluation();
-    QScriptValue    getProperty(const QString& properyName) const;
-    QScriptValue    registerNewVariant(const QVariant &Variant);
+  bool              isEngineRunning() const {return fEngineIsRunning;}
+  bool              isEvalAborted() const {return fAborted;}
 
-    QScriptValue    EvaluationResult;
+  const QString&    getLastError() const {return LastError;}
+  qint64            getElapsedTime();
+  const QString     getFunctionReturnType(const QString& UnitFunction);
 
-    qint64          getElapsedTime();
+  void              deleteMsgDialogs();
 
 public slots:
-    void            AbortEvaluation(QString message = "Aborted!");
-
-    void            hideAllMessengerWidgets();
-    void            showAllMessengerWidgets();
-    void            clearUnusedMsgDialogs();
-    void            closeAllMsgDialogs();
+  virtual void      AbortEvaluation(QString message = "Aborted!");
 
 public:
-    //registered interfaces (units)
-    QVector<QObject*> interfaces;
+  QVector<QObject*> interfaces;  //registered interfaces (units)
+  TRandom2*         RandGen;     //math module uses it
 
-    AInterfaceToCore* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+  //starter dirs
+  QString           LibScripts, LastOpenDir, ExamplesDir;
 
-    TRandom2*       RandGen;     //math module uses it
+  //for minimizer
+  QString           MiniFunctionName;
+  double            MiniBestResult;
+  int               MiniNumVariables;
 
+protected:
+  bool              fEngineIsRunning;
+  bool              fAborted;
 
-    //starter dirs
-    QString         LibScripts, LastOpenDir, ExamplesDir;
+  QString           LastError;
 
-    //for minimizer
-    QString         MiniFunctionName;
-    double          MiniBestResult;
-    int             MiniNumVariables;
-
-    QScriptEngine*  engine;
-private:
-
-    bool            fEngineIsRunning;
-    bool            fAborted;
-
-    QString         LastError;
-
-    QElapsedTimer*  timer;
-    qint64          timeOfStart;
-    qint64          timerEvalTookMs;
-
-    QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
+  QElapsedTimer*    timer;
+  qint64            timeOfStart;
+  qint64            timerEvalTookMs;
 
 signals:
     void            onStart();

@@ -10,7 +10,7 @@
 #include <QVariant>
 #include <QVariantList>
 
-class AScriptManager;
+class AJavaScriptManager;
 class QThread;
 
 class AScriptThreadBase;
@@ -22,7 +22,7 @@ class AInterfaceToMultiThread : public AScriptInterface
 friend class AScriptThreadBase;
 
 public:
-    AInterfaceToMultiThread(AScriptManager *MasterScriptManager);
+    AInterfaceToMultiThread(AJavaScriptManager *MasterScriptManager);
 
     virtual void  ForceStop() override;
 
@@ -46,10 +46,10 @@ public slots:
     bool          deleteOne(int IndexOfWorker);
 
 private:
-    AScriptManager *MasterScriptManager;
+    AJavaScriptManager *MasterScriptManager;
     QVector<AScriptThreadBase*> workers;
 
-    void          startEvaluation(AScriptManager *sm, AScriptThreadBase* worker);
+    void          startEvaluation(AJavaScriptManager *sm, AScriptThreadBase* worker);
 
 private slots:
     void          onErrorInTread(AScriptThreadBase *workerWithError);
@@ -60,7 +60,7 @@ class AScriptThreadBase : public QObject
     Q_OBJECT
 
 public:
-    AScriptThreadBase(AScriptManager* ScriptManager = 0);
+    AScriptThreadBase(AJavaScriptManager* ScriptManager = 0);
     virtual         ~AScriptThreadBase();
 
     bool            isRunning() {return bRunning;}
@@ -74,7 +74,7 @@ signals:
     void            errorFound(AScriptThreadBase*);
 
 public://protected:
-    AScriptManager* ScriptManager = 0;
+    AJavaScriptManager* ScriptManager = 0;
     bool            bRunning = false;
     QVariant        Result = QString("Evaluation was not yet performed");
 
@@ -87,7 +87,7 @@ class AScriptThreadScr : public AScriptThreadBase
 
 public:
     AScriptThreadScr(){}
-    AScriptThreadScr(AScriptManager* ScriptManager, const QString& Script);
+    AScriptThreadScr(AJavaScriptManager* ScriptManager, const QString& Script);
 
 public slots:
     virtual void    Run() override;
@@ -102,7 +102,7 @@ class AScriptThreadFun : public AScriptThreadBase
 
 public:
     AScriptThreadFun(){}
-    AScriptThreadFun(AScriptManager* ScriptManager, const QString& Function, const QVariant& Arguments);
+    AScriptThreadFun(AJavaScriptManager* ScriptManager, const QString& Function, const QVariant& Arguments);
 
 public slots:
     virtual void       Run() override;

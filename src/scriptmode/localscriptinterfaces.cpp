@@ -5,7 +5,7 @@
 #include "asandwich.h"
 #include "detectorclass.h"
 #include "afiletools.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #include "QVector3D"
 

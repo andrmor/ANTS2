@@ -15754,6 +15754,7 @@ on stack</string>
      <string>Script</string>
     </property>
     <addaction name="actionGlobal_script"/>
+    <addaction name="actionOpen_Python_window"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindows"/>
@@ -15867,7 +15868,7 @@ on stack</string>
   </action>
   <action name="actionGlobal_script">
    <property name="text">
-    <string>Open script window</string>
+    <string>Open JavaScript window</string>
    </property>
   </action>
   <action name="actionNew_detector">
@@ -15945,6 +15946,11 @@ on stack</string>
    </property>
    <property name="toolTip">
     <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionOpen_Python_window">
+   <property name="text">
+    <string>Open Python window</string>
    </property>
   </action>
  </widget>

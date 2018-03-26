@@ -9,7 +9,7 @@
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
 #include "aconfiguration.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #include <QScriptEngine>
 #include <QTextStream>
@@ -74,13 +74,13 @@ GenericScriptWindowClass::GenericScriptWindowClass(TRandom2 *RandGen, QWidget *p
     QMainWindow(parent),
     ui(new Ui::GenericScriptWindowClass)
 {
-    ScriptManager = new AScriptManager(RandGen);
-    QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &GenericScriptWindowClass::ShowText);
-    QObject::connect(ScriptManager, &AScriptManager::clearText, this, &GenericScriptWindowClass::ClearText);
+    ScriptManager = new AJavaScriptManager(RandGen);
+    QObject::connect(ScriptManager, &AJavaScriptManager::showMessage, this, &GenericScriptWindowClass::ShowText);
+    QObject::connect(ScriptManager, &AJavaScriptManager::clearText, this, &GenericScriptWindowClass::ClearText);
     //retranslators:
-    QObject::connect(ScriptManager, &AScriptManager::onStart, this, &GenericScriptWindowClass::receivedOnStart);
-    QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &GenericScriptWindowClass::receivedOnAbort);
-    QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &GenericScriptWindowClass::receivedOnSuccess);
+    QObject::connect(ScriptManager, &AJavaScriptManager::onStart, this, &GenericScriptWindowClass::receivedOnStart);
+    QObject::connect(ScriptManager, &AJavaScriptManager::onAbort, this, &GenericScriptWindowClass::receivedOnAbort);
+    QObject::connect(ScriptManager, &AJavaScriptManager::onFinish, this, &GenericScriptWindowClass::receivedOnSuccess);
 
     tmpIgnore = false;
     fJsonTreeAlwayVisible = false;

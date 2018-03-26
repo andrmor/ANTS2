@@ -1,5 +1,5 @@
 #include "scriptminimizer.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #ifdef GUI
 #include "mainwindow.h"
@@ -17,7 +17,7 @@ double ScriptFunctor(const double *p) //last parameter contains the pointer to M
 {
   void *thisvalue;
   memcpy(&thisvalue, &p[0], sizeof(void *));
-  AScriptManager* ScriptManager = (AScriptManager*)thisvalue;
+  AJavaScriptManager* ScriptManager = (AJavaScriptManager*)thisvalue;
 
   if (ScriptManager->isEvalAborted()) return 1e30;
 
@@ -40,7 +40,7 @@ double ScriptFunctor(const double *p) //last parameter contains the pointer to M
   return result;
 }
 
-AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AJavaScriptManager *ScriptManager) :
   ScriptManager(ScriptManager)
 {
     Description = "Access to CERN ROOT minimizer";

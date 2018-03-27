@@ -172,6 +172,7 @@ ants2_RootServer{
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
 
+    #http://pythonqt.sourceforge.net/
     win32:{
             INCLUDEPATH += c:/Python33/include
             LIBS += -Lc:/Python33/libs -lPython33

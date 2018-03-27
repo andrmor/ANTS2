@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
         GenScriptWindow.SetInterfaceObject(geo, "geo");
 
-        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(GenScriptWindow.ScriptManager);
+        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(GenScriptWindow.ScriptManager);
         GenScriptWindow.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(conf, "config");
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
         SM.SetInterfaceObject(geo, "geo");
-        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(&SM);
+        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
         SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         SM.SetInterfaceObject(dat, "events");

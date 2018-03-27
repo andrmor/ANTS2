@@ -25,6 +25,14 @@
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 
+#ifdef ANTS_FLANN
+  #include "ainterfacetoknnscript.h"
+#endif
+
+#ifdef ANTS_FANN
+  #include "ainterfacetoannscript.h"
+#endif
+
 void MainWindow::createPythonScriptWindow()
 {
   QWidget* w = new QWidget();
@@ -45,10 +53,8 @@ void MainWindow::createPythonScriptWindow()
   connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
   PythonScriptWindow->SetInterfaceObject(geo, "geo");
 
-/*
-  AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(ScriptWindow->ScriptManager);
+  AInterfaceToMinimizerPythonScript* mini = new AInterfaceToMinimizerPythonScript(PSM);
   PythonScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
-*/
 
   AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
   QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
@@ -89,7 +95,6 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
   PythonScriptWindow->SetInterfaceObject(photon, "photon");
 
-  /*
 #ifdef ANTS_FLANN
   AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
   PythonScriptWindow->SetInterfaceObject(knn, "knn");
@@ -99,7 +104,6 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToANNScript* ann = new AInterfaceToANNScript();
   PythonScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
-  */
 
   // Interfaces which rely on MainWindow
 

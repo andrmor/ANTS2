@@ -13,7 +13,7 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-double ScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
+double JavaScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
 {
   void *thisvalue;
   memcpy(&thisvalue, &p[0], sizeof(void *));
@@ -40,16 +40,10 @@ double ScriptFunctor(const double *p) //last parameter contains the pointer to M
   return result;
 }
 
-AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AJavaScriptManager *ScriptManager) :
+AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptManager) :
   ScriptManager(ScriptManager)
 {
     Description = "Access to CERN ROOT minimizer";
-}
-
-AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other)
-  : AScriptInterface(other)
-{
-    ScriptManager = 0; // need to be set on copy!
 }
 
 AInterfaceToMinimizerScript::~AInterfaceToMinimizerScript()
@@ -180,8 +174,8 @@ bool AInterfaceToMinimizerScript::Run()
       return false;
     }
 
-  QScriptValue sv = ScriptManager->getMinimalizationFunction();
-  if (!sv.isFunction())
+  ROOT::Math::Functor *Funct = configureFunctor();
+  if (!Funct)
     {
       abort("Minimization function is not defined!");
       return false;
@@ -194,7 +188,6 @@ bool AInterfaceToMinimizerScript::Run()
   RootMinimizer->SetPrintLevel(PrintVerbosity);  
   RootMinimizer->SetStrategy( bHighPrecision ? 2 : 1 ); // 1 -> standard,  2 -> try to improve minimum (slower)
 
-  ROOT::Math::Functor *Funct = new ROOT::Math::Functor(&ScriptFunctor, ScriptManager->MiniNumVariables+1);
   RootMinimizer->SetFunction(*Funct);
 
   //prepare to transfer pointer to ScriptManager - it will the the first variable
@@ -318,3 +311,37 @@ void AInterfaceToMinimizerScript::AVarRecordUpperLimited::Debug() const
 {
   qDebug() << "UpperLimited"<<Value<<Step<<Max;
 }
+
+AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(AJavaScriptManager *ScriptManager) :
+  AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+
+AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(const AInterfaceToMinimizerJavaScript & /*other*/) :
+  AInterfaceToMinimizerScript(0) { }
+
+void AInterfaceToMinimizerJavaScript::SetScriptManager(AJavaScriptManager *NewScriptManager)
+{
+  ScriptManager = dynamic_cast<AScriptManager*>(NewScriptManager);
+}
+
+ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
+{
+  AJavaScriptManager* jsm = static_cast<AJavaScriptManager*>(ScriptManager);
+  QScriptValue sv = jsm->getMinimalizationFunction();
+  if (!sv.isFunction()) return 0;
+
+  return new ROOT::Math::Functor(&JavaScriptFunctor, ScriptManager->MiniNumVariables + 1);
+}
+
+#ifdef __USE_ANTS_PYTHON__
+#include "apythonscriptmanager.h"
+
+AInterfaceToMinimizerPythonScript::AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager) :
+  AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+
+ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
+{
+   // TO DO !!!***
+   //http://www.linuxjournal.com/article/8497?page=0,2
+   return 0;
+}
+#endif

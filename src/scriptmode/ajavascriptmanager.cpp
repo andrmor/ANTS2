@@ -425,7 +425,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
                 //qDebug() << "--this is core";
                 core->SetScriptManager(sm);
             }
-            AInterfaceToMinimizerScript* mini = dynamic_cast<AInterfaceToMinimizerScript*>(copy);
+            AInterfaceToMinimizerJavaScript* mini = dynamic_cast<AInterfaceToMinimizerJavaScript*>(copy);
             if (mini)
             {
                 //qDebug() << "--this is mini";

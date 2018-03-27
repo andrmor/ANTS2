@@ -61,7 +61,7 @@ void MainWindow::createScriptWindow()
     connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
     ScriptWindow->SetInterfaceObject(geo, "geo");
 
-    AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(SM);
+    AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(SM);
     ScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
     AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);

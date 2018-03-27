@@ -1,3 +1,9 @@
+#ifdef __USE_ANTS_PYTHON__
+  #include "Python.h"
+  #include "PythonQtConversion.h"
+  #include "PythonQt.h"
+#endif
+
 //ANTS2 modules
 #include "geometrywindowclass.h"
 #include "graphwindowclass.h"
@@ -3787,6 +3793,19 @@ void MainWindow::on_actionVersion_triggered()
   QString mav = QString::number(majVer);
   QString qv = QT_VERSION_STR;
 
+  QString PythonVersion;
+#ifdef __USE_ANTS_PYTHON__
+  //PyObject *platform = PyImport_ImportModule("platform");
+  //PyObject *python_version = PyObject_GetAttrString(platform, "python_version");
+  //PyObject *version = PyObject_CallObject(python_version, NULL);
+  //PythonVersion = PythonQtConv::PyObjGetString(version);
+
+  PythonQtObjectPtr platform( PyImport_ImportModule("platform") );
+  PythonQtObjectPtr python_version( PyObject_GetAttrString(platform.object(), "python_version") );
+  PythonQtObjectPtr version( PyObject_CallObject(python_version.object(), NULL) );
+  PythonVersion = PythonQtConv::PyObjGetString(version.object());
+#endif
+
   QString out = "ANTS2\n"
                 "   version:  " + mav + "." + miv + "\n"
                 "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
@@ -3823,6 +3842,12 @@ void MainWindow::on_actionVersion_triggered()
                 "\n   Root html server (for JSROOT):  "
 #ifdef USE_ROOT_HTML
  "on"
+#else
+ "off"
+#endif
+                "\n   Python scripting:  "
+#ifdef __USE_ANTS_PYTHON__
+ "on" + " -> Python " + PythonVersion + ""
 #else
  "off"
 #endif

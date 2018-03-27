@@ -31,9 +31,8 @@ void MainWindow::createPythonScriptWindow()
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
   PythonScriptWindow = new AScriptWindow(PSM, GlobSet, w);
   PythonScriptWindow->move(25,25);
-  PythonScriptWindow->show();
-  //connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
-  //connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
+  connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
+  connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
 
   // interface objects are owned after this by the ScriptManager!
   PythonScriptWindow->SetInterfaceObject(0); //initialization

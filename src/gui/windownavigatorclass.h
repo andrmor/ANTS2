@@ -78,7 +78,7 @@ private:
 
   QString LastProcessedWindow;
   bool DisableBSupdate;
-  bool MainOn, ReconOn, OutOn, LRFon, newLRFon, MatOn, ExamplesOn, GeometryOn, GraphOn, ScriptOn;
+  bool MainOn, ReconOn, OutOn, LRFon, newLRFon, MatOn, ExamplesOn, GeometryOn, GraphOn, ScriptOn, PythonScriptOn;
 
   bool MainChangeExplicitlyRequested;
 };

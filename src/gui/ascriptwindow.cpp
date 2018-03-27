@@ -983,12 +983,12 @@ bool AScriptWindow::event(QEvent *e)
             case QEvent::Hide :
                 //qDebug() << "Script window: hide event";
                 ScriptManager->hideMsgDialogs();
-                emit WindowHidden("script");
+                emit WindowHidden( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             case QEvent::Show :
                 //qDebug() << "Script window: show event";
                 ScriptManager->restoreMsgDialogs();
-                emit WindowShown("script");
+                emit WindowShown( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             default:;
         };

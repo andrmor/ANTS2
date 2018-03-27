@@ -46,6 +46,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   GeometryOn = false;
   GraphOn = false;
   ScriptOn = false;
+  PythonScriptOn = false;
   MainChangeExplicitlyRequested = false;
 #ifdef Q_OS_WIN32
   taskButton = 0;
@@ -191,6 +192,7 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
   if (w == "geometry") GeometryOn = false;
   if (w == "graph") GraphOn = false;
   if (w == "script") ScriptOn = false;
+  if (w == "python") PythonScriptOn = false;
 
   ui->pbMain->setChecked(MainOn);
   ui->pbRecon->setChecked(ReconOn);
@@ -216,6 +218,7 @@ void WindowNavigatorClass::ShowWindowTriggered(QString w)
   if (w == "geometry") GeometryOn = true;
   if (w == "graph") GraphOn = true;
   if (w == "script") ScriptOn = true;
+  if (w == "python") PythonScriptOn = true;
 
   ui->pbMain->setChecked(MainOn);
   ui->pbRecon->setChecked(ReconOn);
@@ -263,6 +266,7 @@ void WindowNavigatorClass::BusyOn()
   MW->DAwindow->setEnabled(false);
   MW->Rwindow->onBusyOn();
   MW->ScriptWindow->onBusyOn();
+  if (MW->PythonScriptWindow) MW->PythonScriptWindow->onBusyOn();
   MW->lrfwindow->onBusyOn();
   MW->MIwindow->setEnabled(false);
   MW->ELwindow->setEnabled(false);
@@ -299,6 +303,7 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
 
   //Script
   MW->ScriptWindow->onBusyOff();
+  if (MW->PythonScriptWindow) MW->PythonScriptWindow->onBusyOff();
 
   //lrf window
   MW->lrfwindow->onBusyOff();
@@ -395,6 +400,12 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->ScriptWindow->showNormal();
       MW->ScriptWindow->raise();
     }
+  if (PythonScriptOn)
+    if (MW->PythonScriptWindow)
+    {
+      MW->PythonScriptWindow->showNormal();
+      MW->PythonScriptWindow->raise();
+    }
 
   MainChangeExplicitlyRequested = false;
 }
@@ -412,10 +423,14 @@ void WindowNavigatorClass::on_pbMinAll_clicked()
 
   QList<QMainWindow*> list;
   list.clear();
+
   list<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
+  if (MW->PythonScriptWindow) list << MW->PythonScriptWindow;
+  if (MW->GenScriptWindow) list <<MW->GenScriptWindow;
+  if (MW->GainWindow) list << MW->GainWindow;
+
   foreach (QMainWindow* win, list) win->hide();
-  if (MW->GenScriptWindow) MW->GenScriptWindow->hide();
-  if (MW->GainWindow) MW->GainWindow->hide();
+
   MW->showMinimized();
 
   DisableBSupdate = false;

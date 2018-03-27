@@ -97,28 +97,30 @@ void AHighlighterScriptWindow::highlightBlock(const QString &text)
              }
       }
 
-    setCurrentBlockState(0);
+    if (bMultilineCommentAllowed)
+    {
+        setCurrentBlockState(0);
 
-    int startIndex = 0;
-    if (previousBlockState() != 1)
-             startIndex = commentStartExpression.indexIn(text);
+        int startIndex = 0;
+        if (previousBlockState() != 1)
+                 startIndex = commentStartExpression.indexIn(text);
 
-    while (startIndex >= 0)
-      {
-             int endIndex = commentEndExpression.indexIn(text, startIndex);
-             int commentLength;
-             if (endIndex == -1) {
-                 setCurrentBlockState(1);
-                 commentLength = text.length() - startIndex;
-             } else {
-                 commentLength = endIndex - startIndex
-                                 + commentEndExpression.matchedLength();
-             }
-             setFormat(startIndex, commentLength, multiLineCommentFormat);
-             startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
-       }
+        while (startIndex >= 0)
+          {
+                 int endIndex = commentEndExpression.indexIn(text, startIndex);
+                 int commentLength;
+                 if (endIndex == -1) {
+                     setCurrentBlockState(1);
+                     commentLength = text.length() - startIndex;
+                 } else {
+                     commentLength = endIndex - startIndex
+                                     + commentEndExpression.matchedLength();
+                 }
+                 setFormat(startIndex, commentLength, multiLineCommentFormat);
+                 startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
+           }
+    }
 }
-
 
 AHighlighterLrfScript::AHighlighterLrfScript(QTextDocument *parent)
   : AHighlighterScriptWindow(parent)
@@ -158,6 +160,7 @@ void AHighlighterLrfScript::setFixedVariables()
 AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *parent) :
     AHighlighterScriptWindow(parent)
 {
+    bMultilineCommentAllowed = false;
     highlightingRules.clear();
 
     HighlightingRule rule;
@@ -193,7 +196,7 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
 */
 
     singleLineCommentFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegExp("//[^\n]*");
+    rule.pattern = QRegExp("#[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 

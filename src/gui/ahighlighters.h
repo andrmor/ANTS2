@@ -15,6 +15,7 @@ public:
 
 protected:
     void highlightBlock(const QString &text);
+    bool bMultilineCommentAllowed = true;
 
 //private:
     struct HighlightingRule

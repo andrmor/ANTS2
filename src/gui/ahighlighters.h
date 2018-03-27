@@ -9,6 +9,7 @@ class AHighlighterScriptWindow : public QSyntaxHighlighter
     Q_OBJECT
 public:
     AHighlighterScriptWindow(QTextDocument *parent = 0);
+    virtual ~AHighlighterScriptWindow() {}
 
     void setCustomCommands(QStringList functions, QStringList constants = QStringList());
 
@@ -44,6 +45,13 @@ public:
 
 private:
     void setFixedVariables();
+};
+
+class AHighlighterPythonScriptWindow : public AHighlighterScriptWindow
+{
+    Q_OBJECT
+public:
+    AHighlighterPythonScriptWindow(QTextDocument *parent = 0);
 };
 
 #endif // AHIGHLIGHTERS_H

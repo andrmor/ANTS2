@@ -168,6 +168,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow = new GeometryWindowClass(w, this);
     GeometryWindow->move(25,25);
     createScriptWindow();
+#ifdef __USE_ANTS_PYTHON__
+    createPythonScriptWindow();
+#endif
     qDebug()<<">All windows created";
 
     //root update cycle

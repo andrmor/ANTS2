@@ -182,7 +182,7 @@ ants2_Python{
             LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
     }
 
-
+    SOURCES += gui/MainWindowTools/pythonscript.cpp
 }
 #----------
 
@@ -301,8 +301,7 @@ SOURCES += main.cpp \
     modules/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
     scriptmode/ascriptmanager.cpp \
-    scriptmode/apythonscriptmanager.cpp \
-    gui/MainWindowTools/pythonscript.cpp
+    scriptmode/apythonscriptmanager.cpp
 
 
 HEADERS  += common/CorrelationFilters.h \

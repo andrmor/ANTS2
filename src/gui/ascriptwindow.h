@@ -42,8 +42,8 @@ public:
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
     void HighlightErrorLine(int line);
 
-    void WriteToJson(QJsonObject &json);
-    void ReadFromJson(QJsonObject &json);
+    void WriteToJson();
+    void ReadFromJson();
 
     void UpdateHighlight();
 
@@ -102,10 +102,15 @@ private slots:
 
     void on_actionClose_all_messenger_windows_triggered();
 
+public:
+    enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
+
 private:
     Ui::AScriptWindow *ui;
     QStringListModel* completitionModel;
     GlobalSettingsClass* GlobSet;
+
+    ScriptLanguageEnum ScriptLanguage = _JavaScript_;
 
     int CurrentTab;
     QList<AScriptWindowTabItem*> ScriptTabs;
@@ -167,7 +172,7 @@ class AScriptWindowTabItem : QObject
 {
     Q_OBJECT
 public:
-    AScriptWindowTabItem(QAbstractItemModel *model);
+    AScriptWindowTabItem(QAbstractItemModel *model, AScriptWindow::ScriptLanguageEnum language);
     ~AScriptWindowTabItem();
 
     CompletingTextEditClass* TextEdit;

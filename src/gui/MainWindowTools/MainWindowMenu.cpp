@@ -122,6 +122,13 @@ void MainWindow::on_actionReset_position_of_windows_triggered()
        GraphWindow->showNormal();
        GraphWindow->raise();
      }
+
+   if (PythonScriptWindow)
+   {
+       GraphWindow->setGeometry(20, 20, 700, 500);
+       GraphWindow->showNormal();
+       GraphWindow->raise();
+   }
 }
 
 void addWindow(QString name, QMainWindow* w, QJsonObject &json)
@@ -161,6 +168,7 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   addWindow("Graph", GraphWindow, json);
   addWindow("DA", DAwindow, json);
   addWindow("ScriptWindow", ScriptWindow, json);
+  if (PythonScriptWindow) addWindow("PythonScriptWindow", PythonScriptWindow, json);
 
   if (GenScriptWindow)
     {
@@ -233,6 +241,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       readXYwindow("Graph", GraphWindow, true, json);
       readXYwindow("DA", DAwindow, true, json);
       if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
+      if (json.contains("PythonScriptWindow") && PythonScriptWindow) readXYwindow("PythonScriptWindow", PythonScriptWindow, true, json);
 
       if (json.contains("Script"))
         {
@@ -347,6 +356,7 @@ void MainWindow::setFontSizeAllWindows(int size)
   QList<QMainWindow*> wins;
   wins << (QMainWindow*)this << (QMainWindow*)Rwindow << (QMainWindow*)Owindow << (QMainWindow*)MIwindow << (QMainWindow*)lrfwindow << (QMainWindow*)WindowNavigator << (QMainWindow*)GeometryWindow << (QMainWindow*)GraphWindow << (QMainWindow*)ELwindow << (QMainWindow*)DAwindow << (QMainWindow*)GlobSetWindow << (QMainWindow*)CheckUpWindow;
   if (GainWindow) wins << (QMainWindow*)GainWindow;
+  if (PythonScriptWindow) wins << (QMainWindow*)PythonScriptWindow;
 
   for (int i=0; i<wins.size(); i++) wins[i]->setFont(font);
 }
@@ -431,4 +441,18 @@ void MainWindow::on_actionQuick_load_3_hovered()
 void MainWindow::on_actionLoad_last_config_hovered()
 {
     ui->actionLoad_last_config->setToolTip("Load config on last exit/sim/reconstruct\n" + ELwindow->getQuickSlotMessage(0));
+}
+
+void MainWindow::on_actionOpen_Python_window_triggered()
+{
+    if (PythonScriptWindow)
+    {
+        PythonScriptWindow->showNormal();
+        PythonScriptWindow->raise();
+        PythonScriptWindow->activateWindow();
+    }
+    else
+    {
+        message("Python scripting was not compiled, see ants2.pro", this);
+    }
 }

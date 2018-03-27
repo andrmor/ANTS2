@@ -12,6 +12,7 @@
 
 #include "ascriptmanager.h"
 #include "ajavascriptmanager.h"
+#include "apythonscriptmanager.h"
 
 #include "globalsettingsclass.h"
 #include "afiletools.h"
@@ -43,6 +44,15 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QMainWindow(parent), ScriptManager(ScriptManager),
     ui(new Ui::AScriptWindow)
 {
+    if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
+    {
+        ScriptLanguage = _JavaScript_;
+    }
+    if ( dynamic_cast<APythonScriptManager*>(ScriptManager) )
+    {
+        ScriptLanguage = _PythonScript_;
+    }
+
     if (parent)
     {
         //not a standalone window
@@ -210,21 +220,15 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
 
     trwJson->header()->resizeSection(0, 200);
 
-    if (!GlobSet->MainSplitterSizes_ScriptWindow.isEmpty())
-        SetMainSplitterSizes(GlobSet->MainSplitterSizes_ScriptWindow);
-    else
-    {
-        sizes.clear();
-        sizes << 800 << 70;
-        splMain->setSizes(sizes);
-    }
+    sizes.clear();
+    sizes << 800 << 70;
+    splMain->setSizes(sizes);
 
     //shortcuts
     QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
     connect(Run, SIGNAL(activated()), this, SLOT(on_pbRunScript_clicked()));
 
-    if (!GlobSet->ScriptWindowJson.isEmpty())
-        ReadFromJson(GlobSet->ScriptWindowJson);
+    ReadFromJson();
 }
 
 AScriptWindow::~AScriptWindow()
@@ -321,8 +325,15 @@ void AScriptWindow::HighlightErrorLine(int line)
   ScriptTabs[CurrentTab]->TextEdit->setExtraSelections(esList);
 }
 
-void AScriptWindow::WriteToJson(QJsonObject &json)
+void AScriptWindow::WriteToJson()
 {
+    QJsonObject* ScriptWindowJsonPtr = 0;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if (!ScriptWindowJsonPtr) return;
+
+    QJsonObject& json = *ScriptWindowJsonPtr;
+
     json = QJsonObject(); //clear
 
     QJsonArray ar;
@@ -335,11 +346,21 @@ void AScriptWindow::WriteToJson(QJsonObject &json)
     json["ScriptTabs"] = ar;
     json["CurrentTab"] = CurrentTab;
 
-    GlobSet->MainSplitterSizes_ScriptWindow = splMain->sizes();
+    QJsonArray sar;
+    for (int& i : splMain->sizes()) sar << i;
+    json["Sizes"] = sar;
 }
 
-void AScriptWindow::ReadFromJson(QJsonObject &json)
+void AScriptWindow::ReadFromJson()
 {
+    QJsonObject* ScriptWindowJsonPtr = 0;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if (!ScriptWindowJsonPtr) return;
+
+    QJsonObject& json = *ScriptWindowJsonPtr;
+
+    if (json.isEmpty()) return;
     if (!json.contains("ScriptTabs")) return;
 
     clearAllTabs();
@@ -367,6 +388,17 @@ void AScriptWindow::ReadFromJson(QJsonObject &json)
     CurrentTab = json["CurrentTab"].toInt();
     if (CurrentTab<0 || CurrentTab>ScriptTabs.size()-1) CurrentTab = 0;
     twScriptTabs->setCurrentIndex(CurrentTab);
+
+    if (json.contains("Sizes"))
+    {
+        QJsonArray sar = json["Sizes"].toArray();
+        if (sar.size() == 2)
+        {
+            QList<int> sizes;
+            sizes << sar.at(0).toInt(50) << sar.at(1).toInt(50);
+            splMain->setSizes(sizes);
+        }
+    }
 }
 
 void AScriptWindow::UpdateHighlight()
@@ -404,7 +436,7 @@ void AScriptWindow::ClearText()
 
 void AScriptWindow::on_pbRunScript_clicked()
 {
-   WriteToJson(GlobSet->ScriptWindowJson);
+   WriteToJson();
    GlobSet->SaveANTSconfiguration();
 
    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
@@ -1013,7 +1045,7 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
   return commands;
 }
 
-AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model)
+AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWindow::ScriptLanguageEnum language)
 {
     TextEdit = new CompletingTextEditClass();
     TextEdit->setLineWrapMode(QTextEdit::NoWrap);
@@ -1028,7 +1060,10 @@ AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model)
     completer->setWrapAround(false);
     TextEdit->setCompleter(completer);
 
-    highlighter = new AHighlighterScriptWindow(TextEdit->document());
+    if (language == AScriptWindow::_PythonScript_)
+        highlighter = new AHighlighterPythonScriptWindow(TextEdit->document());
+    else
+        highlighter = new AHighlighterScriptWindow(TextEdit->document());
 }
 
 AScriptWindowTabItem::~AScriptWindowTabItem()
@@ -1121,7 +1156,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 
 void AScriptWindow::AddNewTab()
 {
-    AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel);
+    AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel, ScriptLanguage);
     tab->highlighter->setCustomCommands(functions);
 
     if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())

@@ -111,6 +111,7 @@ public:
     GlobalSettingsWindowClass* GlobSetWindow;
     AScriptWindow* ScriptWindow;                //global script window
     ALrfWindow* newLrfWindow;                   //window of the v3 LRF module
+    AScriptWindow* PythonScriptWindow = 0;
 
 #ifdef ANTS_FANN
     NeuralNetworksWindow* NNwindow;
@@ -634,6 +635,10 @@ private:
     void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
     void ShowParticleSource_noFocus();
     void updateActivityIndication();
+
+#ifdef __USE_ANTS_PYTHON__
+    void createPythonScriptWindow();
+#endif
 
 public slots:
     //new sandwich

@@ -4,8 +4,6 @@
 #include "PythonQt.h"
 #include "PythonQt_QtAll.h"
 
-
-
 APythonScriptManager::APythonScriptManager(TRandom2 *RandGen) :
   AScriptManager(RandGen)
 {

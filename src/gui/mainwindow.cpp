@@ -218,7 +218,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
    //saving ANTS master-configuration file
    //qDebug()<<"--Saving ANTS configuration";   
-   ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
+   ScriptWindow->WriteToJson();
+   if (PythonScriptWindow) PythonScriptWindow->WriteToJson();
    //MIwindow->WriteElasticAutoToJson(GlobSet->ElasticAutoSettings);
    GlobSet->SaveANTSconfiguration();
 

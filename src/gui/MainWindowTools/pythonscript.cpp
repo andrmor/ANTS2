@@ -1,10 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-#ifdef __USE_ANTS_PYTHON__
-  #include "apythonscriptmanager.h"
-#endif
-
+#include "apythonscriptmanager.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"
@@ -29,12 +25,11 @@
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 
-void MainWindow::on_actionOpen_Python_window_triggered()
+void MainWindow::createPythonScriptWindow()
 {
-#ifdef __USE_ANTS_PYTHON__
   QWidget* w = new QWidget();
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
-  AScriptWindow* PythonScriptWindow = new AScriptWindow(PSM, GlobSet, w);
+  PythonScriptWindow = new AScriptWindow(PSM, GlobSet, w);
   PythonScriptWindow->move(25,25);
   PythonScriptWindow->show();
   //connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
@@ -128,7 +123,4 @@ void MainWindow::on_actionOpen_Python_window_triggered()
   QObject::connect(PythonScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));
 
   PythonScriptWindow->UpdateHighlight();
-#else
-  message("Python support was not compiled!", this);
-#endif
 }

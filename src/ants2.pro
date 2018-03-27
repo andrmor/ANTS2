@@ -1,14 +1,14 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 5
+ANTS2_MINOR = 6
 
 #Optional libraries
-CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
-CONFIG += ants2_fann        #enables FANN (fast neural network) library
-CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-CONFIG += ants2_Python      #enable Python scripting
+#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
+#CONFIG += ants2_fann        #enables FANN (fast neural network) library
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_Python      #enable Python scripting
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -181,6 +181,18 @@ ants2_Python{
 
             LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
     }
+    linux-g++ || unix {
+            INCLUDEPATH += $$system(python-config --includes)
+            LIBS += $$system(python-config --libs)
+
+            INCLUDEPATH += usr/PythonQt3.2/src
+            INCLUDEPATH += usr/PythonQt3.2/extensions/PythonQt_QtAll
+
+            LIBS += -Lusr/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
+    }
+
+    HEADERS += scriptmode/apythonscriptmanager.h
+    SOURCES += scriptmode/apythonscriptmanager.cpp
 
     SOURCES += gui/MainWindowTools/pythonscript.cpp
 }
@@ -300,9 +312,7 @@ SOURCES += main.cpp \
     common/acalibratorsignalperphel.cpp \
     modules/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
-    scriptmode/ascriptmanager.cpp \
-    scriptmode/apythonscriptmanager.cpp
-
+    scriptmode/ascriptmanager.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -429,8 +439,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/acalibratorsignalperphel.h \
     modules/areconstructionmanager.h \
     scriptmode/ajavascriptmanager.h \
-    scriptmode/ascriptmanager.h \
-    scriptmode/apythonscriptmanager.h
+    scriptmode/ascriptmanager.h
 
 # --- SIM ---
 ants2_SIM {

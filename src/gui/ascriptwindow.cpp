@@ -12,7 +12,10 @@
 
 #include "ascriptmanager.h"
 #include "ajavascriptmanager.h"
+
+#ifdef __USE_ANTS_PYTHON__
 #include "apythonscriptmanager.h"
+#endif
 
 #include "globalsettingsclass.h"
 #include "afiletools.h"
@@ -48,10 +51,12 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     {
         ScriptLanguage = _JavaScript_;
     }
+#ifdef __USE_ANTS_PYTHON__
     if ( dynamic_cast<APythonScriptManager*>(ScriptManager) )
     {
         ScriptLanguage = _PythonScript_;
     }
+#endif
 
     if (parent)
     {

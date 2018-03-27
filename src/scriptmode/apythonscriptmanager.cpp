@@ -92,6 +92,7 @@ void APythonScriptManager::handleError()
 //      Py_XDECREF(ptraceback);
 
     PythonQt::self()->handleError();
+    return;
 
       /*
     PyObject* err = PyErr_Occurred();
@@ -131,10 +132,6 @@ void APythonScriptManager::handleError()
             Py_DECREF(pyth_val);
         }
     }
-
-
-
-
 
     bool flag = false;
     if (PyErr_Occurred()) {

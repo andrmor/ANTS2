@@ -62,6 +62,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     }
 
     QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::requestHighlightErrorLine, this, &AScriptWindow::HighlightErrorLine);
     QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
     QObject::connect(ScriptManager, &AScriptManager::onStart, this, &AScriptWindow::receivedOnStart);
@@ -297,15 +298,15 @@ void AScriptWindow::SetScript(QString* text)
 
 void AScriptWindow::ReportError(QString error, int line)
 {
-  //pteOut->appendHtml(error);
    error = "<font color=\"red\">Error:</font><br>" + error;
    pteOut->appendHtml( error );
-   //pteOut->moveCursor(QTextCursor::Start);
-   if (line >= 0 ) HighlightErrorLine(line);
+   HighlightErrorLine(line);
 }
 
 void AScriptWindow::HighlightErrorLine(int line)
 {
+  if (line < 0) return;
+
   //highlight line with error
   QTextBlock block = ScriptTabs[CurrentTab]->TextEdit->document()->findBlockByLineNumber(line-1);
   int loc = block.position();
@@ -443,7 +444,7 @@ void AScriptWindow::on_pbRunScript_clicked()
 
    //qDebug() << "Init on Start done";
    pteOut->clear();
-   AScriptWindow::ShowText("Processing script");
+   //AScriptWindow::ShowText("Processing script");
 
    //syntax check
    int errorLineNum = ScriptManager->FindSyntaxError(Script);
@@ -480,8 +481,8 @@ void AScriptWindow::on_pbRunScript_clicked()
        //qDebug() << "Script returned:" << result;
        if (!ScriptManager->isEvalAborted())
          {
-            if (ShowEvalResult && result!="undefined") ShowText("Script evaluation result:\n"+result);
-            else ShowText("Script evaluation: success");
+            if (ShowEvalResult && result!="undefined" && !result.isEmpty()) ShowText("Script evaluation result:\n"+result);
+            //else ShowText("Script evaluation: success");
          }
        else
          {

@@ -170,7 +170,11 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
                        "exec" << "finally" << "for" << "from" << "global" <<
                        "if" << "import" << "in" << "is" << "lambda" <<
                        "not" << "or" << "pass" << "print" << "raise" <<
-                       "return" << "try" << "while";
+                       "return" << "try" << "while" <<
+                       "Data" << "Float" << "Int" << "Numeric" << "Oxphys" <<
+                       "array" << "close" << "float" << "int" << "input" <<
+                       "open" << "range" << "type" << "write" << "zeros";
+
     foreach (const QString &pattern, keywordPatterns)
     {
         QString pattern1 = QString("\\b") + pattern + "\\b";

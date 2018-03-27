@@ -50,6 +50,9 @@ void APythonScriptManager::SetInterfaceObject(QObject *interfaceObject, QString 
 
 QString APythonScriptManager::Evaluate(const QString &Script)
 {
+  fAborted = false;
+  fEngineIsRunning = true;
+
   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
 
   PythonQtObjectPtr p;
@@ -69,14 +72,102 @@ QString APythonScriptManager::Evaluate(const QString &Script)
 
   if (!p)
     {
-      PythonQt::self()->handleError();
+      handleError();
     }
-  else
-    {
 
-    }
+  fEngineIsRunning = false;
 
   return "";
+}
+
+void APythonScriptManager::handleError()
+{
+//    PyObject *ptype;
+//    PyObject *pvalue;
+//    PyObject *ptraceback;
+//    PyErr_Fetch( &ptype, &pvalue, &ptraceback);
+
+//      Py_XDECREF(ptype);
+//      Py_XDECREF(pvalue);
+//      Py_XDECREF(ptraceback);
+
+    PythonQt::self()->handleError();
+
+      /*
+    PyObject* err = PyErr_Occurred();
+    if (err != NULL) {
+        PyObject *ptype, *pvalue, *ptraceback;
+        PyObject *pystr, *module_name, *pyth_module, *pyth_func;
+        char *str;
+
+        PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+        pystr = PyObject_Str(pvalue);
+        str = PyString_AsString(pystr);
+        QString error_description = strdup(str);
+        qDebug() << "error descr:"<<error_description;
+
+        // See if we can get a full traceback
+        module_name = PyString_FromString("traceback");
+        pyth_module = PyImport_Import(module_name);
+        Py_DECREF(module_name);
+
+        if (pyth_module == NULL) {
+            //full_backtrace = NULL;
+
+            fEngineIsRunning = false;
+            return "";
+        }
+
+        pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
+        if (pyth_func && PyCallable_Check(pyth_func)) {
+            PyObject *pyth_val;
+
+            pyth_val = PyObject_CallFunctionObjArgs(pyth_func, ptype, pvalue, ptraceback, NULL);
+
+            pystr = PyObject_Str(pyth_val);
+            str = PyString_AsString(pystr);
+            QString full_backtrace = strdup(str);
+            qDebug() << "full backtrace:"<<full_backtrace;
+            Py_DECREF(pyth_val);
+        }
+    }
+
+
+
+
+
+    bool flag = false;
+    if (PyErr_Occurred()) {
+
+      if (_p->_systemExitExceptionHandlerEnabled &&
+          PyErr_ExceptionMatches(PyExc_SystemExit)) {
+        int exitcode = custom_system_exit_exception_handler();
+        Q_EMIT PythonQt::self()->systemExitExceptionRaised(exitcode);
+        }
+      else
+        {
+        // currently we just print the error and the stderr handler parses the errors
+        PyErr_Print();
+
+
+        // EXTRA: the format of the ptype and ptraceback is not really documented, so I use PyErr_Print() above
+//        PyObject *ptype;
+//        PyObject *pvalue;
+//        PyObject *ptraceback;
+//        PyErr_Fetch( &ptype, &pvalue, &ptraceback);
+
+//          Py_XDECREF(ptype);
+//          Py_XDECREF(pvalue);
+//          Py_XDECREF(ptraceback);
+
+        PyErr_Clear();
+        }
+      flag = true;
+    }
+    _p->_hadError = flag;
+    return flag;
+
+    */
 }
 
 QVariant APythonScriptManager::EvaluateScriptInScript(const QString & /*script*/)
@@ -86,41 +177,60 @@ QVariant APythonScriptManager::EvaluateScriptInScript(const QString & /*script*/
 
 void APythonScriptManager::abortEvaluation()
 {
-  qDebug() << "Not implemented!";
+  // no need to do anything - python interpreter already stopped evaluation
 }
 
 void APythonScriptManager::stdOut(const QString &s)
 {
-  //  QString _stdOut = s;
-  //  int idx;
-  //  while ((idx = _stdOut.indexOf('\n'))!=-1) {
-  //    consoleMessage(_stdOut.left(idx));
-  //    std::cout << _stdOut.left(idx).toLatin1().data() << std::endl;
-  //    _stdOut = _stdOut.mid(idx+1);
-  //  }
-
   if (s == "\n") return;
-  //ui->pteOut->appendPlainText(s);
-  qDebug() << "StdOut>>>" << s;
+  //    qDebug() << "StdOut>>>" << s;
+  emit showMessage(s);
 }
 
 void APythonScriptManager::stdErr(const QString &s)
 {
-  //  _hadError = true;
-  //  _stdErr += s;
-  //  int idx;
-  //  while ((idx = _stdErr.indexOf('\n'))!=-1) {
-  //    consoleMessage(_stdErr.left(idx));
-  //    std::cerr << _stdErr.left(idx).toLatin1().data() << std::endl;
-  //    _stdErr = _stdErr.mid(idx+1);
-  //  }
+  QString str = s.simplified();
+  str.remove("\n");
+  //    qDebug() << "ErrOut>>>" << str;
 
-  if (s == "\n") return;
-  if (s.startsWith("Traceback")) return;
-  if (s.startsWith("  File")) return;
-  if (s.startsWith("NameError")) return;
-  if (s == ": ") return;
+  AbortEvaluation("Aborted!");
 
-  //ui->pteOut->appendPlainText(s);
-  qDebug() << "ErrOut>>>" << s;
+  if (str.isEmpty()) return;
+  if (str.startsWith("Traceback")) return;
+  if (str == ":") return;
+  if (str == "^") return;
+  if (str == "<string>") return;
+  if (str == "File \"") return;
+  if (str == "\", line") return;
+
+  int lineNumber = -1;
+  bool bOK;
+  if (str.startsWith("File \"<string>\", "))
+  {
+      str.remove("File \"<string>\", ");
+      str.remove(", in <module>");
+      QStringList sl = str.split(" ", QString::SkipEmptyParts);
+      if (sl.size() > 1)
+          if (sl.first() == "line")
+          {
+              QString lns = sl.at(1);
+              lineNumber = lns.toInt(&bOK);
+              if (bOK)
+              {
+                  qDebug() << "Error line number:"<<lineNumber;
+                  requestHighlightErrorLine(lineNumber);
+              }
+          }
+  }
+
+  lineNumber = str.toInt(&bOK);
+  if (bOK)
+  {
+      str = "line " + str;
+      requestHighlightErrorLine(lineNumber);
+  }
+
+  QString message = "<font color=\"red\">"+ str +"</font>";
+  //    qDebug() << "---->"<<message;
+  emit showMessage(message);
 }

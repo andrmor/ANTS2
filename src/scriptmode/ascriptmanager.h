@@ -78,6 +78,7 @@ signals:
 
     void            showMessage(QString message);
     void            clearText();
+    void            requestHighlightErrorLine(int lineNumber);
 };
 
 #endif // ASCRIPTMANAGER_H

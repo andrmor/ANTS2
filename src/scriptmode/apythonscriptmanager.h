@@ -27,6 +27,9 @@ public:
 
     virtual void    abortEvaluation() override;
 
+private:
+    void handleError();
+
 private slots:
     void stdOut(const QString& s);
     void stdErr(const QString& s);

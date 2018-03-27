@@ -40,7 +40,6 @@ public:
     void AddNewTab();
 
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
-    void HighlightErrorLine(int line);
 
     void WriteToJson();
     void ReadFromJson();
@@ -58,6 +57,7 @@ public:
 public slots:
     void updateJsonTree();
 
+    void HighlightErrorLine(int line);
     void ShowText(QString text); //shows text in the output box
     void ClearText(); //clears text in the output box
     void on_pbRunScript_clicked();

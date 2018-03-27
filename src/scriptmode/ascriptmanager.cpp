@@ -113,9 +113,14 @@ void AScriptManager::deleteMsgDialogs()
 
 void AScriptManager::AbortEvaluation(QString message)
 {
-  qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
+  //  qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
 
-  if (fAborted || !fEngineIsRunning) return;
+  //if (fAborted || !fEngineIsRunning) return;
+  if (fAborted)
+  {
+      //  qDebug() << "...ignoring, already aborted";
+      return;
+  }
   fAborted = true;
 
   abortEvaluation();
@@ -128,7 +133,10 @@ void AScriptManager::AbortEvaluation(QString message)
       if (bi) bi->ForceStop();
     }
 
-  message = "<font color=\"red\">"+ message +"</font><br>";
-  emit showMessage(message);
+  if (!message.isEmpty())
+  {
+      message = "<font color=\"red\">"+ message +"</font><br>";
+      emit showMessage(message);
+  }
   emit onAbort();
 }

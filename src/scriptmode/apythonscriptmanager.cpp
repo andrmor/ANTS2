@@ -89,17 +89,41 @@ QString APythonScriptManager::Evaluate(const QString &Script)
 
 void APythonScriptManager::handleError()
 {
-//    PyObject *ptype;
-//    PyObject *pvalue;
-//    PyObject *ptraceback;
-//    PyErr_Fetch( &ptype, &pvalue, &ptraceback);
+      PythonQt::self()->handleError();
 
-//      Py_XDECREF(ptype);
-//      Py_XDECREF(pvalue);
-//      Py_XDECREF(ptraceback);
+  /*
 
-    PythonQt::self()->handleError();
-    return;
+      // Work in progress!
+      // no guarantie that direct conversion of traceback will work with other versions
+      //does not report error in attempt to import non-existing module, while StdErr shows it properly
+
+      PyObject *ptype = NULL, *pvalue = NULL, *ptraceback = NULL;
+      PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+      Py_XDECREF(ptype);
+      Py_XDECREF(pvalue);
+      Py_XDECREF(ptraceback);
+
+      if (!pvalue) qDebug() << "No error detected...";
+
+      QString str = "Error";
+      if (pvalue && PyString_Check(pvalue)) str += QString(": ") + PyString_AsString(pvalue);
+      qDebug() << "Error"<<str;
+
+      if (ptraceback)
+        {
+           PyTracebackObject* traceback = (PyTracebackObject*)ptraceback; //dynamic cast does not work - not polymorphic type
+           int line = traceback->tb_lineno;
+           qDebug() << "Error in line #:"<<line;
+           requestHighlightErrorLine(line);
+           str += QString("<br>in line #" + QString::number(line));
+        }
+
+       PyErr_Clear();
+
+       AbortEvaluation(str);
+
+ */
+
 
       /*
     PyObject* err = PyErr_Occurred();
@@ -120,10 +144,8 @@ void APythonScriptManager::handleError()
         Py_DECREF(module_name);
 
         if (pyth_module == NULL) {
-            //full_backtrace = NULL;
-
-            fEngineIsRunning = false;
-            return "";
+            full_backtrace = NULL;
+            return;
         }
 
         pyth_func = PyObject_GetAttrString(pyth_module, "format_exception");
@@ -139,38 +161,6 @@ void APythonScriptManager::handleError()
             Py_DECREF(pyth_val);
         }
     }
-
-    bool flag = false;
-    if (PyErr_Occurred()) {
-
-      if (_p->_systemExitExceptionHandlerEnabled &&
-          PyErr_ExceptionMatches(PyExc_SystemExit)) {
-        int exitcode = custom_system_exit_exception_handler();
-        Q_EMIT PythonQt::self()->systemExitExceptionRaised(exitcode);
-        }
-      else
-        {
-        // currently we just print the error and the stderr handler parses the errors
-        PyErr_Print();
-
-
-        // EXTRA: the format of the ptype and ptraceback is not really documented, so I use PyErr_Print() above
-//        PyObject *ptype;
-//        PyObject *pvalue;
-//        PyObject *ptraceback;
-//        PyErr_Fetch( &ptype, &pvalue, &ptraceback);
-
-//          Py_XDECREF(ptype);
-//          Py_XDECREF(pvalue);
-//          Py_XDECREF(ptraceback);
-
-        PyErr_Clear();
-        }
-      flag = true;
-    }
-    _p->_hadError = flag;
-    return flag;
-
     */
 }
 

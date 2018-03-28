@@ -334,14 +334,106 @@ ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
 
 #ifdef __USE_ANTS_PYTHON__
 #include "apythonscriptmanager.h"
+#include "PythonQt.h"
+#include "PythonQt_QtAll.h"
+#include "PythonQtConversion.h"
+
+double PythonScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
+{
+  void *thisvalue;
+  memcpy(&thisvalue, &p[0], sizeof(void *));
+  APythonScriptManager* psm = (APythonScriptManager*)thisvalue;
+
+  if (psm->isEvalAborted()) return 1e30;
+
+  const int numArguments = psm->MiniNumVariables;
+
+  /*
+    QString str;
+    for (int i=0; i<numArguments; i++)
+        str += QString::number(p[i+1])+"  ";
+    qDebug() << "Functor call with parameters:"<<str<<psm;
+  */
+
+  /*
+    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+    PyObject* dict = NULL;
+    if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
+    else if (PyDict_Check(mainModule))
+        dict = mainModule;
+
+    if (dict)
+      {
+        PyObject* expression = PyDict_GetItemString(dict, psm->MiniFunctionName.toLatin1().data());
+        qDebug() << "expression:"<<expression;
+
+            PyObject *pyth_val;
+
+            //PyObject* arg1 = PyFloat_FromDouble(p[1]);
+            //PyObject* arg2 = PyFloat_FromDouble(p[2]);
+            //qDebug() << "args:"<< arg1 << arg2;
+            //pyth_val = PyObject_CallFunctionObjArgs(expression, arg1, arg2, NULL);
+
+            PyObject* tupleArgs = PyTuple_New(numArguments);
+            for (int i=0; i<numArguments; i++)
+                PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
+            pyth_val = PyObject_Call(expression, tupleArgs, NULL);
+
+            qDebug() << pyth_val;
+
+            double result = 1e30;
+            bool bOK;
+            if (pyth_val)
+                result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+
+            qDebug() << "-->" << result;
+            return result;
+
+      }
+    else return 1e30;
+    */
+
+    //PyObject* tupleArgs = PyTuple_New(numArguments);
+    PythonQtObjectPtr tupleArgs;
+    tupleArgs.setNewRef( PyTuple_New(numArguments) );
+    for (int i=0; i<numArguments; i++)
+        PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
+    //PythonQtObjectPtr pyth_val = PyObject_Call(psm->MinimizationFunctor, tupleArgs, NULL);
+    PythonQtObjectPtr pyth_val;
+    pyth_val.setNewRef( PyObject_Call(psm->MinimizationFunctor, tupleArgs, NULL) );
+
+    double result = 1e30;
+    bool bOK;
+    if (pyth_val)
+        result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+
+    //  qDebug() << "-->" << result;
+    return result;
+}
 
 AInterfaceToMinimizerPythonScript::AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager) :
   AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
 
 ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
 {
-   // TO DO !!!***
-   //http://www.linuxjournal.com/article/8497?page=0,2
+   APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
+
+   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+   //PythonQtObjectPtr p;
+   PyObject* dict = NULL;
+   if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
+   else if (PyDict_Check(mainModule))
+       dict = mainModule;
+
+   if (dict)
+   {
+       psm->MinimizationFunctor = PyDict_GetItemString(dict, ScriptManager->MiniFunctionName.toLatin1().data());
+
+       if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
+           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
+   }
+
+   psm->MinimizationFunctor = 0;
    return 0;
 }
 #endif

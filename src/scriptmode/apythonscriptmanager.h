@@ -1,6 +1,7 @@
 #ifndef APYTHONSCRIPTMANAGER_H
 #define APYTHONSCRIPTMANAGER_H
 
+#include "PythonQtObjectPtr.h"
 #include "ascriptmanager.h"
 
 #include <QObject>
@@ -9,6 +10,7 @@ class QScriptEngine;
 class TRandom2;
 class QDialog;
 class AInterfaceToMessageWindow;
+class PythonQtObjectPtr;
 
 class APythonScriptManager : public AScriptManager
 {
@@ -19,13 +21,15 @@ public:
     ~APythonScriptManager() {}
 
     //configuration
-    virtual void    SetInterfaceObject(QObject* interfaceObject, QString name) override;
+    virtual void      SetInterfaceObject(QObject* interfaceObject, QString name) override;
 
     //run
-    virtual QString Evaluate(const QString &Script) override;
-    virtual QVariant EvaluateScriptInScript(const QString& script) override;
+    virtual QString   Evaluate(const QString &Script) override;
+    virtual QVariant  EvaluateScriptInScript(const QString& script) override;
 
-    virtual void    abortEvaluation() override;
+    virtual void      abortEvaluation() override;
+
+    PythonQtObjectPtr MinimizationFunctor;
 
 private:
     void handleError();

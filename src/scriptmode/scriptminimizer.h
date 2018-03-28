@@ -133,6 +133,7 @@ public:
 
 #ifdef __USE_ANTS_PYTHON__
 class APythonScriptManager;
+
 class AInterfaceToMinimizerPythonScript : public AInterfaceToMinimizerScript
 {
   Q_OBJECT

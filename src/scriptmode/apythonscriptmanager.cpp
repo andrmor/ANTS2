@@ -1,8 +1,8 @@
-#include "apythonscriptmanager.h"
-#include "coreinterfaces.h"
-
 #include "PythonQt.h"
 #include "PythonQt_QtAll.h"
+
+#include "apythonscriptmanager.h"
+#include "coreinterfaces.h"
 
 APythonScriptManager::APythonScriptManager(TRandom2 *RandGen) :
   AScriptManager(RandGen)
@@ -50,10 +50,15 @@ void APythonScriptManager::SetInterfaceObject(QObject *interfaceObject, QString 
 
 QString APythonScriptManager::Evaluate(const QString &Script)
 {
+  LastError.clear();
   fAborted = false;
+
+  emit onStart();
+
   fEngineIsRunning = true;
 
   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+  //_PyModule_Clear(mainModule);
 
   PythonQtObjectPtr p;
   PyObject* dict = NULL;
@@ -76,6 +81,8 @@ QString APythonScriptManager::Evaluate(const QString &Script)
     }
 
   fEngineIsRunning = false;
+
+  emit onFinish("");
 
   return "";
 }
@@ -167,9 +174,31 @@ void APythonScriptManager::handleError()
     */
 }
 
-QVariant APythonScriptManager::EvaluateScriptInScript(const QString & /*script*/)
+QVariant APythonScriptManager::EvaluateScriptInScript(const QString &script)
 {
-  return "Not yet implemented";
+    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+
+    PythonQtObjectPtr p;
+    PyObject* dict = NULL;
+    if (PyModule_Check(mainModule))
+      {
+        dict = PyModule_GetDict(mainModule);
+      }
+    else if (PyDict_Check(mainModule))
+      {
+        dict = mainModule;
+      }
+    if (dict)
+      {
+        p.setNewRef(PyRun_String(script.toLatin1().data(), Py_file_input, dict, dict));//Py_single_input
+      }
+
+    if (!p)
+      {
+        handleError();
+      }
+
+    return "";
 }
 
 void APythonScriptManager::abortEvaluation()

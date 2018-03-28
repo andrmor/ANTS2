@@ -36,7 +36,7 @@ AJavaScriptManager::~AJavaScriptManager()
 
 QString AJavaScriptManager::Evaluate(const QString& Script)
 {
-    LastError = "";
+    LastError.clear();
     fAborted = false;
 
     emit onStart();

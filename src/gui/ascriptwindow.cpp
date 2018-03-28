@@ -634,7 +634,8 @@ void AScriptWindow::on_pbSaveAs_clicked()
 void AScriptWindow::on_pbExample_clicked()
 {
     //reading example database
-    QString RecordsFilename = GlobSet->ExamplesDir + "/" + "ScriptExamples.cfg";
+    QString target = (ScriptLanguage == _JavaScript_ ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
+    QString RecordsFilename = GlobSet->ExamplesDir + "/" + target;
     //check it is found
     QFile file(RecordsFilename);
     if (!file.open(QIODevice::ReadOnly))
@@ -656,7 +657,11 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
 {
   QString UnitDescription;
   AScriptInterface* io = dynamic_cast<AScriptInterface*>(obj);
-  if (io) UnitDescription = io->getDescription();
+  if (io)
+    {
+      UnitDescription = io->getDescription();
+      if (ScriptLanguage == _PythonScript_) UnitDescription.remove("Multithread-capable");
+    }
 
   QStringList functions = getCustomCommandsOfObject(obj, module, true);
   functions.sort();

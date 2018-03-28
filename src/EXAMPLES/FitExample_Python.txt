@@ -1,0 +1,40 @@
+import math
+
+RealFrequency = 2.5
+RealPhase = 1.0
+
+bestD2 = 1e30
+msg.Show()
+msg.Resize(500, 600)
+msg.Clear()
+
+def Functor(freq, phase) :
+       global bestD2
+       d2 = 0
+       for i in range (0, 50) :
+              data = math.sin(RealFrequency * i*math.pi/50 + RealPhase)
+              sim = math.sin(freq  * i*math.pi/50 + phase)
+              d2 += (data-sim)*(data-sim)              
+       d2 = math.sqrt(d2)
+       if d2 < bestD2 :
+              bestD2 = d2
+              s = ""
+              s += " Frequency: " + core.str(freq, 7) + "   Phase: " + core.str(phase, 7) +" Delta: " + core.str(bestD2, 7)
+              msg.Append(s)
+              
+       return d2
+       
+#test = Functor(1.10, 0.5); print(test)
+
+mini.Clear()
+mini.SetFunctorName("Functor")
+mini.AddVariable("fr", 1.0, 0.2, 1, 3)
+mini.AddVariable("ph", 0.5, 0.2, 0, 3)
+success = mini.Run()
+
+res = mini.GetResults()
+
+if res : core.print("Success!")
+else : core.print("Fail!")
+
+core.print("Found frequency of " + core.str(res[0], 7) + " and phase of " + core.str(res[1], 7))

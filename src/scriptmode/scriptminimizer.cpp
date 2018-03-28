@@ -349,6 +349,7 @@ double PythonScriptFunctor(const double *p) //last parameter contains the pointe
   const int numArguments = psm->MiniNumVariables;
 
   /*
+    //Diagnostics
     QString str;
     for (int i=0; i<numArguments; i++)
         str += QString::number(p[i+1])+"  ";

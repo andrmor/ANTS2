@@ -28,7 +28,7 @@ void APythonScriptManager::SetInterfaceObject(QObject *interfaceObject, QString 
       interfaces.append(coreObj);
       //registering math module
       QObject* mathObj = new AInterfaceToMath(RandGen);
-      QString mathName = "math";
+      QString mathName = "MATH";
       mathObj->setObjectName(mathName);
       PythonQt::self()->addObject(PythonQt::self()->getMainModule(), mathName, mathObj);
       interfaces.append(mathObj);

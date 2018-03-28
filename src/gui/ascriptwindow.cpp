@@ -264,8 +264,9 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         fillHelper(&core, "core");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
         AInterfaceToMath math(0); //dummy to extract methods
-        fillHelper(&math, "math");
-        newFunctions << getCustomCommandsOfObject(&math, "math", false);
+        QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
+        fillHelper(&math, mathName);
+        newFunctions << getCustomCommandsOfObject(&math, mathName, false);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else

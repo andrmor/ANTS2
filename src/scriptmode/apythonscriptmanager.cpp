@@ -72,7 +72,13 @@ QString APythonScriptManager::Evaluate(const QString &Script)
     }
   if (dict)
     {
-      p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, dict, dict));//Py_single_input
+      //p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, dict, dict));//Py_single_input
+
+      //dict = PyDict_Copy(dict);
+      //p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, dict, dict));
+
+      GlobalDict.setNewRef(PyDict_Copy(dict));
+      p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, GlobalDict, GlobalDict));
     }
 
   if (!p)

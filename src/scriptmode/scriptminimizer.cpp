@@ -419,13 +419,12 @@ ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
 {
    APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
 
-   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
-   //PythonQtObjectPtr p;
+   /*
+   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();   
    PyObject* dict = NULL;
    if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
    else if (PyDict_Check(mainModule))
        dict = mainModule;
-
    if (dict)
    {
        psm->MinimizationFunctor = PyDict_GetItemString(dict, ScriptManager->MiniFunctionName.toLatin1().data());
@@ -433,6 +432,16 @@ ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
        if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
            return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
    }
+   */
+
+   if (psm->GlobalDict)
+   {
+       psm->MinimizationFunctor = PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data());
+
+       if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
+           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
+   }
+
 
    psm->MinimizationFunctor = 0;
    return 0;

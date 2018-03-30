@@ -30,6 +30,7 @@ public:
     virtual void      abortEvaluation() override;
 
     PythonQtObjectPtr MinimizationFunctor;
+    PythonQtObjectPtr GlobalDict;
 
 private:
     void handleError();

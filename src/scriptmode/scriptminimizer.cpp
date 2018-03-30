@@ -436,7 +436,7 @@ ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
 
    if (psm->GlobalDict.object())
    {
-       psm->MinimizationFunctor = PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data());
+       psm->MinimizationFunctor.setNewRef( PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data()) );
 
        if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
            return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);

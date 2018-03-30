@@ -77,14 +77,13 @@ QString APythonScriptManager::Evaluate(const QString &Script)
       //dict = PyDict_Copy(dict);
       //p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, dict, dict));
 
-      GlobalDict.setNewRef(PyDict_Copy(dict));
+      GlobalDict.setNewRef(PyDict_Copy(dict)); //decref for the old one (if not NULL)
+      //should do Py_XINCREF(GlobalDict.object())? seems not - no memory leak
+      //do not do decref for dict -> crash
       p.setNewRef(PyRun_String(Script.toLatin1().data(), Py_file_input, GlobalDict, GlobalDict));
     }
 
-  if (!p)
-    {
-      handleError();
-    }
+  if (!p) handleError();
 
   fEngineIsRunning = false;
 
@@ -105,15 +104,12 @@ void APythonScriptManager::handleError()
 
       PyObject *ptype = NULL, *pvalue = NULL, *ptraceback = NULL;
       PyErr_Fetch(&ptype, &pvalue, &ptraceback);
-      Py_XDECREF(ptype);
-      Py_XDECREF(pvalue);
-      Py_XDECREF(ptraceback);
-
-      if (!pvalue) qDebug() << "No error detected...";
 
       QString str = "Error";
+
       if (pvalue && PyString_Check(pvalue)) str += QString(": ") + PyString_AsString(pvalue);
-      qDebug() << "Error"<<str;
+      else str += ": Unknown error type";
+      qDebug() << str;
 
       if (ptraceback)
         {
@@ -124,9 +120,13 @@ void APythonScriptManager::handleError()
            str += QString("<br>in line #" + QString::number(line));
         }
 
-       PyErr_Clear();
+      Py_XDECREF(ptype);
+      Py_XDECREF(pvalue);
+      Py_XDECREF(ptraceback);
 
-       AbortEvaluation(str);
+      PyErr_Clear();
+
+      AbortEvaluation(str);
 
  */
 
@@ -189,10 +189,7 @@ QVariant APythonScriptManager::EvaluateScriptInScript(const QString &script)
         p.setNewRef(PyRun_String(script.toLatin1().data(), Py_file_input, dict, dict));//Py_single_input
       }
 
-    if (!p)
-      {
-        handleError();
-      }
+    if (!p) handleError();
 
     return "";
 }

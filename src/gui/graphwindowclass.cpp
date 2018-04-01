@@ -790,6 +790,7 @@ void GraphWindowClass::on_cbLogX_toggled(bool checked)
   if (TMPignore) return;
   RasterWindow->fCanvas->SetLogx(checked);
   RasterWindow->fCanvas->Update();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_cbLogY_toggled(bool checked)
@@ -797,6 +798,7 @@ void GraphWindowClass::on_cbLogY_toggled(bool checked)
   if (TMPignore) return;
   RasterWindow->fCanvas->SetLogy(checked);
   RasterWindow->fCanvas->Update();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_ledXfrom_editingFinished()
@@ -1335,6 +1337,17 @@ void GraphWindowClass::UpdateControls()
 //      ymin = ((TF1*) obj)->GetMinimum();
 //      ymax = ((TF1*) obj)->GetMaximum();
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
+      if (c->GetLogx())
+        {
+          xmin = TMath::Power(10.0, xmin);
+          xmax = TMath::Power(10.0, xmax);
+        }
+      if (c->GetLogy())
+        {
+          ymin = TMath::Power(10.0, ymin);
+          ymax = TMath::Power(10.0, ymax);
+        }
+
     }
   if (PlotType.startsWith("TF2"))
     {
@@ -1360,9 +1373,6 @@ void GraphWindowClass::UpdateControls()
   if (PlotType == "TGraph" || PlotType == "TGraphErrors" || PlotType == "TMultiGraph")
     {
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
-
- //     qDebug()<<"---Ymin:"<<ymin;
-
       if (c->GetLogx())
         {
           xmin = TMath::Power(10.0, xmin);
@@ -1373,6 +1383,7 @@ void GraphWindowClass::UpdateControls()
           ymin = TMath::Power(10.0, ymin);
           ymax = TMath::Power(10.0, ymax);
         }
+       //   qDebug()<<"---Ymin:"<<ymin;
     }
 
   if (PlotType == "TGraph2D")

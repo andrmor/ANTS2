@@ -108,6 +108,8 @@ public:
 
    void clearCalibration();
    bool setCalibration(bool bUseScan);
+   bool setCalibrationDirect(const QVector<QVector<float> >& data);
+
    int countCalibrationEvents() {return numCalibrationEvents;}
 
    double getCalibrationEventX(int ievent);

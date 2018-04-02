@@ -56,6 +56,50 @@ QString AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
+QString AInterfaceToKnnScript::setCalibration(QVariant array)
+{
+    QVariantList VarList = array.toList();
+    if (VarList.isEmpty())
+    {
+        abort("Array of arrays is expected as the second argument in setCalibration()");
+        return "";
+    }
+
+    QVariantList element = VarList.at(0).toList();
+    if (element.isEmpty())
+    {
+        abort("Array of arrays is expected as the second argument in setCalibration()");
+        return "";
+    }
+    const int numDimension = element.size();
+    QVector< QVector<float>> data(numDimension);
+
+    for (int iPoint=0; iPoint<VarList.size(); iPoint++)
+    {
+        QVariantList element = VarList.at(iPoint).toList();
+        if (element.isEmpty())
+        {
+            abort("Array of arrays is expected as the second argument in setCalibration()");
+            return "";
+        }
+        if (element.size() != numDimension)
+        {
+            abort("Array of arrays of the same size is expected in setCalibration()");
+            return "";
+        }
+
+        QVector<float>& dataLine = data[iPoint];
+        dataLine.resize(numDimension);
+        for (int iDim=0; iDim<numDimension; iDim++)
+        {
+            dataLine[iDim] = element.at(iDim).toFloat();
+        }
+    }
+
+  knnModule->ScriptInterfacer->setCalibrationDirect(data);
+  return knnModule->ScriptInterfacer->ErrorString;
+}
+
 int AInterfaceToKnnScript::countCalibrationEvents()
 {
   return knnModule->ScriptInterfacer->countCalibrationEvents();

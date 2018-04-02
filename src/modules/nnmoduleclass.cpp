@@ -750,12 +750,15 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
           }
 
         // normalisation
-        if (NormSwitch > 0)
-        {
-            const float norm = calculateNorm(ievAll);
-            for (int ipm=0; ipm<numPMs; ipm++)
-              (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events[ievAll][ipm] / norm;
-        }
+//        if (NormSwitch > 0)
+//        {
+//            const float norm = calculateNorm(ievAll);
+//            for (int ipm=0; ipm<numPMs; ipm++)
+//              (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events[ievAll][ipm] / norm;
+//        }
+        const float norm = NormSwitch > 0 ? calculateNorm(ievAll) : 1.0;
+        for (int ipm=0; ipm<numPMs; ipm++)
+           (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events.at(ievAll).at(ipm) / norm;
 
         iev++;
       }
@@ -775,6 +778,54 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
 
   bCalibrationReady = true;
   return true;
+}
+
+bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& data)
+{
+    ErrorString.clear();
+    clearCalibration();
+
+    numCalibrationEvents = data.size();
+    if (numCalibrationEvents == 0)
+    {
+        qWarning() << "No calibration events were provided";
+        return false;
+    }
+    numPMs = data.first().count();
+    try
+    {
+      CalibrationEvents = new flann::Matrix<float> (new float[numCalibrationEvents*numPMs], numCalibrationEvents, numPMs);
+    }
+    catch(...)
+    {
+      ErrorString = "Failed to reserve space for the calibration dataset";
+      return false;
+    }
+
+    //qDebug() << "Filling the dataset and the true positions";
+    for (int iev=0; iev<numCalibrationEvents; iev++)
+        {
+          // normalisation
+          const float norm = NormSwitch > 0 ? calculateNorm(iev) : 1.0;
+          for (int ipm=0; ipm<numPMs; ipm++)
+             (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events.at(iev).at(ipm) / norm;
+        }
+
+    //building index
+    try
+    {
+      FlannIndex = new flann::Index<flann::L1<float> > (*CalibrationEvents, flann::KDTreeIndexParams(4));
+      FlannIndex->buildIndex();
+    }
+    catch(...)
+    {
+      FlannIndex = 0;
+      ErrorString = "Failed to build knn index";
+      return false;
+    }
+
+    bCalibrationReady = true;
+    return true;
 }
 
 float AScriptInterfacer::calculateNorm(int ievent) const

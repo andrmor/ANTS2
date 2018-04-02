@@ -24,6 +24,8 @@ public slots:
   // Define calibration data (overrides old)
   QString setGoodScanEventsAsCalibration();
   QString setGoodReconstructedEventsAsCalibration();
+  QString setCalibration(QVariant array);
+
   // Request calibration data
   int countCalibrationEvents();
   double getCalibrationEventX(int ievent);

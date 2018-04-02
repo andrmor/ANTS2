@@ -13,7 +13,8 @@ public:
 
 public slots:
   // Main functionality
-  QVariant getNeighbours(int ievent, int numNeighbours);  //array of [eventIndex, distance] - there will be numNeighbours elements
+  QVariant getNeighbours(int ievent, int numNeighbours);  //return: array of [eventIndex, distance] - there will be numNeighbours elements
+  QVariant getNeighboursDirect(QVariant onePoint, int numNeighbours);  //onePoint - array of signals for one point;   return: array of [eventIndex, distance] - there will be numNeighbours elements
   void filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance);
 
   // options - set BEFORE calibration dataset is given
@@ -24,7 +25,7 @@ public slots:
   // Define calibration data (overrides old)
   QString setGoodScanEventsAsCalibration();
   QString setGoodReconstructedEventsAsCalibration();
-  QString setCalibration(QVariant array);
+  QString setCalibrationDirect(QVariant arrayOfArrays);
 
   // Request calibration data
   int countCalibrationEvents();

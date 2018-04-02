@@ -102,6 +102,7 @@ public:
    AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
 
    QVariant getNeighbours(int ievent, int numNeighbours);
+   QVariant getNeighboursDirect(const QVector<float>& point, int numNeighbours);
    bool filterByDistance(int numNeighbours, float maxDistance, bool filterOutEventsWithSmallerDistance);
 
    void SetSignalNormalization(int type) {NormSwitch = type;}
@@ -137,7 +138,7 @@ private:
 
    bool isValidEventIndex(int ievent);
 
-   float calculateNorm(int ievent) const;
+   float calculateNorm(const QVector<float>& data) const;
 };
 
 class NNmoduleClass

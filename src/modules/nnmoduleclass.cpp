@@ -533,18 +533,21 @@ NNmoduleClass::~NNmoduleClass()
 AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, pms *PMs) :
   EventsDataHub(EventsDataHub), PMs(PMs), bCalibrationReady(false), NormSwitch(0), CalibrationEvents(0), FlannIndex(0) {}
 
-QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
-{    
+QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int numNeighbours)
+{
+  if (point.size() != numPMs)
+  {
+      qDebug() << point.size() << "but expected" << numPMs;
+      ErrorString = "Wrong number of dimensions in point dataset for kNN neighhbour serach!";
+      return QVariantList();
+  }
+
   if (!bCalibrationReady)
   {
       ErrorString = "Calibration set is empty!";
       return QVariantList();
   }
-  if (!isValidEventIndex(ievent))
-  {
-      ErrorString = "Wrong event number";
-      return QVariantList();
-  }
+  ErrorString.clear();
 
   int* indicesContainer;
   try
@@ -575,13 +578,10 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
   float* eventdataContainer = new float[numPMs];
   flann::Matrix<float> eventData(eventdataContainer, 1, numPMs);
 
-  // normalisation
-  if (NormSwitch > 0)
-  {
-      const float norm = calculateNorm(ievent);
-      for (int ipm=0; ipm<numPMs; ipm++)
-            eventData[0][ipm] = EventsDataHub->Events[ievent][ipm] / norm;
-  }
+  // fill and normalisation
+  const float norm = ( NormSwitch > 0 ? calculateNorm(point) : 1.0f );
+  for (int ipm = 0; ipm < numPMs; ipm++)
+     eventData[0][ipm] = point.at(ipm) / norm;
 
   //qDebug() << "Running search" << (fTrainedXYwithSameEventSet?"in X and Y":"in X");
    FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
@@ -600,6 +600,17 @@ QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
    delete[] indices.ptr();
    delete[] dists.ptr();
    return vl;
+}
+
+QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
+{
+  if (!isValidEventIndex(ievent))
+  {
+      ErrorString = "Wrong event number";
+      return QVariantList();
+  }
+
+  return getNeighboursDirect(EventsDataHub->Events.at(ievent), numNeighbours);
 }
 
 bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance, bool filterOutEventsWithSmallerDistance)
@@ -637,15 +648,12 @@ bool AScriptInterfacer::filterByDistance(int numNeighbours, float maxDistance, b
     float* eventdataContainer = new float[numEvents*numPMs];
     flann::Matrix<float> eventData(eventdataContainer, numEvents, numPMs);
 
-    // normalisation
-    if (NormSwitch > 0)
+    // fill and normalisation
+    for (int iev = 0; iev < numEvents; iev++)
     {
-        for (int iev=0; iev<numEvents; iev++)
-        {
-            const float norm = calculateNorm(iev);
-            for (int ipm=0; ipm<numPMs; ipm++)
-                  eventData[iev][ipm] = EventsDataHub->Events[iev][ipm] / norm;
-        }
+       const float norm = ( NormSwitch > 0 ? calculateNorm(EventsDataHub->Events.at(iev)) : 1.0f );
+       for (int ipm = 0; ipm < numPMs; ipm++)
+            eventData[iev][ipm] = EventsDataHub->Events.at(iev).at(ipm) / norm;
     }
 
     FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
@@ -749,15 +757,14 @@ bool AScriptInterfacer::setCalibration(bool bUseScan)
             E << EventsDataHub->ReconstructionData.at(0).at(ievAll)->Points[0].energy;
           }
 
-        // normalisation
 //        if (NormSwitch > 0)
 //        {
 //            const float norm = calculateNorm(ievAll);
 //            for (int ipm=0; ipm<numPMs; ipm++)
 //              (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events[ievAll][ipm] / norm;
 //        }
-        const float norm = NormSwitch > 0 ? calculateNorm(ievAll) : 1.0;
-        for (int ipm=0; ipm<numPMs; ipm++)
+        const float norm = ( NormSwitch > 0 ? calculateNorm(EventsDataHub->Events.at(ievAll)) : 1.0f );
+        for (int ipm = 0; ipm < numPMs; ipm++)
            (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events.at(ievAll).at(ipm) / norm;
 
         iev++;
@@ -791,7 +798,7 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
         qWarning() << "No calibration events were provided";
         return false;
     }
-    numPMs = data.first().count();
+    numPMs = data.first().size();
     try
     {
       CalibrationEvents = new flann::Matrix<float> (new float[numCalibrationEvents*numPMs], numCalibrationEvents, numPMs);
@@ -802,13 +809,12 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
       return false;
     }
 
-    //qDebug() << "Filling the dataset and the true positions";
-    for (int iev=0; iev<numCalibrationEvents; iev++)
+    //filling data with optional normalization
+    for (int iev = 0; iev < numCalibrationEvents; iev++)
         {
-          // normalisation
-          const float norm = NormSwitch > 0 ? calculateNorm(iev) : 1.0;
-          for (int ipm=0; ipm<numPMs; ipm++)
-             (*CalibrationEvents)[iev][ipm] = EventsDataHub->Events.at(iev).at(ipm) / norm;
+          const float norm = ( NormSwitch > 0 ? calculateNorm(data.at(iev)) : 1.0f );
+          for (int ipm = 0; ipm < numPMs; ipm++)
+             (*CalibrationEvents)[iev][ipm] = data.at(iev).at(ipm) / norm;
         }
 
     //building index
@@ -828,23 +834,23 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
     return true;
 }
 
-float AScriptInterfacer::calculateNorm(int ievent) const
+float AScriptInterfacer::calculateNorm(const QVector<float>& data) const
 {
     switch (NormSwitch)
     {
     case 1: //sum signal
       {
         float norm = 0;
-        for (int ipm=0; ipm<numPMs; ipm++)
-            norm += EventsDataHub->Events[ievent][ipm];
+        for (int ipm = 0; ipm < numPMs; ipm++)
+            norm += data.at(ipm);
         if (norm < 1.0e-10f) norm = 1.0e-10f;
         return norm;
       }
     case 2: //quadrature sum
       {
         float norm = 0;
-        for (int ipm=0; ipm<numPMs; ipm++)
-            norm += EventsDataHub->Events[ievent][ipm] * EventsDataHub->Events[ievent][ipm];
+        for (int ipm = 0; ipm < numPMs; ipm++)
+            norm += data.at(ipm) * data.at(ipm);
         norm = sqrt(norm);
         if (norm < 1.0e-10f) norm = 1.0e-10f;
         return norm;

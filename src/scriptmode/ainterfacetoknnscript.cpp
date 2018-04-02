@@ -24,6 +24,28 @@ QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
     return res;
 }
 
+QVariant AInterfaceToKnnScript::getNeighboursDirect(QVariant onePoint, int numNeighbours)
+{
+  QVariantList VarList = onePoint.toList();
+  if (VarList.isEmpty())
+  {
+      abort("getNeighboursDirect() requires first argument to be array.");
+      return "";
+  }
+  QVector<float> data;
+  for (int i=0; i<VarList.size(); i++)
+    {
+      data << VarList.at(i).toFloat();
+    }
+
+  QVariant res = knnModule->ScriptInterfacer->getNeighboursDirect(data, numNeighbours);
+  if (res == QVariantList())
+  {
+      abort("kNN module reports fail:\n" + knnModule->ScriptInterfacer->ErrorString);
+  }
+  return res;
+}
+
 void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance)
 {
     bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, distanceLimit, filterOutEventsWithSmallerDistance);
@@ -56,9 +78,9 @@ QString AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
-QString AInterfaceToKnnScript::setCalibration(QVariant array)
+QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
 {
-    QVariantList VarList = array.toList();
+    QVariantList VarList = arrayOfArrays.toList();
     if (VarList.isEmpty())
     {
         abort("Array of arrays is expected as the second argument in setCalibration()");
@@ -72,9 +94,9 @@ QString AInterfaceToKnnScript::setCalibration(QVariant array)
         return "";
     }
     const int numDimension = element.size();
-    QVector< QVector<float>> data(numDimension);
+    QVector< QVector<float>> data(VarList.size());
 
-    for (int iPoint=0; iPoint<VarList.size(); iPoint++)
+    for (int iPoint = 0; iPoint < VarList.size(); iPoint++)
     {
         QVariantList element = VarList.at(iPoint).toList();
         if (element.isEmpty())
@@ -90,13 +112,15 @@ QString AInterfaceToKnnScript::setCalibration(QVariant array)
 
         QVector<float>& dataLine = data[iPoint];
         dataLine.resize(numDimension);
-        for (int iDim=0; iDim<numDimension; iDim++)
+        for (int iDim = 0; iDim < numDimension; iDim++)
         {
             dataLine[iDim] = element.at(iDim).toFloat();
         }
     }
 
   knnModule->ScriptInterfacer->setCalibrationDirect(data);
+  if (!knnModule->ScriptInterfacer->ErrorString.isEmpty())
+      abort(knnModule->ScriptInterfacer->ErrorString);
   return knnModule->ScriptInterfacer->ErrorString;
 }
 

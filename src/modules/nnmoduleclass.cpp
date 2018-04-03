@@ -848,7 +848,7 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
     return true;
 }
 
-QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours)
+QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit)
 {
   if (!bCalibrationReady)
   {
@@ -858,9 +858,15 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours)
   ErrorString.clear();
 
   QVector<float> avSigma2OverAv(numPMs, 0);
-  for (int iEvent = 0; iEvent<numCalibrationEvents; iEvent++)
+  int numEventsUsed = 0;
+
+  for (int iEvent = 0; iEvent < numCalibrationEvents; iEvent++)
     {
       const QVector<QPair<int, float> > neighb = neighbours(EventsDataHub->Events.at(iEvent), numNeighbours);
+
+      const float& LastDist = neighb.at(numNeighbours-1).second;
+      if (LastDist > upperDistanceLimit) continue;
+      numEventsUsed++;
 
       for (int iPM = 0; iPM<numPMs; iPM++)
       {
@@ -869,20 +875,28 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours)
           for (int iN = 0; iN < numNeighbours; iN++)
             {
               const int& iEvent = neighb.at(iN).first;
-              //const float& Dist = neighb.at(iN).second();
               const float& Sig = EventsDataHub->Events.at(iEvent).at(iPM);
+              //const float& Dist = neighb.at(iN).second;
+
               sum += Sig;
               sum2 += Sig * Sig;
             }
           const float avSig = sum / numNeighbours;
-          const float sigma2 = ( sum2 - 2.0*sum*avSig ) / numNeighbours + avSig * avSig;
+          const float sigma2 = (sum2 - 2.0*sum*avSig) / numNeighbours   +   avSig * avSig;
           const float sigma2OverAv = sigma2 / avSig;
 
           avSigma2OverAv[iPM] += sigma2OverAv;
       }
     }
 
-   for (float& f : avSigma2OverAv) f /= numCalibrationEvents;
+   if (numEventsUsed > 0)
+     {
+      for (float& f : avSigma2OverAv)
+      {
+          qDebug() << f;
+          f /= numEventsUsed;
+      }
+     }
 
    return avSigma2OverAv;
 }

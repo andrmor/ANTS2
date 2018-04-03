@@ -124,9 +124,9 @@ QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
-QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours)
+QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit)
 {
-    QVector<float> phe = knnModule->ScriptInterfacer->evaluatePhPerPhE(numNeighbours);
+    QVector<float> phe = knnModule->ScriptInterfacer->evaluatePhPerPhE(numNeighbours, upperDistanceLimit);
     const QString& error = knnModule->ScriptInterfacer->ErrorString;
     if (!error.isEmpty())
     {

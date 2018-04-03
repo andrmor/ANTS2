@@ -28,7 +28,7 @@ public slots:
   QString setCalibrationDirect(QVariant arrayOfArrays);
 
   //stat calibration
-  QVariant evaluatePhPerPhE(int numNeighbours);
+  QVariant evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit);
 
   // Request calibration data
   int countCalibrationEvents();

@@ -27,6 +27,9 @@ public slots:
   QString setGoodReconstructedEventsAsCalibration();
   QString setCalibrationDirect(QVariant arrayOfArrays);
 
+  //stat calibration
+  QVariant evaluatePhPerPhE(int numNeighbours);
+
   // Request calibration data
   int countCalibrationEvents();
   double getCalibrationEventX(int ievent);

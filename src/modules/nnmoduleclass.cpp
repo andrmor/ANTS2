@@ -533,7 +533,7 @@ NNmoduleClass::~NNmoduleClass()
 AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, pms *PMs) :
   EventsDataHub(EventsDataHub), PMs(PMs), bCalibrationReady(false), NormSwitch(0), CalibrationEvents(0), FlannIndex(0) {}
 
-QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int numNeighbours)
+QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float>& point, int numNeighbours)
 {
   if (point.size() != numPMs)
   {
@@ -549,6 +549,22 @@ QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int
   }
   ErrorString.clear();
 
+  const QVector<QPair<int, float> > res = neighbours(point, numNeighbours);
+
+   //packing results
+   QVariantList vl;
+   for (int i=0; i<res.size(); i++)
+     {
+       QVariantList el;
+       el << res.at(i).first << res.at(i).second;
+       vl.push_back(el);
+     }
+
+   return vl;
+}
+
+const QVector<QPair<int, float> > AScriptInterfacer::neighbours(const QVector<float>& point, int numNeighbours)
+{
   int* indicesContainer;
   try
   {
@@ -557,7 +573,7 @@ QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int
   catch (...)
   {
     ErrorString = "Failed to reserve space for indices";
-    return QVariantList();
+    return QVector<QPair<int, float>>();
   }
 
   float* distsContainer;
@@ -569,7 +585,7 @@ QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int
   {
     ErrorString = "Failed to reserve space for distances";
     delete[] indicesContainer;
-    return QVariantList();
+    return QVector<QPair<int, float>>();
   }
 
   flann::Matrix<int> indices(indicesContainer, 1, numNeighbours);
@@ -581,25 +597,23 @@ QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float> &point, int
   // fill and normalisation
   const float norm = ( NormSwitch > 0 ? calculateNorm(point) : 1.0f );
   for (int ipm = 0; ipm < numPMs; ipm++)
-     eventData[0][ipm] = point.at(ipm) / norm;
+    eventData[0][ipm] = point.at(ipm) / norm;
 
-  //qDebug() << "Running search" << (fTrainedXYwithSameEventSet?"in X and Y":"in X");
-   FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
+  FlannIndex->knnSearch(eventData, indices, dists, numNeighbours, flann::SearchParams(numPMs));
 
-   //packing results
-   QVariantList vl;
-   for (int i=0; i<numNeighbours; i++)
-     {
-       QVariantList el;
-       el << indices[0][i] << dists[0][i];
-       vl.push_back(el);
-     }
+  //packing results
+  QVector<QPair<int, float> > res;
+  for (int i=0; i<numNeighbours; i++)
+  {
+      const QPair<int, float> pair(indices[0][i], dists[0][i]);
+      res << pair;
+  }
 
-     //qDebug() << "Cleanup phase";
-   delete[] eventData.ptr();
-   delete[] indices.ptr();
-   delete[] dists.ptr();
-   return vl;
+  delete[] eventData.ptr();
+  delete[] indices.ptr();
+  delete[] dists.ptr();
+
+  return res;
 }
 
 QVariant AScriptInterfacer::getNeighbours(int ievent, int numNeighbours)
@@ -832,6 +846,45 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
 
     bCalibrationReady = true;
     return true;
+}
+
+QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours)
+{
+  if (!bCalibrationReady)
+  {
+      ErrorString = "Calibration set is empty!";
+      return QVector<float>();
+  }
+  ErrorString.clear();
+
+  QVector<float> avSigma2OverAv(numPMs, 0);
+  for (int iEvent = 0; iEvent<numCalibrationEvents; iEvent++)
+    {
+      const QVector<QPair<int, float> > neighb = neighbours(EventsDataHub->Events.at(iEvent), numNeighbours);
+
+      for (int iPM = 0; iPM<numPMs; iPM++)
+      {
+          float sum = 0;
+          float sum2 = 0;
+          for (int iN = 0; iN < numNeighbours; iN++)
+            {
+              const int& iEvent = neighb.at(iN).first;
+              //const float& Dist = neighb.at(iN).second();
+              const float& Sig = EventsDataHub->Events.at(iEvent).at(iPM);
+              sum += Sig;
+              sum2 += Sig * Sig;
+            }
+          const float avSig = sum / numNeighbours;
+          const float sigma2 = ( sum2 - 2.0*sum*avSig ) / numNeighbours + avSig * avSig;
+          const float sigma2OverAv = sigma2 / avSig;
+
+          avSigma2OverAv[iPM] += sigma2OverAv;
+      }
+    }
+
+   for (float& f : avSigma2OverAv) f /= numCalibrationEvents;
+
+   return avSigma2OverAv;
 }
 
 float AScriptInterfacer::calculateNorm(const QVector<float>& data) const

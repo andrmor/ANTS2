@@ -124,6 +124,22 @@ QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
+QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours)
+{
+    QVector<float> phe = knnModule->ScriptInterfacer->evaluatePhPerPhE(numNeighbours);
+    const QString& error = knnModule->ScriptInterfacer->ErrorString;
+    if (!error.isEmpty())
+    {
+        abort("Error in knn module: " + error);
+        return 0;
+    }
+
+    QVariantList vl;
+    for (const float& f : phe) vl << f;
+
+    return vl;
+}
+
 int AInterfaceToKnnScript::countCalibrationEvents()
 {
   return knnModule->ScriptInterfacer->countCalibrationEvents();

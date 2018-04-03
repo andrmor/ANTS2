@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QJsonObject>
 #include <QObject>
+#include <QPair>
 
 class EventsDataClass;
 class pms;
@@ -113,6 +114,9 @@ public:
 
    int countCalibrationEvents() {return numCalibrationEvents;}
 
+   QVector<float> evaluatePhPerPhE(int numNeighbours);
+   int countPMs() const {return numPMs;}
+
    double getCalibrationEventX(int ievent);
    double getCalibrationEventY(int ievent);
    double getCalibrationEventZ(int ievent);
@@ -139,6 +143,7 @@ private:
    bool isValidEventIndex(int ievent);
 
    float calculateNorm(const QVector<float>& data) const;
+   const QVector<QPair<int, float> > neighbours(const QVector<float> &point, int numNeighbours);
 };
 
 class NNmoduleClass

@@ -890,13 +890,7 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float uppe
     }
 
    if (numEventsUsed > 0)
-     {
-      for (float& f : avSigma2OverAv)
-      {
-          qDebug() << f;
-          f /= numEventsUsed;
-      }
-     }
+      for (float& f : avSigma2OverAv) f /= numEventsUsed;
 
    return avSigma2OverAv;
 }

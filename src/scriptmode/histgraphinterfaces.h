@@ -41,6 +41,7 @@ public slots:
   void           Smooth(const QString& HistName, int times);
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
+  const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
 
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();

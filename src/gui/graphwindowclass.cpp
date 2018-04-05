@@ -343,55 +343,31 @@ double GraphWindowClass::getCanvasMaxY()
 
 double GraphWindowClass::getMinX(bool *ok)
 {
-    if (!ui->ledXfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledXfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxX(bool *ok)
 {
-    if (!ui->ledXto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledXto->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMinY(bool *ok)
 {
-    if (!ui->ledYfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledYfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxY(bool *ok)
 {
-    if (!ui->ledYto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledYto->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMinZ(bool *ok)
 {
-    if (!ui->ledZfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledZfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxZ(bool *ok)
 {
-    if (!ui->ledZto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledZto->text().toDouble(ok);
 }
 

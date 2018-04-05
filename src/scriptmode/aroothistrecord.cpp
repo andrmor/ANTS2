@@ -1,4 +1,5 @@
 #include "aroothistrecord.h"
+#include "apeakfinder.h"
 
 #include "TH1D.h"
 #include "TH2D.h"
@@ -152,6 +153,21 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
             for (int i=0; i<3; i++) res << f1->GetParError(i);
         }
       }
+    return res;
+}
+
+const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
+{
+    QMutexLocker locker(&Mutex);
+
+    QVector<double> res;
+
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        APeakFinder pf(h);
+        res = pf.findPeaks(sigma, threshold);
+    }
     return res;
 }
 

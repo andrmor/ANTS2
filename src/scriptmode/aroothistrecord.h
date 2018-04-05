@@ -30,6 +30,7 @@ public:
     void Smooth(int times);
     const QVector<double> FitGauss(const QString& options = "");
     const QVector<double> FitGaussWithInit(const QVector<double>& InitialParValues, const QString options = "");
+    const QVector<double> FindPeaks(double sigma, double threshold);
 
 };
 

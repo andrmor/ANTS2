@@ -2193,7 +2193,7 @@ QVariant InterfaceToGraphWin::GetAxis()
   result["maxX"] = MW->GraphWindow->getMaxX(&ok);
   if (!ok) result["maxX"] = QJsonValue();
 
-  result["minY"] = MW->GraphWindow->getMinY(&ok);
+  result["minY"] = MW->GraphWindow->getMinY(&ok);  
   if (!ok) result["minY"] = QJsonValue();
   result["maxY"] = MW->GraphWindow->getMaxY(&ok);
   if (!ok) result["maxY"] = QJsonValue();

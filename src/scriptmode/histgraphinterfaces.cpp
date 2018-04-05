@@ -82,7 +82,7 @@ void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double star
 
 void AInterfaceToHist::SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -91,7 +91,7 @@ void AInterfaceToHist::SetTitles(const QString& HistName, QString X_Title, QStri
 
 void AInterfaceToHist::SetLineProperties(const QString &HistName, int LineColor, int LineStyle, int LineWidth)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -100,7 +100,7 @@ void AInterfaceToHist::SetLineProperties(const QString &HistName, int LineColor,
 
 void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -109,7 +109,7 @@ void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
 
 void AInterfaceToHist::Fill2D(const QString &HistName, double x, double y, double weight)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -118,7 +118,7 @@ void AInterfaceToHist::Fill2D(const QString &HistName, double x, double y, doubl
 
 void AInterfaceToHist::Smooth(const QString &HistName, int times)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -130,7 +130,7 @@ void AInterfaceToHist::Smooth(const QString &HistName, int times)
 
 void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -186,7 +186,7 @@ void AInterfaceToHist::FillArr(const QString &HistName, const QVariant Array)
 
 void AInterfaceToHist::Fill2DArr(const QString &HistName, const QVariant Array)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -246,8 +246,8 @@ void AInterfaceToHist::Fill2DArr(const QString &HistName, const QVariant Array)
 
 void AInterfaceToHist::Divide(const QString &HistName, const QString &HistToDivideWith)
 {
-    ARootHistRecord* r1 = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
-    ARootHistRecord* r2 = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistToDivideWith));
+    ARootHistRecord* r1 = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r2 = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistToDivideWith));
     if (!r1) abort("Histogram " + HistName + " not found!");
     if (!r2) abort("Histogram " + HistToDivideWith + " not found!");
     else
@@ -268,7 +268,7 @@ QVariant ReturnNanArray(int num)
 
 const QVariant AInterfaceToHist::FitGauss(const QString &HistName, const QString options)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
     {
         abort("Histogram " + HistName + " not found!");
@@ -292,7 +292,7 @@ const QVariant AInterfaceToHist::FitGauss(const QString &HistName, const QString
 
 const QVariant AInterfaceToHist::FitGaussWithInit(const QString &HistName, const QVariant InitialParValues, const QString options)
 {
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
     {
         abort("Histogram " + HistName + " not found!");
@@ -338,6 +338,31 @@ const QVariant AInterfaceToHist::FitGaussWithInit(const QString &HistName, const
     return res;
 }
 
+const QVariant AInterfaceToHist::FindPeaks(const QString &HistName, double sigma, double threshold)
+{
+    if (threshold <= 0 || threshold >= 1.0)
+    {
+        abort("hist.FindPeaks() : Threshold should be larger than 0 and less than 1.0");
+        return 0;
+    }
+    if (sigma <= 0)
+    {
+        abort("hist.FindPeaks() : Sigma should be positive");
+        return 0;
+    }
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return 0;
+    }
+
+    const QVector<double> vec = r->FindPeaks(sigma, threshold);
+    QVariantList res;
+    for (const double& d : vec) res << d;
+    return res;
+}
+
 bool AInterfaceToHist::Delete(const QString &HistName)
 {
     if (!bGuiThread)
@@ -365,7 +390,7 @@ void AInterfaceToHist::Draw(const QString &HistName, const QString options)
         return;
     }
 
-    ARootHistRecord* r = static_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
@@ -414,7 +439,7 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
 
 void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -423,7 +448,7 @@ void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, 
 
 void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -432,7 +457,7 @@ void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int 
 
 void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -441,7 +466,7 @@ void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_
 
 void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -458,7 +483,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xArray, QVariant y
         return;
     }
 
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -526,7 +551,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
         return;
     }
 
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -535,7 +560,7 @@ void AInterfaceToGraph::AddPoints(QString GraphName, QVariant xyArray)
 
 void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double max)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -544,7 +569,7 @@ void AInterfaceToGraph::SetYRange(const QString &GraphName, double min, double m
 
 void AInterfaceToGraph::SetXRange(const QString &GraphName, double min, double max)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -553,7 +578,7 @@ void AInterfaceToGraph::SetXRange(const QString &GraphName, double min, double m
 
 void AInterfaceToGraph::Sort(const QString &GraphName)
 {
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
@@ -568,7 +593,7 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
         return;
     }
 
-    ARootGraphRecord* r = static_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else

@@ -294,7 +294,7 @@ TF1* ALrfModuleSelector::getRootFunctionRadialNewModule(const LRF::ASensorGroup 
   const LRF::ASensor *lrf_ptr = lrfs.getSensor(ipm);
   if(lrf_ptr == nullptr) return nullptr;
   LRF::ASensor lrf = *lrf_ptr;
-  pm &PM = PMs->at(ipm);
+  APm &PM = PMs->at(ipm);
   double pm_x = PM.x;
   double pm_y = PM.y;
   double rmin, rmax;

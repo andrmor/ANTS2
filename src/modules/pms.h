@@ -16,10 +16,10 @@ class QTextStream;
 class QJsonObject;
 class ACustomRandomSampling;
 
-struct pm
+struct APm
 {
-    explicit pm();
-    pm(double xx, double yy, double zz, double Psi, int typ);
+    APm(double x, double y, double z, double psi, int type) : x(x), y(y), z(z), psi(psi), type(type) {}
+    APm(){}
 
     void setCoords(const double *const xyz) { x = xyz[0]; y = xyz[1]; z = xyz[2]; }
     void saveCoords(QTextStream &file) const;
@@ -27,20 +27,28 @@ struct pm
     void setAngles(const double *const phithepsi) { phi = phithepsi[0]; theta = phithepsi[1]; psi = phithepsi[2]; }
     void saveAngles(QTextStream &file) const;
 
-    double x, y, z;
-    double phi, theta, psi;
-    double relQE_PDE;
-    double relElStrength;
-    int type;
-    int upperLower; //0- upper, 1 - lower
-    double PreprocessingAdd;
-    double PreprocessingMultiply;
+    double x = 0;
+    double y = 0;
+    double z = 0;
 
-    int MCmodel;
-    QVector<double> MCcrosstalk; //empty = not defined; otherwise should contain probabilityes of 1, 2, etc photoelectrons. Normalized to 1!        
-    double MCtriggerProb;    
-      //the following two are calculated before sim!
-    ACustomRandomSampling* MCsampl;
+    double phi = 0;
+    double theta = 0;
+    double psi = 0;
+
+    int    type = 0;
+
+    int    upperLower = 0;               // 0 - upper array, 1 - lower
+
+    double relQE_PDE = 1.0;
+    double relElStrength = 1.0;
+
+    double PreprocessingAdd = 0;
+    double PreprocessingMultiply = 1.0;
+
+    int    MCmodel = 0;
+    QVector<double> MCcrosstalk;        //empty = not defined; otherwise should contain probabilityes of 1, 2, etc photoelectrons. Normalized to 1!
+    ACustomRandomSampling* MCsampl = 0; //calculated before sim
+    double MCtriggerProb = 0;           //calculated before sim
 
 };
 
@@ -98,7 +106,7 @@ public:
     bool saveAngles(const QString &filename);
     bool saveTypes(const QString &filename);
     bool saveUpperLower(const QString &filename);
-    inline pm &at(int ipm) { return PMs[ipm]; }
+    inline APm &at(int ipm) { return PMs[ipm]; }
 
     //accelerator
     double getMaxQE() const {return MaxQE;}
@@ -199,7 +207,6 @@ public:
     void CalculateElChannelsStrength();
 
     double getElNoiseSigma(int ipm) {return ElNoiseSigma[ipm];}
-    const QVector<double>* getAllElNoiseSigma() {return &ElNoiseSigma;}
     double getADCmax(int ipm) {return ADCmax[ipm];}
     const QVector<double>* getAllADCmax() {return &ADCmax;}
     int getADCbits(int ipm) {return ADCbits[ipm];}
@@ -242,7 +249,7 @@ private:
     //
 
     //individual PM properties
-    QVector<pm> PMs;
+    QVector<APm> PMs;
     QVector<double> tmpGains;
 
     double MaxQE; //accelerator, not wave-resolved value

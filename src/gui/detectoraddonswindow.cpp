@@ -155,7 +155,7 @@ void DetectorAddOnsWindow::on_pbConvertToDummies_clicked()
        int ipm = ToAdd[iadd];
 //       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
 
-       const pm &PM = MW->PMs->at(ipm);
+       const APm &PM = MW->PMs->at(ipm);
        dpm.r[0] = PM.x;
        dpm.r[1] = PM.y;
        dpm.r[2] = PM.z;

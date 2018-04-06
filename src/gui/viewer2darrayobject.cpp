@@ -58,7 +58,7 @@ void Viewer2DarrayObject::DrawAll()
       //============================ drawing PMs ===================================
       for (int ipm=0; ipm<numPMs; ipm++)
         {
-          const pm &PM = PMs->at(ipm);
+          const APm &PM = PMs->at(ipm);
 
           //PM object pen
           QPen pen(PMprops[ipm].pen);

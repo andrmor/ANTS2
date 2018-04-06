@@ -2465,7 +2465,7 @@ QString ALrfScriptInterface::Make(QString name, QVariantList instructions, bool 
   std::vector<APoint> sensorPos;
   pms *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
   }
 
@@ -2506,7 +2506,7 @@ QString ALrfScriptInterface::Make(int recipe_id, bool use_scan_data, bool fit_er
   std::vector<APoint> sensorPos;
   pms *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
   }
 

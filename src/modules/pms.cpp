@@ -20,31 +20,13 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-pm::pm()
-{
-  x = 0;         y = 0;           z = 0;
-  phi = 0;       theta = 0;       psi = 0;
-  relQE_PDE = 1.0; relElStrength = 1.0;
-  type = 0;      upperLower = 0;
-  PreprocessingAdd = 0; PreprocessingMultiply = 1.0;
-  MCsampl = 0; MCmodel = 0; MCtriggerProb = 0;
-}
 
-pm::pm(double xx, double yy, double zz, double Psi, int typ)
-{
-  x = xx;        y = yy;          z = zz;
-  phi = 0;       theta = 0;       psi = Psi;
-  relQE_PDE = 1.0; relElStrength = 1.0;
-  type = typ;    upperLower = 0;
-  PreprocessingAdd = 0; PreprocessingMultiply = 1.0;
-  MCsampl = 0; MCmodel = 0; MCtriggerProb = 0;
-}
 
-void pm::saveCoords(QTextStream &file) const { file << x << " " << y << " " << z << "\r\n"; }
+void APm::saveCoords(QTextStream &file) const { file << x << " " << y << " " << z << "\r\n"; }
 
-void pm::saveCoords2D(QTextStream &file) const { file << x << " " << y << "\r\n"; }
+void APm::saveCoords2D(QTextStream &file) const { file << x << " " << y << "\r\n"; }
 
-void pm::saveAngles(QTextStream &file) const { file << phi << " " << theta << " " << psi << "\r\n"; }
+void APm::saveAngles(QTextStream &file) const { file << phi << " " << theta << " " << psi << "\r\n"; }
 
 pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen)
 {    
@@ -499,7 +481,7 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     numPMs++;
 
     //updating individual properties
-    pm newPM(xx, yy, zz, Psi, typ);
+    APm newPM(xx, yy, zz, Psi, typ);
     newPM.upperLower = upperlower;
     PMs.insert(ipm, newPM);
 

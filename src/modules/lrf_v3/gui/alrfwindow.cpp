@@ -683,7 +683,7 @@ void ALrfWindow::on_pb_make_lrfs_clicked()
   std::vector<APoint> sensorPos;
   pms *PMs = mw->Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
   }
 
@@ -1036,7 +1036,7 @@ bool ALrfWindow::doLrfRadialProfile(QVector<double> &radius, QVector<double> &LR
     lrf.deck.push_back(p);
   }
 
-  pm &PM = mw->PMs->at(ipm);
+  APm &PM = mw->PMs->at(ipm);
   int n_profiles = ledProfileCount->text().toDouble();
   const double angle_step = 2*3.141592653589793238462643383279/n_profiles;
   APoint pos(0, 0, mw->Rwindow->getSuggestedZ());

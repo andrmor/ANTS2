@@ -1859,7 +1859,7 @@ void GainEvaluatorWindowClass::UpdateGraphics()
       {
 
 
-        const pm &PM = MW->PMs->at(ipm);
+        const APm &PM = MW->PMs->at(ipm);
         //if (PM.isStaticPassive()) continue;
         //if (igroup != -1) if ( PM.group != igroup ) continue; //wrong group
 

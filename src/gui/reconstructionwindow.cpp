@@ -1946,7 +1946,7 @@ void ReconstructionWindow::on_pbShowPassivePMs_clicked()
     //cycle by PMs and if passive, add tracks for indication
     for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
-        const pm &PM = MW->PMs->at(ipm);
+        const APm &PM = MW->PMs->at(ipm);
         //if (PM.isStaticPassive())
         if (PMgroups->isStaticPassive(ipm))
         {

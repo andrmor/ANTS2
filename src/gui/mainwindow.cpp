@@ -1868,7 +1868,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     Detector->findPM(ipm, ul, index);
     if (index<0) return;
     APmPosAngTypeRecord *p = &Detector->PMarrays[ul].PositionsAnglesTypes[index];
-    pm *PM = &PMs->at(ipm);
+    APm *PM = &PMs->at(ipm);
 
     //format should be the same in MainWindow::on_pbUpdateToFixedZ_clicked() and MainWindow::on_pbUpdateToFullCustom_clicked()
     ui->ledIndPMx->setText(QString::number(PM->x, 'g', 4));

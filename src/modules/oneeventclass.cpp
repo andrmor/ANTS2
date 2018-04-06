@@ -280,12 +280,10 @@ void OneEventClass::HitsToSignal()
                   else TimedPMsignals[t][ipm] = TimedPMhits[t][ipm];
 
                   //Electronic noise
-                  //if (SimSet->fUseElNoise)
                   if (PMs->isDoElNoise())
                       TimedPMsignals[t][ipm] += RandGen->Gaus(0, PMs->getElNoiseSigma(ipm));
 
                   //ADC sim
-                  //if (SimSet->fUseADCs)
                   if (PMs->isDoADC())
                     {
                       if (TimedPMsignals[t][ipm]<0) TimedPMsignals[t][ipm]=0;
@@ -340,12 +338,10 @@ void OneEventClass::HitsToSignal()
           else PMsignals[ipm] = PMhitsTotal[ipm];
 
           //Electronic noise
-          //if (SimSet->fUseElNoise)
           if (PMs->isDoElNoise())
-              PMsignals[ipm] += RandGen->Gaus(0, PMs->getElNoiseSigma(ipm));  //was Sigma(0)!
+              PMsignals[ipm] += RandGen->Gaus(0, PMs->getElNoiseSigma(ipm));
 
           //ADC sim
-          //if (SimSet->fUseADCs)
           if (PMs->isDoADC())
           {
               if (PMsignals[ipm]<0) PMsignals[ipm]=0;

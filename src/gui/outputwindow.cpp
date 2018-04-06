@@ -621,7 +621,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
           else brush.setColor(Qt::black);
         }
 
-      const pm &PM = MW->PMs->at(ipm);
+      const APm &PM = MW->PMs->at(ipm);
       if (Passives)
           if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
 
@@ -663,7 +663,7 @@ void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, 
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
-      const pm &PM = MW->PMs->at(ipm);
+      const APm &PM = MW->PMs->at(ipm);
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 

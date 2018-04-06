@@ -6425,21 +6425,29 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 
   if (MW->TmpHub->PeakHists.size() != numPMs || !MW->TmpHub->PeakHists.at(ipm) )
   {
-      message("Prepare data first!", this);
+      message("Data not prepared!", this);
       return;
   }
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 
+  TString title("PM #");
+  title += ipm;
+  h->SetTitle(title);
+
   if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
   MW->GraphWindow->DrawWithoutFocus(h, "");
+
+  double minY = MW->GraphWindow->getCanvasMinY();
+  double maxY = MW->GraphWindow->getCanvasMaxY();
 
   if (MW->TmpHub->FoundPeaks.size() == numPMs)
     {
       const QVector<double> &peaks = MW->TmpHub->FoundPeaks.at(ipm);
       for (int i=0; i<peaks.size(); i++)
         {
-          TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          //TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          TLine* l = new TLine(peaks.at(i), minY, peaks.at(i), maxY);
           l->SetLineColor(kRed);
           l->SetLineWidth(2);
           l->SetLineStyle(2);

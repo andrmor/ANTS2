@@ -245,17 +245,16 @@ void OneEventClass::HitsToSignal()
               PMsignals[ipm] = 0; //this will be accumulator
               for (int t=0; t<SimSet->TimeBins; t++)
               {
-                  //if (SimSet->fUseGains)
-                  if (PMs->isDoPHS())
+                  if ( PMs->isDoPHS() )
                   {
-                      switch (PMs->getSPePHSmode(ipm))  //(SPePHSmode[ipm])
+                      switch ( PMs->at(ipm).SPePHSmode )
                       {
                         case 0:
-                          TimedPMsignals[t][ipm] = PMs->getAverageSignalPerPhotoelectron(ipm) * TimedPMhits[t][ipm];
+                          TimedPMsignals[t][ipm] = PMs->at(ipm).AverageSignalPerPhotoelectron * TimedPMhits[t][ipm];
                           break;
                         case 1:
                         {
-                          double mean = PMs->getAverageSignalPerPhotoelectron(ipm) * TimedPMhits[t][ipm];
+                          double mean = PMs->at(ipm).AverageSignalPerPhotoelectron * TimedPMhits[t][ipm];
                           double sigma = TMath::Sqrt(TimedPMhits[t][ipm]) * PMs->getSPePHSsigma(ipm);
                           TimedPMsignals[t][ipm] = RandGen->Gaus(mean, sigma);
                           break;
@@ -263,7 +262,7 @@ void OneEventClass::HitsToSignal()
                         case 2:
                         {
                           double k = PMs->getSPePHSshape(ipm);
-                          double theta = PMs->getAverageSignalPerPhotoelectron(ipm)/k;
+                          double theta = PMs->at(ipm).AverageSignalPerPhotoelectron / k;
                           k *= TimedPMhits[t][ipm]; //for sum distribution
                           TimedPMsignals[t][ipm] = GammaRandomGen->getGamma(k, theta);
                           break;
@@ -290,8 +289,8 @@ void OneEventClass::HitsToSignal()
                       if (TimedPMsignals[t][ipm]<0) TimedPMsignals[t][ipm]=0;
                       else
                         {
-                          if (TimedPMsignals[t][ipm] > PMs->getADCmax(ipm)) TimedPMsignals[t][ipm] = PMs->getADClevels(ipm);
-                          else TimedPMsignals[t][ipm] = (int)(TimedPMsignals[t][ipm]/PMs->getADCstep(ipm));
+                          if (TimedPMsignals[t][ipm] > PMs->at(ipm).ADCmax) TimedPMsignals[t][ipm] = PMs->at(ipm).ADClevels;
+                          else TimedPMsignals[t][ipm] = (int)( TimedPMsignals[t][ipm] / PMs->at(ipm).ADCstep );
                         }
                     }
 
@@ -304,17 +303,16 @@ void OneEventClass::HitsToSignal()
   { //not time resolved case
       for (int ipm=0; ipm<numPMs; ipm++)
       {
-          //if (SimSet->fUseGains)
-          if (PMs->isDoPHS())
+          if ( PMs->isDoPHS() )
           {
-              switch (PMs->getSPePHSmode(ipm))
+              switch ( PMs->at(ipm).SPePHSmode )
               {
                 case 0:
-                  PMsignals[ipm] = PMs->getAverageSignalPerPhotoelectron(ipm) * PMhitsTotal[ipm];
+                  PMsignals[ipm] = PMs->at(ipm).AverageSignalPerPhotoelectron * PMhitsTotal[ipm];
                   break;
                 case 1:
                 {
-                  double mean = PMs->getAverageSignalPerPhotoelectron(ipm) * PMhitsTotal[ipm];
+                  double mean = PMs->at(ipm).AverageSignalPerPhotoelectron * PMhitsTotal[ipm];
                   double sigma = TMath::Sqrt(PMhitsTotal[ipm]) * PMs->getSPePHSsigma(ipm);
                   PMsignals[ipm] = RandGen->Gaus(mean, sigma);
                   break;
@@ -322,7 +320,7 @@ void OneEventClass::HitsToSignal()
                 case 2:
                 {
                   double k = PMs->getSPePHSshape(ipm);
-                  double theta = PMs->getAverageSignalPerPhotoelectron(ipm)/k;
+                  double theta = PMs->at(ipm).AverageSignalPerPhotoelectron / k;
                   k *= PMhitsTotal[ipm]; //for sum distribution
                   PMsignals[ipm] = GammaRandomGen->getGamma(k, theta);
                   break;
@@ -349,8 +347,8 @@ void OneEventClass::HitsToSignal()
               if (PMsignals[ipm]<0) PMsignals[ipm]=0;
               else
                 {
-                  if (PMsignals[ipm] > PMs->getADCmax(ipm)) PMsignals[ipm] = PMs->getADClevels(ipm);
-                  else PMsignals[ipm] = (int)(PMsignals[ipm]/PMs->getADCstep(ipm));
+                  if (PMsignals[ipm] > PMs->at(ipm).ADCmax) PMsignals[ipm] = PMs->at(ipm).ADClevels;
+                  else PMsignals[ipm] = (int)( PMsignals[ipm] / PMs->at(ipm).ADCstep );
                 }
           }
       } //end cycle by PMs

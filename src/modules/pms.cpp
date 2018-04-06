@@ -57,11 +57,12 @@ pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen)
     ///PMgroupDescription.append("Default group");
 
     MeasurementTime = 150;
+
 }
 
 pms::~pms()
 {
-  //qDebug() << "  --- PMs destructor";
+  //    qDebug() << "  --- PMs destructor";
   delete GammaRandomGen;
   clearPMtypes();
 }
@@ -105,10 +106,12 @@ bool pms::readInividualOverridesFromJson(QJsonObject &json)
 }
 
 void pms::writePHSsettingsToJson(int ipm, QJsonObject &json)
-{  //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-  json["Mode"] = SPePHSmode[ipm];
-  json["Average"] = AverageSignalPerPhotoelectron[ipm];
-  switch (SPePHSmode[ipm])
+{
+  const int& mode = PMs.at(ipm).SPePHSmode; // 0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
+  json["Mode"] = mode;
+  json["Average"] = PMs.at(ipm).AverageSignalPerPhotoelectron;
+
+  switch ( mode )
     {
     case 0: break;
     case 1:
@@ -130,8 +133,8 @@ void pms::writePHSsettingsToJson(int ipm, QJsonObject &json)
 
 bool pms::readPHSsettingsFromJson(int ipm, QJsonObject &json)
 {
-  parseJson(json, "Mode", SPePHSmode[ipm]);
-  parseJson(json, "Average", AverageSignalPerPhotoelectron[ipm]);
+  parseJson(json, "Mode", PMs[ipm].SPePHSmode);
+  parseJson(json, "Average", PMs[ipm].AverageSignalPerPhotoelectron);
   parseJson(json, "Sigma", SPePHSsigma[ipm]);
   parseJson(json, "Shape", SPePHSshape[ipm]);
 
@@ -192,8 +195,8 @@ void pms::writeElectronicsToJson(QJsonObject &json)
       QJsonArray ar, ar1;
       for (int ipm=0; ipm<numPMs; ipm++)
         {
-          ar.append(ADCmax[ipm]);
-          ar1.append(ADCbits[ipm]);
+          ar.append(PMs.at(ipm).ADCmax);
+          ar1.append(PMs.at(ipm).ADCbits);
         }
       aj["ADCmax"] = ar;
       aj["ADCbits"] = ar1;
@@ -303,7 +306,7 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
            return false;
          }
        for (int ipm=0; ipm<numPMs; ipm++)
-           ADCmax[ipm] = ar[ipm].toDouble();
+           PMs[ipm].ADCmax = ar[ipm].toDouble();
      }
    if (aj.contains("ADCbits"))
      {
@@ -314,7 +317,7 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
            return false;
          }
        for (int ipm=0; ipm<numPMs; ipm++)
-           ADCbits[ipm] = ar[ipm].toDouble();
+           PMs[ipm].ADCbits = ar[ipm].toDouble();
      }
 
    if (js.contains("TimeWindow"))
@@ -442,19 +445,12 @@ void pms::clear() //does not affect PM types!
     AreaStepX.clear();
     AreaStepY.clear();
 
-    AverageSignalPerPhotoelectron.clear();
-    SPePHSmode.clear();
     SPePHSsigma.clear();
     SPePHSshape.clear();    
     for (int ipm=0; ipm<numPMs; ipm++) clearSPePHS(ipm);
     SPePHS_x.clear();
     SPePHS.clear();
     SPePHShist.clear();
-
-    ADCmax.clear();
-    ADCbits.clear();
-    ADCstep.clear();
-    ADClevels.clear();
 
     numPMs = 0;
 }
@@ -497,18 +493,12 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     AreaStepX.insert(ipm, 123); //just a strange value to see if error
     AreaStepY.insert(ipm, 123);
 
-    AverageSignalPerPhotoelectron.insert(ipm, 1);
-    SPePHSmode.insert(ipm, 0);
     SPePHSsigma.insert(ipm, 0);
     SPePHSshape.insert(ipm, 2);
     SPePHS_x.insert(ipm, tmp);
     SPePHS.insert(ipm, tmp);
     SPePHShist.insert(ipm, 0);
 
-    ADCmax.insert(ipm, 65535);
-    ADClevels.insert(ipm, 65535);
-    ADCbits.insert(ipm, 16);
-    ADCstep.insert(ipm, 1);
 }
 
 void pms::remove(int ipm)
@@ -534,42 +524,14 @@ void pms::remove(int ipm)
     AreaStepX.remove(ipm);
     AreaStepY.remove(ipm);
 
-    AverageSignalPerPhotoelectron.remove(ipm);
-    SPePHSmode.remove(ipm);
     SPePHSsigma.remove(ipm);
     SPePHSshape.remove(ipm);
     SPePHS_x.remove(ipm);
     SPePHS.remove(ipm);
     SPePHShist.remove(ipm);
 
-    ADCmax.remove(ipm);
-    ADClevels.remove(ipm);
-    ADCbits.remove(ipm);
-    ADCstep.remove(ipm);
 }
 
-/*
-void pms::setTypeProperties(int typ, PMtypeClass* tp)
-{
-    PMtypeProperties[typ] = *tp;
-}
-*/
-/*
-void pms::setTypePropertiesScalar(int typ, const PMtypeClass *tp)
-{
-    PMtypeProperties[typ].name = tp->name;
-    PMtypeProperties[typ].SiPM = tp->SiPM;
-    PMtypeProperties[typ].MaterialIndex = tp->MaterialIndex;
-    PMtypeProperties[typ].Shape = tp->Shape;
-    PMtypeProperties[typ].SizeX = tp->SizeX;
-    PMtypeProperties[typ].SizeY = tp->SizeY;
-    PMtypeProperties[typ].PixelsX = tp->PixelsX;
-    PMtypeProperties[typ].PixelsY = tp->PixelsY;
-    PMtypeProperties[typ].DarkCountRate = tp->DarkCountRate;
-    PMtypeProperties[typ].RecoveryTime = tp->RecoveryTime;
-    PMtypeProperties[typ].effectivePDE = tp->effectivePDE;
-}
-*/
 bool pms::removePMtype(int itype)
 {
   int numTypes = PMtypes.size();
@@ -694,37 +656,35 @@ void pms::clearSPePHS(int ipm)
 
 void pms::setSPePHSmode(int ipm, int mode) //0-const, 1-normal, 2-gamma, 3-custom
 {
-  SPePHSmode[ipm] = mode;
+  PMs[ipm].SPePHSmode = mode;
   if (mode != 3) clearSPePHS(ipm);
 }
 
 void pms::setADC(int ipm, double max, int bits)
 {
-  ADCmax[ipm] = max;
-  ADCbits[ipm] = bits;
-
-  ADClevels[ipm] = TMath::Power(2, bits) - 1;
-    ADCstep[ipm] = max / ADClevels[ipm];
+  PMs[ipm].ADCmax = max;
+  PMs[ipm].ADCbits = bits;
+  PMs[ipm].ADClevels = TMath::Power(2, bits) - 1;
+  PMs[ipm].ADCstep = max / PMs.at(ipm).ADClevels;
 }
 
 void pms::updateADClevels()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
   {
-      double max = ADCmax[ipm];
-      int bits = ADCbits[ipm];
+      const double& max = PMs.at(ipm).ADCmax;
+      const int& bits = PMs.at(ipm).ADCbits;
 
-      ADClevels[ipm] = TMath::Power(2, bits) - 1;
-      if (ADClevels[ipm] == 0)
-           ADCstep[ipm] = 0;
-      else ADCstep[ipm] = max / ADClevels[ipm];
+      PMs[ipm].ADClevels = TMath::Power(2, bits) - 1;
+      if (PMs.at(ipm).ADClevels == 0) PMs[ipm].ADCstep = 0;
+      else PMs[ipm].ADCstep = max / PMs.at(ipm).ADClevels;
   }
 }
 
 void pms::CopySPePHSdata(int ipmFrom, int ipmTo)
 {
-    AverageSignalPerPhotoelectron[ipmTo] = AverageSignalPerPhotoelectron[ipmFrom];
-    SPePHSmode[ipmTo] = SPePHSmode[ipmFrom];
+    PMs[ipmTo].SPePHSmode = PMs.at(ipmFrom).SPePHSmode;
+    PMs[ipmTo].AverageSignalPerPhotoelectron = PMs.at(ipmFrom).AverageSignalPerPhotoelectron;
     SPePHSsigma[ipmTo] = SPePHSsigma[ipmFrom];
     SPePHSshape[ipmTo] = SPePHSshape[ipmFrom];
 
@@ -750,21 +710,22 @@ void pms::CopyElNoiseData(int ipmFrom, int ipmTo)
 
 void pms::CopyADCdata(int ipmFrom, int ipmTo)
 {
-    ADCmax[ipmTo] = ADCmax[ipmFrom];
-    ADCbits[ipmTo] = ADCbits[ipmFrom];
-    ADCstep[ipmTo] = ADCstep[ipmFrom];
+    PMs[ipmTo].ADCmax    = PMs.at(ipmFrom).ADCmax;
+    PMs[ipmTo].ADCbits   = PMs.at(ipmFrom).ADCbits;
+    PMs[ipmTo].ADCstep   = PMs.at(ipmFrom).ADCstep;
+    PMs[ipmTo].ADClevels = PMs.at(ipmFrom).ADClevels;
 }
 
 void pms::ScaleSPePHS(int ipm, double gain)
 {
-    double NowAverage = getAverageSignalPerPhotoelectron(ipm);
+    const double& NowAverage = PMs.at(ipm).AverageSignalPerPhotoelectron;
     if (NowAverage == gain) return; //nothing to change
 
     if (fabs(gain) > 1e-20) gain /= NowAverage; else gain = 0;
 
-    int mode = getSPePHSmode(ipm); //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
+    const int& mode = PMs.at(ipm).SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
 
-    if (mode < 3) setAverageSignalPerPhotoelectron(ipm, NowAverage * gain);
+    if (mode < 3) PMs[ipm].AverageSignalPerPhotoelectron = NowAverage * gain;
     else if (mode == 3)
     {
         //custom SPePHS - have to adjust the distribution
@@ -787,11 +748,11 @@ void pms::CalculateElChannelsStrength()
 
 double pms::GenerateSignalFromOnePhotoelectron(int ipm)
 {
-    switch (SPePHSmode[ipm])
+    switch ( PMs.at(ipm).SPePHSmode )
     {
-      case 0: return AverageSignalPerPhotoelectron[ipm];
-      case 1: return RandGen->Gaus(AverageSignalPerPhotoelectron[ipm], SPePHSsigma[ipm]);
-      case 2: return GammaRandomGen->getGamma(SPePHSshape[ipm], AverageSignalPerPhotoelectron[ipm]/SPePHSshape[ipm]);
+      case 0: return PMs.at(ipm).AverageSignalPerPhotoelectron;
+      case 1: return RandGen->Gaus( PMs.at(ipm).AverageSignalPerPhotoelectron, SPePHSsigma[ipm] );
+      case 2: return GammaRandomGen->getGamma( SPePHSshape[ipm], PMs.at(ipm).AverageSignalPerPhotoelectron / SPePHSshape[ipm] );
       case 3:
        {
          if (SPePHShist[ipm]) return SPePHShist[ipm]->GetRandom();
@@ -1227,6 +1188,8 @@ bool pms::saveUpperLower(const QString &filename)
         outStream << PMs[i].upperLower << "\r\n";
     return true;
 }
+
+
 
 int pms::getPixelsX(int ipm) const{return PMtypes[PMs[ipm].type]->PixelsX;}
 

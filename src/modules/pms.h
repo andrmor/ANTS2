@@ -42,17 +42,27 @@ struct APm
     double relQE_PDE = 1.0;
     double relElStrength = 1.0;
 
+    // preprocessing for ascii signal import
     double PreprocessingAdd = 0;
     double PreprocessingMultiply = 1.0;
 
+    //  -- ELECTRONICS --
     // optical cross-talk for SiPM
     int    MCmodel = 0;
     QVector<double> MCcrosstalk;        //empty = not defined; otherwise should contain probabilityes of 1, 2, etc photoelectrons. Normalized to 1!
     ACustomRandomSampling* MCsampl = 0; //calculated before sim
     double MCtriggerProb = 0;           //calculated before sim
-
     // electronic noise
     double ElNoiseSigma = 0;
+    // ADC
+    double ADCmax = 65535;
+    double ADCbits = 16;
+    double ADCstep = 1.0;
+    int    ADClevels = 65535;
+    // PHS
+    int    SPePHSmode = 0; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
+    double AverageSignalPerPhotoelectron = 1.0;
+    // ----
 };
 
 class pms
@@ -109,7 +119,9 @@ public:
     bool saveAngles(const QString &filename);
     bool saveTypes(const QString &filename);
     bool saveUpperLower(const QString &filename);
-    inline APm &at(int ipm) { return PMs[ipm]; }
+
+    inline APm& at(int ipm) {return PMs[ipm];}
+    inline const APm& at(int ipm) const {return PMs.at(ipm);}
 
     //accelerator
     double getMaxQE() const {return MaxQE;}
@@ -184,14 +196,13 @@ public:
     void updateTypeArea(int typ, QVector<QVector <double> > *vec, double xStep, double yStep);
     void clearTypeArea(int typ);
 
-    void setAllPMampGains(QVector<double>* vec) {AverageSignalPerPhotoelectron = *vec;}
+    //void setAllPMampGains(QVector<double>* vec) {AverageSignalPerPhotoelectron = *vec;}
     void clearSPePHS(int ipm);
-    void setAverageSignalPerPhotoelectron(int ipm, double val) {AverageSignalPerPhotoelectron[ipm] = val;}
+    //void setAverageSignalPerPhotoelectron(int ipm, double val) {AverageSignalPerPhotoelectron[ipm] = val;}
     void setSPePHSmode(int ipm, int mode);
     void setSPePHSsigma(int ipm, double sigma) {SPePHSsigma[ipm] = sigma;}
     void setSPePHSshape(int ipm, double shape) {SPePHSshape[ipm] = shape;}
     void setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y);
-    //void setElNoiseSigma(int ipm, double val) {PMs[ipm].ElNoiseSigma = val;}  // ***!!!
     void setADC(int ipm, double max, int bits);
 
     void CopySPePHSdata(int ipmFrom, int ipmTo);
@@ -201,21 +212,13 @@ public:
 
     const QVector<double>* getSPePHS_x(int ipm) {return &SPePHS_x[ipm];}
     const QVector<double>* getSPePHS(int ipm) {return &SPePHS[ipm];}
-    double getAverageSignalPerPhotoelectron(int ipm) {return AverageSignalPerPhotoelectron[ipm];}
-    int getSPePHSmode(int ipm) {return SPePHSmode[ipm];}
+    //double getAverageSignalPerPhotoelectron(int ipm) {return AverageSignalPerPhotoelectron[ipm];}
+    //int getSPePHSmode(int ipm) {return SPePHSmode[ipm];}
     double getSPePHSsigma(int ipm) {return SPePHSsigma[ipm];}
     double getSPePHSshape(int ipm) {return SPePHSshape[ipm];}
     TH1D* getSPePHShist(int ipm) {return SPePHShist[ipm];}
     void ScaleSPePHS(int ipm, double gain);
     void CalculateElChannelsStrength();
-
-    //double getElNoiseSigma(int ipm) {return PMs.at(ipm).ElNoiseSigma;} // ***!!!
-    double getADCmax(int ipm) {return ADCmax[ipm];}
-    const QVector<double>* getAllADCmax() {return &ADCmax;}
-    int getADCbits(int ipm) {return ADCbits[ipm];}
-    const QVector<double>* getAllADCbits() {return &ADCbits;}
-    int getADClevels(int ipm) {return ADClevels[ipm];}
-    double getADCstep(int ipm) {return ADCstep[ipm];}
 
     //config
     void SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes);
@@ -272,22 +275,15 @@ private:
     QVector<double> AreaStepX;
     QVector<double> AreaStepY;
 
-    QVector<int> SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-    QVector<double> AverageSignalPerPhotoelectron;
+    //QVector<int> SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
+    //QVector<double> AverageSignalPerPhotoelectron;
     QVector<double> SPePHSsigma;
     QVector<double> SPePHSshape; //For Gamma
     QVector<QVector<double> > SPePHS_x; //custom distribution
     QVector<QVector<double> > SPePHS;   //custom distribution
     QVector<TH1D* > SPePHShist;
 
-    //QVector<double> ElNoiseSigma;
-
     double MeasurementTime;  // measurement time to calculate dark counts for SiPMs
-
-    QVector<double> ADCmax;
-    QVector<double> ADCbits;
-    QVector<double> ADCstep;
-    QVector<int> ADClevels;
 
     //flags for the current simulation mode
     bool WavelengthResolved;

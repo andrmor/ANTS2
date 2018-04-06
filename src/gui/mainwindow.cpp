@@ -2819,7 +2819,7 @@ void MainWindow::on_pbElUpdateIndication_clicked()
 
       ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->name);
       QString str, str1;
-      str.setNum(PMs->getAverageSignalPerPhotoelectron(ipm));
+      str.setNum( PMs->at(ipm).AverageSignalPerPhotoelectron );
       ui->ledAverageSigPhotEl->setText(str);
       str.setNum(PMs->getSPePHSsigma(ipm));
       ui->ledElsigma->setText(str);
@@ -2867,17 +2867,17 @@ void MainWindow::on_pbElUpdateIndication_clicked()
       str.setNum(PMs->at(ipm).ElNoiseSigma);
       ui->ledElNoiseSigma->setText(str);
 
-      str.setNum(PMs->getADCmax(ipm));
-      ui->ledADCmax->setText(str);
-      ui->sbADCbits->setValue(PMs->getADCbits(ipm));
+      //str.setNum(PMs->at(ipm).ADCmax);
+      ui->ledADCmax->setText( QString::number(PMs->at(ipm).ADCmax) );
+      ui->sbADCbits->setValue( PMs->at(ipm).ADCbits );
 
-      str.setNum(PMs->getADClevels(ipm)+1);
+      str.setNum(PMs->at(ipm).ADClevels + 1);
       str = "levels: " + str;
-      str1.setNum(PMs->getADCstep(ipm));
+      str1.setNum(PMs->at(ipm).ADCstep);
       str += "  signal/level: "+str1;
       ui->leoADCInfo->setText(str);
 
-      int mode = PMs->getSPePHSmode(ipm);
+      const int& mode = PMs->at(ipm).SPePHSmode;
       if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
       else ui->ledAverageSigPhotEl->setReadOnly(false);
       ui->cobPMampGainModel->setCurrentIndex(mode);
@@ -3420,7 +3420,7 @@ void MainWindow::ViewChangeRelFactors(QString options)
     {
       tw->setVerticalHeaderItem(i, new QTableWidgetItem("PM#"+QString::number(i)));
       if (options == "QE") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).relQE_PDE)));
-      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->getAverageSignalPerPhotoelectron(i))));
+      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSignalPerPhotoelectron)));
     }
 
   tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
@@ -3592,7 +3592,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       double QE = PMs->getPDEeffective(ipm);
       if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->getAverageSignalPerPhotoelectron(ipm);
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSignalPerPhotoelectron;
       double relStr = QE * AvSig;
       if (relStr > max) max = relStr;
     }
@@ -3608,7 +3608,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
 
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->getAverageSignalPerPhotoelectron(ipm);
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSignalPerPhotoelectron;
       str += "  " + QString::number(AvSig, 'g', 3);
 
       double relStr = QE * AvSig / max;
@@ -4386,7 +4386,7 @@ void MainWindow::on_pbUpdateElectronics_clicked()
 
    int ipm = ui->sbElPMnumber->value();
    PMs->setSPePHSmode(ipm, ui->cobPMampGainModel->currentIndex());
-   PMs->setAverageSignalPerPhotoelectron(ipm, ui->ledAverageSigPhotEl->text().toDouble());
+   PMs->at(ipm).AverageSignalPerPhotoelectron = ui->ledAverageSigPhotEl->text().toDouble();
    PMs->setSPePHSsigma(ipm, ui->ledElsigma->text().toDouble());
    PMs->setSPePHSshape(ipm, ui->ledElShape->text().toDouble());
    PMs->at(ipm).ElNoiseSigma = ui->ledElNoiseSigma->text().toDouble();

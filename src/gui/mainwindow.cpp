@@ -2754,7 +2754,7 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
   bool error = MainWindow::LoadSPePHSfile(fileName, &x, &y);
   if (error == 0)
     {
-      Detector->PMs->setElChanSPePHS(ipm, &x, &y);
+      Detector->PMs->at(ipm).setElChanSPePHS(x, y);
       Detector->PMs->at(ipm).preparePHS();
     }
   else return;
@@ -3560,7 +3560,7 @@ void MainWindow::on_pbRandomScaleELaverages_clicked()
       else
           factor = Detector->RandGen->Gaus(mean, sigma);
 
-      PMs->ScaleSPePHS(ipm, factor);
+      PMs->at(ipm).scaleSPePHS(factor);
     }
 
   ReconstructDetector(true);
@@ -3572,7 +3572,7 @@ void MainWindow::on_pbSetELaveragesToUnity_clicked()
   Detector->PMs->setDoPHS( true );
 
   for (int ipm = 0; ipm<PMs->count(); ipm++)
-      PMs->ScaleSPePHS(ipm, 1.0);
+      PMs->at(ipm).scaleSPePHS(1.0);
 
   ReconstructDetector(true);
   //MainWindow::on_pbElUpdateIndication_clicked();
@@ -4389,7 +4389,7 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->at(ipm).SPePHSsigma      = ui->ledElsigma->text().toDouble();
    PMs->at(ipm).SPePHSshape      = ui->ledElShape->text().toDouble();
    PMs->at(ipm).ElNoiseSigma     = ui->ledElNoiseSigma->text().toDouble();
-   PMs->setADC(ipm, ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
+   PMs->at(ipm).setADC(ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
    PMs->at(ipm).MCmodel          = ui->cobMCcrosstalk_Model->currentIndex();
    PMs->at(ipm).MCtriggerProb    = ui->ledMCcrosstalkTriggerProb->text().toDouble();
 

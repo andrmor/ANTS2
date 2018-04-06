@@ -20,9 +20,14 @@ public:
     void setAngles(const double *const phithepsi) { phi = phithepsi[0]; theta = phithepsi[1]; psi = phithepsi[2]; }
     void saveAngles(QTextStream &file) const;
 
+    void setElChanSPePHS(const QVector<double>& x, const QVector<double>& y);
+    void scaleSPePHS(double gain);
     void preparePHS();
     void clearSPePHSCustomDist();
 
+    void setADC(double max, int bits);
+
+public:
     double x = 0;
     double y = 0;
     double z = 0;

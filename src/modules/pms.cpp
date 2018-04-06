@@ -568,12 +568,6 @@ void pms::updateTypeArea(int typ, QVector<QVector<double> > *vec, double xStep, 
 
 void pms::clearTypeArea(int typ){PMtypes[typ]->AreaSensitivity.resize(0);}
 
-void pms::setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y)
-{
-    PMs[ipm].SPePHS_x = *x;
-    PMs[ipm].SPePHS = *y;
-}
-
 void pms::preparePHSs()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
@@ -594,14 +588,6 @@ void pms::prepareMCcrosstalkForPM(int ipm)
       PMs[ipm].MCsampl = new ACustomRandomSampling(RandGen, &PMs.at(ipm).MCcrosstalk);
 }
 
-void pms::setADC(int ipm, double max, int bits)
-{
-  PMs[ipm].ADCmax = max;
-  PMs[ipm].ADCbits = bits;
-  PMs[ipm].ADClevels = TMath::Power(2, bits) - 1;
-  PMs[ipm].ADCstep = max / PMs.at(ipm).ADClevels;
-}
-
 void pms::updateADClevels()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
@@ -617,12 +603,12 @@ void pms::updateADClevels()
 
 void pms::CopySPePHSdata(int ipmFrom, int ipmTo)
 {
-    PMs[ipmTo].SPePHSmode                    = PMs.at(ipmFrom).SPePHSmode;
+    PMs[ipmTo].SPePHSmode       = PMs.at(ipmFrom).SPePHSmode;
     PMs[ipmTo].AverageSigPerPhE = PMs.at(ipmFrom).AverageSigPerPhE;
-    PMs[ipmTo].SPePHSsigma                   = PMs.at(ipmFrom).SPePHSsigma;
-    PMs[ipmTo].SPePHSshape                   = PMs.at(ipmFrom).SPePHSshape;
-    PMs[ipmTo].SPePHS_x                      = PMs.at(ipmFrom).SPePHS_x;
-    PMs[ipmTo].SPePHS                        = PMs.at(ipmFrom).SPePHS;
+    PMs[ipmTo].SPePHSsigma      = PMs.at(ipmFrom).SPePHSsigma;
+    PMs[ipmTo].SPePHSshape      = PMs.at(ipmFrom).SPePHSshape;
+    PMs[ipmTo].SPePHS_x         = PMs.at(ipmFrom).SPePHS_x;
+    PMs[ipmTo].SPePHS           = PMs.at(ipmFrom).SPePHS;
 
     if (PMs.at(ipmTo).SPePHShist)
     {
@@ -652,36 +638,10 @@ void pms::CopyADCdata(int ipmFrom, int ipmTo)
     PMs[ipmTo].ADClevels = PMs.at(ipmFrom).ADClevels;
 }
 
-void pms::ScaleSPePHS(int ipm, double gain)
-{
-    const double& NowAverage = PMs.at(ipm).AverageSigPerPhE;
-    if (NowAverage == gain) return; //nothing to change
-
-    if (fabs(gain) > 1e-20) gain /= NowAverage; else gain = 0;
-
-    const int& mode = PMs.at(ipm).SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-
-    if (mode < 3) PMs[ipm].AverageSigPerPhE = NowAverage * gain;
-    else if (mode == 3)
-    {
-        //custom SPePHS - have to adjust the distribution
-        //QVector<double> x = *getSPePHS_x(ipm);
-        QVector<double> x = PMs.at(ipm).SPePHS_x;
-        //QVector<double> y = *getSPePHS(ipm);
-        QVector<double> y = PMs.at(ipm).SPePHS;
-        for (int ix=0; ix<x.size(); ix++) x[ix] *= gain;
-
-        setElChanSPePHS(ipm, &x, &y);
-    }
-}
-
 void pms::CalculateElChannelsStrength()
 {
     for (int ipm = 0; ipm<PMs.size(); ipm++)
-    {
-        double factor = PMs[ipm].relElStrength;
-        ScaleSPePHS(ipm, factor);
-    }
+        PMs[ipm].scaleSPePHS( PMs.at(ipm).relElStrength );
 }
 
 double pms::GenerateSignalFromOnePhotoelectron(int ipm)
@@ -1126,19 +1086,35 @@ bool pms::saveUpperLower(const QString &filename)
     return true;
 }
 
+int pms::getPixelsX(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->PixelsX;
+}
 
+int pms::getPixelsY(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->PixelsY;
+}
 
-int pms::getPixelsX(int ipm) const{return PMtypes[PMs[ipm].type]->PixelsX;}
+double pms::SizeX(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->SizeX;
+}
 
-int pms::getPixelsY(int ipm) const{return PMtypes[PMs[ipm].type]->PixelsY;}
+double pms::SizeY(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->SizeY;
+}
 
-double pms::SizeX(int ipm) const {return PMtypes[PMs[ipm].type]->SizeX;}
+double pms::SizeZ(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->SizeZ;
+}
 
-double pms::SizeY(int ipm) const {return PMtypes[PMs[ipm].type]->SizeY;}
-
-double pms::SizeZ(int ipm) const {return PMtypes[PMs[ipm].type]->SizeZ;}
-
-bool pms::isSiPM(int ipm) const {return PMtypes[PMs[ipm].type]->SiPM;}
+bool pms::isSiPM(int ipm) const
+{
+    return PMtypes.at(PMs.at(ipm).type)->SiPM;
+}
 
 bool pms::isPDEwaveOverriden() const
 {
@@ -1168,17 +1144,6 @@ void pms::writePDEeffectiveToJson(QJsonObject &json)
 
 void pms::writeRelQE_PDE(QJsonObject &json)
 {
-//  bool fFound = false;
-//  for (int i=0; i<numPMs; i++)
-//    {
-//      if (PMs.at(i).relQE_PDE !=1 || PMs.at(i).relElStrength !=1)
-//        {
-//          fFound = true;
-//          break;
-//        }
-//    }
-//  if (!fFound) return;
-
   QJsonArray arr;
   for (int i=0; i<numPMs; i++)
     {

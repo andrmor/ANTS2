@@ -8,15 +8,12 @@
 #include <QPair>
 
 class TRandom2;
-//class TH1D;
 class AMaterialParticleCollection;
 class GeneralSimSettings;
 class APmPosAngTypeRecord;
 class PMtypeClass;
 class AGammaRandomGenerator;
-//class QTextStream;
 class QJsonObject;
-//class ACustomRandomSampling;
 
 class pms
 {   
@@ -80,16 +77,15 @@ public:
     double getMaxQEvsWave(int iWave) const {return MaxQEvsWave.at(iWave);}
 
     //individual PMs
-    inline double X(int ipm) const {return PMs[ipm].x;}
-    inline double Y(int ipm) const {return PMs[ipm].y;}
-    inline double Z(int ipm) const {return PMs[ipm].z;}
+    inline double X(int ipm) const {return PMs.at(ipm).x;}
+    inline double Y(int ipm) const {return PMs.at(ipm).y;}
+    inline double Z(int ipm) const {return PMs.at(ipm).z;}
     int getPixelsX(int ipm) const;
     int getPixelsY(int ipm) const;
     double SizeX(int ipm) const;
     double SizeY(int ipm) const;
     double SizeZ(int ipm) const;
-    bool isSiPM(int ipm) const;
-
+    bool   isSiPM(int ipm) const;
 
     //PDE
     bool        isPDEwaveOverriden(int i) const {return (!PDE[i].isEmpty());}
@@ -148,15 +144,11 @@ public:
     void updateTypeArea(int typ, QVector<QVector <double> > *vec, double xStep, double yStep);
     void clearTypeArea(int typ);
 
-    void setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y);  // ***!!!
-    void setADC(int ipm, double max, int bits); // ***!!!
+    void CopySPePHSdata(int ipmFrom, int ipmTo);      //***!!!
+    void CopyMCcrosstalkData(int ipmFrom, int ipmTo);//***!!!
+    void CopyElNoiseData(int ipmFrom, int ipmTo);//***!!!
+    void CopyADCdata(int ipmFrom, int ipmTo);//***!!!
 
-    void CopySPePHSdata(int ipmFrom, int ipmTo);
-    void CopyMCcrosstalkData(int ipmFrom, int ipmTo);
-    void CopyElNoiseData(int ipmFrom, int ipmTo);
-    void CopyADCdata(int ipmFrom, int ipmTo);
-
-    void ScaleSPePHS(int ipm, double gain);
     void CalculateElChannelsStrength();
 
     //config

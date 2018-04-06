@@ -12,7 +12,7 @@ class ARootObjCollection
 public:
     ~ARootObjCollection();
 
-    bool append(const QString& name, ARootObjBase* record);
+    bool append(const QString& name, ARootObjBase* record, bool bAbortIfExists = true);
 
     ARootObjBase* getRecord(const QString& name);   // Unlocks mutex on return!
 

@@ -22,6 +22,8 @@ public:
   bool           IsMultithreadCapable() const override {return true;}
 
 public slots:
+  void           SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
+
   void           NewHist(const QString& HistName, int bins, double start, double stop);
   void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
@@ -52,6 +54,8 @@ signals:
 private:
   TmpObjHubClass *TmpHub;
 
+  bool           bAbortIfExists = false;
+
 };
 
 // ---- G R A P H S ---- (TGraph of ROOT)
@@ -68,6 +72,8 @@ public:
   virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
+  void SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
+
   void NewGraph(const QString& GraphName);
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
@@ -92,6 +98,8 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+
+  bool           bAbortIfExists = false;
 
 };
 

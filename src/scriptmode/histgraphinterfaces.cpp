@@ -45,7 +45,7 @@ void AInterfaceToHist::NewHist(const QString& HistName, int bins, double start, 
     TH1D* hist = new TH1D("", HistName.toLatin1().data(), bins, start, stop);
     ARootHistRecord* rec = new ARootHistRecord(hist, HistName, "TH1D");
 
-    bool bOK = TmpHub->Hists.append(HistName, rec);
+    bool bOK = TmpHub->Hists.append(HistName, rec, bAbortIfExists);
     if (!bOK)
     {
         delete rec;
@@ -68,7 +68,7 @@ void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double star
     TH2D* hist = new TH2D("", HistName.toLatin1().data(), binsX, startX, stopX, binsY, startY, stopY);
     ARootHistRecord* rec = new ARootHistRecord(hist, HistName, "TH2D");
 
-    bool bOK = TmpHub->Hists.append(HistName, rec);
+    bool bOK = TmpHub->Hists.append(HistName, rec, bAbortIfExists);
     if (!bOK)
     {
         delete rec;
@@ -424,7 +424,7 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
 
     TGraph* gr = new TGraph();
     ARootGraphRecord* rec = new ARootGraphRecord(gr, GraphName, "TGraph");
-    bool bOK = TmpHub->Graphs.append(GraphName, rec);
+    bool bOK = TmpHub->Graphs.append(GraphName, rec, bAbortIfExists);
     if (!bOK)
     {
         delete rec;

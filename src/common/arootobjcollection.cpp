@@ -6,13 +6,19 @@ ARootObjCollection::~ARootObjCollection()
     clear();
 }
 
-bool ARootObjCollection::append(const QString &name, ARootObjBase* record)
+bool ARootObjCollection::append(const QString &name, ARootObjBase* record, bool bAbortIfExists)
 {
     QMutexLocker locker(&Mutex);
 
-    if (Collection.contains(name)) return false;
+    if (Collection.contains(name))
+    {
+        if (bAbortIfExists) return false;
+        delete Collection[name];
+        Collection[name] = record;
+    }
+    else
+        Collection.insert(name, record);
 
-    Collection.insert(name, record);
     return true;
 }
 

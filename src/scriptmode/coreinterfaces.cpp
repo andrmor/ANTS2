@@ -41,6 +41,9 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["loadColumn"] = "Load a column with ascii numeric data from the file.\nSecond argument is the column number starting from 0.";
   H["loadArray"] = "Load an array of numerics (or an array of numeric arrays if columns>1).\nColumns parameter can be from 1 to 3.";
   H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
+
+  H["SetNewFileFinder"] = "Configurer for GetNewFiles() function. dir is the search directory, fileNamePattern: *.* for all files. Function return all filenames found.";
+  H["GetNewFiles"] = "Get list (array) of names of new files appeared in the directory configured with SetNewFileFinder()";
 }
 
 AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :
@@ -329,6 +332,38 @@ QString AInterfaceToCore::GetScriptDir()
 QString AInterfaceToCore::GetExamplesDir()
 {
   return ScriptManager->ExamplesDir;
+}
+
+QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fileNamePattern)
+{
+    Finder_Dir = dir;
+    Finder_NamePattern = fileNamePattern;
+
+    QDir d(dir);
+    QStringList files = d.entryList( QStringList(fileNamePattern), QDir::Files);
+    //  qDebug() << files;
+
+    QVariantList res;
+    for (auto& n : files)
+    {
+        Finder_FileNames << n;
+        res << n;
+    }
+    return res;
+}
+
+QVariant AInterfaceToCore::GetNewFiles()
+{
+    QVariantList newFiles;
+    QDir d(Finder_Dir);
+    QStringList files = d.entryList( QStringList(Finder_NamePattern), QDir::Files);
+
+    for (auto& n : files)
+    {
+        if (!Finder_FileNames.contains(n)) newFiles << QVariant(n);
+        Finder_FileNames << n;
+    }
+    return newFiles;
 }
 
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)

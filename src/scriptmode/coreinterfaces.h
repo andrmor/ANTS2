@@ -4,6 +4,7 @@
 #include "ascriptinterface.h"
 
 #include <QVariant>
+#include <QSet>
 #include <QString>
 
 class AScriptManager;
@@ -61,8 +62,17 @@ public slots:
   QString GetScriptDir();
   QString GetExamplesDir();
 
+  //file finder
+  QVariant SetNewFileFinder(const QString dir, const QString fileNamePattern);
+  QVariant GetNewFiles();
+
 private:
   AScriptManager* ScriptManager;
+
+  //file finder
+  QSet<QString>   Finder_FileNames;
+  QString         Finder_Dir;
+  QString         Finder_NamePattern = "*.*";
 };
 
 // ---- M A T H ----

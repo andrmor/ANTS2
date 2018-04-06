@@ -10493,7 +10493,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>159</y>
+            <y>162</y>
             <width>271</width>
             <height>23</height>
            </rect>
@@ -10608,7 +10608,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>77</y>
+            <y>110</y>
             <width>160</width>
             <height>23</height>
            </rect>
@@ -10627,7 +10627,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>163</x>
-            <y>80</y>
+            <y>113</y>
             <width>47</width>
             <height>13</height>
            </rect>
@@ -10643,7 +10643,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>278</x>
-            <y>79</y>
+            <y>112</y>
             <width>67</width>
             <height>16</height>
            </rect>
@@ -10659,7 +10659,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>410</x>
-            <y>77</y>
+            <y>110</y>
             <width>31</width>
             <height>20</height>
            </rect>
@@ -10675,7 +10675,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>224</x>
-            <y>78</y>
+            <y>111</y>
             <width>50</width>
             <height>20</height>
            </rect>
@@ -10688,7 +10688,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>350</x>
-            <y>77</y>
+            <y>110</y>
             <width>50</width>
             <height>20</height>
            </rect>
@@ -10701,7 +10701,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>450</x>
-            <y>77</y>
+            <y>110</y>
             <width>42</width>
             <height>22</height>
            </rect>
@@ -10723,7 +10723,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>100</x>
-            <y>120</y>
+            <y>68</y>
             <width>200</width>
             <height>23</height>
            </rect>
@@ -10736,7 +10736,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>288</x>
-            <y>125</y>
+            <y>73</y>
             <width>47</width>
             <height>13</height>
            </rect>
@@ -10752,7 +10752,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>350</x>
-            <y>120</y>
+            <y>68</y>
             <width>50</width>
             <height>22</height>
            </rect>
@@ -10762,7 +10762,7 @@ in minimization</string>
           <property name="geometry">
            <rect>
             <x>300</x>
-            <y>159</y>
+            <y>162</y>
             <width>191</width>
             <height>23</height>
            </rect>
@@ -10778,6 +10778,45 @@ in minimization</string>
           </property>
           <property name="text">
            <string>Pedestals --&gt; pre-processing</string>
+          </property>
+         </widget>
+         <widget class="Line" name="line_60">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>146</y>
+            <width>486</width>
+            <height>3</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="line_66">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>79</y>
+            <width>80</width>
+            <height>3</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="line_77">
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>79</y>
+            <width>80</width>
+            <height>3</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </widget>

@@ -6355,6 +6355,7 @@ void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
     MW->WindowNavigator->BusyOff();
 
     if (!bOK) message(c->GetLastError(), this);
+    else on_pbFromPeaksShow_clicked();
 }
 
 void ReconstructionWindow::on_ledFromPeaksThreshold_editingFinished()
@@ -6416,10 +6417,17 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 {
   int ipm = ui->sbFrompeakPM->value();
   int numPMs = PMs->count();
+  if (ipm >= numPMs)
+  {
+      message("Bad PM index!", this);
+      return;
+  }
 
-  if (MW->TmpHub->PeakHists.size() != numPMs) return;
-  if (ipm >= MW->TmpHub->PeakHists.size()) return;
-  if (!MW->TmpHub->PeakHists.at(ipm)) return;
+  if (MW->TmpHub->PeakHists.size() != numPMs || !MW->TmpHub->PeakHists.at(ipm) )
+  {
+      message("Prepare data first!", this);
+      return;
+  }
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 

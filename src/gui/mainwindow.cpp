@@ -2755,7 +2755,7 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
   if (error == 0)
     {
       Detector->PMs->setElChanSPePHS(ipm, &x, &y);
-      Detector->PMs->preparePHS(ipm);
+      Detector->PMs->at(ipm).preparePHS();
     }
   else return;
 
@@ -2765,8 +2765,8 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
 void MainWindow::on_pbElGainShowDistr_clicked()
 {  
   int ipm = ui->sbElPMnumber->value(); 
-  PMs->preparePHS(ipm);
-  GraphWindow->Draw(PMs->getSPePHShist(ipm), "", true, false);
+  PMs->at(ipm).preparePHS();
+  GraphWindow->Draw(PMs->at(ipm).SPePHShist, "", true, false);
 }
 
 void MainWindow::on_pbElTestGenerator_clicked()
@@ -2819,14 +2819,13 @@ void MainWindow::on_pbElUpdateIndication_clicked()
 
       ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->name);
       QString str, str1;
-      str.setNum( PMs->at(ipm).AverageSignalPerPhotoelectron );
+      str.setNum( PMs->at(ipm).AverageSigPerPhE );
       ui->ledAverageSigPhotEl->setText(str);
-      str.setNum(PMs->getSPePHSsigma(ipm));
+      str.setNum(PMs->at(ipm).SPePHSsigma);
       ui->ledElsigma->setText(str);
-      str.setNum(PMs->getSPePHSshape(ipm));
+      str.setNum(PMs->at(ipm).SPePHSshape);
       ui->ledElShape->setText(str);
-      if (PMs->getSPePHShist(ipm)) ui->pbElGainShowDistr->setEnabled(true);
-      else ui->pbElGainShowDistr->setEnabled(false);
+      ui->pbElGainShowDistr->setEnabled( PMs->at(ipm).SPePHShist );
 
       //MCcrosstalk      
       ui->cobMCcrosstalk_Model->setCurrentIndex( PMs->at(ipm).MCmodel );
@@ -3420,7 +3419,7 @@ void MainWindow::ViewChangeRelFactors(QString options)
     {
       tw->setVerticalHeaderItem(i, new QTableWidgetItem("PM#"+QString::number(i)));
       if (options == "QE") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).relQE_PDE)));
-      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSignalPerPhotoelectron)));
+      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSigPerPhE)));
     }
 
   tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
@@ -3592,7 +3591,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       double QE = PMs->getPDEeffective(ipm);
       if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSignalPerPhotoelectron;
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       double relStr = QE * AvSig;
       if (relStr > max) max = relStr;
     }
@@ -3608,7 +3607,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
 
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSignalPerPhotoelectron;
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       str += "  " + QString::number(AvSig, 'g', 3);
 
       double relStr = QE * AvSig / max;
@@ -4385,14 +4384,14 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->setMeasurementTime( ui->ledTimeOfOneMeasurement->text().toDouble() );
 
    int ipm = ui->sbElPMnumber->value();
-   PMs->setSPePHSmode(ipm, ui->cobPMampGainModel->currentIndex());
-   PMs->at(ipm).AverageSignalPerPhotoelectron = ui->ledAverageSigPhotEl->text().toDouble();
-   PMs->setSPePHSsigma(ipm, ui->ledElsigma->text().toDouble());
-   PMs->setSPePHSshape(ipm, ui->ledElShape->text().toDouble());
-   PMs->at(ipm).ElNoiseSigma = ui->ledElNoiseSigma->text().toDouble();
+   PMs->at(ipm).SPePHSmode       = ui->cobPMampGainModel->currentIndex();
+   PMs->at(ipm).AverageSigPerPhE = ui->ledAverageSigPhotEl->text().toDouble();
+   PMs->at(ipm).SPePHSsigma      = ui->ledElsigma->text().toDouble();
+   PMs->at(ipm).SPePHSshape      = ui->ledElShape->text().toDouble();
+   PMs->at(ipm).ElNoiseSigma     = ui->ledElNoiseSigma->text().toDouble();
    PMs->setADC(ipm, ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
-   PMs->at(ipm).MCmodel = ui->cobMCcrosstalk_Model->currentIndex();
-   PMs->at(ipm).MCtriggerProb = ui->ledMCcrosstalkTriggerProb->text().toDouble();
+   PMs->at(ipm).MCmodel          = ui->cobMCcrosstalk_Model->currentIndex();
+   PMs->at(ipm).MCtriggerProb    = ui->ledMCcrosstalkTriggerProb->text().toDouble();
 
    ReconstructDetector(true); //GUI update is triggered automatically
 }

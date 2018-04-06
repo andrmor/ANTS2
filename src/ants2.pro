@@ -313,7 +313,8 @@ SOURCES += main.cpp \
     common/acalibratorsignalperphel.cpp \
     modules/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
-    scriptmode/ascriptmanager.cpp
+    scriptmode/ascriptmanager.cpp \
+    common/apm.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -440,7 +441,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/acalibratorsignalperphel.h \
     modules/areconstructionmanager.h \
     scriptmode/ajavascriptmanager.h \
-    scriptmode/ascriptmanager.h
+    scriptmode/ascriptmanager.h \
+    common/apm.h
 
 # --- SIM ---
 ants2_SIM {

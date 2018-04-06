@@ -250,19 +250,19 @@ void OneEventClass::HitsToSignal()
                       switch ( PMs->at(ipm).SPePHSmode )
                       {
                         case 0:
-                          TimedPMsignals[t][ipm] = PMs->at(ipm).AverageSignalPerPhotoelectron * TimedPMhits[t][ipm];
+                          TimedPMsignals[t][ipm] = PMs->at(ipm).AverageSigPerPhE * TimedPMhits[t][ipm];
                           break;
                         case 1:
                         {
-                          double mean = PMs->at(ipm).AverageSignalPerPhotoelectron * TimedPMhits[t][ipm];
-                          double sigma = TMath::Sqrt(TimedPMhits[t][ipm]) * PMs->getSPePHSsigma(ipm);
+                          double mean = PMs->at(ipm).AverageSigPerPhE * TimedPMhits[t][ipm];
+                          double sigma = TMath::Sqrt(TimedPMhits[t][ipm]) * PMs->at(ipm).SPePHSsigma;
                           TimedPMsignals[t][ipm] = RandGen->Gaus(mean, sigma);
                           break;
                         }
                         case 2:
                         {
-                          double k = PMs->getSPePHSshape(ipm);
-                          double theta = PMs->at(ipm).AverageSignalPerPhotoelectron / k;
+                          double k = PMs->at(ipm).SPePHSshape;
+                          double theta = PMs->at(ipm).AverageSigPerPhE / k;
                           k *= TimedPMhits[t][ipm]; //for sum distribution
                           TimedPMsignals[t][ipm] = GammaRandomGen->getGamma(k, theta);
                           break;
@@ -270,9 +270,9 @@ void OneEventClass::HitsToSignal()
                         case 3:
                         {
                           TimedPMsignals[t][ipm] = 0;
-                          if (PMs->getSPePHShist(ipm))
+                          if ( PMs->at(ipm).SPePHShist )
                             for (int j=0; j<TimedPMhits[t][ipm]; j++)
-                                TimedPMsignals[t][ipm] += PMs->getSPePHShist(ipm)->GetRandom();
+                                TimedPMsignals[t][ipm] += PMs->at(ipm).SPePHShist->GetRandom();
                         }
                       }
                   }
@@ -308,19 +308,19 @@ void OneEventClass::HitsToSignal()
               switch ( PMs->at(ipm).SPePHSmode )
               {
                 case 0:
-                  PMsignals[ipm] = PMs->at(ipm).AverageSignalPerPhotoelectron * PMhitsTotal[ipm];
+                  PMsignals[ipm] = PMs->at(ipm).AverageSigPerPhE * PMhitsTotal[ipm];
                   break;
                 case 1:
                 {
-                  double mean = PMs->at(ipm).AverageSignalPerPhotoelectron * PMhitsTotal[ipm];
-                  double sigma = TMath::Sqrt(PMhitsTotal[ipm]) * PMs->getSPePHSsigma(ipm);
+                  double mean =  PMs->at(ipm).AverageSigPerPhE * PMhitsTotal[ipm];
+                  double sigma = PMs->at(ipm).SPePHSsigma * TMath::Sqrt( PMhitsTotal[ipm] );
                   PMsignals[ipm] = RandGen->Gaus(mean, sigma);
                   break;
                 }
                 case 2:
                 {
-                  double k = PMs->getSPePHSshape(ipm);
-                  double theta = PMs->at(ipm).AverageSignalPerPhotoelectron / k;
+                  double k = PMs->at(ipm).SPePHSshape;
+                  double theta = PMs->at(ipm).AverageSigPerPhE / k;
                   k *= PMhitsTotal[ipm]; //for sum distribution
                   PMsignals[ipm] = GammaRandomGen->getGamma(k, theta);
                   break;
@@ -328,9 +328,9 @@ void OneEventClass::HitsToSignal()
                 case 3:
                 {
                   PMsignals[ipm] = 0;
-                  if (PMs->getSPePHShist(ipm))
+                  if ( PMs->at(ipm).SPePHShist )
                     for (int j=0; j<PMhitsTotal[ipm]; j++)
-                      PMsignals[ipm] += PMs->getSPePHShist(ipm)->GetRandom();
+                      PMsignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
                 }
               }
           }

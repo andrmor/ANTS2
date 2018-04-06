@@ -1,69 +1,22 @@
 #ifndef PMS_H
 #define PMS_H
 
+#include "apm.h"
+
 #include <QVector>
 #include <QString>
 #include <QPair>
 
 class TRandom2;
-class TH1D;
+//class TH1D;
 class AMaterialParticleCollection;
 class GeneralSimSettings;
 class APmPosAngTypeRecord;
 class PMtypeClass;
 class AGammaRandomGenerator;
-class QTextStream;
+//class QTextStream;
 class QJsonObject;
-class ACustomRandomSampling;
-
-struct APm
-{
-    APm(double x, double y, double z, double psi, int type) : x(x), y(y), z(z), psi(psi), type(type) {}
-    APm(){}
-
-    void setCoords(const double *const xyz) { x = xyz[0]; y = xyz[1]; z = xyz[2]; }
-    void saveCoords(QTextStream &file) const;
-    void saveCoords2D(QTextStream &file) const;
-    void setAngles(const double *const phithepsi) { phi = phithepsi[0]; theta = phithepsi[1]; psi = phithepsi[2]; }
-    void saveAngles(QTextStream &file) const;
-
-    double x = 0;
-    double y = 0;
-    double z = 0;
-
-    double phi = 0;
-    double theta = 0;
-    double psi = 0;
-
-    int    type = 0;
-
-    int    upperLower = 0;               // 0 - upper array, 1 - lower
-
-    double relQE_PDE = 1.0;
-    double relElStrength = 1.0;
-
-    // preprocessing for ascii signal import
-    double PreprocessingAdd = 0;
-    double PreprocessingMultiply = 1.0;
-
-    //  -- ELECTRONICS --
-    // optical cross-talk for SiPM
-    int    MCmodel = 0;
-    QVector<double> MCcrosstalk;        //empty = not defined; otherwise should contain probabilityes of 1, 2, etc photoelectrons. Normalized to 1!
-    ACustomRandomSampling* MCsampl = 0; //calculated before sim
-    double MCtriggerProb = 0;           //calculated before sim
-    // electronic noise
-    double ElNoiseSigma = 0;
-    // ADC
-    double ADCmax = 65535;
-    double ADCbits = 16;
-    double ADCstep = 1.0;
-    int    ADClevels = 65535;
-    // PHS
-    int    SPePHSmode = 0; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-    double AverageSignalPerPhotoelectron = 1.0;
-    // ----
-};
+//class ACustomRandomSampling;
 
 class pms
 {   
@@ -91,7 +44,6 @@ public:
     void RecalculateAngularForType(int typ);
     void RecalculateAngularForPM(int ipm);
       //prepare pulse height spectra hists
-    void preparePHS(int ipm);
     void preparePHSs();
       // prepare MCcrosstalk
     void prepareMCcrosstalk();
@@ -196,27 +148,14 @@ public:
     void updateTypeArea(int typ, QVector<QVector <double> > *vec, double xStep, double yStep);
     void clearTypeArea(int typ);
 
-    //void setAllPMampGains(QVector<double>* vec) {AverageSignalPerPhotoelectron = *vec;}
-    void clearSPePHS(int ipm);
-    //void setAverageSignalPerPhotoelectron(int ipm, double val) {AverageSignalPerPhotoelectron[ipm] = val;}
-    void setSPePHSmode(int ipm, int mode);
-    void setSPePHSsigma(int ipm, double sigma) {SPePHSsigma[ipm] = sigma;}
-    void setSPePHSshape(int ipm, double shape) {SPePHSshape[ipm] = shape;}
-    void setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y);
-    void setADC(int ipm, double max, int bits);
+    void setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y);  // ***!!!
+    void setADC(int ipm, double max, int bits); // ***!!!
 
     void CopySPePHSdata(int ipmFrom, int ipmTo);
     void CopyMCcrosstalkData(int ipmFrom, int ipmTo);
     void CopyElNoiseData(int ipmFrom, int ipmTo);
     void CopyADCdata(int ipmFrom, int ipmTo);
 
-    const QVector<double>* getSPePHS_x(int ipm) {return &SPePHS_x[ipm];}
-    const QVector<double>* getSPePHS(int ipm) {return &SPePHS[ipm];}
-    //double getAverageSignalPerPhotoelectron(int ipm) {return AverageSignalPerPhotoelectron[ipm];}
-    //int getSPePHSmode(int ipm) {return SPePHSmode[ipm];}
-    double getSPePHSsigma(int ipm) {return SPePHSsigma[ipm];}
-    double getSPePHSshape(int ipm) {return SPePHSshape[ipm];}
-    TH1D* getSPePHShist(int ipm) {return SPePHShist[ipm];}
     void ScaleSPePHS(int ipm, double gain);
     void CalculateElChannelsStrength();
 
@@ -275,14 +214,6 @@ private:
     QVector<double> AreaStepX;
     QVector<double> AreaStepY;
 
-    //QVector<int> SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-    //QVector<double> AverageSignalPerPhotoelectron;
-    QVector<double> SPePHSsigma;
-    QVector<double> SPePHSshape; //For Gamma
-    QVector<QVector<double> > SPePHS_x; //custom distribution
-    QVector<QVector<double> > SPePHS;   //custom distribution
-    QVector<TH1D* > SPePHShist;
-
     double MeasurementTime;  // measurement time to calculate dark counts for SiPMs
 
     //flags for the current simulation mode
@@ -303,8 +234,8 @@ private:
     QVector<PMtypeClass*> PMtypes;
 
     QString ErrorString;
-    void writePHSsettingsToJson(int ipm, QJsonObject &json);
-    bool readPHSsettingsFromJson(int ipm, QJsonObject &json);
+    void writePHSsettingsToJson(int ipm, QJsonObject &json);    // ***!!! to PMs
+    bool readPHSsettingsFromJson(int ipm, QJsonObject &json);   // ***!!! to PMs
     void writeRelQE_PDE(QJsonObject &json);
     void readRelQE_PDE(QJsonObject &json);
 };

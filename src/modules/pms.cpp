@@ -20,14 +20,6 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-
-
-void APm::saveCoords(QTextStream &file) const { file << x << " " << y << " " << z << "\r\n"; }
-
-void APm::saveCoords2D(QTextStream &file) const { file << x << " " << y << "\r\n"; }
-
-void APm::saveAngles(QTextStream &file) const { file << phi << " " << theta << " " << psi << "\r\n"; }
-
 pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen)
 {    
     MaterialCollection = materialCollection;
@@ -109,21 +101,22 @@ void pms::writePHSsettingsToJson(int ipm, QJsonObject &json)
 {
   const int& mode = PMs.at(ipm).SPePHSmode; // 0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
   json["Mode"] = mode;
-  json["Average"] = PMs.at(ipm).AverageSignalPerPhotoelectron;
+  json["Average"] = PMs.at(ipm).AverageSigPerPhE;
 
   switch ( mode )
     {
     case 0: break;
     case 1:
-      json["Sigma"] = SPePHSsigma[ipm];
+      json["Sigma"] = PMs.at(ipm).SPePHSsigma;
       break;
     case 2:
-      json["Shape"] = SPePHSshape[ipm];
+      json["Shape"] = PMs.at(ipm).SPePHSshape;
       break;
     case 3:
       {
         QJsonArray ar;
-        writeTwoQVectorsToJArray(SPePHS_x[ipm], SPePHS[ipm], ar);
+        //writeTwoQVectorsToJArray(SPePHS_x[ipm], SPePHS[ipm], ar);
+        writeTwoQVectorsToJArray(PMs.at(ipm).SPePHS_x, PMs.at(ipm).SPePHS, ar);
         json["Distribution"] = ar;
         break;
       }
@@ -133,19 +126,19 @@ void pms::writePHSsettingsToJson(int ipm, QJsonObject &json)
 
 bool pms::readPHSsettingsFromJson(int ipm, QJsonObject &json)
 {
-  parseJson(json, "Mode", PMs[ipm].SPePHSmode);
-  parseJson(json, "Average", PMs[ipm].AverageSignalPerPhotoelectron);
-  parseJson(json, "Sigma", SPePHSsigma[ipm]);
-  parseJson(json, "Shape", SPePHSshape[ipm]);
+  parseJson(json, "Mode",    PMs[ipm].SPePHSmode);
+  parseJson(json, "Average", PMs[ipm].AverageSigPerPhE);
+  parseJson(json, "Sigma",   PMs[ipm].SPePHSsigma);
+  parseJson(json, "Shape",   PMs[ipm].SPePHSshape);
 
-  SPePHS_x[ipm].clear();
-  SPePHS[ipm].clear();
+  PMs[ipm].SPePHS_x.clear();
+  PMs[ipm].SPePHS.clear();
   if (json.contains("Distribution"))
     {
       QJsonArray ar = json["Distribution"].toArray();
-      readTwoQVectorsFromJArray(ar, SPePHS_x[ipm], SPePHS[ipm]);
+      readTwoQVectorsFromJArray(ar, PMs[ipm].SPePHS_x, PMs[ipm].SPePHS);
     }
-  preparePHS(ipm);
+  PMs[ipm].preparePHS();
 
   return true;
 }
@@ -432,7 +425,8 @@ void pms::calculateMaxQEs()
 
 void pms::clear() //does not affect PM types!
 {
-    PMs.clear();
+    PMs.clear(); //Hists are cleared
+
     PDE.clear();
     PDE_lambda.clear();
     PDEbinned.clear();
@@ -444,13 +438,6 @@ void pms::clear() //does not affect PM types!
     AreaSensitivity.clear();
     AreaStepX.clear();
     AreaStepY.clear();
-
-    SPePHSsigma.clear();
-    SPePHSshape.clear();    
-    for (int ipm=0; ipm<numPMs; ipm++) clearSPePHS(ipm);
-    SPePHS_x.clear();
-    SPePHS.clear();
-    SPePHShist.clear();
 
     numPMs = 0;
 }
@@ -493,12 +480,6 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     AreaStepX.insert(ipm, 123); //just a strange value to see if error
     AreaStepY.insert(ipm, 123);
 
-    SPePHSsigma.insert(ipm, 0);
-    SPePHSshape.insert(ipm, 2);
-    SPePHS_x.insert(ipm, tmp);
-    SPePHS.insert(ipm, tmp);
-    SPePHShist.insert(ipm, 0);
-
 }
 
 void pms::remove(int ipm)
@@ -523,12 +504,6 @@ void pms::remove(int ipm)
     AreaSensitivity.remove(ipm);
     AreaStepX.remove(ipm);
     AreaStepY.remove(ipm);
-
-    SPePHSsigma.remove(ipm);
-    SPePHSshape.remove(ipm);
-    SPePHS_x.remove(ipm);
-    SPePHS.remove(ipm);
-    SPePHShist.remove(ipm);
 
 }
 
@@ -595,38 +570,14 @@ void pms::clearTypeArea(int typ){PMtypes[typ]->AreaSensitivity.resize(0);}
 
 void pms::setElChanSPePHS(int ipm, QVector<double> *x, QVector<double> *y)
 {
-    SPePHS_x[ipm] = *x;
-    SPePHS[ipm] = *y;
-
-//    double sumPro = 0;
-//    double sum = 0;
-//    for (int i=0; i<SPePHS[ipm].size(); i++)
-//    {
-//      sum += SPePHS[ipm][i];
-//      sumPro += SPePHS[ipm][i]*SPePHS_x[ipm][i];
-//    }
-//    AverageSignalPerPhotoelectron[ipm] = sumPro/sum; //zero check is in the loader
-}
-
-void pms::preparePHS(int ipm)
-{
-  if (SPePHShist[ipm])
-    {
-      delete SPePHShist[ipm];
-      SPePHShist[ipm] = 0;
-    }
-
-  int size = SPePHS_x[ipm].size();
-  if (size < 1) return;
-
-  SPePHShist[ipm] = new TH1D("SPePHS"+ipm,"SPePHS", size, SPePHS_x[ipm].at(0), SPePHS_x[ipm].at(size-1));
-  for (int j = 1; j<size+1; j++)  SPePHShist[ipm]->SetBinContent(j, SPePHS[ipm].at(j-1));
-  SPePHShist[ipm]->GetIntegral(); //to make thread safe
+    PMs[ipm].SPePHS_x = *x;
+    PMs[ipm].SPePHS = *y;
 }
 
 void pms::preparePHSs()
 {
-  for (int ipm=0; ipm<numPMs; ipm++) preparePHS(ipm);
+  for (int ipm=0; ipm<numPMs; ipm++)
+      PMs[ipm].preparePHS();
 }
 
 void pms::prepareMCcrosstalk()
@@ -641,23 +592,6 @@ void pms::prepareMCcrosstalkForPM(int ipm)
 
     if (fDoMCcrosstalk && PMs[ipm].MCmodel==0)
       PMs[ipm].MCsampl = new ACustomRandomSampling(RandGen, &PMs.at(ipm).MCcrosstalk);
-}
-
-void pms::clearSPePHS(int ipm)
-{
-    SPePHS_x[ipm].clear();
-    SPePHS[ipm].clear();
-    if (SPePHShist[ipm])
-    {
-        delete SPePHShist[ipm];
-        SPePHShist[ipm] = 0;
-    }
-}
-
-void pms::setSPePHSmode(int ipm, int mode) //0-const, 1-normal, 2-gamma, 3-custom
-{
-  PMs[ipm].SPePHSmode = mode;
-  if (mode != 3) clearSPePHS(ipm);
 }
 
 void pms::setADC(int ipm, double max, int bits)
@@ -683,17 +617,19 @@ void pms::updateADClevels()
 
 void pms::CopySPePHSdata(int ipmFrom, int ipmTo)
 {
-    PMs[ipmTo].SPePHSmode = PMs.at(ipmFrom).SPePHSmode;
-    PMs[ipmTo].AverageSignalPerPhotoelectron = PMs.at(ipmFrom).AverageSignalPerPhotoelectron;
-    SPePHSsigma[ipmTo] = SPePHSsigma[ipmFrom];
-    SPePHSshape[ipmTo] = SPePHSshape[ipmFrom];
+    PMs[ipmTo].SPePHSmode                    = PMs.at(ipmFrom).SPePHSmode;
+    PMs[ipmTo].AverageSigPerPhE = PMs.at(ipmFrom).AverageSigPerPhE;
+    PMs[ipmTo].SPePHSsigma                   = PMs.at(ipmFrom).SPePHSsigma;
+    PMs[ipmTo].SPePHSshape                   = PMs.at(ipmFrom).SPePHSshape;
+    PMs[ipmTo].SPePHS_x                      = PMs.at(ipmFrom).SPePHS_x;
+    PMs[ipmTo].SPePHS                        = PMs.at(ipmFrom).SPePHS;
 
-    if (SPePHS_x[ipmFrom].size()>0)
+    if (PMs.at(ipmTo).SPePHShist)
     {
-        SPePHS_x[ipmTo] = SPePHS_x[ipmFrom];
-        SPePHS[ipmTo] = SPePHS[ipmFrom];
-        SPePHShist[ipmTo] = new TH1D(*SPePHShist[ipmFrom]);
+        delete PMs.at(ipmTo).SPePHShist;
+        PMs[ipmTo].SPePHShist = 0;
     }
+    if (PMs.at(ipmFrom).SPePHShist) PMs[ipmTo].SPePHShist = new TH1D(*PMs.at(ipmFrom).SPePHShist);
 }
 
 void pms::CopyMCcrosstalkData(int ipmFrom, int ipmTo)
@@ -718,19 +654,21 @@ void pms::CopyADCdata(int ipmFrom, int ipmTo)
 
 void pms::ScaleSPePHS(int ipm, double gain)
 {
-    const double& NowAverage = PMs.at(ipm).AverageSignalPerPhotoelectron;
+    const double& NowAverage = PMs.at(ipm).AverageSigPerPhE;
     if (NowAverage == gain) return; //nothing to change
 
     if (fabs(gain) > 1e-20) gain /= NowAverage; else gain = 0;
 
     const int& mode = PMs.at(ipm).SPePHSmode; //0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
 
-    if (mode < 3) PMs[ipm].AverageSignalPerPhotoelectron = NowAverage * gain;
+    if (mode < 3) PMs[ipm].AverageSigPerPhE = NowAverage * gain;
     else if (mode == 3)
     {
         //custom SPePHS - have to adjust the distribution
-        QVector<double> x = *getSPePHS_x(ipm);
-        QVector<double> y = *getSPePHS(ipm);
+        //QVector<double> x = *getSPePHS_x(ipm);
+        QVector<double> x = PMs.at(ipm).SPePHS_x;
+        //QVector<double> y = *getSPePHS(ipm);
+        QVector<double> y = PMs.at(ipm).SPePHS;
         for (int ix=0; ix<x.size(); ix++) x[ix] *= gain;
 
         setElChanSPePHS(ipm, &x, &y);
@@ -750,13 +688,12 @@ double pms::GenerateSignalFromOnePhotoelectron(int ipm)
 {
     switch ( PMs.at(ipm).SPePHSmode )
     {
-      case 0: return PMs.at(ipm).AverageSignalPerPhotoelectron;
-      case 1: return RandGen->Gaus( PMs.at(ipm).AverageSignalPerPhotoelectron, SPePHSsigma[ipm] );
-      case 2: return GammaRandomGen->getGamma( SPePHSshape[ipm], PMs.at(ipm).AverageSignalPerPhotoelectron / SPePHSshape[ipm] );
+      case 0: return PMs.at(ipm).AverageSigPerPhE;
+      case 1: return RandGen->Gaus( PMs.at(ipm).AverageSigPerPhE, PMs.at(ipm).SPePHSsigma );
+      case 2: return GammaRandomGen->getGamma( PMs.at(ipm).SPePHSshape, PMs.at(ipm).AverageSigPerPhE / PMs.at(ipm).SPePHSshape );
       case 3:
        {
-         if (SPePHShist[ipm]) return SPePHShist[ipm]->GetRandom();
-         //else return AverageSignalPerPhotoelectron[ipm];
+         if (PMs.at(ipm).SPePHShist) return PMs[ipm].SPePHShist->GetRandom();
          else return 0;
        }
       default:;

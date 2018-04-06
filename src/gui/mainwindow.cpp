@@ -2863,7 +2863,8 @@ void MainWindow::on_pbElUpdateIndication_clicked()
           ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
       }
 
-      str.setNum(PMs->getElNoiseSigma(ipm));
+      //str.setNum(PMs->getElNoiseSigma(ipm));
+      str.setNum(PMs->at(ipm).ElNoiseSigma);
       ui->ledElNoiseSigma->setText(str);
 
       str.setNum(PMs->getADCmax(ipm));
@@ -4388,7 +4389,7 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->setAverageSignalPerPhotoelectron(ipm, ui->ledAverageSigPhotEl->text().toDouble());
    PMs->setSPePHSsigma(ipm, ui->ledElsigma->text().toDouble());
    PMs->setSPePHSshape(ipm, ui->ledElShape->text().toDouble());
-   PMs->setElNoiseSigma(ipm, ui->ledElNoiseSigma->text().toDouble());
+   PMs->at(ipm).ElNoiseSigma = ui->ledElNoiseSigma->text().toDouble();
    PMs->setADC(ipm, ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
    PMs->at(ipm).MCmodel = ui->cobMCcrosstalk_Model->currentIndex();
    PMs->at(ipm).MCtriggerProb = ui->ledMCcrosstalkTriggerProb->text().toDouble();

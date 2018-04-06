@@ -178,13 +178,12 @@ void pms::writeElectronicsToJson(QJsonObject &json)
       mcj["ProbDistr"] = arrVec;
       mcj["Model"] = arrModel;
       mcj["TrigProb"] = arrTP;
-
   js["MCcrosstalk"] = mcj;
 
   QJsonObject nj;
       nj["Active"] = fDoElNoise;
       QJsonArray ar2;
-      for (int ipm=0; ipm<numPMs; ipm++) ar2.append(ElNoiseSigma[ipm]);
+      for (int ipm=0; ipm<numPMs; ipm++) ar2.append(PMs.at(ipm).ElNoiseSigma);
       nj["NoiseSigma"] = ar2;
   js["Noise"] = nj;
 
@@ -290,7 +289,7 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
            return false;
          }
        for (int ipm=0; ipm<numPMs; ipm++)
-           ElNoiseSigma[ipm] = ar[ipm].toDouble();
+           PMs[ipm].ElNoiseSigma = ar[ipm].toDouble();
      }
 
    QJsonObject aj = js["ADC"].toObject();
@@ -451,7 +450,6 @@ void pms::clear() //does not affect PM types!
     SPePHS_x.clear();
     SPePHS.clear();
     SPePHShist.clear();
-    ElNoiseSigma.clear();
 
     ADCmax.clear();
     ADCbits.clear();
@@ -507,8 +505,6 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     SPePHS.insert(ipm, tmp);
     SPePHShist.insert(ipm, 0);
 
-    ElNoiseSigma.insert(ipm, 0);
-
     ADCmax.insert(ipm, 65535);
     ADClevels.insert(ipm, 65535);
     ADCbits.insert(ipm, 16);
@@ -545,8 +541,6 @@ void pms::remove(int ipm)
     SPePHS_x.remove(ipm);
     SPePHS.remove(ipm);
     SPePHShist.remove(ipm);
-
-    ElNoiseSigma.remove(ipm);
 
     ADCmax.remove(ipm);
     ADClevels.remove(ipm);
@@ -751,7 +745,7 @@ void pms::CopyMCcrosstalkData(int ipmFrom, int ipmTo)
 
 void pms::CopyElNoiseData(int ipmFrom, int ipmTo)
 {
-    ElNoiseSigma[ipmTo] = ElNoiseSigma[ipmFrom];
+    PMs[ipmTo].ElNoiseSigma = PMs.at(ipmFrom).ElNoiseSigma;
 }
 
 void pms::CopyADCdata(int ipmFrom, int ipmTo)

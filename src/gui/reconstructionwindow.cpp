@@ -5829,6 +5829,10 @@ void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
     ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
     TH1D* h = c->GetHistogram(ipm);
 
+    TString title("PM #");
+    title += ipm;
+    h->SetTitle(title);
+
     if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
     MW->GraphWindow->DrawWithoutFocus(h, "", true, false);
 

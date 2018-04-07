@@ -2,6 +2,7 @@
 #define PMS_H
 
 #include "apm.h"
+#include "pmtypeclass.h"
 
 #include <QVector>
 #include <QString>
@@ -11,17 +12,18 @@ class TRandom2;
 class AMaterialParticleCollection;
 class GeneralSimSettings;
 class APmPosAngTypeRecord;
-class PMtypeClass;
 class AGammaRandomGenerator;
 class QJsonObject;
 
 class pms
 {   
 public:
-    explicit pms(AMaterialParticleCollection* materialCollection, TRandom2* randGen);
+    pms(AMaterialParticleCollection* materialCollection, TRandom2* randGen);
     ~pms();
 
-    //json
+    void configure(GeneralSimSettings* SimSet); // must do before simulation
+
+    // top level json save/load
     void writePMtypesToJson(QJsonObject &json);
     bool readPMtypesFromJson(QJsonObject &json);
     void writeInividualOverridesToJson(QJsonObject &json);
@@ -29,15 +31,11 @@ public:
     void writeElectronicsToJson(QJsonObject &json);
     bool readElectronicsFromJson(QJsonObject &json);
 
-    bool readReconstructionRelatedSettingsFromJson(QJsonObject &json);
-
-    void configure(GeneralSimSettings* SimSet);
-
       //recalculate PDE for selected wave binning
     void RebinPDEs(); //triggered by changing between true and false for WavelenegthResolved on the MainWindow
-    void RebinPDEsForType(int typ);
-    void RebinPDEsForPM(int ipm); // *** to APm
-      //recalculate angular for selected angle binning
+    void RebinPDEsForType(int itype);
+    void RebinPDEsForPM(int ipm);
+    //recalculate angular for selected angle binning
     void RecalculateAngular();
     void RecalculateAngularForType(int typ);
     void RecalculateAngularForPM(int ipm);
@@ -58,7 +56,7 @@ public:
 
     int count() const {return numPMs;} //returns number of PMs
     void clear();
-    void resetOverrides(); //*** add single pm method in APm
+    void resetOverrides();
     void add(int upperlower, double xx, double yy, double zz, double Psi, int typ);
     void add(int upperlower, APmPosAngTypeRecord* pat);
     void insert(int ipm, int upperlower, double xx, double yy, double zz, double Psi, int typ);
@@ -78,15 +76,15 @@ public:
     double getMaxQEvsWave(int iWave) const {return MaxQEvsWave.at(iWave);}
 
     //individual PMs
-    inline double X(int ipm) const {return PMs.at(ipm).x;}
-    inline double Y(int ipm) const {return PMs.at(ipm).y;}
-    inline double Z(int ipm) const {return PMs.at(ipm).z;}
-    int getPixelsX(int ipm) const;
-    int getPixelsY(int ipm) const;
-    double SizeX(int ipm) const;
-    double SizeY(int ipm) const;
-    double SizeZ(int ipm) const;
-    bool   isSiPM(int ipm) const;
+    inline double X(int ipm) const       {return PMs.at(ipm).x;}
+    inline double Y(int ipm) const       {return PMs.at(ipm).y;}
+    inline double Z(int ipm) const       {return PMs.at(ipm).z;}
+    inline int    PixelsX(int ipm) const {return PMtypes.at(PMs.at(ipm).type)->PixelsX;}
+    inline int    PixelsY(int ipm) const {return PMtypes.at(PMs.at(ipm).type)->PixelsY;}
+    inline double SizeX(int ipm) const   {return PMtypes.at(PMs.at(ipm).type)->SizeX;}
+    inline double SizeY(int ipm) const   {return PMtypes.at(PMs.at(ipm).type)->SizeY;}
+    inline double SizeZ(int ipm) const   {return PMtypes.at(PMs.at(ipm).type)->SizeZ;}
+    inline bool   isSiPM(int ipm) const  {return PMtypes.at(PMs.at(ipm).type)->SiPM;}
 
     //PDE
     bool   isPDEwaveOverriden(int ipm) const;
@@ -113,8 +111,9 @@ public:
     void   setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep);
 
     //type properties    
-    PMtypeClass* getType(int i) {return PMtypes[i];}
-    PMtypeClass* getTypeForPM(int ipm) {return PMtypes.at(PMs[ipm].type);}
+    const PMtypeClass* getType(int itype) const {return PMtypes.at(itype);}
+    PMtypeClass* getType(int itype) {return PMtypes[itype];}
+    const PMtypeClass* getTypeForPM(int ipm) const {return PMtypes.at(PMs.at(ipm).type);}
     bool removePMtype(int itype);
     void appendNewPMtype(PMtypeClass* tp);
     int  countPMtypes() const {return PMtypes.size();}
@@ -130,20 +129,17 @@ public:
 
     void CalculateElChannelsStrength();
 
-    //config
     void SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes);
-    void setWavelengthResolved(bool flag) {WavelengthResolved = flag;}
-    void setAngularResolved(bool flag) {AngularResolved = flag;}
-    void setAreaResolved(bool flag){AreaResolved = flag;}
-    void setWaveFrom(double from) {WaveFrom = from;}
-    void setWaveStep(double step) {WaveStep = step;}
-    void setWaveNodes(int nodes) {WaveNodes = nodes;}
-    void setCosBins(int bins) {CosBins = bins;}
     void setDoPHS(bool flag) {fDoPHS = flag;}
     void setDoMCcrosstalk(bool flag) {fDoMCcrosstalk = flag;}
     void setDoElNoise(bool flag) {fDoElNoise = flag;}
     void setDoADC(bool flag) {fDoADC = flag;}
     void setMeasurementTime(double time) {MeasurementTime = time;}
+
+    bool   isWaveRes() const {return WavelengthResolved;}
+    double getWaveFrom() const  {return WaveFrom;}
+    double getWaveStep() const  {return WaveStep;}
+    int    getWaveNodes() const {return WaveNodes;}
 
     bool isDoPHS() const {return fDoPHS;}
     bool isDoMCcrosstalk() const {return fDoMCcrosstalk;}
@@ -187,8 +183,6 @@ private:
     QVector<double> MaxQEvsWave; //vs wavelength
     void calculateMaxQEs(); // vector has to be rebinned first according to the actual wave properties (see configure())
 
-    void writePHSsettingsToJson(int ipm, QJsonObject &json);    // ***!!! to PMs
-    bool readPHSsettingsFromJson(int ipm, QJsonObject &json);   // ***!!! to PMs
     void writeRelQE_PDE(QJsonObject &json);
     void readRelQE_PDE(QJsonObject &json);
 };

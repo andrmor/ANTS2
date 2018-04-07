@@ -288,7 +288,6 @@ private slots:
     void on_pbPMtypeShowAngular_clicked();
     void on_pbPMtypeDeleteAngular_clicked();
     void on_pbPMtypeShowEffectiveAngular_clicked();
-    void on_sbCosBins_valueChanged(int arg1);
     void on_cobGunSourceType_currentIndexChanged(int index);    
     void on_pbGunTest_clicked();
     void on_pbGunRefreshparticles_clicked();

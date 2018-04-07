@@ -3,7 +3,6 @@
 #include "amaterialparticlecolection.h"
 #include "generalsimsettings.h"
 #include "apmposangtyperecord.h"
-#include "pmtypeclass.h"
 #include "agammarandomgenerator.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
@@ -71,52 +70,6 @@ bool pms::readInividualOverridesFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::writePHSsettingsToJson(int ipm, QJsonObject &json)
-{
-  const int& mode = PMs.at(ipm).SPePHSmode; // 0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
-  json["Mode"] = mode;
-  json["Average"] = PMs.at(ipm).AverageSigPerPhE;
-
-  switch ( mode )
-    {
-    case 0: break;
-    case 1:
-      json["Sigma"] = PMs.at(ipm).SPePHSsigma;
-      break;
-    case 2:
-      json["Shape"] = PMs.at(ipm).SPePHSshape;
-      break;
-    case 3:
-      {
-        QJsonArray ar;
-        //writeTwoQVectorsToJArray(SPePHS_x[ipm], SPePHS[ipm], ar);
-        writeTwoQVectorsToJArray(PMs.at(ipm).SPePHS_x, PMs.at(ipm).SPePHS, ar);
-        json["Distribution"] = ar;
-        break;
-      }
-    default: qWarning() << "Unknown SPePHS mode";
-    }
-}
-
-bool pms::readPHSsettingsFromJson(int ipm, QJsonObject &json)
-{
-  parseJson(json, "Mode",    PMs[ipm].SPePHSmode);
-  parseJson(json, "Average", PMs[ipm].AverageSigPerPhE);
-  parseJson(json, "Sigma",   PMs[ipm].SPePHSsigma);
-  parseJson(json, "Shape",   PMs[ipm].SPePHSshape);
-
-  PMs[ipm].SPePHS_x.clear();
-  PMs[ipm].SPePHS.clear();
-  if (json.contains("Distribution"))
-    {
-      QJsonArray ar = json["Distribution"].toArray();
-      readTwoQVectorsFromJArray(ar, PMs[ipm].SPePHS_x, PMs[ipm].SPePHS);
-    }
-  PMs[ipm].preparePHS();
-
-  return true;
-}
-
 void pms::writeElectronicsToJson(QJsonObject &json)
 {
   QJsonObject js;
@@ -124,10 +77,10 @@ void pms::writeElectronicsToJson(QJsonObject &json)
   QJsonObject pj;
       pj["Active"] = fDoPHS;
       QJsonArray arr;
-      for (int ipm=0; ipm<numPMs; ipm++)
+      for (int ipm = 0; ipm < numPMs; ipm++)
         {
           QJsonObject jj;
-          writePHSsettingsToJson(ipm, jj);
+          PMs.at(ipm).writePHSsettingsToJson(jj);
           arr.append(jj);
         }
       pj["Data"] = arr;
@@ -207,7 +160,7 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
        for (int ipm=0; ipm<numPMs; ipm++)
          {
            QJsonObject jj = ar[ipm].toObject();
-           readPHSsettingsFromJson(ipm, jj);
+           PMs[ipm].readPHSsettingsFromJson(jj);
          }
      }
 
@@ -297,20 +250,7 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
 
 void pms::resetOverrides()
 {
-  for (int ipm=0; ipm<numPMs; ipm++)
-    {
-      PMs[ipm].effectivePDE = -1.0;
-      PMs[ipm].PDE_lambda.clear();
-      PMs[ipm].PDE.clear();
-      PMs[ipm].PDEbinned.clear();
-      PMs[ipm].AngularSensitivity_lambda.clear();
-      PMs[ipm].AngularSensitivity.clear();
-      PMs[ipm].AngularN1 = 1.0;
-      PMs[ipm].AngularSensitivityCosRefracted.clear();
-      PMs[ipm].AreaSensitivity.clear();
-      PMs[ipm].AreaStepX = 777;
-      PMs[ipm].AreaStepY = 777;
-    }
+    for (APm& pm : PMs) pm.resetOverrides();
 }
 
 void pms::configure(GeneralSimSettings *SimSet)
@@ -563,22 +503,23 @@ double pms::GenerateSignalFromOnePhotoelectron(int ipm)
     return 0;
 }
 
-void pms::RebinPDEsForType(int typ)
-{
+void pms::RebinPDEsForType(int itype)
+{    
     if (WavelengthResolved)
     {
-        if (PMtypes[typ]->PDE_lambda.size() == 0) PMtypes[typ]->PDEbinned.clear();
+        if (PMtypes.at(itype)->PDE_lambda.isEmpty())
+            PMtypes[itype]->PDEbinned.clear();
         else
-            ConvertToStandardWavelengthes(&PMtypes[typ]->PDE_lambda, &PMtypes[typ]->PDE, WaveFrom, WaveStep, WaveNodes, &PMtypes[typ]->PDEbinned);
+            ConvertToStandardWavelengthes(&PMtypes[itype]->PDE_lambda, &PMtypes[itype]->PDE, WaveFrom, WaveStep, WaveNodes, &PMtypes[itype]->PDEbinned);
     }
-    else PMtypes[typ]->PDEbinned.clear();
+    else PMtypes[itype]->PDEbinned.clear();
 }
 
 void pms::RebinPDEsForPM(int ipm)
 {
     if (WavelengthResolved)
     {
-        if (PMs.at(ipm).PDE_lambda.size() == 0)
+        if (PMs.at(ipm).PDE_lambda.isEmpty())
             PMs[ipm].PDEbinned.clear();
         else
             ConvertToStandardWavelengthes(&PMs.at(ipm).PDE_lambda, &PMs.at(ipm).PDE, WaveFrom, WaveStep, WaveNodes, &PMs[ipm].PDEbinned);
@@ -588,19 +529,18 @@ void pms::RebinPDEsForPM(int ipm)
 
 void pms::RebinPDEs()
 {
-    //for all base PM types
-       // qDebug() << "WaveFrom,Nodes,Step"<< WaveFrom<<WaveNodes<<WaveStep;
-    for (int i=0; i<PMtypes.size(); i++) pms::RebinPDEsForType(i);
-    //for all PMs
-    for (int i=0; i<numPMs; i++) pms::RebinPDEsForPM(i);
+    for (int itype = 0; itype < PMtypes.size(); itype++)
+        RebinPDEsForType(itype);
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        RebinPDEsForPM(ipm);
 }
 
 void pms::RecalculateAngular()
 {
-    //for all base PM types
-    for (int i=0; i<countPMtypes(); i++) pms::RecalculateAngularForType(i);
-    //for all PMs
-    for (int i=0; i<numPMs; i++) pms::RecalculateAngularForPM(i);
+    for (int itype = 0; itype < countPMtypes(); itype++)
+        RecalculateAngularForType(itype);
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        RecalculateAngularForPM(ipm);
 }
 
 void pms::RecalculateAngularForType(int typ)
@@ -629,9 +569,7 @@ void pms::RecalculateAngularForType(int typ)
             //         qDebug()<<"Angle: "<<Angle<< " sinI="<<sinI<<" cosI="<<cosI;
             //         qDebug()<<"sinT="<<sinT<<"cosT="<<cosT;
 
-            //correcting for the reflection loss
-            //double Rs = (n1*cosI-n2*cosT)*(n1*cosI-n2*cosT) / (n1*cosI+n2*cosT)/(n1*cosI+n2*cosT);
-            //double Rp = (n1*cosT-n2*cosI)*(n1*cosT-n2*cosI) / (n1*cosT+n2*cosI)/(n1*cosT+n2*cosI);
+            //correcting for the reflection loss            
             double Rs = (n1*cosI-n2*cosT)*(n1*cosI-n2*cosT) / ( (n1*cosI+n2*cosT) * (n1*cosI+n2*cosT) );
             double Rp = (n1*cosT-n2*cosI)*(n1*cosT-n2*cosI) / ( (n1*cosT+n2*cosI) * (n1*cosT+n2*cosI) );
             double R = 0.5*(Rs+Rp);
@@ -644,7 +582,7 @@ void pms::RecalculateAngularForType(int typ)
             y.append(PMtypes[typ]->AngularSensitivity[i]*correction);
             //         qDebug()<<cosT<<correction<<PMtypeProperties[typ].AngularSensitivity[i]*correction;
         }
-        x.replace(0, x[1]); //replace with last reliable value
+        x.replace(0, x[1]); //replace with the last available value
         y.replace(0, y[1]);
         //reusing the function:
         ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &PMtypes[typ]->AngularSensitivityCosRefracted);
@@ -677,9 +615,7 @@ void pms::RecalculateAngularForPM(int ipm)
             //         qDebug()<<"Angle: "<<Angle<< " sinI="<<sinI<<" cosI="<<cosI;
             //         qDebug()<<"sinT="<<sinT<<"cosT="<<cosT;
 
-            //correcting for the reflection loss
-            //double Rs = (n1*cosI-n2*cosT)*(n1*cosI-n2*cosT) / (n1*cosI+n2*cosT)/(n1*cosI+n2*cosT);
-            //double Rp = (n1*cosT-n2*cosI)*(n1*cosT-n2*cosI) / (n1*cosT+n2*cosI)/(n1*cosT+n2*cosI);
+            //correcting for the reflection loss            
             double Rs = (n1*cosI-n2*cosT)*(n1*cosI-n2*cosT) / ( (n1*cosI+n2*cosT) * (n1*cosI+n2*cosT) );
             double Rp = (n1*cosT-n2*cosI)*(n1*cosT-n2*cosI) / ( (n1*cosT+n2*cosI) * (n1*cosT+n2*cosI) );
             double R = 0.5*(Rs+Rp);
@@ -693,7 +629,7 @@ void pms::RecalculateAngularForPM(int ipm)
             y.append( PMs.at(ipm).AngularSensitivity.at(i) * correction );
             //         qDebug()<<cosT<<correction<<AngularSensitivity[ipm][i]*correction;
         }
-        x.replace(0, x[1]); //replace fith last reliable value
+        x.replace(0, x[1]); //replace with the last available value
         y.replace(0, y[1]);
         //reusing the function:
         ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &PMs[ipm].AngularSensitivityCosRefracted);
@@ -765,7 +701,7 @@ double pms::getActualAngularResponse(int ipm, double cosAngle) const
         //angular is activated - as the simulation option
 
         //do we have override data?
-        if (PMs.at(ipm).AngularSensitivityCosRefracted.size() > 0)
+        if ( !PMs.at(ipm).AngularSensitivityCosRefracted.isEmpty() )
         {
             //using overrides
             const int bin = cosAngle * (CosBins-1);
@@ -774,11 +710,12 @@ double pms::getActualAngularResponse(int ipm, double cosAngle) const
         else
         {
             //do we have angular response defined for this pm type?
-            if (PMtypes[PMs[ipm].type]->AngularSensitivityCosRefracted.size() > 0)
+            const int& itype = PMs.at(ipm).type;
+            if ( !PMtypes.at(itype)->AngularSensitivityCosRefracted.isEmpty() )
             {
                 //using base type data
-                int bin = cosAngle  *(CosBins-1);
-                AngularResponse = PMtypes[PMs[ipm].type]->AngularSensitivityCosRefracted[bin];
+                int bin = cosAngle * (CosBins-1);
+                AngularResponse = PMtypes.at(itype)->AngularSensitivityCosRefracted.at(bin);
             }
         }
     }
@@ -933,37 +870,10 @@ bool pms::saveUpperLower(const QString &filename)
     return true;
 }
 
-int pms::getPixelsX(int ipm) const
+bool pms::isPDEwaveOverriden(int ipm) const
 {
-    return PMtypes.at(PMs.at(ipm).type)->PixelsX;
+    return (!PMs.at(ipm).PDE.isEmpty());
 }
-
-int pms::getPixelsY(int ipm) const
-{
-    return PMtypes.at(PMs.at(ipm).type)->PixelsY;
-}
-
-double pms::SizeX(int ipm) const
-{
-    return PMtypes.at(PMs.at(ipm).type)->SizeX;
-}
-
-double pms::SizeY(int ipm) const
-{
-    return PMtypes.at(PMs.at(ipm).type)->SizeY;
-}
-
-double pms::SizeZ(int ipm) const
-{
-    return PMtypes.at(PMs.at(ipm).type)->SizeZ;
-}
-
-bool pms::isSiPM(int ipm) const
-{
-    return PMtypes.at(PMs.at(ipm).type)->SiPM;
-}
-
-bool pms::isPDEwaveOverriden(int ipm) const {return (!PMs.at(ipm).PDE.isEmpty());}
 
 bool pms::isPDEwaveOverriden() const
 {
@@ -1068,9 +978,16 @@ bool pms::readPDEwaveFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y) {PMs[ipm].PDE_lambda = *x; PMs[ipm].PDE = *y;}
+void pms::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
+{
+    PMs[ipm].PDE_lambda = *x;
+    PMs[ipm].PDE = *y;
+}
 
-bool pms::isAngularOverriden(int ipm) const {return !PMs.at(ipm).AngularSensitivity.isEmpty();}
+bool pms::isAngularOverriden(int ipm) const
+{
+    return !PMs.at(ipm).AngularSensitivity.isEmpty();
+}
 
 bool pms::isAngularOverriden() const
 {

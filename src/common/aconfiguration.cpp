@@ -6,6 +6,8 @@
 #include "amaterialparticlecolection.h"
 #include "particlesourcesclass.h"
 #include "asandwich.h"
+#include "generalsimsettings.h"
+#include "pms.h"
 
 #include <QDebug>
 #include <QFile>
@@ -53,6 +55,12 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           //qDebug() << ">>> Loading simulation settings...";
           QJsonObject SimJson = json["SimulationConfig"].toObject();
           JSON["SimulationConfig"] = SimJson;
+
+          GeneralSimSettings simSettings;
+          simSettings.readFromJson(SimJson);
+          Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
+          Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+
           emit requestSimulationGuiUpdate();
           emit requestSelectFirstActiveParticleSource();
         }

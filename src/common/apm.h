@@ -6,6 +6,7 @@
 class QTextStream;
 class ACustomRandomSampling;
 class TH1D;
+class QJsonObject;
 
 class APm
 {
@@ -20,12 +21,16 @@ public:
     void setAngles(const double *const phithepsi) { phi = phithepsi[0]; theta = phithepsi[1]; psi = phithepsi[2]; }
     void saveAngles(QTextStream &file) const;
 
+    void resetOverrides();
+
     // single photoelectron response
     void setElChanSPePHS(const QVector<double>& x, const QVector<double>& y);
     void scaleSPePHS(double gain);
     void preparePHS();
     void clearSPePHSCustomDist();
     void copySPePHSdata(const APm &from);
+    void writePHSsettingsToJson(QJsonObject &json) const;
+    void readPHSsettingsFromJson(QJsonObject &json);
     // SiPM optical crosstalk
     void copyMCcrosstalkData(const APm &from);
     // electronic noise

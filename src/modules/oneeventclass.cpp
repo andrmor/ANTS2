@@ -34,7 +34,7 @@ void OneEventClass::configure(const GeneralSimSettings *simSet)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QBitArray sipmPixels;
-      PMtypeClass *type = PMs->getTypeForPM(ipm);
+      const PMtypeClass *type = PMs->getTypeForPM(ipm);
       if(type->SiPM)
         {
            sipmPixels = QBitArray((SimSet->fTimeResolved ? SimSet->TimeBins : 1) * type->PixelsX * type->PixelsY);
@@ -129,9 +129,9 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
 
   //    qDebug()<<"Detected!";
   const int itype = PMs->at(ipm).type;
-  PMtypeClass* tp = PMs->getType(itype);
-  double sizeX = tp->SizeX;//PMtypeProperties[typ].SizeX;
-  int pixelsX =  tp->PixelsX;//PMtypeProperties[itype].PixelsX;
+  const PMtypeClass* tp = PMs->getType(itype);
+  double sizeX = tp->SizeX;
+  int pixelsX =  tp->PixelsX;
   //double pixLengthX = sizeX / pixelsX;
   //int binX = (x + sizeX*0.5) / pixLengthX;
   int binX = pixelsX * (x/sizeX + 0.5);
@@ -160,7 +160,7 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
 void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int numHits)
 //numHits != 1 is used only for the simplistic model of microcell cross-talk!
 {
-  PMtypeClass *tp = PMs->getTypeForPM(ipm);
+  const PMtypeClass *tp = PMs->getTypeForPM(ipm);
   if (!SimSet->fTimeResolved)
   {
       const int iXY = tp->PixelsX*binY + binX;
@@ -173,7 +173,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
       if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
       {
           const int itype = PMs->at(ipm).type;
-          PMtypeClass* tp = PMs->getType(itype);
+          const PMtypeClass* tp = PMs->getType(itype);
           //checking 4 neighbours
           if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
           if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
@@ -207,7 +207,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
           if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
           {
               const int itype = PMs->at(ipm).type;
-              PMtypeClass* tp = PMs->getType(itype);
+              const PMtypeClass* tp = PMs->getType(itype);
               //checking 4 neighbours
               if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
               if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right

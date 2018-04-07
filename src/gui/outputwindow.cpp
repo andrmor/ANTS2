@@ -288,13 +288,13 @@ void OutputWindow::on_pbSiPMpixels_clicked()
         }
     }
 
-    int binsX = MW->PMs->getPixelsX(ipm);
-    int binsY = MW->PMs->getPixelsY(ipm);
+    int binsX = MW->PMs->PixelsX(ipm);
+    int binsY = MW->PMs->PixelsY(ipm);
 //    qDebug()<<binsX<<binsY;
 
     auto hist = new TH2C("histOutW","x vs y",binsX,0,binsX, binsY, -binsY,0);
 
-    PMtypeClass *typ = MW->PMs->getTypeForPM(ipm);//  PMtypeProperties[PMs[ipm].type];
+    const PMtypeClass *typ = MW->PMs->getTypeForPM(ipm);
     for (int iX=0; iX<binsX; iX++)
      for (int iY=0; iY<binsY; iY++)
       {         

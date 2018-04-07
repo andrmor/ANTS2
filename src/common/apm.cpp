@@ -1,6 +1,8 @@
 #include "apm.h"
+#include "ajsontools.h"
 
 #include <QTextStream>
+#include <QDebug>
 
 #include "TH1D.h"
 #include "TMath.h"
@@ -29,7 +31,7 @@ void APm::preparePHS()
     }
 
   const int size = SPePHS_x.size();
-  if (size < 1) return;
+  if (size < 2) return;
 
   //SPePHShist = new TH1D("SPePHS"+ipm,"SPePHS", size, SPePHS_x.at(0), SPePHS_x.at(size-1));
   SPePHShist = new TH1D("", "", size, SPePHS_x.at(0), SPePHS_x.at(size-1));
@@ -116,4 +118,61 @@ void APm::copyADCdata(const APm& from)
     ADCbits   = from.ADCbits;
     ADCstep   = from.ADCstep;
     ADClevels = from.ADClevels;
+}
+
+void APm::resetOverrides()
+{
+    effectivePDE = -1.0;
+    PDE_lambda.clear();
+    PDE.clear();
+    PDEbinned.clear();
+    AngularSensitivity_lambda.clear();
+    AngularSensitivity.clear();
+    AngularN1 = 1.0;
+    AngularSensitivityCosRefracted.clear();
+    AreaSensitivity.clear();
+    AreaStepX = 777;
+    AreaStepY = 777;
+}
+
+void APm::writePHSsettingsToJson(QJsonObject &json) const
+{
+  json["Mode"]    = SPePHSmode;
+  json["Average"] = AverageSigPerPhE;
+
+  switch ( SPePHSmode ) // 0 - use average value; 1 - normal distr; 2 - Gamma distr; 3 - custom distribution
+    {
+    case 0: break;
+    case 1:
+      json["Sigma"] = SPePHSsigma;
+      break;
+    case 2:
+      json["Shape"] = SPePHSshape;
+      break;
+    case 3:
+      {
+        QJsonArray ar;
+        writeTwoQVectorsToJArray(SPePHS_x, SPePHS, ar);
+        json["Distribution"] = ar;
+        break;
+      }
+    default: qWarning() << "Unknown SPePHS mode";
+    }
+}
+
+void APm::readPHSsettingsFromJson(QJsonObject &json)
+{
+  parseJson(json, "Mode",    SPePHSmode);
+  parseJson(json, "Average", AverageSigPerPhE);
+  parseJson(json, "Sigma",   SPePHSsigma);
+  parseJson(json, "Shape",   SPePHSshape);
+
+  SPePHS_x.clear();
+  SPePHS.clear();
+  if (json.contains("Distribution"))
+    {
+      QJsonArray ar = json["Distribution"].toArray();
+      readTwoQVectorsFromJArray(ar, SPePHS_x, SPePHS);
+    }
+  preparePHS();
 }

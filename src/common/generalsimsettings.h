@@ -56,7 +56,7 @@ public:
   //utility
   QString ErrorString;
 
-  bool readFromJson(QJsonObject &Json);
+  bool readFromJson(const QJsonObject &Json);
 };
 
 

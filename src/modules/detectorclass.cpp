@@ -803,7 +803,7 @@ void DetectorClass::positionPMs()
       QString str = "PM" + QString::number(itype);
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
-      PMtypeClass *tp = PMs->getType(itype);
+      const PMtypeClass *tp = PMs->getType(itype);
       pmTypes[itype] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmTypes[itype]->SetLineColor(kGreen);
@@ -978,7 +978,7 @@ void DetectorClass::positionDummies()
       QString str = "dPM" + QString::number(i);
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
-      PMtypeClass *tp = PMs->getType(i);
+      const PMtypeClass *tp = PMs->getType(i);
       pmtDummy[i] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
                                           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmtDummy[i]->SetLineColor(30);

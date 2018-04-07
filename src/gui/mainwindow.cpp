@@ -1047,7 +1047,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
 {
     //refresh indication of PM model properties
     int index = ui->sbPMtype->value();
-    PMtypeClass *type = PMs->getType(index);
+    const PMtypeClass *type = PMs->getType(index);
 
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
@@ -1275,14 +1275,13 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 
 void MainWindow::on_cbAreaSensitive_toggled(bool checked)
 {
-  PMs->setAreaResolved(checked);
-  if (checked) ui->twOption->setTabIcon(3, Rwindow->YellowIcon);
-  else         ui->twOption->setTabIcon(3, QIcon());
+    if (checked) ui->twOption->setTabIcon(3, Rwindow->YellowIcon);
+    else         ui->twOption->setTabIcon(3, QIcon());
 }
 
 void MainWindow::on_cbAngularSensitive_toggled(bool checked)
 {
-    MainWindow::RefreshAngularButtons();
+    RefreshAngularButtons();
     if (checked) ui->twOption->setTabIcon(2, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(2, QIcon());
     ui->fAngular->setEnabled(checked);
@@ -1291,33 +1290,17 @@ void MainWindow::on_cbAngularSensitive_toggled(bool checked)
 
 void MainWindow::on_cbWaveResolved_toggled(bool checked)
 {
-    if (BulkUpdate) return;
-   //triggered as update after load sim config too!
-   //this is toggled on editing_finished of WaveFrom Waveto and Wavestep
-    //qDebug()<<"---toggle---";
-    //WavelengthResolved = checked;
-    WaveFrom = ui->ledWaveFrom->text().toDouble();
-    WaveStep = ui->ledWaveStep->text().toDouble();
-    MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
-
-    //update materialCollection info -rebinning, hists
-    MpCollection->SetWave(checked, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    for (int i=0; i<MpCollection->countMaterials(); i++) MpCollection->UpdateWaveResolvedProperties(i);
-    //updating PMs
-    PMs->SetWave(checked, WaveFrom, WaveStep, WaveNodes);
-    PMs->RebinPDEs(); //update PMs info -rebinning, hists
-    UpdateTestWavelengthProperties();
-
-    ui->fWaveTests->setEnabled(checked); //tests tab: wavelength resolved properties
-    ui->fWaveOptions->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-    ui->pbShowPDEbinned->setEnabled(checked && PMs->getType(ui->sbPMtype->value())->PDE_lambda.size());
-    MainWindow::on_pbIndPMshowInfo_clicked(); //to refresh the binned button
-
+    ui->fWaveTests->setEnabled(checked);
+    ui->fWaveOptions->setEnabled(checked);
     ui->fPointSource_Wave->setEnabled(checked);
     ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
+
+    const int itype = ui->sbPMtype->value();
+    const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
+    ui->pbShowPDEbinned->setEnabled(checked && bHavePDE);
 }
 
 void MainWindow::on_cbTimeResolved_toggled(bool checked)
@@ -1366,16 +1349,13 @@ void MainWindow::on_ledWaveFrom_editingFinished()
   if (newValue<=0  || newValue > ui->ledWaveTo->text().toDouble())
     {
       QString str;
-      str.setNum(WaveFrom,'g',5);
+      str.setNum(WaveFrom,'g', 5);
       ui->ledWaveFrom->setText(str);      
       message("Error in the starting wavelength value, resetted", this);
       return;
     }
   MainWindow::CorrectWaveTo();
-  WaveFrom = ui->ledWaveFrom->text().toDouble();
-  PMs->setWaveFrom(WaveFrom);
-
-  MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
 
   MainWindow::on_pbUpdateSimConfig_clicked();
 }
@@ -1386,35 +1366,29 @@ void MainWindow::on_ledWaveTo_editingFinished()
   if (newValue<=0  || newValue < ui->ledWaveFrom->text().toDouble())
     {
       QString str;
-      str.setNum(WaveTo,'g',5);
+      str.setNum(WaveTo,'g', 5);
       ui->ledWaveTo->setText(str);      
       message("Error in the ending wavelength value, resetted", this);
       return;
     }
    MainWindow::CorrectWaveTo();
-
-   MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-
+   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
    MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveStep_editingFinished()
 {
    double newValue = ui->ledWaveStep->text().toDouble();
-   if (newValue < 1e-10)
+   if (newValue < 1e-5)
     {
       QString str;
-      str.setNum(WaveStep,'g',5);
+      str.setNum(WaveStep,'g', 5);
       ui->ledWaveStep->setText(str);     
       message("Error in the step value, resetted", this);
       return;
     }
    MainWindow::CorrectWaveTo();
-   WaveStep = ui->ledWaveStep->text().toDouble();
-   PMs->setWaveStep(WaveStep);
-
-   MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-
+   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
    MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
@@ -1425,7 +1399,6 @@ void MainWindow::CorrectWaveTo()
   QString str;
   str.setNum(WaveNodes);
   ui->labWaveOptionNodes->setText(str);
-  PMs->setWaveNodes(WaveNodes);  
   double to = ui->ledWaveFrom->text().toDouble() + ui->ledWaveStep->text().toDouble()*steps;
   WaveTo = to;   
   str.setNum(to,'g',5);
@@ -1448,7 +1421,6 @@ void MainWindow::on_pbUpdateTestWavelengthProperties_clicked()
 void MainWindow::UpdateTestWavelengthProperties()
 {
   if (!ui->cbWaveResolved->isChecked()) return;
- // if (graphRW) graphRW->hide();
   int matId = ui->cobMaterialForWaveTests->currentIndex();
 
   ui->pbTestShowPrimary->setEnabled((*MpCollection)[matId]->PrimarySpectrumHist);
@@ -1626,17 +1598,22 @@ void MainWindow::on_pbShowPDEbinned_clicked()
 {
   if (!ui->cbWaveResolved->isChecked())
     {      
-      message("First activate wavelength resolved simulation option", this);
+      message("Activate wavelength resolved simulation option", this);
       return;
     }
 
-  //force rebinning
-  on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  const int itype = ui->sbPMtype->value();
+  PMs->RebinPDEsForType(itype);
+
+  int WaveNodes = PMs->getWaveNodes();
+  double WaveFrom = PMs->getWaveFrom();
+  double WaveStep = PMs->getWaveStep();
 
   QVector<double> x;
-  x.resize(0);
-  for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  GraphWindow->MakeGraph(&x, &PMs->getType(ui->sbPMtype->value())->PDEbinned, kRed, "Wavelength, nm", "PDE");
+  for (int i = 0; i < WaveNodes; i++)
+      x.append(WaveFrom + WaveStep * i);
+
+  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->PDEbinned, kRed, "Wavelength, nm", "PDE");
 }
 
 void MainWindow::on_pbPMtypeLoadAngular_clicked()
@@ -1704,22 +1681,14 @@ void MainWindow::on_pbPMtypeDeleteAngular_clicked()
 
 void MainWindow::on_pbPMtypeShowEffectiveAngular_clicked()
 {  
-  int typ = ui->cobPMtypes->currentIndex();
+  int itype = ui->cobPMtypes->currentIndex();
 
-  //force rebinning
-  on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+  PMs->RecalculateAngularForType(itype);
 
   QVector<double> x;
-  x.resize(0);
   int CosBins = ui->sbCosBins->value();
   for (int i=0; i<CosBins; i++) x.append(1.0/(CosBins-1)*i);  
-  GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
-}
-
-void MainWindow::on_sbCosBins_valueChanged(int arg1)
-{
-    PMs->setCosBins(arg1);
-    PMs->RecalculateAngular();
+  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
 }
 
 void MainWindow::onGDMLstatusChage(bool fGDMLactivated)
@@ -4744,17 +4713,28 @@ void MainWindow::on_pbUpdatePreprocessingSettings_clicked()
 
     if (!EventsDataHub->Events.isEmpty()) ui->fReloadRequired->setVisible(true);
 
-    if (GenScriptWindow)
-        if (GenScriptWindow->isVisible())
-            GenScriptWindow->updateJsonTree();
+    if (GenScriptWindow && GenScriptWindow->isVisible())
+        GenScriptWindow->updateJsonTree();
+    if (ScriptWindow && ScriptWindow->isVisible())
+        ScriptWindow->updateJsonTree();
 }
 
 void MainWindow::on_pbUpdateSimConfig_clicked()
 {
-    MainWindow::writeSimSettingsToJson(Config->JSON);
-    if (GenScriptWindow)
-        if (GenScriptWindow->isVisible())
-            GenScriptWindow->updateJsonTree();
+    writeSimSettingsToJson(Config->JSON);
+
+    // reading back - like with the detector; if something is not saved, will be obvious
+    readSimSettingsFromJson(Config->JSON);
+    const QJsonObject SimJson = Config->JSON["SimulationConfig"].toObject();
+    GeneralSimSettings simSettings;
+    simSettings.readFromJson(SimJson);
+    Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
+    Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+
+    if (GenScriptWindow && GenScriptWindow->isVisible())
+        GenScriptWindow->updateJsonTree();
+    if (ScriptWindow && ScriptWindow->isVisible())
+        ScriptWindow->updateJsonTree();
 }
 
 void MainWindow::on_pbStopLoad_clicked()

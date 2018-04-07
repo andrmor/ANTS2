@@ -305,11 +305,11 @@ void pms::resetOverrides()
       PMs[ipm].PDE_lambda.clear();
       PMs[ipm].PDE.clear();
       PMs[ipm].PDEbinned.clear();
+      PMs[ipm].AngularSensitivity_lambda.clear();
+      PMs[ipm].AngularSensitivity.clear();
+      PMs[ipm].AngularN1 = -1.0;
+      PMs[ipm].AngularSensitivityCosRefracted.clear();
 
-      AngularSensitivity_lambda[ipm].clear();
-      AngularSensitivity[ipm].clear();
-      AngularSensitivityCosRefracted[ipm].clear();
-      AngularN1[ipm] = -1;
       AreaSensitivity[ipm].clear();
       AreaStepX[ipm] = 123;
       AreaStepY[ipm] = 123;
@@ -408,10 +408,6 @@ void pms::clear() //does not affect PM types!
     }
     PMs.clear();
 
-    AngularSensitivity.clear();
-    AngularSensitivity_lambda.clear();
-    AngularN1.clear();
-    AngularSensitivityCosRefracted.clear();
     AreaSensitivity.clear();
     AreaStepX.clear();
     AreaStepY.clear();
@@ -443,11 +439,6 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     newPM.upperLower = upperlower;
     PMs.insert(ipm, newPM);
 
-    QVector<double> tmp;
-    AngularSensitivity.insert(ipm, tmp);
-    AngularSensitivity_lambda.insert(ipm, tmp);
-    AngularN1.insert(ipm, -1); //-1 = undefined
-    AngularSensitivityCosRefracted.insert(ipm, tmp);
     QVector<QVector<double> > tmp2;
     AreaSensitivity.insert(ipm, tmp2);
     AreaStepX.insert(ipm, 123); //just a strange value to see if error
@@ -469,10 +460,6 @@ void pms::remove(int ipm)
     PMs[ipm].clearSPePHSCustomDist();
     PMs.remove(ipm);
 
-    AngularSensitivity.remove(ipm);
-    AngularSensitivity_lambda.remove(ipm);
-    AngularN1.remove(ipm);
-    AngularSensitivityCosRefracted.remove(ipm);
     AreaSensitivity.remove(ipm);
     AreaStepX.remove(ipm);
     AreaStepY.remove(ipm);
@@ -688,19 +675,19 @@ void pms::RecalculateAngularForType(int typ)
 
 void pms::RecalculateAngularForPM(int ipm)
 {
-    if (!AngularResolved || AngularSensitivity_lambda[ipm].size() == 0)
-        AngularSensitivityCosRefracted[ipm].clear();
+    if ( !AngularResolved || PMs.at(ipm).AngularSensitivity_lambda.isEmpty() )
+        PMs[ipm].AngularSensitivityCosRefracted.clear();
     else
     {
         int typ = PMs[ipm].type;
         //transforming degrees to cos(Refracted)
         QVector<double> x, y;
-        double n1 = AngularN1[ipm];
+        double n1 = PMs.at(ipm).AngularN1;
         double n2 = (*MaterialCollection)[PMtypes[typ]->MaterialIndex]->n;
         //      qDebug()<<"n1 n2 "<<n1<<n2;
-        for (int i=AngularSensitivity_lambda[ipm].size()-1; i>=0; i--) //if i++ - data span from 1 down to 0
+        for (int i = PMs.at(ipm).AngularSensitivity_lambda.size()-1; i >= 0; i--) //if i++ - data span from 1 down to 0
         {
-            double Angle = AngularSensitivity_lambda[ipm][i] * TMath::Pi()/180.0;
+            double Angle = PMs.at(ipm).AngularSensitivity_lambda.at(i) * TMath::Pi()/180.0;
             //calculating cos of the transmitted angle
             double sinI = sin(Angle);
             double cosI = cos(Angle);
@@ -725,13 +712,13 @@ void pms::RecalculateAngularForPM(int ipm)
             double correction = 1.0/(1.0-R);    //T = (1-R)
             //meaning: have to take into account that during measurements part of the light was reflected
 
-            y.append(AngularSensitivity[ipm][i]*correction);
+            y.append( PMs.at(ipm).AngularSensitivity.at(i) * correction );
             //         qDebug()<<cosT<<correction<<AngularSensitivity[ipm][i]*correction;
         }
         x.replace(0, x[1]); //replace fith last reliable value
         y.replace(0, y[1]);
         //reusing the function:
-        ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &AngularSensitivityCosRefracted[ipm]);
+        ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &PMs[ipm].AngularSensitivityCosRefracted);
     }
 }
 
@@ -782,7 +769,7 @@ double pms::getActualPDE(int ipm, int WaveIndex) const
     return PDE;
 }
 
-double pms::getActualAngularResponse(int ipm, double cosAngle)
+double pms::getActualAngularResponse(int ipm, double cosAngle) const
 {
     /*
     qDebug()<<"--------------";
@@ -800,11 +787,11 @@ double pms::getActualAngularResponse(int ipm, double cosAngle)
         //angular is activated - as the simulation option
 
         //do we have override data?
-        if (AngularSensitivityCosRefracted[ipm].size() > 0)
+        if (PMs.at(ipm).AngularSensitivityCosRefracted.size() > 0)
         {
             //using overrides
-            int bin = cosAngle  *(CosBins-1);
-            AngularResponse = AngularSensitivityCosRefracted[ipm][bin];
+            const int bin = cosAngle * (CosBins-1);
+            AngularResponse = PMs.at(ipm).AngularSensitivityCosRefracted.at(bin);
         }
         else
         {
@@ -1121,15 +1108,12 @@ bool pms::readPDEwaveFromJson(QJsonObject &json)
 
 void pms::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y) {PMs[ipm].PDE_lambda = *x; PMs[ipm].PDE = *y;}
 
+bool pms::isAngularOverriden(int ipm) const {return !PMs.at(ipm).AngularSensitivity.isEmpty();}
+
 bool pms::isAngularOverriden() const
 {
-    if (AngularSensitivity.size() != numPMs)
-    {
-        qWarning() << "AngularSensitivity size:"<<AngularSensitivity.size();
-      exit(-1);
-    }
-  for (int i=0; i<numPMs; i++)
-    if (!AngularSensitivity[i].isEmpty()) return true;
+  for (int ipm = 0; ipm < numPMs; ipm++)
+    if ( !PMs.at(ipm ).AngularSensitivity.isEmpty() ) return true;
   return false;
 }
 
@@ -1140,12 +1124,12 @@ void pms::writeAngularToJson(QJsonObject &json)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QJsonArray arpm;
-      writeTwoQVectorsToJArray(AngularSensitivity_lambda[ipm], AngularSensitivity[ipm], arpm);
+      writeTwoQVectorsToJArray(PMs.at(ipm).AngularSensitivity_lambda, PMs.at(ipm).AngularSensitivity, arpm);
       arr.append(arpm);
     }
   js["AngularResponse"] = arr;
   QJsonArray arrn;
-  for (int i=0; i<numPMs; i++) arrn.append(AngularN1[i]);
+  for (int ipm = 0; ipm < numPMs; ipm++) arrn.append(PMs.at(ipm).AngularN1);
   js["RefrIndex"] = arrn;
   json["Angular"] = js;
 }
@@ -1164,7 +1148,7 @@ bool pms::readAngularFromJson(QJsonObject &json)
       for (int ipm=0; ipm<numPMs; ipm++)
       {
         QJsonArray array = arr[ipm].toArray();
-        readTwoQVectorsFromJArray(array, AngularSensitivity_lambda[ipm], AngularSensitivity[ipm]);
+        readTwoQVectorsFromJArray(array, PMs[ipm].AngularSensitivity_lambda, PMs[ipm].AngularSensitivity);
       }
       QJsonArray arrn = js["RefrIndex"].toArray();
       if (arrn.size() != numPMs)
@@ -1172,16 +1156,22 @@ bool pms::readAngularFromJson(QJsonObject &json)
           qWarning() << "RefrIndex json: size mismatch!";
           return false;
         }
-      for (int i=0; i<numPMs; i++) AngularN1[i] = arrn[i].toDouble();
+      for (int ipm = 0; ipm < numPMs; ipm++) PMs[ipm].AngularN1 = arrn[ipm].toDouble();
     }
   return true;
 }
 
+void pms::setAngular(int ipm, QVector<double> *x, QVector<double> *y)
+{
+    PMs[ipm].AngularSensitivity_lambda = *x;
+    PMs[ipm].AngularSensitivity = *y;
+}
+
 bool pms::isAreaOverriden() const
 {
-  if (AreaSensitivity.size() != numPMs)
+    if (AreaSensitivity.size() != numPMs)
     {
-      qWarning() << "AreaSensitivity size:"<<AreaSensitivity.size();
+        qWarning() << "AreaSensitivity size:"<<AreaSensitivity.size();
       exit(-1);
     }
   for (int i=0; i<numPMs; i++)
@@ -1228,13 +1218,18 @@ bool pms::readAreaFromJson(QJsonObject &json)
         QJsonArray array = arr[ipm].toArray();
         read2DQVectorFromJArray(array, AreaSensitivity[ipm]);
       }
-      QJsonArray arrn = js["Step"].toArray();
-      if (arrn.size() != numPMs)
+      QJsonArray as = js["Step"].toArray();
+      if (as.size() != numPMs)
         {
-          qWarning() << "RefrIndex json: size mismatch!";
+          qWarning() << "Area step json: size mismatch!";
           return false;
         }
-      for (int i=0; i<numPMs; i++) AngularN1[i] = arrn[i].toDouble();
+      for (int ipm = 0; ipm < numPMs; ipm++)
+      {
+          QJsonArray ar = as[ipm].toArray();
+          AreaStepX[ipm] = ar[0].toDouble();
+          AreaStepY[ipm] = ar[1].toDouble();
+      }
     }
   return true;
 }

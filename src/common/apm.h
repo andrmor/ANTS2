@@ -60,6 +60,12 @@ public:
     QVector<double> PDE_lambda; // ***!!! use single container
     QVector<double> PDEbinned;
 
+    // angular sensitivity
+    QVector<double> AngularSensitivity;        // ***!!! use single container
+    QVector<double> AngularSensitivity_lambda; // ***!!! use single container
+    double AngularN1 = -1.0; //refractive index of the medium where PM was positioned to measure the angular response; -1 = undefined
+    QVector<double> AngularSensitivityCosRefracted; //Response vs cos of refracted beam, binned from 0 to 1 in CosBins bins
+
     //  -- ELECTRONICS --
     // optical cross-talk for SiPM
     int    MCmodel = 0;

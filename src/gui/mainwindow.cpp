@@ -2306,35 +2306,34 @@ void MainWindow::on_pbIndLoadAngular_clicked()
 
   int ipm = ui->sbIndPMnumber->value();
   PMs->setAngular(ipm, &x, &y);
-  PMs->setAngularN1(ipm, ui->ledIndMediumRefrIndex->text().toDouble());
+  PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
 
   PMs->RecalculateAngularForPM(ipm);
   ReconstructDetector(true);
-
-  MainWindow::on_pbIndPMshowInfo_clicked();
+  //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndRestoreAngular_clicked()
 {
-  QVector<double> x;
-  x.resize(0);
-  int ipm = ui->sbIndPMnumber->value();
-  PMs->setAngular(ipm, &x, &x);
-  PMs->setAngularBinned(ipm, &x);
-  ReconstructDetector(true);
+  const int ipm = ui->sbIndPMnumber->value();
 
-  MainWindow::on_pbIndPMshowInfo_clicked();
+  PMs->at(ipm).AngularSensitivity_lambda.clear();
+  PMs->at(ipm).AngularSensitivity.clear();
+  PMs->at(ipm).AngularSensitivityCosRefracted.clear();
+
+  ReconstructDetector(true);
+  //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowAngular_clicked()
 {  
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
-  //ShowGraphWindow();
+  const int ipm = ui->sbIndPMnumber->value();
+  const int itype = ui->cobPMtypeInExplorers->currentIndex();
+
   if (PMs->isAngularOverriden(ipm))
-        GraphWindow->MakeGraph(PMs->getAngularSensitivity_lambda(ipm), PMs->getAngularSensitivity(ipm), kRed, "Angle, degrees", "Response");
+        GraphWindow->MakeGraph(&PMs->at(ipm).AngularSensitivity_lambda, &PMs->at(ipm).AngularSensitivity, kRed, "Angle, degrees", "Response");
   else
-        GraphWindow->MakeGraph(&PMs->getType(typ)->AngularSensitivity_lambda, &PMs->getType(typ)->AngularSensitivity, kRed, "Angle, degrees", "Response");
+        GraphWindow->MakeGraph(&PMs->getType(itype)->AngularSensitivity_lambda, &PMs->getType(itype)->AngularSensitivity, kRed, "Angle, degrees", "Response");
 }
 
 void MainWindow::on_pbIndShowEffectiveAngular_clicked()
@@ -2356,21 +2355,21 @@ void MainWindow::on_pbIndShowEffectiveAngular_clicked()
   int CosBins = ui->sbCosBins->value();
   for (int i=0; i<CosBins; i++) x.append(1.0/(CosBins-1)*i);
 
-  //MainWindow::ShowGraphWindow();
-  if (PMs->getAngularSensitivityCosRefracted(ipm)->size() > 0)
-    GraphWindow->MakeGraph(&x, PMs->getAngularSensitivityCosRefracted(ipm), kRed, "Cosine of refracted beam", "Response");
+  if (PMs->at(ipm).AngularSensitivityCosRefracted.size() > 0)
+    GraphWindow->MakeGraph(&x, &PMs->at(ipm).AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
   else
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
 }
 
 void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
 {
-    int ipm = ui->sbIndPMnumber->value();
-    PMs->setAngularN1(ipm, ui->ledIndMediumRefrIndex->text().toDouble());
+    const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
+
     PMs->RecalculateAngularForPM(ipm);
     ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndLoadArea_clicked()

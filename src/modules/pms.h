@@ -53,7 +53,7 @@ public:
     double GenerateSignalFromOnePhotoelectron(int ipm);  //used only in GUI of mainwindow!
       // used during simulation:
     double getActualPDE(int ipm, int WaveIndex) const; //returns partial probability to be detected (wave-resolved PDE)
-    double getActualAngularResponse(int ipm, double cosAngle); //returns partial probability to be detected (vs angular response - cos of refracted beam)
+    double getActualAngularResponse(int ipm, double cosAngle) const; //returns partial probability to be detected (vs angular response - cos of refracted beam)
     double getActualAreaResponse(int ipm, double x, double y); //returns partial probability to be detected (vs area response - x, y in local coordinates of the PM)
 
     int count() const {return numPMs;} //returns number of PMs
@@ -99,17 +99,17 @@ public:
     void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y);
 
     //Angular response
-    bool   isAngularOverriden(int i) const {return !AngularSensitivity[i].isEmpty();}
+    bool   isAngularOverriden(int ipm) const;
     bool   isAngularOverriden() const;
     void   writeAngularToJson(QJsonObject &json);
     bool   readAngularFromJson(QJsonObject &json);
-    void   setAngular(int ipm, QVector<double>* x, QVector<double>* y) {AngularSensitivity_lambda[ipm] = *x; AngularSensitivity[ipm] = *y;}
-    void   setAngularN1(int ipm, double n1) {AngularN1[ipm] = n1;}
-    double getAngularN1(int ipm) {return AngularN1[ipm];}
-    void   setAngularBinned(int ipm, QVector<double>* vec) {AngularSensitivityCosRefracted[ipm] = *vec;}
-    const QVector<double>* getAngularSensitivity(int ipm) {return &AngularSensitivity[ipm];}
-    const QVector<double>* getAngularSensitivity_lambda(int ipm) {return &AngularSensitivity_lambda[ipm];}
-    const QVector<double>* getAngularSensitivityCosRefracted(int ipm) {return &AngularSensitivityCosRefracted[ipm];}
+    void   setAngular(int ipm, QVector<double>* x, QVector<double>* y);
+    //void   setAngularN1(int ipm, double n1) {AngularN1[ipm] = n1;}
+    //double getAngularN1(int ipm) {return AngularN1[ipm];}
+    //void   setAngularBinned(int ipm, QVector<double>* vec) {AngularSensitivityCosRefracted[ipm] = *vec;}
+    //const QVector<double>* getAngularSensitivity(int ipm) {return &AngularSensitivity[ipm];}
+    //const QVector<double>* getAngularSensitivity_lambda(int ipm) {return &AngularSensitivity_lambda[ipm];}
+    //const QVector<double>* getAngularSensitivityCosRefracted(int ipm) {return &AngularSensitivityCosRefracted[ipm];}
 
     //Area response
     bool   isAreaOverriden(int i) const {return !AreaSensitivity[i].isEmpty();}
@@ -175,10 +175,10 @@ private:
     //  ----====-----
     //when NEW vector properties are added to PMs -> "clear" "insert" and "remove" methodes have to be updated!
     //
-    QVector<QVector<double> > AngularSensitivity;
-    QVector<QVector<double> > AngularSensitivity_lambda;
-    QVector<double> AngularN1; //refractive index of the medium where PM was positioned to measure the angular response
-    QVector<QVector<double> > AngularSensitivityCosRefracted; //Response vs cos of refracted beam, binned from 0 to 1 in CosBins bins
+    //QVector<QVector<double> > AngularSensitivity;
+    //QVector<QVector<double> > AngularSensitivity_lambda;
+    //QVector<double> AngularN1; //refractive index of the medium where PM was positioned to measure the angular response
+    //QVector<QVector<double> > AngularSensitivityCosRefracted; //Response vs cos of refracted beam, binned from 0 to 1 in CosBins bins
     QVector<QVector< QVector <double> > > AreaSensitivity;
     QVector<double> AreaStepX;
     QVector<double> AreaStepY;

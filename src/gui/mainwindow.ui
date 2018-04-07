@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -2632,7 +2632,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           </rect>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tabDetectionProbability_2">
           <attribute name="title">
@@ -5826,7 +5826,7 @@ Constructor is disabled!</string>
       <property name="geometry">
        <rect>
         <x>200</x>
-        <y>220</y>
+        <y>250</y>
         <width>120</width>
         <height>40</height>
        </rect>

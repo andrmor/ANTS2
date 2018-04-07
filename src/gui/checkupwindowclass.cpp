@@ -547,7 +547,7 @@ TriState DEWCheckUpItem::doCheckUp()
 const QString AngularResponseCheckUpItem::getToolTip() const { return state == TriStateError ? "Neither PM Type nor PM overriden angular sensitivity are defined" : ""; }
 TriState AngularResponseCheckUpItem::doCheckUp()
 {
-    const QVector<double> *angular = MW->PMs->getAngularSensitivityCosRefracted(row());
+    const QVector<double> *angular = &MW->PMs->at(row()).AngularSensitivityCosRefracted;
     const QVector<double> *typeang = &MW->PMs->getType(MW->PMs->at(row()).type)->AngularSensitivityCosRefracted;
     return setState((angular->isEmpty() && typeang->isEmpty()) ? TriStateError : TriStateOk, angular->isEmpty() ? "Inherited" : "Overriden");
 }

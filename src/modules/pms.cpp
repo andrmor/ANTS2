@@ -20,36 +20,12 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen)
+pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen) :
+   RandGen(randGen), MaterialCollection(materialCollection)
 {    
-    MaterialCollection = materialCollection;
-    RandGen = randGen;
-
-    numPMs = 0;
     pms::clear();
-
-    WavelengthResolved = false;
-    AngularResolved = false;
-    AreaResolved = false;   
-    fDoPHS = false;
-    fDoElNoise = false;
-    fDoADC = false;
-    //wave info
-    WaveFrom = 200.0;
-    WaveStep = 5;
-    WaveNodes = 121;
-    //number of bins for angular response
-    CosBins = 1000;
-
-
     GammaRandomGen = new AGammaRandomGenerator();
-
     PMtypes.append(new PMtypeClass("Type1"));
-
-    ///PMgroupDescription.append("Default group");
-
-    MeasurementTime = 150;
-
 }
 
 pms::~pms()
@@ -425,7 +401,11 @@ void pms::calculateMaxQEs()
 
 void pms::clear() //does not affect PM types!
 {
-    PMs.clear(); //Hists are cleared
+    for (APm& pm : PMs)
+    {
+        pm.clearSPePHSCustomDist();
+    }
+    PMs.clear();
 
     PDE.clear();
     PDE_lambda.clear();
@@ -491,6 +471,9 @@ void pms::remove(int ipm)
     }
 
     numPMs--;
+
+    // APm is not owning the histogram objects -> delete them before removing from the vector
+    PMs[ipm].clearSPePHSCustomDist();
     PMs.remove(ipm);
 
     PDE.remove(ipm);
@@ -537,7 +520,7 @@ void pms::appendNewPMtype(PMtypeClass *tp)
   PMtypes.append(tp);
 }
 
-int pms::findPMtype(QString typeName)
+int pms::findPMtype(QString typeName) const
 {
   for (int i=0; i<PMtypes.size(); i++)
     if (PMtypes.at(i)->name == typeName) return i;
@@ -599,43 +582,6 @@ void pms::updateADClevels()
       if (PMs.at(ipm).ADClevels == 0) PMs[ipm].ADCstep = 0;
       else PMs[ipm].ADCstep = max / PMs.at(ipm).ADClevels;
   }
-}
-
-void pms::CopySPePHSdata(int ipmFrom, int ipmTo)
-{
-    PMs[ipmTo].SPePHSmode       = PMs.at(ipmFrom).SPePHSmode;
-    PMs[ipmTo].AverageSigPerPhE = PMs.at(ipmFrom).AverageSigPerPhE;
-    PMs[ipmTo].SPePHSsigma      = PMs.at(ipmFrom).SPePHSsigma;
-    PMs[ipmTo].SPePHSshape      = PMs.at(ipmFrom).SPePHSshape;
-    PMs[ipmTo].SPePHS_x         = PMs.at(ipmFrom).SPePHS_x;
-    PMs[ipmTo].SPePHS           = PMs.at(ipmFrom).SPePHS;
-
-    if (PMs.at(ipmTo).SPePHShist)
-    {
-        delete PMs.at(ipmTo).SPePHShist;
-        PMs[ipmTo].SPePHShist = 0;
-    }
-    if (PMs.at(ipmFrom).SPePHShist) PMs[ipmTo].SPePHShist = new TH1D(*PMs.at(ipmFrom).SPePHShist);
-}
-
-void pms::CopyMCcrosstalkData(int ipmFrom, int ipmTo)
-{
-    PMs[ipmTo].MCcrosstalk = PMs[ipmFrom].MCcrosstalk;
-    PMs[ipmTo].MCmodel = PMs[ipmFrom].MCmodel;
-    PMs[ipmTo].MCtriggerProb = PMs[ipmFrom].MCtriggerProb;
-}
-
-void pms::CopyElNoiseData(int ipmFrom, int ipmTo)
-{
-    PMs[ipmTo].ElNoiseSigma = PMs.at(ipmFrom).ElNoiseSigma;
-}
-
-void pms::CopyADCdata(int ipmFrom, int ipmTo)
-{
-    PMs[ipmTo].ADCmax    = PMs.at(ipmFrom).ADCmax;
-    PMs[ipmTo].ADCbits   = PMs.at(ipmFrom).ADCbits;
-    PMs[ipmTo].ADCstep   = PMs.at(ipmFrom).ADCstep;
-    PMs[ipmTo].ADClevels = PMs.at(ipmFrom).ADClevels;
 }
 
 void pms::CalculateElChannelsStrength()
@@ -743,7 +689,7 @@ void pms::RecalculateAngularForType(int typ)
             y.append(PMtypes[typ]->AngularSensitivity[i]*correction);
             //         qDebug()<<cosT<<correction<<PMtypeProperties[typ].AngularSensitivity[i]*correction;
         }
-        x.replace(0, x[1]); //replace fith last reliable value
+        x.replace(0, x[1]); //replace with last reliable value
         y.replace(0, y[1]);
         //reusing the function:
         ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &PMtypes[typ]->AngularSensitivityCosRefracted);
@@ -798,15 +744,6 @@ void pms::RecalculateAngularForPM(int ipm)
         ConvertToStandardWavelengthes(&x, &y, 0, 1.0/(CosBins-1), CosBins, &AngularSensitivityCosRefracted[ipm]);
     }
 }
-
-/*
-void pms::setADCbitsForType(int typ, int bits)
-{
-  PMtypeProperties[typ].ADCbits = bits;
-  int levels = TMath::Power(2, bits)-1;
-  PMtypeProperties[typ].ADCstep = PMtypeProperties[typ].MaxSignal / levels;
-}
-*/
 
 double pms::getActualPDE(int ipm, int WaveIndex)
 {  
@@ -961,41 +898,6 @@ double pms::getActualAreaResponse(int ipm, double x, double y)
     //    qDebug()<<"Return value= "<<AreaResponse;
     return AreaResponse;
 }
-
-/*
-int pms::getGroupByDescription(QString desc)
-{
-  for (int igroup = 0; igroup<PMgroupDescription.size(); igroup++)
-      if (PMgroupDescription.at(igroup) == desc) return igroup;
-
-  return -1; //not found
-}
-
-int pms::definePMgroup(QString desc)
-{
-    PMgroupDescription.append(desc);
-    return PMgroupDescription.size()-1;
-}
-
-void pms::clearPMgroups()
-{
-    PMgroupDescription.resize(1);
-
-    for (int i=0; i<numPMs; i++)
-    {
-        PMs[i].group = 0;
-        PMs[i].relGain = 1.0;
-    }
-}
-
-bool pms::isPMgroup0empty()
-{
-    for (int ipm=0; ipm<numPMs; ipm++)
-        if (PMs[ipm].group == 0) return false;
-
-    return true;
-}
-*/
 
 QVector<QPair<double, int> > pms::getPMsSortedByR() const
 {

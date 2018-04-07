@@ -32,6 +32,7 @@ public:
     bool readReconstructionRelatedSettingsFromJson(QJsonObject &json);
 
     void configure(GeneralSimSettings* SimSet);
+
       //recalculate PDE for selected wave binning
     void RebinPDEs(); //triggered by changing between true and false for WavelenegthResolved on the MainWindow
     void RebinPDEsForType(int typ);
@@ -88,44 +89,44 @@ public:
     bool   isSiPM(int ipm) const;
 
     //PDE
-    bool        isPDEwaveOverriden(int i) const {return (!PDE[i].isEmpty());}
-    bool        isPDEwaveOverriden() const;
-    bool        isPDEeffectiveOverriden() const;
-    void        writePDEeffectiveToJson(QJsonObject &json);
-    bool        readPDEeffectiveFromJson(QJsonObject &json);
-    void        writePDEwaveToJson(QJsonObject &json);
-    bool        readPDEwaveFromJson(QJsonObject &json);
-    void        setPDEeffective(int ipm, double val) {effectivePDE[ipm] = val;}
-    double      getPDEeffective(int ipm) {return effectivePDE[ipm];}
-    void        setAllEffectivePDE(QVector<double>* vec) {effectivePDE = *vec;} //will be gone sone
-    void        setPDEwave(int ipm, QVector<double>* x, QVector<double>* y) {PDE_lambda[ipm] = *x; PDE[ipm] = *y;}
-    void        setPDEbinned(int ipm, QVector<double>* vec) {PDEbinned[ipm] = *vec;}
+    bool   isPDEwaveOverriden(int i) const {return (!PDE[i].isEmpty());}
+    bool   isPDEwaveOverriden() const;
+    bool   isPDEeffectiveOverriden() const;
+    void   writePDEeffectiveToJson(QJsonObject &json);
+    bool   readPDEeffectiveFromJson(QJsonObject &json);
+    void   writePDEwaveToJson(QJsonObject &json);
+    bool   readPDEwaveFromJson(QJsonObject &json);
+    void   setPDEeffective(int ipm, double val) {effectivePDE[ipm] = val;}
+    double getPDEeffective(int ipm) {return effectivePDE[ipm];}
+    void   setAllEffectivePDE(QVector<double>* vec) {effectivePDE = *vec;} //will be gone sone
+    void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y) {PDE_lambda[ipm] = *x; PDE[ipm] = *y;}
+    void   setPDEbinned(int ipm, QVector<double>* vec) {PDEbinned[ipm] = *vec;}
     const QVector<double>* getPDE(int ipm) {return &PDE[ipm];}
     const QVector<double>* getPDE_lambda(int ipm) {return &PDE_lambda[ipm];}
     const QVector<double>* getPDEbinned(int ipm) {return &PDEbinned[ipm];}
     const QVector<double>* getAllEffectivePDE() {return &effectivePDE;}
 
     //Angular response
-    bool        isAngularOverriden(int i) const {return !AngularSensitivity[i].isEmpty();}
-    bool        isAngularOverriden() const;
-    void        writeAngularToJson(QJsonObject &json);
-    bool        readAngularFromJson(QJsonObject &json);
-    void        setAngular(int ipm, QVector<double>* x, QVector<double>* y) {AngularSensitivity_lambda[ipm] = *x; AngularSensitivity[ipm] = *y;}
-    void        setAngularN1(int ipm, double n1) {AngularN1[ipm] = n1;}
-    double      getAngularN1(int ipm) {return AngularN1[ipm];}
-    void        setAngularBinned(int ipm, QVector<double>* vec) {AngularSensitivityCosRefracted[ipm] = *vec;}
+    bool   isAngularOverriden(int i) const {return !AngularSensitivity[i].isEmpty();}
+    bool   isAngularOverriden() const;
+    void   writeAngularToJson(QJsonObject &json);
+    bool   readAngularFromJson(QJsonObject &json);
+    void   setAngular(int ipm, QVector<double>* x, QVector<double>* y) {AngularSensitivity_lambda[ipm] = *x; AngularSensitivity[ipm] = *y;}
+    void   setAngularN1(int ipm, double n1) {AngularN1[ipm] = n1;}
+    double getAngularN1(int ipm) {return AngularN1[ipm];}
+    void   setAngularBinned(int ipm, QVector<double>* vec) {AngularSensitivityCosRefracted[ipm] = *vec;}
     const QVector<double>* getAngularSensitivity(int ipm) {return &AngularSensitivity[ipm];}
     const QVector<double>* getAngularSensitivity_lambda(int ipm) {return &AngularSensitivity_lambda[ipm];}
     const QVector<double>* getAngularSensitivityCosRefracted(int ipm) {return &AngularSensitivityCosRefracted[ipm];}
 
     //Area response
-    bool        isAreaOverriden(int i) const {return !AreaSensitivity[i].isEmpty();}
-    bool        isAreaOverriden() const;
-    void        writeAreaToJson(QJsonObject &json);
-    bool        readAreaFromJson(QJsonObject &json);
-    void        setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep) {AreaSensitivity[ipm] = *vec; AreaStepX[ipm] = xStep; AreaStepY[ipm] = yStep;}
-    double      getAreaStepX(int ipm) {return AreaStepX[ipm];}
-    double      getAreaStepY(int ipm) {return AreaStepY[ipm];}
+    bool   isAreaOverriden(int i) const {return !AreaSensitivity[i].isEmpty();}
+    bool   isAreaOverriden() const;
+    void   writeAreaToJson(QJsonObject &json);
+    bool   readAreaFromJson(QJsonObject &json);
+    void   setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep) {AreaSensitivity[ipm] = *vec; AreaStepX[ipm] = xStep; AreaStepY[ipm] = yStep;}
+    double getAreaStepX(int ipm) {return AreaStepX[ipm];}
+    double getAreaStepY(int ipm) {return AreaStepY[ipm];}
     const QVector<QVector<double> >* getAreaSensitivity(int ipm) {return &AreaSensitivity[ipm];}
 
     //type properties    
@@ -133,8 +134,8 @@ public:
     PMtypeClass* getTypeForPM(int ipm) {return PMtypes.at(PMs[ipm].type);}
     bool removePMtype(int itype);
     void appendNewPMtype(PMtypeClass* tp);
-    int countPMtypes(){return PMtypes.size();}
-    int findPMtype(QString typeName);
+    int  countPMtypes() const {return PMtypes.size();}
+    int  findPMtype(QString typeName) const;
     void clearPMtypes();
     void replaceType(int itype, PMtypeClass *newType);
     void updateTypePDE(int typ, QVector<double> *x, QVector<double> *y);
@@ -143,11 +144,6 @@ public:
     void updateTypeAngularN1(int typ, double val);
     void updateTypeArea(int typ, QVector<QVector <double> > *vec, double xStep, double yStep);
     void clearTypeArea(int typ);
-
-    void CopySPePHSdata(int ipmFrom, int ipmTo);      //***!!!
-    void CopyMCcrosstalkData(int ipmFrom, int ipmTo);//***!!!
-    void CopyElNoiseData(int ipmFrom, int ipmTo);//***!!!
-    void CopyADCdata(int ipmFrom, int ipmTo);//***!!!
 
     void CalculateElChannelsStrength();
 
@@ -170,6 +166,7 @@ public:
     bool isDoMCcrosstalk() const {return fDoMCcrosstalk;}
     bool isDoElNoise() const {return fDoElNoise;}
     bool isDoADC() const {return fDoADC;}
+
     double getMeasurementTime() const {return MeasurementTime;}
 
     QVector<QPair<double, int> > getPMsSortedByR() const;
@@ -179,21 +176,13 @@ private:
     AMaterialParticleCollection* MaterialCollection;
     AGammaRandomGenerator* GammaRandomGen;
 
-    int numPMs; //number of PMs
+    int numPMs = 0; //number of PMs
+    QVector<APm> PMs;
 
+    //overrides over PM type:
     //  ----====-----
     //when NEW vector properties are added to PMs -> "clear" "insert" and "remove" methodes have to be updated!
     //
-
-    //individual PM properties
-    QVector<APm> PMs;
-    QVector<double> tmpGains;
-
-    double MaxQE; //accelerator, not wave-resolved value
-    QVector<double> MaxQEvsWave; //vs wavelength
-    void calculateMaxQEs(); // first vector has to be rebinned according to acxtual wave properties (see configure())
-
-    //overrides over base PM class:
     QVector<QVector<double> > PDE; //Quantun efficiency & Collection efficiency for PMTs; Photon Detection Efficiency for SiPMs
     QVector<QVector<double> > PDE_lambda;
     QVector<QVector<double> > PDEbinned;
@@ -206,24 +195,30 @@ private:
     QVector<double> AreaStepX;
     QVector<double> AreaStepY;
 
-    double MeasurementTime;  // measurement time to calculate dark counts for SiPMs
+    double MeasurementTime = 150;  // measurement time to calculate dark counts for SiPMs
 
     //flags for the current simulation mode
-    bool WavelengthResolved;
-    bool AngularResolved;
-    bool AreaResolved;
-    bool fDoPHS;
-    bool fDoMCcrosstalk;
-    bool fDoElNoise;
-    bool fDoADC;
-    //wave info
-    double WaveFrom, WaveStep;
-    int WaveNodes;
-    //number of bins for angular response
-    int CosBins;
+    bool WavelengthResolved = false;
+    bool AngularResolved = false;
+    bool AreaResolved = false;
+    bool fDoPHS = false;
+    bool fDoMCcrosstalk = false;
+    bool fDoElNoise = false;
+    bool fDoADC = false;
+
+    // binning settings for wave-resolved data
+    double WaveFrom = 200.0;
+    double WaveStep = 5.0;
+    int    WaveNodes = 121;
+
+    int    CosBins = 1000;  //number of bins for angular response
 
     //defined base PM types
     QVector<PMtypeClass*> PMtypes;
+
+    double MaxQE = 0; //accelerator, not wave-resolved value
+    QVector<double> MaxQEvsWave; //vs wavelength
+    void calculateMaxQEs(); // first vector has to be rebinned according to acxtual wave properties (see configure())
 
     QString ErrorString;
     void writePHSsettingsToJson(int ipm, QJsonObject &json);    // ***!!! to PMs

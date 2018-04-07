@@ -2892,7 +2892,7 @@ void MainWindow::on_pbElCopyGainData_clicked()
 {
    int mode = ui->cobElCopyMode->currentIndex();
    if (mode == 0) return;
-   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 2 - ElNoise, 3 - ADC, 4 - dark counts
+   int selector = ui->twElectronics->currentIndex(); //0-SPePHS, 1-crossTalk, 2-ElNoise, 3-ADC, 4-dark counts
    if (selector == 4) return;
 
    int ipm =  ui->sbElPMnumber->value();
@@ -2900,25 +2900,25 @@ void MainWindow::on_pbElCopyGainData_clicked()
    bool flagSelective = false;
    if (mode == 1) flagSelective = true;
 
-   for (int i=0; i<PMs->count(); i++)
+   for (int ipmTo = 0; ipmTo < PMs->count(); ipmTo++)
      {
-       if (i==ipm) continue;
+       if (ipmTo == ipm) continue;
        if (flagSelective)
-         if (typ != PMs->at(i).type) continue;
+         if (typ != PMs->at(ipmTo).type) continue;
 
        switch (selector)
          {
          case 0:
-           PMs->CopySPePHSdata(ipm, i);
+           PMs->at(ipmTo).copySPePHSdata(PMs->at(ipm));
            break;
          case 1:
-           PMs->CopyMCcrosstalkData(ipm, i);
+           PMs->at(ipmTo).copyMCcrosstalkData(PMs->at(ipm));
            break;
          case 2:
-           PMs->CopyElNoiseData(ipm, i);
+           PMs->at(ipmTo).copyElNoiseData(PMs->at(ipm));
            break;
          case 3:
-           PMs->CopyADCdata(ipm, i);
+           PMs->at(ipmTo).copyADCdata(PMs->at(ipm));
            break;
          default:
            qWarning() << "Unknown electronics selector";

@@ -12,7 +12,7 @@ class APm
 public:
     APm(double x, double y, double z, double psi, int type) : x(x), y(y), z(z), psi(psi), type(type) {}
     APm() {}
-    ~APm(); //can be triggered on resize of the vector!!!
+    // APm is not owning the histogram objects -> manage delete in pms
 
     void setCoords(const double *const xyz) { x = xyz[0]; y = xyz[1]; z = xyz[2]; }
     void saveCoords(QTextStream &file) const;
@@ -20,12 +20,19 @@ public:
     void setAngles(const double *const phithepsi) { phi = phithepsi[0]; theta = phithepsi[1]; psi = phithepsi[2]; }
     void saveAngles(QTextStream &file) const;
 
+    // single photoelectron response
     void setElChanSPePHS(const QVector<double>& x, const QVector<double>& y);
     void scaleSPePHS(double gain);
     void preparePHS();
     void clearSPePHSCustomDist();
-
+    void copySPePHSdata(const APm &from);
+    // SiPM optical crosstalk
+    void copyMCcrosstalkData(const APm &from);
+    // electronic noise
+    void copyElNoiseData(const APm &from);
+    // ADC
     void setADC(double max, int bits);
+    void copyADCdata(const APm &from);
 
 public:
     double x = 0;

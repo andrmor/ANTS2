@@ -5,11 +5,6 @@
 #include "TH1D.h"
 #include "TMath.h"
 
-APm::~APm()
-{
-   clearSPePHSCustomDist();
-}
-
 void APm::saveCoords(QTextStream &file) const
 {
     file << x << " " << y << " " << z << "\r\n";
@@ -85,4 +80,40 @@ void APm::scaleSPePHS(double gain)
 
         for (double& d : SPePHS_x) d *= gain;
     }
+}
+
+void APm::copySPePHSdata(const APm& from)
+{
+    SPePHSmode       = from.SPePHSmode;
+    AverageSigPerPhE = from.AverageSigPerPhE;
+    SPePHSsigma      = from.SPePHSsigma;
+    SPePHSshape      = from.SPePHSshape;
+    SPePHS_x         = from.SPePHS_x;
+    SPePHS           = from.SPePHS;
+
+    if (SPePHShist)
+    {
+        delete SPePHShist; SPePHShist = 0;
+    }
+    if (from.SPePHShist) SPePHShist = new TH1D(*from.SPePHShist);
+}
+
+void APm::copyMCcrosstalkData(const APm& from)
+{
+    MCcrosstalk   = from.MCcrosstalk;
+    MCmodel       = from.MCmodel;
+    MCtriggerProb = from.MCtriggerProb;
+}
+
+void APm::copyElNoiseData(const APm& from)
+{
+    ElNoiseSigma = from.ElNoiseSigma;
+}
+
+void APm::copyADCdata(const APm& from)
+{
+    ADCmax    = from.ADCmax;
+    ADCbits   = from.ADCbits;
+    ADCstep   = from.ADCstep;
+    ADClevels = from.ADClevels;
 }

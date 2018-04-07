@@ -208,7 +208,7 @@ double PolyInterpolation(double x, QVector<double>* xi, QVector<double>* yi, int
 }
 */
 
-void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y)
+void ConvertToStandardWavelengthes(const QVector<double>* sp_x, const QVector<double>* sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y)
 {
   y->resize(0);
 

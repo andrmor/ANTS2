@@ -54,8 +54,11 @@ public:
     double PreprocessingAdd = 0;
     double PreprocessingMultiply = 1.0;
 
-    // PDE
+    // photon detection efficiency
     double effectivePDE = -1.0; // -1 = undefined
+    QVector<double> PDE;        // ***!!! use single container
+    QVector<double> PDE_lambda; // ***!!! use single container
+    QVector<double> PDEbinned;
 
     //  -- ELECTRONICS --
     // optical cross-talk for SiPM

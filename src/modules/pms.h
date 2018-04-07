@@ -36,7 +36,7 @@ public:
       //recalculate PDE for selected wave binning
     void RebinPDEs(); //triggered by changing between true and false for WavelenegthResolved on the MainWindow
     void RebinPDEsForType(int typ);
-    void RebinPDEsForPM(int ipm);
+    void RebinPDEsForPM(int ipm); // *** to APm
       //recalculate angular for selected angle binning
     void RecalculateAngular();
     void RecalculateAngularForType(int typ);
@@ -58,7 +58,7 @@ public:
 
     int count() const {return numPMs;} //returns number of PMs
     void clear();
-    void resetOverrides();
+    void resetOverrides(); //*** add single pm method in APm
     void add(int upperlower, double xx, double yy, double zz, double Psi, int typ);
     void add(int upperlower, APmPosAngTypeRecord* pat);
     void insert(int ipm, int upperlower, double xx, double yy, double zz, double Psi, int typ);
@@ -89,20 +89,14 @@ public:
     bool   isSiPM(int ipm) const;
 
     //PDE
-    bool   isPDEwaveOverriden(int i) const {return (!PDE[i].isEmpty());}
+    bool   isPDEwaveOverriden(int ipm) const;
     bool   isPDEwaveOverriden() const;
     bool   isPDEeffectiveOverriden() const;
     void   writePDEeffectiveToJson(QJsonObject &json);
     bool   readPDEeffectiveFromJson(QJsonObject &json);
     void   writePDEwaveToJson(QJsonObject &json);
     bool   readPDEwaveFromJson(QJsonObject &json);
-    //void   setPDEeffective(int ipm, double val) {effectivePDE[ipm] = val;}
-    //double getPDEeffective(int ipm) {return effectivePDE[ipm];}
-    void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y) {PDE_lambda[ipm] = *x; PDE[ipm] = *y;}
-    void   setPDEbinned(int ipm, QVector<double>* vec) {PDEbinned[ipm] = *vec;}
-    const QVector<double>* getPDE(int ipm) {return &PDE[ipm];}
-    const QVector<double>* getPDE_lambda(int ipm) {return &PDE_lambda[ipm];}
-    const QVector<double>* getPDEbinned(int ipm) {return &PDEbinned[ipm];}
+    void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y);
 
     //Angular response
     bool   isAngularOverriden(int i) const {return !AngularSensitivity[i].isEmpty();}
@@ -181,10 +175,6 @@ private:
     //  ----====-----
     //when NEW vector properties are added to PMs -> "clear" "insert" and "remove" methodes have to be updated!
     //
-    QVector<QVector<double> > PDE; //Quantun efficiency & Collection efficiency for PMTs; Photon Detection Efficiency for SiPMs
-    QVector<QVector<double> > PDE_lambda;
-    QVector<QVector<double> > PDEbinned;
-    //QVector<double> effectivePDE;
     QVector<QVector<double> > AngularSensitivity;
     QVector<QVector<double> > AngularSensitivity_lambda;
     QVector<double> AngularN1; //refractive index of the medium where PM was positioned to measure the angular response

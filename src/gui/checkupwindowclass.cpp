@@ -533,7 +533,7 @@ const QString DEWCheckUpItem::getToolTip() const  { return "Overriden DE" + Chec
 TriState DEWCheckUpItem::doCheckUp()
 {
     const PMtypeClass *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
-    overriden = CheckUpItem::rangeCheck(*MW->PMs->getPDE_lambda(row()), MW->WaveFrom, MW->WaveTo);
+    overriden = CheckUpItem::rangeCheck(MW->PMs->at(row()).PDE_lambda, MW->WaveFrom, MW->WaveTo);
     inherited = CheckUpItem::rangeCheck(pmtype->PDE_lambda, MW->WaveFrom, MW->WaveTo);
     setState(inherited | overriden, "Over.     Inher.");
 

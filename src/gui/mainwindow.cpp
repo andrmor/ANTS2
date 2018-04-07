@@ -1889,13 +1889,13 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
       {
         str.setNum(type->effectivePDE);
         ui->labIndDEStatus->setText("Inherited:");
-        ui->pbIndRestoreEffectiveDE->setEnabled(false);
+        //ui->pbIndRestoreEffectiveDE->setEnabled(false);
       }
     else
       {
         str.setNum(eDE, 'g', 4);
         ui->labIndDEStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreEffectiveDE->setEnabled(true);
+        //ui->pbIndRestoreEffectiveDE->setEnabled(true);
       }
     ui->ledIndEffectiveDE->setText(str);
     //wave-resolved DE
@@ -2167,7 +2167,7 @@ void MainWindow::on_ledIndEffectiveDE_editingFinished()
     PMs->at(ipm).effectivePDE = val;
 
     ReconstructDetector(true);
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
@@ -2177,7 +2177,7 @@ void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
     PMs->at(ipm).effectivePDE = -1.0;
 
     ReconstructDetector(true);
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowDE_clicked()
@@ -2185,33 +2185,23 @@ void MainWindow::on_pbIndShowDE_clicked()
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
 
-  //ShowGraphWindow();
+  const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
   if (PMs->isPDEwaveOverriden(ipm))
-    {
-      if (PMs->isSiPM(ipm))
-        GraphWindow->MakeGraph(PMs->getPDE_lambda(ipm), PMs->getPDE(ipm), kRed, "Wavelength, nm", "Photon Detection Efficiency");
-      else
-        GraphWindow->MakeGraph(PMs->getPDE_lambda(ipm), PMs->getPDE(ipm), kRed, "Wavelength, nm", "Quantum Efficiency");
-    }
+      GraphWindow->MakeGraph(&PMs->at(ipm).PDE_lambda, &PMs->at(ipm).PDE, kRed, "Wavelength, nm", tit);
   else
-    {
-      if (PMs->isSiPM(ipm))
-        GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Photon Detection Efficiency");
-      else
-        GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Quantum Efficiency");
-    }  
+      GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", tit);
 }
 
 void MainWindow::on_pbIndRestoreDE_clicked()
 {
-    QVector<double> x;
-    x.resize(0);
-    int ipm = ui->sbIndPMnumber->value();
-    PMs->setPDEwave(ipm, &x, &x);
-    PMs->setPDEbinned(ipm, &x);
-    ReconstructDetector(true);
+    const int ipm = ui->sbIndPMnumber->value();
 
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    PMs->at(ipm).PDE.clear();
+    PMs->at(ipm).PDE_lambda.clear();
+    PMs->at(ipm).PDEbinned.clear();
+
+    ReconstructDetector(true);
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndLoadDE_clicked()
@@ -2256,13 +2246,12 @@ void MainWindow::on_pbIndShowDEbinned_clicked()
 
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
+
   QVector<double> x;
-  x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
 
-  //MainWindow::ShowGraphWindow();
-  if (PMs->getPDEbinned(ipm)->size() > 0)
-    GraphWindow->MakeGraph(&x, PMs->getPDEbinned(ipm), kRed, "Wavelength, nm", "PDE");
+  if (PMs->at(ipm).PDEbinned.size() > 0)
+    GraphWindow->MakeGraph(&x, &PMs->at(ipm).PDEbinned, kRed, "Wavelength, nm", "PDE");
   else
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->PDEbinned, kRed, "Wavelength, nm", "PDE");
 }

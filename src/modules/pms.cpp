@@ -302,9 +302,10 @@ void pms::resetOverrides()
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       PMs[ipm].effectivePDE = -1.0;
-      PDE_lambda[ipm].clear();
-      PDE[ipm].clear();
-      PDEbinned[ipm].clear();
+      PMs[ipm].PDE_lambda.clear();
+      PMs[ipm].PDE.clear();
+      PMs[ipm].PDEbinned.clear();
+
       AngularSensitivity_lambda[ipm].clear();
       AngularSensitivity[ipm].clear();
       AngularSensitivityCosRefracted[ipm].clear();
@@ -407,9 +408,6 @@ void pms::clear() //does not affect PM types!
     }
     PMs.clear();
 
-    PDE.clear();
-    PDE_lambda.clear();
-    PDEbinned.clear();
     AngularSensitivity.clear();
     AngularSensitivity_lambda.clear();
     AngularN1.clear();
@@ -446,9 +444,6 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     PMs.insert(ipm, newPM);
 
     QVector<double> tmp;
-    PDE.insert(ipm, tmp);
-    PDE_lambda.insert(ipm, tmp);
-    PDEbinned.insert(ipm, tmp);
     AngularSensitivity.insert(ipm, tmp);
     AngularSensitivity_lambda.insert(ipm, tmp);
     AngularN1.insert(ipm, -1); //-1 = undefined
@@ -474,9 +469,6 @@ void pms::remove(int ipm)
     PMs[ipm].clearSPePHSCustomDist();
     PMs.remove(ipm);
 
-    PDE.remove(ipm);
-    PDE_lambda.remove(ipm);
-    PDEbinned.remove(ipm);
     AngularSensitivity.remove(ipm);
     AngularSensitivity_lambda.remove(ipm);
     AngularN1.remove(ipm);
@@ -621,11 +613,12 @@ void pms::RebinPDEsForPM(int ipm)
 {
     if (WavelengthResolved)
     {
-        if (PDE_lambda[ipm].size() == 0) PDEbinned[ipm].clear();
+        if (PMs.at(ipm).PDE_lambda.size() == 0)
+            PMs[ipm].PDEbinned.clear();
         else
-            ConvertToStandardWavelengthes(&PDE_lambda[ipm], &PDE[ipm], WaveFrom, WaveStep, WaveNodes, &PDEbinned[ipm]);
+            ConvertToStandardWavelengthes(&PMs.at(ipm).PDE_lambda, &PMs.at(ipm).PDE, WaveFrom, WaveStep, WaveNodes, &PMs[ipm].PDEbinned);
     }
-    else PDEbinned[ipm].clear();
+    else PMs[ipm].PDEbinned.clear();
 }
 
 void pms::RebinPDEs()
@@ -767,8 +760,8 @@ double pms::getActualPDE(int ipm, int WaveIndex) const
         //Case: Wavelength-resolved AND there is proper waveindex
 
         //if wave-resolved override exists, use it:
-        if ( !PDEbinned[ipm].isEmpty() )
-             PDE = PDEbinned[ipm][WaveIndex];
+        if ( !PMs.at(ipm).PDEbinned.isEmpty() )
+             PDE = PMs.at(ipm).PDEbinned.at(WaveIndex);
         else
         {
             //if effective PDE is overriden, use it
@@ -1021,15 +1014,12 @@ bool pms::isSiPM(int ipm) const
     return PMtypes.at(PMs.at(ipm).type)->SiPM;
 }
 
+bool pms::isPDEwaveOverriden(int ipm) const {return (!PMs.at(ipm).PDE.isEmpty());}
+
 bool pms::isPDEwaveOverriden() const
 {
-  if (PDE.size() != numPMs)
-    {
-      qCritical() << "PDE size:"<<AngularSensitivity.size();
-      exit(-1);
-    }
-  for (int i=0; i<numPMs; i++)
-    if (!PDE[i].isEmpty()) return true;
+    for (int ipm = 0; ipm < numPMs; ipm++)
+        if (!PMs.at(ipm).PDE.isEmpty()) return true;
   return false;
 }
 
@@ -1104,7 +1094,7 @@ void pms::writePDEwaveToJson(QJsonObject &json)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QJsonArray arpm;
-      writeTwoQVectorsToJArray(PDE_lambda[ipm], PDE[ipm], arpm);
+      writeTwoQVectorsToJArray(PMs.at(ipm).PDE_lambda, PMs.at(ipm).PDE, arpm);
       arr.append(arpm);
     }
   json["PDEwave"] = arr;
@@ -1123,17 +1113,19 @@ bool pms::readPDEwaveFromJson(QJsonObject &json)
       for (int ipm=0; ipm<numPMs; ipm++)
       {
         QJsonArray array = arr[ipm].toArray();
-        readTwoQVectorsFromJArray(array, PDE_lambda[ipm], PDE[ipm]);
+        readTwoQVectorsFromJArray(array, PMs[ipm].PDE_lambda, PMs[ipm].PDE);
       }
     }
   return true;
 }
 
+void pms::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y) {PMs[ipm].PDE_lambda = *x; PMs[ipm].PDE = *y;}
+
 bool pms::isAngularOverriden() const
 {
-  if (AngularSensitivity.size() != numPMs)
+    if (AngularSensitivity.size() != numPMs)
     {
-      qWarning() << "AngularSensitivity size:"<<AngularSensitivity.size();
+        qWarning() << "AngularSensitivity size:"<<AngularSensitivity.size();
       exit(-1);
     }
   for (int i=0; i<numPMs; i++)

@@ -54,6 +54,9 @@ public:
     double PreprocessingAdd = 0;
     double PreprocessingMultiply = 1.0;
 
+    // PDE
+    double effectivePDE = -1.0; // -1 = undefined
+
     //  -- ELECTRONICS --
     // optical cross-talk for SiPM
     int    MCmodel = 0;

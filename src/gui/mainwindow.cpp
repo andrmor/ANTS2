@@ -1882,7 +1882,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
 
     //-- overrides --
     //effective DE    
-    double eDE = PMs->getPDEeffective(ipm);
+    double eDE = PMs->at(ipm).effectivePDE;
     QString str;
     PMtypeClass* type = PMs->getType(p->type);
     if (eDE == -1)
@@ -2161,15 +2161,21 @@ void MainWindow::on_pbIndShowType_clicked()
 
 void MainWindow::on_ledIndEffectiveDE_editingFinished()
 {
-    double val = ui->ledIndEffectiveDE->text().toDouble();
-    PMs->setPDEeffective(ui->sbIndPMnumber->value(), val);
+    const int ipm = ui->sbIndPMnumber->value();
+    const double val = ui->ledIndEffectiveDE->text().toDouble();
+
+    PMs->at(ipm).effectivePDE = val;
+
     ReconstructDetector(true);
     MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 {
-    PMs->setPDEeffective(ui->sbIndPMnumber->value(), -1);
+    const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).effectivePDE = -1.0;
+
     ReconstructDetector(true);
     MainWindow::on_pbIndPMshowInfo_clicked();
 }
@@ -3470,7 +3476,7 @@ void MainWindow::CalculateIndividualQEPDE()
 
       //scalar value
       double fromType = PMs->getType(itype)->effectivePDE;
-      PMs->setPDEeffective(ipm, fromType*factor);
+      PMs->at(ipm).effectivePDE = fromType * factor;
 
       //Wavelength resolved data
       QVector<double> tmp = PMs->getType(itype)->PDE;
@@ -3588,8 +3594,8 @@ void MainWindow::on_pbShowRelGains_clicked()
   double max = -1e20;
   for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double QE = PMs->getPDEeffective(ipm);
-      if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      double QE = PMs->at(ipm).effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
       double AvSig = 1.0;
       if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       double relStr = QE * AvSig;
@@ -3600,10 +3606,10 @@ void MainWindow::on_pbShowRelGains_clicked()
   QVector<QString> tmp(0);
   Owindow->OutText("");
   Owindow->OutText("PM  Relative_QE   Average_signal_per_photoelectron   Relative_gain");
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+  for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double QE = PMs->getPDEeffective(ipm);
-      if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      double QE = PMs->at(ipm).effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
       QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
 
       double AvSig = 1.0;

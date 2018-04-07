@@ -52,7 +52,7 @@ public:
       // Single PM signal using photoelectron spectrum
     double GenerateSignalFromOnePhotoelectron(int ipm);  //used only in GUI of mainwindow!
       // used during simulation:
-    double getActualPDE(int ipm, int WaveIndex); //returns partial probability to be detected (wave-resolved PDE)
+    double getActualPDE(int ipm, int WaveIndex) const; //returns partial probability to be detected (wave-resolved PDE)
     double getActualAngularResponse(int ipm, double cosAngle); //returns partial probability to be detected (vs angular response - cos of refracted beam)
     double getActualAreaResponse(int ipm, double x, double y); //returns partial probability to be detected (vs area response - x, y in local coordinates of the PM)
 
@@ -96,15 +96,13 @@ public:
     bool   readPDEeffectiveFromJson(QJsonObject &json);
     void   writePDEwaveToJson(QJsonObject &json);
     bool   readPDEwaveFromJson(QJsonObject &json);
-    void   setPDEeffective(int ipm, double val) {effectivePDE[ipm] = val;}
-    double getPDEeffective(int ipm) {return effectivePDE[ipm];}
-    void   setAllEffectivePDE(QVector<double>* vec) {effectivePDE = *vec;} //will be gone sone
+    //void   setPDEeffective(int ipm, double val) {effectivePDE[ipm] = val;}
+    //double getPDEeffective(int ipm) {return effectivePDE[ipm];}
     void   setPDEwave(int ipm, QVector<double>* x, QVector<double>* y) {PDE_lambda[ipm] = *x; PDE[ipm] = *y;}
     void   setPDEbinned(int ipm, QVector<double>* vec) {PDEbinned[ipm] = *vec;}
     const QVector<double>* getPDE(int ipm) {return &PDE[ipm];}
     const QVector<double>* getPDE_lambda(int ipm) {return &PDE_lambda[ipm];}
     const QVector<double>* getPDEbinned(int ipm) {return &PDEbinned[ipm];}
-    const QVector<double>* getAllEffectivePDE() {return &effectivePDE;}
 
     //Angular response
     bool   isAngularOverriden(int i) const {return !AngularSensitivity[i].isEmpty();}
@@ -186,7 +184,7 @@ private:
     QVector<QVector<double> > PDE; //Quantun efficiency & Collection efficiency for PMTs; Photon Detection Efficiency for SiPMs
     QVector<QVector<double> > PDE_lambda;
     QVector<QVector<double> > PDEbinned;
-    QVector<double> effectivePDE;
+    //QVector<double> effectivePDE;
     QVector<QVector<double> > AngularSensitivity;
     QVector<QVector<double> > AngularSensitivity_lambda;
     QVector<double> AngularN1; //refractive index of the medium where PM was positioned to measure the angular response

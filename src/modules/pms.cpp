@@ -301,7 +301,7 @@ void pms::resetOverrides()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
     {
-      effectivePDE[ipm] = -1;
+      PMs[ipm].effectivePDE = -1.0;
       PDE_lambda[ipm].clear();
       PDE[ipm].clear();
       PDEbinned[ipm].clear();
@@ -410,7 +410,6 @@ void pms::clear() //does not affect PM types!
     PDE.clear();
     PDE_lambda.clear();
     PDEbinned.clear();
-    effectivePDE.clear();
     AngularSensitivity.clear();
     AngularSensitivity_lambda.clear();
     AngularN1.clear();
@@ -450,7 +449,6 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     PDE.insert(ipm, tmp);
     PDE_lambda.insert(ipm, tmp);
     PDEbinned.insert(ipm, tmp);
-    effectivePDE.insert(ipm, -1); //-1 = undefined
     AngularSensitivity.insert(ipm, tmp);
     AngularSensitivity_lambda.insert(ipm, tmp);
     AngularN1.insert(ipm, -1); //-1 = undefined
@@ -479,7 +477,6 @@ void pms::remove(int ipm)
     PDE.remove(ipm);
     PDE_lambda.remove(ipm);
     PDEbinned.remove(ipm);
-    effectivePDE.remove(ipm);
     AngularSensitivity.remove(ipm);
     AngularSensitivity_lambda.remove(ipm);
     AngularN1.remove(ipm);
@@ -745,7 +742,7 @@ void pms::RecalculateAngularForPM(int ipm)
     }
 }
 
-double pms::getActualPDE(int ipm, int WaveIndex)
+double pms::getActualPDE(int ipm, int WaveIndex) const
 {  
     /*
   qDebug()<<"------------";
@@ -755,29 +752,35 @@ double pms::getActualPDE(int ipm, int WaveIndex)
   qDebug()<<"Type-> Effective="<<PMtypeProperties[PMtype[ipm]].effectivePDE<<" size of WaveRes="<<PMtypeProperties[PMtype[ipm]].PDEbinned.size();
   if (PMtypeProperties[PMtype[ipm]].PDEbinned.size() > 0) qDebug()<<"   typePDE at this waveindex="<<PMtypeProperties[PMtype[ipm]].PDEbinned[WaveIndex];
     */
+
     double PDE;
     if (!WavelengthResolved || WaveIndex == -1)
     {
-        //WavelengthResolved is false or no spectral data during photon generation
+        //Case: Not wavelength-resolved or no spectral data during this photon generation
 
-        if (effectivePDE[ipm] != -1) PDE = effectivePDE[ipm]; //override exists
-        else PDE = PMtypes[PMs[ipm].type]->effectivePDE;
+        if (PMs.at(ipm).effectivePDE != -1.0)
+             PDE = PMs.at(ipm).effectivePDE; //override exists
+        else PDE = PMtypes.at( PMs.at(ipm).type )->effectivePDE;
     }
     else
     {
-        //Wave-resolved AND there is proper waveindex
+        //Case: Wavelength-resolved AND there is proper waveindex
 
         //if wave-resolved override exists, use it:
-        if (!PDEbinned[ipm].isEmpty()) PDE = PDEbinned[ipm][WaveIndex];
+        if ( !PDEbinned[ipm].isEmpty() )
+             PDE = PDEbinned[ipm][WaveIndex];
         else
         {
             //if effective PDE is overriden, use it
-            if (effectivePDE[ipm] != -1) PDE = effectivePDE[ipm];
+            if (PMs.at(ipm).effectivePDE != -1.0)
+                 PDE = PMs.at(ipm).effectivePDE;
             else
             {
                 //if type hold wave-resolved info, use it
-                if (PMtypes[PMs[ipm].type]->PDEbinned.size() > 0) PDE = PMtypes[PMs[ipm].type]->PDEbinned[WaveIndex];
-                else PDE = PMtypes[PMs[ipm].type]->effectivePDE; //last resort :)
+                const int& iType = PMs.at(ipm).type;
+                if (PMtypes.at(iType)->PDEbinned.size() > 0)
+                     PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
+                else PDE = PMtypes.at(iType)->effectivePDE; //last resort :)
             }
         }
     }
@@ -1032,15 +1035,16 @@ bool pms::isPDEwaveOverriden() const
 
 bool pms::isPDEeffectiveOverriden() const
 {
-  for (int i=0; i<numPMs; i++)
-    if (effectivePDE.at(i) != -1) return true;
+  for (int ipm = 0; ipm < numPMs; ipm++)
+    if (PMs.at(ipm).effectivePDE != -1.0) return true;
   return false;
 }
 
 void pms::writePDEeffectiveToJson(QJsonObject &json)
 {
   QJsonArray arr;
-  for (int i=0; i<numPMs; i++) arr.append(effectivePDE[i]);
+  for (int ipm = 0; ipm < numPMs; ipm++)
+      arr.append( PMs.at(ipm).effectivePDE );
   json["PDEeffective"] = arr;
 }
 
@@ -1088,7 +1092,8 @@ bool pms::readPDEeffectiveFromJson(QJsonObject &json)
           qWarning() << "PDE json: size mismatch!";
           return false;
         }
-      for (int i=0; i<numPMs; i++) effectivePDE[i] = arr[i].toDouble();
+      for (int ipm = 0; ipm < numPMs; ipm++)
+          PMs[ipm].effectivePDE = arr[ipm].toDouble();
     }
   return true;
 }

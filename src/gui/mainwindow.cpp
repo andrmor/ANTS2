@@ -2413,20 +2413,19 @@ void MainWindow::on_pbIndShowArea_clicked()
     int yNum;
     double xStep;
     double yStep;
-    //PMpropertiesStruct tp = *PMs->getTypeProperties(typ);
 
     if (PMs->isAreaOverriden(ipm))
       {
-        xNum = PMs->getAreaSensitivity(ipm)->size();
-        yNum = PMs->getAreaSensitivity(ipm)[0].size();
-        xStep = PMs->getAreaStepX(ipm);
-        yStep = PMs->getAreaStepY(ipm);
+        xNum = PMs->at(ipm).AreaSensitivity.size();
+        yNum = PMs->at(ipm).AreaSensitivity.at(0).size();
+        xStep = PMs->at(ipm).AreaStepX;
+        yStep = PMs->at(ipm).AreaStepY;
       }
     else
       {
         if (PMs->getType(typ)->AreaSensitivity.isEmpty()) return; //then nothing to show
         xNum = PMs->getType(typ)->AreaSensitivity.size();
-        yNum = PMs->getType(typ)->AreaSensitivity[0].size();
+        yNum = PMs->getType(typ)->AreaSensitivity.at(0).size();
         xStep=PMs->getType(typ)->AreaStepX;
         yStep=PMs->getType(typ)->AreaStepY;
       }
@@ -2438,9 +2437,9 @@ void MainWindow::on_pbIndShowArea_clicked()
      for (int iY=0; iY<yNum; iY++)
      {
         if (PMs->isAreaOverriden(ipm))
-            hist2D->SetCellContent(iX+1, iY+1, (PMs->getAreaSensitivity(ipm))->at(iX)[iY]*100.0);
+            hist2D->SetCellContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY) * 100.0);
         else
-            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]*100.0);
+            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY) * 100.0);
      }
     hist2D->SetXTitle("X, mm");
     hist2D->SetYTitle("Y, mm");

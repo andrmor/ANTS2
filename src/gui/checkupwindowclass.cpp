@@ -555,7 +555,7 @@ TriState AngularResponseCheckUpItem::doCheckUp()
 const QString AreaResponseCheckUpItem::getToolTip() const { return state == TriStateError ? "Neither PM Type nor PM overriden area sensitivity are defined" : ""; }
 TriState AreaResponseCheckUpItem::doCheckUp()
 {
-    const QVector< QVector<double> > *area = MW->PMs->getAreaSensitivity(row());
+    const QVector< QVector<double> > *area = &MW->PMs->at(row()).AreaSensitivity;
     const QVector< QVector<double> > *typearea = &MW->PMs->getType(MW->PMs->at(row()).type)->AreaSensitivity;
     return setState((area->isEmpty() && typearea->isEmpty()) ? TriStateError : TriStateOk, area->isEmpty() ? "Inherited" : "Overriden");
 }

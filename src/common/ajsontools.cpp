@@ -218,7 +218,7 @@ void readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<doubl
     }
 }
 
-bool write2DQVectorToJArray(QVector<QVector<double> > &xy, QJsonArray &ar)
+bool write2DQVectorToJArray(const QVector<QVector<double> > &xy, QJsonArray &ar)
 {
   for (int i1=0; i1<xy.size(); i1++)
     {

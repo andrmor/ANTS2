@@ -32,25 +32,23 @@ pms::~pms()
 {
   //    qDebug() << "  --- PMs destructor";
   delete GammaRandomGen;
+  clear();
   clearPMtypes();
 }
 
 void pms::writeInividualOverridesToJson(QJsonObject &json)
 {
   QJsonObject js;
-  //PDE
-  if (isPDEeffectiveOverriden()) //saving PDEeffectives
-    writePDEeffectiveToJson(js);
-  if (isPDEwaveOverriden()) //wave resolved PDE
-    writePDEwaveToJson(js);
-  //Angular response
-  if (isAngularOverriden()) //angle resolved sensitivity
-    writeAngularToJson(js);
-  //Area response
-  if (isAreaOverriden()) //angle resolved sensitivity
-    writeAreaToJson(js);
-  //relative QE / ElStr if at least one is not 1
-  writeRelQE_PDE(js);
+
+  //if (isPDEeffectiveOverriden())
+    writePDEeffectiveToJson(js);  // scalar PDEs
+  //if (isPDEwaveOverriden())
+    writePDEwaveToJson(js);       // wave-resolved PDE
+  //if (isAngularOverriden())
+    writeAngularToJson(js);       // angular response
+  //if (isAreaOverriden())
+    writeAreaToJson(js);          // area response
+  writeRelQE_PDE(js);             // relative factors used to adjust gains
 
   json["IndividualPMoverrides"] = js;
 }
@@ -307,12 +305,11 @@ void pms::resetOverrides()
       PMs[ipm].PDEbinned.clear();
       PMs[ipm].AngularSensitivity_lambda.clear();
       PMs[ipm].AngularSensitivity.clear();
-      PMs[ipm].AngularN1 = -1.0;
+      PMs[ipm].AngularN1 = 1.0;
       PMs[ipm].AngularSensitivityCosRefracted.clear();
-
-      AreaSensitivity[ipm].clear();
-      AreaStepX[ipm] = 123;
-      AreaStepY[ipm] = 123;
+      PMs[ipm].AreaSensitivity.clear();
+      PMs[ipm].AreaStepX = 777;
+      PMs[ipm].AreaStepY = 777;
     }
 }
 
@@ -402,15 +399,8 @@ void pms::calculateMaxQEs()
 
 void pms::clear() //does not affect PM types!
 {
-    for (APm& pm : PMs)
-    {
-        pm.clearSPePHSCustomDist();
-    }
+    for (APm& pm : PMs) pm.clearSPePHSCustomDist();
     PMs.clear();
-
-    AreaSensitivity.clear();
-    AreaStepX.clear();
-    AreaStepY.clear();
 
     numPMs = 0;
 }
@@ -432,38 +422,26 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
 {
     if (ipm > numPMs) return; //in =case its automatic append
 
-    numPMs++;
-
-    //updating individual properties
     APm newPM(xx, yy, zz, Psi, typ);
     newPM.upperLower = upperlower;
     PMs.insert(ipm, newPM);
 
-    QVector<QVector<double> > tmp2;
-    AreaSensitivity.insert(ipm, tmp2);
-    AreaStepX.insert(ipm, 123); //just a strange value to see if error
-    AreaStepY.insert(ipm, 123);
-
+    numPMs++;
 }
 
 void pms::remove(int ipm)
 {
-    if (ipm<0 || ipm>numPMs-1)
+    if (ipm < 0 || ipm > numPMs-1)
     {
         qDebug()<<"ERROR: attempt to remove non-existent PM # "<<ipm;
         return;
     }
 
-    numPMs--;
-
     // APm is not owning the histogram objects -> delete them before removing from the vector
     PMs[ipm].clearSPePHSCustomDist();
     PMs.remove(ipm);
 
-    AreaSensitivity.remove(ipm);
-    AreaStepX.remove(ipm);
-    AreaStepY.remove(ipm);
-
+    numPMs--;
 }
 
 bool pms::removePMtype(int itype)
@@ -506,7 +484,7 @@ int pms::findPMtype(QString typeName) const
 void pms::clearPMtypes()
 {
   for (int i=0; i<PMtypes.size(); i++) delete PMtypes[i];
-  PMtypes.resize(0);
+  PMtypes.clear();
 }
 
 void pms::replaceType(int itype, PMtypeClass *newType) {delete PMtypes[itype]; PMtypes[itype] = newType;}
@@ -817,56 +795,41 @@ double pms::getActualAreaResponse(int ipm, double x, double y)
     */
 
     double AreaResponse = 1.0;
-    int iX, iY;
-    double xStep, yStep;
-    int xNum, yNum;
 
     if (AreaResolved)
     {
-        //area sensitivity is activated as the simulation option
-
         //are there override data?
-        if (AreaSensitivity[ipm].size() > 0)
+        if ( !PMs.at(ipm).AreaSensitivity.isEmpty() )
         {
             //use override
-            xStep = AreaStepX[ipm];
-            yStep = AreaStepY[ipm];
-            xNum = AreaSensitivity[ipm].size();
-            yNum = AreaSensitivity[ipm][0].size();
-            //iX = (x + 0.5*xNum*xStep)/xStep;
-            //iY = (y + 0.5*yNum*yStep)/yStep;
-            iX = x/xStep + 0.5*xNum;
-            iY = y/yStep + 0.5*yNum;
+            double xStep = PMs.at(ipm).AreaStepX;
+            double yStep = PMs.at(ipm).AreaStepY;
+            int xNum = PMs.at(ipm).AreaSensitivity.size();
+            int yNum = PMs.at(ipm).AreaSensitivity.at(0).size();
+            int iX = x/xStep + 0.5*xNum;
+            int iY = y/yStep + 0.5*yNum;
             //            qDebug()<<"Xbin= "<<iX<<"   Ybin= "<<iY;
-            if (iX<0 || iX>xNum-1 || iY<0 || iY>yNum-1)
-            {
-                //outside
-                AreaResponse = 0;
-            }
-            else AreaResponse = AreaSensitivity[ipm][iX][iY];
+            if (iX<0 || iX>xNum-1 || iY<0 || iY>yNum-1) //outside
+                 AreaResponse = 0;
+            else AreaResponse = PMs.at(ipm).AreaSensitivity.at(iX).at(iY);
         }
         else
         {
-            PMtypeClass *typ = PMtypes[PMs[ipm].type];
-            //are there data for this PM type?
-            if (typ->AreaSensitivity.size() > 0)
+            const PMtypeClass *typ = PMtypes.at( PMs.at(ipm).type );
+
+            if ( !typ->AreaSensitivity.isEmpty() ) //are there data for this PM type?
             {
                 //use type data
-                xStep = typ->AreaStepX;
-                yStep = typ->AreaStepY;
+                double xStep = typ->AreaStepX;
+                double yStep = typ->AreaStepY;
                 int xNum = typ->AreaSensitivity.size();
-                int yNum = typ->AreaSensitivity[0].size();
-                //iX = (x + 0.5*xNum*xStep)/xStep;
-                //iY = (y + 0.5*yNum*yStep)/yStep;
-                iX = x/xStep + 0.5*xNum;
-                iY = y/yStep + 0.5*yNum;
+                int yNum = typ->AreaSensitivity.at(0).size();
+                int iX = x/xStep + 0.5*xNum;
+                int iY = y/yStep + 0.5*yNum;
                 //               qDebug()<<"Xbin= "<<iX<<"   Ybin= "<<iY;
-                if (iX<0 || iX>xNum-1 || iY<0 || iY>yNum-1)
-                {
-                    //outside
-                    AreaResponse = 0;
-                }
-                else AreaResponse = PMtypes[PMs[ipm].type]->AreaSensitivity[iX][iY];
+                if (iX<0 || iX>xNum-1 || iY<0 || iY>yNum-1) //outside
+                     AreaResponse = 0;
+                else AreaResponse = typ->AreaSensitivity.at(iX).at(iY);
             }
         }
 
@@ -907,8 +870,7 @@ bool pms::readPMtypesFromJson(QJsonObject &json)
 {
   if (!json.contains("PMtypes"))
     {
-      ErrorString = "No PM types info foind in json!";
-      qWarning()<<ErrorString;
+      qWarning() << "No PM types info found in json!";
       return false;
     }
 
@@ -1167,15 +1129,15 @@ void pms::setAngular(int ipm, QVector<double> *x, QVector<double> *y)
     PMs[ipm].AngularSensitivity = *y;
 }
 
+bool pms::isAreaOverriden(int ipm) const
+{
+    return !PMs.at(ipm).AreaSensitivity.isEmpty();
+}
+
 bool pms::isAreaOverriden() const
 {
-    if (AreaSensitivity.size() != numPMs)
-    {
-        qWarning() << "AreaSensitivity size:"<<AreaSensitivity.size();
-      exit(-1);
-    }
-  for (int i=0; i<numPMs; i++)
-    if (!AreaSensitivity[i].isEmpty()) return true;
+  for (int ipm = 0; ipm < numPMs; ipm++)
+     if ( !PMs.at(ipm).AreaSensitivity.isEmpty() ) return true;
   return false;
 }
 
@@ -1186,7 +1148,7 @@ void pms::writeAreaToJson(QJsonObject &json)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QJsonArray ar;
-      write2DQVectorToJArray(AreaSensitivity[ipm], ar);
+      write2DQVectorToJArray(PMs.at(ipm).AreaSensitivity, ar);
       arr.append(ar);
     }
   js["AreaResponse"] = arr;
@@ -1194,8 +1156,8 @@ void pms::writeAreaToJson(QJsonObject &json)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QJsonArray ar;
-      ar.append(AreaStepX.at(ipm));
-      ar.append(AreaStepY.at(ipm));
+      ar.append(PMs.at(ipm).AreaStepX);
+      ar.append(PMs.at(ipm).AreaStepY);
       as.append(ar);
     }
   js["Step"] = as;
@@ -1216,7 +1178,7 @@ bool pms::readAreaFromJson(QJsonObject &json)
       for (int ipm=0; ipm<numPMs; ipm++)
       {
         QJsonArray array = arr[ipm].toArray();
-        read2DQVectorFromJArray(array, AreaSensitivity[ipm]);
+        read2DQVectorFromJArray(array, PMs[ipm].AreaSensitivity);
       }
       QJsonArray as = js["Step"].toArray();
       if (as.size() != numPMs)
@@ -1227,9 +1189,16 @@ bool pms::readAreaFromJson(QJsonObject &json)
       for (int ipm = 0; ipm < numPMs; ipm++)
       {
           QJsonArray ar = as[ipm].toArray();
-          AreaStepX[ipm] = ar[0].toDouble();
-          AreaStepY[ipm] = ar[1].toDouble();
+          PMs[ipm].AreaStepX = ar[0].toDouble();
+          PMs[ipm].AreaStepY = ar[1].toDouble();
       }
     }
   return true;
+}
+
+void pms::setArea(int ipm, QVector<QVector<double> > *vec, double xStep, double yStep)
+{
+    PMs[ipm].AreaSensitivity = *vec;
+    PMs[ipm].AreaStepX = xStep;
+    PMs[ipm].AreaStepY = yStep;
 }

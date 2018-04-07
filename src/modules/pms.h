@@ -104,22 +104,13 @@ public:
     void   writeAngularToJson(QJsonObject &json);
     bool   readAngularFromJson(QJsonObject &json);
     void   setAngular(int ipm, QVector<double>* x, QVector<double>* y);
-    //void   setAngularN1(int ipm, double n1) {AngularN1[ipm] = n1;}
-    //double getAngularN1(int ipm) {return AngularN1[ipm];}
-    //void   setAngularBinned(int ipm, QVector<double>* vec) {AngularSensitivityCosRefracted[ipm] = *vec;}
-    //const QVector<double>* getAngularSensitivity(int ipm) {return &AngularSensitivity[ipm];}
-    //const QVector<double>* getAngularSensitivity_lambda(int ipm) {return &AngularSensitivity_lambda[ipm];}
-    //const QVector<double>* getAngularSensitivityCosRefracted(int ipm) {return &AngularSensitivityCosRefracted[ipm];}
 
     //Area response
-    bool   isAreaOverriden(int i) const {return !AreaSensitivity[i].isEmpty();}
+    bool   isAreaOverriden(int ipm) const;
     bool   isAreaOverriden() const;
     void   writeAreaToJson(QJsonObject &json);
     bool   readAreaFromJson(QJsonObject &json);
-    void   setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep) {AreaSensitivity[ipm] = *vec; AreaStepX[ipm] = xStep; AreaStepY[ipm] = yStep;}
-    double getAreaStepX(int ipm) {return AreaStepX[ipm];}
-    double getAreaStepY(int ipm) {return AreaStepY[ipm];}
-    const QVector<QVector<double> >* getAreaSensitivity(int ipm) {return &AreaSensitivity[ipm];}
+    void   setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep);
 
     //type properties    
     PMtypeClass* getType(int i) {return PMtypes[i];}
@@ -168,20 +159,8 @@ private:
     AMaterialParticleCollection* MaterialCollection;
     AGammaRandomGenerator* GammaRandomGen;
 
-    int numPMs = 0; //number of PMs
+    int numPMs = 0;
     QVector<APm> PMs;
-
-    //overrides over PM type:
-    //  ----====-----
-    //when NEW vector properties are added to PMs -> "clear" "insert" and "remove" methodes have to be updated!
-    //
-    //QVector<QVector<double> > AngularSensitivity;
-    //QVector<QVector<double> > AngularSensitivity_lambda;
-    //QVector<double> AngularN1; //refractive index of the medium where PM was positioned to measure the angular response
-    //QVector<QVector<double> > AngularSensitivityCosRefracted; //Response vs cos of refracted beam, binned from 0 to 1 in CosBins bins
-    QVector<QVector< QVector <double> > > AreaSensitivity;
-    QVector<double> AreaStepX;
-    QVector<double> AreaStepY;
 
     double MeasurementTime = 150;  // measurement time to calculate dark counts for SiPMs
 
@@ -206,9 +185,8 @@ private:
 
     double MaxQE = 0; //accelerator, not wave-resolved value
     QVector<double> MaxQEvsWave; //vs wavelength
-    void calculateMaxQEs(); // first vector has to be rebinned according to acxtual wave properties (see configure())
+    void calculateMaxQEs(); // vector has to be rebinned first according to the actual wave properties (see configure())
 
-    QString ErrorString;
     void writePHSsettingsToJson(int ipm, QJsonObject &json);    // ***!!! to PMs
     bool readPHSsettingsFromJson(int ipm, QJsonObject &json);   // ***!!! to PMs
     void writeRelQE_PDE(QJsonObject &json);

@@ -63,8 +63,13 @@ public:
     // angular sensitivity
     QVector<double> AngularSensitivity;        // ***!!! use single container
     QVector<double> AngularSensitivity_lambda; // ***!!! use single container
-    double AngularN1 = -1.0; //refractive index of the medium where PM was positioned to measure the angular response; -1 = undefined
+    double AngularN1 = 1.0; //refractive index of the medium where PM was positioned to measure the angular response;
     QVector<double> AngularSensitivityCosRefracted; //Response vs cos of refracted beam, binned from 0 to 1 in CosBins bins
+
+    //area sensitivity
+    QVector< QVector <double> > AreaSensitivity;
+    double AreaStepX = 777;
+    double AreaStepY = 777;
 
     //  -- ELECTRONICS --
     // optical cross-talk for SiPM

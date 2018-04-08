@@ -314,7 +314,8 @@ SOURCES += main.cpp \
     scriptmode/ascriptmanager.cpp \
     common/apm.cpp \
     modules/apmhub.cpp \
-    common/apmtype.cpp
+    common/apmtype.cpp \
+    scriptmode/ainterfacetoguiscript.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -442,7 +443,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ascriptmanager.h \
     common/apm.h \
     modules/apmhub.h \
-    common/apmtype.h
+    common/apmtype.h \
+    scriptmode/ainterfacetoguiscript.h
 
 # --- SIM ---
 ants2_SIM {

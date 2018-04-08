@@ -25,6 +25,7 @@
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
+#include "ainterfacetoguiscript.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -120,6 +121,9 @@ void MainWindow::createScriptWindow()
 
     InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
     ScriptWindow->SetInterfaceObject(grwin, "grwin");
+
+    AInterfaceToGuiScript* gui = new AInterfaceToGuiScript(SM);
+    ScriptWindow->SetInterfaceObject(gui, "gui");
 
     AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo"); 

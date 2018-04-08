@@ -1,8 +1,8 @@
 #include "detectoraddonswindow.h"
 #include "ui_detectoraddonswindow.h"
 #include "mainwindow.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "checkupwindowclass.h"
 #include "geometrywindowclass.h"
 #include "genericscriptwindowclass.h"
@@ -336,7 +336,7 @@ void DetectorAddOnsWindow::UpdateDummyPMindication()
   if (idpm > Detector->PMdummies.count() ) return;
 
   ui->sbDummyType->setValue(Detector->PMdummies[idpm].PMtype);
-  ui->leoDummyType->setText(MW->PMs->getType(Detector->PMdummies[idpm].PMtype)->name);
+  ui->leoDummyType->setText(MW->PMs->getType(Detector->PMdummies[idpm].PMtype)->Name);
   ui->cobDummyUpperLower->setCurrentIndex(Detector->PMdummies[idpm].UpperLower);
   ui->ledDummyX->setText(QString::number(Detector->PMdummies[idpm].r[0]));
   ui->ledDummyY->setText(QString::number(Detector->PMdummies[idpm].r[1]));
@@ -926,8 +926,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
 
         QString PMshape = vol->GetShape()->ClassName();
         qDebug() << "Found new PM type:"<<Vname<<"Shape:"<<PMshape;
-        PMtypeClass *type = new PMtypeClass();
-        type->name = PMtemplate + QString::number(counter);
+        APmType *type = new APmType();
+        type->Name = PMtemplate + QString::number(counter);
         type->MaterialIndex = tmpMats.FindMaterial(vol->GetMaterial()->GetName());
         type->tmpVol = vol;
         if (PMshape=="TGeoBBox")
@@ -955,7 +955,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
         Detector->PMs->appendNewPMtype(type);
         counter++;
     }
-    if (counter==0) Detector->PMs->appendNewPMtype(new PMtypeClass()); //maybe there are no PMs in the file or template error
+    if (counter==0) Detector->PMs->appendNewPMtype(new APmType()); //maybe there are no PMs in the file or template error
 
     //==== geometry ====
     qDebug() << "Processing geometry";

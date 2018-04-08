@@ -1,7 +1,7 @@
 #include "lrfwindow.h"
 #include "ui_lrfwindow.h"
 #include "mainwindow.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "detectorclass.h"
 #include "graphwindowclass.h"
 #include "sensorlrfs.h"

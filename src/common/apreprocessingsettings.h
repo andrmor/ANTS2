@@ -5,7 +5,7 @@
 
 class ManifestItemBaseClass;
 class QJsonObject;
-class pms;
+class APmHub;
 
 class APreprocessingSettings
 {
@@ -33,8 +33,8 @@ public:
 
   ManifestItemBaseClass* ManifestItem;
 
-  QString readFromJson(QJsonObject &json, pms *PMs, QString FileName);
-  void writeToJson(QJsonObject &json, pms *PMs);
+  QString readFromJson(QJsonObject &json, APmHub *PMs, QString FileName);
+  void writeToJson(QJsonObject &json, APmHub *PMs);
 
   void clear();
 

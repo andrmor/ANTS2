@@ -34,7 +34,7 @@
 //For "Make Lrfs"
 #include "mainwindow.h"
 #include "detectorclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "ainstructioninput.h"
 
@@ -681,7 +681,7 @@ void ALrfWindow::on_pb_make_lrfs_clicked()
   le_current_recipe_name->setText(name);
 
   std::vector<APoint> sensorPos;
-  pms *PMs = mw->Detector->PMs;
+  APmHub *PMs = mw->Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
     APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));

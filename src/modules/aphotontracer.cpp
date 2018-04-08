@@ -1,5 +1,5 @@
 #include "aphotontracer.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "amaterialparticlecolection.h"
 #include "generalsimsettings.h"
 #include "aopticaloverride.h"
@@ -21,7 +21,7 @@
 
 #define c_in_vac 2.997925e2 //speed of light in mm/ns
 
-APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, pms* Pms, const QList<AGridElementRecord *> *Grids)
+APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, APmHub* Pms, const QList<AGridElementRecord *> *Grids)
 {
     RandGen = RandomGenerator;
     GeoManager = geoManager;

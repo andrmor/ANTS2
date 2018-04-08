@@ -2,7 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "outputwindow.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "windownavigatorclass.h"
 #include "geometrywindowclass.h"

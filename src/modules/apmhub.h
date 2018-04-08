@@ -1,8 +1,8 @@
-#ifndef PMS_H
-#define PMS_H
+#ifndef APMHUB_H
+#define APMHUB_H
 
 #include "apm.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 
 #include <QVector>
 #include <QString>
@@ -15,11 +15,11 @@ class APmPosAngTypeRecord;
 class AGammaRandomGenerator;
 class QJsonObject;
 
-class pms
+class APmHub
 {   
 public:
-    pms(AMaterialParticleCollection* materialCollection, TRandom2* randGen);
-    ~pms();
+    APmHub(AMaterialParticleCollection* materialCollection, TRandom2* randGen);
+    ~APmHub();
 
     void configure(GeneralSimSettings* SimSet); // must do before simulation
 
@@ -111,15 +111,15 @@ public:
     void   setArea(int ipm, QVector<QVector <double> > *vec, double xStep, double yStep);
 
     //type properties    
-    const PMtypeClass* getType(int itype) const {return PMtypes.at(itype);}
-    PMtypeClass* getType(int itype) {return PMtypes[itype];}
-    const PMtypeClass* getTypeForPM(int ipm) const {return PMtypes.at(PMs.at(ipm).type);}
+    const APmType* getType(int itype) const {return PMtypes.at(itype);}
+    APmType* getType(int itype) {return PMtypes[itype];}
+    const APmType* getTypeForPM(int ipm) const {return PMtypes.at(PMs.at(ipm).type);}
     bool removePMtype(int itype);
-    void appendNewPMtype(PMtypeClass* tp);
+    void appendNewPMtype(APmType* tp);
     int  countPMtypes() const {return PMtypes.size();}
     int  findPMtype(QString typeName) const;
     void clearPMtypes();
-    void replaceType(int itype, PMtypeClass *newType);
+    void replaceType(int itype, APmType *newType);
     void updateTypePDE(int typ, QVector<double> *x, QVector<double> *y);
     void scaleTypePDE(int typ, double factor);
     void updateTypeAngular(int typ, QVector<double> *x, QVector<double> *y);
@@ -172,7 +172,7 @@ private:
     int    CosBins = 1000;  //number of bins for angular response
 
     //defined base PM types
-    QVector<PMtypeClass*> PMtypes;
+    QVector<APmType*> PMtypes;
 
     double MaxQE = 0; //accelerator, not wave-resolved value
     QVector<double> MaxQEvsWave; //vs wavelength
@@ -182,4 +182,4 @@ private:
     void readRelQE_PDE(QJsonObject &json);
 };
 
-#endif // PMS_H
+#endif // APMHUB_H

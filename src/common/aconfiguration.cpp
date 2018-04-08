@@ -7,7 +7,7 @@
 #include "particlesourcesclass.h"
 #include "asandwich.h"
 #include "generalsimsettings.h"
-#include "pms.h"
+#include "apmhub.h"
 
 #include <QDebug>
 #include <QFile>

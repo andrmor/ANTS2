@@ -3,7 +3,7 @@
 #include "ui_mainwindow.h"
 #include "checkupwindowclass.h"
 #include "amaterialparticlecolection.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"

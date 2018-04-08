@@ -8,7 +8,7 @@
 class APhoton;
 class TGeoManager;
 class AMaterial;
-class pms;
+class APmHub;
 class AMaterialParticleCollection;
 class OneEventClass;
 class GeneralSimSettings;
@@ -24,7 +24,7 @@ public:
     explicit APhotonTracer(TGeoManager* geoManager,
                            TRandom2* RandomGenerator,
                            AMaterialParticleCollection* materialCollection,
-                           pms* Pms,
+                           APmHub* Pms,
                            const QList<AGridElementRecord*>* Grids);
     ~APhotonTracer();
 
@@ -40,7 +40,7 @@ private:
     TGeoManager* GeoManager;
     TGeoNavigator *navigator;    
     AMaterialParticleCollection* MaterialCollection;
-    pms* PMs;
+    APmHub* PMs;
     const QList<AGridElementRecord*>* grids;
     OneEventClass* OneEvent; //PM signals for this event are collected here
     QVector<TrackHolderClass*>* Tracks;

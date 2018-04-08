@@ -13,7 +13,7 @@
 #include "lrfwindow.h"
 #include "reconstructionwindow.h"
 #include "amaterialparticlecolection.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "guiutils.h"
@@ -27,7 +27,7 @@
 #include "detectorclass.h"
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 #include "globalsettingswindowclass.h"
 #include "globalsettingsclass.h"
 #include "aopticaloverride.h"
@@ -1047,11 +1047,11 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
 {
     //refresh indication of PM model properties
     int index = ui->sbPMtype->value();
-    const PMtypeClass *type = PMs->getType(index);
+    const APmType *type = PMs->getType(index);
 
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
-    ui->lePMtypeName->setText(type->name);
+    ui->lePMtypeName->setText(type->Name);
     ui->cobPMdeviceType->setCurrentIndex(type->SiPM);
     ui->cobMatPM->setCurrentIndex(type->MaterialIndex);
     ui->cobPMshape->setCurrentIndex(type->Shape);
@@ -1072,14 +1072,14 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     str.setNum(type->RecoveryTime, 'g', 4);
     ui->ledSiPMrecoveryTime->setText(str);
 
-    str.setNum(type->effectivePDE, 'g', 4);
+    str.setNum(type->EffectivePDE, 'g', 4);
     ui->ledPDE->setText(str);
     ui->pbShowPDE->setEnabled(type->PDE_lambda.size());
     ui->pbShowPDEbinned->setEnabled(ui->cbWaveResolved->isChecked() && type->PDE_lambda.size());
     ui->pbDeletePDE->setEnabled(type->PDE_lambda.size());
     MainWindow::RefreshAngularButtons();
     MainWindow::RefreshAreaButtons();
-    str.setNum(type->n1, 'g', 4);
+    str.setNum(type->AngularN1, 'g', 4);
     ui->ledMediumRefrIndex->setText(str);
 
     //enable/disable control
@@ -1090,7 +1090,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
 
     //update cob
     ui->cobPMtypes->clear();
-    for (int i=0; i<numModels; i++) ui->cobPMtypes->addItem(PMs->getType(i)->name);
+    for (int i=0; i<numModels; i++) ui->cobPMtypes->addItem(PMs->getType(i)->Name);
     ui->cobPMtypes->setCurrentIndex(index);
 
     DoNotUpdateGeometry = tmpBool;
@@ -1101,8 +1101,8 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    if (DoNotUpdateGeometry) return;
 
    int index = ui->sbPMtype->value();
-   PMtypeClass *type = PMs->getType(index);
-   type->name = ui->lePMtypeName->text();
+   APmType *type = PMs->getType(index);
+   type->Name = ui->lePMtypeName->text();
 
    type->SiPM = ui->cobPMdeviceType->currentIndex();
    type->MaterialIndex = ui->cobMatPM->currentIndex();
@@ -1115,7 +1115,7 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->DarkCountRate = ui->ledSiPMdarCountRate->text().toDouble();
    type->RecoveryTime = ui->ledSiPMrecoveryTime->text().toDouble();
    if (type->SiPM) type->Shape = 0; //SiPM - always rectangular
-   type->effectivePDE = ui->ledPDE->text().toDouble();
+   type->EffectivePDE = ui->ledPDE->text().toDouble();
    QString str;
    str.setNum(type->PixelsX * type->PixelsY);
    ui->labTotalPixels->setText("("+str+")");
@@ -1213,7 +1213,7 @@ void MainWindow::AddDefaultPMtype()
     {
       found = false;
       for (int i=0; i<PMs->countPMtypes(); i++)
-        if (name == PMs->getType(i)->name)
+        if (name == PMs->getType(i)->Name)
           {
             found = true;
             break;
@@ -1221,7 +1221,7 @@ void MainWindow::AddDefaultPMtype()
       if (found) name += "_1";
     }
   while (found);
-  PMtypeClass *type = new PMtypeClass(name);
+  APmType *type = new APmType(name);
   PMs->appendNewPMtype(type);
 
   //updating all comboboxes with PM type names
@@ -1245,7 +1245,7 @@ void MainWindow::updateCOBsWithPMtypeNames()
 
   for (int i=0; i<defTypes; i++)
     {
-      QString name = PMs->getType(i)->name;
+      QString name = PMs->getType(i)->Name;
       ui->cobPMtypes->addItem(name);
       ui->cobPMtypeInArrays->addItem(name);
       ui->cobPMtypeInExplorers->addItem(name);
@@ -1581,7 +1581,7 @@ void MainWindow::on_pbScalePDE_clicked()
 
   bool ok;
   double val = QInputDialog::getDouble(this, "PDE scaling",
-                                             "Scale PDE data for PM type "+Detector->PMs->getType(type)->name+"\n"
+                                             "Scale PDE data for PM type "+Detector->PMs->getType(type)->Name+"\n"
                                              "Scaling factor:", 1.0, -1e10, 1e10, 5, &ok);
   if (!ok) return;
 
@@ -1847,10 +1847,10 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     //effective DE    
     double eDE = PMs->at(ipm).effectivePDE;
     QString str;
-    PMtypeClass* type = PMs->getType(p->type);
+    APmType* type = PMs->getType(p->type);
     if (eDE == -1)
       {
-        str.setNum(type->effectivePDE);
+        str.setNum(type->EffectivePDE);
         ui->labIndDEStatus->setText("Inherited:");
         //ui->pbIndRestoreEffectiveDE->setEnabled(false);
       }
@@ -2767,7 +2767,7 @@ void MainWindow::on_pbElUpdateIndication_clicked()
     {
       ui->twElectronics->setEnabled(true);
 
-      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->name);
+      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->Name);
       QString str, str1;
       str.setNum( PMs->at(ipm).AverageSigPerPhE );
       ui->ledAverageSigPhotEl->setText(str);
@@ -3419,7 +3419,7 @@ void MainWindow::CalculateIndividualQEPDE()
       int itype = PMs->at(ipm).type;
 
       //scalar value
-      double fromType = PMs->getType(itype)->effectivePDE;
+      double fromType = PMs->getType(itype)->EffectivePDE;
       PMs->at(ipm).effectivePDE = fromType * factor;
 
       //Wavelength resolved data
@@ -3539,7 +3539,7 @@ void MainWindow::on_pbShowRelGains_clicked()
   for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
       double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
       double AvSig = 1.0;
       if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       double relStr = QE * AvSig;
@@ -3553,7 +3553,7 @@ void MainWindow::on_pbShowRelGains_clicked()
   for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
       double QE = PMs->at(ipm).effectivePDE;
-      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
       QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
 
       double AvSig = 1.0;
@@ -4210,12 +4210,12 @@ void MainWindow::on_pbLoadPMtype_clicked()
   int newMatIndex = MpCollection->countMaterials()-1;
   QString matname = (*MpCollection)[newMatIndex]->name;
 
-  PMtypeClass* typ = new PMtypeClass();
+  APmType* typ = new APmType();
   typ->readFromJson(json);
   typ->MaterialIndex = newMatIndex;
   PMs->appendNewPMtype(typ);
 
-  message("New PM type "+ typ->name +" added and a new material "+matname+" for the optical interface was registered", this);
+  message("New PM type "+ typ->Name +" added and a new material "+matname+" for the optical interface was registered", this);
 
   PMs->RecalculateAngular();
   PMs->RebinPDEs();

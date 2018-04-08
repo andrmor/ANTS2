@@ -4,7 +4,7 @@
 #include "generalsimsettings.h"
 #include "aphoton.h"
 #include "oneeventclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "alrfmoduleselector.h"
 
 #include <QDebug>

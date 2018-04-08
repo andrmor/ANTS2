@@ -1,7 +1,7 @@
 #include "neuralnetworkswindow.h"
 #include "neuralnetworksmodule.h"
 #include "eventsdataclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 
 /*===========================================================================*/
@@ -549,7 +549,7 @@ double TrainMSE, TrainFailBit, TestMSE, TestFailBit; QString mess;
 } }
 
 /*===========================================================================*/
-NeuralNetworksModule::NeuralNetworksModule(pms* Pms, APmGroupsManager *PMgroups, EventsDataClass* eventsDataHub, QObject *parent)
+NeuralNetworksModule::NeuralNetworksModule(APmHub* Pms, APmGroupsManager *PMgroups, EventsDataClass* eventsDataHub, QObject *parent)
 :QObject(parent),PMs(Pms),PMgroups(PMgroups), FNorm(nsToSum),FTrainOutput(NULL),FEnergyDims(-1),
 FSpaceDims(-1),FMaxEpochsStag(1),FnEpochsStag(0), EventsDataHub(eventsDataHub), RecSet(NULL) { } //ANDR
 

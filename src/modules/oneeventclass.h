@@ -4,7 +4,7 @@
 #include <QVector>
 #include <QBitArray>
 
-class pms;
+class APmHub;
 class TRandom2;
 class ASimulationStatistics;
 class GeneralSimSettings;
@@ -13,7 +13,7 @@ class AGammaRandomGenerator;
 class OneEventClass
 {
 public:
-  OneEventClass(pms* Pms, TRandom2* randGen, ASimulationStatistics* simStat);
+  OneEventClass(APmHub* Pms, TRandom2* randGen, ASimulationStatistics* simStat);
   ~OneEventClass();
 
   //Pm hits info
@@ -41,7 +41,7 @@ public:
   int  TimeToBin(double time);
 
 private:
-  pms* PMs;
+  APmHub* PMs;
   TRandom2* RandGen;  
   AGammaRandomGenerator* GammaRandomGen; // not to use one in pms module - multithread conflict?
 

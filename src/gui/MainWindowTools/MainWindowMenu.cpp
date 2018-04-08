@@ -1,7 +1,7 @@
 //ANTS2 modules and windows
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "materialinspectorwindow.h"
 #include "reconstructionwindow.h"
 #include "outputwindow.h"

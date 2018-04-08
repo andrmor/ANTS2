@@ -1,7 +1,7 @@
 #ifdef __USE_ANTS_CUDA__
 
 #include "cudamanagerclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 #include "sensorlrfs.h"
 #include "eventsdataclass.h"
@@ -56,7 +56,7 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 2 - Slices; 
 
 extern "C" const char* getLastCUDAerror();
 
-CudaManagerClass::CudaManagerClass(pms* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass *eventsDataHub, ReconstructionSettings *RecSet, int currentGroup) :
+CudaManagerClass::CudaManagerClass(APmHub* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass *eventsDataHub, ReconstructionSettings *RecSet, int currentGroup) :
    PMs(PMs), PMgroups(PMgroups), SensLRF(SensLRF), EventsDataHub(eventsDataHub), CurrentGroup(currentGroup)
 {  
   eventsData = 0; 

@@ -209,7 +209,6 @@ SOURCES += main.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
     common/generalsimsettings.cpp \
-    common/pmtypeclass.cpp \
     common/globalsettingsclass.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
@@ -225,7 +224,6 @@ SOURCES += main.cpp \
     common/ageoobject.cpp \
     common/aopticaloverride.cpp \
     modules/detectorclass.cpp \
-    modules/pms.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/processorclass.cpp \
@@ -314,13 +312,14 @@ SOURCES += main.cpp \
     modules/areconstructionmanager.cpp \
     scriptmode/ajavascriptmanager.cpp \
     scriptmode/ascriptmanager.cpp \
-    common/apm.cpp
+    common/apm.cpp \
+    modules/apmhub.cpp \
+    common/apmtype.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
     common/generalsimsettings.h \
-    common/pmtypeclass.h \
     common/globalsettingsclass.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
@@ -338,7 +337,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageoobject.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
-    modules/pms.h \
     modules/particlesourcesclass.h \    
     modules/flatfield.h \    
     modules/sensorlrfs.h \
@@ -442,7 +440,9 @@ HEADERS  += common/CorrelationFilters.h \
     modules/areconstructionmanager.h \
     scriptmode/ajavascriptmanager.h \
     scriptmode/ascriptmanager.h \
-    common/apm.h
+    common/apm.h \
+    modules/apmhub.h \
+    common/apmtype.h
 
 # --- SIM ---
 ants2_SIM {

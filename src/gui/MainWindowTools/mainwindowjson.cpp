@@ -11,7 +11,7 @@
 #include "particlesourcesclass.h"
 #include "aparticleonstack.h"
 #include "globalsettingsclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "reconstructionwindow.h"

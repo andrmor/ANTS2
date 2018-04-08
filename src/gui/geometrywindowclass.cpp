@@ -2,8 +2,8 @@
 #include "geometrywindowclass.h"
 #include "ui_geometrywindowclass.h"
 #include "mainwindow.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "windownavigatorclass.h"
 #include "detectorclass.h"
 #include "rasterwindowbaseclass.h"
@@ -266,7 +266,7 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
     for (int i=0; i<numPMs; i++)
       {
         int typ = MW->PMs->at(i).type;
-        PMtypeClass tp = *MW->PMs->getType(typ);
+        APmType tp = *MW->PMs->getType(typ);
         if (tp.SizeX<minSize) minSize = tp.SizeX;
         int shape = tp.Shape; //0 box, 1 round, 2 hexa
         if (shape == 0)

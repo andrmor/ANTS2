@@ -7,7 +7,7 @@
 #include "processorclass.h"
 #include "ageoobject.h"
 #include "apositionenergyrecords.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 #include "acalibratorsignalperphel.h"
 #include "detectorclass.h"

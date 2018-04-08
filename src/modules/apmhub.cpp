@@ -1,5 +1,5 @@
 //ANTS
-#include "pms.h"
+#include "apmhub.h"
 #include "amaterialparticlecolection.h"
 #include "generalsimsettings.h"
 #include "apmposangtyperecord.h"
@@ -19,15 +19,15 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-pms::pms(AMaterialParticleCollection *materialCollection, TRandom2 *randGen) :
+APmHub::APmHub(AMaterialParticleCollection *materialCollection, TRandom2 *randGen) :
    RandGen(randGen), MaterialCollection(materialCollection)
 {    
-    pms::clear();
+    APmHub::clear();
     GammaRandomGen = new AGammaRandomGenerator();
-    PMtypes.append(new PMtypeClass("Type1"));
+    PMtypes.append(new APmType("Type1"));
 }
 
-pms::~pms()
+APmHub::~APmHub()
 {
   //    qDebug() << "  --- PMs destructor";
   delete GammaRandomGen;
@@ -35,7 +35,7 @@ pms::~pms()
   clearPMtypes();
 }
 
-void pms::writeInividualOverridesToJson(QJsonObject &json)
+void APmHub::writeInividualOverridesToJson(QJsonObject &json)
 {
   QJsonObject js;
 
@@ -52,7 +52,7 @@ void pms::writeInividualOverridesToJson(QJsonObject &json)
   json["IndividualPMoverrides"] = js;
 }
 
-bool pms::readInividualOverridesFromJson(QJsonObject &json)
+bool APmHub::readInividualOverridesFromJson(QJsonObject &json)
 {
   if (!json.contains("IndividualPMoverrides"))
     {
@@ -60,7 +60,7 @@ bool pms::readInividualOverridesFromJson(QJsonObject &json)
       return false;
     }
   QJsonObject js = json["IndividualPMoverrides"].toObject();
-  pms::resetOverrides();
+  APmHub::resetOverrides();
   readPDEeffectiveFromJson(js);
   readPDEwaveFromJson(js);
   readAngularFromJson(js);
@@ -70,7 +70,7 @@ bool pms::readInividualOverridesFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::writeElectronicsToJson(QJsonObject &json)
+void APmHub::writeElectronicsToJson(QJsonObject &json)
 {
   QJsonObject js;
 
@@ -127,7 +127,7 @@ void pms::writeElectronicsToJson(QJsonObject &json)
   json["Electronics"] = js;
 }
 
-bool pms::readElectronicsFromJson(QJsonObject &json)
+bool APmHub::readElectronicsFromJson(QJsonObject &json)
 {  
    fDoPHS = false;
    fDoMCcrosstalk = false;
@@ -248,12 +248,12 @@ bool pms::readElectronicsFromJson(QJsonObject &json)
    return true;
 }
 
-void pms::resetOverrides()
+void APmHub::resetOverrides()
 {
     for (APm& pm : PMs) pm.resetOverrides();
 }
 
-void pms::configure(GeneralSimSettings *SimSet)
+void APmHub::configure(GeneralSimSettings *SimSet)
 {
     WavelengthResolved = SimSet->fWaveResolved;
     AngularResolved = SimSet->fAngResolved;
@@ -275,7 +275,7 @@ void pms::configure(GeneralSimSettings *SimSet)
     prepareMCcrosstalk();
 }
 
-void pms::SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes)
+void APmHub::SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes)
 {
   WavelengthResolved = wavelengthResolved;
   WaveFrom = waveFrom;
@@ -283,7 +283,7 @@ void pms::SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int
   WaveNodes = waveNodes;
 }
 
-void pms::calculateMaxQEs()
+void APmHub::calculateMaxQEs()
 {
     //calculating maxQE for accelerator
     //qDebug() << "--Initializing QEcheck accelerator in PMs--";
@@ -337,7 +337,7 @@ void pms::calculateMaxQEs()
      //qDebug()<<"MaxQE ="<< MaxQE;
 }
 
-void pms::clear() //does not affect PM types!
+void APmHub::clear() //does not affect PM types!
 {
     for (APm& pm : PMs) pm.clearSPePHSCustomDist();
     PMs.clear();
@@ -345,20 +345,20 @@ void pms::clear() //does not affect PM types!
     numPMs = 0;
 }
 
-void pms::add(int upperlower, double xx, double yy, double zz, double Psi, int typ) //add new PM
+void APmHub::add(int upperlower, double xx, double yy, double zz, double Psi, int typ) //add new PM
 {  
-  pms::insert(numPMs, upperlower, xx, yy, zz, Psi, typ);
+  APmHub::insert(numPMs, upperlower, xx, yy, zz, Psi, typ);
 }
 
-void pms::add(int upperlower, APmPosAngTypeRecord *pat)
+void APmHub::add(int upperlower, APmPosAngTypeRecord *pat)
 {
-  pms::insert(numPMs, upperlower, pat->x, pat->y, pat->z, 0, pat->type);
+  APmHub::insert(numPMs, upperlower, pat->x, pat->y, pat->z, 0, pat->type);
   PMs.last().phi = pat->phi;
   PMs.last().theta = pat->theta;
   PMs.last().psi = pat->psi;
 }
 
-void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, double Psi, int typ)
+void APmHub::insert(int ipm, int upperlower, double xx, double yy, double zz, double Psi, int typ)
 {
     if (ipm > numPMs) return; //in =case its automatic append
 
@@ -369,7 +369,7 @@ void pms::insert(int ipm, int upperlower, double xx, double yy, double zz, doubl
     numPMs++;
 }
 
-void pms::remove(int ipm)
+void APmHub::remove(int ipm)
 {
     if (ipm < 0 || ipm > numPMs-1)
     {
@@ -384,7 +384,7 @@ void pms::remove(int ipm)
     numPMs--;
 }
 
-bool pms::removePMtype(int itype)
+bool APmHub::removePMtype(int itype)
 {
   int numTypes = PMtypes.size();
   if (numTypes < 2) return false;
@@ -409,55 +409,55 @@ bool pms::removePMtype(int itype)
   return true;
 }
 
-void pms::appendNewPMtype(PMtypeClass *tp)
+void APmHub::appendNewPMtype(APmType *tp)
 {
   PMtypes.append(tp);
 }
 
-int pms::findPMtype(QString typeName) const
+int APmHub::findPMtype(QString typeName) const
 {
   for (int i=0; i<PMtypes.size(); i++)
-    if (PMtypes.at(i)->name == typeName) return i;
+    if (PMtypes.at(i)->Name == typeName) return i;
   return -1;
 }
 
-void pms::clearPMtypes()
+void APmHub::clearPMtypes()
 {
   for (int i=0; i<PMtypes.size(); i++) delete PMtypes[i];
   PMtypes.clear();
 }
 
-void pms::replaceType(int itype, PMtypeClass *newType) {delete PMtypes[itype]; PMtypes[itype] = newType;}
+void APmHub::replaceType(int itype, APmType *newType) {delete PMtypes[itype]; PMtypes[itype] = newType;}
 
-void pms::updateTypePDE(int typ, QVector<double> *x, QVector<double> *y) {PMtypes[typ]->PDE_lambda = *x; PMtypes[typ]->PDE = *y;}
+void APmHub::updateTypePDE(int typ, QVector<double> *x, QVector<double> *y) {PMtypes[typ]->PDE_lambda = *x; PMtypes[typ]->PDE = *y;}
 
-void pms::scaleTypePDE(int typ, double factor)
+void APmHub::scaleTypePDE(int typ, double factor)
 {
     for (int i=0; i<PMtypes[typ]->PDE.size(); i++)
         PMtypes[typ]->PDE[i] *= factor;
 }
 
-void pms::updateTypeAngular(int typ, QVector<double> *x, QVector<double> *y) {PMtypes[typ]->AngularSensitivity_lambda = *x; PMtypes[typ]->AngularSensitivity = *y;}
+void APmHub::updateTypeAngular(int typ, QVector<double> *x, QVector<double> *y) {PMtypes[typ]->AngularSensitivity_lambda = *x; PMtypes[typ]->AngularSensitivity = *y;}
 
-void pms::updateTypeAngularN1(int typ, double val) {PMtypes[typ]->n1 = val;}
+void APmHub::updateTypeAngularN1(int typ, double val) {PMtypes[typ]->AngularN1 = val;}
 
-void pms::updateTypeArea(int typ, QVector<QVector<double> > *vec, double xStep, double yStep){PMtypes[typ]->AreaSensitivity = *vec; PMtypes[typ]->AreaStepX = xStep; PMtypes[typ]->AreaStepY = yStep;}
+void APmHub::updateTypeArea(int typ, QVector<QVector<double> > *vec, double xStep, double yStep){PMtypes[typ]->AreaSensitivity = *vec; PMtypes[typ]->AreaStepX = xStep; PMtypes[typ]->AreaStepY = yStep;}
 
-void pms::clearTypeArea(int typ){PMtypes[typ]->AreaSensitivity.resize(0);}
+void APmHub::clearTypeArea(int typ){PMtypes[typ]->AreaSensitivity.resize(0);}
 
-void pms::preparePHSs()
+void APmHub::preparePHSs()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
       PMs[ipm].preparePHS();
 }
 
-void pms::prepareMCcrosstalk()
+void APmHub::prepareMCcrosstalk()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
      prepareMCcrosstalkForPM(ipm);
 }
 
-void pms::prepareMCcrosstalkForPM(int ipm)
+void APmHub::prepareMCcrosstalkForPM(int ipm)
 {
     delete PMs[ipm].MCsampl; PMs[ipm].MCsampl = 0;
 
@@ -465,7 +465,7 @@ void pms::prepareMCcrosstalkForPM(int ipm)
       PMs[ipm].MCsampl = new ACustomRandomSampling(RandGen, &PMs.at(ipm).MCcrosstalk);
 }
 
-void pms::updateADClevels()
+void APmHub::updateADClevels()
 {
   for (int ipm=0; ipm<numPMs; ipm++)
   {
@@ -478,13 +478,13 @@ void pms::updateADClevels()
   }
 }
 
-void pms::CalculateElChannelsStrength()
+void APmHub::CalculateElChannelsStrength()
 {
     for (int ipm = 0; ipm<PMs.size(); ipm++)
         PMs[ipm].scaleSPePHS( PMs.at(ipm).relElStrength );
 }
 
-double pms::GenerateSignalFromOnePhotoelectron(int ipm)
+double APmHub::GenerateSignalFromOnePhotoelectron(int ipm)
 {
     switch ( PMs.at(ipm).SPePHSmode )
     {
@@ -503,7 +503,7 @@ double pms::GenerateSignalFromOnePhotoelectron(int ipm)
     return 0;
 }
 
-void pms::RebinPDEsForType(int itype)
+void APmHub::RebinPDEsForType(int itype)
 {    
     if (WavelengthResolved)
     {
@@ -515,7 +515,7 @@ void pms::RebinPDEsForType(int itype)
     else PMtypes[itype]->PDEbinned.clear();
 }
 
-void pms::RebinPDEsForPM(int ipm)
+void APmHub::RebinPDEsForPM(int ipm)
 {
     if (WavelengthResolved)
     {
@@ -527,7 +527,7 @@ void pms::RebinPDEsForPM(int ipm)
     else PMs[ipm].PDEbinned.clear();
 }
 
-void pms::RebinPDEs()
+void APmHub::RebinPDEs()
 {
     for (int itype = 0; itype < PMtypes.size(); itype++)
         RebinPDEsForType(itype);
@@ -535,7 +535,7 @@ void pms::RebinPDEs()
         RebinPDEsForPM(ipm);
 }
 
-void pms::RecalculateAngular()
+void APmHub::RecalculateAngular()
 {
     for (int itype = 0; itype < countPMtypes(); itype++)
         RecalculateAngularForType(itype);
@@ -543,7 +543,7 @@ void pms::RecalculateAngular()
         RecalculateAngularForPM(ipm);
 }
 
-void pms::RecalculateAngularForType(int typ)
+void APmHub::RecalculateAngularForType(int typ)
 {
     if (!AngularResolved || PMtypes[typ]->AngularSensitivity_lambda.size() == 0)
         PMtypes[typ]->AngularSensitivityCosRefracted.clear();
@@ -551,7 +551,7 @@ void pms::RecalculateAngularForType(int typ)
     {
         //transforming degrees to cos(Refracted)
         QVector<double> x, y;
-        double n1 = PMtypes[typ]->n1;
+        double n1 = PMtypes[typ]->AngularN1;
         double n2 = (*MaterialCollection)[PMtypes[typ]->MaterialIndex]->n;
         //      qDebug()<<"n1 n2 "<<n1<<n2;
 
@@ -589,7 +589,7 @@ void pms::RecalculateAngularForType(int typ)
     }
 }
 
-void pms::RecalculateAngularForPM(int ipm)
+void APmHub::RecalculateAngularForPM(int ipm)
 {
     if ( !AngularResolved || PMs.at(ipm).AngularSensitivity_lambda.isEmpty() )
         PMs[ipm].AngularSensitivityCosRefracted.clear();
@@ -636,7 +636,7 @@ void pms::RecalculateAngularForPM(int ipm)
     }
 }
 
-double pms::getActualPDE(int ipm, int WaveIndex) const
+double APmHub::getActualPDE(int ipm, int WaveIndex) const
 {  
     /*
   qDebug()<<"------------";
@@ -654,7 +654,7 @@ double pms::getActualPDE(int ipm, int WaveIndex) const
 
         if (PMs.at(ipm).effectivePDE != -1.0)
              PDE = PMs.at(ipm).effectivePDE; //override exists
-        else PDE = PMtypes.at( PMs.at(ipm).type )->effectivePDE;
+        else PDE = PMtypes.at( PMs.at(ipm).type )->EffectivePDE;
     }
     else
     {
@@ -674,7 +674,7 @@ double pms::getActualPDE(int ipm, int WaveIndex) const
                 const int& iType = PMs.at(ipm).type;
                 if (PMtypes.at(iType)->PDEbinned.size() > 0)
                      PDE = PMtypes.at(iType)->PDEbinned.at(WaveIndex);
-                else PDE = PMtypes.at(iType)->effectivePDE; //last resort :)
+                else PDE = PMtypes.at(iType)->EffectivePDE; //last resort :)
             }
         }
     }
@@ -683,7 +683,7 @@ double pms::getActualPDE(int ipm, int WaveIndex) const
     return PDE;
 }
 
-double pms::getActualAngularResponse(int ipm, double cosAngle) const
+double APmHub::getActualAngularResponse(int ipm, double cosAngle) const
 {
     /*
     qDebug()<<"--------------";
@@ -724,7 +724,7 @@ double pms::getActualAngularResponse(int ipm, double cosAngle) const
     return AngularResponse;
 }
 
-double pms::getActualAreaResponse(int ipm, double x, double y)
+double APmHub::getActualAreaResponse(int ipm, double x, double y)
 {
     /*
     qDebug()<<"--------------";
@@ -752,7 +752,7 @@ double pms::getActualAreaResponse(int ipm, double x, double y)
         }
         else
         {
-            const PMtypeClass *typ = PMtypes.at( PMs.at(ipm).type );
+            const APmType *typ = PMtypes.at( PMs.at(ipm).type );
 
             if ( !typ->AreaSensitivity.isEmpty() ) //are there data for this PM type?
             {
@@ -782,7 +782,7 @@ double pms::getActualAreaResponse(int ipm, double x, double y)
     return AreaResponse;
 }
 
-QVector<QPair<double, int> > pms::getPMsSortedByR() const
+QVector<QPair<double, int> > APmHub::getPMsSortedByR() const
 {
     QVector<QPair<double, int> > snake(numPMs);
     for (int ipm = 0; ipm < numPMs; ipm++)
@@ -791,7 +791,7 @@ QVector<QPair<double, int> > pms::getPMsSortedByR() const
     return snake;
 }
 
-void pms::writePMtypesToJson(QJsonObject &json)
+void APmHub::writePMtypesToJson(QJsonObject &json)
 {
   QJsonArray ar;
   for (int i=0; i<PMtypes.size(); i++)
@@ -803,7 +803,7 @@ void pms::writePMtypesToJson(QJsonObject &json)
   json["PMtypes"] = ar;
 }
 
-bool pms::readPMtypesFromJson(QJsonObject &json)
+bool APmHub::readPMtypesFromJson(QJsonObject &json)
 {
   if (!json.contains("PMtypes"))
     {
@@ -815,14 +815,14 @@ bool pms::readPMtypesFromJson(QJsonObject &json)
   clearPMtypes();//PMtypes.clear();
   for (int i=0; i<ar.size(); i++)
     {
-      PMtypes.append(new PMtypeClass());
+      PMtypes.append(new APmType());
       QJsonObject js = ar[i].toObject();
       PMtypes.last()->readFromJson(js);
     }
   return (PMtypes.size()>0);
 }
 
-bool pms::saveCoords(const QString &filename)
+bool APmHub::saveCoords(const QString &filename)
 {
     QFile outFile(filename);
     outFile.open(QIODevice::WriteOnly);
@@ -834,7 +834,7 @@ bool pms::saveCoords(const QString &filename)
     return true;
 }
 
-bool pms::saveAngles(const QString &filename)
+bool APmHub::saveAngles(const QString &filename)
 {
     QFile outFile(filename);
     outFile.open(QIODevice::WriteOnly);
@@ -846,7 +846,7 @@ bool pms::saveAngles(const QString &filename)
     return true;
 }
 
-bool pms::saveTypes(const QString &filename)
+bool APmHub::saveTypes(const QString &filename)
 {
     QFile outFile(filename);
     outFile.open(QIODevice::WriteOnly);
@@ -858,7 +858,7 @@ bool pms::saveTypes(const QString &filename)
     return true;
 }
 
-bool pms::saveUpperLower(const QString &filename)
+bool APmHub::saveUpperLower(const QString &filename)
 {
     QFile outFile(filename);
     outFile.open(QIODevice::WriteOnly);
@@ -870,26 +870,26 @@ bool pms::saveUpperLower(const QString &filename)
     return true;
 }
 
-bool pms::isPDEwaveOverriden(int ipm) const
+bool APmHub::isPDEwaveOverriden(int ipm) const
 {
     return (!PMs.at(ipm).PDE.isEmpty());
 }
 
-bool pms::isPDEwaveOverriden() const
+bool APmHub::isPDEwaveOverriden() const
 {
     for (int ipm = 0; ipm < numPMs; ipm++)
         if (!PMs.at(ipm).PDE.isEmpty()) return true;
   return false;
 }
 
-bool pms::isPDEeffectiveOverriden() const
+bool APmHub::isPDEeffectiveOverriden() const
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
     if (PMs.at(ipm).effectivePDE != -1.0) return true;
   return false;
 }
 
-void pms::writePDEeffectiveToJson(QJsonObject &json)
+void APmHub::writePDEeffectiveToJson(QJsonObject &json)
 {
   QJsonArray arr;
   for (int ipm = 0; ipm < numPMs; ipm++)
@@ -897,7 +897,7 @@ void pms::writePDEeffectiveToJson(QJsonObject &json)
   json["PDEeffective"] = arr;
 }
 
-void pms::writeRelQE_PDE(QJsonObject &json)
+void APmHub::writeRelQE_PDE(QJsonObject &json)
 {
   QJsonArray arr;
   for (int i=0; i<numPMs; i++)
@@ -909,7 +909,7 @@ void pms::writeRelQE_PDE(QJsonObject &json)
   json["RelQEandElStr"] = arr;
 }
 
-void pms::readRelQE_PDE(QJsonObject &json)
+void APmHub::readRelQE_PDE(QJsonObject &json)
 {
   for (int i=0; i<numPMs; i++)
     {
@@ -931,7 +931,7 @@ void pms::readRelQE_PDE(QJsonObject &json)
     }
 }
 
-bool pms::readPDEeffectiveFromJson(QJsonObject &json)
+bool APmHub::readPDEeffectiveFromJson(QJsonObject &json)
 {
   if (json.contains("PDEeffective"))
     {
@@ -947,7 +947,7 @@ bool pms::readPDEeffectiveFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::writePDEwaveToJson(QJsonObject &json)
+void APmHub::writePDEwaveToJson(QJsonObject &json)
 {
   QJsonArray arr;
   for (int ipm=0; ipm<numPMs; ipm++)
@@ -959,7 +959,7 @@ void pms::writePDEwaveToJson(QJsonObject &json)
   json["PDEwave"] = arr;
 }
 
-bool pms::readPDEwaveFromJson(QJsonObject &json)
+bool APmHub::readPDEwaveFromJson(QJsonObject &json)
 {
   if (json.contains("PDEwave"))
     {
@@ -978,25 +978,25 @@ bool pms::readPDEwaveFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
+void APmHub::setPDEwave(int ipm, QVector<double> *x, QVector<double> *y)
 {
     PMs[ipm].PDE_lambda = *x;
     PMs[ipm].PDE = *y;
 }
 
-bool pms::isAngularOverriden(int ipm) const
+bool APmHub::isAngularOverriden(int ipm) const
 {
     return !PMs.at(ipm).AngularSensitivity.isEmpty();
 }
 
-bool pms::isAngularOverriden() const
+bool APmHub::isAngularOverriden() const
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
     if ( !PMs.at(ipm ).AngularSensitivity.isEmpty() ) return true;
   return false;
 }
 
-void pms::writeAngularToJson(QJsonObject &json)
+void APmHub::writeAngularToJson(QJsonObject &json)
 {
   QJsonObject js;
   QJsonArray arr;
@@ -1013,7 +1013,7 @@ void pms::writeAngularToJson(QJsonObject &json)
   json["Angular"] = js;
 }
 
-bool pms::readAngularFromJson(QJsonObject &json)
+bool APmHub::readAngularFromJson(QJsonObject &json)
 {
   if (json.contains("Angular"))
     {
@@ -1040,25 +1040,25 @@ bool pms::readAngularFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::setAngular(int ipm, QVector<double> *x, QVector<double> *y)
+void APmHub::setAngular(int ipm, QVector<double> *x, QVector<double> *y)
 {
     PMs[ipm].AngularSensitivity_lambda = *x;
     PMs[ipm].AngularSensitivity = *y;
 }
 
-bool pms::isAreaOverriden(int ipm) const
+bool APmHub::isAreaOverriden(int ipm) const
 {
     return !PMs.at(ipm).AreaSensitivity.isEmpty();
 }
 
-bool pms::isAreaOverriden() const
+bool APmHub::isAreaOverriden() const
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
      if ( !PMs.at(ipm).AreaSensitivity.isEmpty() ) return true;
   return false;
 }
 
-void pms::writeAreaToJson(QJsonObject &json)
+void APmHub::writeAreaToJson(QJsonObject &json)
 {
   QJsonObject js;
   QJsonArray arr;
@@ -1081,7 +1081,7 @@ void pms::writeAreaToJson(QJsonObject &json)
   json["Area"] = js;
 }
 
-bool pms::readAreaFromJson(QJsonObject &json)
+bool APmHub::readAreaFromJson(QJsonObject &json)
 {
   if (json.contains("Area"))
     {
@@ -1113,7 +1113,7 @@ bool pms::readAreaFromJson(QJsonObject &json)
   return true;
 }
 
-void pms::setArea(int ipm, QVector<QVector<double> > *vec, double xStep, double yStep)
+void APmHub::setArea(int ipm, QVector<QVector<double> > *vec, double xStep, double yStep)
 {
     PMs[ipm].AreaSensitivity = *vec;
     PMs[ipm].AreaStepX = xStep;

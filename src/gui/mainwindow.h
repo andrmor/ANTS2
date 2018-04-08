@@ -25,7 +25,7 @@ class SensorLRFs;
 class ExamplesWindow;
 class CheckUpWindowClass;
 class DetectorAddOnsWindow;
-class pms;
+class APmHub;
 class AReconstructionManager;
 class MaterialInspectorWindow;
 class OutputWindow;
@@ -83,7 +83,7 @@ public:
 
     // Pointers to external resources
     DetectorClass *Detector;
-    pms* PMs;                                   //alias
+    APmHub* PMs;                                   //alias
     AMaterialParticleCollection* MpCollection;  //alias
     AConfiguration* Config;
     EventsDataClass *EventsDataHub;

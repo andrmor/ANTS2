@@ -4,7 +4,7 @@
 #include "detectorclass.h"
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 
 #include <QDebug>

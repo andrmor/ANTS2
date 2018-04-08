@@ -1,7 +1,7 @@
 #include "nnmoduleclass.h"
 #include "eventsdataclass.h"
 #include "ajsontools.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 
 #include <QDebug>
@@ -517,7 +517,7 @@ bool KNNreconstructorClass::readFromJson(QJsonObject &json)
 }
 
 // ------------------------ NN module --------------------------
-NNmoduleClass::NNmoduleClass(EventsDataClass *EventsDataHub, pms* PMs) : EventsDataHub(EventsDataHub)
+NNmoduleClass::NNmoduleClass(EventsDataClass *EventsDataHub, APmHub* PMs) : EventsDataHub(EventsDataHub)
 {  
   Filter.configure(EventsDataHub, PMs);
   Reconstructor.configure(EventsDataHub, PMs);
@@ -530,7 +530,7 @@ NNmoduleClass::~NNmoduleClass()
   delete ScriptInterfacer;
 }
 
-AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, pms *PMs) :
+AScriptInterfacer::AScriptInterfacer(EventsDataClass *EventsDataHub, APmHub *PMs) :
   EventsDataHub(EventsDataHub), PMs(PMs), bCalibrationReady(false), NormSwitch(0), CalibrationEvents(0), FlannIndex(0) {}
 
 QVariant AScriptInterfacer::getNeighboursDirect(const QVector<float>& point, int numNeighbours)

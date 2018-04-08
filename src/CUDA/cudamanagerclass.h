@@ -7,8 +7,7 @@
 #include <QString>
 
 class EventsDataClass;
-//class DetectorClass;
-class pms;
+class APmHub;
 class APmGroupsManager;
 class SensorLRFs;
 class ReconstructionSettings;
@@ -25,7 +24,7 @@ struct RecDataStruct
 class CudaManagerClass
 {
 public:
-  CudaManagerClass(pms* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass* eventsDataHub, ReconstructionSettings* RecSet, int currentGroup);
+  CudaManagerClass(APmHub* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass* eventsDataHub, ReconstructionSettings* RecSet, int currentGroup);
   ~CudaManagerClass();
 
   //run in GUI
@@ -53,7 +52,7 @@ private:
   void           Clear();
 
 private:
-  pms* PMs;
+  APmHub* PMs;
   APmGroupsManager* PMgroups;
   SensorLRFs* SensLRF;
   EventsDataClass* EventsDataHub;

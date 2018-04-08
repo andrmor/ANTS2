@@ -7,7 +7,7 @@
 #include "lrfwindow.h"
 #include "reconstructionwindow.h"
 #include "sensorlrfs.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "guiutils.h"

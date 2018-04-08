@@ -3,7 +3,7 @@
 #include "ui_mainwindow.h"
 #include "detectoraddonswindow.h"
 #include "amaterialparticlecolection.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "outputwindow.h"
 #include "reconstructionwindow.h"
 #include "gainevaluatorwindowclass.h"   //onPMnumChange!

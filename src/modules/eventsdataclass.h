@@ -15,7 +15,7 @@
 #include <TString.h>
 
 class TTree;
-class pms;
+class APmHub;
 struct AScanRecord;
 struct AReconRecord;
 class TRandom2;
@@ -88,7 +88,7 @@ public:
     //Trees
     TTree *ReconstructionTree; //tree with reconstruction data
     void clearReconstructionTree();
-    bool createReconstructionTree(pms* PMs,
+    bool createReconstructionTree(APmHub* PMs,
                                   bool fIncludePMsignals=true,
                                   bool fIncludeRho=true,
                                   bool fIncludeTrue=true,
@@ -99,7 +99,7 @@ public:
 
     //Data Save
     bool saveReconstructionAsTree(QString fileName,
-                                  pms *PMs,
+                                  APmHub *PMs,
                                   bool fIncludePMsignals=true,
                                   bool fIncludeRho = true,
                                   bool fIncludeTrue = true,                                  
@@ -110,11 +110,11 @@ public:
 
     //Data Load - ascii
     bool fLoadedEventsHaveEnergyInfo;
-    int loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, pms *PMs); //returns -1 if failed, otherwise number of events added
+    int loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, APmHub *PMs); //returns -1 if failed, otherwise number of events added
 
     //data load - Tree
-    int loadSimulatedEventsFromTree(QString fileName, pms *PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
-    bool overlayAsciiFile(QString fileName, bool fAddMulti, pms *PMs); //true = success, if not, see ErrorString
+    int loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
+    bool overlayAsciiFile(QString fileName, bool fAddMulti, APmHub *PMs); //true = success, if not, see ErrorString
 
     //Misc
     QString ErrorString;

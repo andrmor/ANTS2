@@ -1,6 +1,6 @@
 #include "detectorclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "alrfmoduleselector.h"
 #include "amaterialparticlecolection.h"
 #include "ajsontools.h"
@@ -75,7 +75,7 @@ DetectorClass::DetectorClass(AConfiguration *config)
   *Sandwich->DefaultXY = ASlabXYModel(0, 6, 100, 100, 0);
   QObject::connect(MpCollection, SIGNAL(MaterialsChanged(const QStringList)), Sandwich, SLOT(onMaterialsChanged(const QStringList)));
 
-  PMs = new pms(MpCollection, RandGen);
+  PMs = new APmHub(MpCollection, RandGen);
   PMs->clearPMtypes();
 
   LRF::CoreLrfs::Setup(LRF::ALrfTypeManager::instance());
@@ -803,7 +803,7 @@ void DetectorClass::positionPMs()
       QString str = "PM" + QString::number(itype);
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
-      const PMtypeClass *tp = PMs->getType(itype);
+      const APmType *tp = PMs->getType(itype);
       pmTypes[itype] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmTypes[itype]->SetLineColor(kGreen);
@@ -978,7 +978,7 @@ void DetectorClass::positionDummies()
       QString str = "dPM" + QString::number(i);
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
-      const PMtypeClass *tp = PMs->getType(i);
+      const APmType *tp = PMs->getType(i);
       pmtDummy[i] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
                                           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmtDummy[i]->SetLineColor(30);

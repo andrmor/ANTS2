@@ -1,6 +1,6 @@
 #include "apreprocessingsettings.h"
 
-#include "pms.h"
+#include "apmhub.h"
 #include "ajsontools.h"
 #include "manifesthandling.h"
 
@@ -19,7 +19,7 @@ APreprocessingSettings::~APreprocessingSettings()
     clear();
 }
 
-QString APreprocessingSettings::readFromJson(QJsonObject &json, pms* PMs, QString FileName)
+QString APreprocessingSettings::readFromJson(QJsonObject &json, APmHub* PMs, QString FileName)
 // returns empty string if loaded OK
 // returns "-" is preprocessing data not found in json
 // otherwise returns error message
@@ -114,7 +114,7 @@ QString APreprocessingSettings::readFromJson(QJsonObject &json, pms* PMs, QStrin
   return "";
 }
 
-void APreprocessingSettings::writeToJson(QJsonObject &json, pms *PMs)
+void APreprocessingSettings::writeToJson(QJsonObject &json, APmHub *PMs)
 {
     json["Preprocessing"] = fActive;
       QJsonArray ar;

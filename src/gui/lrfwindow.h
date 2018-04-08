@@ -11,7 +11,7 @@ class PMsensorGroup;
 class SensorLocalCache;
 class QListWidgetItem;
 class SensorLRFs;
-class pms;
+class APmHub;
 
 class EventsDataClass;
 
@@ -116,7 +116,7 @@ private:
     Ui::LRFwindow *ui;
     MainWindow *MW;
     SensorLRFs* SensLRF;
-    pms* PMs;
+    APmHub* PMs;
     EventsDataClass *EventsDataHub;
     QTimer timer;
 

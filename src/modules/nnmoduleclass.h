@@ -9,7 +9,7 @@
 #include <QPair>
 
 class EventsDataClass;
-class pms;
+class APmHub;
 
 class KNNfilterClass
 {
@@ -17,7 +17,7 @@ public:
   KNNfilterClass();
   ~KNNfilterClass();
 
-  void configure(EventsDataClass *EventsDataHub, pms* PMs) {this->EventsDataHub = EventsDataHub, this->PMs = PMs;}
+  void configure(EventsDataClass *EventsDataHub, APmHub* PMs) {this->EventsDataHub = EventsDataHub, this->PMs = PMs;}
 
   void clear(); //deletes/clears data and forces next filter call to recalculate data
   bool prepareNNfilter(int KNNfilterAverageOver); //MUST be used after events data changed
@@ -28,7 +28,7 @@ public:
 
 private:
   EventsDataClass *EventsDataHub;
-  pms* PMs;
+  APmHub* PMs;
 
   flann::Matrix<int> *indices;
   flann::Matrix<float> *dists;
@@ -53,7 +53,7 @@ public:
   KNNreconstructorClass();
   ~KNNreconstructorClass();
 
-  void configure(EventsDataClass *EventsDataHub, pms* PMs) {this->EventsDataHub = EventsDataHub, this->PMs = PMs;}
+  void configure(EventsDataClass *EventsDataHub, APmHub* PMs) {this->EventsDataHub = EventsDataHub, this->PMs = PMs;}
   void setNumNeighbours(int num) {numNeighbours = num;}
   void setNumTrees(int num) {numTrees = num;}
   void setWeightMode(int mode) {weightMode = mode;}
@@ -79,7 +79,7 @@ signals:
 
 private:
   EventsDataClass *EventsDataHub;
-  pms* PMs;
+  APmHub* PMs;
   int numNeighbours; //search for numNeighbours in calibration set and use their coordinates
   int useNeighbours; //number of neighbours used to reconstruct position. Cannot be larger than numNeighbours!
   int numTrees; //number of trees used in flann index
@@ -100,7 +100,7 @@ private:
 class AScriptInterfacer
 {
 public:
-   AScriptInterfacer(EventsDataClass *EventsDataHub, pms* PMs);
+   AScriptInterfacer(EventsDataClass *EventsDataHub, APmHub* PMs);
 
    QVariant getNeighbours(int ievent, int numNeighbours);
    QVariant getNeighboursDirect(const QVector<float>& point, int numNeighbours);
@@ -127,7 +127,7 @@ public:
 
 private:
    EventsDataClass* EventsDataHub;
-   pms* PMs;
+   APmHub* PMs;
 
    bool bCalibrationReady;
    int numCalibrationEvents;
@@ -149,7 +149,7 @@ private:
 class NNmoduleClass
 {  
 public:
-  NNmoduleClass(EventsDataClass *EventsDataHub, pms* PMs);
+  NNmoduleClass(EventsDataClass *EventsDataHub, APmHub* PMs);
   ~NNmoduleClass();
 
   KNNfilterClass Filter;
@@ -158,7 +158,7 @@ public:
 
 private:
   EventsDataClass *EventsDataHub;
-  pms* PMs;
+  APmHub* PMs;
 };
 
 #endif // NNMODULECLASS_H

@@ -1,6 +1,6 @@
 #include "oneeventclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "asimulationstatistics.h"
 #include "generalsimsettings.h"
 #include "agammarandomgenerator.h"
@@ -12,7 +12,7 @@
 #include "TRandom2.h"
 #include "TH1D.h"
 
-OneEventClass::OneEventClass(pms *Pms, TRandom2 *randGen, ASimulationStatistics* simStat)
+OneEventClass::OneEventClass(APmHub *Pms, TRandom2 *randGen, ASimulationStatistics* simStat)
 {
   PMs = Pms;
   RandGen = randGen;
@@ -34,7 +34,7 @@ void OneEventClass::configure(const GeneralSimSettings *simSet)
   for (int ipm=0; ipm<numPMs; ipm++)
     {
       QBitArray sipmPixels;
-      const PMtypeClass *type = PMs->getTypeForPM(ipm);
+      const APmType *type = PMs->getTypeForPM(ipm);
       if(type->SiPM)
         {
            sipmPixels = QBitArray((SimSet->fTimeResolved ? SimSet->TimeBins : 1) * type->PixelsX * type->PixelsY);
@@ -129,7 +129,7 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
 
   //    qDebug()<<"Detected!";
   const int itype = PMs->at(ipm).type;
-  const PMtypeClass* tp = PMs->getType(itype);
+  const APmType* tp = PMs->getType(itype);
   double sizeX = tp->SizeX;
   int pixelsX =  tp->PixelsX;
   //double pixLengthX = sizeX / pixelsX;
@@ -160,7 +160,7 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
 void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int numHits)
 //numHits != 1 is used only for the simplistic model of microcell cross-talk!
 {
-  const PMtypeClass *tp = PMs->getTypeForPM(ipm);
+  const APmType *tp = PMs->getTypeForPM(ipm);
   if (!SimSet->fTimeResolved)
   {
       const int iXY = tp->PixelsX*binY + binX;
@@ -173,7 +173,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
       if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
       {
           const int itype = PMs->at(ipm).type;
-          const PMtypeClass* tp = PMs->getType(itype);
+          const APmType* tp = PMs->getType(itype);
           //checking 4 neighbours
           if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
           if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
@@ -207,7 +207,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
           if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
           {
               const int itype = PMs->at(ipm).type;
-              const PMtypeClass* tp = PMs->getType(itype);
+              const APmType* tp = PMs->getType(itype);
               //checking 4 neighbours
               if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
               if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
@@ -361,7 +361,7 @@ void OneEventClass::AddDarkCounts()
     {
       if (PMs->isSiPM(ipm)) //Add dark counts for SiPMs
         {
-          const PMtypeClass* typ = PMs->getTypeForPM(ipm);
+          const APmType* typ = PMs->getTypeForPM(ipm);
           const int&    pixelsX =  typ->PixelsX;
           const int&    pixelsY =  typ->PixelsY;
           const double& darkRate = typ->DarkCountRate; //in Hz

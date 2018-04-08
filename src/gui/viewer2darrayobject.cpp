@@ -1,12 +1,12 @@
 #include "viewer2darrayobject.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 
 #include <QGraphicsItem>
 #include <QDebug>
 #include <math.h>
 
-Viewer2DarrayObject::Viewer2DarrayObject(myQGraphicsView *GV, pms* PM_module)
+Viewer2DarrayObject::Viewer2DarrayObject(myQGraphicsView *GV, APmHub* PM_module)
 //  QObject()
 {
   gv = GV;

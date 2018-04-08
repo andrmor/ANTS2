@@ -3,8 +3,8 @@
 #include "ui_outputwindow.h"
 #include "mainwindow.h"
 #include "graphwindowclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "windownavigatorclass.h"
 #include "guiutils.h"
 #include "amaterialparticlecolection.h"
@@ -294,7 +294,7 @@ void OutputWindow::on_pbSiPMpixels_clicked()
 
     auto hist = new TH2C("histOutW","x vs y",binsX,0,binsX, binsY, -binsY,0);
 
-    const PMtypeClass *typ = MW->PMs->getTypeForPM(ipm);
+    const APmType *typ = MW->PMs->getTypeForPM(ipm);
     for (int iX=0; iX<binsX; iX++)
      for (int iY=0; iY<binsY; iY++)
       {         

@@ -17,7 +17,7 @@
 
 class EventsDataClass;
 class DetectorClass;
-class pms;
+class APmHub;
 class APmGroupsManager;
 class ALrfModuleSelector;
 class TmpObjHubClass;
@@ -65,7 +65,7 @@ public:
 
   EventsDataClass *EventsDataHub;
   DetectorClass* Detector;
-  pms* PMs;
+  APmHub* PMs;
   APmGroupsManager* PMgroups;
   ALrfModuleSelector* LRFs;
 

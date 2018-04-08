@@ -22,7 +22,7 @@ class DetectorClass;
 class EventsDataClass;
 class GeometryWindowClass;
 class GraphWindowClass;
-class pms;
+class APmHub;
 class TF2;
 class AConfiguration;
 class AReconstructionManager;
@@ -285,7 +285,7 @@ public slots:
 
 private:
   AConfiguration* Config;
-  pms* PMs;
+  APmHub* PMs;
 
   bool checkValidPM(int ipm);
   bool checkAddPmCommon(int UpperLower, int type);

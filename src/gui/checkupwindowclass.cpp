@@ -3,8 +3,8 @@
 #include "ui_checkupwindowclass.h"
 #include "mainwindow.h"
 #include "detectorclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
@@ -521,18 +521,18 @@ TriState DESCheckUpItem::doCheckUp()
     if(effPDE != -1)
         return setState(TriStateOk, QString::number(effPDE, 'g', 4));
 
-    const PMtypeClass *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
+    const APmType *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
     int ipm = 0;
     for(; ipm < MW->PMs->count(); ipm++)
         if( MW->PMs->at(ipm).effectivePDE != -1.0 && ipm != row())
             break;
-    return setState((ipm == MW->PMs->count()) ? TriStateOk : TriStateWarning, QString::number(pmtype->effectivePDE, 'g', 4));
+    return setState((ipm == MW->PMs->count()) ? TriStateOk : TriStateWarning, QString::number(pmtype->EffectivePDE, 'g', 4));
 }
 
 const QString DEWCheckUpItem::getToolTip() const  { return "Overriden DE" + CheckUpItem::wavelenToolTips[overriden] + " and Inherited DE" + CheckUpItem::wavelenToolTips[inherited]; }
 TriState DEWCheckUpItem::doCheckUp()
 {
-    const PMtypeClass *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
+    const APmType *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
     overriden = CheckUpItem::rangeCheck(MW->PMs->at(row()).PDE_lambda, MW->WaveFrom, MW->WaveTo);
     inherited = CheckUpItem::rangeCheck(pmtype->PDE_lambda, MW->WaveFrom, MW->WaveTo);
     setState(inherited | overriden, "Over.     Inher.");

@@ -2,14 +2,14 @@
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 #include "atrackrecords.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 #include "aconfiguration.h"
 #include "apreprocessingsettings.h"
 #include "areconstructionmanager.h"
@@ -2463,7 +2463,7 @@ QString ALrfScriptInterface::Make(QString name, QVariantList instructions, bool 
     recipe = repo->addRecipe(name.toLocal8Bit().data(), current_instructions);
 
   std::vector<APoint> sensorPos;
-  pms *PMs = Detector->PMs;
+  APmHub *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
     APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
@@ -2504,7 +2504,7 @@ QString ALrfScriptInterface::Make(int recipe_id, bool use_scan_data, bool fit_er
     return "Reconstruction data is not setup";
 
   std::vector<APoint> sensorPos;
-  pms *PMs = Detector->PMs;
+  APmHub *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
     APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));

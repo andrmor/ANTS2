@@ -4,7 +4,7 @@
 #include <QDialog>
 
 class ALrfModuleSelector;
-class pms;
+class APmHub;
 class APmGroupsManager;
 class Viewer2DarrayObject;
 class myQGraphicsView;
@@ -17,7 +17,7 @@ class ALrfMouseExplorer : public QDialog
   Q_OBJECT
 
 public:
-  ALrfMouseExplorer(ALrfModuleSelector *LRFs, pms *PMs, APmGroupsManager *PMgroups, double SuggestedZ = 0, QWidget *parent = 0);
+  ALrfMouseExplorer(ALrfModuleSelector *LRFs, APmHub *PMs, APmGroupsManager *PMgroups, double SuggestedZ = 0, QWidget *parent = 0);
   ~ALrfMouseExplorer();
 
   void Start();
@@ -27,7 +27,7 @@ private:
   myQGraphicsView* gv;
 
   ALrfModuleSelector* LRFs;
-  pms* PMs;
+  APmHub* PMs;
   APmGroupsManager* PMgroups;
 
   QComboBox *cobSG;

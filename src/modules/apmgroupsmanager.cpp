@@ -1,13 +1,13 @@
 #include "apmgroupsmanager.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "ajsontools.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDebug>
 
-APmGroupsManager::APmGroupsManager(pms *PMs, QJsonObject *ConfigJSON) : QObject(), PMs(PMs), ConfigJSON(ConfigJSON)
+APmGroupsManager::APmGroupsManager(APmHub *PMs, QJsonObject *ConfigJSON) : QObject(), PMs(PMs), ConfigJSON(ConfigJSON)
 {
    definePMgroup("Default group", true);
    setCurrentGroup(0);
@@ -157,7 +157,7 @@ void APmGroupsManager::autogroup(int Regularity)
                     QString str;
                     if (iul == 0) str = "UpperPMs_";
                     else str = "LowerPMs_";
-                    str += PMs->getType(ityp)->name;
+                    str += PMs->getType(ityp)->Name;
                     int ThisGroup = definePMgroup(str, true);
                     for (int i=0; i<vp.count(); i++)
                         addPMtoGroup(vp.at(i), ThisGroup);
@@ -210,7 +210,7 @@ void APmGroupsManager::autogroup(int Regularity)
                 if (thisZ != lastZ)
                   {
                     //new group
-                    lastGroup = definePMgroup("Z="+QString::number(thisZ) + "_" + PMs->getType(ityp)->name, true);
+                    lastGroup = definePMgroup("Z="+QString::number(thisZ) + "_" + PMs->getType(ityp)->Name, true);
                   }
                 //add pm to this group
                 addPMtoGroup(ipm, lastGroup);

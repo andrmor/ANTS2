@@ -221,10 +221,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Default detector configured";
 
     //Environment
-    on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
-    on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-    on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-    on_cbAreaSensitive_toggled(ui->cbAreaSensitive->isChecked());
+    //on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
+    //on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+    //on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+    //on_cbAreaSensitive_toggled(ui->cbAreaSensitive->isChecked());
     ui->fLoadProgress->setVisible(false);
     TGaxis::SetMaxDigits(3);  //Global setting for cern Root graphs!
      //Script window geometry

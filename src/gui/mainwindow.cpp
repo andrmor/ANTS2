@@ -972,7 +972,7 @@ void MainWindow::ToggleUpperLowerPMs()
   if (ui->cbUPM->isChecked() && !ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(0);
   else if (!ui->cbUPM->isChecked() && ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(1);
 
-  //force-trigger visualization  
+  //force-trigger visualization  ***!!!
   MainWindow::on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
 
   if (DoNotUpdateGeometry) return; //if it is triggered during load/init hase
@@ -1116,20 +1116,18 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->RecoveryTime = ui->ledSiPMrecoveryTime->text().toDouble();
    if (type->SiPM) type->Shape = 0; //SiPM - always rectangular
    type->effectivePDE = ui->ledPDE->text().toDouble();
-   //PMs->setTypePropertiesScalar(index, &tp);
    QString str;
    str.setNum(type->PixelsX * type->PixelsY);
    ui->labTotalPixels->setText("("+str+")");
 
-   //wave-, angular- and area-resolved data are updated independently
+   updateCOBsWithPMtypeNames();
+   on_pbShowPMsArrayRegularData_clicked(); //in case type name was changed
 
-   MainWindow::updateCOBsWithPMtypeNames();
-   MainWindow::on_pbShowPMsArrayRegularData_clicked(); //in case type name was changed
-   MainWindow::ReconstructDetector();//MainWindow::on_pbCreateCustomConfiguration_clicked();
+   ReconstructDetector();
+   on_pbUpdateSimConfig_clicked();
 
    //for indication, update PMs binned properties
-   on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+   //on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
 }
 
 void MainWindow::on_sbPMtype_valueChanged(int arg1)
@@ -1420,7 +1418,7 @@ void MainWindow::on_pbUpdateTestWavelengthProperties_clicked()
 
 void MainWindow::UpdateTestWavelengthProperties()
 {
-  if (!ui->cbWaveResolved->isChecked()) return;
+  if (!isWavelengthResolved()) return;
   int matId = ui->cobMaterialForWaveTests->currentIndex();
 
   ui->pbTestShowPrimary->setEnabled((*MpCollection)[matId]->PrimarySpectrumHist);
@@ -1603,11 +1601,7 @@ void MainWindow::on_pbShowPDEbinned_clicked()
     }
 
   const int itype = ui->sbPMtype->value();
-  PMs->RebinPDEsForType(itype);
-
-  int WaveNodes = PMs->getWaveNodes();
-  double WaveFrom = PMs->getWaveFrom();
-  double WaveStep = PMs->getWaveStep();
+  //PMs->RebinPDEsForType(itype);
 
   QVector<double> x;
   for (int i = 0; i < WaveNodes; i++)
@@ -2210,8 +2204,6 @@ void MainWindow::on_pbIndShowDEbinned_clicked()
       message("First activate wavelength resolved simulation option", this);
       return;
     }
-  //force rebinning
-  on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
 
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
@@ -2316,11 +2308,7 @@ void MainWindow::on_pbIndShowEffectiveAngular_clicked()
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
 
-  //force rebinning
-  on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-
   QVector<double> x;
-  x.resize(0);
   int CosBins = ui->sbCosBins->value();
   for (int i=0; i<CosBins; i++) x.append(1.0/(CosBins-1)*i);
 
@@ -4730,6 +4718,8 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
     simSettings.readFromJson(SimJson);
     Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
     Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+
+    UpdateTestWavelengthProperties();
 
     if (GenScriptWindow && GenScriptWindow->isVisible())
         GenScriptWindow->updateJsonTree();

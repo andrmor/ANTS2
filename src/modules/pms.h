@@ -136,11 +136,6 @@ public:
     void setDoADC(bool flag) {fDoADC = flag;}
     void setMeasurementTime(double time) {MeasurementTime = time;}
 
-    bool   isWaveRes() const {return WavelengthResolved;}
-    double getWaveFrom() const  {return WaveFrom;}
-    double getWaveStep() const  {return WaveStep;}
-    int    getWaveNodes() const {return WaveNodes;}
-
     bool isDoPHS() const {return fDoPHS;}
     bool isDoMCcrosstalk() const {return fDoMCcrosstalk;}
     bool isDoElNoise() const {return fDoElNoise;}

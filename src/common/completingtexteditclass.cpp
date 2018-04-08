@@ -41,6 +41,8 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
         return;
     }
 
+    if (e->key() == Qt::Key_Escape) QToolTip::hideText();
+
     if (e->key() == Qt::Key_Delete && (e->modifiers()==0))
     {
         //bugs:

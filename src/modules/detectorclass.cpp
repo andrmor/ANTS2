@@ -151,6 +151,8 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
       fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
     }
 
+  Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
+
   if (numPMs != pmCount())
   {
       LRFs->clear(PMs->count()); // clear LRFs if number of PMs changed

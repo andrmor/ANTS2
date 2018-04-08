@@ -275,14 +275,6 @@ void APmHub::configure(GeneralSimSettings *SimSet)
     prepareMCcrosstalk();
 }
 
-void APmHub::SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes)
-{
-  WavelengthResolved = wavelengthResolved;
-  WaveFrom = waveFrom;
-  WaveStep = waveStep;
-  WaveNodes = waveNodes;
-}
-
 void APmHub::calculateMaxQEs()
 {
     //calculating maxQE for accelerator

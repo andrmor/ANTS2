@@ -129,7 +129,6 @@ public:
 
     void CalculateElChannelsStrength();
 
-    void SetWave(bool wavelengthResolved, double waveFrom, double waveStep, int waveNodes);
     void setDoPHS(bool flag) {fDoPHS = flag;}
     void setDoMCcrosstalk(bool flag) {fDoMCcrosstalk = flag;}
     void setDoElNoise(bool flag) {fDoElNoise = flag;}

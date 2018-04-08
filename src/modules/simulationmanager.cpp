@@ -1812,7 +1812,7 @@ void ASimulationManager::onSimulationFinished()
     EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
 
     Detector->BuildDetector();
-    Detector->Config->UpdateSimSettingsOfDetector();
+    //Detector->Config->UpdateSimSettingsOfDetector(); //inside the rebuild now
 
     emit SimulationFinished();
 

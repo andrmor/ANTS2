@@ -56,10 +56,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           QJsonObject SimJson = json["SimulationConfig"].toObject();
           JSON["SimulationConfig"] = SimJson;
 
-          GeneralSimSettings simSettings;
-          simSettings.readFromJson(SimJson);
-          Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
-          Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+          UpdateSimSettingsOfDetector();
 
           emit requestSimulationGuiUpdate();
           emit requestSelectFirstActiveParticleSource();
@@ -398,4 +395,14 @@ const QString AConfiguration::RemoveParticle(int particleId)
   emit RequestClearParticleStack(); //clear defined ParticleStack in GUI
 
   return "";
+}
+
+void AConfiguration::UpdateSimSettingsOfDetector()
+{
+    QJsonObject SimJson = JSON["SimulationConfig"].toObject();
+
+    GeneralSimSettings simSettings;
+    simSettings.readFromJson(SimJson);
+    Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
+    Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
 }

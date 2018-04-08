@@ -2632,7 +2632,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           </rect>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tabDetectionProbability_2">
           <attribute name="title">

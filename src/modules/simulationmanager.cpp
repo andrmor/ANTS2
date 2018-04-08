@@ -21,6 +21,7 @@
 #include "ageomarkerclass.h"
 #include "atrackrecords.h"
 #include "ajsontools.h"
+#include "aconfiguration.h"
 
 #include <QVector>
 #include <QTime>
@@ -1811,6 +1812,7 @@ void ASimulationManager::onSimulationFinished()
     EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
 
     Detector->BuildDetector();
+    Detector->Config->UpdateSimSettingsOfDetector();
 
     emit SimulationFinished();
 

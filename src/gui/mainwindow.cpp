@@ -4713,11 +4713,7 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
 
     // reading back - like with the detector; if something is not saved, will be obvious
     readSimSettingsFromJson(Config->JSON);
-    const QJsonObject SimJson = Config->JSON["SimulationConfig"].toObject();
-    GeneralSimSettings simSettings;
-    simSettings.readFromJson(SimJson);
-    Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
-    Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+    Detector->Config->UpdateSimSettingsOfDetector();
 
     UpdateTestWavelengthProperties();
 

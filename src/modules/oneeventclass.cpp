@@ -256,49 +256,58 @@ void OneEventClass::convertHitsToSignal(const QVector<int>& pmHits, QVector<floa
         {
             switch ( PMs->at(ipm).SPePHSmode )
             {
-              case 0:
+            case 0:
                 pmSignals[ipm] = PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
                 break;
-              case 1:
-              {
+            case 1:
+            {
                 double mean =  PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
                 double sigma = PMs->at(ipm).SPePHSsigma * TMath::Sqrt( pmHits.at(ipm) );
                 pmSignals[ipm] = RandGen->Gaus(mean, sigma);
                 break;
-              }
-              case 2:
-              {
+            }
+            case 2:
+            {
                 double k = PMs->at(ipm).SPePHSshape;
                 double theta = PMs->at(ipm).AverageSigPerPhE / k;
                 k *= pmHits.at(ipm); //for sum distribution
                 pmSignals[ipm] = GammaRandomGen->getGamma(k, theta);
                 break;
-              }
-              case 3:
-              {
+            }
+            case 3:
+            {
                 pmSignals[ipm] = 0;
                 if ( PMs->at(ipm).SPePHShist )
-                  for (int j = 0; j < pmHits.at(ipm); j++)
-                    pmSignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
-              }
+                    for (int j = 0; j < pmHits.at(ipm); j++)
+                        pmSignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
+            }
             }
         }
         else pmSignals[ipm] = pmHits.at(ipm);
 
         // adding electronic noise
         if (PMs->isDoElNoise())
-            pmSignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
+        {
+            //pmSignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
+
+            const double& sigma_const = PMs->at(ipm).ElNoiseSigma;
+            const double& sigma_stat  = PMs->at(ipm).ElNoiseSigma_StatSigma;
+            const double& sigma_norm  = PMs->at(ipm).ElNoiseSigma_StatNorm;
+
+            const double sigma = (sigma_stat == 0 ? sigma_const : sqrt( sigma_const*sigma_const  +  sigma_stat*sigma_stat * pmSignals.at(ipm) / sigma_norm) );
+            pmSignals[ipm] += RandGen->Gaus(0, sigma);
+        }
 
         // doing ADC sim
         if (PMs->isDoADC())
         {
             if (pmSignals[ipm] < 0) pmSignals[ipm] = 0;
             else
-              {
+            {
                 if (pmSignals[ipm] > PMs->at(ipm).ADCmax)
-                     pmSignals[ipm] = PMs->at(ipm).ADClevels;
+                    pmSignals[ipm] = PMs->at(ipm).ADClevels;
                 else pmSignals[ipm] = static_cast<int>( pmSignals.at(ipm) / PMs->at(ipm).ADCstep );
-              }
+            }
         }
     }
 }

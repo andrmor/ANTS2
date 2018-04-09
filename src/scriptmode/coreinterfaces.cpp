@@ -374,6 +374,7 @@ void AInterfaceToCore::processEvents()
 void AInterfaceToCore::reportProgress(int percents)
 {
     emit ScriptManager->reportProgress(percents);
+    qApp->processEvents();
 }
 
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)

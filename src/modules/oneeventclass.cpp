@@ -50,17 +50,22 @@ void OneEventClass::clearHits()
   PMhits.resize(numPMs);
   PMsignals.resize(numPMs);
   if (SimSet->fTimeResolved)
-    {
+  {
       TimedPMhits.resize(SimSet->TimeBins);
       TimedPMsignals.resize(SimSet->TimeBins);
-      for (int itime=0; itime<SimSet->TimeBins; itime++)
-        {
+      for (int itime = 0; itime < SimSet->TimeBins; itime++)
+      {
           TimedPMhits[itime].resize(numPMs);
           TimedPMsignals[itime].resize(numPMs);
-        }
-    }
+      }
+  }
+  else
+  {
+      TimedPMhits.clear();
+      TimedPMsignals.clear();
+  }
 
-  for (int ipm=0; ipm<numPMs; ipm++)
+  for (int ipm = 0; ipm < numPMs; ipm++)
   {
       //total per PM
       PMhits[ipm] = 0;

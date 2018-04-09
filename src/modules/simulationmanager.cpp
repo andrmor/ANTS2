@@ -1595,7 +1595,7 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
     dataHub->Events.resize(0);
     dataHub->TimedEvents.resize(0);
 
-    qDebug() << "Total hits recorded:" << OneEvent->PMhits;
+    //qDebug() << "Total hits recorded:" << OneEvent->PMhits;
 
     OneEvent->HitsToSignal();
     dataHub->Events.append(OneEvent->PMsignals);

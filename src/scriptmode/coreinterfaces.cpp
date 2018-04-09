@@ -366,6 +366,16 @@ QVariant AInterfaceToCore::GetNewFiles()
     return newFiles;
 }
 
+void AInterfaceToCore::processEvents()
+{
+    qApp->processEvents();
+}
+
+void AInterfaceToCore::reportProgress(int percents)
+{
+    emit ScriptManager->reportProgress(percents);
+}
+
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)
 {
   if (QFileInfo(fileName).exists())

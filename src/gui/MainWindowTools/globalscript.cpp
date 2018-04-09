@@ -43,8 +43,9 @@ void MainWindow::createScriptWindow()
     AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
     ScriptWindow = new AScriptWindow(SM, GlobSet, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
-    connect(ScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
-    connect(ScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
+    connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
+    connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
+    connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
     NetModule->SetScriptManager(SM);
 
     // interface objects are owned after this by the ScriptManager!

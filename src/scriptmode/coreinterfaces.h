@@ -66,6 +66,10 @@ public slots:
   QVariant SetNewFileFinder(const QString dir, const QString fileNamePattern);
   QVariant GetNewFiles();
 
+  //misc
+  void processEvents();
+  void reportProgress(int percents);
+
 private:
   AScriptManager* ScriptManager;
 
@@ -73,6 +77,7 @@ private:
   QSet<QString>   Finder_FileNames;
   QString         Finder_Dir;
   QString         Finder_NamePattern = "*.*";
+
 };
 
 // ---- M A T H ----

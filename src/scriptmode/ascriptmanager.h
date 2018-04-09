@@ -79,6 +79,8 @@ signals:
     void            showMessage(QString message);
     void            clearText();
     void            requestHighlightErrorLine(int lineNumber);
+
+    void            reportProgress(int percent);
 };
 
 #endif // ASCRIPTMANAGER_H

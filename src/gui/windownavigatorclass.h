@@ -24,9 +24,6 @@ public:
   explicit WindowNavigatorClass(QWidget *parent, MainWindow *mw);
   ~WindowNavigatorClass();
 
-  //void setLastProcessedWindow(QString str){LastProcessedWindow = str;}
-  void setProgress(int percent);
-
   void SetupWindowsTaskbar(); //Windows only
 
   void ResetAllProgressBars();
@@ -50,6 +47,7 @@ public slots:
   void ShowWindowTriggered(QString w);  
   void on_pbMaxAll_clicked();
   void ChangeGuiBusyStatus(bool flag);
+  void setProgress(int percent);
 
 private slots:   
    void on_pbMinAll_clicked();

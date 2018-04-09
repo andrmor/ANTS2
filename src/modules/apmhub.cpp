@@ -106,8 +106,16 @@ void APmHub::writeElectronicsToJson(QJsonObject &json)
   QJsonObject nj;
       nj["Active"] = fDoElNoise;
       QJsonArray ar2;
-      for (int ipm=0; ipm<numPMs; ipm++) ar2.append(PMs.at(ipm).ElNoiseSigma);
+        for (int ipm=0; ipm<numPMs; ipm++) ar2.append(PMs.at(ipm).ElNoiseSigma);
       nj["NoiseSigma"] = ar2;
+      QJsonArray ar2s;
+        for (int ipm=0; ipm<numPMs; ipm++)
+        {
+            QJsonArray el;
+                el << PMs.at(ipm).ElNoiseSigma_StatSigma << PMs.at(ipm).ElNoiseSigma_StatNorm;
+            ar2s.append(el);
+        }
+      nj["NoiseSigmaStat"] = ar2s;
   js["Noise"] = nj;
 
   QJsonObject aj;
@@ -128,12 +136,13 @@ void APmHub::writeElectronicsToJson(QJsonObject &json)
 }
 
 bool APmHub::readElectronicsFromJson(QJsonObject &json)
-{  
+{
    fDoPHS = false;
    fDoMCcrosstalk = false;
    fDoElNoise = false;
    fDoADC = false;
-   MeasurementTime = 150.0;
+
+   if (!json.contains("Electronics")) return false;
 
    //compatibility
    for (int ipm=0; ipm<numPMs; ipm++)
@@ -141,107 +150,101 @@ bool APmHub::readElectronicsFromJson(QJsonObject &json)
        PMs[ipm].MCcrosstalk.clear();
        PMs[ipm].MCmodel = 0;
        PMs[ipm].MCtriggerProb = 0;
+       PMs[ipm].ElNoiseSigma_StatSigma = 0;
+       PMs[ipm].ElNoiseSigma_StatNorm = 1.0;
    }
 
-   if (!json.contains("Electronics")) return false;
    QJsonObject js = json["Electronics"].toObject();
 
    QJsonObject pj = js["PHS"].toObject();
    parseJson(pj, "Active", fDoPHS);
 
    if (pj.contains("Data"))
-     {
-       QJsonArray ar = pj["Data"].toArray();
-       if (ar.size() != numPMs)
-         {
-           qWarning()<<"PHS json size mismatch!" << "PMs:"<<PMs.count()<<"in json:"<<ar.size();
-           return false;
-         }
-       for (int ipm=0; ipm<numPMs; ipm++)
-         {
-           QJsonObject jj = ar[ipm].toObject();
-           PMs[ipm].readPHSsettingsFromJson(jj);
-         }
-     }
+   {
+       const QJsonArray ar = pj["Data"].toArray();
+       if (ar.size() != numPMs) qWarning()<<"PHS json size mismatch!" << "PMs:"<<PMs.count()<<"in json:"<<ar.size() << " - ignoring!";
+       else
+           for (int ipm=0; ipm<numPMs; ipm++)
+           {
+               const QJsonObject jj = ar[ipm].toObject();
+               PMs[ipm].readPHSsettingsFromJson(jj);
+           }
+   }
 
    if (js.contains("MCcrosstalk"))
      {
-       QJsonObject mcj =js["MCcrosstalk"].toObject();
+       const QJsonObject mcj =js["MCcrosstalk"].toObject();
        parseJson(mcj, "Active", fDoMCcrosstalk);
 
        QJsonArray arrM;
        if (mcj.contains("Data")) arrM = mcj["Data"].toArray();  //old name
        if (mcj.contains("ProbDistr")) arrM = mcj["ProbDistr"].toArray();  //new name
-       if (arrM.size() != PMs.count())
-         qWarning() << "MCcrosstalk array size mismatch!";
+       if (arrM.size() != numPMs) qWarning() << "MCcrosstalk array size mismatch - ignoring";
        else
-         {
            for (int ipm=0; ipm<numPMs; ipm++)
-             {
-               QJsonArray amc = arrM[ipm].toArray();
+           {
+               PMs[ipm].MCcrosstalk.clear();
+               const QJsonArray amc = arrM[ipm].toArray();
                for (int i=0; i<amc.size(); i++)
-                 PMs[ipm].MCcrosstalk << amc[i].toDouble();
-             }
-         }       
+                   PMs[ipm].MCcrosstalk << amc[i].toDouble();
+           }
        if (mcj.contains("Model"))
        {
-           QJsonArray arrMod = mcj["Model"].toArray();
-           if (arrMod.size() != PMs.count())
-             qWarning() << "MCcrosstalk/Model array size mismatch!";
+           const QJsonArray arrMod = mcj["Model"].toArray();
+           if (arrMod.size() != PMs.count()) qWarning() << "MCcrosstalk/Model array size mismatch - ignoring!";
            else
-             for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].MCmodel = arrMod[ipm].toDouble();
+               for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].MCmodel = arrMod[ipm].toDouble();
        }
        if (mcj.contains("TrigProb"))
        {
-           QJsonArray arrTP = mcj["TrigProb"].toArray();
-           if (arrTP.size() != PMs.count())
-             qWarning() << "MCcrosstalk/TrigProb array size mismatch!";
+           const QJsonArray arrTP = mcj["TrigProb"].toArray();
+           if (arrTP.size() != PMs.count()) qWarning() << "MCcrosstalk/TrigProb array size mismatch - ignoring!";
            else
-             for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].MCtriggerProb = arrTP[ipm].toDouble();
+               for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].MCtriggerProb = arrTP[ipm].toDouble();
        }
      }
 
-   QJsonObject nj = js["Noise"].toObject();
+   const QJsonObject nj = js["Noise"].toObject();
    parseJson(nj, "Active", fDoElNoise);
    if (nj.contains("NoiseSigma"))
-     {
-       QJsonArray ar = nj["NoiseSigma"].toArray();
-       if (ar.size() != numPMs)
-         {
-           qWarning()<<"Electronics noise json size mismatch!";
-           return false;
-         }
-       for (int ipm=0; ipm<numPMs; ipm++)
-           PMs[ipm].ElNoiseSigma = ar[ipm].toDouble();
-     }
+   {
+       const QJsonArray ar = nj["NoiseSigma"].toArray();
+       if (ar.size() != numPMs) qWarning()<<"Electronics noise json size mismatch - ignoring!";
+       else
+           for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].ElNoiseSigma = ar[ipm].toDouble(0);
+   }
+   if (nj.contains("NoiseSigmaStat"))
+   {
+       const QJsonArray ar2s = nj["NoiseSigmaStat"].toArray();
+       if (ar2s.size() != numPMs) qWarning()<<"Electronics noise sigma_stat json size mismatch - ignoring!";
+       else
+           for (int ipm=0; ipm<numPMs; ipm++)
+           {
+               const QJsonArray el = ar2s[ipm].toArray();
+               PMs[ipm].ElNoiseSigma_StatSigma = el[0].toDouble(0);
+               PMs[ipm].ElNoiseSigma_StatNorm  = el[1].toDouble(1.0);
+           }
+   }
 
-   QJsonObject aj = js["ADC"].toObject();
+   const QJsonObject aj = js["ADC"].toObject();
    parseJson(aj, "Active", fDoADC);
    if (aj.contains("ADCmax"))
      {
-       QJsonArray ar = aj["ADCmax"].toArray();
-       if (ar.size() != numPMs)
-         {
-           qWarning()<<"ADC max json size mismatch!";
-           return false;
-         }
-       for (int ipm=0; ipm<numPMs; ipm++)
-           PMs[ipm].ADCmax = ar[ipm].toDouble();
+       const QJsonArray ar = aj["ADCmax"].toArray();
+       if (ar.size() != numPMs) qWarning()<<"ADC max json size mismatch - ignoring!";
+       else
+           for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].ADCmax = ar[ipm].toDouble();
      }
    if (aj.contains("ADCbits"))
      {
-       QJsonArray ar = aj["ADCbits"].toArray();
-       if (ar.size() != numPMs)
-         {
-           qWarning()<<"ADC bits json size mismatch!";
-           return false;
-         }
-       for (int ipm=0; ipm<numPMs; ipm++)
-           PMs[ipm].ADCbits = ar[ipm].toDouble();
+       const QJsonArray ar = aj["ADCbits"].toArray();
+       if (ar.size() != numPMs) qWarning()<<"ADC bits json size mismatch - ignoring!";
+       else
+           for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].ADCbits = ar[ipm].toDouble();
      }
 
-   if (js.contains("TimeWindow"))
-        MeasurementTime = js["TimeWindow"].toDouble();
+   if (js.contains("TimeWindow")) MeasurementTime = js["TimeWindow"].toDouble(150.0);
+   else MeasurementTime = 150.0;
 
    updateADClevels();
 

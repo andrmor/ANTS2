@@ -280,7 +280,6 @@ void OneEventClass::HitsToSignal()
 
                   //Electronic noise
                   if (PMs->isDoElNoise())
-                      //TimedPMsignals[t][ipm] += RandGen->Gaus(0, PMs->getElNoiseSigma(ipm));
                       TimedPMsignals[t][ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
 
                   //ADC sim
@@ -338,7 +337,6 @@ void OneEventClass::HitsToSignal()
 
           //Electronic noise
           if (PMs->isDoElNoise())
-              //PMsignals[ipm] += RandGen->Gaus(0, PMs->getElNoiseSigma(ipm));
               PMsignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
 
           //ADC sim

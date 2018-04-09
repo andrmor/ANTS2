@@ -30,7 +30,7 @@ public:
     void clearSPePHSCustomDist();
     void copySPePHSdata(const APm &from);
     void writePHSsettingsToJson(QJsonObject &json) const;
-    void readPHSsettingsFromJson(QJsonObject &json);
+    void readPHSsettingsFromJson(const QJsonObject &json);
     // SiPM optical crosstalk
     void copyMCcrosstalkData(const APm &from);
     // electronic noise
@@ -84,6 +84,8 @@ public:
     double MCtriggerProb = 0;           //calculated before sim
     // electronic noise
     double ElNoiseSigma = 0;
+    double ElNoiseSigma_StatSigma = 0;
+    double ElNoiseSigma_StatNorm = 1.0;
     // ADC
     double ADCmax = 65535;
     double ADCbits = 16;

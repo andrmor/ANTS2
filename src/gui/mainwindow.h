@@ -614,6 +614,8 @@ private slots:
 
     void on_actionOpen_Python_window_triggered();
 
+    void on_ledElNoiseSigma_Norm_editingFinished();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

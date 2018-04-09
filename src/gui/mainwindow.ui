@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -3191,7 +3191,7 @@ of the refracted beam:</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tabPMaplGains">
          <attribute name="title">
@@ -3787,30 +3787,104 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_264">
            <property name="geometry">
             <rect>
-             <x>78</x>
-             <y>42</y>
-             <width>211</width>
+             <x>4</x>
+             <y>10</y>
+             <width>510</width>
              <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>Gauss, average = 0; sigma = </string>
+            <string>Add random from gauss: Mean=0; Sigma=sqrt(Sigma_const^2 + Sigma_stat^2 * Sig/SigNorm )</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
           <widget class="QLineEdit" name="ledElNoiseSigma">
            <property name="geometry">
             <rect>
-             <x>290</x>
-             <y>42</y>
+             <x>170</x>
+             <y>37</y>
              <width>71</width>
              <height>20</height>
             </rect>
            </property>
            <property name="text">
             <string>5</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_125">
+           <property name="geometry">
+            <rect>
+             <x>44</x>
+             <y>38</y>
+             <width>121</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Sigma_const:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_154">
+           <property name="geometry">
+            <rect>
+             <x>44</x>
+             <y>62</y>
+             <width>121</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Sigma_stat:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledElNoiseSigma_Stat">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>60</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_169">
+           <property name="geometry">
+            <rect>
+             <x>245</x>
+             <y>60</y>
+             <width>61</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>SigNorm:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledElNoiseSigma_Norm">
+           <property name="geometry">
+            <rect>
+             <x>310</x>
+             <y>60</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1</string>
            </property>
           </widget>
          </widget>
@@ -4118,7 +4192,7 @@ of the refracted beam:</string>
          </rect>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
@@ -19004,8 +19078,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>477</y>
+     <x>251</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19506,6 +19580,22 @@ on stack</string>
     <hint type="destinationlabel">
      <x>318</x>
      <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledElNoiseSigma_Stat</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>484</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>324</y>
     </hint>
    </hints>
   </connection>

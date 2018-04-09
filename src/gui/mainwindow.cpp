@@ -2815,6 +2815,10 @@ void MainWindow::on_pbElUpdateIndication_clicked()
       //str.setNum(PMs->getElNoiseSigma(ipm));
       str.setNum(PMs->at(ipm).ElNoiseSigma);
       ui->ledElNoiseSigma->setText(str);
+      str.setNum(PMs->at(ipm).ElNoiseSigma_StatSigma);
+      ui->ledElNoiseSigma_Stat->setText(str);
+      str.setNum(PMs->at(ipm).ElNoiseSigma_StatNorm);
+      ui->ledElNoiseSigma_Norm->setText(str);
 
       //str.setNum(PMs->at(ipm).ADCmax);
       ui->ledADCmax->setText( QString::number(PMs->at(ipm).ADCmax) );
@@ -4338,8 +4342,13 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->at(ipm).AverageSigPerPhE = ui->ledAverageSigPhotEl->text().toDouble();
    PMs->at(ipm).SPePHSsigma      = ui->ledElsigma->text().toDouble();
    PMs->at(ipm).SPePHSshape      = ui->ledElShape->text().toDouble();
+
    PMs->at(ipm).ElNoiseSigma     = ui->ledElNoiseSigma->text().toDouble();
+   PMs->at(ipm).ElNoiseSigma_StatSigma = ui->ledElNoiseSigma_Stat->text().toDouble();
+   PMs->at(ipm).ElNoiseSigma_StatNorm  = ui->ledElNoiseSigma_Norm->text().toDouble();
+
    PMs->at(ipm).setADC(ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
+
    PMs->at(ipm).MCmodel          = ui->cobMCcrosstalk_Model->currentIndex();
    PMs->at(ipm).MCtriggerProb    = ui->ledMCcrosstalkTriggerProb->text().toDouble();
 
@@ -4982,4 +4991,16 @@ void MainWindow::on_twElectronics_currentChanged(int index)
     bool bDarkCountTab = ( index == 4 );
     ui->frPmNumberForElectronics->setEnabled(!bDarkCountTab);
     ui->pbElCopyGainData->setEnabled(!bDarkCountTab);
+}
+
+void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
+{
+    double newVal = ui->ledElNoiseSigma_Norm->text().toDouble();
+    if (newVal<1.0e10)
+    {
+        newVal = 1.0;
+        ui->ledElNoiseSigma_Norm->setText("1.0");
+        message("Value has to be > 0", this);
+    }
+    on_pbUpdateElectronics_clicked();
 }

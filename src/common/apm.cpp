@@ -109,7 +109,9 @@ void APm::copyMCcrosstalkData(const APm& from)
 
 void APm::copyElNoiseData(const APm& from)
 {
-    ElNoiseSigma = from.ElNoiseSigma;
+    ElNoiseSigma           = from.ElNoiseSigma;
+    ElNoiseSigma_StatSigma = from.ElNoiseSigma_StatSigma;
+    ElNoiseSigma_StatNorm  = from.ElNoiseSigma_StatNorm;
 }
 
 void APm::copyADCdata(const APm& from)
@@ -160,7 +162,7 @@ void APm::writePHSsettingsToJson(QJsonObject &json) const
     }
 }
 
-void APm::readPHSsettingsFromJson(QJsonObject &json)
+void APm::readPHSsettingsFromJson(const QJsonObject &json)
 {
   parseJson(json, "Mode",    SPePHSmode);
   parseJson(json, "Average", AverageSigPerPhE);

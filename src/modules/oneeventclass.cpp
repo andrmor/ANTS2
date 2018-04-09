@@ -47,7 +47,7 @@ void OneEventClass::configure(const GeneralSimSettings *simSet)
 void OneEventClass::clearHits()
 {
   //prot
-  PMhitsTotal.resize(numPMs);
+  PMhits.resize(numPMs);
   PMsignals.resize(numPMs);
   if (SimSet->fTimeResolved)
     {
@@ -63,7 +63,7 @@ void OneEventClass::clearHits()
   for (int ipm=0; ipm<numPMs; ipm++)
   {
       //total per PM
-      PMhitsTotal[ipm] = 0;
+      PMhits[ipm] = 0;
       PMsignals[ipm] = 0;
 
       //time resolved info
@@ -99,7 +99,7 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
 
   if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
 
-  PMhitsTotal[ipm]++;
+  PMhits[ipm]++;
   if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm]++;
 
   return true;
@@ -168,7 +168,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
 
       //registering hit
       SiPMpixels[ipm].setBit(iXY, true);
-      PMhitsTotal[ipm] += numHits;
+      PMhits[ipm] += numHits;
 
       if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
       {
@@ -201,7 +201,7 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
       {
           //registering the hit
           SiPMpixels[ipm].setBit(iTXY+i*timeBinInterval, true);
-          PMhitsTotal[ipm] += numHits;
+          PMhits[ipm] += numHits;
           TimedPMhits[iTime+i][ipm] += numHits;
 
           if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
@@ -221,11 +221,89 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
 bool OneEventClass::isHitsEmpty()
 {
   for (int i=0; i<numPMs; i++)
-    if (PMhitsTotal[i] > 0) return false;
+    if (PMhits[i] > 0) return false;
   return true;
 }
 
+void OneEventClass::HitsToSignal()
+{
+    OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
 
+    PMsignals.resize(numPMs);
+
+    if (SimSet->fTimeResolved)
+    {
+        TimedPMsignals.resize(SimSet->TimeBins);
+        for (int itime = 0; itime < SimSet->TimeBins; itime++) TimedPMsignals[itime].resize(numPMs);
+        for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] = 0;
+
+        for (int itime = 0; itime < SimSet->TimeBins; itime++)
+        {
+            convertHitsToSignal(TimedPMhits.at(itime), TimedPMsignals[itime]);
+
+            for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] += TimedPMsignals.at(itime).at(ipm);
+        }
+    }
+    else convertHitsToSignal(PMhits, PMsignals);
+}
+
+void OneEventClass::convertHitsToSignal(const QVector<int>& pmHits, QVector<float>& pmSignals)
+{
+    for (int ipm = 0; ipm < numPMs; ipm++)
+    {
+        // hits to signal
+        if ( PMs->isDoPHS() )
+        {
+            switch ( PMs->at(ipm).SPePHSmode )
+            {
+              case 0:
+                pmSignals[ipm] = PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
+                break;
+              case 1:
+              {
+                double mean =  PMs->at(ipm).AverageSigPerPhE * pmHits.at(ipm);
+                double sigma = PMs->at(ipm).SPePHSsigma * TMath::Sqrt( pmHits.at(ipm) );
+                pmSignals[ipm] = RandGen->Gaus(mean, sigma);
+                break;
+              }
+              case 2:
+              {
+                double k = PMs->at(ipm).SPePHSshape;
+                double theta = PMs->at(ipm).AverageSigPerPhE / k;
+                k *= pmHits.at(ipm); //for sum distribution
+                pmSignals[ipm] = GammaRandomGen->getGamma(k, theta);
+                break;
+              }
+              case 3:
+              {
+                pmSignals[ipm] = 0;
+                if ( PMs->at(ipm).SPePHShist )
+                  for (int j = 0; j < pmHits.at(ipm); j++)
+                    pmSignals[ipm] += PMs->at(ipm).SPePHShist->GetRandom();
+              }
+            }
+        }
+        else pmSignals[ipm] = pmHits.at(ipm);
+
+        // adding electronic noise
+        if (PMs->isDoElNoise())
+            pmSignals[ipm] += RandGen->Gaus(0, PMs->at(ipm).ElNoiseSigma);
+
+        // doing ADC sim
+        if (PMs->isDoADC())
+        {
+            if (pmSignals[ipm] < 0) pmSignals[ipm] = 0;
+            else
+              {
+                if (pmSignals[ipm] > PMs->at(ipm).ADCmax)
+                     pmSignals[ipm] = PMs->at(ipm).ADClevels;
+                else pmSignals[ipm] = static_cast<int>( pmSignals.at(ipm) / PMs->at(ipm).ADCstep );
+              }
+        }
+    }
+}
+
+/*
 void OneEventClass::HitsToSignal()
 {
   OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
@@ -352,6 +430,7 @@ void OneEventClass::HitsToSignal()
       } //end cycle by PMs
     }//end not-time resolved case
 }
+*/
 
 void OneEventClass::AddDarkCounts()
 {

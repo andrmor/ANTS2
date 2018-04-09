@@ -2094,7 +2094,7 @@ void InterfaceToReconstructor::Peaks_Configure(int bins, double from, double to,
     RManager->Calibrator_Peaks->SetMaximumPeaks(maxPeaks);
 }
 
-double InterfaceToReconstructor::Peaks_Extract(int ipm)
+double InterfaceToReconstructor::Peaks_Extract_NoAbortOnFail(int ipm)
 {
     const int numPMs = EventsDataHub->getNumPMs();
     if (ipm >=0 && ipm < numPMs)
@@ -2124,7 +2124,10 @@ QVariant InterfaceToReconstructor::Peaks_GetPeakPositions(int ipm)
 {
     const int numPMs = EventsDataHub->getNumPMs();
     QVariantList res;
-    if (ipm >=0  &&  ipm < numPMs  &&  TmpHub->FoundPeaks.size() == numPMs)
+
+    qDebug() << TmpHub->FoundPeaks.size() << numPMs << TmpHub->FoundPeaks.at(ipm);
+
+    if (ipm >=0  &&  ipm < numPMs  &&  TmpHub->FoundPeaks.size() > ipm)
     {
         const QVector<double>& vec = TmpHub->FoundPeaks.at(ipm);
         for (const double& d : vec) res << d;

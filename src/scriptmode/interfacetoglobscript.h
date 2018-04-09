@@ -119,7 +119,7 @@ public slots:
   const QVariant Peaks_GetSignalPerPhE() const;
   void Peaks_PrepareData();
   void Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks = 30);
-  double Peaks_Extract(int ipm);
+  double Peaks_Extract_NoAbortOnFail(int ipm);
   void Peaks_ExtractAll();
   QVariant Peaks_GetPeakPositions(int ipm);
 

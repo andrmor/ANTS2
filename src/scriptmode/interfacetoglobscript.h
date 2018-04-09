@@ -115,9 +115,16 @@ public slots:
   void AddRectangularManisfetItem(double x, double y, double dX, double dY, double Angle);  
   void SetManifestItemLineProperties(int i, int color, int width, int style);
 
-  //signal per ph el extraction
-  const QVariant GetSignalPerPhE_peaks() const;
+  //signal per ph el extraction  
+  const QVariant Peaks_GetSignalPerPhE() const;
+  void Peaks_PrepareData();
+  void Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks = 30);
+  double Peaks_Extract(int ipm);
+  void Peaks_ExtractAll();
+  QVariant Peaks_GetPeakPositions(int ipm);
+
   const QVariant GetSignalPerPhE_stat() const;
+
 
 private:
   AReconstructionManager* RManager;

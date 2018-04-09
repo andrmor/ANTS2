@@ -2068,13 +2068,68 @@ void InterfaceToReconstructor::SetManifestItemLineProperties(int i, int color, i
     EventsDataHub->Manifest[i]->LineWidth = width;
 }
 
-const QVariant InterfaceToReconstructor::GetSignalPerPhE_peaks() const
+const QVariant InterfaceToReconstructor::Peaks_GetSignalPerPhE() const
 {
     QVariantList vl;
     const int numPMs = TmpHub->ChPerPhEl_Peaks.size();
     for (int i=0; i<numPMs; i++)
         vl.append(TmpHub->ChPerPhEl_Peaks.at(i));
     return vl;
+}
+
+#include "acalibratorsignalperphel.h"
+void InterfaceToReconstructor::Peaks_PrepareData()
+{
+    bool bOK = RManager->Calibrator_Peaks->PrepareData();
+    if (!bOK)
+        abort("Failed to prepare data for SigPerPhE calibration from peaks");
+}
+
+void InterfaceToReconstructor::Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks)
+{
+    RManager->Calibrator_Peaks->SetNumBins(bins);
+    RManager->Calibrator_Peaks->SetRange(from, to);
+    RManager->Calibrator_Peaks->SetSigma(sigmaPeakfinder);
+    RManager->Calibrator_Peaks->SetThreshold(thresholdPeakfinder);
+    RManager->Calibrator_Peaks->SetMaximumPeaks(maxPeaks);
+}
+
+double InterfaceToReconstructor::Peaks_Extract(int ipm)
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+    if (ipm >=0 && ipm < numPMs)
+    {
+        bool bOK = RManager->Calibrator_Peaks->Extract(ipm);
+        if (bOK) return TmpHub->ChPerPhEl_Peaks.at(ipm);
+    }
+    return std::numeric_limits<double>::quiet_NaN();
+}
+
+void InterfaceToReconstructor::Peaks_ExtractAll()
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+
+    bool bThereWereErrors = false;
+    for (int ipm=0; ipm<numPMs; ipm++)
+    {
+         bool bOK = RManager->Calibrator_Peaks->Extract(ipm);
+         if (!bOK) bThereWereErrors = true;
+    }
+
+    if (bThereWereErrors)
+        abort("Failed to extract peaks: " + RManager->Calibrator_Peaks->GetLastError());
+}
+
+QVariant InterfaceToReconstructor::Peaks_GetPeakPositions(int ipm)
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+    QVariantList res;
+    if (ipm >=0  &&  ipm < numPMs  &&  TmpHub->FoundPeaks.size() == numPMs)
+    {
+        const QVector<double>& vec = TmpHub->FoundPeaks.at(ipm);
+        for (const double& d : vec) res << d;
+    }
+    return res;
 }
 
 const QVariant InterfaceToReconstructor::GetSignalPerPhE_stat() const

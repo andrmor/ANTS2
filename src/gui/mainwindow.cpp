@@ -4996,7 +4996,7 @@ void MainWindow::on_twElectronics_currentChanged(int index)
 void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
 {
     double newVal = ui->ledElNoiseSigma_Norm->text().toDouble();
-    if (newVal<1.0e-10)
+    if (newVal < 1.0e-10)
     {
         newVal = 1.0;
         ui->ledElNoiseSigma_Norm->setText("1.0");

@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -3191,7 +3191,7 @@ of the refracted beam:</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabPMaplGains">
          <attribute name="title">

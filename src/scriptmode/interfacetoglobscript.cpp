@@ -2125,8 +2125,6 @@ QVariant InterfaceToReconstructor::Peaks_GetPeakPositions(int ipm)
     const int numPMs = EventsDataHub->getNumPMs();
     QVariantList res;
 
-    qDebug() << TmpHub->FoundPeaks.size() << numPMs << TmpHub->FoundPeaks.at(ipm);
-
     if (ipm >=0  &&  ipm < numPMs  &&  TmpHub->FoundPeaks.size() > ipm)
     {
         const QVector<double>& vec = TmpHub->FoundPeaks.at(ipm);

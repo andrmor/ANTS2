@@ -46,40 +46,39 @@ void OneEventClass::configure(const GeneralSimSettings *simSet)
 
 void OneEventClass::clearHits()
 {
-  //prot
-  PMhits.resize(numPMs);
-  PMsignals.resize(numPMs);
+  if (PMhits.size()    != numPMs)
+      PMhits.resize(numPMs);
+  if (PMsignals.size() != numPMs)
+      PMsignals.resize(numPMs);
+
   if (SimSet->fTimeResolved)
   {
-      TimedPMhits.resize(SimSet->TimeBins);
-      TimedPMsignals.resize(SimSet->TimeBins);
+      if (TimedPMhits.size()    != SimSet->TimeBins)
+          TimedPMhits.resize(SimSet->TimeBins);
+      if (TimedPMsignals.size() != SimSet->TimeBins)
+          TimedPMsignals.resize(SimSet->TimeBins);
+
       for (int itime = 0; itime < SimSet->TimeBins; itime++)
       {
-          TimedPMhits[itime].resize(numPMs);
-          TimedPMsignals[itime].resize(numPMs);
+          if (TimedPMhits.at(itime).size()    != numPMs)
+              TimedPMhits[itime].resize(numPMs);
+          if (TimedPMsignals.at(itime).size() != numPMs)
+              TimedPMsignals[itime].resize(numPMs);
       }
-  }
-  else
-  {
-      TimedPMhits.clear();
-      TimedPMsignals.clear();
   }
 
   for (int ipm = 0; ipm < numPMs; ipm++)
   {
-      //total per PM
       PMhits[ipm] = 0;
       PMsignals[ipm] = 0;
 
-      //time resolved info
       if (SimSet->fTimeResolved)
-          for (int itime=0; itime<SimSet->TimeBins; itime++)
+          for (int itime = 0; itime < SimSet->TimeBins; itime++)
           {
               TimedPMhits[itime][ipm] = 0;
               TimedPMsignals[itime][ipm] = 0;
           }
 
-      //SiPMpixels info
       SiPMpixels[ipm].fill(false);
   }
 }
@@ -104,8 +103,8 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
 
   if (SimSet->fLogsStat) CollectStatistics(WaveIndex, time, cosAngle, Transitions);
 
-  PMhits[ipm]++;
-  if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm]++;
+  PMhits[ipm] += 1.0f;
+  if (SimSet->fTimeResolved) TimedPMhits[iTime][ipm] += 1.0f;
 
   return true;
 }
@@ -162,11 +161,48 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
   return true;
 }
 
-void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int numHits)
-//numHits != 1 is used only for the simplistic model of microcell cross-talk!
+void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits)
+//numHits != 1 is used 1) for the simplistic model of microcell cross-talk
+//                     2) to simulate dark counts in advanced model
 {
-  const APmType *tp = PMs->getTypeForPM(ipm);
+  const APmType* tp = PMs->getTypeForPM(ipm);
+
   if (!SimSet->fTimeResolved)
+  {
+      const int timeBinInterval = tp->PixelsX * tp->PixelsY;
+      const int iTXY = iTime*timeBinInterval + tp->PixelsX*binY + binX;
+
+      //have to check status of pixel during the recovery time from iTime and register hit in each "non-lit" time bins
+      const int Tbins = SimSet->TimeBins < 1 ? 1 : SimSet->TimeBins; //protection
+      int bins = tp->RecoveryTime * Tbins / (SimSet->TimeTo - SimSet->TimeFrom);  //time bins during which the pixel keeps lit status
+      if (bins < 1) bins = 1;
+
+      //Simplified model is used!
+      //"later"-emitted photons can appear before "earlier"-emitted photons - overlaps in fired pixels will be wrong at ~saturation conditions!
+
+      const int imax = (bins <= SimSet->TimeBins-iTime) ? bins : SimSet->TimeBins-iTime;
+      for (int itime = 0; itime < imax; itime++)
+      {
+          if (!SiPMpixels[ipm].testBit(iTXY+itime*timeBinInterval)) //not yet lit here
+          {
+              //registering the hit
+              SiPMpixels[ipm].setBit(iTXY+itime*timeBinInterval, true);
+              PMhits[ipm] += numHits;
+              TimedPMhits[iTime+itime][ipm] += numHits;
+
+              if (PMs->isDoMCcrosstalk()  &&  PMs->at(ipm).MCmodel == 1)
+              {
+                  //checking 4 neighbours
+                  const double& trigProb = PMs->at(ipm).MCtriggerProb;
+                  if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
+                  if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
+                  if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
+                  if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
+              }
+          }
+        }
+  }
+  else
   {
       const int iXY = tp->PixelsX*binY + binX;
       if (SiPMpixels[ipm].testBit(iXY)) return;  //nothing to do - already lit
@@ -175,72 +211,36 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, int 
       SiPMpixels[ipm].setBit(iXY, true);
       PMhits[ipm] += numHits;
 
-      if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
+      if (PMs->isDoMCcrosstalk()  &&  PMs->at(ipm).MCmodel == 1)
       {
-          const int itype = PMs->at(ipm).type;
-          const APmType* tp = PMs->getType(itype);
           //checking 4 neighbours
-          if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
-          if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
-          if (binY>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
-          if (binY+1<tp->PixelsY && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
+          const double& trigProb = PMs->at(ipm).MCtriggerProb;
+          if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
+          if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
+          if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
+          if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
       }
-      return;
   }
-
-  const int timeBinInterval = tp->PixelsX * tp->PixelsY;
-  const int iTXY = iTime*timeBinInterval + tp->PixelsX*binY + binX;
-
-  //have to check status of pixel during the recovery time from iTime and register hit in each "non-lit" time bins
-  const int Tbins = SimSet->TimeBins < 1 ? 1 : SimSet->TimeBins; //protection
-  int bins = tp->RecoveryTime * Tbins / (SimSet->TimeTo - SimSet->TimeFrom);  //time bins during which the pixel keeps lit status
-  if (bins < 1) bins = 1;
-
-  //Simplified model is used!
-  //"later"-emitted photons can appear before "earlier"-emitted photons - overlaps in fired pixels will be wrong at ~saturation conditions!
-
-  const int imax = (bins <= SimSet->TimeBins-iTime) ? bins : SimSet->TimeBins-iTime;
-  for (int i = 0; i < imax; i++)
-  {
-      if (!SiPMpixels[ipm].testBit(iTXY+i*timeBinInterval)) //not yet lit here
-      {
-          //registering the hit
-          SiPMpixels[ipm].setBit(iTXY+i*timeBinInterval, true);
-          PMhits[ipm] += numHits;
-          TimedPMhits[iTime+i][ipm] += numHits;
-
-          if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==1)
-          {
-              const int itype = PMs->at(ipm).type;
-              const APmType* tp = PMs->getType(itype);
-              //checking 4 neighbours
-              if (binX>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
-              if (binX+1<tp->PixelsX && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
-              if (binY>0 && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
-              if (binY+1<tp->PixelsY && RandGen->Rndm()<PMs->at(ipm).MCtriggerProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
-          }
-      }
-    }
 }
 
-bool OneEventClass::isHitsEmpty()
+bool OneEventClass::isHitsEmpty() const
 {
-  for (int i=0; i<numPMs; i++)
-    if (PMhits[i] > 0) return false;
+  for (int ipm = 0; ipm < numPMs; ipm++)
+    if (PMhits.at(ipm) != 0) return false;  // set to exact zero on init, any non-zero is fine
   return true;
 }
 
 void OneEventClass::HitsToSignal()
 {
-    OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
+    //PMsignals.resize(numPMs);
 
-    PMsignals.resize(numPMs);
+    OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
 
     if (SimSet->fTimeResolved)
     {
-        TimedPMsignals.resize(SimSet->TimeBins);
-        for (int itime = 0; itime < SimSet->TimeBins; itime++) TimedPMsignals[itime].resize(numPMs);
-        for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] = 0;
+        //TimedPMsignals.resize(SimSet->TimeBins);
+        //for (int itime = 0; itime < SimSet->TimeBins; itime++) TimedPMsignals[itime].resize(numPMs);
+        //for (int ipm = 0; ipm < numPMs; ipm++) PMsignals[ipm] = 0;
 
         for (int itime = 0; itime < SimSet->TimeBins; itime++)
         {
@@ -252,7 +252,7 @@ void OneEventClass::HitsToSignal()
     else convertHitsToSignal(PMhits, PMsignals);
 }
 
-void OneEventClass::convertHitsToSignal(const QVector<int>& pmHits, QVector<float>& pmSignals)
+void OneEventClass::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>& pmSignals)
 {
     for (int ipm = 0; ipm < numPMs; ipm++)
     {
@@ -446,12 +446,11 @@ void OneEventClass::HitsToSignal()
 }
 */
 
-void OneEventClass::AddDarkCounts()
+void OneEventClass::AddDarkCounts() //currently applicable only for SiPMs!
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
-    {
-      if (PMs->isSiPM(ipm)) //Add dark counts for SiPMs
-        {
+      if (PMs->isSiPM(ipm))
+      {
           const APmType* typ = PMs->getTypeForPM(ipm);
           const int&    pixelsX =  typ->PixelsX;
           const int&    pixelsY =  typ->PixelsY;
@@ -499,8 +498,7 @@ void OneEventClass::AddDarkCounts()
                         }
                 }
             }
-        }
-    }
+      }
 }
 
 void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
@@ -515,7 +513,7 @@ void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngl
     SimStat->registerNumTrans(Transitions);
 }
 
-int OneEventClass::TimeToBin(double time)
+int OneEventClass::TimeToBin(double time) const
 {
   if (time < SimSet->TimeFrom || time > SimSet->TimeTo) return -1;
   if (SimSet->TimeBins == 0) return -1;

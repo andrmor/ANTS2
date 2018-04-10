@@ -2754,8 +2754,9 @@ void MainWindow::on_pbElUpdateIndication_clicked()
   ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
   ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
   ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
+  ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
 
-  int ipm = ui->sbElPMnumber->value(); 
+  int ipm = ui->sbElPMnumber->value();
   int NumPMs = PMs->count();
   if (ipm>NumPMs-1 && ipm != 0)
     {
@@ -2812,7 +2813,13 @@ void MainWindow::on_pbElUpdateIndication_clicked()
           ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
       }
 
-      //str.setNum(PMs->getElNoiseSigma(ipm));
+      ui->ledTimeOfOneMeasurement->setText( QString::number(PMs->at(ipm).MeasurementTime) );
+      ui->swDarkCounts_Time->setCurrentIndex( PMs->WavelengthResolved ? 1 : 0 );
+      ui->cobDarkCounts_Model->setCurrentIndex( PMs->at(ipm).DarkCounts_Model );
+      const bool bHaveDist = !PMs->at(ipm).DarkCounts_Distribution.isEmpty();
+      ui->pbDarkCounts_Show->setEnabled(bHaveDist);
+      ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
+
       str.setNum(PMs->at(ipm).ElNoiseSigma);
       ui->ledElNoiseSigma->setText(str);
       str.setNum(PMs->at(ipm).ElNoiseSigma_StatSigma);
@@ -2837,7 +2844,7 @@ void MainWindow::on_pbElUpdateIndication_clicked()
     }
   else ui->twElectronics->setEnabled(false);
 
-  ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->getMeasurementTime()) );
+  //ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->at(ipm).MeasurementTime) );
 
   BulkUpdate = tmpBulk;
 }
@@ -2847,7 +2854,6 @@ void MainWindow::on_pbElCopyGainData_clicked()
    int mode = ui->cobElCopyMode->currentIndex();
    if (mode == 0) return;
    int selector = ui->twElectronics->currentIndex(); //0-SPePHS, 1-crossTalk, 2-ElNoise, 3-ADC, 4-dark counts
-   if (selector == 4) return;
 
    int ipm =  ui->sbElPMnumber->value();
    int typ = PMs->at(ipm).type;
@@ -2873,6 +2879,9 @@ void MainWindow::on_pbElCopyGainData_clicked()
            break;
          case 3:
            PMs->at(ipmTo).copyADCdata(PMs->at(ipm));
+           break;
+         case 4:
+           PMs->at(ipmTo).copyDarkCountsData(PMs->at(ipm));
            break;
          default:
            qWarning() << "Unknown electronics selector";
@@ -2908,6 +2917,13 @@ void MainWindow::on_cbEnableADC_toggled(bool checked)
     ui->fADC->setEnabled(checked);    
     if (checked) ui->twElectronics->setTabText(3, "ADC :On ");
     else ui->twElectronics->setTabText(3, "ADC :Off");
+}
+
+void MainWindow::on_cbDarkCounts_Enable_toggled(bool checked)
+{
+    ui->fDarkCounts->setEnabled(checked);
+    if (checked) ui->twElectronics->setTabText(4, "Dark counts :On ");
+    else ui->twElectronics->setTabText(4, "Dark counts :Off");
 }
 
 void MainWindow::on_pbScanDistrLoad_clicked()
@@ -4335,9 +4351,10 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->setDoMCcrosstalk( ui->cbEnableMCcrosstalk->isChecked() );
    PMs->setDoElNoise( ui->cbEnableElNoise->isChecked() );
    PMs->setDoADC( ui->cbEnableADC->isChecked() );
-   PMs->setMeasurementTime( ui->ledTimeOfOneMeasurement->text().toDouble() );
+   PMs->fDoDarkCounts = ui->cbDarkCounts_Enable->isChecked();
 
-   int ipm = ui->sbElPMnumber->value();
+   const int ipm = ui->sbElPMnumber->value();
+
    PMs->at(ipm).SPePHSmode       = ui->cobPMampGainModel->currentIndex();
    PMs->at(ipm).AverageSigPerPhE = ui->ledAverageSigPhotEl->text().toDouble();
    PMs->at(ipm).SPePHSsigma      = ui->ledElsigma->text().toDouble();
@@ -4351,6 +4368,9 @@ void MainWindow::on_pbUpdateElectronics_clicked()
 
    PMs->at(ipm).MCmodel          = ui->cobMCcrosstalk_Model->currentIndex();
    PMs->at(ipm).MCtriggerProb    = ui->ledMCcrosstalkTriggerProb->text().toDouble();
+
+   PMs->at(ipm).MeasurementTime  = ui->ledTimeOfOneMeasurement->text().toDouble();
+   PMs->at(ipm).DarkCounts_Model = ui->cobDarkCounts_Model->currentIndex();
 
    ReconstructDetector(true); //GUI update is triggered automatically
 }
@@ -4984,13 +5004,6 @@ void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
     if (index == 0) s = "# of particles per event:";
     else            s = "average particles per event:";
     ui->labPartPerEvent->setText(s);
-}
-
-void MainWindow::on_twElectronics_currentChanged(int index)
-{
-    bool bDarkCountTab = ( index == 4 );
-    ui->frPmNumberForElectronics->setEnabled(!bDarkCountTab);
-    ui->pbElCopyGainData->setEnabled(!bDarkCountTab);
 }
 
 void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()

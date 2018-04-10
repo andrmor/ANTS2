@@ -31,6 +31,10 @@ public:
     void copySPePHSdata(const APm &from);
     void writePHSsettingsToJson(QJsonObject &json) const;
     void readPHSsettingsFromJson(const QJsonObject &json);
+    // dark counts
+    void copyDarkCountsData(const APm &from);
+    const QJsonObject writeDarkCountsSettingsToJson() const;
+    void readDarkCountsSettingsFromJson(const QJsonObject& json);
     // SiPM optical crosstalk
     void copyMCcrosstalkData(const APm &from);
     // electronic noise
@@ -82,6 +86,10 @@ public:
     QVector<double> MCcrosstalk;        //empty = not defined; otherwise should contain probabilityes of 1, 2, etc photoelectrons. Normalized to 1!
     ACustomRandomSampling* MCsampl = 0; //calculated before sim
     double MCtriggerProb = 0;           //calculated before sim
+    // dark count
+    double MeasurementTime = 150;       // in ns
+    int    DarkCounts_Model = 0;        // 0 = simplistic (integer hits), 1 - fractional hits using time window
+    QVector<double> DarkCounts_Distribution;
     // electronic noise
     double ElNoiseSigma = 0;
     double ElNoiseSigma_StatSigma = 0;

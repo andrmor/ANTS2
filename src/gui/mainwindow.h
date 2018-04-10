@@ -610,11 +610,12 @@ private slots:
     void on_actionQuick_load_3_hovered();
     void on_actionLoad_last_config_hovered();
     void on_cobPartPerEvent_currentIndexChanged(int index);
-    void on_twElectronics_currentChanged(int index);
 
     void on_actionOpen_Python_window_triggered();
 
     void on_ledElNoiseSigma_Norm_editingFinished();
+
+    void on_cbDarkCounts_Enable_toggled(bool checked);
 
 public slots:
     void on_pbRebuildDetector_clicked();

@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -3191,7 +3191,7 @@ of the refracted beam:</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="tabPMaplGains">
          <attribute name="title">
@@ -4024,81 +4024,297 @@ of the refracted beam:</string>
         </widget>
         <widget class="QWidget" name="tab_7">
          <attribute name="title">
-          <string>Dark counts</string>
+          <string>Dark counts : Off</string>
          </attribute>
-         <widget class="QFrame" name="fTimeOneMeasurement">
+         <widget class="QCheckBox" name="cbDarkCounts_Enable">
           <property name="geometry">
            <rect>
-            <x>0</x>
-            <y>70</y>
-            <width>519</width>
-            <height>31</height>
+            <x>15</x>
+            <y>6</y>
+            <width>151</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Enable dark counts</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_177">
+          <property name="geometry">
+           <rect>
+            <x>199</x>
+            <y>4</y>
+            <width>110</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Only affects SiPMs!</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QFrame" name="fDarkCounts">
+          <property name="geometry">
+           <rect>
+            <x>1</x>
+            <y>56</y>
+            <width>516</width>
+            <height>95</height>
            </rect>
           </property>
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::Box</enum>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <widget class="QLabel" name="label_262">
+          <widget class="QLabel" name="label_208">
            <property name="geometry">
             <rect>
-             <x>46</x>
-             <y>5</y>
-             <width>181</width>
-             <height>16</height>
+             <x>-6</x>
+             <y>25</y>
+             <width>520</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>Time interval of one measurement:</string>
+            <string>Average dark counts = ( time interval )  x  ( dark count rate of the SiPM )</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QComboBox" name="cobDarkCounts_Model">
+           <property name="geometry">
+            <rect>
+             <x>100</x>
+             <y>50</y>
+             <width>210</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <item>
+            <property name="text">
+             <string>Simplistic: integer hits</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Using user-provided distribution</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QLabel" name="label_172">
+           <property name="geometry">
+            <rect>
+             <x>5</x>
+             <y>52</y>
+             <width>90</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Hit generation:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
-          <widget class="QLineEdit" name="ledTimeOfOneMeasurement">
+          <widget class="QStackedWidget" name="swDarkCounts_Time">
            <property name="geometry">
             <rect>
-             <x>233</x>
-             <y>4</y>
-             <width>50</width>
+             <x>10</x>
+             <y>3</y>
+             <width>501</width>
+             <height>29</height>
+            </rect>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_24">
+            <widget class="QLabel" name="label_263">
+             <property name="geometry">
+              <rect>
+               <x>343</x>
+               <y>5</y>
+               <width>31</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>ns </string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_262">
+             <property name="geometry">
+              <rect>
+               <x>102</x>
+               <y>5</y>
+               <width>181</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Time interval of one measurement:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="ledTimeOfOneMeasurement">
+             <property name="geometry">
+              <rect>
+               <x>289</x>
+               <y>4</y>
+               <width>50</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>150</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="page_25">
+            <widget class="QLabel" name="label_187">
+             <property name="geometry">
+              <rect>
+               <x>4</x>
+               <y>3</y>
+               <width>471</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Time interval of one measurement: time bin duration is used</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </widget>
+          </widget>
+          <widget class="QPushButton" name="pbDarkCounts_Show">
+           <property name="geometry">
+            <rect>
+             <x>320</x>
+             <y>50</y>
+             <width>80</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Show</string>
+           </property>
+          </widget>
+          <widget class="Line" name="line_64">
+           <property name="geometry">
+            <rect>
+             <x>243</x>
+             <y>59</y>
+             <width>260</width>
+             <height>3</height>
+            </rect>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pbDarkCounts_Load">
+           <property name="geometry">
+            <rect>
+             <x>406</x>
+             <y>50</y>
+             <width>80</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>Ascii, two columns: wavelength and value</string>
+           </property>
+           <property name="text">
+            <string>Load</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pbDarkCounts_Delete">
+           <property name="geometry">
+            <rect>
+             <x>491</x>
+             <y>50</y>
+             <width>18</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>Clear data</string>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="cbDarkCounts_Integrating">
+           <property name="geometry">
+            <rect>
+             <x>410</x>
+             <y>75</y>
+             <width>112</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Integrating</string>
+           </property>
+          </widget>
+          <widget class="Line" name="line_22">
+           <property name="geometry">
+            <rect>
+             <x>410</x>
+             <y>63</y>
+             <width>10</width>
              <height>20</height>
             </rect>
            </property>
-           <property name="text">
-            <string>150</string>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
           </widget>
-          <widget class="QLabel" name="label_263">
-           <property name="geometry">
-            <rect>
-             <x>287</x>
-             <y>5</y>
-             <width>231</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>ns      Only affects SiPMs!</string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QLabel" name="label_208">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>110</y>
-            <width>520</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Average dark counts = ( time interval )  x  ( dark count rate of the SiPM )</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+          <zorder>line_64</zorder>
+          <zorder>label_208</zorder>
+          <zorder>cobDarkCounts_Model</zorder>
+          <zorder>label_172</zorder>
+          <zorder>swDarkCounts_Time</zorder>
+          <zorder>pbDarkCounts_Show</zorder>
+          <zorder>pbDarkCounts_Delete</zorder>
+          <zorder>line_22</zorder>
+          <zorder>pbDarkCounts_Load</zorder>
+          <zorder>cbDarkCounts_Integrating</zorder>
          </widget>
         </widget>
        </widget>
@@ -17126,8 +17342,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>258</x>
-     <y>453</y>
+     <x>331</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -19596,6 +19812,38 @@ on stack</string>
     <hint type="destinationlabel">
      <x>412</x>
      <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbDarkCounts_Enable</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>326</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobDarkCounts_Model</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>475</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>320</y>
     </hint>
    </hints>
   </connection>

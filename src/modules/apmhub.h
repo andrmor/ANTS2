@@ -133,26 +133,13 @@ public:
     void setDoMCcrosstalk(bool flag) {fDoMCcrosstalk = flag;}
     void setDoElNoise(bool flag) {fDoElNoise = flag;}
     void setDoADC(bool flag) {fDoADC = flag;}
-    void setMeasurementTime(double time) {MeasurementTime = time;}
 
     bool isDoPHS() const {return fDoPHS;}
     bool isDoMCcrosstalk() const {return fDoMCcrosstalk;}
     bool isDoElNoise() const {return fDoElNoise;}
     bool isDoADC() const {return fDoADC;}
 
-    double getMeasurementTime() const {return MeasurementTime;}
-
     QVector<QPair<double, int> > getPMsSortedByR() const;
-
-private:
-    TRandom2* RandGen;
-    AMaterialParticleCollection* MaterialCollection;
-    AGammaRandomGenerator* GammaRandomGen;
-
-    int numPMs = 0;
-    QVector<APm> PMs;
-
-    double MeasurementTime = 150;  // measurement time to calculate dark counts for SiPMs
 
     //flags for the current simulation mode
     bool WavelengthResolved = false;
@@ -162,6 +149,17 @@ private:
     bool fDoMCcrosstalk = false;
     bool fDoElNoise = false;
     bool fDoADC = false;
+    bool fDoDarkCounts = false;
+
+private:
+    TRandom2* RandGen;
+    AMaterialParticleCollection* MaterialCollection;
+    AGammaRandomGenerator* GammaRandomGen;
+
+    int numPMs = 0;
+    QVector<APm> PMs;
+
+    //double MeasurementTime = 150;  // measurement time to calculate dark counts for SiPMs - no a part of APm
 
     // binning settings for wave-resolved data
     double WaveFrom = 200.0;

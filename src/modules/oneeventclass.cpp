@@ -458,7 +458,7 @@ void OneEventClass::AddDarkCounts() //currently applicable only for SiPMs!
           //   qDebug() << "SiPM dark rate:" << darkRate << "Hz";
 
           const int     iTimeBins = SimSet->fTimeResolved ? SimSet->TimeBins : 1;
-          const double  TimeInterval = ( iTimeBins == 1 ? PMs->getMeasurementTime() : (SimSet->TimeTo - SimSet->TimeFrom)/SimSet->TimeBins );
+          const double  TimeInterval = ( iTimeBins == 1 ? PMs->at(ipm).MeasurementTime : (SimSet->TimeTo - SimSet->TimeFrom)/SimSet->TimeBins );
           //   qDebug() << "Time interval:" << TimeInterval << "ns";
 
           const double  averageDarkCounts = darkRate * TimeInterval * 1.0e-9;

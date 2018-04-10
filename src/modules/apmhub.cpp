@@ -130,7 +130,19 @@ void APmHub::writeElectronicsToJson(QJsonObject &json)
       aj["ADCbits"] = ar1;
   js["ADC"] = aj;
 
-  js["TimeWindow"] = MeasurementTime;
+  QJsonObject dj;
+  {
+      dj["Active"] = fDoDarkCounts;
+      QJsonArray ar;
+      for (int ipm = 0; ipm < numPMs; ipm++)
+        {
+          const QJsonObject j = PMs.at(ipm).writeDarkCountsSettingsToJson();
+          ar.append(j);
+        }
+      dj["Data"] = ar;
+  }
+  js["DarkCounts"] = dj;
+  //js["TimeWindow"] = MeasurementTime;
 
   json["Electronics"] = js;
 }
@@ -141,6 +153,7 @@ bool APmHub::readElectronicsFromJson(QJsonObject &json)
    fDoMCcrosstalk = false;
    fDoElNoise = false;
    fDoADC = false;
+   fDoDarkCounts = false;
 
    if (!json.contains("Electronics")) return false;
 
@@ -152,13 +165,15 @@ bool APmHub::readElectronicsFromJson(QJsonObject &json)
        PMs[ipm].MCtriggerProb = 0;
        PMs[ipm].ElNoiseSigma_StatSigma = 0;
        PMs[ipm].ElNoiseSigma_StatNorm = 1.0;
+       PMs[ipm].MeasurementTime = 150;
+       PMs[ipm].DarkCounts_Model = 0;
+       PMs[ipm].DarkCounts_Distribution.clear();
    }
 
    QJsonObject js = json["Electronics"].toObject();
 
    QJsonObject pj = js["PHS"].toObject();
    parseJson(pj, "Active", fDoPHS);
-
    if (pj.contains("Data"))
    {
        const QJsonArray ar = pj["Data"].toArray();
@@ -242,11 +257,36 @@ bool APmHub::readElectronicsFromJson(QJsonObject &json)
        else
            for (int ipm=0; ipm<numPMs; ipm++) PMs[ipm].ADCbits = ar[ipm].toDouble();
      }
+   updateADClevels();
 
+   if (js.contains("DarkCounts"))
+   {
+       QJsonObject j = js["DarkCounts"].toObject();
+       parseJson(j, "Active", fDoDarkCounts);
+
+       const QJsonArray ar = j["Data"].toArray();
+       if (ar.size() != numPMs) qWarning() << "Dark counts json size mismatch - ignoring!";
+       else
+           for (int ipm = 0; ipm < numPMs; ipm++)
+           {
+               const QJsonObject j = ar[ipm].toObject();
+               PMs[ipm].readDarkCountsSettingsFromJson(j);
+           }
+   }
+   else
+   {
+       // compatibility
+       if (js.contains("TimeWindow"))
+       {
+           double MeasurementTime = js["TimeWindow"].toDouble(150.0);
+           for (APm& pm : PMs) pm.MeasurementTime = MeasurementTime;
+       }
+   }
+
+/*
    if (js.contains("TimeWindow")) MeasurementTime = js["TimeWindow"].toDouble(150.0);
    else MeasurementTime = 150.0;
-
-   updateADClevels();
+*/
 
    return true;
 }

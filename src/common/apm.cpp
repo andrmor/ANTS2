@@ -100,6 +100,44 @@ void APm::copySPePHSdata(const APm& from)
     if (from.SPePHShist) SPePHShist = new TH1D(*from.SPePHShist);
 }
 
+void APm::copyDarkCountsData(const APm &from)
+{
+    MeasurementTime         = from.MeasurementTime;
+    DarkCounts_Model        = from.DarkCounts_Model;
+    DarkCounts_Distribution = from.DarkCounts_Distribution;
+}
+
+const QJsonObject APm::writeDarkCountsSettingsToJson() const
+{
+    QJsonObject js;
+
+    js["DarkCounts_time"]         = MeasurementTime;
+    js["DarkCounts_model"]        = DarkCounts_Model;
+
+    QJsonArray ar;
+    for (const double& d : DarkCounts_Distribution) ar << d;
+    js["DarkCounts_distribution"] = ar;
+
+    return js;
+}
+
+void APm::readDarkCountsSettingsFromJson(const QJsonObject &json)
+{
+    parseJson(json, "DarkCounts_time", MeasurementTime);
+
+    parseJson(json, "DarkCounts_model", DarkCounts_Model);
+    if (DarkCounts_Model < 0 || DarkCounts_Model > 1)
+    {
+        qWarning() << "Bad dark counts model:"<<DarkCounts_Model<< " - replaced with simplistic (0)";
+        DarkCounts_Model = 0;
+    }
+
+    QJsonArray ar;
+    parseJson(json, "DarkCounts_distribution", ar);
+    DarkCounts_Distribution.clear();
+    for (int i=0; i<ar.size(); i++) DarkCounts_Distribution << ar[i].toDouble();
+}
+
 void APm::copyMCcrosstalkData(const APm& from)
 {
     MCcrosstalk   = from.MCcrosstalk;

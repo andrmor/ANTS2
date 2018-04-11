@@ -2,7 +2,7 @@
 #include "apmhub.h"
 #include "alrfmoduleselector.h"
 #include "detectorclass.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "eventsdataclass.h"
 #include "photon_generator.h"
 #include "primaryparticletracker.h"
@@ -372,7 +372,7 @@ Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
     progress = 0;
     RandGen = new TRandom2();    
     dataHub = new EventsDataClass(nameID);    
-    OneEvent = new OneEventClass(detector->PMs, RandGen, dataHub->SimStat);
+    OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
 }

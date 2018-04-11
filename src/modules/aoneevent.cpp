@@ -1,4 +1,4 @@
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "apmhub.h"
 #include "apmtype.h"
 #include "asimulationstatistics.h"
@@ -12,7 +12,7 @@
 #include "TRandom2.h"
 #include "TH1D.h"
 
-OneEventClass::OneEventClass(APmHub *Pms, TRandom2 *randGen, ASimulationStatistics* simStat)
+AOneEvent::AOneEvent(APmHub *Pms, TRandom2 *randGen, ASimulationStatistics* simStat)
 {
   PMs = Pms;
   RandGen = randGen;
@@ -21,12 +21,12 @@ OneEventClass::OneEventClass(APmHub *Pms, TRandom2 *randGen, ASimulationStatisti
   GammaRandomGen = new AGammaRandomGenerator(); 
 }
 
-OneEventClass::~OneEventClass()
+AOneEvent::~AOneEvent()
 {
     delete GammaRandomGen;
 }
 
-void OneEventClass::configure(const GeneralSimSettings *simSet)
+void AOneEvent::configure(const GeneralSimSettings *simSet)
 {
   SimSet = simSet; 
   numPMs = PMs->count();
@@ -41,10 +41,10 @@ void OneEventClass::configure(const GeneralSimSettings *simSet)
            SiPMpixels[ipm] = sipmPixels;
         }
     }
-  OneEventClass::clearHits(); //the rest of object are resized there  
+  AOneEvent::clearHits(); //the rest of object are resized there
 }
 
-void OneEventClass::clearHits()
+void AOneEvent::clearHits()
 {
   if (PMhits.size()    != numPMs)
       PMhits.resize(numPMs);
@@ -83,13 +83,13 @@ void OneEventClass::clearHits()
   }
 }
 
-bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
+bool AOneEvent::CheckPMThit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
     {
-      iTime = OneEventClass::TimeToBin(time);
+      iTime = AOneEvent::TimeToBin(time);
       if (iTime == -1) return false;
     }
   //cheking vs photon detection efficiency
@@ -109,13 +109,13 @@ bool OneEventClass::CheckPMThit(int ipm, double time, int WaveIndex, double x, d
   return true;
 }
 
-bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
+bool AOneEvent::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, double y, double cosAngle, int Transitions, double rnd)
 {
   //if time resolved, first check we are inside time window!
   int iTime = 0;
   if (SimSet->fTimeResolved)
     {
-      iTime = OneEventClass::TimeToBin(time);
+      iTime = AOneEvent::TimeToBin(time);
       if (iTime == -1) return false;
     }
   //cheking vs photon detection efficiency
@@ -161,7 +161,7 @@ bool OneEventClass::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, 
   return true;
 }
 
-void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits)
+void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits)
 //numHits != 1 is used 1) for the simplistic model of microcell cross-talk
 //                     2) to simulate dark counts in advanced model
 {
@@ -223,18 +223,18 @@ void OneEventClass::registerSiPMhit(int ipm, int iTime, int binX, int binY, floa
   }
 }
 
-bool OneEventClass::isHitsEmpty() const
+bool AOneEvent::isHitsEmpty() const
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
     if (PMhits.at(ipm) != 0) return false;  // set to exact zero on init, any non-zero is fine
   return true;
 }
 
-void OneEventClass::HitsToSignal()
+void AOneEvent::HitsToSignal()
 {
     //PMsignals.resize(numPMs);
 
-    OneEventClass::AddDarkCounts(); //add dark counts for all SiPMs
+    AOneEvent::AddDarkCounts(); //add dark counts for all SiPMs
 
     if (SimSet->fTimeResolved)
     {
@@ -252,7 +252,7 @@ void OneEventClass::HitsToSignal()
     else convertHitsToSignal(PMhits, PMsignals);
 }
 
-void OneEventClass::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>& pmSignals)
+void AOneEvent::convertHitsToSignal(const QVector<float>& pmHits, QVector<float>& pmSignals)
 {
     for (int ipm = 0; ipm < numPMs; ipm++)
     {
@@ -446,7 +446,7 @@ void OneEventClass::HitsToSignal()
 }
 */
 
-void OneEventClass::AddDarkCounts() //currently applicable only for SiPMs!
+void AOneEvent::AddDarkCounts() //currently applicable only for SiPMs!
 {
   for (int ipm = 0; ipm < numPMs; ipm++)
       if (PMs->isSiPM(ipm))
@@ -501,7 +501,7 @@ void OneEventClass::AddDarkCounts() //currently applicable only for SiPMs!
       }
 }
 
-void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
+void AOneEvent::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)
 {
     SimStat->registerWave(WaveIndex);
     SimStat->registerTime(time);
@@ -513,7 +513,7 @@ void OneEventClass::CollectStatistics(int WaveIndex, double time, double cosAngl
     SimStat->registerNumTrans(Transitions);
 }
 
-int OneEventClass::TimeToBin(double time) const
+int AOneEvent::TimeToBin(double time) const
 {
   if (time < SimSet->TimeFrom || time > SimSet->TimeTo) return -1;
   if (SimSet->TimeBins == 0) return -1;

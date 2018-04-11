@@ -4,7 +4,7 @@
 #include "generalsimsettings.h"
 #include "aopticaloverride.h"
 #include "asimulationstatistics.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "agridelementrecord.h"
 #include "aphoton.h"
 #include "atrackrecords.h"
@@ -38,7 +38,7 @@ APhotonTracer::~APhotonTracer()
     delete p;
 }
 
-void APhotonTracer::configure(const GeneralSimSettings *simSet, OneEventClass* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
+void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
 {
    SimSet = simSet;
    OneEvent = oneEvent;

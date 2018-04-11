@@ -1,5 +1,5 @@
-#ifndef ONEEVENTCLASS_H
-#define ONEEVENTCLASS_H
+#ifndef AONEEVENT_H
+#define AONEEVENT_H
 
 #include <QVector>
 #include <QBitArray>
@@ -10,11 +10,11 @@ class ASimulationStatistics;
 class GeneralSimSettings;
 class AGammaRandomGenerator;
 
-class OneEventClass
+class AOneEvent
 {
 public:
-  OneEventClass(APmHub* Pms, TRandom2* randGen, ASimulationStatistics* simStat);
-  ~OneEventClass();
+  AOneEvent(APmHub* Pms, TRandom2* randGen, ASimulationStatistics* simStat);
+  ~AOneEvent();
 
   //Pm hits info
   QVector<QVector<float> > TimedPMhits;      // PM hits [time][pm]
@@ -54,4 +54,4 @@ private:
   void convertHitsToSignal(const QVector<float> &pmHits, QVector<float> &pmSignals);
 };
 
-#endif // ONEEVENTCLASS_H
+#endif // AONEEVENT_H

@@ -17,7 +17,7 @@
 #include "RVersion.h"
 
 class DetectorClass;
-class OneEventClass;
+class AOneEvent;
 class EventsDataClass;
 class AParticle;
 class Photon_Generator;
@@ -181,7 +181,7 @@ public:
 
     virtual int getEventCount() const = 0;
     virtual int getTotalEventCount() const = 0;
-    const OneEventClass *getLastEvent() const { return OneEvent; }
+    const AOneEvent *getLastEvent() const { return OneEvent; }
 
     bool wasSuccessful() const { return fSuccess; }
     virtual void updateGeoManager();
@@ -203,7 +203,7 @@ protected:
 
     const DetectorClass *detector;
     TRandom2 *RandGen;
-    OneEventClass* OneEvent; //PM hit data for one event is stored here
+    AOneEvent* OneEvent; //PM hit data for one event is stored here
     EventsDataClass *dataHub;
     Photon_Generator *photonGenerator;
     QString ErrorString; //last error

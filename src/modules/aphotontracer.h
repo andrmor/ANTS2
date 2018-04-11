@@ -10,7 +10,7 @@ class TGeoManager;
 class AMaterial;
 class APmHub;
 class AMaterialParticleCollection;
-class OneEventClass;
+class AOneEvent;
 class GeneralSimSettings;
 class TGeoNavigator;
 class TrackHolderClass;
@@ -29,11 +29,11 @@ public:
     ~APhotonTracer();
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;}//will be obsolete with new simulation system soon
-    void configure(const GeneralSimSettings *simSet, OneEventClass* oneEvent, bool fBuildTracks, QVector<TrackHolderClass *> *tracks);
+    void configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, QVector<TrackHolderClass *> *tracks);
 
     void TracePhoton(const APhoton* Photon);
 
-    OneEventClass* getEvent() {return OneEvent;}  //only used in LRF-based sim
+    AOneEvent* getEvent() {return OneEvent;}  //only used in LRF-based sim
 
 private:    
     TRandom2* RandGen;
@@ -42,7 +42,7 @@ private:
     AMaterialParticleCollection* MaterialCollection;
     APmHub* PMs;
     const QList<AGridElementRecord*>* grids;
-    OneEventClass* OneEvent; //PM signals for this event are collected here
+    AOneEvent* OneEvent; //PM signals for this event are collected here
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;

@@ -315,7 +315,8 @@ SOURCES += main.cpp \
     common/apm.cpp \
     modules/apmhub.cpp \
     common/apmtype.cpp \
-    scriptmode/ainterfacetoguiscript.cpp
+    scriptmode/ainterfacetoguiscript.cpp \
+    modules/aoneevent.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -444,7 +445,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/apm.h \
     modules/apmhub.h \
     common/apmtype.h \
-    scriptmode/ainterfacetoguiscript.h
+    scriptmode/ainterfacetoguiscript.h \
+    modules/aoneevent.h
 
 # --- SIM ---
 ants2_SIM {
@@ -455,7 +457,6 @@ ants2_SIM {
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
-    modules/oneeventclass.cpp \
     modules/simulationmanager.cpp \
     modules/phscatclaudiomodel.cpp \
     modules/scatteronmetal.cpp \
@@ -477,7 +478,6 @@ ants2_SIM {
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \
-    modules/oneeventclass.h \
     modules/simulationmanager.h \
     modules/phscatclaudiomodel.h \
     modules/scatteronmetal.h \

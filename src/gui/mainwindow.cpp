@@ -1283,7 +1283,7 @@ void MainWindow::on_cbAngularSensitive_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(2, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(2, QIcon());
     ui->fAngular->setEnabled(checked);
-    MainWindow::on_pbIndPMshowInfo_clicked(); //to refresh the binned button
+    on_pbIndPMshowInfo_clicked(); //to refresh the binned button
 }
 
 void MainWindow::on_cbWaveResolved_toggled(bool checked)
@@ -2814,7 +2814,7 @@ void MainWindow::on_pbElUpdateIndication_clicked()
       }
 
       ui->ledTimeOfOneMeasurement->setText( QString::number(PMs->at(ipm).MeasurementTime) );
-      ui->swDarkCounts_Time->setCurrentIndex( PMs->WavelengthResolved ? 1 : 0 );
+      ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
       ui->cobDarkCounts_Model->setCurrentIndex( PMs->at(ipm).DarkCounts_Model );
       const bool bHaveDist = !PMs->at(ipm).DarkCounts_Distribution.isEmpty();
       ui->pbDarkCounts_Show->setEnabled(bHaveDist);
@@ -2878,11 +2878,11 @@ void MainWindow::on_pbElCopyGainData_clicked()
            PMs->at(ipmTo).copyElNoiseData(PMs->at(ipm));
            break;
          case 3:
-           PMs->at(ipmTo).copyADCdata(PMs->at(ipm));
-           break;
-         case 4:
            PMs->at(ipmTo).copyDarkCountsData(PMs->at(ipm));
            break;
+         case 4:
+           PMs->at(ipmTo).copyADCdata(PMs->at(ipm));
+           break;         
          default:
            qWarning() << "Unknown electronics selector";
          }
@@ -4750,6 +4750,8 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
         GenScriptWindow->updateJsonTree();
     if (ScriptWindow && ScriptWindow->isVisible())
         ScriptWindow->updateJsonTree();
+
+    on_pbElUpdateIndication_clicked(); //Dark noise indication might change: depends on time-resolved status
 }
 
 void MainWindow::on_pbStopLoad_clicked()
@@ -5119,6 +5121,7 @@ void MainWindow::on_pbDarkCounts_Delete_clicked()
     }
 
     PMs->at(ipm).DarkCounts_Distribution.clear();
+    on_pbUpdateElectronics_clicked();
 }
 
 void MainWindow::on_pushButton_clicked()

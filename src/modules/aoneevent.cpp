@@ -478,7 +478,8 @@ void AOneEvent::AddDarkCounts() //currently applicable only for SiPMs!
                       int iY = pixelsY * RandGen->Rndm();
                       if (iY >= pixelsY) iY = pixelsY-1;
                       //   qDebug()<<"Pixels:"<<iX<<iY;
-                      registerSiPMhit(ipm, iTime, iX, iY);
+
+                      registerSiPMhit(ipm, iTime, iX, iY, generateDarkHitIncrement(ipm));
                     }
                 }
             }
@@ -491,11 +492,19 @@ void AOneEvent::AddDarkCounts() //currently applicable only for SiPMs!
                       for (int iY = 0; iY<pixelsY; iY++)
                         {
                           if (RandGen->Rndm() < pixelFiringProbability)
-                              registerSiPMhit(ipm, iTime, iX, iY);
+                              registerSiPMhit(ipm, iTime, iX, iY, generateDarkHitIncrement(ipm));
                         }
                 }
             }
       }
+}
+
+float AOneEvent::generateDarkHitIncrement(int ipm) const
+{
+    if (PMs->at(ipm).DarkCounts_Model == 0 || PMs->at(ipm).DarkCounts_Distribution.isEmpty()) return 1.0f;
+
+    const int index = RandGen->Uniform(PMs->at(ipm).DarkCounts_Distribution.size());
+    return PMs->at(ipm).DarkCounts_Distribution.at(index);
 }
 
 void AOneEvent::CollectStatistics(int WaveIndex, double time, double cosAngle, int Transitions)

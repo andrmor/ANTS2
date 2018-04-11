@@ -623,6 +623,12 @@ private slots:
 
     void on_pbDarkCounts_Delete_clicked();
 
+    void on_pushButton_clicked();
+
+    void on_cobDarkCounts_Model_currentIndexChanged(int index);
+
+    void on_cobDarkCounts_LoadOptions_currentIndexChanged(int index);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

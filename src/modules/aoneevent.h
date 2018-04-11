@@ -52,6 +52,7 @@ private:
   void registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits = 1.0f); // numHits != 1 for two cases: 1) simplistic model of microcell cross-talk  2) advanced model of dark counts
   void AddDarkCounts();
   void convertHitsToSignal(const QVector<float> &pmHits, QVector<float> &pmSignals);
+  float generateDarkHitIncrement(int ipm) const;
 };
 
 #endif // AONEEVENT_H

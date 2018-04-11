@@ -2912,18 +2912,18 @@ void MainWindow::on_cbEnableElNoise_toggled(bool checked)
   else ui->twElectronics->setTabText(2, "Electronic noise :Off");
 }
 
-void MainWindow::on_cbEnableADC_toggled(bool checked)
-{  
-    ui->fADC->setEnabled(checked);    
-    if (checked) ui->twElectronics->setTabText(3, "ADC :On ");
-    else ui->twElectronics->setTabText(3, "ADC :Off");
-}
-
 void MainWindow::on_cbDarkCounts_Enable_toggled(bool checked)
 {
     ui->fDarkCounts->setEnabled(checked);
-    if (checked) ui->twElectronics->setTabText(4, "Dark counts :On ");
-    else ui->twElectronics->setTabText(4, "Dark counts :Off");
+    if (checked) ui->twElectronics->setTabText(3, "Dark counts :On ");
+    else ui->twElectronics->setTabText(3, "Dark counts :Off");
+}
+
+void MainWindow::on_cbEnableADC_toggled(bool checked)
+{  
+    ui->fADC->setEnabled(checked);    
+    if (checked) ui->twElectronics->setTabText(4, "ADC :On ");
+    else ui->twElectronics->setTabText(4, "ADC :Off");
 }
 
 void MainWindow::on_pbScanDistrLoad_clicked()
@@ -5059,6 +5059,51 @@ void MainWindow::on_pbDarkCounts_Load_clicked()
     int res = LoadDoubleVectorsFromFile(fileName, &x);
     if (res == 0)
     {
+        qDebug() << "Original:\n"<< x;
+        const int LoadOption = ui->cobDarkCounts_LoadOptions->currentIndex(); //0=as is; 1=scale; 2=Integrate; 3=Integrate then scale
+        if (LoadOption == 2 || LoadOption == 3)
+        {
+            // integrating
+            int range = ui->sbDarkCounts_IntegralRange->value();
+            if (range == 0)
+                range = x.size();
+            else if (range > x.size())
+            {
+                message("Error: given range is larger than the length of the distribution in the file!", this);
+                return;
+            }
+
+            QVector<double> xi;
+            int start = 0;
+            int inWindow = 1; // max inWindow vaue = range; on right side clipping is in the sum cycle condition
+            while (start < x.size())
+            {
+                double val = 0;
+                for (int i = start; (i < (start + inWindow)) && (i < x.size()); i++)
+                    val += x.at(i);
+
+                xi << val;
+
+                if (inWindow < range)
+                     inWindow++;
+                else start++;
+            }
+
+            x = xi;
+        }
+
+        if (LoadOption == 1 || LoadOption == 3)
+        {
+            // scaling max to 1
+            float max = -1e10;
+            for (const double& d : x)
+                if (d > max) max = d;
+            if (max > 0)
+                for (double& d : x) d /= max;
+        }
+
+        qDebug() << "After pre-processing:\n"<<x;
+
         PMs->at(ipm).DarkCounts_Distribution = x;
         on_pbUpdateElectronics_clicked();
     }
@@ -5074,4 +5119,37 @@ void MainWindow::on_pbDarkCounts_Delete_clicked()
     }
 
     PMs->at(ipm).DarkCounts_Distribution.clear();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString s = "Average dark counts = ( time interval )  x  ( dark count rate of the SiPM )\n"
+                "\n"
+                "For time-resolved simulation the time interval is = time duration of one bin\n"
+                "\n"
+                "Simplistic model:\n"
+                "   A dark count event is processed exactly the same way as a detected photon hit\n"
+                "Advanced model:\n"
+                "   A dark count event can contribute \"fractional\" number of hits\n"
+                "   The contributed value is sampled from the user provided data:\n"
+                "   using uniform random generator, one of the values in the provided data vector is selected."
+                "   Two main load options:\n"
+                "     When data loaded \"as is\", it imitates DAC which digitizes data at a given trigger."
+                "     When \"integrating\" is used, it imitates DAC which integrate signal waveform in a certain range"
+                "\n"
+                "     Integrating range has to be smaller or equal to the provided dataset range.\n"
+                "       0 values inidicates that the integration range has to be equal to the range of the provided dataset."
+                "";
+
+    message(s, this);
+}
+
+void MainWindow::on_cobDarkCounts_Model_currentIndexChanged(int index)
+{
+    ui->frDarkCounts_Advanced->setVisible(index != 0);
+}
+
+void MainWindow::on_cobDarkCounts_LoadOptions_currentIndexChanged(int index)
+{
+    ui->sbDarkCounts_IntegralRange->setEnabled(index > 1);
 }

@@ -12,12 +12,9 @@
 #include "TRandom2.h"
 #include "TH1D.h"
 
-AOneEvent::AOneEvent(APmHub *Pms, TRandom2 *randGen, ASimulationStatistics* simStat)
+AOneEvent::AOneEvent(APmHub *PMs, TRandom2 *RandGen, ASimulationStatistics* SimStat) :
+    PMs(PMs), RandGen(RandGen), SimStat(SimStat)
 {
-  PMs = Pms;
-  RandGen = randGen;
-  SimStat = simStat;
-
   GammaRandomGen = new AGammaRandomGenerator(); 
 }
 
@@ -28,20 +25,20 @@ AOneEvent::~AOneEvent()
 
 void AOneEvent::configure(const GeneralSimSettings *simSet)
 {
-  SimSet = simSet; 
-  numPMs = PMs->count();
-  SiPMpixels.resize(numPMs);
-  for (int ipm=0; ipm<numPMs; ipm++)
+    SimSet = simSet;
+    numPMs = PMs->count();
+    SiPMpixels.resize(numPMs);
+    for (int ipm = 0; ipm < numPMs; ipm++)
     {
-      QBitArray sipmPixels;
-      const APmType *type = PMs->getTypeForPM(ipm);
-      if(type->SiPM)
+        QBitArray sipmPixels;
+        const APmType *type = PMs->getTypeForPM(ipm);
+        if(type->SiPM)
         {
-           sipmPixels = QBitArray((SimSet->fTimeResolved ? SimSet->TimeBins : 1) * type->PixelsX * type->PixelsY);
-           SiPMpixels[ipm] = sipmPixels;
+             sipmPixels = QBitArray((SimSet->fTimeResolved ? SimSet->TimeBins : 1) * type->PixelsX * type->PixelsY);
+             SiPMpixels[ipm] = sipmPixels;
         }
     }
-  AOneEvent::clearHits(); //the rest of object are resized there
+    AOneEvent::clearHits(); //clears and resizes the hits / signals containers
 }
 
 void AOneEvent::clearHits()
@@ -169,6 +166,25 @@ void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float nu
 
   if (!SimSet->fTimeResolved)
   {
+      const int iXY = tp->PixelsX*binY + binX;
+      if (SiPMpixels[ipm].testBit(iXY)) return;  //nothing to do - already lit
+
+      //registering hit
+      SiPMpixels[ipm].setBit(iXY, true);
+      PMhits[ipm] += numHits;
+
+      if (PMs->isDoMCcrosstalk()  &&  PMs->at(ipm).MCmodel == 1)
+      {
+          //checking 4 neighbours
+          const double& trigProb = PMs->at(ipm).MCtriggerProb;
+          if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
+          if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
+          if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
+          if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
+      }
+  }
+  else
+  {
       const int timeBinInterval = tp->PixelsX * tp->PixelsY;
       const int iTXY = iTime*timeBinInterval + tp->PixelsX*binY + binX;
 
@@ -202,25 +218,6 @@ void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float nu
           }
         }
   }
-  else
-  {
-      const int iXY = tp->PixelsX*binY + binX;
-      if (SiPMpixels[ipm].testBit(iXY)) return;  //nothing to do - already lit
-
-      //registering hit
-      SiPMpixels[ipm].setBit(iXY, true);
-      PMhits[ipm] += numHits;
-
-      if (PMs->isDoMCcrosstalk()  &&  PMs->at(ipm).MCmodel == 1)
-      {
-          //checking 4 neighbours
-          const double& trigProb = PMs->at(ipm).MCtriggerProb;
-          if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
-          if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
-          if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
-          if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
-      }
-  }
 }
 
 bool AOneEvent::isHitsEmpty() const
@@ -234,7 +231,7 @@ void AOneEvent::HitsToSignal()
 {
     //PMsignals.resize(numPMs);
 
-    AOneEvent::AddDarkCounts(); //add dark counts for all SiPMs
+    if (PMs->fDoDarkCounts) AddDarkCounts(); //add dark counts for all SiPMs
 
     if (SimSet->fTimeResolved)
     {

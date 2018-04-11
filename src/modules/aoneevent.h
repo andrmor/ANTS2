@@ -13,7 +13,7 @@ class AGammaRandomGenerator;
 class AOneEvent
 {
 public:
-  AOneEvent(APmHub* Pms, TRandom2* randGen, ASimulationStatistics* simStat);
+  AOneEvent(APmHub* PMs, TRandom2* RandGen, ASimulationStatistics* SimStat);
   ~AOneEvent();
 
   //Pm hits info

@@ -2954,6 +2954,7 @@ void GraphWindowClass::AppendRootHistsOrGraphs()
     }
 
     f->Close();
+    delete f;
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()

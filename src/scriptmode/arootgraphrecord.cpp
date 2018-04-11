@@ -120,3 +120,23 @@ void ARootGraphRecord::SetXRange(double min, double max)
         }
     }
 }
+
+const QVector<QPair<double, double> > ARootGraphRecord::GetPoints()
+{
+    QMutexLocker locker(&Mutex);
+
+    QVector<QPair<double, double>> res;
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+        {
+            const int numPoints = g->GetN();
+            res.resize(numPoints);
+            for (int ip=0; ip<numPoints; ip++)
+                g->GetPoint(ip, res[ip].first, res[ip].second);
+        }
+    }
+    return res;
+}

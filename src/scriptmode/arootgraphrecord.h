@@ -4,6 +4,7 @@
 #include "arootobjbase.h"
 
 #include <QVector>
+#include <QPair>
 #include <QString>
 #include <QMutex>
 
@@ -26,6 +27,7 @@ public:
     void     Sort();
     void     SetYRange(double min, double max);
     void     SetXRange(double min, double max);
+    const QVector<QPair<double, double> > GetPoints();
 
 private:
     QString  TitleX, TitleY;

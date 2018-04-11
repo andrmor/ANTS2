@@ -75,6 +75,7 @@ public slots:
   void SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
   void NewGraph(const QString& GraphName);
+
   void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
   void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
@@ -89,6 +90,9 @@ public slots:
   void Sort(const QString& GraphName);
 
   void Draw(QString GraphName, QString options = "APL");
+
+  void LoadTGraph(const QString& NewGraphName, const QString& FileName);
+  const QVariant GetPoints(const QString& GraphName);
 
   bool Delete(QString GraphName);
   void DeleteAllGraph();

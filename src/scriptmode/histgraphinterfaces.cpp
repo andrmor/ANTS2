@@ -427,6 +427,7 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
     bool bOK = TmpHub->Graphs.append(GraphName, rec, bAbortIfExists);
     if (!bOK)
     {
+        delete gr;
         delete rec;
         abort("Graph "+GraphName+" already exists!");
     }
@@ -598,6 +599,79 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
         abort("Graph "+GraphName+" not found!");
     else
         emit RequestDraw(r->GetObject(), options, true);
+}
+
+#include "TFile.h"
+#include "TKey.h"
+void AInterfaceToGraph::LoadTGraph(const QString &NewGraphName, const QString &FileName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot load graphs!");
+        return;
+    }
+
+    TFile* f = new TFile(FileName.toLocal8Bit().data());
+    if (!f)
+    {
+        abort("Cannot open file " + FileName);
+        return;
+    }
+
+    const int numKeys = f->GetListOfKeys()->GetEntries();
+
+    TGraph* g = 0;
+    for (int ikey = 0; ikey < numKeys; ikey++)
+    {
+        TKey *key = (TKey*)f->GetListOfKeys()->At(ikey);
+        qDebug() << key->GetName() << key->GetClassName() << key->GetTitle();
+
+        const QString Type = key->GetClassName();
+        if (Type != "TGraph") continue;
+        g = dynamic_cast<TGraph*>(key->ReadObj());
+        if (g) break;
+    }
+    if (!g) abort(FileName + " does not contain TGraphs");
+    else
+    {
+        ARootGraphRecord* rec = new ARootGraphRecord(g, NewGraphName, "TGraph");
+        bool bOK = TmpHub->Graphs.append(NewGraphName, rec, bAbortIfExists);
+        if (!bOK)
+        {
+            delete g;
+            delete rec;
+            abort("Graph "+NewGraphName+" already exists!");
+        }
+        else
+        {
+            g->SetFillColor(0);
+            g->SetFillStyle(0);
+        }
+    }
+
+    f->Close();
+    delete f;
+}
+
+const QVariant AInterfaceToGraph::GetPoints(const QString &GraphName)
+{
+    QVariantList res;
+
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+    {
+        const QVector<QPair<double, double> > vec = r->GetPoints();
+        for (const QPair<double, double>& pair : vec)
+        {
+            QVariantList el;
+            el << pair.first << pair.second;
+            res.push_back(el); // creates nested array!
+        }
+    }
+
+    return res;
 }
 
 bool AInterfaceToGraph::Delete(QString GraphName)

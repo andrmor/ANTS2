@@ -209,7 +209,7 @@ TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<doub
     return 0;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y) const
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y) const
 {
   int numEl = x.size();
   TVectorD xx(numEl);
@@ -226,7 +226,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector
   return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y,
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
                                           const char *Title, const char *XTitle, const char *YTitle,
                                           Color_t MarkerColor, int MarkerStyle, int MarkerSize,
                                           Color_t LineColor, int LineStyle, int LineWidth) const
@@ -239,7 +239,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector
     return gr;
 }
 
-TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> &x, const QVector<double> &y, const QVector<double> &z) const
 {
     int numEl = x.size();
     TGraph2D* gr = new TGraph2D(numEl, (double*)x.data(), (double*)y.data(), (double*)z.data());
@@ -248,7 +248,7 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVe
     return gr;
 }
 
-TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z,
                                             const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
                                             Color_t MarkerColor, int MarkerStyle, int MarkerSize,
                                             Color_t LineColor, int LineStyle, int LineWidth)

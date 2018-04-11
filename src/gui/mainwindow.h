@@ -617,6 +617,12 @@ private slots:
 
     void on_cbDarkCounts_Enable_toggled(bool checked);
 
+    void on_pbDarkCounts_Show_clicked();
+
+    void on_pbDarkCounts_Load_clicked();
+
+    void on_pbDarkCounts_Delete_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

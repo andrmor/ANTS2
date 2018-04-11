@@ -125,13 +125,13 @@ public:
                       bool OnlyBuild = false);
 
     //use this to only construct!
-    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y) const;
-    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y,
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                             Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
-    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const;
-    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+    TGraph2D* ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z) const;
+    TGraph2D* ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z,
                               const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);

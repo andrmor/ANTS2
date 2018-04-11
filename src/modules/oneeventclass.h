@@ -43,7 +43,7 @@ public:
 private:
   APmHub* PMs;
   TRandom2* RandGen;  
-  AGammaRandomGenerator* GammaRandomGen; // not to use one in pms module - multithread conflict?
+  AGammaRandomGenerator* GammaRandomGen; // cannot use one in the APmHub module - thread conflict?
 
   //settings
   const GeneralSimSettings *SimSet;

@@ -5017,3 +5017,61 @@ void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
     }
     on_pbUpdateElectronics_clicked();
 }
+
+void MainWindow::on_pbDarkCounts_Show_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    const QVector<double>& dist = PMs->at(ipm).DarkCounts_Distribution;
+    if (dist.isEmpty())
+    {
+        message("Distribution is not defined", this);
+        return;
+    }
+
+    TString title = "Generator distribution for PM #";
+    title += ipm;
+    QVector<double> x;
+    for (int i = 0; i < dist.size(); i++) x << i;
+    TGraph* g = GraphWindow->ConstructTGraph(x, dist, title, "", "");
+    GraphWindow->Draw(g, "AP");
+}
+
+void MainWindow::on_pbDarkCounts_Load_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QVector<double> x;
+    int res = LoadDoubleVectorsFromFile(fileName, &x);
+    if (res == 0)
+    {
+        PMs->at(ipm).DarkCounts_Distribution = x;
+        on_pbUpdateElectronics_clicked();
+    }
+}
+
+void MainWindow::on_pbDarkCounts_Delete_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    PMs->at(ipm).DarkCounts_Distribution.clear();
+}

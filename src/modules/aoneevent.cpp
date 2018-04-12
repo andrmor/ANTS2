@@ -159,8 +159,8 @@ bool AOneEvent::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, doub
 }
 
 void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float numHits)
-//numHits != 1 is used 1) for the simplistic model of microcell cross-talk
-//                     2) to simulate dark counts in advanced model
+//numHits != 1 is used 1) for the simplistic model of microcell cross-talk -> then MCmodel = 0
+//                     2) to simulate dark counts in advanced model (MCmodel = 1)
 {
   const APmType* tp = PMs->getTypeForPM(ipm);
 
@@ -177,10 +177,10 @@ void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float nu
       {
           //checking 4 neighbours
           const double& trigProb = PMs->at(ipm).MCtriggerProb;
-          if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
-          if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
-          if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
-          if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
+          if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY, numHits);//left
+          if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY, numHits);//right
+          if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1, numHits);//bottom
+          if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1, numHits);//top
       }
   }
   else
@@ -210,10 +210,10 @@ void AOneEvent::registerSiPMhit(int ipm, int iTime, int binX, int binY, float nu
               {
                   //checking 4 neighbours
                   const double& trigProb = PMs->at(ipm).MCtriggerProb;
-                  if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY);//left
-                  if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY);//right
-                  if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1);//bottom
-                  if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1);//top
+                  if (binX > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX-1, binY, numHits);//left
+                  if (binX+1 < tp->PixelsX && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX+1, binY, numHits);//right
+                  if (binY > 0             && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY-1, numHits);//bottom
+                  if (binY+1 < tp->PixelsY && RandGen->Rndm() < trigProb) registerSiPMhit(ipm, iTime, binX, binY+1, numHits);//top
               }
           }
         }

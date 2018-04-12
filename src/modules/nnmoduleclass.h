@@ -114,7 +114,7 @@ public:
 
    int countCalibrationEvents() {return numCalibrationEvents;}
 
-   QVector<float> evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit);
+   QVector<float> evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit, float maxSignal);
    int countPMs() const {return numPMs;}
 
    double getCalibrationEventX(int ievent);

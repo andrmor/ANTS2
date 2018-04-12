@@ -316,7 +316,9 @@ SOURCES += main.cpp \
     modules/apmhub.cpp \
     common/apmtype.cpp \
     scriptmode/ainterfacetoguiscript.cpp \
-    modules/aoneevent.cpp
+    modules/aoneevent.cpp \
+    scriptmode/ainterfacetottree.cpp \
+    common/aroottreerecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -446,7 +448,9 @@ HEADERS  += common/CorrelationFilters.h \
     modules/apmhub.h \
     common/apmtype.h \
     scriptmode/ainterfacetoguiscript.h \
-    modules/aoneevent.h
+    modules/aoneevent.h \
+    scriptmode/ainterfacetottree.h \
+    common/aroottreerecord.h
 
 # --- SIM ---
 ants2_SIM {

@@ -598,7 +598,10 @@ void AInterfaceToGraph::Draw(QString GraphName, QString options)
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
+    {
         emit RequestDraw(r->GetObject(), options, true);
+        r->LastDrawOption = options;
+    }
 }
 
 #include "TFile.h"
@@ -624,7 +627,7 @@ void AInterfaceToGraph::LoadTGraph(const QString &NewGraphName, const QString &F
     for (int ikey = 0; ikey < numKeys; ikey++)
     {
         TKey *key = (TKey*)f->GetListOfKeys()->At(ikey);
-        qDebug() << key->GetName() << key->GetClassName() << key->GetTitle();
+        qDebug() << "Key->  name:" << key->GetName() << " class:" << key->GetClassName() <<" title:"<< key->GetTitle();
 
         const QString Type = key->GetClassName();
         if (Type != "TGraph") continue;
@@ -644,6 +647,8 @@ void AInterfaceToGraph::LoadTGraph(const QString &NewGraphName, const QString &F
         }
         else
         {
+            qDebug() << "Draw opt:"<<g->GetDrawOption() << g->GetOption();
+            //g->Dump();
             g->SetFillColor(0);
             g->SetFillStyle(0);
         }
@@ -651,6 +656,21 @@ void AInterfaceToGraph::LoadTGraph(const QString &NewGraphName, const QString &F
 
     f->Close();
     delete f;
+}
+
+void AInterfaceToGraph::Save(const QString &GraphName, const QString &FileName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot save graphs!");
+        return;
+    }
+
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->Save(FileName);
 }
 
 const QVariant AInterfaceToGraph::GetPoints(const QString &GraphName)

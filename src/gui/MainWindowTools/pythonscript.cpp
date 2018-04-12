@@ -24,6 +24,7 @@
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
+#include "ainterfacetottree.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -83,7 +84,7 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
   PythonScriptWindow->SetInterfaceObject(hist, "hist");
 
-  AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
+  AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
   PythonScriptWindow->SetInterfaceObject(tree, "tree");
 
   AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(PSM, PythonScriptWindow);

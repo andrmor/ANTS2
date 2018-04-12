@@ -30,7 +30,6 @@ class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
 class QJsonValue;
-class TmpObjHubClass;
 
 // ====== interfaces which do not require GUI ======
 
@@ -418,26 +417,6 @@ private:
   DetectorClass* Detector;
   EventsDataClass* EventsDataHub;
   LRF::ARepository *repo; //alias
-};
-
-// ---- T R E E ---- (TTree of ROOT)
-class AInterfaceToTree : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-   AInterfaceToTree(TmpObjHubClass *TmpHub);
-   ~AInterfaceToTree() {}
-
-public slots:
-   void     OpenTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
-   QString  PrintBranches(const QString &TreeName);
-   QVariant GetBranch(const QString &TreeName, const QString &BranchName);
-   bool     CloseTree(const QString &TreeName);
-   void     CloseAllTrees();
-
-private:
-   TmpObjHubClass *TmpHub;
 };
 
 #ifdef GUI // =============== GUI mode only ===============

@@ -848,7 +848,7 @@ bool AScriptInterfacer::setCalibrationDirect(const QVector< QVector<float>>& dat
     return true;
 }
 
-QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit)
+QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit, float maxSignal)
 {
   if (!bCalibrationReady)
   {
@@ -858,7 +858,7 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float uppe
   ErrorString.clear();
 
   QVector<float> avSigma2OverAv(numPMs, 0);
-  int numEventsUsed = 0;
+  QVector<int>   avSigma2OverAv_entries(numPMs, 0);
 
   for (int iEvent = 0; iEvent < numCalibrationEvents; iEvent++)
     {
@@ -866,7 +866,6 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float uppe
 
       const float& LastDist = neighb.at(numNeighbours-1).second;
       if (LastDist > upperDistanceLimit) continue;
-      numEventsUsed++;
 
       for (int iPM = 0; iPM<numPMs; iPM++)
       {
@@ -882,15 +881,18 @@ QVector<float> AScriptInterfacer::evaluatePhPerPhE(int numNeighbours, float uppe
               sum2 += Sig * Sig;
             }
           const float avSig = sum / numNeighbours;
+          if (avSig > maxSignal) continue;
           const float sigma2 = (sum2 - 2.0*sum*avSig) / numNeighbours   +   avSig * avSig;
           const float sigma2OverAv = sigma2 / avSig;
 
           avSigma2OverAv[iPM] += sigma2OverAv;
+          avSigma2OverAv_entries[iPM]++;
       }
     }
 
-   if (numEventsUsed > 0)
-      for (float& f : avSigma2OverAv) f /= numEventsUsed;
+   for (int ipm=0; ipm<numPMs; ipm++)
+       if (avSigma2OverAv_entries.at(ipm) > 1)
+           avSigma2OverAv[ipm] /= avSigma2OverAv_entries.at(ipm);
 
    return avSigma2OverAv;
 }

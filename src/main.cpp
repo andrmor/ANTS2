@@ -9,6 +9,7 @@
 #include "ajavascriptmanager.h"
 #include "interfacetoglobscript.h"
 #include "histgraphinterfaces.h"
+#include "ainterfacetottree.h"
 #include "scriptminimizer.h"
 #include "globalsettingsclass.h"
 #include "afiletools.h"
@@ -188,7 +189,7 @@ int main(int argc, char *argv[])
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
-        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         GenScriptWindow.SetInterfaceObject(tree, "tree");
 
         AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(GenScriptWindow.ScriptManager, &GenScriptWindow);
@@ -275,7 +276,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(graph, "graph");
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.SetInterfaceObject(hist, "hist");
-        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         SM.SetInterfaceObject(tree, "tree");
 
         int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside

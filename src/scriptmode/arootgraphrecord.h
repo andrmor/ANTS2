@@ -28,6 +28,9 @@ public:
     void     SetYRange(double min, double max);
     void     SetXRange(double min, double max);
     const QVector<QPair<double, double> > GetPoints();
+    void     Save(const QString& fileName);
+
+    QString  LastDrawOption;
 
 private:
     QString  TitleX, TitleY;

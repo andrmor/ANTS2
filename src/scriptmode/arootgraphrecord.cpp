@@ -140,3 +140,14 @@ const QVector<QPair<double, double> > ARootGraphRecord::GetPoints()
     }
     return res;
 }
+
+void ARootGraphRecord::Save(const QString &fileName)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g) g->SaveAs(fileName.toLatin1().data(), LastDrawOption.toLatin1().data());
+    }
+}

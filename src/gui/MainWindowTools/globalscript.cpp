@@ -26,6 +26,7 @@
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 #include "ainterfacetoguiscript.h"
+#include "ainterfacetottree.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -93,7 +94,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
     ScriptWindow->SetInterfaceObject(hist, "hist");
 
-    AInterfaceToTree* tree = new AInterfaceToTree(TmpHub);
+    AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
 
     AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);

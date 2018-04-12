@@ -92,6 +92,7 @@ public slots:
   void Draw(QString GraphName, QString options = "APL");
 
   void LoadTGraph(const QString& NewGraphName, const QString& FileName);
+  void Save(const QString& GraphName, const QString& FileName);
   const QVariant GetPoints(const QString& GraphName);
 
   bool Delete(QString GraphName);

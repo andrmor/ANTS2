@@ -3832,7 +3832,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist1D;
+             //delete tmpHist1D;
              return;
            }
          break;
@@ -3856,7 +3856,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist2D;
+             //delete tmpHist2D;
              return;
            }
          break;
@@ -3882,7 +3882,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist3D;
+             //delete tmpHist3D;
              return;
            }
          break;

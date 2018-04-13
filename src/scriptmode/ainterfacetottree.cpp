@@ -92,7 +92,7 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
 
         QString Bname = th.at(0).toString();
         QString Btype = th.at(1).toString();
-        if (!ATreeWriterBuffer::getAllTypes().contains(Btype))
+        if (!ABranchBuffer::getAllTypes().contains(Btype))
         {
             abort("CreateTree() header contain unknown branch type: " + Btype );
             return;

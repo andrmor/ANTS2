@@ -4,23 +4,72 @@
 #include "TTree.h"
 
 #include <QVariant>
+#include <QDebug>
 
-void ATreeWriterBuffer::createBranch(TTree *t)
+void ABranchBuffer::createBranch(TTree *t)
 {
     TString n = name.toLatin1().data();
     TString f = n + "/" + type.toLatin1().data();
-    if      (type == "C") t->Branch(n, &C, f);
-    else if (type == "I") t->Branch(n, &I, f);
-    else if (type == "F") t->Branch(n, &F, f);
-    else if (type == "D") t->Branch(n, &D, f);
+
+    if (type.length() == 1)
+    {
+        bVector = false;
+        cType   = type.at(0).toLatin1();
+
+        switch (cType)
+        {
+            case 'C' : t->Branch(n, &C, f); break;
+            case 'I' : t->Branch(n, &I, f); break;
+            case 'F' : t->Branch(n, &F, f); break;
+            case 'D' : t->Branch(n, &D, f); break;
+            case 'O' : t->Branch(n, &O, f); break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
+    else
+    {
+        bVector = true;
+        cType   = type.at(1).toLatin1();
+
+        switch (cType)
+        {
+            case 'C' : t->Branch(n, &AC); break;
+            case 'I' : t->Branch(n, &AI); break;
+            case 'F' : t->Branch(n, &AF); break;
+            case 'D' : t->Branch(n, &AD); break;
+            case 'O' : t->Branch(n, &AO); break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
 }
 
-void ATreeWriterBuffer::fill(const QVariant &val)
+void ABranchBuffer::fillBranch(const QVariant &val)
 {
-    if      (type == "C") C = val.toString().toLatin1().data();
-    else if (type == "I") I = val.toInt();
-    else if (type == "F") F = val.toFloat();
-    else if (type == "D") D = val.toDouble();
+    if (!bVector)
+    {
+        switch (cType)
+        {
+            case 'C' : C = val.toString().toLatin1().data(); break;
+            case 'I' : I = val.toInt();    break;
+            case 'F' : F = val.toFloat();  break;
+            case 'D' : D = val.toDouble(); break;
+            case 'O' : O = val.toBool();   break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
+    else
+    {
+        const QVariantList vl = val.toList();
+        switch (cType)
+        {
+            case 'C' : AC.resize(vl.size()); for (int i=0; i<vl.size(); i++) AC[i] = vl.at(i).toString().toLatin1().data(); break;
+            case 'I' : AI.resize(vl.size()); for (int i=0; i<vl.size(); i++) AI[i] = vl.at(i).toInt();    break;
+            case 'F' : AF.resize(vl.size()); for (int i=0; i<vl.size(); i++) AF[i] = vl.at(i).toFloat();  break;
+            case 'D' : AD.resize(vl.size()); for (int i=0; i<vl.size(); i++) AD[i] = vl.at(i).toDouble(); break;
+            case 'O' : AO.resize(vl.size()); for (int i=0; i<vl.size(); i++) AO[i] = vl.at(i).toBool();   break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
 }
 
 ARootTreeRecord::ARootTreeRecord(TObject *tree, const QString &name) :
@@ -32,10 +81,10 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
 
     for (int ib = 0; ib < branches.size(); ib++)
     {
-        ATreeWriterBuffer& b = Branches[ib];
+        ABranchBuffer& b = Branches[ib];
         b.name = branches.at(ib).first;
         b.type = branches.at(ib).second;
-        if (!ATreeWriterBuffer::getAllTypes().contains(b.type))
+        if (!ABranchBuffer::getAllTypes().contains(b.type))
             return false;
     }
 
@@ -46,7 +95,7 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
 
     for (int ib = 0; ib < branches.size(); ib++)
     {
-        ATreeWriterBuffer& b = Branches[ib];
+        ABranchBuffer& b = Branches[ib];
         b.createBranch(t);
     }
 
@@ -59,10 +108,12 @@ bool ARootTreeRecord::fillSingle(const QVariantList &vl)
 
     for (int ib = 0; ib < Branches.size(); ib++)
     {
-        ATreeWriterBuffer& b = Branches[ib];
-        b.fill(vl.at(ib));
+        ABranchBuffer& b = Branches[ib];
+        b.fillBranch(vl.at(ib));
     }
     static_cast<TTree*>(Object)->Fill();
+
+    return true;
 }
 
 

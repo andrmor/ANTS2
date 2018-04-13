@@ -16,11 +16,11 @@
 
 class TTree;
 
-class ATreeWriterBuffer
+class ABranchBuffer
 {
 public:
     void createBranch(TTree* t);
-    void fill(const QVariant& val);
+    void fillBranch(const QVariant& val);
 
     TString C;
     int     I;
@@ -35,6 +35,9 @@ public:
 
     QString name;
     QString type;
+
+    char cType = '-';
+    bool bVector = false;
 
     static QVector<QString> getAllTypes() {QVector<QString> s; s<<"C"<<"I"<<"F"<<"D"<<"O"<<"AC"<<"AI"<<"AF"<<"AD"<<"AO";return s;}
 };
@@ -53,7 +56,7 @@ public:
     bool fillSingle(const QVariantList& vl);
 
 private:
-    QVector<ATreeWriterBuffer> Branches;
+    QVector<ABranchBuffer> Branches;
 };
 
 #endif // AROOTTREERECORD_H

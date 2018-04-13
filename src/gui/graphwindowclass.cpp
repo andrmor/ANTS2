@@ -1489,7 +1489,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            else
            {
                qDebug() << "There is no data to show!";
-               delete tmpHist1D;
+               //delete tmpHist1D;
                return false;
            }
            break;
@@ -1509,7 +1509,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            else
            {
                  qDebug() << "There is no data to show!";
-                 delete tmpHist2D;
+                 //delete tmpHist2D;
                  return false;
            }
            break;
@@ -1530,7 +1530,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            else
            {
                qDebug() << "There is no data to show!";
-               delete tmpHist3D;
+               //delete tmpHist3D;
                return false;
            }
            break;

@@ -27,6 +27,7 @@ public slots:
    void     SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
    void     LoadTTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
+
    void     CreateTree(const QString &TreeName, const QVariant HeadersOfBranches);
    void     FillTree_SingleEntry(const QString &TreeName, const QVariant Array);
 

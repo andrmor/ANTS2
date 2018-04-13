@@ -61,29 +61,17 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
         return;
     }
 
-    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
-    if (r)
-    {
-        if (bAbortIfExists)
-        {
-            abort("Tree with name " + TreeName + " already exists!");
-            return;
-        }
-        else DeleteTree(TreeName);
-    }
-
-    QVariantList headersVL = HeadersOfBranches.toList();
+    const QVariantList headersVL = HeadersOfBranches.toList();
     if (headersVL.size() < 1)
     {
-        abort("CreateTree() requires arrays of the same length as Branch arguments");
+        abort("CreateTree() requires array of arrays as the second argument");
         return;
     }
 
     QVector<QPair<QString, QString>> h;
-    const int numBranches = headersVL.size();
-    for (int ib = 0; ib < numBranches; ib++)
+    for (int ibranch = 0; ibranch < headersVL.size(); ibranch++)
     {
-        QVariantList th = headersVL.at(ib).toList();
+        QVariantList th = headersVL.at(ibranch).toList();
         if (th.size() != 2)
         {
             abort("CreateTree() headers should be array of [Name,Type] values");
@@ -101,11 +89,18 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
         h << QPair<QString, QString>(Bname, Btype);
     }
 
-    r = new ARootTreeRecord(0, TreeName);
-    r->createTree(TreeName, h);  // ***!!! ->constructor?
-
-    bool bOK = TmpHub->Trees.append(TreeName, r);
-    if (!bOK) abort("Failed to create tree record");
+    ARootTreeRecord* rec = new ARootTreeRecord(0, TreeName);
+    bool bOK = rec->createTree(TreeName, h);
+    if (bOK)
+    {
+        bOK = TmpHub->Trees.append(TreeName, rec, bAbortIfExists);
+        if (!bOK)
+        {
+            delete rec;
+            abort("Tree " + TreeName+" already exists!");
+        }
+    }
+    else abort("Failed to create tree: "+ TreeName);
 }
 
 void AInterfaceToTTree::FillTree_SingleEntry(const QString &TreeName, const QVariant Array)
@@ -115,8 +110,8 @@ void AInterfaceToTTree::FillTree_SingleEntry(const QString &TreeName, const QVar
         abort("Tree "+TreeName+" not found!");
     else
     {
-        QVariantList vl = Array.toList();
-        bool bOK = r->fillSingle(vl);
+        const QVariantList vl = Array.toList();
+        const bool bOK = r->fillSingle(vl);
         if (!bOK)
             abort("FillTree_SingleEntry() failed - check that array size = number of branches");
     }

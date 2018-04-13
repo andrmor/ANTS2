@@ -77,6 +77,8 @@ ARootTreeRecord::ARootTreeRecord(TObject *tree, const QString &name) :
 
 bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QString, QString> > &branches)
 {
+    QMutexLocker locker(&Mutex);
+
     Branches.resize(branches.size());
 
     for (int ib = 0; ib < branches.size(); ib++)
@@ -102,8 +104,16 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
     return true;
 }
 
+int ARootTreeRecord::countBranches() const
+{
+    QMutexLocker locker(&Mutex);
+    return Branches.size();
+}
+
 bool ARootTreeRecord::fillSingle(const QVariantList &vl)
 {
+    QMutexLocker locker(&Mutex);
+
     if (vl.size() != Branches.size()) return false;
 
     for (int ib = 0; ib < Branches.size(); ib++)

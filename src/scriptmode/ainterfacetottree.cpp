@@ -103,7 +103,7 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
     else abort("Failed to create tree: "+ TreeName);
 }
 
-void AInterfaceToTTree::FillTree_SingleEntry(const QString &TreeName, const QVariant Array)
+void AInterfaceToTTree::FillSingle(const QString &TreeName, const QVariant Array)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -117,7 +117,7 @@ void AInterfaceToTTree::FillTree_SingleEntry(const QString &TreeName, const QVar
     }
 }
 
-const QString AInterfaceToTTree::PrintBranches(const QString& TreeName)
+const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
     ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
     if (!r)
@@ -158,12 +158,20 @@ const QString AInterfaceToTTree::PrintBranches(const QString& TreeName)
 
 const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QString& BranchName)
 {
-    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
+    QVariantList res;
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
-    {
         abort("Tree " + TreeName + " not found!");
-        return "";
+    else
+    {
+        if (!r->isBranchExist(BranchName))
+            abort("Tree " + TreeName + " does not have branch " + BranchName);
+        else
+            res = r->getBranch(BranchName);
     }
+    return res;
+
+    /*
     TTree *t = static_cast<TTree*>(r->GetObject());
 
     TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
@@ -368,6 +376,22 @@ const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QStri
 
     t->ResetBranchAddresses();
     return varList;
+    */
+}
+
+const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QString &BranchName, int entry)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree " + TreeName + " not found!");
+    else
+    {
+        if (!r->isBranchExist(BranchName))
+            abort("Tree " + TreeName + " does not have branch " + BranchName);
+        else
+            return r->getBranch(BranchName, entry);
+    }
+    return QVariant();
 }
 
 const QVariantList assertBinsAndRanges(const QVariant& in)
@@ -414,6 +438,21 @@ void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const
         //r->reconnectBranchAddresses();
         r->externalUnlock();
     }
+}
+
+void AInterfaceToTTree::Save(const QString &TreeName, const QString &FileName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot save tree!");
+        return;
+    }
+
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+        r->save(FileName);
 }
 
 bool AInterfaceToTTree::DeleteTree(const QString& TreeName)

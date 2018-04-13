@@ -15,13 +15,16 @@
 #include <vector>
 
 class TTree;
+class TBranch;
 
 class ABranchBuffer
 {
 public:
     void createBranch(TTree* t);
     void reconnectAddresses(TTree* t);
-    void fillBranch(const QVariant& val);
+
+    void write(const QVariant& val);
+    const QVariant read();
 
     QString name;
     QString type;
@@ -37,10 +40,10 @@ public:
     std::vector<double>  AD;
     std::vector<bool>    AO;
 
-private:
     // fast access selectors
     char cType = '-';
     bool bVector = false;
+    TBranch* branchPtr = 0;
 
 public:
 
@@ -56,12 +59,19 @@ public:
     bool createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
     int countBranches() const;
     bool fillSingle(const QVariantList& vl);
+    bool isBranchExist(const QString& branchName) const;
+    const QVariantList getBranch(const QString& branchName);
+    const QVariant     getBranch(const QString& branchName, int entry);
+    void save(const QString &FileName);
 
     //not protected by Mutex
     void reconnectBranchAddresses();
 
 private:
     QVector<ABranchBuffer> Branches;
+
+private:
+    ABranchBuffer* getBranchBuffer(const QString& name);
 };
 
 #endif // AROOTTREERECORD_H

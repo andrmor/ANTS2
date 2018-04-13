@@ -29,12 +29,16 @@ public slots:
    void     LoadTTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
 
    void     CreateTree(const QString &TreeName, const QVariant HeadersOfBranches);
-   void     FillTree_SingleEntry(const QString &TreeName, const QVariant Array);
+   void     FillSingle(const QString &TreeName, const QVariant Array);
 
-   const QString  PrintBranches(const QString &TreeName);
+   const QString  GetTreeStructure(const QString &TreeName);
+
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName);
+   const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int entry);
 
    void     Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+
+   void     Save(const QString& TreeName, const QString& FileName);
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();

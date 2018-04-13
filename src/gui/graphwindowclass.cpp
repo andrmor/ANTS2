@@ -1442,7 +1442,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     int num = Vars.size();
     if (num > 3) return false;
 
-    tree->ResetBranchAddresses(); //if addresses are not resetted std::vectors cause crash on attempt to draw
+    //tree->ResetBranchAddresses(); //if addresses are not resetted std::vectors cause crash on attempt to draw
 
     QString str = what + ">>htemp(";
     for (int i = 0; i < num; i++)

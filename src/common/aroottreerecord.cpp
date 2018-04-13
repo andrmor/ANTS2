@@ -43,6 +43,43 @@ void ABranchBuffer::createBranch(TTree *t)
     }
 }
 
+void ABranchBuffer::reconnectAddresses(TTree *t)
+{
+    qDebug() << "Attempting to reconnect";
+
+    if (type.isEmpty()) return;
+
+    TString n = name.toLatin1().data();
+
+    if (bVector)
+    {
+        switch (cType)
+        {
+            case 'C' : t->SetBranchAddress(n, &C); break;
+            case 'I' : t->SetBranchAddress(n, &I); break;
+            case 'F' : t->SetBranchAddress(n, &F); break;
+            case 'D' : t->SetBranchAddress(n, &D); break;
+            case 'O' : t->SetBranchAddress(n, &O); break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
+    else
+    {
+        bVector = true;
+        cType   = type.at(1).toLatin1();
+
+        switch (cType)
+        {
+            case 'C' : t->SetBranchAddress(n, &AC); break;
+            case 'I' : t->SetBranchAddress(n, &AI); break;
+            case 'F' : t->SetBranchAddress(n, &AF); break;
+            case 'D' : t->SetBranchAddress(n, &AD); break;
+            case 'O' : t->SetBranchAddress(n, &AO); break;
+            default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
+}
+
 void ABranchBuffer::fillBranch(const QVariant &val)
 {
     if (!bVector)
@@ -124,6 +161,12 @@ bool ARootTreeRecord::fillSingle(const QVariantList &vl)
     static_cast<TTree*>(Object)->Fill();
 
     return true;
+}
+
+void ARootTreeRecord::reconnectBranchAddresses()
+{
+    TTree* t = static_cast<TTree*>(Object);
+    for (ABranchBuffer& b : Branches) b.reconnectAddresses(t);
 }
 
 

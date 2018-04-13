@@ -20,6 +20,7 @@ class ABranchBuffer
 {
 public:
     void createBranch(TTree* t);
+    void reconnectAddresses(TTree* t);
     void fillBranch(const QVariant& val);
 
     QString name;
@@ -55,6 +56,9 @@ public:
     bool createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
     int countBranches() const;
     bool fillSingle(const QVariantList& vl);
+
+    //not protected by Mutex
+    void reconnectBranchAddresses();
 
 private:
     QVector<ABranchBuffer> Branches;

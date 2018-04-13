@@ -408,7 +408,11 @@ void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const
             QVariantList el = assertBinsAndRanges( i < vlIn.size() ? vlIn.at(i) : 0 );
             out.push_back( el );
         }
+
+        r->externalLock();
         emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out);
+        //r->reconnectBranchAddresses();
+        r->externalUnlock();
     }
 }
 

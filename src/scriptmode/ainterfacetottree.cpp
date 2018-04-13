@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include "TFile.h"
-#include "TTree.h"
+//#include "TTree.h"
 #include "TBranch.h"
 #include "TLeaf.h"
 
@@ -373,6 +373,48 @@ const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QStri
 
     t->ResetBranchAddresses();
     return varList;
+}
+
+const QVariantList assertBinsAndRanges(const QVariant& in)
+{
+    QVariantList out;
+    bool bOK;
+
+    QVariantList inVL = in.toList();
+    if (inVL.size() == 3)
+    {
+        int bins = inVL.at(0).toInt(&bOK);
+        if (!bOK) bins = 100;
+        double from = inVL.at(1).toDouble(&bOK); if (!bOK) from = 0;
+        double to   = inVL.at(2).toDouble(&bOK); if (!bOK) to   = 0;
+        out << bins << from << to;
+    }
+    else out << 100 << 0.0 << 0.0;
+    return out;
+}
+
+void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options, const QVariant binsAndRanges)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot draw!");
+        return;
+    }
+
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+    {
+        QVariantList vlIn = binsAndRanges.toList();
+        QVariantList out;
+        for (int i = 0; i < 3; i++)
+        {
+            QVariantList el = assertBinsAndRanges( i < vlIn.size() ? vlIn.at(i) : 0 );
+            out.push_back( el );
+        }
+        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out);
+    }
 }
 
 bool AInterfaceToTTree::DeleteTree(const QString& TreeName)

@@ -9,11 +9,11 @@
 #include <QVariant>
 
 #include "TString.h"
+#include "TTree.h"
 
 #include <vector>
 
 class TmpObjHubClass;
-class TTree;
 
 class AInterfaceToTTree : public AScriptInterface
 {
@@ -33,8 +33,13 @@ public slots:
    const QString  PrintBranches(const QString &TreeName);
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName);
 
+   void     Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();
+
+signals:
+   void     RequestTreeDraw(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges);
 
 private:
    TmpObjHubClass *TmpHub;

@@ -31,6 +31,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPlainTextEdit>
+#include <QVariantList>
+
 
 //Root
 #include "TGraph.h"
@@ -63,7 +65,7 @@
 #include "TAttLine.h"
 #include "TLegend.h"
 #include "TVectorD.h"
-//#include "TROOT.h"
+#include "TTree.h"
 
 #include "TPave.h"
 #include "TPaveLabel.h"
@@ -1430,6 +1432,111 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
       return;
     }
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
+}
+
+bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges)
+{
+    if (what.isEmpty()) return false;
+
+    QStringList Vars = what.split(":", QString::SkipEmptyParts);
+    int num = Vars.size();
+    if (num > 3) return false;
+
+    tree->ResetBranchAddresses(); //if addresses are not resetted std::vectors cause crash on attempt to draw
+
+    QString str = what + ">>htemp(";
+    for (int i = 0; i < num; i++)
+    {
+        QVariantList br = binsAndRanges.at(i).toList();
+        int    bins = br.at(0).toInt();
+        double from = br.at(1).toDouble();
+        double to   = br.at(2).toDouble();
+        str += QString::number(bins) + "," + QString::number(from) + "," + QString::number(to) + ",";
+    }
+    str.chop(1);
+    str += ")";
+
+    TString What = str.toLocal8Bit().data();
+    TString Cond = ( cond.isEmpty() ? "" : cond.toLocal8Bit().data() );
+    TString How  = (  how.isEmpty() ? "" :  how.toLocal8Bit().data() );
+
+    QString howAdj = ( how.isEmpty() ? "goff" : "goff,"+how );
+    TString HowAdj = howAdj.toLocal8Bit().data();
+
+    TObject* oldObj = gDirectory->FindObject("htemp");
+    if (oldObj)
+    {
+        //  qDebug() << "Old htemp found!"<<oldObj->GetName();
+        gDirectory->RecursiveRemove(oldObj);
+    }
+
+    TH1::AddDirectory(true);
+    tree->Draw(What, Cond, HowAdj);
+    TH1::AddDirectory(false);
+
+    switch (num)
+    {
+       case 1:
+       {
+           TH1* tmpHist1D = (TH1*)gDirectory->Get("htemp");
+           if (!tmpHist1D)
+           {
+               qDebug() << "Root has not generated any data!";
+               return false;
+           }
+           tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How);
+           else
+           {
+               qDebug() << "There is no data to show!";
+               delete tmpHist1D;
+               return false;
+           }
+           break;
+       }
+       case 2:
+       {
+           TH2* tmpHist2D = (TH2*)gDirectory->Get("htemp");
+           if (!tmpHist2D)
+           {
+              qDebug() << "Root has not generated any data!";
+              return false;
+           }
+           tmpHist2D->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           tmpHist2D->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+
+           if (tmpHist2D->GetEntries() > 0) Draw(tmpHist2D, How);
+           else
+           {
+                 qDebug() << "There is no data to show!";
+                 delete tmpHist2D;
+                 return false;
+           }
+           break;
+       }
+       case 3:
+       {
+           TH3* tmpHist3D = (TH3*)gDirectory->Get("htemp");
+           if (!tmpHist3D)
+           {
+               qDebug() << "Root has not generated any data!";
+               return false;
+           }
+           tmpHist3D->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           tmpHist3D->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+           tmpHist3D->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+
+           if (tmpHist3D->GetEntries() > 0) Draw(tmpHist3D, How);
+           else
+           {
+               qDebug() << "There is no data to show!";
+               delete tmpHist3D;
+               return false;
+           }
+           break;
+       }
+    }
+    return true;
 }
 
 void GraphWindowClass::on_cbToolBox_toggled(bool checked)

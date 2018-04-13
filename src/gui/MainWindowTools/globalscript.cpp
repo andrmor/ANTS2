@@ -96,6 +96,7 @@ void MainWindow::createScriptWindow()
 
     AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
     ScriptWindow->SetInterfaceObject(tree, "tree");
+    connect(tree, &AInterfaceToTTree::RequestTreeDraw, GraphWindow, &GraphWindowClass::DrawTree);
 
     AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");

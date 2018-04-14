@@ -67,7 +67,8 @@ public:
     bool  isBranchExist(const QString& branchName) const;
     const QVariantList getBranch(const QString& branchName);
     const QVariant     getBranch(const QString& branchName, int entry);
-    void  save(const QString &FileName);
+    void  save(const QString &FileName);    
+    const QVariantList getEntry(int entry);
 
 private:
     QVector<ABranchBuffer*> Branches;

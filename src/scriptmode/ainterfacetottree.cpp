@@ -103,7 +103,7 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
     else abort("Failed to create tree: "+ TreeName);
 }
 
-void AInterfaceToTTree::FillSingle(const QString &TreeName, const QVariant Array)
+void AInterfaceToTTree::AddEntry(const QString &TreeName, const QVariant Array)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -117,7 +117,7 @@ void AInterfaceToTTree::FillSingle(const QString &TreeName, const QVariant Array
     }
 }
 
-int AInterfaceToTTree::getNumEntries(const QString &TreeName)
+int AInterfaceToTTree::GetNumEntries(const QString &TreeName)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -401,6 +401,18 @@ const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QStri
             return r->getBranch(BranchName, entry);
     }
     return QVariant();
+}
+
+const QVariant AInterfaceToTTree::GetEntry(const QString &TreeName, int entry)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+    {
+        abort("Tree " + TreeName + " not found!");
+        return 0;
+    }
+    else
+        return r->getEntry(entry);
 }
 
 const QVariantList assertBinsAndRanges(const QVariant& in)

@@ -211,7 +211,7 @@ const QVariant ARootTreeRecord::getBranch(const QString &branchName, int entry)
             const int numEntries = bb->branchPtr->GetEntries();
             if (entry >= 0 && entry < numEntries)
             {
-                Long64_t tentry = bb->treePtr->LoadTree(entry);
+                const Long64_t tentry = bb->treePtr->LoadTree(entry);
                 bb->branchPtr->GetEntry(tentry);
                 return bb->read();
             }
@@ -219,6 +219,30 @@ const QVariant ARootTreeRecord::getBranch(const QString &branchName, int entry)
     }
 
     return QVariant();
+}
+
+const QVariantList ARootTreeRecord::getEntry(int entry)
+{
+    QVariantList res;
+
+    for (int ibranch = 0; ibranch < Branches.size(); ibranch++)
+    {
+         ABranchBuffer* bb = Branches[ibranch];
+         if (bb->branchPtr)
+         {
+             const int numEntries = bb->branchPtr->GetEntries();
+             if (entry >= 0 && entry < numEntries)
+             {
+                 const Long64_t tentry = bb->treePtr->LoadTree(entry);
+                 bb->branchPtr->GetEntry(tentry);
+                 res.push_back( bb->read() );
+             }
+             else res.push_back( QVariant() );
+         }
+         else return QVariantList();
+    }
+
+    return res;
 }
 
 void ARootTreeRecord::save(const QString &FileName)

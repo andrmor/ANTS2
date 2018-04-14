@@ -24,7 +24,7 @@ void AInterfaceToTTree::Load(const QString& TreeName, const QString& FileName, c
     }
 
     ARootTreeRecord* rec = new ARootTreeRecord(0, TreeName);
-    QString ErrorString = rec->loadTree(TreeName, FileName, TreeNameInFile);
+    QString ErrorString = rec->loadTree(FileName, TreeNameInFile);
     if (ErrorString.isEmpty())
     {
         bool bOK = TmpHub->Trees.append(TreeName, rec, bAbortIfExists);
@@ -440,7 +440,6 @@ void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const
 
         r->externalLock();
         emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out);
-        //r->reconnectBranchAddresses();
         r->externalUnlock();
     }
 }

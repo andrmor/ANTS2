@@ -57,9 +57,18 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
     {
         if ( ABranchBuffer::getAllTypes().contains(type) )
         {
-            //this is one of the basic types
+            //this is one of the basic types            
             bVector = false;
             cType   = type.at(0).toLatin1();
+            switch (cType)
+            {
+                case 'C' : treePtr->SetBranchAddress(tName, &C); break;
+                case 'I' : treePtr->SetBranchAddress(tName, &I); break;
+                case 'F' : treePtr->SetBranchAddress(tName, &F); break;
+                case 'D' : treePtr->SetBranchAddress(tName, &D); break;
+                case 'O' : treePtr->SetBranchAddress(tName, &O); break;
+                default:;
+            }
             branchPtr = branch; // non 0 -> indicates that the branch is valid
         }
     }
@@ -71,11 +80,11 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             type.remove("<");
             type.remove(">");
 
-            if      (type == "char")   type = "AC";
-            else if (type == "int")    type = "AI";
-            else if (type == "float")  type = "AF";
-            else if (type == "double") type = "AD";
-            else if (type == "bool")   type = "AO";
+            if      (type == "char")   { type = "AC"; treePtr->SetBranchAddress(tName, &AC); }
+            else if (type == "int")    { type = "AI"; treePtr->SetBranchAddress(tName, &AI); }
+            else if (type == "float")  { type = "AF"; treePtr->SetBranchAddress(tName, &AF); }
+            else if (type == "double") { type = "AD"; treePtr->SetBranchAddress(tName, &AD); }
+            else if (type == "bool")   { type = "AO"; treePtr->SetBranchAddress(tName, &AO); }
 
             if ( ABranchBuffer::getAllTypes().contains(type) && type.size() == 2)
             {
@@ -87,13 +96,20 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
     }
 }
 
+//#include "TString.h"
 void ABranchBuffer::write(const QVariant &val)
 {
     if (!bVector)
     {
         switch (cType)
         {
-            case 'C' : C = val.toString().toLatin1().data(); break;
+            //case 'C' : C = val.toString().toLatin1().data(); break;
+            case 'C' :
+            {
+                TString tmp = val.toString().toLatin1().data();
+                for (int i = 0; i < tmp.Length()+1; i++) C[i] = tmp[i]; //including termination
+                break;
+            }
             case 'I' : I = val.toInt();    break;
             case 'F' : F = val.toFloat();  break;
             case 'D' : D = val.toDouble(); break;
@@ -187,7 +203,7 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
     return true;
 }
 
-const QString ARootTreeRecord::loadTree(const QString &treeName, const QString &fileName, const QString treeNameInFile)
+const QString ARootTreeRecord::loadTree(const QString &fileName, const QString treeNameInFile)
 {
     TFile *f = TFile::Open(fileName.toLocal8Bit().data(), "READ");
     if (!f) return QString("Cannot open file ") + fileName;

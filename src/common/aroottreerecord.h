@@ -38,7 +38,8 @@ public:
     bool           bVector = false;
     TBranch*       branchPtr = 0; // if it remains 0 -> branch is invalid
 
-    TString C;
+    //TString C;
+    char    C[300];
     int     I;
     float   F;
     double  D;
@@ -62,7 +63,7 @@ public:
 
     // Protected by Mutex
     bool  createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
-    const QString loadTree(const QString& treeName, const QString& fileName, const QString treeNameInFile = ""); //report error ("" if fine)
+    const QString loadTree(const QString& fileName, const QString treeNameInFile = ""); //report error ("" if fine)
     int   countBranches() const;
     int   countEntries() const;
     bool  fillSingle(const QVariantList& vl);

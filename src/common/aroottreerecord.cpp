@@ -8,6 +8,8 @@
 #include <QVariant>
 #include <QDebug>
 
+#include "TMathBase.h"
+
 ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchType, TTree *tree) :
     name(branchName), type(branchType), treePtr(tree)
 {
@@ -29,7 +31,7 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             default  : qWarning() << "Unknown tree branch type:" << type;
         }
     }
-    else
+    else if (type.startsWith("A"))
     {
         bVector = true;
         cType   = type.at(1).toLatin1();
@@ -80,11 +82,11 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             type.remove("<");
             type.remove(">");
 
-            if      (type == "char")   { type = "AC"; treePtr->SetBranchAddress(tName, &AC); }
-            else if (type == "int")    { type = "AI"; treePtr->SetBranchAddress(tName, &AI); }
-            else if (type == "float")  { type = "AF"; treePtr->SetBranchAddress(tName, &AF); }
-            else if (type == "double") { type = "AD"; treePtr->SetBranchAddress(tName, &AD); }
-            else if (type == "bool")   { type = "AO"; treePtr->SetBranchAddress(tName, &AO); }
+            if      (type == "string") { type = "AC"; pAC = &AC; treePtr->SetBranchAddress(tName, &pAC); }
+            else if (type == "int")    { type = "AI"; pAI = &AI; treePtr->SetBranchAddress(tName, &pAI); }
+            else if (type == "float")  { type = "AF"; pAF = &AF; treePtr->SetBranchAddress(tName, &pAF); }
+            else if (type == "double") { type = "AD"; pAD = &AD; treePtr->SetBranchAddress(tName, &pAD); }
+            else if (type == "bool")   { type = "AO"; pAO = &AO; treePtr->SetBranchAddress(tName, &pAO); }
 
             if ( ABranchBuffer::getAllTypes().contains(type) && type.size() == 2)
             {
@@ -96,7 +98,6 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
     }
 }
 
-//#include "TString.h"
 void ABranchBuffer::write(const QVariant &val)
 {
     if (!bVector)

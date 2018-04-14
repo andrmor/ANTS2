@@ -14,6 +14,7 @@
 #include "TString.h"
 
 #include <vector>
+#include <string>
 
 class TTree;
 class TBranch;
@@ -45,11 +46,11 @@ public:
     double  D;
     bool    O;
 
-    std::vector<TString> AC;
-    std::vector<int>     AI;
-    std::vector<float>   AF;
-    std::vector<double>  AD;
-    std::vector<bool>    AO;
+    std::vector<std::string> AC, *pAC; //need pointers in TTree::setBranchAddress()
+    std::vector<int>     AI, *pAI;
+    std::vector<float>   AF, *pAF;
+    std::vector<double>  AD, *pAD;
+    std::vector<bool>    AO, *pAO;
 
 public:
     static QVector<QString> getAllTypes() {QVector<QString> s; s<<"C"<<"I"<<"F"<<"D"<<"O"<<"AC"<<"AI"<<"AF"<<"AD"<<"AO";return s;}

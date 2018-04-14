@@ -26,19 +26,19 @@ public:
 public slots:
    void     SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
-   void     LoadTTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
+   void     Load(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
+   void     Save(const QString& TreeName, const QString& FileName);
 
    void     CreateTree(const QString &TreeName, const QVariant HeadersOfBranches);
    void     FillSingle(const QString &TreeName, const QVariant Array);
 
+   int      getNumEntries(const QString &TreeName);
    const QString  GetTreeStructure(const QString &TreeName);
 
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName);
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int entry);
 
    void     Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
-
-   void     Save(const QString& TreeName, const QString& FileName);
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();

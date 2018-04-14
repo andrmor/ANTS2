@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QMap>
 #include <QPair>
 #include <QPair>
 #include <QString>
@@ -20,33 +21,35 @@ class TBranch;
 class ABranchBuffer
 {
 public:
-    void createBranch(TTree* t);
-    void reconnectAddresses(TTree* t);
+    ABranchBuffer(const QString& branchName, const QString& branchType, TTree* tree);
+    ABranchBuffer(){}
 
-    void write(const QVariant& val);
+    bool           isValid() const {return branchPtr;}
+
+    void           write(const QVariant& val);
     const QVariant read();
 
-    QString name;
-    QString type;
+    QString        name;
+    TString        tName;
+    QString        type;
+    TTree*         treePtr;
+    char           cType = '-';
+    bool           bVector = false;
+    TBranch*       branchPtr = 0; // if it remains 0 -> branch is invalid
 
     TString C;
     int     I;
     float   F;
     double  D;
     bool    O;
+
     std::vector<TString> AC;
     std::vector<int>     AI;
     std::vector<float>   AF;
     std::vector<double>  AD;
     std::vector<bool>    AO;
 
-    // fast access selectors
-    char cType = '-';
-    bool bVector = false;
-    TBranch* branchPtr = 0;
-
 public:
-
     static QVector<QString> getAllTypes() {QVector<QString> s; s<<"C"<<"I"<<"F"<<"D"<<"O"<<"AC"<<"AI"<<"AF"<<"AD"<<"AO";return s;}
 };
 
@@ -54,24 +57,22 @@ class ARootTreeRecord : public ARootObjBase
 {
 public:
     ARootTreeRecord(TObject* tree, const QString& name);
+    ~ARootTreeRecord();
 
     // Protected by Mutex
-    bool createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
-    int countBranches() const;
-    bool fillSingle(const QVariantList& vl);
-    bool isBranchExist(const QString& branchName) const;
+    bool  createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
+    int   countBranches() const;
+    int   countEntries() const;
+    bool  fillSingle(const QVariantList& vl);
+    bool  isBranchExist(const QString& branchName) const;
     const QVariantList getBranch(const QString& branchName);
     const QVariant     getBranch(const QString& branchName, int entry);
-    void save(const QString &FileName);
-
-    //not protected by Mutex
-    void reconnectBranchAddresses();
+    void  save(const QString &FileName);
 
 private:
-    QVector<ABranchBuffer> Branches;
+    QVector<ABranchBuffer*> Branches;
+    QMap<QString, ABranchBuffer*> MapOfBranches;
 
-private:
-    ABranchBuffer* getBranchBuffer(const QString& name);
 };
 
 #endif // AROOTTREERECORD_H

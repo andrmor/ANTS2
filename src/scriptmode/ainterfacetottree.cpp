@@ -15,7 +15,7 @@ AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
     Description = "Interface to CERN ROOT Trees";
 }
 
-void AInterfaceToTTree::LoadTTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
+void AInterfaceToTTree::Load(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
 {
     if (!bGuiThread)
     {
@@ -115,6 +115,15 @@ void AInterfaceToTTree::FillSingle(const QString &TreeName, const QVariant Array
         if (!bOK)
             abort("FillTree_SingleEntry() failed - check that array size = number of branches");
     }
+}
+
+int AInterfaceToTTree::getNumEntries(const QString &TreeName)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        return 0;
+    else
+        return r->countEntries();
 }
 
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)

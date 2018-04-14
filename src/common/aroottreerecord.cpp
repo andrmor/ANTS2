@@ -6,10 +6,11 @@
 #include <QVariant>
 #include <QDebug>
 
-void ABranchBuffer::createBranch(TTree *t)
+ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchType, TTree *tree) :
+    name(branchName), type(branchType), treePtr(tree)
 {
-    TString n = name.toLatin1().data();
-    TString f = n + "/" + type.toLatin1().data();
+    tName = name.toLatin1().data();
+    TString f = tName + "/" + type.toLatin1().data();
 
     if (type.length() == 1)
     {
@@ -18,11 +19,11 @@ void ABranchBuffer::createBranch(TTree *t)
 
         switch (cType)
         {
-            case 'C' : branchPtr = t->Branch(n, &C, f); break;
-            case 'I' : branchPtr = t->Branch(n, &I, f); break;
-            case 'F' : branchPtr = t->Branch(n, &F, f); break;
-            case 'D' : branchPtr = t->Branch(n, &D, f); break;
-            case 'O' : branchPtr = t->Branch(n, &O, f); break;
+            case 'C' : branchPtr = tree->Branch(tName, &C, f); break;
+            case 'I' : branchPtr = tree->Branch(tName, &I, f); break;
+            case 'F' : branchPtr = tree->Branch(tName, &F, f); break;
+            case 'D' : branchPtr = tree->Branch(tName, &D, f); break;
+            case 'O' : branchPtr = tree->Branch(tName, &O, f); break;
             default  : qWarning() << "Unknown tree branch type:" << type;
         }
     }
@@ -33,48 +34,11 @@ void ABranchBuffer::createBranch(TTree *t)
 
         switch (cType)
         {
-            case 'C' : branchPtr = t->Branch(n, &AC); break;
-            case 'I' : branchPtr = t->Branch(n, &AI); break;
-            case 'F' : branchPtr = t->Branch(n, &AF); break;
-            case 'D' : branchPtr = t->Branch(n, &AD); break;
-            case 'O' : branchPtr = t->Branch(n, &AO); break;
-            default  : qWarning() << "Unknown tree branch type:" << type;
-        }
-    }
-}
-
-void ABranchBuffer::reconnectAddresses(TTree *t)
-{
-    qDebug() << "Attempting to reconnect";
-
-    if (type.isEmpty()) return;
-
-    TString n = name.toLatin1().data();
-
-    if (bVector)
-    {
-        switch (cType)
-        {
-            case 'C' : t->SetBranchAddress(n, &C); break;
-            case 'I' : t->SetBranchAddress(n, &I); break;
-            case 'F' : t->SetBranchAddress(n, &F); break;
-            case 'D' : t->SetBranchAddress(n, &D); break;
-            case 'O' : t->SetBranchAddress(n, &O); break;
-            default  : qWarning() << "Unknown tree branch type:" << type;
-        }
-    }
-    else
-    {
-        bVector = true;
-        cType   = type.at(1).toLatin1();
-
-        switch (cType)
-        {
-            case 'C' : t->SetBranchAddress(n, &AC); break;
-            case 'I' : t->SetBranchAddress(n, &AI); break;
-            case 'F' : t->SetBranchAddress(n, &AF); break;
-            case 'D' : t->SetBranchAddress(n, &AD); break;
-            case 'O' : t->SetBranchAddress(n, &AO); break;
+            case 'C' : branchPtr = tree->Branch(tName, &AC); break;
+            case 'I' : branchPtr = tree->Branch(tName, &AI); break;
+            case 'F' : branchPtr = tree->Branch(tName, &AF); break;
+            case 'D' : branchPtr = tree->Branch(tName, &AD); break;
+            case 'O' : branchPtr = tree->Branch(tName, &AO); break;
             default  : qWarning() << "Unknown tree branch type:" << type;
         }
     }
@@ -142,32 +106,41 @@ const QVariant ABranchBuffer::read()
 ARootTreeRecord::ARootTreeRecord(TObject *tree, const QString &name) :
     ARootObjBase(tree, name, "") {}
 
+ARootTreeRecord::~ARootTreeRecord()
+{
+    for (ABranchBuffer* bb : Branches) delete bb;
+    Branches.clear();
+    MapOfBranches.clear();
+}
+
 bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QString, QString> > &branches)
 {
     QMutexLocker locker(&Mutex);
 
     Branches.resize(branches.size());
-
-    for (int ib = 0; ib < branches.size(); ib++)
-    {
-        ABranchBuffer& b = Branches[ib];
-        b.name = branches.at(ib).first;
-        b.type = branches.at(ib).second;
-        if (!ABranchBuffer::getAllTypes().contains(b.type))
-            return false;
-    }
+    MapOfBranches.clear();
+    if (Object) delete Object;
 
     TTree* t = new TTree(name.toLatin1().data(), "");
-
-    if (Object) delete Object;
     Object = t;
 
     for (int ib = 0; ib < branches.size(); ib++)
-    {
-        ABranchBuffer& b = Branches[ib];
-        b.createBranch(t);
-    }
+    {        
+        const QString& Bname = branches.at(ib).first;
+        const QString& Btype = branches.at(ib).second;
 
+        ABranchBuffer* bb = new ABranchBuffer(Bname, Btype, t);
+        if (bb->isValid())
+        {
+            Branches[ib] = bb;
+            MapOfBranches.insert( Bname, bb );
+        }
+        else
+        {
+            delete bb;
+            return false;
+        }
+    }
     return true;
 }
 
@@ -175,6 +148,13 @@ int ARootTreeRecord::countBranches() const
 {
     QMutexLocker locker(&Mutex);
     return Branches.size();
+}
+
+int ARootTreeRecord::countEntries() const
+{
+    QMutexLocker locker(&Mutex);
+
+    return static_cast<TTree*>(Object)->GetEntries();
 }
 
 bool ARootTreeRecord::fillSingle(const QVariantList &vl)
@@ -185,8 +165,8 @@ bool ARootTreeRecord::fillSingle(const QVariantList &vl)
 
     for (int ib = 0; ib < Branches.size(); ib++)
     {
-        ABranchBuffer& b = Branches[ib];
-        b.write(vl.at(ib));
+        ABranchBuffer* bb = Branches[ib];
+        bb->write(vl.at(ib));
     }
     static_cast<TTree*>(Object)->Fill();
 
@@ -197,26 +177,23 @@ bool ARootTreeRecord::isBranchExist(const QString &branchName) const
 {
     QMutexLocker locker(&Mutex);
 
-    for (const ABranchBuffer& b : Branches)
-        if (b.name == branchName) return true;
-    return false;
+    return MapOfBranches.value(branchName, 0);
 }
 
 const QVariantList ARootTreeRecord::getBranch(const QString &branchName)
 {
     QVariantList res;
-    TTree *t = static_cast<TTree*>(Object);
-    TBranch* branch = t->GetBranch(branchName.toLocal8Bit().data());
-    if (branch)
+
+    ABranchBuffer* bb = MapOfBranches.value(branchName, 0);
+    if (bb)
     {
-        const int numEntries = branch->GetEntries();
-        ABranchBuffer* bb = getBranchBuffer(branchName);
-        if (bb)
+        if (bb->branchPtr)
         {
+            const int numEntries = bb->branchPtr->GetEntries();
             for (int i = 0; i < numEntries; i++)
             {
-                Long64_t tentry = t->LoadTree(i);
-                branch->GetEntry(tentry);
+                Long64_t tentry = bb->treePtr->LoadTree(i);
+                bb->branchPtr->GetEntry(tentry);
                 res.push_back(bb->read());
             }
         }
@@ -226,25 +203,21 @@ const QVariantList ARootTreeRecord::getBranch(const QString &branchName)
 
 const QVariant ARootTreeRecord::getBranch(const QString &branchName, int entry)
 {
-    TTree *t = static_cast<TTree*>(Object);
-    ABranchBuffer* bb = getBranchBuffer(branchName);
-
-    TBranch* branchPtr = bb->branchPtr;//->GetBranch(branchName.toLocal8Bit().data());
-
-    if (branchPtr)
+    ABranchBuffer* bb = MapOfBranches.value(branchName, 0);
+    if (bb)
     {
-        const int numEntries = branchPtr->GetEntries();
-        if (entry>=0 && entry<numEntries)
+        if (bb->branchPtr)
         {
-
-            if (bb)
+            const int numEntries = bb->branchPtr->GetEntries();
+            if (entry >= 0 && entry < numEntries)
             {
-                    Long64_t tentry = t->LoadTree(entry);
-                    branchPtr->GetEntry(tentry);
-                    return bb->read();
+                Long64_t tentry = bb->treePtr->LoadTree(entry);
+                bb->branchPtr->GetEntry(tentry);
+                return bb->read();
             }
         }
     }
+
     return QVariant();
 }
 
@@ -253,18 +226,3 @@ void ARootTreeRecord::save(const QString &FileName)
     TTree* t = static_cast<TTree*>(Object);
     t->SaveAs(FileName.toLatin1().data());
 }
-
-void ARootTreeRecord::reconnectBranchAddresses()
-{
-    TTree* t = static_cast<TTree*>(Object);
-    for (ABranchBuffer& b : Branches) b.reconnectAddresses(t);
-}
-
-ABranchBuffer* ARootTreeRecord::getBranchBuffer(const QString &name)
-{
-    for (ABranchBuffer& bb : Branches)
-        if (bb.name == name) return &bb;
-    return 0;
-}
-
-

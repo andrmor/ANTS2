@@ -95,6 +95,42 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
                 branchPtr = branch; // non 0 -> indicates that the branch is valid
             }
         }
+        else if (type.startsWith("[") && type.contains("]"))
+        {
+            type.remove("[");
+            QStringList sl = type.split("]", QString::SkipEmptyParts);
+            if (sl.size() == 2)
+            {
+                bool bOK;
+                QString sizeStr = sl.at(0);
+                QString typeStr = sl.at(1);
+
+                int size = sizeStr.toInt(&bOK);
+
+                cType = typeStr.at(0).toLatin1();
+                type = QString("A") + typeStr;
+
+                bVector = true;
+                if (bOK && ABranchBuffer::getAllTypes().contains(type))
+                {
+                    qDebug() << type << cType << size;
+
+                    switch (cType)
+                    {
+                        case 'C' : AC.resize(size); treePtr->SetBranchAddress(tName, AC.data()); break;
+                        case 'I' : AI.resize(size); treePtr->SetBranchAddress(tName, AI.data()); break;
+                        case 'F' : AF.resize(size); treePtr->SetBranchAddress(tName, AF.data()); break;
+                        case 'D' : AD.resize(size); treePtr->SetBranchAddress(tName, AD.data()); break;
+                        case 'O' : Ao.resize(size); treePtr->SetBranchAddress(tName, Ao.data()); cType = 'o'; break;
+                        default:;
+                        QVector<bool> bbb;
+                        qDebug() << bbb.data();
+                    }
+                    branchPtr = branch; // non 0 -> indicates that the branch is valid
+                }
+            }
+
+        }
     }
 }
 
@@ -157,6 +193,7 @@ const QVariant ABranchBuffer::read()
             case 'F' : for (const float& e : AF) vl << e; return vl;
             case 'D' : for (const double& e : AD) vl << e; return vl;
             case 'O' : for (const bool& e : AO) vl << e; return vl;
+            case 'o' : for (const bool& e : Ao) vl << e; return vl;
             default  : qWarning() << "read - unknown tree branch type:" << type;
         }
     }

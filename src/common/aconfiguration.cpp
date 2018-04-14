@@ -47,7 +47,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
         }
     }
 
-  //qDebug() << "Loading simulation config";
+  //    qDebug() << "Loading simulation config";
   if (SimSettings)
     {
       if (json.contains("SimulationConfig"))
@@ -72,7 +72,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       emit requestSimulationGuiUpdate(); //in case new detector was loaded
   }
 
-  //qDebug() << "Loading reconstruction configuration";
+  //    qDebug() << "Loading reconstruction configuration";
   if (ReconstrSettings)
     {
       if (json.contains("ReconstructionConfig"))
@@ -399,10 +399,13 @@ const QString AConfiguration::RemoveParticle(int particleId)
 
 void AConfiguration::UpdateSimSettingsOfDetector()
 {
-    QJsonObject SimJson = JSON["SimulationConfig"].toObject();
+    if (JSON.contains("SimulationConfig"))
+    {
+        QJsonObject SimJson = JSON["SimulationConfig"].toObject();
 
-    GeneralSimSettings simSettings;
-    simSettings.readFromJson(SimJson);
-    Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
-    Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+        GeneralSimSettings simSettings;
+        simSettings.readFromJson(SimJson);
+        Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
+        Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+    }
 }

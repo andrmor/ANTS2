@@ -52,6 +52,10 @@ public:
     std::vector<double>  AD, *pAD;
     std::vector<bool>    AO, *pAO;
 
+    QVector<bool>        Ao;
+
+    float *pF;
+
 public:
     static QVector<QString> getAllTypes() {QVector<QString> s; s<<"C"<<"I"<<"F"<<"D"<<"O"<<"AC"<<"AI"<<"AF"<<"AD"<<"AO";return s;}
 };

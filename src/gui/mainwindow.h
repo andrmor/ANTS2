@@ -96,25 +96,25 @@ public:
     GlobalSettingsClass* GlobSet;
 
     // ANTS2 windows
-    GraphWindowClass *GraphWindow;
-    GeometryWindowClass *GeometryWindow;   
-    OutputWindow *Owindow;
-    LRFwindow *lrfwindow;                       //window of the v3 LRF module
-    ReconstructionWindow *Rwindow;
-    MaterialInspectorWindow *MIwindow;
-    WindowNavigatorClass *WindowNavigator;
-    ExamplesWindow* ELwindow;
-    DetectorAddOnsWindow* DAwindow;
-    CheckUpWindowClass* CheckUpWindow;
-    GainEvaluatorWindowClass* GainWindow;
-    GenericScriptWindowClass* GenScriptWindow;  //local script window
-    GlobalSettingsWindowClass* GlobSetWindow;
-    AScriptWindow* ScriptWindow;                //global script window
-    ALrfWindow* newLrfWindow;                   //window of the v3 LRF module
+    GraphWindowClass *GraphWindow = 0;
+    GeometryWindowClass *GeometryWindow = 0;
+    OutputWindow *Owindow = 0;
+    LRFwindow *lrfwindow = 0;                       //window of the v3 LRF module
+    ReconstructionWindow *Rwindow = 0;
+    MaterialInspectorWindow *MIwindow = 0;
+    WindowNavigatorClass *WindowNavigator = 0;
+    ExamplesWindow* ELwindow = 0;
+    DetectorAddOnsWindow* DAwindow = 0;
+    CheckUpWindowClass* CheckUpWindow = 0;
+    GainEvaluatorWindowClass* GainWindow = 0;
+    GenericScriptWindowClass* GenScriptWindow = 0;  //local script window
+    GlobalSettingsWindowClass* GlobSetWindow = 0;
+    AScriptWindow* ScriptWindow = 0;                //global script window
+    ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module
     AScriptWindow* PythonScriptWindow = 0;
 
 #ifdef ANTS_FANN
-    NeuralNetworksWindow* NNwindow;
+    NeuralNetworksWindow* NNwindow = 0;
 #endif
 
     // custom gui elements
@@ -180,10 +180,10 @@ public:
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
-    bool GeometryDrawDisabled; //no drawing of th geometry or tracks
-    bool fStartedFromGUI;          //flag indicating that an action was run from GUI, e.g. simulation
-    bool ShowTop;
-    bool ColorByMaterial;
+    bool GeometryDrawDisabled = false; //no drawing of th geometry or tracks
+    bool fStartedFromGUI = false;          //flag indicating that an action was run from GUI, e.g. simulation
+    bool ShowTop = false;
+    bool ColorByMaterial = false;
 
     bool isWavelengthResolved() const;
     double WaveFrom, WaveTo, WaveStep;
@@ -191,7 +191,7 @@ public:
 
     QVector<QString> NoiseTypeDescriptions;
 
-    TH1D *histSecScint;
+    TH1D *histSecScint = 0;
 
     int ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH;
     void recallGeometryOfScriptWindow();
@@ -388,18 +388,18 @@ protected:
 private:
     Ui::MainWindow *ui;
     QTimer *RootUpdateTimer; //root update timer
-    QMessageBox *msBox; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
+    QMessageBox *msBox = 0; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
 
     //flags
-    bool TriggerForbidden;
-    bool BulkUpdate;
+    bool TriggerForbidden = false;
+    bool BulkUpdate = false;
 
-    TH1I* histScan;
+    TH1I* histScan = 0;
 
 public:
-    bool ShutDown; //when exiting ANTS2 by closing the main window    
+    bool ShutDown = false; //when exiting ANTS2 by closing the main window
 
-    bool fSimDataNotSaved;
+    bool fSimDataNotSaved = false;
 
     void createScriptWindow();
 
@@ -446,13 +446,13 @@ private:
 
     QVector<ScanFloodStructure> ScanFloodNoise;
     bool NoiseTableLocked;
-    double ScanFloodNoiseProbability;
+    double ScanFloodNoiseProbability = 0;
 
     QString PreprocessingFileName;
 
-    int PreviousNumberPMs;    
-    bool fConfigGuiLocked;
-    int timesTriedToExit;
+    int PreviousNumberPMs = 0;
+    bool fConfigGuiLocked = false;
+    int timesTriedToExit = 0;
 
     bool populateTable; //for SimLoadConfig - compatability check
 

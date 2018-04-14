@@ -2,6 +2,8 @@
 
 #include "TObject.h"
 #include "TTree.h"
+#include "TFile.h"
+#include "TKey.h"
 
 #include <QVariant>
 #include <QDebug>
@@ -40,6 +42,47 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             case 'D' : branchPtr = tree->Branch(tName, &AD); break;
             case 'O' : branchPtr = tree->Branch(tName, &AO); break;
             default  : qWarning() << "Unknown tree branch type:" << type;
+        }
+    }
+}
+
+ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchType, TBranch *branch)
+{
+    name  = branchName;
+    type  = branchType;
+    tName = branchName.toLatin1().data();
+    treePtr = branch->GetTree();
+
+    if (type.size() == 1)
+    {
+        if ( ABranchBuffer::getAllTypes().contains(type) )
+        {
+            //this is one of the basic types
+            bVector = false;
+            cType   = type.at(0).toLatin1();
+            branchPtr = branch; // non 0 -> indicates that the branch is valid
+        }
+    }
+    else
+    {
+        if (type.contains("vector"))
+        {
+            type.remove("vector");
+            type.remove("<");
+            type.remove(">");
+
+            if      (type == "char")   type = "AC";
+            else if (type == "int")    type = "AI";
+            else if (type == "float")  type = "AF";
+            else if (type == "double") type = "AD";
+            else if (type == "bool")   type = "AO";
+
+            if ( ABranchBuffer::getAllTypes().contains(type) && type.size() == 2)
+            {
+                bVector = true;
+                cType = type.at(1).toLatin1();
+                branchPtr = branch; // non 0 -> indicates that the branch is valid
+            }
         }
     }
 }
@@ -142,6 +185,87 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
         }
     }
     return true;
+}
+
+const QString ARootTreeRecord::loadTree(const QString &treeName, const QString &fileName, const QString treeNameInFile)
+{
+    TFile *f = TFile::Open(fileName.toLocal8Bit().data(), "READ");
+    if (!f) return QString("Cannot open file ") + fileName;
+
+    TTree *t = 0;
+    if (treeNameInFile.isEmpty())
+    {
+        const int numKeys = f->GetListOfKeys()->GetEntries();
+        for (int ikey = 0; ikey < numKeys; ikey++)
+        {
+            TKey *key = (TKey*)f->GetListOfKeys()->At(ikey);
+            qDebug() << "Key->  name:" << key->GetName() << " class:" << key->GetClassName() <<" title:"<< key->GetTitle();
+
+            const QString Type = key->GetClassName();
+            if (Type != "TTree") continue;
+            t = dynamic_cast<TTree*>(key->ReadObj());
+            if (t) break;
+        }
+        if (!t)
+        {
+            delete f;
+            return QString("No trees found in file ") + fileName;
+        }
+    }
+    else
+    {
+        f->GetObject(treeNameInFile.toLocal8Bit().data(), t);
+        if (!t)
+        {
+            delete f;
+            return QString("Tree ") + treeNameInFile + " not found in file " + fileName;
+        }
+    }
+
+    t->Print();
+
+    QMutexLocker locker(&Mutex);
+
+    Branches.clear();
+    MapOfBranches.clear();
+    if (Object) delete Object;
+    Object = t;
+
+    const int numBranches = t->GetNbranches();
+    TObjArray* lb = t->GetListOfBranches();
+
+    for (int ibranch = 0; ibranch < numBranches; ibranch++)
+    {
+        TBranch* branchPtr = (TBranch*)(lb->At(ibranch));
+        QString branchName = branchPtr->GetName();
+        QString branchType = branchPtr->GetClassName();
+        if (branchType.isEmpty())
+        {
+            QString title = branchPtr->GetTitle();
+            title.remove(branchName);
+            title.remove("/");
+            branchType = title;
+        }
+        // else    -> vector<T> is here
+        qDebug() << branchName << branchType << branchPtr;
+
+        ABranchBuffer* bb = new ABranchBuffer(branchName, branchType, branchPtr);
+        if (bb->isValid())
+        {
+            Branches << bb;
+            MapOfBranches.insert( branchName, bb );
+        }
+        else
+        {
+            delete bb;
+            delete t;
+            delete f;
+            branchType.replace("<", "(");
+            branchType.replace(">", ")");
+            return QString("Unsupported branch type ") + branchType + " for tree in file " + fileName;
+        }
+    }
+    return "";
 }
 
 int ARootTreeRecord::countBranches() const

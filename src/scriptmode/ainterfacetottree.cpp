@@ -23,34 +23,18 @@ void AInterfaceToTTree::Load(const QString& TreeName, const QString& FileName, c
         return;
     }
 
-    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
-    if (r)
+    ARootTreeRecord* rec = new ARootTreeRecord(0, TreeName);
+    QString ErrorString = rec->loadTree(TreeName, FileName, TreeNameInFile);
+    if (ErrorString.isEmpty())
     {
-        if (bAbortIfExists)
+        bool bOK = TmpHub->Trees.append(TreeName, rec, bAbortIfExists);
+        if (!bOK)
         {
-            abort("Tree with name " + TreeName + " already exists!");
-            return;
+            delete rec;
+            abort("Tree " + TreeName + " already exists!");
         }
-        else DeleteTree(TreeName);
     }
-
-    TFile *f = TFile::Open(FileName.toLocal8Bit().data(), "READ");
-    if (!f)
-    {
-        abort("Cannot open file " + FileName);
-        return;
-    }
-    TTree *t = 0;
-    f->GetObject(TreeNameInFile.toLocal8Bit().data(), t);
-    if (!t)
-    {
-        abort("Tree " + TreeNameInFile + " not found in file " + FileName);
-        return;
-    }
-    t->Print();
-
-    r = new ARootObjBase(t, TreeName, "TTree");
-    TmpHub->Trees.append(TreeName, r);
+    else abort("Failed to create tree "+ TreeName + ": " + ErrorString);
 }
 
 void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant HeadersOfBranches)

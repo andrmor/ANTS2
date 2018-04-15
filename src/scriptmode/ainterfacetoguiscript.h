@@ -28,7 +28,13 @@ public slots:
     void labelSetText(const QString name, const QString labelText);
 
     void editNew(const QString name, const QString addTo, const QString text = "");
+    void editSetText(const QString name, const QString text);
     const QString editGetText(const QString name);
+
+    void comboboxNew(const QString name, const QString addTo, bool Editable = false);
+    void comboboxAppend(const QString name, const QVariant entries);
+    void comboboxClear(const QString name);
+    const QString comboboxGetSelected(const QString name);
 
     void textNew(const QString name, const QString addTo, const QString text = "");
     void textClear(const QString name);
@@ -40,6 +46,8 @@ public slots:
 
     void verticalLayout(const QString name, const QString addTo);
     void horizontalLayout(const QString& name, const QString& addTo);
+
+    void messageBox(const QString text);
 
     void show();
     void hide();

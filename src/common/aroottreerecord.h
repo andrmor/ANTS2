@@ -70,6 +70,7 @@ public:
     bool  createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
     const QString loadTree(const QString& fileName, const QString treeNameInFile = ""); //report error ("" if fine)
     int   countBranches() const;
+    QStringList getBranchNames() const;
     int   countEntries() const;
     bool  fillSingle(const QVariantList& vl);
     bool  isBranchExist(const QString& branchName) const;

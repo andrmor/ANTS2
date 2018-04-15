@@ -110,6 +110,18 @@ int AInterfaceToTTree::GetNumEntries(const QString &TreeName)
         return r->countEntries();
 }
 
+const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName)
+{
+    QVariantList vl;
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (r)
+    {
+        QStringList sl = r->getBranchNames();
+        for (const QString& s : sl) vl << s;
+    }
+    return vl;
+}
+
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
     ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);

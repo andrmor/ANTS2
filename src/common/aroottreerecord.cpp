@@ -328,6 +328,17 @@ int ARootTreeRecord::countBranches() const
     return Branches.size();
 }
 
+QStringList ARootTreeRecord::getBranchNames() const
+{
+    QStringList sl;
+    for (ABranchBuffer* bb : Branches)
+    {
+        if (!bb->branchPtr) return QStringList();
+        sl << bb->name;
+    }
+    return sl;
+}
+
 int ARootTreeRecord::countEntries() const
 {
     QMutexLocker locker(&Mutex);

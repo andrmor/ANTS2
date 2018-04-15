@@ -85,7 +85,11 @@ void ReconstructionWindow::writeMiscGUIsettingsToJson(QJsonObject &json)
 
 void ReconstructionWindow::updateGUIsettingsInConfig()
 {
-    QJsonObject js = MW->Detector->Config->JSON["GUI"].toObject();
+    QJsonObject js;
+
+    if (MW->Detector->Config->JSON.contains("GUI"))
+        js = MW->Detector->Config->JSON["GUI"].toObject();
+
     MW->Rwindow->writeMiscGUIsettingsToJson(js);
     MW->Detector->Config->JSON["GUI"] = js;
 }

@@ -1,5 +1,6 @@
 #include "ainterfacetoguiscript.h"
 #include "ajavascriptmanager.h"
+#include "amessage.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -9,6 +10,7 @@
 #include <QSpacerItem>
 #include <QLineEdit>
 #include <QPlainTextEdit>
+#include <QComboBox>
 
 AInterfaceToGuiScript::AInterfaceToGuiScript(AJavaScriptManager* ScriptManager) :
     AScriptInterface(), ScriptManager(ScriptManager)
@@ -21,6 +23,7 @@ void AInterfaceToGuiScript::init()
     delete Wid;
     Wid = new QWidget();
     Wid->resize(400, 200);
+    Wid->setWindowFlags(Qt::WindowStaysOnTopHint);
 
     Widgets.clear(); //items owned by Wid!
     Layouts.clear(); //items owned by Wid!
@@ -142,6 +145,14 @@ void AInterfaceToGuiScript::editNew(const QString name, const QString addTo, con
     lay->addWidget(e);
 }
 
+void AInterfaceToGuiScript::editSetText(const QString name, const QString text)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QLineEdit* e = dynamic_cast<QLineEdit*>(w);
+    if (!e) abort("Edit box " + name + " does not exist");
+    else e->setText(text);
+}
+
 const QString AInterfaceToGuiScript::editGetText(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
@@ -152,6 +163,59 @@ const QString AInterfaceToGuiScript::editGetText(const QString name)
         return "";
     }
     return e->text();
+}
+
+void AInterfaceToGuiScript::comboboxNew(const QString name, const QString addTo, bool Editable)
+{
+    if (Widgets.contains(name))
+    {
+        abort("Widget " + name + " already exists");
+        return;
+    }
+    QLayout* lay = Layouts.value(addTo, 0);
+    if (!lay)
+    {
+        abort("Layout " + addTo + " does not exist");
+        return;
+    }
+    QComboBox* e = new QComboBox();
+    e->setEditable(Editable);
+    Widgets.insert(name, e);
+    lay->addWidget(e);
+}
+
+void AInterfaceToGuiScript::comboboxAppend(const QString name, const QVariant entries)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QComboBox* e = dynamic_cast<QComboBox*>(w);
+    if (!e) abort("Combobox " + name + " does not exist");
+    else
+    {
+        QVariantList vl = entries.toList();
+        QStringList list;
+        for (QVariant& v : vl) list << v.toString();
+        e->addItems(list);
+    }
+}
+
+void AInterfaceToGuiScript::comboboxClear(const QString name)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QComboBox* e = dynamic_cast<QComboBox*>(w);
+    if (!e) abort("Combobox " + name + " does not exist");
+    else e->clear();
+}
+
+const QString AInterfaceToGuiScript::comboboxGetSelected(const QString name)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QComboBox* e = dynamic_cast<QComboBox*>(w);
+    if (!e)
+    {
+        abort("Combobox " + name + " does not exist");
+        return "";
+    }
+    return e->currentText();
 }
 
 void AInterfaceToGuiScript::textNew(const QString name, const QString addTo, const QString text)
@@ -285,6 +349,11 @@ void AInterfaceToGuiScript::horizontalLayout(const QString &name, const QString 
         QHBoxLayout* h = dynamic_cast<QHBoxLayout*>(lay);
         if (h) h->addLayout(l);
     }
+}
+
+void AInterfaceToGuiScript::messageBox(const QString text)
+{
+    message(text, Wid);
 }
 
 void AInterfaceToGuiScript::show()

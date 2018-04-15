@@ -55,7 +55,8 @@ public slots:
   //load from file
   QVariant loadColumn(QString fileName, int column = 0); //load column of doubles from file and return it as an array
   QVariant loadArray(QString fileName, int columns);     //load column of doubles from file and return it as an array
-  QString loadText(QString fileName);
+  QString  loadText(QString fileName);
+  QVariant loadObject(QString fileName);
 
   //dirs
   QString GetWorkDir();

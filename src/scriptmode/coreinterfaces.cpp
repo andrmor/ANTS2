@@ -186,8 +186,7 @@ bool AInterfaceToCore::saveObject(QString FileName, QVariant Object, bool CanOve
     QString type = Object.typeName();
     if (type != "QVariantMap")
     {
-        qDebug() << "Not an object - cannt use saveObject function";
-        //abort("Cannot extract array in saveColumns function");
+        qDebug() << "Not an object - cannot use saveObject function";
         return false;
     }
 
@@ -317,6 +316,23 @@ QString AInterfaceToCore::loadText(QString fileName)
       return "";
     }
   return str;
+}
+
+QVariant AInterfaceToCore::loadObject(QString fileName)
+{
+    QFile loadFile(fileName);
+    if (!loadFile.open(QIODevice::ReadOnly))
+      {
+        qWarning() << "Cannot open file " + fileName;
+        return QVariant();
+      }
+
+    QByteArray saveData = loadFile.readAll();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+    QJsonObject json = loadDoc.object();
+
+    QVariantMap v = json.toVariantMap();
+    return v;
 }
 
 QString AInterfaceToCore::GetWorkDir()

@@ -22,7 +22,9 @@ public:
 
 public slots:
     void buttonNew(const QString name, const QString addTo, const QString text = "");
+    void buttonSetText(const QString name, const QString text, bool bold = false);
     void buttonOnClick(const QString name, const QVariant scriptFunction);
+    void buttonOnRightClick(const QString name, const QVariant scriptFunction);
 
     void labelNew(const QString name, const QString addTo, const QString text);
     void labelSetText(const QString name, const QString labelText);
@@ -43,6 +45,7 @@ public slots:
     const QString textGet(const QString name);
 
     void addStretch(const QString addTo);
+    void addHoizontalLine(const QString addTo);
 
     void verticalLayout(const QString name, const QString addTo);
     void horizontalLayout(const QString& name, const QString& addTo);
@@ -52,6 +55,7 @@ public slots:
     void show();
     void hide();
     void setWidgetTitle(const QString title = "");
+    void resize(int width, int height);
 
     void setEnabled(const QString name, bool flag);
     void setVisible(const QString name, bool flag);

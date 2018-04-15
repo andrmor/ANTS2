@@ -11,6 +11,8 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
+#include <QFont>
+#include <QFrame>
 
 AInterfaceToGuiScript::AInterfaceToGuiScript(AJavaScriptManager* ScriptManager) :
     AScriptInterface(), ScriptManager(ScriptManager)
@@ -57,8 +59,23 @@ void AInterfaceToGuiScript::buttonNew(const QString name, const QString addTo, c
         return;
     }
     QPushButton* b = new QPushButton(text);
+    b->setContextMenuPolicy(Qt::CustomContextMenu);
     Widgets.insert(name, b);
     lay->addWidget(b);
+}
+
+void AInterfaceToGuiScript::buttonSetText(const QString name, const QString text, bool bold)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QPushButton* b = dynamic_cast<QPushButton*>(w);
+    if (!b) abort("Button " + name + " does not exist");
+    else
+    {
+        b->setText(text);
+        QFont fo = b->font();
+        fo.setBold(bold);
+        b->setFont(fo);
+    }
 }
 
 void AInterfaceToGuiScript::buttonOnClick(const QString name, const QVariant scriptFunction)
@@ -81,18 +98,54 @@ void AInterfaceToGuiScript::buttonOnClick(const QString name, const QVariant scr
     }
     if (functionName.isEmpty())
     {
-        abort("ButtonOnClick() function requires function or its name as the second argument!");
+        abort("buttonOnClick() function requires function or its name as the second argument!");
         return;
     }
 
     QScriptValue func = ScriptManager->getProperty(functionName);
     if (!func.isValid() || !func.isFunction())
     {
-        abort("ButtonOnClick() function requires function or its name as the second argument!");
+        abort("buttonOnClick() function requires function or its name as the second argument!");
         return;
     }
 
     connect(b, &QPushButton::clicked, [=](){ScriptManager->getProperty(functionName).call();});
+    //QScriptValue res = func.call(); //QScriptValue(), args);
+    //***!!! add error report!
+}
+
+void AInterfaceToGuiScript::buttonOnRightClick(const QString name, const QVariant scriptFunction)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QPushButton* b = dynamic_cast<QPushButton*>(w);
+    if (!b)
+    {
+        abort("Button " + name + " does not exist");
+        return;
+    }
+
+    QString functionName;
+    QString typeArr = scriptFunction.typeName();
+    if (typeArr == "QString") functionName = scriptFunction.toString();
+    else if (typeArr == "QVariantMap")
+    {
+        QVariantMap vm = scriptFunction.toMap();
+        functionName = vm["name"].toString();
+    }
+    if (functionName.isEmpty())
+    {
+        abort("buttonOnRightClick() function requires function or its name as the second argument!");
+        return;
+    }
+
+    QScriptValue func = ScriptManager->getProperty(functionName);
+    if (!func.isValid() || !func.isFunction())
+    {
+        abort("buttonOnRightClick() function requires function or its name as the second argument!");
+        return;
+    }
+
+    connect(b, &QPushButton::customContextMenuRequested, [=](){ScriptManager->getProperty(functionName).call();});
     //QScriptValue res = func.call(); //QScriptValue(), args);
     //***!!! add error report!
 }
@@ -301,6 +354,20 @@ void AInterfaceToGuiScript::addStretch(const QString addTo)
     }
 }
 
+void AInterfaceToGuiScript::addHoizontalLine(const QString addTo)
+{
+    QLayout* lay = Layouts.value(addTo, 0);
+    if (!lay)
+    {
+        abort("Layout " + addTo + " does not exist");
+        return;
+    }
+    QFrame* e = new QFrame;
+    e->setFrameShape(QFrame::HLine);
+    e->setFrameShadow(QFrame::Raised);
+    lay->addWidget(e);
+}
+
 void AInterfaceToGuiScript::verticalLayout(const QString name, const QString addTo)
 {
     if (Layouts.contains(name))
@@ -369,6 +436,11 @@ void AInterfaceToGuiScript::hide()
 void AInterfaceToGuiScript::setWidgetTitle(const QString title)
 {
     Wid->setWindowTitle(title);
+}
+
+void AInterfaceToGuiScript::resize(int width, int height)
+{
+    Wid->resize(width, height);
 }
 
 void AInterfaceToGuiScript::setEnabled(const QString name, bool flag)

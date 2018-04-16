@@ -15,7 +15,7 @@ AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
     Description = "Interface to CERN ROOT Trees";
 }
 
-void AInterfaceToTTree::Load(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
+void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
 {
     if (!bGuiThread)
     {
@@ -37,7 +37,7 @@ void AInterfaceToTTree::Load(const QString& TreeName, const QString& FileName, c
     else abort("Failed to create tree "+ TreeName + ": " + ErrorString);
 }
 
-void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant HeadersOfBranches)
+void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersOfBranches)
 {
     if (!bGuiThread)
     {
@@ -87,7 +87,7 @@ void AInterfaceToTTree::CreateTree(const QString &TreeName, const QVariant Heade
     else abort("Failed to create tree: "+ TreeName);
 }
 
-void AInterfaceToTTree::AddEntry(const QString &TreeName, const QVariant Array)
+void AInterfaceToTTree::Fill(const QString &TreeName, const QVariant Array)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -97,11 +97,11 @@ void AInterfaceToTTree::AddEntry(const QString &TreeName, const QVariant Array)
         const QVariantList vl = Array.toList();
         const bool bOK = r->fillSingle(vl);
         if (!bOK)
-            abort("FillTree_SingleEntry() failed - check that array size = number of branches");
+            abort("Fill failed");
     }
 }
 
-int AInterfaceToTTree::GetNumEntries(const QString &TreeName)
+int AInterfaceToTTree::GetNumEntries(const QString &TreeName) const
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -110,7 +110,7 @@ int AInterfaceToTTree::GetNumEntries(const QString &TreeName)
         return r->countEntries();
 }
 
-const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName)
+const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName) const
 {
     QVariantList vl;
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
@@ -122,7 +122,19 @@ const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName)
     return vl;
 }
 
-const QVariant AInterfaceToTTree::GetAllTreeNames()
+const QVariant AInterfaceToTTree::GetBranchTypes(const QString &TreeName) const
+{
+    QVariantList vl;
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (r)
+    {
+        QStringList sl = r->getBranchTypes();
+        for (const QString& s : sl) vl << s;
+    }
+    return vl;
+}
+
+const QVariant AInterfaceToTTree::GetAllTreeNames() const
 {
     QStringList sl = TmpHub->Trees.getAllRecordNames();
 
@@ -131,6 +143,7 @@ const QVariant AInterfaceToTTree::GetAllTreeNames()
     return vl;
 }
 
+/*
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
     ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
@@ -169,6 +182,7 @@ const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
     }
     return s;
 }
+*/
 
 const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QString& BranchName)
 {
@@ -393,7 +407,7 @@ const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QStri
     */
 }
 
-const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QString &BranchName, int entry)
+const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QString &BranchName, int EntryIndex)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -403,12 +417,12 @@ const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QStri
         if (!r->isBranchExist(BranchName))
             abort("Tree " + TreeName + " does not have branch " + BranchName);
         else
-            return r->getBranch(BranchName, entry);
+            return r->getBranch(BranchName, EntryIndex);
     }
     return QVariant();
 }
 
-const QVariant AInterfaceToTTree::GetEntry(const QString &TreeName, int entry)
+const QVariant AInterfaceToTTree::GetEntry(const QString &TreeName, int EntryIndex)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -417,7 +431,7 @@ const QVariant AInterfaceToTTree::GetEntry(const QString &TreeName, int entry)
         return 0;
     }
     else
-        return r->getEntry(entry);
+        return r->getEntry(EntryIndex);
 }
 
 const QVariantList assertBinsAndRanges(const QVariant& in)

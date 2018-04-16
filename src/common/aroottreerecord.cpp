@@ -62,6 +62,7 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             //this is one of the basic types            
             bVector = false;
             cType   = type.at(0).toLatin1();
+            branchPtr = branch; // non 0 -> indicates that the branch is valid
             switch (cType)
             {
                 case 'C' : treePtr->SetBranchAddress(tName, &C); break;
@@ -69,9 +70,8 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
                 case 'F' : treePtr->SetBranchAddress(tName, &F); break;
                 case 'D' : treePtr->SetBranchAddress(tName, &D); break;
                 case 'O' : treePtr->SetBranchAddress(tName, &O); break;
-                default:;
+                default  : branchPtr = 0; qWarning() << "Not implemented tree branch type:" << type; break;
             }
-            branchPtr = branch; // non 0 -> indicates that the branch is valid
         }
     }
     else
@@ -82,18 +82,18 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
             type.remove("<");
             type.remove(">");
 
+            bVector = true;
+            branchPtr = branch; // non 0 -> indicates that the branch is valid
+
             if      (type == "string") { type = "AC"; pAC = &AC; treePtr->SetBranchAddress(tName, &pAC); }
             else if (type == "int")    { type = "AI"; pAI = &AI; treePtr->SetBranchAddress(tName, &pAI); }
             else if (type == "float")  { type = "AF"; pAF = &AF; treePtr->SetBranchAddress(tName, &pAF); }
             else if (type == "double") { type = "AD"; pAD = &AD; treePtr->SetBranchAddress(tName, &pAD); }
             else if (type == "bool")   { type = "AO"; pAO = &AO; treePtr->SetBranchAddress(tName, &pAO); }
+            else                       { branchPtr = 0; qWarning() << "Not implemented tree branch type:" << branchType; }
 
-            if ( ABranchBuffer::getAllTypes().contains(type) && type.size() == 2)
-            {
-                bVector = true;
-                cType = type.at(1).toLatin1();
-                branchPtr = branch; // non 0 -> indicates that the branch is valid
-            }
+            if (type.size() > 1) cType = type.at(1).toLatin1();
+
         }
         else if (type.startsWith("[") && type.contains("]"))
         {
@@ -110,11 +110,13 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
                 cType = typeStr.at(0).toLatin1();
                 type = QString("A") + typeStr;
 
+                bCanFill = false; // cannot fill new entries!
+
                 bVector = true;
                 if (bOK && ABranchBuffer::getAllTypes().contains(type))
                 {
                     qDebug() << type << cType << size;
-
+                    branchPtr = branch; // non 0 -> indicates that the branch is valid
                     switch (cType)
                     {
                         case 'C' : AC.resize(size); treePtr->SetBranchAddress(tName, AC.data()); break;
@@ -122,11 +124,9 @@ ABranchBuffer::ABranchBuffer(const QString &branchName, const QString &branchTyp
                         case 'F' : AF.resize(size); treePtr->SetBranchAddress(tName, AF.data()); break;
                         case 'D' : AD.resize(size); treePtr->SetBranchAddress(tName, AD.data()); break;
                         case 'O' : Ao.resize(size); treePtr->SetBranchAddress(tName, Ao.data()); cType = 'o'; break;
-                        default:;
-                        QVector<bool> bbb;
-                        qDebug() << bbb.data();
+                        default  : branchPtr = 0; qWarning() << "Not implemented tree branch type:" << branchType; break;
                     }
-                    branchPtr = branch; // non 0 -> indicates that the branch is valid
+
                 }
             }
 
@@ -308,6 +308,7 @@ const QString ARootTreeRecord::loadTree(const QString &fileName, const QString t
         {
             Branches << bb;
             MapOfBranches.insert( branchName, bb );
+            if (!bb->canFill()) canAddEntries = false;
         }
         else
         {
@@ -328,13 +329,24 @@ int ARootTreeRecord::countBranches() const
     return Branches.size();
 }
 
-QStringList ARootTreeRecord::getBranchNames() const
+const QStringList ARootTreeRecord::getBranchNames() const
 {
     QStringList sl;
     for (ABranchBuffer* bb : Branches)
     {
         if (!bb->branchPtr) return QStringList();
         sl << bb->name;
+    }
+    return sl;
+}
+
+const QStringList ARootTreeRecord::getBranchTypes() const
+{
+    QStringList sl;
+    for (ABranchBuffer* bb : Branches)
+    {
+        if (!bb->branchPtr) return QStringList();
+        sl << bb->type;
     }
     return sl;
 }
@@ -349,6 +361,12 @@ int ARootTreeRecord::countEntries() const
 bool ARootTreeRecord::fillSingle(const QVariantList &vl)
 {
     QMutexLocker locker(&Mutex);
+
+    if (!canAddEntries)
+    {
+        qDebug() << "This tree has branch(es) which cannot be filled from script!";
+        return false;
+    }
 
     if (vl.size() != Branches.size()) return false;
 

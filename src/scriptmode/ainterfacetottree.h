@@ -26,22 +26,24 @@ public:
 public slots:
    void     SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
-   void     Load(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile); //one leaf per branch, all branches have same length
-   void     Save(const QString& TreeName, const QString& FileName);
+   void     LoadTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile); //one leaf per branch!
+   void     NewTree(const QString &TreeName, const QVariant HeadersOfBranches);
 
-   void     CreateTree(const QString &TreeName, const QVariant HeadersOfBranches);
-   void     AddEntry(const QString &TreeName, const QVariant Array);
+   void     Fill(const QString &TreeName, const QVariant Array);
 
-   int      GetNumEntries(const QString &TreeName);
-   const QVariant GetBranchNames(const QString &TreeName);
-   const QVariant GetAllTreeNames();
-   const QString  GetTreeStructure(const QString &TreeName);
+   int      GetNumEntries(const QString &TreeName) const;
+   const QVariant GetBranchNames(const QString &TreeName) const;
+   const QVariant GetBranchTypes(const QString &TreeName) const;
 
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName);
-   const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int entry);
-   const QVariant GetEntry(const QString &TreeName, int entry);
+   const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int EntryIndex);
+   const QVariant GetEntry(const QString &TreeName, int EntryIndex);
 
-   const QString Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+   const QString  Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+
+   void     Save(const QString& TreeName, const QString& FileName);
+
+   const QVariant GetAllTreeNames() const;
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();

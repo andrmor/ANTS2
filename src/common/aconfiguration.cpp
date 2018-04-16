@@ -125,16 +125,19 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       J["PartcleStackChecker"] = j;
       JSON["GUI"] = J;
     }
-  QJsonObject js = JSON["ReconstructionConfig"].toObject();
-  if (js.contains("GuiMisc"))
+  if (JSON.contains("ReconstructionConfig"))
   {
-      QJsonObject jg = JSON["GUI"].toObject();
-      QJsonObject jj = js["GuiMisc"].toObject();
-      jg["ReconstructionWindow"] = jj;
-      JSON["GUI"] = jg;
+      QJsonObject js = JSON["ReconstructionConfig"].toObject();
+      if (js.contains("GuiMisc"))
+      {
+          QJsonObject jg = JSON["GUI"].toObject();
+          QJsonObject jj = js["GuiMisc"].toObject();
+          jg["ReconstructionWindow"] = jj;
+          JSON["GUI"] = jg;
 
-      js.remove("GuiMisc");
-      JSON["ReconstructionConfig"] = js;
+          js.remove("GuiMisc");
+          JSON["ReconstructionConfig"] = js;
+      }
   }
 
   emit NewConfigLoaded();

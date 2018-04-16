@@ -40,13 +40,13 @@ public slots:
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int entry);
    const QVariant GetEntry(const QString &TreeName, int entry);
 
-   void     Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+   const QString Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();
 
 signals:
-   void     RequestTreeDraw(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges);
+   void     RequestTreeDraw(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString* result = 0);
 
 private:
    TmpObjHubClass* TmpHub;

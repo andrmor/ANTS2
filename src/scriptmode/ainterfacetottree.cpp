@@ -429,17 +429,20 @@ const QVariantList assertBinsAndRanges(const QVariant& in)
     return out;
 }
 
-void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options, const QVariant binsAndRanges)
+const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options, const QVariant binsAndRanges)
 {
     if (!bGuiThread)
     {
         abort("Threads cannot draw!");
-        return;
+        return "";
     }
 
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
+    {
         abort("Tree "+TreeName+" not found!");
+        return "";
+    }
     else
     {
         QVariantList vlIn = binsAndRanges.toList();
@@ -450,9 +453,11 @@ void AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const
             out.push_back( el );
         }
 
+        QString error;
         r->externalLock();
-        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out);
+        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out, &error);
         r->externalUnlock();
+        return error;
     }
 }
 

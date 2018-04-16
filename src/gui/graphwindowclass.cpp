@@ -1434,15 +1434,21 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
 }
 
-bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges)
+bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString* result)
 {
-    if (what.isEmpty()) return false;
+    if (what.isEmpty())
+    {
+        if (result) *result = "\What\" string is not defined!";
+        return false;
+    }
 
     QStringList Vars = what.split(":", QString::SkipEmptyParts);
     int num = Vars.size();
-    if (num > 3) return false;
-
-    //tree->ResetBranchAddresses(); //if addresses are not resetted std::vectors cause crash on attempt to draw
+    if (num > 3)
+    {
+        if (result) *result = "Invalid \"What\" string - there should be max fields separated with \":\" character!";
+        return false;
+    }
 
     QString str = what + ">>htemp(";
     for (int i = 0; i < num; i++)
@@ -1481,15 +1487,16 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            TH1* tmpHist1D = (TH1*)gDirectory->Get("htemp");
            if (!tmpHist1D)
            {
-               qDebug() << "Root has not generated any data!";
+               qDebug() << "No histogram was generated: check input!";
+               if (result) *result = "No histogram was generated: check input!";
                return false;
            }
            tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
            if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How);
            else
            {
-               qDebug() << "There is no data to show!";
-               //delete tmpHist1D;
+               qDebug() << "Empty histogram was generated!";
+               if (result) *result = "Empty histogram was generated!";
                return false;
            }
            break;
@@ -1499,8 +1506,9 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            TH2* tmpHist2D = (TH2*)gDirectory->Get("htemp");
            if (!tmpHist2D)
            {
-              qDebug() << "Root has not generated any data!";
-              return false;
+               qDebug() << "No histogram was generated: check input!";
+               if (result) *result = "No histogram was generated: check input!";
+               return false;
            }
            tmpHist2D->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
            tmpHist2D->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
@@ -1508,9 +1516,9 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            if (tmpHist2D->GetEntries() > 0) Draw(tmpHist2D, How);
            else
            {
-                 qDebug() << "There is no data to show!";
-                 //delete tmpHist2D;
-                 return false;
+               qDebug() << "Empty histogram was generated!";
+               if (result) *result = "Empty histogram was generated!";
+               return false;
            }
            break;
        }
@@ -1519,7 +1527,8 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            TH3* tmpHist3D = (TH3*)gDirectory->Get("htemp");
            if (!tmpHist3D)
            {
-               qDebug() << "Root has not generated any data!";
+               qDebug() << "No histogram was generated: check input!";
+               if (result) *result = "No histogram was generated: check input!";
                return false;
            }
            tmpHist3D->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
@@ -1529,13 +1538,15 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            if (tmpHist3D->GetEntries() > 0) Draw(tmpHist3D, How);
            else
            {
-               qDebug() << "There is no data to show!";
-               //delete tmpHist3D;
+               qDebug() << "Empty histogram was generated!";
+               if (result) *result = "Empty histogram was generated!";
                return false;
            }
            break;
        }
     }
+
+    if (result) *result = "";
     return true;
 }
 

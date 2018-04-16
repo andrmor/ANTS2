@@ -173,7 +173,7 @@ public slots:
     QVector<double> Get2DArray(); //for temporary script command
 
     void DrawStrOpt(TObject* obj, QString options = "", bool DoUpdate = true);
-    bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges);
+    bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString *result = 0);
 
 private slots:
     void Reshape();

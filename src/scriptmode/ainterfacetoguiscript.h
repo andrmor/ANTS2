@@ -18,7 +18,8 @@ public:
     AInterfaceToGuiScript(AJavaScriptManager* ScriptManager);
     ~AInterfaceToGuiScript();
 
-    bool           InitOnRun() override;
+    bool         InitOnRun() override;
+    virtual void ForceStop() override;
 
 public slots:
     void buttonNew(const QString name, const QString addTo, const QString text = "");

@@ -122,6 +122,15 @@ const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName)
     return vl;
 }
 
+const QVariant AInterfaceToTTree::GetAllTreeNames()
+{
+    QStringList sl = TmpHub->Trees.getAllRecordNames();
+
+    QVariantList vl;
+    for (const QString& s : sl) vl << s;
+    return vl;
+}
+
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
     ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);

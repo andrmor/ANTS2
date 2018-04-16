@@ -1438,7 +1438,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
 {
     if (what.isEmpty())
     {
-        if (result) *result = "\What\" string is not defined!";
+        if (result) *result = "\"What\" string is empty!";
         return false;
     }
 
@@ -1446,7 +1446,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     int num = Vars.size();
     if (num > 3)
     {
-        if (result) *result = "Invalid \"What\" string - there should be max fields separated with \":\" character!";
+        if (result) *result = "Invalid \"What\" string - there should be 1, 2 or 3 fields separated with \":\" character!";
         return false;
     }
 

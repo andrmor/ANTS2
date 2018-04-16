@@ -111,6 +111,18 @@ void AScriptManager::deleteMsgDialogs()
   }
 }
 
+void AScriptManager::ifError_AbortAndReport()
+{
+    if (isUncaughtException())
+    {
+        int lineNum = getUncaughtExceptionLineNumber();
+        QString err = getUncaughtExceptionString();
+        //err += "<br>Line #" + QString::number(lineNum) + ", call originating from function: " + functionName;
+        requestHighlightErrorLine(lineNum);
+        AbortEvaluation(err);
+    }
+}
+
 void AScriptManager::AbortEvaluation(QString message)
 {
   //  qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;

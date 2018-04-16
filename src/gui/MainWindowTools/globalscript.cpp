@@ -46,7 +46,8 @@ void MainWindow::createScriptWindow()
     ScriptWindow->move(25,25);
     connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
-    connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
+    //connect(SM, &AScriptManager::reportProgress, WindowNavigator, &WindowNavigatorClass::setProgress);
+    connect(SM, &AScriptManager::reportProgress, ScriptWindow, &AScriptWindow::onProgressChanged);
     NetModule->SetScriptManager(SM);
 
     // interface objects are owned after this by the ScriptManager!

@@ -1,15 +1,15 @@
 
-//optional:
+//function which will be called on start
 function onStart()
 {
-       var treeName = "t"
-       tree.Load(treeName, "d:/tmp/sim.root", "")
-       gui.editSetText("eTree", treeName)
-       update()
+//       var treeName = "k"
+//       tree.Load(treeName, "d:/tmp/sim.root", "")
+//       gui.editSetText("eTree", treeName)
+//       update()
        core.print("History file: " + filename_History)
 }
 //save history to file
-var bSaveHistory = true
+var bSaveHistory = true  //if true, history will be loaded/saved from/to file
 var filename_History = core.GetWorkDir() + "/TreeDrawGUIhistory.txt"
 
 //inits
@@ -19,7 +19,7 @@ var History = []
 History.push(emptyRecord)
 var HistoryIndex = 0
 
-// can modify start-up info on buttons 1 - 5. Now it is emptyRecord
+// can modify start-up info on buttons 1 - 5. Now it is emptyRecord. LoadHistory overrides these settings, so put overrides in onStart()
 var CustomB = []
 for (var i=0; i<5; i++) CustomB.push(emptyRecord)
 
@@ -35,18 +35,18 @@ gui.horizontalLayout("h1", "")
 gui.addHoizontalLine("")
 gui.addStretch("")    
        
-gui.horizontalLayout("h3", "")
-       gui.verticalLayout("v1", "h3")
+gui.horizontalLayout("h2", "")
+       gui.verticalLayout("v1", "h2")
               gui.labelNew("lWhat", "v1", "What:")
               gui.labelNew("lWhatHelper", "v1", "")
               gui.labelNew("lCuts", "v1", "Cuts:")
               gui.labelNew("lOpt", "v1", "Options:")
-       gui.verticalLayout("v2", "h3")       
+       gui.verticalLayout("v2", "h2")       
               gui.editNew("eWhat", "v2", "")
-                     gui.horizontalLayout("h2", "v2")
-                     gui.labelNew("lBra", "h2", "Available branches:")
-                     gui.comboboxNew("cBranches", "h2")
-                     gui.buttonNew("bCopy", "h2", "Copy")
+                     gui.horizontalLayout("h3", "v2")
+                     gui.labelNew("lBra", "h3", "Available branches:")
+                     gui.comboboxNew("cBranches", "h3")
+                     gui.buttonNew("bCopy", "h3", "Copy")
               gui.editNew("eCuts", "v2", "")       
               gui.editNew("eOpt", "v2", "")
               
@@ -146,17 +146,23 @@ function draw()
              for (var i=0; i<3; i++)
                     br.push( [ parseInt(gui.editGetText("eBins"+i)), parseFloat(gui.editGetText("eFrom"+i)), parseFloat(gui.editGetText("eTo"+i)) ] )
              
-             tree.Draw(treeName, what, cuts, opt, br)
-             
-             var addRec = [what, cuts, opt, br]             
-             var js = JSON.stringify(addRec)             
-             for (var i=History.length-1; i>=0; i--)
-                    if (JSON.stringify( History[i] ) == js)
-                           History.splice(i, 1)
-             History.push( addRec )       
-             if (History.length > maxHistoryLength) History.splice(0,1)
-             HistoryIndex = History.length-1             
-             if (bSaveHistory) saveAll()
+             var error = tree.Draw(treeName, what, cuts, opt, br)
+             if (error !== "")
+             {
+                    gui.messageBox(error)
+             }
+             else
+             {
+                    var addRec = [what, cuts, opt, br]             
+                    var js = JSON.stringify(addRec)             
+                    for (var i=History.length-1; i>=0; i--)
+                           if (JSON.stringify( History[i] ) == js)
+                                  History.splice(i, 1)
+                    History.push( addRec )       
+                    if (History.length > maxHistoryLength) History.splice(0,1)
+                    HistoryIndex = History.length-1             
+                    if (bSaveHistory) saveAll()
+             }             
        }       
 }
 
@@ -167,9 +173,9 @@ function setBinRange(i, ar)
         gui.editSetText("eTo"+i, ar[2])
 }
 
-function clearBR0() { gui.editSetText("eBins0", "100"); gui.editSetText("eFrom0", "0"); gui.editSetText("eTo0", "0") }
-function clearBR1() { gui.editSetText("eBins1", "100"); gui.editSetText("eFrom1", "0"); gui.editSetText("eTo1", "0") }
-function clearBR2() { gui.editSetText("eBins2", "100"); gui.editSetText("eFrom2", "0"); gui.editSetText("eTo2", "0") }
+function clearBR0() { setBinRange(0, [100,0,0]) }
+function clearBR1() { setBinRange(1, [100,0,0]) }
+function clearBR2() { setBinRange(2, [100,0,0]) }
 
 function newDraw()
 {
@@ -268,6 +274,7 @@ gui.buttonOnRightClick("b1", CustomStore1)
 gui.buttonOnRightClick("b2", CustomStore2)
 gui.buttonOnRightClick("b3", CustomStore3)
 gui.buttonOnRightClick("b4", CustomStore4)
+// --- GUI is ready ---
 
 gui.setWidgetTitle("Tree draw")
 

@@ -51,3 +51,19 @@ void ARootObjCollection::clear()
     }
     Collection.clear();
 }
+
+const QStringList ARootObjCollection::getAllRecordNames() const
+{
+    QMutexLocker locker(&Mutex);
+
+    QStringList sl;
+    QMapIterator<QString, ARootObjBase*> iter(Collection);
+    while (iter.hasNext())
+    {
+        iter.next();
+        sl << iter.key();
+    }
+
+    sl.sort();
+    return sl;
+}

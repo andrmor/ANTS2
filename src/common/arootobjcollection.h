@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QMutex>
 
 class ARootObjBase;
@@ -19,9 +20,11 @@ public:
     bool remove(const QString& name);               // Not multithread-safe: graph can be in use by the GUI
     void clear();                                   // Not multithread-safe: graph can be in use by the GUI
 
+    const QStringList getAllRecordNames() const;
+
 private:
     QMap<QString, ARootObjBase*> Collection;
-    QMutex        Mutex;
+    mutable QMutex               Mutex;
 
 };
 

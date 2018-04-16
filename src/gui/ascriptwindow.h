@@ -163,9 +163,10 @@ signals:
 
 public slots:
     void receivedOnStart() {emit onStart();}
-    void receivedOnAbort() {emit onAbort();}
-    void receivedOnSuccess(QString eval) {emit success(eval);}
+    void receivedOnAbort();
+    void receivedOnSuccess(QString eval);
     void onDefaulFontSizeChanged(int size);
+    void onProgressChanged(int percent);
 };
 
 class AScriptWindowTabItem : QObject

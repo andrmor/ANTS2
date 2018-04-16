@@ -34,6 +34,7 @@ public slots:
 
    int      GetNumEntries(const QString &TreeName);
    const QVariant GetBranchNames(const QString &TreeName);
+   const QVariant GetAllTreeNames();
    const QString  GetTreeStructure(const QString &TreeName);
 
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName);

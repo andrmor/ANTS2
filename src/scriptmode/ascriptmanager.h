@@ -46,6 +46,8 @@ public:
 
   void              deleteMsgDialogs();
 
+  void              ifError_AbortAndReport();
+
 public slots:
   virtual void      AbortEvaluation(QString message = "Aborted!");
 

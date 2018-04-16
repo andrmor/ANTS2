@@ -13,6 +13,7 @@
 #include <QComboBox>
 #include <QFont>
 #include <QFrame>
+#include <QDebug>
 
 AInterfaceToGuiScript::AInterfaceToGuiScript(AJavaScriptManager* ScriptManager) :
     AScriptInterface(), ScriptManager(ScriptManager)
@@ -36,13 +37,18 @@ void AInterfaceToGuiScript::init()
 
 AInterfaceToGuiScript::~AInterfaceToGuiScript()
 {
-    delete Wid;
+    delete Wid; Wid = 0;
 }
 
 bool AInterfaceToGuiScript::InitOnRun()
 {
     init();
     return true;
+}
+
+void AInterfaceToGuiScript::ForceStop()
+{
+    delete Wid; Wid = 0;
 }
 
 void AInterfaceToGuiScript::buttonNew(const QString name, const QString addTo, const QString text)
@@ -109,9 +115,8 @@ void AInterfaceToGuiScript::buttonOnClick(const QString name, const QVariant scr
         return;
     }
 
-    connect(b, &QPushButton::clicked, [=](){ScriptManager->getProperty(functionName).call();});
-    //QScriptValue res = func.call(); //QScriptValue(), args);
-    //***!!! add error report!
+    connect(b, &QPushButton::clicked,
+            [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
 void AInterfaceToGuiScript::buttonOnRightClick(const QString name, const QVariant scriptFunction)
@@ -145,9 +150,8 @@ void AInterfaceToGuiScript::buttonOnRightClick(const QString name, const QVarian
         return;
     }
 
-    connect(b, &QPushButton::customContextMenuRequested, [=](){ScriptManager->getProperty(functionName).call();});
-    //QScriptValue res = func.call(); //QScriptValue(), args);
-    //***!!! add error report!
+    connect(b, &QPushButton::customContextMenuRequested,
+            [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
 void AInterfaceToGuiScript::labelNew(const QString name, const QString addTo, const QString text)

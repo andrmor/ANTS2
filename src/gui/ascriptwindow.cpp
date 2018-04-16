@@ -86,6 +86,8 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     ui->pbStop->setVisible(false);
     LocalScript = "//no external script provided!";
     this->setWindowTitle("ANTS2 script");
+    ui->prbProgress->setValue(0);
+    ui->prbProgress->setVisible(false);
 
     QPixmap rm(16, 16);
     rm.fill(Qt::transparent);
@@ -314,10 +316,14 @@ void AScriptWindow::HighlightErrorLine(int line)
   if (line < 0) return;
 
   //highlight line with error
-  QTextBlock block = ScriptTabs[CurrentTab]->TextEdit->document()->findBlockByLineNumber(line-1);
+  if (line > 1) line--;
+  QTextBlock block = ScriptTabs[CurrentTab]->TextEdit->document()->findBlockByLineNumber(line);
   int loc = block.position();
   QTextCursor cur = ScriptTabs[CurrentTab]->TextEdit->textCursor();
   cur.setPosition(loc);
+  ScriptTabs[CurrentTab]->TextEdit->setTextCursor(cur);
+  ScriptTabs[CurrentTab]->TextEdit->ensureCursorVisible();
+
   int length = block.text().split("\n").at(0).length();
   cur.movePosition(cur.Right, cur.KeepAnchor, length);
 
@@ -1002,11 +1008,32 @@ bool AScriptWindow::event(QEvent *e)
     return QMainWindow::event(e) ;
 }
 
+void AScriptWindow::receivedOnAbort()
+{
+    ui->prbProgress->setValue(0);
+    ui->prbProgress->setVisible(false);
+    emit onAbort();
+}
+
+void AScriptWindow::receivedOnSuccess(QString eval)
+{
+    ui->prbProgress->setValue(0);
+    ui->prbProgress->setVisible(false);
+    emit success(eval);
+}
+
 void AScriptWindow::onDefaulFontSizeChanged(int size)
 {
     GlobSet->DefaultFontSize_ScriptWindow = size;
     for (AScriptWindowTabItem* tab : ScriptTabs)
         tab->TextEdit->SetFontSize(size);
+}
+
+void AScriptWindow::onProgressChanged(int percent)
+{
+    ui->prbProgress->setValue(percent);
+    ui->prbProgress->setVisible(true);
+    qApp->processEvents();
 }
 
 QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)

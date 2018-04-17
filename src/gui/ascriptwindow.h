@@ -149,13 +149,14 @@ private:
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
 
+    void ReadFromJson(QJsonObject &json);
+    void WriteToJson(QJsonObject &json);
+
     void askRemoveTab(int tab);
     void removeTab(int tab);
     void clearAllTabs();
     QString createNewTabName();
-
-    void ReadFromJson(QJsonObject &json);
-    void WriteToJson(QJsonObject &json);
+    void renameTab(int tab);
 
 protected:
   virtual void closeEvent(QCloseEvent *e);
@@ -190,6 +191,7 @@ public:
 
     QString FileName;
     QString TabName;
+    bool    bExplicitlyNamed = false;   //if true save will not auto-rename
 
     QCompleter* completer;
     AHighlighterScriptWindow* highlighter;

@@ -9,6 +9,7 @@
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
 #include "aconfiguration.h"
+#include "ajsontools.h"
 
 #include "ascriptmanager.h"
 #include "ajavascriptmanager.h"
@@ -43,6 +44,7 @@
 #include <QJsonArray>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QInputDialog>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager),
@@ -636,8 +638,12 @@ void AScriptWindow::on_pbSave_clicked()
     outStream << Script;
     outputFile.close();
 
-    ScriptTabs[CurrentTab]->TabName = QFileInfo(SavedName).baseName();
-    twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+    if (!ScriptTabs[CurrentTab]->bExplicitlyNamed)
+    {
+        ScriptTabs[CurrentTab]->TabName = QFileInfo(SavedName).baseName();
+        twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+    }
+
     ScriptTabs[CurrentTab]->setModifiedStatus(false);
     updateFileStatusIndication();
 }
@@ -1139,6 +1145,7 @@ void AScriptWindowTabItem::WriteToJson(QJsonObject &json)
     if (!TextEdit) return;
     json["FileName"] = FileName;
     json["TabName"] = TabName;
+    json["bExplicitlyNamed"] = bExplicitlyNamed;
     json["Script"] = TextEdit->document()->toPlainText();
 }
 
@@ -1151,6 +1158,10 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
 
     FileName.clear();
     FileName = json["FileName"].toString();
+
+    bExplicitlyNamed = false;
+    parseJson(json, "bExplicitlyNamed", bExplicitlyNamed);
+
     if (json.contains("TabName")) TabName = json["TabName"].toString();
     else
     {
@@ -1245,7 +1256,9 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 
     QAction* add = menu.addAction("Add new tab");
     menu.addSeparator();
-    QAction* remove = (tab==-1) ? 0 : menu.addAction("Close tab");
+    QAction* rename = (tab == -1 ? 0 : menu.addAction("Rename tab") );
+    menu.addSeparator();
+    QAction* remove = (tab == -1 ? 0 : menu.addAction("Close tab") );
     menu.addSeparator();
     QAction* removeAll = (ScriptTabs.isEmpty()) ? 0 : menu.addAction("Close all tabs");
 
@@ -1255,6 +1268,7 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     if (selectedItem == add)            AddNewTab();
     else if (selectedItem == remove)    askRemoveTab(tab);
     else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
+    else if (selectedItem == rename)    renameTab(tab);
 }
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
@@ -1418,6 +1432,24 @@ void AScriptWindow::askRemoveTab(int tab)
     if (ret == QMessageBox::Yes) removeTab(tab);
 }
 
+void AScriptWindow::renameTab(int tab)
+{
+    if (tab < 0 || tab >= ScriptTabs.size()) return;
+
+    bool ok;
+    QString text = QInputDialog::getText(this, "Input text",
+                                             "New name for the tab:", QLineEdit::Normal,
+                                             ScriptTabs.at(tab)->TabName, &ok);
+    if (ok && !text.isEmpty())
+    {
+
+       ScriptTabs[tab]->TabName = text;
+       ScriptTabs[tab]->bExplicitlyNamed = true;
+       twScriptTabs->setTabText(tab, text);
+
+    }
+}
+
 void AScriptWindow::on_actionRemove_current_tab_triggered()
 {
     askRemoveTab(CurrentTab);
@@ -1439,7 +1471,6 @@ void AScriptWindow::on_actionRemove_all_tabs_triggered()
     }
 }
 
-#include "ajsontools.h"
 void AScriptWindow::on_actionStore_all_tabs_triggered()
 {
     if (ScriptTabs.isEmpty()) return;

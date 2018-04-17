@@ -15,8 +15,38 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>6</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
@@ -67,7 +97,10 @@
          </size>
         </property>
         <property name="value">
-         <number>24</number>
+         <number>0</number>
+        </property>
+        <property name="invertedAppearance">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -99,6 +132,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbHelp">
           <property name="text">
@@ -122,10 +158,10 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-      </item>
-      <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbLoad">
           <property name="text">
@@ -144,6 +180,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbSaveAs">
           <property name="text">
@@ -164,6 +203,72 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Associated file:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbFileName">
+         <property name="toolTip">
+          <string>Click to open in default file explorer</string>
+         </property>
+         <property name="text">
+          <string>Not saved</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -195,6 +300,16 @@
     <addaction name="actionClose_all_messenger_windows"/>
     <addaction name="actionClear_unused_messenger_windows"/>
    </widget>
+   <widget class="QMenu" name="menuTabs">
+    <property name="title">
+     <string>Tabs</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionStore_all_tabs"/>
+    <addaction name="actionRestore_session"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menuTabs"/>
    <addaction name="menuFont"/>
    <addaction name="menuView"/>
   </widget>
@@ -231,6 +346,16 @@
   <action name="actionClose_all_messenger_windows">
    <property name="text">
     <string>Close all messenger windows</string>
+   </property>
+  </action>
+  <action name="actionStore_all_tabs">
+   <property name="text">
+    <string>Store all tabs</string>
+   </property>
+  </action>
+  <action name="actionRestore_session">
+   <property name="text">
+    <string>Restore session</string>
    </property>
   </action>
  </widget>

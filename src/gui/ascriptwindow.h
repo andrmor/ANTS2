@@ -102,6 +102,8 @@ private slots:
 
     void on_actionClose_all_messenger_windows_triggered();
 
+    void on_pbFileName_clicked();
+
 public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 
@@ -177,7 +179,9 @@ public:
     ~AScriptWindowTabItem();
 
     CompletingTextEditClass* TextEdit;
+
     QString FileName;
+    QString TabName;
 
     QCompleter* completer;
     AHighlighterScriptWindow* highlighter;

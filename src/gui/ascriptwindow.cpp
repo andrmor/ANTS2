@@ -88,6 +88,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     this->setWindowTitle("ANTS2 script");
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
+    //ui->labFileName->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QPixmap rm(16, 16);
     rm.fill(Qt::transparent);
@@ -384,6 +385,9 @@ void AScriptWindow::ReadFromJson()
         AddNewTab();
         AScriptWindowTabItem* st = ScriptTabs.last();
         st->ReadFromJson(js);
+
+        if (st->TabName.isEmpty()) st->TabName = createNewTabName();
+        /*
         if (!st->FileName.isEmpty())
         {
            QString ScriptInFile;
@@ -392,15 +396,20 @@ void AScriptWindow::ReadFromJson()
                QTextEdit te;
                te.append(ScriptInFile);
                if (te.document()->toPlainText() == st->TextEdit->document()->toPlainText())
-                   twScriptTabs->setTabText(twScriptTabs->count()-1, QFileInfo(st->FileName).fileName());
+                   twScriptTabs->setTabText(twScriptTabs->count()-1, QFileInfo(st->FileName).baseName());
            }
         }
+        */
+        twScriptTabs->setTabText(twScriptTabs->count()-1, st->TabName);
+
     }
     if (ScriptTabs.isEmpty()) AddNewTab();
 
+    int oldCurrentTab = CurrentTab;
     CurrentTab = json["CurrentTab"].toInt();
     if (CurrentTab<0 || CurrentTab>ScriptTabs.size()-1) CurrentTab = 0;
     twScriptTabs->setCurrentIndex(CurrentTab);
+    if (oldCurrentTab != CurrentTab) onCurrentTabChanged(CurrentTab);
 
     if (json.contains("Sizes"))
     {
@@ -574,24 +583,28 @@ void AScriptWindow::on_pbLoad_clicked()
   onLoadRequested(Script);
 
   ScriptTabs[CurrentTab]->FileName = fileName;
-  twScriptTabs->setTabText(CurrentTab, QFileInfo(fileName).fileName());
+
+  ScriptTabs[CurrentTab]->TabName = QFileInfo(fileName).baseName();
+  twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+  onCurrentTabChanged(CurrentTab); //to update file name indication
 }
 
 void AScriptWindow::onLoadRequested(QString NewScript)
 {
     if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty()) AddNewTab();
-    twScriptTabs->setTabText(CurrentTab, "__123456789");
-    twScriptTabs->setTabText(CurrentTab, createNewTabName());
+    //twScriptTabs->setTabText(CurrentTab, "__123456789");
+    //twScriptTabs->setTabText(CurrentTab, createNewTabName());
 
     tmpIgnore = true;
     ScriptTabs[CurrentTab]->TextEdit->clear();
     ScriptTabs[CurrentTab]->TextEdit->append(NewScript);
     tmpIgnore = false;
 
+    //for examples (triggered on signal from example explorer -> do not register file name!)
     ScriptTabs[CurrentTab]->FileName.clear();
-
-    //ui->pbRunScript->setIcon(*RedIcon);
-    //ui->pbSave->setEnabled(false);
+    ScriptTabs[CurrentTab]->TabName = createNewTabName();
+    twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+    onCurrentTabChanged(CurrentTab); //to update file name indication
 }
 
 void AScriptWindow::on_pbSave_clicked()
@@ -618,9 +631,9 @@ void AScriptWindow::on_pbSave_clicked()
     outStream << Script;
     outputFile.close();
 
-    twScriptTabs->setTabText(CurrentTab, QFileInfo(SavedName).fileName());
-
-    //ui->pbSave->setEnabled(true);
+    ScriptTabs[CurrentTab]->TabName = QFileInfo(SavedName).baseName();
+    twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
+    onCurrentTabChanged(CurrentTab); //to update file name indication
 }
 
 void AScriptWindow::on_pbSaveAs_clicked()
@@ -634,7 +647,7 @@ void AScriptWindow::on_pbSaveAs_clicked()
     QFileInfo fileInfo(fileName);
     if(fileInfo.suffix().isEmpty()) fileName += ".txt";
 
-    ScriptTabs[CurrentTab]->FileName = fileName;
+    ScriptTabs[CurrentTab]->FileName = fileName;    
     AScriptWindow::on_pbSave_clicked();
 }
 
@@ -1119,6 +1132,7 @@ void AScriptWindowTabItem::WriteToJson(QJsonObject &json)
 {
     if (!TextEdit) return;
     json["FileName"] = FileName;
+    json["TabName"] = TabName;
     json["Script"] = TextEdit->document()->toPlainText();
 }
 
@@ -1131,12 +1145,44 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
 
     FileName.clear();
     FileName = json["FileName"].toString();
+    if (json.contains("TabName")) TabName = json["TabName"].toString();
+    else
+    {
+        //compatibility
+        if (!FileName.isEmpty())
+        {
+            QFileInfo fi(FileName);
+            TabName = fi.baseName();
+        }
+        else TabName.clear();
+    }
 }
 
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
-    //qDebug() << "Current changed!";
+    //qDebug() << "Current changed!" << tab << ScriptTabs.size();
     CurrentTab = tab;
+
+    if (tab < 0 || tab >= ScriptTabs.size()) return;
+
+    QString fileName = ScriptTabs.at(tab)->FileName;
+
+#ifdef Q_OS_WIN32
+    fileName.replace("/", "\\");
+#endif
+
+    QString t = ( fileName.isEmpty() ? " not saved" : fileName );
+    ui->pbFileName->setText(t);
+}
+
+#include <QDesktopServices>
+void AScriptWindow::on_pbFileName_clicked()
+{
+    QString s = ScriptTabs.at(CurrentTab)->FileName;
+    QFileInfo fi(s);
+    QString path = fi.path();
+    pteOut->appendPlainText(path);
+    QDesktopServices::openUrl(QUrl("file:///"+path, QUrl::TolerantMode));
 }
 
 void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)

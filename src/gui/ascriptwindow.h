@@ -66,7 +66,7 @@ public slots:
     void onLoadRequested(QString NewScript);
 
 private slots:
-    void onCurrentTabChanged(int tab);
+    void onCurrentTabChanged(int tab);   //also updates status (modified, filename)
     void onRequestTabWidgetContextMenu(QPoint pos);
     void onScriptTabMoved(int from, int to);
     void onContextMenuRequestedByJsonTree(QPoint pos);
@@ -169,6 +169,7 @@ public slots:
     void receivedOnSuccess(QString eval);
     void onDefaulFontSizeChanged(int size);
     void onProgressChanged(int percent);
+    void updateFileStatusIndication();
 };
 
 class AScriptWindowTabItem : QObject
@@ -190,6 +191,9 @@ public:
 
     void WriteToJson(QJsonObject &json);
     void ReadFromJson(QJsonObject &json);
+
+    bool wasModified() const;
+    void setModifiedStatus(bool flag);
 };
 
 #endif // ASCRIPTWINDOW_H

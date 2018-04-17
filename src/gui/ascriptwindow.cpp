@@ -387,7 +387,6 @@ void AScriptWindow::ReadFromJson()
         st->ReadFromJson(js);
 
         if (st->TabName.isEmpty()) st->TabName = createNewTabName();
-        /*
         if (!st->FileName.isEmpty())
         {
            QString ScriptInFile;
@@ -395,21 +394,18 @@ void AScriptWindow::ReadFromJson()
            {
                QTextEdit te;
                te.append(ScriptInFile);
-               if (te.document()->toPlainText() == st->TextEdit->document()->toPlainText())
-                   twScriptTabs->setTabText(twScriptTabs->count()-1, QFileInfo(st->FileName).baseName());
+               st->setModifiedStatus( !(te.document()->toPlainText() == st->TextEdit->document()->toPlainText()) );
            }
         }
-        */
         twScriptTabs->setTabText(twScriptTabs->count()-1, st->TabName);
 
     }
     if (ScriptTabs.isEmpty()) AddNewTab();
 
-    int oldCurrentTab = CurrentTab;
     CurrentTab = json["CurrentTab"].toInt();
     if (CurrentTab<0 || CurrentTab>ScriptTabs.size()-1) CurrentTab = 0;
     twScriptTabs->setCurrentIndex(CurrentTab);
-    if (oldCurrentTab != CurrentTab) onCurrentTabChanged(CurrentTab);
+    updateFileStatusIndication();
 
     if (json.contains("Sizes"))
     {
@@ -586,7 +582,7 @@ void AScriptWindow::on_pbLoad_clicked()
 
   ScriptTabs[CurrentTab]->TabName = QFileInfo(fileName).baseName();
   twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
-  onCurrentTabChanged(CurrentTab); //to update file name indication
+  updateFileStatusIndication();
 }
 
 void AScriptWindow::onLoadRequested(QString NewScript)
@@ -604,7 +600,7 @@ void AScriptWindow::onLoadRequested(QString NewScript)
     ScriptTabs[CurrentTab]->FileName.clear();
     ScriptTabs[CurrentTab]->TabName = createNewTabName();
     twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
-    onCurrentTabChanged(CurrentTab); //to update file name indication
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::on_pbSave_clicked()
@@ -633,7 +629,8 @@ void AScriptWindow::on_pbSave_clicked()
 
     ScriptTabs[CurrentTab]->TabName = QFileInfo(SavedName).baseName();
     twScriptTabs->setTabText(CurrentTab, ScriptTabs[CurrentTab]->TabName);
-    onCurrentTabChanged(CurrentTab); //to update file name indication
+    ScriptTabs[CurrentTab]->setModifiedStatus(false);
+    updateFileStatusIndication();
 }
 
 void AScriptWindow::on_pbSaveAs_clicked()
@@ -1158,21 +1155,52 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
     }
 }
 
+/*
+QTextEdit holds a QTextDocument object which can be retrieved using the document() method.
+You can also set your own document object using setDocument(). QTextDocument emits a textChanged() signal
+ if the text changes and it also provides a isModified() function which will return true if the text has been modified
+ since it was either loaded or since the last call to setModified with false as argument.
+ In addition it provides methods for undo and redo.
+*/
+
+bool AScriptWindowTabItem::wasModified() const
+{
+    return TextEdit->document()->isModified();
+}
+
+void AScriptWindowTabItem::setModifiedStatus(bool flag)
+{
+    TextEdit->document()->setModified(flag);
+}
+
+
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
     //qDebug() << "Current changed!" << tab << ScriptTabs.size();
     CurrentTab = tab;
 
-    if (tab < 0 || tab >= ScriptTabs.size()) return;
+    updateFileStatusIndication();
+}
 
-    QString fileName = ScriptTabs.at(tab)->FileName;
+void AScriptWindow::updateFileStatusIndication()
+{
+    if (CurrentTab < 0 || CurrentTab >= ScriptTabs.size()) return;
+
+    QString fileName = ScriptTabs.at(CurrentTab)->FileName;
+
+    QString s;
+    if (fileName.isEmpty()) s = "not saved";
+    else
+    {
+        if ( ScriptTabs.at(CurrentTab)->wasModified() ) s = "(was modified) ";
 
 #ifdef Q_OS_WIN32
-    fileName.replace("/", "\\");
+        fileName.replace("/", "\\");
 #endif
 
-    QString t = ( fileName.isEmpty() ? " not saved" : fileName );
-    ui->pbFileName->setText(t);
+        s += fileName;
+    }
+    ui->pbFileName->setText(s);
 }
 
 #include <QDesktopServices>

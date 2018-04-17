@@ -348,7 +348,11 @@ void AScriptWindow::WriteToJson()
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
+    WriteToJson(json);
+}
 
+void AScriptWindow::WriteToJson(QJsonObject& json)
+{
     json = QJsonObject(); //clear
 
     QJsonArray ar;
@@ -374,7 +378,11 @@ void AScriptWindow::ReadFromJson()
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
+    ReadFromJson(json);
+}
 
+void AScriptWindow::ReadFromJson(QJsonObject& json)
+{
     if (json.isEmpty()) return;
     if (!json.contains("ScriptTabs")) return;
 
@@ -1244,36 +1252,9 @@ void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
     QAction* selectedItem = menu.exec(twScriptTabs->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
 
-    if (selectedItem == add)
-      {
-        AddNewTab();
-      }
-    else if (selectedItem == remove)
-      {
-        QMessageBox m(this);
-        //m.setText("Confirmation.");
-        m.setIcon(QMessageBox::Question);
-        m.setText("Close tab "+twScriptTabs->tabText(tab)+"?");  //setInformativeText
-        m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
-        m.setDefaultButton(QMessageBox::Cancel);
-        int ret = m.exec();
-        if (ret == QMessageBox::Yes) removeTab(tab);
-      }
-    else if (selectedItem == removeAll)
-      {
-        QMessageBox m(this);
-        //m.setText("Confirmation.");
-        m.setIcon(QMessageBox::Warning);
-        m.setText("Close ALL tabs?");
-        m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
-        m.setDefaultButton(QMessageBox::Cancel);
-        int ret = m.exec();
-        if (ret == QMessageBox::Yes)
-        {
-            clearAllTabs();
-            AddNewTab();
-        }
-    }
+    if (selectedItem == add)            AddNewTab();
+    else if (selectedItem == remove)    askRemoveTab(tab);
+    else if (selectedItem == removeAll) on_actionRemove_all_tabs_triggered();
 }
 
 void AScriptWindow::onScriptTabMoved(int from, int to)
@@ -1416,4 +1397,86 @@ void AScriptWindow::on_actionClose_all_messenger_windows_triggered()
 {
     AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
     if (JSM) JSM->closeAllMsgDialogs();
+}
+
+void AScriptWindow::on_actionAdd_new_tab_triggered()
+{
+    AddNewTab();
+}
+
+void AScriptWindow::askRemoveTab(int tab)
+{
+    if (tab < 0 || tab >= ScriptTabs.size()) return;
+
+    QMessageBox m(this);
+    //m.setText("Confirmation.");
+    m.setIcon(QMessageBox::Question);
+    m.setText("Close tab "+twScriptTabs->tabText(tab)+"?");  //setInformativeText
+    m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
+    m.setDefaultButton(QMessageBox::Cancel);
+    int ret = m.exec();
+    if (ret == QMessageBox::Yes) removeTab(tab);
+}
+
+void AScriptWindow::on_actionRemove_current_tab_triggered()
+{
+    askRemoveTab(CurrentTab);
+}
+
+void AScriptWindow::on_actionRemove_all_tabs_triggered()
+{
+    QMessageBox m(this);
+    //m.setText("Confirmation.");
+    m.setIcon(QMessageBox::Warning);
+    m.setText("Close ALL tabs?");
+    m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
+    m.setDefaultButton(QMessageBox::Cancel);
+    int ret = m.exec();
+    if (ret == QMessageBox::Yes)
+    {
+        clearAllTabs();
+        AddNewTab();
+    }
+}
+
+#include "ajsontools.h"
+void AScriptWindow::on_actionStore_all_tabs_triggered()
+{
+    if (ScriptTabs.isEmpty()) return;
+    QString starter = GlobSet->LastOpenDir;
+    QString fileName = QFileDialog::getSaveFileName(this,"Save session", starter, "Json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+
+    QFileInfo fileInfo(fileName);
+    if(fileInfo.suffix().isEmpty()) fileName += ".json";
+
+    QJsonObject json;
+    WriteToJson(json);
+    SaveJsonToFile(json, fileName);
+}
+
+void AScriptWindow::on_actionRestore_session_triggered()
+{
+    if (ScriptTabs.size() == 1 && ScriptTabs.at(0)->TextEdit->document()->isEmpty())
+    {
+        //empty - do not ask confirmation
+    }
+    else
+    {
+        QMessageBox m(this);
+        m.setText("Confirmation.");
+        m.setIcon(QMessageBox::Warning);
+        m.setText("This will close all tabs and unsaved data will be lost.\nContinue?");
+        m.setStandardButtons(QMessageBox::Yes| QMessageBox::Cancel);
+        m.setDefaultButton(QMessageBox::Cancel);
+        int ret = m.exec();
+        if (ret != QMessageBox::Yes) return;
+    }
+
+    QString starter = GlobSet->LastOpenDir;
+    QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+
+    QJsonObject json;
+    ReadFromJson(json);
 }

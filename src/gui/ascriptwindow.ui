@@ -319,6 +319,11 @@
      <string>Tabs</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionAdd_new_tab"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemove_current_tab"/>
+    <addaction name="actionRemove_all_tabs"/>
+    <addaction name="separator"/>
     <addaction name="actionStore_all_tabs"/>
     <addaction name="actionRestore_session"/>
     <addaction name="separator"/>
@@ -370,6 +375,21 @@
   <action name="actionRestore_session">
    <property name="text">
     <string>Restore session</string>
+   </property>
+  </action>
+  <action name="actionAdd_new_tab">
+   <property name="text">
+    <string>Add new tab</string>
+   </property>
+  </action>
+  <action name="actionRemove_current_tab">
+   <property name="text">
+    <string>Remove current tab</string>
+   </property>
+  </action>
+  <action name="actionRemove_all_tabs">
+   <property name="text">
+    <string>Remove all tabs</string>
    </property>
   </action>
  </widget>

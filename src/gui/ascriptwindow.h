@@ -93,16 +93,19 @@ private slots:
 
     void on_actionIncrease_font_size_triggered();
     void on_actionDecrease_font_size_triggered();
-
     void on_actionSelect_font_triggered();
 
     void on_actionShow_all_messenger_windows_triggered();
     void on_actionHide_all_messenger_windows_triggered();
     void on_actionClear_unused_messenger_windows_triggered();
-
     void on_actionClose_all_messenger_windows_triggered();
 
     void on_pbFileName_clicked();
+    void on_actionAdd_new_tab_triggered();
+    void on_actionRemove_current_tab_triggered();
+    void on_actionRemove_all_tabs_triggered();
+    void on_actionStore_all_tabs_triggered();
+    void on_actionRestore_session_triggered();
 
 public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
@@ -146,9 +149,13 @@ private:
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
 
+    void askRemoveTab(int tab);
     void removeTab(int tab);
     void clearAllTabs();
     QString createNewTabName();
+
+    void ReadFromJson(QJsonObject &json);
+    void WriteToJson(QJsonObject &json);
 
 protected:
   virtual void closeEvent(QCloseEvent *e);

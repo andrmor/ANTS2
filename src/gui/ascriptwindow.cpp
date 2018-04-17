@@ -42,6 +42,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QMessageBox>
+#include <QDesktopServices>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager),
@@ -1182,28 +1183,42 @@ void AScriptWindow::onCurrentTabChanged(int tab)
     updateFileStatusIndication();
 }
 
+QIcon makeIcon(int h)
+{
+    QPixmap pm(h-2, h-2);
+    pm.fill(Qt::transparent);
+    QPainter b(&pm);
+    b.setBrush(QBrush(Qt::yellow));
+    b.drawEllipse(0, 2, h-5, h-5);
+    return QIcon(pm);
+}
+
+
 void AScriptWindow::updateFileStatusIndication()
 {
     if (CurrentTab < 0 || CurrentTab >= ScriptTabs.size()) return;
 
     QString fileName = ScriptTabs.at(CurrentTab)->FileName;
+    const bool bWasModified = ScriptTabs.at(CurrentTab)->wasModified();
+
+    ui->labNotSaved->setVisible(fileName.isEmpty());
 
     QString s;
-    if (fileName.isEmpty()) s = "not saved";
+    if (fileName.isEmpty())
+        ui->labWasModified->setVisible(false);
     else
     {
-        if ( ScriptTabs.at(CurrentTab)->wasModified() ) s = "(was modified) ";
+        ui->labWasModified->setVisible(bWasModified);
 
 #ifdef Q_OS_WIN32
         fileName.replace("/", "\\");
 #endif
 
-        s += fileName;
+        s = fileName;
     }
     ui->pbFileName->setText(s);
 }
 
-#include <QDesktopServices>
 void AScriptWindow::on_pbFileName_clicked()
 {
     QString s = ScriptTabs.at(CurrentTab)->FileName;
@@ -1282,13 +1297,15 @@ void AScriptWindow::AddNewTab()
         tab->TextEdit->setFont(font);
       }
 
-    QObject::connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
+    connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
     ScriptTabs.append(tab);
 
     twScriptTabs->addTab(ScriptTabs.last()->TextEdit, createNewTabName());
     QObject::connect(ScriptTabs.last()->TextEdit, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
     CurrentTab = ScriptTabs.size()-1;
     twScriptTabs->setCurrentIndex(CurrentTab);
+
+    connect(tab->TextEdit->document(), &QTextDocument::modificationChanged, this, &AScriptWindow::updateFileStatusIndication);
 }
 
 QString AScriptWindow::createNewTabName()

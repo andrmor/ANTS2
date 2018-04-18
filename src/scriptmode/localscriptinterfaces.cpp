@@ -7,7 +7,8 @@
 #include "afiletools.h"
 #include "ajavascriptmanager.h"
 
-#include "QVector3D"
+#include <QVector3D>
+#include <QDebug>
 
 #ifdef GUI
 //--------------------------------------------------------------
@@ -149,6 +150,217 @@ void InterfaceToAddObjScript::Arb8(QString name, QVariant NodesX, QVariant Nodes
                                  new AGeoArb8(0.5*h, V),
                                  x,y,z, phi,theta,psi);
   GeoObjects.append(o);
+}
+
+void InterfaceToAddObjScript::Monitor(QString name, int shape, double size1, double size2, QString container, double x, double y, double z, double phi, double theta, double psi, bool SensitiveTop, bool SensitiveBottom, bool StopsTraking)
+{
+    AGeoObject* o = new AGeoObject(name, container, 0,    // no material -> it will be updated on build
+                                   0,                     // no shape yet
+                                   x,y,z, phi,theta,psi);
+
+    ATypeMonitorObject* mto = new ATypeMonitorObject();
+    delete o->ObjectType; o->ObjectType = mto;
+
+    AMonitorConfig& mc = mto->config;
+    mc.shape = shape;
+    mc.size1 = 0.5 * size1;
+    mc.size2 = 0.5 * size2;
+    mc.bUpper = SensitiveTop;
+    mc.bLower = SensitiveBottom;
+    mc.bStopTracking = StopsTraking;
+
+    o->updateMonitorShape();
+    o->color = 1;
+
+    GeoObjects.append(o);
+}
+
+void InterfaceToAddObjScript::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave)
+{
+    AGeoObject* o = 0;
+    for (AGeoObject* obj : GeoObjects)
+        if (obj->Name == MonitorName)
+        {
+            o = obj;
+            break;
+        }
+
+    if (!o)
+    {
+        abort("Cannot find monitor \"" + MonitorName + "\"");
+        return;
+    }
+
+    if (!o->ObjectType || !o->ObjectType->isMonitor())
+    {
+        abort(MonitorName + " is not a monitor object!");
+        return;
+    }
+
+    ATypeMonitorObject* m = static_cast<ATypeMonitorObject*>(o->ObjectType);
+    AMonitorConfig& mc = m->config;
+
+    mc.PhotonOrParticle = 0;
+
+    QVariantList pos = Position.toList();
+    if (!pos.isEmpty())
+    {
+        if (pos.size() == 2)
+        {
+            mc.xbins = pos.at(0).toInt();
+            mc.ybins = pos.at(1).toInt();
+        }
+        else
+        {
+            abort("Monitor config: Position argument should be either an empty array for default settings or an array of two integers (binsx and binsy)");
+            return;
+        }
+    }
+
+    QVariantList time = Time.toList();
+    if (!time.isEmpty())
+    {
+        if (time.size() == 3)
+        {
+            mc.timeBins = time.at(0).toInt();
+            mc.timeFrom = time.at(1).toDouble();
+            mc.timeTo   = time.at(2).toDouble();
+        }
+        else
+        {
+            abort("Monitor config: Time argument should be either an empty array for default settings or an array of [bins, from, to]");
+            return;
+        }
+    }
+
+    QVariantList a = Angle.toList();
+    if (!a.isEmpty())
+    {
+        if (a.size() == 3)
+        {
+            mc.angleBins = a.at(0).toInt();
+            mc.angleFrom = a.at(1).toDouble();
+            mc.angleTo   = a.at(2).toDouble();
+        }
+        else
+        {
+            abort("Monitor config: Angle argument should be either an empty array for default settings or an array of [bins, degreesFrom, degreesTo]");
+            return;
+        }
+    }
+
+    QVariantList w = Wave.toList();
+    if (!w.isEmpty())
+    {
+        if (w.size() == 3)
+        {
+            mc.waveBins = w.at(0).toInt();
+            mc.waveFrom = w.at(1).toDouble();
+            mc.waveTo   = w.at(2).toDouble();
+        }
+        else
+        {
+            abort("Monitor config: Wave argument should be either an empty array for default settings or an array of [bins, from, to]");
+            return;
+        }
+    }
+}
+
+void InterfaceToAddObjScript::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitivePrimary, bool SensitiveSecondary,
+                                                            QVariant Position, QVariant Time, QVariant Angle, QVariant Energy)
+{
+    AGeoObject* o = 0;
+    for (AGeoObject* obj : GeoObjects)
+        if (obj->Name == MonitorName)
+        {
+            o = obj;
+            break;
+        }
+
+    if (!o)
+    {
+        abort("Cannot find monitor \"" + MonitorName + "\"");
+        return;
+    }
+
+    if (!o->ObjectType || !o->ObjectType->isMonitor())
+    {
+        abort(MonitorName + " is not a monitor object!");
+        return;
+    }
+
+    ATypeMonitorObject* m = static_cast<ATypeMonitorObject*>(o->ObjectType);
+    AMonitorConfig& mc = m->config;
+
+    mc.PhotonOrParticle = 1;
+    mc.ParticleIndex = ParticleIndex;
+    mc.bPrimary = SensitivePrimary;
+    mc.bSecondary = SensitiveSecondary;
+
+    QVariantList pos = Position.toList();
+    if (!pos.isEmpty())
+    {
+        if (pos.size() == 2)
+        {
+            mc.xbins = pos.at(0).toInt();
+            mc.ybins = pos.at(1).toInt();
+        }
+        else
+        {
+            abort("Monitor config: Position argument should be either an empty array for default settings or an array of two integers (binsx and binsy)");
+            return;
+        }
+    }
+
+    QVariantList time = Time.toList();
+    if (!time.isEmpty())
+    {
+        if (time.size() == 3)
+        {
+            mc.timeBins = time.at(0).toInt();
+            mc.timeFrom = time.at(1).toDouble();
+            mc.timeTo   = time.at(2).toDouble();
+        }
+        else
+        {
+            abort("Monitor config: Time argument should be either an empty array for default settings or an array of [bins, from, to]");
+            return;
+        }
+    }
+
+    QVariantList a = Angle.toList();
+    if (!a.isEmpty())
+    {
+        if (a.size() == 3)
+        {
+            mc.angleBins = a.at(0).toInt();
+            mc.angleFrom = a.at(1).toDouble();
+            mc.angleTo   = a.at(2).toDouble();
+        }
+        else
+        {
+            abort("Monitor config: Angle argument should be either an empty array for default settings or an array of [bins, degreesFrom, degreesTo]");
+            return;
+        }
+    }
+
+    QVariantList e = Energy.toList();
+    if (!e.isEmpty())
+    {
+        if (pos.size() == 4 && e.at(3).toInt() >= 0 && e.at(3).toInt() < 4)
+        {
+            mc.energyBins = e.at(0).toInt();
+            mc.energyFrom = e.at(1).toDouble();
+            mc.energyTo   = e.at(2).toDouble();
+            mc.energyUnitsInHist = e.at(3).toInt();
+        }
+        else
+        {
+            abort("Monitor config: Energy argument should be either an empty array for default settings or an array of [bins, from, to, units]\n"
+                  "Energy units: 0,1,2,3 -> meV, eV, keV, MeV;");
+            return;
+        }
+    }
 }
 
 void InterfaceToAddObjScript::TGeo(QString name, QString GenerationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)

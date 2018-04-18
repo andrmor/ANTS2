@@ -1446,7 +1446,6 @@ void AScriptWindow::renameTab(int tab)
        ScriptTabs[tab]->TabName = text;
        ScriptTabs[tab]->bExplicitlyNamed = true;
        twScriptTabs->setTabText(tab, text);
-
     }
 }
 

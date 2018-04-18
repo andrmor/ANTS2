@@ -32,6 +32,13 @@ public slots:
   void Sphere(QString name, double D, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
   void Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
+  void Monitor(QString name, int shape, double size1, double size2,
+               QString container, double x, double y, double z, double phi, double theta, double psi,
+               bool SensitiveTop, bool SensitiveBottom, bool StopsTraking);
+  void Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave);
+  void Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitivePrimary, bool SensitiveSecondary,
+                                     QVariant Position, QVariant Time, QVariant Angle, QVariant Energy);
+
   void TGeo(QString name, QString generationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi);
 
   void RecalculateStack(QString name);

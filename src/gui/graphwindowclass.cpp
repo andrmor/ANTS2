@@ -1484,7 +1484,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     {
        case 1:
        {
-           TH1* tmpHist1D = (TH1*)gDirectory->Get("htemp");
+           TH1* tmpHist1D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
            if (!tmpHist1D)
            {
                qDebug() << "No histogram was generated: check input!";
@@ -1503,7 +1503,8 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        }
        case 2:
        {
-           TH2* tmpHist2D = (TH2*)gDirectory->Get("htemp");
+           TH1* tmpHist2D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
+           //TH2* tmpHist2D = dynamic_cast<TH2*>(gDirectory->Get("htemp"));
            if (!tmpHist2D)
            {
                qDebug() << "No histogram was generated: check input!";
@@ -1524,7 +1525,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        }
        case 3:
        {
-           TH3* tmpHist3D = (TH3*)gDirectory->Get("htemp");
+           TH3* tmpHist3D = dynamic_cast<TH3*>(gDirectory->Get("htemp"));
            if (!tmpHist3D)
            {
                qDebug() << "No histogram was generated: check input!";

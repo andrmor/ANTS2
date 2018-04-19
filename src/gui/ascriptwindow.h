@@ -8,7 +8,7 @@ class AHighlighterScriptWindow;
 class QAbstractItemModel;
 class QCompleter;
 class QStringListModel;
-class CompletingTextEditClass;
+class ATextEdit;
 class QPlainTextEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
@@ -187,7 +187,7 @@ public:
     AScriptWindowTabItem(QAbstractItemModel *model, AScriptWindow::ScriptLanguageEnum language);
     ~AScriptWindowTabItem();
 
-    CompletingTextEditClass* TextEdit;
+    ATextEdit* TextEdit;
 
     QString FileName;
     QString TabName;

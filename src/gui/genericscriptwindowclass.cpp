@@ -1,7 +1,7 @@
 #include "genericscriptwindowclass.h"
 #include "ui_genericscriptwindowclass.h"
 #include "ahighlighters.h"
-#include "completingtexteditclass.h"
+#include "atextedit.h"
 #include "localscriptinterfaces.h"
 #include "coreinterfaces.h"
 #include "histgraphinterfaces.h"
@@ -104,7 +104,7 @@ GenericScriptWindowClass::GenericScriptWindowClass(TRandom2 *RandGen, QWidget *p
 
     //creating text edit with completition for the script window
     completitionModel = 0;
-    cteScript = new CompletingTextEditClass(this);
+    cteScript = new ATextEdit(this);
     cteScript->setLineWrapMode(QPlainTextEdit::NoWrap);
     QObject::connect(cteScript, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
     completer = new QCompleter(this);

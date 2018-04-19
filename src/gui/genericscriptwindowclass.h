@@ -8,7 +8,7 @@ class AHighlighterScriptWindow;
 class QAbstractItemModel;
 class QCompleter;
 class QStringListModel;
-class CompletingTextEditClass;
+class ATextEdit;
 class QPlainTextEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
@@ -97,7 +97,7 @@ private:
     QStringListModel* completitionModel;
 
     QSplitter* splHelp;
-    CompletingTextEditClass* cteScript;
+    ATextEdit* cteScript;
     QPlainTextEdit* pteOut;
     QTreeWidget* trwHelp;
     QTreeWidget* trwJson;

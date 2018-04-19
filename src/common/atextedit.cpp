@@ -1,4 +1,4 @@
-#include "completingtexteditclass.h"
+#include "atextedit.h"
 
 #include <QCompleter>
 #include <QKeyEvent>
@@ -12,14 +12,14 @@
 #include <QWidget>
 #include <QTextEdit>
 
-CompletingTextEditClass::CompletingTextEditClass(QWidget *parent) : QPlainTextEdit(parent), c(0)
+ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
   this->setToolTipDuration(100000);
   TabGivesSpaces = 7;
-  QObject::connect(this, &CompletingTextEditClass::cursorPositionChanged, this, &CompletingTextEditClass::onCursorPositionChanged);
+  QObject::connect(this, &ATextEdit::cursorPositionChanged, this, &ATextEdit::onCursorPositionChanged);
 }
 
-void CompletingTextEditClass::setCompleter(QCompleter *completer)
+void ATextEdit::setCompleter(QCompleter *completer)
 {
     if (c) QObject::disconnect(c, 0, this, 0);
     c = completer;
@@ -31,7 +31,7 @@ void CompletingTextEditClass::setCompleter(QCompleter *completer)
     QObject::connect(c, SIGNAL(activated(QString)), this, SLOT(insertCompletion(QString)));
 }
 
-void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
+void ATextEdit::keyPressEvent(QKeyEvent *e)
 {
     QTextCursor tc = this->textCursor();
 
@@ -281,13 +281,13 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
     c->complete(cr); // popup it up!
 }
 
-void CompletingTextEditClass::focusInEvent(QFocusEvent *e)
+void ATextEdit::focusInEvent(QFocusEvent *e)
 {
     if (c) c->setWidget(this);
     QPlainTextEdit::focusInEvent(e);
 }
 
-void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
+void ATextEdit::wheelEvent(QWheelEvent *e)
 {
   if (e->modifiers().testFlag(Qt::ControlModifier))
     {
@@ -308,7 +308,7 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
     }
 }
 
-void CompletingTextEditClass::setFontSizeAndEmitSignal(int size)
+void ATextEdit::setFontSizeAndEmitSignal(int size)
 {
     QFont f = font();
     if (size<1) size = 1;
@@ -317,7 +317,7 @@ void CompletingTextEditClass::setFontSizeAndEmitSignal(int size)
     emit fontSizeChanged(size);
 }
 
-void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
+void ATextEdit::mouseDoubleClickEvent(QMouseEvent* /*e*/)
 {
   QTextCursor tc = textCursor();
   tc.select(QTextCursor::WordUnderCursor);
@@ -327,13 +327,13 @@ void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
   setExtraSelections(extraSelections);
 }
 
-void CompletingTextEditClass::focusOutEvent(QFocusEvent *e)
+void ATextEdit::focusOutEvent(QFocusEvent *e)
 {
   emit editingFinished();
   QPlainTextEdit::focusOutEvent(e);
 }
 
-void CompletingTextEditClass::insertCompletion(const QString &completion)
+void ATextEdit::insertCompletion(const QString &completion)
 {
     if (c->widget() != this) return;
 
@@ -379,7 +379,7 @@ void CompletingTextEditClass::insertCompletion(const QString &completion)
       }
 }
 
-bool CompletingTextEditClass::findInList(QString text, QString& tmp) const
+bool ATextEdit::findInList(QString text, QString& tmp) const
 {
   for (int i=0; i<functionList.size(); i++)
     {
@@ -393,7 +393,7 @@ bool CompletingTextEditClass::findInList(QString text, QString& tmp) const
   return false;
 }
 
-void CompletingTextEditClass::onCursorPositionChanged()
+void ATextEdit::onCursorPositionChanged()
 {    
   QString thisOne = SelectObjFunctUnderCursor();
   QString tmp;
@@ -581,7 +581,7 @@ void CompletingTextEditClass::onCursorPositionChanged()
   }
 }
 
-void CompletingTextEditClass::SetFontSize(int size)
+void ATextEdit::SetFontSize(int size)
 {
     if (size<1) size = 1;
     QFont f = font();
@@ -589,7 +589,7 @@ void CompletingTextEditClass::SetFontSize(int size)
     setFont(f);
 }
 
-QString CompletingTextEditClass::textUnderCursor() const
+QString ATextEdit::textUnderCursor() const
 {    
     QTextCursor tc = textCursor();
 /*
@@ -610,7 +610,7 @@ QString CompletingTextEditClass::textUnderCursor() const
     return selected;
 }
 
-QString CompletingTextEditClass::SelectObjFunctUnderCursor(QTextCursor *cursor) const
+QString ATextEdit::SelectObjFunctUnderCursor(QTextCursor *cursor) const
 {
   QString sel;
   QTextCursor tc = (cursor == 0) ? textCursor() : *cursor;
@@ -643,7 +643,7 @@ QString CompletingTextEditClass::SelectObjFunctUnderCursor(QTextCursor *cursor) 
   return sel;
 }
 
-QString CompletingTextEditClass::SelectTextToLeft(QTextCursor cursor, int num) const
+QString ATextEdit::SelectTextToLeft(QTextCursor cursor, int num) const
 {
     while ( num>0 && cursor.position() != 0)
     {
@@ -653,7 +653,7 @@ QString CompletingTextEditClass::SelectTextToLeft(QTextCursor cursor, int num) c
     return cursor.selectedText();
 }
 
-bool CompletingTextEditClass::InsertClosingBracket() const
+bool ATextEdit::InsertClosingBracket() const
 {
     //to the left
     QTextCursor tc = this->textCursor();

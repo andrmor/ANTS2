@@ -318,7 +318,8 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetoguiscript.cpp \
     modules/aoneevent.cpp \
     scriptmode/ainterfacetottree.cpp \
-    common/aroottreerecord.cpp
+    common/aroottreerecord.cpp \
+    common/atextedit.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -450,7 +451,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ainterfacetoguiscript.h \
     modules/aoneevent.h \
     scriptmode/ainterfacetottree.h \
-    common/aroottreerecord.h
+    common/aroottreerecord.h \
+    common/atextedit.h
 
 # --- SIM ---
 ants2_SIM {
@@ -537,7 +539,6 @@ ants2_GUI {
     gui/ascriptexampleexplorer.cpp \
     gui/MainWindowTools/mainwindowjson.cpp \
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
-    common/completingtexteditclass.cpp \
     gui/ascriptwindow.cpp \
     gui/alrfmouseexplorer.cpp \
     modules/lrf_v3/gui/atransformwidget.cpp \
@@ -574,7 +575,6 @@ HEADERS  += gui/mainwindow.h \
     gui/MainWindowTools/ashapehelpdialog.h \
     gui/MainWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
-    common/completingtexteditclass.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
     modules/lrf_v3/gui/atransformwidget.h \

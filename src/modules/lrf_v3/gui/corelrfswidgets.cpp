@@ -640,7 +640,7 @@ void ASlicedXYInternalsWidget::onSetZSlice()
 ScriptSettingsWidget::ScriptSettingsWidget(const QString &example_code, QWidget *parent)
   : QWidget(parent)
 {
-  code = new CompletingTextEditClass(this);
+  code = new ATextEdit(this);
   highlighter = new AHighlighterLrfScript(code->document());
   code->setLineWrapMode(QPlainTextEdit::NoWrap);
   code->setFixedHeight(130);
@@ -690,7 +690,7 @@ ScriptSettingsWidget::ScriptSettingsWidget(const QString &example_code, QWidget 
   layout->addWidget(code);
   this->setLayout(layout);
 
-  connect(code, &CompletingTextEditClass::editingFinished, this, &ScriptSettingsWidget::elementChanged);
+  connect(code, &ATextEdit::editingFinished, this, &ScriptSettingsWidget::elementChanged);
   connect(expand_button, &QPushButton::clicked, [=] () {
     code->setFixedHeight(code->height()+20);
     emit elementChanged();
@@ -720,7 +720,7 @@ ScriptInternalsWidget::ScriptInternalsWidget(QWidget *parent)
   : QWidget(parent)
 {
   dv = new QDoubleValidator(this);
-  code = new CompletingTextEditClass;
+  code = new ATextEdit;
   highlighter = new AHighlighterLrfScript(code->document());
   code->setLineWrapMode(QPlainTextEdit::NoWrap);
   code->setMinimumHeight(80);

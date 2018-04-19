@@ -4,7 +4,7 @@
 #include <memory>
 #include <QJsonObject>
 
-#include "completingtexteditclass.h"
+#include "atextedit.h"
 #include "ahighlighters.h"
 #include "idclasses.h"
 #include "astateinterface.h"
@@ -143,7 +143,7 @@ private slots:
 //TODO: add tree view to check script results to avoid user (and dev!) headaches
 class ScriptSettingsWidget : public QWidget, public AStateInterface {
   Q_OBJECT
-  CompletingTextEditClass *code;
+  ATextEdit *code;
   AHighlighterScriptWindow* highlighter;
   QTableWidget *parameters;
 public:
@@ -157,7 +157,7 @@ signals:
 class ScriptInternalsWidget : public QWidget, public AStateInterface {
   Q_OBJECT
   ATransformWidget *transform;
-  CompletingTextEditClass *code;
+  ATextEdit *code;
   AHighlighterScriptWindow* highlighter;
   QJsonObject config;
   QTableWidget *parameters, *parameters_sigma;

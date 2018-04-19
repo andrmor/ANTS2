@@ -1,7 +1,7 @@
 #include "ascriptwindow.h"
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
-#include "completingtexteditclass.h"
+#include "atextedit.h"
 #include "localscriptinterfaces.h"
 #include "coreinterfaces.h"
 #include "histgraphinterfaces.h"
@@ -1111,7 +1111,7 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
 
 AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWindow::ScriptLanguageEnum language)
 {
-    TextEdit = new CompletingTextEditClass();
+    TextEdit = new ATextEdit();
     TextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
 
     completer = new QCompleter(this);
@@ -1292,7 +1292,7 @@ void AScriptWindow::AddNewTab()
         tab->TextEdit->setFont(font);
       }
 
-    connect(tab->TextEdit, &CompletingTextEditClass::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
+    connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
     ScriptTabs.append(tab);
 
     twScriptTabs->addTab(ScriptTabs.last()->TextEdit, createNewTabName());

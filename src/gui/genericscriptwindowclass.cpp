@@ -105,7 +105,7 @@ GenericScriptWindowClass::GenericScriptWindowClass(TRandom2 *RandGen, QWidget *p
     //creating text edit with completition for the script window
     completitionModel = 0;
     cteScript = new CompletingTextEditClass(this);
-    cteScript->setLineWrapMode(QTextEdit::NoWrap);
+    cteScript->setLineWrapMode(QPlainTextEdit::NoWrap);
     QObject::connect(cteScript, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
     completer = new QCompleter(this);
     QStringList words;
@@ -306,7 +306,7 @@ void GenericScriptWindowClass::SetScript(QString* text)
 
     tmpIgnore = true;
       cteScript->clear();
-      cteScript->append(*text);
+      cteScript->appendPlainText(*text);
     tmpIgnore = false;
 }
 
@@ -570,7 +570,7 @@ void GenericScriptWindowClass::on_pbLoad_clicked()
 
   tmpIgnore = true;
   cteScript->clear();
-  cteScript->append(*Script);
+  cteScript->appendPlainText(*Script);
   tmpIgnore = false;
 
   ui->pbRunScript->setIcon(*RedIcon);
@@ -601,7 +601,7 @@ void GenericScriptWindowClass::on_pbAppendScript_clicked()
 
     tmpIgnore = true;
     cteScript->clear();
-    cteScript->append(*Script);
+    cteScript->appendPlainText(*Script);
     tmpIgnore = false;
 
     ui->pbRunScript->setIcon(*RedIcon);
@@ -704,7 +704,7 @@ void GenericScriptWindowClass::on_pbExample_clicked()
       }
 
     cteScript->clear();
-    cteScript->append(*Script);
+    cteScript->appendPlainText(*Script);
     tmpIgnore = false;
 
     ui->pbRunScript->setIcon(*RedIcon);
@@ -719,7 +719,7 @@ void GenericScriptWindowClass::onLoadRequested(QString NewScript)
     tmpIgnore = true;
     *Script = NewScript;
     cteScript->clear();
-    cteScript->append(NewScript);
+    cteScript->appendPlainText(NewScript);
     tmpIgnore = false;
 
     ui->pbRunScript->setIcon(*RedIcon);
@@ -1081,7 +1081,7 @@ void GenericScriptWindowClass::onRequestHistoryBefore()
   HistoryPosition--;
   tmpIgnore = true;
   cteScript->clear();
-  cteScript->setText(ScriptHistory[HistoryPosition]);
+  cteScript->appendPlainText(ScriptHistory[HistoryPosition]);
   tmpIgnore = false;
 }
 
@@ -1092,7 +1092,7 @@ void GenericScriptWindowClass::onRequestHistoryAfter()
   HistoryPosition++;
   tmpIgnore = true;
   cteScript->clear();
-  cteScript->setText(ScriptHistory[HistoryPosition]);
+  cteScript->appendPlainText(ScriptHistory[HistoryPosition]);
   tmpIgnore = false;
 }
 

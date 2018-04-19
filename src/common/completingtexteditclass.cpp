@@ -10,8 +10,9 @@
 #include <QScrollBar>
 #include <QToolTip>
 #include <QWidget>
+#include <QTextEdit>
 
-CompletingTextEditClass::CompletingTextEditClass(QWidget *parent) : QTextEdit(parent), c(0)
+CompletingTextEditClass::CompletingTextEditClass(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
   this->setToolTipDuration(100000);
   TabGivesSpaces = 7;
@@ -69,7 +70,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
         }
         else
         {
-            QTextEdit::keyPressEvent(e);
+            QPlainTextEdit::keyPressEvent(e);
             return;
         }
         */
@@ -224,7 +225,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 
     if (e->key() == Qt::Key_Delete)
     {
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
         onCursorPositionChanged();
         return;
     }
@@ -248,7 +249,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 
     bool isShortcut = ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_E); // CTRL+E
     if (!c || !isShortcut) // do not process the shortcut when we have a completer
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
 
     const bool ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
     if (!c || (ctrlOrShift && e->text().isEmpty()))
@@ -283,7 +284,7 @@ void CompletingTextEditClass::keyPressEvent(QKeyEvent *e)
 void CompletingTextEditClass::focusInEvent(QFocusEvent *e)
 {
     if (c) c->setWidget(this);
-    QTextEdit::focusInEvent(e);
+    QPlainTextEdit::focusInEvent(e);
 }
 
 void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
@@ -297,8 +298,13 @@ void CompletingTextEditClass::wheelEvent(QWheelEvent *e)
   else
     {
       //scroll
-      int vas = this->verticalScrollBar()->value();
-      this->verticalScrollBar()->setValue(vas - e->delta()*0.5);
+      int delta = e->delta();
+      if (delta != 0) //paranoic :)
+      {
+          int was = this->verticalScrollBar()->value();
+          delta /= abs(delta);
+          this->verticalScrollBar()->setValue(was - 2*delta);
+      }
     }
 }
 
@@ -324,7 +330,7 @@ void CompletingTextEditClass::mouseDoubleClickEvent(QMouseEvent* /*e*/)
 void CompletingTextEditClass::focusOutEvent(QFocusEvent *e)
 {
   emit editingFinished();
-  QTextEdit::focusOutEvent(e);
+  QPlainTextEdit::focusOutEvent(e);
 }
 
 void CompletingTextEditClass::insertCompletion(const QString &completion)

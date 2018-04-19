@@ -304,7 +304,7 @@ void AScriptWindow::SetScript(QString* text)
 
     tmpIgnore = true;
       ScriptTabs[CurrentTab]->TextEdit->clear();
-      ScriptTabs[CurrentTab]->TextEdit->append(*text);
+      ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*text);
       tmpIgnore = false;
 }
 
@@ -604,7 +604,7 @@ void AScriptWindow::onLoadRequested(QString NewScript)
 
     tmpIgnore = true;
     ScriptTabs[CurrentTab]->TextEdit->clear();
-    ScriptTabs[CurrentTab]->TextEdit->append(NewScript);
+    ScriptTabs[CurrentTab]->TextEdit->appendPlainText(NewScript);
     tmpIgnore = false;
 
     //for examples (triggered on signal from example explorer -> do not register file name!)
@@ -1112,7 +1112,7 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
 AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWindow::ScriptLanguageEnum language)
 {
     TextEdit = new CompletingTextEditClass();
-    TextEdit->setLineWrapMode(QTextEdit::NoWrap);
+    TextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
 
     completer = new QCompleter(this);
     completer->setModel(model);
@@ -1154,7 +1154,7 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
     if (!TextEdit) return;
     QString Script = json["Script"].toString();
     TextEdit->clear();
-    TextEdit->append(Script);
+    TextEdit->appendPlainText(Script);
 
     FileName.clear();
     FileName = json["FileName"].toString();

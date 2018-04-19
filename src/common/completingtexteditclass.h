@@ -42,12 +42,12 @@
 #define COMPLETINGTEXTEDITCLASS_H
 
 #include <QObject>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 
 class QCompleter;
 class QWidget;
 
-class CompletingTextEditClass : public QTextEdit
+class CompletingTextEditClass : public QPlainTextEdit
 {
     Q_OBJECT
 public:

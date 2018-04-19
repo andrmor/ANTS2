@@ -452,7 +452,26 @@ const QVariantList assertBinsAndRanges(const QVariant& in)
     return out;
 }
 
-const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options, const QVariant binsAndRanges)
+const QVariantList assertMarkerLine(const QVariant& in)
+{
+    QVariantList out;
+    bool bOK;
+
+    QVariantList inVL = in.toList();
+    if (inVL.size() == 2)
+    {
+        int color = inVL.at(0).toInt(&bOK);
+        if (!bOK) color = 602;
+        double style = inVL.at(1).toInt(&bOK); if (!bOK) style = 1;
+        double size   = inVL.at(2).toDouble(&bOK); if (!bOK) size   = 1.0;
+        out << color << style << size;
+    }
+    else out << 602 << 1 << 1.0;
+    return out;
+}
+
+const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options,
+                                      const QVariant binsAndRanges, const QVariant markerAndLineAttributes)
 {
     if (!bGuiThread)
     {
@@ -468,17 +487,24 @@ const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &wh
     }
     else
     {
-        QVariantList vlIn = binsAndRanges.toList();
-        QVariantList out;
+        QVariantList vlInBR = binsAndRanges.toList();
+        QVariantList outBR;
         for (int i = 0; i < 3; i++)
         {
-            QVariantList el = assertBinsAndRanges( i < vlIn.size() ? vlIn.at(i) : 0 );
-            out.push_back( el );
+            QVariantList el = assertBinsAndRanges( i < vlInBR.size() ? vlInBR.at(i) : 0 );
+            outBR.push_back( el );
+        }
+        QVariantList vlInML = markerAndLineAttributes.toList();
+        QVariantList outML;
+        for (int i = 0; i < 2; i++)
+        {
+            QVariantList el = assertMarkerLine( i < vlInML.size() ? vlInML.at(i) : 0 );
+            outML.push_back( el );
         }
 
         QString error;
         r->externalLock();
-        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, out, &error);
+        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, outBR, outML, &error);
         r->externalUnlock();
         return error;
     }

@@ -2,6 +2,7 @@
 #define GRAPHWINDOWCLASS_H
 
 #include <QMainWindow>
+#include <QVariantList>
 
 #include "TMathBase.h"
 
@@ -173,7 +174,9 @@ public slots:
     QVector<double> Get2DArray(); //for temporary script command
 
     void DrawStrOpt(TObject* obj, QString options = "", bool DoUpdate = true);
-    bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString *result = 0);
+    bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how,
+                  const QVariantList binsAndRanges = QVariantList(), const QVariantList markersAndLines = QVariantList(),
+                  QString *result = 0);
 
 private slots:
     void Reshape();

@@ -31,6 +31,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPlainTextEdit>
+#include <QVariant>
 #include <QVariantList>
 
 
@@ -1434,7 +1435,25 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
 }
 
-bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString* result)
+void SetMarkerAttributes(TAttMarker* m, const QVariantList& vl)
+{
+    qDebug() << m->GetMarkerColor();
+    m->SetMarkerColor(vl.at(0).toInt());
+    m->SetMarkerStyle(vl.at(1).toInt());
+    m->SetMarkerSize (vl.at(2).toDouble());
+}
+void SetLineAttributes(TAttLine* l, const QVariantList& vl)
+{
+    qDebug() << l->GetLineColor();
+    l->SetLineColor(vl.at(0).toInt());
+    l->SetLineStyle(vl.at(1).toInt());
+    l->SetLineWidth(vl.at(2).toDouble());
+}
+
+
+bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how,
+                                const QVariantList binsAndRanges, const QVariantList markersAndLines,
+                                QString* result)
 {
     if (what.isEmpty())
     {
@@ -1453,12 +1472,67 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     bool bHistToGraph = ( num == 2 && ( how.contains("L") || how.contains("C") ) );
     qDebug() << "Hist to Graph?"<< bHistToGraph;
 
+    QVariantList defaultBR;
+    defaultBR << (int)100 << (double)0 << (double)0;
+    QVariantList defaultMarkerLine;
+    defaultMarkerLine << (int)602 << (int)1 << (double)1.0;
+
+    //check ups
+    QVariantList vlBR;
+    for (int i=0; i<3; i++)
+    {
+        if (i >= binsAndRanges.size())
+             vlBR.push_back(defaultBR);
+        else vlBR.push_back(binsAndRanges.at(i));
+
+        QVariantList vl = vlBR.at(i).toList();
+        if (vl.size() != 3)
+        {
+            if (result) *result = "Error in BinsAndRanges argument (bad size)";
+            return false;
+        }
+        bool bOK0, bOK1, bOK2;
+        vl.at(0).toInt(&bOK0);
+        vl.at(0).toDouble(&bOK1);
+        vl.at(0).toDouble(&bOK2);
+        if (!bOK0 || !bOK1 || !bOK2)
+        {
+            if (result) *result = "Error in BinsAndRanges argument (conversion problem)";
+            return false;
+        }
+    }
+    qDebug() << "binsranges:" << vlBR;
+    QVariantList vlML;
+    for (int i=0; i<2; i++)
+    {
+        if (i >= markersAndLines.size())
+             vlML.push_back(defaultMarkerLine);
+        else vlML.push_back(markersAndLines.at(i));
+
+        QVariantList vl = vlML.at(i).toList();
+        if (vl.size() != 3)
+        {
+            if (result) *result = "Error in MarkersAndLines argument (bad size)";
+            return false;
+        }
+        bool bOK0, bOK1, bOK2;
+        vl.at(0).toInt(&bOK0);
+        vl.at(0).toInt(&bOK1);
+        vl.at(0).toDouble(&bOK2);
+        if (!bOK0 || !bOK1 || !bOK2)
+        {
+            if (result) *result = "Error in MarkersAndLines argument (conversion problem)";
+            return false;
+        }
+    }
+    qDebug() << "markersLine:"<<vlML;
+
     QString str = what + ">>htemp(";
     for (int i = 0; i < num; i++)
     {
         if (i == 1 && bHistToGraph) break;
 
-        QVariantList br = binsAndRanges.at(i).toList();
+        QVariantList br = vlBR.at(i).toList();
         int    bins = br.at(0).toInt();
         double from = br.at(1).toDouble();
         double to   = br.at(2).toDouble();
@@ -1478,7 +1552,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     TObject* oldObj = gDirectory->FindObject("htemp");
     if (oldObj)
     {
-          qDebug() << "Old htemp found!"<<oldObj->GetName();
+        //  qDebug() << "Old htemp found!"<<oldObj->GetName();
         gDirectory->RecursiveRemove(oldObj);
     }
 
@@ -1501,6 +1575,8 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                return false;
            }
            tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist1D), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(tmpHist1D), vlML.at(0).toList());
            if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How);
            else
            {
@@ -1513,8 +1589,8 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        case 2:
        {
             //checkis common for both versions
-            TH1* tmpHist2D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
-            if (!tmpHist2D)
+            TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
+            if (!tmpHist)
             {
                 qDebug() << "No histogram was generated: check input!";
                 if (result) *result = "No histogram was generated: check input!";
@@ -1539,7 +1615,9 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                    {
                        clone->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
                        clone->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-                       clone->SetTitle(tmpHist2D->GetTitle());
+                       clone->SetTitle(tmpHist->GetTitle());
+                       SetMarkerAttributes(static_cast<TAttMarker*>(clone), vlML.at(0).toList());
+                       SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(0).toList());
 
                        How = "A" + How;
                        Draw(clone, How);
@@ -1554,10 +1632,12 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            }
            else
            {
-               tmpHist2D->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-               tmpHist2D->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+               tmpHist->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+               tmpHist->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+               SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
+               SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(0).toList());
 
-               if (tmpHist2D->GetEntries() > 0) Draw(tmpHist2D, How);
+               if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
                else
                {
                    qDebug() << "Empty histogram was generated!";
@@ -1570,18 +1650,20 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        }
        case 3:
        {
-           TH3* tmpHist3D = dynamic_cast<TH3*>(gDirectory->Get("htemp"));
-           if (!tmpHist3D)
+           TH3* tmpHist = dynamic_cast<TH3*>(gDirectory->Get("htemp"));
+           if (!tmpHist)
            {
                qDebug() << "No histogram was generated: check input!";
                if (result) *result = "No histogram was generated: check input!";
                return false;
            }
-           tmpHist3D->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           tmpHist3D->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-           tmpHist3D->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+           tmpHist->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           tmpHist->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+           tmpHist->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+           SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(0).toList());
 
-           if (tmpHist3D->GetEntries() > 0) Draw(tmpHist3D, How);
+           if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
            else
            {
                qDebug() << "Empty histogram was generated!";

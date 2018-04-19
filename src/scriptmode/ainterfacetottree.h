@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QString>
 #include <QVariant>
+#include <QVariantList>
 
 #include "TString.h"
 #include "TTree.h"
@@ -39,7 +40,8 @@ public slots:
    const QVariant GetBranch(const QString &TreeName, const QString &BranchName, int EntryIndex);
    const QVariant GetEntry(const QString &TreeName, int EntryIndex);
 
-   const QString  Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options, const QVariant binsAndRanges = QVariantList());
+   const QString  Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options,
+                       const QVariant binsAndRanges = QVariantList(), const QVariant markerAndLineAttributes = QVariantList());
 
    void     Save(const QString& TreeName, const QString& FileName);
 
@@ -49,7 +51,8 @@ public slots:
    void     DeleteAllTrees();
 
 signals:
-   void     RequestTreeDraw(TTree* tree, const QString& what, const QString& cond, const QString& how, const QVariantList& binsAndRanges, QString* result = 0);
+   void     RequestTreeDraw(TTree* tree, const QString& what, const QString& cond, const QString& how,
+                            const QVariantList binsAndRanges, const QVariantList markersAndLine, QString* result = 0);
 
 private:
    TmpObjHubClass* TmpHub;

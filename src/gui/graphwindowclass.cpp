@@ -1437,19 +1437,16 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
 
 void SetMarkerAttributes(TAttMarker* m, const QVariantList& vl)
 {
-    qDebug() << m->GetMarkerColor();
     m->SetMarkerColor(vl.at(0).toInt());
     m->SetMarkerStyle(vl.at(1).toInt());
     m->SetMarkerSize (vl.at(2).toDouble());
 }
 void SetLineAttributes(TAttLine* l, const QVariantList& vl)
 {
-    qDebug() << l->GetLineColor();
     l->SetLineColor(vl.at(0).toInt());
     l->SetLineStyle(vl.at(1).toInt());
     l->SetLineWidth(vl.at(2).toDouble());
 }
-
 
 bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how,
                                 const QVariantList binsAndRanges, const QVariantList markersAndLines,
@@ -1470,7 +1467,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     }
 
     bool bHistToGraph = ( num == 2 && ( how.contains("L") || how.contains("C") ) );
-    qDebug() << "Hist to Graph?"<< bHistToGraph;
+    //  qDebug() << "Hist to Graph?"<< bHistToGraph;
 
     QVariantList defaultBR;
     defaultBR << (int)100 << (double)0 << (double)0;
@@ -1501,7 +1498,8 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
             return false;
         }
     }
-    qDebug() << "binsranges:" << vlBR;
+    //  qDebug() << "binsranges:" << vlBR;
+
     QVariantList vlML;
     for (int i=0; i<2; i++)
     {
@@ -1525,7 +1523,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
             return false;
         }
     }
-    qDebug() << "markersLine:"<<vlML;
+    //  qDebug() << "markersLine:"<<vlML;
 
     QString str = what + ">>htemp(";
     for (int i = 0; i < num; i++)
@@ -1576,7 +1574,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            }
            tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
            SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist1D), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(tmpHist1D), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(tmpHist1D), vlML.at(1).toList());
            if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How);
            else
            {
@@ -1610,14 +1608,13 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                TGraph* clone = new TGraph(*g);
                if (clone)
                {
-                   qDebug() << "num points:"<<clone->GetN();
                    if (clone->GetN() > 0)
                    {
                        clone->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
                        clone->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
                        clone->SetTitle(tmpHist->GetTitle());
                        SetMarkerAttributes(static_cast<TAttMarker*>(clone), vlML.at(0).toList());
-                       SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(0).toList());
+                       SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(1).toList());
 
                        How = "A" + How;
                        Draw(clone, How);
@@ -1635,7 +1632,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                tmpHist->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
                tmpHist->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
                SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
-               SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(0).toList());
+               SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
 
                if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
                else
@@ -1650,7 +1647,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        }
        case 3:
        {
-           TH3* tmpHist = dynamic_cast<TH3*>(gDirectory->Get("htemp"));
+           TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
            if (!tmpHist)
            {
                qDebug() << "No histogram was generated: check input!";
@@ -1661,7 +1658,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            tmpHist->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
            tmpHist->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
            SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
 
            if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
            else

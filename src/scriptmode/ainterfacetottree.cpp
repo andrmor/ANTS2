@@ -458,12 +458,12 @@ const QVariantList assertMarkerLine(const QVariant& in)
     bool bOK;
 
     QVariantList inVL = in.toList();
-    if (inVL.size() == 2)
+    if (inVL.size() == 3)
     {
         int color = inVL.at(0).toInt(&bOK);
         if (!bOK) color = 602;
-        double style = inVL.at(1).toInt(&bOK); if (!bOK) style = 1;
-        double size   = inVL.at(2).toDouble(&bOK); if (!bOK) size   = 1.0;
+        double style = inVL.at(1).toInt(&bOK);    if (!bOK) style = 1;
+        double size  = inVL.at(2).toDouble(&bOK); if (!bOK) size  = 1.0;
         out << color << style << size;
     }
     else out << 602 << 1 << 1.0;

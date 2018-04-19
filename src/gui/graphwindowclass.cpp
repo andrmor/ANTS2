@@ -1450,9 +1450,14 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
         return false;
     }
 
+    bool bHistToGraph = ( num == 2 && ( how.contains("L") || how.contains("C") ) );
+    qDebug() << "Hist to Graph?"<< bHistToGraph;
+
     QString str = what + ">>htemp(";
     for (int i = 0; i < num; i++)
     {
+        if (i == 1 && bHistToGraph) break;
+
         QVariantList br = binsAndRanges.at(i).toList();
         int    bins = br.at(0).toInt();
         double from = br.at(1).toDouble();
@@ -1466,16 +1471,20 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     TString Cond = ( cond.isEmpty() ? "" : cond.toLocal8Bit().data() );
     TString How  = (  how.isEmpty() ? "" :  how.toLocal8Bit().data() );
 
-    QString howAdj = ( how.isEmpty() ? "goff" : "goff,"+how );
+    QString howAdj = how;   //( how.isEmpty() ? "goff" : "goff,"+how );
+    if (!bHistToGraph) howAdj = "goff," + how;
     TString HowAdj = howAdj.toLocal8Bit().data();
 
     TObject* oldObj = gDirectory->FindObject("htemp");
     if (oldObj)
     {
-        //  qDebug() << "Old htemp found!"<<oldObj->GetName();
+          qDebug() << "Old htemp found!"<<oldObj->GetName();
         gDirectory->RecursiveRemove(oldObj);
     }
 
+    qDebug() << "TreeDraw input:" << What << Cond << HowAdj;
+
+    if (bHistToGraph) SetAsActiveRootWindow();
     TH1::AddDirectory(true);
     tree->Draw(What, Cond, HowAdj);
     TH1::AddDirectory(false);
@@ -1503,24 +1512,60 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
        }
        case 2:
        {
-           TH1* tmpHist2D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
-           //TH2* tmpHist2D = dynamic_cast<TH2*>(gDirectory->Get("htemp"));
-           if (!tmpHist2D)
-           {
-               qDebug() << "No histogram was generated: check input!";
-               if (result) *result = "No histogram was generated: check input!";
-               return false;
-           }
-           tmpHist2D->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           tmpHist2D->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+            //checkis common for both versions
+            TH1* tmpHist2D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
+            if (!tmpHist2D)
+            {
+                qDebug() << "No histogram was generated: check input!";
+                if (result) *result = "No histogram was generated: check input!";
+                return false;
+            }
 
-           if (tmpHist2D->GetEntries() > 0) Draw(tmpHist2D, How);
+           if (bHistToGraph)
+           {
+               TGraph *g = dynamic_cast<TGraph*>(gPad->GetPrimitive("Graph"));
+               if (!g)
+               {
+                   qDebug() << "Graph was not generated: check input!";
+                   if (result) *result = "No graph was generated: check input!";
+                   return false;
+               }
+
+               TGraph* clone = new TGraph(*g);
+               if (clone)
+               {
+                   qDebug() << "num points:"<<clone->GetN();
+                   if (clone->GetN() > 0)
+                   {
+                       clone->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                       clone->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+                       clone->SetTitle(tmpHist2D->GetTitle());
+
+                       How = "A" + How;
+                       Draw(clone, How);
+                   }
+                   else
+                   {
+                       qDebug() << "Empty graph was generated!";
+                       if (result) *result = "Empty graph was generated!";
+                       return false;
+                   }
+               }
+           }
            else
            {
-               qDebug() << "Empty histogram was generated!";
-               if (result) *result = "Empty histogram was generated!";
-               return false;
+               tmpHist2D->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+               tmpHist2D->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+
+               if (tmpHist2D->GetEntries() > 0) Draw(tmpHist2D, How);
+               else
+               {
+                   qDebug() << "Empty histogram was generated!";
+                   if (result) *result = "Empty histogram was generated!";
+                   return false;
+               }
            }
+
            break;
        }
        case 3:

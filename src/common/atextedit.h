@@ -1,11 +1,12 @@
 #ifndef ATEXTEDIT_H
 #define ATEXTEDIT_H
 
-#include <QObject>
 #include <QPlainTextEdit>
+#include <QObject>
+#include <QWidget>
 
 class QCompleter;
-class QWidget;
+class ALeftField;
 
 class ATextEdit : public QPlainTextEdit
 {
@@ -23,15 +24,18 @@ public:
     int TabGivesSpaces;
 
 protected:
-    void keyPressEvent(QKeyEvent *e) Q_DECL_OVERRIDE;
-    void focusInEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
-    void wheelEvent(QWheelEvent *e) Q_DECL_OVERRIDE;
-    void mouseDoubleClickEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
-    void focusOutEvent(QFocusEvent *e) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent *e) override;
+    void focusInEvent(QFocusEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void focusOutEvent(QFocusEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
 
 private slots:
     void insertCompletion(const QString &completion);    
     void onCursorPositionChanged();
+    void updateLineNumberAreaWidth();
+    void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     QString textUnderCursor() const;
@@ -41,7 +45,12 @@ private:
     bool findInList(QString text, QString &tmp) const;
     void setFontSizeAndEmitSignal(int size);
 
-    QCompleter *c;    
+    friend class ALeftField;
+    void paintLeftField(QPaintEvent *event);
+    int  getWidthLeftField() const;
+
+    QCompleter* c;
+    ALeftField* LeftField;
 
 signals:
     void requestHelp(QString);
@@ -51,6 +60,19 @@ signals:
 //    void requestHistoryAfter();
 //    void requestHistoryStart();
 //    void requestHistoryEnd();
+};
+
+class ALeftField : public QWidget
+{
+public:
+    ALeftField(ATextEdit& edit) : QWidget(&edit), edit(edit) {}
+
+    QSize sizeHint() const override { return QSize(edit.getWidthLeftField(), 0); }
+protected:
+    void paintEvent(QPaintEvent *event) override { edit.paintLeftField(event); }
+
+private:
+    ATextEdit& edit;
 };
 
 #endif // ATEXTEDIT_H

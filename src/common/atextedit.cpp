@@ -11,12 +11,20 @@
 #include <QToolTip>
 #include <QWidget>
 #include <QTextEdit>
+#include <QPainter>
+#include <QTextBlock>
 
 ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
-  this->setToolTipDuration(100000);
-  TabGivesSpaces = 7;
-  QObject::connect(this, &ATextEdit::cursorPositionChanged, this, &ATextEdit::onCursorPositionChanged);
+    setToolTipDuration(100000);
+    TabGivesSpaces = 7;
+
+    LeftField = new ALeftField(*this);
+    connect(this, &ATextEdit::blockCountChanged, this, &ATextEdit::updateLineNumberAreaWidth);
+    connect(this, &ATextEdit::updateRequest, this, &ATextEdit::updateLineNumberArea);
+    updateLineNumberAreaWidth();
+
+    connect(this, &ATextEdit::cursorPositionChanged, this, &ATextEdit::onCursorPositionChanged);
 }
 
 void ATextEdit::setCompleter(QCompleter *completer)
@@ -317,6 +325,51 @@ void ATextEdit::setFontSizeAndEmitSignal(int size)
     emit fontSizeChanged(size);
 }
 
+void ATextEdit::paintLeftField(QPaintEvent *event)
+{
+    QPainter painter(LeftField);
+    QColor color = QColor(Qt::gray).lighter(152);
+    painter.fillRect(event->rect(), color);
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = static_cast<int>( blockBoundingGeometry(block).translated(contentOffset()).top() );
+    int bottom = top + static_cast<int>( blockBoundingRect(block).height() );
+
+    QFont font = painter.font();
+    font.setPointSize(font.pointSize() * 0.8);
+    painter.setFont(font);
+
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
+            QString number = QString::number(blockNumber + 1);
+            painter.setPen(Qt::gray);
+            painter.drawText(0, top, LeftField->width(), fontMetrics().height(), Qt::AlignCenter, number);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + static_cast<int>( blockBoundingRect(block).height() );
+        ++blockNumber;
+    }
+}
+
+int ATextEdit::getWidthLeftField() const
+{
+    int digits = 1;
+    int max = qMax(1, blockCount());
+    while (max >= 10)
+    {
+        max /= 10;
+        ++digits;
+    }
+
+    int width = 20 + fontMetrics().width(QLatin1Char('0')) * digits;
+    return width;
+}
+
 void ATextEdit::mouseDoubleClickEvent(QMouseEvent* /*e*/)
 {
   QTextCursor tc = textCursor();
@@ -329,8 +382,16 @@ void ATextEdit::mouseDoubleClickEvent(QMouseEvent* /*e*/)
 
 void ATextEdit::focusOutEvent(QFocusEvent *e)
 {
-  emit editingFinished();
-  QPlainTextEdit::focusOutEvent(e);
+    emit editingFinished();
+    QPlainTextEdit::focusOutEvent(e);
+}
+
+void ATextEdit::resizeEvent(QResizeEvent *e)
+{
+    QPlainTextEdit::resizeEvent(e);
+
+    QRect cr = contentsRect();
+    LeftField->setGeometry( QRect(cr.left(), cr.top(), getWidthLeftField(), cr.height()) );
 }
 
 void ATextEdit::insertCompletion(const QString &completion)
@@ -394,7 +455,26 @@ bool ATextEdit::findInList(QString text, QString& tmp) const
 }
 
 void ATextEdit::onCursorPositionChanged()
-{    
+{
+  QList<QTextEdit::ExtraSelection> extraSelections;
+
+  //lowest priority: highlight line where the cursor is
+  QTextEdit::ExtraSelection extra;
+  QColor color = QColor(Qt::gray).lighter(140);
+  extra.format.setBackground(color);
+  extra.format.setProperty(QTextFormat::FullWidthSelection, true);
+  extra.cursor = textCursor();
+  extra.cursor.clearSelection();
+  extraSelections.append(extra);
+
+  /*
+  tc.select(QTextCursor::LineUnderCursor);
+  extra.format.setBackground(color);
+  extra.cursor = tc;
+  extraSelections.append(extra);
+  setExtraSelections(extraSelections);
+  */
+
   QString thisOne = SelectObjFunctUnderCursor();
   QString tmp;
   bool fFound = findInList(thisOne, tmp); // cursor is on one of defined functions
@@ -420,20 +500,8 @@ void ATextEdit::onCursorPositionChanged()
   if (fFound) QToolTip::showText( mapToGlobal(cursorRect().topRight()), tmp );
   else QToolTip::hideText();
 
-  QList<QTextEdit::ExtraSelection> extraSelections;
-  QTextCursor tc = textCursor();
-
-  //highlight the line
-  tc.select(QTextCursor::LineUnderCursor);
-  QColor color = QColor(Qt::gray).lighter(140);
-  QTextEdit::ExtraSelection extra;
-  extra.format.setBackground(color);
-  extra.cursor = tc;
-  extraSelections.append(extra);
-  setExtraSelections(extraSelections);
-
   // highlight same text if not in Exclude list
-  tc = textCursor();
+  QTextCursor tc = textCursor();
   tc.select(QTextCursor::WordUnderCursor);
   QString selection = tc.selectedText();
   color = QColor(Qt::green).lighter(170);
@@ -579,6 +647,19 @@ void ATextEdit::onCursorPositionChanged()
       setExtraSelections(extraSelections);
       return;
   }
+}
+
+void ATextEdit::updateLineNumberAreaWidth()
+{
+    setViewportMargins(getWidthLeftField(), 0, 0, 0);
+}
+
+void ATextEdit::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy) LeftField->scroll(0, dy);
+    else LeftField->update(0, rect.y(), LeftField->width(), rect.height());
+
+    if (rect.contains(viewport()->rect())) updateLineNumberAreaWidth();
 }
 
 void ATextEdit::SetFontSize(int size)

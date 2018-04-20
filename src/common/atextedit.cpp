@@ -340,12 +340,14 @@ void ATextEdit::paintLeftField(QPaintEvent *event)
     font.setPointSize(font.pointSize() * 0.8);
     painter.setFont(font);
 
+    int currentLine = textCursor().block().firstLineNumber();
+
     while (block.isValid() && top <= event->rect().bottom())
     {
         if (block.isVisible() && bottom >= event->rect().top())
         {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::gray);
+            painter.setPen( currentLine == blockNumber ? Qt::black : Qt::gray);
             painter.drawText(0, top, LeftField->width(), fontMetrics().height(), Qt::AlignCenter, number);
         }
 
@@ -467,6 +469,8 @@ void ATextEdit::onCursorPositionChanged()
   extra.cursor.clearSelection();
   extraSelections.append(extra);
 
+//  setExtraSelections(extraSelections);
+
   /*
   tc.select(QTextCursor::LineUnderCursor);
   extra.format.setBackground(color);
@@ -475,6 +479,155 @@ void ATextEdit::onCursorPositionChanged()
   setExtraSelections(extraSelections);
   */
 
+  // highlight same text if not in Exclude list
+  QTextCursor tc = textCursor();
+  tc.select(QTextCursor::WordUnderCursor);
+  QString selection = tc.selectedText();
+  color = QColor(Qt::green).lighter(170);
+  QRegExp exl("[0-9 (){}\\[\\]=+\\-*/\\|~^.,:;\"'<>\\#\\$\\&\\?]");
+  QString test = selection.simplified();
+  test.remove(exl);
+  if (!test.isEmpty())
+    {
+      QRegExp pat("\\b"+selection+"\\b");
+      QTextCursor cursor = document()->find(pat, 0, QTextDocument::FindCaseSensitively);
+      while(cursor.hasSelection())
+        {
+          QTextEdit::ExtraSelection extra;
+          extra.format.setBackground(color);
+          extra.cursor = cursor;
+          extraSelections.append(extra);
+          cursor = document()->find(pat, cursor, QTextDocument::FindCaseSensitively);
+        }
+ //     setExtraSelections(extraSelections);
+
+      //variable highlight test
+      QRegExp patvar("\\bvar\\s"+selection+"\\b");
+      QTextCursor cursor1 = document()->find(patvar, tc, QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
+      if (cursor1.hasSelection() && cursor1 != tc)
+        {
+          QTextEdit::ExtraSelection extra;
+          extra.format.setBackground(Qt::black);
+          extra.format.setForeground(Qt::white);
+            //extra.format.setFontUnderline(true);
+            //extra.format.setUnderlineColor(Qt::red);
+          extra.cursor = cursor1;
+          extraSelections.append(extra);
+
+          QTextEdit::ExtraSelection extra1;
+          //extra1.format.setFontUnderline(true);
+          //extra1.format.setUnderlineColor(Qt::blue);
+          extra1.format.setBackground(Qt::white);
+          extra1.format.setForeground(Qt::blue);
+          extra1.cursor = tc;
+          extraSelections.append(extra1);
+        }
+//      setExtraSelections(extraSelections);
+    }
+
+  //checking for '}' on the left
+  tc = textCursor();
+  tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+  if (tc.selectedText() == "}" || tc.selectedText() == ")" || tc.selectedText() == "]")
+  {
+      QString same, inverse;
+      if (tc.selectedText() == "}")
+      {
+          same = "}"; inverse = "{";
+      }
+      else if (tc.selectedText() == ")")
+      {
+          same = ")"; inverse = "(";
+      }
+      else if (tc.selectedText() == "]")
+      {
+          same = "]"; inverse = "[";
+      }
+
+      int depth = 0;
+      QString selected;
+      do
+      {
+          tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+          selected = tc.selectedText();
+          //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
+          QString s = selected.left(1);
+          if ( s == same )
+          {
+              depth++;
+              continue;
+          }
+          if (s == inverse)
+          {
+              if (depth>0)
+              {
+                  depth--;
+                  continue;
+              }
+              else break;
+          }
+      }
+      while (tc.position() != 0);
+
+      QTextEdit::ExtraSelection extra;
+      extra.format.setBackground(color);
+      extra.cursor = tc;
+      extraSelections.append(extra);
+  }
+
+  //checking for '{' on the right
+  tc = textCursor();
+  tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+  if (tc.selectedText() == "{" || tc.selectedText() == "(" || tc.selectedText() == "[")
+  {
+      QString same, inverse;
+      if (tc.selectedText() == "{")
+      {
+          same = "{"; inverse = "}";
+      }
+      else if (tc.selectedText() == "(")
+      {
+          same = "("; inverse = ")";
+      }
+      else if (tc.selectedText() == "[")
+      {
+          same = "["; inverse = "]";
+      }
+      int depth = 0;
+      QString selected;
+      do
+      {
+          tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+          selected = tc.selectedText();
+          //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
+          QString s = selected.right(1);
+          if ( s == same )
+          {
+              depth++;
+              continue;
+          }
+          if (s == inverse)
+          {
+              if (depth>0)
+              {
+                  depth--;
+                  continue;
+              }
+              else break;
+          }
+      }
+      while (tc.position() < document()->characterCount()-1);
+
+      QTextEdit::ExtraSelection extra;
+      extra.format.setBackground(color);
+      extra.cursor = tc;
+      extraSelections.append(extra);
+  }
+
+  //all extra selections defined, applying now
+  setExtraSelections(extraSelections);
+
+  // tooltip for known functions
   QString thisOne = SelectObjFunctUnderCursor();
   QString tmp;
   bool fFound = findInList(thisOne, tmp); // cursor is on one of defined functions
@@ -497,156 +650,9 @@ void ATextEdit::onCursorPositionChanged()
             }
         }
     }
-  if (fFound) QToolTip::showText( mapToGlobal(cursorRect().topRight()), tmp );
+  int fh = fontMetrics().height();
+  if (fFound) QToolTip::showText( mapToGlobal( QPoint(cursorRect().topRight().x(), cursorRect().topRight().y()-2.2*fh) ), tmp );
   else QToolTip::hideText();
-
-  // highlight same text if not in Exclude list
-  QTextCursor tc = textCursor();
-  tc.select(QTextCursor::WordUnderCursor);
-  QString selection = tc.selectedText();
-  color = QColor(Qt::green).lighter(170);
-  QRegExp exl("[0-9 (){}\\[\\]=+\\-*/\\|~^.,:;\"'<>\\#\\$\\&\\?]");
-  QString test = selection.simplified();
-  test.remove(exl);
-  if (!test.isEmpty())
-    {
-      QRegExp pat("\\b"+selection+"\\b");
-      QTextCursor cursor = document()->find(pat, 0, QTextDocument::FindCaseSensitively);
-      while(cursor.hasSelection())
-        {
-          QTextEdit::ExtraSelection extra;
-          extra.format.setBackground(color);
-          extra.cursor = cursor;
-          extraSelections.append(extra);
-          cursor = document()->find(pat, cursor, QTextDocument::FindCaseSensitively);
-        }
-      setExtraSelections(extraSelections);
-
-      //variable highlight test
-      QRegExp patvar("\\bvar\\s"+selection+"\\b");
-      QTextCursor cursor1 = document()->find(patvar, tc, QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
-      if (cursor1.hasSelection() && cursor1 != tc)
-        {
-          QTextEdit::ExtraSelection extra;
-          extra.format.setBackground(Qt::black);
-          extra.format.setForeground(Qt::white);
-          //extra.format.setFontUnderline(true);
-          //extra.format.setUnderlineColor(Qt::red);
-          extra.cursor = cursor1;
-          extraSelections.append(extra);
-
-          QTextEdit::ExtraSelection extra1;
-          //extra1.format.setFontUnderline(true);
-          //extra1.format.setUnderlineColor(Qt::blue);
-          extra1.format.setBackground(Qt::white);
-          extra1.format.setForeground(Qt::blue);
-          extra1.cursor = tc;
-          extraSelections.append(extra1);
-        }
-      setExtraSelections(extraSelections);
-    }
-
-  //checking for '}' on the left
-  tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-  if (tc.selectedText() == "}" || tc.selectedText() == ")" || tc.selectedText() == "]")
-    {
-      QString same, inverse;
-      if (tc.selectedText() == "}")
-        {
-          same = "}"; inverse = "{";
-        }
-      else if (tc.selectedText() == ")")
-        {
-          same = ")"; inverse = "(";
-        }
-      else if (tc.selectedText() == "]")
-        {
-          same = "]"; inverse = "[";
-        }
-
-      int depth = 0;
-      QString selected;
-      do
-        {
-          tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-          selected = tc.selectedText();
-          //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
-          QString s = selected.left(1);
-          if ( s == same )
-            {
-              depth++;
-              continue;
-            }
-          if (s == inverse)
-            {
-              if (depth>0)
-                {
-                  depth--;
-                  continue;
-                }
-              else break;
-            }
-        }
-      while (tc.position() != 0);
-
-      QTextEdit::ExtraSelection extra;
-      extra.format.setBackground(color);
-      extra.cursor = tc;
-      extraSelections.append(extra);
-      setExtraSelections(extraSelections);
-      return;
-    }
-
-  tc = textCursor();
-  //checking for '{' on the right
-  tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-  if (tc.selectedText() == "{" || tc.selectedText() == "(" || tc.selectedText() == "[")
-    {
-      QString same, inverse;
-      if (tc.selectedText() == "{")
-        {
-          same = "{"; inverse = "}";
-        }
-      else if (tc.selectedText() == "(")
-        {
-          same = "("; inverse = ")";
-        }
-      else if (tc.selectedText() == "[")
-        {
-          same = "["; inverse = "]";
-        }
-      int depth = 0;
-      QString selected;
-      do
-        {
-          tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-          selected = tc.selectedText();
-          //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
-          QString s = selected.right(1);
-          if ( s == same )
-            {
-              depth++;
-              continue;
-            }
-          if (s == inverse)
-            {
-              if (depth>0)
-                {
-                  depth--;
-                  continue;
-                }
-              else break;
-            }
-        }
-      while (tc.position() < document()->characterCount()-1);
-
-      QTextEdit::ExtraSelection extra;
-      extra.format.setBackground(color);
-      extra.cursor = tc;
-      extraSelections.append(extra);
-      setExtraSelections(extraSelections);
-      return;
-  }
 }
 
 void ATextEdit::updateLineNumberAreaWidth()

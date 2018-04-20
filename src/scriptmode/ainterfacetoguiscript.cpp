@@ -1,6 +1,7 @@
 #include "ainterfacetoguiscript.h"
 #include "ajavascriptmanager.h"
 #include "amessage.h"
+#include "alineedit.h"
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -8,12 +9,15 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSpacerItem>
-#include <QLineEdit>
+//#include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
 #include <QFont>
 #include <QFrame>
 #include <QDebug>
+#include <QIntValidator>
+#include <QDoubleValidator>
+#include <QCompleter>
 
 AInterfaceToGuiScript::AInterfaceToGuiScript(AJavaScriptManager* ScriptManager) :
     AScriptInterface(), ScriptManager(ScriptManager)
@@ -197,7 +201,7 @@ void AInterfaceToGuiScript::editNew(const QString name, const QString addTo, con
         abort("Layout " + addTo + " does not exist");
         return;
     }
-    QLineEdit* e = new QLineEdit(text);
+    ALineEdit* e = new ALineEdit(text);
     Widgets.insert(name, e);
     lay->addWidget(e);
 }
@@ -205,7 +209,7 @@ void AInterfaceToGuiScript::editNew(const QString name, const QString addTo, con
 void AInterfaceToGuiScript::editSetText(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
-    QLineEdit* e = dynamic_cast<QLineEdit*>(w);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
     if (!e) abort("Edit box " + name + " does not exist");
     else e->setText(text);
 }
@@ -213,13 +217,100 @@ void AInterfaceToGuiScript::editSetText(const QString name, const QString text)
 const QString AInterfaceToGuiScript::editGetText(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
-    QLineEdit* e = dynamic_cast<QLineEdit*>(w);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
     if (!e)
     {
         abort("Edit box " + name + " does not exist");
         return "";
     }
     return e->text();
+}
+
+void AInterfaceToGuiScript::editSetIntValidator(const QString name, int min, int max)
+{
+    QWidget* w = Widgets.value(name, 0);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
+    if (!e) abort("Edit box " + name + " does not exist");
+    else
+    {
+        const QValidator* old = e->validator();
+        if (old) delete old;
+
+        QValidator* validator = new QIntValidator(min, max, e);
+        e->setValidator(validator);
+    }
+}
+
+void AInterfaceToGuiScript::editSetDoubleValidator(const QString name, double min, double max, int decimals)
+{
+    QWidget* w = Widgets.value(name, 0);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
+    if (!e) abort("Edit box " + name + " does not exist");
+    else
+    {
+        const QValidator* old = e->validator();
+        if (old) delete old;
+
+        QValidator* validator = new QDoubleValidator(min, max, decimals, e);
+        e->setValidator(validator);
+    }
+}
+
+void AInterfaceToGuiScript::editSetCompleter(const QString name, const QVariant arrayOfStrings)
+{
+    QWidget* w = Widgets.value(name, 0);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
+    if (!e) abort("Edit box " + name + " does not exist");
+    else
+    {
+        const QCompleter* old = e->completer();
+        if (old) delete old;
+
+        QVariantList vl = arrayOfStrings.toList();
+        QStringList sl;
+        for (int i=0; i<vl.size(); i++) sl << vl.at(i).toString();
+
+        qDebug() << "possible:" << sl;
+
+        QCompleter* completer = new QCompleter(sl, e);
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        e->setCompleter(completer);
+    }
+}
+
+void AInterfaceToGuiScript::editOnTextChanged(const QString name, const QVariant scriptFunction)
+{
+    QWidget* w = Widgets.value(name, 0);
+    ALineEdit* e = dynamic_cast<ALineEdit*>(w);
+    if (!e)
+    {
+        abort("Edit box " + name + " does not exist");
+        return;
+    }
+
+    QString functionName;
+    QString typeArr = scriptFunction.typeName();
+    if (typeArr == "QString") functionName = scriptFunction.toString();
+    else if (typeArr == "QVariantMap")
+    {
+        QVariantMap vm = scriptFunction.toMap();
+        functionName = vm["name"].toString();
+    }
+    if (functionName.isEmpty())
+    {
+        abort("editOnTextChanged() function requires function or its name as the second argument!");
+        return;
+    }
+
+    QScriptValue func = ScriptManager->getProperty(functionName);
+    if (!func.isValid() || !func.isFunction())
+    {
+        abort("editOnTextChanged() function requires function or its name as the second argument!");
+        return;
+    }
+
+    connect(e, &ALineEdit::textChanged,
+            [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
 void AInterfaceToGuiScript::comboboxNew(const QString name, const QString addTo, bool Editable)
@@ -273,6 +364,41 @@ const QString AInterfaceToGuiScript::comboboxGetSelected(const QString name)
         return "";
     }
     return e->currentText();
+}
+
+void AInterfaceToGuiScript::comboboxOnTextChanged(const QString name, const QVariant scriptFunction)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QComboBox* b = dynamic_cast<QComboBox*>(w);
+    if (!b)
+    {
+        abort("Combobox " + name + " does not exist");
+        return;
+    }
+
+    QString functionName;
+    QString typeArr = scriptFunction.typeName();
+    if (typeArr == "QString") functionName = scriptFunction.toString();
+    else if (typeArr == "QVariantMap")
+    {
+        QVariantMap vm = scriptFunction.toMap();
+        functionName = vm["name"].toString();
+    }
+    if (functionName.isEmpty())
+    {
+        abort("comboboxOnTextChanged() function requires function or its name as the second argument!");
+        return;
+    }
+
+    QScriptValue func = ScriptManager->getProperty(functionName);
+    if (!func.isValid() || !func.isFunction())
+    {
+        abort("comboboxOnTextChanged() function requires function or its name as the second argument!");
+        return;
+    }
+
+    connect(b, &QComboBox::currentTextChanged,
+            [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
 void AInterfaceToGuiScript::textNew(const QString name, const QString addTo, const QString text)

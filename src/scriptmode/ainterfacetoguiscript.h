@@ -31,13 +31,18 @@ public slots:
     void labelSetText(const QString name, const QString labelText);
 
     void editNew(const QString name, const QString addTo, const QString text = "");
-    void editSetText(const QString name, const QString text);
+    void editSetText(const QString name, const QString text);    
     const QString editGetText(const QString name);
+    void editSetIntValidator(const QString name, int min, int max);
+    void editSetDoubleValidator(const QString name, double min, double max, int decimals);
+    void editSetCompleter(const QString name, const QVariant arrayOfStrings);
+    void editOnTextChanged(const QString name, const QVariant scriptFunction);
 
     void comboboxNew(const QString name, const QString addTo, bool Editable = false);
     void comboboxAppend(const QString name, const QVariant entries);
     void comboboxClear(const QString name);
     const QString comboboxGetSelected(const QString name);
+    void comboboxOnTextChanged(const QString name, const QVariant scriptFunction);
 
     void textNew(const QString name, const QString addTo, const QString text = "");
     void textClear(const QString name);

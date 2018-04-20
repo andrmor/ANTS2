@@ -319,7 +319,8 @@ SOURCES += main.cpp \
     modules/aoneevent.cpp \
     scriptmode/ainterfacetottree.cpp \
     common/aroottreerecord.cpp \
-    common/atextedit.cpp
+    common/atextedit.cpp \
+    gui/alineedit.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -452,7 +453,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/aoneevent.h \
     scriptmode/ainterfacetottree.h \
     common/aroottreerecord.h \
-    common/atextedit.h
+    common/atextedit.h \
+    gui/alineedit.h
 
 # --- SIM ---
 ants2_SIM {

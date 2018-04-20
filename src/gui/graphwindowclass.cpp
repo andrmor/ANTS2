@@ -33,6 +33,7 @@
 #include <QPlainTextEdit>
 #include <QVariant>
 #include <QVariantList>
+#include <QSet>
 
 
 //Root
@@ -1466,8 +1467,12 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
         return false;
     }
 
-    bool bHistToGraph = ( num == 2 && ( how.contains("L") || how.contains("C") ) );
-    //  qDebug() << "Hist to Graph?"<< bHistToGraph;
+    QString howProc = how;
+    QVector<QString> vDisreguard;
+    vDisreguard << "func" << "same" << "pfc" << "plc" << "pmc" << "lego" << "col" << "candle" << "violin" << "cont" << "list" << "cyl" << "pol" << "scat";
+    for (const QString& s : vDisreguard) howProc.remove(s, Qt::CaseInsensitive);
+    bool bHistToGraph = ( num == 2 && ( howProc.contains("L") || howProc.contains("C") ) );
+    qDebug() << "Graph instead of hist?"<< bHistToGraph;
 
     QVariantList defaultBR;
     defaultBR << (int)100 << (double)0 << (double)0;
@@ -1550,7 +1555,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     TObject* oldObj = gDirectory->FindObject("htemp");
     if (oldObj)
     {
-        //  qDebug() << "Old htemp found!"<<oldObj->GetName();
+          qDebug() << "Old htemp found: "<<oldObj->GetName() << " -> deleting!";
         gDirectory->RecursiveRemove(oldObj);
     }
 
@@ -1575,7 +1580,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
            SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist1D), vlML.at(0).toList());
            SetLineAttributes(static_cast<TAttLine*>(tmpHist1D), vlML.at(1).toList());
-           if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How);
+           if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How, true, false);
            else
            {
                qDebug() << "Empty histogram was generated!";
@@ -1634,7 +1639,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
                SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
 
-               if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
+               if (tmpHist->GetEntries() > 0) Draw(tmpHist, How, true, false);
                else
                {
                    qDebug() << "Empty histogram was generated!";
@@ -1660,7 +1665,7 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
            SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
 
-           if (tmpHist->GetEntries() > 0) Draw(tmpHist, How);
+           if (tmpHist->GetEntries() > 0) Draw(tmpHist, How, true, false);
            else
            {
                qDebug() << "Empty histogram was generated!";

@@ -46,6 +46,7 @@ public slots:
    void     Save(const QString& TreeName, const QString& FileName);
 
    const QVariant GetAllTreeNames() const;
+   bool     IsTreeExists(const QString& TreeName) const;
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();

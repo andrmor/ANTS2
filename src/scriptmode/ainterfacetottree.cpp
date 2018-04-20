@@ -143,6 +143,12 @@ const QVariant AInterfaceToTTree::GetAllTreeNames() const
     return vl;
 }
 
+bool AInterfaceToTTree::IsTreeExists(const QString &TreeName) const
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    return r;
+}
+
 /*
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {

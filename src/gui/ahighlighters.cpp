@@ -6,7 +6,7 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
     HighlightingRule rule;
 
     keywordFormat.setForeground(Qt::blue);
-    keywordFormat.setFontWeight(QFont::Bold);
+    //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bbreak\\b" << "\\bcatch\\b" << "\\bcontinue\\b" << "\\b.length\\b" << "\\barguments\\b"
                     << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b"
@@ -63,8 +63,10 @@ void AHighlighterScriptWindow::setCustomCommands(QStringList functions, QStringL
 {
     HighlightingRule rule;
 
-    customKeywordFormat.setForeground(Qt::darkCyan);
-    customKeywordFormat.setFontWeight(QFont::Bold);
+    QColor color = Qt::darkCyan;
+    customKeywordFormat.setForeground(color.darker(110));
+    //customKeywordFormat.setForeground(Qt::darkCyan);
+    //customKeywordFormat.setFontWeight(QFont::Bold);
 //    customKeywordFormat.setFontItalic(true);
 
     QVector<HighlightingRule> hr;

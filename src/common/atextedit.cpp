@@ -522,7 +522,7 @@ void ATextEdit::onCursorPositionChanged()
           //extra1.format.setFontUnderline(true);
           //extra1.format.setUnderlineColor(Qt::blue);
           extra1.format.setBackground(Qt::white);
-          extra1.format.setForeground(Qt::blue);
+          //extra1.format.setForeground(color);
           extra1.cursor = tc;
           extraSelections.append(extra1);
         }

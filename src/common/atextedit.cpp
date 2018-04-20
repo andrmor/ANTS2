@@ -416,12 +416,14 @@ void ATextEdit::insertCompletion(const QString &completion)
     //qDebug() << "reached left, selection:"<<tc.selectedText();
     tc.removeSelectedText();
 
+
+    /*
     QString OnRight;
     while (tc.position() != document()->characterCount()-1)
       {
         tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
         QString selected = tc.selectedText();
-        //qDebug() << "->"<< selected << selected.right(1).contains(QRegExp("[A-Za-z0-9.]"));
+        qDebug() << "->"<< selected << selected.right(1).contains(QRegExp("[A-Za-z0-9.]"));
         OnRight = selected.right(1);
         if ( !OnRight.contains(QRegExp("[A-Za-z0-9._]")) )
           {
@@ -429,10 +431,11 @@ void ATextEdit::insertCompletion(const QString &completion)
             break;
           }
       }
-
     if (!tc.selectedText().isEmpty()) tc.removeSelectedText();
+    */
     tc.insertText(completion);
 
+    /*
     //if OnRight is "(", remove the "()" on the left if exist
     //qDebug() << "OnRight" << OnRight;
     if (OnRight == "(")
@@ -440,6 +443,7 @@ void ATextEdit::insertCompletion(const QString &completion)
         tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 2);
         if (tc.selectedText() == "()") tc.removeSelectedText();
       }
+    */
 }
 
 bool ATextEdit::findInList(QString text, QString& tmp) const

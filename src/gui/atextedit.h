@@ -20,8 +20,12 @@ public:
 
     void SetFontSize(int size);
 
+    void RefreshExtraHighlight();
+
     QStringList functionList;
     int TabInSpaces;
+
+    QString FindString;
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -51,6 +55,9 @@ private:
 
     QCompleter* c;
     ALeftField* LeftField;
+
+    void checkBracketsOnLeft(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
+    void checkBracketsOnRight(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
 
 signals:
     void requestHelp(QString);

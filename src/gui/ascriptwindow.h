@@ -107,6 +107,16 @@ private slots:
     void on_actionStore_all_tabs_triggered();
     void on_actionRestore_session_triggered();
 
+    void on_pbCloseFindReplaceFrame_clicked();
+
+    void on_actionShow_Find_Replace_triggered();
+
+    void on_pbFindNext_clicked();
+
+    void on_pbFindPrevious_clicked();
+
+    void on_leFind_textChanged(const QString &arg1);
+
 public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 
@@ -158,6 +168,8 @@ private:
     QString createNewTabName();
     void renameTab(int tab);
 
+    void applyTextFindState();
+    void findText(bool bForward);
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);

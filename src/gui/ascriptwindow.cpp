@@ -236,9 +236,13 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     sizes << 800 << 70;
     splMain->setSizes(sizes);
 
+    ui->frFindReplace->setVisible(false);
+
     //shortcuts
     QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
     connect(Run, SIGNAL(activated()), this, SLOT(on_pbRunScript_clicked()));
+    QShortcut* Find = new QShortcut(QKeySequence("Ctrl+f"), this);
+    connect(Find, &QShortcut::activated, this, &AScriptWindow::on_actionShow_Find_Replace_triggered);
 
     ReadFromJson();
 }
@@ -1200,6 +1204,7 @@ void AScriptWindow::onCurrentTabChanged(int tab)
     CurrentTab = tab;
 
     updateFileStatusIndication();
+    applyTextFindState();
 }
 
 QIcon makeIcon(int h)
@@ -1509,4 +1514,113 @@ void AScriptWindow::on_actionRestore_session_triggered()
 
     QJsonObject json;
     ReadFromJson(json);
+}
+
+void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()
+{
+    ui->frFindReplace->hide();
+    applyTextFindState();
+}
+
+void AScriptWindow::on_actionShow_Find_Replace_triggered()
+{
+    bool vis = ui->frFindReplace->isVisible();
+    ui->frFindReplace->setVisible( !vis );
+    applyTextFindState();
+
+    if (ui->frFindReplace->isVisible())
+    {
+        ui->leFind->setFocus();
+        ui->leFind->selectAll();
+    }
+}
+
+void AScriptWindow::on_pbFindNext_clicked()
+{
+    findText(true);
+}
+
+void AScriptWindow::on_pbFindPrevious_clicked()
+{
+    findText(false);
+}
+
+void AScriptWindow::findText(bool bForward)
+{
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    QTextDocument* d = te->document();
+
+    QString textToFind = ui->leFind->text();
+    const int oldPos = te->textCursor().anchor();
+    QTextDocument::FindFlags flags = ( bForward ? QTextDocument::FindCaseSensitively : QTextDocument::FindCaseSensitively | QTextDocument::FindBackward );
+
+    QTextCursor tc = d->find(textToFind, te->textCursor(), flags);
+
+    if (tc.isNull())
+    {
+        tc = te->textCursor();
+        if (bForward)
+        {
+            tc.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+            te->setTextCursor(tc);
+            te->ensureCursorVisible();
+            message("End of the document reached", this);
+        }
+        else
+        {
+            tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+            te->setTextCursor(tc);
+            te->ensureCursorVisible();
+            message("Start of the document reached", this);
+        }
+    }
+    else
+    {
+       if (oldPos == tc.anchor())
+       {
+           //just because the cursor was already on the start of the searched string
+           tc = d->find(textToFind, tc, flags);
+       }
+
+       QTextCursor tc_copy = QTextCursor(tc);
+       tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
+       te->setTextCursor(tc_copy);
+       te->ensureCursorVisible();
+
+       QTextCharFormat tf;
+       tf.setBackground(Qt::blue);
+       tf.setForeground(Qt::white);
+       tf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+       QTextEdit::ExtraSelection es;
+       es.cursor = tc;
+       es.format = tf;
+
+       QList<QTextEdit::ExtraSelection> esList = te->extraSelections();
+       esList << es;
+       te->setExtraSelections(esList);
+    }
+
+    /*
+    FindBackward        = 0x00001,
+    FindCaseSensitively = 0x00002,
+    FindWholeWords      = 0x00004
+    */
+}
+
+void AScriptWindow::on_leFind_textChanged(const QString & /*arg1*/)
+{
+    applyTextFindState();
+}
+
+void AScriptWindow::applyTextFindState()
+{
+    if (CurrentTab < 0 || CurrentTab >= ScriptTabs.size()) return;
+
+    bool bActive = ui->frFindReplace->isVisible();
+    QString Text = (bActive ? ui->leFind->text() : "");
+
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    te->FindString = Text;
+    te->RefreshExtraHighlight();
 }

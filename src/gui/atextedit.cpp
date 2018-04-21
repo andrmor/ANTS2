@@ -41,38 +41,120 @@ void ATextEdit::setCompleter(QCompleter *completer)
 
 void ATextEdit::keyPressEvent(QKeyEvent *e)
 {
-    if (e->key() == Qt::Key_Tab && e->modifiers() == 0 && !(c && c->popup()->isVisible()) )
-    {
-        QTextCursor tc = this->textCursor();
-        int posInBlock = tc.positionInBlock();
-        int timesInsert = TabInSpaces - posInBlock % TabInSpaces;
-        if (timesInsert == 0) timesInsert += TabInSpaces;
-        QString s(" ");
-        this->insertPlainText(s.repeated(timesInsert));
-        return;
-    }
 
-    if (e->key() == Qt::Key_Backspace && (e->modifiers() & Qt::ShiftModifier) )
+    QTextCursor tc = this->textCursor();
+
+    //simple cases handle with switch
+    switch (e->key())
     {
-        QTextCursor tc = this->textCursor();
-        int posInBlock = tc.positionInBlock();
-        int timesDelete = posInBlock % TabInSpaces;
-        if (timesDelete == 0) timesDelete = TabInSpaces;
-        if (timesDelete <= posInBlock)
+        case Qt::Key_Tab :
         {
-            tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, timesDelete);
-            QString s = tc.selectedText().simplified();
-            if (s.isEmpty()) tc.removeSelectedText();
+            if (e->modifiers() == 0 && !(c && c->popup()->isVisible()) )
+            {
+                int posInBlock = tc.positionInBlock();
+                int timesInsert = TabInSpaces - posInBlock % TabInSpaces;
+                if (timesInsert == 0) timesInsert += TabInSpaces;
+                QString s(" ");
+                this->insertPlainText(s.repeated(timesInsert));
+                return;
+            }
         }
-        return;
+        break;
+
+        case Qt::Key_Backspace :
+        {
+            if (e->modifiers() & Qt::ShiftModifier)
+            {
+                QTextCursor tc = this->textCursor();
+                int posInBlock = tc.positionInBlock();
+                int timesDelete = posInBlock % TabInSpaces;
+                if (timesDelete == 0) timesDelete = TabInSpaces;
+                if (timesDelete <= posInBlock)
+                {
+                    tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, timesDelete);
+                    QString s = tc.selectedText().simplified();
+                    if (s.isEmpty()) tc.removeSelectedText();
+                }
+                return;
+            }
+        }
+        break;
+
+        case Qt::Key_Escape :
+            QToolTip::hideText();
+            //no return!
+        break;
+
+        case Qt::Key_F1 :
+        {
+            QString text = SelectObjFunctUnderCursor();
+            emit requestHelp(text);
+            return;
+        }
+        break;
+
+        case Qt::Key_Delete :
+        {
+            if ( e->modifiers() & Qt::ShiftModifier )  //Delete line
+            {
+                tc.select(QTextCursor::LineUnderCursor);
+                tc.removeSelectedText();
+                tc.deleteChar();
+                onCursorPositionChanged();
+                return;
+            }
+            QPlainTextEdit::keyPressEvent(e);
+            onCursorPositionChanged();
+            return;
+        }
+        break;
+
+        case Qt::Key_Down :
+        {
+            if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) ||
+                 (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::ShiftModifier) )  //Copy line;
+            {
+                tc.select(QTextCursor::LineUnderCursor);
+                QString line = tc.selectedText();
+                tc.movePosition(QTextCursor::EndOfLine);
+                this->setTextCursor(tc);
+                this->insertPlainText("\n");
+                this->insertPlainText(line);
+                onCursorPositionChanged();
+                return;
+            }
+        }
+        break;
+
+        case Qt::Key_Plus :
+        {
+            if ( e->modifiers() & Qt::ControlModifier ) //font size +
+            {
+                int size = font().pointSize();
+                setFontSizeAndEmitSignal(++size);
+                return;
+            }
+        }
+        break;
+
+        case Qt::Key_Minus :
+        {
+            if ( e->modifiers() & Qt::ControlModifier )  //font size -
+            {
+                int size = font().pointSize();
+                setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
+                return;
+            }
+        }
+        break;
+
+        default:
+        break;
     }
 
-    if (e->key() == Qt::Key_Escape) QToolTip::hideText();
-
+    /*  BUGS!
     if (e->key() == Qt::Key_Delete && (e->modifiers()==0))
     {
-        //bugs:
-        /*
         QTextCursor tc = this->textCursor();
         int pos = tc.position();
         tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
@@ -98,15 +180,8 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
             QPlainTextEdit::keyPressEvent(e);
             return;
         }
-        */
     }
-
-    if (e->key() == Qt::Key_F1)
-      {
-        QString text = SelectObjFunctUnderCursor();
-        emit requestHelp(text);
-        return;
-      }
+    */
 
     if (e->key() == Qt::Key_Return  && !(c && c->popup()->isVisible()))
       { //enter is pressed but completer popup is not visible
@@ -209,55 +284,7 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
 
       }
 
-    //font size
-    if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Plus )
-    {                
-        int size = font().pointSize();
-        setFontSizeAndEmitSignal(++size);
-        return;
-    }
-    if ( (e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Minus )
-    {
-        int size = font().pointSize();
-        setFontSizeAndEmitSignal(--size); //check is there: cannot go < 1
-        return;
-    }
-
-    //Copy line;
-    if ( (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::AltModifier) ||
-         (e->modifiers() & Qt::ControlModifier) && (e->modifiers() & Qt::ShiftModifier) )
-      {
-        if (e->key() == Qt::Key_Down)
-          {
-            QTextCursor tc = this->textCursor();
-            tc.select(QTextCursor::LineUnderCursor);
-            QString line = tc.selectedText();
-            tc.movePosition(QTextCursor::EndOfLine);
-            this->setTextCursor(tc);
-            this->insertPlainText("\n");
-            this->insertPlainText(line);
-            return;
-          }
-      }
-
-    //Delete line
-    if ( e->modifiers() & Qt::ShiftModifier )
-        if (e->key() == Qt::Key_Delete)
-        {
-            QTextCursor tc = this->textCursor();
-            tc.select(QTextCursor::LineUnderCursor);
-            tc.removeSelectedText();
-            tc.deleteChar();
-            return;
-        }
-
-    if (e->key() == Qt::Key_Delete)
-    {
-        QPlainTextEdit::keyPressEvent(e);
-        onCursorPositionChanged();
-        return;
-    }
-
+    // ----- completer -----
     if (c && c->popup()->isVisible())
     {
         // The following keys are forwarded by the completer to the widget

@@ -1,8 +1,8 @@
 #ifndef AHIGHLIGHTERS_H
 #define AHIGHLIGHTERS_H
 
-
 #include <QSyntaxHighlighter>
+#include <QRegularExpression>
 
 class AHighlighterScriptWindow : public QSyntaxHighlighter
 {
@@ -20,17 +20,17 @@ protected:
 //private:
     struct HighlightingRule
       {
-        QRegExp pattern;
+        QRegularExpression pattern;
         QTextCharFormat format;
       };
     QVector<HighlightingRule> highlightingRules;
 
-    QRegExp commentStartExpression;
-    QRegExp commentEndExpression;
+    QRegularExpression commentStartExpression;
+    QRegularExpression commentEndExpression;
 
     QTextCharFormat keywordFormat;
     QTextCharFormat customKeywordFormat;
-//    QTextCharFormat classFormat;
+    QTextCharFormat unitFormat;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat multiLineCommentFormat;
     QTextCharFormat quotationFormat;

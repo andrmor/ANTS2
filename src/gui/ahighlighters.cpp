@@ -106,31 +106,14 @@ void AHighlighterScriptWindow::setCustomCommands(QStringList functions, QStringL
 
 void AHighlighterScriptWindow::highlightBlock(const QString &text)
 {
-    foreach (const HighlightingRule &rule, highlightingRules)
-      {
-//             QRegularExpression expression(rule.pattern);
-//             int index = expression.indexIn(text);
-//             while (index >= 0) {
-//                 int length = expression.matchedLength();
-//                 setFormat(index, length, rule.format);
-//                 index = expression.indexIn(text, index + length);
-//
-//             }
-        /*
-               QRegularExpression exp(rule.pattern);
-               QRegularExpressionMatchIterator matches = exp.globalMatch(text);
-               while (matches.hasNext())
-               {
-                    QRegularExpressionMatch match = matches.next();
-                    setFormat(match.capturedStart(), match.capturedLength(), rule.format);
-               }
-         */
-               QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
-               while (matchIterator.hasNext())
-               {
-                    QRegularExpressionMatch match = matchIterator.next();
-                    setFormat(match.capturedStart(), match.capturedLength(), rule.format);
-               }
+    for (const HighlightingRule &rule : highlightingRules)
+    {
+        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+        while ( matchIterator.hasNext() )
+        {
+            QRegularExpressionMatch match = matchIterator.next();
+            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+        }
     }
 
     if (bMultilineCommentAllowed)
@@ -139,36 +122,24 @@ void AHighlighterScriptWindow::highlightBlock(const QString &text)
 
         int startIndex = 0;
         if (previousBlockState() != 1)
-             //    startIndex = commentStartExpression.indexIn(text);
             startIndex = text.indexOf(commentStartExpression);
 
         while (startIndex >= 0)
-          {
-//                 int endIndex = commentEndExpression.indexIn(text, startIndex);
-//                 int commentLength;
-//                 if (endIndex == -1) {
-//                     setCurrentBlockState(1);
-//                     commentLength = text.length() - startIndex;
-//                 } else {
-//                     commentLength = endIndex - startIndex
-//                                     + commentEndExpression.matchedLength();
-//                 }
-//                 setFormat(startIndex, commentLength, multiLineCommentFormat);
-//                 startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
+        {
+            QRegularExpressionMatch match = commentEndExpression.match(text, startIndex);
+            int endIndex = match.capturedStart();
+            int commentLength = 0;
+            if (endIndex == -1)
+            {
+                setCurrentBlockState(1);
+                commentLength = text.length() - startIndex;
+            }
+            else
+                commentLength = endIndex - startIndex + match.capturedLength();
 
-                    QRegularExpressionMatch match = commentEndExpression.match(text, startIndex);
-                    int endIndex = match.capturedStart();
-                    int commentLength = 0;
-                    if (endIndex == -1) {
-                        setCurrentBlockState(1);
-                        commentLength = text.length() - startIndex;
-                    } else {
-                        commentLength = endIndex - startIndex
-                                        + match.capturedLength();
-                    }
-                    setFormat(startIndex, commentLength, multiLineCommentFormat);
-                    startIndex = text.indexOf(commentStartExpression, startIndex + commentLength);
-           }
+            setFormat(startIndex, commentLength, multiLineCommentFormat);
+            startIndex = text.indexOf(commentStartExpression, startIndex + commentLength);
+        }
     }
 }
 
@@ -191,13 +162,7 @@ void AHighlighterLrfScript::setFixedVariables()
 //    customKeywordFormat.setFontItalic(true);
 
   QVector<HighlightingRule> hr;
-//  foreach (const QString &pattern, functions)
-//    {
-//      rule.pattern = QRegExp("\\b"+pattern+"(?=\\()");
-//      rule.format = customKeywordFormat;
-//      hr.append(rule);
-//    }
-  foreach (const QString &pattern, variables)
+  for (const QString &pattern : variables)
     {
       rule.pattern = QRegularExpression("\\b"+pattern+"\\b(?![\\(\\{\\[])");
       rule.format = customKeywordFormat;
@@ -262,7 +227,7 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     highlightingRules.append(rule);
 
 //    charFormat.setForeground(Qt::darkGreen);
-//    rule.pattern = QRegularExpression("'.*'");
+//    rule.pattern = QRegularExpression("'.'");
 //    rule.format = charFormat;
 //    highlightingRules.append(rule);
 

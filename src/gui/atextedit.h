@@ -21,7 +21,7 @@ public:
     void SetFontSize(int size);
 
     QStringList functionList;
-    int TabGivesSpaces;
+    int TabInSpaces;
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;

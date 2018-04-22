@@ -92,6 +92,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     //ui->labFileName->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    ui->cbActivateTextReplace->setChecked(false);
 
     QPixmap rm(16, 16);
     rm.fill(Qt::transparent);
@@ -1552,9 +1553,23 @@ void AScriptWindow::findText(bool bForward)
 
     QString textToFind = ui->leFind->text();
     const int oldPos = te->textCursor().anchor();
-    QTextDocument::FindFlags flags = ( bForward ? QTextDocument::FindCaseSensitively : QTextDocument::FindCaseSensitively | QTextDocument::FindBackward );
+    //QTextDocument::FindFlags flags = ( bForward ? QTextDocument::FindCaseSensitively : QTextDocument::FindCaseSensitively | QTextDocument::FindBackward );
+    QTextDocument::FindFlags flags;
+    if (!bForward)
+        flags = flags | QTextDocument::FindBackward;
+    if (ui->cbFindTextCaseSensitive->isChecked())
+        flags = flags | QTextDocument::FindCaseSensitively;
+    if (ui->cbFindTextWholeWords->isChecked())
+        flags = flags | QTextDocument::FindWholeWords;
 
     QTextCursor tc = d->find(textToFind, te->textCursor(), flags);
+
+    if (!tc.isNull())
+        if (oldPos == tc.anchor())
+        {
+            //just because the cursor was already on the start of the searched string
+            tc = d->find(textToFind, tc, flags);
+        }
 
     if (tc.isNull())
     {
@@ -1576,12 +1591,6 @@ void AScriptWindow::findText(bool bForward)
     }
     else
     {
-       if (oldPos == tc.anchor())
-       {
-           //just because the cursor was already on the start of the searched string
-           tc = d->find(textToFind, tc, flags);
-       }
-
        QTextCursor tc_copy = QTextCursor(tc);
        tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
        te->setTextCursor(tc_copy);
@@ -1600,12 +1609,6 @@ void AScriptWindow::findText(bool bForward)
        esList << es;
        te->setExtraSelections(esList);
     }
-
-    /*
-    FindBackward        = 0x00001,
-    FindCaseSensitively = 0x00002,
-    FindWholeWords      = 0x00004
-    */
 }
 
 void AScriptWindow::on_leFind_textChanged(const QString & /*arg1*/)
@@ -1623,4 +1626,14 @@ void AScriptWindow::applyTextFindState()
     ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
     te->FindString = Text;
     te->RefreshExtraHighlight();
+}
+
+void AScriptWindow::on_pbReplaceOne_clicked()
+{
+
+}
+
+void AScriptWindow::on_pbReplaceAll_clicked()
+{
+
 }

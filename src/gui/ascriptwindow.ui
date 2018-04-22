@@ -293,6 +293,9 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <property name="leftMargin">
         <number>2</number>
        </property>
@@ -312,11 +315,17 @@
          </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
            <item>
             <widget class="QLabel" name="label_2">
              <property name="minimumSize">
               <size>
-               <width>75</width>
+               <width>60</width>
                <height>0</height>
               </size>
              </property>
@@ -332,16 +341,45 @@
             <widget class="QLineEdit" name="leFind"/>
            </item>
            <item>
-            <widget class="QPushButton" name="pbFindNext">
+            <widget class="QCheckBox" name="cbFindTextWholeWords">
+             <property name="toolTip">
+              <string>Match whole words only</string>
+             </property>
              <property name="text">
-              <string>next</string>
+              <string>Whole</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cbFindTextCaseSensitive">
+             <property name="toolTip">
+              <string>Case sensitive</string>
+             </property>
+             <property name="text">
+              <string>Case</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbFindNext">
+             <property name="toolTip">
+              <string>Find next match</string>
+             </property>
+             <property name="text">
+              <string>Next</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pbFindPrevious">
+             <property name="toolTip">
+              <string>Find previous match</string>
+             </property>
              <property name="text">
-              <string>previous</string>
+              <string>Previous</string>
              </property>
             </widget>
            </item>
@@ -349,11 +387,17 @@
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
            <item>
             <widget class="QLabel" name="label_3">
              <property name="minimumSize">
               <size>
-               <width>75</width>
+               <width>60</width>
                <height>0</height>
               </size>
              </property>
@@ -370,21 +414,46 @@
            </item>
            <item>
             <widget class="QPushButton" name="pbReplaceOne">
+             <property name="toolTip">
+              <string>Replace this  match</string>
+             </property>
              <property name="text">
-              <string>one</string>
+              <string>This</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pbReplaceAll">
+             <property name="toolTip">
+              <string>Replace all matches</string>
+             </property>
              <property name="text">
-              <string>all</string>
+              <string>All</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbActivateTextReplace">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Show replace tools</string>
+         </property>
+         <property name="text">
+          <string>Replace</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QFrame" name="frame">
@@ -412,6 +481,15 @@
           </property>
           <item>
            <widget class="QPushButton" name="pbCloseFindReplaceFrame">
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Close this widget</string>
+            </property>
             <property name="text">
              <string>X</string>
             </property>
@@ -556,12 +634,76 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>444</x>
-     <y>446</y>
+     <x>418</x>
+     <y>462</y>
     </hint>
     <hint type="destinationlabel">
      <x>582</x>
      <y>452</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>714</x>
+     <y>494</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>43</x>
+     <y>519</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leReplace</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>728</x>
+     <y>499</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>537</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbReplaceOne</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>692</x>
+     <y>495</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>568</x>
+     <y>544</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbReplaceAll</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>737</x>
+     <y>502</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>657</x>
+     <y>544</y>
     </hint>
    </hints>
   </connection>

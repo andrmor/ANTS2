@@ -117,6 +117,10 @@ private slots:
 
     void on_leFind_textChanged(const QString &arg1);
 
+    void on_pbReplaceOne_clicked();
+
+    void on_pbReplaceAll_clicked();
+
 public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 

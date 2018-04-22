@@ -559,12 +559,12 @@
   </widget>
   <action name="actionIncrease_font_size">
    <property name="text">
-    <string>Increase font size</string>
+    <string>Increase font size (Ctrl + Plus)</string>
    </property>
   </action>
   <action name="actionDecrease_font_size">
    <property name="text">
-    <string>Decrease font size</string>
+    <string>Decrease font size (Ctrl + Minus)</string>
    </property>
   </action>
   <action name="actionSelect_font">
@@ -619,7 +619,7 @@
   </action>
   <action name="actionShow_Find_Replace">
    <property name="text">
-    <string>Find widget (Ctr-f)</string>
+    <string>Find (Ctrl + F)</string>
    </property>
    <property name="toolTip">
     <string>Find / Replace widget (Ctr-f)</string>
@@ -627,7 +627,7 @@
   </action>
   <action name="actionReplace_widget_Ctr_r">
    <property name="text">
-    <string>Replace widget (Ctr-r)</string>
+    <string>Replace (Ctrl + R)</string>
    </property>
   </action>
  </widget>

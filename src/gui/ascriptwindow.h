@@ -37,7 +37,7 @@ public:
     void SetScript(QString *text);
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
-    void AddNewTab();
+    void AddNewTab();  // new tab !
 
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
 
@@ -196,9 +196,17 @@ public slots:
     void onDefaulFontSizeChanged(int size);
     void onProgressChanged(int percent);
     void updateFileStatusIndication();
+
+private slots:
+    void onFindSelected();
+    void onReplaceSelected();
+    virtual void onFindFunction();
+    virtual void onFindVariable();
+    void onBack();
+    void onForward();
 };
 
-class AScriptWindowTabItem : QObject
+class AScriptWindowTabItem : public QObject
 {
     Q_OBJECT
 public:
@@ -214,6 +222,10 @@ public:
     QCompleter* completer;
     AHighlighterScriptWindow* highlighter;
 
+    QVector<int> VisitedLineNumber;
+    int indexInVisitedLineNumber = 0;
+    int maxLineNumbers = 20;
+
     void UpdateHighlight();
 
     void WriteToJson(QJsonObject &json);
@@ -221,6 +233,19 @@ public:
 
     bool wasModified() const;
     void setModifiedStatus(bool flag);
+
+    void goBack();
+    void goForward();
+
+private slots:
+    void onCustomContextMenuRequested(const QPoint& pos);
+    void onLineNumberChanged(int lineNumber);
+
+signals:
+    void requestFindText();
+    void requestReplaceText();
+    void requestFindFunction();
+    void requestFindVariable();
 };
 
 #endif // ASCRIPTWINDOW_H

@@ -22,6 +22,8 @@ public:
 
     void RefreshExtraHighlight();
 
+    void setTextCursorSilently(const QTextCursor& tc);
+
     QStringList functionList;
     int TabInSpaces;
 
@@ -42,6 +44,9 @@ private slots:
     void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
+    int  previousLineNumber = 0;
+    bool bMonitorLineChange = true;
+
     QString textUnderCursor() const;
     QString SelectObjFunctUnderCursor(QTextCursor* cursor = 0) const;
     QString SelectTextToLeft(QTextCursor cursor, int num) const;
@@ -62,11 +67,9 @@ private:
 signals:
     void requestHelp(QString);
     void editingFinished();
-    void fontSizeChanged(int size);    
-//    void requestHistoryBefore();
-//    void requestHistoryAfter();
-//    void requestHistoryStart();
-//    void requestHistoryEnd();
+    void fontSizeChanged(int size);
+    void lineNumberChanged(int lineNumber);
+
 };
 
 class ALeftField : public QWidget

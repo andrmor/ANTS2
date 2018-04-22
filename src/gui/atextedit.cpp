@@ -627,6 +627,12 @@ void ATextEdit::onCursorPositionChanged()
   int fh = fontMetrics().height();
   if (fFound) QToolTip::showText( mapToGlobal( QPoint(cursorRect().topRight().x(), cursorRect().topRight().y()-2.2*fh) ), tmp );
   else QToolTip::hideText();
+
+  if (bMonitorLineChange)
+  {
+      int currentLine = textCursor().blockNumber();
+      if ( currentLine != previousLineNumber) emit lineNumberChanged(currentLine);
+  }
 }
 
 void ATextEdit::checkBracketsOnLeft(QList<QTextEdit::ExtraSelection>& extraSelections, const QColor& color)
@@ -760,6 +766,13 @@ void ATextEdit::SetFontSize(int size)
 void ATextEdit::RefreshExtraHighlight()
 {
     onCursorPositionChanged();
+}
+
+void ATextEdit::setTextCursorSilently(const QTextCursor &tc)
+{
+    bMonitorLineChange = false;
+    setTextCursor(tc);
+    bMonitorLineChange = true;
 }
 
 QString ATextEdit::textUnderCursor() const

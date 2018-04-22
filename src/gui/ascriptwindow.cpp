@@ -246,6 +246,14 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     connect(Find, &QShortcut::activated, this, &AScriptWindow::on_actionShow_Find_Replace_triggered);
     QShortcut* Replace = new QShortcut(QKeySequence("Ctrl+r"), this);
     connect(Replace, &QShortcut::activated, this, &AScriptWindow::on_actionReplace_widget_Ctr_r_triggered);
+    QShortcut* FindFunction = new QShortcut(QKeySequence("F2"), this);
+    connect(FindFunction, &QShortcut::activated, this, &AScriptWindow::onFindFunction);
+    QShortcut* FindVariable = new QShortcut(QKeySequence("F3"), this);
+    connect(FindVariable, &QShortcut::activated, this, &AScriptWindow::onFindVariable);
+    QShortcut* GoBack = new QShortcut(QKeySequence("Alt+Left"), this);
+    connect(GoBack, &QShortcut::activated, this, &AScriptWindow::onBack);
+    QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
+    connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
 
     ReadFromJson();
 }
@@ -1135,6 +1143,10 @@ AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWin
         highlighter = new AHighlighterPythonScriptWindow(TextEdit->document());
     else
         highlighter = new AHighlighterScriptWindow(TextEdit->document());
+
+    TextEdit->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(TextEdit, &ATextEdit::customContextMenuRequested, this, &AScriptWindowTabItem::onCustomContextMenuRequested);
+    connect(TextEdit, &ATextEdit::lineNumberChanged, this, &AScriptWindowTabItem::onLineNumberChanged);
 }
 
 AScriptWindowTabItem::~AScriptWindowTabItem()
@@ -1199,7 +1211,6 @@ void AScriptWindowTabItem::setModifiedStatus(bool flag)
 {
     TextEdit->document()->setModified(flag);
 }
-
 
 void AScriptWindow::onCurrentTabChanged(int tab)
 {
@@ -1309,6 +1320,10 @@ void AScriptWindow::AddNewTab()
     twScriptTabs->setCurrentIndex(CurrentTab);
 
     connect(tab->TextEdit->document(), &QTextDocument::modificationChanged, this, &AScriptWindow::updateFileStatusIndication);
+    connect(tab, &AScriptWindowTabItem::requestFindText, this, &AScriptWindow::onFindSelected);
+    connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
+    connect(tab, &AScriptWindowTabItem::requestFindFunction, this, &AScriptWindow::onFindFunction);
+    connect(tab, &AScriptWindowTabItem::requestFindVariable, this, &AScriptWindow::onFindVariable);
 }
 
 QString AScriptWindow::createNewTabName()
@@ -1527,38 +1542,182 @@ void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()
 
 void AScriptWindow::on_actionShow_Find_Replace_triggered()
 {
-    bool vis = ui->frFindReplace->isVisible();
-    if (vis && ui->cbActivateTextReplace->isChecked())
-        ui->cbActivateTextReplace->setChecked(false);
-    else
-        ui->frFindReplace->setVisible( !vis );
-
-    applyTextFindState();
-
     if (ui->frFindReplace->isVisible())
     {
-        ui->cbActivateTextReplace->setChecked(false);
-        ui->leFind->setFocus();
-        ui->leFind->selectAll();
+        if (ui->cbActivateTextReplace->isChecked())
+            ui->cbActivateTextReplace->setChecked(false);
+        else
+        {
+            if (ScriptTabs[CurrentTab]->TextEdit->textCursor().selectedText() == ui->leFind->text())
+            {
+                ui->frFindReplace->setVisible(false);
+                return;
+            }
+        }
     }
+    else ui->frFindReplace->setVisible(true);
+
+    onFindSelected();
+}
+
+void AScriptWindow::onFindSelected()
+{
+    ui->frFindReplace->setVisible(true);
+    ui->cbActivateTextReplace->setChecked(false);
+
+    QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
+    QString sel = tc.selectedText();
+    if (!sel.isEmpty())
+        ui->leFind->setText(sel);
+
+    ui->leFind->setFocus();
+    ui->leFind->selectAll();
+
+    applyTextFindState();
 }
 
 void AScriptWindow::on_actionReplace_widget_Ctr_r_triggered()
 {
-    bool vis = ui->frFindReplace->isVisible();
-    if (vis && !ui->cbActivateTextReplace->isChecked())
-        ui->cbActivateTextReplace->setChecked(true);
-    else
-        ui->frFindReplace->setVisible( !vis );
-
-    applyTextFindState();
-
     if (ui->frFindReplace->isVisible())
     {
-        ui->cbActivateTextReplace->setChecked(true);
+        if (!ui->cbActivateTextReplace->isChecked())
+            ui->cbActivateTextReplace->setChecked(true);
+        else
+        {
+            if (ScriptTabs[CurrentTab]->TextEdit->textCursor().selectedText() == ui->leFind->text())
+            {
+                ui->frFindReplace->setVisible(false);
+                return;
+            }
+        }
+    }
+    else ui->frFindReplace->setVisible(true);
+
+    onReplaceSelected();
+}
+
+void AScriptWindow::onReplaceSelected()
+{
+    ui->frFindReplace->setVisible(true);
+    ui->cbActivateTextReplace->setChecked(true);
+
+    QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
+    QString sel = tc.selectedText();
+    if (sel.isEmpty())
+    {
         ui->leFind->setFocus();
         ui->leFind->selectAll();
     }
+    else
+    {
+        ui->leFind->setText(sel);
+        ui->leReplace->setFocus();
+        ui->leReplace->selectAll();
+    }
+
+    applyTextFindState();
+}
+
+void AScriptWindow::onFindFunction()
+{
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    QTextDocument* d = te->document();
+    QTextCursor tc = te->textCursor();
+    QString name = tc.selectedText();
+    if (name.isEmpty())
+    {
+        message("Select function name", this);
+        return;
+    }
+
+    QStringList sl = name.split("(");
+    if (sl.size() > 0) name = sl.first();
+    QRegExp sp("\\bfunction\\s+" + name + "\\s*" + "\\(");
+    //qDebug() << "Looking for:"<<sp;
+
+    QTextDocument::FindFlags flags = QTextDocument::FindCaseSensitively;
+
+    tc = d->find(sp, 0, flags);
+
+    if (tc.isNull())
+    {
+        message("Function definition for " + name + " not found", this);
+        return;
+    }
+
+    QTextCursor tc_copy = QTextCursor(tc);
+    tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
+    te->setTextCursor(tc_copy);
+    te->ensureCursorVisible();
+
+    QTextCharFormat tf;
+    tf.setBackground(Qt::blue);
+    tf.setForeground(Qt::white);
+    tf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+    QTextEdit::ExtraSelection es;
+    es.cursor = tc;
+    es.format = tf;
+
+    QList<QTextEdit::ExtraSelection> esList = te->extraSelections();
+    esList << es;
+    te->setExtraSelections(esList);
+}
+
+void AScriptWindow::onFindVariable()
+{
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    QTextDocument* d = te->document();
+    QTextCursor tc = te->textCursor();
+    QString name = tc.selectedText();
+    if (name.isEmpty())
+    {
+        message("Select variable name", this);
+        return;
+    }
+
+    QStringList sl = name.split("(");
+    if (sl.size() > 0) name = sl.first();
+    QRegExp sp("\\bvar\\s+" + name + "\\b");
+    qDebug() << "Looking for:"<<sp;
+
+    QTextDocument::FindFlags flags = QTextDocument::FindCaseSensitively;
+
+    tc = d->find(sp, 0, flags);
+
+    if (tc.isNull())
+    {
+        message("Variable definition for " + name + " not found", this);
+        return;
+    }
+
+    QTextCursor tc_copy = QTextCursor(tc);
+    tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
+    te->setTextCursor(tc_copy);
+    te->ensureCursorVisible();
+
+    QTextCharFormat tf;
+    tf.setBackground(Qt::blue);
+    tf.setForeground(Qt::white);
+    tf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+    QTextEdit::ExtraSelection es;
+    es.cursor = tc;
+    es.format = tf;
+
+    QList<QTextEdit::ExtraSelection> esList = te->extraSelections();
+    esList << es;
+    te->setExtraSelections(esList);
+}
+
+void AScriptWindow::onBack()
+{
+    ScriptTabs[CurrentTab]->goBack();
+}
+
+void AScriptWindow::onForward()
+{
+    ScriptTabs[CurrentTab]->goForward();
 }
 
 void AScriptWindow::on_pbFindNext_clicked()
@@ -1597,42 +1756,35 @@ void AScriptWindow::findText(bool bForward)
 
     if (tc.isNull())
     {
-        tc = te->textCursor();
         if (bForward)
-        {
-            tc.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-            te->setTextCursor(tc);
-            te->ensureCursorVisible();
-            message("End of the document reached", this);
-        }
+            tc = d->find(textToFind, 0, flags);
         else
+            tc = d->find(textToFind, d->characterCount()-1, flags);
+
+        if (tc.isNull())
         {
-            tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
-            te->setTextCursor(tc);
-            te->ensureCursorVisible();
-            message("Start of the document reached", this);
+            message("No matches found", this);
+            return;
         }
     }
-    else
-    {
-       QTextCursor tc_copy = QTextCursor(tc);
-       tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
-       te->setTextCursor(tc_copy);
-       te->ensureCursorVisible();
 
-       QTextCharFormat tf;
-       tf.setBackground(Qt::blue);
-       tf.setForeground(Qt::white);
-       tf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+    QTextCursor tc_copy = QTextCursor(tc);
+    tc_copy.setPosition(tc_copy.anchor(), QTextCursor::MoveAnchor); //position
+    te->setTextCursor(tc_copy);
+    te->ensureCursorVisible();
 
-       QTextEdit::ExtraSelection es;
-       es.cursor = tc;
-       es.format = tf;
+    QTextCharFormat tf;
+    tf.setBackground(Qt::blue);
+    tf.setForeground(Qt::white);
+    tf.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
-       QList<QTextEdit::ExtraSelection> esList = te->extraSelections();
-       esList << es;
-       te->setExtraSelections(esList);
-    }
+    QTextEdit::ExtraSelection es;
+    es.cursor = tc;
+    es.format = tf;
+
+    QList<QTextEdit::ExtraSelection> esList = te->extraSelections();
+    esList << es;
+    te->setExtraSelections(esList);
 }
 
 void AScriptWindow::on_leFind_textChanged(const QString & /*arg1*/)
@@ -1699,5 +1851,74 @@ void AScriptWindow::on_pbReplaceAll_clicked()
         numReplacements++;
         tc = d->find(textToFind, tc, flags);
     }
-    message("Replacements performed: " + QString::number(numReplacements));
+    message("Replacements performed: " + QString::number(numReplacements), this);
+}
+
+void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
+{
+    QMenu menu;
+
+    QAction* findSel = menu.addAction("Find selected text (Ctrl + F)");
+    QAction* findFunct = menu.addAction("Find function definition (F2)");
+    QAction* findVar = menu.addAction("Find variable definition (F3)");
+    menu.addSeparator();
+    QAction* replaceSel = menu.addAction("Replace selected text (Ctrl + R)");
+    menu.addSeparator();
+    QAction* shiftBack = menu.addAction("Go back (Alt + Left)");
+    QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
+
+    QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
+    if (!selectedItem) return; //nothing was selected
+
+    if (selectedItem == findSel)         emit requestFindText();
+    if (selectedItem == replaceSel)      emit requestReplaceText();
+    else if (selectedItem == findFunct)  emit requestFindFunction();
+    else if (selectedItem == findVar)    emit requestFindVariable();
+    else if (selectedItem == replaceSel) emit requestReplaceText();
+
+    else if (selectedItem == shiftBack) goBack();
+    else if (selectedItem == shiftForward) goForward();
+}
+
+void AScriptWindowTabItem::goBack()
+{
+    if (indexInVisitedLineNumber >= 1 && indexInVisitedLineNumber < VisitedLineNumber.size())
+    {
+        indexInVisitedLineNumber--;
+        int goTo = VisitedLineNumber.at(indexInVisitedLineNumber);
+        QTextCursor tc = TextEdit->textCursor();
+        int nowAt = tc.blockNumber();
+        if (nowAt == goTo) return;
+        else if (nowAt < goTo) tc.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, goTo-nowAt );
+        else if (nowAt > goTo) tc.movePosition(QTextCursor::Up,   QTextCursor::MoveAnchor, nowAt-goTo );
+        TextEdit->setTextCursorSilently(tc);
+        TextEdit->ensureCursorVisible();
+    }
+}
+
+void AScriptWindowTabItem::goForward()
+{
+    if (indexInVisitedLineNumber >= 0 && indexInVisitedLineNumber < VisitedLineNumber.size()-1)
+    {
+        indexInVisitedLineNumber++;
+        int goTo = VisitedLineNumber.at(indexInVisitedLineNumber);
+        QTextCursor tc = TextEdit->textCursor();
+        int nowAt = tc.blockNumber();
+        if (nowAt == goTo) return;
+        else if (nowAt < goTo) tc.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, goTo-nowAt );
+        else if (nowAt > goTo) tc.movePosition(QTextCursor::Up,   QTextCursor::MoveAnchor, nowAt-goTo );
+        TextEdit->setTextCursorSilently(tc);
+        TextEdit->ensureCursorVisible();
+    }
+}
+
+void AScriptWindowTabItem::onLineNumberChanged(int lineNumber)
+{
+    if (!VisitedLineNumber.isEmpty())
+        if (VisitedLineNumber.last() == lineNumber) return;
+
+    VisitedLineNumber.append(lineNumber);
+    if (VisitedLineNumber.size() > maxLineNumbers) VisitedLineNumber.removeFirst();
+
+    indexInVisitedLineNumber = VisitedLineNumber.size() - 1;
 }

@@ -241,9 +241,11 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
 
     //shortcuts
     QShortcut* Run = new QShortcut(QKeySequence("Ctrl+Return"), this);
-    connect(Run, SIGNAL(activated()), this, SLOT(on_pbRunScript_clicked()));
+    connect(Run, &QShortcut::activated, this, &AScriptWindow::on_pbRunScript_clicked);
     QShortcut* Find = new QShortcut(QKeySequence("Ctrl+f"), this);
     connect(Find, &QShortcut::activated, this, &AScriptWindow::on_actionShow_Find_Replace_triggered);
+    QShortcut* Replace = new QShortcut(QKeySequence("Ctrl+r"), this);
+    connect(Replace, &QShortcut::activated, this, &AScriptWindow::on_actionReplace_widget_Ctr_r_triggered);
 
     ReadFromJson();
 }
@@ -1526,11 +1528,34 @@ void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()
 void AScriptWindow::on_actionShow_Find_Replace_triggered()
 {
     bool vis = ui->frFindReplace->isVisible();
-    ui->frFindReplace->setVisible( !vis );
+    if (vis && ui->cbActivateTextReplace->isChecked())
+        ui->cbActivateTextReplace->setChecked(false);
+    else
+        ui->frFindReplace->setVisible( !vis );
+
     applyTextFindState();
 
     if (ui->frFindReplace->isVisible())
     {
+        ui->cbActivateTextReplace->setChecked(false);
+        ui->leFind->setFocus();
+        ui->leFind->selectAll();
+    }
+}
+
+void AScriptWindow::on_actionReplace_widget_Ctr_r_triggered()
+{
+    bool vis = ui->frFindReplace->isVisible();
+    if (vis && !ui->cbActivateTextReplace->isChecked())
+        ui->cbActivateTextReplace->setChecked(true);
+    else
+        ui->frFindReplace->setVisible( !vis );
+
+    applyTextFindState();
+
+    if (ui->frFindReplace->isVisible())
+    {
+        ui->cbActivateTextReplace->setChecked(true);
         ui->leFind->setFocus();
         ui->leFind->selectAll();
     }
@@ -1553,7 +1578,6 @@ void AScriptWindow::findText(bool bForward)
 
     QString textToFind = ui->leFind->text();
     const int oldPos = te->textCursor().anchor();
-    //QTextDocument::FindFlags flags = ( bForward ? QTextDocument::FindCaseSensitively : QTextDocument::FindCaseSensitively | QTextDocument::FindBackward );
     QTextDocument::FindFlags flags;
     if (!bForward)
         flags = flags | QTextDocument::FindBackward;
@@ -1630,10 +1654,50 @@ void AScriptWindow::applyTextFindState()
 
 void AScriptWindow::on_pbReplaceOne_clicked()
 {
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    QTextDocument* d = te->document();
 
+    QString textToFind = ui->leFind->text();
+    QString textReplacement = ui->leReplace->text();
+    const int oldPos = te->textCursor().anchor();
+    QTextDocument::FindFlags flags;
+    if (ui->cbFindTextCaseSensitive->isChecked())
+        flags = flags | QTextDocument::FindCaseSensitively;
+    if (ui->cbFindTextWholeWords->isChecked())
+        flags = flags | QTextDocument::FindWholeWords;
+
+    QTextCursor tc = d->find(textToFind, te->textCursor(), flags);
+    if (tc.isNull() || oldPos != tc.anchor())
+    {
+        message("Not found or cursor is not in front of the match pattern. Use find buttons above", this);
+        return;
+    }
+
+    tc.insertText(textReplacement);
+    te->setTextCursor(tc);
 }
 
 void AScriptWindow::on_pbReplaceAll_clicked()
 {
+    ATextEdit* te = ScriptTabs[CurrentTab]->TextEdit;
+    QTextDocument* d = te->document();
 
+    QString textToFind = ui->leFind->text();
+    QString textReplacement = ui->leReplace->text();
+
+    QTextDocument::FindFlags flags;
+    if (ui->cbFindTextCaseSensitive->isChecked())
+        flags = flags | QTextDocument::FindCaseSensitively;
+    if (ui->cbFindTextWholeWords->isChecked())
+        flags = flags | QTextDocument::FindWholeWords;
+
+    int numReplacements = 0;
+    QTextCursor tc = d->find(textToFind, 0, flags);
+    while (!tc.isNull())
+    {
+        tc.insertText(textReplacement);
+        numReplacements++;
+        tc = d->find(textToFind, tc, flags);
+    }
+    message("Replacements performed: " + QString::number(numReplacements));
 }

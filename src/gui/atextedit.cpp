@@ -515,12 +515,6 @@ void ATextEdit::onCursorPositionChanged()
 
   // extraSelections introduced later override previous if both match!
 
-  //checking for '}', ')' or ']' on the left
-  QColor colorBrackets = QColor(Qt::green).lighter(170);
-  checkBracketsOnLeft(extraSelections, colorBrackets);
-  //checking for '{', '(' or '[' on the right
-  checkBracketsOnRight(extraSelections, colorBrackets);
-
   //lowest priority: highlight line where the cursor is
   QTextEdit::ExtraSelection extra;
   QColor color = QColor(Qt::gray).lighter(150);
@@ -537,6 +531,12 @@ void ATextEdit::onCursorPositionChanged()
   extra.format.setBackground(color);
   extra.cursor = tc;
   extraSelections.append(extra);
+
+  //checking for '}', ')' or ']' on the left
+  QColor colorBrackets = QColor(Qt::green).lighter(170);
+  checkBracketsOnLeft(extraSelections, colorBrackets);
+  //checking for '{', '(' or '[' on the right
+  checkBracketsOnRight(extraSelections, colorBrackets);
 
   if (!FindString.isEmpty())
   {
@@ -634,18 +634,19 @@ void ATextEdit::checkBracketsOnLeft(QList<QTextEdit::ExtraSelection>& extraSelec
     //checking for '}', ')' or ']' on the left
     QTextCursor tc = textCursor();
     tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-    if (tc.selectedText() == "}" || tc.selectedText() == ")" || tc.selectedText() == "]")
+    const QString selText = tc.selectedText();
+    if ( selText == "}" || selText == ")" || selText == "]")
     {
         QString same, inverse;
-        if (tc.selectedText() == "}")
+        if (selText == "}")
         {
             same = "}"; inverse = "{";
         }
-        else if (tc.selectedText() == ")")
+        else if (selText == ")")
         {
             same = ")"; inverse = "(";
         }
-        else if (tc.selectedText() == "]")
+        else if (selText == "]")
         {
             same = "]"; inverse = "[";
         }
@@ -687,18 +688,19 @@ void ATextEdit::checkBracketsOnRight(QList<QTextEdit::ExtraSelection> &extraSele
     //checking for '{', '(' or '[' on the right
     QTextCursor tc = textCursor();
     tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-    if (tc.selectedText() == "{" || tc.selectedText() == "(" || tc.selectedText() == "[")
+    const QString selText = tc.selectedText();
+    if ( selText == "{" || selText == "(" || selText == "[" )
     {
         QString same, inverse;
-        if (tc.selectedText() == "{")
+        if (selText == "{")
         {
             same = "{"; inverse = "}";
         }
-        else if (tc.selectedText() == "(")
+        else if (selText == "(")
         {
             same = "("; inverse = ")";
         }
-        else if (tc.selectedText() == "[")
+        else if (selText == "[")
         {
             same = "["; inverse = "]";
         }

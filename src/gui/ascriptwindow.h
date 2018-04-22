@@ -121,6 +121,8 @@ private slots:
 
     void on_pbReplaceAll_clicked();
 
+    void on_actionReplace_widget_Ctr_r_triggered();
+
 public:
     enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 

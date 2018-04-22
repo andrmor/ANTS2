@@ -550,6 +550,7 @@
      <string>Find</string>
     </property>
     <addaction name="actionShow_Find_Replace"/>
+    <addaction name="actionReplace_widget_Ctr_r"/>
    </widget>
    <addaction name="menuTabs"/>
    <addaction name="menuFind"/>
@@ -618,10 +619,15 @@
   </action>
   <action name="actionShow_Find_Replace">
    <property name="text">
-    <string>Find / Replace widget (Ctr-f)</string>
+    <string>Find widget (Ctr-f)</string>
    </property>
    <property name="toolTip">
     <string>Find / Replace widget (Ctr-f)</string>
+   </property>
+  </action>
+  <action name="actionReplace_widget_Ctr_r">
+   <property name="text">
+    <string>Replace widget (Ctr-r)</string>
    </property>
   </action>
  </widget>

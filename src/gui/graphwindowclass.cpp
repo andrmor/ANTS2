@@ -2858,7 +2858,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           DrawObjects.append(DrawObjectStructure(Basket[row].DrawObjects[i].getPointer(), safe));
         }
       CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
-      RedrawAll();     
+      RedrawAll();
     }
   else if (selectedItem == scale)
     {
@@ -2940,6 +2940,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
                       double x, y;
                       g->GetPoint(i, x, y);
                       x = x * val.first + val.second;
+                      g->SetPoint(i, x, y);
                   }
               }
           }
@@ -3046,6 +3047,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           bool ok;
           QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
           if (ok) a->SetTitle(newTitle.toLatin1().data());
+          RedrawAll();
       }
   }
 }

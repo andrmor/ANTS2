@@ -1577,6 +1577,7 @@ void AScriptWindow::on_actionRestore_session_triggered()
     if (fileName.isEmpty()) return;
 
     QJsonObject json;
+    LoadJsonFromFile(json, fileName);
     ReadFromJson(json);
 }
 

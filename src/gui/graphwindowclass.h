@@ -301,6 +301,7 @@ private:
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
+    const QPair<double, double> runShiftDialog();
 };
 
 #endif // GRAPHWINDOWCLASS_H

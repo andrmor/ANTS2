@@ -2098,6 +2098,40 @@ double GraphWindowClass::runScaleDialog()
   return res;
 }
 
+const QPair<double, double> GraphWindowClass::runShiftDialog()
+{
+    QDialog* D = new QDialog(this);
+
+    QDoubleValidator* vali = new QDoubleValidator(D);
+    QVBoxLayout* l = new QVBoxLayout(D);
+    QHBoxLayout* l1 = new QHBoxLayout();
+      QLabel* lab1 = new QLabel("Multiply by: ");
+      QLineEdit* leM = new QLineEdit("1.0");
+      leM->setValidator(vali);
+      l1->addWidget(lab1);
+      l1->addWidget(leM);
+      QLabel* lab2 = new QLabel(" Add: ");
+      QLineEdit* leA = new QLineEdit("0");
+      leA->setValidator(vali);
+      l1->addWidget(lab2);
+      l1->addWidget(leA);
+    l->addLayout(l1);
+      QPushButton* pb = new QPushButton("Shift");
+      connect(pb, &QPushButton::clicked, D, &QDialog::accept);
+    l->addWidget(pb);
+
+    int ret = D->exec();
+    QPair<double, double> res(1.0, 0);
+    if (ret == QDialog::Accepted)
+      {
+        res.first =  leM->text().toDouble();
+        res.second = leA->text().toDouble();
+      }
+
+    delete D;
+    return res;
+}
+
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2578,12 +2612,15 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* del = 0;
   QAction* rename = 0;
   QAction* scale = 0;
+  QAction* shift = 0;
   QAction* uniMap = 0;
   QAction* gaussFit = 0;
   QAction* setLine = 0;
   QAction* setMarker = 0;
   QAction* drawMenu = 0;
   QAction* drawIntegral = 0;
+  QAction* titleX = 0;
+  QAction* titleY = 0;
 
   if (temp)
     {
@@ -2600,6 +2637,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       BasketMenu.addSeparator();
       rename = BasketMenu.addAction("Rename");
       scale = BasketMenu.addAction("Scale");
+      shift = BasketMenu.addAction("Shift X scale");
       if (!MasterDrawObjects.isEmpty())
           if ( QString(MasterDrawObjects.first().getPointer()->ClassName()) == "TH2D")
               if (Basket.at(row).Type == "TH2D")
@@ -2609,7 +2647,10 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              drawIntegral = BasketMenu.addAction("Draw integral");
       }
-      BasketMenu.addSeparator();      
+      BasketMenu.addSeparator();
+      titleX = BasketMenu.addAction("Edit title X");
+      titleY = BasketMenu.addAction("Edit title Y");
+      BasketMenu.addSeparator();
       del = BasketMenu.addAction("Delete");
       BasketMenu.addSeparator();
     }  
@@ -2869,6 +2910,57 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         }
       RedrawAll();
     } 
+  else if (selectedItem == shift)
+  {
+      if (row == -1) return; //protection
+      if (DrawObjects.isEmpty()) return; //protection
+      TObject* obj = Basket[row].DrawObjects.first().getPointer();
+      if (obj)
+      {
+          QString name = obj->ClassName();
+          QList<QString> impl;
+          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
+          if (!impl.contains(name))
+           {
+             message("Not implemented for this object type", this);
+             return;
+           }
+
+          const QPair<double, double> val = runShiftDialog();
+          if (val.first == 1.0 && val.second == 0) return;
+
+          if (name.startsWith("TGraph"))
+          {
+              TGraph* g = dynamic_cast<TGraph*>(obj);
+              if (g)
+              {
+                  const int num = g->GetN();
+                  for (int i=0; i<num; i++)
+                  {
+                      double x, y;
+                      g->GetPoint(i, x, y);
+                      x = x * val.first + val.second;
+                  }
+              }
+          }
+          else
+          {
+              TH1* h = dynamic_cast<TH1*>(obj);
+              if (h)
+              {
+                  const int nbins = h->GetXaxis()->GetNbins();
+                  double* new_bins = new double[nbins+1];
+                  for (int i=0; i <= nbins; i++)
+                      new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
+
+                  h->SetBins(nbins, new_bins);
+                  delete [] new_bins;
+              }
+          }
+
+          RedrawAll();
+      }
+  }
   else if (selectedItem == uniMap)
   {
       TH2D* map = static_cast<TH2D*>(Basket[row].DrawObjects.first().getPointer());
@@ -2924,6 +3016,37 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           hi->SetBinContent(i, prev);
         }
       Draw(hi, "");
+  }
+  else if (selectedItem == titleX || selectedItem == titleY)
+  {
+      if (row == -1) return; //protection
+      if (DrawObjects.isEmpty()) return; //protection
+      TObject* obj = Basket[row].DrawObjects.first().getPointer();
+      if (obj)
+      {
+          TAxis* a = 0;
+
+          TGraph* g = dynamic_cast<TGraph*>(obj);
+          if (g)
+             a = ( selectedItem == titleX ? g->GetXaxis() : g->GetYaxis() );
+          else
+          {
+              TH1* h = dynamic_cast<TH1*>(obj);
+              if (h)
+                 a = ( selectedItem == titleX ? h->GetXaxis() : h->GetYaxis() );
+              else
+              {
+                  message("Not supported for this object type", this);
+                  return;
+              }
+          }
+
+          QString oldTitle;
+          oldTitle = a->GetTitle();
+          bool ok;
+          QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
+          if (ok) a->SetTitle(newTitle.toLatin1().data());
+      }
   }
 }
 

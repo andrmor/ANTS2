@@ -125,10 +125,10 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
 
 void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
 {
-  MW->extractGeometryOfScriptWindow();
+  MW->extractGeometryOfLocalScriptWindow();
   if (MW->GenScriptWindow) delete MW->GenScriptWindow;
   MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-  MW->recallGeometryOfScriptWindow();
+  MW->recallGeometryOfLocalScriptWindow();
 
   //configure the script window and engine
   GStyleInterface  = new  InterfaceToGStyleScript() ; //deleted by the GenScriptWindow

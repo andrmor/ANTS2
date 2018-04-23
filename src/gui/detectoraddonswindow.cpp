@@ -509,10 +509,10 @@ void DetectorAddOnsWindow::HighlightVolume(QString VolName)
 
 void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
 {
-  MW->extractGeometryOfScriptWindow();
+  MW->extractGeometryOfLocalScriptWindow();
   if (MW->GenScriptWindow) delete MW->GenScriptWindow;  
   MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-  MW->recallGeometryOfScriptWindow();
+  MW->recallGeometryOfLocalScriptWindow();
 
   QList<QTreeWidgetItem*> list = twGeo->selectedItems();
   if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);

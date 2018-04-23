@@ -30,11 +30,10 @@ class AScriptWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, QWidget *parent = 0);
+    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");
-    void SetScript(QString *text);
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
     void AddNewTab();  // new tab !
@@ -51,6 +50,8 @@ public:
     void onBusyOn();
     void onBusyOff();
 
+    void ConfigureForLightMode(QString* ScriptPtr, const QString &WindowTitle, const QString& Example);
+
     AScriptManager* ScriptManager;
     QStringList functions;
 
@@ -61,7 +62,6 @@ public slots:
     void ShowText(QString text); //shows text in the output box
     void ClearText(); //clears text in the output box
     void on_pbRunScript_clicked();
-    //void abortEvaluation(QString message = "Aborted!");
     void onF1pressed(QString text);
     void onLoadRequested(QString NewScript);
 
@@ -108,19 +108,12 @@ private slots:
     void on_actionRestore_session_triggered();
 
     void on_pbCloseFindReplaceFrame_clicked();
-
     void on_actionShow_Find_Replace_triggered();
-
     void on_pbFindNext_clicked();
-
     void on_pbFindPrevious_clicked();
-
     void on_leFind_textChanged(const QString &arg1);
-
     void on_pbReplaceOne_clicked();
-
     void on_pbReplaceAll_clicked();
-
     void on_actionReplace_widget_Ctr_r_triggered();
 
 public:
@@ -137,6 +130,10 @@ private:
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
+    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for small local scripts
+    QString* LightModeScript = 0;
+    QString  LightModeExample;
+
     QSplitter* splMain;
     QSplitter* splHelp;
     QPlainTextEdit* pteOut;
@@ -149,10 +146,6 @@ private:
     QLineEdit* leFindJ;
     QIcon* RedIcon;
 
-    QString* Script;     //pointer to external script
-    QString LocalScript; //if external not provided, this is the default script
-
-    bool tmpIgnore;
     bool ShowEvalResult;
 
     QSet<QString> ExpandedItemsInJsonTW;

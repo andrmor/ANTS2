@@ -125,10 +125,10 @@ public:
     QVector<GeoMarkerClass*> GeoMarkers;
     QVector<AParticleOnStack*> ParticleStack;
 
-    InterfaceToPMscript *PMscriptInterface;
+    InterfaceToPMscript *PMscriptInterface = 0;
 
     QVector<QVector3D*> CustomScanNodes;
-    InterfaceToNodesScript *NodesScriptInterface;
+    InterfaceToNodesScript *NodesScriptInterface = 0;
     QString NodesScript;
 
     //critical - updates
@@ -194,8 +194,8 @@ public:
     TH1D *histSecScint = 0;
 
     int ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH;
-    void recallGeometryOfScriptWindow();
-    void extractGeometryOfScriptWindow();
+    void recallGeometryOfLocalScriptWindow();
+    void extractGeometryOfLocalScriptWindow();
 
     void LoadSecScintTheta(QString fileName);
 

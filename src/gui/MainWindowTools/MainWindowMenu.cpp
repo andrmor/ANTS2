@@ -250,7 +250,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           parseJson(js, "y", ScriptWinY);
           parseJson(js, "w", ScriptWinW);
           parseJson(js, "h", ScriptWinH);
-          if (GenScriptWindow) recallGeometryOfScriptWindow();
+          if (GenScriptWindow) recallGeometryOfLocalScriptWindow();
         }
     }
 }

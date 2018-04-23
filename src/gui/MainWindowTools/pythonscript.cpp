@@ -38,7 +38,7 @@ void MainWindow::createPythonScriptWindow()
 {
   QWidget* w = new QWidget();
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
-  PythonScriptWindow = new AScriptWindow(PSM, GlobSet, w);
+  PythonScriptWindow = new AScriptWindow(PSM, GlobSet, false, w);
   PythonScriptWindow->move(25,25);
   connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));

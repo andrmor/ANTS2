@@ -42,7 +42,7 @@ void MainWindow::createScriptWindow()
 {
     QWidget* w = new QWidget();
     AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
-    ScriptWindow = new AScriptWindow(SM, GlobSet, w); //transfer ownership of SM
+    ScriptWindow = new AScriptWindow(SM, GlobSet, false, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
     connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);

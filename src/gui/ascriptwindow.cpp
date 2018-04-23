@@ -46,8 +46,8 @@
 #include <QDesktopServices>
 #include <QInputDialog>
 
-AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, QWidget *parent) :
-    QMainWindow(parent), ScriptManager(ScriptManager),
+AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
+    QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow)
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
@@ -83,11 +83,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     ScriptManager->LastOpenDir = GlobSet->LastOpenDir;
     ScriptManager->ExamplesDir = GlobSet->ExamplesDir;
 
-    tmpIgnore = false;
     ShowEvalResult = true;
     ui->setupUi(this);
     ui->pbStop->setVisible(false);
-    LocalScript = "//no external script provided!";
     this->setWindowTitle("ANTS2 script");
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
@@ -255,12 +253,21 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
 
-    ReadFromJson();
+    if (!bLightMode)
+        ReadFromJson();
+    else
+    {
+        ui->pbConfig->setEnabled(false);
+        twScriptTabs->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
+        ui->pbExample->setText("Example");
+        ui->menuTabs->setEnabled(false);
+        ui->menuView->setEnabled(false);
+    }
+
 }
 
 AScriptWindow::~AScriptWindow()
 {
-  tmpIgnore = true;
   clearAllTabs();
   delete ui;
   delete RedIcon;
@@ -280,7 +287,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     { // empty name means the main module
         // populating help for main, math and core units
         trwHelp->clear();
-        //fillHelper(interfaceObject, "", "Global object functions"); //forbidden to override master object now.
+        if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
         AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core");
         newFunctions << getCustomCommandsOfObject(&core, "core", false);
@@ -310,17 +317,8 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 
-    trwHelp->collapseAll();
-}
-
-void AScriptWindow::SetScript(QString* text)
-{
-    Script = text;
-
-    tmpIgnore = true;
-      ScriptTabs[CurrentTab]->TextEdit->clear();
-      ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*text);
-      tmpIgnore = false;
+    if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
+    else trwHelp->collapseAll();
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -466,6 +464,19 @@ void AScriptWindow::onBusyOff()
     ui->pbRunScript->setEnabled(true);
 }
 
+void AScriptWindow::ConfigureForLightMode(QString *ScriptPtr, const QString& WindowTitle, const QString &Example)
+{
+    LightModeScript = ScriptPtr;
+    LightModeExample = Example;
+    setWindowTitle(WindowTitle);
+
+    if (LightModeScript)
+    {
+        ScriptTabs[CurrentTab]->TextEdit->clear();
+        ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*LightModeScript);
+    }
+}
+
 void AScriptWindow::ShowText(QString text)
 {
   pteOut->appendHtml(text);
@@ -484,6 +495,7 @@ void AScriptWindow::on_pbRunScript_clicked()
    GlobSet->SaveANTSconfiguration();
 
    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+   if (bLightMode && LightModeScript) *LightModeScript = Script;
 
    //qDebug() << "Init on Start done";
    pteOut->clear();
@@ -600,6 +612,7 @@ void AScriptWindow::on_pbLoad_clicked()
     }
   QTextStream in(&file);
   QString Script = in.readAll();
+  if (bLightMode && LightModeScript) *LightModeScript = Script;
   file.close();
 
   onLoadRequested(Script);
@@ -617,10 +630,8 @@ void AScriptWindow::onLoadRequested(QString NewScript)
     //twScriptTabs->setTabText(CurrentTab, "__123456789");
     //twScriptTabs->setTabText(CurrentTab, createNewTabName());
 
-    tmpIgnore = true;
     ScriptTabs[CurrentTab]->TextEdit->clear();
     ScriptTabs[CurrentTab]->TextEdit->appendPlainText(NewScript);
-    tmpIgnore = false;
 
     //for examples (triggered on signal from example explorer -> do not register file name!)
     ScriptTabs[CurrentTab]->FileName.clear();
@@ -680,6 +691,39 @@ void AScriptWindow::on_pbSaveAs_clicked()
 
 void AScriptWindow::on_pbExample_clicked()
 {
+    if (bLightMode)
+    {
+        if (!LightModeScript)
+        {
+            message("Error: script pointer is not set", this);
+            return;
+        }
+
+        if (!ScriptTabs[CurrentTab]->TextEdit->document()->isEmpty())
+        {
+            QMessageBox b;
+            b.setText("Load / append example");
+            //msgBox.setInformativeText("Do you want to save your changes?");
+            QPushButton* append = b.addButton("Append", QMessageBox::AcceptRole);
+            b.addButton("Replace", QMessageBox::AcceptRole);
+            QPushButton* cancel = b.addButton("Cancel", QMessageBox::RejectRole);
+            b.setDefaultButton(cancel);
+
+            b.exec();
+
+            if (b.clickedButton() == cancel) return;
+            if (b.clickedButton() == append)
+                *LightModeScript += "\n" + LightModeExample;
+            else
+                *LightModeScript = LightModeExample;
+        }
+        else *LightModeScript = LightModeExample;
+
+        ScriptTabs[CurrentTab]->TextEdit->clear();
+        ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*LightModeScript);
+        return;
+    }
+
     //reading example database
     QString target = (ScriptLanguage == _JavaScript_ ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
     QString RecordsFilename = GlobSet->ExamplesDir + "/" + target;
@@ -1268,7 +1312,9 @@ void AScriptWindow::on_pbFileName_clicked()
 
 void AScriptWindow::onRequestTabWidgetContextMenu(QPoint pos)
 {
-    if (pos.isNull())return;
+    if (bLightMode) return;
+
+    if (pos.isNull()) return;
 
     QMenu menu;
     int tab = twScriptTabs->tabBar()->tabAt(pos);

@@ -51,6 +51,8 @@
 #include "gui/alrfwindow.h"
 #include "acustomrandomsampling.h"
 #include "particlesourcesclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 
 //Qt
 #include <QDebug>
@@ -1321,16 +1323,15 @@ bool MainWindow::isWavelengthResolved() const
   return ui->cbWaveResolved->isChecked();
 }
 
-void MainWindow::recallGeometryOfScriptWindow()
+void MainWindow::recallGeometryOfLocalScriptWindow()
 {
   if (!GenScriptWindow) return;
-    //GenScriptWindow->setGeometry(ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH);
 
   GenScriptWindow->move(ScriptWinX, ScriptWinY);
   GenScriptWindow->resize(ScriptWinW, ScriptWinH);
 }
 
-void MainWindow::extractGeometryOfScriptWindow()
+void MainWindow::extractGeometryOfLocalScriptWindow()
 {
   if (GenScriptWindow)
     {
@@ -4275,33 +4276,20 @@ void MainWindow::on_pbShowNodes_clicked()
 
 void MainWindow::on_pbRunNodeScript_clicked()
 {
-  extractGeometryOfScriptWindow();
-  if (GenScriptWindow) delete GenScriptWindow;
-  GenScriptWindow = new GenericScriptWindowClass(Detector->RandGen);
-  recallGeometryOfScriptWindow();
+  extractGeometryOfLocalScriptWindow();
+  if (GenScriptWindow) delete GenScriptWindow; GenScriptWindow = 0;
 
-  //configure the script window and engine
-  NodesScriptInterface = new InterfaceToNodesScript(); //deleted by the GenScriptWindow  
-  GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
-  //QStringList coms;
-  //coms << "node";
-  //GenScriptWindow->SetCustomCommands(coms);
-  QString HelpText = "  Available commands:\n\n"
-                     " node(x, y, z)\n"
-                     " Math. followed by standard function (e.g. sin(x) )\n";
-  GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-  GenScriptWindow->SetExample("for (var i=0; i<5; i++) node(i*10, (i-2)*20, 0)\nnode(40,-20,10)");
+  AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
+  AScriptWindow* sw = new AScriptWindow(jsm, GlobSet, true, this);
+  sw->ConfigureForLightMode(&NodesScript, "Custom nodes", "for (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
-  GenScriptWindow->SetTitle("Custom nodes");
+  if (!NodesScriptInterface) delete NodesScriptInterface;
+  NodesScriptInterface = new InterfaceToNodesScript();
+  sw->SetInterfaceObject(NodesScriptInterface);
+  connect(sw, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
-  GenScriptWindow->SetScript(&NodesScript);
-
-  GenScriptWindow->SetStarterDir(GlobSet->LibScripts);
-
-  //define what to do on evaluation success
-  connect(GenScriptWindow, SIGNAL(success(QString)), this, SLOT(NodesScriptSuccess()));
-  //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
-  GenScriptWindow->show();
+  recallGeometryOfLocalScriptWindow();
+  sw->show();
 }
 
 void MainWindow::NodesScriptSuccess()

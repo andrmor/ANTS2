@@ -409,15 +409,14 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
         AddNewTab();
         AScriptWindowTabItem* st = ScriptTabs.last();
         st->ReadFromJson(js);
-
         if (st->TabName.isEmpty()) st->TabName = createNewTabName();
         if (!st->FileName.isEmpty())
         {
            QString ScriptInFile;
            if ( LoadTextFromFile(st->FileName, ScriptInFile) )
            {
-               QTextEdit te;
-               te.append(ScriptInFile);
+               QPlainTextEdit te;
+               te.appendPlainText(ScriptInFile);
                st->setModifiedStatus( !(te.document()->toPlainText() == st->TextEdit->document()->toPlainText()) );
            }
         }
@@ -1218,7 +1217,6 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
     QString Script = json["Script"].toString();
     TextEdit->clear();
     TextEdit->appendPlainText(Script);
-
     FileName.clear();
     FileName = json["FileName"].toString();
 
@@ -1741,7 +1739,7 @@ void AScriptWindow::onFindVariable()
     QStringList sl = name.split("(");
     if (sl.size() > 0) name = sl.first();
     QRegExp sp("\\bvar\\s+" + name + "\\b");
-    qDebug() << "Looking for:"<<sp;
+    //qDebug() << "Looking for:"<<sp;
 
     QTextDocument::FindFlags flags = QTextDocument::FindCaseSensitively;
 

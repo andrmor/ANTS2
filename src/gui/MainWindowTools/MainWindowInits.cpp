@@ -127,16 +127,18 @@ MainWindow::MainWindow(DetectorClass *Detector,
     w = new QWidget();
     WindowNavigator = new WindowNavigatorClass(w, this);
     WindowNavigator->move(700,50);
-    qDebug()<<">Creating Graph Window";
+    qDebug()<<">Creating graph window";
     w = new QWidget();
     GraphWindow = new GraphWindowClass(w, this);
     GraphWindow->move(25,25);
-    qDebug()<<">Creating Geometry Window";
+    qDebug()<<">Creating geometry window";
     w = new QWidget();
     GeometryWindow = new GeometryWindowClass(w, this);
     GeometryWindow->move(25,25);
+    qDebug()<<">Creating JavaScript window";
     createScriptWindow();
 #ifdef __USE_ANTS_PYTHON__
+    qDebug()<<">Creating Python script window";
     createPythonScriptWindow();
 #endif
     qDebug()<<">All windows created";

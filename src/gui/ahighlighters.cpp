@@ -6,7 +6,6 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
    : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
-
     keywordFormat.setForeground(Qt::blue);
     //keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
@@ -14,10 +13,14 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
                     << "\\bdo\\b" << "\\bwhile\\b" << "\\bfor\\b"
                     << "\\bin\\b" << "\\bfunction\\b" << "\\bif\\b"
                     << "\\belse\\b" << "\\breturn\\b" << "\\bswitch\\b"
-                    << "\\bthrow\\b" << "\\btry\\b" << "\\bvar\\b" << "\\bpush\\b" << "\\btypeof\\b"
-                    << "\\Math.\\b" << "\\Array.\\b" << "\\String.\\b";
-    foreach (const QString &pattern, keywordPatterns) {
+                    << "\\bthrow\\b" << "\\btry\\b" << "\\bvar\\b"
+                    << "\\bpush\\b" << "\\btypeof\\b"
+                    << "\\bsplice\\b"
+                    << "\\bMath\\s*.\\b" << "\\bArray\\s*.\\b" << "\\bString\\s*.\\b";
+    for (const QString &pattern : keywordPatterns)
+    {
         rule.pattern = QRegularExpression(pattern);
+        if (!rule.pattern.isValid()) qDebug() << "-------------------------" << pattern;
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
@@ -193,7 +196,7 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
                        "array" << "close" << "float" << "int" << "input" <<
                        "open" << "range" << "type" << "write" << "zeros";
 
-    foreach (const QString &pattern, keywordPatterns)
+    for (const QString &pattern : keywordPatterns)
     {
         QString pattern1 = QString("\\b") + pattern + "\\b";
 
@@ -218,19 +221,11 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     multiLineCommentFormat.setForeground(Qt::darkGreen);
 
     quotationFormat.setForeground(Qt::darkGreen);
-    //QRegularExpression rx("\".*\"");
     QRegularExpression rx("((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\1))*.?)\\1");
     //qDebug() << "----------------------"<< rx.isValid();
-    //rx.setMinimal(true); //fixes the problem with "xdsfdsfds" +variable+ "dsfdsfdsf"
     rule.pattern = rx;
     rule.format = quotationFormat;
     highlightingRules.append(rule);
-
-//    charFormat.setForeground(Qt::darkGreen);
-//    rule.pattern = QRegularExpression("'.'");
-//    rule.format = charFormat;
-//    highlightingRules.append(rule);
-
 /*
     functionFormat.setFontItalic(true);
     functionFormat.setForeground(Qt::blue);
@@ -239,6 +234,4 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     highlightingRules.append(rule);
 */
 
-    commentStartExpression = QRegularExpression("/\\*");
-    commentEndExpression = QRegularExpression("\\*/");
 }

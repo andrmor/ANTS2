@@ -270,10 +270,15 @@ void AInterfaceToGuiScript::editSetCompleter(const QString name, const QVariant 
         QStringList sl;
         for (int i=0; i<vl.size(); i++) sl << vl.at(i).toString();
 
-        qDebug() << "possible:" << sl;
+        //qDebug() << "possible:" << sl;
 
         QCompleter* completer = new QCompleter(sl, e);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        completer->setCaseSensitivity(Qt::CaseInsensitive); //Qt::CaseSensitive
+        completer->setCompletionMode(QCompleter::PopupCompletion);
+        //completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+        completer->setFilterMode(Qt::MatchContains);
+        completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+        completer->setWrapAround(false);
         e->setCompleter(completer);
     }
 }

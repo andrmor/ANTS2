@@ -1614,8 +1614,16 @@ void AScriptWindow::onFindSelected()
 
     QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
     QString sel = tc.selectedText();
-    if (!sel.isEmpty())
-        ui->leFind->setText(sel);
+    //if (!sel.isEmpty())
+    //    ui->leFind->setText(sel);
+
+    if (sel.isEmpty())
+    {
+        tc.select(QTextCursor::WordUnderCursor);
+        sel = tc.selectedText();
+    }
+
+    ui->leFind->setText(sel);
 
     ui->leFind->setFocus();
     ui->leFind->selectAll();
@@ -1650,17 +1658,24 @@ void AScriptWindow::onReplaceSelected()
 
     QTextCursor tc = ScriptTabs[CurrentTab]->TextEdit->textCursor();
     QString sel = tc.selectedText();
+    //if (sel.isEmpty())
+    //{
+    //    ui->leFind->setFocus();
+    //    ui->leFind->selectAll();
+    //}
+    //else
+    //{
+
     if (sel.isEmpty())
     {
-        ui->leFind->setFocus();
-        ui->leFind->selectAll();
+        tc.select(QTextCursor::WordUnderCursor);
+        sel = tc.selectedText();
     }
-    else
-    {
+
         ui->leFind->setText(sel);
         ui->leReplace->setFocus();
         ui->leReplace->selectAll();
-    }
+    //}
 
     applyTextFindState();
 }
@@ -1673,8 +1688,8 @@ void AScriptWindow::onFindFunction()
     QString name = tc.selectedText();
     if (name.isEmpty())
     {
-        message("Select function name", this);
-        return;
+        tc.select(QTextCursor::WordUnderCursor);
+        name = tc.selectedText();
     }
 
     QStringList sl = name.split("(");
@@ -1719,8 +1734,8 @@ void AScriptWindow::onFindVariable()
     QString name = tc.selectedText();
     if (name.isEmpty())
     {
-        message("Select variable name", this);
-        return;
+        tc.select(QTextCursor::WordUnderCursor);
+        name = tc.selectedText();
     }
 
     QStringList sl = name.split("(");

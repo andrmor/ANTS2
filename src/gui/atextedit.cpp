@@ -575,22 +575,22 @@ void ATextEdit::onCursorPositionChanged()
             }
 
           //variable highlight test
-          QRegExp patvar("\\bvar\\s"+selection+"\\b");
+          QRegExp patvar("\\bvar\\s+"+selection+"\\b");
           QTextCursor cursor1 = document()->find(patvar, tc, QTextDocument::FindCaseSensitively | QTextDocument::FindBackward);
-          if (cursor1.hasSelection() && cursor1 != tc)
+          if (cursor1.hasSelection())// && cursor1 != tc)
             {
               QTextEdit::ExtraSelection extra;
               extra.format.setBackground(Qt::black);
               extra.format.setForeground(Qt::white);
                 //extra.format.setFontUnderline(true);
-                //extra.format.setUnderlineColor(Qt::red);
+              extra.format.setUnderlineColor(Qt::black);
               extra.cursor = cursor1;
               extraSelections.append(extra);
 
               QTextEdit::ExtraSelection extra1;
-              //extra1.format.setFontUnderline(true);
-              //extra1.format.setUnderlineColor(Qt::blue);
               extra1.format.setBackground(Qt::white);
+              extra1.format.setFontUnderline(true);
+              extra1.format.setUnderlineColor(Qt::blue);
               //extra1.format.setForeground(color);
               extra1.cursor = tc;
               extraSelections.append(extra1);

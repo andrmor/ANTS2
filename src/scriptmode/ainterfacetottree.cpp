@@ -160,6 +160,15 @@ bool AInterfaceToTTree::IsTreeExists(const QString &TreeName) const
     return r;
 }
 
+void AInterfaceToTTree::ResetTreeAddresses(const QString &TreeName)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+        r->resetTreeRecords();
+}
+
 /*
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
@@ -523,6 +532,9 @@ const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &wh
         r->externalLock();
         emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, outBR, outML, &error);
         r->externalUnlock();
+
+        //r->resetTreeRecords();
+
         return error;
     }
 }

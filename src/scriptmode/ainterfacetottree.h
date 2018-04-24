@@ -52,6 +52,8 @@ public slots:
    const QVariant GetAllTreeNames() const;
    bool     IsTreeExists(const QString& TreeName) const;
 
+   void     ResetTreeAddresses(const QString& TreeName);
+
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();
 

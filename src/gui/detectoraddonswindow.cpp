@@ -91,7 +91,6 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
 {
-    delete AddObjScriptInterface; AddObjScriptInterface = 0;
     delete ui;  ui = 0;
 }
 
@@ -527,7 +526,7 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
       Detector->AddObjPositioningScript = obj->LastScript;
 
     MW->extractGeometryOfLocalScriptWindow();
-    if (MW->GenScriptWindow) delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
+    delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
 
     AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
     MW->GenScriptWindow = new AScriptWindow(jsm, MW->GlobSet, true, this);
@@ -536,7 +535,7 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
     MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
-    if (!AddObjScriptInterface) AddObjScriptInterface = new InterfaceToAddObjScript(Detector);
+    AddObjScriptInterface = new InterfaceToAddObjScript(Detector);
     MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
 
     connect(AddObjScriptInterface, &InterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);

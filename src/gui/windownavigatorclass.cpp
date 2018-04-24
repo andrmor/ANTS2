@@ -10,7 +10,6 @@
 #include "geometrywindowclass.h"
 #include "exampleswindow.h"
 #include "gainevaluatorwindowclass.h"
-#include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "ascriptwindow.h"
 #include "detectoraddonswindow.h"

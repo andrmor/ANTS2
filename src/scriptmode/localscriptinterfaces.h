@@ -87,15 +87,16 @@ public slots:
 
 class InterfaceToNodesScript : public AScriptInterface
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  QVector<QVector3D*> nodes; //output is placed here
+    InterfaceToNodesScript(QVector<QVector3D *> & nodes);
 
-  InterfaceToNodesScript();
-  ~InterfaceToNodesScript();
+private:
+    QVector<QVector3D*> & nodes;
 
 public slots:
-  void node(double x, double y, double z);
+    void clear();
+    void node(double x, double y, double z);
 };
 
 #endif // LOCALSCRIPTINTERFACES_H

@@ -528,7 +528,6 @@ ants2_GUI {
     gui/ReconstructionWindowTools/Reconstruction_NN.cpp \
     gui/viewer2darrayobject.cpp \
     gui/shapeablerectitem.cpp \
-    gui/genericscriptwindowclass.cpp \
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
@@ -567,7 +566,6 @@ HEADERS  += gui/mainwindow.h \
     gui/RasterWindow/rasterwindowgraphclass.h \
     gui/viewer2darrayobject.h \
     gui/shapeablerectitem.h \
-    gui/genericscriptwindowclass.h \
     gui/graphicsruler.h \
     gui/credits.h \
     gui/globalsettingswindowclass.h \

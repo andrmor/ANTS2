@@ -40,8 +40,7 @@ GlobalSettingsWindowClass::GlobalSettingsWindowClass(MainWindow *parent) :
 
 GlobalSettingsWindowClass::~GlobalSettingsWindowClass()
 {
-  delete ui; ui = 0;
-  delete GStyleInterface; GStyleInterface = 0;
+   delete ui; ui = 0;
 }
 
 void GlobalSettingsWindowClass::updateGUI()
@@ -128,7 +127,7 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
 void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
 {
     MW->extractGeometryOfLocalScriptWindow();
-    if (MW->GenScriptWindow) delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
+    delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
 
     AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
     MW->GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
@@ -138,7 +137,7 @@ void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
                               "Script to set ROOT's gStyle",
                               example);
 
-    if (!GStyleInterface) GStyleInterface = new  InterfaceToGStyleScript();
+    GStyleInterface = new InterfaceToGStyleScript();
     MW->GenScriptWindow->SetInterfaceObject(GStyleInterface);
 
     MW->recallGeometryOfLocalScriptWindow();

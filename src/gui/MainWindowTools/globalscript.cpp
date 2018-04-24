@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ajavascriptmanager.h"
 #include "ui_mainwindow.h"
-#include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"

@@ -6,9 +6,8 @@
 #include "apmhub.h"
 #include "outputwindow.h"
 #include "reconstructionwindow.h"
-#include "gainevaluatorwindowclass.h"   //onPMnumChange!
+#include "gainevaluatorwindowclass.h"
 #include "detectorclass.h"
-#include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "materialinspectorwindow.h"
 #include "checkupwindowclass.h"
@@ -251,10 +250,8 @@ void MainWindow::NumberOfPMsHaveChanged()
 
 void MainWindow::on_pbPositionScript_clicked()
 {
-    // ***!!! transfer all processing to script interface?
-
     extractGeometryOfLocalScriptWindow();
-    if (GenScriptWindow) delete GenScriptWindow; GenScriptWindow = 0;
+    delete GenScriptWindow; GenScriptWindow = 0;
 
     AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
     GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
@@ -265,7 +262,6 @@ void MainWindow::on_pbPositionScript_clicked()
     QString example = "for (var i=0; i<3; i++)\n  PM(i*60, (i-2)*60, 0, 0)";
     GenScriptWindow->ConfigureForLightMode(&Detector->PMarrays[ul].PositioningScript, title, example);
 
-    if (PMscriptInterface) delete PMscriptInterface;
     PMscriptInterface = new InterfaceToPMscript();
     GenScriptWindow->SetInterfaceObject(PMscriptInterface);
     connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::PMscriptSuccess); // ***!!! uses ScriptWindow directly!

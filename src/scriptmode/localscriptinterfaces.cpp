@@ -754,20 +754,19 @@ void InterfaceToPMscript::PM(double x, double y, double z, QString type, double 
   arr.append(el);
 }
 
-InterfaceToNodesScript::InterfaceToNodesScript()
+InterfaceToNodesScript::InterfaceToNodesScript(QVector<QVector3D*> & nodes) : nodes(nodes)
 {
-  H["node"] = "Adds a node with (x,y,z) coordinates";
+    H["node"] = "Adds a node with (x,y,z) coordinates";
+    H["clear"] = "clear all nodes";
 }
 
-InterfaceToNodesScript::~InterfaceToNodesScript()
+void InterfaceToNodesScript::clear()
 {
-  //on normal operation nodes are empty - the addresses are transferred to CustomScanNodes container of the main window
-  //qDebug() << "nodes still defined in destructor:"<<nodes.size();
-  for (int i=0; i<nodes.size(); i++) delete nodes[i];
-  nodes.clear();
+    for (int i=0; i<nodes.size(); i++) delete nodes.at(i);
+    nodes.clear();
 }
 
 void InterfaceToNodesScript::node(double x, double y, double z)
 {
-  nodes.append( new QVector3D(x,y,z));
+    nodes.append( new QVector3D(x,y,z) );
 }

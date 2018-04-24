@@ -28,7 +28,8 @@
 #ifdef GUI
 #include "mainwindow.h"
 #include "exampleswindow.h"
-#include "genericscriptwindowclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 #include "ainterfacetomessagewindow.h"
 #endif
 
@@ -151,7 +152,8 @@ int main(int argc, char *argv[])
     }
     else if (argc == 2 && (QString(argv[1])=="-b" || QString(argv[1])=="--batch") )
     {
-        GenericScriptWindowClass GenScriptWindow(Detector.RandGen);
+        AJavaScriptManager* jsm = new AJavaScriptManager(Detector.RandGen);
+        AScriptWindow GenScriptWindow(jsm, &GlobSet, false, 0);
 
         GenScriptWindow.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
 
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
         InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
         GenScriptWindow.SetInterfaceObject(geo, "geo");
 
-        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(GenScriptWindow.ScriptManager);
+        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(jsm);
         GenScriptWindow.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
@@ -196,20 +198,17 @@ int main(int argc, char *argv[])
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window
-        GenScriptWindow.SetStarterDir(GlobSet.LibScripts, GlobSet.LastOpenDir, GlobSet.ExamplesDir);
-        GenScriptWindow.SetExample(""); //empty example will force to start example explorer on "Example" button pressed
-        GenScriptWindow.SetShowEvaluationResult(true);
-        GenScriptWindow.SetTitle("ANTS2 batch mode");
-        GenScriptWindow.SetScript(&GlobSet.GlobScript);
+        GenScriptWindow.setWindowTitle("ANTS2 batch mode");
+        //GenScriptWindow.SetScript(&GlobSet.GlobScript);
 
-        QObject::connect(&GenScriptWindow, SIGNAL(success(QString)), &GenScriptWindow, SLOT(updateJsonTree()));
+        QObject::connect(&GenScriptWindow, &AScriptWindow::success, &GenScriptWindow, &AScriptWindow::updateJsonTree);
 
         if (QFile(GlobSet.ExamplesDir + "/StartupDetector.json").exists())
             Config.LoadConfig(GlobSet.ExamplesDir + "/StartupDetector.json");
         else
             message("Default detector configuration not loaded - file not found");
 
-        GenScriptWindow.SetJsonTreeAlwaysVisible(true);
+        //GenScriptWindow.SetJsonTreeAlwaysVisible(true);
         GenScriptWindow.show();
         return a.exec();
     }

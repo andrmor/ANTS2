@@ -144,7 +144,7 @@ public:
   void updateGUI();
   void SetTab(int iTab);
 
-  InterfaceToGStyleScript* GStyleInterface = 0;
+  InterfaceToGStyleScript* GStyleInterface = 0;  // if created -> owned by the script manager
 
 public slots:
   void updateNetGui();

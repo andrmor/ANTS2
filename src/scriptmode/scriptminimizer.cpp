@@ -3,7 +3,6 @@
 
 #ifdef GUI
 #include "mainwindow.h"
-#include "genericscriptwindowclass.h"
 #endif
 
 #include <QScriptEngine>

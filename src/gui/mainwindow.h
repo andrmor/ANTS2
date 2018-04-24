@@ -40,7 +40,6 @@ class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
 class Viewer2DarrayObject;
-class GenericScriptWindowClass;
 class DetectorClass;
 class ASimulatorRunner;
 class ParticleSourceSimulator;
@@ -82,18 +81,18 @@ public:
     ~MainWindow();
 
     // Pointers to external resources
-    DetectorClass *Detector;
-    APmHub* PMs;                                   //alias
-    AMaterialParticleCollection* MpCollection;  //alias
-    AConfiguration* Config;
-    EventsDataClass *EventsDataHub;
-    TApplication *RootApp;
-    ASimulationManager* SimulationManager;
-    ParticleSourcesClass* ParticleSources;      //alias
-    AReconstructionManager *ReconstructionManager;
-    ANetworkModule* NetModule;
-    TmpObjHubClass *TmpHub;
-    GlobalSettingsClass* GlobSet;
+    DetectorClass *Detector = 0;
+    APmHub* PMs = 0;
+    AMaterialParticleCollection* MpCollection = 0;
+    AConfiguration* Config = 0;
+    EventsDataClass *EventsDataHub = 0;
+    TApplication *RootApp = 0;
+    ASimulationManager* SimulationManager = 0;
+    ParticleSourcesClass* ParticleSources = 0;
+    AReconstructionManager *ReconstructionManager = 0;
+    ANetworkModule* NetModule = 0;
+    TmpObjHubClass *TmpHub = 0;
+    GlobalSettingsClass* GlobSet = 0;
 
     // ANTS2 windows
     GraphWindowClass *GraphWindow = 0;
@@ -118,17 +117,17 @@ public:
 #endif
 
     // custom gui elements
-    ASlabListWidget* lw;
+    ASlabListWidget* lw = 0;
 
     //local data, just for GUI
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<GeoMarkerClass*> GeoMarkers;
     QVector<AParticleOnStack*> ParticleStack;
 
-    InterfaceToPMscript *PMscriptInterface = 0;
+    InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
     QVector<QVector3D*> CustomScanNodes;
-    InterfaceToNodesScript *NodesScriptInterface = 0;
+    InterfaceToNodesScript* NodesScriptInterface = 0; // if created -> managed by the script manager
     QString NodesScript;
 
     //critical - updates

@@ -17,7 +17,6 @@
 #include "checkupwindowclass.h"
 #include "CorrelationFilters.h"
 #include "amaterialparticlecolection.h"
-#include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"

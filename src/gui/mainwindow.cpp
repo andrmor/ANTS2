@@ -22,7 +22,6 @@
 #include "detectoraddonswindow.h"
 #include "checkupwindowclass.h"
 #include "gainevaluatorwindowclass.h"
-#include "genericscriptwindowclass.h"
 #include "credits.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
@@ -92,21 +91,18 @@
 
 MainWindow::~MainWindow()
 {
-    //qDebug()<<"<-Staring destructor for MainWindow...";  
-    if (histSecScint) delete histSecScint;
-    if (histScan) delete histScan;
-    //qDebug()<< "  Tmp hists deleted";
+    qDebug()<<"<Staring destructor for MainWindow";
+    delete histSecScint;
+    delete histScan;
 
+    qDebug() << "<-Clearing containers with dynamic objects";
     clearGeoMarkers();
-    //qDebug()<<"  GeoMarkers cleared";
     clearEnergyVector();
     clearCustomScanNodes();
 
-    delete PMscriptInterface; PMscriptInterface = 0;
-    delete NodesScriptInterface; NodesScriptInterface = 0;
-
+    qDebug() << "<-Deleting ui";
     delete ui;
-    //qDebug()<<"  <-User interface deleted";
+    qDebug() << "<Main window destructor finished (automatic destructor starts now))";
 }
 
 void MainWindow::onBusyOn()
@@ -206,13 +202,14 @@ void MainWindow::clearEnergyVector()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-   //   qDebug() << "<-MainWindow close event received";
+   qDebug() << "\n<MainWindow shutdown initiated";
+
    ShutDown = true;
 
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
-           qDebug() << "Reconstruction manager is busy, terminating...";
+           qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
            ReconstructionManager->requestStop();
            SimulationManager->StopSimulation();
            qApp->processEvents();
@@ -225,26 +222,34 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
+   qDebug() << "<Preparing graph window for shutdown";
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
+
    //saving ANTS master-configuration file
-   //qDebug()<<"--Saving ANTS configuration";   
+   qDebug() << "<Saving JavaScripts";
    ScriptWindow->WriteToJson();
-   if (PythonScriptWindow) PythonScriptWindow->WriteToJson();
-   //MIwindow->WriteElasticAutoToJson(GlobSet->ElasticAutoSettings);
+   if (PythonScriptWindow)
+   {
+       qDebug() << "<Saving Python scripts";
+       PythonScriptWindow->WriteToJson();
+   }
+   qDebug()<<"<Saving global settings";
    GlobSet->SaveANTSconfiguration();
 
    EventsDataHub->clear();
 
+   qDebug()<<"<Saving ANTS configuration";
    ELwindow->QuickSave(0);
 
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
      {
-       //qDebug()<<"--Saving position/status of all windows";
+       qDebug()<<"<Saving position/status of all windows";
        MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
      }
-   //qDebug()<<"  <Stopping Root update timer-based cycle";
+
+   qDebug() << "<Stopping Root update timer-based cycle";
    RootUpdateTimer->stop();
    disconnect(RootUpdateTimer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
    QThread::msleep(110);
@@ -253,7 +258,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
    if (ScriptWindow)
      {
-       //qDebug()<<"  <Deleting ScriptWindow";
+       qDebug()<<"<-Deleting ScriptWindow";
        delete ScriptWindow->parent();
        ScriptWindow = 0;
      }
@@ -261,92 +266,93 @@ void MainWindow::closeEvent(QCloseEvent *event)
    if (GenScriptWindow)
      {
        GenScriptWindow->close();
-       //qDebug() << " <Deleting general script window";
+       qDebug() << "<-Deleting local script window";
        delete GenScriptWindow;
      }
 
 #ifdef ANTS_FANN
    if (NNwindow)
      {
-       //qDebug()<<"  <Deleting NeuralNetworksWindow";
+       qDebug() << "<-Deleting NeuralNetworksWindow";
        delete NNwindow->parent();
        NNwindow = 0;
      }
 #endif
 
-   if (lrfwindow) {
-       //qDebug()<<"  <Deleting  lrf Window";
+   if (lrfwindow)
+   {
+       qDebug() << "<-Deleting  lrf Window";
        delete lrfwindow->parent();
        lrfwindow = 0;
    }
-   if (WindowNavigator) {
-       //qDebug()<<"  <Deleting WindowNavigator";
+   if (WindowNavigator)
+   {
+       qDebug() << "<-Deleting WindowNavigator";
        delete WindowNavigator->parent();
        WindowNavigator = 0;
    }
    if (GeometryWindow)
      {
-       //qDebug()<<"  <Deleting Geometry Window";
+       qDebug() << "<-Deleting Geometry Window";
        GeometryWindow->hide();
        delete GeometryWindow->parent();
        GeometryWindow = 0;
      }
    if (GraphWindow)
      {
-       //qDebug()<<"  <Deleting Graph Window";
+       qDebug() << "<-Deleting Graph Window";
        GraphWindow->hide();
        delete GraphWindow->parent();
        GraphWindow = 0;
      }   
    if (GlobSetWindow)
      {
-       //qDebug()<<"  <Deleting Settings Window";
+       qDebug() << "<-Deleting Settings Window";
        GlobSetWindow->hide();
        delete GlobSetWindow;
        GlobSetWindow = 0;
      }
    if (Rwindow)
      {
-       //qDebug() << "  <Deleting Reconstruction window";
+       qDebug() << "<-Deleting Reconstruction window";
        Rwindow->close();
        delete Rwindow->parent();
        Rwindow = 0;
      }
    if (Owindow)
      {
-       //qDebug() << "  <Deleting Output window";
+       qDebug() << "<-Deleting Output window";
        Owindow->close();
        delete Owindow->parent();
        Owindow = 0;
      }
    if (MIwindow)
      {
-       //qDebug()<<"  <Deleting material inspector window";
+       qDebug() << "<-Deleting material inspector window";
        delete MIwindow->parent();
        MIwindow = 0;
      }
    if (ELwindow)
      {
-       //qDebug()<<"  <Deleting examples window";
+       qDebug() << "<-Deleting examples window";
        ELwindow->close();
        delete ELwindow->parent();
        ELwindow = 0;
      }
    if (DAwindow)
      {
-       //qDebug()<<"  <Deleting detector addon window";
+       qDebug() << "<-Deleting detector addon window";
        delete DAwindow;
        DAwindow = 0;
-       //qDebug() << "   done";
      }
    if (CheckUpWindow)
      {
-       //qDebug()<<"  <Deleting check up window";
+       qDebug() << "<-Deleting check up window";
        delete CheckUpWindow;
        CheckUpWindow = 0;
      }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
-   //qDebug() << "  <-MainWindow close event: all done";
+   qDebug() << "<MainWindow close event processing finished";
 }
 
 bool MainWindow::event(QEvent *event)
@@ -4262,8 +4268,9 @@ void MainWindow::on_pbLoadNodes_clicked()
       clearCustomScanNodes();
       for (int i=0; i<x.size(); i++)
           CustomScanNodes.append( new QVector3D(x[i], y[i], z[i]));
-      UpdateCustomScanNodesIndication();
-    }  
+      on_pbUpdateSimConfig_clicked();
+    }
+  UpdateCustomScanNodesIndication();
 }
 
 void MainWindow::on_pbShowNodes_clicked()
@@ -4280,13 +4287,13 @@ void MainWindow::on_pbShowNodes_clicked()
 void MainWindow::on_pbRunNodeScript_clicked()
 {
   extractGeometryOfLocalScriptWindow();
-  if (GenScriptWindow) delete GenScriptWindow; GenScriptWindow = 0;
+  delete GenScriptWindow; GenScriptWindow = 0;
 
   AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
   GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
-  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "for (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
+  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
-  if (!NodesScriptInterface) NodesScriptInterface = new InterfaceToNodesScript();
+  NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
   GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
   connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
@@ -4296,20 +4303,14 @@ void MainWindow::on_pbRunNodeScript_clicked()
 
 void MainWindow::NodesScriptSuccess()
 {
-  clearCustomScanNodes();
-  CustomScanNodes = NodesScriptInterface->nodes; //addresses are transferred
-  NodesScriptInterface->nodes.clear();
-
   on_pbUpdateSimConfig_clicked();
-
   UpdateCustomScanNodesIndication();
-  on_pbShowNodes_clicked();
 }
 
 void MainWindow::UpdateCustomScanNodesIndication()
 {
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
-  MainWindow::on_pbUpdateSimConfig_clicked();
+  on_pbShowNodes_clicked();
 }
 
 void MainWindow::on_cobMatPointSource_activated(int index)

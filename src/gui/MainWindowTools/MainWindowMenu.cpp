@@ -10,7 +10,6 @@
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "lrfwindow.h"
-#include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "detectoraddonswindow.h"
 #include "detectorclass.h"

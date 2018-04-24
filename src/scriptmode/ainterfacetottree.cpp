@@ -37,12 +37,23 @@ void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileNam
     else abort("Failed to create tree "+ TreeName + ": " + ErrorString);
 }
 
-void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersOfBranches)
+void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersOfBranches,
+                                const QString StoreInFileName, int AutosaveAfterEntriesAdded)
 {
     if (!bGuiThread)
     {
         abort("Can load TTree only in main thread!");
         return;
+    }
+
+    if ( IsTreeExists(TreeName) )
+    {
+        if (bAbortIfExists)
+        {
+            abort("Tree " + TreeName + " already exists!");
+            return;
+        }
+        DeleteTree(TreeName); // need to delete first -> cannot just replace because of save to file root mechanism
     }
 
     const QVariantList headersVL = HeadersOfBranches.toList();
@@ -74,17 +85,17 @@ void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersO
     }
 
     ARootTreeRecord* rec = new ARootTreeRecord(0, TreeName);
-    bool bOK = rec->createTree(TreeName, h);
+    bool bOK = rec->createTree(TreeName, h, StoreInFileName, AutosaveAfterEntriesAdded);
     if (bOK)
     {
         bOK = TmpHub->Trees.append(TreeName, rec, bAbortIfExists);
-        if (!bOK)
+        if (!bOK) // paranoic - should not happen
         {
             delete rec;
-            abort("Tree " + TreeName+" already exists!");
+            abort("Tree " + TreeName + " already exists!");
         }
     }
-    else abort("Failed to create tree: "+ TreeName);
+    else abort("Failed to create tree: " + TreeName);
 }
 
 void AInterfaceToTTree::Fill(const QString &TreeName, const QVariant Array)
@@ -529,6 +540,30 @@ void AInterfaceToTTree::Save(const QString &TreeName, const QString &FileName)
         abort("Tree "+TreeName+" not found!");
     else
         r->save(FileName);
+}
+
+void AInterfaceToTTree::FlushToFile(const QString &TreeName)
+{
+    if (!bGuiThread)
+    {
+        abort("Threads cannot close trees!");
+        return;
+    }
+
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+        r->flush();
+}
+
+void AInterfaceToTTree::SetAutoSave(const QString &TreeName, int AutoSaveAfterEntriesAdded)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+        r->setAutoSave(AutoSaveAfterEntriesAdded);
 }
 
 bool AInterfaceToTTree::DeleteTree(const QString& TreeName)

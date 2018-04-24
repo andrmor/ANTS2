@@ -205,21 +205,48 @@ ARootTreeRecord::ARootTreeRecord(TObject *tree, const QString &name) :
 
 ARootTreeRecord::~ARootTreeRecord()
 {
+    if (file)
+    {
+        TTree* t = dynamic_cast<TTree*>(Object);
+        if (t)
+        {
+            t->AutoSave();
+            delete t; Object = 0;
+        }
+        file->Close();
+        delete file; file = 0;
+    }
+
     for (ABranchBuffer* bb : Branches) delete bb;
     Branches.clear();
     MapOfBranches.clear();
 }
 
-bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QString, QString> > &branches)
+#include "TFile.h"
+bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QString, QString> > &branches,
+                                 const QString fileName, int autosaveNum)
 {
+    qDebug() << fileName;
     QMutexLocker locker(&Mutex);
 
     Branches.resize(branches.size());
     MapOfBranches.clear();
     if (Object) delete Object;
 
+    if (!fileName.isEmpty())
+    {
+        file = new TFile(fileName.toLatin1().data(), "RECREATE");
+    }
+
     TTree* t = new TTree(name.toLatin1().data(), "");
     Object = t;
+
+    if (file)
+    {
+        t->SetDirectory(file);
+        t->SetMaxVirtualSize(0);
+        t->SetAutoSave(autosaveNum);
+    }
 
     for (int ib = 0; ib < branches.size(); ib++)
     {        
@@ -238,6 +265,9 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
             return false;
         }
     }
+
+    if (file) t->AutoSave();
+
     return true;
 }
 
@@ -375,7 +405,8 @@ bool ARootTreeRecord::fillSingle(const QVariantList &vl)
         ABranchBuffer* bb = Branches[ib];
         bb->write(vl.at(ib));
     }
-    static_cast<TTree*>(Object)->Fill();
+    TTree* t = static_cast<TTree*>(Object);
+    t->Fill();
 
     return true;
 }
@@ -456,4 +487,20 @@ void ARootTreeRecord::save(const QString &FileName)
 {
     TTree* t = static_cast<TTree*>(Object);
     t->SaveAs(FileName.toLatin1().data());
+}
+
+void ARootTreeRecord::flush()
+{
+    if (file)
+    {
+        TTree* t = static_cast<TTree*>(Object);
+        //t->Write();
+        t->AutoSave();
+    }
+}
+
+void ARootTreeRecord::setAutoSave(int autosaveAfterEntriesWritten)
+{
+    TTree* t = static_cast<TTree*>(Object);
+    t->SetAutoSave(autosaveAfterEntriesWritten);
 }

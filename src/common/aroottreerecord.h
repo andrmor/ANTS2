@@ -61,6 +61,8 @@ public:
     static QVector<QString> getAllTypes() {QVector<QString> s; s<<"C"<<"I"<<"F"<<"D"<<"O"<<"AC"<<"AI"<<"AF"<<"AD"<<"AO";return s;}
 };
 
+class TFile;
+
 class ARootTreeRecord : public ARootObjBase
 {
 public:
@@ -68,7 +70,8 @@ public:
     ~ARootTreeRecord();
 
     // Protected by Mutex
-    bool               createTree(const QString& name, const QVector<QPair<QString, QString>>& branches);
+    bool               createTree(const QString& name, const QVector<QPair<QString, QString>>& branches,
+                                  const QString fileName = "", int autosaveNum = 10000);
     const QString      loadTree(const QString& fileName, const QString treeNameInFile = ""); //report error ("" if fine)
 
     int                countBranches() const;
@@ -85,9 +88,14 @@ public:
 
     void               save(const QString &FileName);
 
+    void               flush();
+    void               setAutoSave(int autosaveAfterEntriesWritten);
+
 private:
     QVector<ABranchBuffer*> Branches;
     QMap<QString, ABranchBuffer*> MapOfBranches;
+
+    TFile* file = 0;
 
     bool  canAddEntries = true;  //some trees can be loaded, but due to conversion fo data, cannot be filled with new entries
 

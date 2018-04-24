@@ -28,7 +28,8 @@ public slots:
    void     SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
 
    void     LoadTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile); //one leaf per branch!
-   void     NewTree(const QString &TreeName, const QVariant HeadersOfBranches);
+   void     NewTree(const QString &TreeName, const QVariant HeadersOfBranches,
+                    const QString StoreInFileName = "", int AutosaveAfterEntriesAdded = 10000);
 
    void     Fill(const QString &TreeName, const QVariant Array);
 
@@ -44,6 +45,9 @@ public slots:
                        const QVariant binsAndRanges = QVariantList(), const QVariant markerAndLineAttributes = QVariantList());
 
    void     Save(const QString& TreeName, const QString& FileName);
+
+   void     FlushToFile(const QString& TreeName);
+   void     SetAutoSave(const QString& TreeName, int AutoSaveAfterEntriesAdded);
 
    const QVariant GetAllTreeNames() const;
    bool     IsTreeExists(const QString& TreeName) const;

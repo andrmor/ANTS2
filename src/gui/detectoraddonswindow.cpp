@@ -5,7 +5,8 @@
 #include "apmtype.h"
 #include "checkupwindowclass.h"
 #include "geometrywindowclass.h"
-#include "genericscriptwindowclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 #include "detectorclass.h"
 #include "globalsettingsclass.h"
 #include "localscriptinterfaces.h"
@@ -90,7 +91,8 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
 
 DetectorAddOnsWindow::~DetectorAddOnsWindow()
 {
-  delete ui;  
+    delete AddObjScriptInterface; AddObjScriptInterface = 0;
+    delete ui;  ui = 0;
 }
 
 void DetectorAddOnsWindow::onReconstructDetectorRequest()
@@ -509,44 +511,79 @@ void DetectorAddOnsWindow::HighlightVolume(QString VolName)
 
 void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
 {
-  MW->extractGeometryOfLocalScriptWindow();
-  if (MW->GenScriptWindow) delete MW->GenScriptWindow;  
-  MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-  MW->recallGeometryOfLocalScriptWindow();
+    QList<QTreeWidgetItem*> list = twGeo->selectedItems();
+    if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
+    else ObjectScriptTarget = "World";
 
-  QList<QTreeWidgetItem*> list = twGeo->selectedItems();
-  if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
-  else ObjectScriptTarget = "World";
+    AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
+    if (!obj)
+      {
+        ObjectScriptTarget = "World";
+        obj = Detector->Sandwich->World;
+      }
+    if (obj->LastScript.isEmpty())
+      Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
+    else
+      Detector->AddObjPositioningScript = obj->LastScript;
 
-  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
-  if (!obj)
-    {
-      ObjectScriptTarget = "World";
-      obj = Detector->Sandwich->World;
-    }
-  if (obj->LastScript.isEmpty())
-    Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
-  else
-    Detector->AddObjPositioningScript = obj->LastScript;
+    MW->extractGeometryOfLocalScriptWindow();
+    if (MW->GenScriptWindow) delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
 
-  AddObjScriptInterface = new InterfaceToAddObjScript(Detector); //deleted by the GenScriptWindow
-  MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
-  MW->GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-  MW->GenScriptWindow->SetExample("ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)");
-  QObject::connect(AddObjScriptInterface, SIGNAL(AbortScriptEvaluation(QString)), this, SLOT(ReportScriptError(QString)));
-  QObject::connect(AddObjScriptInterface, SIGNAL(requestShowCheckUpWindow()), MW->CheckUpWindow, SLOT(showNormal()));
+    AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
+    MW->GenScriptWindow = new AScriptWindow(jsm, MW->GlobSet, true, this);
 
-  if (ObjectScriptTarget.isEmpty())
-    MW->GenScriptWindow->SetTitle("Add objects script");
-  else
-    MW->GenScriptWindow->SetTitle("Add objects script. Script will be stored in object "+ObjectScriptTarget);
+    QString example = "ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)";
+    QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
+    MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
-  MW->GenScriptWindow->SetScript(&Detector->AddObjPositioningScript);  
-  MW->GenScriptWindow->SetStarterDir(MW->GlobSet->LibScripts);
-  connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(AddObjScriptSuccess()));
+    if (!AddObjScriptInterface) AddObjScriptInterface = new InterfaceToAddObjScript(Detector);
+    MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
 
-  AddObjScriptInterface->GeoObjects.clear();
-  MW->GenScriptWindow->show();
+    connect(AddObjScriptInterface, &InterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
+    connect(AddObjScriptInterface, &InterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
+    connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
+
+    MW->recallGeometryOfLocalScriptWindow();
+    MW->GenScriptWindow->show();
+
+//  MW->extractGeometryOfLocalScriptWindow();
+//  if (MW->GenScriptWindow) delete MW->GenScriptWindow;
+//  MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
+//  MW->recallGeometryOfLocalScriptWindow();
+//
+//  QList<QTreeWidgetItem*> list = twGeo->selectedItems();
+//  if (list.size() == 1) ObjectScriptTarget = list.first()->text(0);
+//  else ObjectScriptTarget = "World";
+
+//  AGeoObject* obj = Detector->Sandwich->World->findObjectByName(ObjectScriptTarget);
+//  if (!obj)
+//    {
+//      ObjectScriptTarget = "World";
+//      obj = Detector->Sandwich->World;
+//    }
+//  if (obj->LastScript.isEmpty())
+//    Detector->AddObjPositioningScript = Detector->Sandwich->World->LastScript;
+//  else
+//    Detector->AddObjPositioningScript = obj->LastScript;
+//
+//  AddObjScriptInterface = new InterfaceToAddObjScript(Detector); //deleted by the GenScriptWindow
+//  MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
+//  MW->GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
+//  MW->GenScriptWindow->SetExample("ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)");
+//  QObject::connect(AddObjScriptInterface, SIGNAL(AbortScriptEvaluation(QString)), this, SLOT(ReportScriptError(QString)));
+//  QObject::connect(AddObjScriptInterface, SIGNAL(requestShowCheckUpWindow()), MW->CheckUpWindow, SLOT(showNormal()));
+//
+//  if (ObjectScriptTarget.isEmpty())
+//    MW->GenScriptWindow->SetTitle("Add objects script");
+//  else
+//    MW->GenScriptWindow->SetTitle("Add objects script. Script will be stored in object "+ObjectScriptTarget);
+
+//  MW->GenScriptWindow->SetScript(&Detector->AddObjPositioningScript);
+//  MW->GenScriptWindow->SetStarterDir(MW->GlobSet->LibScripts);
+//  connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(AddObjScriptSuccess()));
+//
+//  AddObjScriptInterface->GeoObjects.clear();
+//  MW->GenScriptWindow->show();
 }
 
 void DetectorAddOnsWindow::AddObjScriptSuccess()

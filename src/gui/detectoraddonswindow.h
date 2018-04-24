@@ -26,7 +26,7 @@ public:
   void UpdateDummyPMindication();
   void HighlightVolume(QString VolName);
 
-  InterfaceToAddObjScript *AddObjScriptInterface;
+  InterfaceToAddObjScript* AddObjScriptInterface = 0;
   AGeoTreeWidget* twGeo;  // WorldTree widget
 
 private slots:

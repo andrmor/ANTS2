@@ -17,7 +17,7 @@
 #include "ajsontools.h"
 #include "gainevaluatorwindowclass.h"
 #include "viewer2darrayobject.h"
-#include "genericscriptwindowclass.h"
+#include "ascriptwindow.h"
 #include "eventsdataclass.h"
 #include "dynamicpassiveshandler.h"
 #include "areconstructionmanager.h"
@@ -6123,9 +6123,9 @@ void ReconstructionWindow::on_pbUpdateReconConfig_clicked()
 void ReconstructionWindow::UpdateReconConfig()
 {
     ReconstructionWindow::writeToJson(MW->Config->JSON);
-    if (MW->GenScriptWindow)
-        if (MW->GenScriptWindow->isVisible())
-            MW->GenScriptWindow->updateJsonTree();    
+    if (MW->ScriptWindow)
+        if (MW->ScriptWindow->isVisible())
+            MW->ScriptWindow->updateJsonTree();
 }
 
 void ReconstructionWindow::on_cobCurrentGroup_activated(int index)

@@ -144,7 +144,7 @@ public:
   void updateGUI();
   void SetTab(int iTab);
 
-  InterfaceToGStyleScript* GStyleInterface;
+  InterfaceToGStyleScript* GStyleInterface = 0;
 
 public slots:
   void updateNetGui();

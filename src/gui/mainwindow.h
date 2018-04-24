@@ -107,7 +107,7 @@ public:
     DetectorAddOnsWindow* DAwindow = 0;
     CheckUpWindowClass* CheckUpWindow = 0;
     GainEvaluatorWindowClass* GainWindow = 0;
-    GenericScriptWindowClass* GenScriptWindow = 0;  //local script window
+    AScriptWindow* GenScriptWindow = 0;  //local script window
     GlobalSettingsWindowClass* GlobSetWindow = 0;
     AScriptWindow* ScriptWindow = 0;                //global script window
     ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module

@@ -102,6 +102,9 @@ MainWindow::~MainWindow()
     clearEnergyVector();
     clearCustomScanNodes();
 
+    delete PMscriptInterface; PMscriptInterface = 0;
+    delete NodesScriptInterface; NodesScriptInterface = 0;
+
     delete ui;
     //qDebug()<<"  <-User interface deleted";
 }
@@ -4280,16 +4283,15 @@ void MainWindow::on_pbRunNodeScript_clicked()
   if (GenScriptWindow) delete GenScriptWindow; GenScriptWindow = 0;
 
   AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-  AScriptWindow* sw = new AScriptWindow(jsm, GlobSet, true, this);
-  sw->ConfigureForLightMode(&NodesScript, "Custom nodes", "for (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
+  GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
+  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "for (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
-  if (!NodesScriptInterface) delete NodesScriptInterface;
-  NodesScriptInterface = new InterfaceToNodesScript();
-  sw->SetInterfaceObject(NodesScriptInterface);
-  connect(sw, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
+  if (!NodesScriptInterface) NodesScriptInterface = new InterfaceToNodesScript();
+  GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
+  connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
   recallGeometryOfLocalScriptWindow();
-  sw->show();
+  GenScriptWindow->show();
 }
 
 void MainWindow::NodesScriptSuccess()
@@ -4298,8 +4300,10 @@ void MainWindow::NodesScriptSuccess()
   CustomScanNodes = NodesScriptInterface->nodes; //addresses are transferred
   NodesScriptInterface->nodes.clear();
 
+  on_pbUpdateSimConfig_clicked();
+
   UpdateCustomScanNodesIndication();
-  MainWindow::on_pbShowNodes_clicked();
+  on_pbShowNodes_clicked();
 }
 
 void MainWindow::UpdateCustomScanNodesIndication()
@@ -4734,8 +4738,6 @@ void MainWindow::on_pbUpdateSimConfig_clicked()
 
     UpdateTestWavelengthProperties();
 
-    if (GenScriptWindow && GenScriptWindow->isVisible())
-        GenScriptWindow->updateJsonTree();
     if (ScriptWindow && ScriptWindow->isVisible())
         ScriptWindow->updateJsonTree();
 

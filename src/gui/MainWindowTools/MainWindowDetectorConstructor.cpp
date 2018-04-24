@@ -253,34 +253,27 @@ void MainWindow::on_pbPositionScript_clicked()
 {
     // ***!!! transfer all processing to script interface?
 
-    /*
     extractGeometryOfLocalScriptWindow();
     if (GenScriptWindow) delete GenScriptWindow; GenScriptWindow = 0;
 
     AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-    AScriptWindow* sw = new AScriptWindow(jsm, GlobSet, true, this);
+    GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
 
     int ul = ui->cobUpperLowerPMs->currentIndex();
-    QString s = QString("Position PMs: ") + ( ul == 0 ? "upper array" : "lower array" );
+    QString title = QString("Position PMs: ") + ( ul == 0 ? "upper array" : "lower array" );
 
-    qDebug() << Detector->PMarrays.size();
-
-    qDebug() << Detector->PMarrays[ul].PositioningScript;
-
-    sw->ConfigureForLightMode(&Detector->PMarrays[ul].PositioningScript,
-                              s,
-                              "for (var i=0; i<3; i++)\n  PM(i*60, (i-2)*60, 0, 0)");
+    QString example = "for (var i=0; i<3; i++)\n  PM(i*60, (i-2)*60, 0, 0)";
+    GenScriptWindow->ConfigureForLightMode(&Detector->PMarrays[ul].PositioningScript, title, example);
 
     if (PMscriptInterface) delete PMscriptInterface;
     PMscriptInterface = new InterfaceToPMscript();
-    sw->SetInterfaceObject(NodesScriptInterface);
-    connect(sw, &AScriptWindow::success, this, &MainWindow::PMscriptSuccess); // ***!!! uses ScriptWindow directly!
+    GenScriptWindow->SetInterfaceObject(PMscriptInterface);
+    connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::PMscriptSuccess); // ***!!! uses ScriptWindow directly!
 
     recallGeometryOfLocalScriptWindow();
-    sw->show();
-    */
+    GenScriptWindow->show();
 
-
+/*
     extractGeometryOfLocalScriptWindow();
     if (GenScriptWindow) delete GenScriptWindow;
     GenScriptWindow = new GenericScriptWindowClass(Detector->RandGen);
@@ -305,6 +298,7 @@ void MainWindow::on_pbPositionScript_clicked()
     connect(GenScriptWindow, SIGNAL(success(QString)), this, SLOT(PMscriptSuccess()));
     //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
     GenScriptWindow->show();
+    */
 }
 
 void MainWindow::PMscriptSuccess()

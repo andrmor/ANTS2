@@ -2,6 +2,8 @@
 #include "ascriptmanager.h"
 #include "afiletools.h"
 
+#include "curvefit.h"
+
 #include "TRandom2.h"
 
 #include <QScriptEngine>
@@ -391,6 +393,28 @@ void AInterfaceToCore::reportProgress(int percents)
 {
     emit ScriptManager->reportProgress(percents);
     qApp->processEvents();
+}
+
+void AInterfaceToCore::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
+{
+    QVariantList vlX = x.toList();
+    QVariantList vlY = y.toList();
+
+    QVector<double> xx, yy;
+    for (int i=0; i<vlX.size() && i<vlY.size(); i++)
+    {
+        xx << vlX.at(i).toDouble();
+        yy << vlY.at(i).toDouble();
+    }
+
+    CurF = new CurveFit(min, max, nInt, xx, yy);
+}
+
+double AInterfaceToCore::getFitted(double x)
+{
+    if (!CurF) return 0;
+
+    return CurF->eval(x);
 }
 
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)

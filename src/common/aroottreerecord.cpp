@@ -308,12 +308,23 @@ const QString ARootTreeRecord::loadTree(const QString &fileName, const QString t
 
     t->Print();
 
-    QMutexLocker locker(&Mutex);
+    Mutex.lock();
+        if (Object) delete Object;
+        Object = t;
+    Mutex.unlock();
 
+    QString error = resetTreeRecords();
+    if (!error.isEmpty())
+    {
+        delete t;
+        delete f;
+        error += " for tree in file " + fileName;
+    }
+    return error;
+
+    /*
     Branches.clear();
     MapOfBranches.clear();
-    if (Object) delete Object;
-    Object = t;
 
     const int numBranches = t->GetNbranches();
     TObjArray* lb = t->GetListOfBranches();
@@ -348,6 +359,53 @@ const QString ARootTreeRecord::loadTree(const QString &fileName, const QString t
             branchType.replace("<", "(");
             branchType.replace(">", ")");
             return QString("Unsupported branch type ") + branchType + " for tree in file " + fileName;
+        }
+    }
+    return "";
+    */
+}
+
+const QString ARootTreeRecord::resetTreeRecords()
+{
+    QMutexLocker locker(&Mutex);
+
+    Branches.clear();
+    MapOfBranches.clear();
+    canAddEntries = true;
+
+    TTree* t = static_cast<TTree*>(Object);
+
+    const int numBranches = t->GetNbranches();
+    TObjArray* lb = t->GetListOfBranches();
+
+    for (int ibranch = 0; ibranch < numBranches; ibranch++)
+    {
+        TBranch* branchPtr = (TBranch*)(lb->At(ibranch));
+        QString branchName = branchPtr->GetName();
+        QString branchType = branchPtr->GetClassName();
+        if (branchType.isEmpty())
+        {
+            QString title = branchPtr->GetTitle();
+            title.remove(branchName);
+            title.remove("/");
+            branchType = title;
+        }
+        // else    -> vector<T> is here
+        qDebug() << branchName << branchType << branchPtr;
+
+        ABranchBuffer* bb = new ABranchBuffer(branchName, branchType, branchPtr);
+        if (bb->isValid())
+        {
+            Branches << bb;
+            MapOfBranches.insert( branchName, bb );
+            if (!bb->canFill()) canAddEntries = false;
+        }
+        else
+        {
+            delete bb;
+            branchType.replace("<", "(");
+            branchType.replace(">", ")");
+            return QString("Unsupported branch type: ") + branchType;
         }
     }
     return "";

@@ -9,6 +9,7 @@
 
 class AScriptManager;
 class TRandom2;
+class CurveFit;
 
 class AInterfaceToCore : public AScriptInterface
 {
@@ -71,6 +72,9 @@ public slots:
   void processEvents();
   void reportProgress(int percents);
 
+  void setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y);
+  double getFitted(double x);
+
 private:
   AScriptManager* ScriptManager;
 
@@ -78,6 +82,8 @@ private:
   QSet<QString>   Finder_FileNames;
   QString         Finder_Dir;
   QString         Finder_NamePattern = "*.*";
+
+  CurveFit* CurF = 0;
 
 };
 

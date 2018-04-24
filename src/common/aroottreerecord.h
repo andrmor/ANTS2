@@ -23,7 +23,7 @@ class ABranchBuffer
 {
 public:
     ABranchBuffer(const QString& branchName, const QString& branchType, TTree* tree);     // creates a new branch!
-    ABranchBuffer(const QString& branchName, const QString& branchType, TBranch* branch); // uses an existent branch
+    ABranchBuffer(const QString& branchName, const QString& branchType, TBranch* branch); // creates buffer for a branch loaded from TTree
     ABranchBuffer(){}
 
     bool           isValid() const {return branchPtr;}
@@ -73,6 +73,7 @@ public:
     bool               createTree(const QString& name, const QVector<QPair<QString, QString>>& branches,
                                   const QString fileName = "", int autosaveNum = 10000);
     const QString      loadTree(const QString& fileName, const QString treeNameInFile = ""); //report error ("" if fine)
+    const QString      resetTreeRecords(); // need to call it after save!
 
     int                countBranches() const;
     bool               isBranchExist(const QString& branchName) const;

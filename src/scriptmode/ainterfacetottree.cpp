@@ -539,7 +539,12 @@ void AInterfaceToTTree::Save(const QString &TreeName, const QString &FileName)
     if (!r)
         abort("Tree "+TreeName+" not found!");
     else
+    {
         r->save(FileName);
+        const QString err = r->resetTreeRecords();
+        if (!err.isEmpty())
+            abort("Could not recover tree after save:\n" + err);
+    }
 }
 
 void AInterfaceToTTree::FlushToFile(const QString &TreeName)

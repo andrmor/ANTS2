@@ -490,10 +490,15 @@ void AScriptWindow::ClearText()
 
 void AScriptWindow::on_pbRunScript_clicked()
 {
-   WriteToJson();
-   GlobSet->SaveANTSconfiguration();
+   // if not light mode, save all tabs -> GlobSet
+   if (!bLightMode)
+   {
+       WriteToJson();
+       GlobSet->SaveANTSconfiguration();
+   }
 
    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+   //in light mode save the script directly
    if (bLightMode && LightModeScript) *LightModeScript = Script;
 
    //qDebug() << "Init on Start done";

@@ -226,7 +226,6 @@ ARootTreeRecord::~ARootTreeRecord()
 bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QString, QString> > &branches,
                                  const QString fileName, int autosaveNum)
 {
-    qDebug() << fileName;
     QMutexLocker locker(&Mutex);
 
     Branches.resize(branches.size());
@@ -234,9 +233,7 @@ bool ARootTreeRecord::createTree(const QString &name, const QVector<QPair<QStrin
     if (Object) delete Object;
 
     if (!fileName.isEmpty())
-    {
         file = new TFile(fileName.toLatin1().data(), "RECREATE");
-    }
 
     TTree* t = new TTree(name.toLatin1().data(), "");
     Object = t;
@@ -375,12 +372,14 @@ const QString ARootTreeRecord::resetTreeRecords()
 
     TTree* t = static_cast<TTree*>(Object);
 
+    t->ResetBranchAddresses();
+
     const int numBranches = t->GetNbranches();
     TObjArray* lb = t->GetListOfBranches();
 
     for (int ibranch = 0; ibranch < numBranches; ibranch++)
     {
-        TBranch* branchPtr = (TBranch*)(lb->At(ibranch));
+        TBranch* branchPtr = static_cast<TBranch*>(lb->At(ibranch));
         QString branchName = branchPtr->GetName();
         QString branchType = branchPtr->GetClassName();
         if (branchType.isEmpty())
@@ -391,7 +390,7 @@ const QString ARootTreeRecord::resetTreeRecords()
             branchType = title;
         }
         // else    -> vector<T> is here
-        qDebug() << branchName << branchType << branchPtr;
+        qDebug() << "name, type, ptr:"<< branchName << branchType << branchPtr;
 
         ABranchBuffer* bb = new ABranchBuffer(branchName, branchType, branchPtr);
         if (bb->isValid())
@@ -478,6 +477,8 @@ bool ARootTreeRecord::isBranchExist(const QString &branchName) const
 
 const QVariantList ARootTreeRecord::getBranch(const QString &branchName)
 {
+    QMutexLocker locker(&Mutex);
+
     QVariantList res;
 
     ABranchBuffer* bb = MapOfBranches.value(branchName, 0);
@@ -499,6 +500,8 @@ const QVariantList ARootTreeRecord::getBranch(const QString &branchName)
 
 const QVariant ARootTreeRecord::getBranch(const QString &branchName, int entry)
 {
+    QMutexLocker locker(&Mutex);
+
     ABranchBuffer* bb = MapOfBranches.value(branchName, 0);
     if (bb)
     {
@@ -519,6 +522,8 @@ const QVariant ARootTreeRecord::getBranch(const QString &branchName, int entry)
 
 const QVariantList ARootTreeRecord::getEntry(int entry)
 {
+    QMutexLocker locker(&Mutex);
+
     QVariantList res;
 
     for (int ibranch = 0; ibranch < Branches.size(); ibranch++)
@@ -543,22 +548,56 @@ const QVariantList ARootTreeRecord::getEntry(int entry)
 
 void ARootTreeRecord::save(const QString &FileName)
 {
+    QMutexLocker locker(&Mutex);
+
     TTree* t = static_cast<TTree*>(Object);
     t->SaveAs(FileName.toLatin1().data());
 }
 
-void ARootTreeRecord::flush()
+bool ARootTreeRecord::autoSave()
 {
+    QMutexLocker locker(&Mutex);
+
     if (file)
     {
         TTree* t = static_cast<TTree*>(Object);
-        //t->Write();
         t->AutoSave();
+        return true;
     }
+
+    return false;
 }
 
+/*
 void ARootTreeRecord::setAutoSave(int autosaveAfterEntriesWritten)
 {
+    QMutexLocker locker(&Mutex);
+
     TTree* t = static_cast<TTree*>(Object);
     t->SetAutoSave(autosaveAfterEntriesWritten);
 }
+*/
+
+/*
+#include <iostream>
+void ARootTreeRecord::scan(const QString& arg1, const QString& arg2, const QString& arg3)
+{
+    QMutexLocker locker(&Mutex);
+
+    TTree* t = static_cast<TTree*>(Object);
+
+    t->ResetBranchAddresses();
+
+    qDebug() << "TTree Print() method:";
+    t->Print();
+
+    qDebug() << "Show(0):";
+    t->Show(0);
+
+    std::cout << std::flush;
+    //fprintf("")
+
+    //qDebug() << "TTree Scan("<<arg1<<","<<arg2<<","<<arg3<<") method:";
+    //t->Scan(arg1.toLatin1().data(), arg2.toLatin1().data(), arg3.toLatin1().data());
+}
+*/

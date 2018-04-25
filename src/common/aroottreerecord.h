@@ -89,8 +89,10 @@ public:
 
     void               save(const QString &FileName);
 
-    void               flush();
-    void               setAutoSave(int autosaveAfterEntriesWritten);
+    bool               autoSave();
+    //void               setAutoSave(int autosaveAfterEntriesWritten);
+
+    //void               scan(const QString& arg1, const QString& arg2, const QString& arg3);
 
 private:
     QVector<ABranchBuffer*> Branches;

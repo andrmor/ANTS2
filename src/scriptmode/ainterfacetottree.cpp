@@ -170,6 +170,17 @@ void AInterfaceToTTree::ResetTreeAddresses(const QString &TreeName)
 }
 
 /*
+void AInterfaceToTTree::Scan(const QString& TreeName, const QString& arg1, const QString& arg2, const QString& arg3)
+{
+    ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
+    if (!r)
+        abort("Tree "+TreeName+" not found!");
+    else
+        r->scan(arg1, arg2, arg3);
+}
+*/
+
+/*
 const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 {
     ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
@@ -571,9 +582,14 @@ void AInterfaceToTTree::FlushToFile(const QString &TreeName)
     if (!r)
         abort("Tree "+TreeName+" not found!");
     else
-        r->flush();
+    {
+        bool bOK = r->autoSave();
+        if (bOK) ;
+        else abort("Tree " + TreeName + " does not support autosave to file.\nThis feature requires the tree to be created with non-empty file name argument.");
+    }
 }
 
+/*
 void AInterfaceToTTree::SetAutoSave(const QString &TreeName, int AutoSaveAfterEntriesAdded)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
@@ -582,6 +598,7 @@ void AInterfaceToTTree::SetAutoSave(const QString &TreeName, int AutoSaveAfterEn
     else
         r->setAutoSave(AutoSaveAfterEntriesAdded);
 }
+*/
 
 bool AInterfaceToTTree::DeleteTree(const QString& TreeName)
 {

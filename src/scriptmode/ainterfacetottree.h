@@ -47,12 +47,13 @@ public slots:
    void     Save(const QString& TreeName, const QString& FileName);
 
    void     FlushToFile(const QString& TreeName);
-   void     SetAutoSave(const QString& TreeName, int AutoSaveAfterEntriesAdded);
+   //void     SetAutoSave(const QString& TreeName, int AutoSaveAfterEntriesAdded);
 
    const QVariant GetAllTreeNames() const;
    bool     IsTreeExists(const QString& TreeName) const;
 
    void     ResetTreeAddresses(const QString& TreeName);
+   //void     Scan(const QString& TreeName, const QString &arg1, const QString &arg2, const QString &arg3);
 
    bool     DeleteTree(const QString &TreeName);
    void     DeleteAllTrees();

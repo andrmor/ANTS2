@@ -1577,16 +1577,18 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                if (result) *result = "No histogram was generated: check input!";
                return false;
            }
-           tmpHist1D->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist1D), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(tmpHist1D), vlML.at(1).toList());
-           if (tmpHist1D->GetEntries() > 0) Draw(tmpHist1D, How, true, false);
-           else
+           if (tmpHist1D->GetEntries() == 0)
            {
                qDebug() << "Empty histogram was generated!";
                if (result) *result = "Empty histogram was generated!";
                return false;
            }
+
+           TH1* h = dynamic_cast<TH1*>(tmpHist1D->Clone(""));
+           h->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
+           Draw(h, How, true, false);
            break;
        }
        case 2:
@@ -1634,18 +1636,21 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
            }
            else
            {
-               tmpHist->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-               tmpHist->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-               SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
-               SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
-
-               if (tmpHist->GetEntries() > 0) Draw(tmpHist, How, true, false);
-               else
+               if (tmpHist->GetEntries() == 0)
                {
                    qDebug() << "Empty histogram was generated!";
                    if (result) *result = "Empty histogram was generated!";
                    return false;
                }
+
+               TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
+
+               tmpHist->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+               tmpHist->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+               SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
+               SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
+
+               Draw(h, How, true, false);
            }
 
            break;
@@ -1659,19 +1664,22 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
                if (result) *result = "No histogram was generated: check input!";
                return false;
            }
-           tmpHist->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           tmpHist->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-           tmpHist->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
-           SetMarkerAttributes(static_cast<TAttMarker*>(tmpHist), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(tmpHist), vlML.at(1).toList());
-
-           if (tmpHist->GetEntries() > 0) Draw(tmpHist, How, true, false);
-           else
+           if (tmpHist->GetEntries() == 0)
            {
                qDebug() << "Empty histogram was generated!";
                if (result) *result = "Empty histogram was generated!";
                return false;
            }
+
+           TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
+
+           tmpHist->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+           tmpHist->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+           tmpHist->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+           SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
+           SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
+
+           Draw(h, How, true, false);
            break;
        }
     }

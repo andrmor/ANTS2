@@ -541,7 +541,8 @@ const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &wh
 
         QString error;
         r->externalLock();
-        emit RequestTreeDraw((TTree*)r->GetObject(), what, cuts, options, outBR, outML, &error);
+        TTree* t = static_cast<TTree*>(r->GetObject());
+        emit RequestTreeDraw(t, what, cuts, options, outBR, outML, &error);
         r->externalUnlock();
 
         //r->resetTreeRecords();

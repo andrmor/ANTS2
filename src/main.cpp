@@ -20,6 +20,8 @@
 #include "asandwich.h"
 #include "amessageoutput.h"
 #include "amessage.h"
+#include "ainterfacetodeposcript.h"
+#include "ainterfacetophotonscript.h"
 
 // SIM
 #ifdef SIM
@@ -194,6 +196,12 @@ int main(int argc, char *argv[])
         AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         GenScriptWindow.SetInterfaceObject(tree, "tree");
 
+        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        GenScriptWindow.SetInterfaceObject(photon, "photon");
+
+        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
+        GenScriptWindow.SetInterfaceObject(depo, "depo");
+
         AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(GenScriptWindow.ScriptManager, &GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
@@ -277,6 +285,10 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(hist, "hist");
         AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         SM.SetInterfaceObject(tree, "tree");
+        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        SM.SetInterfaceObject(photon, "photon");
+        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
+        SM.SetInterfaceObject(depo, "depo");
 
         int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
         if (errorLineNum > -1)

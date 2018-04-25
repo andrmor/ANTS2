@@ -42,7 +42,8 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
 
     quotationFormat.setForeground(Qt::darkGreen);
     //QRegularExpression rx("\".*\"");
-    QRegularExpression rx("((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\1))*.?)\\1");
+    //QRegularExpression rx("((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\1))*.?)\\1");
+    QRegularExpression rx("\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"|\'([^\'\\\\]*(\\\\.[^\'\\\\]*)*)\'");
     //qDebug() << "----------------------"<< rx.isValid();
     //rx.setMinimal(true); //fixes the problem with "xdsfdsfds" +variable+ "dsfdsfdsf"
     rule.pattern = rx;
@@ -221,7 +222,8 @@ AHighlighterPythonScriptWindow::AHighlighterPythonScriptWindow(QTextDocument *pa
     multiLineCommentFormat.setForeground(Qt::darkGreen);
 
     quotationFormat.setForeground(Qt::darkGreen);
-    QRegularExpression rx("((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\1))*.?)\\1");
+    //QRegularExpression rx("((?<![\\\\])['\"])((?:.(?!(?<![\\\\])\\1))*.?)\\1");
+    QRegularExpression rx("\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"|\'([^\'\\\\]*(\\\\.[^\'\\\\]*)*)\'");
     //qDebug() << "----------------------"<< rx.isValid();
     rule.pattern = rx;
     rule.format = quotationFormat;

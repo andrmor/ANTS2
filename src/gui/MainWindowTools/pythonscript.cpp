@@ -96,6 +96,9 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
   PythonScriptWindow->SetInterfaceObject(photon, "photon");
 
+  AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
+  PythonScriptWindow->SetInterfaceObject(depo, "depo");
+
 #ifdef ANTS_FLANN
   AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
   PythonScriptWindow->SetInterfaceObject(knn, "knn");
@@ -113,9 +116,6 @@ void MainWindow::createPythonScriptWindow()
 
   InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
   PythonScriptWindow->SetInterfaceObject(grwin, "grwin");
-
-  AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
-  PythonScriptWindow->SetInterfaceObject(depo, "depo");
 
   AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
   PythonScriptWindow->SetInterfaceObject(out, "outwin");

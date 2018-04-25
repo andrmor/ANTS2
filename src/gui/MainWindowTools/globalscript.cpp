@@ -107,6 +107,9 @@ void MainWindow::createScriptWindow()
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(photon, "photon");
 
+    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
+    ScriptWindow->SetInterfaceObject(depo, "depo");
+
 #ifdef ANTS_FLANN
     AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
     ScriptWindow->SetInterfaceObject(knn, "knn");
@@ -127,9 +130,6 @@ void MainWindow::createScriptWindow()
 
     AInterfaceToGuiScript* gui = new AInterfaceToGuiScript(SM);
     ScriptWindow->SetInterfaceObject(gui, "gui");
-
-    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(this, EventsDataHub);
-    ScriptWindow->SetInterfaceObject(depo, "depo"); 
 
     AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
     ScriptWindow->SetInterfaceObject(out, "outwin");

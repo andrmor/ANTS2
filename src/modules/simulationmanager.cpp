@@ -1558,14 +1558,14 @@ bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleOnStack *> *
         ErrorString = "Particle stack is empty!";
         return false;
     }
-    qDebug() << ">Standalone particle stack tracker received stack size:"<<particleStack->size();
+    //qDebug() << ">Standalone particle stack tracker received stack size:"<<particleStack->size();
     clearParticleStack();
-    qDebug() << ">Cleared stack";
+    //qDebug() << ">Cleared stack";
     for (int i=0; i<particleStack->size(); i++)
         ParticleStack.append(particleStack->at(i)->clone());
-    qDebug() << ">Cloned";
+    //qDebug() << ">Cloned";
     ParticleTracker->setRemoveTracksIfNoEnergyDepo(false);
-    qDebug() << ">Start tracking...";
+    //qDebug() << ">Start tracking...";
     return ParticleTracker->TrackParticlesInStack();
 }
 
@@ -1794,7 +1794,7 @@ void ASimulationManager::onSimulationFinished()
           {
              ParticleSourceSimulator *lastPartSrcSimulator = static_cast< ParticleSourceSimulator *>(simulators.last());
              EnergyVector = lastPartSrcSimulator->getEnergyVector();
-             lastPartSrcSimulator->ClearEnergyVector(); // to avoid clearing the energy vector cells
+             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
           }
 
         for(int iSim = 0; iSim<simulators.count(); iSim++)

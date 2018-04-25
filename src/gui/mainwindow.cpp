@@ -102,7 +102,7 @@ MainWindow::~MainWindow()
 
     qDebug() << "<-Deleting ui";
     delete ui;
-    qDebug() << "<Main window destructor finished (automatic destructor starts now))";
+    qDebug() << "<Main window custom destructor finished";
 }
 
 void MainWindow::onBusyOn()
@@ -4090,7 +4090,7 @@ void MainWindow::on_pbTrackStack_clicked()
         //--- Retrieve results ---
         clearEnergyVector(); // just in case clear procedures change
         EnergyVector = pss->getEnergyVector();
-        pss->ClearEnergyVector(); //disconnected this copy so delete of the simulator does not kill the vector
+        pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
           //qDebug() << "-------------En vector size:"<<EnergyVector.size();
 
         //track handling

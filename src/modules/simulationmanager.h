@@ -312,7 +312,7 @@ public:
     ~ParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }
-    void ClearEnergyVector() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector
+    void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector
 
     virtual int getEventCount() const { return eventEnd - eventBegin; }
     virtual int getEventsDone() const { return eventCurrent - eventBegin; }

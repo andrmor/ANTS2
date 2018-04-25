@@ -3827,7 +3827,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          QByteArray tmp = fields[0].toLocal8Bit();
          tmpHist1D->GetXaxis()->SetTitle(tmp.data());
          int size = tmpHist1D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist1D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
          else
            {
              message("There is no data to show!", this);
@@ -3851,7 +3851,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          tmpHist2D->GetXaxis()->SetTitle(tmp2.data());
 
          int size = tmpHist2D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist2D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
          else
            {
              message("There is no data to show!", this);
@@ -3877,7 +3877,7 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          tmpHist3D->GetXaxis()->SetTitle(tmp3.data());
 
          int size = tmpHist3D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist3D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
          else
            {
              message("There is no data to show!", this);

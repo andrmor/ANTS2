@@ -8,7 +8,7 @@
 #include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
-#include "localscriptinterfaces.h"
+#include "ainterfacetoaddobjscript.h"
 #include "ainterfacetodeposcript.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
@@ -50,7 +50,7 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
   PythonScriptWindow->SetInterfaceObject(conf, "config");
 
-  InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(Detector);
+  AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(Detector);
   connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
   PythonScriptWindow->SetInterfaceObject(geo, "geo");
 

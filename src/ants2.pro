@@ -321,7 +321,9 @@ SOURCES += main.cpp \
     common/aroottreerecord.cpp \
     gui/atextedit.cpp \
     gui/alineedit.cpp \
-    SplineLibrary/curvefit.cpp
+    SplineLibrary/curvefit.cpp \
+    scriptmode/ainterfacetoaddobjscript.cpp \
+    scriptmode/ainterfacetogstylescript.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -456,7 +458,9 @@ HEADERS  += common/CorrelationFilters.h \
     common/aroottreerecord.h \
     gui/atextedit.h \
     gui/alineedit.h \
-    SplineLibrary/curvefit.h
+    SplineLibrary/curvefit.h \
+    scriptmode/ainterfacetoaddobjscript.h \
+    scriptmode/ainterfacetogstylescript.h
 
 # --- SIM ---
 ants2_SIM {

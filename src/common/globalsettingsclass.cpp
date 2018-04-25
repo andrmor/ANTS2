@@ -3,6 +3,7 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 #include "amessage.h"
+#include "ainterfacetogstylescript.h"
 
 #ifdef GUI
 #include "globalsettingswindowclass.h"
@@ -110,7 +111,7 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   {
       AJavaScriptManager* SM = new AJavaScriptManager(0);
 #ifdef GUI
-      InterfaceToGStyleScript* GStyleInterface  = new  InterfaceToGStyleScript(); //deleted by the SM
+      AInterfaceToGStyleScript* GStyleInterface  = new  AInterfaceToGStyleScript(); //deleted by the SM
       SM->SetInterfaceObject(GStyleInterface);
 #endif
       SM->Evaluate(RootStyleScript);

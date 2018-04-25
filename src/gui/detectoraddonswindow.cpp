@@ -9,7 +9,7 @@
 #include "ascriptwindow.h"
 #include "detectorclass.h"
 #include "globalsettingsclass.h"
-#include "localscriptinterfaces.h"
+#include "ainterfacetoaddobjscript.h"
 #include "asandwich.h"
 #include "slab.h"
 #include "ageotreewidget.h"
@@ -535,11 +535,11 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
     MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
-    AddObjScriptInterface = new InterfaceToAddObjScript(Detector);
+    AddObjScriptInterface = new AInterfaceToAddObjScript(Detector);
     MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
 
-    connect(AddObjScriptInterface, &InterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
-    connect(AddObjScriptInterface, &InterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
+    connect(AddObjScriptInterface, &AInterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
+    connect(AddObjScriptInterface, &AInterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
     connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
 
     MW->recallGeometryOfLocalScriptWindow();

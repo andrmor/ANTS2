@@ -8,6 +8,7 @@
 #include "aconfiguration.h"
 #include "ajavascriptmanager.h"
 #include "interfacetoglobscript.h"
+#include "ainterfacetoaddobjscript.h"
 #include "histgraphinterfaces.h"
 #include "ainterfacetottree.h"
 #include "scriptminimizer.h"
@@ -18,6 +19,7 @@
 #include "anetworkmodule.h"
 #include "asandwich.h"
 #include "amessageoutput.h"
+#include "amessage.h"
 
 // SIM
 #ifdef SIM
@@ -52,8 +54,6 @@
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
 #include "TThread.h"
 #endif
-
-#include "amessage.h"
 
 int main(int argc, char *argv[])
 {
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         GenScriptWindow.SetInterfaceObject(conf, "config");
 
-        InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
+        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
         GenScriptWindow.SetInterfaceObject(geo, "geo");
 
         AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(jsm);
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
-        InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
+        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
         SM.SetInterfaceObject(geo, "geo");
         AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
         SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly

@@ -3,6 +3,8 @@
 
 #include "localscriptinterfaces.h"
 
+#include <QVariant>
+
 class NNmoduleClass;
 
 class AInterfaceToKnnScript : public AScriptInterface

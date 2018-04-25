@@ -10,8 +10,8 @@ class AScriptInterface : public QObject
   Q_OBJECT
 
 public:
-  AScriptInterface() {}
-  AScriptInterface(const AScriptInterface& other) : H(other.H), Description(other.Description), bGuiThread(false) {}
+  AScriptInterface() : QObject() {}
+  AScriptInterface(const AScriptInterface& other) : QObject(), H(other.H), Description(other.Description), bGuiThread(false) {}
 
   virtual bool InitOnRun() {return true;}   // automatically called before script evaluation
   virtual void ForceStop() {}               // called when abort was triggered - used to e.g. abort simulation or reconstruction

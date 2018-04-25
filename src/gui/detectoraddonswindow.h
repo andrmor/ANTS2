@@ -5,7 +5,7 @@
 
 class MainWindow;
 class DetectorClass;
-class InterfaceToAddObjScript;
+class AInterfaceToAddObjScript;
 class AGeoTreeWidget;
 class AGeoObject;
 
@@ -26,7 +26,7 @@ public:
   void UpdateDummyPMindication();
   void HighlightVolume(QString VolName);
 
-  InterfaceToAddObjScript* AddObjScriptInterface = 0;  // if created -> owned by the script manager
+  AInterfaceToAddObjScript* AddObjScriptInterface = 0;  // if created -> owned by the script manager
   AGeoTreeWidget* twGeo;  // WorldTree widget
 
 private slots:

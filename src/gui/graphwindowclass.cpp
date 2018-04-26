@@ -15,6 +15,7 @@
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
+#include "curvefit.h"
 
 //Qt
 #include <QtGui>
@@ -1558,10 +1559,13 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
           qDebug() << "Old htemp found: "<<oldObj->GetName() << " -> deleting!";
         gDirectory->RecursiveRemove(oldObj);
     }
+    if (bHistToGraph)
+    {
+        SetAsActiveRootWindow();
+        gPad->Clear();
+    }
 
     qDebug() << "TreeDraw input:" << What << Cond << HowAdj;
-
-    if (bHistToGraph) SetAsActiveRootWindow();
     TH1::AddDirectory(true);
     tree->Draw(What, Cond, HowAdj);
     TH1::AddDirectory(false);
@@ -2629,6 +2633,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* drawIntegral = 0;
   QAction* titleX = 0;
   QAction* titleY = 0;
+  QAction* splineFit = 0;
 
   if (temp)
     {
@@ -2654,6 +2659,10 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              drawIntegral = BasketMenu.addAction("Draw integral");
+      }
+      if (Basket.at(row).Type == "TGraph" || Basket.at(row).Type == "TProfile")
+      {
+             splineFit = BasketMenu.addAction("Fit with B-spline");
       }
       BasketMenu.addSeparator();
       titleX = BasketMenu.addAction("Edit title X");
@@ -2992,6 +3001,43 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
           ui->cbShowFitParameters->setChecked(true);
           ui->cbShowLegend->setChecked(true);
+          RedrawAll();
+      }
+  }
+  else if (selectedItem == splineFit)
+  {
+      TGraph* g =   static_cast<TGraph*>(Basket[row].DrawObjects.first().getPointer());
+      if (!g)
+      {
+          message("Suppoted only for TGraph-based ROOT objects", this);
+          return;
+      }
+
+      bool ok;
+      int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
+      if (ok)
+      {
+          int numPoints = g->GetN();
+          if (numPoints < numNodes)
+          {
+              message("Not enough points in the graph for the selected number of nodes", this);
+              return;
+          }
+
+          QVector<double> x(numPoints), y(numPoints), f(numPoints);
+          for (int i=0; i<numPoints; i++)
+              g->GetPoint(i, x[i], y[i]);
+
+          CurveFit cf(x.first(), x.last(), numNodes, x, y);
+
+          TGraph* fg = new TGraph();
+          for (int i=0; i<numPoints; i++)
+          {
+              const double& xx = x.at(i);
+              fg->SetPoint(i, xx, cf.eval(xx));
+          }
+
+          Basket[row].DrawObjects.append(DrawObjectStructure(fg, "Csame"));
           RedrawAll();
       }
   }

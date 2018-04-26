@@ -37,7 +37,7 @@ TObject *ARootGraphRecord::GetObject()
     return Object;
 }
 
-void ARootGraphRecord::SetMarkerProperties(int markerColor, int markerStyle, int markerSize)
+void ARootGraphRecord::SetMarkerProperties(int markerColor, int markerStyle, double markerSize)
 {
     MarkerColor = markerColor, MarkerStyle = markerStyle, MarkerSize = markerSize;
 }
@@ -47,9 +47,16 @@ void ARootGraphRecord::SetLineProperties(int lineColor, int lineStyle, int lineW
     LineColor = lineColor,   LineStyle = lineStyle,    LineWidth = lineWidth;
 }
 
-void ARootGraphRecord::SetAxisTitles(const QString &titleX, const QString &titleY)
+void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, const QString graphTitle)
 {
     TitleX = titleX; TitleY = titleY;
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph" && !graphTitle.isEmpty())
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        g->SetTitle(graphTitle.toLatin1().data());
+    }
 }
 
 void ARootGraphRecord::AddPoint(double x, double y)

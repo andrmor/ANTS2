@@ -17,9 +17,9 @@ public:
 
     TObject* GetObject() override;  // unasve for multithread (draw on queued signal), only GUI thread can trigger draw
 
-    void     SetMarkerProperties(int markerColor, int markerStyle, int markerSize);
+    void     SetMarkerProperties(int markerColor, int markerStyle, double markerSize);
     void     SetLineProperties(int lineColor, int lineStyle, int lineWidth);
-    void     SetAxisTitles(const QString& titleX, const QString& titleY);
+    void     SetTitles(const QString& titleX, const QString& titleY, const QString graphTitle = "");
 
     // Protected by Mutex
     void     AddPoint(double x, double y);
@@ -34,7 +34,8 @@ public:
 
 private:
     QString  TitleX, TitleY;
-    int      MarkerColor = 4, MarkerStyle = 20, MarkerSize = 1;
+    int      MarkerColor = 4, MarkerStyle = 20;
+    double   MarkerSize = 1.0;
     int      LineColor = 4,   LineStyle = 1,    LineWidth = 1;
 };
 

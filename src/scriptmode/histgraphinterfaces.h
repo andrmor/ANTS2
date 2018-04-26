@@ -76,9 +76,9 @@ public slots:
 
   void NewGraph(const QString& GraphName);
 
-  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
+  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
-  void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
+  void SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle = "");
 
   void AddPoint(QString GraphName, double x, double y);
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);

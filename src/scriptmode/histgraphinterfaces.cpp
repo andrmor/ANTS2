@@ -438,7 +438,7 @@ void AInterfaceToGraph::NewGraph(const QString &GraphName)
     }
 }
 
-void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize)
+void AInterfaceToGraph::SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize)
 {
     ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
@@ -456,13 +456,13 @@ void AInterfaceToGraph::SetLineProperties(QString GraphName, int LineColor, int 
         r->SetLineProperties(LineColor, LineStyle, LineWidth);
 }
 
-void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_Title)
+void AInterfaceToGraph::SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle)
 {
     ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
     if (!r)
         abort("Graph "+GraphName+" not found!");
     else
-        r->SetAxisTitles(X_Title, Y_Title);
+        r->SetTitles(X_Title, Y_Title, GraphTitle);
 }
 
 void AInterfaceToGraph::AddPoint(QString GraphName, double x, double y)

@@ -7,7 +7,7 @@ CurveFit::CurveFit(double x_min, double x_max, int n_intervals, QVector <double>
 {
     int n_pts = std::min(x0.size(), y0.size());
 
-    QVector <double> x(n_pts+2), y(n_pts+2), w(n_pts+2);
+    std::vector <double> x(n_pts+2), y(n_pts+2), w(n_pts+2);
     x[0] = x_min; y[0] = w[0] = 0.;
     x[n_pts+1] = x_max; y[n_pts+1] = w[n_pts+1] = 0.;
     for (int i=1; i<n_pts+1; i++) {
@@ -18,7 +18,7 @@ CurveFit::CurveFit(double x_min, double x_max, int n_intervals, QVector <double>
 
     bs = new Bspline3(x_min, x_max, n_intervals);
     BS3fit F(bs);
-    F.Fit(n_pts, x.data(), y.data(), w.data());
+    F.Fit(n_pts+2, x.data(), y.data(), w.data());
 }
 
 CurveFit::~CurveFit()

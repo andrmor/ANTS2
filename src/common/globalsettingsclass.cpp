@@ -226,7 +226,10 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "RunWebSocketServerOnStart", fRunWebSocketServerOnStart);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
-    parseJson(js, "ExternalJSROOT", ExternalJSROOT);
+
+    QString tmp;
+    parseJson(js, "ExternalJSROOT", tmp);
+    if (!tmp.isEmpty()) ExternalJSROOT = tmp;
 }
 
 void GlobalSettingsClass::SaveANTSconfiguration()

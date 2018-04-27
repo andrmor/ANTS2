@@ -8,18 +8,6 @@
 
 #include <QDebug>
 
-ANetworkModule::ANetworkModule()
-{
-    ScriptManager = 0;
-    WebSocketServer = 0;
-    fDebug = true;
-    RootServerPort = 0;
-
-#ifdef USE_ROOT_HTML
-    RootHttpServer = 0;
-#endif
-}
-
 ANetworkModule::~ANetworkModule()
 {
     delete WebSocketServer;

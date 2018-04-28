@@ -339,7 +339,7 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
 
 void ATextEdit::focusInEvent(QFocusEvent *e)
 {
-    if (c) c->setWidget(this);
+    //if (c) c->setWidget(this);
     QPlainTextEdit::focusInEvent(e);
 }
 
@@ -512,7 +512,7 @@ bool ATextEdit::findInList(QString text, QString& tmp) const
 
 void ATextEdit::onCursorPositionChanged()
 {
-  //    qDebug() << "ExtraSel update triggered (on cursor change)";
+  //    qDebug() << "--> On cursor change";
 
   QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -674,12 +674,12 @@ bool ATextEdit::TryShowFunctionTooltip(QTextCursor* cursor)
 bool ATextEdit::event(QEvent *event)
 {
     if (event->type() == QEvent::ToolTip)
-        {
-            QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
-            QTextCursor cursor = cursorForPosition(helpEvent->pos());
+    {
+        QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
+        QTextCursor cursor = cursorForPosition(helpEvent->pos());
 
-            return TryShowFunctionTooltip(&cursor);
-        }
+        return TryShowFunctionTooltip(&cursor);
+    }
     return QPlainTextEdit::event(event);
 }
 

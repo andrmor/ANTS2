@@ -30,6 +30,8 @@ public:
     QString FindString;
 
 protected:
+    bool event(QEvent *event);
+    void mouseReleaseEvent(QMouseEvent *e);
     void keyPressEvent(QKeyEvent *e) override;
     void focusInEvent(QFocusEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
@@ -64,6 +66,7 @@ private:
     void checkBracketsOnLeft(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
     void checkBracketsOnRight(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
 
+    bool TryShowFunctionTooltip(QTextCursor *cursor);
 signals:
     void requestHelp(QString);
     void editingFinished();

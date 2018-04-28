@@ -24,6 +24,8 @@ ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
     updateLineNumberAreaWidth();
 
     connect(this, &ATextEdit::cursorPositionChanged, this, &ATextEdit::onCursorPositionChanged);
+
+    setMouseTracking(true);
 }
 
 void ATextEdit::setCompleter(QCompleter *completer)
@@ -603,41 +605,75 @@ void ATextEdit::onCursorPositionChanged()
   setExtraSelections(extraSelections);
 
   // tooltip for known functions
-  QString thisOne = SelectObjFunctUnderCursor();
-  QString tmp;
-  bool fFound = findInList(thisOne, tmp); // cursor is on one of defined functions
-  if (!fFound)
-    {
-      QTextCursor tc = textCursor();
-      while (tc.position() != 0)
-        {
-          tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-          QString selected = tc.selectedText();
-          //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
-          if ( selected.left(1) == ")" ) break;
-          if ( selected.left(1) == "\n" ) break;
-          if ( selected.left(1) == "(")
-            {
-              tc.setPosition(tc.position(), QTextCursor::MoveAnchor);
-              //qDebug() << SelectObjFunctUnderCursor(&tc);
-              fFound = findInList(SelectObjFunctUnderCursor(&tc), tmp); //is cursor is in the arguments of a defined function
-              break;
-            }
-        }
-    }
-  int fh = fontMetrics().height();
-  if (fFound) QToolTip::showText( mapToGlobal( QPoint(cursorRect().topRight().x(), cursorRect().topRight().y()-2.2*fh) ),
-                                  tmp,
-                                  this,
-                                  QRect(),
-                                  100000);
-  else QToolTip::hideText();
+  QTextCursor tcc = textCursor();
+  TryShowFunctionTooltip(&tcc);
 
   if (bMonitorLineChange)
   {
       int currentLine = textCursor().blockNumber();
       if ( currentLine != previousLineNumber) emit lineNumberChanged(currentLine);
   }
+}
+
+bool ATextEdit::TryShowFunctionTooltip(QTextCursor* cursor)
+{
+    QTextCursor tc = *cursor;
+    QString functionCandidateText = SelectObjFunctUnderCursor(cursor);
+    QString tmp;
+    bool fFound = findInList(functionCandidateText, tmp); // cursor is on one of defined functions
+    if (!fFound)
+      {
+        while (tc.position() != 0)
+          {
+            tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+            QString selected = tc.selectedText();
+            //qDebug() << selected << selected.left(1).contains(QRegExp("[A-Za-z0-9.]"));
+            if ( selected.left(1) == ")" ) break;
+            if ( selected.left(1) == "\n" ) break;
+            if ( selected.left(1) == "(")
+              {
+                tc.setPosition(tc.position(), QTextCursor::MoveAnchor);
+                //qDebug() << SelectObjFunctUnderCursor(&tc);
+                fFound = findInList(SelectObjFunctUnderCursor(&tc), tmp); //is cursor is in the arguments of a defined function
+                break;
+              }
+          }
+      }
+    int fh = fontMetrics().height();
+
+    if (fFound)
+    {
+        QToolTip::showText( mapToGlobal( QPoint(cursorRect(*cursor).topRight().x(), cursorRect(*cursor).topRight().y()-2.2*fh) ),
+                                    tmp,
+                                    this,
+                                    QRect(),
+                                    100000);
+        return true;
+    }
+    else
+    {
+        QToolTip::hideText();
+        return false;
+    }
+}
+
+bool ATextEdit::event(QEvent *event)
+{
+    if (event->type() == QEvent::ToolTip)
+        {
+            QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
+            QTextCursor cursor = cursorForPosition(helpEvent->pos());
+
+            return TryShowFunctionTooltip(&cursor);
+        }
+    return QPlainTextEdit::event(event);
+}
+
+void ATextEdit::mouseReleaseEvent(QMouseEvent *e)
+{
+    QTextCursor cursor = cursorForPosition(e->pos());
+    TryShowFunctionTooltip(&cursor);
+    QPlainTextEdit::mouseReleaseEvent(e);
 }
 
 void ATextEdit::checkBracketsOnLeft(QList<QTextEdit::ExtraSelection>& extraSelections, const QColor& color)

@@ -711,6 +711,7 @@ void ScriptSettingsWidget::saveState(QJsonObject &json) const
 
 void ScriptSettingsWidget::loadState(const QJsonObject &settings)
 {
+  code->clear();
   code->appendPlainText(settings["script"].toString());
   code->setFixedHeight(settings["text height"].toInt());
 }

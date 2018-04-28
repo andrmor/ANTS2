@@ -16,7 +16,6 @@
 
 ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
-    setToolTipDuration(100000);
     TabInSpaces = 7;
 
     LeftField = new ALeftField(*this);
@@ -497,7 +496,9 @@ bool ATextEdit::findInList(QString text, QString& tmp) const
 {
   for (int i=0; i<functionList.size(); i++)
     {
-      tmp = functionList[i];
+      tmp = functionList.at(i);
+      QString returnArgument = tmp.section(' ', 0, 0) + " ";
+      tmp.remove(returnArgument);
       if (tmp.remove(text).startsWith("("))
         {
           tmp = functionList[i];
@@ -625,7 +626,11 @@ void ATextEdit::onCursorPositionChanged()
         }
     }
   int fh = fontMetrics().height();
-  if (fFound) QToolTip::showText( mapToGlobal( QPoint(cursorRect().topRight().x(), cursorRect().topRight().y()-2.2*fh) ), tmp );
+  if (fFound) QToolTip::showText( mapToGlobal( QPoint(cursorRect().topRight().x(), cursorRect().topRight().y()-2.2*fh) ),
+                                  tmp,
+                                  this,
+                                  QRect(),
+                                  100000);
   else QToolTip::hideText();
 
   if (bMonitorLineChange)

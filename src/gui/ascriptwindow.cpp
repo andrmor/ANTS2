@@ -776,7 +776,8 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       QStringList sl = functions.at(i).split("_:_");
       QString Fshort = sl.first();
       QString Flong  = sl.last();
-      functionList << Fshort;
+      //functionList << Fshort;
+      functionList << Flong;
 
       QTreeWidgetItem *fItem = new QTreeWidgetItem(objItem);
       fItem->setText(0, Fshort);

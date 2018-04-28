@@ -483,15 +483,16 @@ void ATextEdit::insertCompletion(const QString &completion)
     */
     tc.insertText(completion);
 
-    /*
+
     //if OnRight is "(", remove the "()" on the left if exist
     //qDebug() << "OnRight" << OnRight;
-    if (OnRight == "(")
-      {
-        tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, 2);
-        if (tc.selectedText() == "()") tc.removeSelectedText();
-      }
-    */
+    tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
+    tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 3);
+    if (tc.selectedText() == "()(")
+    {
+        tc.removeSelectedText();
+        tc.insertText("(");
+    }
 }
 
 bool ATextEdit::findInList(QString text, QString& tmp) const

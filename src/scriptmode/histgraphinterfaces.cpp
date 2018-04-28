@@ -80,13 +80,22 @@ void AInterfaceToHist::NewHist2D(const QString& HistName, int binsX, double star
     }
 }
 
+void AInterfaceToHist::SetTitle(const QString &HistName, const QString &Title)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+        r->SetTitle(Title);
+}
+
 void AInterfaceToHist::SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title)
 {
     ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
     if (!r)
         abort("Histogram " + HistName + " not found!");
     else
-        r->SetTitles(X_Title, Y_Title, Z_Title);
+        r->SetAxisTitles(X_Title, Y_Title, Z_Title);
 }
 
 void AInterfaceToHist::SetLineProperties(const QString &HistName, int LineColor, int LineStyle, int LineWidth)
@@ -96,6 +105,15 @@ void AInterfaceToHist::SetLineProperties(const QString &HistName, int LineColor,
         abort("Histogram " + HistName + " not found!");
     else
         r->SetLineProperties(LineColor, LineStyle, LineWidth);
+}
+
+void AInterfaceToHist::SetMarkerProperties(const QString &HistName, int MarkerColor, int MarkerStyle, double MarkerSize)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+        r->SetMarkerProperties(MarkerColor, MarkerStyle, MarkerSize);
 }
 
 void AInterfaceToHist::Fill(const QString &HistName, double val, double weight)
@@ -361,6 +379,39 @@ const QVariant AInterfaceToHist::FindPeaks(const QString &HistName, double sigma
     QVariantList res;
     for (const double& d : vec) res << d;
     return res;
+}
+
+double AInterfaceToHist::GetIntegral(const QString &HistName, bool MultiplyByBinWidth)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return 1.0;
+    }
+    else
+        return r->GetIntegral(MultiplyByBinWidth);
+}
+
+double AInterfaceToHist::GetMaximum(const QString &HistName)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+    {
+        abort("Histogram " + HistName + " not found!");
+        return 1.0;
+    }
+    else
+        return r->GetMaximum();
+}
+
+void AInterfaceToHist::Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth)
+{
+    ARootHistRecord* r = dynamic_cast<ARootHistRecord*>(TmpHub->Hists.getRecord(HistName));
+    if (!r)
+        abort("Histogram " + HistName + " not found!");
+    else
+        r->Scale(ScaleIntegralTo, DividedByBinWidth);
 }
 
 bool AInterfaceToHist::Delete(const QString &HistName)

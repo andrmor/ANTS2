@@ -27,8 +27,10 @@ public slots:
   void           NewHist(const QString& HistName, int bins, double start, double stop);
   void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
+  void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
+  void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
 
   void           Fill(const QString& HistName, double val, double weight);
   void           Fill2D(const QString& HistName, double x, double y, double weight);
@@ -44,6 +46,10 @@ public slots:
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
   const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
+
+  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
+  double         GetMaximum(const QString& HistName);
+  void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();

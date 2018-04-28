@@ -305,7 +305,10 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 
     // auto-read list of public slots for highlighter    
     for (int i=0; i<ScriptTabs.size(); i++)
+    {
         ScriptTabs[i]->highlighter->setCustomCommands(newFunctions);
+        ScriptTabs[i]->TextEdit->functionList = functionList;
+    }
 
     //filling autocompleter
     for (int i=0; i<newFunctions.size(); i++)
@@ -773,7 +776,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       QStringList sl = functions.at(i).split("_:_");
       QString Fshort = sl.first();
       QString Flong  = sl.last();
-      ScriptTabs[CurrentTab]->TextEdit->functionList << Fshort;
+      functionList << Fshort;
 
       QTreeWidgetItem *fItem = new QTreeWidgetItem(objItem);
       fItem->setText(0, Fshort);
@@ -1349,6 +1352,7 @@ void AScriptWindow::AddNewTab()
 {
     AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel, ScriptLanguage);
     tab->highlighter->setCustomCommands(functions);
+    tab->TextEdit->functionList = functionList;
 
     if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
       {
@@ -1361,10 +1365,11 @@ void AScriptWindow::AddNewTab()
       }
 
     connect(tab->TextEdit, &ATextEdit::fontSizeChanged, this, &AScriptWindow::onDefaulFontSizeChanged);
-    ScriptTabs.append(tab);
+    connect(tab->TextEdit, &ATextEdit::requestHelp, this, &AScriptWindow::onF1pressed);
 
-    twScriptTabs->addTab(ScriptTabs.last()->TextEdit, createNewTabName());
-    QObject::connect(ScriptTabs.last()->TextEdit, SIGNAL(requestHelp(QString)), this, SLOT(onF1pressed(QString)));
+    ScriptTabs.append(tab);
+    twScriptTabs->addTab(tab->TextEdit, createNewTabName());
+
     CurrentTab = ScriptTabs.size()-1;
     twScriptTabs->setCurrentIndex(CurrentTab);
 

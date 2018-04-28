@@ -149,6 +149,7 @@ private:
     bool ShowEvalResult;
 
     QSet<QString> ExpandedItemsInJsonTW;
+    QStringList functionList; //functions to populate tooltip helper
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -212,8 +213,8 @@ public:
     QString TabName;
     bool    bExplicitlyNamed = false;   //if true save will not auto-rename
 
-    QCompleter* completer;
-    AHighlighterScriptWindow* highlighter;
+    QCompleter* completer = 0;
+    AHighlighterScriptWindow* highlighter = 0;
 
     QVector<int> VisitedLineNumber;
     int indexInVisitedLineNumber = 0;

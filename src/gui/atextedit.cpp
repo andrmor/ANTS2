@@ -484,8 +484,7 @@ void ATextEdit::insertCompletion(const QString &completion)
     tc.insertText(completion);
 
 
-    //if OnRight is "(", remove the "()" on the left if exist
-    //qDebug() << "OnRight" << OnRight;
+    //if inserted empty brackets at the end of the functuion, and the next character is "(", remove "()"
     tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor, 2);
     tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 3);
     if (tc.selectedText() == "()(")
@@ -561,10 +560,24 @@ void ATextEdit::onCursorPositionChanged()
       QTextCursor tc = textCursor();
       tc.select(QTextCursor::WordUnderCursor);
       QString selection = tc.selectedText();
+      //    qDebug() << "-->"<<selection;
       QColor color = QColor(Qt::green).lighter(170);
       QRegExp exl("[0-9 (){}\\[\\]=+\\-*/\\|~^.,:;\"'<>\\#\\$\\&\\?]");
       QString test = selection.simplified();
       test.remove(exl);
+      //    qDebug() << "rem-->"<<test;
+      if (test.isEmpty())
+      {
+          //could be after the var name and followed by bracket
+          tc = textCursor();
+          tc.movePosition(QTextCursor::Left, QTextCursor::MoveAnchor);
+          tc.select(QTextCursor::WordUnderCursor);
+          selection = tc.selectedText();
+          test = selection.simplified();
+          test.remove(exl);
+          //    qDebug() << "New test:>>>"<<test;
+      }
+
       if (!test.isEmpty())
         {
           QRegExp pat("\\b"+selection+"\\b");

@@ -42,7 +42,8 @@ public slots:
    const QVariant GetEntry(const QString &TreeName, int EntryIndex);
 
    const QString  Draw(const QString& TreeName, const QString& what, const QString& cuts, const QString& options,
-                       const QVariant binsAndRanges = QVariantList(), const QVariant markerAndLineAttributes = QVariantList());
+                       const QVariant binsAndRanges = QVariantList(), const QVariant markerAndLineAttributes = QVariantList(),
+                       bool AbortIfFailedToDraw = true);
 
    void     Save(const QString& TreeName, const QString& FileName);
 

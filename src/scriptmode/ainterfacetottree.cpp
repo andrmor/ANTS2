@@ -508,7 +508,7 @@ const QVariantList assertMarkerLine(const QVariant& in)
 }
 
 const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options,
-                                      const QVariant binsAndRanges, const QVariant markerAndLineAttributes)
+                                      const QVariant binsAndRanges, const QVariant markerAndLineAttributes, bool AbortIfFailedToDraw)
 {
     if (!bGuiThread)
     {
@@ -546,6 +546,9 @@ const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &wh
         r->externalUnlock();
 
         //r->resetTreeRecords();
+
+        if (AbortIfFailedToDraw && !error.isEmpty())
+            abort("Tree Draw error -> " + error);
 
         return error;
     }

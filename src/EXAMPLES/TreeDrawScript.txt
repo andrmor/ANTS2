@@ -164,7 +164,7 @@ function draw()
              ml.push( [  parseInt(gui.editGetText("eColor")),  parseInt(gui.editGetText("eMStyle")),  parseFloat(gui.editGetText("eMSize")) ] )
              ml.push( [  parseInt(gui.editGetText("eColor")),  parseInt(gui.editGetText("eLStyle")),  parseFloat(gui.editGetText("eLSize")) ] )
              
-             var error = tree.Draw(treeName, what, cuts, opt, br, ml)
+             var error = tree.Draw(treeName, what, cuts, opt, br, ml, false)
              if (error !== "")
              {
                     gui.messageBox(error)

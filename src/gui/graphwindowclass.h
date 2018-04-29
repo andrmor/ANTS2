@@ -257,31 +257,32 @@ private slots:
 private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;
-    RasterWindowGraphClass *RasterWindow;
-    QWidget *QWinContainer;
-    bool ExtractionCanceled;
-    int LastOptStat;
+    RasterWindowGraphClass *RasterWindow = 0;
+    QWidget *QWinContainer = 0;
+    bool ExtractionCanceled = false;
+    int LastOptStat = 1111;
 
     QVector<DrawObjectStructure> DrawObjects;  //currently drawn
     QVector<DrawObjectStructure> MasterDrawObjects; //last draw made from outse of the graph window
     QVector< BasketItemClass > Basket; //container with user selected "drawings"
-    int CurrentBasketItem;
-    int BasketMode;
+    int CurrentBasketItem = -1;
+    int BasketMode = 0;
 
     QList<TObject*> tmpTObjects;
-    TH1D* hProjection;  //for toolbox
-    double TG_X0, TG_Y0;
+    TH1D* hProjection = 0;  //for toolbox
+    double TG_X0 = 0;
+    double TG_Y0 = 0;
 
-    QGraphicsView* gvOver;
-    AToolboxScene* scene;
+    QGraphicsView* gvOver = 0;
+    AToolboxScene* scene = 0;
 
     void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 
     //flags
-    bool TMPignore; //temporarily forbid updates - need for bulk update to avoid cross-modification
+    bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
     bool BarShown;
-    bool ColdStart;
-    bool fFirstTime; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
+    bool ColdStart = true;
+    bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
     double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"

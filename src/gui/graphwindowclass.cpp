@@ -75,26 +75,9 @@
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
-  QMainWindow(parent),
+  QMainWindow(parent), MW(mw),
   ui(new Ui::GraphWindowClass)
 { 
-  //inits
-  RasterWindow = 0;
-  QWinContainer = 0;
-  TG_X0 = 0, TG_Y0 = 0;   
-  TMPignore = false;
-  DrawObjects.clear();
-  MW = mw;
-  ColdStart = true;
-  ExtractionCanceled = false;
-  gvOver = 0;  
-  CurrentBasketItem = -1;
-  BasketMode = 0;
-  fFirstTime = false;
-  LastOptStat = 1111;
-
-  hProjection = 0;
-
   //setting UI
   ui->setupUi(this);
   this->setMinimumWidth(200);
@@ -1546,149 +1529,128 @@ bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString&
     str += ")";
 
     TString What = str.toLocal8Bit().data();
-    TString Cond = ( cond.isEmpty() ? "" : cond.toLocal8Bit().data() );
-    TString How  = (  how.isEmpty() ? "" :  how.toLocal8Bit().data() );
+    //TString Cond = ( cond.isEmpty() ? "" : cond.toLocal8Bit().data() );
+    TString Cond = cond.toLocal8Bit().data();
+    //TString How  = (  how.isEmpty() ? "" :  how.toLocal8Bit().data() );
+    TString How  = how.toLocal8Bit().data();
 
     QString howAdj = how;   //( how.isEmpty() ? "goff" : "goff,"+how );
     if (!bHistToGraph) howAdj = "goff," + how;
     TString HowAdj = howAdj.toLocal8Bit().data();
 
+    // -------------Delete old tmp hist if exists---------------
     TObject* oldObj = gDirectory->FindObject("htemp");
     if (oldObj)
     {
           qDebug() << "Old htemp found: "<<oldObj->GetName() << " -> deleting!";
         gDirectory->RecursiveRemove(oldObj);
     }
+
+    // --------------DRAW--------------
+    qDebug() << "TreeDraw -> what:" << What << "cuts:" << Cond << "opt:"<<HowAdj;
+
+    GraphWindowClass* tmpWin = 0;
     if (bHistToGraph)
     {
-        SetAsActiveRootWindow();
-        gPad->Clear();
+        tmpWin = new GraphWindowClass(this, MW);
+        tmpWin->SetAsActiveRootWindow();
     }
 
-    qDebug() << "TreeDraw input:" << What << Cond << HowAdj;
     TH1::AddDirectory(true);
     tree->Draw(What, Cond, HowAdj);
     TH1::AddDirectory(false);
 
-    switch (num)
+    // --------------Checks------------
+    TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
+    if (!tmpHist)
     {
-       case 1:
-       {
-           TH1* tmpHist1D = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
-           if (!tmpHist1D)
-           {
-               qDebug() << "No histogram was generated: check input!";
-               if (result) *result = "No histogram was generated: check input!";
-               return false;
-           }
-           if (tmpHist1D->GetEntries() == 0)
-           {
-               qDebug() << "Empty histogram was generated!";
-               if (result) *result = "Empty histogram was generated!";
-               return false;
-           }
+        qDebug() << "No histogram was generated: check input!";
+        if (result) *result = "No histogram was generated: check input!";
+        delete tmpWin;
+        return false;
+    }
 
-           TH1* h = dynamic_cast<TH1*>(tmpHist1D->Clone(""));
-           h->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
-           Draw(h, How, true, false);
-           break;
-       }
-       case 2:
-       {
-            //checkis common for both versions
-            TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
-            if (!tmpHist)
+    // -------------Formatting-----------
+    if (bHistToGraph)
+    {
+        TGraph *g = dynamic_cast<TGraph*>(gPad->GetPrimitive("Graph"));
+        if (!g)
+        {
+            qDebug() << "Graph was not generated: check input!";
+            if (result) *result = "No graph was generated: check input!";
+            delete tmpWin;
+            return false;
+        }
+
+        TGraph* clone = new TGraph(*g);
+        if (clone)
+        {
+            if (clone->GetN() > 0)
             {
-                qDebug() << "No histogram was generated: check input!";
-                if (result) *result = "No histogram was generated: check input!";
+                const QVariantList xx = vlBR.at(0).toList();
+                double min = xx.at(1).toDouble();
+                double max = xx.at(2).toDouble();
+                if (max > min)
+                    clone->GetXaxis()->SetLimits(min, max);
+                const QVariantList yy = vlBR.at(1).toList();
+                min = yy.at(1).toDouble();
+                max = yy.at(2).toDouble();
+                if (max > min)
+                {
+                    clone->SetMinimum(min);
+                    clone->SetMaximum(max);
+                }
+
+                clone->SetTitle(tmpHist->GetTitle());
+                SetMarkerAttributes(static_cast<TAttMarker*>(clone), vlML.at(0).toList());
+                SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(1).toList());
+
+                if ( !How.Contains("same", TString::kIgnoreCase) ) How = "A," + How;
+                SetAsActiveRootWindow();
+                Draw(clone, How);
+            }
+            else
+            {
+                qDebug() << "Empty graph was generated!";
+                if (result) *result = "Empty graph was generated!";
+                delete tmpWin;
                 return false;
             }
+        }
+    }
+    else
+    {
+        if (tmpHist->GetEntries() == 0)
+        {
+            qDebug() << "Empty histogram was generated!";
+            if (result) *result = "Empty histogram was generated!";
+            return false;
+        }
 
-           if (bHistToGraph)
-           {
-               TGraph *g = dynamic_cast<TGraph*>(gPad->GetPrimitive("Graph"));
-               if (!g)
-               {
-                   qDebug() << "Graph was not generated: check input!";
-                   if (result) *result = "No graph was generated: check input!";
-                   return false;
-               }
+        TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
 
-               TGraph* clone = new TGraph(*g);
-               if (clone)
-               {
-                   if (clone->GetN() > 0)
-                   {
-                       clone->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-                       clone->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-                       clone->SetTitle(tmpHist->GetTitle());
-                       SetMarkerAttributes(static_cast<TAttMarker*>(clone), vlML.at(0).toList());
-                       SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(1).toList());
+        switch (num)
+        {
+            case 1:
+                h->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                break;
+            case 2:
+                h->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                h->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+                break;
+            case 3:
+                h->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                h->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+                h->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+        }
 
-                       How = "A" + How;
-                       Draw(clone, How);
-                   }
-                   else
-                   {
-                       qDebug() << "Empty graph was generated!";
-                       if (result) *result = "Empty graph was generated!";
-                       return false;
-                   }
-               }
-           }
-           else
-           {
-               if (tmpHist->GetEntries() == 0)
-               {
-                   qDebug() << "Empty histogram was generated!";
-                   if (result) *result = "Empty histogram was generated!";
-                   return false;
-               }
-
-               TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
-
-               tmpHist->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-               tmpHist->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-               SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
-               SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
-
-               Draw(h, How, true, false);
-           }
-
-           break;
-       }
-       case 3:
-       {
-           TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
-           if (!tmpHist)
-           {
-               qDebug() << "No histogram was generated: check input!";
-               if (result) *result = "No histogram was generated: check input!";
-               return false;
-           }
-           if (tmpHist->GetEntries() == 0)
-           {
-               qDebug() << "Empty histogram was generated!";
-               if (result) *result = "Empty histogram was generated!";
-               return false;
-           }
-
-           TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
-
-           tmpHist->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
-           tmpHist->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
-           tmpHist->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
-           SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
-           SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
-
-           Draw(h, How, true, false);
-           break;
-       }
+        SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
+        SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
+        Draw(h, How, true, false);
     }
 
     if (result) *result = "";
+    delete tmpWin;
     return true;
 }
 

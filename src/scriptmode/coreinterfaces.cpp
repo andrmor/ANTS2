@@ -417,6 +417,18 @@ double AInterfaceToCore::getFitted(double x)
     return CurF->eval(x);
 }
 
+const QVariant AInterfaceToCore::getFittedArr(const QVariant array)
+{
+    if (!CurF) return 0;
+
+    QVariantList vl = array.toList();
+    QVariantList res;
+    for (int i=0; i<vl.size(); i++)
+        res << CurF->eval( vl.at(i).toDouble() );
+
+    return res;
+}
+
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)
 {
   if (QFileInfo(fileName).exists())

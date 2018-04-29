@@ -74,6 +74,7 @@ public slots:
 
   void setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y);
   double getFitted(double x);
+  const QVariant getFittedArr(const QVariant array);
 
 private:
   AScriptManager* ScriptManager;

@@ -2188,7 +2188,12 @@ void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
+    MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
+}
+
+void InterfaceToGraphWin::SetLegendBorder(int color, int style, int size)
+{
+    MW->GraphWindow->SetLegendBorder(color, style, size);
 }
 
 void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)

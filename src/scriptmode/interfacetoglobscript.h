@@ -442,6 +442,8 @@ public slots:
   void SetLog(bool Xaxis, bool Yaxis);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
+  void SetLegendBorder(int color, int style, int size);
+
   void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
 
   void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);

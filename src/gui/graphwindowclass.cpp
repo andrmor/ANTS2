@@ -2332,8 +2332,46 @@ void GraphWindowClass::AddCurrentToBasket(QString name)
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
-  UpdateRootCanvas();
+  TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
+
+  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+  {
+      RegisterTObject(leg);
+      DrawObjects.append(DrawObjectStructure(leg, "same"));
+  }
+  else
+  {
+      //do not register for basket - they have their own system
+      Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(leg, "same"));
+  }
+  RedrawAll();
+
+  //UpdateRootCanvas();
+}
+
+//#include "TLegendEntry.h"
+void GraphWindowClass::SetLegendBorder(int color, int style, int size)
+{
+    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    for (int i=0; i<DrObj.size(); i++)
+    {
+        QString cn = DrObj[i].getPointer()->ClassName();
+        //qDebug() << cn;
+        if (cn == "TLegend")
+        {
+            TLegend* le = dynamic_cast<TLegend*>(DrObj[i].getPointer());
+            le->SetLineColor(color);
+            le->SetLineStyle(style);
+            le->SetLineWidth(size);
+
+            //TList* l = le->GetListOfPrimitives();
+            //qDebug() << l->GetEntries() << l->At(0)->ClassName()<<((TLegendEntry*)l->At(1))->GetLabel();
+
+            RedrawAll();
+            return;
+        }
+    }
+    qDebug() << "Legend object was not found!";
 }
 
 void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)

@@ -27,6 +27,9 @@ public:
     void     Sort();
     void     SetYRange(double min, double max);
     void     SetXRange(double min, double max);
+    void     SetXDivisions(int numDiv);
+    void     SetYDivisions(int numDiv);
+
     const QVector<QPair<double, double> > GetPoints();
     void     Save(const QString& fileName);
 

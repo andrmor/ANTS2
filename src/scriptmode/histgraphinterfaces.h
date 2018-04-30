@@ -92,6 +92,8 @@ public slots:
 
   void SetYRange(const QString& GraphName, double min, double max);
   void SetXRange(const QString& GraphName, double min, double max);
+  void SetXDivisions(const QString& GraphName, int numDiv);
+  void SetYDivisions(const QString& GraphName, int numDiv);
 
   void Sort(const QString& GraphName);
 

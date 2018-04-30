@@ -128,6 +128,30 @@ void ARootGraphRecord::SetXRange(double min, double max)
     }
 }
 
+void ARootGraphRecord::SetXDivisions(int numDiv)
+{
+    QMutexLocker locker(&Mutex);
+
+    TGraph* g = dynamic_cast<TGraph*>(Object);
+    if (g)
+    {
+        TAxis* ax = g->GetXaxis();
+        if (ax) ax->SetNdivisions(numDiv);
+    }
+}
+
+void ARootGraphRecord::SetYDivisions(int numDiv)
+{
+    QMutexLocker locker(&Mutex);
+
+    TGraph* g = dynamic_cast<TGraph*>(Object);
+    if (g)
+    {
+        TAxis* ax = g->GetYaxis();
+        if (ax) ax->SetNdivisions(numDiv);
+    }
+}
+
 const QVector<QPair<double, double> > ARootGraphRecord::GetPoints()
 {
     QMutexLocker locker(&Mutex);

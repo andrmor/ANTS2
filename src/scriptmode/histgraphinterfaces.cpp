@@ -628,6 +628,24 @@ void AInterfaceToGraph::SetXRange(const QString &GraphName, double min, double m
         r->SetXRange(min, max);
 }
 
+void AInterfaceToGraph::SetXDivisions(const QString &GraphName, int numDiv)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetXDivisions(numDiv);
+}
+
+void AInterfaceToGraph::SetYDivisions(const QString &GraphName, int numDiv)
+{
+    ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));
+    if (!r)
+        abort("Graph "+GraphName+" not found!");
+    else
+        r->SetYDivisions(numDiv);
+}
+
 void AInterfaceToGraph::Sort(const QString &GraphName)
 {
     ARootGraphRecord* r = dynamic_cast<ARootGraphRecord*>(TmpHub->Graphs.getRecord(GraphName));

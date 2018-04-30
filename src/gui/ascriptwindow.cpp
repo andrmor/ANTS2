@@ -164,7 +164,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
             //splHelp->addWidget(leFind);
             leFind->setMinimumHeight(20);
             leFind->setMaximumHeight(20);
-            QObject::connect(leFind, SIGNAL(textChanged(QString)), this, SLOT(onFindTextChanged(QString)));
+            connect(leFind, &QLineEdit::textChanged, this, &AScriptWindow::onFindTextChanged);
             vb1->addWidget(leFind);
 
         frHelper->setLayout(vb1);
@@ -198,7 +198,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
           //splHelp->addWidget(leFind);
           leFindJ->setMinimumHeight(20);
           leFindJ->setMaximumHeight(20);
-          QObject::connect(leFindJ, SIGNAL(textChanged(QString)), this, SLOT(onFindTextJsonChanged(QString)));
+          QObject::connect(leFindJ, &QLineEdit::textChanged, this, &AScriptWindow::onFindTextJsonChanged);
         vbl->addWidget(leFindJ);
         frJsonBrowser->setLayout(vbl);
 

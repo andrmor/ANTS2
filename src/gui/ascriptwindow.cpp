@@ -252,6 +252,8 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     connect(GoBack, &QShortcut::activated, this, &AScriptWindow::onBack);
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
+    QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
+    connect(DoAlign, &QShortcut::activated, [=](){onRequestAlignText(ScriptTabs[CurrentTab]->TextEdit->textCursor());});
 
     if (!bLightMode)
         ReadFromJson();
@@ -1379,6 +1381,7 @@ void AScriptWindow::AddNewTab()
     connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
     connect(tab, &AScriptWindowTabItem::requestFindFunction, this, &AScriptWindow::onFindFunction);
     connect(tab, &AScriptWindowTabItem::requestFindVariable, this, &AScriptWindow::onFindVariable);
+    connect(tab, &AScriptWindowTabItem::requestAlignText, this, &AScriptWindow::onRequestAlignText);
 }
 
 QString AScriptWindow::createNewTabName()
@@ -1781,6 +1784,82 @@ void AScriptWindow::onFindVariable()
     te->setExtraSelections(esList);
 }
 
+#include <QTextDocumentFragment>
+void AScriptWindow::onRequestAlignText(QTextCursor& tc)
+{
+    int start = tc.anchor();
+    int stop = tc.position();
+    if (start > stop) std::swap(start, stop);
+
+    tc.setPosition(stop, QTextCursor::MoveAnchor);
+    tc.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+    tc.setPosition(start, QTextCursor::KeepAnchor);
+    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+
+    QString text = tc.selection().toPlainText();
+    if (text.isEmpty()) return;
+
+    QStringList list = text.split('\n');
+    if (list.size() == 1) return;
+
+    int currentIndent = getIndent(list.first());
+    int currentSectionCounter = 0;
+
+    for (int i=1; i<list.size(); i++)
+    {
+        int NewInd = currentIndent;
+        if (NewInd >= 0) setIndent(list[i], currentIndent);
+    }
+
+    tc.removeSelectedText();
+    QString res = list.join('\n');
+    tc.insertText(res);
+}
+
+int AScriptWindow::getIndent(const QString& line)
+{
+    qDebug() << "   calculating indent for line ->"+line+"<-";
+    int indent = -1; //empty line or         todo: only whitespace character
+    if (!line.isEmpty())
+    {
+        // ***!!! add convertion of tabs to spaces
+        for (indent = 0; indent<line.size(); indent++)
+            if (line.at(indent) != " ") break;
+
+        if (indent == line.size()) indent = -1;
+        qDebug() << "    ->"<<indent;
+    }
+    return indent;
+}
+
+void AScriptWindow::setIndent(QString &line, int indent)
+{
+    qDebug() << "--Setting indent of"<<indent<< "for line ->"+line+"<-";
+    int oldIndent = getIndent(line);
+    if (oldIndent == -1) return;
+
+    line.remove(0, oldIndent);
+    qDebug() << "   removed old ->"+line+"<-";
+
+    const QString spaces = QString(indent, ' ');
+    line.insert(0, spaces);
+    qDebug() << "   inserted new ->"+line+"<-";
+}
+
+int AScriptWindow::getSectionCounterChange(QTextCursor& tc)
+{
+    tc.select(QTextCursor::LineUnderCursor);
+    QString sel = tc.selectedText();
+    int counter = 0;
+    for (int i=0; i<sel.size(); i++)
+    {
+        // ***!!! add ignore commented!
+        if      (sel.at(i) == "{" ) counter++;
+        else if (sel.at(i) == "}" ) counter--;
+    }
+    return counter;
+}
+
 void AScriptWindow::onBack()
 {
     ScriptTabs[CurrentTab]->goBack();
@@ -1937,6 +2016,8 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     menu.addSeparator();
     QAction* shiftBack = menu.addAction("Go back (Alt + Left)");
     QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
+    menu.addSeparator();
+    QAction* alignText = menu.addAction("Align selected text");
 
     QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
@@ -1949,6 +2030,8 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
 
     else if (selectedItem == shiftBack) goBack();
     else if (selectedItem == shiftForward) goForward();
+
+    else if (selectedItem == alignText) emit requestAlignText(TextEdit->textCursor());
 }
 
 void AScriptWindowTabItem::goBack()

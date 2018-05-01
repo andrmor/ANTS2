@@ -20,6 +20,7 @@ class QThread;
 class AScriptManager;
 class AScriptWindowTabItem;
 class GlobalSettingsClass;
+class QTextCursor;
 
 namespace Ui {
 class AScriptWindow;
@@ -170,6 +171,9 @@ private:
 
     void applyTextFindState();
     void findText(bool bForward);
+    int  getIndent(const QString &line);
+    void setIndent(QString& line, int indent);
+    int getSectionCounterChange(QTextCursor &tc);
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);
@@ -196,6 +200,7 @@ private slots:
     void onReplaceSelected();
     virtual void onFindFunction();
     virtual void onFindVariable();
+    virtual void onRequestAlignText(QTextCursor &tc);
     void onBack();
     void onForward();
 };
@@ -240,6 +245,7 @@ signals:
     void requestReplaceText();
     void requestFindFunction();
     void requestFindVariable();
+    void requestAlignText(QTextCursor&);
 };
 
 #endif // ASCRIPTWINDOW_H

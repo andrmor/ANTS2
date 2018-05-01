@@ -25,9 +25,10 @@ public:
     void setTextCursorSilently(const QTextCursor& tc);
 
     QStringList functionList;
-    int TabInSpaces;
 
     QString FindString;
+
+    static const int TabInSpaces = 7;
 
 protected:
     bool event(QEvent *event);

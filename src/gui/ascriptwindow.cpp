@@ -45,6 +45,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QInputDialog>
+#include <QTextDocumentFragment>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
@@ -1228,6 +1229,7 @@ void AScriptWindowTabItem::ReadFromJson(QJsonObject &json)
     QString Script = json["Script"].toString();
     TextEdit->clear();
     TextEdit->appendPlainText(Script);
+    TextEdit->document()->clearUndoRedoStacks();
     FileName.clear();
     FileName = json["FileName"].toString();
 
@@ -1784,7 +1786,6 @@ void AScriptWindow::onFindVariable()
     te->setExtraSelections(esList);
 }
 
-#include <QTextDocumentFragment>
 void AScriptWindow::onRequestAlignText(QTextCursor& tc)
 {
     int start = tc.anchor();
@@ -1802,62 +1803,70 @@ void AScriptWindow::onRequestAlignText(QTextCursor& tc)
     QStringList list = text.split('\n');
     if (list.size() == 1) return;
 
+    for (QString& s : list) convertTabToSpaces(s);
+
     int currentIndent = getIndent(list.first());
-    int currentSectionCounter = 0;
 
     for (int i=1; i<list.size(); i++)
     {
-        int NewInd = currentIndent;
-        if (NewInd >= 0) setIndent(list[i], currentIndent);
+        int deltaSections = getSectionCounterChange(list.at(i-1));
+        currentIndent += deltaSections * ATextEdit::TabInSpaces;
+
+        if (list.at(i).trimmed().startsWith('}')) currentIndent -= ATextEdit::TabInSpaces;
+
+        if (currentIndent < 0) currentIndent = 0;
+        setIndent(list[i], currentIndent);
     }
 
-    tc.removeSelectedText();
     QString res = list.join('\n');
     tc.insertText(res);
 }
 
 int AScriptWindow::getIndent(const QString& line)
 {
-    qDebug() << "   calculating indent for line ->"+line+"<-";
-    int indent = -1; //empty line or         todo: only whitespace character
+    int indent = -1;
     if (!line.isEmpty())
     {
-        // ***!!! add convertion of tabs to spaces
         for (indent = 0; indent<line.size(); indent++)
             if (line.at(indent) != " ") break;
 
         if (indent == line.size()) indent = -1;
-        qDebug() << "    ->"<<indent;
     }
     return indent;
 }
 
 void AScriptWindow::setIndent(QString &line, int indent)
 {
-    qDebug() << "--Setting indent of"<<indent<< "for line ->"+line+"<-";
-    int oldIndent = getIndent(line);
-    if (oldIndent == -1) return;
-
-    line.remove(0, oldIndent);
-    qDebug() << "   removed old ->"+line+"<-";
+    //int oldIndent = getIndent(line);
+    //if (oldIndent == -1) return;
+    //line.remove(0, oldIndent);
+    line = line.trimmed();
 
     const QString spaces = QString(indent, ' ');
     line.insert(0, spaces);
-    qDebug() << "   inserted new ->"+line+"<-";
 }
 
-int AScriptWindow::getSectionCounterChange(QTextCursor& tc)
+int AScriptWindow::getSectionCounterChange(const QString& line)
 {
-    tc.select(QTextCursor::LineUnderCursor);
-    QString sel = tc.selectedText();
     int counter = 0;
-    for (int i=0; i<sel.size(); i++)
+    for (int i=0; i<line.size(); i++)
     {
-        // ***!!! add ignore commented!
-        if      (sel.at(i) == "{" ) counter++;
-        else if (sel.at(i) == "}" ) counter--;
+        // ***!!! add ignore commented: // and inside /* */
+        if      (line.at(i) == "{" ) counter++;
+        else if (line.at(i) == "}" ) counter--;
     }
     return counter;
+}
+
+void AScriptWindow::convertTabToSpaces(QString& line)
+{
+    for (int i=line.size()-1; i>-1; i--)
+        if (line.at(i) == '\t')
+        {
+            line.remove(i, 1);
+            const QString spaces = QString(ATextEdit::TabInSpaces, ' ');
+            line.insert(i, spaces);
+        }
 }
 
 void AScriptWindow::onBack()
@@ -2017,7 +2026,7 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     QAction* shiftBack = menu.addAction("Go back (Alt + Left)");
     QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
     menu.addSeparator();
-    QAction* alignText = menu.addAction("Align selected text");
+    QAction* alignText = menu.addAction("Align selected text (Ctrl + I)");
 
     QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected

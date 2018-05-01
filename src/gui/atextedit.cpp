@@ -16,8 +16,6 @@
 
 ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
-    TabInSpaces = 7;
-
     LeftField = new ALeftField(*this);
     connect(this, &ATextEdit::blockCountChanged, this, &ATextEdit::updateLineNumberAreaWidth);
     connect(this, &ATextEdit::updateRequest, this, &ATextEdit::updateLineNumberArea);

@@ -136,6 +136,9 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
+
+
+
     MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 
     //checkig this material
@@ -2590,7 +2593,7 @@ void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
      d->exec();
 }
 
-void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QModelIndex &index)
+void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QModelIndex & /*index*/)
 {
     if (!ui->cbShowIsotopes->isChecked())
     {

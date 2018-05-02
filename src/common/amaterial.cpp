@@ -525,6 +525,10 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
 
 QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
 {
+  const QString errInComposition = ChemicalComposition.checkForErrors();
+  if (!errInComposition.isEmpty())
+      return name + ": " + errInComposition;
+
   if (iPart<0 || iPart>=MpCollection->countParticles())
       return QString("Wrong particle index: ") + QString::number(iPart);
 

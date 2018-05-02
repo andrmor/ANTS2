@@ -98,7 +98,7 @@ AGeneratedParticleDelegate::AGeneratedParticleDelegate(AAbsorptionGeneratedParti
         cbOp = new QCheckBox("Opposite direction");
         cbOp->setChecked(ParticleRecord->bOpositeDirectionWithPrevious);
         cbOp->setEnabled(bEnableDir);
-        cbOp->setToolTip("This particle is generated with the direction opposite of this of the previously defined pareticle");
+        cbOp->setToolTip("If checked, this particle is generated with the direction opposite to the one of the particle above");
         l->addWidget(cbOp);
 
     QObject::connect(combP, SIGNAL(activated(int)), this, SLOT(onPropertiesChanged()));

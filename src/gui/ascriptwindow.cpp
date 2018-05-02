@@ -100,7 +100,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     b.drawEllipse(0, 0, 14, 14);
     RedIcon = new QIcon(rm);
 
-    completitionModel = new QStringListModel(QStringList());
+    //completitionModel = new QStringListModel(QStringList());
 
     //more GUI
     splMain = new QSplitter();  // upper + output with buttons
@@ -276,7 +276,7 @@ AScriptWindow::~AScriptWindow()
   delete RedIcon;
   delete ScriptManager;
   //qDebug() << "Script manager deleted";
-  delete completitionModel;
+  //delete completitionModel;
   //qDebug() << "Completition model deleted";
 }
 
@@ -317,7 +317,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     for (int i=0; i<newFunctions.size(); i++)
         newFunctions[i] += "()";
     functions << newFunctions;
-    completitionModel->setStringList(functions);
+    //completitionModel->setStringList(functions);
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
@@ -1179,13 +1179,16 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
   return commands;
 }
 
-AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWindow::ScriptLanguageEnum language)
+AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language) :
+    functions(functions)
 {
     TextEdit = new ATextEdit();
     TextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
 
     completer = new QCompleter(this);
-    completer->setModel(model);
+    //completer->setModel(model);
+    completitionModel = new QStringListModel(functions, this);
+    completer->setModel(completitionModel);
     completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
     //completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setFilterMode(Qt::MatchContains);
@@ -1202,6 +1205,8 @@ AScriptWindowTabItem::AScriptWindowTabItem(QAbstractItemModel* model, AScriptWin
     TextEdit->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(TextEdit, &ATextEdit::customContextMenuRequested, this, &AScriptWindowTabItem::onCustomContextMenuRequested);
     connect(TextEdit, &ATextEdit::lineNumberChanged, this, &AScriptWindowTabItem::onLineNumberChanged);
+
+    connect(TextEdit, &ATextEdit::textChanged, this, &AScriptWindowTabItem::onTextChanged);
 }
 
 AScriptWindowTabItem::~AScriptWindowTabItem()
@@ -1355,7 +1360,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 
 void AScriptWindow::AddNewTab()
 {
-    AScriptWindowTabItem* tab = new AScriptWindowTabItem(completitionModel, ScriptLanguage);
+    AScriptWindowTabItem* tab = new AScriptWindowTabItem(functions, ScriptLanguage);
     tab->highlighter->setCustomCommands(functions);
     tab->TextEdit->functionList = functionList;
 
@@ -2084,4 +2089,22 @@ void AScriptWindowTabItem::onLineNumberChanged(int lineNumber)
     if (VisitedLineNumber.size() > maxLineNumbers) VisitedLineNumber.removeFirst();
 
     indexInVisitedLineNumber = VisitedLineNumber.size() - 1;
+}
+
+void AScriptWindowTabItem::onTextChanged()
+{
+    //qDebug() << "Text changed!";
+    QTextDocument* d = TextEdit->document();
+    QRegularExpression re("(?<=var)\\s+\\w+\\b");
+
+    QStringList Variables;
+    QTextCursor tc = d->find(re, 0);//, flags);
+    while (!tc.isNull())
+    {
+        Variables << tc.selectedText().trimmed();
+        tc = d->find(re, tc);//, flags);
+    }
+
+    Variables.append(functions);
+    completitionModel->setStringList(Variables);
 }

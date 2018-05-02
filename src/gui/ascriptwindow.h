@@ -122,7 +122,7 @@ public:
 
 private:
     Ui::AScriptWindow *ui;
-    QStringListModel* completitionModel;
+    //QStringListModel* completitionModel;
     GlobalSettingsClass* GlobSet;
 
     ScriptLanguageEnum ScriptLanguage = _JavaScript_;
@@ -210,7 +210,7 @@ class AScriptWindowTabItem : public QObject
 {
     Q_OBJECT
 public:
-    AScriptWindowTabItem(QAbstractItemModel *model, AScriptWindow::ScriptLanguageEnum language);
+    AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language);
     ~AScriptWindowTabItem();
 
     ATextEdit* TextEdit;
@@ -219,7 +219,10 @@ public:
     QString TabName;
     bool    bExplicitlyNamed = false;   //if true save will not auto-rename
 
+    const QStringList& functions;
+
     QCompleter* completer = 0;
+    QStringListModel* completitionModel;
     AHighlighterScriptWindow* highlighter = 0;
 
     QVector<int> VisitedLineNumber;
@@ -240,6 +243,7 @@ public:
 private slots:
     void onCustomContextMenuRequested(const QPoint& pos);
     void onLineNumberChanged(int lineNumber);
+    void onTextChanged();
 
 signals:
     void requestFindText();

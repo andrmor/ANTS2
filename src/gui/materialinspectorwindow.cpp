@@ -2138,6 +2138,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
     L->addWidget(new QLabel("C2 H5 OH"));
     L->addWidget(new QLabel("C22H10N205"));
+    L->addWidget(new QLabel("\nWarning: pressing \"Confirm\" button resets custom isotope composition!"));
     d->setLayout(L);
 
     while (d->exec() != 0)
@@ -2587,4 +2588,13 @@ void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
      connect(pbClose, SIGNAL(clicked(bool)), d, SLOT(accept()));
 
      d->exec();
+}
+
+void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QModelIndex &index)
+{
+    if (!ui->cbShowIsotopes->isChecked())
+    {
+        ui->cbShowIsotopes->setChecked(true);
+        ShowTreeWithChemicalComposition();
+    }
 }

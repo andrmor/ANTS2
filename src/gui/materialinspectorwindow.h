@@ -136,6 +136,8 @@ private slots:
 
     void on_pbAutoLoadMissingNeutronCrossSections_clicked();
 
+    void on_trwChemicalComposition_doubleClicked(const QModelIndex &index);
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

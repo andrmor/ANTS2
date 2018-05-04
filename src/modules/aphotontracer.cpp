@@ -314,7 +314,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
        case 'P': // PM hit
          {
            const int PMnumber = NodeAfterInterface->GetNumber();
-           //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle();
+           //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle()<<"WaveIndex:"<<p->waveIndex;
            if (SimSet->bDoPhotonHistoryLog)
              {
                PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Fresnel_Transmition, MatIndexFrom, MatIndexTo) );
@@ -575,7 +575,7 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
               {
                 if (RandGen->Rndm()<(*MaterialCollection)[MatIndexFrom]->reemissionProb)
                   {
-                    //qDebug() << "Waveshifting! Original index:"<<p->WaveIndex;
+                    //qDebug() << "Waveshifting! Original index:"<<p->waveIndex;
                     if (p->waveIndex!=-1 && (*MaterialCollection)[MatIndexFrom]->PrimarySpectrumHist)
                       {
                         double wavelength;
@@ -586,10 +586,12 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                             attempts++;
                             if (attempts > 9) return AbsTriggered;  // ***!!! absolute number
                             wavelength = (*MaterialCollection)[MatIndexFrom]->PrimarySpectrumHist->GetRandom();
-                            waveIndex = (wavelength - SimSet->WaveFrom)/SimSet->WaveStep;
+                            //qDebug() << "   "<<wavelength << " MatIndexFrom:"<< MatIndexFrom;
+                            waveIndex = round( (wavelength - SimSet->WaveFrom)/SimSet->WaveStep );
                         }
                         while (waveIndex < p->waveIndex); //conserving energy
 
+                        //qDebug() << "NewIndex:"<<waveIndex;
                         p->waveIndex = waveIndex;                        
                       }
                     else p->waveIndex = -1; // this is to allow to use this procedure to make diffuse medium (including -1 waveIndex)

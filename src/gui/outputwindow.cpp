@@ -787,9 +787,12 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   //qDebug() << nBins << MW->WaveNodes;
   if (MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins-1, MW->WaveFrom, MW->WaveTo);
+      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins, MW->WaveFrom, MW->WaveTo);
       for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
+      {
+          //qDebug() << i << spec->GetBinCenter(i)<< spec->GetBinContent(i);
           WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
+      }
       WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
       MW->GraphWindow->Draw(WavelengthSpectrum);
     }

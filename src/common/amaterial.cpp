@@ -21,13 +21,13 @@ AMaterial::AMaterial()
 double AMaterial::getRefractiveIndex(int iWave) const
 {
   if (iWave == -1 || nWaveBinned.isEmpty()) return n;
-  return nWaveBinned[iWave];
+  return nWaveBinned.at(iWave);
 }
 
 double AMaterial::getAbsorptionCoefficient(int iWave) const
 {
   if (iWave == -1 || absWaveBinned.isEmpty()) return abs;
-  return absWaveBinned[iWave];
+  return absWaveBinned.at(iWave);
 }
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)

@@ -258,6 +258,9 @@ void MaterialInspectorWindow::UpdateWaveButtons()
       ui->pbShowABSlambda->setEnabled(false);
       ui->pbDeleteABSlambda->setEnabled(false);
     }
+
+  ui->pbShowReemProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
+  ui->pbDeleteReemisProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
 }
 
 void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
@@ -962,7 +965,7 @@ void MaterialInspectorWindow::AddMatToCobs(QString str)
 void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1087,7 +1090,7 @@ void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1115,7 +1118,6 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
 {
-  //MW->ShowGraphWindow();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.nWave_lambda, &tmpMaterial.nWave, kRed, "Wavelength, nm", "Refractive index");
 }
@@ -1135,7 +1137,7 @@ void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
 void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1163,9 +1165,8 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
 {
-  //MW->ShowGraphWindow();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient");
+  MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
 void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
@@ -1177,6 +1178,44 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
   ui->pbShowABSlambda->setEnabled(false);
   ui->pbDeleteABSlambda->setEnabled(false);
   MaterialInspectorWindow::on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    MW->GraphWindow->MakeGraph(&tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave, kRed, "Wavelength, nm", "Reemission probability");
+}
+
+void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, "Load reemission probability vs wavelength", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    LoadDoubleVectorsFromFile(fileName, &tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave);  //cleans previous data too
+
+    int numPoints = tmpMaterial.reemisProbWave_lambda.size();
+    QString str;
+    str.setNum(numPoints);
+    MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
+
+    ui->pbShowReemProbLambda->setEnabled(numPoints>0);
+    ui->pbDeleteReemisProbLambda->setEnabled(numPoints>0);
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbDeleteReemisProbLambda_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.reemisProbWave_lambda.clear();
+    tmpMaterial.reemisProbWave.clear();
+
+    ui->pbShowReemProbLambda->setEnabled(false);
+    ui->pbDeleteReemisProbLambda->setEnabled(false);
+    on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbWasModified_clicked()
@@ -1310,6 +1349,7 @@ void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
     //accepting changes/new material
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     tmpMaterial.absWaveBinned.resize(0);
+    tmpMaterial.reemissionProbBinned.resize(0);
     tmpMaterial.nWaveBinned.resize(0);
     tmpMaterial.GeoMat = 0;  //no delete! the original material has to have them
     tmpMaterial.GeoMed = 0;

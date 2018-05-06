@@ -138,6 +138,12 @@ private slots:
 
     void on_trwChemicalComposition_doubleClicked(const QModelIndex &index);
 
+    void on_pbShowReemProbLambda_clicked();
+
+    void on_pbLoadReemisProbLambda_clicked();
+
+    void on_pbDeleteReemisProbLambda_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

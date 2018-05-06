@@ -571,9 +571,10 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                }
 
             //check if this material is waveshifter
-            if ((*MaterialCollection)[MatIndexFrom]->reemissionProb > 0)
+            const double reemissionProb = (*MaterialCollection)[MatIndexFrom]->getReemissionProbability(p->waveIndex);
+            if ( reemissionProb > 0 )
               {
-                if (RandGen->Rndm()<(*MaterialCollection)[MatIndexFrom]->reemissionProb)
+                if (RandGen->Rndm() < reemissionProb)
                   {
                     //qDebug() << "Waveshifting! Original index:"<<p->waveIndex;
                     if (p->waveIndex!=-1 && (*MaterialCollection)[MatIndexFrom]->PrimarySpectrumHist)

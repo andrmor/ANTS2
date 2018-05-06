@@ -26,8 +26,15 @@ double AMaterial::getRefractiveIndex(int iWave) const
 
 double AMaterial::getAbsorptionCoefficient(int iWave) const
 {
+  //qDebug() << iWave << ( absWaveBinned.size()  >0 ? absWaveBinned.at(iWave) : -1 ) ;
   if (iWave == -1 || absWaveBinned.isEmpty()) return abs;
   return absWaveBinned.at(iWave);
+}
+
+double AMaterial::getReemissionProbability(int iWave) const
+{
+    if (iWave == -1 || reemissionProbBinned.isEmpty()) return reemissionProb;
+    return reemissionProbBinned.at(iWave);
 }
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
@@ -89,21 +96,29 @@ void AMaterial::clear()
   Comments = "";
 
   rayleighBinned.clear();
+
   nWave_lambda.clear();
   nWave.clear();
   nWaveBinned.clear();
+
   absWave_lambda.clear();
   absWave.clear();
   absWaveBinned.clear();
+
+  reemisProbWave.clear();
+  reemisProbWave_lambda.clear();
+  reemissionProbBinned.clear();
+
   PrimarySpectrum_lambda.clear();
   PrimarySpectrum.clear();
+
   SecondarySpectrum_lambda.clear();
   SecondarySpectrum.clear();
 
   if(PrimarySpectrumHist)
     {
       delete PrimarySpectrumHist;
-      PrimarySpectrumHist=0;
+      PrimarySpectrumHist = 0;
     }
   if (SecondarySpectrumHist)
     {
@@ -154,6 +169,12 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       QJsonArray ar;
       writeTwoQVectorsToJArray(absWave_lambda, absWave, ar);
       json["BulkAbsorptionWave"] = ar;
+    }
+  //if (reemisProbWave_lambda.size() >0)
+    {
+      QJsonArray ar;
+      writeTwoQVectorsToJArray(reemisProbWave_lambda, reemisProbWave, ar);
+      json["ReemissionProbabilityWave"] = ar;
     }
   //if (PrimarySpectrum_lambda.size() >0)
     {
@@ -312,6 +333,11 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
     {
       QJsonArray ar = json["BulkAbsorptionWave"].toArray();
       readTwoQVectorsFromJArray(ar, absWave_lambda, absWave);
+    }
+  if (json.contains("ReemissionProbabilityWave"))
+    {
+      QJsonArray ar = json["ReemissionProbabilityWave"].toArray();
+      readTwoQVectorsFromJArray(ar, reemisProbWave_lambda, reemisProbWave);
     }
   if (json.contains("PrimScintSpectrum"))
     {

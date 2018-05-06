@@ -33,6 +33,7 @@ double AMaterial::getAbsorptionCoefficient(int iWave) const
 
 double AMaterial::getReemissionProbability(int iWave) const
 {
+    //qDebug() << "reemis->" << iWave << ( reemissionProbBinned.size() > 0 ? reemissionProbBinned.at(iWave) : reemissionProb );
     if (iWave == -1 || reemissionProbBinned.isEmpty()) return reemissionProb;
     return reemissionProbBinned.at(iWave);
 }

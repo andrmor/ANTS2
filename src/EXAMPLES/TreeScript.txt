@@ -1,0 +1,14 @@
+
+tree.NewTree("t", [ ["i", "I"], ["x", "D"], ["y", "D"] ])
+
+for (var i=0; i<50000; i++)
+{
+       var phi = 2 * 3.1415926 * math.random()
+       var r = math.gauss(10, 1)
+       var x = r * math.cos(phi)
+       var y = r * math.sin(phi)
+       
+       tree.Fill("t", [i, x, y])
+}
+
+tree.Draw("t", "sqrt(x) : y", "y>-10 && i>1", "colz", [ [200,-15, 15], [200, -0.5, 4] ])

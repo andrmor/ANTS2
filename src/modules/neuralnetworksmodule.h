@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <cstdio>
 
-class pms;
+class APmHub;
 class APmGroupsManager;
 class reconstructor;
 class EventsDataClass;
@@ -478,7 +478,7 @@ class NeuralNetworksModule : public QObject, public cFANNWrapper{
   Q_OBJECT
 public: enum cNormSignals { nsToMax=0, nsToSum };
 private: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   pms* PMs;
+   APmHub* PMs;
    APmGroupsManager* PMgroups;
    cNormSignals FNorm;
    string *FTrainOutput;
@@ -493,7 +493,7 @@ protected: //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
    int userCallback(fann_train_data* train, unsigned max_epochs,
     unsigned epochs_between_reports, float desired_error, unsigned epochs);
 public: //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-  explicit NeuralNetworksModule(pms *Pms, APmGroupsManager *PMgroups, EventsDataClass *eventsDataHub, QObject *parent = 0);
+  explicit NeuralNetworksModule(APmHub *Pms, APmGroupsManager *PMgroups, EventsDataClass *eventsDataHub, QObject *parent = 0);
   void Configure(ReconstructionSettings *recSet) {RecSet = recSet;}
   bool ReconstructEvent(int ievent, int itime, double (*r)[3], double *energy);
   //...........................................................................

@@ -3,12 +3,11 @@
 #include "ui_mainwindow.h"
 #include "detectoraddonswindow.h"
 #include "amaterialparticlecolection.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "outputwindow.h"
 #include "reconstructionwindow.h"
-#include "gainevaluatorwindowclass.h"   //onPMnumChange!
+#include "gainevaluatorwindowclass.h"
 #include "detectorclass.h"
-#include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "materialinspectorwindow.h"
 #include "checkupwindowclass.h"
@@ -19,6 +18,8 @@
 #include "ageotreewidget.h"
 #include "localscriptinterfaces.h"
 #include "aconfiguration.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 
 //Qt
 #include <QDebug>
@@ -249,30 +250,51 @@ void MainWindow::NumberOfPMsHaveChanged()
 
 void MainWindow::on_pbPositionScript_clicked()
 {
-  extractGeometryOfScriptWindow();
-  if (GenScriptWindow) delete GenScriptWindow;
-  GenScriptWindow = new GenericScriptWindowClass(Detector->RandGen);
-  recallGeometryOfScriptWindow();
-  int ul = ui->cobUpperLowerPMs->currentIndex();
+    extractGeometryOfLocalScriptWindow();
+    delete GenScriptWindow; GenScriptWindow = 0;
 
-  //configure the script window and engine
-  PMscriptInterface = new InterfaceToPMscript(); //deleted by the GenScriptWindow
-  GenScriptWindow->SetInterfaceObject(PMscriptInterface);
+    AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
+    GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
 
-  GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-  GenScriptWindow->SetExample("for (var i=0; i<3; i++) PM(i*60, (i-2)*60, 0, 0)");
+    int ul = ui->cobUpperLowerPMs->currentIndex();
+    QString title = QString("Position PMs: ") + ( ul == 0 ? "upper array" : "lower array" );
 
-  QString s = (ul==0) ? "upper array":"lower array";
-  GenScriptWindow->SetTitle("Position PMs: "+s);
+    QString example = "for (var i=0; i<3; i++)\n  PM(i*60, (i-2)*60, 0, 0)";
+    GenScriptWindow->ConfigureForLightMode(&Detector->PMarrays[ul].PositioningScript, title, example);
 
-  GenScriptWindow->SetScript(&Detector->PMarrays[ul].PositioningScript);  
+    PMscriptInterface = new InterfaceToPMscript();
+    GenScriptWindow->SetInterfaceObject(PMscriptInterface);
+    connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::PMscriptSuccess); // ***!!! uses ScriptWindow directly!
 
-  GenScriptWindow->SetStarterDir(GlobSet->LibScripts);
+    recallGeometryOfLocalScriptWindow();
+    GenScriptWindow->show();
 
-  //define what to do on evaluation success
-  connect(GenScriptWindow, SIGNAL(success(QString)), this, SLOT(PMscriptSuccess()));
-  //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
-  GenScriptWindow->show();  
+/*
+    extractGeometryOfLocalScriptWindow();
+    if (GenScriptWindow) delete GenScriptWindow;
+    GenScriptWindow = new GenericScriptWindowClass(Detector->RandGen);
+    recallGeometryOfLocalScriptWindow();
+    int ul = ui->cobUpperLowerPMs->currentIndex();
+
+    //configure the script window and engine
+    PMscriptInterface = new InterfaceToPMscript(); //deleted by the GenScriptWindow
+    GenScriptWindow->SetInterfaceObject(PMscriptInterface);
+
+    GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
+    GenScriptWindow->SetExample("for (var i=0; i<3; i++) PM(i*60, (i-2)*60, 0, 0)");
+
+    QString s = (ul==0) ? "upper array":"lower array";
+    GenScriptWindow->SetTitle("Position PMs: "+s);
+
+    GenScriptWindow->SetScript(&Detector->PMarrays[ul].PositioningScript);
+
+    GenScriptWindow->SetStarterDir(GlobSet->LibScripts);
+
+    //define what to do on evaluation success
+    connect(GenScriptWindow, SIGNAL(success(QString)), this, SLOT(PMscriptSuccess()));
+    //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
+    GenScriptWindow->show();
+    */
 }
 
 void MainWindow::PMscriptSuccess()

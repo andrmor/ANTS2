@@ -2,14 +2,14 @@
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 #include "atrackrecords.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 #include "aconfiguration.h"
 #include "apreprocessingsettings.h"
 #include "areconstructionmanager.h"
@@ -18,8 +18,6 @@
 #include "modules/lrf_v3/asensor.h"
 #include "modules/lrf_v3/ainstructioninput.h"
 #include "amonitor.h"
-#include "arootobjbase.h"
-#include "tmpobjhubclass.h"
 
 #ifdef SIM
 #include "simulationmanager.h"
@@ -37,7 +35,6 @@
 #endif
 
 #include <QFile>
-#include <QVariant>
 #include <QThread>
 #include <QDateTime>
 #include <QApplication>
@@ -52,10 +49,6 @@
 #include "TAxis.h"
 #include "TH1D.h"
 #include "TH2D.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TBranch.h"
-#include "TLeaf.h"
 
 bool AInterfaceToConfig::keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes)
 {
@@ -2068,13 +2061,69 @@ void InterfaceToReconstructor::SetManifestItemLineProperties(int i, int color, i
     EventsDataHub->Manifest[i]->LineWidth = width;
 }
 
-const QVariant InterfaceToReconstructor::GetSignalPerPhE_peaks() const
+const QVariant InterfaceToReconstructor::Peaks_GetSignalPerPhE() const
 {
     QVariantList vl;
     const int numPMs = TmpHub->ChPerPhEl_Peaks.size();
     for (int i=0; i<numPMs; i++)
         vl.append(TmpHub->ChPerPhEl_Peaks.at(i));
     return vl;
+}
+
+#include "acalibratorsignalperphel.h"
+void InterfaceToReconstructor::Peaks_PrepareData()
+{
+    bool bOK = RManager->Calibrator_Peaks->PrepareData();
+    if (!bOK)
+        abort("Failed to prepare data for SigPerPhE calibration from peaks");
+}
+
+void InterfaceToReconstructor::Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks)
+{
+    RManager->Calibrator_Peaks->SetNumBins(bins);
+    RManager->Calibrator_Peaks->SetRange(from, to);
+    RManager->Calibrator_Peaks->SetSigma(sigmaPeakfinder);
+    RManager->Calibrator_Peaks->SetThreshold(thresholdPeakfinder);
+    RManager->Calibrator_Peaks->SetMaximumPeaks(maxPeaks);
+}
+
+double InterfaceToReconstructor::Peaks_Extract_NoAbortOnFail(int ipm)
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+    if (ipm >=0 && ipm < numPMs)
+    {
+        bool bOK = RManager->Calibrator_Peaks->Extract(ipm);
+        if (bOK) return TmpHub->ChPerPhEl_Peaks.at(ipm);
+    }
+    return std::numeric_limits<double>::quiet_NaN();
+}
+
+void InterfaceToReconstructor::Peaks_ExtractAll()
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+
+    bool bThereWereErrors = false;
+    for (int ipm=0; ipm<numPMs; ipm++)
+    {
+         bool bOK = RManager->Calibrator_Peaks->Extract(ipm);
+         if (!bOK) bThereWereErrors = true;
+    }
+
+    if (bThereWereErrors)
+        abort("Failed to extract peaks: " + RManager->Calibrator_Peaks->GetLastError());
+}
+
+QVariant InterfaceToReconstructor::Peaks_GetPeakPositions(int ipm)
+{
+    const int numPMs = EventsDataHub->getNumPMs();
+    QVariantList res;
+
+    if (ipm >=0  &&  ipm < numPMs  &&  TmpHub->FoundPeaks.size() > ipm)
+    {
+        const QVector<double>& vec = TmpHub->FoundPeaks.at(ipm);
+        for (const double& d : vec) res << d;
+    }
+    return res;
 }
 
 const QVariant InterfaceToReconstructor::GetSignalPerPhE_stat() const
@@ -2139,7 +2188,12 @@ void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
+    MW->GraphWindow->AddLegend(x1, y1, x2, y2, title);
+}
+
+void InterfaceToGraphWin::SetLegendBorder(int color, int style, int size)
+{
+    MW->GraphWindow->SetLegendBorder(color, style, size);
 }
 
 void InterfaceToGraphWin::AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right)
@@ -2193,7 +2247,7 @@ QVariant InterfaceToGraphWin::GetAxis()
   result["maxX"] = MW->GraphWindow->getMaxX(&ok);
   if (!ok) result["maxX"] = QJsonValue();
 
-  result["minY"] = MW->GraphWindow->getMinY(&ok);
+  result["minY"] = MW->GraphWindow->getMinY(&ok);  
   if (!ok) result["minY"] = QJsonValue();
   result["maxY"] = MW->GraphWindow->getMaxY(&ok);
   if (!ok) result["maxY"] = QJsonValue();
@@ -2463,9 +2517,9 @@ QString ALrfScriptInterface::Make(QString name, QVariantList instructions, bool 
     recipe = repo->addRecipe(name.toLocal8Bit().data(), current_instructions);
 
   std::vector<APoint> sensorPos;
-  pms *PMs = Detector->PMs;
+  APmHub *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
   }
 
@@ -2504,9 +2558,9 @@ QString ALrfScriptInterface::Make(int recipe_id, bool use_scan_data, bool fit_er
     return "Reconstruction data is not setup";
 
   std::vector<APoint> sensorPos;
-  pms *PMs = Detector->PMs;
+  APmHub *PMs = Detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensorPos.push_back(APoint(PM.x, PM.y, PM.z));
   }
 
@@ -2628,299 +2682,3 @@ QList<int> ALrfScriptInterface::Load(QString fileName)
 
 // ------------- End of New LRF module interface ------------
 
-AInterfaceToTree::AInterfaceToTree(TmpObjHubClass *TmpHub) :
-    TmpHub(TmpHub)
-{
-    Description = "Reader for CERN ROOT Trees";
-}
-
-void AInterfaceToTree::OpenTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
-{
-    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
-    if (r)
-    {
-        abort("Tree with name " + TreeName + " already exists!");
-        return;
-    }
-
-    TFile *f = TFile::Open(FileName.toLocal8Bit().data(), "READ");
-    if (!f)
-    {
-        abort("Cannot open file " + FileName);
-        return;
-    }
-    TTree *t = 0;
-    f->GetObject(TreeNameInFile.toLocal8Bit().data(), t);
-    if (!t)
-    {
-        abort("Tree " + TreeNameInFile + " not found in file " + FileName);
-        return;
-    }
-    t->Print();
-
-    r = new ARootObjBase(t, TreeName, "TTree");
-    TmpHub->Trees.append(TreeName, r);
-}
-
-QString AInterfaceToTree::PrintBranches(const QString& TreeName)
-{
-    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
-    if (!r)
-    {
-        abort("Tree " + TreeName + " not found!");
-        return "";
-    }
-    TTree *t = static_cast<TTree*>(r->GetObject());
-
-    QString s = "Thee ";
-    s += TreeName;
-    s += " has the following branches (-> data_type):<br>";
-    for (int i=0; i<t->GetNbranches(); i++)
-    {
-        TObjArray* lb = t->GetListOfBranches();
-        const TBranch* b = (const TBranch*)(lb->At(i));
-        QString name = b->GetName();
-        s += name;
-        s += " -> ";
-        QString type = b->GetClassName();
-        if (type.isEmpty())
-        {
-            QString title = b->GetTitle();
-            title.remove(name);
-            title.remove("/");
-            s += title;
-        }
-        else
-        {
-            type.replace("<", "(");
-            type.replace(">", ")");
-            s += type;
-        }
-        s += "<br>";
-    }
-    return s;
-}
-
-QVariant AInterfaceToTree::GetBranch(const QString& TreeName, const QString& BranchName)
-{
-    ARootObjBase* r = TmpHub->Trees.getRecord(TreeName);
-    if (!r)
-    {
-        abort("Tree " + TreeName + " not found!");
-        return "";
-    }
-    TTree *t = static_cast<TTree*>(r->GetObject());
-
-    TBranch* branch = t->GetBranch(BranchName.toLocal8Bit().data());
-    if (!branch)
-    {
-        abort("Tree " + TreeName + " does not have branch " + BranchName);
-        return QVariant();
-    }
-
-    int numEntries = branch->GetEntries();
-    qDebug() << "The branch contains:" << numEntries << "elements";
-
-    QList< QVariant > varList;
-    QString type = branch->GetClassName();
-    qDebug() << "Element type:" << type;
-    if (type == "vector<double>")
-    {
-        std::vector<double> *v = 0;
-        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-
-        for (Int_t i = 0; i < numEntries; i++)
-        {
-            Long64_t tentry = t->LoadTree(i);
-            branch->GetEntry(tentry);
-            QList<QVariant> ll;
-            for (UInt_t j = 0; j < v->size(); ++j)
-                ll.append( (*v)[j] );
-            QVariant r = ll;
-            varList << r;
-        }
-    }
-    else if (type == "vector<float>")
-    {
-        std::vector<float> *v = 0;
-        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-
-        for (Int_t i = 0; i < numEntries; i++)
-        {
-            Long64_t tentry = t->LoadTree(i);
-            branch->GetEntry(tentry);
-            QList<QVariant> ll;
-            for (UInt_t j = 0; j < v->size(); ++j)
-                ll.append( (*v)[j] );
-            QVariant r = ll;
-            varList << r;
-        }
-    }
-    else if (type == "vector<int>")
-    {
-        std::vector<int> *v = 0;
-        t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-
-        for (Int_t i = 0; i < numEntries; i++)
-        {
-            Long64_t tentry = t->LoadTree(i);
-            branch->GetEntry(tentry);
-            QList<QVariant> ll;
-            for (UInt_t j = 0; j < v->size(); ++j)
-                ll.append( (*v)[j] );
-            QVariant r = ll;
-            varList << r;
-        }
-    }
-    else if (type == "")
-    {
-        //have to use another system
-        QString title = branch->GetTitle();  //  can be, e.g., "blabla/D" or "signal[19]/F"
-
-        if (title.contains("["))
-        {
-            qDebug() << "Array of data"<<title;
-            QRegExp selector("\\[(.*)\\]");
-            selector.indexIn(title);
-            QStringList List = selector.capturedTexts();
-            if (List.size()!=2)
-            {
-               abort("Cannot extract the length of the array");
-               return QVariant();
-            }
-            else
-            {
-               QString s = List.at(1);
-               bool fOK = false;
-               int numInArray = s.toInt(&fOK);
-               if (!fOK)
-               {
-                  abort("Cannot extract the length of the array");
-                  return QVariant();
-               }
-               qDebug() << "in the array there are"<<numInArray<<"elements";
-
-               //type dependent too!
-               if (title.contains("/I"))
-               {
-                   qDebug() << "It is an array with ints";
-                   int *array = new int[numInArray];
-                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
-
-                   for (Int_t i = 0; i < numEntries; i++)
-                   {
-                       Long64_t tentry = t->LoadTree(i);
-                       branch->GetEntry(tentry);
-                       QList<QVariant> ll;
-                       for (int j = 0; j < numInArray; j++)
-                           ll.append( array[j] );
-                       QVariant r = ll;
-                       varList << r;
-                   }
-                   delete [] array;
-               }
-               else if (title.contains("/D"))
-               {
-                   qDebug() << "It is an array with doubles";
-                   double *array = new double[numInArray];
-                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
-
-                   for (Int_t i = 0; i < numEntries; i++)
-                   {
-                       Long64_t tentry = t->LoadTree(i);
-                       branch->GetEntry(tentry);
-                       QList<QVariant> ll;
-                       for (int j = 0; j < numInArray; j++)
-                           ll.append( array[j] );
-                       QVariant r = ll;
-                       varList << r;
-                   }
-                   delete [] array;
-               }
-               else if (title.contains("/F"))
-               {
-                   qDebug() << "It is an array with floats";
-                   float *array = new float[numInArray];
-                   t->SetBranchAddress(BranchName.toLocal8Bit().data(), array, &branch);
-
-                   for (Int_t i = 0; i < numEntries; i++)
-                   {
-                       Long64_t tentry = t->LoadTree(i);
-                       branch->GetEntry(tentry);
-                       QList<QVariant> ll;
-                       for (int j = 0; j < numInArray; j++)
-                           ll.append( array[j] );
-                       QVariant r = ll;
-                       varList << r;
-                   }
-                   delete [] array;
-               }
-               else
-               {
-                   abort("Cannot extract the type of the array");
-                   return QVariant();
-               }
-            }
-        }
-        else if (title.contains("/I"))
-        {
-            qDebug() << "Int data - scalar";
-            int v = 0;
-            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-            for (Int_t i = 0; i < numEntries; i++)
-            {
-                Long64_t tentry = t->LoadTree(i);
-                branch->GetEntry(tentry);
-                varList.append(v);
-            }
-        }
-        else if (title.contains("/D"))
-        {
-            qDebug() << "Double data - scalar";
-            double v = 0;
-            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-            for (Int_t i = 0; i < numEntries; i++)
-            {
-                Long64_t tentry = t->LoadTree(i);
-                branch->GetEntry(tentry);
-                varList.append(v);
-            }
-        }
-        else if (title.contains("/F"))
-        {
-            qDebug() << "Float data - scalar";
-            float v = 0;
-            t->SetBranchAddress(BranchName.toLocal8Bit().data(), &v, &branch);
-            for (Int_t i = 0; i < numEntries; i++)
-            {
-                Long64_t tentry = t->LoadTree(i);
-                branch->GetEntry(tentry);
-                varList.append(v);
-            }
-        }
-        else
-        {
-            abort("Unsupported data type of the branch - title is: "+title);
-            return QVariant();
-        }
-
-    }
-    else
-    {
-        abort("Tree branch type " + type + " is not supported");
-        return QVariant();
-    }
-
-    t->ResetBranchAddresses();
-    return varList;
-}
-
-bool AInterfaceToTree::CloseTree(const QString& TreeName)
-{
-    return TmpHub->Trees.remove(TreeName);
-}
-
-void AInterfaceToTree::CloseAllTrees()
-{
-    TmpHub->Trees.clear();
-}

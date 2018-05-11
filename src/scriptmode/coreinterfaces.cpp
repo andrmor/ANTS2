@@ -2,6 +2,8 @@
 #include "ascriptmanager.h"
 #include "afiletools.h"
 
+#include "curvefit.h"
+
 #include "TRandom2.h"
 
 #include <QScriptEngine>
@@ -41,6 +43,9 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["loadColumn"] = "Load a column with ascii numeric data from the file.\nSecond argument is the column number starting from 0.";
   H["loadArray"] = "Load an array of numerics (or an array of numeric arrays if columns>1).\nColumns parameter can be from 1 to 3.";
   H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
+
+  H["SetNewFileFinder"] = "Configurer for GetNewFiles() function. dir is the search directory, fileNamePattern: *.* for all files. Function return all filenames found.";
+  H["GetNewFiles"] = "Get list (array) of names of new files appeared in the directory configured with SetNewFileFinder()";
 }
 
 AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :
@@ -57,8 +62,7 @@ void AInterfaceToCore::abort(QString message)
 
 QVariant AInterfaceToCore::evaluate(QString script)
 {
-    QScriptValue val = ScriptManager->EvaluateScriptInScript(script);
-    return val.toVariant();
+    return ScriptManager->EvaluateScriptInScript(script);
 }
 
 void AInterfaceToCore::sleep(int ms)
@@ -184,8 +188,7 @@ bool AInterfaceToCore::saveObject(QString FileName, QVariant Object, bool CanOve
     QString type = Object.typeName();
     if (type != "QVariantMap")
     {
-        qDebug() << "Not an object - cannt use saveObject function";
-        //abort("Cannot extract array in saveColumns function");
+        qDebug() << "Not an object - cannot use saveObject function";
         return false;
     }
 
@@ -317,6 +320,23 @@ QString AInterfaceToCore::loadText(QString fileName)
   return str;
 }
 
+QVariant AInterfaceToCore::loadObject(QString fileName)
+{
+    QFile loadFile(fileName);
+    if (!loadFile.open(QIODevice::ReadOnly))
+      {
+        qWarning() << "Cannot open file " + fileName;
+        return QVariant();
+      }
+
+    QByteArray saveData = loadFile.readAll();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+    QJsonObject json = loadDoc.object();
+
+    QVariantMap v = json.toVariantMap();
+    return v;
+}
+
 QString AInterfaceToCore::GetWorkDir()
 {
   return ScriptManager->LastOpenDir;
@@ -330,6 +350,83 @@ QString AInterfaceToCore::GetScriptDir()
 QString AInterfaceToCore::GetExamplesDir()
 {
   return ScriptManager->ExamplesDir;
+}
+
+QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fileNamePattern)
+{
+    Finder_Dir = dir;
+    Finder_NamePattern = fileNamePattern;
+
+    QDir d(dir);
+    QStringList files = d.entryList( QStringList(fileNamePattern), QDir::Files);
+    //  qDebug() << files;
+
+    QVariantList res;
+    for (auto& n : files)
+    {
+        Finder_FileNames << n;
+        res << n;
+    }
+    return res;
+}
+
+QVariant AInterfaceToCore::GetNewFiles()
+{
+    QVariantList newFiles;
+    QDir d(Finder_Dir);
+    QStringList files = d.entryList( QStringList(Finder_NamePattern), QDir::Files);
+
+    for (auto& n : files)
+    {
+        if (!Finder_FileNames.contains(n)) newFiles << QVariant(n);
+        Finder_FileNames << n;
+    }
+    return newFiles;
+}
+
+void AInterfaceToCore::processEvents()
+{
+    qApp->processEvents();
+}
+
+void AInterfaceToCore::reportProgress(int percents)
+{
+    emit ScriptManager->reportProgress(percents);
+    qApp->processEvents();
+}
+
+void AInterfaceToCore::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
+{
+    QVariantList vlX = x.toList();
+    QVariantList vlY = y.toList();
+
+    QVector<double> xx, yy;
+    for (int i=0; i<vlX.size() && i<vlY.size(); i++)
+    {
+        xx << vlX.at(i).toDouble();
+        yy << vlY.at(i).toDouble();
+    }
+
+    CurF = new CurveFit(min, max, nInt, xx, yy);
+}
+
+double AInterfaceToCore::getFitted(double x)
+{
+    if (!CurF) return 0;
+
+    return CurF->eval(x);
+}
+
+const QVariant AInterfaceToCore::getFittedArr(const QVariant array)
+{
+    if (!CurF) return 0;
+
+    QVariantList vl = array.toList();
+    QVariantList res;
+    for (int i=0; i<vl.size(); i++)
+        res << CurF->eval( vl.at(i).toDouble() );
+
+    return res;
 }
 
 bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)

@@ -1,4 +1,5 @@
 #include "aroothistrecord.h"
+#include "apeakfinder.h"
 
 #include "TH1D.h"
 #include "TH2D.h"
@@ -12,7 +13,14 @@ TObject* ARootHistRecord::GetObject()
     return Object;
 }
 
-void ARootHistRecord::SetTitles(const QString X_Title, const QString Y_Title, const QString Z_Title)
+void ARootHistRecord::SetTitle(const QString Title)
+{
+    QMutexLocker locker(&Mutex);
+    TH1* h = dynamic_cast<TH1*>(Object);
+    h->SetTitle(Title.toLatin1().data());
+}
+
+void ARootHistRecord::SetAxisTitles(const QString X_Title, const QString Y_Title, const QString Z_Title)
 {
     QMutexLocker locker(&Mutex);
 
@@ -35,19 +43,23 @@ void ARootHistRecord::SetLineProperties(int LineColor, int LineStyle, int LineWi
 {
     QMutexLocker locker(&Mutex);
 
-    if (Type == "TH1D")
-      {
-        TH1D* h = static_cast<TH1D*>(Object);
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
         h->SetLineColor(LineColor);
         h->SetLineWidth(LineWidth);
         h->SetLineStyle(LineStyle);
-      }
-    else if (Type == "TH2D")
-      {
-        TH2D* h = static_cast<TH2D*>(Object);
-        h->SetLineColor(LineColor);
-        h->SetLineWidth(LineWidth);
-        h->SetLineStyle(LineStyle);
+    }
+}
+
+void ARootHistRecord::SetMarkerProperties(int MarkerColor, int MarkerStyle, double MarkerSize)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        h->SetMarkerColor(MarkerColor);
+        h->SetMarkerStyle(MarkerStyle);
+        h->SetMarkerSize(MarkerSize);
     }
 }
 
@@ -131,6 +143,31 @@ void ARootHistRecord::Smooth(int times)
     }
 }
 
+void ARootHistRecord::Scale(double ScaleIntegralTo, bool bDividedByBinWidth)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TH1D")
+      {
+        TH1* h = dynamic_cast<TH1*>(Object);
+        h->Scale( ScaleIntegralTo, ( bDividedByBinWidth ? "width" : "" ) );
+    }
+}
+
+double ARootHistRecord::GetIntegral(bool bMultipliedByBinWidth)
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return 1.0;
+    return ( bMultipliedByBinWidth ? h->Integral("width") : h->Integral() );
+}
+
+double ARootHistRecord::GetMaximum()
+{
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (!h) return 1.0;
+    return h->GetMaximum();
+}
+
 const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &InitialParValues, const QString options)
 {
     QMutexLocker locker(&Mutex);
@@ -152,6 +189,21 @@ const QVector<double> ARootHistRecord::FitGaussWithInit(const QVector<double> &I
             for (int i=0; i<3; i++) res << f1->GetParError(i);
         }
       }
+    return res;
+}
+
+const QVector<double> ARootHistRecord::FindPeaks(double sigma, double threshold)
+{
+    QMutexLocker locker(&Mutex);
+
+    QVector<double> res;
+
+    TH1* h = dynamic_cast<TH1*>(Object);
+    if (h)
+    {
+        APeakFinder pf(h);
+        res = pf.findPeaks(sigma, threshold);
+    }
     return res;
 }
 

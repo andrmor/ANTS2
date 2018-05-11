@@ -6,7 +6,7 @@
 struct APoint;
 class TF1;
 class TF2;
-class pms;
+class APmHub;
 namespace LRF {
   class ARepository;
   class ASensorGroup;
@@ -19,9 +19,9 @@ namespace LRF {
 //      If copy is used after that, crash!!!
 class ALrfModuleSelector
 {
-  pms *PMs;
+  APmHub *PMs;
 public:
-  ALrfModuleSelector(pms *PMs);
+  ALrfModuleSelector(APmHub *PMs);
 
   bool isAllLRFsDefined() const;
   bool isAllLRFsDefined(bool fUseOldModule) const;

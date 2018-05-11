@@ -1,34 +1,36 @@
 #ifndef AHIGHLIGHTERS_H
 #define AHIGHLIGHTERS_H
 
-
 #include <QSyntaxHighlighter>
+#include <QRegularExpression>
 
 class AHighlighterScriptWindow : public QSyntaxHighlighter
 {
     Q_OBJECT
 public:
     AHighlighterScriptWindow(QTextDocument *parent = 0);
+    virtual ~AHighlighterScriptWindow() {}
 
     void setCustomCommands(QStringList functions, QStringList constants = QStringList());
 
 protected:
     void highlightBlock(const QString &text);
+    bool bMultilineCommentAllowed = true;
 
 //private:
     struct HighlightingRule
       {
-        QRegExp pattern;
+        QRegularExpression pattern;
         QTextCharFormat format;
       };
     QVector<HighlightingRule> highlightingRules;
 
-    QRegExp commentStartExpression;
-    QRegExp commentEndExpression;
+    QRegularExpression commentStartExpression;
+    QRegularExpression commentEndExpression;
 
     QTextCharFormat keywordFormat;
     QTextCharFormat customKeywordFormat;
-//    QTextCharFormat classFormat;
+    QTextCharFormat unitFormat;
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat multiLineCommentFormat;
     QTextCharFormat quotationFormat;
@@ -44,6 +46,13 @@ public:
 
 private:
     void setFixedVariables();
+};
+
+class AHighlighterPythonScriptWindow : public AHighlighterScriptWindow
+{
+    Q_OBJECT
+public:
+    AHighlighterPythonScriptWindow(QTextDocument *parent = 0);
 };
 
 #endif // AHIGHLIGHTERS_H

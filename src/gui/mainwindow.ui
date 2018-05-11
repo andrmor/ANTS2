@@ -3787,24 +3787,24 @@ of the refracted beam:</string>
           <widget class="QLabel" name="label_264">
            <property name="geometry">
             <rect>
-             <x>78</x>
-             <y>42</y>
-             <width>211</width>
+             <x>4</x>
+             <y>10</y>
+             <width>510</width>
              <height>20</height>
             </rect>
            </property>
            <property name="text">
-            <string>Gauss, average = 0; sigma = </string>
+            <string>Add random from gauss: Mean=0; Sigma=sqrt(Sigma_const^2 + Sigma_stat^2 * Sig/SigNorm )</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
           <widget class="QLineEdit" name="ledElNoiseSigma">
            <property name="geometry">
             <rect>
-             <x>290</x>
-             <y>42</y>
+             <x>170</x>
+             <y>37</y>
              <width>71</width>
              <height>20</height>
             </rect>
@@ -3813,6 +3813,436 @@ of the refracted beam:</string>
             <string>5</string>
            </property>
           </widget>
+          <widget class="QLabel" name="label_125">
+           <property name="geometry">
+            <rect>
+             <x>44</x>
+             <y>38</y>
+             <width>121</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Sigma_const:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_154">
+           <property name="geometry">
+            <rect>
+             <x>44</x>
+             <y>62</y>
+             <width>121</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Sigma_stat:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledElNoiseSigma_Stat">
+           <property name="geometry">
+            <rect>
+             <x>170</x>
+             <y>60</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_169">
+           <property name="geometry">
+            <rect>
+             <x>245</x>
+             <y>60</y>
+             <width>61</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>SigNorm:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledElNoiseSigma_Norm">
+           <property name="geometry">
+            <rect>
+             <x>310</x>
+             <y>60</y>
+             <width>71</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_7">
+         <attribute name="title">
+          <string>Dark counts : Off</string>
+         </attribute>
+         <widget class="QCheckBox" name="cbDarkCounts_Enable">
+          <property name="geometry">
+           <rect>
+            <x>15</x>
+            <y>6</y>
+            <width>151</width>
+            <height>17</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Enable dark counts</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_177">
+          <property name="geometry">
+           <rect>
+            <x>199</x>
+            <y>4</y>
+            <width>110</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Only affects SiPMs!</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QFrame" name="fDarkCounts">
+          <property name="geometry">
+           <rect>
+            <x>1</x>
+            <y>56</y>
+            <width>516</width>
+            <height>95</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QComboBox" name="cobDarkCounts_Model">
+           <property name="geometry">
+            <rect>
+             <x>100</x>
+             <y>37</y>
+             <width>210</width>
+             <height>22</height>
+            </rect>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>Simplistic: integer hits</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Using user-provided distribution</string>
+            </property>
+           </item>
+          </widget>
+          <widget class="QLabel" name="label_172">
+           <property name="geometry">
+            <rect>
+             <x>5</x>
+             <y>41</y>
+             <width>90</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Hit generation:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QStackedWidget" name="swDarkCounts_Time">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>3</y>
+             <width>501</width>
+             <height>29</height>
+            </rect>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_24">
+            <widget class="QLabel" name="label_263">
+             <property name="geometry">
+              <rect>
+               <x>303</x>
+               <y>5</y>
+               <width>31</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>ns </string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_262">
+             <property name="geometry">
+              <rect>
+               <x>62</x>
+               <y>5</y>
+               <width>181</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Time interval of one measurement:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="ledTimeOfOneMeasurement">
+             <property name="geometry">
+              <rect>
+               <x>249</x>
+               <y>4</y>
+               <width>50</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>150</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="page_25">
+            <widget class="QLabel" name="label_187">
+             <property name="geometry">
+              <rect>
+               <x>-7</x>
+               <y>3</y>
+               <width>471</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Time interval of one measurement: time bin duration is used</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </widget>
+          </widget>
+          <widget class="QPushButton" name="pushButton">
+           <property name="geometry">
+            <rect>
+             <x>19</x>
+             <y>7</y>
+             <width>41</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>?</string>
+           </property>
+          </widget>
+          <widget class="QFrame" name="frDarkCounts_Advanced">
+           <property name="geometry">
+            <rect>
+             <x>120</x>
+             <y>37</y>
+             <width>392</width>
+             <height>55</height>
+            </rect>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QPushButton" name="pbDarkCounts_Delete">
+            <property name="geometry">
+             <rect>
+              <x>372</x>
+              <y>0</y>
+              <width>18</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Clear data</string>
+            </property>
+            <property name="text">
+             <string>X</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pbDarkCounts_Show">
+            <property name="geometry">
+             <rect>
+              <x>201</x>
+              <y>0</y>
+              <width>80</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Show</string>
+            </property>
+           </widget>
+           <widget class="Line" name="line_64">
+            <property name="geometry">
+             <rect>
+              <x>124</x>
+              <y>10</y>
+              <width>260</width>
+              <height>3</height>
+             </rect>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pbDarkCounts_Load">
+            <property name="geometry">
+             <rect>
+              <x>287</x>
+              <y>0</y>
+              <width>80</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Ascii, two columns: wavelength and value</string>
+            </property>
+            <property name="text">
+             <string>Load</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="cobDarkCounts_LoadOptions">
+            <property name="geometry">
+             <rect>
+              <x>202</x>
+              <y>29</y>
+              <width>140</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>How to post-process the distribution data loaded from the file (have to be selected BEFORE clicking on Load)</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>As is</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Max scaled to 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Integral in window</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Integral, Max to 1</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="Line" name="line_22">
+            <property name="geometry">
+             <rect>
+              <x>325</x>
+              <y>10</y>
+              <width>3</width>
+              <height>29</height>
+             </rect>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+           <widget class="QSpinBox" name="sbDarkCounts_IntegralRange">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="geometry">
+             <rect>
+              <x>344</x>
+              <y>29</y>
+              <width>45</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Integrating assuming time interval = # of points in the provided distribution.
+0 is used to indicate that the distribution range = measurement window </string>
+            </property>
+           </widget>
+           <zorder>line_22</zorder>
+           <zorder>line_64</zorder>
+           <zorder>pbDarkCounts_Delete</zorder>
+           <zorder>pbDarkCounts_Show</zorder>
+           <zorder>pbDarkCounts_Load</zorder>
+           <zorder>cobDarkCounts_LoadOptions</zorder>
+           <zorder>sbDarkCounts_IntegralRange</zorder>
+          </widget>
+          <zorder>label_172</zorder>
+          <zorder>swDarkCounts_Time</zorder>
+          <zorder>frDarkCounts_Advanced</zorder>
+          <zorder>cobDarkCounts_Model</zorder>
+          <zorder>pushButton</zorder>
          </widget>
         </widget>
         <widget class="QWidget" name="tabDigitalization">
@@ -3948,85 +4378,6 @@ of the refracted beam:</string>
           </property>
          </widget>
         </widget>
-        <widget class="QWidget" name="tab_7">
-         <attribute name="title">
-          <string>Dark counts</string>
-         </attribute>
-         <widget class="QFrame" name="fTimeOneMeasurement">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>70</y>
-            <width>519</width>
-            <height>31</height>
-           </rect>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <widget class="QLabel" name="label_262">
-           <property name="geometry">
-            <rect>
-             <x>46</x>
-             <y>5</y>
-             <width>181</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Time interval of one measurement:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="ledTimeOfOneMeasurement">
-           <property name="geometry">
-            <rect>
-             <x>233</x>
-             <y>4</y>
-             <width>50</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>150</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_263">
-           <property name="geometry">
-            <rect>
-             <x>287</x>
-             <y>5</y>
-             <width>231</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>ns      Only affects SiPMs!</string>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QLabel" name="label_208">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>110</y>
-            <width>520</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Average dark counts = ( time interval )  x  ( dark count rate of the SiPM )</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </widget>
        </widget>
        <widget class="QPushButton" name="pbElUpdateIndication">
         <property name="geometry">
@@ -4118,7 +4469,7 @@ of the refracted beam:</string>
          </rect>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
@@ -5826,7 +6177,7 @@ Constructor is disabled!</string>
       <property name="geometry">
        <rect>
         <x>200</x>
-        <y>221</y>
+        <y>220</y>
         <width>120</width>
         <height>40</height>
        </rect>
@@ -13133,7 +13484,7 @@ multiply to loaded data</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabMiscTests">
        <attribute name="title">
@@ -15754,6 +16105,7 @@ on stack</string>
      <string>Script</string>
     </property>
     <addaction name="actionGlobal_script"/>
+    <addaction name="actionOpen_Python_window"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindows"/>
@@ -15867,7 +16219,7 @@ on stack</string>
   </action>
   <action name="actionGlobal_script">
    <property name="text">
-    <string>Open script window</string>
+    <string>Open JavaScript window</string>
    </property>
   </action>
   <action name="actionNew_detector">
@@ -15945,6 +16297,11 @@ on stack</string>
    </property>
    <property name="toolTip">
     <string>This quick save slot is empty</string>
+   </property>
+  </action>
+  <action name="actionOpen_Python_window">
+   <property name="text">
+    <string>Open Python window</string>
    </property>
   </action>
  </widget>
@@ -16150,7 +16507,7 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
+     <x>293</x>
      <y>275</y>
     </hint>
     <hint type="destinationlabel">
@@ -16170,8 +16527,8 @@ on stack</string>
      <y>465</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>468</y>
+     <x>521</x>
+     <y>490</y>
     </hint>
    </hints>
   </connection>
@@ -16234,8 +16591,8 @@ on stack</string>
      <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16250,8 +16607,8 @@ on stack</string>
      <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16266,8 +16623,8 @@ on stack</string>
      <y>360</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16278,12 +16635,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
+     <x>416</x>
      <y>363</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16294,12 +16651,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
+     <x>416</x>
      <y>394</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16310,12 +16667,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
+     <x>416</x>
      <y>424</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16330,8 +16687,8 @@ on stack</string>
      <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16346,8 +16703,8 @@ on stack</string>
      <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16362,8 +16719,8 @@ on stack</string>
      <y>427</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16378,8 +16735,8 @@ on stack</string>
      <y>374</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16394,8 +16751,8 @@ on stack</string>
      <y>374</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16410,8 +16767,8 @@ on stack</string>
      <y>430</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16422,12 +16779,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
+     <x>210</x>
      <y>293</y>
     </hint>
     <hint type="destinationlabel">
-     <x>447</x>
-     <y>305</y>
+     <x>449</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16442,8 +16799,8 @@ on stack</string>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>511</x>
-     <y>420</y>
+     <x>513</x>
+     <y>413</y>
     </hint>
    </hints>
   </connection>
@@ -16506,8 +16863,8 @@ on stack</string>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>492</x>
-     <y>336</y>
+     <x>494</x>
+     <y>314</y>
     </hint>
    </hints>
   </connection>
@@ -16554,8 +16911,8 @@ on stack</string>
      <y>400</y>
     </hint>
     <hint type="destinationlabel">
-     <x>486</x>
-     <y>437</y>
+     <x>484</x>
+     <y>415</y>
     </hint>
    </hints>
   </connection>
@@ -16586,8 +16943,8 @@ on stack</string>
      <y>108</y>
     </hint>
     <hint type="destinationlabel">
-     <x>423</x>
-     <y>179</y>
+     <x>425</x>
+     <y>157</y>
     </hint>
    </hints>
   </connection>
@@ -16742,12 +17099,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>203</x>
-     <y>366</y>
+     <x>201</x>
+     <y>344</y>
     </hint>
     <hint type="destinationlabel">
-     <x>440</x>
-     <y>305</y>
+     <x>442</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -16918,7 +17275,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>279</x>
+     <x>285</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -17046,8 +17403,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>252</x>
-     <y>578</y>
+     <x>291</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -17542,7 +17899,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>124</x>
+     <x>128</x>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
@@ -17574,7 +17931,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
+     <x>132</x>
      <y>158</y>
     </hint>
     <hint type="destinationlabel">
@@ -17590,7 +17947,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>326</x>
+     <x>330</x>
      <y>123</y>
     </hint>
     <hint type="destinationlabel">
@@ -17606,8 +17963,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>490</x>
-     <y>121</y>
+     <x>494</x>
+     <y>123</y>
     </hint>
     <hint type="destinationlabel">
      <x>322</x>
@@ -17622,7 +17979,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>496</x>
+     <x>500</x>
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
@@ -17638,7 +17995,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>380</x>
+     <x>384</x>
      <y>113</y>
     </hint>
     <hint type="destinationlabel">
@@ -17654,7 +18011,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>92</x>
+     <x>96</x>
      <y>155</y>
     </hint>
     <hint type="destinationlabel">
@@ -17670,7 +18027,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
+     <x>465</x>
      <y>133</y>
     </hint>
     <hint type="destinationlabel">
@@ -17686,8 +18043,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>154</y>
+     <x>445</x>
+     <y>155</y>
     </hint>
     <hint type="destinationlabel">
      <x>331</x>
@@ -17702,7 +18059,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>174</x>
+     <x>178</x>
      <y>144</y>
     </hint>
     <hint type="destinationlabel">
@@ -17718,7 +18075,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>67</x>
+     <x>71</x>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
@@ -17734,7 +18091,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
+     <x>174</x>
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
@@ -17750,7 +18107,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>313</x>
+     <x>317</x>
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
@@ -17766,7 +18123,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
+     <x>444</x>
      <y>146</y>
     </hint>
     <hint type="destinationlabel">
@@ -17782,7 +18139,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>67</x>
+     <x>71</x>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
@@ -17798,7 +18155,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
+     <x>111</x>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
@@ -17814,7 +18171,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>389</x>
+     <x>393</x>
      <y>146</y>
     </hint>
     <hint type="destinationlabel">
@@ -17830,7 +18187,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
+     <x>238</x>
      <y>137</y>
     </hint>
     <hint type="destinationlabel">
@@ -17846,7 +18203,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
+     <x>183</x>
      <y>235</y>
     </hint>
     <hint type="destinationlabel">
@@ -17862,7 +18219,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>367</x>
+     <x>371</x>
      <y>235</y>
     </hint>
     <hint type="destinationlabel">
@@ -17878,7 +18235,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>360</x>
+     <x>364</x>
      <y>240</y>
     </hint>
     <hint type="destinationlabel">
@@ -17894,7 +18251,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>454</x>
+     <x>458</x>
      <y>240</y>
     </hint>
     <hint type="destinationlabel">
@@ -17910,7 +18267,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>346</x>
+     <x>350</x>
      <y>238</y>
     </hint>
     <hint type="destinationlabel">
@@ -17926,7 +18283,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>449</x>
+     <x>453</x>
      <y>238</y>
     </hint>
     <hint type="destinationlabel">
@@ -17942,7 +18299,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
+     <x>238</x>
      <y>275</y>
     </hint>
     <hint type="destinationlabel">
@@ -17958,7 +18315,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
+     <x>196</x>
      <y>301</y>
     </hint>
     <hint type="destinationlabel">
@@ -17974,7 +18331,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>313</x>
+     <x>317</x>
      <y>300</y>
     </hint>
     <hint type="destinationlabel">
@@ -17990,8 +18347,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>462</x>
-     <y>275</y>
+     <x>464</x>
+     <y>268</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -18006,7 +18363,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
+     <x>214</x>
      <y>302</y>
     </hint>
     <hint type="destinationlabel">
@@ -18022,7 +18379,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
+     <x>416</x>
      <y>346</y>
     </hint>
     <hint type="destinationlabel">
@@ -18038,7 +18395,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>439</x>
+     <x>443</x>
      <y>365</y>
     </hint>
     <hint type="destinationlabel">
@@ -18086,7 +18443,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>223</x>
+     <x>227</x>
      <y>451</y>
     </hint>
     <hint type="destinationlabel">
@@ -18134,7 +18491,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
+     <x>162</x>
      <y>430</y>
     </hint>
     <hint type="destinationlabel">
@@ -18150,7 +18507,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
+     <x>234</x>
      <y>430</y>
     </hint>
     <hint type="destinationlabel">
@@ -18166,7 +18523,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>299</x>
+     <x>305</x>
      <y>430</y>
     </hint>
     <hint type="destinationlabel">
@@ -18182,7 +18539,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
+     <x>156</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -18198,7 +18555,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
+     <x>198</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -18214,7 +18571,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
+     <x>240</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -18230,7 +18587,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
+     <x>307</x>
      <y>473</y>
     </hint>
     <hint type="destinationlabel">
@@ -18246,7 +18603,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>400</x>
+     <x>406</x>
      <y>472</y>
     </hint>
     <hint type="destinationlabel">
@@ -18262,7 +18619,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>84</x>
+     <x>90</x>
      <y>491</y>
     </hint>
     <hint type="destinationlabel">
@@ -18278,7 +18635,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
+     <x>156</x>
      <y>493</y>
     </hint>
     <hint type="destinationlabel">
@@ -18294,7 +18651,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
+     <x>198</x>
      <y>493</y>
     </hint>
     <hint type="destinationlabel">
@@ -18310,7 +18667,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
+     <x>240</x>
      <y>493</y>
     </hint>
     <hint type="destinationlabel">
@@ -18326,7 +18683,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>303</x>
+     <x>309</x>
      <y>494</y>
     </hint>
     <hint type="destinationlabel">
@@ -18342,7 +18699,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>367</x>
+     <x>373</x>
      <y>493</y>
     </hint>
     <hint type="destinationlabel">
@@ -18358,7 +18715,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
+     <x>109</x>
      <y>512</y>
     </hint>
     <hint type="destinationlabel">
@@ -18374,7 +18731,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
+     <x>156</x>
      <y>514</y>
     </hint>
     <hint type="destinationlabel">
@@ -18390,7 +18747,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>192</x>
+     <x>198</x>
      <y>514</y>
     </hint>
     <hint type="destinationlabel">
@@ -18406,7 +18763,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
+     <x>240</x>
      <y>514</y>
     </hint>
     <hint type="destinationlabel">
@@ -18422,7 +18779,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>300</x>
+     <x>306</x>
      <y>515</y>
     </hint>
     <hint type="destinationlabel">
@@ -18438,7 +18795,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>406</x>
+     <x>412</x>
      <y>514</y>
     </hint>
     <hint type="destinationlabel">
@@ -18454,7 +18811,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
+     <x>416</x>
      <y>557</y>
     </hint>
     <hint type="destinationlabel">
@@ -18470,7 +18827,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>146</x>
+     <x>152</x>
      <y>438</y>
     </hint>
     <hint type="destinationlabel">
@@ -18486,7 +18843,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
+     <x>298</x>
      <y>438</y>
     </hint>
     <hint type="destinationlabel">
@@ -18566,7 +18923,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>363</x>
+     <x>369</x>
      <y>465</y>
     </hint>
     <hint type="destinationlabel">
@@ -18630,7 +18987,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
+     <x>239</x>
      <y>470</y>
     </hint>
     <hint type="destinationlabel">
@@ -18694,7 +19051,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>245</x>
+     <x>249</x>
      <y>400</y>
     </hint>
     <hint type="destinationlabel">
@@ -18758,7 +19115,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>103</x>
+     <x>107</x>
      <y>400</y>
     </hint>
     <hint type="destinationlabel">
@@ -18790,7 +19147,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>280</x>
+     <x>284</x>
      <y>108</y>
     </hint>
     <hint type="destinationlabel">
@@ -18822,7 +19179,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
+     <x>112</x>
      <y>390</y>
     </hint>
     <hint type="destinationlabel">
@@ -18854,7 +19211,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>138</x>
+     <x>142</x>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
@@ -18870,7 +19227,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>186</x>
+     <x>190</x>
      <y>515</y>
     </hint>
     <hint type="destinationlabel">
@@ -18886,7 +19243,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>484</x>
+     <x>488</x>
      <y>517</y>
     </hint>
     <hint type="destinationlabel">
@@ -18902,7 +19259,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>313</x>
+     <x>317</x>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
@@ -18918,7 +19275,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>318</x>
+     <x>322</x>
      <y>566</y>
     </hint>
     <hint type="destinationlabel">
@@ -18934,7 +19291,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>498</x>
+     <x>502</x>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
@@ -18950,7 +19307,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>509</x>
+     <x>513</x>
      <y>566</y>
     </hint>
     <hint type="destinationlabel">
@@ -18998,8 +19355,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>477</y>
+     <x>251</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19046,12 +19403,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>183</x>
+     <x>187</x>
      <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>406</x>
-     <y>221</y>
+     <x>408</x>
+     <y>199</y>
     </hint>
    </hints>
   </connection>
@@ -19062,7 +19419,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
+     <x>128</x>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
@@ -19078,7 +19435,7 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>185</x>
+     <x>191</x>
      <y>442</y>
     </hint>
     <hint type="destinationlabel">
@@ -19094,7 +19451,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>366</x>
+     <x>372</x>
      <y>479</y>
     </hint>
     <hint type="destinationlabel">
@@ -19110,7 +19467,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>237</x>
+     <x>241</x>
      <y>442</y>
     </hint>
     <hint type="destinationlabel">
@@ -19126,12 +19483,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
+     <x>198</x>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>493</x>
-     <y>320</y>
+     <x>495</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -19142,11 +19499,11 @@ on stack</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>172</x>
+     <x>176</x>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>165</x>
+     <x>169</x>
      <y>432</y>
     </hint>
    </hints>
@@ -19158,12 +19515,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
+     <x>236</x>
      <y>432</y>
     </hint>
     <hint type="destinationlabel">
-     <x>478</x>
-     <y>318</y>
+     <x>480</x>
+     <y>298</y>
     </hint>
    </hints>
   </connection>
@@ -19174,8 +19531,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>270</x>
-     <y>150</y>
+     <x>274</x>
+     <y>158</y>
     </hint>
     <hint type="destinationlabel">
      <x>290</x>
@@ -19206,8 +19563,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>41</x>
-     <y>550</y>
+     <x>45</x>
+     <y>560</y>
     </hint>
     <hint type="destinationlabel">
      <x>215</x>
@@ -19222,8 +19579,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>318</x>
-     <y>146</y>
+     <x>322</x>
+     <y>151</y>
     </hint>
     <hint type="destinationlabel">
      <x>321</x>
@@ -19238,8 +19595,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>281</x>
-     <y>510</y>
+     <x>285</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>281</x>
@@ -19286,11 +19643,11 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>253</x>
+     <x>257</x>
      <y>324</y>
     </hint>
     <hint type="destinationlabel">
-     <x>522</x>
+     <x>526</x>
      <y>546</y>
     </hint>
    </hints>
@@ -19366,7 +19723,7 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>312</x>
+     <x>316</x>
      <y>120</y>
     </hint>
     <hint type="destinationlabel">
@@ -19398,11 +19755,11 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>522</x>
+     <x>526</x>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
-     <x>242</x>
+     <x>246</x>
      <y>324</y>
     </hint>
    </hints>
@@ -19430,11 +19787,11 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>345</x>
+     <x>349</x>
      <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>395</x>
+     <x>399</x>
      <y>566</y>
     </hint>
    </hints>
@@ -19446,11 +19803,11 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>381</x>
+     <x>385</x>
      <y>566</y>
     </hint>
     <hint type="destinationlabel">
-     <x>325</x>
+     <x>329</x>
      <y>393</y>
     </hint>
    </hints>
@@ -19462,11 +19819,11 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
+     <x>344</x>
      <y>370</y>
     </hint>
     <hint type="destinationlabel">
-     <x>353</x>
+     <x>357</x>
      <y>546</y>
     </hint>
    </hints>
@@ -19478,12 +19835,76 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
+     <x>368</x>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
-     <x>325</x>
+     <x>329</x>
      <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledNevesAlbedo</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbOverride</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>424</x>
+     <y>234</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>318</x>
+     <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledElNoiseSigma_Stat</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>484</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbDarkCounts_Enable</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>326</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobDarkCounts_Model</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateElectronics</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>462</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>320</y>
     </hint>
    </hints>
   </connection>

@@ -11,7 +11,10 @@
 
 class MainWindow;
 class AScriptManager;
+class AJavaScriptManager;
+
 namespace ROOT { namespace Minuit2 { class Minuit2Minimizer; } }
+namespace ROOT { namespace Math { class Functor; } }
 
 class AInterfaceToMinimizerScript : public AScriptInterface
 {
@@ -75,13 +78,10 @@ class AInterfaceToMinimizerScript : public AScriptInterface
 
 public:
   AInterfaceToMinimizerScript(AScriptManager* ScriptManager);
-  AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other);
-  ~AInterfaceToMinimizerScript();
+  virtual ~AInterfaceToMinimizerScript();
 
   bool           IsMultithreadCapable() const override {return true;}
   void           ForceStop() override;
-
-  void           SetScriptManager(AScriptManager* NewScriptManager) {ScriptManager = NewScriptManager;}
 
 public slots:
 
@@ -101,12 +101,12 @@ public slots:
   void           SetSimplex();
   void           SetMigrad();
 
-  bool           Run();
+  virtual bool   Run();
 
   const QVariant GetResults() const {return Results;}
 
-private:
-  AScriptManager* ScriptManager;
+protected:
+  AScriptManager* ScriptManager = 0;
   QVector<AVarRecordBase*> Variables;
   QVariantList    Results;
 
@@ -114,6 +114,36 @@ private:
   int             PrintVerbosity = -1;
   int             Method = 0; // 0-Migrad, 1-Simplex
 
+  virtual ROOT::Math::Functor* configureFunctor() = 0;
 };
+
+class AInterfaceToMinimizerJavaScript : public AInterfaceToMinimizerScript
+{
+  Q_OBJECT
+
+public:
+  AInterfaceToMinimizerJavaScript(AJavaScriptManager* ScriptManager);
+  AInterfaceToMinimizerJavaScript(const AInterfaceToMinimizerJavaScript& other);
+
+  void SetScriptManager(AJavaScriptManager* NewScriptManager);
+
+  virtual ROOT::Math::Functor*  configureFunctor() override;
+
+};
+
+#ifdef __USE_ANTS_PYTHON__
+class APythonScriptManager;
+
+class AInterfaceToMinimizerPythonScript : public AInterfaceToMinimizerScript
+{
+  Q_OBJECT
+
+public:
+  AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager);
+
+  virtual ROOT::Math::Functor*  configureFunctor() override;
+
+};
+#endif
 
 #endif // SCRIPTMINIMIZER_H

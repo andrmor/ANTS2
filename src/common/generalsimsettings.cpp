@@ -22,7 +22,7 @@ GeneralSimSettings::GeneralSimSettings()
   MinEnergyNeutrons = 0.01; //in meV
 }
 
-bool GeneralSimSettings::readFromJson(QJsonObject &Json)
+bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
 {
   if (!Json.contains("GeneralSimConfig"))
     {

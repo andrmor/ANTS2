@@ -45,7 +45,7 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::UpdateBeforeSimulation(GeneralSimSettings *SimSet)
+void AMaterialParticleCollection::UpdateWavelengthBinning(GeneralSimSettings *SimSet)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
   for (int i=0; i<MaterialCollectionData.size(); i++)
@@ -163,18 +163,21 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
     }
 
   //initialize wavelength-resolved data
-  m->PrimarySpectrum_lambda.resize(0);
-  m->PrimarySpectrum.resize(0);
+  m->PrimarySpectrum_lambda.clear();
+  m->PrimarySpectrum.clear();
   m->PrimarySpectrumHist = 0;
-  m->SecondarySpectrum_lambda.resize(0);
-  m->SecondarySpectrum.resize(0);
+  m->SecondarySpectrum_lambda.clear();
+  m->SecondarySpectrum.clear();
   m->SecondarySpectrumHist = 0;
-  m->nWave_lambda.resize(0);
-  m->nWave.resize(0);
-  m->nWaveBinned.resize(0); //regular step (WaveStep step, WaveNodes bins)
-  m->absWave_lambda.resize(0);
-  m->absWave.resize(0);
-  m->absWaveBinned.resize(0);//regular step (WaveStep step, WaveNodes bins)
+  m->nWave_lambda.clear();
+  m->nWave.clear();
+  m->nWaveBinned.clear();
+  m->absWave_lambda.clear();
+  m->absWave.clear();
+  m->absWaveBinned.clear();
+  m->reemisProbWave.clear();
+  m->reemisProbWave_lambda.clear();
+  m->reemissionProbBinned.clear();
 
   //appending to the material collection
   MaterialCollectionData.append(m);
@@ -265,17 +268,20 @@ void AMaterialParticleCollection::ClearTmpMaterial()
         }
     }
 
-  tmpMaterial.nWave_lambda.resize(0);
-  tmpMaterial.nWave.resize(0);
-  tmpMaterial.nWaveBinned.resize(0);
-  tmpMaterial.absWave_lambda.resize(0);
-  tmpMaterial.absWave.resize(0);
-  tmpMaterial.absWaveBinned.resize(0);
+  tmpMaterial.nWave_lambda.clear();
+  tmpMaterial.nWave.clear();
+  tmpMaterial.nWaveBinned.clear();
+  tmpMaterial.absWave_lambda.clear();
+  tmpMaterial.absWave.clear();
+  tmpMaterial.absWaveBinned.clear();
+  tmpMaterial.reemisProbWave.clear();
+  tmpMaterial.reemisProbWave_lambda.clear();
+  tmpMaterial.reemissionProbBinned.clear();
 
-  tmpMaterial.PrimarySpectrum_lambda.resize(0);
-  tmpMaterial.PrimarySpectrum.resize(0);
-  tmpMaterial.SecondarySpectrum_lambda.resize(0);
-  tmpMaterial.SecondarySpectrum.resize(0);
+  tmpMaterial.PrimarySpectrum_lambda.clear();
+  tmpMaterial.PrimarySpectrum.clear();
+  tmpMaterial.SecondarySpectrum_lambda.clear();
+  tmpMaterial.SecondarySpectrum.clear();
 
   //---POINTERS---
   if (tmpMaterial.PrimarySpectrumHist)
@@ -345,17 +351,21 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   if (WavelengthResolved)
     {
       //calculating histograms and "-Binned" for effective data
-      MaterialCollectionData[imat]->nWaveBinned.resize(0);
+      MaterialCollectionData[imat]->nWaveBinned.clear();
       if (MaterialCollectionData[imat]->nWave_lambda.size() > 0)
         ConvertToStandardWavelengthes(&MaterialCollectionData[imat]->nWave_lambda, &MaterialCollectionData[imat]->nWave, &MaterialCollectionData[imat]->nWaveBinned);
 
-      MaterialCollectionData[imat]->absWaveBinned.resize(0);
+      MaterialCollectionData[imat]->absWaveBinned.clear();
       if (MaterialCollectionData[imat]->absWave_lambda.size() > 0)
         ConvertToStandardWavelengthes(&MaterialCollectionData[imat]->absWave_lambda, &MaterialCollectionData[imat]->absWave, &MaterialCollectionData[imat]->absWaveBinned);
 
+      MaterialCollectionData[imat]->reemissionProbBinned.clear();
+      if (MaterialCollectionData[imat]->reemisProbWave_lambda.size() > 0)
+        ConvertToStandardWavelengthes(&MaterialCollectionData[imat]->reemisProbWave_lambda, &MaterialCollectionData[imat]->reemisProbWave, &MaterialCollectionData[imat]->reemissionProbBinned);
+
       if (MaterialCollectionData[imat]->rayleighMFP != 0)
         {
-          MaterialCollectionData[imat]->rayleighBinned.resize(0);
+          MaterialCollectionData[imat]->rayleighBinned.clear();
           double baseWave4 = MaterialCollectionData[imat]->rayleighWave * MaterialCollectionData[imat]->rayleighWave * MaterialCollectionData[imat]->rayleighWave * MaterialCollectionData[imat]->rayleighWave;
           double base = MaterialCollectionData[imat]->rayleighMFP / baseWave4;
           for (int i=0; i<WaveNodes; i++)
@@ -407,9 +417,10 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   else
     {
       //making empty histograms and "-Binned" for effective data
-      MaterialCollectionData[imat]->nWaveBinned.resize(0);
-      MaterialCollectionData[imat]->absWaveBinned.resize(0);
-      MaterialCollectionData[imat]->rayleighBinned.resize(0);
+      MaterialCollectionData[imat]->nWaveBinned.clear();
+      MaterialCollectionData[imat]->absWaveBinned.clear();
+      MaterialCollectionData[imat]->reemissionProbBinned.clear();
+      MaterialCollectionData[imat]->rayleighBinned.clear();
       if (MaterialCollectionData[imat]->PrimarySpectrumHist)
         {
           delete MaterialCollectionData[imat]->PrimarySpectrumHist;

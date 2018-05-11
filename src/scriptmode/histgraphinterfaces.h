@@ -22,11 +22,15 @@ public:
   bool           IsMultithreadCapable() const override {return true;}
 
 public slots:
+  void           SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
+
   void           NewHist(const QString& HistName, int bins, double start, double stop);
   void           NewHist2D(const QString &HistName, int binsX, double startX, double stopX, int binsY, double startY, double stopY);
 
+  void           SetTitle(const QString& HistName, const QString& Title);
   void           SetTitles(const QString& HistName, QString X_Title, QString Y_Title, QString Z_Title = "");
   void           SetLineProperties(const QString& HistName, int LineColor, int LineStyle, int LineWidth);
+  void           SetMarkerProperties(const QString& HistName, int MarkerColor, int MarkerStyle, double MarkerSize);
 
   void           Fill(const QString& HistName, double val, double weight);
   void           Fill2D(const QString& HistName, double x, double y, double weight);
@@ -41,6 +45,11 @@ public slots:
   void           Smooth(const QString& HistName, int times);
   const QVariant FitGauss(const QString& HistName, const QString options = "");
   const QVariant FitGaussWithInit(const QString& HistName, const QVariant InitialParValues, const QString options = "");
+  const QVariant FindPeaks(const QString& HistName, double sigma, double threshold);
+
+  double         GetIntegral(const QString& HistName, bool MultiplyByBinWidth = false);
+  double         GetMaximum(const QString& HistName);
+  void           Scale(const QString& HistName, double ScaleIntegralTo, bool DividedByBinWidth = false);
 
   bool           Delete(const QString& HistName);
   void           DeleteAllHist();
@@ -50,6 +59,8 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+
+  bool           bAbortIfExists = false;
 
 };
 
@@ -67,10 +78,13 @@ public:
   virtual bool IsMultithreadCapable() const override {return true;}
 
 public slots:
+  void SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}
+
   void NewGraph(const QString& GraphName);
-  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, int MarkerSize);
+
+  void SetMarkerProperties(QString GraphName, int MarkerColor, int MarkerStyle, double MarkerSize);
   void SetLineProperties(QString GraphName, int LineColor, int LineStyle, int LineWidth);
-  void SetTitles(QString GraphName, QString X_Title, QString Y_Title);
+  void SetTitles(QString GraphName, QString X_Title, QString Y_Title, QString GraphTitle = "");
 
   void AddPoint(QString GraphName, double x, double y);
   void AddPoints(QString GraphName, QVariant xArray, QVariant yArray);
@@ -78,10 +92,16 @@ public slots:
 
   void SetYRange(const QString& GraphName, double min, double max);
   void SetXRange(const QString& GraphName, double min, double max);
+  void SetXDivisions(const QString& GraphName, int numDiv);
+  void SetYDivisions(const QString& GraphName, int numDiv);
 
   void Sort(const QString& GraphName);
 
   void Draw(QString GraphName, QString options = "APL");
+
+  void LoadTGraph(const QString& NewGraphName, const QString& FileName);
+  void Save(const QString& GraphName, const QString& FileName);
+  const QVariant GetPoints(const QString& GraphName);
 
   bool Delete(QString GraphName);
   void DeleteAllGraph();
@@ -91,6 +111,8 @@ signals:
 
 private:
   TmpObjHubClass *TmpHub;
+
+  bool           bAbortIfExists = false;
 
 };
 

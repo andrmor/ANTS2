@@ -271,7 +271,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>absorb</string>
+     <string>non</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_10">

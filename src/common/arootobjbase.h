@@ -24,7 +24,7 @@ protected:
     QString  Title;
     QString  Type;                    // object type according to ROOT (e.g. "TH1D")
 
-    QMutex   Mutex;
+    mutable QMutex   Mutex;
 };
 
 #endif // AROOTOBJBASE_H

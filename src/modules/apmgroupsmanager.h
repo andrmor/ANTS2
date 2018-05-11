@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVector>
 
-class pms;
+class APmHub;
 class QJsonObject;
 
 class APmRecordNew
@@ -39,7 +39,7 @@ class APmGroupsManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit APmGroupsManager(pms* PMs, QJsonObject* ConfigJSON);
+    explicit APmGroupsManager(APmHub* PMs, QJsonObject* ConfigJSON);
     ~APmGroupsManager();
 
     QVector<APmGroup*> Groups;
@@ -116,7 +116,7 @@ private:
     int CurrentGroup;
 
     //aliases
-    pms* PMs;
+    APmHub* PMs;
     QJsonObject* ConfigJSON;
 
 signals:

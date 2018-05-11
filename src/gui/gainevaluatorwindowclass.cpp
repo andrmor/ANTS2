@@ -2,8 +2,8 @@
 #include "ui_gainevaluatorwindowclass.h"
 #include "mainwindow.h"
 #include "reconstructionwindow.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "windownavigatorclass.h"
 #include "guiutils.h"
 #include "outputwindow.h"
@@ -1859,7 +1859,7 @@ void GainEvaluatorWindowClass::UpdateGraphics()
       {
 
 
-        const pm &PM = MW->PMs->at(ipm);
+        const APm &PM = MW->PMs->at(ipm);
         //if (PM.isStaticPassive()) continue;
         //if (igroup != -1) if ( PM.group != igroup ) continue; //wrong group
 

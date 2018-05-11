@@ -27,7 +27,7 @@ class AReconstructionManager;
 class TObject;
 class DetectorClass;
 class APmGroupsManager;
-class pms;
+class APmHub;
 
 class linkCustomClass
 {
@@ -547,7 +547,7 @@ private:
   AReconstructionManager* ReconstructionManager; //only pointer!
   DetectorClass* Detector;
   APmGroupsManager* PMgroups;
-  pms* PMs;
+  APmHub* PMs;
 
   QStandardItemModel *modelSpF_TV;
 

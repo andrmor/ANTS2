@@ -9,7 +9,7 @@
 #include <QPair>
 
 class LRF2;
-class pms;
+class APmHub;
 class SensorLRFs;
 class SensorLocalCache;
 class QJsonObject;
@@ -25,12 +25,12 @@ public:
     PMsensorGroup &operator=(const PMsensorGroup &copy);
 
     static QVector<PMsensorGroup> mkFromSensorsAndLRFs(QVector<int> gids, QVector<PMsensor> sensors, QVector<LRF2*> lrfs);
-    static QVector<PMsensorGroup> mkIndividual(const pms *PMs);
-    static QVector<PMsensorGroup> mkCommon(const pms *PMs);
-    static QVector<PMsensorGroup> mkAxial(const pms *PMs);
-    static QVector<PMsensorGroup> mkLattice(const pms *PMs, int N_gonal);
-    static QVector<PMsensorGroup> mkHexagonal(const pms *PMs);
-    static QVector<PMsensorGroup> mkSquare(const pms *PMs);
+    static QVector<PMsensorGroup> mkIndividual(const APmHub *PMs);
+    static QVector<PMsensorGroup> mkCommon(const APmHub *PMs);
+    static QVector<PMsensorGroup> mkAxial(const APmHub *PMs);
+    static QVector<PMsensorGroup> mkLattice(const APmHub *PMs, int N_gonal);
+    static QVector<PMsensorGroup> mkHexagonal(const APmHub *PMs);
+    static QVector<PMsensorGroup> mkSquare(const APmHub *PMs);
 
     void setLRF(LRF2 *lrf);
     LRF2* getLRF() { return lrf; }
@@ -43,7 +43,7 @@ public:
     bool readJSON (QJsonObject &json);
 
 private:
-    void addSensor(const pms *PMs, int ipm, double phi, bool flip);
+    void addSensor(const APmHub *PMs, int ipm, double phi, bool flip);
 
     std::vector<PMsensor> sensors;
     LRF2* lrf;

@@ -25,8 +25,8 @@ public:
         const AInterfaceToConfig* config = dynamic_cast<const AInterfaceToConfig*>(other);
         if (config) return new AInterfaceToConfig(*config);
 
-        const AInterfaceToMinimizerScript* mini = dynamic_cast<const AInterfaceToMinimizerScript*>(other);
-        if (mini) return new AInterfaceToMinimizerScript(*mini);
+        const AInterfaceToMinimizerJavaScript* mini = dynamic_cast<const AInterfaceToMinimizerJavaScript*>(other);
+        if (mini) return new AInterfaceToMinimizerJavaScript(*mini);
 
         const AInterfaceToData* events = dynamic_cast<const AInterfaceToData*>(other);
         if (events) return new AInterfaceToData(*events);

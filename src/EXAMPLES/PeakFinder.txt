@@ -1,0 +1,34 @@
+hist.DeleteAllHist()
+
+//---load config to generate peaks---
+config.Load(core.GetExamplesDir()+"/NewGenSiPM64.json" )
+var phs = config.GetKeyValue(".Electronics.PHS.Data")
+var noise = config.GetKeyValue(".Electronics.Noise.NoiseSigma" )
+for (var i=0; i<64; i++)
+{
+       phs[i].Average = 100
+       noise[i] = 20
+}
+config.Replace(".Electronics.PHS.Data", phs)
+config.Replace(".Electronics.Noise.NoiseSigma", noise)
+config.Replace(".Electronics.PHS.Active", true )
+config.Replace(".Electronics.Noise.Active", true )
+//---simulate---
+config.Replace(".ControlOptions.Single_Scan_Flood", 2 )
+config.Replace( ".PointSourcesConfig.FloodOptions.Nodes" , 10000 )
+sim.RunPhotonSources()
+
+//---finding peaks for PM #24
+hist.NewHist("h", 100, -50,500)
+
+var numEv = events.GetNumEvents()
+for (var i=0; i<numEv; i++)
+       hist.Fill("h", events.GetPMsignal(i, 24), 1)
+ 
+var peaks = hist.FindPeaks("h", 4, 0.2)
+core.print("Peaks are at: " + peaks)
+
+hist.Draw("h", "")
+
+for (var i=0; i<peaks.length; i++)
+       grwin.AddLine(peaks[i], 0, peaks[i], grwin.GetAxis().maxY, 2, 2, 2)

@@ -20,7 +20,7 @@ public:
   ~GeometryWindowClass();
 
   bool ModePerspective;
-  int ZoomLevel; //0 is fastest, +2 is typically the most "natural"
+  int  ZoomLevel; //0 is fastest, +2 is typically the most "natural"
   bool fNeedZoom; //set to true by "ShowGeometry", which force-resets the view
 
   void ShowAndFocus();
@@ -75,45 +75,25 @@ public slots:
 
 private slots:
     void on_pbHideBar_clicked();
-
     void on_pbShowBar_clicked();
-
     void on_cbShowTop_toggled(bool checked);
-
     void on_cbColor_toggled(bool checked);
-
     void on_pbSaveAs_clicked();
-
     void on_pbShowGLview_clicked();
-
     void on_pbSide_clicked();
-
     void on_cobViewType_currentIndexChanged(int index);
-
     void on_cbShowAxes_toggled(bool checked);
-
     void on_actionSmall_dot_toggled(bool arg1);
-
     void on_actionLarge_dot_triggered(bool arg1);
-
     void on_actionSmall_cross_toggled(bool arg1);
-
     void on_actionLarge_cross_toggled(bool arg1);
-
     void on_actionSize_1_triggered();
-
     void on_actionSize_2_triggered();
-
     void on_actionDefault_zoom_1_triggered();
-
     void on_actionDefault_zoom_2_triggered();
-
     void on_actionDefault_zoom_to_0_triggered();
-
     void on_actionSet_line_width_for_objects_triggered();
-
     void on_actionDecrease_line_width_triggered();
-
     void on_pbWebViewer_clicked();
 
 private:

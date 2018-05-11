@@ -1,8 +1,9 @@
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
 #include "anetworkmodule.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 #include "amessage.h"
+#include "ainterfacetogstylescript.h"
 
 #ifdef GUI
 #include "globalsettingswindowclass.h"
@@ -108,9 +109,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
   //running root TStyle script  
   if (!RootStyleScript.isEmpty())
   {
-      AScriptManager* SM = new AScriptManager(0);
+      AJavaScriptManager* SM = new AJavaScriptManager(0);
 #ifdef GUI
-      InterfaceToGStyleScript* GStyleInterface  = new  InterfaceToGStyleScript(); //deleted by the SM
+      AInterfaceToGStyleScript* GStyleInterface  = new  AInterfaceToGStyleScript(); //deleted by the SM
       SM->SetInterfaceObject(GStyleInterface);
 #endif
       SM->Evaluate(RootStyleScript);
@@ -154,13 +155,11 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
 
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
+  js["PythonScriptWindowJson"] = PythonScriptWindowJson;
   js["DefaultFontSize_ScriptWindow"] = DefaultFontSize_ScriptWindow;
   js["DefaultFontFamily_ScriptWindow"] = DefaultFontFamily_ScriptWindow;
   js["DefaultFontWeight_ScriptWindow"] = DefaultFontWeight_ScriptWindow;
   js["DefaultFontItalic_ScriptWindow"] = DefaultFontItalic_ScriptWindow;
-  QJsonArray mspAr;
-  for (int w : MainSplitterSizes_ScriptWindow) mspAr << w;
-  js["MainSplitterSizes_ScriptWindow"] = mspAr;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
   js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
@@ -206,6 +205,8 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "GlobScript", GlobScript);
     if (js.contains("ScriptWindowJson"))
         ScriptWindowJson = js["ScriptWindowJson"].toObject();
+    if (js.contains("PythonScriptWindowJson"))
+        PythonScriptWindowJson = js["PythonScriptWindowJson"].toObject();
 
     parseJson(js, "MaterialsAndParticlesSettings", MaterialsAndParticlesSettings);
 
@@ -213,10 +214,6 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "DefaultFontFamily_ScriptWindow", DefaultFontFamily_ScriptWindow);
     parseJson(js, "DefaultFontWeight_ScriptWindow", DefaultFontWeight_ScriptWindow);
     parseJson(js, "DefaultFontItalic_ScriptWindow", DefaultFontItalic_ScriptWindow);
-    QJsonArray mspAr;
-    parseJson(js, "MainSplitterSizes_ScriptWindow", mspAr);
-    for (int imsa=0; imsa<mspAr.size(); imsa++)
-        MainSplitterSizes_ScriptWindow << mspAr[imsa].toInt(50);
 
     //network
     DefaultWebSocketPort = 1234;
@@ -229,7 +226,10 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "RunWebSocketServerOnStart", fRunWebSocketServerOnStart);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
-    parseJson(js, "ExternalJSROOT", ExternalJSROOT);
+
+    QString tmp;
+    parseJson(js, "ExternalJSROOT", tmp);
+    if (!tmp.isEmpty()) ExternalJSROOT = tmp;
 }
 
 void GlobalSettingsClass::SaveANTSconfiguration()

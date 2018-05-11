@@ -1,7 +1,7 @@
 #include "alrfdraw.h"
 #include "alrfmoduleselector.h"
 #include "eventsdataclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 #include "graphwindowclass.h"
 #include "ajsontools.h"
@@ -110,7 +110,7 @@ bool ALrfDraw::extractOptionsAndVerify(int PMnumber, const QJsonObject &json)
     return true;
 }
 
-ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, pms *PMs, GraphWindowClass *GraphWindow) :
+ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, APmHub *PMs, GraphWindowClass *GraphWindow) :
   LRFs(LRFs), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow), fUseOldModule(fUseOldModule) {}
 
 bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)

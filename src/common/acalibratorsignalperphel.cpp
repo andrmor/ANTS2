@@ -4,7 +4,7 @@
 #include "detectorclass.h"
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 
 #include <QDebug>
@@ -326,8 +326,13 @@ bool ACalibratorSignalPerPhEl_Peaks::PrepareData()
     return true;
 }
 
-bool ACalibratorSignalPerPhEl_Peaks::extract(int ipm)
+bool ACalibratorSignalPerPhEl_Peaks::Extract(int ipm)
 {
+    if (DataHists.size()     <= ipm || !DataHists.at(ipm)) return false;
+
+    if (FoundPeaks.size()    <= ipm) FoundPeaks.resize(ipm+1);
+    if (SignalPerPhEl.size() <= ipm) SignalPerPhEl.resize(ipm+1);
+
     APeakFinder f(DataHists.at(ipm));
     QVector<double> peaks = f.findPeaks(sigma, threshold, maxNumPeaks, true);
     std::sort(peaks.begin(), peaks.end());
@@ -370,7 +375,7 @@ bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl(int ipm)
     if (FoundPeaks.size() != numPMs) FoundPeaks.resize(numPMs);
     if (SignalPerPhEl.size() != numPMs) SignalPerPhEl.resize(numPMs);
 
-    bool bOK = extract(ipm);
+    bool bOK = Extract(ipm);
 
     if (bOK) LastError.clear();
     else     LastError = "Peak finding failed for PM #" + QString::number(ipm);
@@ -393,7 +398,7 @@ bool ACalibratorSignalPerPhEl_Peaks::ExtractSignalPerPhEl()
     QVector<int> failedPMs;
     for (int ipm = 0; ipm < numPMs; ipm++)
     {
-        bool bOK = extract(ipm);
+        bool bOK = Extract(ipm);
         if (!bOK) failedPMs << ipm;
     }
 

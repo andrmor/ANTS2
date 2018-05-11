@@ -181,6 +181,24 @@ void AMaterialComposition::CalculateMeanAtomMass()
     qDebug() << "Mean atom mass is"<< MeanAtomMass;
 }
 
+const QString AMaterialComposition::checkForErrors() const
+{
+    for (const AChemicalElement& el : ElementComposition)
+    {
+        double sumPercents = 0;
+        for (const AIsotope& iso : el.Isotopes)
+        {
+            //qDebug() << el.Symbol << iso.Mass << iso.Abundancy;
+            sumPercents += iso.Abundancy;
+        }
+
+        if (sumPercents < 99.9 || sumPercents > 100.1)
+            return QString("Isotope fractions for element ") + el.Symbol + " do not add up to 100%\nTolerance is 0.1%, current sum is " + QString::number(sumPercents);
+    }
+
+    return "";
+}
+
 int AMaterialComposition::countIsotopes() const
 {
     int count = 0;

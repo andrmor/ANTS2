@@ -37,7 +37,7 @@ TObject *ARootGraphRecord::GetObject()
     return Object;
 }
 
-void ARootGraphRecord::SetMarkerProperties(int markerColor, int markerStyle, int markerSize)
+void ARootGraphRecord::SetMarkerProperties(int markerColor, int markerStyle, double markerSize)
 {
     MarkerColor = markerColor, MarkerStyle = markerStyle, MarkerSize = markerSize;
 }
@@ -47,9 +47,16 @@ void ARootGraphRecord::SetLineProperties(int lineColor, int lineStyle, int lineW
     LineColor = lineColor,   LineStyle = lineStyle,    LineWidth = lineWidth;
 }
 
-void ARootGraphRecord::SetAxisTitles(const QString &titleX, const QString &titleY)
+void ARootGraphRecord::SetTitles(const QString &titleX, const QString &titleY, const QString graphTitle)
 {
     TitleX = titleX; TitleY = titleY;
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph" && !graphTitle.isEmpty())
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        g->SetTitle(graphTitle.toLatin1().data());
+    }
 }
 
 void ARootGraphRecord::AddPoint(double x, double y)
@@ -118,5 +125,60 @@ void ARootGraphRecord::SetXRange(double min, double max)
             TAxis* axis = g->GetXaxis();
             if (axis) axis->SetLimits(min, max);
         }
+    }
+}
+
+void ARootGraphRecord::SetXDivisions(int numDiv)
+{
+    QMutexLocker locker(&Mutex);
+
+    TGraph* g = dynamic_cast<TGraph*>(Object);
+    if (g)
+    {
+        TAxis* ax = g->GetXaxis();
+        if (ax) ax->SetNdivisions(numDiv);
+    }
+}
+
+void ARootGraphRecord::SetYDivisions(int numDiv)
+{
+    QMutexLocker locker(&Mutex);
+
+    TGraph* g = dynamic_cast<TGraph*>(Object);
+    if (g)
+    {
+        TAxis* ax = g->GetYaxis();
+        if (ax) ax->SetNdivisions(numDiv);
+    }
+}
+
+const QVector<QPair<double, double> > ARootGraphRecord::GetPoints()
+{
+    QMutexLocker locker(&Mutex);
+
+    QVector<QPair<double, double>> res;
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g)
+        {
+            const int numPoints = g->GetN();
+            res.resize(numPoints);
+            for (int ip=0; ip<numPoints; ip++)
+                g->GetPoint(ip, res[ip].first, res[ip].second);
+        }
+    }
+    return res;
+}
+
+void ARootGraphRecord::Save(const QString &fileName)
+{
+    QMutexLocker locker(&Mutex);
+
+    if (Type == "TGraph")
+    {
+        TGraph* g = dynamic_cast<TGraph*>(Object);
+        if (g) g->SaveAs(fileName.toLatin1().data(), LastDrawOption.toLatin1().data());
     }
 }

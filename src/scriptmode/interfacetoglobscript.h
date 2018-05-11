@@ -22,7 +22,7 @@ class DetectorClass;
 class EventsDataClass;
 class GeometryWindowClass;
 class GraphWindowClass;
-class pms;
+class APmHub;
 class TF2;
 class AConfiguration;
 class AReconstructionManager;
@@ -30,7 +30,6 @@ class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
 class QJsonValue;
-class TmpObjHubClass;
 
 // ====== interfaces which do not require GUI ======
 
@@ -115,9 +114,16 @@ public slots:
   void AddRectangularManisfetItem(double x, double y, double dX, double dY, double Angle);  
   void SetManifestItemLineProperties(int i, int color, int width, int style);
 
-  //signal per ph el extraction
-  const QVariant GetSignalPerPhE_peaks() const;
+  //signal per ph el extraction  
+  const QVariant Peaks_GetSignalPerPhE() const;
+  void Peaks_PrepareData();
+  void Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks = 30);
+  double Peaks_Extract_NoAbortOnFail(int ipm);
+  void Peaks_ExtractAll();
+  QVariant Peaks_GetPeakPositions(int ipm);
+
   const QVariant GetSignalPerPhE_stat() const;
+
 
 private:
   AReconstructionManager* RManager;
@@ -285,7 +291,7 @@ public slots:
 
 private:
   AConfiguration* Config;
-  pms* PMs;
+  APmHub* PMs;
 
   bool checkValidPM(int ipm);
   bool checkAddPmCommon(int UpperLower, int type);
@@ -413,26 +419,6 @@ private:
   LRF::ARepository *repo; //alias
 };
 
-// ---- T R E E ---- (TTree of ROOT)
-class AInterfaceToTree : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-   AInterfaceToTree(TmpObjHubClass *TmpHub);
-   ~AInterfaceToTree() {}
-
-public slots:
-   void     OpenTree(const QString &TreeName, const QString &FileName, const QString &TreeNameInFile);
-   QString  PrintBranches(const QString &TreeName);
-   QVariant GetBranch(const QString &TreeName, const QString &BranchName);
-   bool     CloseTree(const QString &TreeName);
-   void     CloseAllTrees();
-
-private:
-   TmpObjHubClass *TmpHub;
-};
-
 #ifdef GUI // =============== GUI mode only ===============
 
 // -- GRAPH WINDOW --
@@ -456,6 +442,8 @@ public slots:
   void SetLog(bool Xaxis, bool Yaxis);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
+  void SetLegendBorder(int color, int style, int size);
+
   void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
 
   void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);

@@ -1,3 +1,9 @@
+#ifdef __USE_ANTS_PYTHON__
+  #include "Python.h"
+  #include "PythonQtConversion.h"
+  #include "PythonQt.h"
+#endif
+
 //ANTS2 modules
 #include "geometrywindowclass.h"
 #include "graphwindowclass.h"
@@ -7,7 +13,7 @@
 #include "lrfwindow.h"
 #include "reconstructionwindow.h"
 #include "amaterialparticlecolection.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "guiutils.h"
@@ -16,12 +22,11 @@
 #include "detectoraddonswindow.h"
 #include "checkupwindowclass.h"
 #include "gainevaluatorwindowclass.h"
-#include "genericscriptwindowclass.h"
 #include "credits.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
-#include "pmtypeclass.h"
+#include "apmtype.h"
 #include "globalsettingswindowclass.h"
 #include "globalsettingsclass.h"
 #include "aopticaloverride.h"
@@ -45,6 +50,8 @@
 #include "gui/alrfwindow.h"
 #include "acustomrandomsampling.h"
 #include "particlesourcesclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 
 //Qt
 #include <QDebug>
@@ -84,18 +91,18 @@
 
 MainWindow::~MainWindow()
 {
-    //qDebug()<<"<-Staring destructor for MainWindow...";  
-    if (histSecScint) delete histSecScint;
-    if (histScan) delete histScan;
-    //qDebug()<< "  Tmp hists deleted";
+    qDebug()<<"<Staring destructor for MainWindow";
+    delete histSecScint;
+    delete histScan;
 
+    qDebug() << "<-Clearing containers with dynamic objects";
     clearGeoMarkers();
-    //qDebug()<<"  GeoMarkers cleared";
     clearEnergyVector();
     clearCustomScanNodes();
 
+    qDebug() << "<-Deleting ui";
     delete ui;
-    //qDebug()<<"  <-User interface deleted";
+    qDebug() << "<Main window custom destructor finished";
 }
 
 void MainWindow::onBusyOn()
@@ -195,13 +202,14 @@ void MainWindow::clearEnergyVector()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-   //   qDebug() << "<-MainWindow close event received";
+   qDebug() << "\n<MainWindow shutdown initiated";
+
    ShutDown = true;
 
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
-           qDebug() << "Reconstruction manager is busy, terminating...";
+           qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
            ReconstructionManager->requestStop();
            SimulationManager->StopSimulation();
            qApp->processEvents();
@@ -214,25 +222,34 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
+   qDebug() << "<Preparing graph window for shutdown";
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
+
    //saving ANTS master-configuration file
-   //qDebug()<<"--Saving ANTS configuration";   
-   ScriptWindow->WriteToJson(GlobSet->ScriptWindowJson);
-   //MIwindow->WriteElasticAutoToJson(GlobSet->ElasticAutoSettings);
+   qDebug() << "<Saving JavaScripts";
+   ScriptWindow->WriteToJson();
+   if (PythonScriptWindow)
+   {
+       qDebug() << "<Saving Python scripts";
+       PythonScriptWindow->WriteToJson();
+   }
+   qDebug()<<"<Saving global settings";
    GlobSet->SaveANTSconfiguration();
 
    EventsDataHub->clear();
 
+   qDebug()<<"<Saving ANTS configuration";
    ELwindow->QuickSave(0);
 
    //if checked, save windows' status
    if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
      {
-       //qDebug()<<"--Saving position/status of all windows";
+       qDebug()<<"<Saving position/status of all windows";
        MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
      }
-   //qDebug()<<"  <Stopping Root update timer-based cycle";
+
+   qDebug() << "<Stopping Root update timer-based cycle";
    RootUpdateTimer->stop();
    disconnect(RootUpdateTimer, SIGNAL(timeout()), this, SLOT(timerTimeout()));
    QThread::msleep(110);
@@ -241,7 +258,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
    if (ScriptWindow)
      {
-       //qDebug()<<"  <Deleting ScriptWindow";
+       qDebug()<<"<-Deleting ScriptWindow";
        delete ScriptWindow->parent();
        ScriptWindow = 0;
      }
@@ -249,92 +266,93 @@ void MainWindow::closeEvent(QCloseEvent *event)
    if (GenScriptWindow)
      {
        GenScriptWindow->close();
-       //qDebug() << " <Deleting general script window";
+       qDebug() << "<-Deleting local script window";
        delete GenScriptWindow;
      }
 
 #ifdef ANTS_FANN
    if (NNwindow)
      {
-       //qDebug()<<"  <Deleting NeuralNetworksWindow";
+       qDebug() << "<-Deleting NeuralNetworksWindow";
        delete NNwindow->parent();
        NNwindow = 0;
      }
 #endif
 
-   if (lrfwindow) {
-       //qDebug()<<"  <Deleting  lrf Window";
+   if (lrfwindow)
+   {
+       qDebug() << "<-Deleting  lrf Window";
        delete lrfwindow->parent();
        lrfwindow = 0;
    }
-   if (WindowNavigator) {
-       //qDebug()<<"  <Deleting WindowNavigator";
+   if (WindowNavigator)
+   {
+       qDebug() << "<-Deleting WindowNavigator";
        delete WindowNavigator->parent();
        WindowNavigator = 0;
    }
    if (GeometryWindow)
      {
-       //qDebug()<<"  <Deleting Geometry Window";
+       qDebug() << "<-Deleting Geometry Window";
        GeometryWindow->hide();
        delete GeometryWindow->parent();
        GeometryWindow = 0;
      }
    if (GraphWindow)
      {
-       //qDebug()<<"  <Deleting Graph Window";
+       qDebug() << "<-Deleting Graph Window";
        GraphWindow->hide();
        delete GraphWindow->parent();
        GraphWindow = 0;
      }   
    if (GlobSetWindow)
      {
-       //qDebug()<<"  <Deleting Settings Window";
+       qDebug() << "<-Deleting Settings Window";
        GlobSetWindow->hide();
        delete GlobSetWindow;
        GlobSetWindow = 0;
      }
    if (Rwindow)
      {
-       //qDebug() << "  <Deleting Reconstruction window";
+       qDebug() << "<-Deleting Reconstruction window";
        Rwindow->close();
        delete Rwindow->parent();
        Rwindow = 0;
      }
    if (Owindow)
      {
-       //qDebug() << "  <Deleting Output window";
+       qDebug() << "<-Deleting Output window";
        Owindow->close();
        delete Owindow->parent();
        Owindow = 0;
      }
    if (MIwindow)
      {
-       //qDebug()<<"  <Deleting material inspector window";
+       qDebug() << "<-Deleting material inspector window";
        delete MIwindow->parent();
        MIwindow = 0;
      }
    if (ELwindow)
      {
-       //qDebug()<<"  <Deleting examples window";
+       qDebug() << "<-Deleting examples window";
        ELwindow->close();
        delete ELwindow->parent();
        ELwindow = 0;
      }
    if (DAwindow)
      {
-       //qDebug()<<"  <Deleting detector addon window";
+       qDebug() << "<-Deleting detector addon window";
        delete DAwindow;
        DAwindow = 0;
-       //qDebug() << "   done";
      }
    if (CheckUpWindow)
      {
-       //qDebug()<<"  <Deleting check up window";
+       qDebug() << "<-Deleting check up window";
        delete CheckUpWindow;
        CheckUpWindow = 0;
      }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
-   //qDebug() << "  <-MainWindow close event: all done";
+   qDebug() << "<MainWindow close event processing finished";
 }
 
 bool MainWindow::event(QEvent *event)
@@ -965,7 +983,7 @@ void MainWindow::ToggleUpperLowerPMs()
   if (ui->cbUPM->isChecked() && !ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(0);
   else if (!ui->cbUPM->isChecked() && ui->cbLPM->isChecked()) ui->cobUpperLowerPMs->setCurrentIndex(1);
 
-  //force-trigger visualization  
+  //force-trigger visualization  ***!!!
   MainWindow::on_cobUpperLowerPMs_currentIndexChanged(ui->cobUpperLowerPMs->currentIndex());
 
   if (DoNotUpdateGeometry) return; //if it is triggered during load/init hase
@@ -1040,11 +1058,11 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
 {
     //refresh indication of PM model properties
     int index = ui->sbPMtype->value();
-    PMtypeClass *type = PMs->getType(index);
+    const APmType *type = PMs->getType(index);
 
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
-    ui->lePMtypeName->setText(type->name);
+    ui->lePMtypeName->setText(type->Name);
     ui->cobPMdeviceType->setCurrentIndex(type->SiPM);
     ui->cobMatPM->setCurrentIndex(type->MaterialIndex);
     ui->cobPMshape->setCurrentIndex(type->Shape);
@@ -1065,14 +1083,14 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     str.setNum(type->RecoveryTime, 'g', 4);
     ui->ledSiPMrecoveryTime->setText(str);
 
-    str.setNum(type->effectivePDE, 'g', 4);
+    str.setNum(type->EffectivePDE, 'g', 4);
     ui->ledPDE->setText(str);
     ui->pbShowPDE->setEnabled(type->PDE_lambda.size());
     ui->pbShowPDEbinned->setEnabled(ui->cbWaveResolved->isChecked() && type->PDE_lambda.size());
     ui->pbDeletePDE->setEnabled(type->PDE_lambda.size());
     MainWindow::RefreshAngularButtons();
     MainWindow::RefreshAreaButtons();
-    str.setNum(type->n1, 'g', 4);
+    str.setNum(type->AngularN1, 'g', 4);
     ui->ledMediumRefrIndex->setText(str);
 
     //enable/disable control
@@ -1083,7 +1101,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
 
     //update cob
     ui->cobPMtypes->clear();
-    for (int i=0; i<numModels; i++) ui->cobPMtypes->addItem(PMs->getType(i)->name);
+    for (int i=0; i<numModels; i++) ui->cobPMtypes->addItem(PMs->getType(i)->Name);
     ui->cobPMtypes->setCurrentIndex(index);
 
     DoNotUpdateGeometry = tmpBool;
@@ -1094,8 +1112,8 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    if (DoNotUpdateGeometry) return;
 
    int index = ui->sbPMtype->value();
-   PMtypeClass *type = PMs->getType(index);
-   type->name = ui->lePMtypeName->text();
+   APmType *type = PMs->getType(index);
+   type->Name = ui->lePMtypeName->text();
 
    type->SiPM = ui->cobPMdeviceType->currentIndex();
    type->MaterialIndex = ui->cobMatPM->currentIndex();
@@ -1108,21 +1126,19 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->DarkCountRate = ui->ledSiPMdarCountRate->text().toDouble();
    type->RecoveryTime = ui->ledSiPMrecoveryTime->text().toDouble();
    if (type->SiPM) type->Shape = 0; //SiPM - always rectangular
-   type->effectivePDE = ui->ledPDE->text().toDouble();
-   //PMs->setTypePropertiesScalar(index, &tp);
+   type->EffectivePDE = ui->ledPDE->text().toDouble();
    QString str;
    str.setNum(type->PixelsX * type->PixelsY);
    ui->labTotalPixels->setText("("+str+")");
 
-   //wave-, angular- and area-resolved data are updated independently
+   updateCOBsWithPMtypeNames();
+   on_pbShowPMsArrayRegularData_clicked(); //in case type name was changed
 
-   MainWindow::updateCOBsWithPMtypeNames();
-   MainWindow::on_pbShowPMsArrayRegularData_clicked(); //in case type name was changed
-   MainWindow::ReconstructDetector();//MainWindow::on_pbCreateCustomConfiguration_clicked();
+   ReconstructDetector();
+   on_pbUpdateSimConfig_clicked();
 
    //for indication, update PMs binned properties
-   on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-   on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+   //on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
 }
 
 void MainWindow::on_sbPMtype_valueChanged(int arg1)
@@ -1208,7 +1224,7 @@ void MainWindow::AddDefaultPMtype()
     {
       found = false;
       for (int i=0; i<PMs->countPMtypes(); i++)
-        if (name == PMs->getType(i)->name)
+        if (name == PMs->getType(i)->Name)
           {
             found = true;
             break;
@@ -1216,7 +1232,7 @@ void MainWindow::AddDefaultPMtype()
       if (found) name += "_1";
     }
   while (found);
-  PMtypeClass *type = new PMtypeClass(name);
+  APmType *type = new APmType(name);
   PMs->appendNewPMtype(type);
 
   //updating all comboboxes with PM type names
@@ -1240,7 +1256,7 @@ void MainWindow::updateCOBsWithPMtypeNames()
 
   for (int i=0; i<defTypes; i++)
     {
-      QString name = PMs->getType(i)->name;
+      QString name = PMs->getType(i)->Name;
       ui->cobPMtypes->addItem(name);
       ui->cobPMtypeInArrays->addItem(name);
       ui->cobPMtypeInExplorers->addItem(name);
@@ -1268,49 +1284,32 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 
 void MainWindow::on_cbAreaSensitive_toggled(bool checked)
 {
-  PMs->setAreaResolved(checked);
-  if (checked) ui->twOption->setTabIcon(3, Rwindow->YellowIcon);
-  else         ui->twOption->setTabIcon(3, QIcon());
+    if (checked) ui->twOption->setTabIcon(3, Rwindow->YellowIcon);
+    else         ui->twOption->setTabIcon(3, QIcon());
 }
 
 void MainWindow::on_cbAngularSensitive_toggled(bool checked)
 {
-    MainWindow::RefreshAngularButtons();
+    RefreshAngularButtons();
     if (checked) ui->twOption->setTabIcon(2, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(2, QIcon());
     ui->fAngular->setEnabled(checked);
-    MainWindow::on_pbIndPMshowInfo_clicked(); //to refresh the binned button
+    on_pbIndPMshowInfo_clicked(); //to refresh the binned button
 }
 
 void MainWindow::on_cbWaveResolved_toggled(bool checked)
 {
-    if (BulkUpdate) return;
-   //triggered as update after load sim config too!
-   //this is toggled on editing_finished of WaveFrom Waveto and Wavestep
-    //qDebug()<<"---toggle---";
-    //WavelengthResolved = checked;
-    WaveFrom = ui->ledWaveFrom->text().toDouble();
-    WaveStep = ui->ledWaveStep->text().toDouble();
-    MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
-
-    //update materialCollection info -rebinning, hists
-    MpCollection->SetWave(checked, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    for (int i=0; i<MpCollection->countMaterials(); i++) MpCollection->UpdateWaveResolvedProperties(i);
-    //updating PMs
-    PMs->SetWave(checked, WaveFrom, WaveStep, WaveNodes);
-    PMs->RebinPDEs(); //update PMs info -rebinning, hists
-    UpdateTestWavelengthProperties();
-
-    ui->fWaveTests->setEnabled(checked); //tests tab: wavelength resolved properties
-    ui->fWaveOptions->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-    ui->pbShowPDEbinned->setEnabled(checked && PMs->getType(ui->sbPMtype->value())->PDE_lambda.size());
-    MainWindow::on_pbIndPMshowInfo_clicked(); //to refresh the binned button
-
+    ui->fWaveTests->setEnabled(checked);
+    ui->fWaveOptions->setEnabled(checked);
     ui->fPointSource_Wave->setEnabled(checked);
     ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
+
+    const int itype = ui->sbPMtype->value();
+    const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
+    ui->pbShowPDEbinned->setEnabled(checked && bHavePDE);
 }
 
 void MainWindow::on_cbTimeResolved_toggled(bool checked)
@@ -1333,16 +1332,15 @@ bool MainWindow::isWavelengthResolved() const
   return ui->cbWaveResolved->isChecked();
 }
 
-void MainWindow::recallGeometryOfScriptWindow()
+void MainWindow::recallGeometryOfLocalScriptWindow()
 {
   if (!GenScriptWindow) return;
-    //GenScriptWindow->setGeometry(ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH);
 
   GenScriptWindow->move(ScriptWinX, ScriptWinY);
   GenScriptWindow->resize(ScriptWinW, ScriptWinH);
 }
 
-void MainWindow::extractGeometryOfScriptWindow()
+void MainWindow::extractGeometryOfLocalScriptWindow()
 {
   if (GenScriptWindow)
     {
@@ -1359,16 +1357,13 @@ void MainWindow::on_ledWaveFrom_editingFinished()
   if (newValue<=0  || newValue > ui->ledWaveTo->text().toDouble())
     {
       QString str;
-      str.setNum(WaveFrom,'g',5);
+      str.setNum(WaveFrom,'g', 5);
       ui->ledWaveFrom->setText(str);      
       message("Error in the starting wavelength value, resetted", this);
       return;
     }
   MainWindow::CorrectWaveTo();
-  WaveFrom = ui->ledWaveFrom->text().toDouble();
-  PMs->setWaveFrom(WaveFrom);
-
-  MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
 
   MainWindow::on_pbUpdateSimConfig_clicked();
 }
@@ -1379,35 +1374,29 @@ void MainWindow::on_ledWaveTo_editingFinished()
   if (newValue<=0  || newValue < ui->ledWaveFrom->text().toDouble())
     {
       QString str;
-      str.setNum(WaveTo,'g',5);
+      str.setNum(WaveTo,'g', 5);
       ui->ledWaveTo->setText(str);      
       message("Error in the ending wavelength value, resetted", this);
       return;
     }
    MainWindow::CorrectWaveTo();
-
-   MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-
+   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
    MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_ledWaveStep_editingFinished()
 {
    double newValue = ui->ledWaveStep->text().toDouble();
-   if (newValue < 1e-10)
+   if (newValue < 1e-5)
     {
       QString str;
-      str.setNum(WaveStep,'g',5);
+      str.setNum(WaveStep,'g', 5);
       ui->ledWaveStep->setText(str);     
       message("Error in the step value, resetted", this);
       return;
     }
    MainWindow::CorrectWaveTo();
-   WaveStep = ui->ledWaveStep->text().toDouble();
-   PMs->setWaveStep(WaveStep);
-
-   MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-
+   //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
    MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
@@ -1418,7 +1407,6 @@ void MainWindow::CorrectWaveTo()
   QString str;
   str.setNum(WaveNodes);
   ui->labWaveOptionNodes->setText(str);
-  PMs->setWaveNodes(WaveNodes);  
   double to = ui->ledWaveFrom->text().toDouble() + ui->ledWaveStep->text().toDouble()*steps;
   WaveTo = to;   
   str.setNum(to,'g',5);
@@ -1440,8 +1428,7 @@ void MainWindow::on_pbUpdateTestWavelengthProperties_clicked()
 
 void MainWindow::UpdateTestWavelengthProperties()
 {
-  if (!ui->cbWaveResolved->isChecked()) return;
- // if (graphRW) graphRW->hide();
+  if (!isWavelengthResolved()) return;
   int matId = ui->cobMaterialForWaveTests->currentIndex();
 
   ui->pbTestShowPrimary->setEnabled((*MpCollection)[matId]->PrimarySpectrumHist);
@@ -1604,7 +1591,7 @@ void MainWindow::on_pbScalePDE_clicked()
 
   bool ok;
   double val = QInputDialog::getDouble(this, "PDE scaling",
-                                             "Scale PDE data for PM type "+Detector->PMs->getType(type)->name+"\n"
+                                             "Scale PDE data for PM type "+Detector->PMs->getType(type)->Name+"\n"
                                              "Scaling factor:", 1.0, -1e10, 1e10, 5, &ok);
   if (!ok) return;
 
@@ -1619,17 +1606,18 @@ void MainWindow::on_pbShowPDEbinned_clicked()
 {
   if (!ui->cbWaveResolved->isChecked())
     {      
-      message("First activate wavelength resolved simulation option", this);
+      message("Activate wavelength resolved simulation option", this);
       return;
     }
 
-  //force rebinning
-  on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
+  const int itype = ui->sbPMtype->value();
+  //PMs->RebinPDEsForType(itype);
 
   QVector<double> x;
-  x.resize(0);
-  for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
-  GraphWindow->MakeGraph(&x, &PMs->getType(ui->sbPMtype->value())->PDEbinned, kRed, "Wavelength, nm", "PDE");
+  for (int i = 0; i < WaveNodes; i++)
+      x.append(WaveFrom + WaveStep * i);
+
+  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->PDEbinned, kRed, "Wavelength, nm", "PDE");
 }
 
 void MainWindow::on_pbPMtypeLoadAngular_clicked()
@@ -1697,22 +1685,14 @@ void MainWindow::on_pbPMtypeDeleteAngular_clicked()
 
 void MainWindow::on_pbPMtypeShowEffectiveAngular_clicked()
 {  
-  int typ = ui->cobPMtypes->currentIndex();
+  int itype = ui->cobPMtypes->currentIndex();
 
-  //force rebinning
-  on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+  PMs->RecalculateAngularForType(itype);
 
   QVector<double> x;
-  x.resize(0);
   int CosBins = ui->sbCosBins->value();
   for (int i=0; i<CosBins; i++) x.append(1.0/(CosBins-1)*i);  
-  GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
-}
-
-void MainWindow::on_sbCosBins_valueChanged(int arg1)
-{
-    PMs->setCosBins(arg1);
-    PMs->RecalculateAngular();
+  GraphWindow->MakeGraph(&x, &PMs->getType(itype)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
 }
 
 void MainWindow::onGDMLstatusChage(bool fGDMLactivated)
@@ -1861,7 +1841,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
     Detector->findPM(ipm, ul, index);
     if (index<0) return;
     APmPosAngTypeRecord *p = &Detector->PMarrays[ul].PositionsAnglesTypes[index];
-    pm *PM = &PMs->at(ipm);
+    APm *PM = &PMs->at(ipm);
 
     //format should be the same in MainWindow::on_pbUpdateToFixedZ_clicked() and MainWindow::on_pbUpdateToFullCustom_clicked()
     ui->ledIndPMx->setText(QString::number(PM->x, 'g', 4));
@@ -1875,20 +1855,20 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
 
     //-- overrides --
     //effective DE    
-    double eDE = PMs->getPDEeffective(ipm);
+    double eDE = PMs->at(ipm).effectivePDE;
     QString str;
-    PMtypeClass* type = PMs->getType(p->type);
+    APmType* type = PMs->getType(p->type);
     if (eDE == -1)
       {
-        str.setNum(type->effectivePDE);
+        str.setNum(type->EffectivePDE);
         ui->labIndDEStatus->setText("Inherited:");
-        ui->pbIndRestoreEffectiveDE->setEnabled(false);
+        //ui->pbIndRestoreEffectiveDE->setEnabled(false);
       }
     else
       {
         str.setNum(eDE, 'g', 4);
         ui->labIndDEStatus->setText("<b>Override:</b>");
-        ui->pbIndRestoreEffectiveDE->setEnabled(true);
+        //ui->pbIndRestoreEffectiveDE->setEnabled(true);
       }
     ui->ledIndEffectiveDE->setText(str);
     //wave-resolved DE
@@ -2154,17 +2134,23 @@ void MainWindow::on_pbIndShowType_clicked()
 
 void MainWindow::on_ledIndEffectiveDE_editingFinished()
 {
-    double val = ui->ledIndEffectiveDE->text().toDouble();
-    PMs->setPDEeffective(ui->sbIndPMnumber->value(), val);
+    const int ipm = ui->sbIndPMnumber->value();
+    const double val = ui->ledIndEffectiveDE->text().toDouble();
+
+    PMs->at(ipm).effectivePDE = val;
+
     ReconstructDetector(true);
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 {
-    PMs->setPDEeffective(ui->sbIndPMnumber->value(), -1);
+    const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).effectivePDE = -1.0;
+
     ReconstructDetector(true);
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowDE_clicked()
@@ -2172,33 +2158,23 @@ void MainWindow::on_pbIndShowDE_clicked()
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
 
-  //ShowGraphWindow();
+  const TString tit = ( PMs->isSiPM(ipm) ? "Photon detection efficiency" : "Quantum efficiency" );
   if (PMs->isPDEwaveOverriden(ipm))
-    {
-      if (PMs->isSiPM(ipm))
-        GraphWindow->MakeGraph(PMs->getPDE_lambda(ipm), PMs->getPDE(ipm), kRed, "Wavelength, nm", "Photon Detection Efficiency");
-      else
-        GraphWindow->MakeGraph(PMs->getPDE_lambda(ipm), PMs->getPDE(ipm), kRed, "Wavelength, nm", "Quantum Efficiency");
-    }
+      GraphWindow->MakeGraph(&PMs->at(ipm).PDE_lambda, &PMs->at(ipm).PDE, kRed, "Wavelength, nm", tit);
   else
-    {
-      if (PMs->isSiPM(ipm))
-        GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Photon Detection Efficiency");
-      else
-        GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", "Quantum Efficiency");
-    }  
+      GraphWindow->MakeGraph(&PMs->getType(typ)->PDE_lambda, &PMs->getType(typ)->PDE, kRed, "Wavelength, nm", tit);
 }
 
 void MainWindow::on_pbIndRestoreDE_clicked()
 {
-    QVector<double> x;
-    x.resize(0);
-    int ipm = ui->sbIndPMnumber->value();
-    PMs->setPDEwave(ipm, &x, &x);
-    PMs->setPDEbinned(ipm, &x);
-    ReconstructDetector(true);
+    const int ipm = ui->sbIndPMnumber->value();
 
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    PMs->at(ipm).PDE.clear();
+    PMs->at(ipm).PDE_lambda.clear();
+    PMs->at(ipm).PDEbinned.clear();
+
+    ReconstructDetector(true);
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndLoadDE_clicked()
@@ -2238,18 +2214,15 @@ void MainWindow::on_pbIndShowDEbinned_clicked()
       message("First activate wavelength resolved simulation option", this);
       return;
     }
-  //force rebinning
-  on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
 
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
+
   QVector<double> x;
-  x.resize(0);
   for (int i=0; i<WaveNodes; i++) x.append(WaveFrom + WaveStep*i);
 
-  //MainWindow::ShowGraphWindow();
-  if (PMs->getPDEbinned(ipm)->size() > 0)
-    GraphWindow->MakeGraph(&x, PMs->getPDEbinned(ipm), kRed, "Wavelength, nm", "PDE");
+  if (PMs->at(ipm).PDEbinned.size() > 0)
+    GraphWindow->MakeGraph(&x, &PMs->at(ipm).PDEbinned, kRed, "Wavelength, nm", "PDE");
   else
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->PDEbinned, kRed, "Wavelength, nm", "PDE");
 }
@@ -2304,35 +2277,34 @@ void MainWindow::on_pbIndLoadAngular_clicked()
 
   int ipm = ui->sbIndPMnumber->value();
   PMs->setAngular(ipm, &x, &y);
-  PMs->setAngularN1(ipm, ui->ledIndMediumRefrIndex->text().toDouble());
+  PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
 
   PMs->RecalculateAngularForPM(ipm);
   ReconstructDetector(true);
-
-  MainWindow::on_pbIndPMshowInfo_clicked();
+  //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndRestoreAngular_clicked()
 {
-  QVector<double> x;
-  x.resize(0);
-  int ipm = ui->sbIndPMnumber->value();
-  PMs->setAngular(ipm, &x, &x);
-  PMs->setAngularBinned(ipm, &x);
-  ReconstructDetector(true);
+  const int ipm = ui->sbIndPMnumber->value();
 
-  MainWindow::on_pbIndPMshowInfo_clicked();
+  PMs->at(ipm).AngularSensitivity_lambda.clear();
+  PMs->at(ipm).AngularSensitivity.clear();
+  PMs->at(ipm).AngularSensitivityCosRefracted.clear();
+
+  ReconstructDetector(true);
+  //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowAngular_clicked()
 {  
-  int ipm = ui->sbIndPMnumber->value();
-  int typ = ui->cobPMtypeInExplorers->currentIndex();
-  //ShowGraphWindow();
+  const int ipm = ui->sbIndPMnumber->value();
+  const int itype = ui->cobPMtypeInExplorers->currentIndex();
+
   if (PMs->isAngularOverriden(ipm))
-        GraphWindow->MakeGraph(PMs->getAngularSensitivity_lambda(ipm), PMs->getAngularSensitivity(ipm), kRed, "Angle, degrees", "Response");
+        GraphWindow->MakeGraph(&PMs->at(ipm).AngularSensitivity_lambda, &PMs->at(ipm).AngularSensitivity, kRed, "Angle, degrees", "Response");
   else
-        GraphWindow->MakeGraph(&PMs->getType(typ)->AngularSensitivity_lambda, &PMs->getType(typ)->AngularSensitivity, kRed, "Angle, degrees", "Response");
+        GraphWindow->MakeGraph(&PMs->getType(itype)->AngularSensitivity_lambda, &PMs->getType(itype)->AngularSensitivity, kRed, "Angle, degrees", "Response");
 }
 
 void MainWindow::on_pbIndShowEffectiveAngular_clicked()
@@ -2346,29 +2318,25 @@ void MainWindow::on_pbIndShowEffectiveAngular_clicked()
   int ipm = ui->sbIndPMnumber->value();
   int typ = ui->cobPMtypeInExplorers->currentIndex();
 
-  //force rebinning
-  on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-
   QVector<double> x;
-  x.resize(0);
   int CosBins = ui->sbCosBins->value();
   for (int i=0; i<CosBins; i++) x.append(1.0/(CosBins-1)*i);
 
-  //MainWindow::ShowGraphWindow();
-  if (PMs->getAngularSensitivityCosRefracted(ipm)->size() > 0)
-    GraphWindow->MakeGraph(&x, PMs->getAngularSensitivityCosRefracted(ipm), kRed, "Cosine of refracted beam", "Response");
+  if (PMs->at(ipm).AngularSensitivityCosRefracted.size() > 0)
+    GraphWindow->MakeGraph(&x, &PMs->at(ipm).AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
   else
     GraphWindow->MakeGraph(&x, &PMs->getType(typ)->AngularSensitivityCosRefracted, kRed, "Cosine of refracted beam", "Response");
 }
 
 void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
 {
-    int ipm = ui->sbIndPMnumber->value();
-    PMs->setAngularN1(ipm, ui->ledIndMediumRefrIndex->text().toDouble());
+    const int ipm = ui->sbIndPMnumber->value();
+
+    PMs->at(ipm).AngularN1 = ui->ledIndMediumRefrIndex->text().toDouble();
+
     PMs->RecalculateAngularForPM(ipm);
     ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
+    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndLoadArea_clicked()
@@ -2412,20 +2380,19 @@ void MainWindow::on_pbIndShowArea_clicked()
     int yNum;
     double xStep;
     double yStep;
-    //PMpropertiesStruct tp = *PMs->getTypeProperties(typ);
 
     if (PMs->isAreaOverriden(ipm))
       {
-        xNum = PMs->getAreaSensitivity(ipm)->size();
-        yNum = PMs->getAreaSensitivity(ipm)[0].size();
-        xStep = PMs->getAreaStepX(ipm);
-        yStep = PMs->getAreaStepY(ipm);
+        xNum = PMs->at(ipm).AreaSensitivity.size();
+        yNum = PMs->at(ipm).AreaSensitivity.at(0).size();
+        xStep = PMs->at(ipm).AreaStepX;
+        yStep = PMs->at(ipm).AreaStepY;
       }
     else
       {
         if (PMs->getType(typ)->AreaSensitivity.isEmpty()) return; //then nothing to show
         xNum = PMs->getType(typ)->AreaSensitivity.size();
-        yNum = PMs->getType(typ)->AreaSensitivity[0].size();
+        yNum = PMs->getType(typ)->AreaSensitivity.at(0).size();
         xStep=PMs->getType(typ)->AreaStepX;
         yStep=PMs->getType(typ)->AreaStepY;
       }
@@ -2437,9 +2404,9 @@ void MainWindow::on_pbIndShowArea_clicked()
      for (int iY=0; iY<yNum; iY++)
      {
         if (PMs->isAreaOverriden(ipm))
-            hist2D->SetCellContent(iX+1, iY+1, (PMs->getAreaSensitivity(ipm))->at(iX)[iY]*100.0);
+            hist2D->SetCellContent(iX+1, iY+1, PMs->at(ipm).AreaSensitivity.at(iX).at(iY) * 100.0);
         else
-            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity[iX][iY]*100.0);
+            hist2D->SetCellContent(iX+1, iY+1, PMs->getType(typ)->AreaSensitivity.at(iX).at(iY) * 100.0);
      }
     hist2D->SetXTitle("X, mm");
     hist2D->SetYTitle("Y, mm");
@@ -2747,8 +2714,8 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
   bool error = MainWindow::LoadSPePHSfile(fileName, &x, &y);
   if (error == 0)
     {
-      Detector->PMs->setElChanSPePHS(ipm, &x, &y);
-      Detector->PMs->preparePHS(ipm);
+      Detector->PMs->at(ipm).setElChanSPePHS(x, y);
+      Detector->PMs->at(ipm).preparePHS();
     }
   else return;
 
@@ -2758,8 +2725,8 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
 void MainWindow::on_pbElGainShowDistr_clicked()
 {  
   int ipm = ui->sbElPMnumber->value(); 
-  PMs->preparePHS(ipm);
-  GraphWindow->Draw(PMs->getSPePHShist(ipm), "", true, false);
+  PMs->at(ipm).preparePHS();
+  GraphWindow->Draw(PMs->at(ipm).SPePHShist, "", true, false);
 }
 
 void MainWindow::on_pbElTestGenerator_clicked()
@@ -2797,8 +2764,9 @@ void MainWindow::on_pbElUpdateIndication_clicked()
   ui->cbEnableMCcrosstalk->setChecked(Detector->PMs->isDoMCcrosstalk());
   ui->cbEnableElNoise->setChecked(Detector->PMs->isDoElNoise());
   ui->cbEnableADC->setChecked(Detector->PMs->isDoADC());
+  ui->cbDarkCounts_Enable->setChecked(Detector->PMs->fDoDarkCounts);
 
-  int ipm = ui->sbElPMnumber->value(); 
+  int ipm = ui->sbElPMnumber->value();
   int NumPMs = PMs->count();
   if (ipm>NumPMs-1 && ipm != 0)
     {
@@ -2810,16 +2778,15 @@ void MainWindow::on_pbElUpdateIndication_clicked()
     {
       ui->twElectronics->setEnabled(true);
 
-      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->name);
+      ui->labElType->setText(PMs->getType(PMs->at(ipm).type)->Name);
       QString str, str1;
-      str.setNum(PMs->getAverageSignalPerPhotoelectron(ipm));
+      str.setNum( PMs->at(ipm).AverageSigPerPhE );
       ui->ledAverageSigPhotEl->setText(str);
-      str.setNum(PMs->getSPePHSsigma(ipm));
+      str.setNum(PMs->at(ipm).SPePHSsigma);
       ui->ledElsigma->setText(str);
-      str.setNum(PMs->getSPePHSshape(ipm));
+      str.setNum(PMs->at(ipm).SPePHSshape);
       ui->ledElShape->setText(str);
-      if (PMs->getSPePHShist(ipm)) ui->pbElGainShowDistr->setEnabled(true);
-      else ui->pbElGainShowDistr->setEnabled(false);
+      ui->pbElGainShowDistr->setEnabled( PMs->at(ipm).SPePHShist );
 
       //MCcrosstalk      
       ui->cobMCcrosstalk_Model->setCurrentIndex( PMs->at(ipm).MCmodel );
@@ -2856,27 +2823,38 @@ void MainWindow::on_pbElUpdateIndication_clicked()
           ui->labMCmean->setText( QString::number(MCmeanCells, 'g', 4) );
       }
 
-      str.setNum(PMs->getElNoiseSigma(ipm));
+      ui->ledTimeOfOneMeasurement->setText( QString::number(PMs->at(ipm).MeasurementTime) );
+      ui->swDarkCounts_Time->setCurrentIndex( ui->cbTimeResolved->isChecked() ? 1 : 0 );
+      ui->cobDarkCounts_Model->setCurrentIndex( PMs->at(ipm).DarkCounts_Model );
+      const bool bHaveDist = !PMs->at(ipm).DarkCounts_Distribution.isEmpty();
+      ui->pbDarkCounts_Show->setEnabled(bHaveDist);
+      ui->pbDarkCounts_Delete->setEnabled(bHaveDist);
+
+      str.setNum(PMs->at(ipm).ElNoiseSigma);
       ui->ledElNoiseSigma->setText(str);
+      str.setNum(PMs->at(ipm).ElNoiseSigma_StatSigma);
+      ui->ledElNoiseSigma_Stat->setText(str);
+      str.setNum(PMs->at(ipm).ElNoiseSigma_StatNorm);
+      ui->ledElNoiseSigma_Norm->setText(str);
 
-      str.setNum(PMs->getADCmax(ipm));
-      ui->ledADCmax->setText(str);
-      ui->sbADCbits->setValue(PMs->getADCbits(ipm));
+      //str.setNum(PMs->at(ipm).ADCmax);
+      ui->ledADCmax->setText( QString::number(PMs->at(ipm).ADCmax) );
+      ui->sbADCbits->setValue( PMs->at(ipm).ADCbits );
 
-      str.setNum(PMs->getADClevels(ipm)+1);
+      str.setNum(PMs->at(ipm).ADClevels + 1);
       str = "levels: " + str;
-      str1.setNum(PMs->getADCstep(ipm));
+      str1.setNum(PMs->at(ipm).ADCstep);
       str += "  signal/level: "+str1;
       ui->leoADCInfo->setText(str);
 
-      int mode = PMs->getSPePHSmode(ipm);
+      const int& mode = PMs->at(ipm).SPePHSmode;
       if (mode == 3) ui->ledAverageSigPhotEl->setReadOnly(true);
       else ui->ledAverageSigPhotEl->setReadOnly(false);
       ui->cobPMampGainModel->setCurrentIndex(mode);
     }
   else ui->twElectronics->setEnabled(false);
 
-  ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->getMeasurementTime()) );
+  //ui->ledTimeOfOneMeasurement->setText( QString::number(Detector->PMs->at(ipm).MeasurementTime) );
 
   BulkUpdate = tmpBulk;
 }
@@ -2885,34 +2863,36 @@ void MainWindow::on_pbElCopyGainData_clicked()
 {
    int mode = ui->cobElCopyMode->currentIndex();
    if (mode == 0) return;
-   int selector = ui->twElectronics->currentIndex(); //0 -SPePHS, 1-crossTalk, 2 - ElNoise, 3 - ADC, 4 - dark counts
-   if (selector == 4) return;
+   int selector = ui->twElectronics->currentIndex(); //0-SPePHS, 1-crossTalk, 2-ElNoise, 3-ADC, 4-dark counts
 
    int ipm =  ui->sbElPMnumber->value();
    int typ = PMs->at(ipm).type;
    bool flagSelective = false;
    if (mode == 1) flagSelective = true;
 
-   for (int i=0; i<PMs->count(); i++)
+   for (int ipmTo = 0; ipmTo < PMs->count(); ipmTo++)
      {
-       if (i==ipm) continue;
+       if (ipmTo == ipm) continue;
        if (flagSelective)
-         if (typ != PMs->at(i).type) continue;
+         if (typ != PMs->at(ipmTo).type) continue;
 
        switch (selector)
          {
          case 0:
-           PMs->CopySPePHSdata(ipm, i);
+           PMs->at(ipmTo).copySPePHSdata(PMs->at(ipm));
            break;
          case 1:
-           PMs->CopyMCcrosstalkData(ipm, i);
+           PMs->at(ipmTo).copyMCcrosstalkData(PMs->at(ipm));
            break;
          case 2:
-           PMs->CopyElNoiseData(ipm, i);
+           PMs->at(ipmTo).copyElNoiseData(PMs->at(ipm));
            break;
          case 3:
-           PMs->CopyADCdata(ipm, i);
+           PMs->at(ipmTo).copyDarkCountsData(PMs->at(ipm));
            break;
+         case 4:
+           PMs->at(ipmTo).copyADCdata(PMs->at(ipm));
+           break;         
          default:
            qWarning() << "Unknown electronics selector";
          }
@@ -2942,11 +2922,18 @@ void MainWindow::on_cbEnableElNoise_toggled(bool checked)
   else ui->twElectronics->setTabText(2, "Electronic noise :Off");
 }
 
+void MainWindow::on_cbDarkCounts_Enable_toggled(bool checked)
+{
+    ui->fDarkCounts->setEnabled(checked);
+    if (checked) ui->twElectronics->setTabText(3, "Dark counts :On ");
+    else ui->twElectronics->setTabText(3, "Dark counts :Off");
+}
+
 void MainWindow::on_cbEnableADC_toggled(bool checked)
 {  
     ui->fADC->setEnabled(checked);    
-    if (checked) ui->twElectronics->setTabText(3, "ADC :On ");
-    else ui->twElectronics->setTabText(3, "ADC :Off");
+    if (checked) ui->twElectronics->setTabText(4, "ADC :On ");
+    else ui->twElectronics->setTabText(4, "ADC :Off");
 }
 
 void MainWindow::on_pbScanDistrLoad_clicked()
@@ -3412,7 +3399,7 @@ void MainWindow::ViewChangeRelFactors(QString options)
     {
       tw->setVerticalHeaderItem(i, new QTableWidgetItem("PM#"+QString::number(i)));
       if (options == "QE") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).relQE_PDE)));
-      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->getAverageSignalPerPhotoelectron(i))));
+      else if (options == "EL") tw->setItem(i, 0, new QTableWidgetItem(QString::number(PMs->at(i).AverageSigPerPhE)));
     }
 
   tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
@@ -3462,8 +3449,8 @@ void MainWindow::CalculateIndividualQEPDE()
       int itype = PMs->at(ipm).type;
 
       //scalar value
-      double fromType = PMs->getType(itype)->effectivePDE;
-      PMs->setPDEeffective(ipm, fromType*factor);
+      double fromType = PMs->getType(itype)->EffectivePDE;
+      PMs->at(ipm).effectivePDE = fromType * factor;
 
       //Wavelength resolved data
       QVector<double> tmp = PMs->getType(itype)->PDE;
@@ -3553,7 +3540,7 @@ void MainWindow::on_pbRandomScaleELaverages_clicked()
       else
           factor = Detector->RandGen->Gaus(mean, sigma);
 
-      PMs->ScaleSPePHS(ipm, factor);
+      PMs->at(ipm).scaleSPePHS(factor);
     }
 
   ReconstructDetector(true);
@@ -3565,7 +3552,7 @@ void MainWindow::on_pbSetELaveragesToUnity_clicked()
   Detector->PMs->setDoPHS( true );
 
   for (int ipm = 0; ipm<PMs->count(); ipm++)
-      PMs->ScaleSPePHS(ipm, 1.0);
+      PMs->at(ipm).scaleSPePHS(1.0);
 
   ReconstructDetector(true);
   //MainWindow::on_pbElUpdateIndication_clicked();
@@ -3581,10 +3568,10 @@ void MainWindow::on_pbShowRelGains_clicked()
   double max = -1e20;
   for (int ipm = 0; ipm<PMs->count(); ipm++)
     {
-      double QE = PMs->getPDEeffective(ipm);
-      if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      double QE = PMs->at(ipm).effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->getAverageSignalPerPhotoelectron(ipm);
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       double relStr = QE * AvSig;
       if (relStr > max) max = relStr;
     }
@@ -3593,14 +3580,14 @@ void MainWindow::on_pbShowRelGains_clicked()
   QVector<QString> tmp(0);
   Owindow->OutText("");
   Owindow->OutText("PM  Relative_QE   Average_signal_per_photoelectron   Relative_gain");
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
+  for (int ipm = 0; ipm < PMs->count(); ipm++)
     {
-      double QE = PMs->getPDEeffective(ipm);
-      if (QE == -1) QE = PMs->getType( PMs->at(ipm).type )->effectivePDE;
+      double QE = PMs->at(ipm).effectivePDE;
+      if (QE == -1.0) QE = PMs->getType( PMs->at(ipm).type )->EffectivePDE;
       QString str = "PM#" + QString::number(ipm) +"> "+ QString::number(QE, 'g', 3);
 
       double AvSig = 1.0;
-      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->getAverageSignalPerPhotoelectron(ipm);
+      if (ui->cbEnableSPePHS->isChecked()) AvSig =  PMs->at(ipm).AverageSigPerPhE;
       str += "  " + QString::number(AvSig, 'g', 3);
 
       double relStr = QE * AvSig / max;
@@ -3786,6 +3773,19 @@ void MainWindow::on_actionVersion_triggered()
   QString mav = QString::number(majVer);
   QString qv = QT_VERSION_STR;
 
+  QString PythonVersion;
+#ifdef __USE_ANTS_PYTHON__
+  //PyObject *platform = PyImport_ImportModule("platform");
+  //PyObject *python_version = PyObject_GetAttrString(platform, "python_version");
+  //PyObject *version = PyObject_CallObject(python_version, NULL);
+  //PythonVersion = PythonQtConv::PyObjGetString(version);
+
+  PythonQtObjectPtr platform( PyImport_ImportModule("platform") );
+  PythonQtObjectPtr python_version( PyObject_GetAttrString(platform.object(), "python_version") );
+  PythonQtObjectPtr version( PyObject_CallObject(python_version.object(), NULL) );
+  PythonVersion = PythonQtConv::PyObjGetString(version.object());
+#endif
+
   QString out = "ANTS2\n"
                 "   version:  " + mav + "." + miv + "\n"
                 "   build date:  " + QString::fromLocal8Bit(__DATE__)+"\n"
@@ -3822,6 +3822,12 @@ void MainWindow::on_actionVersion_triggered()
                 "\n   Root html server (for JSROOT):  "
 #ifdef USE_ROOT_HTML
  "on"
+#else
+ "off"
+#endif
+                "\n   Python scripting:  "
+#ifdef __USE_ANTS_PYTHON__
+ "on" + " -> Python " + PythonVersion + ""
 #else
  "off"
 #endif
@@ -4084,7 +4090,7 @@ void MainWindow::on_pbTrackStack_clicked()
         //--- Retrieve results ---
         clearEnergyVector(); // just in case clear procedures change
         EnergyVector = pss->getEnergyVector();
-        pss->ClearEnergyVector(); //disconnected this copy so delete of the simulator does not kill the vector
+        pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
           //qDebug() << "-------------En vector size:"<<EnergyVector.size();
 
         //track handling
@@ -4234,12 +4240,12 @@ void MainWindow::on_pbLoadPMtype_clicked()
   int newMatIndex = MpCollection->countMaterials()-1;
   QString matname = (*MpCollection)[newMatIndex]->name;
 
-  PMtypeClass* typ = new PMtypeClass();
+  APmType* typ = new APmType();
   typ->readFromJson(json);
   typ->MaterialIndex = newMatIndex;
   PMs->appendNewPMtype(typ);
 
-  message("New PM type "+ typ->name +" added and a new material "+matname+" for the optical interface was registered", this);
+  message("New PM type "+ typ->Name +" added and a new material "+matname+" for the optical interface was registered", this);
 
   PMs->RecalculateAngular();
   PMs->RebinPDEs();
@@ -4262,8 +4268,9 @@ void MainWindow::on_pbLoadNodes_clicked()
       clearCustomScanNodes();
       for (int i=0; i<x.size(); i++)
           CustomScanNodes.append( new QVector3D(x[i], y[i], z[i]));
-      UpdateCustomScanNodesIndication();
-    }  
+      on_pbUpdateSimConfig_clicked();
+    }
+  UpdateCustomScanNodesIndication();
 }
 
 void MainWindow::on_pbShowNodes_clicked()
@@ -4279,49 +4286,31 @@ void MainWindow::on_pbShowNodes_clicked()
 
 void MainWindow::on_pbRunNodeScript_clicked()
 {
-  extractGeometryOfScriptWindow();
-  if (GenScriptWindow) delete GenScriptWindow;
-  GenScriptWindow = new GenericScriptWindowClass(Detector->RandGen);
-  recallGeometryOfScriptWindow();
+  extractGeometryOfLocalScriptWindow();
+  delete GenScriptWindow; GenScriptWindow = 0;
 
-  //configure the script window and engine
-  NodesScriptInterface = new InterfaceToNodesScript(); //deleted by the GenScriptWindow  
+  AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
+  GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
+  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
+
+  NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
   GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
-  //QStringList coms;
-  //coms << "node";
-  //GenScriptWindow->SetCustomCommands(coms);
-  QString HelpText = "  Available commands:\n\n"
-                     " node(x, y, z)\n"
-                     " Math. followed by standard function (e.g. sin(x) )\n";
-  GenScriptWindow->SetShowEvaluationResult(false); //do not show "undefined"
-  GenScriptWindow->SetExample("for (var i=0; i<5; i++) node(i*10, (i-2)*20, 0)\nnode(40,-20,10)");
+  connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
-  GenScriptWindow->SetTitle("Custom nodes");
-
-  GenScriptWindow->SetScript(&NodesScript);
-
-  GenScriptWindow->SetStarterDir(GlobSet->LibScripts);
-
-  //define what to do on evaluation success
-  connect(GenScriptWindow, SIGNAL(success(QString)), this, SLOT(NodesScriptSuccess()));
-  //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
+  recallGeometryOfLocalScriptWindow();
   GenScriptWindow->show();
 }
 
 void MainWindow::NodesScriptSuccess()
 {
-  clearCustomScanNodes();
-  CustomScanNodes = NodesScriptInterface->nodes; //addresses are transferred
-  NodesScriptInterface->nodes.clear();
-
+  on_pbUpdateSimConfig_clicked();
   UpdateCustomScanNodesIndication();
-  MainWindow::on_pbShowNodes_clicked();
 }
 
 void MainWindow::UpdateCustomScanNodesIndication()
 {
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
-  MainWindow::on_pbUpdateSimConfig_clicked();
+  on_pbShowNodes_clicked();
 }
 
 void MainWindow::on_cobMatPointSource_activated(int index)
@@ -4355,17 +4344,26 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    PMs->setDoMCcrosstalk( ui->cbEnableMCcrosstalk->isChecked() );
    PMs->setDoElNoise( ui->cbEnableElNoise->isChecked() );
    PMs->setDoADC( ui->cbEnableADC->isChecked() );
-   PMs->setMeasurementTime( ui->ledTimeOfOneMeasurement->text().toDouble() );
+   PMs->fDoDarkCounts = ui->cbDarkCounts_Enable->isChecked();
 
-   int ipm = ui->sbElPMnumber->value();
-   PMs->setSPePHSmode(ipm, ui->cobPMampGainModel->currentIndex());
-   PMs->setAverageSignalPerPhotoelectron(ipm, ui->ledAverageSigPhotEl->text().toDouble());
-   PMs->setSPePHSsigma(ipm, ui->ledElsigma->text().toDouble());
-   PMs->setSPePHSshape(ipm, ui->ledElShape->text().toDouble());
-   PMs->setElNoiseSigma(ipm, ui->ledElNoiseSigma->text().toDouble());
-   PMs->setADC(ipm, ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
-   PMs->at(ipm).MCmodel = ui->cobMCcrosstalk_Model->currentIndex();
-   PMs->at(ipm).MCtriggerProb = ui->ledMCcrosstalkTriggerProb->text().toDouble();
+   const int ipm = ui->sbElPMnumber->value();
+
+   PMs->at(ipm).SPePHSmode       = ui->cobPMampGainModel->currentIndex();
+   PMs->at(ipm).AverageSigPerPhE = ui->ledAverageSigPhotEl->text().toDouble();
+   PMs->at(ipm).SPePHSsigma      = ui->ledElsigma->text().toDouble();
+   PMs->at(ipm).SPePHSshape      = ui->ledElShape->text().toDouble();
+
+   PMs->at(ipm).ElNoiseSigma     = ui->ledElNoiseSigma->text().toDouble();
+   PMs->at(ipm).ElNoiseSigma_StatSigma = ui->ledElNoiseSigma_Stat->text().toDouble();
+   PMs->at(ipm).ElNoiseSigma_StatNorm  = ui->ledElNoiseSigma_Norm->text().toDouble();
+
+   PMs->at(ipm).setADC(ui->ledADCmax->text().toDouble(), ui->sbADCbits->value());
+
+   PMs->at(ipm).MCmodel          = ui->cobMCcrosstalk_Model->currentIndex();
+   PMs->at(ipm).MCtriggerProb    = ui->ledMCcrosstalkTriggerProb->text().toDouble();
+
+   PMs->at(ipm).MeasurementTime  = ui->ledTimeOfOneMeasurement->text().toDouble();
+   PMs->at(ipm).DarkCounts_Model = ui->cobDarkCounts_Model->currentIndex();
 
    ReconstructDetector(true); //GUI update is triggered automatically
 }
@@ -4725,17 +4723,26 @@ void MainWindow::on_pbUpdatePreprocessingSettings_clicked()
 
     if (!EventsDataHub->Events.isEmpty()) ui->fReloadRequired->setVisible(true);
 
-    if (GenScriptWindow)
-        if (GenScriptWindow->isVisible())
-            GenScriptWindow->updateJsonTree();
+    if (GenScriptWindow && GenScriptWindow->isVisible())
+        GenScriptWindow->updateJsonTree();
+    if (ScriptWindow && ScriptWindow->isVisible())
+        ScriptWindow->updateJsonTree();
 }
 
 void MainWindow::on_pbUpdateSimConfig_clicked()
 {
-    MainWindow::writeSimSettingsToJson(Config->JSON);
-    if (GenScriptWindow)
-        if (GenScriptWindow->isVisible())
-            GenScriptWindow->updateJsonTree();
+    writeSimSettingsToJson(Config->JSON);
+
+    // reading back - like with the detector; if something is not saved, will be obvious
+    readSimSettingsFromJson(Config->JSON);
+    Detector->Config->UpdateSimSettingsOfDetector();
+
+    UpdateTestWavelengthProperties();
+
+    if (ScriptWindow && ScriptWindow->isVisible())
+        ScriptWindow->updateJsonTree();
+
+    on_pbElUpdateIndication_clicked(); //Dark noise indication might change: depends on time-resolved status
 }
 
 void MainWindow::on_pbStopLoad_clicked()
@@ -4992,9 +4999,151 @@ void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
     ui->labPartPerEvent->setText(s);
 }
 
-void MainWindow::on_twElectronics_currentChanged(int index)
+void MainWindow::on_ledElNoiseSigma_Norm_editingFinished()
 {
-    bool bDarkCountTab = ( index == 4 );
-    ui->frPmNumberForElectronics->setEnabled(!bDarkCountTab);
-    ui->pbElCopyGainData->setEnabled(!bDarkCountTab);
+    double newVal = ui->ledElNoiseSigma_Norm->text().toDouble();
+    if (newVal < 1.0e-10)
+    {
+        newVal = 1.0;
+        ui->ledElNoiseSigma_Norm->setText("1.0");
+        message("Value has to be > 0", this);
+    }
+    on_pbUpdateElectronics_clicked();
+}
+
+void MainWindow::on_pbDarkCounts_Show_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    const QVector<double>& dist = PMs->at(ipm).DarkCounts_Distribution;
+    if (dist.isEmpty())
+    {
+        message("Distribution is not defined", this);
+        return;
+    }
+
+    TString title = "Generator distribution for PM #";
+    title += ipm;
+    QVector<double> x;
+    for (int i = 0; i < dist.size(); i++) x << i;
+    TGraph* g = GraphWindow->ConstructTGraph(x, dist, title, "", "");
+    GraphWindow->Draw(g, "AP");
+}
+
+void MainWindow::on_pbDarkCounts_Load_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    QVector<double> x;
+    int res = LoadDoubleVectorsFromFile(fileName, &x);
+    if (res == 0)
+    {
+        qDebug() << "Original:\n"<< x;
+        const int LoadOption = ui->cobDarkCounts_LoadOptions->currentIndex(); //0=as is; 1=scale; 2=Integrate; 3=Integrate then scale
+        if (LoadOption == 2 || LoadOption == 3)
+        {
+            // integrating
+            int range = ui->sbDarkCounts_IntegralRange->value();
+            if (range == 0)
+                range = x.size();
+            else if (range > x.size())
+            {
+                message("Error: given range is larger than the length of the distribution in the file!", this);
+                return;
+            }
+
+            QVector<double> xi;
+            int start = 0;
+            int inWindow = 1; // max inWindow vaue = range; on right side clipping is in the sum cycle condition
+            while (start < x.size())
+            {
+                double val = 0;
+                for (int i = start; (i < (start + inWindow)) && (i < x.size()); i++)
+                    val += x.at(i);
+
+                xi << val;
+
+                if (inWindow < range)
+                     inWindow++;
+                else start++;
+            }
+
+            x = xi;
+        }
+
+        if (LoadOption == 1 || LoadOption == 3)
+        {
+            // scaling max to 1
+            float max = -1e10;
+            for (const double& d : x)
+                if (d > max) max = d;
+            if (max > 0)
+                for (double& d : x) d /= max;
+        }
+
+        qDebug() << "After pre-processing:\n"<<x;
+
+        PMs->at(ipm).DarkCounts_Distribution = x;
+        on_pbUpdateElectronics_clicked();
+    }
+}
+
+void MainWindow::on_pbDarkCounts_Delete_clicked()
+{
+    const int ipm = ui->sbElPMnumber->value();
+    if (ipm >= PMs->count())
+    {
+        message("Bad PM index", this);
+        return;
+    }
+
+    PMs->at(ipm).DarkCounts_Distribution.clear();
+    on_pbUpdateElectronics_clicked();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString s = "Average dark counts = ( time interval )  x  ( dark count rate of the SiPM )\n"
+                "\n"
+                "For time-resolved simulation the time interval is = time duration of one bin\n"
+                "\n"
+                "Simplistic model:\n"
+                "   A dark count event is processed exactly the same way as a detected photon hit\n"
+                "Advanced model:\n"
+                "   A dark count event can contribute \"fractional\" number of hits\n"
+                "   The contributed value is sampled from the user provided data:\n"
+                "   using uniform random generator, one of the values in the provided data vector is selected."
+                "   Two main load options:\n"
+                "     When data loaded \"as is\", it imitates DAC which digitizes data at a given trigger."
+                "     When \"integrating\" is used, it imitates DAC which integrate signal waveform in a certain range"
+                "\n"
+                "     Integrating range has to be smaller or equal to the provided dataset range.\n"
+                "       0 values inidicates that the integration range has to be equal to the range of the provided dataset."
+                "";
+
+    message(s, this);
+}
+
+void MainWindow::on_cobDarkCounts_Model_currentIndexChanged(int index)
+{
+    ui->frDarkCounts_Advanced->setVisible(index != 0);
+}
+
+void MainWindow::on_cobDarkCounts_LoadOptions_currentIndexChanged(int index)
+{
+    ui->sbDarkCounts_IntegralRange->setEnabled(index > 1);
 }

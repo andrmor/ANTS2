@@ -4,7 +4,7 @@
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "ajsontools.h"
-#include "pms.h"
+#include "apmhub.h"
 
 #include <QJsonObject>
 #include <QDebug>
@@ -13,7 +13,7 @@
 #include "TF1.h"
 #include "TF2.h"
 
-ALrfModuleSelector::ALrfModuleSelector(pms *PMs) : PMs(PMs),
+ALrfModuleSelector::ALrfModuleSelector(APmHub *PMs) : PMs(PMs),
   OldModule(new SensorLRFs(0)), NewModule(new LRF::ARepository())
 {
   fOldSelected = true;
@@ -294,7 +294,7 @@ TF1* ALrfModuleSelector::getRootFunctionRadialNewModule(const LRF::ASensorGroup 
   const LRF::ASensor *lrf_ptr = lrfs.getSensor(ipm);
   if(lrf_ptr == nullptr) return nullptr;
   LRF::ASensor lrf = *lrf_ptr;
-  pm &PM = PMs->at(ipm);
+  APm &PM = PMs->at(ipm);
   double pm_x = PM.x;
   double pm_y = PM.y;
   double rmin, rmax;

@@ -91,6 +91,8 @@ public:
     void         SetThreshold(double thresholdPeakfinder);
     void         SetMaximumPeaks(int number);
 
+    bool         Extract(int ipm);
+
 protected:
     int          numBins = 300;
     double       rangeFrom = -50;
@@ -102,8 +104,6 @@ protected:
 
     QVector< QVector<double>>& FoundPeaks;
 
-private:
-    bool         extract(int ipm); //no watchdogs!
 };
 
 #endif // ACALIBRATORSIGNALPERPHEL_H

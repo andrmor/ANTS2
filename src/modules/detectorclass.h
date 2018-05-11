@@ -12,7 +12,7 @@
 class AParticle;
 class TGeoManager;
 class ALrfModuleSelector;
-class pms;
+class APmHub;
 class AMaterialParticleCollection;
 class TGeoVolume;
 class TGeoMedium;
@@ -43,7 +43,7 @@ class DetectorClass : public QObject
 public:
   AConfiguration* Config;              // contains json config file
   TGeoManager* GeoManager;             // detector geometry, navigator and visualizator
-  pms* PMs;                            // all info on PMs 
+  APmHub* PMs;                            // all info on PMs 
   ALrfModuleSelector* LRFs;            // detector response
   APmGroupsManager* PMgroups;          // all info on defined PM groups, including rec settings jsons
   TGeoVolume* top;                     // world in GeoManager

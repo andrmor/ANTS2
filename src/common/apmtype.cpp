@@ -1,41 +1,29 @@
-#include "pmtypeclass.h"
+#include "apmtype.h"
 #include "ajsontools.h"
-//#include "functions.h"
 
-PMtypeClass::PMtypeClass(QString Name)
+#include <QJsonObject>
+
+void APmType::clear()
 {
-  //default properties
-  name = Name;
-  SiPM = false;
-  MaterialIndex = 0;
-  Shape = 1;
-  SizeX = 25.0;
-  SizeY = 25.0;
-  SizeZ = 0.01;
-  PixelsX = 50;
-  PixelsY = 50;
-  DarkCountRate = 1e7;
-  RecoveryTime = 50;
-  effectivePDE = 1;
-  n1 = 1;
-  AreaStepX = 1.0; AreaStepY = 1.0;
-  //name has to be unicque, so it has to initialized outside the class
+  PDE_lambda.clear();
+  PDE.clear();
+  PDEbinned.clear();
+  EffectivePDE = 1.0;
+
+  AngularSensitivity_lambda.clear();
+  AngularSensitivity.clear();
+  AngularSensitivityCosRefracted.clear();
+  AngularN1 = 1.0;
+
+  AreaSensitivity.clear();
+  AreaStepX = 1.0;
+  AreaStepY = 1.0;
 }
 
-void PMtypeClass::clear()
-{
-  PDE_lambda.resize(0);
-  PDE.resize(0);
-  AngularSensitivity_lambda.resize(0);
-  AngularSensitivity.resize(0);
-  AreaSensitivity.resize(0);
-  n1=1;
-}
-
-void PMtypeClass::writeToJson(QJsonObject &json)
+void APmType::writeToJson(QJsonObject &json) const
 {
   QJsonObject genj;
-  genj["Name"] = name;
+  genj["Name"] = Name;
   genj["MaterialIndex"] = MaterialIndex;
   genj["Shape"] = Shape;
   genj["SizeX"] = SizeX;
@@ -55,7 +43,7 @@ void PMtypeClass::writeToJson(QJsonObject &json)
     }
 
   QJsonObject pdej;
-  pdej["PDE"] = effectivePDE;
+  pdej["PDE"] = EffectivePDE;
   //if (PDE_lambda.size()>0)
     {
       QJsonArray ar;
@@ -67,7 +55,7 @@ void PMtypeClass::writeToJson(QJsonObject &json)
   //if (AngularSensitivity_lambda.size()>0)
     {
       QJsonObject angj;
-      angj["RefrIndexMeasure"] = n1;
+      angj["RefrIndexMeasure"] = AngularN1;
       QJsonArray ar1;
       writeTwoQVectorsToJArray(AngularSensitivity_lambda, AngularSensitivity, ar1);
       angj["ResponseVsAngle"] = ar1;
@@ -86,11 +74,11 @@ void PMtypeClass::writeToJson(QJsonObject &json)
     }
 }
 
-void PMtypeClass::readFromJson(QJsonObject &json)
+void APmType::readFromJson(const QJsonObject &json)
 {
   clear();
   QJsonObject genj = json["General"].toObject();
-  parseJson(genj, "Name", name);
+  parseJson(genj, "Name", Name);
   parseJson(genj, "MaterialIndex", MaterialIndex);
   parseJson(genj, "Shape", Shape);
   parseJson(genj, "SizeX", SizeX);
@@ -106,7 +94,7 @@ void PMtypeClass::readFromJson(QJsonObject &json)
   parseJson(sij, "RecoveryTime", RecoveryTime);
 
   QJsonObject pdej = json["PDEproperties"].toObject();
-  parseJson(pdej, "PDE", effectivePDE);
+  parseJson(pdej, "PDE", EffectivePDE);
   if (pdej.contains("PDEwave"))
     {
       QJsonArray ar = pdej["PDEwave"].toArray();
@@ -116,7 +104,7 @@ void PMtypeClass::readFromJson(QJsonObject &json)
   if (json.contains("AngularResponse"))
     {
       QJsonObject angj = json["AngularResponse"].toObject();
-      parseJson(angj, "RefrIndexMeasure", n1);
+      parseJson(angj, "RefrIndexMeasure", AngularN1);
       QJsonArray ar =  angj["ResponseVsAngle"].toArray();
       readTwoQVectorsFromJArray(ar, AngularSensitivity_lambda, AngularSensitivity);
     }

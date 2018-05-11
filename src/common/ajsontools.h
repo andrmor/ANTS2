@@ -29,7 +29,7 @@ void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
 
 bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y, QJsonArray &ar);
 void readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y);
-bool write2DQVectorToJArray(QVector< QVector<double> > &xy, QJsonArray &ar);
+bool write2DQVectorToJArray(const QVector<QVector<double> > &xy, QJsonArray &ar);
 void read2DQVectorFromJArray(QJsonArray &ar, QVector<QVector<double> > &xy);
 
 bool LoadJsonFromFile(QJsonObject &json, QString fileName);

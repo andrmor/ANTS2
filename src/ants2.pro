@@ -1,13 +1,14 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 5
+ANTS2_MINOR = 8
 
 #Optional libraries
-CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
+#CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_Python      #enable Python scripting
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -161,10 +162,41 @@ ants2_cuda {
      }
 }
 
+#---ROOT server---
 ants2_RootServer{
   DEFINES += USE_ROOT_HTML
 }
+#----------
 
+#---Python---
+ants2_Python{
+    DEFINES += __USE_ANTS_PYTHON__
+
+    #http://pythonqt.sourceforge.net/
+    win32:{
+            INCLUDEPATH += c:/Python33/include
+            LIBS += -Lc:/Python33/libs -lPython33
+
+            INCLUDEPATH += C:/PythonQt3.2/src
+            INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
+
+            LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
+    }
+    linux-g++ || unix {
+            INCLUDEPATH += $$system(python-config --includes)
+            LIBS += $$system(python-config --libs)
+
+            INCLUDEPATH += usr/PythonQt3.2/src
+            INCLUDEPATH += usr/PythonQt3.2/extensions/PythonQt_QtAll
+
+            LIBS += -Lusr/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
+    }
+
+    HEADERS += scriptmode/apythonscriptmanager.h
+    SOURCES += scriptmode/apythonscriptmanager.cpp
+
+    SOURCES += gui/MainWindowTools/pythonscript.cpp
+}
 #----------
 
 #Modular compilation flags
@@ -177,7 +209,6 @@ SOURCES += main.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
     common/generalsimsettings.cpp \
-    common/pmtypeclass.cpp \
     common/globalsettingsclass.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
@@ -193,7 +224,6 @@ SOURCES += main.cpp \
     common/ageoobject.cpp \
     common/aopticaloverride.cpp \
     modules/detectorclass.cpp \
-    modules/pms.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/processorclass.cpp \
@@ -225,7 +255,6 @@ SOURCES += main.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
-    scriptmode/ascriptmanager.cpp \
     gui/MainWindowTools/slab.cpp \
     modules/lrf_v3/arecipe.cpp \
     modules/lrf_v3/alrftypemanager.cpp \
@@ -280,14 +309,26 @@ SOURCES += main.cpp \
     common/arootobjcollection.cpp \
     common/arootobjbase.cpp \
     common/acalibratorsignalperphel.cpp \
-    modules/areconstructionmanager.cpp
-
+    modules/areconstructionmanager.cpp \
+    scriptmode/ajavascriptmanager.cpp \
+    scriptmode/ascriptmanager.cpp \
+    common/apm.cpp \
+    modules/apmhub.cpp \
+    common/apmtype.cpp \
+    scriptmode/ainterfacetoguiscript.cpp \
+    modules/aoneevent.cpp \
+    scriptmode/ainterfacetottree.cpp \
+    common/aroottreerecord.cpp \
+    gui/atextedit.cpp \
+    gui/alineedit.cpp \
+    SplineLibrary/curvefit.cpp \
+    scriptmode/ainterfacetoaddobjscript.cpp \
+    scriptmode/ainterfacetogstylescript.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
     common/generalsimsettings.h \
-    common/pmtypeclass.h \
     common/globalsettingsclass.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
@@ -305,7 +346,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageoobject.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
-    modules/pms.h \
     modules/particlesourcesclass.h \    
     modules/flatfield.h \    
     modules/sensorlrfs.h \
@@ -337,7 +377,6 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/scriptminimizer.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
-    scriptmode/ascriptmanager.h \
     scriptmode/ascriptinterface.h \
     modules/asandwich.h \
     gui/MainWindowTools/slab.h \
@@ -407,7 +446,21 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aroothistrecord.h \
     common/arootobjbase.h \
     common/acalibratorsignalperphel.h \
-    modules/areconstructionmanager.h
+    modules/areconstructionmanager.h \
+    scriptmode/ajavascriptmanager.h \
+    scriptmode/ascriptmanager.h \
+    common/apm.h \
+    modules/apmhub.h \
+    common/apmtype.h \
+    scriptmode/ainterfacetoguiscript.h \
+    modules/aoneevent.h \
+    scriptmode/ainterfacetottree.h \
+    common/aroottreerecord.h \
+    gui/atextedit.h \
+    gui/alineedit.h \
+    SplineLibrary/curvefit.h \
+    scriptmode/ainterfacetoaddobjscript.h \
+    scriptmode/ainterfacetogstylescript.h
 
 # --- SIM ---
 ants2_SIM {
@@ -418,7 +471,6 @@ ants2_SIM {
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
-    modules/oneeventclass.cpp \
     modules/simulationmanager.cpp \
     modules/phscatclaudiomodel.cpp \
     modules/scatteronmetal.cpp \
@@ -440,7 +492,6 @@ ants2_SIM {
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \
-    modules/oneeventclass.h \
     modules/simulationmanager.h \
     modules/phscatclaudiomodel.h \
     modules/scatteronmetal.h \
@@ -483,7 +534,6 @@ ants2_GUI {
     gui/ReconstructionWindowTools/Reconstruction_NN.cpp \
     gui/viewer2darrayobject.cpp \
     gui/shapeablerectitem.cpp \
-    gui/genericscriptwindowclass.cpp \
     gui/graphicsruler.cpp \
     gui/credits.cpp \
     gui/globalsettingswindowclass.cpp \
@@ -496,7 +546,6 @@ ants2_GUI {
     gui/ascriptexampleexplorer.cpp \
     gui/MainWindowTools/mainwindowjson.cpp \
     gui/ReconstructionWindowTools/reconstructionwindowguiupdates.cpp \
-    common/completingtexteditclass.cpp \
     gui/ascriptwindow.cpp \
     gui/alrfmouseexplorer.cpp \
     modules/lrf_v3/gui/atransformwidget.cpp \
@@ -523,7 +572,6 @@ HEADERS  += gui/mainwindow.h \
     gui/RasterWindow/rasterwindowgraphclass.h \
     gui/viewer2darrayobject.h \
     gui/shapeablerectitem.h \
-    gui/genericscriptwindowclass.h \
     gui/graphicsruler.h \
     gui/credits.h \
     gui/globalsettingswindowclass.h \
@@ -533,7 +581,6 @@ HEADERS  += gui/mainwindow.h \
     gui/MainWindowTools/ashapehelpdialog.h \
     gui/MainWindowTools/agridelementdialog.h \
     gui/ascriptexampleexplorer.h \
-    common/completingtexteditclass.h \
     gui/ascriptwindow.h \
     gui/alrfmouseexplorer.h \
     modules/lrf_v3/gui/atransformwidget.h \

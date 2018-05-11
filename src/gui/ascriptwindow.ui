@@ -15,8 +15,38 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>6</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
@@ -53,6 +83,28 @@
        </widget>
       </item>
       <item>
+       <widget class="QProgressBar" name="prbProgress">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="invertedAppearance">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbStop">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -80,6 +132,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbHelp">
           <property name="text">
@@ -103,10 +158,10 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-      </item>
-      <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbLoad">
           <property name="text">
@@ -125,6 +180,9 @@
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>2</number>
+        </property>
         <item>
          <widget class="QPushButton" name="pbSaveAs">
           <property name="text">
@@ -145,6 +203,303 @@
        </layout>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QFrame" name="frFile">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>6</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Associated file:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labWasModified">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#c38200;&quot;&gt;modified&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labNotSaved">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#c38200;&quot;&gt;not saved&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbFileName">
+         <property name="toolTip">
+          <string>Click to open in default file explorer</string>
+         </property>
+         <property name="text">
+          <string>Not saved</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frFindReplace">
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="leftMargin">
+        <number>2</number>
+       </property>
+       <property name="topMargin">
+        <number>2</number>
+       </property>
+       <property name="rightMargin">
+        <number>2</number>
+       </property>
+       <property name="bottomMargin">
+        <number>2</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Find:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leFind"/>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cbFindTextWholeWords">
+             <property name="toolTip">
+              <string>Match whole words only</string>
+             </property>
+             <property name="text">
+              <string>Whole</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cbFindTextCaseSensitive">
+             <property name="toolTip">
+              <string>Case sensitive</string>
+             </property>
+             <property name="text">
+              <string>Case</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbFindNext">
+             <property name="toolTip">
+              <string>Find next match</string>
+             </property>
+             <property name="text">
+              <string>Next</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbFindPrevious">
+             <property name="toolTip">
+              <string>Find previous match</string>
+             </property>
+             <property name="text">
+              <string>Previous</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>3</number>
+           </property>
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Replace:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leReplace"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbReplaceOne">
+             <property name="toolTip">
+              <string>Replace this  match</string>
+             </property>
+             <property name="text">
+              <string>This</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbReplaceAll">
+             <property name="toolTip">
+              <string>Replace all matches</string>
+             </property>
+             <property name="text">
+              <string>All</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbActivateTextReplace">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Show replace tools</string>
+         </property>
+         <property name="text">
+          <string>Replace</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pbCloseFindReplaceFrame">
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Close this widget</string>
+            </property>
+            <property name="text">
+             <string>X</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -176,17 +531,40 @@
     <addaction name="actionClose_all_messenger_windows"/>
     <addaction name="actionClear_unused_messenger_windows"/>
    </widget>
+   <widget class="QMenu" name="menuTabs">
+    <property name="title">
+     <string>Tabs</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_new_tab"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemove_current_tab"/>
+    <addaction name="actionRemove_all_tabs"/>
+    <addaction name="separator"/>
+    <addaction name="actionStore_all_tabs"/>
+    <addaction name="actionRestore_session"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuFind">
+    <property name="title">
+     <string>Find</string>
+    </property>
+    <addaction name="actionShow_Find_Replace"/>
+    <addaction name="actionReplace_widget_Ctr_r"/>
+   </widget>
+   <addaction name="menuTabs"/>
+   <addaction name="menuFind"/>
    <addaction name="menuFont"/>
    <addaction name="menuView"/>
   </widget>
   <action name="actionIncrease_font_size">
    <property name="text">
-    <string>Increase font size</string>
+    <string>Increase font size (Ctrl + Plus)</string>
    </property>
   </action>
   <action name="actionDecrease_font_size">
    <property name="text">
-    <string>Decrease font size</string>
+    <string>Decrease font size (Ctrl + Minus)</string>
    </property>
   </action>
   <action name="actionSelect_font">
@@ -214,7 +592,126 @@
     <string>Close all messenger windows</string>
    </property>
   </action>
+  <action name="actionStore_all_tabs">
+   <property name="text">
+    <string>Store all tabs</string>
+   </property>
+  </action>
+  <action name="actionRestore_session">
+   <property name="text">
+    <string>Restore session</string>
+   </property>
+  </action>
+  <action name="actionAdd_new_tab">
+   <property name="text">
+    <string>Add new tab</string>
+   </property>
+  </action>
+  <action name="actionRemove_current_tab">
+   <property name="text">
+    <string>Remove current tab</string>
+   </property>
+  </action>
+  <action name="actionRemove_all_tabs">
+   <property name="text">
+    <string>Remove all tabs</string>
+   </property>
+  </action>
+  <action name="actionShow_Find_Replace">
+   <property name="text">
+    <string>Find (Ctrl + F)</string>
+   </property>
+   <property name="toolTip">
+    <string>Find / Replace widget (Ctr-f)</string>
+   </property>
+  </action>
+  <action name="actionReplace_widget_Ctr_r">
+   <property name="text">
+    <string>Replace (Ctrl + R)</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>leFind</sender>
+   <signal>returnPressed()</signal>
+   <receiver>pbFindNext</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>418</x>
+     <y>462</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>452</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>label_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>714</x>
+     <y>494</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>43</x>
+     <y>519</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leReplace</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>728</x>
+     <y>499</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>537</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbReplaceOne</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>692</x>
+     <y>495</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>568</x>
+     <y>544</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbActivateTextReplace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pbReplaceAll</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>737</x>
+     <y>502</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>657</x>
+     <y>544</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

@@ -39,6 +39,9 @@ public:
   //remove particle
   const QString RemoveParticle(int particleId);  //returns "" on sucess, otherwise gives error string
 
+  //update of sim-related settings in PMs and MPcollection
+  void UpdateSimSettingsOfDetector(); //has to be called after simulation (rebuilds detector) and in gui after detector rebuild
+
   void AskForAllGuiUpdate();
   void AskForDetectorGuiUpdate();
   void AskForSimulationGuiUpdate();

@@ -4,10 +4,12 @@
 #include "ascriptinterface.h"
 
 #include <QVariant>
+#include <QSet>
 #include <QString>
 
 class AScriptManager;
 class TRandom2;
+class CurveFit;
 
 class AInterfaceToCore : public AScriptInterface
 {
@@ -54,15 +56,36 @@ public slots:
   //load from file
   QVariant loadColumn(QString fileName, int column = 0); //load column of doubles from file and return it as an array
   QVariant loadArray(QString fileName, int columns);     //load column of doubles from file and return it as an array
-  QString loadText(QString fileName);
+  QString  loadText(QString fileName);
+  QVariant loadObject(QString fileName);
 
   //dirs
   QString GetWorkDir();
   QString GetScriptDir();
   QString GetExamplesDir();
 
+  //file finder
+  QVariant SetNewFileFinder(const QString dir, const QString fileNamePattern);
+  QVariant GetNewFiles();
+
+  //misc
+  void processEvents();
+  void reportProgress(int percents);
+
+  void setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y);
+  double getFitted(double x);
+  const QVariant getFittedArr(const QVariant array);
+
 private:
   AScriptManager* ScriptManager;
+
+  //file finder
+  QSet<QString>   Finder_FileNames;
+  QString         Finder_Dir;
+  QString         Finder_NamePattern = "*.*";
+
+  CurveFit* CurF = 0;
+
 };
 
 // ---- M A T H ----

@@ -3,8 +3,8 @@
 #include "ui_checkupwindowclass.h"
 #include "mainwindow.h"
 #include "detectorclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
@@ -517,23 +517,23 @@ TriState SecondaryScintCheckUpItem::doCheckUp() {
 const QString DESCheckUpItem::getToolTip() const  { return state == TriStateWarning ? "Other PMs have overriden scalars, but this one does not" : ""; }
 TriState DESCheckUpItem::doCheckUp()
 {
-    const double effPDE = MW->PMs->getPDEeffective(row());
+    const double effPDE = MW->PMs->at( row() ).effectivePDE;
     if(effPDE != -1)
         return setState(TriStateOk, QString::number(effPDE, 'g', 4));
 
-    const PMtypeClass *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
-    int i = 0;
-    for(; i < MW->PMs->count(); i++)
-        if(MW->PMs->getPDEeffective(i) != -1 && i != row())
+    const APmType *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
+    int ipm = 0;
+    for(; ipm < MW->PMs->count(); ipm++)
+        if( MW->PMs->at(ipm).effectivePDE != -1.0 && ipm != row())
             break;
-    return setState((i == MW->PMs->count()) ? TriStateOk : TriStateWarning, QString::number(pmtype->effectivePDE, 'g', 4));
+    return setState((ipm == MW->PMs->count()) ? TriStateOk : TriStateWarning, QString::number(pmtype->EffectivePDE, 'g', 4));
 }
 
 const QString DEWCheckUpItem::getToolTip() const  { return "Overriden DE" + CheckUpItem::wavelenToolTips[overriden] + " and Inherited DE" + CheckUpItem::wavelenToolTips[inherited]; }
 TriState DEWCheckUpItem::doCheckUp()
 {
-    const PMtypeClass *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
-    overriden = CheckUpItem::rangeCheck(*MW->PMs->getPDE_lambda(row()), MW->WaveFrom, MW->WaveTo);
+    const APmType *pmtype = MW->PMs->getType(MW->PMs->at(row()).type);
+    overriden = CheckUpItem::rangeCheck(MW->PMs->at(row()).PDE_lambda, MW->WaveFrom, MW->WaveTo);
     inherited = CheckUpItem::rangeCheck(pmtype->PDE_lambda, MW->WaveFrom, MW->WaveTo);
     setState(inherited | overriden, "Over.     Inher.");
 
@@ -547,7 +547,7 @@ TriState DEWCheckUpItem::doCheckUp()
 const QString AngularResponseCheckUpItem::getToolTip() const { return state == TriStateError ? "Neither PM Type nor PM overriden angular sensitivity are defined" : ""; }
 TriState AngularResponseCheckUpItem::doCheckUp()
 {
-    const QVector<double> *angular = MW->PMs->getAngularSensitivityCosRefracted(row());
+    const QVector<double> *angular = &MW->PMs->at(row()).AngularSensitivityCosRefracted;
     const QVector<double> *typeang = &MW->PMs->getType(MW->PMs->at(row()).type)->AngularSensitivityCosRefracted;
     return setState((angular->isEmpty() && typeang->isEmpty()) ? TriStateError : TriStateOk, angular->isEmpty() ? "Inherited" : "Overriden");
 }
@@ -555,7 +555,7 @@ TriState AngularResponseCheckUpItem::doCheckUp()
 const QString AreaResponseCheckUpItem::getToolTip() const { return state == TriStateError ? "Neither PM Type nor PM overriden area sensitivity are defined" : ""; }
 TriState AreaResponseCheckUpItem::doCheckUp()
 {
-    const QVector< QVector<double> > *area = MW->PMs->getAreaSensitivity(row());
+    const QVector< QVector<double> > *area = &MW->PMs->at(row()).AreaSensitivity;
     const QVector< QVector<double> > *typearea = &MW->PMs->getType(MW->PMs->at(row()).type)->AreaSensitivity;
     return setState((area->isEmpty() && typearea->isEmpty()) ? TriStateError : TriStateOk, area->isEmpty() ? "Inherited" : "Overriden");
 }

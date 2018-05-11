@@ -6,7 +6,7 @@
 class ALrfModuleSelector;
 class EventsDataClass;
 class GraphWindowClass;
-class pms;
+class APmHub;
 class TF1;
 class TH2D;
 
@@ -38,7 +38,7 @@ public:
 class ALrfDraw
 {
 public:
-    ALrfDraw(ALrfModuleSelector* LRFs, bool fUseOldModule, EventsDataClass* EventsDataHub, pms* PMs, GraphWindowClass *GraphWindow);
+    ALrfDraw(ALrfModuleSelector* LRFs, bool fUseOldModule, EventsDataClass* EventsDataHub, APmHub* PMs, GraphWindowClass *GraphWindow);
 
     bool DrawRadial(int ipm, const QJsonObject &json);
     bool DrawXY(int ipm, const QJsonObject &json);
@@ -46,7 +46,7 @@ public:
 private:
     ALrfModuleSelector *LRFs;
     EventsDataClass    *EventsDataHub;
-    pms                *PMs;
+    APmHub                *PMs;
     GraphWindowClass   *GraphWindow;
     ALrfDrawSettings    Options;
     QString             LastError;

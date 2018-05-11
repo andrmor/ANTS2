@@ -6,7 +6,7 @@
 struct MaterialHistoryStructure
 {
     MaterialHistoryStructure(int mat, double en, double dis) {MaterialId = mat; DepositedEnergy = en; Distance = dis;}
-    MaterialHistoryStructure(){;}
+    MaterialHistoryStructure(){}
     int MaterialId;
     double DepositedEnergy;
     double Distance;

@@ -3,8 +3,8 @@
 #include "amaterialparticlecolection.h"
 #include "generalsimsettings.h"
 #include "aphoton.h"
-#include "oneeventclass.h"
-#include "pms.h"
+#include "aoneevent.h"
+#include "apmhub.h"
 #include "alrfmoduleselector.h"
 
 #include <QDebug>
@@ -112,7 +112,7 @@ void Photon_Generator::GenerateWaveTime(APhoton* Photon, int materialId)
   //  qDebug()<<"Final time"<<Photon->time;
 }
 
-void Photon_Generator::GenerateSignalsForLrfMode(int NumPhotons, double* r, OneEventClass* OneEvent)
+void Photon_Generator::GenerateSignalsForLrfMode(int NumPhotons, double* r, AOneEvent* OneEvent)
 {
     double energy = 1.0 * NumPhotons / SimSet->NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
 

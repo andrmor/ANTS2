@@ -4,7 +4,7 @@
 #include "pmsensorgroup.h"
 #include "ajsontools.h"
 #include "eventsdataclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "sensorlocalcache.h"
 #include "afiletools.h"
 #include "amessage.h"
@@ -758,7 +758,7 @@ void IterationGroups::fillRefs(int pmCount)
     }
 }
 
-bool SensorLRFs::makeLRFs(QJsonObject &json, EventsDataClass *EventsDataHub, pms *PMs)
+bool SensorLRFs::makeLRFs(QJsonObject &json, EventsDataClass *EventsDataHub, APmHub *PMs)
 {
   error_string = "";
   bool ok = LRFsettings.readFromJson(json); //extract setting from json
@@ -874,7 +874,7 @@ bool SensorLRFs::makeLRFs(QJsonObject &json, EventsDataClass *EventsDataHub, pms
   return OK;
 }
 
-bool SensorLRFs::makeAxialLRFsFromRfiles(QJsonObject &json, QString FileNamePattern, pms *PMs)
+bool SensorLRFs::makeAxialLRFsFromRfiles(QJsonObject &json, QString FileNamePattern, APmHub *PMs)
 {
   bool ok = LRFsettings.readFromJson(json); //extract setting from json
   if (!ok)
@@ -924,7 +924,7 @@ bool SensorLRFs::makeAxialLRFsFromRfiles(QJsonObject &json, QString FileNamePatt
   return OK;
 }
 
-bool SensorLRFs::onlyGains(QJsonObject &json, EventsDataClass *EventsDataHub, pms *PMs)
+bool SensorLRFs::onlyGains(QJsonObject &json, EventsDataClass *EventsDataHub, APmHub *PMs)
 {
   error_string = "";
   bool ok = LRFsettings.readFromJson(json); //extract setting from json

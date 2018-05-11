@@ -2,6 +2,8 @@
 #define GRAPHWINDOWCLASS_H
 
 #include <QMainWindow>
+#include <QVariantList>
+
 #include "TMathBase.h"
 
 class MainWindow;
@@ -14,6 +16,7 @@ class QGraphicsView;
 class AToolboxScene;
 class QListWidgetItem;
 class TObject;
+class TTree;
 
 class DrawObjectStructure
 {
@@ -125,13 +128,13 @@ public:
                       bool OnlyBuild = false);
 
     //use this to only construct!
-    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y) const;
-    TGraph* ConstructTGraph(const QVector<double> x, const QVector<double> y,
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y) const;
+    TGraph* ConstructTGraph(const QVector<double>& x, const QVector<double>& y,
                             const char *Title, const char *XTitle, const char *YTitle,
                             Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                             Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2) const;
-    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const;
-    TGraph2D* ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+    TGraph2D* ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z) const;
+    TGraph2D* ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z,
                               const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
                               Color_t MarkerColor=2, int MarkerStyle=20, int MarkerSize=1,
                               Color_t LineColor=2,   int LineStyle=1,    int LineWidth=2);
@@ -164,6 +167,7 @@ public slots:
     void DoSaveGraph(QString name);
     void AddCurrentToBasket(QString name);
     void AddLegend(double x1, double y1, double x2, double y2, QString title);
+    void SetLegendBorder(int color, int style, int size);
     void AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right);
     void on_pbAddLegend_clicked();
     void ExportTH2AsText(QString fileName); //for temporary script command
@@ -171,6 +175,9 @@ public slots:
     QVector<double> Get2DArray(); //for temporary script command
 
     void DrawStrOpt(TObject* obj, QString options = "", bool DoUpdate = true);
+    bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how,
+                  const QVariantList binsAndRanges = QVariantList(), const QVariantList markersAndLines = QVariantList(),
+                  QString *result = 0);
 
 private slots:
     void Reshape();
@@ -251,31 +258,32 @@ private slots:
 private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;
-    RasterWindowGraphClass *RasterWindow;
-    QWidget *QWinContainer;
-    bool ExtractionCanceled;
-    int LastOptStat;
+    RasterWindowGraphClass *RasterWindow = 0;
+    QWidget *QWinContainer = 0;
+    bool ExtractionCanceled = false;
+    int LastOptStat = 1111;
 
     QVector<DrawObjectStructure> DrawObjects;  //currently drawn
     QVector<DrawObjectStructure> MasterDrawObjects; //last draw made from outse of the graph window
     QVector< BasketItemClass > Basket; //container with user selected "drawings"
-    int CurrentBasketItem;
-    int BasketMode;
+    int CurrentBasketItem = -1;
+    int BasketMode = 0;
 
     QList<TObject*> tmpTObjects;
-    TH1D* hProjection;  //for toolbox
-    double TG_X0, TG_Y0;
+    TH1D* hProjection = 0;  //for toolbox
+    double TG_X0 = 0;
+    double TG_Y0 = 0;
 
-    QGraphicsView* gvOver;
-    AToolboxScene* scene;
+    QGraphicsView* gvOver = 0;
+    AToolboxScene* scene = 0;
 
     void doDraw(TObject *obj, const char *options, bool DoUpdate); //actual drawing, does not have window focussing - done to avoid refocussing issues leading to bugs
 
     //flags
-    bool TMPignore; //temporarily forbid updates - need for bulk update to avoid cross-modification
+    bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
     bool BarShown;
-    bool ColdStart;
-    bool fFirstTime; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
+    bool ColdStart = true;
+    bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 
     double xmin, xmax, ymin, ymax, zmin, zmax;
     double xmin0, xmax0, ymin0, ymax0, zmin0, zmax0; //start values - filled on first draw, can be used to reset view with "Unzoom"
@@ -295,6 +303,7 @@ private:
     QVector<DrawObjectStructure> *getCurrentDrawObjects();
     void ShowProjection(QString type);
     double runScaleDialog();
+    const QPair<double, double> runShiftDialog();
 };
 
 #endif // GRAPHWINDOWCLASS_H

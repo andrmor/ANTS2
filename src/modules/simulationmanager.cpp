@@ -1,8 +1,8 @@
 #include "simulationmanager.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "alrfmoduleselector.h"
 #include "detectorclass.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "eventsdataclass.h"
 #include "photon_generator.h"
 #include "primaryparticletracker.h"
@@ -21,6 +21,7 @@
 #include "ageomarkerclass.h"
 #include "atrackrecords.h"
 #include "ajsontools.h"
+#include "aconfiguration.h"
 
 #include <QVector>
 #include <QTime>
@@ -114,7 +115,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
   //qDebug() << "Updating MaterialColecftion module according to sim settings";
-  detector->MpCollection->UpdateBeforeSimulation(&simSettings); //update wave-resolved properties of materials and runtime properties for neutrons
+  detector->MpCollection->UpdateWavelengthBinning(&simSettings); //update wave-resolved properties of materials and runtime properties for neutrons
 
   clearWorkers(); //just rebuild them all everytime, it's easier
   threadCount = std::max(threadCount, 1);
@@ -371,7 +372,7 @@ Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
     progress = 0;
     RandGen = new TRandom2();    
     dataHub = new EventsDataClass(nameID);    
-    OneEvent = new OneEventClass(detector->PMs, RandGen, dataHub->SimStat);
+    OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
 }
@@ -1557,14 +1558,14 @@ bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleOnStack *> *
         ErrorString = "Particle stack is empty!";
         return false;
     }
-    qDebug() << ">Standalone particle stack tracker received stack size:"<<particleStack->size();
+    //qDebug() << ">Standalone particle stack tracker received stack size:"<<particleStack->size();
     clearParticleStack();
-    qDebug() << ">Cleared stack";
+    //qDebug() << ">Cleared stack";
     for (int i=0; i<particleStack->size(); i++)
         ParticleStack.append(particleStack->at(i)->clone());
-    qDebug() << ">Cloned";
+    //qDebug() << ">Cloned";
     ParticleTracker->setRemoveTracksIfNoEnergyDepo(false);
-    qDebug() << ">Start tracking...";
+    //qDebug() << ">Start tracking...";
     return ParticleTracker->TrackParticlesInStack();
 }
 
@@ -1594,7 +1595,7 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
     dataHub->Events.resize(0);
     dataHub->TimedEvents.resize(0);
 
-    qDebug() << "Total hits recorded:" << OneEvent->PMhitsTotal;
+    //qDebug() << "Total hits recorded:" << OneEvent->PMhits;
 
     OneEvent->HitsToSignal();
     dataHub->Events.append(OneEvent->PMsignals);
@@ -1793,7 +1794,7 @@ void ASimulationManager::onSimulationFinished()
           {
              ParticleSourceSimulator *lastPartSrcSimulator = static_cast< ParticleSourceSimulator *>(simulators.last());
              EnergyVector = lastPartSrcSimulator->getEnergyVector();
-             lastPartSrcSimulator->ClearEnergyVector(); // to avoid clearing the energy vector cells
+             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
           }
 
         for(int iSim = 0; iSim<simulators.count(); iSim++)
@@ -1811,6 +1812,7 @@ void ASimulationManager::onSimulationFinished()
     EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
 
     Detector->BuildDetector();
+    //Detector->Config->UpdateSimSettingsOfDetector(); //inside the rebuild now
 
     emit SimulationFinished();
 

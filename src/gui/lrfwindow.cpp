@@ -1,7 +1,7 @@
 #include "lrfwindow.h"
 #include "ui_lrfwindow.h"
 #include "mainwindow.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "detectorclass.h"
 #include "graphwindowclass.h"
 #include "sensorlrfs.h"
@@ -17,7 +17,7 @@
 #include "jsonparser.h"
 #include "amessage.h"
 #include "aconfiguration.h"
-#include "genericscriptwindowclass.h"
+#include "ascriptwindow.h"
 #include "tmpobjhubclass.h"
 #include "apmgroupsmanager.h"
 #include "alrfmouseexplorer.h"
@@ -1499,9 +1499,9 @@ void LRFwindow::on_pbUpdateLRFmakeJson_clicked()
       //qDebug() << "LRFmakeGUI->JSON";
     writeToJson(SensLRF->LRFmakeJson);
     MW->Config->UpdateLRFmakeJson();
-    if (MW->GenScriptWindow)
-        if (MW->GenScriptWindow->isVisible())
-            MW->GenScriptWindow->updateJsonTree();
+    if (MW->ScriptWindow)
+        if (MW->ScriptWindow->isVisible())
+            MW->ScriptWindow->updateJsonTree();
 }
 
 void LRFwindow::on_actionPM_numbers_triggered()

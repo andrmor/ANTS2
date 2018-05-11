@@ -15,6 +15,7 @@
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
+#include "curvefit.h"
 
 //Qt
 #include <QtGui>
@@ -31,6 +32,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPlainTextEdit>
+#include <QVariant>
+#include <QVariantList>
+#include <QSet>
+
 
 //Root
 #include "TGraph.h"
@@ -63,33 +68,16 @@
 #include "TAttLine.h"
 #include "TLegend.h"
 #include "TVectorD.h"
-//#include "TROOT.h"
+#include "TTree.h"
 
 #include "TPave.h"
 #include "TPaveLabel.h"
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
-  QMainWindow(parent),
+  QMainWindow(parent), MW(mw),
   ui(new Ui::GraphWindowClass)
 { 
-  //inits
-  RasterWindow = 0;
-  QWinContainer = 0;
-  TG_X0 = 0, TG_Y0 = 0;   
-  TMPignore = false;
-  DrawObjects.clear();
-  MW = mw;
-  ColdStart = true;
-  ExtractionCanceled = false;
-  gvOver = 0;  
-  CurrentBasketItem = -1;
-  BasketMode = 0;
-  fFirstTime = false;
-  LastOptStat = 1111;
-
-  hProjection = 0;
-
   //setting UI
   ui->setupUi(this);
   this->setMinimumWidth(200);
@@ -209,7 +197,7 @@ TGraph* GraphWindowClass::MakeGraph(const QVector<double> *x, const QVector<doub
     return 0;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y) const
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y) const
 {
   int numEl = x.size();
   TVectorD xx(numEl);
@@ -226,7 +214,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector
   return gr;
 }
 
-TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector<double> y,
+TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> &x, const QVector<double> &y,
                                           const char *Title, const char *XTitle, const char *YTitle,
                                           Color_t MarkerColor, int MarkerStyle, int MarkerSize,
                                           Color_t LineColor, int LineStyle, int LineWidth) const
@@ -239,7 +227,7 @@ TGraph *GraphWindowClass::ConstructTGraph(const QVector<double> x, const QVector
     return gr;
 }
 
-TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z) const
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> &x, const QVector<double> &y, const QVector<double> &z) const
 {
     int numEl = x.size();
     TGraph2D* gr = new TGraph2D(numEl, (double*)x.data(), (double*)y.data(), (double*)z.data());
@@ -248,7 +236,7 @@ TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVe
     return gr;
 }
 
-TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double> x, const QVector<double> y, const QVector<double> z,
+TGraph2D *GraphWindowClass::ConstructTGraph2D(const QVector<double>& x, const QVector<double>& y, const QVector<double>& z,
                                             const char *Title, const char *XTitle, const char *YTitle, const char *ZTitle,
                                             Color_t MarkerColor, int MarkerStyle, int MarkerSize,
                                             Color_t LineColor, int LineStyle, int LineWidth)
@@ -343,55 +331,31 @@ double GraphWindowClass::getCanvasMaxY()
 
 double GraphWindowClass::getMinX(bool *ok)
 {
-    if (!ui->ledXfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledXfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxX(bool *ok)
 {
-    if (!ui->ledXto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledXto->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMinY(bool *ok)
 {
-    if (!ui->ledYfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledYfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxY(bool *ok)
 {
-    if (!ui->ledYto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledYto->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMinZ(bool *ok)
 {
-    if (!ui->ledZfrom->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledZfrom->text().toDouble(ok);
 }
 
 double GraphWindowClass::getMaxZ(bool *ok)
 {
-    if (!ui->ledZto->isEnabled()) {
-        if(ok) *ok = false;
-        return 0.0;
-    }
     return ui->ledZto->text().toDouble(ok);
 }
 
@@ -790,6 +754,7 @@ void GraphWindowClass::on_cbLogX_toggled(bool checked)
   if (TMPignore) return;
   RasterWindow->fCanvas->SetLogx(checked);
   RasterWindow->fCanvas->Update();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_cbLogY_toggled(bool checked)
@@ -797,6 +762,7 @@ void GraphWindowClass::on_cbLogY_toggled(bool checked)
   if (TMPignore) return;
   RasterWindow->fCanvas->SetLogy(checked);
   RasterWindow->fCanvas->Update();
+  UpdateControls();
 }
 
 void GraphWindowClass::on_ledXfrom_editingFinished()
@@ -1335,6 +1301,17 @@ void GraphWindowClass::UpdateControls()
 //      ymin = ((TF1*) obj)->GetMinimum();
 //      ymax = ((TF1*) obj)->GetMaximum();
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
+      if (c->GetLogx())
+        {
+          xmin = TMath::Power(10.0, xmin);
+          xmax = TMath::Power(10.0, xmax);
+        }
+      if (c->GetLogy())
+        {
+          ymin = TMath::Power(10.0, ymin);
+          ymax = TMath::Power(10.0, ymax);
+        }
+
     }
   if (PlotType.startsWith("TF2"))
     {
@@ -1360,9 +1337,6 @@ void GraphWindowClass::UpdateControls()
   if (PlotType == "TGraph" || PlotType == "TGraphErrors" || PlotType == "TMultiGraph")
     {
       c->GetRangeAxis(xmin, ymin, xmax, ymax);
-
- //     qDebug()<<"---Ymin:"<<ymin;
-
       if (c->GetLogx())
         {
           xmin = TMath::Power(10.0, xmin);
@@ -1373,6 +1347,7 @@ void GraphWindowClass::UpdateControls()
           ymin = TMath::Power(10.0, ymin);
           ymax = TMath::Power(10.0, ymax);
         }
+       //   qDebug()<<"---Ymin:"<<ymin;
     }
 
   if (PlotType == "TGraph2D")
@@ -1443,6 +1418,240 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
       return;
     }
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
+}
+
+void SetMarkerAttributes(TAttMarker* m, const QVariantList& vl)
+{
+    m->SetMarkerColor(vl.at(0).toInt());
+    m->SetMarkerStyle(vl.at(1).toInt());
+    m->SetMarkerSize (vl.at(2).toDouble());
+}
+void SetLineAttributes(TAttLine* l, const QVariantList& vl)
+{
+    l->SetLineColor(vl.at(0).toInt());
+    l->SetLineStyle(vl.at(1).toInt());
+    l->SetLineWidth(vl.at(2).toDouble());
+}
+
+bool GraphWindowClass::DrawTree(TTree *tree, const QString& what, const QString& cond, const QString& how,
+                                const QVariantList binsAndRanges, const QVariantList markersAndLines,
+                                QString* result)
+{
+    if (what.isEmpty())
+    {
+        if (result) *result = "\"What\" string is empty!";
+        return false;
+    }
+
+    QStringList Vars = what.split(":", QString::SkipEmptyParts);
+    int num = Vars.size();
+    if (num > 3)
+    {
+        if (result) *result = "Invalid \"What\" string - there should be 1, 2 or 3 fields separated with \":\" character!";
+        return false;
+    }
+
+    QString howProc = how;
+    QVector<QString> vDisreguard;
+    vDisreguard << "func" << "same" << "pfc" << "plc" << "pmc" << "lego" << "col" << "candle" << "violin" << "cont" << "list" << "cyl" << "pol" << "scat";
+    for (const QString& s : vDisreguard) howProc.remove(s, Qt::CaseInsensitive);
+    bool bHistToGraph = ( num == 2 && ( howProc.contains("L") || howProc.contains("C") ) );
+    qDebug() << "Graph instead of hist?"<< bHistToGraph;
+
+    QVariantList defaultBR;
+    defaultBR << (int)100 << (double)0 << (double)0;
+    QVariantList defaultMarkerLine;
+    defaultMarkerLine << (int)602 << (int)1 << (double)1.0;
+
+    //check ups
+    QVariantList vlBR;
+    for (int i=0; i<3; i++)
+    {
+        if (i >= binsAndRanges.size())
+             vlBR.push_back(defaultBR);
+        else vlBR.push_back(binsAndRanges.at(i));
+
+        QVariantList vl = vlBR.at(i).toList();
+        if (vl.size() != 3)
+        {
+            if (result) *result = "Error in BinsAndRanges argument (bad size)";
+            return false;
+        }
+        bool bOK0, bOK1, bOK2;
+        vl.at(0).toInt(&bOK0);
+        vl.at(0).toDouble(&bOK1);
+        vl.at(0).toDouble(&bOK2);
+        if (!bOK0 || !bOK1 || !bOK2)
+        {
+            if (result) *result = "Error in BinsAndRanges argument (conversion problem)";
+            return false;
+        }
+    }
+    //  qDebug() << "binsranges:" << vlBR;
+
+    QVariantList vlML;
+    for (int i=0; i<2; i++)
+    {
+        if (i >= markersAndLines.size())
+             vlML.push_back(defaultMarkerLine);
+        else vlML.push_back(markersAndLines.at(i));
+
+        QVariantList vl = vlML.at(i).toList();
+        if (vl.size() != 3)
+        {
+            if (result) *result = "Error in MarkersAndLines argument (bad size)";
+            return false;
+        }
+        bool bOK0, bOK1, bOK2;
+        vl.at(0).toInt(&bOK0);
+        vl.at(0).toInt(&bOK1);
+        vl.at(0).toDouble(&bOK2);
+        if (!bOK0 || !bOK1 || !bOK2)
+        {
+            if (result) *result = "Error in MarkersAndLines argument (conversion problem)";
+            return false;
+        }
+    }
+    //  qDebug() << "markersLine:"<<vlML;
+
+    QString str = what + ">>htemp(";
+    for (int i = 0; i < num; i++)
+    {
+        if (i == 1 && bHistToGraph) break;
+
+        QVariantList br = vlBR.at(i).toList();
+        int    bins = br.at(0).toInt();
+        double from = br.at(1).toDouble();
+        double to   = br.at(2).toDouble();
+        str += QString::number(bins) + "," + QString::number(from) + "," + QString::number(to) + ",";
+    }
+    str.chop(1);
+    str += ")";
+
+    TString What = str.toLocal8Bit().data();
+    //TString Cond = ( cond.isEmpty() ? "" : cond.toLocal8Bit().data() );
+    TString Cond = cond.toLocal8Bit().data();
+    //TString How  = (  how.isEmpty() ? "" :  how.toLocal8Bit().data() );
+    TString How  = how.toLocal8Bit().data();
+
+    QString howAdj = how;   //( how.isEmpty() ? "goff" : "goff,"+how );
+    if (!bHistToGraph) howAdj = "goff," + how;
+    TString HowAdj = howAdj.toLocal8Bit().data();
+
+    // -------------Delete old tmp hist if exists---------------
+    TObject* oldObj = gDirectory->FindObject("htemp");
+    if (oldObj)
+    {
+          qDebug() << "Old htemp found: "<<oldObj->GetName() << " -> deleting!";
+        gDirectory->RecursiveRemove(oldObj);
+    }
+
+    // --------------DRAW--------------
+    qDebug() << "TreeDraw -> what:" << What << "cuts:" << Cond << "opt:"<<HowAdj;
+
+    GraphWindowClass* tmpWin = 0;
+    if (bHistToGraph)
+    {
+        tmpWin = new GraphWindowClass(this, MW);
+        tmpWin->SetAsActiveRootWindow();
+    }
+
+    TH1::AddDirectory(true);
+    tree->Draw(What, Cond, HowAdj);
+    TH1::AddDirectory(false);
+
+    // --------------Checks------------
+    TH1* tmpHist = dynamic_cast<TH1*>(gDirectory->Get("htemp"));
+    if (!tmpHist)
+    {
+        qDebug() << "No histogram was generated: check input!";
+        if (result) *result = "No histogram was generated: check input!";
+        delete tmpWin;
+        return false;
+    }
+
+    // -------------Formatting-----------
+    if (bHistToGraph)
+    {
+        TGraph *g = dynamic_cast<TGraph*>(gPad->GetPrimitive("Graph"));
+        if (!g)
+        {
+            qDebug() << "Graph was not generated: check input!";
+            if (result) *result = "No graph was generated: check input!";
+            delete tmpWin;
+            return false;
+        }
+
+        TGraph* clone = new TGraph(*g);
+        if (clone)
+        {
+            if (clone->GetN() > 0)
+            {
+                const QVariantList xx = vlBR.at(0).toList();
+                double min = xx.at(1).toDouble();
+                double max = xx.at(2).toDouble();
+                if (max > min)
+                    clone->GetXaxis()->SetLimits(min, max);
+                const QVariantList yy = vlBR.at(1).toList();
+                min = yy.at(1).toDouble();
+                max = yy.at(2).toDouble();
+                if (max > min)
+                {
+                    clone->SetMinimum(min);
+                    clone->SetMaximum(max);
+                }
+
+                clone->SetTitle(tmpHist->GetTitle());
+                SetMarkerAttributes(static_cast<TAttMarker*>(clone), vlML.at(0).toList());
+                SetLineAttributes(static_cast<TAttLine*>(clone), vlML.at(1).toList());
+
+                if ( !How.Contains("same", TString::kIgnoreCase) ) How = "A," + How;
+                SetAsActiveRootWindow();
+                Draw(clone, How);
+            }
+            else
+            {
+                qDebug() << "Empty graph was generated!";
+                if (result) *result = "Empty graph was generated!";
+                delete tmpWin;
+                return false;
+            }
+        }
+    }
+    else
+    {
+        if (tmpHist->GetEntries() == 0)
+        {
+            qDebug() << "Empty histogram was generated!";
+            if (result) *result = "Empty histogram was generated!";
+            return false;
+        }
+
+        TH1* h = dynamic_cast<TH1*>(tmpHist->Clone(""));
+
+        switch (num)
+        {
+            case 1:
+                h->GetXaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                break;
+            case 2:
+                h->GetYaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                h->GetXaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+                break;
+            case 3:
+                h->GetZaxis()->SetTitle(Vars.at(0).toLocal8Bit().data());
+                h->GetYaxis()->SetTitle(Vars.at(1).toLocal8Bit().data());
+                h->GetXaxis()->SetTitle(Vars.at(2).toLocal8Bit().data());
+        }
+
+        SetMarkerAttributes(static_cast<TAttMarker*>(h), vlML.at(0).toList());
+        SetLineAttributes(static_cast<TAttLine*>(h), vlML.at(1).toList());
+        Draw(h, How, true, false);
+    }
+
+    if (result) *result = "";
+    delete tmpWin;
+    return true;
 }
 
 void GraphWindowClass::on_cbToolBox_toggled(bool checked)
@@ -1863,6 +2072,40 @@ double GraphWindowClass::runScaleDialog()
   return res;
 }
 
+const QPair<double, double> GraphWindowClass::runShiftDialog()
+{
+    QDialog* D = new QDialog(this);
+
+    QDoubleValidator* vali = new QDoubleValidator(D);
+    QVBoxLayout* l = new QVBoxLayout(D);
+    QHBoxLayout* l1 = new QHBoxLayout();
+      QLabel* lab1 = new QLabel("Multiply by: ");
+      QLineEdit* leM = new QLineEdit("1.0");
+      leM->setValidator(vali);
+      l1->addWidget(lab1);
+      l1->addWidget(leM);
+      QLabel* lab2 = new QLabel(" Add: ");
+      QLineEdit* leA = new QLineEdit("0");
+      leA->setValidator(vali);
+      l1->addWidget(lab2);
+      l1->addWidget(leA);
+    l->addLayout(l1);
+      QPushButton* pb = new QPushButton("Shift");
+      connect(pb, &QPushButton::clicked, D, &QDialog::accept);
+    l->addWidget(pb);
+
+    int ret = D->exec();
+    QPair<double, double> res(1.0, 0);
+    if (ret == QDialog::Accepted)
+      {
+        res.first =  leM->text().toDouble();
+        res.second = leA->text().toDouble();
+      }
+
+    delete D;
+    return res;
+}
+
 void GraphWindowClass::EnforceOverlayOff()
 {
    ui->cbToolBox->setChecked(false); //update is in on_toggle
@@ -2089,8 +2332,46 @@ void GraphWindowClass::AddCurrentToBasket(QString name)
 
 void GraphWindowClass::AddLegend(double x1, double y1, double x2, double y2, QString title)
 {
-  RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
-  UpdateRootCanvas();
+  TLegend* leg = RasterWindow->fCanvas->BuildLegend(x1, y1, x2, y2, title.toLatin1());
+
+  if (CurrentBasketItem < 0) //-1 - Basket is off; -2 -basket is Off, using tmp drawing (e.g. overlap of two histograms)
+  {
+      RegisterTObject(leg);
+      DrawObjects.append(DrawObjectStructure(leg, "same"));
+  }
+  else
+  {
+      //do not register for basket - they have their own system
+      Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(leg, "same"));
+  }
+  RedrawAll();
+
+  //UpdateRootCanvas();
+}
+
+//#include "TLegendEntry.h"
+void GraphWindowClass::SetLegendBorder(int color, int style, int size)
+{
+    QVector<DrawObjectStructure> &DrObj = (CurrentBasketItem < 0) ? DrawObjects : Basket[CurrentBasketItem].DrawObjects;
+    for (int i=0; i<DrObj.size(); i++)
+    {
+        QString cn = DrObj[i].getPointer()->ClassName();
+        //qDebug() << cn;
+        if (cn == "TLegend")
+        {
+            TLegend* le = dynamic_cast<TLegend*>(DrObj[i].getPointer());
+            le->SetLineColor(color);
+            le->SetLineStyle(style);
+            le->SetLineWidth(size);
+
+            //TList* l = le->GetListOfPrimitives();
+            //qDebug() << l->GetEntries() << l->At(0)->ClassName()<<((TLegendEntry*)l->At(1))->GetLabel();
+
+            RedrawAll();
+            return;
+        }
+    }
+    qDebug() << "Legend object was not found!";
 }
 
 void GraphWindowClass::AddText(QString text, bool bShowFrame, int Alignment_0Left1Center2Right)
@@ -2343,12 +2624,16 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   QAction* del = 0;
   QAction* rename = 0;
   QAction* scale = 0;
+  QAction* shift = 0;
   QAction* uniMap = 0;
   QAction* gaussFit = 0;
   QAction* setLine = 0;
   QAction* setMarker = 0;
   QAction* drawMenu = 0;
   QAction* drawIntegral = 0;
+  QAction* titleX = 0;
+  QAction* titleY = 0;
+  QAction* splineFit = 0;
 
   if (temp)
     {
@@ -2365,6 +2650,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       BasketMenu.addSeparator();
       rename = BasketMenu.addAction("Rename");
       scale = BasketMenu.addAction("Scale");
+      shift = BasketMenu.addAction("Shift X scale");
       if (!MasterDrawObjects.isEmpty())
           if ( QString(MasterDrawObjects.first().getPointer()->ClassName()) == "TH2D")
               if (Basket.at(row).Type == "TH2D")
@@ -2374,7 +2660,14 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
              gaussFit = BasketMenu.addAction("Fit with Gauss");
              drawIntegral = BasketMenu.addAction("Draw integral");
       }
-      BasketMenu.addSeparator();      
+      if (Basket.at(row).Type == "TGraph" || Basket.at(row).Type == "TProfile")
+      {
+             splineFit = BasketMenu.addAction("Fit with B-spline");
+      }
+      BasketMenu.addSeparator();
+      titleX = BasketMenu.addAction("Edit title X");
+      titleY = BasketMenu.addAction("Edit title Y");
+      BasketMenu.addSeparator();
       del = BasketMenu.addAction("Delete");
       BasketMenu.addSeparator();
     }  
@@ -2582,7 +2875,7 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           DrawObjects.append(DrawObjectStructure(Basket[row].DrawObjects[i].getPointer(), safe));
         }
       CurrentBasketItem = -2; //forcing to "basket off, tmp graph" mode
-      RedrawAll();     
+      RedrawAll();
     }
   else if (selectedItem == scale)
     {
@@ -2634,6 +2927,58 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
         }
       RedrawAll();
     } 
+  else if (selectedItem == shift)
+  {
+      if (row == -1) return; //protection
+      if (DrawObjects.isEmpty()) return; //protection
+      TObject* obj = Basket[row].DrawObjects.first().getPointer();
+      if (obj)
+      {
+          QString name = obj->ClassName();
+          QList<QString> impl;
+          impl << "TGraph" << "TGraphErrors"  << "TH1I" << "TH1D" << "TH1F" << "TProfile";
+          if (!impl.contains(name))
+           {
+             message("Not implemented for this object type", this);
+             return;
+           }
+
+          const QPair<double, double> val = runShiftDialog();
+          if (val.first == 1.0 && val.second == 0) return;
+
+          if (name.startsWith("TGraph"))
+          {
+              TGraph* g = dynamic_cast<TGraph*>(obj);
+              if (g)
+              {
+                  const int num = g->GetN();
+                  for (int i=0; i<num; i++)
+                  {
+                      double x, y;
+                      g->GetPoint(i, x, y);
+                      x = x * val.first + val.second;
+                      g->SetPoint(i, x, y);
+                  }
+              }
+          }
+          else
+          {
+              TH1* h = dynamic_cast<TH1*>(obj);
+              if (h)
+              {
+                  const int nbins = h->GetXaxis()->GetNbins();
+                  double* new_bins = new double[nbins+1];
+                  for (int i=0; i <= nbins; i++)
+                      new_bins[i] = ( h-> GetBinLowEdge(i+1) ) * val.first + val.second;
+
+                  h->SetBins(nbins, new_bins);
+                  delete [] new_bins;
+              }
+          }
+
+          RedrawAll();
+      }
+  }
   else if (selectedItem == uniMap)
   {
       TH2D* map = static_cast<TH2D*>(Basket[row].DrawObjects.first().getPointer());
@@ -2656,6 +3001,43 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
       {
           ui->cbShowFitParameters->setChecked(true);
           ui->cbShowLegend->setChecked(true);
+          RedrawAll();
+      }
+  }
+  else if (selectedItem == splineFit)
+  {
+      TGraph* g =   static_cast<TGraph*>(Basket[row].DrawObjects.first().getPointer());
+      if (!g)
+      {
+          message("Suppoted only for TGraph-based ROOT objects", this);
+          return;
+      }
+
+      bool ok;
+      int numNodes = QInputDialog::getInt(this, "", "Enter number of nodes:", 6, 2, 1000, 1, &ok);
+      if (ok)
+      {
+          int numPoints = g->GetN();
+          if (numPoints < numNodes)
+          {
+              message("Not enough points in the graph for the selected number of nodes", this);
+              return;
+          }
+
+          QVector<double> x(numPoints), y(numPoints), f(numPoints);
+          for (int i=0; i<numPoints; i++)
+              g->GetPoint(i, x[i], y[i]);
+
+          CurveFit cf(x.first(), x.last(), numNodes, x, y);
+
+          TGraph* fg = new TGraph();
+          for (int i=0; i<numPoints; i++)
+          {
+              const double& xx = x.at(i);
+              fg->SetPoint(i, xx, cf.eval(xx));
+          }
+
+          Basket[row].DrawObjects.append(DrawObjectStructure(fg, "Csame"));
           RedrawAll();
       }
   }
@@ -2689,6 +3071,38 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           hi->SetBinContent(i, prev);
         }
       Draw(hi, "");
+  }
+  else if (selectedItem == titleX || selectedItem == titleY)
+  {
+      if (row == -1) return; //protection
+      if (DrawObjects.isEmpty()) return; //protection
+      TObject* obj = Basket[row].DrawObjects.first().getPointer();
+      if (obj)
+      {
+          TAxis* a = 0;
+
+          TGraph* g = dynamic_cast<TGraph*>(obj);
+          if (g)
+             a = ( selectedItem == titleX ? g->GetXaxis() : g->GetYaxis() );
+          else
+          {
+              TH1* h = dynamic_cast<TH1*>(obj);
+              if (h)
+                 a = ( selectedItem == titleX ? h->GetXaxis() : h->GetYaxis() );
+              else
+              {
+                  message("Not supported for this object type", this);
+                  return;
+              }
+          }
+
+          QString oldTitle;
+          oldTitle = a->GetTitle();
+          bool ok;
+          QString newTitle = QInputDialog::getText(this, "", "New axis title:", QLineEdit::Normal, oldTitle, &ok);
+          if (ok) a->SetTitle(newTitle.toLatin1().data());
+          RedrawAll();
+      }
   }
 }
 
@@ -2967,6 +3381,7 @@ void GraphWindowClass::AppendRootHistsOrGraphs()
     }
 
     f->Close();
+    delete f;
 }
 
 void GraphWindowClass::on_pbSmooth_clicked()

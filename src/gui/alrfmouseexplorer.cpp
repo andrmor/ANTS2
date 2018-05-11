@@ -2,7 +2,7 @@
 #include "viewer2darrayobject.h"
 #include "guiutils.h"
 #include "alrfmoduleselector.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 
 #include <QPushButton>
@@ -14,7 +14,7 @@
 #include <QPointF>
 #include <QDebug>
 
-ALrfMouseExplorer::ALrfMouseExplorer(ALrfModuleSelector *LRFs, pms* PMs, APmGroupsManager* PMgroups, double SuggestedZ, QWidget* parent) :
+ALrfMouseExplorer::ALrfMouseExplorer(ALrfModuleSelector *LRFs, APmHub* PMs, APmGroupsManager* PMgroups, double SuggestedZ, QWidget* parent) :
   QDialog(parent), LRFs(LRFs), PMs(PMs), PMgroups(PMgroups)
 {  
   setModal(true);

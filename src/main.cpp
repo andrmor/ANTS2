@@ -6,9 +6,11 @@
 #include "amaterialparticlecolection.h"
 #include "tmpobjhubclass.h"
 #include "aconfiguration.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 #include "interfacetoglobscript.h"
+#include "ainterfacetoaddobjscript.h"
 #include "histgraphinterfaces.h"
+#include "ainterfacetottree.h"
 #include "scriptminimizer.h"
 #include "globalsettingsclass.h"
 #include "afiletools.h"
@@ -17,6 +19,9 @@
 #include "anetworkmodule.h"
 #include "asandwich.h"
 #include "amessageoutput.h"
+#include "amessage.h"
+#include "ainterfacetodeposcript.h"
+#include "ainterfacetophotonscript.h"
 
 // SIM
 #ifdef SIM
@@ -27,7 +32,8 @@
 #ifdef GUI
 #include "mainwindow.h"
 #include "exampleswindow.h"
-#include "genericscriptwindowclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 #include "ainterfacetomessagewindow.h"
 #endif
 
@@ -50,8 +56,6 @@
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
 #include "TThread.h"
 #endif
-
-#include "amessage.h"
 
 int main(int argc, char *argv[])
 {
@@ -150,17 +154,18 @@ int main(int argc, char *argv[])
     }
     else if (argc == 2 && (QString(argv[1])=="-b" || QString(argv[1])=="--batch") )
     {
-        GenericScriptWindowClass GenScriptWindow(Detector.RandGen);
+        AJavaScriptManager* jsm = new AJavaScriptManager(Detector.RandGen);
+        AScriptWindow GenScriptWindow(jsm, &GlobSet, false, 0);
 
         GenScriptWindow.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
 
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         GenScriptWindow.SetInterfaceObject(conf, "config");
 
-        InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
+        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
         GenScriptWindow.SetInterfaceObject(geo, "geo");
 
-        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(GenScriptWindow.ScriptManager);
+        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(jsm);
         GenScriptWindow.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
 
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
@@ -188,27 +193,30 @@ int main(int argc, char *argv[])
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         GenScriptWindow.SetInterfaceObject(hist, "hist");
 
-        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         GenScriptWindow.SetInterfaceObject(tree, "tree");
+
+        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        GenScriptWindow.SetInterfaceObject(photon, "photon");
+
+        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
+        GenScriptWindow.SetInterfaceObject(depo, "depo");
 
         AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(GenScriptWindow.ScriptManager, &GenScriptWindow);
         GenScriptWindow.SetInterfaceObject(txt, "msg");
 
         //Setting up the window
-        GenScriptWindow.SetStarterDir(GlobSet.LibScripts, GlobSet.LastOpenDir, GlobSet.ExamplesDir);
-        GenScriptWindow.SetExample(""); //empty example will force to start example explorer on "Example" button pressed
-        GenScriptWindow.SetShowEvaluationResult(true);
-        GenScriptWindow.SetTitle("ANTS2 batch mode");
-        GenScriptWindow.SetScript(&GlobSet.GlobScript);
+        GenScriptWindow.setWindowTitle("ANTS2 batch mode");
+        //GenScriptWindow.SetScript(&GlobSet.GlobScript);
 
-        QObject::connect(&GenScriptWindow, SIGNAL(success(QString)), &GenScriptWindow, SLOT(updateJsonTree()));
+        QObject::connect(&GenScriptWindow, &AScriptWindow::success, &GenScriptWindow, &AScriptWindow::updateJsonTree);
 
         if (QFile(GlobSet.ExamplesDir + "/StartupDetector.json").exists())
             Config.LoadConfig(GlobSet.ExamplesDir + "/StartupDetector.json");
         else
             message("Default detector configuration not loaded - file not found");
 
-        GenScriptWindow.SetJsonTreeAlwaysVisible(true);
+        //GenScriptWindow.SetJsonTreeAlwaysVisible(true);
         GenScriptWindow.show();
         return a.exec();
     }
@@ -249,13 +257,13 @@ int main(int argc, char *argv[])
 
         qDebug() << "Script from file:"<<fileName;
 
-        AScriptManager SM(Detector.RandGen);        
+        AJavaScriptManager SM(Detector.RandGen);        
         SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
-        InterfaceToAddObjScript* geo = new InterfaceToAddObjScript(&Detector);
+        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
         SM.SetInterfaceObject(geo, "geo");
-        AInterfaceToMinimizerScript* mini = new AInterfaceToMinimizerScript(&SM);
+        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
         SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         SM.SetInterfaceObject(dat, "events");
@@ -275,8 +283,12 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(graph, "graph");
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.SetInterfaceObject(hist, "hist");
-        AInterfaceToTree* tree = new AInterfaceToTree(&TmpHub);
+        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
         SM.SetInterfaceObject(tree, "tree");
+        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        SM.SetInterfaceObject(photon, "photon");
+        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
+        SM.SetInterfaceObject(depo, "depo");
 
         int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
         if (errorLineNum > -1)

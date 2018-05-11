@@ -11,7 +11,7 @@
 #include "particlesourcesclass.h"
 #include "aparticleonstack.h"
 #include "globalsettingsclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "reconstructionwindow.h"
@@ -248,9 +248,6 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
   fVerbose = true;  //Now always!!!
 
   QJsonObject js;
-
-  //js["ANTS2build"] = versionNumber;
-
   SimGeneralConfigToJson(js);         //general sim settings
   if (ui->twSourcePhotonsParticles->currentIndex() == 0)
     { //point source sim
@@ -606,12 +603,25 @@ if (scj.contains("CustomDistrib"))
   BulkUpdate = false;
 
   //updating global parameters
-  MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked()); //update on toggle
-  MainWindow::on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-  MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
+  //MainWindow::on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked()); //update on toggle
+  WaveFrom = ui->ledWaveFrom->text().toDouble(); //***!!!
+  WaveStep = ui->ledWaveStep->text().toDouble();
+  MainWindow::CorrectWaveTo(); //WaveTo and WaveNode are set here
+  //update materialCollection info -rebinning, hists
+  //bool bWaveRes = ui->cbWaveResolved->isChecked();
+  //MpCollection->SetWave(bWaveRes, WaveFrom, WaveTo, WaveStep, WaveNodes); //***!!! move!!!
+  //for (int i=0; i<MpCollection->countMaterials(); i++)
+  //    MpCollection->UpdateWaveResolvedProperties(i); //***!!! move
+  //PMs->SetWave(bWaveRes, WaveFrom, WaveStep, WaveNodes);
+  //PMs->RebinPDEs(); //update PMs info -rebinning, hists
+  on_pbIndPMshowInfo_clicked(); //to refresh the binned button
+  //MainWindow::on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
+  //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
   MainWindow::on_pbRefreshStack_clicked();
+
+  UpdateTestWavelengthProperties();
 
   return true;
 }

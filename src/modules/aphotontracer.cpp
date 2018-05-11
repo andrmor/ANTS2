@@ -1,10 +1,10 @@
 #include "aphotontracer.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "amaterialparticlecolection.h"
 #include "generalsimsettings.h"
 #include "aopticaloverride.h"
 #include "asimulationstatistics.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "agridelementrecord.h"
 #include "aphoton.h"
 #include "atrackrecords.h"
@@ -21,7 +21,7 @@
 
 #define c_in_vac 2.997925e2 //speed of light in mm/ns
 
-APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, pms* Pms, const QList<AGridElementRecord *> *Grids)
+APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator, AMaterialParticleCollection* materialCollection, APmHub* Pms, const QList<AGridElementRecord *> *Grids)
 {
     RandGen = RandomGenerator;
     GeoManager = geoManager;
@@ -38,7 +38,7 @@ APhotonTracer::~APhotonTracer()
     delete p;
 }
 
-void APhotonTracer::configure(const GeneralSimSettings *simSet, OneEventClass* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
+void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
 {
    SimSet = simSet;
    OneEvent = oneEvent;
@@ -314,7 +314,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
        case 'P': // PM hit
          {
            const int PMnumber = NodeAfterInterface->GetNumber();
-           //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle();
+           //qDebug()<<"PM hit:"<<ThisVolume->GetName()<<PMnumber<<ThisVolume->GetTitle()<<"WaveIndex:"<<p->waveIndex;
            if (SimSet->bDoPhotonHistoryLog)
              {
                PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Fresnel_Transmition, MatIndexFrom, MatIndexTo) );
@@ -571,11 +571,12 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                }
 
             //check if this material is waveshifter
-            if ((*MaterialCollection)[MatIndexFrom]->reemissionProb > 0)
+            const double reemissionProb = (*MaterialCollection)[MatIndexFrom]->getReemissionProbability(p->waveIndex);
+            if ( reemissionProb > 0 )
               {
-                if (RandGen->Rndm()<(*MaterialCollection)[MatIndexFrom]->reemissionProb)
+                if (RandGen->Rndm() < reemissionProb)
                   {
-                    //qDebug() << "Waveshifting! Original index:"<<p->WaveIndex;
+                    //qDebug() << "Waveshifting! Original index:"<<p->waveIndex;
                     if (p->waveIndex!=-1 && (*MaterialCollection)[MatIndexFrom]->PrimarySpectrumHist)
                       {
                         double wavelength;
@@ -586,10 +587,12 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                             attempts++;
                             if (attempts > 9) return AbsTriggered;  // ***!!! absolute number
                             wavelength = (*MaterialCollection)[MatIndexFrom]->PrimarySpectrumHist->GetRandom();
-                            waveIndex = (wavelength - SimSet->WaveFrom)/SimSet->WaveStep;
+                            //qDebug() << "   "<<wavelength << " MatIndexFrom:"<< MatIndexFrom;
+                            waveIndex = round( (wavelength - SimSet->WaveFrom)/SimSet->WaveStep );
                         }
                         while (waveIndex < p->waveIndex); //conserving energy
 
+                        //qDebug() << "NewIndex:"<<waveIndex;
                         p->waveIndex = waveIndex;                        
                       }
                     else p->waveIndex = -1; // this is to allow to use this procedure to make diffuse medium (including -1 waveIndex)

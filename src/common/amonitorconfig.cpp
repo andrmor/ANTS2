@@ -3,27 +3,6 @@
 
 #include <QJsonObject>
 
-AMonitorConfig::AMonitorConfig()
-{
-    shape = 0;
-    size1 = size2 = 100.0;
-    dz = 0.001;  // constant! - half-thickness
-
-    PhotonOrParticle = 0;
-    bUpper = true;
-    bLower = true;
-    bStopTracking = false;
-
-    ParticleIndex = 0;
-    bPrimary = true;
-    bSecondary = false;
-
-    xbins = ybins = timeBins = angleBins = waveBins = energyBins = 100;
-    timeFrom = timeTo = angleFrom = waveFrom = waveTo = energyFrom = energyTo = 0;
-    energyUnitsInHist = 2; // 0,1,2,3 -> meV, eV, keV, MeV
-    angleTo = 90.0;
-}
-
 void AMonitorConfig::writeToJson(QJsonObject &json)
 {
    json["shape"] = shape;

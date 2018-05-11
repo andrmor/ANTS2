@@ -8,7 +8,7 @@ class AHighlighterScriptWindow;
 class QAbstractItemModel;
 class QCompleter;
 class QStringListModel;
-class CompletingTextEditClass;
+class ATextEdit;
 class QPlainTextEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
@@ -17,10 +17,10 @@ class QFrame;
 class QLineEdit;
 class TObject;
 class QThread;
-class TRandom2;
 class AScriptManager;
 class AScriptWindowTabItem;
 class GlobalSettingsClass;
+class QTextCursor;
 
 namespace Ui {
 class AScriptWindow;
@@ -31,20 +31,18 @@ class AScriptWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AScriptWindow(GlobalSettingsClass* GlobSet, TRandom2* RandGen, QWidget *parent = 0);
+    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");
-    void SetScript(QString *text);
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
-    void AddNewTab();
+    void AddNewTab();  // new tab !
 
     void ReportError(QString error, int line = 0);   //0 - no line is highligted
-    void HighlightErrorLine(int line);
 
-    void WriteToJson(QJsonObject &json);
-    void ReadFromJson(QJsonObject &json);
+    void WriteToJson();
+    void ReadFromJson();
 
     void UpdateHighlight();
 
@@ -53,21 +51,23 @@ public:
     void onBusyOn();
     void onBusyOff();
 
+    void ConfigureForLightMode(QString* ScriptPtr, const QString &WindowTitle, const QString& Example);
+
     AScriptManager* ScriptManager;
     QStringList functions;
 
 public slots:
     void updateJsonTree();
 
+    void HighlightErrorLine(int line);
     void ShowText(QString text); //shows text in the output box
     void ClearText(); //clears text in the output box
     void on_pbRunScript_clicked();
-    //void abortEvaluation(QString message = "Aborted!");
     void onF1pressed(QString text);
     void onLoadRequested(QString NewScript);
 
 private slots:
-    void onCurrentTabChanged(int tab);
+    void onCurrentTabChanged(int tab);   //also updates status (modified, filename)
     void onRequestTabWidgetContextMenu(QPoint pos);
     void onScriptTabMoved(int from, int to);
     void onContextMenuRequestedByJsonTree(QPoint pos);
@@ -94,23 +94,46 @@ private slots:
 
     void on_actionIncrease_font_size_triggered();
     void on_actionDecrease_font_size_triggered();
-
     void on_actionSelect_font_triggered();
 
     void on_actionShow_all_messenger_windows_triggered();
     void on_actionHide_all_messenger_windows_triggered();
     void on_actionClear_unused_messenger_windows_triggered();
-
     void on_actionClose_all_messenger_windows_triggered();
+
+    void on_pbFileName_clicked();
+    void on_actionAdd_new_tab_triggered();
+    void on_actionRemove_current_tab_triggered();
+    void on_actionRemove_all_tabs_triggered();
+    void on_actionStore_all_tabs_triggered();
+    void on_actionRestore_session_triggered();
+
+    void on_pbCloseFindReplaceFrame_clicked();
+    void on_actionShow_Find_Replace_triggered();
+    void on_pbFindNext_clicked();
+    void on_pbFindPrevious_clicked();
+    void on_leFind_textChanged(const QString &arg1);
+    void on_pbReplaceOne_clicked();
+    void on_pbReplaceAll_clicked();
+    void on_actionReplace_widget_Ctr_r_triggered();
+
+public:
+    enum ScriptLanguageEnum {_JavaScript_ = 0, _PythonScript_ = 1};
 
 private:
     Ui::AScriptWindow *ui;
-    QStringListModel* completitionModel;
+    //QStringListModel* completitionModel;
     GlobalSettingsClass* GlobSet;
+
+    ScriptLanguageEnum ScriptLanguage = _JavaScript_;
 
     int CurrentTab;
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
+
+    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for small local scripts
+    QString* LightModeScript = 0;
+    QString  LightModeExample;
 
     QSplitter* splMain;
     QSplitter* splHelp;
@@ -124,13 +147,10 @@ private:
     QLineEdit* leFindJ;
     QIcon* RedIcon;
 
-    QString* Script;     //pointer to external script
-    QString LocalScript; //if external not provided, this is the default script
-
-    bool tmpIgnore;
     bool ShowEvalResult;
 
     QSet<QString> ExpandedItemsInJsonTW;
+    QStringList functionList; //functions to populate tooltip helper
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -140,10 +160,21 @@ private:
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
 
+    void ReadFromJson(QJsonObject &json);
+    void WriteToJson(QJsonObject &json);
+
+    void askRemoveTab(int tab);
     void removeTab(int tab);
     void clearAllTabs();
     QString createNewTabName();
+    void renameTab(int tab);
 
+    void applyTextFindState();
+    void findText(bool bForward);
+    int  getIndent(const QString &line);
+    void setIndent(QString& line, int indent);
+    int  getSectionCounterChange(const QString &line);
+    void convertTabToSpaces(QString &line);
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);
@@ -159,28 +190,67 @@ signals:
 
 public slots:
     void receivedOnStart() {emit onStart();}
-    void receivedOnAbort() {emit onAbort();}
-    void receivedOnSuccess(QString eval) {emit success(eval);}
+    void receivedOnAbort();
+    void receivedOnSuccess(QString eval);
     void onDefaulFontSizeChanged(int size);
+    void onProgressChanged(int percent);
+    void updateFileStatusIndication();
+
+private slots:
+    void onFindSelected();
+    void onReplaceSelected();
+    virtual void onFindFunction();
+    virtual void onFindVariable();
+    virtual void onRequestAlignText(const QTextCursor &textCursor);
+    void onBack();
+    void onForward();
 };
 
-class AScriptWindowTabItem : QObject
+class AScriptWindowTabItem : public QObject
 {
     Q_OBJECT
 public:
-    AScriptWindowTabItem(QAbstractItemModel *model);
+    AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language);
     ~AScriptWindowTabItem();
 
-    CompletingTextEditClass* TextEdit;
-    QString FileName;
+    ATextEdit* TextEdit;
 
-    QCompleter* completer;
-    AHighlighterScriptWindow* highlighter;
+    QString FileName;
+    QString TabName;
+    bool    bExplicitlyNamed = false;   //if true save will not auto-rename
+
+    const QStringList& functions;
+
+    QCompleter* completer = 0;
+    QStringListModel* completitionModel;
+    AHighlighterScriptWindow* highlighter = 0;
+
+    QVector<int> VisitedLineNumber;
+    int indexInVisitedLineNumber = 0;
+    int maxLineNumbers = 20;
 
     void UpdateHighlight();
 
     void WriteToJson(QJsonObject &json);
     void ReadFromJson(QJsonObject &json);
+
+    bool wasModified() const;
+    void setModifiedStatus(bool flag);
+
+    void goBack();
+    void goForward();
+
+private slots:
+    void onCustomContextMenuRequested(const QPoint& pos);
+    void onLineNumberChanged(int lineNumber);
+    void onTextChanged();
+
+signals:
+    void requestFindText();
+    void requestReplaceText();
+    void requestFindFunction();
+    void requestFindVariable();
+    void requestAlignText(const QTextCursor&);
 };
 
 #endif // ASCRIPTWINDOW_H

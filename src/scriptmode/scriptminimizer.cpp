@@ -1,9 +1,8 @@
 #include "scriptminimizer.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #ifdef GUI
 #include "mainwindow.h"
-#include "genericscriptwindowclass.h"
 #endif
 
 #include <QScriptEngine>
@@ -13,11 +12,11 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-double ScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
+double JavaScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
 {
   void *thisvalue;
   memcpy(&thisvalue, &p[0], sizeof(void *));
-  AScriptManager* ScriptManager = (AScriptManager*)thisvalue;
+  AJavaScriptManager* ScriptManager = (AJavaScriptManager*)thisvalue;
 
   if (ScriptManager->isEvalAborted()) return 1e30;
 
@@ -44,12 +43,6 @@ AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(AScriptManager *ScriptM
   ScriptManager(ScriptManager)
 {
     Description = "Access to CERN ROOT minimizer";
-}
-
-AInterfaceToMinimizerScript::AInterfaceToMinimizerScript(const AInterfaceToMinimizerScript& other)
-  : AScriptInterface(other)
-{
-    ScriptManager = 0; // need to be set on copy!
 }
 
 AInterfaceToMinimizerScript::~AInterfaceToMinimizerScript()
@@ -180,8 +173,8 @@ bool AInterfaceToMinimizerScript::Run()
       return false;
     }
 
-  QScriptValue sv = ScriptManager->getMinimalizationFunction();
-  if (!sv.isFunction())
+  ROOT::Math::Functor *Funct = configureFunctor();
+  if (!Funct)
     {
       abort("Minimization function is not defined!");
       return false;
@@ -194,7 +187,6 @@ bool AInterfaceToMinimizerScript::Run()
   RootMinimizer->SetPrintLevel(PrintVerbosity);  
   RootMinimizer->SetStrategy( bHighPrecision ? 2 : 1 ); // 1 -> standard,  2 -> try to improve minimum (slower)
 
-  ROOT::Math::Functor *Funct = new ROOT::Math::Functor(&ScriptFunctor, ScriptManager->MiniNumVariables+1);
   RootMinimizer->SetFunction(*Funct);
 
   //prepare to transfer pointer to ScriptManager - it will the the first variable
@@ -318,3 +310,139 @@ void AInterfaceToMinimizerScript::AVarRecordUpperLimited::Debug() const
 {
   qDebug() << "UpperLimited"<<Value<<Step<<Max;
 }
+
+AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(AJavaScriptManager *ScriptManager) :
+  AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+
+AInterfaceToMinimizerJavaScript::AInterfaceToMinimizerJavaScript(const AInterfaceToMinimizerJavaScript & /*other*/) :
+  AInterfaceToMinimizerScript(0) { }
+
+void AInterfaceToMinimizerJavaScript::SetScriptManager(AJavaScriptManager *NewScriptManager)
+{
+  ScriptManager = dynamic_cast<AScriptManager*>(NewScriptManager);
+}
+
+ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
+{
+  AJavaScriptManager* jsm = static_cast<AJavaScriptManager*>(ScriptManager);
+  QScriptValue sv = jsm->getMinimalizationFunction();
+  if (!sv.isFunction()) return 0;
+
+  return new ROOT::Math::Functor(&JavaScriptFunctor, ScriptManager->MiniNumVariables + 1);
+}
+
+#ifdef __USE_ANTS_PYTHON__
+#include "apythonscriptmanager.h"
+#include "PythonQt.h"
+#include "PythonQt_QtAll.h"
+#include "PythonQtConversion.h"
+
+double PythonScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object
+{
+  void *thisvalue;
+  memcpy(&thisvalue, &p[0], sizeof(void *));
+  APythonScriptManager* psm = (APythonScriptManager*)thisvalue;
+
+  if (psm->isEvalAborted()) return 1e30;
+
+  const int numArguments = psm->MiniNumVariables;
+
+  /*
+    //Diagnostics
+    QString str;
+    for (int i=0; i<numArguments; i++)
+        str += QString::number(p[i+1])+"  ";
+    qDebug() << "Functor call with parameters:"<<str<<psm;
+  */
+
+  /*
+    PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();
+    PyObject* dict = NULL;
+    if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
+    else if (PyDict_Check(mainModule))
+        dict = mainModule;
+
+    if (dict)
+      {
+        PyObject* expression = PyDict_GetItemString(dict, psm->MiniFunctionName.toLatin1().data());
+        qDebug() << "expression:"<<expression;
+
+            PyObject *pyth_val;
+
+            //PyObject* arg1 = PyFloat_FromDouble(p[1]);
+            //PyObject* arg2 = PyFloat_FromDouble(p[2]);
+            //qDebug() << "args:"<< arg1 << arg2;
+            //pyth_val = PyObject_CallFunctionObjArgs(expression, arg1, arg2, NULL);
+
+            PyObject* tupleArgs = PyTuple_New(numArguments);
+            for (int i=0; i<numArguments; i++)
+                PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
+            pyth_val = PyObject_Call(expression, tupleArgs, NULL);
+
+            qDebug() << pyth_val;
+
+            double result = 1e30;
+            bool bOK;
+            if (pyth_val)
+                result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+
+            qDebug() << "-->" << result;
+            return result;
+
+      }
+    else return 1e30;
+    */
+
+    //PyObject* tupleArgs = PyTuple_New(numArguments);
+    PythonQtObjectPtr tupleArgs;
+    tupleArgs.setNewRef( PyTuple_New(numArguments) );
+    for (int i=0; i<numArguments; i++)
+        PyTuple_SetItem(tupleArgs, i, PyFloat_FromDouble(p[i+1]));
+    //PythonQtObjectPtr pyth_val = PyObject_Call(psm->MinimizationFunctor, tupleArgs, NULL);
+    PythonQtObjectPtr pyth_val;
+    pyth_val.setNewRef( PyObject_Call(psm->MinimizationFunctor, tupleArgs, NULL) );
+
+    double result = 1e30;
+    bool bOK;
+    if (pyth_val)
+        result = PythonQtConv::PyObjGetDouble(pyth_val, false, bOK);
+
+    //  qDebug() << "-->" << result;
+    return result;
+}
+
+AInterfaceToMinimizerPythonScript::AInterfaceToMinimizerPythonScript(APythonScriptManager *ScriptManager) :
+  AInterfaceToMinimizerScript( dynamic_cast<AScriptManager*>(ScriptManager) ) {}
+
+ROOT::Math::Functor *AInterfaceToMinimizerPythonScript::configureFunctor()
+{
+   APythonScriptManager* psm = static_cast<APythonScriptManager*>(ScriptManager);
+
+   /*
+   PythonQtObjectPtr mainModule = PythonQt::self()->getMainModule();   
+   PyObject* dict = NULL;
+   if (PyModule_Check(mainModule)) dict = PyModule_GetDict(mainModule);
+   else if (PyDict_Check(mainModule))
+       dict = mainModule;
+   if (dict)
+   {
+       psm->MinimizationFunctor = PyDict_GetItemString(dict, ScriptManager->MiniFunctionName.toLatin1().data());
+
+       if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
+           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
+   }
+   */
+
+   if (psm->GlobalDict.object())
+   {
+       psm->MinimizationFunctor.setNewRef( PyDict_GetItemString(psm->GlobalDict, ScriptManager->MiniFunctionName.toLatin1().data()) );
+
+       if (psm->MinimizationFunctor && PyCallable_Check(psm->MinimizationFunctor))
+           return new ROOT::Math::Functor(&PythonScriptFunctor, psm->MiniNumVariables + 1);
+   }
+
+
+   psm->MinimizationFunctor = 0;
+   return 0;
+}
+#endif

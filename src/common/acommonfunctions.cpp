@@ -27,12 +27,12 @@ double GetInterpolatedValue(double val, const QVector<double>* X, const QVector<
     //      qDebug()<<"data point in arrays X and F:"<<X->size()<<F->size()<<"Min X:"<<X->first()<<"Max X:"<<X->last();
     if (val < X->first())
       {
-        qWarning()<<"Interpolation: value is out of the data range:"<<val<< " < " << X->first();
+        //  qWarning()<<"Interpolation: value is out of the data range:"<<val<< " < " << X->first();
         return F->first();
       }
     if (val > X->last())
       {
-        qWarning()<<"Interpolation: value is out of the data range:"<<val<< " > " << X->last();
+        //  qWarning()<<"Interpolation: value is out of the data range:"<<val<< " > " << X->last();
         return F->last();
       }
 
@@ -208,7 +208,7 @@ double PolyInterpolation(double x, QVector<double>* xi, QVector<double>* yi, int
 }
 */
 
-void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y)
+void ConvertToStandardWavelengthes(const QVector<double>* sp_x, const QVector<double>* sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y)
 {
   y->resize(0);
 

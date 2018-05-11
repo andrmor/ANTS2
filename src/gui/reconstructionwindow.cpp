@@ -5,8 +5,8 @@
 #include "detectorclass.h"
 #include "geometrywindowclass.h"
 #include "graphwindowclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "outputwindow.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
@@ -17,7 +17,7 @@
 #include "ajsontools.h"
 #include "gainevaluatorwindowclass.h"
 #include "viewer2darrayobject.h"
-#include "genericscriptwindowclass.h"
+#include "ascriptwindow.h"
 #include "eventsdataclass.h"
 #include "dynamicpassiveshandler.h"
 #include "areconstructionmanager.h"
@@ -1946,7 +1946,7 @@ void ReconstructionWindow::on_pbShowPassivePMs_clicked()
     //cycle by PMs and if passive, add tracks for indication
     for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
-        const pm &PM = MW->PMs->at(ipm);
+        const APm &PM = MW->PMs->at(ipm);
         //if (PM.isStaticPassive())
         if (PMgroups->isStaticPassive(ipm))
         {
@@ -3827,12 +3827,12 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          QByteArray tmp = fields[0].toLocal8Bit();
          tmpHist1D->GetXaxis()->SetTitle(tmp.data());
          int size = tmpHist1D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist1D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist1D, How, true, false);
          else
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist1D;
+             //delete tmpHist1D;
              return;
            }
          break;
@@ -3851,12 +3851,12 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          tmpHist2D->GetXaxis()->SetTitle(tmp2.data());
 
          int size = tmpHist2D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist2D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist2D, How, true, false);
          else
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist2D;
+             //delete tmpHist2D;
              return;
            }
          break;
@@ -3877,12 +3877,12 @@ void ReconstructionWindow::on_pbTreeView_clicked()
          tmpHist3D->GetXaxis()->SetTitle(tmp3.data());
 
          int size = tmpHist3D->GetEntries();
-         if (size>0) MW->GraphWindow->Draw(tmpHist3D, How);
+         if (size>0) MW->GraphWindow->Draw(tmpHist3D, How, true, false);
          else
            {
              message("There is no data to show!", this);
              MW->GraphWindow->close();
-             delete tmpHist3D;
+             //delete tmpHist3D;
              return;
            }
          break;
@@ -5829,6 +5829,10 @@ void ReconstructionWindow::on_pbChanPerPhElShow_clicked()
     ACalibratorSignalPerPhEl_Stat* c = ReconstructionManager->Calibrator_Stat;
     TH1D* h = c->GetHistogram(ipm);
 
+    TString title("PM #");
+    title += ipm;
+    h->SetTitle(title);
+
     if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
     MW->GraphWindow->DrawWithoutFocus(h, "", true, false);
 
@@ -6119,9 +6123,9 @@ void ReconstructionWindow::on_pbUpdateReconConfig_clicked()
 void ReconstructionWindow::UpdateReconConfig()
 {
     ReconstructionWindow::writeToJson(MW->Config->JSON);
-    if (MW->GenScriptWindow)
-        if (MW->GenScriptWindow->isVisible())
-            MW->GenScriptWindow->updateJsonTree();    
+    if (MW->ScriptWindow)
+        if (MW->ScriptWindow->isVisible())
+            MW->ScriptWindow->updateJsonTree();
 }
 
 void ReconstructionWindow::on_cobCurrentGroup_activated(int index)
@@ -6355,6 +6359,7 @@ void ReconstructionWindow::on_pbPrepareSignalHistograms_clicked()
     MW->WindowNavigator->BusyOff();
 
     if (!bOK) message(c->GetLastError(), this);
+    else on_pbFromPeaksShow_clicked();
 }
 
 void ReconstructionWindow::on_ledFromPeaksThreshold_editingFinished()
@@ -6416,22 +6421,37 @@ void ReconstructionWindow::on_pbFromPeaksShow_clicked()
 {
   int ipm = ui->sbFrompeakPM->value();
   int numPMs = PMs->count();
+  if (ipm >= numPMs)
+  {
+      message("Bad PM index!", this);
+      return;
+  }
 
-  if (MW->TmpHub->PeakHists.size() != numPMs) return;
-  if (ipm >= MW->TmpHub->PeakHists.size()) return;
-  if (!MW->TmpHub->PeakHists.at(ipm)) return;
+  if (MW->TmpHub->PeakHists.size() != numPMs || !MW->TmpHub->PeakHists.at(ipm) )
+  {
+      message("Data not prepared!", this);
+      return;
+  }
 
   TH1D* h = new TH1D( *(MW->TmpHub->PeakHists.at(ipm)) );
 
+  TString title("PM #");
+  title += ipm;
+  h->SetTitle(title);
+
   if (!MW->GraphWindow->isVisible()) MW->GraphWindow->showNormal();
   MW->GraphWindow->DrawWithoutFocus(h, "");
+
+  double minY = MW->GraphWindow->getCanvasMinY();
+  double maxY = MW->GraphWindow->getCanvasMaxY();
 
   if (MW->TmpHub->FoundPeaks.size() == numPMs)
     {
       const QVector<double> &peaks = MW->TmpHub->FoundPeaks.at(ipm);
       for (int i=0; i<peaks.size(); i++)
         {
-          TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          //TLine* l = new TLine(peaks.at(i), -1e10, peaks.at(i), 1e10);
+          TLine* l = new TLine(peaks.at(i), minY, peaks.at(i), maxY);
           l->SetLineColor(kRed);
           l->SetLineWidth(2);
           l->SetLineStyle(2);

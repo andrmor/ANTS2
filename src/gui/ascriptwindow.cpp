@@ -254,7 +254,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
     QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
-    connect(DoAlign, &QShortcut::activated, [=](){onRequestAlignText(ScriptTabs[CurrentTab]->TextEdit->textCursor());});
+    connect(DoAlign, &QShortcut::activated, [&](){onRequestAlignText(ScriptTabs[CurrentTab]->TextEdit->textCursor());});
 
     if (!bLightMode)
         ReadFromJson();
@@ -1791,8 +1791,9 @@ void AScriptWindow::onFindVariable()
     te->setExtraSelections(esList);
 }
 
-void AScriptWindow::onRequestAlignText(QTextCursor& tc)
+void AScriptWindow::onRequestAlignText(const QTextCursor& textCursor)
 {
+    QTextCursor tc = textCursor;
     int start = tc.anchor();
     int stop = tc.position();
     if (start > stop) std::swap(start, stop);

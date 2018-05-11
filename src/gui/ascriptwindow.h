@@ -201,7 +201,7 @@ private slots:
     void onReplaceSelected();
     virtual void onFindFunction();
     virtual void onFindVariable();
-    virtual void onRequestAlignText(QTextCursor &tc);
+    virtual void onRequestAlignText(const QTextCursor &textCursor);
     void onBack();
     void onForward();
 };
@@ -250,7 +250,7 @@ signals:
     void requestReplaceText();
     void requestFindFunction();
     void requestFindVariable();
-    void requestAlignText(QTextCursor&);
+    void requestAlignText(const QTextCursor&);
 };
 
 #endif // ASCRIPTWINDOW_H

@@ -245,7 +245,7 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     if (obj.isNumber())
     {
         QVariant var = obj.toVariant();
-        if (var.type() ==  QMetaType::Int)
+        if (var.type() ==  QVariant::Int)
           {
             int integerVal = var.toInt();
             //  qDebug() << "     Integer:"<<integerVal;

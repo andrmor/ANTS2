@@ -6,7 +6,7 @@ ANTS2_MINOR = 8
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
+#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 
@@ -39,10 +39,11 @@ ants2_eigen3 {
 
      SOURCES += SplineLibrary/bs3fit.cpp \
                 SplineLibrary/tps3fit.cpp \
-
+                SplineLibrary/curvefit.cpp
 
      HEADERS += SplineLibrary/bs3fit.h \
-                SplineLibrary/tps3fit.h
+                SplineLibrary/tps3fit.h \
+                SplineLibrary/curvefit.h
 }
 ants2_matrix { # use matrix algebra for TP splines
     DEFINES += TPS3M
@@ -183,13 +184,15 @@ ants2_Python{
             LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
     }
     linux-g++ || unix {
-            INCLUDEPATH += $$system(python-config --includes)
+            INCLUDEPATH += $$system(python-config --includes) #fix:  --includes returns in -I/path format, and Qt expects /path
             LIBS += $$system(python-config --libs)
 
             INCLUDEPATH += usr/PythonQt3.2/src
             INCLUDEPATH += usr/PythonQt3.2/extensions/PythonQt_QtAll
 
-            LIBS += -Lusr/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
+            LIBS += -Lusr/PythonQt3.2/lib/ #only this?
+            LIBS += -Lusr/PythonQt3.2
+            LIBS += -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h
@@ -320,8 +323,7 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetottree.cpp \
     common/aroottreerecord.cpp \
     gui/atextedit.cpp \
-    gui/alineedit.cpp \
-    SplineLibrary/curvefit.cpp \
+    gui/alineedit.cpp \    
     scriptmode/ainterfacetoaddobjscript.cpp \
     scriptmode/ainterfacetogstylescript.cpp
 
@@ -458,7 +460,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/aroottreerecord.h \
     gui/atextedit.h \
     gui/alineedit.h \
-    SplineLibrary/curvefit.h \
     scriptmode/ainterfacetoaddobjscript.h \
     scriptmode/ainterfacetogstylescript.h
 

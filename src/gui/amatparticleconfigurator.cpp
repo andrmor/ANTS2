@@ -23,6 +23,9 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
 
     if (!GlobSet->MaterialsAndParticlesSettings.isEmpty())
         readFromJson(GlobSet->MaterialsAndParticlesSettings);
+
+    if (ui->leNatAbundFile->text().isEmpty())
+        ui->leNatAbundFile->setText(GlobSet->ExamplesDir + "/IsotopeNaturalAbundances.txt");
 }
 
 AMatParticleConfigurator::~AMatParticleConfigurator()

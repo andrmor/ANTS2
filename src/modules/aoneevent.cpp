@@ -13,7 +13,7 @@
 #include "TH1D.h"
 
 AOneEvent::AOneEvent(APmHub *PMs, TRandom2 *RandGen, ASimulationStatistics* SimStat) :
-    PMs(PMs), RandGen(RandGen), SimStat(SimStat)
+    SimStat(SimStat), PMs(PMs), RandGen(RandGen)
 {
   GammaRandomGen = new AGammaRandomGenerator(); 
 }

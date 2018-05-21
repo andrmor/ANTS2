@@ -5,7 +5,7 @@
 #include "aphoton.h"
 #include "aenergydepositioncell.h"
 #include "generalsimsettings.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 
 #include <QDebug>
 

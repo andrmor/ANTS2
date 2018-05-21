@@ -14,7 +14,7 @@ double GetInterpolatedValue(double val, const QVector<double> *X, const QVector<
 
 //double PolyInterpolation(double x, QVector<double> *xi, QVector<double> *yi, int order);
 
-void ConvertToStandardWavelengthes(QVector<double>* sp_x, QVector<double>* sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y);
+void ConvertToStandardWavelengthes(const QVector<double> *sp_x, const QVector<double> *sp_y, double WaveFrom, double WaveStep, int WaveNodes, QVector<double>* y);
 
 bool ExtractNumbersFromQString(QString input, QList<int> *ToAdd);  //parse number string e.g. like that: "2, 4-8, 7, 25-65"
 

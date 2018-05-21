@@ -1,0 +1,44 @@
+function output(dir)
+{
+       var s = gui.editGetText("e")
+       //var  steps = parseInt(s)
+       var output = "Moving " + dir + " " + s + " steps"
+       core.print(output)
+       gui.textAppendPlainText("t", output)
+}
+
+function left() { output("left") }
+function right() { output("right") }
+function up() { output("up") }
+function down() { output("down") }
+
+gui.horizontalLayout("h1", "")
+       gui.addStretch("h1")
+       gui.buttonNew("up", "h1", "Up")
+       gui.addStretch("h1")
+       
+gui.horizontalLayout("h2", "")
+       gui.addStretch("h2")
+       gui.buttonNew("left", "h2", "Left")       
+       gui.buttonNew("right", "h2", "Right")
+       gui.addStretch("h2")
+       
+gui.horizontalLayout("h3", "")
+       gui.addStretch("h3")
+       gui.buttonNew("down", "h3", "Down")
+       gui.addStretch("h3")
+       
+gui.horizontalLayout("h4", "")
+       gui.labelNew("l", "h4", "Set number of steps:")
+       gui.editNew("e", "h4", "1")
+       
+gui.textNew("t", "")
+
+gui.buttonOnClick("up", up)
+gui.buttonOnClick("down", down)
+gui.buttonOnClick("left", left)
+gui.buttonOnClick("right", right)
+
+gui.setWidgetTitle("Direction control")
+gui.show()
+

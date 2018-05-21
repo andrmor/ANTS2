@@ -1,12 +1,12 @@
 #include "viewer2darrayobject.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 
 #include <QGraphicsItem>
 #include <QDebug>
 #include <math.h>
 
-Viewer2DarrayObject::Viewer2DarrayObject(myQGraphicsView *GV, pms* PM_module)
+Viewer2DarrayObject::Viewer2DarrayObject(myQGraphicsView *GV, APmHub* PM_module)
 //  QObject()
 {
   gv = GV;
@@ -58,7 +58,7 @@ void Viewer2DarrayObject::DrawAll()
       //============================ drawing PMs ===================================
       for (int ipm=0; ipm<numPMs; ipm++)
         {
-          const pm &PM = PMs->at(ipm);
+          const APm &PM = PMs->at(ipm);
 
           //PM object pen
           QPen pen(PMprops[ipm].pen);

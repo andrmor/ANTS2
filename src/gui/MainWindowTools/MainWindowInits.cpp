@@ -7,7 +7,7 @@
 #include "lrfwindow.h"
 #include "reconstructionwindow.h"
 #include "sensorlrfs.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "guiutils.h"
@@ -17,10 +17,9 @@
 #include "checkupwindowclass.h"
 #include "CorrelationFilters.h"
 #include "amaterialparticlecolection.h"
-#include "genericscriptwindowclass.h"
 #include "detectorclass.h"
 #include "simulationmanager.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "particlesourcesclass.h"
 #include "globalsettingsclass.h"
 #include "globalsettingswindowclass.h"
@@ -36,6 +35,7 @@
 #endif
 
 #include <QVector>
+#include <QScreen>
 #include <QDebug>
 
 //Root
@@ -46,7 +46,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        EventsDataClass *EventsDataHub,
                        TApplication *RootApp,
                        ASimulationManager *SimulationManager,
-                       ReconstructionManagerClass *ReconstructionManager,
+                       AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
                        TmpObjHubClass *TmpHub,
                        GlobalSettingsClass *GlobSet) :
@@ -57,42 +57,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
 {
     qDebug() << ">Main window constructor started";
 
-    //Inits
-    GeometryWindow = 0;
-    GraphWindow = 0;
-    Owindow = 0;
-    ScriptWindow = 0;
-    newLrfWindow = nullptr;
-#ifdef ANTS_FANN
-    NNwindow = 0;    
-#endif
-    MIwindow = 0;
-    WindowNavigator = 0;
-    ELwindow = 0;
-    DAwindow = 0;
-    CheckUpWindow = 0;
-    GainWindow = 0;  
-    GenScriptWindow = 0;
-    GlobSetWindow = 0;    
-    PreviousNumberPMs = 0;    
-    ScanFloodNoiseProbability = 0;
-    histScan = 0;
-    histSecScint = 0;
-    msBox = 0;
-    BulkUpdate = false;
-    ShutDown = false;
-    TriggerForbidden = false;
-    ShowTop = false;
-    ColorByMaterial = false;
-    fConfigGuiLocked = false;
-    GeometryDrawDisabled = false;
-    fStartedFromGUI = false;
-    fSimDataNotSaved = false;
-    timesTriedToExit = 0;
     //aliases to use in GUI
-    MpCollection = Detector->MpCollection; // just an alias
-    PMs = Detector->PMs;                               // just an alias
-    Config = Detector->Config;                         // just an alias
+    MpCollection = Detector->MpCollection;
+    PMs = Detector->PMs;
+    Config = Detector->Config;
 
     qDebug()<<">Creating user interface for the main window";
     ui->setupUi(this);
@@ -158,15 +126,20 @@ MainWindow::MainWindow(DetectorClass *Detector,
     w = new QWidget();
     WindowNavigator = new WindowNavigatorClass(w, this);
     WindowNavigator->move(700,50);
-    qDebug()<<">Creating Graph Window";
+    qDebug()<<">Creating graph window";
     w = new QWidget();
     GraphWindow = new GraphWindowClass(w, this);
     GraphWindow->move(25,25);
-    qDebug()<<">Creating Geometry Window";
+    qDebug()<<">Creating geometry window";
     w = new QWidget();
     GeometryWindow = new GeometryWindowClass(w, this);
     GeometryWindow->move(25,25);
+    qDebug()<<">Creating JavaScript window";
     createScriptWindow();
+#ifdef __USE_ANTS_PYTHON__
+    qDebug()<<">Creating Python script window";
+    createPythonScriptWindow();
+#endif
     qDebug()<<">All windows created";
 
     //root update cycle
@@ -207,15 +180,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     //Busy status updates
     QObject::connect(WindowNavigator, SIGNAL(BusyStatusChanged(bool)), newLrfWindow, SLOT(onBusyStatusChanged(bool)));
 
-    //SimManager = new ASimulatorRunner(Detector, EventsDataHub);
     QObject::connect(SimulationManager->Runner, SIGNAL(updateReady(int, double)), this, SLOT(RefreshPhotSimOnTimer(int, double))); //Simulation interface refresh/update stuff
     QObject::connect(SimulationManager, SIGNAL(SimulationFinished()), this, SLOT(simulationFinished())); //Simulation finished
-    //QObject::connect(this, SIGNAL(StopRequested()), SimManager, SLOT(requestStop()), Qt::DirectConnection); //Stop button pressed
-    //SimManager->moveToThread(&simThread); //Move to background thread, as it always runs synchronously even in MT
-    //QObject::connect(&simThread, SIGNAL(started()), SimManager, SLOT(simulate())); //Connect thread to simulation start
-    //simTimerGuiUpdate.setInterval(1000);
-    //QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), SimManager, SLOT(updateGui()), Qt::DirectConnection);
-    //qDebug() << "->Simulation manager module created";
 
     DoNotUpdateGeometry = false; //control
 
@@ -224,10 +190,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Default detector configured";
 
     //Environment
-    on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
-    on_cbWaveResolved_toggled(ui->cbWaveResolved->isChecked());
-    on_cbAngularSensitive_toggled(ui->cbAngularSensitive->isChecked());
-    on_cbAreaSensitive_toggled(ui->cbAreaSensitive->isChecked());
     ui->fLoadProgress->setVisible(false);
     TGaxis::SetMaxDigits(3);  //Global setting for cern Root graphs!
      //Script window geometry
@@ -319,6 +281,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     {
         WindowNavigator->show();
         fShowGeom = true;
+        AssureWidgetIsWithingVisibleArea(this);
     }
     ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
 
@@ -335,7 +298,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->resize(GeometryWindow->width()+1, GeometryWindow->height());
     GeometryWindow->resize(GeometryWindow->width()-1, GeometryWindow->height());
     QThread::msleep(50);
-    MainWindow::ShowGeometry(false);
+    GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
     ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back

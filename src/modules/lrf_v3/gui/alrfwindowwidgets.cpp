@@ -11,7 +11,7 @@
 #include "detectorclass.h"
 #include "apmgroupsmanager.h"
 #include "afitlayersensorgroup.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "acollapsiblegroupbox.h"
 
 #include <array>
@@ -258,9 +258,9 @@ void FitLayerWidget::showTextOnSensors(int type)
 {
   Instructions::FitLayer *instruction = static_cast<Instructions::FitLayer*>(makeInstruction());
   std::vector<APoint> sensor_pos;
-  pms *PMs = detector->PMs;
+  APmHub *PMs = detector->PMs;
   for(int i = 0; i < PMs->count(); i++) {
-    pm &PM = PMs->at(i);
+    APm &PM = PMs->at(i);
     sensor_pos.push_back(APoint(PM.x, PM.y, PM.z));
   }
   AInstructionInput sensors(nullptr, sensor_pos, detector->PMgroups, nullptr, false, false, false);

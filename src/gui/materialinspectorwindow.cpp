@@ -19,6 +19,7 @@
 #include "aelementandisotopedelegates.h"
 #include "aneutronreactionsconfigurator.h"
 #include "aneutroninfodialog.h"
+#include "geometrywindowclass.h"
 
 #include <QDebug>
 #include <QLayout>
@@ -135,6 +136,9 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
+
+
+
     MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 
     //checkig this material
@@ -254,6 +258,9 @@ void MaterialInspectorWindow::UpdateWaveButtons()
       ui->pbShowABSlambda->setEnabled(false);
       ui->pbDeleteABSlambda->setEnabled(false);
     }
+
+  ui->pbShowReemProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
+  ui->pbDeleteReemisProbLambda->setEnabled( !tmpMaterial.reemisProbWave_lambda.isEmpty() );
 }
 
 void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
@@ -958,7 +965,7 @@ void MaterialInspectorWindow::AddMatToCobs(QString str)
 void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1083,7 +1090,7 @@ void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1111,7 +1118,6 @@ void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowNlambda_clicked()
 {
-  //MW->ShowGraphWindow();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
   MW->GraphWindow->MakeGraph(&tmpMaterial.nWave_lambda, &tmpMaterial.nWave, kRed, "Wavelength, nm", "Refractive index");
 }
@@ -1131,7 +1137,7 @@ void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
 void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
@@ -1159,9 +1165,8 @@ void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 
 void MaterialInspectorWindow::on_pbShowABSlambda_clicked()
 {
-  //MW->ShowGraphWindow();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient");
+  MW->GraphWindow->MakeGraph(&tmpMaterial.absWave_lambda, &tmpMaterial.absWave, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
 void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
@@ -1173,6 +1178,44 @@ void MaterialInspectorWindow::on_pbDeleteABSlambda_clicked()
   ui->pbShowABSlambda->setEnabled(false);
   ui->pbDeleteABSlambda->setEnabled(false);
   MaterialInspectorWindow::on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    MW->GraphWindow->MakeGraph(&tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave, kRed, "Wavelength, nm", "Reemission probability");
+}
+
+void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, "Load reemission probability vs wavelength", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+
+    if (fileName.isEmpty()) return;
+    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    LoadDoubleVectorsFromFile(fileName, &tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave);  //cleans previous data too
+
+    int numPoints = tmpMaterial.reemisProbWave_lambda.size();
+    QString str;
+    str.setNum(numPoints);
+    MW->Owindow->OutText(fileName + " - loaded "+str+" data points");
+
+    ui->pbShowReemProbLambda->setEnabled(numPoints>0);
+    ui->pbDeleteReemisProbLambda->setEnabled(numPoints>0);
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_pbDeleteReemisProbLambda_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.reemisProbWave_lambda.clear();
+    tmpMaterial.reemisProbWave.clear();
+
+    ui->pbShowReemProbLambda->setEnabled(false);
+    ui->pbDeleteReemisProbLambda->setEnabled(false);
+    on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbWasModified_clicked()
@@ -1306,6 +1349,7 @@ void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
     //accepting changes/new material
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     tmpMaterial.absWaveBinned.resize(0);
+    tmpMaterial.reemissionProbBinned.resize(0);
     tmpMaterial.nWaveBinned.resize(0);
     tmpMaterial.GeoMat = 0;  //no delete! the original material has to have them
     tmpMaterial.GeoMed = 0;
@@ -1462,11 +1506,11 @@ void MaterialInspectorWindow::on_pbShowUsage_clicked()
   if (flagFound)
     {
       Detector->colorVolumes(2, index);
-      MW->ShowGeometry(true, true, false);
+      MW->GeometryWindow->ShowGeometry(true, true, false);
     }
   else
     {
-      MW->ShowGeometry(false);
+      MW->GeometryWindow->ShowGeometry(false);
       message("Current detector configuration does not have objects referring to material "+name, this);
     }
 
@@ -2137,6 +2181,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
     L->addWidget(new QLabel("C2 H5 OH"));
     L->addWidget(new QLabel("C22H10N205"));
+    L->addWidget(new QLabel("\nWarning: pressing \"Confirm\" button resets custom isotope composition!"));
     d->setLayout(L);
 
     while (d->exec() != 0)
@@ -2586,4 +2631,13 @@ void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
      connect(pbClose, SIGNAL(clicked(bool)), d, SLOT(accept()));
 
      d->exec();
+}
+
+void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QModelIndex & /*index*/)
+{
+    if (!ui->cbShowIsotopes->isChecked())
+    {
+        ui->cbShowIsotopes->setChecked(true);
+        ShowTreeWithChemicalComposition();
+    }
 }

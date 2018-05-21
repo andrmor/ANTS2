@@ -94,7 +94,10 @@ struct AReconRecord : public ABaseScanAndReconRecord
   double xCoG, yCoG, zCoG;
   int iPMwithMaxSignal;
 
-  AReconRecord() : xCoG(0), yCoG(0), zCoG(0), iPMwithMaxSignal(0), chi2(0), fScriptFiltered(false) {}  //by default there is one point
+  AReconRecord() :
+    chi2(0), fScriptFiltered(false),
+    xCoG(0), yCoG(0), zCoG(0),
+    iPMwithMaxSignal(0) {}  //by default there is one point
 
   void CopyTo(AReconRecord* target) //copy all data to another ReconstructionStructure
     {

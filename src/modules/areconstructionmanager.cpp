@@ -1,4 +1,4 @@
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "eventsdataclass.h"
 #include "CorrelationFilters.h"
 #include "alrfmoduleselector.h"
@@ -7,15 +7,20 @@
 #include "processorclass.h"
 #include "ageoobject.h"
 #include "apositionenergyrecords.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
+#include "acalibratorsignalperphel.h"
+#include "detectorclass.h"
+#include "tmpobjhubclass.h"
 
 #ifdef ANTS_FLANN
 #include "nnmoduleclass.h"
 #endif
+
 #ifdef __USE_ANTS_CUDA__
 #include "cudamanagerclass.h"
 #endif
+
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
 #endif
@@ -30,46 +35,46 @@
 #include "TGeoManager.h"
 #include "TError.h"
 
-
-//ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub, DetectorClass *detector)
-ReconstructionManagerClass::ReconstructionManagerClass(EventsDataClass *eventsDataHub,
-                                                       pms* PMs,
-                                                       APmGroupsManager* PMgroups,
-                                                       ALrfModuleSelector *LRFs,
-                                                       TGeoManager** PGeoManager) :
-    EventsDataHub(eventsDataHub), PMs(PMs), PMgroups(PMgroups), LRFs(LRFs), PGeoManager(PGeoManager)
+AReconstructionManager::AReconstructionManager(EventsDataClass *eventsDataHub, DetectorClass *Detector, TmpObjHubClass* TmpObjHub) :
+    EventsDataHub(eventsDataHub), Detector(Detector), PMs(Detector->PMs), PMgroups(Detector->PMgroups), LRFs(Detector->LRFs), TmpObjHub(TmpObjHub)
 {
-  NumThreads = 1;
-  bBusy = false;
+    NumThreads = 1;
+    bBusy = false;
 
 #ifdef ANTS_FANN
-  ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
-  qDebug() << "->NeuralNetworks module created";
+    ANNmodule = new NeuralNetworksModule(PMs, PMgroups, EventsDataHub);
+    qDebug() << "->NeuralNetworks module created";
 #endif
 
 #ifdef ANTS_FLANN
-  KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
-  qDebug() << "->Nearest neighbour module created";
+    KNNmodule = new NNmoduleClass(EventsDataHub, PMs); //fast nearest neighbour module
+    qDebug() << "->Nearest neighbour module created";
 #endif
+
+    Calibrator_Stat  = new ACalibratorSignalPerPhEl_Stat (*EventsDataHub, TmpObjHub->SigmaHists, TmpObjHub->ChPerPhEl_Sigma2, *Detector);
+    Calibrator_Peaks = new ACalibratorSignalPerPhEl_Peaks(*EventsDataHub, TmpObjHub->PeakHists,  TmpObjHub->ChPerPhEl_Peaks, TmpObjHub->FoundPeaks);
 }
 
-ReconstructionManagerClass::~ReconstructionManagerClass()
+AReconstructionManager::~AReconstructionManager()
 {
+    delete Calibrator_Peaks;
+    delete Calibrator_Stat;
+
 #ifdef ANTS_FLANN
-  delete KNNmodule;
-  //qDebug() << "  Nearest neighbour module deleted";
+    delete KNNmodule;
+    //qDebug() << "  Nearest neighbour module deleted";
 #endif
 
 #ifdef ANTS_FANN
-  delete ANNmodule;
-  //qDebug() << "  NeuralNetworks module deleted";
+    delete ANNmodule;
+    //qDebug() << "  NeuralNetworks module deleted";
 #endif
 }
 
-bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
+bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, bool fShow)
 {
    //qDebug() << "==> Reconstruct all events triggered";    
-  bool fOK = ReconstructionManagerClass::fillSettingsAndVerify(json, true);
+  bool fOK = AReconstructionManager::fillSettingsAndVerify(json, true);
   if (!fOK)
     {
       qWarning() << "Reconstruction manager reports fail in processing of configuration:\n"
@@ -151,17 +156,16 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
           {
 #ifdef __USE_ANTS_CUDA__
               CudaManagerClass cm(PMs, PMgroups, LRFs->getOldModule(), EventsDataHub, &RecSet[CurrentGroup], CurrentGroup);
-              QString Method = (*LRFs->getOldModule())[0]->type();//  "Axial" "XY" "Sliced3D" "ComprAxial" "Composite"
-              bool ok = cm.RunCuda(Method);
+              bool ok = cm.RunCuda(1000 * RecSet.at(CurrentGroup).BufferSize);
               if (!ok)
               {
-                  ErrorString = cm.getLastError();//"CUDA module reports an error during reconstruction";
+                  ErrorString = cm.GetLastError();//"CUDA module reports an error during reconstruction";
                   PMgroups->clearActiveSensorGroups();
                   bBusy = false;
                   emit ReconstructionFinished(false, fShow);
                   return false;
               }
-              qDebug() << "Rate (us/event) reported by cuda manager module:" << cm.getUsPerEvent();
+              qDebug() << "Rate (us/event) reported by cuda manager module:" << cm.GetUsPerEvent();
 #else
               ErrorString = "CUDA was not configured in .pro";
               PMgroups->clearActiveSensorGroups();
@@ -271,7 +275,7 @@ bool ReconstructionManagerClass::reconstructAll(QJsonObject &json, int numThread
   return true;
 }
 
-void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorClass*> &todo)
+void AReconstructionManager::distributeWork(int Algorithm, QList<ProcessorClass*> &todo)
 // Algorithm options:
 //0 - CoG reconstruction, 1 - MG, 2 - RootMini
 //10 - Calculate Chi2, 11 - process event filters
@@ -320,7 +324,7 @@ void ReconstructionManagerClass::distributeWork(int Algorithm, QList<ProcessorCl
   while (from<numEvents);
 }
 
-void ReconstructionManagerClass::doFilters()
+void AReconstructionManager::doFilters()
 {
     QList<ProcessorClass*> todo;
 
@@ -341,7 +345,7 @@ void ReconstructionManagerClass::doFilters()
     bBusy = false;
 }
 
-bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs)
+bool AReconstructionManager::fillSettingsAndVerify(QJsonObject &json, bool fCheckLRFs)
 {
   if (EventsDataHub->isEmpty())
     {
@@ -463,7 +467,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
   //filling and checking event filtering settings
   FiltSet.clear();
 
-  bool fOK = ReconstructionManagerClass::configureFilters(jsReconSet);
+  bool fOK = AReconstructionManager::configureFilters(jsReconSet);
   if (!fOK) return false;
 
   if (RecSet.size() != FiltSet.size())
@@ -476,7 +480,7 @@ bool ReconstructionManagerClass::fillSettingsAndVerify(QJsonObject &json, bool f
   return true;
 }
 
-bool ReconstructionManagerClass::configureFilters(QJsonObject &json)
+bool AReconstructionManager::configureFilters(QJsonObject &json)
 {
   //expecting json to be "ReconstructionConfig" object
   if ( !json.contains("FilterOptions") )
@@ -518,12 +522,12 @@ bool ReconstructionManagerClass::configureFilters(QJsonObject &json)
   return true;
 }
 
-void ReconstructionManagerClass::onLRFsCopied()
+void AReconstructionManager::onLRFsCopied()
 {
     fDoingCopyLRFs.store(false);
 }
 
-bool ReconstructionManagerClass::run(QList<ProcessorClass *> reconstructorList)
+bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    
   fStopRequested = false;
   QList<QThread*> threads;  
@@ -595,10 +599,10 @@ bool ReconstructionManagerClass::run(QList<ProcessorClass *> reconstructorList)
   return !fStopRequested;
 }
 
-void ReconstructionManagerClass::filterEvents(QJsonObject &json, int numThreads)
+void AReconstructionManager::filterEvents(QJsonObject &json, int numThreads)
 { 
     //qDebug() << "==>Filter all events triggered";
-  bool fOK = ReconstructionManagerClass::fillSettingsAndVerify(json, false);
+  bool fOK = AReconstructionManager::fillSettingsAndVerify(json, false);
   if (!fOK)
       {
          qWarning() << "Reconstruction manager reports fail in processing of configuration:\n"
@@ -618,7 +622,7 @@ void ReconstructionManagerClass::filterEvents(QJsonObject &json, int numThreads)
   emit RequestShowStatistics();
 }
 
-void ReconstructionManagerClass::assureReconstructionDataContainersExist()
+void AReconstructionManager::assureReconstructionDataContainersExist()
 {
     for (CurrentGroup = 0; CurrentGroup<FiltSet.size(); CurrentGroup++)
     {
@@ -635,7 +639,7 @@ void ReconstructionManagerClass::assureReconstructionDataContainersExist()
     }
 }
 
-void ReconstructionManagerClass::singleThreadEventFilters()
+void AReconstructionManager::singleThreadEventFilters()
 {
   //qDebug() << "Running single thread filters";
   //GoodEvent status already set by multithread filters!
@@ -658,8 +662,8 @@ void ReconstructionManagerClass::singleThreadEventFilters()
 #endif
 
   TGeoNavigator* navi = 0;
-  if (FiltS->fSpF_LimitToObj && PGeoManager)
-      navi = (*PGeoManager)->GetCurrentNavigator();
+  if (FiltS->fSpF_LimitToObj)
+      navi = Detector->GeoManager->GetCurrentNavigator();
   else FiltS->fSpF_LimitToObj = false;
 
   // main cycle
@@ -742,7 +746,7 @@ void ReconstructionManagerClass::singleThreadEventFilters()
   //qDebug() << "Single thread filters done!";
 }
 
-void ReconstructionManagerClass::onRequestClearKNNfilter()
+void AReconstructionManager::onRequestClearKNNfilter()
 {
 #ifdef ANTS_FLANN
    KNNmodule->Filter.clear();

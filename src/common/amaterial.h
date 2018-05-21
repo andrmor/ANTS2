@@ -51,8 +51,13 @@ public:
 
   QVector<double> absWave_lambda;
   QVector<double> absWave;
-  QVector<double> absWaveBinned;//regular step (WaveStep step, WaveNodes bins)
+  QVector<double> absWaveBinned; //regular step (WaveStep step, WaveNodes bins)
   double getAbsorptionCoefficient(int iWave = -1) const;
+
+  QVector<double> reemisProbWave;
+  QVector<double> reemisProbWave_lambda;
+  QVector<double> reemissionProbBinned; //regular step (WaveStep step, WaveNodes bins)
+  double getReemissionProbability(int iWave = -1) const;
 
   QVector<double> PrimarySpectrum_lambda;
   QVector<double> PrimarySpectrum;

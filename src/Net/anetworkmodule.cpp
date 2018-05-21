@@ -1,5 +1,5 @@
 #include "anetworkmodule.h"
-#include "ascriptmanager.h"
+#include "ajavascriptmanager.h"
 
 #include "awebsocketserver.h"
 #ifdef USE_ROOT_HTML
@@ -7,18 +7,6 @@
 #endif
 
 #include <QDebug>
-
-ANetworkModule::ANetworkModule()
-{
-    ScriptManager = 0;
-    WebSocketServer = 0;
-    fDebug = true;
-    RootServerPort = 0;
-
-#ifdef USE_ROOT_HTML
-    RootHttpServer = 0;
-#endif
-}
 
 ANetworkModule::~ANetworkModule()
 {
@@ -29,7 +17,7 @@ ANetworkModule::~ANetworkModule()
 #endif
 }
 
-void ANetworkModule::SetScriptManager(AScriptManager* man)
+void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
 {
   ScriptManager = man;
 }

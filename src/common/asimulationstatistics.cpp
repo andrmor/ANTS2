@@ -42,7 +42,7 @@ void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords
 
     if (WaveSpectrum) delete WaveSpectrum;
     if (WaveNodes != 0)
-       WaveSpectrum = new TH1D("iWaveSpectrum"+NameID,"WaveIndex spectrum", WaveNodes, 0, WaveNodes-1);
+       WaveSpectrum = new TH1D("iWaveSpectrum"+NameID,"WaveIndex spectrum", WaveNodes, 0, WaveNodes);
     else
        WaveSpectrum = new TH1D("iWaveSpectrum"+NameID,"WaveIndex spectrum",numBins,0,-1);
 

@@ -3,8 +3,8 @@
 #include "ui_outputwindow.h"
 #include "mainwindow.h"
 #include "graphwindowclass.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "windownavigatorclass.h"
 #include "guiutils.h"
 #include "amaterialparticlecolection.h"
@@ -288,13 +288,13 @@ void OutputWindow::on_pbSiPMpixels_clicked()
         }
     }
 
-    int binsX = MW->PMs->getPixelsX(ipm);
-    int binsY = MW->PMs->getPixelsY(ipm);
+    int binsX = MW->PMs->PixelsX(ipm);
+    int binsY = MW->PMs->PixelsY(ipm);
 //    qDebug()<<binsX<<binsY;
 
     auto hist = new TH2C("histOutW","x vs y",binsX,0,binsX, binsY, -binsY,0);
 
-    PMtypeClass *typ = MW->PMs->getTypeForPM(ipm);//  PMtypeProperties[PMs[ipm].type];
+    const APmType *typ = MW->PMs->getTypeForPM(ipm);
     for (int iX=0; iX<binsX; iX++)
      for (int iY=0; iY<binsY; iY++)
       {         
@@ -621,7 +621,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
           else brush.setColor(Qt::black);
         }
 
-      const pm &PM = MW->PMs->at(ipm);
+      const APm &PM = MW->PMs->at(ipm);
       if (Passives)
           if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
 
@@ -663,7 +663,7 @@ void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, 
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
-      const pm &PM = MW->PMs->at(ipm);
+      const APm &PM = MW->PMs->at(ipm);
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 
@@ -787,9 +787,12 @@ void OutputWindow::on_pbWaveSpectrum_clicked()
   //qDebug() << nBins << MW->WaveNodes;
   if (MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins-1, MW->WaveFrom, MW->WaveTo);
+      auto WavelengthSpectrum = new TH1D("","Wavelength of detected photons", nBins, MW->WaveFrom, MW->WaveTo);
       for (int i=1; i<nBins+1; i++) //0 - underflow, n+1 - overflow
+      {
+          //qDebug() << i << spec->GetBinCenter(i)<< spec->GetBinContent(i);
           WavelengthSpectrum->SetBinContent(i, spec->GetBinContent(i));
+      }
       WavelengthSpectrum->GetXaxis()->SetTitle("Wavelength, nm");
       MW->GraphWindow->Draw(WavelengthSpectrum);
     }

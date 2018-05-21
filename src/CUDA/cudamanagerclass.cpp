@@ -1,7 +1,7 @@
 #ifdef __USE_ANTS_CUDA__
 
 #include "cudamanagerclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 #include "sensorlrfs.h"
 #include "eventsdataclass.h"
@@ -56,7 +56,7 @@ extern "C" bool cuda_run(const int Method,  //0 - Axial 2D; 1 - XY; 2 - Slices; 
 
 extern "C" const char* getLastCUDAerror();
 
-CudaManagerClass::CudaManagerClass(pms* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass *eventsDataHub, ReconstructionSettings *RecSet, int currentGroup) :
+CudaManagerClass::CudaManagerClass(APmHub* PMs, APmGroupsManager* PMgroups, SensorLRFs* SensLRF, EventsDataClass *eventsDataHub, ReconstructionSettings *RecSet, int currentGroup) :
    PMs(PMs), PMgroups(PMgroups), SensLRF(SensLRF), EventsDataHub(eventsDataHub), CurrentGroup(currentGroup)
 {  
   eventsData = 0; 
@@ -120,10 +120,11 @@ CudaManagerClass::~CudaManagerClass()
   Clear();
 }
 
-bool CudaManagerClass::RunCuda(QString method)
-{  
+bool CudaManagerClass::RunCuda(int bufferSize)
+{
   //watchdogs
-  if (EventsDataHub->isEmpty())
+  numEvents = EventsDataHub->Events.size(); //num events defined
+  if (numEvents == 0)
     {
       message("There are no events to reconstruct!");
       return false;
@@ -133,14 +134,26 @@ bool CudaManagerClass::RunCuda(QString method)
       message("Start from true XY selected, but scan data are empty!");
       return false;
     }
-  numEvents = EventsDataHub->Events.size(); //num events defined
-    //qDebug() << "Events to process:"<<numEvents;
   if (!SensLRF->isAllLRFsDefined())
     {
       message("LRFs are not defined!");
       return false;
     }
+  numPMs = PMs->count(); //num PMs defined
+  numPMsStaticActive = PMgroups->countActives(); //num PMs for CUDA: all active PMs (dynamic were cleared!)
+  if (numPMsStaticActive<2)
+    {
+      message("Not enough active PMs: "+QString::number(numPMsStaticActive)+" are defined!");
+      return false;
+    }
 
+  //selecting reconstruction method
+    //find the first active PM - it defined the method
+  int iFirstActivePM = 0;
+  for (;iFirstActivePM<numPMs; iFirstActivePM++)
+    if (PMgroups->isActive(iFirstActivePM)) break;
+  const LRF2* lrf =  (*SensLRF)[iFirstActivePM];
+  const QString method = lrf->type();
   //Defining the method
   if (method == "Axial") Method = 0;
   else if (method == "XY") Method = 1;
@@ -153,20 +166,7 @@ bool CudaManagerClass::RunCuda(QString method)
       return false;
     }
 
-  numPMs = PMs->count(); //num PMs defined
-  numPMsStaticActive = PMgroups->countActives(); //num PMs for CUDA: all active PMs (dynamic were cleared!)
-  if (numPMsStaticActive<2)
-    {
-      message("Not enough active PMs: "+QString::number(numPMsStaticActive)+" are defined!");
-      return false;
-    }
-    //qDebug() << "Method:"<<method<< "Total PMs:"<<numPMs<<"Active PMs:"<<numPMsStaticActive;
-  int iFirstActivePM = 0;
-  for (;iFirstActivePM<numPMs; iFirstActivePM++)
-    if (PMgroups->isActive(iFirstActivePM)) break;
-
   //confirming that all LRFs (active pms!) have the same type and setting (nodes number, compression parameters...)
-  const LRF2* lrf =  (*SensLRF)[iFirstActivePM];
   QJsonObject json0 = lrf->reportSettings();
   for (int ipm=iFirstActivePM+1; ipm<numPMs; ipm++)
     if (PMgroups->isActive(ipm))
@@ -177,7 +177,7 @@ bool CudaManagerClass::RunCuda(QString method)
             return false;
           }
      }
-
+  //no need?:
   for (int ipm=0; ipm<numPMs; ipm++)
    if (PMgroups->isActive(ipm))
     {
@@ -209,62 +209,84 @@ bool CudaManagerClass::RunCuda(QString method)
           return false;
         }
     }
-/*
-  if (IgnoreFarPMs)
-    if (Method != 0 && Method != 3 && Method != 4)
-      {
-        //only Axial, CompAxial and Composite are allowed!
-        message("LRFs should be Axial/CompAxial/Composite to use dynamic passives by distance!");
-        return false;
-      }
-*/
 
-  //clear containers
-  Clear();
+  qDebug() << "->Cuda reconstruction";
+  qDebug() << "-->Method:"<<method<< "Total PMs:"<<numPMs<<"Active PMs:"<<numPMsStaticActive;
 
-//  qDebug()<<"\n\n==>Starting cuda inits...";
-
-//  if (Method == 0 || Method == 3 || Method == 4)
+  qDebug()<<"-->Starting cuda inits";
+  qDebug()<<"--->Clear...";
+  Clear(); //clear all containers
+  qDebug()<<"--->PM centers...";
   ConfigurePMcenters();
-//   qDebug()<<"..centers";
+  qDebug()<<"--->LRFs...";
   ConfigureLRFs(); //also defines slices data for Slice3D
-//   qDebug()<<"..LRFs";
-  bool ok = ConfigureEvents();
-  if (!ok)
-    {
-      message("CUDA manager: Failed to reserve memory on host to store events");
-      return false;
-    }
-//   qDebug()<<"..Events";
-  ok = ConfigureOutputs();  //needs Slices defined!
-  if (!ok)
+  qDebug()<<"--->Outputs...";
+  bool bOK = ConfigureOutputs(bufferSize);  //needs Slices defined!
+  if (!bOK)
     {
       message("CUDA manager: Failed to reserve memory on host for the results");
+      Clear();
       return false;
     }
-//   qDebug()<<"..outputs";
 
-  //running reconstruction
-  ElapsedTime = 0;
+  int from = 0;
+  int to = bufferSize;
+  float FullElapsedTime = 0;
+  do
+  {
+      if (to > numEvents) to = numEvents;
+      if (from == to) break;
+      qDebug() << "--->Preparing reconstruction for events from"<< from << "to" << to;
 
-  if (Method == 2) ok = CudaManagerClass::PerformSliced();
-  else ok = CudaManagerClass::Perform2D();
+      qDebug()<<"---->configure events";
+      bool bOK = ConfigureEvents(from, to);
+      if (!bOK)
+        {
+          message("CUDA manager: Failed to reserve memory on host to store events");
+          Clear();
+          return false;
+        }
 
-  qDebug()<<"\n==>Cuda run completed. Success:"<<ok;
-  if (ok) qDebug() << "GPU kernel cumulative execution time: " << ElapsedTime << "ms";
 
-  if (!ok) LastError = getLastCUDAerror();
-  else LastError = "";
+      if (Method == 2) bOK = CudaManagerClass::PerformSliced(from, to);
+      else bOK = CudaManagerClass::Perform2D(from, to);
+      qDebug()<<"---->Cuda run completed. Success:"<<bOK;
+      FullElapsedTime += ElapsedTime;
+      if (!bOK)
+      {
+          qDebug() << "Fail!";
+          LastError = getLastCUDAerror();
+          Clear();
+          return false;
+      }
 
-  usPerEvent = (numEvents>0) ? 1000.0*ElapsedTime/numEvents : 0;
-  Clear();
-  return ok;
+      from += bufferSize;
+      to   += bufferSize;
+  }
+  while (to <= numEvents);
+
+  qDebug() << "---->GPU kernel cumulative execution time: " << FullElapsedTime << "ms";
+
+  usPerEvent = (FullElapsedTime>0) ? 1000.0*FullElapsedTime/numEvents : 0;
+  LastError = "";
+  return true;
 }
 
-bool CudaManagerClass::Perform2D()
+double CudaManagerClass::GetUsPerEvent() const
 {
-  qDebug()<<"==>Runnig cuda...";
-  bool ok = cuda_run(Method,
+    return usPerEvent;
+}
+
+const QString &CudaManagerClass::GetLastError() const
+{
+    return LastError;
+}
+
+bool CudaManagerClass::Perform2D(int from, int to)
+{
+    int numEventsInBuffer = to - from;
+
+    bool ok = cuda_run(Method,
             BlockSizeXY,
             Iterations,
             Scale,
@@ -288,7 +310,7 @@ bool CudaManagerClass::Perform2D()
             p2,
             lrfFloatsAxialPerPM,
             eventsData,
-            numEvents,
+            numEventsInBuffer,
             recX,
             recY,
             recEnergy,
@@ -296,14 +318,15 @@ bool CudaManagerClass::Perform2D()
             probability,
             &ElapsedTime);
 
-  //for (int i=0; i<(numEvents<10?numEvents:10); i++) qDebug()<<i<<"> "<<recX[i]<<recY[i]<<recEnergy[i]<<chi2[i];
-  if (ok) DataToAntsContainers();
+  if (ok) DataToAntsContainers(from, to);
   return ok;
 }
 
-bool CudaManagerClass::PerformSliced()
+bool CudaManagerClass::PerformSliced(int from, int to)
 {
+    int numEventsInBuffer = to - from;
     float ElapsedTimeDelta = 0;
+
     for (int iz = 0; iz<zSlices; iz++)
       {
         qDebug()<<"==>Running cuda, slice="<<iz;
@@ -331,7 +354,7 @@ bool CudaManagerClass::PerformSliced()
                       p2,
                       lrfFloatsAxialPerPM,
                       eventsData,
-                      numEvents,
+                      numEventsInBuffer,
                       recX,
                       recY,
                       recEnergy,
@@ -343,7 +366,7 @@ bool CudaManagerClass::PerformSliced()
         qDebug()<<"==> done!";
 
         //storing temporary data
-        for (int iev=0; iev<numEvents; iev++)
+        for (int iev=0; iev<numEventsInBuffer; iev++)
           {
            RecData[iz][iev].X = recX[iev];
            RecData[iz][iev].Y = recY[iev];
@@ -358,19 +381,11 @@ bool CudaManagerClass::PerformSliced()
       }
 
     //success! - processing results
-      //choosing z and sending data to ANTS
-    EventsDataHub->clearReconstruction(0);
-    EventsDataHub->ReconstructionData.resize(1);
-    EventsDataHub->ReconstructionData[0].reserve(numEvents);
-
-    for (int iev = 0; iev<numEvents; iev++)
+    for (int iev = 0; iev<numEventsInBuffer; iev++)
       {
-        //qDebug()<<iev<<"> "<<recX[iev]<<recY[iev];
-        AReconRecord* tmp = new AReconRecord();
-
-        //choosing z
+        //finding best z
         int imax = 0;
-        float maxProb, minChi2, Prob, Chi2;
+        float maxProb, minChi2;
 
         if (MLorChi2 == 0) maxProb = RecData[0][iev].Probability;
         else minChi2 = RecData[0][iev].Chi2;
@@ -379,7 +394,7 @@ bool CudaManagerClass::PerformSliced()
           {
             if (MLorChi2 == 0)
               {
-                Prob = RecData[iz][iev].Probability;
+                const float& Prob = RecData[iz][iev].Probability;
                 if (Prob > maxProb)
                   {
                     maxProb = Prob;
@@ -388,7 +403,7 @@ bool CudaManagerClass::PerformSliced()
               }
             else
               {
-                Chi2 = RecData[iz][iev].Chi2;
+                const float& Chi2 = RecData[iz][iev].Chi2;
                 if (Chi2 < minChi2)
                   {
                     minChi2 = Chi2;
@@ -397,18 +412,21 @@ bool CudaManagerClass::PerformSliced()
               }
           }
 
-        tmp->Points[0].r[0] = RecData[imax][iev].X;
-        tmp->Points[0].r[1] = RecData[imax][iev].Y;
+        AReconRecord* rec = EventsDataHub->ReconstructionData[CurrentGroup][from + iev];
+        rec->Points[0].r[0] = RecData[imax][iev].X;
+        rec->Points[0].r[1] =  RecData[imax][iev].Y;
         const LRFsliced3D *lrf = dynamic_cast<const LRFsliced3D*>( (*SensLRF)[0] );
         if (lrf)
-           tmp->Points[0].r[2] = lrf->getSliceMedianZ(imax); //like in CPU based
+           rec->Points[0].r[2] = lrf->getSliceMedianZ(imax); //like in CPU based
         else
-           tmp->Points[0].r[2] = Slice0Z + imax * SliceThickness;
-        tmp->Points[0].energy = RecData[imax][iev].Energy;
-        tmp->chi2 = RecData[imax][iev].Chi2;
-        tmp->ReconstructionOK = true;
-       // tmp->GoodEvent = true;
-        EventsDataHub->ReconstructionData[0].append(tmp);
+           rec->Points[0].r[2] = Slice0Z + imax * SliceThickness;
+
+        rec->Points[0].energy = RecData[imax][iev].Energy;
+        rec->chi2 = RecData[imax][iev].Chi2;
+        bool bGoodEvent = ( rec->chi2 != 1.0e10 );
+        rec->ReconstructionOK = bGoodEvent;
+        rec->GoodEvent = bGoodEvent;
+
         //qDebug()<<"Imax:"<<imax<<"  prob:"<<maxProb<<" z0="<<Slice0Z<<"  z="<<Slice0Z + imax * SliceThickness;
       }
     return true;
@@ -416,8 +434,6 @@ bool CudaManagerClass::PerformSliced()
 
 void CudaManagerClass::ConfigurePMcenters()
 {  
-   PMsX.clear();
-   PMsY.clear();   
    for (int ipm=0; ipm<numPMs; ipm++)
     if (PMgroups->isActive(ipm))
       {
@@ -426,15 +442,17 @@ void CudaManagerClass::ConfigurePMcenters()
       }
 }
 
-bool CudaManagerClass::ConfigureEvents()
+bool CudaManagerClass::ConfigureEvents(int from, int to)
 {
-  if (eventsData) delete[] eventsData;
   int eventSize = numPMsStaticActive + 2; //PM signals of active PMs + XY coordinates of grid center
+  int numEventsInBuffer = to - from;
 
   //allocating event data container
+  if (eventsData) delete [] eventsData;
+  eventsData = 0;
   try
     {
-      eventsData = new float[numEvents * eventSize];
+      eventsData = new float[numEventsInBuffer * eventSize];
     }
   catch (...)
     {
@@ -442,26 +460,25 @@ bool CudaManagerClass::ConfigureEvents()
     }
 
   //filling events (only active PMs!)
-  for (int iev = 0; iev<numEvents; iev++)
+  for (int iev = 0; iev<numEventsInBuffer; iev++)
     {
       int ipm = 0;
-      for (int iActualPM=0; iActualPM<numPMs; iActualPM++) //iActualPM - acual PM index, ipm - pm index for CUDA
+      for (int iActualPM = 0; iActualPM < numPMs; iActualPM++) //iActualPM - acual PM index, ipm - pm index for CUDA
         if (PMgroups->isActive(iActualPM))
           { //adding only active PMs! - note - dynamic status was cleared for all PMs!
-              eventsData[iev*eventSize + ipm] = EventsDataHub->Events.at(iev)[iActualPM];
+              eventsData[iev*eventSize + ipm] = EventsDataHub->Events.at(from + iev)[iActualPM];
               ipm++;
           }
     }
 
   //filling centers of grid for all events
-  //qint64 t0 = QDateTime::currentDateTime().toMSecsSinceEpoch();
   switch (OffsetOption)
   {
   case 0: //CoG XY -> center of grid
-      for (int iev = 0; iev<numEvents; iev++)
+      for (int iev = 0; iev<numEventsInBuffer; iev++)
       {          
           float *cuEvent = &eventsData[iev*eventSize];          
-          const AReconRecord* thisEv = EventsDataHub->ReconstructionData.at(0).at(iev);
+          const AReconRecord* thisEv = EventsDataHub->ReconstructionData.at(0).at(from + iev);
           if (thisEv->ReconstructionOK)
           {
               cuEvent[numPMsStaticActive]   = thisEv->xCoG;
@@ -476,10 +493,10 @@ bool CudaManagerClass::ConfigureEvents()
       }
       break;
   case 1: //PM with maximum signal (corrected for gain) -> center of grid
-      for (int iev = 0; iev<numEvents; iev++)
+      for (int iev = 0; iev<numEventsInBuffer; iev++)
       {
           float *cuEvent = &eventsData[iev*eventSize];
-          const AReconRecord* thisEv = EventsDataHub->ReconstructionData.at(0).at(iev);
+          const AReconRecord* thisEv = EventsDataHub->ReconstructionData.at(0).at(from + iev);
           if (thisEv->ReconstructionOK)
             {
               cuEvent[numPMsStaticActive]   = PMs->X(thisEv->iPMwithMaxSignal);
@@ -491,22 +508,20 @@ bool CudaManagerClass::ConfigureEvents()
               cuEvent[numPMsStaticActive]   = 1e10;
               cuEvent[numPMsStaticActive+1] = 1e10;
             }
-          // eventsData[iev*eventSize + numPMsStaticActive]   = Detector->PMs->X(thisEv->iPMwithMaxSignal);
-          // eventsData[iev*eventSize + numPMsStaticActive+1] = Detector->PMs->Y(thisEv->iPMwithMaxSignal);
       }
       break;
   case 2: //fixed initial grid center
-      for (int iev = 0; iev<numEvents; iev++)
+      for (int iev = 0; iev<numEventsInBuffer; iev++)
       {          
           eventsData[iev*eventSize + numPMsStaticActive]   = OffsetX;
           eventsData[iev*eventSize + numPMsStaticActive+1] = OffsetY;
       }
       break;
   case 3: //true XY position
-      for (int iev = 0; iev<numEvents; iev++)
+      for (int iev = 0; iev<numEventsInBuffer; iev++)
       {          
-          eventsData[iev*eventSize + numPMsStaticActive]   = EventsDataHub->Scan[iev]->Points[0].r[0];
-          eventsData[iev*eventSize + numPMsStaticActive+1] = EventsDataHub->Scan[iev]->Points[0].r[1];
+          eventsData[iev*eventSize + numPMsStaticActive]   = EventsDataHub->Scan[from + iev]->Points[0].r[0];
+          eventsData[iev*eventSize + numPMsStaticActive+1] = EventsDataHub->Scan[from + iev]->Points[0].r[1];
       }
       break;
   default:
@@ -515,20 +530,18 @@ bool CudaManagerClass::ConfigureEvents()
         return false;
       }
   }
-  //qint64 t1 = QDateTime::currentDateTime().toMSecsSinceEpoch();
-  //qDebug()<<"delta t ="<<(t1-t0);
   return true;
 }
 
-bool CudaManagerClass::ConfigureOutputs()
+bool CudaManagerClass::ConfigureOutputs(int bufferSize)
 {
   try
     {
-      recX = new float[numEvents];
-      recY = new float[numEvents];
-      recEnergy = new float[numEvents];
-      chi2 = new float[numEvents];
-      if (MLorChi2 == 0) probability = new float[numEvents];
+      recX = new float[bufferSize];
+      recY = new float[bufferSize];
+      recEnergy = new float[bufferSize];
+      chi2 = new float[bufferSize];
+      probability = new float[bufferSize];
     }
   catch(...)
     {
@@ -539,16 +552,13 @@ bool CudaManagerClass::ConfigureOutputs()
     {
       //additional tmp storage
       RecData.resize(zSlices);
-      for (int i=0; i<zSlices; i++) RecData[i].resize(numEvents);
+      for (int i=0; i<zSlices; i++) RecData[i].resize(bufferSize);
     }
   return true;
 }
 
 void CudaManagerClass::ConfigureLRFs()
 {
-  if (lrfData) delete [] lrfData;
-  lrfData = 0;
-
   int mem = 0;
   switch (Method)
     {
@@ -874,16 +884,15 @@ void CudaManagerClass::ConfigureLRFs_Sliced3D()
     }
 }
 
-void CudaManagerClass::DataToAntsContainers()
+void CudaManagerClass::DataToAntsContainers(int from, int to)
 {
-  //EventsDataHub->clearReconstruction();
-  //EventsDataHub->ReconstructionData.reserve(numEvents);
+  int numEventsInBuffer = to - from;
 
-  for (int iev = 0; iev<numEvents; iev++)
+  for (int iev = 0; iev<numEventsInBuffer; iev++)
     {
       //qDebug()<<iev<<"> "<<recX[iev]<<recY[iev];
       if (recX[iev] == 1.0e10) continue; //CoG failed, no need to process
-      AReconRecord* rec = EventsDataHub->ReconstructionData[CurrentGroup][iev];
+      AReconRecord* rec = EventsDataHub->ReconstructionData[CurrentGroup][from + iev];
       rec->chi2 = chi2[iev];
       if (rec->chi2 != 1.0e10)
       {
@@ -900,7 +909,6 @@ void CudaManagerClass::DataToAntsContainers()
           rec->GoodEvent = false;
         }
     }
-  //qDebug() <<"GPU kernel execution time:" << ElapsedTime << "ms";
 }
 
 void CudaManagerClass::Clear()

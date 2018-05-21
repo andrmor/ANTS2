@@ -24,6 +24,28 @@ QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
     return res;
 }
 
+QVariant AInterfaceToKnnScript::getNeighboursDirect(QVariant onePoint, int numNeighbours)
+{
+  QVariantList VarList = onePoint.toList();
+  if (VarList.isEmpty())
+  {
+      abort("getNeighboursDirect() requires first argument to be array.");
+      return "";
+  }
+  QVector<float> data;
+  for (int i=0; i<VarList.size(); i++)
+    {
+      data << VarList.at(i).toFloat();
+    }
+
+  QVariant res = knnModule->ScriptInterfacer->getNeighboursDirect(data, numNeighbours);
+  if (res == QVariantList())
+  {
+      abort("kNN module reports fail:\n" + knnModule->ScriptInterfacer->ErrorString);
+  }
+  return res;
+}
+
 void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance)
 {
     bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, distanceLimit, filterOutEventsWithSmallerDistance);
@@ -54,6 +76,68 @@ QString AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
 {
   knnModule->ScriptInterfacer->setCalibration(false);
   return knnModule->ScriptInterfacer->ErrorString;
+}
+
+QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
+{
+    QVariantList VarList = arrayOfArrays.toList();
+    if (VarList.isEmpty())
+    {
+        abort("Array of arrays is expected as the second argument in setCalibration()");
+        return "";
+    }
+
+    QVariantList element = VarList.at(0).toList();
+    if (element.isEmpty())
+    {
+        abort("Array of arrays is expected as the second argument in setCalibration()");
+        return "";
+    }
+    const int numDimension = element.size();
+    QVector< QVector<float>> data(VarList.size());
+
+    for (int iPoint = 0; iPoint < VarList.size(); iPoint++)
+    {
+        QVariantList element = VarList.at(iPoint).toList();
+        if (element.isEmpty())
+        {
+            abort("Array of arrays is expected as the second argument in setCalibration()");
+            return "";
+        }
+        if (element.size() != numDimension)
+        {
+            abort("Array of arrays of the same size is expected in setCalibration()");
+            return "";
+        }
+
+        QVector<float>& dataLine = data[iPoint];
+        dataLine.resize(numDimension);
+        for (int iDim = 0; iDim < numDimension; iDim++)
+        {
+            dataLine[iDim] = element.at(iDim).toFloat();
+        }
+    }
+
+  knnModule->ScriptInterfacer->setCalibrationDirect(data);
+  if (!knnModule->ScriptInterfacer->ErrorString.isEmpty())
+      abort(knnModule->ScriptInterfacer->ErrorString);
+  return knnModule->ScriptInterfacer->ErrorString;
+}
+
+QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit, float maxSignal)
+{
+    QVector<float> phe = knnModule->ScriptInterfacer->evaluatePhPerPhE(numNeighbours, upperDistanceLimit, maxSignal);
+    const QString& error = knnModule->ScriptInterfacer->ErrorString;
+    if (!error.isEmpty())
+    {
+        abort("Error in knn module: " + error);
+        return 0;
+    }
+
+    QVariantList vl;
+    for (const float& f : phe) vl << f;
+
+    return vl;
 }
 
 int AInterfaceToKnnScript::countCalibrationEvents()

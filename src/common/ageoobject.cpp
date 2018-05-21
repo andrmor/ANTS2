@@ -304,8 +304,13 @@ void AGeoObject::readAllFromJarr(AGeoObject* World, QJsonArray &jarr)
        return;
      }
 
+   //the first object in the tree must be World -> only extracting the script!
+   QJsonObject worldJS = jarr[0].toObject();
+   AGeoObject wgo;
+   wgo.readFromJson(worldJS);
+   World->LastScript = wgo.LastScript;
+
    AGeoObject* prevObj = World;
-   //the first object in the tree must be World, so ignore it!
    for (int iob=1; iob<size; iob++)
      {
        AGeoObject* newObj = new AGeoObject();

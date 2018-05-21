@@ -2,7 +2,7 @@
 #include "ajsontools.h"
 #include "apositionenergyrecords.h"
 #include "apreprocessingsettings.h"
-#include "pms.h"
+#include "apmhub.h"
 
 //Root
 #include "TTree.h"
@@ -132,7 +132,7 @@ void EventsDataClass::initializeSimStat(QVector<const AGeoObject*> monitorRecord
 }
 #endif
 
-bool EventsDataClass::isReconstructionDataEmpty(int igroup)
+bool EventsDataClass::isReconstructionDataEmpty(int igroup) const
 {
     if (ReconstructionData.isEmpty()) return true;
     if (igroup > ReconstructionData.size()-1) return true;
@@ -347,7 +347,7 @@ void EventsDataClass::Purge(int OnePer, int igroup)
   emit requestEventsGuiUpdate();
 }
 
-bool EventsDataClass::isReconstructionReady(int igroup)
+bool EventsDataClass::isReconstructionReady(int igroup) const
 {
     if (igroup<0 || igroup > ReconstructionData.size()-1)
     {
@@ -426,19 +426,19 @@ void EventsDataClass::resetReconstructionData(int numGroups)
   clearReconstructionTree();
 }
 
-int EventsDataClass::getTimeBins()
+int EventsDataClass::getTimeBins() const
 {
   if (TimedEvents.isEmpty()) return 0;
   return TimedEvents[0].size();
 }
 
-int EventsDataClass::getNumPMs()
+int EventsDataClass::getNumPMs() const
 {
     if (Events.isEmpty()) return 0;
     return Events[0].size();
 }
 
-const QVector<float> *EventsDataClass::getEvent(int iev)
+const QVector<float> *EventsDataClass::getEvent(int iev) const
 {
   return &Events.at(iev);
 }
@@ -553,7 +553,7 @@ void EventsDataClass::copyReconstructedToTrue(int igroup)
       }
 }
 
-bool EventsDataClass::createReconstructionTree(pms* PMs, bool fIncludePMsignals, bool fIncludeRho, bool fIncludeTrue, int igroup)
+bool EventsDataClass::createReconstructionTree(APmHub* PMs, bool fIncludePMsignals, bool fIncludeRho, bool fIncludeTrue, int igroup)
 {
   if (igroup > ReconstructionData.size()-1)
   {
@@ -811,7 +811,7 @@ bool EventsDataClass::createResolutionTree(int igroup)
   return true;
 }
 
-bool EventsDataClass::saveReconstructionAsTree(QString fileName, pms *PMs, bool fIncludePMsignals, bool fIncludeRho, bool fIncludeTrue, int igroup)
+bool EventsDataClass::saveReconstructionAsTree(QString fileName, APmHub *PMs, bool fIncludePMsignals, bool fIncludeRho, bool fIncludeTrue, int igroup)
 {
   clearReconstructionTree();
   QByteArray ba = fileName.toLocal8Bit();
@@ -993,7 +993,7 @@ bool EventsDataClass::saveSimulationAsText(QString fileName)
   return true;
 }
 
-int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, pms *PMs)
+int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, APmHub *PMs)
 {
   ErrorString = "";
   fStopLoadRequested = false;
@@ -1382,7 +1382,7 @@ int EventsDataClass::loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPr
    return numEvents;
 }
 
-bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, pms* PMs)
+bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, APmHub* PMs)
 {
   qDebug() << fAddMulti<< PMs->at(0).PreprocessingAdd << PMs->at(0).PreprocessingMultiply;
   if (Events.isEmpty())
@@ -1475,7 +1475,7 @@ bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, pms* PM
   return true;
 }
 
-int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, pms *PMs, int maxEvents)
+int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, int maxEvents)
 {
   ErrorString = "";
   bool limitNumEvents = (maxEvents>0);

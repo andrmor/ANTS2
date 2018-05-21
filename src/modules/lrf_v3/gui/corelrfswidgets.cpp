@@ -640,12 +640,12 @@ void ASlicedXYInternalsWidget::onSetZSlice()
 ScriptSettingsWidget::ScriptSettingsWidget(const QString &example_code, QWidget *parent)
   : QWidget(parent)
 {
-  code = new CompletingTextEditClass(this);
+  code = new ATextEdit(this);
   highlighter = new AHighlighterLrfScript(code->document());
-  code->setLineWrapMode(QTextEdit::NoWrap);
+  code->setLineWrapMode(QPlainTextEdit::NoWrap);
   code->setFixedHeight(130);
   code->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-  code->setText(example_code);
+  code->appendPlainText(example_code);
   //code->clearFocus();
 
   QPushButton *help_button = new QPushButton("Help");
@@ -690,7 +690,7 @@ ScriptSettingsWidget::ScriptSettingsWidget(const QString &example_code, QWidget 
   layout->addWidget(code);
   this->setLayout(layout);
 
-  connect(code, &CompletingTextEditClass::editingFinished, this, &ScriptSettingsWidget::elementChanged);
+  connect(code, &ATextEdit::editingFinished, this, &ScriptSettingsWidget::elementChanged);
   connect(expand_button, &QPushButton::clicked, [=] () {
     code->setFixedHeight(code->height()+20);
     emit elementChanged();
@@ -711,7 +711,8 @@ void ScriptSettingsWidget::saveState(QJsonObject &json) const
 
 void ScriptSettingsWidget::loadState(const QJsonObject &settings)
 {
-  code->setText(settings["script"].toString());
+  code->clear();
+  code->appendPlainText(settings["script"].toString());
   code->setFixedHeight(settings["text height"].toInt());
 }
 
@@ -720,13 +721,13 @@ ScriptInternalsWidget::ScriptInternalsWidget(QWidget *parent)
   : QWidget(parent)
 {
   dv = new QDoubleValidator(this);
-  code = new CompletingTextEditClass;
+  code = new ATextEdit;
   highlighter = new AHighlighterLrfScript(code->document());
-  code->setLineWrapMode(QTextEdit::NoWrap);
+  code->setLineWrapMode(QPlainTextEdit::NoWrap);
   code->setMinimumHeight(80);
   code->setMaximumHeight(150);
   code->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-  code->setText("");
+  code->appendPlainText("");
   //code->clearFocus();
 
   QPushButton *expand_button = new QPushButton("+");
@@ -837,7 +838,7 @@ void ScriptInternalsWidget::loadState(const QJsonObject &state)
     parameters_sigma->setCellWidget(row, 1, le_number);
   }
 
-  code->setText(state["script_code"].toString());
+  code->appendPlainText(state["script_code"].toString());
 }
 
 } } //namespace LRF::CoreLrfs

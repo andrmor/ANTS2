@@ -38,7 +38,7 @@ private slots:
     void on_pbUnselectAllTags_clicked();
 
     void onTagStateChanged(QListWidgetItem* item);
-
+    void onFindTextChanged(const QString& text);
     void on_lwTags_itemDoubleClicked(QListWidgetItem *item);
 
 signals:

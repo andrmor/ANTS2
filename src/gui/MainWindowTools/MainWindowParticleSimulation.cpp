@@ -2,7 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "outputwindow.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "windownavigatorclass.h"
 #include "geometrywindowclass.h"
@@ -703,7 +703,7 @@ void MainWindow::on_pbRemoveSource_clicked()
       if (ParticleSources->size() == 0)
         {
            Detector->GeoManager->ClearTracks();
-           ShowGeometry(false);
+           GeometryWindow->ShowGeometry(false);
         }
         else
         ShowParticleSource_noFocus();
@@ -888,7 +888,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
     else
       {
         Detector->GeoManager->ClearTracks();
-        ShowGeometry();
+        GeometryWindow->ShowGeometry();
       }
 }
 
@@ -985,7 +985,7 @@ void MainWindow::on_pbSingleSourceShow_clicked()
     marks1->SetNextPoint(r[0], r[1], r[2]);    
     GeoMarkers.append(marks1);
 
-    ShowGeometry(false);
+    GeometryWindow->ShowGeometry(false);
 }
 
 void MainWindow::on_pbRenameSource_clicked()

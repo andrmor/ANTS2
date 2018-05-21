@@ -1,7 +1,7 @@
 #include "alrfdraw.h"
 #include "alrfmoduleselector.h"
 #include "eventsdataclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apositionenergyrecords.h"
 #include "graphwindowclass.h"
 #include "ajsontools.h"
@@ -15,6 +15,8 @@
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TF2.h"
+#include "TLine.h"
+#include "TAttLine.h"
 
 bool ALrfDrawSettings::ReadFromJson(const QJsonObject &json)
 {
@@ -40,7 +42,7 @@ bool ALrfDrawSettings::ReadFromJson(const QJsonObject &json)
   return true;
 }
 
-void ALrfDraw::reportError(QString text)
+void ALrfDraw::reportError(const QString &text)
 {
     LastError = text;
     qWarning() << "LRF drawing error:"<< text;
@@ -108,8 +110,8 @@ bool ALrfDraw::extractOptionsAndVerify(int PMnumber, const QJsonObject &json)
     return true;
 }
 
-ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, pms *PMs, GraphWindowClass *GraphWindow) :
-  LRFs(LRFs), fUseOldModule(fUseOldModule), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow) {}
+ALrfDraw::ALrfDraw(ALrfModuleSelector *LRFs, bool fUseOldModule, EventsDataClass *EventsDataHub, APmHub *PMs, GraphWindowClass *GraphWindow) :
+  LRFs(LRFs), EventsDataHub(EventsDataHub), PMs(PMs), GraphWindow(GraphWindow), fUseOldModule(fUseOldModule) {}
 
 bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
 {
@@ -118,8 +120,8 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
   bool fOk = extractOptionsAndVerify(PMnumber, json);
   if (!fOk) return false;
 
-  TF1 *tf1, *tf1bis;
-  TH2D *hist2D;
+  TF1 *tf1, *tf1bis;    //if created, ownership is transferred to the GraphWindow
+  TH2D *hist2D;         //if created, ownership is transferred to the GraphWindow
 
   //only calculations of LRFs, no drawing
   if (Options.plot_lrf)
@@ -216,7 +218,7 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
         hist2D->GetXaxis()->SetTitle("Radial distance, mm");
         hist2D->GetYaxis()->SetTitle("Signal");
 
-        GraphWindow->DrawWithoutFocus(hist2D, "colz", false);
+        GraphWindow->DrawWithoutFocus(hist2D, "colz");//, false);
       }
 
     //to be on top!
@@ -226,9 +228,9 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
         TString opt = "";
         if (Options.plot_data || Options.plot_diff) opt = "same";
 
-        GraphWindow->DrawWithoutFocus(tf1, opt, false);
+        GraphWindow->DrawWithoutFocus(tf1, opt);//, false);
         if (Options.draw_second && tf1bis)
-          GraphWindow->DrawWithoutFocus(tf1bis, "same", false);
+          GraphWindow->DrawWithoutFocus(tf1bis, "same");//, false);
       }
 
     //Drawing nodes
@@ -238,9 +240,20 @@ bool ALrfDraw::DrawRadial(int PMnumber, const QJsonObject &json)
          bool fOk = LRFs->getNodes(fUseOldModule, PMnumber, GrX);
          if (fOk)
            {
-             QVector <double> GrY(GrX.size(), 0);             
-             auto tgraph = GraphWindow->MakeGraph(&GrX, &GrY, kBlue, "", "", 2, 6, 0, 0, "", true);
-             GraphWindow->Draw(tgraph, "P same", false);
+             //QVector <double> GrY(GrX.size(), 0);
+             //auto tgraph = GraphWindow->MakeGraph(&GrX, &GrY, kBlue, "", "", 2, 6, 0, 0, "", true);
+             //GraphWindow->Draw(tgraph, "P same", false);
+
+             GraphWindow->UpdateRootCanvas();
+             double yMin = GraphWindow->getCanvasMinY();
+             double yMax = GraphWindow->getCanvasMaxY();
+             for (double& x : GrX)
+             {
+                 TLine* l = new TLine(x, yMin, x, yMax);
+                 l->SetLineColor(1);
+                 l->SetLineStyle(9);
+                 GraphWindow->Draw(l, "same", false);
+             }
            }
       }
 
@@ -261,7 +274,7 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
     int counter = 0;
     double factor = 1.0;
 
-    TF2 *tf2, *tf2bis;
+    TF2 *tf2, *tf2bis;  //if created, ownership is transferred to GraphWindow
 
     if ( Options.plot_data || Options.plot_diff )
       {
@@ -312,7 +325,7 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
 
         tf2->SetNpx(Options.FunctionPointsX);
         tf2->SetNpy(Options.FunctionPointsY);
-        GraphWindow->DrawWithoutFocus(tf2, "surf", false);
+        GraphWindow->DrawWithoutFocus(tf2, "surf");//, false);
 
         if (Options.draw_second)
             {
@@ -327,24 +340,24 @@ bool ALrfDraw::DrawXY(int PMnumber, const QJsonObject &json)
                   tf2bis->SetLineStyle(9);
                   tf2bis->SetNpx(Options.FunctionPointsX);
                   tf2bis->SetNpy(Options.FunctionPointsY);
-                  GraphWindow->DrawWithoutFocus(tf2bis, "surf same", false);
+                  GraphWindow->DrawWithoutFocus(tf2bis, "surf same");//, false);
               }
             }
       }
 
     if (Options.plot_data)
       {
-        auto tgraph2D = new TGraph2D(ffdata.size(), xx.data(), yy.data(), ffdata.data());
+        TGraph2D* tgraph2D = new TGraph2D(ffdata.size(), xx.data(), yy.data(), ffdata.data());
         tgraph2D->SetMarkerStyle(7);
-        if (Options.plot_lrf) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol", false);
-        else                  GraphWindow->DrawWithoutFocus(tgraph2D, "pcol", false);
+        if (Options.plot_lrf) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
+        else                  GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
       }
     else if (Options.plot_diff)
       {
-        auto tgraph2D = new TGraph2D(ffdiff.size(), xx.data(), yy.data(), ffdiff.data());
+        TGraph2D* tgraph2D = new TGraph2D(ffdiff.size(), xx.data(), yy.data(), ffdiff.data());
         tgraph2D->SetMarkerStyle(7);
-        if (Options.plot_lrf || Options.plot_data) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol", false);
-        else                                       GraphWindow->DrawWithoutFocus(tgraph2D, "pcol", false);
+        if (Options.plot_lrf || Options.plot_data) GraphWindow->DrawWithoutFocus(tgraph2D, "samepcol");//, false);
+        else                                       GraphWindow->DrawWithoutFocus(tgraph2D, "pcol");//, false);
       }
     GraphWindow->UpdateRootCanvas();
 

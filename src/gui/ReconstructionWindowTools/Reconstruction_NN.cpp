@@ -6,11 +6,12 @@
 #include "ageomarkerclass.h"
 #include "graphwindowclass.h"
 #include "windownavigatorclass.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include "globalsettingsclass.h"
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "graphwindowclass.h"
+#include "geometrywindowclass.h"
 
 #include <QDebug>
 
@@ -67,7 +68,7 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
   if (ShowDots)
     {
       MW->clearGeoMarkers();
-      MW->ShowGeometry();
+      MW->GeometryWindow->ShowGeometry();
 
       Double_t r[]    = {0., 0.0, 1.0, 1.0, 1.0};
       Double_t g[]    = {0., 0.0, 0.0, 1.0, 1.0};
@@ -121,7 +122,7 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
           MW->GeoMarkers.append(marks);
         }
 
-      MW->ShowGeometry(false);
+      MW->GeometryWindow->ShowGeometry(false);
     } 
 
   MW->WindowNavigator->BusyOff();

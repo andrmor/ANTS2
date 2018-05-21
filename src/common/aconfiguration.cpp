@@ -6,6 +6,8 @@
 #include "amaterialparticlecolection.h"
 #include "particlesourcesclass.h"
 #include "asandwich.h"
+#include "generalsimsettings.h"
+#include "apmhub.h"
 
 #include <QDebug>
 #include <QFile>
@@ -45,7 +47,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
         }
     }
 
-  //qDebug() << "Loading simulation config";
+  //    qDebug() << "Loading simulation config";
   if (SimSettings)
     {
       if (json.contains("SimulationConfig"))
@@ -53,6 +55,9 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           //qDebug() << ">>> Loading simulation settings...";
           QJsonObject SimJson = json["SimulationConfig"].toObject();
           JSON["SimulationConfig"] = SimJson;
+
+          UpdateSimSettingsOfDetector();
+
           emit requestSimulationGuiUpdate();
           emit requestSelectFirstActiveParticleSource();
         }
@@ -67,7 +72,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       emit requestSimulationGuiUpdate(); //in case new detector was loaded
   }
 
-  //qDebug() << "Loading reconstruction configuration";
+  //    qDebug() << "Loading reconstruction configuration";
   if (ReconstrSettings)
     {
       if (json.contains("ReconstructionConfig"))
@@ -120,16 +125,19 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       J["PartcleStackChecker"] = j;
       JSON["GUI"] = J;
     }
-  QJsonObject js = JSON["ReconstructionConfig"].toObject();
-  if (js.contains("GuiMisc"))
+  if (JSON.contains("ReconstructionConfig"))
   {
-      QJsonObject jg = JSON["GUI"].toObject();
-      QJsonObject jj = js["GuiMisc"].toObject();
-      jg["ReconstructionWindow"] = jj;
-      JSON["GUI"] = jg;
+      QJsonObject js = JSON["ReconstructionConfig"].toObject();
+      if (js.contains("GuiMisc"))
+      {
+          QJsonObject jg = JSON["GUI"].toObject();
+          QJsonObject jj = js["GuiMisc"].toObject();
+          jg["ReconstructionWindow"] = jj;
+          JSON["GUI"] = jg;
 
-      js.remove("GuiMisc");
-      JSON["ReconstructionConfig"] = js;
+          js.remove("GuiMisc");
+          JSON["ReconstructionConfig"] = js;
+      }
   }
 
   emit NewConfigLoaded();
@@ -163,8 +171,8 @@ bool AConfiguration::LoadConfig(QString fileName, bool DetConstructor, bool SimS
 
     if (json.isEmpty())
       {
-        ErrorString = "File does not contain json object:\nWrong file or unsupported old format";
-        qWarning() << "ErrorString";
+        ErrorString = fileName + " is not valid configuration file";
+        qWarning() << ErrorString;
         return false;
       }
     if (jsout) *jsout = json; //for global script mode
@@ -390,4 +398,17 @@ const QString AConfiguration::RemoveParticle(int particleId)
   emit RequestClearParticleStack(); //clear defined ParticleStack in GUI
 
   return "";
+}
+
+void AConfiguration::UpdateSimSettingsOfDetector()
+{
+    if (JSON.contains("SimulationConfig"))
+    {
+        QJsonObject SimJson = JSON["SimulationConfig"].toObject();
+
+        GeneralSimSettings simSettings;
+        simSettings.readFromJson(SimJson);
+        Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
+        Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+    }
 }

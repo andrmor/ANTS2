@@ -30,7 +30,8 @@ add:ANTS2 tests:Optical grids:OpticalGridTester.json:Detector with optical grids
 add:ANTS2 tests:WavelengthShifters:BulkWavelengthShifter.json:Detector with a bulk wavelength shifter. Run simulations with enabled/disabled WavelengthShifter object and check the wavelength distribution of the detected photons.
 add:ANTS2 tests:WavelengthShifters:SurfaceWavelengthShifter.json:Detector with a surface wavelength shifter. Note that for more complex behavior (e.g. scattering/reflection on original wavelength) bulk waveshifters should be used.
 
-add:Gamma cameras:SiPM-based:SiPM_64cross.json:30x30x5 mm3 LYSO crystal with 4 x 16-elements SensL SiPM, ceramic holders; NaturalLYSO, Co-57 and Na-22 sources
+add:Gamma cameras:SiPM-based:NewGenSiPM64.json:30x30x2 mm3 LYSO crystal with 8 x 8 SiPMs; NaturalLYSO, Co-57 and Na-22 sources
+add:Gamma cameras:SiPM-based:SiPM_64cross.json:30x30x5 mm3 LYSO crystal with 4 x 16-elements SensL SiPMs, ceramic holders; NaturalLYSO, Co-57 and Na-22 sources
 
 add:Gamma cameras:SiPM-based:SiPM_16.json:30x30x5 mm3 LYSO crystal with 16 PMTs at the center; No wave-resolved data and overrides; 57Co+Natural sources
 

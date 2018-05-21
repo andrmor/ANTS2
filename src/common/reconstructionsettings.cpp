@@ -148,6 +148,7 @@ bool ReconstructionSettings::readFromJson(QJsonObject &RecJson)
   ANNsettings = ajson["FANNsettings"].toObject();
   //CUDA
   CGonCUDAsettings = ajson["CGonCUDAsettings"].toObject();
+  parseJson(CGonCUDAsettings, "Buffer", BufferSize);
   //kNNreconstruct
   kNNrecSet = ajson["kNNrecSet"].toObject();
 

@@ -6,10 +6,10 @@
 #include "mainwindow.h"
 //#include "classes.h"
 #include "apositionenergyrecords.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "reconstructionwindow.h"
-#include "reconstructionmanagerclass.h"
+#include "areconstructionmanager.h"
 #include <fstream>
 #include <QJsonDocument>
 #include <QTextStream>

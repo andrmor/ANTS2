@@ -5,7 +5,7 @@
 #include "alrfmoduleselector.h"
 
 class ReconstructionSettings;
-class pms;
+class APmHub;
 class APmGroupsManager;
 class ALrfModuleSelector;
 class DynamicPassivesHandler;
@@ -19,7 +19,7 @@ class ProcessorClass : public QObject
 {
   Q_OBJECT
 public:
-  ProcessorClass(pms* PMs,
+  ProcessorClass(APmHub* PMs,
                  APmGroupsManager* PMgroups,
                  ALrfModuleSelector* LRFs,
                  EventsDataClass *EventsDataHub,
@@ -39,7 +39,7 @@ public:
   DynamicPassivesHandler *DynamicPassives;
 
     // pointers: for static use with minimizer, should be public:  
-  pms* PMs;
+  APmHub* PMs;
   APmGroupsManager* PMgroups;
   ALrfModuleSelector LRFs;
   EventsDataClass *EventsDataHub;
@@ -56,7 +56,6 @@ signals:
   void lrfsCopied();
 
 protected:
-  //ReconstructionManagerClass *RecManager;
   int EventsFrom, EventsTo;
   double calculateChi2NoDegFree(int iev, AReconRecord *rec);
   double calculateMLfactor(int iev, AReconRecord *rec);
@@ -67,7 +66,7 @@ class CoGReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-  CoGReconstructorClass(pms* PMs,
+  CoGReconstructorClass(APmHub* PMs,
                         APmGroupsManager* PMgroups,
                         ALrfModuleSelector* LRFs,
                         EventsDataClass *EventsDataHub,
@@ -85,7 +84,7 @@ class CGonCPUreconstructorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-  CGonCPUreconstructorClass(pms* PMs,
+  CGonCPUreconstructorClass(APmHub* PMs,
                             APmGroupsManager* PMgroups,
                             ALrfModuleSelector* LRFs,
                             EventsDataClass *EventsDataHub,
@@ -111,7 +110,7 @@ class RootMinReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-  RootMinReconstructorClass(pms* PMs,
+  RootMinReconstructorClass(APmHub* PMs,
                             APmGroupsManager* PMgroups,
                             ALrfModuleSelector* LRFs,
                             EventsDataClass *EventsDataHub,
@@ -135,7 +134,7 @@ class RootMinRangedReconstructorClass : public RootMinReconstructorClass
 {
   Q_OBJECT
 public:
-    RootMinRangedReconstructorClass(pms* PMs,
+    RootMinRangedReconstructorClass(APmHub* PMs,
                                     APmGroupsManager* PMgroups,
                                     ALrfModuleSelector* LRFs,
                                     EventsDataClass *EventsDataHub,
@@ -161,7 +160,7 @@ class RootMinDoubleReconstructorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-  RootMinDoubleReconstructorClass(pms* PMs,
+  RootMinDoubleReconstructorClass(APmHub* PMs,
                                   APmGroupsManager* PMgroups,
                                   ALrfModuleSelector* LRFs,
                                   EventsDataClass *EventsDataHub,
@@ -185,7 +184,7 @@ class Chi2calculatorClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-  Chi2calculatorClass(pms* PMs,
+  Chi2calculatorClass(APmHub* PMs,
                       APmGroupsManager* PMgroups,
                       ALrfModuleSelector* LRFs,
                       EventsDataClass *EventsDataHub,
@@ -203,7 +202,7 @@ class EventFilterClass : public ProcessorClass
 {
   Q_OBJECT
 public:
-    EventFilterClass(pms* PMs,
+    EventFilterClass(APmHub* PMs,
                      APmGroupsManager* PMgroups,
                      ALrfModuleSelector* LRFs,
                      EventsDataClass *EventsDataHub,

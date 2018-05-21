@@ -1,7 +1,7 @@
 #include "pmsensorgroup.h"
 #include "sensorlocalcache.h"
 #include "lrf2.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "jsonparser.h"
 #include "lrfaxial.h"
 #include "lrfcaxial.h"
@@ -83,7 +83,7 @@ static double getPhiDetCenter(double x, double y, double flip_y = 1.0)
     return phi;
 }
 
-static QVector< QPair <double, int> > getGroupByPhi(const pms *PMs, QVector< QPair <double, int> > &snake, double rTolerance = 0.1)
+static QVector< QPair <double, int> > getGroupByPhi(const APmHub *PMs, QVector< QPair <double, int> > &snake, double rTolerance = 0.1)
 {
     QVector< QPair <double, int> > group;
     if (snake.size() == 0) return group;
@@ -99,7 +99,7 @@ static QVector< QPair <double, int> > getGroupByPhi(const pms *PMs, QVector< QPa
     return group;
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkIndividual(const pms *PMs)
+QVector<PMsensorGroup> PMsensorGroup::mkIndividual(const APmHub *PMs)
 {
     QVector<PMsensorGroup> SensorGroups;
 
@@ -113,7 +113,7 @@ QVector<PMsensorGroup> PMsensorGroup::mkIndividual(const pms *PMs)
     return SensorGroups;
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkCommon(const pms *PMs)
+QVector<PMsensorGroup> PMsensorGroup::mkCommon(const APmHub *PMs)
 {
     QVector<PMsensorGroup> SensorGroups(1);
     SensorGroups[0] = PMsensorGroup();
@@ -124,7 +124,7 @@ QVector<PMsensorGroup> PMsensorGroup::mkCommon(const pms *PMs)
     return SensorGroups;
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkAxial(const pms *PMs)
+QVector<PMsensorGroup> PMsensorGroup::mkAxial(const APmHub *PMs)
 {
     QVector<PMsensorGroup> SensorGroups;
     QVector< QPair<double, int> > snake = PMs->getPMsSortedByR();
@@ -141,7 +141,7 @@ QVector<PMsensorGroup> PMsensorGroup::mkAxial(const pms *PMs)
     return SensorGroups;
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkLattice(const pms *PMs, int N_gon)
+QVector<PMsensorGroup> PMsensorGroup::mkLattice(const APmHub *PMs, int N_gon)
 {
     QVector<PMsensorGroup> result;
     QVector< QPair<double, int> > snake = PMs->getPMsSortedByR();
@@ -176,12 +176,12 @@ QVector<PMsensorGroup> PMsensorGroup::mkLattice(const pms *PMs, int N_gon)
     return result;
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkHexagonal(const pms *PMs)
+QVector<PMsensorGroup> PMsensorGroup::mkHexagonal(const APmHub *PMs)
 {
     return mkLattice(PMs, 6);
 }
 
-QVector<PMsensorGroup> PMsensorGroup::mkSquare(const pms *PMs)
+QVector<PMsensorGroup> PMsensorGroup::mkSquare(const APmHub *PMs)
 {
     return mkLattice(PMs, 4);
 }
@@ -326,7 +326,7 @@ bool PMsensorGroup::readJSON(QJsonObject &json)
   return true;
 }
 
-void PMsensorGroup::addSensor(const pms *PMs, int ipm, double phi, bool flip)
+void PMsensorGroup::addSensor(const APmHub *PMs, int ipm, double phi, bool flip)
 {
     PMsensor newSensor(ipm);
     newSensor.SetTransform(-PMs->X(ipm), -PMs->Y(ipm), phi, flip);

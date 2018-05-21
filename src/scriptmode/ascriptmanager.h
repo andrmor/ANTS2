@@ -4,59 +4,85 @@
 #include <QObject>
 #include <QVector>
 #include <QString>
+#include <QVariant>
 
-class QScriptEngine;
 class TRandom2;
+class AInterfaceToCore;
+class QElapsedTimer;
 
 class AScriptManager : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    AScriptManager(TRandom2 *RandGen);
-    ~AScriptManager();    
+  AScriptManager(TRandom2 *RandGen);
+  virtual ~AScriptManager();
 
-    //configuration
-    void SetInterfaceObject(QObject* interfaceObject, QString name = "");
+  //configuration
+  virtual void      SetInterfaceObject(QObject* interfaceObject, QString name = "") = 0;
 
-    //run
-    int FindSyntaxError(QString script); //returns line number of the first syntax error; -1 if no errors found
-    QString Evaluate(QString Script);
+  //run
+  virtual int       FindSyntaxError(const QString & /*script*/ ) {return -1;} //returns line number of the first syntax error; -1 if no errors found
+  virtual QString   Evaluate(const QString &Script) = 0;
+  virtual QVariant  EvaluateScriptInScript(const QString& script) = 0;
 
-    void CollectGarbage();
+  virtual bool      isUncaughtException() const {return false;}
+  virtual int       getUncaughtExceptionLineNumber() const {return -1;}
+  virtual const QString getUncaughtExceptionString() const {return "";}
 
-    QScriptEngine* engine;
-    TRandom2* RandGen;     //math module uses it
-    QString LastError;
+  virtual void      collectGarbage(){}
+  virtual void      abortEvaluation() = 0;
 
-    bool fEngineIsRunning;
-    bool fAborted;
+  virtual void      hideMsgDialogs();
+  virtual void      restoreMsgDialogs();
 
-    //registered objects
-    QVector<QObject*> interfaces;
-    QVector<QString> interfaceNames;
 
-    //starter dirs
-    QString LibScripts, LastOpenDir, ExamplesDir;
+  bool              isEngineRunning() const {return fEngineIsRunning;}
+  bool              isEvalAborted() const {return fAborted;}
 
-    //for minimizer
-    QString FunctName;
-    double bestResult;
-    int numVariables;
+  const QString&    getLastError() const {return LastError;}
+  qint64            getElapsedTime();
+  const QString     getFunctionReturnType(const QString& UnitFunction);
 
-    void deleteMsgDialog();  //needed in batch mode to force close MSG window if shown
-    void hideMsgDialog();
-    void restoreMsgDialog();
+  void              deleteMsgDialogs();
 
-public slots:    
-    void AbortEvaluation(QString message = "Aborted!");
+  void              ifError_AbortAndReport();
+
+public slots:
+  virtual void      AbortEvaluation(QString message = "Aborted!");
+
+public:
+  QVector<QObject*> interfaces;  //registered interfaces (units)
+  TRandom2*         RandGen;     //math module uses it
+
+  //starter dirs
+  QString           LibScripts, LastOpenDir, ExamplesDir;
+
+  //for minimizer
+  QString           MiniFunctionName;
+  double            MiniBestResult;
+  int               MiniNumVariables;
+
+protected:
+  bool              fEngineIsRunning;
+  bool              fAborted;
+
+  QString           LastError;
+
+  QElapsedTimer*    timer;
+  qint64            timeOfStart;
+  qint64            timerEvalTookMs;
 
 signals:
-    void onStart();
-    void onAbort();
-    void success(QString eval);
-    void showMessage(QString message);
-    void clearText();
+    void            onStart();
+    void            onAbort();
+    void            onFinish(QString eval);
+
+    void            showMessage(QString message);
+    void            clearText();
+    void            requestHighlightErrorLine(int lineNumber);
+
+    void            reportProgress(int percent);
 };
 
 #endif // ASCRIPTMANAGER_H

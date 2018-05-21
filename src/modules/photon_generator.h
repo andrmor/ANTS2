@@ -8,7 +8,7 @@ class DetectorClass;
 class APhoton;
 class GeneralSimSettings;
 class ASimulationStatistics;
-class OneEventClass;
+class AOneEvent;
 
 class Photon_Generator : public QObject
 {
@@ -23,7 +23,7 @@ public:
 
     void configure(const GeneralSimSettings *simSet, ASimulationStatistics* detStat) {SimSet = simSet; DetStat = detStat;}
 
-    void GenerateSignalsForLrfMode(int NumPhotons, double *r, OneEventClass* OneEvent);
+    void GenerateSignalsForLrfMode(int NumPhotons, double *r, AOneEvent* OneEvent);
 
     ASimulationStatistics* DetStat;
     const GeneralSimSettings* SimSet;

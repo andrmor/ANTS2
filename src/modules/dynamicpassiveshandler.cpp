@@ -1,5 +1,5 @@
 #include "dynamicpassiveshandler.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "eventsdataclass.h"
 #include "reconstructionsettings.h"
 #include "apositionenergyrecords.h"
@@ -8,7 +8,7 @@
 
 #include <QDebug>
 
-DynamicPassivesHandler::DynamicPassivesHandler(pms* Pms, APmGroupsManager* PMgroups, EventsDataClass *eventsDataHub)
+DynamicPassivesHandler::DynamicPassivesHandler(APmHub* Pms, APmGroupsManager* PMgroups, EventsDataClass *eventsDataHub)
  : PMs(Pms), PMgroups(PMgroups), EventsDataHub(eventsDataHub) { }
 
 void DynamicPassivesHandler::init(ReconstructionSettings *RecSet, int ThisPmGroup)

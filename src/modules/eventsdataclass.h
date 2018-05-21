@@ -15,7 +15,7 @@
 #include <TString.h>
 
 class TTree;
-class pms;
+class APmHub;
 struct AScanRecord;
 struct AReconRecord;
 class TRandom2;
@@ -37,11 +37,11 @@ public:
     // PM signal data
     QVector< QVector <float> > Events; //[event][pm]  - remember, if events energy is loaded, one MORE CHANNEL IS ADDED: last channel is numPMs+1
     QVector< QVector < QVector <float> > > TimedEvents; //event timebin pm
-    bool isEmpty() {return Events.isEmpty();}
-    bool isTimed() {return !TimedEvents.isEmpty();}
-    int getTimeBins();
-    int getNumPMs();
-    const QVector<float> *getEvent(int iev);
+    bool isEmpty() const {return Events.isEmpty();}
+    bool isTimed() const {return !TimedEvents.isEmpty();}
+    int getTimeBins() const;
+    int getNumPMs() const;
+    const QVector<float> *getEvent(int iev) const;
     const QVector<QVector<float> > *getTimedEvent(int iev);
 
 #ifdef SIM
@@ -59,8 +59,8 @@ public:
     QVector< QVector<AReconRecord*> > ReconstructionData;  // [sensor_group] : [event]
     //QVector<bool> fReconstructionDataReady; // true if reconstruction was already performed for the group
     bool fReconstructionDataReady; // true if reconstruction was already performed for the group
-    bool isReconstructionDataEmpty(int igroup = 0);  // container is empty
-    bool isReconstructionReady(int igroup = 0);  // reconstruction was not yet performed
+    bool isReconstructionDataEmpty(int igroup = 0) const;  // container is empty
+    bool isReconstructionReady(int igroup = 0) const;  // reconstruction was not yet performed
     void clearReconstruction();
     void clearReconstruction(int igroup);
     void createDefaultReconstructionData(int igroup = 0); //recreates new container - clears data completely!
@@ -88,7 +88,7 @@ public:
     //Trees
     TTree *ReconstructionTree; //tree with reconstruction data
     void clearReconstructionTree();
-    bool createReconstructionTree(pms* PMs,
+    bool createReconstructionTree(APmHub* PMs,
                                   bool fIncludePMsignals=true,
                                   bool fIncludeRho=true,
                                   bool fIncludeTrue=true,
@@ -99,7 +99,7 @@ public:
 
     //Data Save
     bool saveReconstructionAsTree(QString fileName,
-                                  pms *PMs,
+                                  APmHub *PMs,
                                   bool fIncludePMsignals=true,
                                   bool fIncludeRho = true,
                                   bool fIncludeTrue = true,                                  
@@ -110,11 +110,11 @@ public:
 
     //Data Load - ascii
     bool fLoadedEventsHaveEnergyInfo;
-    int loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, pms *PMs); //returns -1 if failed, otherwise number of events added
+    int loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, APmHub *PMs); //returns -1 if failed, otherwise number of events added
 
     //data load - Tree
-    int loadSimulatedEventsFromTree(QString fileName, pms *PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
-    bool overlayAsciiFile(QString fileName, bool fAddMulti, pms *PMs); //true = success, if not, see ErrorString
+    int loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
+    bool overlayAsciiFile(QString fileName, bool fAddMulti, APmHub *PMs); //true = success, if not, see ErrorString
 
     //Misc
     QString ErrorString;

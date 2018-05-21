@@ -3,7 +3,7 @@
 #include "aphotontracer.h"
 #include "detectorclass.h"
 #include "asandwich.h"
-#include "oneeventclass.h"
+#include "aoneevent.h"
 #include "asimulationstatistics.h"
 #include "aphoton.h"
 #include "atrackrecords.h"
@@ -22,7 +22,7 @@
 AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, EventsDataClass* EventsDataHub) :
     Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
 {
-    Event = new OneEventClass(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
+    Event = new AOneEvent(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
     Tracer = new APhotonTracer(Detector->GeoManager, Detector->RandGen, Detector->MpCollection, Detector->PMs, &Detector->Sandwich->GridRecords);
     ClearHistoryFilters();
 

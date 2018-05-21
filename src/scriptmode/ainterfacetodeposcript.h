@@ -3,12 +3,14 @@
 
 #include "localscriptinterfaces.h"
 #include "ahistoryrecords.h"
+#include "detectorclass.h"
 
 #include <QVector>
 
-class MainWindow;
 class EventsDataClass;
+class GlobalSettingsClass;
 struct AEnergyDepositionCell;
+class AParticleOnStack;
 
 struct DepoNode
 {
@@ -36,18 +38,22 @@ class AInterfaceToDepoScript : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AInterfaceToDepoScript(MainWindow* MW, EventsDataClass* EventsDataHub);
-  ~AInterfaceToDepoScript(){ClearExtractedData();}
+  AInterfaceToDepoScript(DetectorClass* Detector, GlobalSettingsClass* GlobSet, EventsDataClass* EventsDataHub);
+  ~AInterfaceToDepoScript();
 
 private:
-  MainWindow* MW;
+  DetectorClass* Detector;
+  GlobalSettingsClass* GlobSet;
   EventsDataClass* EventsDataHub;
+
+  QVector<AParticleOnStack*> ParticleStack;
+  QVector<AEnergyDepositionCell*> EnergyVector;
   QVector<ParticleRecord> PR;
 
 public slots:
   void ClearStack();
   void AddParticleToStack(int particleID, double X, double Y, double Z, double dX, double dY, double dZ, double time, double Energy, int numCopies);
-  void TrackStack();  //run simulationwith particles in the stack
+  void TrackStack(bool bDoTracks = false);  //run simulationwith particles in the stack
   void ClearExtractedData();
 
   int count() {return PR.length();} // total number of records
@@ -100,6 +106,8 @@ public slots:
 
 private:
   void populateParticleRecords();
+  bool doTracking(bool bDoTracks);
+  void clearEnergyVector();
 
 };
 

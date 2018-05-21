@@ -11,7 +11,7 @@ class EventsDataClass;
 class DetectorClass;
 class APhotonTracer;
 class TrackHolderClass;
-class OneEventClass;
+class AOneEvent;
 class TH1;
 
 class AInterfaceToPhotonScript : public AScriptInterface
@@ -83,7 +83,7 @@ private:
     int TrackWidth;
     int MaxNumberTracks;
     QVector<TrackHolderClass *> Tracks;
-    OneEventClass* Event;
+    AOneEvent* Event;
 
     void clearTrackHolder();
     void normalizeVector(double *arr);

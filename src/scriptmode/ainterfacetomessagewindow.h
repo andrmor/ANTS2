@@ -3,50 +3,68 @@
 
 #include "ascriptinterface.h"
 
-class QDialog;
-class QPlainTextEdit;
-class QWidget;
+#include <QObject>
+#include <QVector>
+#include <QString>
+
+class AScriptManager;
+class AScriptMessengerDialog;
 
 class AInterfaceToMessageWindow : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  AInterfaceToMessageWindow(QWidget *parent);
+  AInterfaceToMessageWindow(AScriptManager *ScriptManager, QWidget *parent);
+  AInterfaceToMessageWindow(const AInterfaceToMessageWindow& other);
   ~AInterfaceToMessageWindow();
 
-  QDialog *D;
-  double X, Y;
-  double WW, HH;
+  bool IsMultithreadCapable() const override {return true;}
 
-  QPlainTextEdit* e;
-  bool bEnabled;
+  // for handling with the Scriptmanager of the GUI thread
+  void ReplaceDialogWidget(AScriptMessengerDialog* AnotherDialogWidget);
+  AScriptMessengerDialog* GetDialogWidget();
 
 public slots:
-  void Enable(bool flag) {bEnabled = flag;}
-  void Append(QString txt);
+  void Append(const QString& text);
   void Clear();
   void Show();
   void Hide();
-  void Show(QString txt, int ms = -1);
+  void Show(const QString& text, int ms = -1);
   void SetTransparent(bool flag);
+  void SetDialogTitle(const QString& title);
 
   void Move(double x, double y);
   void Resize(double w, double h);
 
   void SetFontSize(int size);
 
+  void ShowAllThreadMessengers();
+  void HideAllThreadMessengers();
+
+signals:
+  void requestAppend(const QString& text);
+  void requestClear();
+  void requestShow();
+  void requestHide();
+  void requestTemporaryShow(int ms);
+  void requestSetTransparency(bool bTransparent);
+  void requestSetTitle(const QString& title);
+  void requestMove(double x, double y);
+  void requestResize(double w, double h);
+  void requestSetFontSize(int size);
+
 public:
-  void deleteDialog();
-  bool isActive() {return bActivated;}
-  void hide();     //does not affect bActivated status
-  void restore();  //does not affect bActivated status
+  void RestorelWidget();  //on script window restore
+  void HideWidget();     //on script window hide
 
 private:
+  AScriptManager* ScriptManager;
   QWidget* Parent;
-  bool bActivated;
+  AScriptMessengerDialog* DialogWidget;
 
-  void init(bool fTransparent);
+  void connectSignalSlots();
+
 };
 
 #endif // AINTERFACETOMESSAGEWINDOW_H

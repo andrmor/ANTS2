@@ -609,11 +609,17 @@ double RasterWindowGraphClass::getCanvasMaxX()
 
 double RasterWindowGraphClass::getCanvasMinY()
 {
+  if (fCanvas->GetLogy())
+    return TMath::Power(10.0, fCanvas->GetUymin());
+
   return fCanvas->GetUymin();
 }
 
 double RasterWindowGraphClass::getCanvasMaxY()
 {
+  if (fCanvas->GetLogy())
+    return TMath::Power(10.0, fCanvas->GetUymax());
+
   return fCanvas->GetUymax();
 }
 

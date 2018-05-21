@@ -1,13 +1,20 @@
 #include "ainterfacetodeposcript.h"
-#include "mainwindow.h"
 #include "eventsdataclass.h"
 #include "aenergydepositioncell.h"
 #include "aparticleonstack.h"
+#include "simulationmanager.h"
+#include "asandwich.h"
+#include "globalsettingsclass.h"
+#include "atrackrecords.h"
 
 #include <QDebug>
 
-AInterfaceToDepoScript::AInterfaceToDepoScript(MainWindow* MW, EventsDataClass* EventsDataHub)
-  : MW(MW), EventsDataHub(EventsDataHub)
+#include "TRandom2.h"
+#include "TGeoTrack.h"
+#include "TGeoManager.h"
+
+AInterfaceToDepoScript::AInterfaceToDepoScript(DetectorClass *Detector, GlobalSettingsClass *GlobSet, EventsDataClass* EventsDataHub)
+  : Detector(Detector), GlobSet(GlobSet), EventsDataHub(EventsDataHub)
 {
   H["ClearStack"] = "Clear particle stack";
   H["AddParticleToStack"] = "Add a particle (or several identical particles) to the stack";
@@ -50,10 +57,23 @@ AInterfaceToDepoScript::AInterfaceToDepoScript(MainWindow* MW, EventsDataClass* 
   H["getAllDefinedTerminatorTypes"] = "Return array with all defined terminator types. Format of array element is 'index=type'";
 }
 
+AInterfaceToDepoScript::~AInterfaceToDepoScript()
+{
+    ClearExtractedData();
+    ClearStack();
+    clearEnergyVector();
+}
+
 void AInterfaceToDepoScript::ClearStack()
 {
   //qDebug() << "Clear stack triggered";
-  MW->on_pbClearAllStack_clicked();
+
+  //MW->on_pbClearAllStack_clicked();
+
+  for (int i=0; i<ParticleStack.size(); i++)
+      delete ParticleStack[i];
+  ParticleStack.clear();
+
   //qDebug() << "Done";
 }
 
@@ -62,22 +82,33 @@ void AInterfaceToDepoScript::AddParticleToStack(int particleID, double X, double
                                                       double Time, double Energy,
                                                       int numCopies)
 {
-  MW->ParticleStack.reserve(MW->ParticleStack.size() + numCopies);
-  for (int i=0; i<numCopies; i++)
-  {
-     AParticleOnStack *tmp = new AParticleOnStack(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
-     MW->ParticleStack.append(tmp);
-  }
-  MW->on_pbRefreshStack_clicked();
+//  MW->ParticleStack.reserve(MW->ParticleStack.size() + numCopies);
+//  for (int i=0; i<numCopies; i++)
+//  {
+//     AParticleOnStack *tmp = new AParticleOnStack(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
+//     MW->ParticleStack.append(tmp);
+//  }
+//  MW->on_pbRefreshStack_clicked();
+
+    ParticleStack.reserve( ParticleStack.size() + numCopies );
+    for (int i=0; i<numCopies; i++)
+    {
+        AParticleOnStack* tmp = new AParticleOnStack(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
+        ParticleStack.append(tmp);
+    }
 }
 
-void AInterfaceToDepoScript::TrackStack()
+void AInterfaceToDepoScript::TrackStack(bool bDoTracks)
 {
   //qDebug() << "->Track stack triggered";
   ClearExtractedData();
   //qDebug() << "--->PR cleared";
-  MW->on_pbTrackStack_clicked();
-  //qDebug() << "--->Stack tracked";
+
+  //MW->on_pbTrackStack_clicked();
+  bool bOK = doTracking(bDoTracks);
+  //qDebug() << "--->Stack tracked" << bOK;
+  if (!bOK) return;
+
   populateParticleRecords();
   //qDebug() << "--->Particle records populated";
 }
@@ -95,7 +126,7 @@ void AInterfaceToDepoScript::populateParticleRecords()
       abort("EventHistory is empty!");
       return;
     }
-  if (MW->EnergyVector.isEmpty())
+  if (EnergyVector.isEmpty())
     {
       abort("EnergyVector is empty!");
       return;
@@ -112,14 +143,14 @@ void AInterfaceToDepoScript::populateParticleRecords()
       // adding info from EnergyVector
       int sernum = pr.History->index;
         //needs at least one entry in EnergyVector with the same serial number
-      while (indexEV<MW->EnergyVector.size() && MW->EnergyVector.at(indexEV)->index == sernum)
+      while (indexEV < EnergyVector.size() && EnergyVector.at(indexEV)->index == sernum)
         {
           MaterialRecord mr;
           // Material ID
-          mr.MatId = MW->EnergyVector.at(indexEV)->MaterialId;
+          mr.MatId = EnergyVector.at(indexEV)->MaterialId;
           // Start position
-          double* r = MW->EnergyVector.at(indexEV)->r;
-          double  l = MW->EnergyVector.at(indexEV)->cellLength;
+          double* r = EnergyVector.at(indexEV)->r;
+          double  l = EnergyVector.at(indexEV)->cellLength;
           mr.StartPosition[0] = r[0] - l * pr.History->dx;
           mr.StartPosition[1] = r[1] - l * pr.History->dy;
           mr.StartPosition[2] = r[2] - l * pr.History->dz;
@@ -128,22 +159,136 @@ void AInterfaceToDepoScript::populateParticleRecords()
             {
               DepoNode depo;
               // position
-              depo.R[0] = MW->EnergyVector.at(indexEV)->r[0];
-              depo.R[1] = MW->EnergyVector.at(indexEV)->r[1];
-              depo.R[2] = MW->EnergyVector.at(indexEV)->r[2];
+              depo.R[0] = EnergyVector.at(indexEV)->r[0];
+              depo.R[1] = EnergyVector.at(indexEV)->r[1];
+              depo.R[2] = EnergyVector.at(indexEV)->r[2];
               // energy
-              depo.Energy = MW->EnergyVector.at(indexEV)->dE;
+              depo.Energy = EnergyVector.at(indexEV)->dE;
               // length
-              depo.CellLength = MW->EnergyVector.at(indexEV)->cellLength;
+              depo.CellLength = EnergyVector.at(indexEV)->cellLength;
               // adding to the record
               mr.ByMaterial.append(depo);
               indexEV++;
             }
-          while(indexEV<MW->EnergyVector.size() && MW->EnergyVector.at(indexEV)->index==sernum && MW->EnergyVector.at(indexEV)->MaterialId==mr.MatId);
+          while(indexEV < EnergyVector.size() &&
+                EnergyVector.at(indexEV)->index == sernum &&
+                EnergyVector.at(indexEV)->MaterialId == mr.MatId);
           pr.Deposition.append(mr);
         }
       PR.append(pr);
+  }
+}
+
+#include "aconfiguration.h"
+bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
+{
+    clearEnergyVector();
+    EventsDataHub->clear();
+
+    if ( !Detector->Config->JSON.contains("SimulationConfig"))
+    {
+        abort("Configuration does not contain simulation settings");
+        return false;
     }
+    QJsonObject json = Detector->Config->JSON["SimulationConfig"].toObject();
+
+    //overrides
+    json["Mode"] = "StackSim";
+    json["DoGuiUpdate"] = false;
+
+    if (!json.contains("ParticleSourcesConfig"))
+    {
+        abort("Json sent to simulator does not contain particle sim config data!");
+        return false;
+    }
+        QJsonObject js = json["ParticleSourcesConfig"].toObject();
+        if ( !js.contains("SourceControlOptions"))
+        {
+            abort("Json sent to simulator does not contain proper sim config data!");
+            return false;
+        }
+        //control options
+            QJsonObject cjs = js["SourceControlOptions"].toObject();
+
+            cjs["AllowMultipleParticles"] = false;
+            cjs["DoS1"] = false;
+            cjs["DoS2"] = false;
+            cjs["ParticleTracks"] = bDoTracks;
+            cjs["IgnoreNoHitsEvents"] = false;
+            cjs["IgnoreNoDepoEvents"] = false;
+        js["SourceControlOptions"] = cjs;
+    json["ParticleSourcesConfig"] = js;
+    //SaveJsonToFile(json, "ThisSimConfig.json");
+    //qDebug() << js;
+
+    GeneralSimSettings simSettings;
+    simSettings.readFromJson(json);
+    simSettings.fLogsStat = true; //force to populate logs
+
+    //========== prepare simulator ==========
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    pss->setSimSettings(&simSettings);
+    pss->setup(json);
+    pss->initSimStat();
+    pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
+
+    EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
+
+    bool fOK = pss->standaloneTrackStack(&ParticleStack);
+    if (!fOK)
+    {
+        abort("Error in tracker: " + pss->getErrorString());
+        return false;
+    }
+    //--- Retrieve results ---
+
+    clearEnergyVector(); // just in case clear procedures change
+    EnergyVector = pss->getEnergyVector();
+    pss->ClearEnergyVectorButKeepObjects(); //disconnected this copy so delete of the simulator does not kill the vector
+    //  qDebug() << "-------------En vector size:"<<EnergyVector.size();
+
+    //track handling
+    if (bDoTracks)
+    {
+        Detector->GeoManager->ClearTracks();
+
+        int numTracks = 0;
+        //qDebug() << "Tracks collected:"<<pss->tracks.size();
+        for (int iTr=0; iTr<pss->tracks.size(); iTr++)
+        {
+            TrackHolderClass* th = pss->tracks[iTr];
+
+            if (numTracks < GlobSet->MaxNumberOfTracks)
+            {
+                TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+                track->SetLineColor(th->Color);
+                track->SetLineWidth(th->Width);
+                for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+                    track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+
+                if (track->GetNpoints()>1)
+                {
+                    numTracks++;
+                    Detector->GeoManager->AddTrack(track);
+                }
+                else delete track;
+            }
+            delete th;
+        }
+        pss->tracks.clear();
+    }
+
+    //report data saved in history
+    pss->appendToDataHub(EventsDataHub);
+
+    delete pss;
+    return true;
+}
+
+void AInterfaceToDepoScript::clearEnergyVector()
+{
+    for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
+    EnergyVector.clear();
 }
 
 int AInterfaceToDepoScript::termination(int i)
@@ -398,7 +543,7 @@ QString AInterfaceToDepoScript::Deposition_volumeName(int i, int m)
     }
 
   if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return "";
-  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  TGeoManager* GeoManager = Detector->GeoManager;
   double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
   TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
   if (node) return QString(node->GetName());
@@ -419,7 +564,7 @@ int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
     }
 
   if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return -1;
-  TGeoManager* GeoManager = MW->Detector->GeoManager;
+  TGeoManager* GeoManager = Detector->GeoManager;
   double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
   TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
   if (node) return node->GetNumber();

@@ -10,9 +10,9 @@
 #include "geometrywindowclass.h"
 #include "exampleswindow.h"
 #include "gainevaluatorwindowclass.h"
-#include "genericscriptwindowclass.h"
 #include "globalsettingsclass.h"
 #include "ascriptwindow.h"
+#include "detectoraddonswindow.h"
 
 #include <QTime>
 #include <QDebug>
@@ -45,6 +45,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   GeometryOn = false;
   GraphOn = false;
   ScriptOn = false;
+  PythonScriptOn = false;
   MainChangeExplicitlyRequested = false;
 #ifdef Q_OS_WIN32
   taskButton = 0;
@@ -190,6 +191,7 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
   if (w == "geometry") GeometryOn = false;
   if (w == "graph") GraphOn = false;
   if (w == "script") ScriptOn = false;
+  if (w == "python") PythonScriptOn = false;
 
   ui->pbMain->setChecked(MainOn);
   ui->pbRecon->setChecked(ReconOn);
@@ -215,6 +217,7 @@ void WindowNavigatorClass::ShowWindowTriggered(QString w)
   if (w == "geometry") GeometryOn = true;
   if (w == "graph") GraphOn = true;
   if (w == "script") ScriptOn = true;
+  if (w == "python") PythonScriptOn = true;
 
   ui->pbMain->setChecked(MainOn);
   ui->pbRecon->setChecked(ReconOn);
@@ -259,13 +262,16 @@ void WindowNavigatorClass::BusyOn()
   MW->stopRootUpdate(); //--//
 
   MW->onBusyOn();
+  MW->DAwindow->setEnabled(false);
   MW->Rwindow->onBusyOn();
+  MW->ScriptWindow->onBusyOn();
+  if (MW->PythonScriptWindow) MW->PythonScriptWindow->onBusyOn();
   MW->lrfwindow->onBusyOn();
   MW->MIwindow->setEnabled(false);
   MW->ELwindow->setEnabled(false);
   if (MW->GainWindow) MW->GainWindow->setEnabled(false);
-  if (MW->GraphWindow) MW->GraphWindow->OnBusyOn();
-  if (MW->GeometryWindow) MW->GeometryWindow->onBusyOn();
+  MW->GraphWindow->setEnabled(false);//OnBusyOn();
+  MW->GeometryWindow->onBusyOn();
   MW->Owindow->setEnabled(false);
 
   emit BusyStatusChanged(true);
@@ -287,9 +293,16 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //main window
   MW->onBusyOff();
 
+  //addon window
+  MW->DAwindow->setEnabled(true);
+
   //reconstruction window
   //MW->Rwindow->setEnabled(true);
   MW->Rwindow->onBusyOff();
+
+  //Script
+  MW->ScriptWindow->onBusyOff();
+  if (MW->PythonScriptWindow) MW->PythonScriptWindow->onBusyOff();
 
   //lrf window
   MW->lrfwindow->onBusyOff();
@@ -303,7 +316,7 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
 
-  MW->GraphWindow->OnBusyOff();
+  MW->GraphWindow->setEnabled(true);//OnBusyOff();
 
   MW->GeometryWindow->onBusyOff();
 
@@ -386,6 +399,12 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->ScriptWindow->showNormal();
       MW->ScriptWindow->raise();
     }
+  if (PythonScriptOn)
+    if (MW->PythonScriptWindow)
+    {
+      MW->PythonScriptWindow->showNormal();
+      MW->PythonScriptWindow->raise();
+    }
 
   MainChangeExplicitlyRequested = false;
 }
@@ -403,10 +422,14 @@ void WindowNavigatorClass::on_pbMinAll_clicked()
 
   QList<QMainWindow*> list;
   list.clear();
+
   list<<MW->Owindow<<MW->Rwindow<<MW->lrfwindow<<MW->newLrfWindow<<MW->MIwindow<<MW->ELwindow<<MW->GraphWindow<<MW->GeometryWindow<<MW->ScriptWindow;
+  if (MW->PythonScriptWindow) list << MW->PythonScriptWindow;
+  if (MW->GenScriptWindow) list <<MW->GenScriptWindow;
+  if (MW->GainWindow) list << MW->GainWindow;
+
   foreach (QMainWindow* win, list) win->hide();
-  if (MW->GenScriptWindow) MW->GenScriptWindow->hide();
-  if (MW->GainWindow) MW->GainWindow->hide();
+
   MW->showMinimized();
 
   DisableBSupdate = false;
@@ -471,7 +494,7 @@ void WindowNavigatorClass::on_pbGeometry_clicked()
     {
       MW->GeometryWindow->showNormal();
       MW->GeometryWindow->raise();
-      MW->ShowGeometry();
+      MW->GeometryWindow->ShowGeometry();
       MW->ShowTracks();
     }
   else MW->GeometryWindow->hide();

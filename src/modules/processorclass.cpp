@@ -1,5 +1,5 @@
 #include "processorclass.h"
-#include "pms.h"
+#include "apmhub.h"
 #include "apmgroupsmanager.h"
 #include "eventsdataclass.h"
 #include "reconstructionsettings.h"
@@ -13,7 +13,7 @@
 #include "Math/Functor.h"
 #include "Minuit2/Minuit2Minimizer.h"
 
-ProcessorClass::ProcessorClass(pms* PMs,
+ProcessorClass::ProcessorClass(APmHub* PMs,
                APmGroupsManager* PMgroups,
                ALrfModuleSelector *LRFs,
                EventsDataClass *EventsDataHub,
@@ -199,7 +199,7 @@ void CoGReconstructorClass::execute()
   fFinished = true;
 }
 
-RootMinReconstructorClass::RootMinReconstructorClass(pms* PMs,
+RootMinReconstructorClass::RootMinReconstructorClass(APmHub* PMs,
                                                      APmGroupsManager* PMgroups,
                                                      ALrfModuleSelector *LRFs,
                                                      EventsDataClass *EventsDataHub,
@@ -332,7 +332,7 @@ void RootMinReconstructorClass::execute()
 }
 
 // -----Experimental-----
-RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(pms *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range, bool UseGauss) :
+RootMinRangedReconstructorClass::RootMinRangedReconstructorClass(APmHub *PMs, APmGroupsManager *PMgroups, ALrfModuleSelector *LRFs, EventsDataClass *EventsDataHub, ReconstructionSettings *RecSet, int ThisPmGroup, int EventsFrom, int EventsTo, double Range, bool UseGauss) :
     RootMinReconstructorClass(PMs, PMgroups, LRFs, EventsDataHub, RecSet, ThisPmGroup, EventsFrom, EventsTo, UseGauss), Range(Range)
 {
     qDebug() << "Warning! Experimental feature activated - reconstruction by RootMin for ranged X or Y\nScanX or ScanY of 1e10 -> free search, otherwise within"<<Range<<"from ScanX or ScanY value";
@@ -452,7 +452,7 @@ void RootMinRangedReconstructorClass::execute()
 }
 // -------------------------
 
-RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(pms* PMs,
+RootMinDoubleReconstructorClass::RootMinDoubleReconstructorClass(APmHub* PMs,
                                                                  APmGroupsManager* PMgroups,
                                                                  ALrfModuleSelector *LRFs,
                                                                  EventsDataClass *EventsDataHub,
@@ -797,7 +797,8 @@ double MLstatic(const double *p) //0-x, 1-y, 2-z, 3-energy, 4-pointer to RootMin
       {
        double LRFhere = Reconstructor->LRFs.getLRF(ipm, p)*p[3];//X, Y, Z) * energy;
        if (LRFhere <= 0.)
-           return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+           //return Reconstructor->LastMiniValue += fabs(Reconstructor->LastMiniValue) * 0.25;
+           return Reconstructor->LastMiniValue + fabs(Reconstructor->LastMiniValue) * 0.25;
 
        sum += Reconstructor->PMsignals->at(ipm)*log(LRFhere) - LRFhere; //measures probability
      }

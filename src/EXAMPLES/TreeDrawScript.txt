@@ -1,0 +1,337 @@
+
+//function which will be called on start
+function onStart()
+{
+       //       tree.LoadTree("t", "D:/SIMULATIONS/Neutrons/April2018-For1stPaper/HighResTree-50k-noScat.root", "")
+       update()
+       core.print("History file: " + filename_History)
+}
+//save history to file
+var bSaveHistory = true  //if true, history will be loaded/saved from/to file
+var filename_History = core.GetWorkDir() + "/TreeDrawGUIhistory.json"
+
+//inits
+//var emptyRecord = ["", "", "", [[100,0,0],[100,0,0],[100,0,0]] ]  // what cuts opt [[bins, from to], ...]
+var emptyRecord = {  What:"", Cuts:"", Opt:"", BinRange:[ [100,0,0], [100,0,0], [100,0,0] ], MarkerLine:[ [602,1,1], [602,1,1] ]  }
+var maxHistoryLength = 25
+var History = []
+History.push(emptyRecord)
+var HistoryIndex = 0
+
+// can modify start-up info on buttons 1 - 5. Now it is emptyRecord. LoadHistory overrides these settings, so put overrides in onStart()
+var CustomB = []
+for (var i=0; i<5; i++) CustomB.push(emptyRecord)
+
+// --- Constructing GUI ---
+gui.horizontalLayout("h1", "")
+       gui.addStretch("h1")
+       gui.labelNew("l1", "h1", "Tree:")
+       gui.comboboxNew("cTree", "h1", true)
+       gui.buttonNew("bUpdate", "h1", "")
+              gui.buttonSetText("bUpdate", "Update", true)
+       gui.addStretch("h1")
+       
+gui.addHoizontalLine("")
+gui.addStretch("")    
+       
+gui.horizontalLayout("h2", "")
+       gui.verticalLayout("v1", "h2")
+              gui.labelNew("lWhat", "v1", "What:")
+              gui.labelNew("lWhatHelper", "v1", "")
+              gui.labelNew("lCuts", "v1", "Cuts:")
+              gui.labelNew("lOpt", "v1", "Options:")
+       gui.verticalLayout("v2", "h2")       
+              gui.editNew("eWhat", "v2", "")
+                     gui.horizontalLayout("h3", "v2")
+                     gui.labelNew("lBra", "h3", "Available branches:")
+                     gui.comboboxNew("cBranches", "h3")
+              gui.editNew("eCuts", "v2", "")       
+              gui.editNew("eOpt", "v2", "")
+              
+ gui.buttonNew("bDraw", "", "")
+        gui.buttonSetText("bDraw", "Draw", true)
+       
+gui.horizontalLayout("h4", "")
+       gui.verticalLayout("v3", "h4")
+              gui.labelNew("lD1", "v3", "Axis 1 -> bins:")
+              gui.labelNew("lD2", "v3", "Axis 2 -> bins:")
+              gui.labelNew("lD3", "v3", "Axis 3 -> bins:")
+       gui.verticalLayout("v4", "h4")
+              gui.editNew("eBins0", "v4", "100")
+              gui.editNew("eBins1", "v4", "100")
+              gui.editNew("eBins2", "v4", "100")
+       gui.verticalLayout("v5", "h4")
+              gui.labelNew("lD11", "v5", " from:")
+              gui.labelNew("lD12", "v5", " from:")
+              gui.labelNew("lD13", "v5", " from:")       
+       gui.verticalLayout("v6", "h4")
+              gui.editNew("eFrom0", "v6", "0")
+              gui.editNew("eFrom1", "v6", "0")
+              gui.editNew("eFrom2", "v6", "0")
+       gui.verticalLayout("v7", "h4")
+              gui.labelNew("lD111", "v7", " to:")
+              gui.labelNew("lD112", "v7", " to:")
+              gui.labelNew("lD113", "v7", " to:")
+       gui.verticalLayout("v8", "h4")
+              gui.editNew("eTo0", "v8", "0")
+              gui.editNew("eTo1", "v8", "0")
+              gui.editNew("eTo2", "v8", "0")
+       gui.verticalLayout("v9", "h4")
+              gui.buttonNew("bClr0", "v9", "clear")
+              gui.buttonNew("bClr1", "v9", "clear")
+              gui.buttonNew("bClr2", "v9", "clear")
+              
+gui.horizontalLayout("hA", "")
+       gui.verticalLayout("vAC", "hA")
+              gui.horizontalLayout("hAC", "vAC")
+                     gui.labelNew("lMC", "hAC", "Color:")
+                     gui.editNew("eColor", "hAC", "4")
+                     gui.editSetIntValidator("eColor", 0, 1000)
+        gui.verticalLayout("vALabStyle", "hA")
+                gui.labelNew("lMSt", "vALabStyle", "Marker style:")
+                gui.labelNew("lLSt", "vALabStyle", "Line style:")
+        gui.verticalLayout("vAEStyle", "hA")
+                gui.editNew("eMStyle", "vAEStyle", "1")
+                gui.editNew("eLStyle", "vAEStyle", "1") 
+        gui.verticalLayout("vALabWidth", "hA")       
+                gui.labelNew("lMSize", "vALabWidth", "Marker size:")
+                gui.labelNew("lLSize", "vALabWidth", "Line size:")
+        gui.verticalLayout("vAEWidth", "hA")        
+                gui.editNew("eMSize", "vAEWidth", "1")
+                gui.editNew("eLSize", "vAEWidth", "1")
+              
+gui.addStretch("")
+gui.addHoizontalLine("")
+
+gui.horizontalLayout("h5", "")
+       gui.labelNew("lHist", "h5", "Draw history:")
+       gui.buttonNew("bFullBack", "h5", "|<-")
+       gui.buttonNew("bBack", "h5", "<-")
+       gui.buttonNew("bForward", "h5", "->")
+       gui.buttonNew("bFullForward", "h5", "->|")
+   
+gui.labelNew("lCust", "", "Right-click to store, Left-click to recall:")
+       
+gui.horizontalLayout("h6", "")
+       gui.buttonNew("b0", "h6", "1")
+       gui.buttonNew("b1", "h6", "2")
+       gui.buttonNew("b2", "h6", "3")
+       gui.buttonNew("b3", "h6", "4")
+       gui.buttonNew("b4", "h6", "5")
+
+gui.resize(400, 450)
+
+function update()
+{
+       var availableTrees = tree.GetAllTreeNames()
+       gui.comboboxClear("cTree")
+       gui.comboboxAppend("cTree", availableTrees)
+}
+
+function treeChanged()
+{
+       var treeName = gui.comboboxGetSelected("cTree")
+       var brNames = tree.GetBranchNames(treeName)  //empty if tree not found
+       
+       gui.comboboxClear("cBranches")
+       gui.comboboxAppend("cBranches", brNames)
+       //       core.print(brNames)
+       gui.editSetCompleter("eWhat", brNames)
+       gui.editSetCompleter("eCuts", brNames)        
+}
+
+function saveAll()
+{
+       var obj = {History: History, Custom: CustomB}
+       core.saveObject(filename_History, obj, true)
+}
+
+function draw()
+{
+       var treeName = gui.comboboxGetSelected("cTree")
+       if ( !tree.IsTreeExists(treeName) )
+              gui.messageBox("Tree " + treeName + "not found")
+       else
+       {
+             var what = gui.editGetText("eWhat")
+             var cuts = gui.editGetText("eCuts")
+             var opt = gui.editGetText("eOpt")
+             
+             var br = []
+             for (var i=0; i<3; i++)
+                    br.push( [ parseInt(gui.editGetText("eBins"+i)), parseFloat(gui.editGetText("eFrom"+i)), parseFloat(gui.editGetText("eTo"+i)) ] )
+             var ml = []       
+             ml.push( [  parseInt(gui.editGetText("eColor")),  parseInt(gui.editGetText("eMStyle")),  parseFloat(gui.editGetText("eMSize")) ] )
+             ml.push( [  parseInt(gui.editGetText("eColor")),  parseInt(gui.editGetText("eLStyle")),  parseFloat(gui.editGetText("eLSize")) ] )
+             
+             var error = tree.Draw(treeName, what, cuts, opt, br, ml, false)
+             if (error !== "")
+             {
+                    gui.messageBox(error)
+             }
+             else
+             {
+                    var addRec = {}//  What:"", Cuts:"", Opt:"", BinRange:[ [100,0,0], [100,0,0], [100,0,0] ], MarkerLine:[ [602,1,1], [602,1,1] ]  }
+                    addRec.What = what; addRec.Cuts = cuts; addRec.Opt = opt; addRec.BinRange = br; addRec.MarkerLine = ml
+                    var js = JSON.stringify(addRec)             
+                    for (var i=History.length-1; i>=0; i--)
+                           if (JSON.stringify( History[i] ) == js)
+                                  History.splice(i, 1)
+                    History.push( addRec )       
+                    if (History.length > maxHistoryLength) History.splice(0,1)
+                    HistoryIndex = History.length-1             
+                    if (bSaveHistory) saveAll()
+             }             
+       }       
+}
+
+function setBinRange(i, ar)
+{
+        gui.editSetText("eBins"+i, ar[0])
+        gui.editSetText("eFrom"+i, ar[1])
+        gui.editSetText("eTo"+i, ar[2])
+}
+
+function clearBR0() { setBinRange(0, [100,0,0]) }
+function clearBR1() { setBinRange(1, [100,0,0]) }
+function clearBR2() { setBinRange(2, [100,0,0]) }
+
+function histBack()
+{
+       if (HistoryIndex > 0)
+       {
+              HistoryIndex--
+              Restore(History[HistoryIndex])
+       }       
+}
+function histFullBack()
+{
+       if (HistoryIndex > 0)
+       {
+              HistoryIndex = 0
+              Restore(History[HistoryIndex])
+       }       
+}
+function histForward()
+{
+       if (HistoryIndex < History.length-1)
+       {
+              HistoryIndex++
+              Restore(History[HistoryIndex])
+       }       
+}
+function histFullForward()
+{
+       if ( History.length > 0)
+       {
+              HistoryIndex = History.length-1
+              Restore(History[HistoryIndex])
+       }       
+}
+function Restore(rec)
+{
+       gui.editSetText("eWhat", rec.What)
+       gui.editSetText("eCuts", rec.Cuts)
+       gui.editSetText("eOpt", rec.Opt)
+       setBinRange(0, rec.BinRange[0])
+       setBinRange(1, rec.BinRange[1])
+       setBinRange(2, rec.BinRange[2])
+       gui.editSetText("eColor", rec.MarkerLine[0][0])
+       gui.editSetText("eMStyle", rec.MarkerLine[0][1])
+       gui.editSetText("eMSize", rec.MarkerLine[0][2])
+       gui.editSetText("eLStyle", rec.MarkerLine[1][1])
+       gui.editSetText("eLSize", rec.MarkerLine[1][2])
+}
+function Store()
+{
+       var rec = {} //  What:"", Cuts:"", Opt:"", BinRange:[ [100,0,0], [100,0,0], [100,0,0] ], MarkerLine:[ [602,1,1], [602,1,1] ]
+       
+       rec.What = gui.editGetText("eWhat")
+       rec.Cuts = gui.editGetText("eCuts")
+       rec.Opt  = gui.editGetText("eOpt")
+       
+       var br = []
+       for (var i=0; i<3; i++)
+       {
+              var rr = [ gui.editGetText("eBins"+i), gui.editGetText("eFrom"+i), gui.editGetText("eTo"+i) ]
+              br.push(rr)
+       }
+       rec.BinRange = br
+	   
+       var ml = []
+            var rr = [ gui.editGetText("eColor"), gui.editGetText("eMStyle"), gui.editGetText("eMSize") ]
+            ml.push(rr)
+            var rr = [ gui.editGetText("eColor"), gui.editGetText("eLStyle"), gui.editGetText("eLSize") ]
+            ml.push(rr)
+       rec.MarkerLine = ml
+	   
+       return rec
+}
+
+function CustomStore0()    { CustomB[0] = Store(); if (bSaveHistory) saveAll() }
+function CustomStore1()    { CustomB[1] = Store(); if (bSaveHistory) saveAll() }
+function CustomStore2()    { CustomB[2] = Store(); if (bSaveHistory) saveAll() }
+function CustomStore3()    { CustomB[3] = Store(); if (bSaveHistory) saveAll() }
+function CustomStore4()    { CustomB[4] = Store(); if (bSaveHistory) saveAll() }
+function CustomRestore0() { Restore(CustomB[0]) }
+function CustomRestore1() { Restore(CustomB[1]) }
+function CustomRestore2() { Restore(CustomB[2]) }
+function CustomRestore3() { Restore(CustomB[3]) }
+function CustomRestore4() { Restore(CustomB[4]) }
+
+gui.buttonOnClick("bUpdate", update)
+gui.comboboxOnTextChanged("cTree", treeChanged)
+gui.buttonOnClick("bDraw", draw)
+gui.buttonOnClick("bClr0", clearBR0)
+gui.buttonOnClick("bClr1", clearBR1)
+gui.buttonOnClick("bClr2", clearBR2)
+gui.buttonOnClick("bBack", histBack)
+gui.buttonOnClick("bFullBack", histFullBack)
+gui.buttonOnClick("bForward", histForward)
+gui.buttonOnClick("bFullForward", histFullForward)
+
+gui.buttonOnClick("b0", CustomRestore0)
+gui.buttonOnClick("b1", CustomRestore1)
+gui.buttonOnClick("b2", CustomRestore2)
+gui.buttonOnClick("b3", CustomRestore3)
+gui.buttonOnClick("b4", CustomRestore4)
+gui.buttonOnRightClick("b0", CustomStore0)
+gui.buttonOnRightClick("b1", CustomStore1)
+gui.buttonOnRightClick("b2", CustomStore2)
+gui.buttonOnRightClick("b3", CustomStore3)
+gui.buttonOnRightClick("b4", CustomStore4)
+// --- GUI is ready ---
+
+gui.setWidgetTitle("Tree draw")
+
+gui.show()
+
+if (bSaveHistory)
+{
+       var bFound = core.isFileExists( filename_History )
+       if (bFound)
+       {
+              var obj = core.loadObject( filename_History )
+              if (obj.hasOwnProperty("History"))
+              {
+                     var hi = obj.History
+                     if (hi.length > 0)
+                     {
+                            History = hi
+                            HistoryIndex = History.length - 1
+                            Restore( History[HistoryIndex] )
+                     }
+              }
+              else core.print("History records not found in the file")
+              
+              if (obj.hasOwnProperty("Custom"))
+              {
+                     var cust = obj.Custom
+                     if (cust.length > 0) CustomB = cust
+              }
+              else core.print("Custom buttons records not found in the file")
+       }
+       else core.createFile( filename_History )
+}
+
+onStart()

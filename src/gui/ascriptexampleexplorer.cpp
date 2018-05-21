@@ -43,7 +43,8 @@ AScriptExampleExplorer::AScriptExampleExplorer(QString RecordsFileName, QWidget 
     }
     fBulkUpdate = false;
 
-    QObject::connect(ui->lwTags, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(onTagStateChanged(QListWidgetItem*)));
+    connect(ui->lwTags, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(onTagStateChanged(QListWidgetItem*)));
+    connect(ui->leFind, &QLineEdit::textChanged, this, &AScriptExampleExplorer::onFindTextChanged);
     UpdateGui();
 
     QTimer::singleShot(100, this, SLOT(ClearSelection()));
@@ -144,6 +145,19 @@ void AScriptExampleExplorer::onTagStateChanged(QListWidgetItem* /*item*/)
 {
     if (fBulkUpdate) return;
     UpdateGui();
+}
+
+void AScriptExampleExplorer::onFindTextChanged(const QString &text)
+{
+    const bool bEmpty = text.isEmpty();
+
+    for (int i=0; i<ui->lwTags->count(); i++)
+    {
+        bool bVisible = bEmpty || ui->lwTags->item(i)->text().contains(text, Qt::CaseInsensitive);
+
+        ui->lwTags->item(i)->setHidden( !bVisible );
+        ui->lwTags->item(i)->setCheckState( bVisible ? Qt::Checked : Qt::Unchecked );
+    }
 }
 
 void AScriptExampleExplorer::on_lwTags_itemDoubleClicked(QListWidgetItem *item)

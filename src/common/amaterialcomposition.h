@@ -67,6 +67,8 @@ public:
 
     void CalculateMeanAtomMass();
 
+    const QString checkForErrors() const; //returns empty string if OK
+
 private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;

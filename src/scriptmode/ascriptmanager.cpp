@@ -1,180 +1,154 @@
 #include "ascriptmanager.h"
+#include "ascriptinterface.h"
 #include "ainterfacetomessagewindow.h"
-#include "coreinterfaces.h"
 
-#include <QScriptEngine>
 #include <QDebug>
+#include <QElapsedTimer>
+#include <QMetaMethod>
 
-AScriptManager::AScriptManager(TRandom2* RandGen) :
-    RandGen(RandGen)
+AScriptManager::AScriptManager(TRandom2 *RandGen) : RandGen(RandGen)
 {
-    engine = new QScriptEngine();
-    engine->setProcessEventsInterval(200);
+  fEngineIsRunning = false;
+  fAborted = false;
+  MiniBestResult = 1e30;
+  MiniNumVariables = 0;
 
-    fEngineIsRunning = false;
-    bestResult = 1e30;
-    numVariables = 0;
+  timer = 0;
+  timerEvalTookMs = 0;
 }
 
 AScriptManager::~AScriptManager()
 {
-    for (int i=0; i<interfaces.size(); i++) delete interfaces[i];
-    interfaces.clear();
+  for (int i=0; i<interfaces.size(); i++) delete interfaces[i];
+  interfaces.clear();
 
-    if (engine)
-    {
-        engine->abortEvaluation();
-        engine->deleteLater();
-        engine = 0;
+  delete timer;
+}
+
+void AScriptManager::hideMsgDialogs()
+{
+  for (int i=0; i<interfaces.size(); i++)
+  {
+      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      if (t)  t->HideWidget();
     }
 }
 
-QString AScriptManager::Evaluate(QString Script)
+void AScriptManager::restoreMsgDialogs()
 {
-    LastError = "";
-    fAborted = false;
-
-    emit onStart();
-
-    //running InitOnRun method (if defined) for all defined interfaces
-    for (int i=0; i<interfaces.size(); i++)
-      {
-          AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
-          if (bi)
-            {
-              if (!bi->InitOnRun())
-                {
-                  LastError = "Init failed for unit: "+interfaceNames.at(i);
-                  return LastError;
-                }
-            }
-      }
-
-    fEngineIsRunning = true;
-    QScriptValue scriptreturn = engine->evaluate(Script);
-    fEngineIsRunning = false;
-
-    QString result = scriptreturn.toString();
-    emit success(result); //bad name here :) could be not successful at all, but still want to trigger
-
-    return result;
+  for (int i=0; i<interfaces.size(); i++)
+  {
+      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      if (t) t->RestorelWidget();
+  }
 }
 
-void AScriptManager::CollectGarbage()
+qint64 AScriptManager::getElapsedTime()
 {
-    engine->collectGarbage();
+  if (timer) return timer->elapsed();
+  return timerEvalTookMs;
+}
+
+const QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
+{
+  QStringList f = UnitFunction.split(".");
+  if (f.size() != 2) return "";
+
+  QString unit = f.first();
+  int unitIndex = -1;
+  for (int i=0; i<interfaces.size(); i++)
+    if (interfaces.at(i)->objectName() == unit)
+      {
+        unitIndex = i;
+        break;
+      }
+  if (unitIndex == -1) return "";
+
+  //qDebug() << "Found unit"<<unit<<" with index"<<unitIndex;
+  QString met = f.last();
+  //qDebug() << met;
+  QStringList skob = met.split("(", QString::SkipEmptyParts);
+  if (skob.size()<2) return "";
+  QString funct = skob.first();
+  QString args = skob[1];
+  args.chop(1);
+  //qDebug() << funct << args;
+
+  QString insert;
+  if (!args.isEmpty())
+    {
+      QStringList argl = args.split(",");
+      for (int i=0; i<argl.size(); i++)
+        {
+          QStringList a = argl.at(i).simplified().split(" ");
+          if (!insert.isEmpty()) insert += ",";
+          insert += a.first();
+        }
+    }
+  //qDebug() << insert;
+
+  QString methodName = funct + "(" + insert + ")";
+  //qDebug() << "method name" << methodName;
+  int mi = interfaces.at(unitIndex)->metaObject()->indexOfMethod(methodName.toLatin1().data());
+  //qDebug() << "method index:"<<mi;
+  if (mi == -1) return "";
+
+  QString returnType = interfaces.at(unitIndex)->metaObject()->method(mi).typeName();
+  //qDebug() << returnType;
+  return returnType;
+}
+
+void AScriptManager::deleteMsgDialogs()
+{
+  for (int i=0; i<interfaces.size(); i++)
+  {
+      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      if (t)
+      {
+          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+          return;
+      }
+  }
+}
+
+void AScriptManager::ifError_AbortAndReport()
+{
+    if (isUncaughtException())
+    {
+        int lineNum = getUncaughtExceptionLineNumber();
+        QString err = getUncaughtExceptionString();
+        //err += "<br>Line #" + QString::number(lineNum) + ", call originating from function: " + functionName;
+        requestHighlightErrorLine(lineNum);
+        AbortEvaluation(err);
+    }
 }
 
 void AScriptManager::AbortEvaluation(QString message)
 {
-    //qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
+  //  qDebug() << "ScriptManager: Abort requested!"<<fAborted<<fEngineIsRunning;
 
-    if (fAborted || !fEngineIsRunning) return;
-    fAborted = true;
+  //if (fAborted || !fEngineIsRunning) return;
+  if (fAborted)
+  {
+      //  qDebug() << "...ignoring, already aborted";
+      return;
+  }
+  fAborted = true;
 
-    engine->abortEvaluation();
-    fEngineIsRunning = false;
+  abortEvaluation();
+  fEngineIsRunning = false;
 
-    // going through registered units and requesting abort
-    for (int i=0; i<interfaces.size(); i++)
-      {
-        AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
-        if (bi) bi->ForceStop();
-      }
-
-    message = "<font color=\"red\">"+ message +"</font><br>";
-    emit showMessage(message);
-    emit onAbort();
-}
-
-void AScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
-{
-    //qDebug() << "Registering:" << interfaceObject << name;
-    QScriptValue obj = ( interfaceObject ? engine->newQObject(interfaceObject, QScriptEngine::QtOwnership) : QScriptValue() );
-
-    if (name.isEmpty())
-      { // empty name means the main module
-        if (interfaceObject)
-           engine->setGlobalObject(obj); //do not replace the global object for global script - in effect (non zero pointer) only for local scripts
-        // registering service object
-        QObject* coreObj = new AInterfaceToCore(this);
-        QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
-        QString coreName = "core";
-        engine->globalObject().setProperty(coreName, coreVal);
-        interfaces.append(coreObj);  //CORE OBJECT IS FIRST in interfaces!
-        interfaceNames.append(coreName);
-        //registering math module
-        QObject* mathObj = new AInterfaceToMath(RandGen);
-        QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
-        QString mathName = "math";
-        engine->globalObject().setProperty(mathName, mathVal);
-        interfaces.append(mathObj);  //SERVICE OBJECT IS FIRST in interfaces!
-        interfaceNames.append(mathName);
-      }
-    else
-      { // name is not empty - this is one of the secondary modules
-        engine->globalObject().setProperty(name, obj);
-      }
-
-    if (interfaceObject)
-      {
-        interfaces.append(interfaceObject);
-        interfaceNames.append(name);
-
-        //connecting abort request from main interface to serviceObj
-        int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");
-        if (index != -1)
-            QObject::connect(interfaceObject, "2AbortScriptEvaluation(QString)", this, SLOT(AbortEvaluation(QString)));  //1-slot, 2-signal
-      }
-}
-
-int AScriptManager::FindSyntaxError(QString script)
-{
-    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(script);
-    if (check.state() == QScriptSyntaxCheckResult::Valid) return -1;
-    else
-      {
-        int lineNumber = check.errorLineNumber();
-        qDebug()<<"Syntax error at line"<<lineNumber;
-        return lineNumber;
-      }
-}
-
-void AScriptManager::deleteMsgDialog()
-{
-    for (int i=0; i<interfaces.size(); i++)
+  // going through registered units and requesting abort
+  for (int i=0; i<interfaces.size(); i++)
     {
-        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            t->deleteDialog();
-            return;
-        }
+      AScriptInterface* bi = dynamic_cast<AScriptInterface*>(interfaces[i]);
+      if (bi) bi->ForceStop();
     }
-}
 
-void AScriptManager::hideMsgDialog()
-{
-    for (int i=0; i<interfaces.size(); i++)
-    {
-        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            t->hide();
-            return;
-        }
-    }
-}
-
-void AScriptManager::restoreMsgDialog()
-{
-    for (int i=0; i<interfaces.size(); i++)
-    {
-        AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-        if (t)
-        {
-            if (t->isActive()) t->restore();
-            return;
-        }
-    }
+  if (!message.isEmpty())
+  {
+      message = "<font color=\"red\">"+ message +"</font><br>";
+      emit showMessage(message);
+  }
+  emit onAbort();
 }

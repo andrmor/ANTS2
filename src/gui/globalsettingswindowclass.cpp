@@ -1,11 +1,14 @@
 #include "globalsettingswindowclass.h"
 #include "ui_globalsettingswindowclass.h"
 #include "mainwindow.h"
-#include "genericscriptwindowclass.h"
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
 #include "globalsettingsclass.h"
 #include "detectorclass.h"
 #include "amessage.h"
 #include "anetworkmodule.h"
+#include "geometrywindowclass.h"
+#include "ainterfacetogstylescript.h"
 
 //Qt
 #include <QFileDialog>
@@ -38,7 +41,7 @@ GlobalSettingsWindowClass::GlobalSettingsWindowClass(MainWindow *parent) :
 
 GlobalSettingsWindowClass::~GlobalSettingsWindowClass()
 {
-  delete ui;
+   delete ui; ui = 0;
 }
 
 void GlobalSettingsWindowClass::updateGUI()
@@ -124,10 +127,28 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
 
 void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
 {
-  MW->extractGeometryOfScriptWindow();
+    MW->extractGeometryOfLocalScriptWindow();
+    delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
+
+    AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
+    MW->GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
+
+    QString example = QString("");
+    MW->GenScriptWindow->ConfigureForLightMode(&GlobSet->RootStyleScript,
+                              "Script to set ROOT's gStyle",
+                              example);
+
+    GStyleInterface = new AInterfaceToGStyleScript();
+    MW->GenScriptWindow->SetInterfaceObject(GStyleInterface);
+
+    MW->recallGeometryOfLocalScriptWindow();
+    MW->GenScriptWindow->show();
+
+  /*
+  MW->extractGeometryOfLocalScriptWindow();
   if (MW->GenScriptWindow) delete MW->GenScriptWindow;
   MW->GenScriptWindow = new GenericScriptWindowClass(MW->Detector->RandGen);
-  MW->recallGeometryOfScriptWindow();
+  MW->recallGeometryOfLocalScriptWindow();
 
   //configure the script window and engine
   GStyleInterface  = new  InterfaceToGStyleScript() ; //deleted by the GenScriptWindow
@@ -143,6 +164,7 @@ void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
   //connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(HolesScriptSuccess()));
   //if needed. connect signals of the interface object with the required slots of any ANTS2 objects
   MW->GenScriptWindow->show();
+  */
 }
 
 void GlobalSettingsWindowClass::on_pbChoosePMtypeLib_clicked()
@@ -190,8 +212,6 @@ void GlobalSettingsWindowClass::on_pbChooseScriptsLib_clicked()
   QString dir = QFileDialog::getExistingDirectory(this, "Select directory for scripts",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if (dir.isEmpty()) return;
   GlobSet->LibScripts = dir;
-  if (MW->GenScriptWindow)
-    MW->GenScriptWindow->SetStarterDir(GlobSet->LibScripts, GlobSet->LastOpenDir, GlobSet->ExamplesDir);
   ui->leLibScripts->setText(dir);
 }
 void GlobalSettingsWindowClass::on_leLibScripts_editingFinished()
@@ -317,7 +337,7 @@ void GlobalSettingsWindowClass::on_sbNumSegments_editingFinished()
 {
     GlobSet->NumSegments = ui->sbNumSegments->value();
     MW->Detector->GeoManager->SetNsegments(GlobSet->NumSegments);
-    MW->ShowGeometry(false);
+    MW->GeometryWindow->ShowGeometry(false);
 }
 
 void GlobalSettingsWindowClass::on_sbMaxNumTracks_editingFinished()

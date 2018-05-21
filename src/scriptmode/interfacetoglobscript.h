@@ -22,10 +22,10 @@ class DetectorClass;
 class EventsDataClass;
 class GeometryWindowClass;
 class GraphWindowClass;
-class pms;
+class APmHub;
 class TF2;
 class AConfiguration;
-class ReconstructionManagerClass;
+class AReconstructionManager;
 class SensorLRFs;
 class TmpObjHubClass;
 class APmGroupsManager;
@@ -34,15 +34,16 @@ class QJsonValue;
 // ====== interfaces which do not require GUI ======
 
 // ---- C O N F I G U R A T I O N ----
-class InterfaceToConfig : public AScriptInterface
+class AInterfaceToConfig : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToConfig(AConfiguration* config);
-  ~InterfaceToConfig(){}
+  AInterfaceToConfig(AConfiguration* config);
+  AInterfaceToConfig(const AInterfaceToConfig &other);
+  ~AInterfaceToConfig(){}
 
-//  virtual bool InitOnRun();
+  virtual bool IsMultithreadCapable() const override {return true;}
 
   AConfiguration* Config;
   QString LastError;
@@ -67,6 +68,7 @@ private:
   void find(const QJsonObject &obj, QStringList Keys, QStringList& Found, QString Path = "");
   bool keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes);
   bool expandKey(QString &Key);
+
 };
 
 // ---- R E C O N S T R U C T I O N ----
@@ -75,10 +77,10 @@ class InterfaceToReconstructor : public AScriptInterface
   Q_OBJECT
 
 public:
-  InterfaceToReconstructor(ReconstructionManagerClass* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, int RecNumThreads);
+  InterfaceToReconstructor(AReconstructionManager* RManager, AConfiguration* Config, EventsDataClass* EventsDataHub, TmpObjHubClass* TmpHub, int RecNumThreads);
   ~InterfaceToReconstructor(){}
 
-  virtual void ForceStop();
+  virtual void ForceStop() override;
 
 public slots:
   void ReconstructEvents(int NumThreads = -1, bool fShow = true);
@@ -107,16 +109,28 @@ public slots:
 
   // manifest item handling
   void ClearManifestItems();
-  int CountManifestItems();
+  int  CountManifestItems();
   void AddRoundManisfetItem(double x, double y, double Diameter);
   void AddRectangularManisfetItem(double x, double y, double dX, double dY, double Angle);  
   void SetManifestItemLineProperties(int i, int color, int width, int style);
 
+  //signal per ph el extraction  
+  const QVariant Peaks_GetSignalPerPhE() const;
+  void Peaks_PrepareData();
+  void Peaks_Configure(int bins, double from, double to, double sigmaPeakfinder, double thresholdPeakfinder, int maxPeaks = 30);
+  double Peaks_Extract_NoAbortOnFail(int ipm);
+  void Peaks_ExtractAll();
+  QVariant Peaks_GetPeakPositions(int ipm);
+
+  const QVariant GetSignalPerPhE_stat() const;
+
+
 private:
-  ReconstructionManagerClass* RManager;
+  AReconstructionManager* RManager;
   AConfiguration* Config;
   EventsDataClass* EventsDataHub;
   APmGroupsManager* PMgroups;
+  TmpObjHubClass* TmpHub;
 
   int RecNumThreads;
 
@@ -126,13 +140,15 @@ signals:
 };
 
 // ---- E V E N T S ----
-class InterfaceToData : public AScriptInterface
+class AInterfaceToData : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToData(AConfiguration* Config, ReconstructionManagerClass* RManager, EventsDataClass* EventsDataHub);
-  ~InterfaceToData(){}
+  AInterfaceToData(AConfiguration* Config, EventsDataClass* EventsDataHub);
+  ~AInterfaceToData(){}
+
+  bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   int GetNumPMs();
@@ -190,6 +206,7 @@ public slots:
   //for custom reconstrtuctions
     //assuming there is only one group, and single point reconstruction
   void SetReconstructed(int ievent, double x, double y, double z, double e);
+  void SetReconstructed(int ievent, double x, double y, double z, double e, double chi2);
   void SetReconstructedX(int ievent, double x);
   void SetReconstructedY(int ievent, double y);
   void SetReconstructedZ(int ievent, double z);
@@ -231,7 +248,6 @@ public slots:
 
 private:
   AConfiguration* Config;
-  ReconstructionManagerClass* RManager;
   EventsDataClass* EventsDataHub;
 
   bool checkEventNumber(int ievent);
@@ -253,23 +269,29 @@ public:
   AInterfaceToPMs(AConfiguration* Config);
   ~AInterfaceToPMs() {}
 
-public slots:  
-  int CountPM();
+  bool IsMultithreadCapable() const override {return true;}
 
-  double GetPMx(int ipm);
-  double GetPMy(int ipm);
-  double GetPMz(int ipm);
+public slots:  
+  int      CountPM() const;
+
+  double   GetPMx(int ipm);
+  double   GetPMy(int ipm);
+  double   GetPMz(int ipm);
+
+  bool     IsPmCenterWithin(int ipm, double x, double y, double distance_in_square);
+  bool     IsPmCenterWithinFast(int ipm, double x, double y, double distance_in_square) const;
 
   QVariant GetPMtypes();
+  QVariant GetPMpositions() const;
 
-  void RemoveAllPMs();
-  bool AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
-  bool AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
-  void SetAllArraysFullyCustom();
+  void     RemoveAllPMs();
+  bool     AddPMToPlane(int UpperLower, int type, double X, double Y, double angle = 0);
+  bool     AddPM(int UpperLower, int type, double X, double Y, double Z, double phi, double theta, double psi);
+  void     SetAllArraysFullyCustom();
 
 private:
   AConfiguration* Config;
-  pms* PMs;
+  APmHub* PMs;
 
   bool checkValidPM(int ipm);
   bool checkAddPmCommon(int UpperLower, int type);
@@ -329,17 +351,21 @@ private:
 #endif
 
 // ---- L R F ----
-class InterfaceToLRF : public AScriptInterface
+class AInterfaceToLRF : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToLRF(AConfiguration* Config, EventsDataClass* EventsDataHub);
+  AInterfaceToLRF(AConfiguration* Config, EventsDataClass* EventsDataHub);
+
+  bool IsMultithreadCapable() const override {return true;}
 
 public slots:
   QString Make();
   double GetLRF(int ipm, double x, double y, double z);
   double GetLRFerror(int ipm, double x, double y, double z);
+
+  QVariant GetAllLRFs(double x, double y, double z);
 
   //iterations  
   int CountIterations();
@@ -350,13 +376,10 @@ public slots:
   QString Save(QString fileName);
   int Load(QString fileName);
 
-  //void ShowVsXY(int ipm, int PointsX, int PointsY);
-
 private:
   AConfiguration* Config;
   EventsDataClass* EventsDataHub;
   SensorLRFs* SensLRF; //alias
-  //TF2 *f2d;
 
   bool getValidIteration(int &iterIndex);
 };
@@ -396,25 +419,6 @@ private:
   LRF::ARepository *repo; //alias
 };
 
-// ---- T R E E ---- (TTree of ROOT)
-class AInterfaceToTree : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-   AInterfaceToTree(TmpObjHubClass *TmpHub);
-   ~AInterfaceToTree() {}
-
-public slots:
-   void OpenTree(QString TreeName, QString FileName, QString TreeNameInFile);
-   QString PrintBranches(QString TreeName);
-   QVariant GetBranch(QString TreeName, QString BranchName);
-   void CloseTree(QString TreeName);
-
-private:
-   TmpObjHubClass *TmpHub;
-};
-
 #ifdef GUI // =============== GUI mode only ===============
 
 // -- GRAPH WINDOW --
@@ -438,7 +442,11 @@ public slots:
   void SetLog(bool Xaxis, bool Yaxis);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
+  void SetLegendBorder(int color, int style, int size);
+
   void AddText(QString text, bool Showframe, int Alignment_0Left1Center2Right);
+
+  void AddLine(double x1, double y1, double x2, double y2, int color, int width, int style);
 
   //basket operation
   void AddToBasket(QString Title);

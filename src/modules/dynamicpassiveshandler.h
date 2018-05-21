@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-class pms;
+class APmHub;
 class EventsDataClass;
 struct AReconRecord;
 class ReconstructionSettings;
@@ -12,7 +12,7 @@ class APmGroupsManager;
 class DynamicPassivesHandler
 {
 public:
-    DynamicPassivesHandler(pms *Pms, APmGroupsManager* PMgroups, EventsDataClass *eventsDataHub);
+    DynamicPassivesHandler(APmHub *Pms, APmGroupsManager* PMgroups, EventsDataClass *eventsDataHub);
     void init(ReconstructionSettings *RecSet, int ThisPmGroup); //configure, clean passives, copy passives from PMgroups
     void calculateDynamicPassives(int ievent, const AReconRecord *rec); //RecSet.fuseDynamicPassives knows to do it or not
 
@@ -29,7 +29,7 @@ public:
     inline void clearDynamicPassive(int ipm) {StatePMs[ipm] &= ~(2);}
     void clearDynamicPassives();
 private:
-    pms* PMs;
+    APmHub* PMs;
     APmGroupsManager* PMgroups;
     int ThisPmGroup;
     EventsDataClass* EventsDataHub;

@@ -283,7 +283,7 @@ void ExamplesWindow::on_pbLoadExample_clicked()
   MW->GeometryWindow->raise();
 
   MW->GeometryDrawDisabled = false;
-  MW->ShowGeometry();
+  MW->GeometryWindow->ShowGeometry();
 }
 
 void ExamplesWindow::on_lwExample_doubleClicked(const QModelIndex &index)
@@ -307,11 +307,16 @@ void ExamplesWindow::on_pbLoadSettings_clicked()
   QString fileName = QFileDialog::getOpenFileName(this, "Load configuration", MW->GlobSet->LastOpenDir, "All files (*.*)");
   if (fileName.isEmpty()) return;
   MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-  MW->GeometryDrawDisabled = true;
-  MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
-  MW->GeometryDrawDisabled = false;
-  this->close();
-  if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(); 
+
+  MW->GeometryDrawDisabled = true; //->
+  bool bOK = MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
+  if (!bOK) message(MW->Config->ErrorString, this);
+  else
+  {
+      this->close();
+      if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+  }
+  MW->GeometryDrawDisabled = false; //<-
 }
 
 void ExamplesWindow::on_pbLoadLast_clicked()
@@ -336,7 +341,7 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
   MW->GeometryDrawDisabled = false;
 
   this->close();
-  if (MW->GeometryWindow->isVisible()) MW->ShowGeometry();
+  if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
 }
 
 QString ExamplesWindow::getQuickSlotMessage(int i)
@@ -436,5 +441,5 @@ void ExamplesWindow::on_actionCreate_new_detector_triggered()
 {
     MW->Config->LoadConfig(MW->GlobSet->ExamplesDir + "/Simplest.json");
     hide();
-    if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(false);
+    if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry(false);
 }

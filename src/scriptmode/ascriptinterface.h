@@ -10,12 +10,16 @@ class AScriptInterface : public QObject
   Q_OBJECT
 
 public:
-  AScriptInterface() {}
+  AScriptInterface() : QObject() {}
+  AScriptInterface(const AScriptInterface& other) : QObject(), H(other.H), Description(other.Description), bGuiThread(false) {}
+
   virtual bool InitOnRun() {return true;}   // automatically called before script evaluation
   virtual void ForceStop() {}               // called when abort was triggered - used to e.g. abort simulation or reconstruction
 
-  QString Description;  // used as help for the unit
-  QString UnitName;     // used as default name of the unit
+  virtual bool IsMultithreadCapable() const {return false;}
+
+  const QString getDescription() const
+      {return Description + (IsMultithreadCapable()?"\nMultithread-capable":"");}  // description text for the unit in GUI
 
 public slots:
   const QString help(QString method) const  //automatically requested to obtain help strings
@@ -30,7 +34,9 @@ signals:
   void AbortScriptEvaluation(QString);      //abort request is automatically linked to abort slot of core unit
 
 protected:
-  QHash<QString, QString> H;
+  QHash<const QString, QString> H;
+  QString Description;
+  bool bGuiThread = true;
 
   void abort(QString message = "Aborted!") {emit AbortScriptEvaluation(message);}
 };

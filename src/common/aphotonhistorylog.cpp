@@ -7,7 +7,7 @@ APhotonHistoryLog::APhotonHistoryLog(const double *Position, const QString volum
                                      APhotonHistoryLog::NodeType node,
                                      int MatIndex, int MatIndexAfter,
                                      int number) :
-  volumeName(volumeName), time(Time), process(node),
+  process(node), volumeName(volumeName), time(Time),
   matIndex(MatIndex), matIndexAfter(MatIndexAfter), number(number), iWave(iWave)
 {
   r[0] = Position[0];

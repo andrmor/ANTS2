@@ -2,8 +2,8 @@
 #include "ui_gainevaluatorwindowclass.h"
 #include "mainwindow.h"
 #include "reconstructionwindow.h"
-#include "pms.h"
-#include "pmtypeclass.h"
+#include "apmhub.h"
+#include "apmtype.h"
 #include "windownavigatorclass.h"
 #include "guiutils.h"
 #include "outputwindow.h"
@@ -15,6 +15,7 @@
 #include "acommonfunctions.h"
 #include "detectorclass.h"
 #include "apmgroupsmanager.h"
+#include "geometrywindowclass.h"
 
 //Qt
 #include <QGraphicsScene>
@@ -1225,7 +1226,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
       marks->SetMarkerSize(2);
       marks->SetMarkerStyle(2);
       MW->GeoMarkers.append(marks);     
-      MW->ShowGeometry();
+      MW->GeometryWindow->ShowGeometry();
       //MW->ShowGeoMarkers();
     }
 
@@ -1858,7 +1859,7 @@ void GainEvaluatorWindowClass::UpdateGraphics()
       {
 
 
-        const pm &PM = MW->PMs->at(ipm);
+        const APm &PM = MW->PMs->at(ipm);
         //if (PM.isStaticPassive()) continue;
         //if (igroup != -1) if ( PM.group != igroup ) continue; //wrong group
 

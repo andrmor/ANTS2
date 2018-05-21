@@ -6,17 +6,17 @@
 class AWebSocketServer;
 class ARootHttpServer;
 class TObject;
-class AScriptManager;
+class AJavaScriptManager;
 
 class ANetworkModule : public QObject
 {
     Q_OBJECT
 public:
-    ANetworkModule();
+    ANetworkModule() {}
     ~ANetworkModule();
 
     void SetDebug(bool flag) {fDebug = flag;}
-    void SetScriptManager(AScriptManager* man);
+    void SetScriptManager(AJavaScriptManager* man);
 
     bool isWebSocketServerRunning() const {return (bool)WebSocketServer;}
     int getWebSocketPort() const;
@@ -26,9 +26,9 @@ public:
     int getRootServerPort() const;
     const QString getJSROOTstring() const {return JSROOT;}
 
-    AWebSocketServer* WebSocketServer;
+    AWebSocketServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
-public: ARootHttpServer* RootHttpServer;
+public: ARootHttpServer* RootHttpServer = 0;
 #endif
 
 public slots:
@@ -45,10 +45,10 @@ signals:
   void RootServerStarted();
 
 private:
-  AScriptManager* ScriptManager;
-  bool fDebug;
-  QString JSROOT;
-  unsigned int RootServerPort;
+  AJavaScriptManager* ScriptManager = 0;
+  bool fDebug = true;
+  QString JSROOT = "https://root.cern/js/latest/";
+  unsigned int RootServerPort = 0;
 
 };
 

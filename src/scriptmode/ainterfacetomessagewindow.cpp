@@ -1,147 +1,150 @@
 #include "ainterfacetomessagewindow.h"
+#include "ajavascriptmanager.h"
+#include "ascriptmessengerdialog.h"
 
-#include <QWidget>
-#include <QTime>
-#include <QApplication>
-#include <QDialog>
-#include <QPlainTextEdit>
-#include <QVBoxLayout>
+#include <QDebug>
 
-static int msgH = 500, msgW = 300, msgX=50, msgY=50;
-
-AInterfaceToMessageWindow::AInterfaceToMessageWindow(QWidget* parent) : D(0), Parent(parent)
+AInterfaceToMessageWindow::AInterfaceToMessageWindow(AScriptManager *ScriptManager, QWidget* parent) :
+    ScriptManager(ScriptManager), Parent(parent)
 {
-  bEnabled = true;
-  bActivated = false;
-  init(false);
+    DialogWidget = new AScriptMessengerDialog(parent);
+    connectSignalSlots();
+
+    Description = "Output to script message window.\n"
+                  "If used inside multithread evaluation, every thread has its own window";
 }
 
-void AInterfaceToMessageWindow::init(bool fTransparent)
+AInterfaceToMessageWindow::AInterfaceToMessageWindow(const AInterfaceToMessageWindow &other) :
+   AScriptInterface(other),
+   ScriptManager(other.ScriptManager), Parent(other.Parent)  //not a bug - pointer of MasterScriptManager in the clone!
 {
-  D = new QDialog(Parent);
-  QObject::connect(D, &QDialog::finished, this, &AInterfaceToMessageWindow::Hide);
-
-  QVBoxLayout* l = new QVBoxLayout;
-  e = new QPlainTextEdit();
-  e->setReadOnly(true);
-  l->addWidget(e);
-  D->setLayout(l);
-
-  X = msgX;
-  Y = msgY;
-  WW = msgW;
-  HH = msgH;
-
-  D->setGeometry(X, Y, WW, HH);
-  D->setWindowTitle("Script msg");
-
-  if (fTransparent)
-    {
-      D->setWindowFlags(Qt::FramelessWindowHint);
-      D->setAttribute(Qt::WA_TranslucentBackground);
-
-      e->setStyleSheet("background: rgba(0,0,255,0%)");
-      e->setFrameStyle(QFrame::NoFrame);
-    }
+    DialogWidget = new AScriptMessengerDialog(other.Parent);
+    connectSignalSlots();
 }
 
+void AInterfaceToMessageWindow::connectSignalSlots()
+{
+    Qt::ConnectionType ct = ( bGuiThread ? Qt::DirectConnection : Qt::QueuedConnection );
+
+    connect(this, &AInterfaceToMessageWindow::requestAppend, DialogWidget, &AScriptMessengerDialog::Append, ct);
+    connect(this, &AInterfaceToMessageWindow::requestClear, DialogWidget, &AScriptMessengerDialog::Clear, ct);
+    connect(this, &AInterfaceToMessageWindow::requestShow, DialogWidget, &AScriptMessengerDialog::Show, ct);
+    connect(this, &AInterfaceToMessageWindow::requestHide, DialogWidget, &AScriptMessengerDialog::Hide, ct);
+    connect(this, &AInterfaceToMessageWindow::requestTemporaryShow, DialogWidget, &AScriptMessengerDialog::ShowTemporary, ct);
+    connect(this, &AInterfaceToMessageWindow::requestSetTransparency, DialogWidget, &AScriptMessengerDialog::SetTransparent, ct);
+    connect(this, &AInterfaceToMessageWindow::requestSetTitle, DialogWidget, &AScriptMessengerDialog::SetDialogTitle, ct);
+    connect(this, &AInterfaceToMessageWindow::requestMove, DialogWidget, &AScriptMessengerDialog::Move, ct);
+    connect(this, &AInterfaceToMessageWindow::requestResize, DialogWidget, &AScriptMessengerDialog::Resize, ct);
+    connect(this, &AInterfaceToMessageWindow::requestSetFontSize, DialogWidget, &AScriptMessengerDialog::SetFontSize, ct);
+}
 
 AInterfaceToMessageWindow::~AInterfaceToMessageWindow()
 {
-  //qDebug() << "Msg destructor";
-  deleteDialog();
+  //    qDebug() << "Msg destructor. Master?"<<bGUIthread;
+
+  if (bGuiThread)
+  {
+      //    qDebug() << "Delete message dialog for master triggered!";
+      delete DialogWidget; DialogWidget = 0;
+  }
+  //Clones - DO NOT delete the dialogs -> they are handled by the ScriptManager of the GUI thread
 }
 
-void AInterfaceToMessageWindow::SetTransparent(bool flag)
+void AInterfaceToMessageWindow::ReplaceDialogWidget(AScriptMessengerDialog *AnotherDialogWidget)
 {
-  QString text = e->document()->toPlainText();
-  delete D;
-  D = 0;
-  init(flag);
-  e->setPlainText(text);
+    delete DialogWidget;
+    DialogWidget = AnotherDialogWidget;
+    connectSignalSlots();
 }
 
-void AInterfaceToMessageWindow::Append(QString txt)
+AScriptMessengerDialog *AInterfaceToMessageWindow::GetDialogWidget()
 {
-  e->appendHtml(txt);
+    return DialogWidget;
+}
+
+void AInterfaceToMessageWindow::Append(const QString &text)
+{
+    emit requestAppend(text);
 }
 
 void AInterfaceToMessageWindow::Clear()
 {
-  e->clear();
-}
-
-void AInterfaceToMessageWindow::Show(QString txt, int ms)
-{
-  if (!bEnabled) return;
-  e->clear();
-  e->appendHtml(txt);
-
-  if (ms == -1)
-    {
-      D->show();
-      D->raise();
-      bActivated = true;
-      return;
-    }
-
-  D->show();
-  D->raise();
-  bActivated = true;
-  QTime t;
-  t.restart();
-  do qApp->processEvents();
-  while (t.elapsed()<ms);
-  D->hide();
-  bActivated = false;
-}
-
-void AInterfaceToMessageWindow::Move(double x, double y)
-{
-  X = msgX = x; Y = msgY = y;
-  D->move(X, Y);
-}
-
-void AInterfaceToMessageWindow::Resize(double w, double h)
-{
-  WW = msgW = w; HH = msgH = h;
-  D->resize(WW, HH);
+    emit requestClear();
 }
 
 void AInterfaceToMessageWindow::Show()
 {
-  if (!bEnabled) return;
-  D->show();
-  D->raise();
-  bActivated = true;
+    emit requestShow();
 }
 
 void AInterfaceToMessageWindow::Hide()
 {
-  D->hide();
-  bActivated = false;
+    emit requestHide();
+}
+
+void AInterfaceToMessageWindow::Show(const QString &text, int ms)
+{
+    emit requestAppend(text);
+    emit requestTemporaryShow(ms);
+}
+
+void AInterfaceToMessageWindow::SetTransparent(bool flag)
+{
+    emit requestSetTransparency(flag);
+}
+
+void AInterfaceToMessageWindow::SetDialogTitle(const QString &title)
+{
+    emit requestSetTitle(title);
+}
+
+void AInterfaceToMessageWindow::Move(double x, double y)
+{
+    emit requestMove(x, y);
+}
+
+void AInterfaceToMessageWindow::Resize(double w, double h)
+{
+    emit requestResize(w, h);
 }
 
 void AInterfaceToMessageWindow::SetFontSize(int size)
 {
-  QFont f = e->font();
-  f.setPointSize(size);
-  e->setFont(f);
+    emit requestSetFontSize(size);
 }
 
-void AInterfaceToMessageWindow::deleteDialog()
+void AInterfaceToMessageWindow::ShowAllThreadMessengers()
 {
-   delete D;
-   D = 0;
+    if (bGuiThread)
+      {
+        AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+        if (JSM) JSM->showAllMessengerWidgets();
+      }
 }
 
-void AInterfaceToMessageWindow::hide()
+void AInterfaceToMessageWindow::HideAllThreadMessengers()
 {
-    if (D) D->hide();
+    if (bGuiThread)
+      {
+        AJavaScriptManager* JSM = dynamic_cast<AJavaScriptManager*>(ScriptManager);
+        if (JSM) JSM->hideAllMessengerWidgets();
+      }
 }
 
-void AInterfaceToMessageWindow::restore()
+void AInterfaceToMessageWindow::RestorelWidget()
 {
-    if (D) D->show();
+    if (bGuiThread)
+    {
+        if (DialogWidget->IsShown())
+            DialogWidget->RestoreWidget();
+    }        
 }
 
+void AInterfaceToMessageWindow::HideWidget()
+{
+    if (bGuiThread)
+    {
+        if (DialogWidget->IsShown())
+            DialogWidget->Hide();
+    }
+}

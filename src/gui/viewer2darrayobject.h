@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-class pms;
+class APmHub;
 
 class PMpropsClass
 {
@@ -23,7 +23,7 @@ class Viewer2DarrayObject : public QObject
 {
   Q_OBJECT
 public:
-  explicit Viewer2DarrayObject(myQGraphicsView *GV, pms* PM_module);
+  explicit Viewer2DarrayObject(myQGraphicsView *GV, APmHub* PM_module);
   ~Viewer2DarrayObject();
 
   void DrawAll();
@@ -48,7 +48,7 @@ private slots:
   void sceneSelectionChanged();
 
 private:
-  pms* PMs;
+  APmHub* PMs;
 
   QVector<QGraphicsItem*> PMicons;
   QVector<PMpropsClass> PMprops;

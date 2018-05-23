@@ -17,29 +17,8 @@
 
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)
 {
-  SaveLoadWindows = true;
-  ShowExamplesOnStart = true;
-  PerformAutomaticGeometryCheck = true;
-
-  fOpenImageExternalEditor = true;
-  TextLogPrecision = 4;
-  BinsX = BinsY = BinsZ = 100;
-  FunctionPointsX = FunctionPointsY = 30;
-  NumSegments = 20;
-  MaxNumberOfTracks = 1000;
-
-  DefaultFontSize_ScriptWindow = 12;
-  DefaultFontFamily_ScriptWindow = ""; //undefined - Qt standard settings will be used
-  DefaultFontWeight_ScriptWindow = false;
-  DefaultFontItalic_ScriptWindow = false;
-
-  NumThreads = -1; //if not loaded - set it using recommended settings
-  RecNumTreads = QThread::idealThreadCount()-1;
-  if (RecNumTreads<1) RecNumTreads = 1;
-
-  RecTreeSave_IncludePMsignals = true;
-  RecTreeSave_IncludeRho = true;
-  RecTreeSave_IncludeTrue = true;
+  RecNumTreads = QThread::idealThreadCount() - 1;
+  if (RecNumTreads < 1) RecNumTreads = 1;
 
   //default font size
 #ifdef Q_OS_LINUX // fix font size on Linux

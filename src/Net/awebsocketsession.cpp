@@ -119,11 +119,12 @@ bool AWebSocketSession::sendText(const QString &message)
 void AWebSocketSession::onConnect()
 {
     qDebug() << "Connected to server, checking busy status...";
+    bWaitForAnswer = true;
 }
 
 void AWebSocketSession::onDisconnect()
 {
-    if (WaitingForAnswer)
+    if (bWaitForAnswer)
     {
         qDebug() << "Abnormal disconnect detected";
         if (State == Connecting)
@@ -134,7 +135,7 @@ void AWebSocketSession::onDisconnect()
     }
     else
     {
-        qDebug() << "Normal disconnect detected";
+        qDebug() << "Clinet disconnected";
         State = Idle; //paranoic
     }
 }

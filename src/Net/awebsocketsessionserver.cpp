@@ -61,14 +61,15 @@ void AWebSocketSessionServer::onNewConnection()
     }
     else
     {
-        if (bDebug) qDebug() << "Connection established with" << pSocket->peerAddress();
+        if (bDebug) qDebug() << "Connection established with" << pSocket->peerAddress().toString();
+        client = pSocket;
+
+
         connect(pSocket, &QWebSocket::textMessageReceived, this, &AWebSocketSessionServer::onTextMessageReceived);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSessionServer::onBinaryMessageReceived);
         connect(pSocket, &QWebSocket::disconnected, this, &AWebSocketSessionServer::onSocketDisconnected);
 
-        client = pSocket;
-
-        pSocket->sendTextMessage("OK: Connection established");
+        //if (client) client->sendTextMessage("OK: Connection established");
     }
 }
 
@@ -79,7 +80,10 @@ void AWebSocketSessionServer::onTextMessageReceived(const QString &message)
     if (bDebug) qDebug() << "Text message received:\n--->\n"<<message << "\n<---";
 
     if (message.isEmpty())
-        client->sendTextMessage("OK"); //used for watchdogs
+    {
+        if (client)
+            client->sendTextMessage("PING"); //used for watchdogs
+    }
     else
        emit textMessageReceived(message);
 }

@@ -1,7 +1,8 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 
-#include "awebsocketserver.h"
+//#include "awebsocketserver.h"
+#include "awebsocketsessionserver.h"
 #ifdef USE_ROOT_HTML
 #include "aroothttpserver.h"
 #endif
@@ -50,8 +51,8 @@ bool ANetworkModule::isRootServerRunning() const
 void ANetworkModule::StartWebSocketServer(quint16 port)
 {
   if (WebSocketServer) WebSocketServer->deleteLater();
-    WebSocketServer = new AWebSocketServer(port, fDebug);
-    QObject::connect(WebSocketServer, &AWebSocketServer::NotifyTextMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
+    WebSocketServer = new AWebSocketSessionServer(port);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
 
     emit StatusChanged();
 }
@@ -104,13 +105,13 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
     if (line != -1)
     {
        qDebug() << "Syntaxt error!";
-       WebSocketServer->ReplyAndClose("Syntax error!");
+       WebSocketServer->ReplyWithText("Syntax error!");
     }
     else
     {
         QString res = ScriptManager->Evaluate(message);
         qDebug() << "Result:"<<res;
-        WebSocketServer->ReplyAndClose("UpdateGeometry");
+        WebSocketServer->ReplyWithText("UpdateGeometry");
     }
 }
 

@@ -14,32 +14,43 @@ class AInterfaceToWebSocket: public AScriptInterface
   Q_OBJECT
 
 public:
-    enum ServerState {Idle=0, Sending, WaitingForAnswer};
+    enum ServerState {Idle=0, Sending, WaitingForAnswer,
+                      TryingToConnect, Connected, ConnectionFailed};
     AInterfaceToWebSocket();
     ~AInterfaceToWebSocket();
 
 public slots:
     void setTimeout(int milliseconds) {timeout = milliseconds;}
-    QString SendTextMessage(QString Url, QVariant message, bool WaitForAnswer=false);
+
+    //standalone - no persistent connection
+    QString SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer=false);
     int Ping(QString Url);
+
+    //with persistent connection
+    void Connect(const QString& Url);
+    void Disconnect();
+    const QVariant SendText(const QString& message, bool WaitForAnswer=false);
+    //const QVariant SendJson(const QString& message, const QVariant& json, bool WaitForAnswer=false);
 
 private slots:
     void onClientConnected();
+    void onClientDisconnected();
     void onTextMessageReceived(QString message);
 
 private:
-   // QWebSocketServer *Server;
-    QWebSocket *ClientSocket;
+    QWebSocket *ClientSocket = 0;
+    bool bConnected = false;
 
-    int timeout;
+    int timeout = 3000;
     int lastExchangeDuration;
 
-    ServerState State;
+    ServerState State = Idle;
     QString MessageToSend;
     QString MessageReceived;
-    bool fWaitForAnswer;
+    bool bWaitForAnswer;
+    bool bServerWasBusy = false;
 
-    QString variantToString(QVariant val);
+    QString variantToString(const QVariant &val);
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

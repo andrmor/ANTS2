@@ -8,22 +8,22 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonDocument>
+#include <QElapsedTimer>
 
 AInterfaceToWebSocket::AInterfaceToWebSocket()
 {
-    timeout = 3000;
     ClientSocket = new QWebSocket();
     connect(ClientSocket, &QWebSocket::connected, this, &AInterfaceToWebSocket::onClientConnected);
+    connect(ClientSocket, &QWebSocket::disconnected, this, &AInterfaceToWebSocket::onClientDisconnected);
     connect(ClientSocket, &QWebSocket::textMessageReceived, this, &AInterfaceToWebSocket::onTextMessageReceived);
-    State = Idle;
 }
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
 {
     ClientSocket->deleteLater();
 }
-#include <QElapsedTimer>
-QString AInterfaceToWebSocket::SendTextMessage(QString Url, QVariant message, bool WaitForAnswer)
+
+QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
 {
    if (State != Idle)
    {
@@ -38,7 +38,7 @@ QString AInterfaceToWebSocket::SendTextMessage(QString Url, QVariant message, bo
    State = Sending;
    MessageToSend = variantToString(message);
    MessageReceived = "";
-   fWaitForAnswer = WaitForAnswer;
+   bWaitForAnswer = WaitForAnswer;
 
    QElapsedTimer timer;
    timer.start();
@@ -71,20 +71,54 @@ int AInterfaceToWebSocket::Ping(QString Url)
 void AInterfaceToWebSocket::onClientConnected()
 {
     qDebug() << "ClientSocket connected";
-    ClientSocket->sendTextMessage(MessageToSend);
 
-    if (!fWaitForAnswer) State = Idle;
-    else State = WaitingForAnswer;
+    if (State == TryingToConnect)
+    {
+        //session mode
+        //waiting for confirmation that server is not busy
+    }
+    else
+    {
+        //standalone
+        ClientSocket->sendTextMessage(MessageToSend);
+        if (!bWaitForAnswer) State = Idle;
+        else State = WaitingForAnswer;
+    }
+}
+
+void AInterfaceToWebSocket::onClientDisconnected()
+{
+    State = Idle;
 }
 
 void AInterfaceToWebSocket::onTextMessageReceived(QString message)
 {
     qDebug() << "Message received:" << message;
     MessageReceived = message;
-    State = Idle;
+
+    if (State == TryingToConnect)
+    {
+        //session mode
+        if (MessageReceived.startsWith("Error"))
+        {
+            State = ConnectionFailed;
+            bServerWasBusy = MessageReceived.contains("another client is already connected");
+        }
+        else
+            State = Connected;
+    }
+    else if (State == Connected)
+    {
+        bWaitForAnswer = false;
+    }
+    else
+    {
+        //standalone
+        State = Idle;
+    }
 }
 
-QString AInterfaceToWebSocket::variantToString(QVariant val)
+QString AInterfaceToWebSocket::variantToString(const QVariant& val)
 {
     QString type = val.typeName();
 
@@ -126,4 +160,81 @@ QString AInterfaceToWebSocket::variantToString(QVariant val)
         }
 
     return rep;
+}
+
+// -------------- persistent ---------------------
+void AInterfaceToWebSocket::Connect(const QString &Url)
+{
+    if (State != Idle)
+    {
+        abort("Cannot connect: network module is not idle");
+        return;
+    }
+
+    QElapsedTimer timer;
+    timer.start();
+
+    State = TryingToConnect;
+    ClientSocket->open(QUrl(Url));
+
+    //waiting for connection
+    do
+    {
+        qApp->processEvents();
+        if (timer.elapsed() > timeout)
+        {
+            ClientSocket->abort();
+            State = Idle;
+            abort("Connection timeout!");
+            return;
+        }
+    }
+    while (State == TryingToConnect);
+
+    if (State == ConnectionFailed)
+    {
+        ClientSocket->close();
+        State = Idle;
+        QString err = (bServerWasBusy ? "Connection failed: another client is connected to the server" : "Connection failed");
+        abort(err);
+    }
+}
+
+void AInterfaceToWebSocket::Disconnect()
+{
+    if (State == Connected)
+        ClientSocket->close();
+    //status change on actual disconnect! see slot onClientDisconnected()
+}
+
+const QVariant AInterfaceToWebSocket::SendText(const QString &message, bool WaitForAnswer)
+{
+    if (State != Connected)
+    {
+        abort("Not connected to server");
+        return 0;
+    }
+
+    ClientSocket->sendTextMessage(message);
+    if (WaitForAnswer)
+    {
+        bWaitForAnswer = true;
+
+        QElapsedTimer timer;
+        timer.start();
+        do
+        {
+            qApp->processEvents();
+            if (timer.elapsed() > timeout)
+            {
+                ClientSocket->abort();
+                State = Idle;
+                abort("Timeout!");
+                return "";
+            }
+        }
+        while (bWaitForAnswer);
+
+        return MessageReceived;
+    }
 }

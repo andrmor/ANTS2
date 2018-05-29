@@ -3,7 +3,8 @@
 
 #include <QObject>
 
-class AWebSocketServer;
+//class AWebSocketServer;
+class AWebSocketSessionServer;
 class ARootHttpServer;
 class TObject;
 class AJavaScriptManager;
@@ -26,7 +27,7 @@ public:
     int getRootServerPort() const;
     const QString getJSROOTstring() const {return JSROOT;}
 
-    AWebSocketServer* WebSocketServer = 0;
+    AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
 public: ARootHttpServer* RootHttpServer = 0;
 #endif

@@ -325,7 +325,8 @@ SOURCES += main.cpp \
     gui/atextedit.cpp \
     gui/alineedit.cpp \    
     scriptmode/ainterfacetoaddobjscript.cpp \
-    scriptmode/ainterfacetogstylescript.cpp
+    scriptmode/ainterfacetogstylescript.cpp \
+    Net/awebsocketsessionserver.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -461,7 +462,8 @@ HEADERS  += common/CorrelationFilters.h \
     gui/atextedit.h \
     gui/alineedit.h \
     scriptmode/ainterfacetoaddobjscript.h \
-    scriptmode/ainterfacetogstylescript.h
+    scriptmode/ainterfacetogstylescript.h \
+    Net/awebsocketsessionserver.h
 
 # --- SIM ---
 ants2_SIM {

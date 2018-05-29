@@ -88,7 +88,18 @@ void AInterfaceToWebSocket::onClientConnected()
 
 void AInterfaceToWebSocket::onClientDisconnected()
 {
-    State = Idle;
+    if (State == Connected)
+    {
+        if (State = TryingToConnect)
+        {
+            State = ConnectionFailed;
+            return; //handled outside
+        }
+        else
+            abort("Lost connection");
+    }
+    else
+        State = Idle;
 }
 
 void AInterfaceToWebSocket::onTextMessageReceived(QString message)
@@ -237,4 +248,5 @@ const QVariant AInterfaceToWebSocket::SendText(const QString &message, bool Wait
 
         return MessageReceived;
     }
+    return QVariant();
 }

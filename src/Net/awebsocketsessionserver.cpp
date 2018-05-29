@@ -69,7 +69,7 @@ void AWebSocketSessionServer::onNewConnection()
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSessionServer::onBinaryMessageReceived);
         connect(pSocket, &QWebSocket::disconnected, this, &AWebSocketSessionServer::onSocketDisconnected);
 
-        //if (client) client->sendTextMessage("OK: Connection established");
+        if (client) client->sendTextMessage("OK: Connection established");
     }
 }
 
@@ -101,7 +101,7 @@ void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
     if (bDebug) qDebug() << "Json message received. Json contains" << JsonReceived.count() << "properties";
 
     if (JsonReceived.isEmpty())
-        client->sendTextMessage("Server: Empty json received"); //used for pinging
+        if (client) client->sendTextMessage("Server: Empty json received"); //used for pinging
     else
         emit jsonMessageReceived(JsonReceived);
 }

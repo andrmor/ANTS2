@@ -27,7 +27,7 @@ public:
     void  externalAbort() {fExternalAbort = true;}
 
 public:
-    enum  ServerState {Idle = 0, Connecting, WaitingForAnswer, ConnectionFailed, Connected};
+    enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected};
 
 private slots:
     void  onConnect();

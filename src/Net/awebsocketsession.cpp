@@ -6,6 +6,7 @@
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QFile>
 
 AWebSocketSession::AWebSocketSession() : QObject()
 {
@@ -13,6 +14,7 @@ AWebSocketSession::AWebSocketSession() : QObject()
     QObject::connect(socket, &QWebSocket::connected, this, &AWebSocketSession::onConnect);
     QObject::connect(socket, &QWebSocket::disconnected, this, &AWebSocketSession::onDisconnect);
     QObject::connect(socket, &QWebSocket::textMessageReceived, this, &AWebSocketSession::onTextMessageReceived);
+    QObject::connect(socket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSession::onBinaryMessageReceived);
 }
 
 AWebSocketSession::~AWebSocketSession()
@@ -23,7 +25,8 @@ AWebSocketSession::~AWebSocketSession()
 bool AWebSocketSession::connect(const QString &Url)
 {
     Error.clear();
-    Answer.clear();
+    TextReply.clear();
+    BinaryReply.clear();
 
     if (State != Idle)
     {
@@ -84,21 +87,25 @@ int AWebSocketSession::ping()
     }
 }
 
-bool AWebSocketSession::sendText(const QString &message)
+bool AWebSocketSession::confirmSendPossible()
 {
     Error.clear();
+    TextReply.clear();
 
     if (State != Connected)
     {
         Error = "Not connected to server";
         return false;
     }
+    return true;
+}
 
-    socket->sendTextMessage(message);
-
+bool AWebSocketSession::waitForReply()
+{
     bWaitForAnswer = true;
     QElapsedTimer timer;
     timer.start();
+
     do
     {
         qApp->processEvents();
@@ -114,6 +121,51 @@ bool AWebSocketSession::sendText(const QString &message)
     TimeMs = timer.elapsed();
 
     return true;
+}
+
+bool AWebSocketSession::sendText(const QString &message)
+{
+    if ( !confirmSendPossible() ) return false;
+
+    socket->sendTextMessage(message);
+
+    return waitForReply();
+}
+
+bool AWebSocketSession::sendJson(const QJsonObject &json)
+{
+    if ( !confirmSendPossible() ) return false;
+
+    QJsonDocument doc(json);
+    QByteArray ba = doc.toBinaryData();
+
+    socket->sendBinaryMessage(ba);
+
+    return waitForReply();
+}
+
+bool AWebSocketSession::sendFile(const QString &fileName)
+{
+    if ( !confirmSendPossible() ) return false;
+
+    QFile file(fileName);
+    if ( !file.open(QIODevice::ReadOnly) )
+    {
+        Error = "Cannot open file: ";
+        Error += fileName;
+        return false;
+    }
+    QByteArray ba = file.readAll();
+
+    socket->sendBinaryMessage(ba);
+
+    return waitForReply();
+}
+
+void AWebSocketSession::clearReply()
+{
+    TextReply.clear();
+    BinaryReply.clear();
 }
 
 void AWebSocketSession::onConnect()
@@ -143,7 +195,7 @@ void AWebSocketSession::onDisconnect()
 void AWebSocketSession::onTextMessageReceived(const QString &message)
 {
     qDebug() << "Text message received:" << message;
-    Answer = message;
+    TextReply = message;
     bWaitForAnswer = false;
 
     if (State == Connecting)
@@ -158,4 +210,12 @@ void AWebSocketSession::onTextMessageReceived(const QString &message)
         else
             State = Connected;
     }
+}
+
+void AWebSocketSession::onBinaryMessageReceived(const QByteArray &message)
+{
+    qDebug() << "Binary message received. Size = " << message.length();
+    TextReply = "#binary";
+    BinaryReply = message;
+    bWaitForAnswer = false;
 }

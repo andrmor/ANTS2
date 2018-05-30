@@ -27,9 +27,20 @@ public slots:
     //with persistent connection
     void           Connect(const QString& Url);
     void           Disconnect();
-    const QVariant SendText(const QString& message);
-    //const QVariant SendJson(const QString& message, const QVariant& json, bool WaitForAnswer=false);
+    const QString  SendText(const QString& message);
+    const QString  SendObject(const QVariant& object);
+    const QString  SendFile(const QString& fileName);
+    const QVariant GetBinaryReplyAsObject() const;
+    bool           SaveBinaryReplyToFile(const QString& fileName);
 
+    /*
+    //server side
+    void           ServerReplyText(const QString& message);
+    void           ServerReplyFile(const QString& fileName);
+    void           ServerReplyObject(const QVariant& object);
+    */
+
+    //misc
     void           SetTimeout(int milliseconds);
 
 private:

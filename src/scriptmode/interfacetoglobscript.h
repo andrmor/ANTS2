@@ -52,6 +52,9 @@ public slots:
   bool Load(QString FileName);
   bool Save(QString FileName);
 
+  const QVariant GetConfig() const;
+  bool SetConfig(const QVariant& conf);
+
   bool Replace(QString Key, QVariant val);
   QVariant GetKeyValue(QString Key);
 

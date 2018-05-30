@@ -11,7 +11,8 @@ AWebSocketSessionServer::AWebSocketSessionServer(quint16 port, QObject *parent) 
     QObject(parent),
     server(new QWebSocketServer(QStringLiteral("ANTS2"), QWebSocketServer::NonSecureMode, this))
 {
-    if (server->listen(QHostAddress::Any, port))
+    //if (server->listen(QHostAddress::Any, port))
+    if (server->listen(QHostAddress::AnyIPv4, port))
     {
         if (bDebug)
           {
@@ -162,7 +163,7 @@ void AWebSocketSessionServer::onTextMessageReceived(const QString &message)
 
 void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
 {
-    ReceivedBinary.clear();
+    ReceivedBinary = message;
 
     if (bDebug) qDebug() << "Binary message received. Length =" << message.length();
 
@@ -174,7 +175,8 @@ void AWebSocketSessionServer::onSocketDisconnected()
 {
     if (bDebug) qDebug() << "Client disconnected!";
 
-    if (client) client->deleteLater();
+    //if (client) client->deleteLater();
+    if (client) delete client;
     client = 0;
 
     emit clientDisconnected();

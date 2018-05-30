@@ -110,6 +110,8 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
     else
     {
         QString res = ScriptManager->Evaluate(message);
+        qDebug() << "Script evaluation result:"<<res;
+
         if (ScriptManager->isEvalAborted())
         {
             WebSocketServer->ReplyWithText("Error: aborted -> " + ScriptManager->getLastError());
@@ -117,10 +119,11 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
         else
         {
             if ( !WebSocketServer->isReplied() )
-                WebSocketServer->ReplyWithText("OK");
+            {
+                if (res == "undefined") WebSocketServer->ReplyWithText("OK");
+                else WebSocketServer->ReplyWithText(res);
+            }
         }
-
-        qDebug() << "Result:"<<res;
         //WebSocketServer->ReplyWithText("UpdateGeometry");
     }
 }

@@ -16,7 +16,14 @@ public:
     ~AWebSocketSessionServer();
 
     void ReplyWithText(const QString& message);
-    //void ReplyWithJsonCompressed(const QJsonObject& message);
+    void ReplyWithBinaryFile(const QString& fileName);
+    void ReplyWithBinaryObject(const QVariant& object);
+    void ReplyWithBinaryObject_asJSON(const QVariant& object);
+
+    bool isReplied() const {return bReplied;}
+    bool isBinaryEmpty() const {return ReceivedBinary.isEmpty();}
+    void clearBinary() {ReceivedBinary.clear();}
+    const QByteArray& getBinary() const {return ReceivedBinary;}
 
     const QString GetUrl() const;
     int GetPort() const;
@@ -30,7 +37,6 @@ private slots:
 
 signals:
     void textMessageReceived(const QString &message);
-    void jsonMessageReceived(const QJsonObject& json);
     void clientDisconnected();
     void closed();
 
@@ -39,10 +45,15 @@ private:
     QWebSocket* client = 0;
 
     bool bDebug = true;
-    bool bCompressBinary = false;
-    int CompressionLevel = -1;
+    //bool bCompressBinary = false;
+    //int CompressionLevel = -1;
 
-    QJsonObject JsonReceived;
+    QByteArray ReceivedBinary;
+
+    bool bReplied = false;
+
+private:
+    bool assureCanReply();
 };
 
 #endif // AWEBSOCKETSESSIONSERVER_H

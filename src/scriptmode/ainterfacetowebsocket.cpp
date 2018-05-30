@@ -1,13 +1,15 @@
 #include "ainterfacetowebsocket.h"
+#include "anetworkmodule.h"
 #include "awebsocketstandalonemessanger.h"
 #include "awebsocketsession.h"
+#include "awebsocketsessionserver.h"
 
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
 
-AInterfaceToWebSocket::AInterfaceToWebSocket()
+AInterfaceToWebSocket::AInterfaceToWebSocket(ANetworkModule &NetworkModule) : AScriptInterface(), NetworkModule(NetworkModule)
 {
     standaloneMessenger = new AWebSocketStandaloneMessanger();
     sessionMessenger    = new AWebSocketSession();
@@ -107,8 +109,8 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 
 const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject() const
 {
-    const QByteArray& bs = sessionMessenger->getBinaryReply();
-    QJsonDocument doc( QJsonDocument::fromJson(bs) );
+    const QByteArray& ba = sessionMessenger->getBinaryReply();
+    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
     QJsonObject json = doc.object();
 
     QVariantMap vm = json.toVariantMap();
@@ -117,8 +119,64 @@ const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject() const
 
 bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
 {
-    const QByteArray& bs = sessionMessenger->getBinaryReply();
-    QJsonDocument doc( QJsonDocument::fromJson(bs) );
+    const QByteArray& ba = sessionMessenger->getBinaryReply();
+    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
+
+    QFile saveFile(fileName);
+    if ( !saveFile.open(QIODevice::WriteOnly) )
+    {
+        abort( QString("Server: Cannot save binary to file: ") + fileName );
+        return false;
+    }
+    saveFile.write(doc.toJson());
+    saveFile.close();
+    return true;
+}
+
+void AInterfaceToWebSocket::ServerReplyText(const QString &message)
+{
+    NetworkModule.WebSocketServer->ReplyWithText(message);
+}
+
+void AInterfaceToWebSocket::ServerReplyBinaryFile(const QString &fileName)
+{
+    NetworkModule.WebSocketServer->ReplyWithBinaryFile(fileName);
+}
+
+void AInterfaceToWebSocket::ServerReplyBinaryObject(const QVariant &object)
+{
+    NetworkModule.WebSocketServer->ReplyWithBinaryObject(object);
+}
+
+void AInterfaceToWebSocket::ServerReplyBinaryObject_asJSON(const QVariant &object)
+{
+    NetworkModule.WebSocketServer->ReplyWithBinaryObject_asJSON(object);
+}
+
+bool AInterfaceToWebSocket::ServerIsBinaryEmpty() const
+{
+    return NetworkModule.WebSocketServer->isBinaryEmpty();
+}
+
+void AInterfaceToWebSocket::ServerClearBinary()
+{
+    NetworkModule.WebSocketServer->clearBinary();
+}
+
+const QVariant AInterfaceToWebSocket::ServerBinaryToObject() const
+{
+    const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
+    QJsonDocument doc =  QJsonDocument::fromBinaryData(ba);
+    QJsonObject json = doc.object();
+
+    QVariantMap vm = json.toVariantMap();
+    return vm;
+}
+
+bool AInterfaceToWebSocket::ServerBinaryToFile(const QString& fileName)
+{
+    const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
+    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
 
     QFile saveFile(fileName);
     if ( !saveFile.open(QIODevice::WriteOnly) )

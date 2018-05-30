@@ -101,7 +101,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
-    AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+    AInterfaceToWebSocket* web = new AInterfaceToWebSocket(*NetModule);
     ScriptWindow->SetInterfaceObject(web, "web");
 
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);

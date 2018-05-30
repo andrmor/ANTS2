@@ -100,18 +100,28 @@ void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
 
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
-    qDebug() << "attempting to use as script the message received by websocket server";
+    qDebug() << "Message received by websocket server -> running as script";
     int line = ScriptManager->FindSyntaxError(message);
     if (line != -1)
     {
        qDebug() << "Syntaxt error!";
-       WebSocketServer->ReplyWithText("Syntax error!");
+       WebSocketServer->ReplyWithText("Error: Syntax check failed");
     }
     else
     {
         QString res = ScriptManager->Evaluate(message);
+        if (ScriptManager->isEvalAborted())
+        {
+            WebSocketServer->ReplyWithText("Error: aborted -> " + ScriptManager->getLastError());
+        }
+        else
+        {
+            if ( !WebSocketServer->isReplied() )
+                WebSocketServer->ReplyWithText("OK");
+        }
+
         qDebug() << "Result:"<<res;
-        WebSocketServer->ReplyWithText("UpdateGeometry");
+        //WebSocketServer->ReplyWithText("UpdateGeometry");
     }
 }
 

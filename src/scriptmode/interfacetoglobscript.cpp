@@ -530,7 +530,7 @@ bool AInterfaceToConfig::SetConfig(const QVariant &conf)
 
         if ( json.contains("DetectorConfig") && json.contains("SimulationConfig") && json.contains("ReconstructionConfig"))
         {
-            Config->JSON = json;
+            Config->LoadConfig(json, true, true, true);
             return true;
         }
     }

@@ -133,37 +133,37 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
     return true;
 }
 
-void AInterfaceToWebSocket::ServerReplyText(const QString &message)
+void AInterfaceToWebSocket::ServerSendText(const QString &message)
 {
     NetworkModule.WebSocketServer->ReplyWithText(message);
 }
 
-void AInterfaceToWebSocket::ServerReplyBinaryFile(const QString &fileName)
+void AInterfaceToWebSocket::ServerSendBinaryFile(const QString &fileName)
 {
     NetworkModule.WebSocketServer->ReplyWithBinaryFile(fileName);
 }
 
-void AInterfaceToWebSocket::ServerReplyBinaryObject(const QVariant &object)
+void AInterfaceToWebSocket::ServerSendBinaryObject(const QVariant &object)
 {
     NetworkModule.WebSocketServer->ReplyWithBinaryObject(object);
 }
 
-void AInterfaceToWebSocket::ServerReplyBinaryObject_asJSON(const QVariant &object)
+void AInterfaceToWebSocket::ServerSendBinaryObject_asJSON(const QVariant &object)
 {
     NetworkModule.WebSocketServer->ReplyWithBinaryObject_asJSON(object);
 }
 
-bool AInterfaceToWebSocket::ServerIsBinaryEmpty() const
+bool AInterfaceToWebSocket::ServerIsBinaryInputEmpty() const
 {
     return NetworkModule.WebSocketServer->isBinaryEmpty();
 }
 
-void AInterfaceToWebSocket::ServerClearBinary()
+void AInterfaceToWebSocket::ServerClearBinaryInput()
 {
     NetworkModule.WebSocketServer->clearBinary();
 }
 
-const QVariant AInterfaceToWebSocket::ServerBinaryToObject() const
+const QVariant AInterfaceToWebSocket::ServerGetBinaryInputAsObject() const
 {
     const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
     QJsonDocument doc =  QJsonDocument::fromBinaryData(ba);
@@ -173,7 +173,7 @@ const QVariant AInterfaceToWebSocket::ServerBinaryToObject() const
     return vm;
 }
 
-bool AInterfaceToWebSocket::ServerBinaryToFile(const QString& fileName)
+bool AInterfaceToWebSocket::ServerSaveBinaryInputToFile(const QString& fileName)
 {
     const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
     QJsonDocument doc = QJsonDocument::fromBinaryData(ba);

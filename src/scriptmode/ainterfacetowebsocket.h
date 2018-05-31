@@ -48,7 +48,7 @@ private:
     QMap<QThread*, AWebSocketSession*> sockets;
 
 private:
-    void ctorCommon();
+    void initSocket();
     AWebSocketSession* getSocket() const;
 };
 

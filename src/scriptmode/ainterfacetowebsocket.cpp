@@ -11,22 +11,17 @@
 
 AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface()
 {
-    ctorCommon();
+    standaloneMessenger = new AWebSocketStandaloneMessanger();
 }
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 {
-    ctorCommon();
+    standaloneMessenger = new AWebSocketStandaloneMessanger();
 }
 
-void AInterfaceToWebSocket::ctorCommon()
+void AInterfaceToWebSocket::initSocket()
 {
-    standaloneMessenger = new AWebSocketStandaloneMessanger();
-    //socket    = new AWebSocketSession();
-
-    if (sockets.contains(QThread::currentThread()))
-        qWarning() << "Strange: this thread already has a socket!";
-    else
+    if ( !sockets.contains(QThread::currentThread()))
         sockets.insert( QThread::currentThread(), new AWebSocketSession() );
 }
 
@@ -34,7 +29,7 @@ AInterfaceToWebSocket::~AInterfaceToWebSocket()
 {
     //standaloneMessenger->deleteLater();
     delete standaloneMessenger;
-    //sessionMessenger->deleteLater();
+    //socket->deleteLater();
     //delete socket;
 
     for(auto e : sockets.keys())
@@ -84,6 +79,8 @@ AWebSocketSession *AInterfaceToWebSocket::getSocket() const
 
 void AInterfaceToWebSocket::Connect(const QString &Url)
 {
+    initSocket();
+
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
@@ -113,7 +110,7 @@ const QString AInterfaceToWebSocket::SendText(const QString &message)
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
-        abort("Web socket interface system error: socket not found for this thread");
+        abort("Not connected or socket not found for this thread");
         return "";
     }
 
@@ -132,7 +129,7 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
-        abort("Web socket interface system error: socket not found for this thread");
+        abort("Not connected or socket not found for this thread");
         return "";
     }
 
@@ -159,7 +156,7 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
-        abort("Web socket interface system error: socket not found for this thread");
+        abort("Not connected or socket not found for this thread");
         return "";
     }
 
@@ -178,7 +175,7 @@ const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
-        abort("Web socket interface system error: socket not found for this thread");
+        abort("There was no connection yet or socket not found for this thread");
         return 0;
     }
 
@@ -195,7 +192,7 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
-        abort("Web socket interface system error: socket not found for this thread");
+        abort("There was no connection yet or socket not found for this thread");
         return false;
     }
 

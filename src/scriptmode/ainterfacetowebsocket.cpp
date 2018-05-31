@@ -197,7 +197,7 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
     }
 
     const QByteArray& ba = socket->getBinaryReply();
-    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
+    qDebug() << "ByteArray to save size:"<<ba.size();
 
     QFile saveFile(fileName);
     if ( !saveFile.open(QIODevice::WriteOnly) )
@@ -205,7 +205,7 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
         abort( QString("Server: Cannot save binary to file: ") + fileName );
         return false;
     }
-    saveFile.write(doc.toJson());
+    saveFile.write(ba);
     saveFile.close();
     return true;
 }

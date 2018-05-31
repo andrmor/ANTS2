@@ -13,13 +13,13 @@ class ANetworkModule : public QObject
 {
     Q_OBJECT
 public:
-    ANetworkModule() {}
+    ANetworkModule();
     ~ANetworkModule();
 
     void SetDebug(bool flag) {fDebug = flag;}
     void SetScriptManager(AJavaScriptManager* man);
 
-    bool isWebSocketServerRunning() const {return (bool)WebSocketServer;}
+    bool isWebSocketServerRunning() const;
     int getWebSocketPort() const;
     const QString getWebSocketURL() const;
 

@@ -9,6 +9,14 @@
 
 #include <QDebug>
 
+ANetworkModule::ANetworkModule()
+{
+    WebSocketServer = new AWebSocketSessionServer();
+
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
+}
+
 ANetworkModule::~ANetworkModule()
 {
     delete WebSocketServer;
@@ -23,10 +31,15 @@ void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
   ScriptManager = man;
 }
 
+bool ANetworkModule::isWebSocketServerRunning() const
+{
+    return WebSocketServer->IsRunning();
+}
+
 int ANetworkModule::getWebSocketPort() const
 {
-  if (!WebSocketServer) return 0;
-  return WebSocketServer->GetPort();
+    if (!WebSocketServer) return 0;
+    return WebSocketServer->GetPort();
 }
 
 const QString ANetworkModule::getWebSocketURL() const
@@ -50,20 +63,13 @@ bool ANetworkModule::isRootServerRunning() const
 
 void ANetworkModule::StartWebSocketServer(quint16 port)
 {
-  if (WebSocketServer) WebSocketServer->deleteLater();
-    WebSocketServer = new AWebSocketSessionServer(port);
-    QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
-    QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
-
+    WebSocketServer->StartListen(port);
     emit StatusChanged();
 }
 
 void ANetworkModule::StopWebSocketServer()
 {
-    //WebSocketServer->deleteLater();
-    delete WebSocketServer;
-    WebSocketServer = 0;
-
+    WebSocketServer->StopListen();
     qDebug() << "ANTS2 web socket server has stopped listening";
     emit StatusChanged();
 }

@@ -12,8 +12,12 @@ class AWebSocketSessionServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit AWebSocketSessionServer(quint16 port, QObject *parent = 0);
+    explicit AWebSocketSessionServer(QObject *parent = 0);
     ~AWebSocketSessionServer();
+
+    bool StartListen(quint16 port);
+    void StopListen();
+    bool IsRunning();
 
     void ReplyWithText(const QString& message);
     void ReplyWithBinaryFile(const QString& fileName);
@@ -27,7 +31,6 @@ public:
 
     const QString GetUrl() const;
     int GetPort() const;
-    void PauseAccepting(bool flag);
 
 private slots:
     void onNewConnection();

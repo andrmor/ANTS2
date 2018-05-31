@@ -7,28 +7,45 @@
 #include <QNetworkInterface>
 #include <QFile>
 
-AWebSocketSessionServer::AWebSocketSessionServer(quint16 port, QObject *parent) :
+AWebSocketSessionServer::AWebSocketSessionServer(QObject *parent) :
     QObject(parent),
     server(new QWebSocketServer(QStringLiteral("ANTS2"), QWebSocketServer::NonSecureMode, this))
 {
-    //if (server->listen(QHostAddress::Any, port))
-    if (server->listen(QHostAddress::AnyIPv4, port))
-    {
-        if (bDebug)
-          {
-            qDebug() << "ANTS2 is operating in the servermode";
-            //qDebug() << "--Address:"<<server->serverAddress();
-            qDebug() << "--Port:"<<server->serverPort();
-            qDebug() << "--URL:" << server->serverUrl().toString();
-          }
-        connect(server, &QWebSocketServer::newConnection, this, &AWebSocketSessionServer::onNewConnection);
-        connect(server, &QWebSocketServer::closed, this, &AWebSocketSessionServer::closed);
-    }
+    connect(server, &QWebSocketServer::newConnection, this, &AWebSocketSessionServer::onNewConnection);
+    connect(server, &QWebSocketServer::closed, this, &AWebSocketSessionServer::closed);
 }
 
 AWebSocketSessionServer::~AWebSocketSessionServer()
 {
     server->close();
+}
+
+bool AWebSocketSessionServer::StartListen(quint16 port)
+{
+    //if ( !server->listen(QHostAddress::Any, port) )
+    if ( !server->listen(QHostAddress::AnyIPv4, port) )
+    {
+        qCritical("WebSocket server was unable to starrt listen!");
+        return false;
+    }
+
+    if (bDebug)
+    {
+        qDebug() << "ANTS2 is operating in the servermode";
+        qDebug() << "--Port:" << server->serverPort();
+        qDebug() << "--URL:" << GetUrl();
+    }
+    return true;
+}
+
+void AWebSocketSessionServer::StopListen()
+{
+    server->close();
+}
+
+bool AWebSocketSessionServer::IsRunning()
+{
+    return server->isListening();
 }
 
 bool AWebSocketSessionServer::assureCanReply()

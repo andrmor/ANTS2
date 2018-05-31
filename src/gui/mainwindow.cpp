@@ -135,12 +135,12 @@ void MainWindow::onBusyOff()
 
 void MainWindow::startRootUpdate()
 {
-  RootUpdateTimer->start();
+  if (RootUpdateTimer) RootUpdateTimer->start();
 }
 
 void MainWindow::stopRootUpdate()
 {
-  RootUpdateTimer->stop();
+  if (RootUpdateTimer) RootUpdateTimer->stop();
 }
 
 static bool DontAskAgainPlease = false;
@@ -5146,4 +5146,16 @@ void MainWindow::on_cobDarkCounts_Model_currentIndexChanged(int index)
 void MainWindow::on_cobDarkCounts_LoadOptions_currentIndexChanged(int index)
 {
     ui->sbDarkCounts_IntegralRange->setEnabled(index > 1);
+}
+
+#include "awebsocketserverdialog.h"
+void MainWindow::on_actionServer_window_triggered()
+{
+    ServerDialog->show();
+}
+
+void MainWindow::on_actionServer_settings_triggered()
+{
+    GlobSetWindow->SetTab(5);
+    GlobSetWindow->show();
 }

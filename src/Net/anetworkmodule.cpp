@@ -53,6 +53,7 @@ void ANetworkModule::StartWebSocketServer(quint16 port)
   if (WebSocketServer) WebSocketServer->deleteLater();
     WebSocketServer = new AWebSocketSessionServer(port);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
 
     emit StatusChanged();
 }

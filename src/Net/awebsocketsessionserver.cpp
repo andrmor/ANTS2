@@ -93,7 +93,8 @@ void AWebSocketSessionServer::ReplyWithBinaryObject(const QVariant &object)
     }
     else
     {
-        qDebug() << "Reply from object failed";
+        QString err = "Error: Reply with object failed";
+        qDebug() << err;
         client->sendTextMessage("Error: ReplyWithBinaryObject argument is not object");
     }
     bReplied = true;
@@ -125,10 +126,13 @@ void AWebSocketSessionServer::onNewConnection()
     if (bDebug) qDebug() << "New connection attempt";
     QWebSocket *pSocket = server->nextPendingConnection();
 
+    emit reportToGUI(QString("--- Connection request from ") + pSocket->peerAddress().toString());
+
     if (client)
     {
         //deny - exclusive connections!
         if (bDebug) qDebug() << "Connection denied: another client is already connected";
+        emit reportToGUI("--X Denied: another session is already active");
         pSocket->sendTextMessage("Error: another client is already connected");
         pSocket->close();
     }
@@ -137,6 +141,7 @@ void AWebSocketSessionServer::onNewConnection()
         if (bDebug) qDebug() << "Connection established with" << pSocket->peerAddress().toString();
         client = pSocket;
 
+        emit reportToGUI("--> Connection established");
 
         connect(pSocket, &QWebSocket::textMessageReceived, this, &AWebSocketSessionServer::onTextMessageReceived);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSessionServer::onBinaryMessageReceived);
@@ -152,6 +157,8 @@ void AWebSocketSessionServer::onTextMessageReceived(const QString &message)
 
     if (bDebug) qDebug() << "Text message received:\n--->\n"<<message << "\n<---";
 
+    //emit reportToGUI("    Text message received");
+
     if (message.isEmpty())
     {
         if (client)
@@ -165,6 +172,8 @@ void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
 {
     ReceivedBinary = message;
 
+    //emit reportToGUI("    Binary message received");
+
     if (bDebug) qDebug() << "Binary message received. Length =" << message.length();
 
     if (client)
@@ -174,6 +183,8 @@ void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
 void AWebSocketSessionServer::onSocketDisconnected()
 {
     if (bDebug) qDebug() << "Client disconnected!";
+
+    emit reportToGUI("<-- Client disconnected");
 
     //if (client) client->deleteLater();
     if (client) delete client;

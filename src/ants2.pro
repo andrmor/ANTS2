@@ -328,7 +328,8 @@ SOURCES += main.cpp \
     scriptmode/ainterfacetogstylescript.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
-    Net/awebsocketsession.cpp
+    Net/awebsocketsession.cpp \
+    gui/awebsocketserverdialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -467,7 +468,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ainterfacetogstylescript.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
-    Net/awebsocketsession.h
+    Net/awebsocketsession.h \
+    gui/awebsocketserverdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -718,4 +720,5 @@ FORMS += \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
-    gui/aneutroninfodialog.ui
+    gui/aneutroninfodialog.ui \
+    gui/awebsocketserverdialog.ui

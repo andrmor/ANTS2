@@ -44,6 +44,7 @@ public slots:
 signals:
   void StatusChanged();
   void RootServerStarted();
+  void ReportTextToGUI(const QString text);
 
 private:
   AJavaScriptManager* ScriptManager = 0;

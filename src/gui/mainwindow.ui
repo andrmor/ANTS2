@@ -16107,9 +16107,17 @@ on stack</string>
     <addaction name="actionGlobal_script"/>
     <addaction name="actionOpen_Python_window"/>
    </widget>
+   <widget class="QMenu" name="menuServers">
+    <property name="title">
+     <string>Servers</string>
+    </property>
+    <addaction name="actionServer_window"/>
+    <addaction name="actionServer_settings"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindows"/>
    <addaction name="menuScript"/>
+   <addaction name="menuServers"/>
    <addaction name="menuFont"/>
    <addaction name="menuAbout"/>
   </widget>
@@ -16302,6 +16310,16 @@ on stack</string>
   <action name="actionOpen_Python_window">
    <property name="text">
     <string>Open Python window</string>
+   </property>
+  </action>
+  <action name="actionServer_window">
+   <property name="text">
+    <string>Server window</string>
+   </property>
+  </action>
+  <action name="actionServer_settings">
+   <property name="text">
+    <string>Server settings</string>
    </property>
   </action>
  </widget>

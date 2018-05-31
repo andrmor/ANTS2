@@ -39,6 +39,7 @@ signals:
     void textMessageReceived(const QString &message);
     void clientDisconnected();
     void closed();
+    void reportToGUI(const QString& text);
 
 private:
     QWebSocketServer *server = 0;

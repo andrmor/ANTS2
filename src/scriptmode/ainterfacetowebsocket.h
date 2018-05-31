@@ -5,6 +5,8 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QThread>
+#include <QMap>
 
 class QWebSocketServer;
 class QWebSocket;
@@ -17,28 +19,37 @@ class AInterfaceToWebSocket: public AScriptInterface
 
 public:
     AInterfaceToWebSocket();
+    AInterfaceToWebSocket(const AInterfaceToWebSocket& other);
     ~AInterfaceToWebSocket();
 
-public slots:    
-    //standalone - no persistent connection
-    const QString  SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer = false);
-    int            Ping(const QString& Url);
+    virtual bool IsMultithreadCapable() const {return true;}
 
-    //with persistent connection
+public slots:    
     void           Connect(const QString& Url);
     void           Disconnect();
+
     const QString  SendText(const QString& message);
     const QString  SendObject(const QVariant& object);
     const QString  SendFile(const QString& fileName);
-    const QVariant GetBinaryReplyAsObject() const;
+
+    const QVariant GetBinaryReplyAsObject();
     bool           SaveBinaryReplyToFile(const QString& fileName);
 
-    //misc
     void           SetTimeout(int milliseconds);
+
+    //compatibility mode -> standalone - no persistent connection
+    const QString  SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer = false);
+    int            Ping(const QString& Url);
 
 private:
     AWebSocketStandaloneMessanger* standaloneMessenger;
-    AWebSocketSession* sessionMessenger;
+    //AWebSocketSession* socket;
+
+    QMap<QThread*, AWebSocketSession*> sockets;
+
+private:
+    void ctorCommon();
+    AWebSocketSession* getSocket() const;
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

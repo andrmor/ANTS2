@@ -52,6 +52,7 @@ const QVariant AWebServerInterface::GetBufferAsObject() const
 bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
 {
     const QByteArray& ba = Server.getBinary();
+    qDebug() << "Preparing to save, ba size = " << ba.size();
 
     QFile saveFile(fileName);
     if ( !saveFile.open(QIODevice::WriteOnly) )

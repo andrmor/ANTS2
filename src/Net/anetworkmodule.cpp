@@ -60,7 +60,8 @@ void ANetworkModule::StartWebSocketServer(quint16 port)
 
 void ANetworkModule::StopWebSocketServer()
 {
-    WebSocketServer->deleteLater();
+    //WebSocketServer->deleteLater();
+    delete WebSocketServer;
     WebSocketServer = 0;
 
     qDebug() << "ANTS2 web socket server has stopped listening";

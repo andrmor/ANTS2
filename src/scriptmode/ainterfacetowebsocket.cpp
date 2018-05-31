@@ -9,7 +9,7 @@
 #include <QJsonDocument>
 #include <QFile>
 
-AInterfaceToWebSocket::AInterfaceToWebSocket(ANetworkModule &NetworkModule) : AScriptInterface(), NetworkModule(NetworkModule)
+AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface()
 {
     standaloneMessenger = new AWebSocketStandaloneMessanger();
     sessionMessenger    = new AWebSocketSession();
@@ -126,62 +126,6 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
     if ( !saveFile.open(QIODevice::WriteOnly) )
     {
         abort( QString("Server: Cannot save binary to file: ") + fileName );
-        return false;
-    }
-    saveFile.write(doc.toJson());
-    saveFile.close();
-    return true;
-}
-
-void AInterfaceToWebSocket::ServerSendText(const QString &message)
-{
-    NetworkModule.WebSocketServer->ReplyWithText(message);
-}
-
-void AInterfaceToWebSocket::ServerSendBinaryFile(const QString &fileName)
-{
-    NetworkModule.WebSocketServer->ReplyWithBinaryFile(fileName);
-}
-
-void AInterfaceToWebSocket::ServerSendBinaryObject(const QVariant &object)
-{
-    NetworkModule.WebSocketServer->ReplyWithBinaryObject(object);
-}
-
-void AInterfaceToWebSocket::ServerSendBinaryObject_asJSON(const QVariant &object)
-{
-    NetworkModule.WebSocketServer->ReplyWithBinaryObject_asJSON(object);
-}
-
-bool AInterfaceToWebSocket::ServerIsBinaryInputEmpty() const
-{
-    return NetworkModule.WebSocketServer->isBinaryEmpty();
-}
-
-void AInterfaceToWebSocket::ServerClearBinaryInput()
-{
-    NetworkModule.WebSocketServer->clearBinary();
-}
-
-const QVariant AInterfaceToWebSocket::ServerGetBinaryInputAsObject() const
-{
-    const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
-    QJsonDocument doc =  QJsonDocument::fromBinaryData(ba);
-    QJsonObject json = doc.object();
-
-    QVariantMap vm = json.toVariantMap();
-    return vm;
-}
-
-bool AInterfaceToWebSocket::ServerSaveBinaryInputToFile(const QString& fileName)
-{
-    const QByteArray& ba = NetworkModule.WebSocketServer->getBinary();
-    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
-
-    QFile saveFile(fileName);
-    if ( !saveFile.open(QIODevice::WriteOnly) )
-    {
-        abort( QString("Cannot save binary reply to file: ") + fileName );
         return false;
     }
     saveFile.write(doc.toJson());

@@ -6,7 +6,6 @@
 #include <QObject>
 #include <QVariant>
 
-class ANetworkModule;
 class QWebSocketServer;
 class QWebSocket;
 class AWebSocketStandaloneMessanger;
@@ -17,7 +16,7 @@ class AInterfaceToWebSocket: public AScriptInterface
   Q_OBJECT
 
 public:
-    AInterfaceToWebSocket(ANetworkModule& NetworkModule);
+    AInterfaceToWebSocket();
     ~AInterfaceToWebSocket();
 
 public slots:    
@@ -34,22 +33,10 @@ public slots:
     const QVariant GetBinaryReplyAsObject() const;
     bool           SaveBinaryReplyToFile(const QString& fileName);
 
-    //server side
-    void           ServerSendText(const QString& message);
-    void           ServerSendBinaryFile(const QString& fileName);
-    void           ServerSendBinaryObject(const QVariant& object);
-    void           ServerSendBinaryObject_asJSON(const QVariant& object);
-    bool           ServerIsBinaryInputEmpty() const;
-    void           ServerClearBinaryInput();
-    const QVariant ServerGetBinaryInputAsObject() const;
-    bool           ServerSaveBinaryInputToFile(const QString& fileName);
-
     //misc
     void           SetTimeout(int milliseconds);
 
 private:
-    ANetworkModule& NetworkModule;
-
     AWebSocketStandaloneMessanger* standaloneMessenger;
     AWebSocketSession* sessionMessenger;
 };

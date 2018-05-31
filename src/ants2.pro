@@ -329,7 +329,8 @@ SOURCES += main.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
-    gui/awebsocketserverdialog.cpp
+    gui/awebsocketserverdialog.cpp \
+    scriptmode/awebserverinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -469,7 +470,8 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    gui/awebsocketserverdialog.h
+    gui/awebsocketserverdialog.h \
+    scriptmode/awebserverinterface.h
 
 # --- SIM ---
 ants2_SIM {

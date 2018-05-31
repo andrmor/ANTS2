@@ -10,7 +10,7 @@
 AWebSocketServerDialog::AWebSocketServerDialog(MainWindow *MW) :
     QDialog(MW), MW(MW),
     ui(new Ui::AWebSocketServerDialog)
-{
+{    
     ui->setupUi(this);
     setWindowTitle("ANTS2 servers");
 

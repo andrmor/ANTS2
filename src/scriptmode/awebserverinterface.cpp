@@ -52,7 +52,6 @@ const QVariant AWebServerInterface::GetBufferAsObject() const
 bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
 {
     const QByteArray& ba = Server.getBinary();
-    QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
 
     QFile saveFile(fileName);
     if ( !saveFile.open(QIODevice::WriteOnly) )
@@ -60,7 +59,7 @@ bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
         abort( QString("Cannot save binary reply to file: ") + fileName );
         return false;
     }
-    saveFile.write(doc.toJson());
+    saveFile.write(ba);
     saveFile.close();
     return true;
 }

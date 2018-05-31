@@ -32,15 +32,19 @@ bool AWebSocketSessionServer::StartListen(quint16 port)
     if (bDebug)
     {
         qDebug() << "ANTS2 is operating in the servermode";
-        qDebug() << "--Port:" << server->serverPort();
+        //qDebug() << "--Port:" << server->serverPort();
         qDebug() << "--URL:" << GetUrl();
     }
+
+    emit reportToGUI("> Server started listening -> URL: "+GetUrl());
+
     return true;
 }
 
 void AWebSocketSessionServer::StopListen()
 {
     server->close();
+    emit reportToGUI("< Server stopped listening\n");
 }
 
 bool AWebSocketSessionServer::IsRunning()

@@ -24,6 +24,7 @@ AWebSocketSession::~AWebSocketSession()
 
 bool AWebSocketSession::connect(const QString &Url)
 {
+    fExternalAbort = false;
     Error.clear();
     TextReply.clear();
     BinaryReply.clear();
@@ -168,6 +169,13 @@ void AWebSocketSession::clearReply()
     BinaryReply.clear();
 }
 
+void AWebSocketSession::externalAbort()
+{
+    State = Aborted;
+    socket->abort();
+    fExternalAbort = true; //paranoic
+}
+
 void AWebSocketSession::onConnect()
 {
     qDebug() << "Connected to server, checking busy status...";
@@ -176,7 +184,12 @@ void AWebSocketSession::onConnect()
 
 void AWebSocketSession::onDisconnect()
 {
-    if (bWaitForAnswer)
+    if (State = Aborted)
+    {
+        qDebug() << "Disconnect on abort";
+        State = Idle;
+    }
+    else if (bWaitForAnswer)
     {
         qDebug() << "Abnormal disconnect detected";
         if (State == Connecting)
@@ -184,7 +197,7 @@ void AWebSocketSession::onDisconnect()
         else
             Error = "Server disconnected before reply";
         State = ConnectionFailed;
-    }
+    }    
     else
     {
         qDebug() << "Clinet disconnected";

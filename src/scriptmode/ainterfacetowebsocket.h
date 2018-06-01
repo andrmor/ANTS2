@@ -23,6 +23,7 @@ public:
     ~AInterfaceToWebSocket();
 
     virtual bool IsMultithreadCapable() const {return true;}
+    virtual void ForceStop();
 
 public slots:    
     void           Connect(const QString& Url);

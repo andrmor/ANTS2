@@ -21,10 +21,10 @@ public:
     const QString& getReceivedMessage() {return MessageReceived;}
     const QString& getError() {return Error;}
 
-    void  externalAbort() {fExternalAbort = true;}
+    void  externalAbort();
 
 public:
-    enum  ServerState {Idle = 0, Connecting, WaitingForAnswer};
+    enum  ServerState {Idle = 0, Connecting, WaitingForAnswer, Aborted};
 
 private slots:
     void  onConnect();

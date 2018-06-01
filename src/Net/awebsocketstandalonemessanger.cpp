@@ -71,6 +71,13 @@ int AWebSocketStandaloneMessanger::ping(const QString& Url)
     else     return -1;
 }
 
+void AWebSocketStandaloneMessanger::externalAbort()
+{
+    State = Aborted;
+    socket->abort();
+    fExternalAbort = true;
+}
+
 void AWebSocketStandaloneMessanger::onConnect()
 {
     qDebug() << "Connected";
@@ -82,7 +89,12 @@ void AWebSocketStandaloneMessanger::onConnect()
 
 void AWebSocketStandaloneMessanger::onDisconnect()
 {
-    if (bWaitForAnswer)
+    if (State = Aborted)
+    {
+        qDebug() << "compatibility socket: Disconnect on abort";
+        State = Idle;
+    }
+    else if (bWaitForAnswer)
     {
         Error = "Disconnected";
         State = Idle;

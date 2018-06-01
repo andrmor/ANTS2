@@ -30,12 +30,12 @@ public:
     const QByteArray& getBinaryReply() const {return BinaryReply;}
     bool              isBinaryReplyEmpty() const {return BinaryReply.isEmpty();}
 
-    void  externalAbort() {fExternalAbort = true;}
+    void  externalAbort();
 
     void  setTimeout(int milliseconds) {timeout = milliseconds;}
 
 public:
-    enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected};
+    enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected, Aborted};
 
 private slots:
     void  onConnect();

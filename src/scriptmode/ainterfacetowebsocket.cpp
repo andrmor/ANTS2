@@ -43,6 +43,12 @@ AInterfaceToWebSocket::~AInterfaceToWebSocket()
     */
 }
 
+void AInterfaceToWebSocket::ForceStop()
+{
+    socket->externalAbort();
+    compatibilitySocket->externalAbort();
+}
+
 void AInterfaceToWebSocket::SetTimeout(int milliseconds)
 {
     compatibilitySocket->setTimeout(milliseconds);

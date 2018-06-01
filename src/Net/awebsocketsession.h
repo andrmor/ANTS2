@@ -23,6 +23,8 @@ public:
     bool  sendJson(const QJsonObject& json);
     bool  sendFile(const QString& fileName);
 
+    bool  resumeWaitForAnswer();
+
     void  clearReply();
 
     const QString&    getError() const {return Error;}

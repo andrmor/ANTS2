@@ -197,7 +197,14 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 
 const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
 {
-    return socket->getTextReply();
+    bool bOK = socket->resumeWaitForAnswer();
+    if (bOK)
+        return socket->getTextReply();
+    else
+    {
+        abort(socket->getError());
+        return 0;
+    }
 }
 
 const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()

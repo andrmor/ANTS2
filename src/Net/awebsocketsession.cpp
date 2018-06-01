@@ -163,6 +163,12 @@ bool AWebSocketSession::sendFile(const QString &fileName)
     return waitForReply();
 }
 
+bool AWebSocketSession::resumeWaitForAnswer()
+{
+    if ( !confirmSendPossible() ) return false;
+    return waitForReply();
+}
+
 void AWebSocketSession::clearReply()
 {
     TextReply.clear();

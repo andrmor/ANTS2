@@ -142,7 +142,7 @@ void AWebSocketSessionServer::ReplyProgress(int percents)
 {
     if ( !assureCanReply() ) return;
 
-    QString s = QStringLiteral("##Progress#") + QString::number(percents) + "#";
+    QString s = QStringLiteral("##progress#") + QString::number(percents) + "#";
     qDebug() << "Sending progress: "<<s;
 
     client->sendTextMessage(s);

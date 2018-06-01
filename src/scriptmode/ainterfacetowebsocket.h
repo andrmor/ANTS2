@@ -42,14 +42,14 @@ public slots:
     int            Ping(const QString& Url);
 
 private:
-    AWebSocketStandaloneMessanger* standaloneMessenger;
-    //AWebSocketSession* socket;
+    AWebSocketStandaloneMessanger* compatibilitySocket;
+    AWebSocketSession* socket;
 
-    QMap<QThread*, AWebSocketSession*> sockets;
+    //QMap<QThread*, AWebSocketSession*> sockets;
 
 private:
-    void initSocket();
-    AWebSocketSession* getSocket() const;
+    //void initSocket();
+    //AWebSocketSession* getSocket() const;
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

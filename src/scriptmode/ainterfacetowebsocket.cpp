@@ -11,82 +11,93 @@
 
 AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface()
 {
-    standaloneMessenger = new AWebSocketStandaloneMessanger();
+    compatibilitySocket = new AWebSocketStandaloneMessanger();
+    socket = new AWebSocketSession();
 }
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 {
-    standaloneMessenger = new AWebSocketStandaloneMessanger();
+    compatibilitySocket = new AWebSocketStandaloneMessanger();
+    socket = new AWebSocketSession();
 }
 
+/*
 void AInterfaceToWebSocket::initSocket()
 {
     if ( !sockets.contains(QThread::currentThread()))
         sockets.insert( QThread::currentThread(), new AWebSocketSession() );
 }
+*/
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
 {
     //standaloneMessenger->deleteLater();
-    delete standaloneMessenger;
+    delete compatibilitySocket;
     //socket->deleteLater();
-    //delete socket;
+    delete socket;
 
+    /*
     for(auto e : sockets.keys())
        delete sockets.value(e);
     sockets.clear();
+    */
 }
 
 void AInterfaceToWebSocket::SetTimeout(int milliseconds)
 {
-    standaloneMessenger->setTimeout(milliseconds);
-    //socket->setTimeout(milliseconds);
+    compatibilitySocket->setTimeout(milliseconds);
+    socket->setTimeout(milliseconds);
 
+    /*
     AWebSocketSession* socket = getSocket();
     if (socket) socket->setTimeout(milliseconds);
+    */
 }
 
 const QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
 {
-   bool bOK = standaloneMessenger->sendTextMessage(Url, message, WaitForAnswer);
+   bool bOK = compatibilitySocket->sendTextMessage(Url, message, WaitForAnswer);
 
    if (!bOK)
    {
-       abort(standaloneMessenger->getError());
+       abort(compatibilitySocket->getError());
        return "";
    }
-   return standaloneMessenger->getReceivedMessage();
+   return compatibilitySocket->getReceivedMessage();
 }
 
 int AInterfaceToWebSocket::Ping(const QString &Url)
 {
-    int ping = standaloneMessenger->ping(Url);
+    int ping = compatibilitySocket->ping(Url);
 
     if (ping < 0)
     {
-        abort(standaloneMessenger->getError());
+        abort(compatibilitySocket->getError());
         return -1;
     }
     return ping;
 }
 
+/*
 AWebSocketSession *AInterfaceToWebSocket::getSocket() const
 {
     if (sockets.contains(QThread::currentThread()))
         return sockets[QThread::currentThread()];
     else return 0;
 }
+*/
 
 void AInterfaceToWebSocket::Connect(const QString &Url)
 {
+    /*
     initSocket();
-
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("Web socket interface system error: socket not found for this thread");
         return;
     }
+    */
 
     bool bOK = socket->connect(Url);
     if (!bOK)
@@ -95,24 +106,28 @@ void AInterfaceToWebSocket::Connect(const QString &Url)
 
 void AInterfaceToWebSocket::Disconnect()
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("Web socket interface system error: socket not found for this thread");
         return;
     }
+    */
 
     socket->disconnect();
 }
 
 const QString AInterfaceToWebSocket::SendText(const QString &message)
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("Not connected or socket not found for this thread");
         return "";
     }
+    */
 
     bool bOK = socket->sendText(message);
     if (bOK)
@@ -126,12 +141,14 @@ const QString AInterfaceToWebSocket::SendText(const QString &message)
 
 const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("Not connected or socket not found for this thread");
         return "";
     }
+    */
 
     if (object.type() != QMetaType::QVariantMap)
     {
@@ -153,12 +170,14 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
 
 const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("Not connected or socket not found for this thread");
         return "";
     }
+    */
 
     bool bOK = socket->sendFile(fileName);
     if (bOK)
@@ -172,12 +191,14 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 
 const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("There was no connection yet or socket not found for this thread");
         return 0;
     }
+    */
 
     const QByteArray& ba = socket->getBinaryReply();
     QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
@@ -189,12 +210,14 @@ const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
 
 bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
 {
+    /*
     AWebSocketSession* socket = getSocket();
     if (!socket)
     {
         abort("There was no connection yet or socket not found for this thread");
         return false;
     }
+    */
 
     const QByteArray& ba = socket->getBinaryReply();
     qDebug() << "ByteArray to save size:"<<ba.size();

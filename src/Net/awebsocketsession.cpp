@@ -184,7 +184,7 @@ void AWebSocketSession::onConnect()
 
 void AWebSocketSession::onDisconnect()
 {
-    if (State = Aborted)
+    if (State == Aborted)
     {
         qDebug() << "Disconnect on abort";
         State = Idle;

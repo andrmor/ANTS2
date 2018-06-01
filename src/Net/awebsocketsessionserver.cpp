@@ -88,6 +88,7 @@ void AWebSocketSessionServer::ReplyWithBinaryFile(const QString &fileName)
     {
         QByteArray ba = file.readAll();
         client->sendBinaryMessage(ba);
+        client->sendTextMessage("##binary#file#");
     }
     bReplied = true;
 }
@@ -104,6 +105,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject(const QVariant &object)
         QJsonObject js = QJsonObject::fromVariantMap(vm);
         QJsonDocument doc(js);
         client->sendBinaryMessage(doc.toBinaryData());
+        client->sendTextMessage("##binary#object#");
     }
     else
     {
@@ -126,6 +128,7 @@ void AWebSocketSessionServer::ReplyWithBinaryObject_asJSON(const QVariant &objec
         QJsonObject js = QJsonObject::fromVariantMap(vm);
         QJsonDocument doc(js);
         client->sendBinaryMessage(doc.toJson());
+        client->sendTextMessage("##binary#JSON#");
     }
     else
     {
@@ -133,6 +136,16 @@ void AWebSocketSessionServer::ReplyWithBinaryObject_asJSON(const QVariant &objec
         client->sendTextMessage("Error: ReplyWithBinaryObject_asJSON argument is not object");
     }
     bReplied = true;
+}
+
+void AWebSocketSessionServer::ReplyProgress(int percents)
+{
+    if ( !assureCanReply() ) return;
+
+    QString s = QStringLiteral("##Progress#") + QString::number(percents) + "#";
+    qDebug() << "Sending progress: "<<s;
+
+    client->sendTextMessage(s);
 }
 
 void AWebSocketSessionServer::onNewConnection()
@@ -236,4 +249,9 @@ const QString AWebSocketSessionServer::GetUrl() const
 int AWebSocketSessionServer::GetPort() const
 {
     return server->serverPort();
+}
+
+void AWebSocketSessionServer::onProgressChanged(int percents)
+{
+    if (bRetranslateProgress) ReplyProgress(percents);
 }

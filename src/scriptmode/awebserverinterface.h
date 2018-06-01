@@ -28,6 +28,9 @@ public slots:
     const QVariant GetBufferAsObject() const;
     bool           SaveBufferToFile(const QString& fileName);
 
+    void           SendProgressReport(int percents);
+    void           SetAcceptExternalProgressReport(bool flag);
+
 private:
     AWebSocketSessionServer& Server;
 };

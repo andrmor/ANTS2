@@ -64,3 +64,13 @@ bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
     saveFile.close();
     return true;
 }
+
+void AWebServerInterface::SendProgressReport(int percents)
+{
+    Server.ReplyProgress(percents);
+}
+
+void AWebServerInterface::SetAcceptExternalProgressReport(bool flag)
+{
+    Server.SetCanRetranslateProgress(flag);
+}

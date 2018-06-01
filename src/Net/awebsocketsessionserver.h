@@ -24,6 +24,9 @@ public:
     void ReplyWithBinaryObject(const QVariant& object);
     void ReplyWithBinaryObject_asJSON(const QVariant& object);
 
+    void ReplyProgress(int percents);
+    void SetCanRetranslateProgress(bool flag) {bRetranslateProgress = flag;}
+
     bool isReplied() const {return bReplied;}
     bool isBinaryEmpty() const {return ReceivedBinary.isEmpty();}
     void clearBinary() {ReceivedBinary.clear();}
@@ -31,6 +34,9 @@ public:
 
     const QString GetUrl() const;
     int GetPort() const;
+
+public slots:
+    void onProgressChanged(int percents);
 
 private slots:
     void onNewConnection();
@@ -55,6 +61,7 @@ private:
     QByteArray ReceivedBinary;
 
     bool bReplied = false;
+    bool bRetranslateProgress = false;
 
 private:
     bool assureCanReply();

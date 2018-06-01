@@ -89,7 +89,7 @@ void AWebSocketStandaloneMessanger::onConnect()
 
 void AWebSocketStandaloneMessanger::onDisconnect()
 {
-    if (State = Aborted)
+    if (State == Aborted)
     {
         qDebug() << "compatibility socket: Disconnect on abort";
         State = Idle;

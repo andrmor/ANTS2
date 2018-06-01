@@ -15,6 +15,8 @@ ANetworkModule::ANetworkModule()
 
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
+
+    QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
 }
 
 ANetworkModule::~ANetworkModule()
@@ -135,5 +137,3 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
         //WebSocketServer->ReplyWithText("UpdateGeometry");
     }
 }
-
-

@@ -33,6 +33,8 @@ public slots:
     const QString  SendObject(const QVariant& object);
     const QString  SendFile(const QString& fileName);
 
+    const QString  ResumeWaitForAnswer();
+
     const QVariant GetBinaryReplyAsObject();
     bool           SaveBinaryReplyToFile(const QString& fileName);
 

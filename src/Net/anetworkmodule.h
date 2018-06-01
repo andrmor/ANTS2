@@ -45,6 +45,7 @@ signals:
   void StatusChanged();
   void RootServerStarted();
   void ReportTextToGUI(const QString text);
+  void ProgressReport(int percents); //retranslator to AWebSocketSessionServer
 
 private:
   AJavaScriptManager* ScriptManager = 0;

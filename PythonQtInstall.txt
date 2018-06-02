@@ -1,0 +1,103 @@
+
+# 1. Download PythonQt - e.g., from https://github.com/Orochimarufan/PythonQt
+# 2. In the text below, modify path to your Python installation (in the section of the approproiate OS - unix or win32)
+# 3. Save this file as PythonQt.pro in src directory of PythonQt
+# 4. Open this file in QtCreator 
+# 5. From menu "Build" do "Run qmake"
+# 6. From menu "Build" do "Rebuild all"
+# 7. Copy path to lib directory created one level up from the src and use it in ANTS2.pro
+
+
+#---------------------------------------
+# PythonQt was developed by Florian Link
+#---------------------------------------
+
+#Modify paths for your Python version!
+
+unix {
+  unix:LIBS += $$system(python3.5-config --libs)
+  unix:QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+}
+else:win32 {
+
+  CONFIG(debug, debug|release) {
+    DEBUG_EXT = _d
+  } else {
+    DEBUG_EXT =
+  }
+
+  INCLUDEPATH += c:/Python33/include
+  LIBS += -Lc:/Python33/libs -lPython33$${DEBUG_EXT}
+}
+else:macx {
+  # for macx you need to have the Python development kit installed as framework
+  INCLUDEPATH += /System/Library/Frameworks/Python.framework/Headers
+  LIBS += -F/System/Library/Frameworks -framework Python
+}
+
+TARGET   = PythonQt
+TEMPLATE = lib
+DESTDIR    = ../lib
+
+CONFIG += qt
+CONFIG -= flat
+
+QT += widgets #core-private
+QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings # Qt 5.4 adds this option, but this is not compatible with the Python API
+
+DEFINES +=  PYTHONQT_EXPORTS
+INCLUDEPATH += $$PWD
+
+HEADERS +=                    \
+  $$PWD/PythonQt.h                  \
+  $$PWD/PythonQtStdDecorators.h     \
+  $$PWD/PythonQtClassInfo.h         \
+  $$PWD/PythonQtImporter.h          \
+  $$PWD/PythonQtObjectPtr.h         \
+  $$PWD/PythonQtProperty.h          \
+  $$PWD/PythonQtSignal.h            \
+  $$PWD/PythonQtSlot.h              \
+  $$PWD/PythonQtSlotDecorator.h     \
+  $$PWD/PythonQtStdIn.h             \
+  $$PWD/PythonQtStdOut.h            \
+  $$PWD/PythonQtMisc.h              \
+  $$PWD/PythonQtMethodInfo.h        \
+  $$PWD/PythonQtImportFileInterface.h \
+  $$PWD/PythonQtConversion.h        \
+  $$PWD/PythonQtSignalReceiver.h    \
+  $$PWD/PythonQtInstanceWrapper.h   \
+  $$PWD/PythonQtClassWrapper.h \
+  $$PWD/PythonQtCppWrapperFactory.h \
+  $$PWD/PythonQtQFileImporter.h     \
+  $$PWD/PythonQtQFileImporter.h     \
+  $$PWD/PythonQtVariants.h          \
+#  $$PWD/gui/PythonQtScriptingConsole.h    \
+  $$PWD/PythonQtSystem.h \
+  $$PWD/PythonQtUtils.h \
+  $$PWD/PythonQtBoolResult.h
+
+SOURCES +=                    \
+  $$PWD/PythonQtStdDecorators.cpp   \
+  $$PWD/PythonQt.cpp                \
+  $$PWD/PythonQtClassInfo.cpp       \
+  $$PWD/PythonQtImporter.cpp        \
+  $$PWD/PythonQtObjectPtr.cpp       \
+  $$PWD/PythonQtProperty.cpp        \
+  $$PWD/PythonQtStdIn.cpp           \
+  $$PWD/PythonQtStdOut.cpp          \
+  $$PWD/PythonQtSignal.cpp          \
+  $$PWD/PythonQtSlot.cpp            \
+  $$PWD/PythonQtSlotDecorator.cpp   \
+  $$PWD/PythonQtMisc.cpp            \
+  $$PWD/PythonQtMethodInfo.cpp      \
+  $$PWD/PythonQtConversion.cpp      \
+  $$PWD/PythonQtSignalReceiver.cpp  \
+  $$PWD/PythonQtInstanceWrapper.cpp \
+  $$PWD/PythonQtQFileImporter.cpp   \
+  $$PWD/PythonQtClassWrapper.cpp    \
+  $$PWD/PythonQtBoolResult.cpp      \
+#  $$PWD/gui/PythonQtScriptingConsole.cpp \
+
+include (../generated_cpp_56/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin.pri)
+include (../generated_cpp_56/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin.pri)
+

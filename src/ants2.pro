@@ -8,7 +8,7 @@ ANTS2_MINOR = 8
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-#CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
+CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -173,26 +173,25 @@ ants2_RootServer{
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
 
-    #http://pythonqt.sourceforge.net/
+    #http://pythonqt.sourceforge.net/ or https://github.com/Orochimarufan/PythonQt
+    #for PythonQt installation see instructions in PythonQtInstall.txt in the root of ANTS2 on GitHub
     win32:{
             INCLUDEPATH += c:/Python33/include
             LIBS += -Lc:/Python33/libs -lPython33
 
-            INCLUDEPATH += C:/PythonQt3.2/src
-            INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
+            #INCLUDEPATH += C:/PythonQt3.2/src
+            INCLUDEPATH += D:/PythonQtTest/src
+            #INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
 
-            LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
+            #LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
+            LIBS += -LD:/PythonQtTest/lib -lPythonQt
     }
     linux-g++ || unix {
-            INCLUDEPATH += $$system(python-config --includes) #fix:  --includes returns in -I/path format, and Qt expects /path
-            LIBS += $$system(python-config --libs)
+            LIBS += $$system(python3.5-config --libs)
+            QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
 
-            INCLUDEPATH += usr/PythonQt3.2/src
-            INCLUDEPATH += usr/PythonQt3.2/extensions/PythonQt_QtAll
-
-            LIBS += -Lusr/PythonQt3.2/lib/ #only this?
-            LIBS += -Lusr/PythonQt3.2
-            LIBS += -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
+            INCLUDEPATH += /home/andr/PythonQt/src
+            LIBS += -L/home/andr/PythonQt/lib -lPythonQt
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h

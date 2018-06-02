@@ -5,7 +5,7 @@
 # 4. Open this file in QtCreator 
 # 5. From menu "Build" do "Run qmake"
 # 6. From menu "Build" do "Rebuild all"
-# 7. Copy path to lib directory created one level up from the src and use it in ANTS2.pro
+# 7. Modify ANTS2.pro for the selected PythonQt paths
 
 
 #---------------------------------------

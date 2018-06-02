@@ -28,28 +28,31 @@ public:
   QString LibParticleSources;
   QString LibScripts;
 
-  int FontSize;
-  int TextLogPrecision;
-  int BinsX, BinsY, BinsZ;
-  int FunctionPointsX, FunctionPointsY;
-  int NumSegments;     // number of segments in drawing, e.g., round objects
-  int MaxNumberOfTracks;
+  int FontSize = 8;
+  int TextLogPrecision = 4;
+  int BinsX = 100;
+  int BinsY = 100;
+  int BinsZ = 100;
+  int FunctionPointsX = 30;
+  int FunctionPointsY = 30;
+  int NumSegments = 20;     // number of segments in drawing, e.g., round objects
+  int MaxNumberOfTracks = 1000;
 
-  bool ShowExamplesOnStart; //pop-up examples window
-  bool SaveLoadWindows; //save windows on exit, load them on ANTS2 start
+  bool ShowExamplesOnStart = true; //pop-up examples window
+  bool SaveLoadWindows = true; //save windows on exit, load them on ANTS2 start
   //bool AlwaysSaveOnExit; //save detector to QuickSave on exit, do not ask
   //bool NeverSaveOnExit; //do not save detector on exit, do not ask
 
-  int NumThreads;
-  int RecNumTreads;
+  int NumThreads = -1; //if not loaded -> -1 means use recommended settings
+  int RecNumTreads = 1;
 
-  bool RecTreeSave_IncludePMsignals;
-  bool RecTreeSave_IncludeRho;
-  bool RecTreeSave_IncludeTrue;  
+  bool RecTreeSave_IncludePMsignals = true;
+  bool RecTreeSave_IncludeRho = true;
+  bool RecTreeSave_IncludeTrue = true;
 
-  bool PerformAutomaticGeometryCheck;
+  bool PerformAutomaticGeometryCheck = true;
 
-  bool fOpenImageExternalEditor;
+  bool fOpenImageExternalEditor = true;
 
   QJsonObject MaterialsAndParticlesSettings;
 
@@ -59,16 +62,16 @@ public:
   QString GlobScript;
   QJsonObject ScriptWindowJson;
   QJsonObject PythonScriptWindowJson;
-  int DefaultFontSize_ScriptWindow;
-  QString DefaultFontFamily_ScriptWindow;
-  bool DefaultFontWeight_ScriptWindow;
-  bool DefaultFontItalic_ScriptWindow;
+  int DefaultFontSize_ScriptWindow = 12;
+  QString DefaultFontFamily_ScriptWindow; //empty => Qt standard settings will be used
+  bool DefaultFontWeight_ScriptWindow = false;
+  bool DefaultFontItalic_ScriptWindow = false;
 
   //Network
-  int DefaultWebSocketPort;
-  bool fRunWebSocketServerOnStart;
-  int DefaultRootServerPort;
-  bool fRunRootServerOnStart;
+  int DefaultWebSocketPort = 1234;
+  bool fRunWebSocketServerOnStart = false;
+  int DefaultRootServerPort = 8080;
+  bool fRunRootServerOnStart = false;
   QString ExternalJSROOT;
 
   ANetworkModule* NetModule;

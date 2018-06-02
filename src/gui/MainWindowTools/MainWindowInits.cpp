@@ -28,6 +28,7 @@
 #include "alrfmoduleselector.h"
 #include "gui/alrfwindow.h"
 #include "anetworkmodule.h"
+#include "awebsocketserverdialog.h"
 
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
@@ -140,6 +141,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Creating Python script window";
     createPythonScriptWindow();
 #endif
+    ServerDialog = new AWebSocketServerDialog(this);
     qDebug()<<">All windows created";
 
     //root update cycle

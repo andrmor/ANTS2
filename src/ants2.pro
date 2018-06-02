@@ -6,7 +6,7 @@ ANTS2_MINOR = 8
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
-#CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
+CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
 
@@ -282,7 +282,6 @@ SOURCES += main.cpp \
     common/ainternetbrowser.cpp \
     Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
-    Net/awebsocketserver.cpp \
     modules/lrf_v3/gui/atpspline3widget.cpp \
     modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
@@ -325,7 +324,12 @@ SOURCES += main.cpp \
     gui/atextedit.cpp \
     gui/alineedit.cpp \    
     scriptmode/ainterfacetoaddobjscript.cpp \
-    scriptmode/ainterfacetogstylescript.cpp
+    scriptmode/ainterfacetogstylescript.cpp \
+    Net/awebsocketsessionserver.cpp \
+    Net/awebsocketstandalonemessanger.cpp \
+    Net/awebsocketsession.cpp \
+    gui/awebsocketserverdialog.cpp \
+    scriptmode/awebserverinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -415,7 +419,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ainternetbrowser.h \
     Net/aroothttpserver.h \
     Net/anetworkmodule.h \
-    Net/awebsocketserver.h \
     modules/lrf_v3/gui/atpspline3widget.h \
     modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
@@ -461,7 +464,12 @@ HEADERS  += common/CorrelationFilters.h \
     gui/atextedit.h \
     gui/alineedit.h \
     scriptmode/ainterfacetoaddobjscript.h \
-    scriptmode/ainterfacetogstylescript.h
+    scriptmode/ainterfacetogstylescript.h \
+    Net/awebsocketsessionserver.h \
+    Net/awebsocketstandalonemessanger.h \
+    Net/awebsocketsession.h \
+    gui/awebsocketserverdialog.h \
+    scriptmode/awebserverinterface.h
 
 # --- SIM ---
 ants2_SIM {
@@ -652,8 +660,8 @@ RC_FILE = myapp.rc
 #---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  #QMAKE_CXXFLAGS_RELEASE -= -O2
-  #QMAKE_CXXFLAGS_RELEASE *= -Od
+  QMAKE_CXXFLAGS_RELEASE -= -O2
+  QMAKE_CXXFLAGS_RELEASE *= -Od
 }
 linux-g++ || unix {
     QMAKE_CXXFLAGS += -march=native
@@ -712,4 +720,5 @@ FORMS += \
     gui/amatparticleconfigurator.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
-    gui/aneutroninfodialog.ui
+    gui/aneutroninfodialog.ui \
+    gui/awebsocketserverdialog.ui

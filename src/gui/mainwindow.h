@@ -55,6 +55,7 @@ class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
 struct ParticleSourceStructure;
+class AWebSocketServerDialog;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -111,6 +112,7 @@ public:
     AScriptWindow* ScriptWindow = 0;                //global script window
     ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module
     AScriptWindow* PythonScriptWindow = 0;
+    AWebSocketServerDialog* ServerDialog = 0;
 
 #ifdef ANTS_FANN
     NeuralNetworksWindow* NNwindow = 0;
@@ -386,7 +388,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QTimer *RootUpdateTimer; //root update timer
+    QTimer *RootUpdateTimer = 0; //root update timer
     QMessageBox *msBox = 0; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
 
     //flags
@@ -627,6 +629,10 @@ private slots:
     void on_cobDarkCounts_Model_currentIndexChanged(int index);
 
     void on_cobDarkCounts_LoadOptions_currentIndexChanged(int index);
+
+    void on_actionServer_window_triggered();
+
+    void on_actionServer_settings_triggered();
 
 public slots:
     void on_pbRebuildDetector_clicked();

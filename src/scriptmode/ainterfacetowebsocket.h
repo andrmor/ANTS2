@@ -5,41 +5,54 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QThread>
+#include <QMap>
 
 class QWebSocketServer;
 class QWebSocket;
+class AWebSocketStandaloneMessanger;
+class AWebSocketSession;
 
 class AInterfaceToWebSocket: public AScriptInterface
 {
   Q_OBJECT
 
 public:
-    enum ServerState {Idle=0, Sending, WaitingForAnswer};
     AInterfaceToWebSocket();
+    AInterfaceToWebSocket(const AInterfaceToWebSocket& other);
     ~AInterfaceToWebSocket();
 
-public slots:
-    void setTimeout(int milliseconds) {timeout = milliseconds;}
-    QString SendTextMessage(QString Url, QVariant message, bool WaitForAnswer=false);
-    int Ping(QString Url);
+    virtual bool IsMultithreadCapable() const {return true;}
+    virtual void ForceStop();
 
-private slots:
-    void onClientConnected();
-    void onTextMessageReceived(QString message);
+public slots:    
+    void           Connect(const QString& Url);
+    void           Disconnect();
+
+    const QString  SendText(const QString& message);
+    const QString  SendObject(const QVariant& object);
+    const QString  SendFile(const QString& fileName);
+
+    const QString  ResumeWaitForAnswer();
+
+    const QVariant GetBinaryReplyAsObject();
+    bool           SaveBinaryReplyToFile(const QString& fileName);
+
+    void           SetTimeout(int milliseconds);
+
+    //compatibility mode -> standalone - no persistent connection
+    const QString  SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer = false);
+    int            Ping(const QString& Url);
 
 private:
-   // QWebSocketServer *Server;
-    QWebSocket *ClientSocket;
+    AWebSocketStandaloneMessanger* compatibilitySocket;
+    AWebSocketSession* socket;
 
-    int timeout;
-    int lastExchangeDuration;
+    //QMap<QThread*, AWebSocketSession*> sockets;
 
-    ServerState State;
-    QString MessageToSend;
-    QString MessageReceived;
-    bool fWaitForAnswer;
-
-    QString variantToString(QVariant val);
+private:
+    //void initSocket();
+    //AWebSocketSession* getSocket() const;
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

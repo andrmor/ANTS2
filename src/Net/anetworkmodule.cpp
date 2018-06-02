@@ -1,12 +1,23 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 
-#include "awebsocketserver.h"
+//#include "awebsocketserver.h"
+#include "awebsocketsessionserver.h"
 #ifdef USE_ROOT_HTML
 #include "aroothttpserver.h"
 #endif
 
 #include <QDebug>
+
+ANetworkModule::ANetworkModule()
+{
+    WebSocketServer = new AWebSocketSessionServer();
+
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
+
+    QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
+}
 
 ANetworkModule::~ANetworkModule()
 {
@@ -22,10 +33,15 @@ void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
   ScriptManager = man;
 }
 
+bool ANetworkModule::isWebSocketServerRunning() const
+{
+    return WebSocketServer->IsRunning();
+}
+
 int ANetworkModule::getWebSocketPort() const
 {
-  if (!WebSocketServer) return 0;
-  return WebSocketServer->GetPort();
+    if (!WebSocketServer) return 0;
+    return WebSocketServer->GetPort();
 }
 
 const QString ANetworkModule::getWebSocketURL() const
@@ -49,18 +65,13 @@ bool ANetworkModule::isRootServerRunning() const
 
 void ANetworkModule::StartWebSocketServer(quint16 port)
 {
-  if (WebSocketServer) WebSocketServer->deleteLater();
-    WebSocketServer = new AWebSocketServer(port, fDebug);
-    QObject::connect(WebSocketServer, &AWebSocketServer::NotifyTextMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
-
+    WebSocketServer->StartListen(port);
     emit StatusChanged();
 }
 
 void ANetworkModule::StopWebSocketServer()
 {
-    WebSocketServer->deleteLater();
-    WebSocketServer = 0;
-
+    WebSocketServer->StopListen();
     qDebug() << "ANTS2 web socket server has stopped listening";
     emit StatusChanged();
 }
@@ -99,19 +110,30 @@ void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
 
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
-    qDebug() << "attempting to use as script the message received by websocket server";
+    qDebug() << "Message received by websocket server -> running as script";
     int line = ScriptManager->FindSyntaxError(message);
     if (line != -1)
     {
        qDebug() << "Syntaxt error!";
-       WebSocketServer->ReplyAndClose("Syntax error!");
+       WebSocketServer->ReplyWithText("Error: Syntax check failed");
     }
     else
     {
         QString res = ScriptManager->Evaluate(message);
-        qDebug() << "Result:"<<res;
-        WebSocketServer->ReplyAndClose("UpdateGeometry");
+        qDebug() << "Script evaluation result:"<<res;
+
+        if (ScriptManager->isEvalAborted())
+        {
+            WebSocketServer->ReplyWithText("Error: aborted -> " + ScriptManager->getLastError());
+        }
+        else
+        {
+            if ( !WebSocketServer->isReplied() )
+            {
+                if (res == "undefined") WebSocketServer->ReplyWithText("OK");
+                else WebSocketServer->ReplyWithText(res);
+            }
+        }
+        //WebSocketServer->ReplyWithText("UpdateGeometry");
     }
 }
-
-

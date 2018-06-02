@@ -1697,6 +1697,8 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 
     simTimerGuiUpdate.setInterval(1000);
     QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), Runner, SLOT(updateGui()), Qt::DirectConnection);
+
+    QObject::connect(Runner, &ASimulatorRunner::updateReady, this, &ASimulationManager::ProgressReport);
 }
 
 ASimulationManager::~ASimulationManager()

@@ -1834,7 +1834,7 @@ int AScriptWindow::getIndent(const QString& line)
     if (!line.isEmpty())
     {
         for (indent = 0; indent<line.size(); indent++)
-            if (line.at(indent) != " ") break;
+            if (line.at(indent) != ' ') break;
 
         if (indent == line.size()) indent = -1;
     }
@@ -1858,8 +1858,8 @@ int AScriptWindow::getSectionCounterChange(const QString& line)
     for (int i=0; i<line.size(); i++)
     {
         // ***!!! add ignore commented: // and inside /* */
-        if      (line.at(i) == "{" ) counter++;
-        else if (line.at(i) == "}" ) counter--;
+        if      (line.at(i) == '{' ) counter++;
+        else if (line.at(i) == '}' ) counter--;
     }
     return counter;
 }

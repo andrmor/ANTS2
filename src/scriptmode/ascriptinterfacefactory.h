@@ -8,6 +8,7 @@
 #include "histgraphinterfaces.h"
 #include "ainterfacetowebsocket.h"
 #include "ainterfacetomessagewindow.h"
+#include "ainterfacetowebsocket.h"
 
 #include <QObject>
 
@@ -45,6 +46,9 @@ public:
 
         const AInterfaceToMessageWindow* msg = dynamic_cast<const AInterfaceToMessageWindow*>(other);
         if (msg) return new AInterfaceToMessageWindow(*msg);
+
+        const AInterfaceToWebSocket* web = dynamic_cast<const AInterfaceToWebSocket*>(other);
+        if (web) return new AInterfaceToWebSocket(*web);
 
         return 0;
     }

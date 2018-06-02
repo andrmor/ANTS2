@@ -21,6 +21,7 @@
 #include "ascriptwindow.h"
 #include "checkupwindowclass.h"
 #include "ainterfacetowebsocket.h"
+#include "awebserverinterface.h"
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
@@ -103,6 +104,9 @@ void MainWindow::createScriptWindow()
 
     AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
     ScriptWindow->SetInterfaceObject(web, "web");
+
+    AWebServerInterface* server = new AWebServerInterface(*NetModule->WebSocketServer);
+    ScriptWindow->SetInterfaceObject(server, "server");
 
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(photon, "photon");

@@ -510,6 +510,35 @@ bool AInterfaceToConfig::Save(QString FileName)
     return SaveJsonToFile(Config->JSON, FileName);
 }
 
+const QVariant AInterfaceToConfig::GetConfig() const
+{
+    return Config->JSON.toVariantMap();
+}
+
+bool AInterfaceToConfig::SetConfig(const QVariant &conf)
+{
+    if (!bGuiThread)
+      {
+        abort("Script in threads: cannot modify detector configuration!");
+        return false;
+      }
+
+    if (conf.type() == QMetaType::QVariantMap)
+    {
+        QVariantMap vm = conf.toMap();
+        QJsonObject json = QJsonObject::fromVariantMap(vm);
+
+        if ( json.contains("DetectorConfig") && json.contains("SimulationConfig") && json.contains("ReconstructionConfig"))
+        {
+            Config->LoadConfig(json, true, true, true);
+            return true;
+        }
+    }
+
+    abort("Failed to set config from object: it does not seens to be a valid configuration");
+    return false;
+}
+
 #ifdef SIM
 //----------------------------------
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)

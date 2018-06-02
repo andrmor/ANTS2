@@ -3,7 +3,8 @@
 
 #include <QObject>
 
-class AWebSocketServer;
+//class AWebSocketServer;
+class AWebSocketSessionServer;
 class ARootHttpServer;
 class TObject;
 class AJavaScriptManager;
@@ -12,13 +13,13 @@ class ANetworkModule : public QObject
 {
     Q_OBJECT
 public:
-    ANetworkModule() {}
+    ANetworkModule();
     ~ANetworkModule();
 
     void SetDebug(bool flag) {fDebug = flag;}
     void SetScriptManager(AJavaScriptManager* man);
 
-    bool isWebSocketServerRunning() const {return (bool)WebSocketServer;}
+    bool isWebSocketServerRunning() const;
     int getWebSocketPort() const;
     const QString getWebSocketURL() const;
 
@@ -26,7 +27,7 @@ public:
     int getRootServerPort() const;
     const QString getJSROOTstring() const {return JSROOT;}
 
-    AWebSocketServer* WebSocketServer = 0;
+    AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
 public: ARootHttpServer* RootHttpServer = 0;
 #endif
@@ -43,6 +44,8 @@ public slots:
 signals:
   void StatusChanged();
   void RootServerStarted();
+  void ReportTextToGUI(const QString text);
+  void ProgressReport(int percents); //retranslator to AWebSocketSessionServer
 
 private:
   AJavaScriptManager* ScriptManager = 0;

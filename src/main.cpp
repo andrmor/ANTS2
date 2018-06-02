@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
     QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
+    QObject::connect(&SimulationManager, &ASimulationManager::ProgressReport, &Network, &ANetworkModule::ProgressReport );
       //in GlobSetWindow init now:
       //Network.StartRootHttpServer();  //does nothing if compilation flag is not set
       //Network.StartWebSocketServer(1234);

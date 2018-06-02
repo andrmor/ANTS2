@@ -90,6 +90,7 @@ signals:
     void RequestStopSimulation();
     void SimulationFinished();
 
+    void ProgressReport(int percents);
 };
 
 class ASimulatorRunner : public QObject

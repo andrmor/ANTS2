@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 8
+ANTS2_MINOR = 9
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -179,12 +179,11 @@ ants2_Python{
             INCLUDEPATH += c:/Python33/include
             LIBS += -Lc:/Python33/libs -lPython33
 
-            #INCLUDEPATH += C:/PythonQt3.2/src
-            INCLUDEPATH += D:/PythonQtTest/src
-            #INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
+            INCLUDEPATH += C:/PythonQt3.2/src
+            #INCLUDEPATH += D:/PythonQtTest/src
 
-            #LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
-            LIBS += -LD:/PythonQtTest/lib -lPythonQt
+            LIBS += -LC:/PythonQt3.2 -lPythonQt-Qt5-Python333
+            #LIBS += -LD:/PythonQtTest/lib -lPythonQt
     }
     linux-g++ || unix {
             LIBS += $$system(python3.5-config --libs)

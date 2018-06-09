@@ -25,7 +25,7 @@ public:
     virtual void ForceStop();
 
 public slots:    
-    void           Connect(const QString& Url, bool WaitForConfirmationFromServer);
+    const QString  Connect(const QString& Url, bool GetAnswerOnConnection);
     void           Disconnect();
 
     const QString  SendText(const QString& message);

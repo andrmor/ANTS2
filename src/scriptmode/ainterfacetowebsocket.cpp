@@ -65,11 +65,18 @@ int AInterfaceToWebSocket::Ping(const QString &Url)
     return ping;
 }
 
-void AInterfaceToWebSocket::Connect(const QString &Url, bool WaitForConfirmationFromServer)
+const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerOnConnection)
 {
-    bool bOK = socket->Connect(Url, WaitForConfirmationFromServer);
-    if (!bOK)
+    bool bOK = socket->Connect(Url, GetAnswerOnConnection);
+    if (bOK)
+    {
+        return socket->GetTextReply();
+    }
+    else
+    {
         abort(socket->GetError());
+        return "";
+    }
 }
 
 void AInterfaceToWebSocket::Disconnect()

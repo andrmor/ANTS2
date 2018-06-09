@@ -16,25 +16,25 @@ public:
     AWebSocketSession();
     ~AWebSocketSession();
 
-    bool  connect(const QString& Url);
-    void  disconnect();
-    int   ping();
-    bool  sendText(const QString& message);
-    bool  sendJson(const QJsonObject& json);
-    bool  sendFile(const QString& fileName);
+    bool  Connect(const QString& Url, bool WaitForAnswer = true);
+    void  Disconnect();
+    int   Ping();
+    bool  SendText(const QString& message);
+    bool  SendJson(const QJsonObject& json);
+    bool  SendFile(const QString& fileName);
 
-    bool  resumeWaitForAnswer();
+    bool  ResumeWaitForAnswer();
 
-    void  clearReply();
+    void  ClearReply();
 
-    const QString&    getError() const {return Error;}
-    const QString&    getTextReply() const {return TextReply;}
-    const QByteArray& getBinaryReply() const {return BinaryReply;}
-    bool              isBinaryReplyEmpty() const {return BinaryReply.isEmpty();}
+    const QString&    GetError() const {return Error;}
+    const QString&    GetTextReply() const {return TextReply;}
+    const QByteArray& GetBinaryReply() const {return BinaryReply;}
+    bool              IsBinaryReplyEmpty() const {return BinaryReply.isEmpty();}
 
-    void  externalAbort();
+    void  ExternalAbort();
 
-    void  setTimeout(int milliseconds) {timeout = milliseconds;}
+    void  SetTimeout(int milliseconds) {timeout = milliseconds;}
 
 public:
     enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected, Aborted};
@@ -59,7 +59,7 @@ private:
     QByteArray BinaryReply;
 
 private:
-    bool confirmSendPossible();
+    bool ConfirmSendPossible();
     bool waitForReply();
 };
 

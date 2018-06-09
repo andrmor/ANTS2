@@ -22,12 +22,13 @@ AWebSocketSession::~AWebSocketSession()
     socket->deleteLater();
 }
 
-bool AWebSocketSession::connect(const QString &Url)
+bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
 {
     fExternalAbort = false;
     Error.clear();
     TextReply.clear();
     BinaryReply.clear();
+    bWaitForAnswer = WaitForAnswer;
 
     if (State != Idle)
     {
@@ -64,18 +65,19 @@ bool AWebSocketSession::connect(const QString &Url)
     }
 }
 
-void AWebSocketSession::disconnect()
+void AWebSocketSession::Disconnect()
 {
     if (State == Connected)
-        socket->close();
-    //status change on actual disconnect! see slot onClientDisconnected()
+        socket->abort();
+
+    State = Idle;
 }
 
-int AWebSocketSession::ping()
+int AWebSocketSession::Ping()
 {
     if (State == Connected)
     {
-        bool bOK = sendText("");
+        bool bOK = SendText("");
         if (bOK)
             return TimeMs;
         else
@@ -88,7 +90,7 @@ int AWebSocketSession::ping()
     }
 }
 
-bool AWebSocketSession::confirmSendPossible()
+bool AWebSocketSession::ConfirmSendPossible()
 {
     Error.clear();
     TextReply.clear();
@@ -124,18 +126,18 @@ bool AWebSocketSession::waitForReply()
     return true;
 }
 
-bool AWebSocketSession::sendText(const QString &message)
+bool AWebSocketSession::SendText(const QString &message)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     socket->sendTextMessage(message);
 
     return waitForReply();
 }
 
-bool AWebSocketSession::sendJson(const QJsonObject &json)
+bool AWebSocketSession::SendJson(const QJsonObject &json)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     QJsonDocument doc(json);
     QByteArray ba = doc.toBinaryData();
@@ -145,9 +147,9 @@ bool AWebSocketSession::sendJson(const QJsonObject &json)
     return waitForReply();
 }
 
-bool AWebSocketSession::sendFile(const QString &fileName)
+bool AWebSocketSession::SendFile(const QString &fileName)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     QFile file(fileName);
     if ( !file.open(QIODevice::ReadOnly) )
@@ -163,19 +165,19 @@ bool AWebSocketSession::sendFile(const QString &fileName)
     return waitForReply();
 }
 
-bool AWebSocketSession::resumeWaitForAnswer()
+bool AWebSocketSession::ResumeWaitForAnswer()
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
     return waitForReply();
 }
 
-void AWebSocketSession::clearReply()
+void AWebSocketSession::ClearReply()
 {
     TextReply.clear();
     BinaryReply.clear();
 }
 
-void AWebSocketSession::externalAbort()
+void AWebSocketSession::ExternalAbort()
 {
     State = Aborted;
     socket->abort();
@@ -184,8 +186,9 @@ void AWebSocketSession::externalAbort()
 
 void AWebSocketSession::onConnect()
 {
-    qDebug() << "Connected to server, checking busy status...";
-    bWaitForAnswer = true;
+    qDebug() << "Connected to server";
+    if (bWaitForAnswer) qDebug() << "Waiting for confirmation";
+    else State = Connected;
 }
 
 void AWebSocketSession::onDisconnect()

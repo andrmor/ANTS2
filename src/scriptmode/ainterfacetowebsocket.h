@@ -5,7 +5,6 @@
 
 #include <QObject>
 #include <QVariant>
-#include <QThread>
 #include <QMap>
 
 class QWebSocketServer;
@@ -26,7 +25,7 @@ public:
     virtual void ForceStop();
 
 public slots:    
-    void           Connect(const QString& Url);
+    void           Connect(const QString& Url, bool WaitForConfirmationFromServer);
     void           Disconnect();
 
     const QString  SendText(const QString& message);
@@ -47,12 +46,6 @@ public slots:
 private:
     AWebSocketStandaloneMessanger* compatibilitySocket;
     AWebSocketSession* socket;
-
-    //QMap<QThread*, AWebSocketSession*> sockets;
-
-private:
-    //void initSocket();
-    //AWebSocketSession* getSocket() const;
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

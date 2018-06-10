@@ -15,6 +15,8 @@ AWebSocketSession::AWebSocketSession() : QObject()
     QObject::connect(socket, &QWebSocket::disconnected, this, &AWebSocketSession::onDisconnect);
     QObject::connect(socket, &QWebSocket::textMessageReceived, this, &AWebSocketSession::onTextMessageReceived);
     QObject::connect(socket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSession::onBinaryMessageReceived);
+
+    //QObject::connect(socket, &QWebSocket::stateChanged, this, &AWebSocketSession::onStateChanged);
 }
 
 AWebSocketSession::~AWebSocketSession()
@@ -241,3 +243,10 @@ void AWebSocketSession::onBinaryMessageReceived(const QByteArray &message)
     BinaryReply = message;
     bWaitForAnswer = false;
 }
+
+/*
+void AWebSocketSession::onStateChanged(QAbstractSocket::SocketState state)
+{
+    qDebug() << "State changed!"<< state;
+}
+*/

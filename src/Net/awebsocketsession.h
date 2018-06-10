@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QByteArray>
+#include <QAbstractSocket>
 
 class QWebSocket;
 class QJsonObject;
@@ -44,6 +45,8 @@ private slots:
     void  onDisconnect();
     void  onTextMessageReceived(const QString& message);
     void  onBinaryMessageReceived(const QByteArray &message);
+
+    //void  onStateChanged(QAbstractSocket::SocketState state);
 
 private:
     QWebSocket* socket = 0;

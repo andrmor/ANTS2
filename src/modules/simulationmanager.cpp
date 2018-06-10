@@ -1718,7 +1718,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     Runner->setup(json, threads);
 
     simThread.start();
-    if (fFromGui) simTimerGuiUpdate.start();
+    simTimerGuiUpdate.start();
 }
 
 void ASimulationManager::StopSimulation()

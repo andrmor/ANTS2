@@ -29,6 +29,8 @@ public:
 
     const QString getWebSocketServerURL();
 
+    void SetExitOnDisconnect(bool flag) {bExitOnDisconnect = flag;}
+
     AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
 public: ARootHttpServer* RootHttpServer = 0;
@@ -42,6 +44,7 @@ public slots:
 
   void onNewGeoManagerCreated(TObject* GeoManager);
   void OnWebSocketTextMessageReceived(QString message);
+  void OnClientDisconnected();
 
 signals:
   void StatusChanged();
@@ -54,7 +57,7 @@ private:
   bool fDebug = true;
   QString JSROOT = "https://root.cern/js/latest/";
   unsigned int RootServerPort = 0;
-
+  bool bExitOnDisconnect = false;
 };
 
 #endif // ANETWORKMODULE_H

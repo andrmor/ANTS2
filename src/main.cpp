@@ -371,6 +371,7 @@ int main(int argc, char *argv[])
             QString ticket = parser.value(ticketOption);
             qDebug() << "Starting server. Port ="<<Port<<"ticket="<<ticket;
             Network.StartWebSocketServer(Port);
+            Network.SetExitOnDisconnect(true);
             qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
             a.exec();
             qDebug() << "Finished!"<<QTime::currentTime().toString();

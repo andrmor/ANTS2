@@ -15,6 +15,7 @@ ANetworkModule::ANetworkModule()
 
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
     QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::clientDisconnected, this, &ANetworkModule::OnClientDisconnected);
 
     QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
 }
@@ -140,6 +141,10 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
                 else WebSocketServer->ReplyWithText("{ \"result\" : false, \"evaluation\" : \"" + res + "\" }");
             }
         }
-        //WebSocketServer->ReplyWithText("UpdateGeometry");
     }
+}
+
+void ANetworkModule::OnClientDisconnected()
+{
+    if (bExitOnDisconnect) exit(0);
 }

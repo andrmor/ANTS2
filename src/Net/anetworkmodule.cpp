@@ -44,7 +44,7 @@ int ANetworkModule::getWebSocketPort() const
     return WebSocketServer->GetPort();
 }
 
-const QString ANetworkModule::getWebSocketURL() const
+const QString ANetworkModule::getWebSocketServerURL() const
 {
   if (!WebSocketServer) return "";
   return WebSocketServer->GetUrl();
@@ -52,7 +52,12 @@ const QString ANetworkModule::getWebSocketURL() const
 
 int ANetworkModule::getRootServerPort() const
 {
-  return RootServerPort;
+    return RootServerPort;
+}
+
+const QString ANetworkModule::getWebSocketServerURL()
+{
+    return WebSocketServer->GetUrl();
 }
 
 bool ANetworkModule::isRootServerRunning() const
@@ -115,7 +120,7 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
     if (line != -1)
     {
        qDebug() << "Syntaxt error!";
-       WebSocketServer->ReplyWithText("Error: Syntax check failed");
+       WebSocketServer->sendError("Syntax check failed - message is not a valid JavaScript");
     }
     else
     {
@@ -124,14 +129,15 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 
         if (ScriptManager->isEvalAborted())
         {
-            WebSocketServer->ReplyWithText("Error: aborted -> " + ScriptManager->getLastError());
+            qDebug() << "Was aborted:" << ScriptManager->getLastError();
+            WebSocketServer->sendError("Aborted -> " + ScriptManager->getLastError());
         }
         else
         {
             if ( !WebSocketServer->isReplied() )
             {
-                if (res == "undefined") WebSocketServer->ReplyWithText("OK");
-                else WebSocketServer->ReplyWithText(res);
+                if (res == "undefined") WebSocketServer->sendOK();
+                else WebSocketServer->ReplyWithText("{ \"result\" : false, \"evaluation\" : \"" + res + "\" }");
             }
         }
         //WebSocketServer->ReplyWithText("UpdateGeometry");

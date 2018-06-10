@@ -20,6 +20,7 @@ public:
     bool IsRunning();
 
     void ReplyWithText(const QString& message);
+    void ReplyWithTextFromObject(const QVariant& object);
     void ReplyWithBinaryFile(const QString& fileName);
     void ReplyWithBinaryObject(const QVariant& object);
     void ReplyWithBinaryObject_asJSON(const QVariant& object);
@@ -35,6 +36,9 @@ public:
     const QString GetUrl() const;
     int GetPort() const;
 
+    void sendOK();
+    void sendError(const QString& error);
+
 public slots:
     void onProgressChanged(int percents);
 
@@ -49,6 +53,7 @@ signals:
     void clientDisconnected();
     void closed();
     void reportToGUI(const QString& text);
+    void requestAbort(const QString reason);
 
 private:
     QWebSocketServer *server = 0;

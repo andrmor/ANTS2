@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
+#include <QThread>
 
 AWebSocketSession::AWebSocketSession() : QObject()
 {
@@ -47,6 +48,7 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
     //waiting for connection
     do
     {
+        QThread::msleep(sleepDuration);
         qApp->processEvents();
         if (timer.elapsed() > timeout || fExternalAbort)
         {
@@ -113,6 +115,7 @@ bool AWebSocketSession::waitForReply()
 
     do
     {
+        QThread::msleep(sleepDuration);
         qApp->processEvents();
         if (timer.elapsed() > timeout || fExternalAbort)
         {

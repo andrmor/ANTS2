@@ -21,11 +21,13 @@ public:
 
     bool isWebSocketServerRunning() const;
     int getWebSocketPort() const;
-    const QString getWebSocketURL() const;
+    const QString getWebSocketServerURL() const;
 
     bool isRootServerRunning() const;
     int getRootServerPort() const;
     const QString getJSROOTstring() const {return JSROOT;}
+
+    const QString getWebSocketServerURL();
 
     AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML

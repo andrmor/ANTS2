@@ -36,6 +36,7 @@ public:
     void  ExternalAbort();
 
     void  SetTimeout(int milliseconds) {timeout = milliseconds;}
+    void  SetIntervalBetweenEventProcessing(int milliseconds) {sleepDuration = milliseconds;}
 
 public:
     enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected, Aborted};
@@ -51,6 +52,7 @@ private slots:
 private:
     QWebSocket* socket = 0;
     int timeout = 3000;
+    ulong sleepDuration = 50;
 
     ServerState State = Idle;
     QString Error;

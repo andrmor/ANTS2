@@ -92,7 +92,7 @@ void GlobalSettingsWindowClass::updateNetGui()
     {
       int port = GlobSet->NetModule->getWebSocketPort();
       ui->leWebSocketPort->setText(QString::number(port));
-      ui->leWebSocketURL->setText(GlobSet->NetModule->getWebSocketURL());
+      ui->leWebSocketURL->setText(GlobSet->NetModule->getWebSocketServerURL());
     }
 
   bool fRootServerRunning = GlobSet->NetModule->isRootServerRunning();

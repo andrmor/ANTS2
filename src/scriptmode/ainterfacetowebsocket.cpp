@@ -23,10 +23,8 @@ AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
 {
-    //standaloneMessenger->deleteLater();
-    delete compatibilitySocket;
-    //socket->deleteLater();
-    delete socket;
+    compatibilitySocket->deleteLater();
+    socket->deleteLater();
 }
 
 void AInterfaceToWebSocket::ForceStop()

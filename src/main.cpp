@@ -1,5 +1,4 @@
 //ANTS2
-
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "areconstructionmanager.h"
@@ -22,6 +21,15 @@
 #include "amessage.h"
 #include "ainterfacetodeposcript.h"
 #include "ainterfacetophotonscript.h"
+#include "ainterfacetomultithread.h"
+#include "ainterfacetowebsocket.h"
+#include "awebserverinterface.h"
+#ifdef ANTS_FLANN
+  #include "ainterfacetoknnscript.h"
+#endif
+#ifdef ANTS_FANN
+  #include "ainterfacetoannscript.h"
+#endif
 
 // SIM
 #ifdef SIM
@@ -47,6 +55,7 @@
 #include <QDir>
 #include <QLoggingCategory>
 #include <QtMessageHandler>
+#include <QCommandLineParser>
 
 //Root
 #include "TApplication.h"
@@ -225,40 +234,60 @@ int main(int argc, char *argv[])
 #else // GUI
     if (argc > 1)
 #endif // GUI
-    {    
+    {
         //direct script mode
-        QString fileName = QString(argv[1]);
-        //QString fileName = "/home/vova/Work/GAMMA/ANTS2V3/myscript.js";
-        if (!QFile(fileName).exists())
-        {
-            qDebug() << "File not found:"<<fileName;
-            return -101;
-        }
-        QString script;
-        bool ok = LoadTextFromFile(fileName, script);
-        if (!ok)
-        {
-            qDebug() << "Failed to read script from file:"<<fileName;
-            return -102;
-        }
+        QCommandLineParser parser;
+        parser.setApplicationDescription("ANTS2");
+        parser.addHelpOption();
+        parser.addPositionalArgument("scriptFile", QCoreApplication::translate("main", "File with the script to run"));
+        parser.addPositionalArgument("outputFile", QCoreApplication::translate("main", "File with the console output"));
+        parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
+        parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
 
-        QString path = QFileInfo(fileName).absolutePath();
-        QDir::setCurrent(path);
+        QCommandLineOption batchOption(QStringList() << "b" << "batch",
+                QCoreApplication::translate("main", "Run ANTS2 in batch mode (deprecated)."));
+        parser.addOption(batchOption);
 
-        if (argc == 4 && (QString(argv[2])=="-o" || QString(argv[2])=="--output") )
+        QCommandLineOption serverOption(QStringList() << "s" << "server",
+                QCoreApplication::translate("main", "Run ANTS2 in server mode."));
+        parser.addOption(serverOption);
+
+        QCommandLineOption scriptOption(QStringList() << "f" << "file",
+                QCoreApplication::translate("main", "Run script from <scriptFile>."),
+                QCoreApplication::translate("main", "scriptFile"));
+        parser.addOption(scriptOption);
+
+        QCommandLineOption outputOption(QStringList() << "o" << "output",
+                QCoreApplication::translate("main", "Redirect console to <outputFile>."),
+                QCoreApplication::translate("main", "outputFile"));
+        parser.addOption(outputOption);
+
+        QCommandLineOption portOption(QStringList() << "p" << "port",
+                QCoreApplication::translate("main", "Sets server port."),
+                QCoreApplication::translate("main", "port"));
+        parser.addOption(portOption);
+
+        QCommandLineOption ticketOption(QStringList() << "t" << "ticket",
+                QCoreApplication::translate("main", "Sets server ticket."),
+                QCoreApplication::translate("main", "ticket"));
+        parser.addOption(ticketOption);
+
+        parser.process(a);
+
+        if ( parser.isSet(outputOption) )
         {
-            QString LogFileName = QString(argv[3]);
+            QString LogFileName = parser.value(outputOption);
+            qDebug() << "Redirecting console output to file: " << LogFileName;
             AQtMessageRedirector rd; //redirecting qDebug, qWarning etc to file
-            if (!rd.activate(LogFileName))
+            if ( !rd.activate(LogFileName) )
             {
                 qDebug() << "Failed to redirect output to file:"<<LogFileName;
-                return -103;
+                return 103;
             }
         }
 
-        qDebug() << "Script from file:"<<fileName;
-
-        AJavaScriptManager SM(Detector.RandGen);        
+        AJavaScriptManager SM(Detector.RandGen);
+        Network.SetScriptManager(&SM);
         SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.SetInterfaceObject(conf, "config");
@@ -270,9 +299,11 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(dat, "events");
 #ifdef SIM
         InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
+        QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
         SM.SetInterfaceObject(sim, "sim");
 #endif
         InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
+        QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         SM.SetInterfaceObject(rec, "rec");
         AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
         SM.SetInterfaceObject(lrf, "lrf");
@@ -290,14 +321,65 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(photon, "photon");
         AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
         SM.SetInterfaceObject(depo, "depo");
+        AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
+        SM.SetInterfaceObject(threads, "threads");
+        AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+        SM.SetInterfaceObject(web, "web");
+        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer);
+        SM.SetInterfaceObject(server, "server");
+#ifdef ANTS_FLANN
+        AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);
+        SM.SetInterfaceObject(knn, "knn");
+#endif
+#ifdef ANTS_FANN
+        AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+        SM.SetInterfaceObject(ann, "ann");
+#endif
 
-        int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
-        if (errorLineNum > -1)
+        if ( parser.isSet(scriptOption) )
+        {
+            QString fileName = parser.value(scriptOption);
+            qDebug() << "Running script from file:"<< fileName;
+            if (!QFile(fileName).exists())
+            {
+                qDebug() << "File not found:"<<fileName;
+                return 101;
+            }
+
+            QString script;
+            bool ok = LoadTextFromFile(fileName, script);
+            if (!ok)
+            {
+                qDebug() << "Failed to read script from file:"<<fileName;
+                return 102;
+            }
+
+            QString path = QFileInfo(fileName).absolutePath();
+            QDir::setCurrent(path);
+
+            int errorLineNum = SM.FindSyntaxError(script); //qDebug is already inside
+            if (errorLineNum > -1)
+                return 0;
+
+            QString result = SM.Evaluate(script);
+            qDebug() << "Script evaluation result:"<<result;
             return 0;
-
-        QString result = SM.Evaluate(script);
-        qDebug() << "Script evaluation result:"<<result;        
-        return 0;
+        }
+        else if ( parser.isSet(serverOption) )
+        {
+            quint16 Port = parser.value(portOption).toUShort();
+            QString ticket = parser.value(ticketOption);
+            qDebug() << "Starting server. Port ="<<Port<<"ticket="<<ticket;
+            Network.StartWebSocketServer(Port);
+            qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
+            a.exec();
+            qDebug() << "Finished!"<<QTime::currentTime().toString();
+        }
+        else
+        {
+            qDebug() << "Unknown ANTS2 mode! Try ants2 -h";
+            return 110;
+        }
     }
 
     Network.StopRootHttpServer();

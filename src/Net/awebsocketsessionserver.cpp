@@ -24,8 +24,9 @@ bool AWebSocketSessionServer::StartListen(quint16 port)
 {
     //if ( !server->listen(QHostAddress::Any, port) )
     if ( !server->listen(QHostAddress::AnyIPv4, port) )
+    //if ( !server->listen(QHostAddress::LocalHost, port) )
     {
-        qCritical("WebSocket server was unable to starrt listen!");
+        qCritical("WebSocket server was unable to start listen!");
         return false;
     }
 

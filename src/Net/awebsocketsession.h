@@ -52,6 +52,7 @@ private slots:
 private:
     QWebSocket* socket = 0;
     int timeout = 3000;
+    int timeoutForDisconnect = 3000;
     ulong sleepDuration = 50;
 
     ServerState State = Idle;

@@ -33,7 +33,7 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
     BinaryReply.clear();
     bWaitForAnswer = WaitForAnswer;
 
-    if (State != Idle)
+    if ( !(State == Idle || State == Aborted) )
     {
         Error = "Cannot connect: not idle";
         return false;
@@ -48,17 +48,22 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
     //waiting for connection
     do
     {
-        QThread::msleep(sleepDuration);
-        qApp->processEvents();
-        if (timer.elapsed() > timeout || fExternalAbort)
+        Error.clear();
+        do
         {
-            socket->abort();
-            State = Idle;
-            Error = "Connection timeout!";
-            return false;
+            QThread::msleep(sleepDuration);
+            qApp->processEvents();
+            if (timer.elapsed() > timeout || fExternalAbort)
+            {
+                socket->abort();
+                State = Idle;
+                Error = "Connection timeout!";
+                return false;
+            }
         }
+        while (State == Connecting);
     }
-    while (State == Connecting);
+    while (State == ConnectionFailed);  //on server start-up, it refuses connections -> wait for fully operational
 
     if (Error.isEmpty()) return true;
     else
@@ -71,8 +76,21 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
 
 void AWebSocketSession::Disconnect()
 {
-    if (State == Connected)
-        socket->abort();
+    QElapsedTimer timer;
+    timer.start();
+
+    socket->close();
+    while (socket->state() != QAbstractSocket::UnconnectedState)
+    {
+        if (fExternalAbort) break;
+        QThread::msleep(10);
+        qApp->processEvents();
+        if (timer.elapsed() > timeoutForDisconnect )
+        {
+            socket->abort();
+            break;
+        }
+    }
 
     State = Idle;
 }

@@ -241,7 +241,7 @@ void AWebSocketSessionServer::onSocketDisconnected()
     //if (client) client->deleteLater();
     if (client)
     {
-        client->abort();
+        client->close();
         delete client;
     }
     client = 0;

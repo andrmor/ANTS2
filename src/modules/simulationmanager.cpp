@@ -1715,6 +1715,12 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     fSuccess = false;
     fStartedFromGui = fFromGui;
 
+    if (MaxThreads > 0 && threads > MaxThreads)
+    {
+        qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
+        threads = MaxThreads;
+    }
+
     Runner->setup(json, threads);
 
     simThread.start();

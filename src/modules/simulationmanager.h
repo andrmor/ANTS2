@@ -62,6 +62,8 @@ public:
     bool fStartedFromGui;
     int LastSimType; // -1 - undefined, 0 - PointSources, 1 - ParticleSources
 
+    int MaxThreads = -1;
+
     //info to report back
     APhoton LastPhoton;
     QVector< QBitArray > SiPMpixels;

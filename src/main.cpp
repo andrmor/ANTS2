@@ -243,6 +243,7 @@ int main(int argc, char *argv[])
         parser.addPositionalArgument("outputFile", QCoreApplication::translate("main", "File with the console output"));
         parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
         parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
+        parser.addPositionalArgument("maxThreads", QCoreApplication::translate("main", "Maximum number of threads in sim and rec"));
 
         QCommandLineOption batchOption(QStringList() << "b" << "batch",
                 QCoreApplication::translate("main", "Run ANTS2 in batch mode (deprecated)."));
@@ -271,6 +272,11 @@ int main(int argc, char *argv[])
                 QCoreApplication::translate("main", "Sets server ticket."),
                 QCoreApplication::translate("main", "ticket"));
         parser.addOption(ticketOption);
+
+        QCommandLineOption maxThreadsOption(QStringList() << "m" << "maxThreads",
+                QCoreApplication::translate("main", "Sets max sim and rec threads."),
+                QCoreApplication::translate("main", "maxThreads"));
+        parser.addOption(maxThreadsOption);
 
         parser.process(a);
 
@@ -367,6 +373,12 @@ int main(int argc, char *argv[])
         }
         else if ( parser.isSet(serverOption) )
         {
+            if ( parser.isSet(maxThreadsOption) )
+            {
+                int max = parser.value(maxThreadsOption).toInt();
+                SimulationManager.MaxThreads = max;
+                ReconstructionManager.setMaxThread(max);
+            }
             quint16 Port = parser.value(portOption).toUShort();
             QString ticket = parser.value(ticketOption);
             qDebug() << "Starting server. Port ="<<Port<<"ticket="<<ticket;

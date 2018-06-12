@@ -85,6 +85,13 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
     //qDebug() << "  Sensor groups configured:"<< RecSet.size();
   NumThreads = numThreads;
   if (NumThreads<1) NumThreads = 1;
+
+  if (MaxThreads > 0 && NumThreads > MaxThreads)
+  {
+      qDebug() << "Reconstruction manager: Enforcing max threads to " << MaxThreads;
+      NumThreads = MaxThreads;
+  }
+
     //qDebug() << "  Using threads:"<<NumThreads;
   EventsDataHub->resetReconstructionData(RecSet.size()); //does some clear too, keeps EventId
 
@@ -612,6 +619,13 @@ void AReconstructionManager::filterEvents(QJsonObject &json, int numThreads)
 
   NumThreads = numThreads;
   if (NumThreads<1) NumThreads = 1;
+
+  if (MaxThreads > 0 && NumThreads > MaxThreads)
+  {
+      qDebug() << "Reconstruction manager: Enforcing max threads to " << MaxThreads;
+      NumThreads = MaxThreads;
+  }
+
   //qDebug() << "Filter settings ok, Number of threads:" << NumThreads;
   assureReconstructionDataContainersExist();  //important - can be the first call after new data were simulated/loaded
   //qDebug() << "Rec data containers synchronized";

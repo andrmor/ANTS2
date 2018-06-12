@@ -42,13 +42,13 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
     QElapsedTimer timer;
     timer.start();
 
-    State = Connecting;
-    socket->open( QUrl(Url) );
-
     //waiting for connection
     do
     {
+        State = Connecting;
         Error.clear();
+        socket->open( QUrl(Url) );
+
         do
         {
             QThread::msleep(sleepDuration);
@@ -223,7 +223,7 @@ void AWebSocketSession::onDisconnect()
     }
     else if (bWaitForAnswer)
     {
-        qDebug() << "Abnormal disconnect detected";
+        qDebug() << "Disconnected while attempting to establish connection";
         if (State == Connecting)
             Error = "Server disconnected before confirming connection";
         else

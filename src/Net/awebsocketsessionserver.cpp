@@ -234,12 +234,16 @@ void AWebSocketSessionServer::onBinaryMessageReceived(const QByteArray &message)
 
 void AWebSocketSessionServer::onSocketDisconnected()
 {
-    if (bDebug) qDebug() << "Client disconnected!";
+    if (bDebug) qDebug() << "Client disconnected";
 
     emit reportToGUI("<-- Client disconnected");
 
     //if (client) client->deleteLater();
-    if (client) delete client;
+    if (client)
+    {
+        client->abort();
+        delete client;
+    }
     client = 0;
 
     emit clientDisconnected();
@@ -255,6 +259,11 @@ void AWebSocketSessionServer::sendError(const QString &error)
 {
     if (client && client->state() == QAbstractSocket::ConnectedState)
         client->sendTextMessage("{ \"result\" : false, \"error\" : \"" + error + "\" }");
+}
+
+void AWebSocketSessionServer::DisconnectClient()
+{
+    onSocketDisconnected();
 }
 
 const QString AWebSocketSessionServer::GetUrl() const

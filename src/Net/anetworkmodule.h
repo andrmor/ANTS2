@@ -2,6 +2,7 @@
 #define ANETWORKMODULE_H
 
 #include <QObject>
+#include <QTimer>;
 
 //class AWebSocketServer;
 class AWebSocketSessionServer;
@@ -29,7 +30,8 @@ public:
 
     const QString getWebSocketServerURL();
 
-    void SetExitOnDisconnect(bool flag) {bExitOnDisconnect = flag;}
+    void SetExitOnDisconnect(bool flag) {bSingleConnectionMode = flag;} //important: do it before start listen!
+    void SetTicket(const QString& ticket);
 
     AWebSocketSessionServer* WebSocketServer = 0;
 #ifdef USE_ROOT_HTML
@@ -52,12 +54,20 @@ signals:
   void ReportTextToGUI(const QString text);
   void ProgressReport(int percents); //retranslator to AWebSocketSessionServer
 
+private slots:
+  void onIdleTimerTriggered();
+
 private:
   AJavaScriptManager* ScriptManager = 0;
   bool fDebug = true;
   QString JSROOT = "https://root.cern/js/latest/";
   unsigned int RootServerPort = 0;
-  bool bExitOnDisconnect = false;
+
+  QString Ticket;
+  bool bTicketChecked = true;
+  bool bSingleConnectionMode = false;
+  int  SelfDestructOnIdle = 10000; //milliseconds
+  QTimer IdleTimer;
 };
 
 #endif // ANETWORKMODULE_H

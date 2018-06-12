@@ -39,6 +39,8 @@ public:
     void sendOK();
     void sendError(const QString& error);
 
+    void DisconnectClient();
+
 public slots:
     void onProgressChanged(int percents);
 

@@ -370,8 +370,9 @@ int main(int argc, char *argv[])
             quint16 Port = parser.value(portOption).toUShort();
             QString ticket = parser.value(ticketOption);
             qDebug() << "Starting server. Port ="<<Port<<"ticket="<<ticket;
-            Network.StartWebSocketServer(Port);
+            if (!ticket.isEmpty()) Network.SetTicket(ticket);
             Network.SetExitOnDisconnect(true);
+            Network.StartWebSocketServer(Port);            
             qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
             a.exec();
             qDebug() << "Finished!"<<QTime::currentTime().toString();

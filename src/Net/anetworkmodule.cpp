@@ -128,23 +128,27 @@ void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
 #endif
 }
 
+#include <QJsonObject>
+#include <QJsonDocument>
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
     if (bSingleConnectionMode) IdleTimer.stop();
 
-    if (message.startsWith("#"))
+    if (message.startsWith("__"))
     {
-        qDebug() << "Command received:"<<message;
-        QStringList sl = message.split('#', QString::SkipEmptyParts);
+        qDebug() << "WebSocket server received system message:"<<message;
+        message.remove(0, 2);
+        QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
+        QJsonObject json = doc.object();
 
-        if (sl.size() >= 2 && sl.first().simplified() == "ticket")
+        if (json.contains("ticket"))
         {
-            QString receivedTicket = sl.at(1);
-            qDebug() << "Received ticket" << receivedTicket;
+            QString receivedTicket = json["ticket"].toString();
+            qDebug() << "  Ticket presented" << receivedTicket;
             if ( receivedTicket == Ticket || Ticket.isEmpty() )
             {
                 bTicketChecked = true;
-                qDebug() << "  Ticket is valid";
+                qDebug() << "  Ticket is valid!";
                 WebSocketServer->sendOK();
             }
             else
@@ -152,23 +156,26 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
                 qDebug() << "  Invalid ticket!";
                 WebSocketServer->sendError("Invalid ticket");
                 WebSocketServer->DisconnectClient();
+                return;
             }
         }
         else
         {
-            qDebug() << "Unknown command";
-            WebSocketServer->sendError("Invalid command");
+            qDebug() << "  System message not recognized!";
+            WebSocketServer->sendError("Unknown system message");
             WebSocketServer->DisconnectClient();
+            return;
         }
     }
     else
     {
-        qDebug() << "Message received by websocket server";
+        qDebug() << "Websocket server: Message (script) received";
         if (!bTicketChecked)
         {
-            qDebug() << "  Ticket is required, but was not validated, disconnecting";
+            qDebug() << "  Ticket is required, but has not been validated, disconnecting";
             WebSocketServer->sendError("Ticket was not validated");
             WebSocketServer->DisconnectClient();
+            return;
         }
 
         qDebug() << "  Evaluating as JavaScript";

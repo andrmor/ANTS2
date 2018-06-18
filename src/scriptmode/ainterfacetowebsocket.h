@@ -28,7 +28,10 @@ public slots:
     const QString  Connect(const QString& Url, bool GetAnswerOnConnection);
     void           Disconnect();
 
+    const QString  OpenSession(const QString& IP, int port, int threads);
+
     const QString  SendText(const QString& message);
+    const QString  SendTicket(const QString& ticket);
     const QString  SendObject(const QVariant& object);
     const QString  SendFile(const QString& fileName);
 

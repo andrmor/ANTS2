@@ -73,13 +73,73 @@ const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerO
     else
     {
         abort(socket->GetError());
-        return "";
+        return "error";
     }
 }
 
 void AInterfaceToWebSocket::Disconnect()
 {
     socket->Disconnect();
+}
+
+const QJsonObject strToObject(const QString& s)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+    return doc.object();
+}
+
+const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads)
+{
+    QString url = "ws://" + IP + ':' + QString::number(port);
+    QString reply = Connect(url, true);
+    if (reply == "error") return "";
+    qDebug() << "Dispatcher reply onConnect: " << reply;
+    if ( !strToObject(reply)["result"].toBool() )
+    {
+        abort("Failed to connect to the ants2 dispatcher");
+        return "";
+    }
+
+    QJsonObject cn;
+    cn["command"] = "new";
+    cn["threads"] = threads;
+    QJsonDocument doc(cn);
+    QString strCn(doc.toJson(QJsonDocument::Compact));
+    reply = SendText( strCn ); //   SendText( '{ "command":"new", "threads":4 }' )
+    qDebug() << reply;
+    Disconnect();
+
+    QJsonObject ro = strToObject(reply);
+    if ( !ro["result"].toBool())
+    {
+        abort("Dispatcher rejected request for the new server: " + reply);
+        return "";
+    }
+
+    port = ro["port"].toInt();
+    QString ticket = ro["ticket"].toString();
+    qDebug() << "Dispatcher allocated port: " << port << "  and ticket: "<< ticket;
+    qDebug() << "\nConnecting to ants2 server...";
+
+    url = "ws://" + IP + ':' + QString::number(port);
+    reply = Connect(url, true);
+    qDebug() << "Server reply onConnect: " << reply;
+    if ( !strToObject(reply)["result"].toBool())
+    {
+        abort("Failed to connect to the ants2 server");
+        return "";
+    }
+
+    reply = SendTicket( ticket );
+    qDebug() << "ants2 server reply message: " << reply;
+    if ( !strToObject(reply)["result"].toBool() )
+    {
+        abort("Server rejected the ticket!");
+        return "";
+    }
+    qDebug() << "   Connected!";
+
+    return QString("Connected to ants2 server with ticket ") + ticket;
 }
 
 const QString AInterfaceToWebSocket::SendText(const QString &message)
@@ -92,6 +152,16 @@ const QString AInterfaceToWebSocket::SendText(const QString &message)
         abort(socket->GetError());
         return 0;
     }
+}
+
+const QString AInterfaceToWebSocket::SendTicket(const QString &ticket)
+{
+    QString m = "__";
+    m += "{\"ticket\" : \"";
+    m += ticket;
+    m += "\"}";
+
+    return SendText(m);
 }
 
 const QString AInterfaceToWebSocket::SendObject(const QVariant &object)

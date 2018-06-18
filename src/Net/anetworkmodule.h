@@ -2,7 +2,7 @@
 #define ANETWORKMODULE_H
 
 #include <QObject>
-#include <QTimer>;
+#include <QTimer>
 
 //class AWebSocketServer;
 class AWebSocketSessionServer;

@@ -201,7 +201,7 @@ void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
                 if ( !WebSocketServer->isReplied() )
                 {
                     if (res == "undefined") WebSocketServer->sendOK();
-                    else WebSocketServer->ReplyWithText("{ \"result\" : false, \"evaluation\" : \"" + res + "\" }");
+                    else WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : \"" + res + "\" }");
                 }
             }
         }

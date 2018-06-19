@@ -47,8 +47,10 @@ public slots:
     int            Ping(const QString& Url);
 
 private:
-    AWebSocketStandaloneMessanger* compatibilitySocket;
-    AWebSocketSession* socket;
+    AWebSocketStandaloneMessanger* compatibilitySocket = 0;
+    AWebSocketSession* socket = 0;
+
+    int TimeOut = 5000; //milliseconds
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

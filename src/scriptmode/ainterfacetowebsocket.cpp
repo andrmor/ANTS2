@@ -12,13 +12,13 @@
 AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface()
 {
     compatibilitySocket = new AWebSocketStandaloneMessanger();
-    socket = new AWebSocketSession();
+    //socket = new AWebSocketSession();
 }
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 {
     compatibilitySocket = new AWebSocketStandaloneMessanger();
-    socket = new AWebSocketSession();
+    //socket = new AWebSocketSession();
 }
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
@@ -35,8 +35,12 @@ void AInterfaceToWebSocket::ForceStop()
 
 void AInterfaceToWebSocket::SetTimeout(int milliseconds)
 {
+    TimeOut = milliseconds;
+
+    if (!socket) return;
+    else socket->SetTimeout(milliseconds);
+
     compatibilitySocket->setTimeout(milliseconds);
-    socket->SetTimeout(milliseconds);
 }
 
 const QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
@@ -65,6 +69,12 @@ int AInterfaceToWebSocket::Ping(const QString &Url)
 
 const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerOnConnection)
 {
+    if (!socket)
+    {
+        socket = new AWebSocketSession();
+        socket->SetTimeout(TimeOut);
+    }
+
     bool bOK = socket->Connect(Url, GetAnswerOnConnection);
     if (bOK)
     {
@@ -79,7 +89,7 @@ const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerO
 
 void AInterfaceToWebSocket::Disconnect()
 {
-    socket->Disconnect();
+    if (socket) socket->Disconnect();
 }
 
 const QJsonObject strToObject(const QString& s)
@@ -144,6 +154,12 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
 
 const QString AInterfaceToWebSocket::SendText(const QString &message)
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
     bool bOK = socket->SendText(message);
     if (bOK)
         return socket->GetTextReply();
@@ -166,6 +182,12 @@ const QString AInterfaceToWebSocket::SendTicket(const QString &ticket)
 
 const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
     if (object.type() != QMetaType::QVariantMap)
     {
         abort("Argument type of SendObject() method should be object!");
@@ -186,6 +208,12 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
 
 const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
     bool bOK = socket->SendFile(fileName);
     if (bOK)
         return socket->GetTextReply();
@@ -198,6 +226,12 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
 
 const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
     bool bOK = socket->ResumeWaitForAnswer();
     if (bOK)
         return socket->GetTextReply();

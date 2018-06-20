@@ -297,6 +297,7 @@ private:
 
     //wavelength and time options
     bool fDirectGeneration;
+    bool fAutomaticWaveTime = false;
     double iWaveIndex;
     double DecayTime;
     int iMatIndex;

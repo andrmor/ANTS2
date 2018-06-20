@@ -1302,10 +1302,10 @@ void MainWindow::on_cbWaveResolved_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-    ui->fWaveTests->setEnabled(checked);
-    ui->fWaveOptions->setEnabled(checked);
-    ui->fPointSource_Wave->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
+//    ui->fWaveTests->setEnabled(checked);
+//    ui->fWaveOptions->setEnabled(checked);
+//    ui->fPointSource_Wave->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
 
     const int itype = ui->sbPMtype->value();
     const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
@@ -1317,8 +1317,8 @@ void MainWindow::on_cbTimeResolved_toggled(bool checked)
     ui->fTime->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(0, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(0, QIcon());
-    ui->fPointSource_Time->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
+//    ui->fPointSource_Time->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
 }
 
 void MainWindow::on_pbPMtypeShowCurrent_clicked()
@@ -5158,4 +5158,10 @@ void MainWindow::on_actionServer_settings_triggered()
 {
     GlobSetWindow->SetTab(5);
     GlobSetWindow->show();
+}
+
+void MainWindow::on_cobDirectlyOrFromMaterial_currentIndexChanged(int index)
+{
+    ui->frMatDirSelection->setVisible(index != 2);
+    ui->swPointSourceWaveTime->setCurrentIndex( (index == 0 ? 0 : 1) );
 }

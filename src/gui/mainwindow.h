@@ -634,6 +634,8 @@ private slots:
 
     void on_actionServer_settings_triggered();
 
+    void on_cobDirectlyOrFromMaterial_currentIndexChanged(int index);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

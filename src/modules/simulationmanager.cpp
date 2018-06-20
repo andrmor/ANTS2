@@ -564,7 +564,10 @@ bool PointSourceSimulator::setup(QJsonObject &json)
 
     //reading wavelength/decay options
     QJsonObject wdjson = js["WaveTimeOptions"].toObject();
-    fDirectGeneration = !(bool)wdjson["Direct_Material"].toInt(); //0-direct, 1-from material
+    int matMode = wdjson["Direct_Material"].toInt(); //0-direct, 1-from material, 2 - automatic
+    fDirectGeneration = ( matMode == 0 );
+    fAutomaticWaveTime = ( matMode == 2);
+
     PhotonOnStart.waveIndex = wdjson["WaveIndex"].toInt();
     //PhotonOnStart.wavelength = simSettings->WaveFrom + simSettings->WaveStep*PhotonOnStart.waveIndex;
     if (!simSettings->fWaveResolved) PhotonOnStart.waveIndex = -1;
@@ -1008,16 +1011,25 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         //else it is already set
 
         //configure  wavelength index and emission time
-        if (fDirectGeneration)
+        PhotonOnStart.time = 0;
+        if (fDirectGeneration) //directly given properties
         {
-            //directly given properties
             //Wavelength and index are already set
             if (simSettings->fTimeResolved) PhotonOnStart.time = RandGen->Exp(DecayTime);
         }
-        else
+        else if (fAutomaticWaveTime) //material according to to emission position
         {
-            //material defined properties
-            PhotonOnStart.time = 0;
+            TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+            TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
+            if (!node) PhotonOnStart.waveIndex = -1;
+            else
+            {
+                int thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
+                photonGenerator->GenerateWaveTime(&PhotonOnStart, thisMatIndex);
+            }
+        }
+        else  //specific material
+        {
             photonGenerator->GenerateWaveTime(&PhotonOnStart, iMatIndex);
         }
         if (scs->ScintType == 2) PhotonOnStart.r[2] = z1 + (z2-z1)*RandGen->Rndm();

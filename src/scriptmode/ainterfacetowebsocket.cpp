@@ -9,16 +9,12 @@
 #include <QJsonDocument>
 #include <QFile>
 
-AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface()
-{
-    compatibilitySocket = new AWebSocketStandaloneMessanger();
-    //socket = new AWebSocketSession();
-}
+AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface() {}
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 {
-    compatibilitySocket = new AWebSocketStandaloneMessanger();
-    //socket = new AWebSocketSession();
+    compatibilitySocket = 0;
+    socket = 0;
 }
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
@@ -29,34 +25,43 @@ AInterfaceToWebSocket::~AInterfaceToWebSocket()
 
 void AInterfaceToWebSocket::ForceStop()
 {
-    socket->ExternalAbort();
-    compatibilitySocket->externalAbort();
+    if (socket) socket->ExternalAbort();
+    if (compatibilitySocket) compatibilitySocket->externalAbort();
 }
 
 void AInterfaceToWebSocket::SetTimeout(int milliseconds)
 {
     TimeOut = milliseconds;
 
-    if (!socket) return;
-    else socket->SetTimeout(milliseconds);
-
-    compatibilitySocket->setTimeout(milliseconds);
+    if (socket) socket->SetTimeout(milliseconds);
+    if (compatibilitySocket) compatibilitySocket->setTimeout(milliseconds);
 }
 
 const QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
 {
-   bool bOK = compatibilitySocket->sendTextMessage(Url, message, WaitForAnswer);
+    if (!compatibilitySocket)
+    {
+        compatibilitySocket = new AWebSocketStandaloneMessanger();
+        compatibilitySocket->setTimeout(TimeOut);
+    }
 
-   if (!bOK)
-   {
-       abort(compatibilitySocket->getError());
-       return "";
-   }
-   return compatibilitySocket->getReceivedMessage();
+    bool bOK = compatibilitySocket->sendTextMessage(Url, message, WaitForAnswer);
+
+    if (!bOK)
+    {
+        abort(compatibilitySocket->getError());
+        return "";
+    }
+    return compatibilitySocket->getReceivedMessage();
 }
 
 int AInterfaceToWebSocket::Ping(const QString &Url)
 {
+    if (!compatibilitySocket)
+    {
+        compatibilitySocket = new AWebSocketStandaloneMessanger();
+        compatibilitySocket->setTimeout(TimeOut);
+    }
     int ping = compatibilitySocket->ping(Url);
 
     if (ping < 0)
@@ -244,6 +249,11 @@ const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
 
 const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
     const QByteArray& ba = socket->GetBinaryReply();
     QJsonDocument doc = QJsonDocument::fromBinaryData(ba);
     QJsonObject json = doc.object();
@@ -254,6 +264,11 @@ const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
 
 bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
     const QByteArray& ba = socket->GetBinaryReply();
     qDebug() << "ByteArray to save size:"<<ba.size();
 

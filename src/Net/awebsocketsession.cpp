@@ -117,11 +117,12 @@ bool AWebSocketSession::ConfirmSendPossible()
     Error.clear();
     TextReply.clear();
 
-    if (State != Connected)
+    if (State != Connected  ||  socket->state() != QAbstractSocket::ConnectedState)
     {
         Error = "Not connected to server";
         return false;
     }
+
     return true;
 }
 

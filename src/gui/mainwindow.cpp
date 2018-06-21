@@ -5218,21 +5218,63 @@ void MainWindow::on_pbSSO_Show_clicked()
     SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
     if (!ov) return;
 
+    QVector<double> Fr;
+    for (int i=0; i<ov->Wave.size(); i++)
+        Fr << (1.0 - ov->ProbLoss.at(i) - ov->ProbRef.at(i) - ov->ProbDiff.at(i));
+
     TMultiGraph* mg = new TMultiGraph();
-    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "Loss", 2);
+    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "", 2, 20, 1, 2);
     mg->Add(gLoss, "LP");
-    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "Reflection", 4);
+    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "", 4, 21, 1, 4);
     mg->Add(gRef, "LP");
-    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "Scatter", 7);
+    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "", 7, 22, 1, 7);
     mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(ov->Wave, Fr, "Fresnel", "Wavelength, nm", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
 
     mg->SetMinimum(0);
     GraphWindow->Draw(mg, "apl");
-
-
+    mg->GetXaxis()->SetTitle("Wavelength, nm");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
 }
 
 void MainWindow::on_pbSSO_Binned_clicked()
 {
+    if (!ui->cbWaveResolved->isChecked())
+    {
+        message("Activate wavelength-resolved simulation option!", this);
+        return;
+    }
 
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->initializeWaveResolved(WaveFrom, WaveStep, WaveNodes);
+
+    QVector<double> waveIndex;
+    for (int i=0; i<WaveNodes; i++) waveIndex << i;
+
+    QVector<double> Fr;
+    for (int i=0; i<waveIndex.size(); i++)
+        Fr << (1.0 - ov->ProbLossBinned.at(i) - ov->ProbRefBinned.at(i) - ov->ProbDiffBinned.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(waveIndex, ov->ProbLossBinned, "Loss", "Wave index", "Loss", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(waveIndex, ov->ProbRefBinned, "Specular reflection", "Wave index", "Reflection", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(waveIndex, ov->ProbDiffBinned, "Diffuse scattering", "Wave index", "Scatter", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(waveIndex, Fr, "Fresnel", "Wave index", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wave index");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
 }

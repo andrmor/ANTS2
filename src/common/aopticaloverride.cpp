@@ -643,12 +643,20 @@ void SpectralBasicOpticalOverride::initializeWaveResolved(double waveFrom, doubl
     effectiveWaveIndex = (effectiveWavelength - waveFrom) / waveStep;
     if (effectiveWaveIndex < 0) effectiveWaveIndex = 0;
     else if (effectiveWaveIndex >= waveNodes ) effectiveWaveIndex = waveNodes - 1;
-    qDebug() << "Eff wave"<<effectiveWavelength << "assigned index:"<<effectiveWaveIndex;
+    //qDebug() << "Eff wave"<<effectiveWavelength << "assigned index:"<<effectiveWaveIndex;
 }
 
 const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
 {
     QVector< QVector<double>* > vec;
     vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;
-    return LoadDoubleVectorsFromFile(fileName, vec);
+    QString err = LoadDoubleVectorsFromFile(fileName, vec);
+    if (!err.isEmpty()) return err;
+
+    for (int i=0; i<Wave.size(); i++)
+    {
+        double sum = ProbLoss.at(i) + ProbRef.at(i) + ProbDiff.at(i);
+        if (sum > 1.0) return QString("Sum of probabilities is larger than 1.0 for wavelength of ") + QString::number(Wave.at(i)) + " nm";
+    }
+    return "";
 }

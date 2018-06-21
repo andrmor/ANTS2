@@ -3,6 +3,7 @@
 #include "aphoton.h"
 #include "acommonfunctions.h"
 #include "ajsontools.h"
+#include "afiletools.h"
 #include "asimulationstatistics.h"
 
 #ifdef SIM
@@ -50,14 +51,10 @@ void AOpticalOverride::RandomDir(TRandom2 *RandGen, APhoton *Photon)
 
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, double probLoss, double probRef, double probDiff, int scatterModel)
     : AOpticalOverride(MatCollection, MatFrom, MatTo),
-      probLoss(probLoss), probRef(probRef), probDiff(probDiff), scatterModel(scatterModel)
-{
-}
+      probLoss(probLoss), probRef(probRef), probDiff(probDiff), scatterModel(scatterModel) {}
 
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo)
-{
-}
+    : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
 
 AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
 {
@@ -238,7 +235,8 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
 {
    if (model == "Simplistic_model")
      return new BasicOpticalOverride(MatCollection, MatFrom, MatTo);
-#ifdef SIM
+   if (model == "SimplisticSpectral_model")
+     return new SpectralBasicOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V1")
      return new PhScatClaudioModelV1(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V2")
@@ -251,7 +249,6 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
      return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
    else if (model == "DielectricToMetal")
      return new ScatterOnMetal(MatCollection, MatFrom, MatTo);
-#endif
    else if (model=="FS_NP" || model=="Neves_model")
      return new FSNPOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model=="SurfaceWLS")
@@ -551,4 +548,107 @@ bool AWaveshifterOverride::readFromJson(QJsonObject &json)
     readTwoQVectorsFromJArray(arEm, EmissionSpectrum_lambda, EmissionSpectrum);
 
     return true;
+}
+
+// ---------------- SpectralSimplistic -------------------
+SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
+    : BasicOpticalOverride(MatCollection, MatFrom, MatTo) {}
+
+SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ScatterModel, double EffWave)
+    : BasicOpticalOverride(MatCollection, MatFrom, MatTo, 0,0,0, ScatterModel), effectiveWavelength(EffWave) {}
+
+AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+{
+    int waveIndex = Photon->waveIndex;
+    if (waveIndex == -1) waveIndex = effectiveWaveIndex;
+
+    probLoss = ProbLossBinned.at(waveIndex);
+    probDiff = ProbDiffBinned.at(waveIndex);
+    probRef  = ProbRefBinned.at(waveIndex);
+
+    return BasicOpticalOverride::calculate(RandGen, Photon, NormalVector);
+}
+
+void SpectralBasicOpticalOverride::printConfiguration(int iWave)
+{
+    qDebug() << "-------Configuration:-------";
+    qDebug() << "Wavelength:"<<Wave;
+    qDebug() << "Absorption fraction:"<<ProbLoss;
+    qDebug() << "Specular fraction:"<<ProbRef;
+    qDebug() << "Scatter fraction:"<<ProbDiff;
+    qDebug() << "Scatter model (4Pi/LambBack/LambForward):"<<scatterModel;
+    qDebug() << "----------------------------";
+}
+
+QString SpectralBasicOpticalOverride::getReportLine()
+{
+    QString s = "to " + (*MatCollection)[MatTo]->name;
+    s += "->";
+
+    if (Wave.isEmpty()) return s + " To be defined"; //not defined - shown during configuration phase only
+
+    s += " Spectral data with " + QString::number(Wave.size()) + " points";
+    return s;
+}
+
+void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json)
+{
+    AOpticalOverride::writeToJson(json);
+
+    json["ScatMode"] = scatterModel;
+    json["EffWavelength"] = effectiveWavelength;
+
+    if (Wave.size() != ProbLoss.size() || Wave.size() != ProbRef.size() || Wave.size() != ProbDiff.size())
+    {
+        qWarning() << "Mismatch in data size for SpectralBasicOverride! skipping data!";
+        return;
+    }
+    QJsonArray sp;
+    for (int i=0; i<Wave.size(); i++)
+    {
+        QJsonArray ar;
+        ar << Wave.at(i) << ProbLoss.at(i) << ProbRef.at(i) << ProbDiff.at(i);
+        sp << ar;
+    }
+    json["Data"] = sp;
+}
+
+bool SpectralBasicOpticalOverride::readFromJson(QJsonObject &json)
+{
+    if (!AOpticalOverride::readFromJson(json)) return false;
+
+    parseJson(json, "ScatMode", scatterModel);
+    parseJson(json, "EffWavelength", effectiveWavelength);
+
+    QJsonArray sp;
+    parseJson(json, "Data", sp);
+    for (int i=0; i<sp.size(); i++)
+    {
+        QJsonArray ar = sp.at(i).toArray();
+        Wave     << ar.at(0).toDouble();
+        ProbLoss << ar.at(1).toDouble();
+        ProbRef  << ar.at(2).toDouble();
+        ProbDiff << ar.at(3).toDouble();
+    }
+
+    return true;
+}
+
+void SpectralBasicOpticalOverride::initializeWaveResolved(double waveFrom, double waveStep, int waveNodes)
+{
+    ConvertToStandardWavelengthes(&Wave, &ProbLoss, waveFrom, waveStep, waveNodes, &ProbLossBinned);
+    ConvertToStandardWavelengthes(&Wave, &ProbRef, waveFrom, waveStep, waveNodes, &ProbRefBinned);
+    ConvertToStandardWavelengthes(&Wave, &ProbDiff, waveFrom, waveStep, waveNodes, &ProbDiffBinned);
+
+    effectiveWaveIndex = (effectiveWavelength - waveFrom) / waveStep;
+    if (effectiveWaveIndex < 0) effectiveWaveIndex = 0;
+    else if (effectiveWaveIndex >= waveNodes ) effectiveWaveIndex = waveNodes - 1;
+    qDebug() << "Eff wave"<<effectiveWavelength << "assigned index:"<<effectiveWaveIndex;
+}
+
+const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
+{
+    QVector< QVector<double>* > vec;
+    vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;
+    return LoadDoubleVectorsFromFile(fileName, vec);
 }

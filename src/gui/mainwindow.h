@@ -636,6 +636,12 @@ private slots:
 
     void on_cobDirectlyOrFromMaterial_currentIndexChanged(int index);
 
+    void on_pbSSO_Load_clicked();
+
+    void on_pbSSO_Show_clicked();
+
+    void on_pbSSO_Binned_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

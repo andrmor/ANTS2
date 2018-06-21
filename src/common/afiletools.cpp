@@ -148,7 +148,7 @@ int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<doub
   return 0;
 }
 
-QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double> *> V)
+const QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double> *> V)
 {
     if (FileName.isEmpty()) return("Empty file name");
 
@@ -156,7 +156,7 @@ QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double
     if(!file.open(QIODevice::ReadOnly | QFile::Text)) return QString("Could not open: ")+FileName;
 
     const int Vsize = V.size();
-    if (Vsize==0) return ("Received no vectors to load");
+    if (Vsize==0) return "Received no vectors to load";
     for (QVector<double>* v : V) v->clear();
 
     QTextStream in(&file);

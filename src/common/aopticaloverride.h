@@ -65,7 +65,6 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
-  //-- parameters --
   double probLoss; //probability of absorption
   double probRef;  //probability of specular reflection
   double probDiff; //probability of scattering
@@ -125,6 +124,37 @@ public:
   double WaveFrom;
   double WaveStep;
   int WaveNodes;
+};
+
+class SpectralBasicOpticalOverride : public BasicOpticalOverride
+{
+public:
+  SpectralBasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
+  SpectralBasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, int ScatterModel, double EffWave);
+  virtual ~SpectralBasicOpticalOverride() {}
+
+  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
+
+  virtual void printConfiguration(int iWave) override;
+  virtual QString getType() const override {return "SimplisticSpectral_model";}
+  virtual QString getReportLine() override;
+
+  // save/load config is not used for this type!
+  virtual void writeToJson(QJsonObject &json) override;
+  virtual bool readFromJson(QJsonObject &json) override;
+
+  virtual void initializeWaveResolved(double waveFrom, double waveStep, int waveNodes) override;
+  const QString loadData(const QString& fileName);
+
+  QVector<double> Wave;
+  QVector<double> ProbLoss; //probability of absorption
+  QVector<double> ProbLossBinned; //probability of absorption
+  QVector<double> ProbRef;  //probability of specular reflection
+  QVector<double> ProbRefBinned;  //probability of specular reflection
+  QVector<double> ProbDiff; //probability of scattering
+  QVector<double> ProbDiffBinned; //probability of scattering
+  double effectiveWavelength; //if waveIndex of photon is -1, index correspinding to this this wavelength will be used
+  double effectiveWaveIndex;
 };
 
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);

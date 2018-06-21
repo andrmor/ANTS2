@@ -304,6 +304,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     if (!fShowGeom) GeometryWindow->hide();
 
     ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back
+    ui->cobSSO_ScatterModel->setCurrentIndex(1); //default to Lambertian back
     //MainWindow::on_pbRefreshOverrides_clicked();  //already in load detector
     MainWindow::updateCOBsWithPMtypeNames();
 

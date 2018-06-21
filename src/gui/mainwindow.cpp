@@ -808,6 +808,18 @@ void MainWindow::on_pbOverride_clicked()
           ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
           break;
         }
+      case 6:  // Simplistic spectral
+        {
+          ov = new SpectralBasicOpticalOverride(Detector->MpCollection, From, To, ui->cobSSO_ScatterModel->currentIndex(), ui->ledSSO_EffWave->text().toDouble());
+          ui->pbSSO_Show->setEnabled(false);
+          ui->pbSSO_Binned->setEnabled(false);
+          break;
+        }
+      default:
+        {
+            qDebug() << "Not existent override model!";
+            break;
+        }
       }
 
 //    if (ov)
@@ -893,6 +905,15 @@ void MainWindow::on_pbRefreshOverrides_clicked()
             AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
             ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
             ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
+          }
+        else if (model == "SimplisticSpectral_model")
+          {
+            ui->cobOpticalOverrideModel->setCurrentIndex(6);
+            SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
+            ui->pbSSO_Show->setEnabled(!ov->Wave.isEmpty());
+            ui->pbSSO_Binned->setEnabled(!ov->Wave.isEmpty());
+            ui->cobSSO_ScatterModel->setCurrentIndex(ov->scatterModel);
+            ui->ledSSO_EffWave->setText( QString::number(ov->effectiveWavelength) );
           }
         else
           {
@@ -5164,4 +5185,19 @@ void MainWindow::on_cobDirectlyOrFromMaterial_currentIndexChanged(int index)
 {
     ui->frMatDirSelection->setVisible(index != 2);
     ui->swPointSourceWaveTime->setCurrentIndex( (index == 0 ? 0 : 1) );
+}
+
+void MainWindow::on_pbSSO_Load_clicked()
+{
+
+}
+
+void MainWindow::on_pbSSO_Show_clicked()
+{
+
+}
+
+void MainWindow::on_pbSSO_Binned_clicked()
+{
+
 }

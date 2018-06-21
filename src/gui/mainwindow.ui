@@ -5421,7 +5421,7 @@ materials</string>
           <x>265</x>
           <y>115</y>
           <width>269</width>
-          <height>72</height>
+          <height>73</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -5434,7 +5434,7 @@ materials</string>
          <enum>QFrame::Plain</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="page_12">
          <widget class="QLabel" name="label_45">
@@ -5963,6 +5963,150 @@ back in 2Pi:</string>
           </property>
          </widget>
         </widget>
+        <widget class="QWidget" name="page_26">
+         <widget class="QLabel" name="label_208">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>29</y>
+            <width>171</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>When wave not defined, assume</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbSSO_Show">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>4</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbSSO_Load">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>4</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Format: Lines of Wavelength, ProbLoss, ProbReflection,ProbDiffuse</string>
+          </property>
+          <property name="text">
+           <string>Load</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="cobSSO_ScatterModel">
+          <property name="geometry">
+           <rect>
+            <x>7</x>
+            <y>46</y>
+            <width>82</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Isotropic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, back</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, forw</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="label_238">
+          <property name="geometry">
+           <rect>
+            <x>5</x>
+            <y>29</y>
+            <width>81</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Diffuse type:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="ledSSO_EffWave">
+          <property name="geometry">
+           <rect>
+            <x>149</x>
+            <y>46</y>
+            <width>50</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>500</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_241">
+          <property name="geometry">
+           <rect>
+            <x>204</x>
+            <y>49</y>
+            <width>29</width>
+            <height>13</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>nm</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbSSO_Binned">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>180</x>
+            <y>4</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Binned</string>
+          </property>
+         </widget>
+         <zorder>label_208</zorder>
+         <zorder>pbSSO_Show</zorder>
+         <zorder>pbSSO_Load</zorder>
+         <zorder>label_238</zorder>
+         <zorder>ledSSO_EffWave</zorder>
+         <zorder>label_241</zorder>
+         <zorder>pbSSO_Binned</zorder>
+         <zorder>cobSSO_ScatterModel</zorder>
+        </widget>
        </widget>
        <widget class="Line" name="line_63">
         <property name="geometry">
@@ -6017,6 +6161,11 @@ back in 2Pi:</string>
         <item>
          <property name="text">
           <string>WLS</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SimpSpectral</string>
          </property>
         </item>
        </widget>
@@ -16521,8 +16670,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>518</y>
+     <x>226</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16685,8 +16834,8 @@ on stack</string>
      <y>273</y>
     </hint>
     <hint type="destinationlabel">
-     <x>254</x>
-     <y>281</y>
+     <x>262</x>
+     <y>307</y>
     </hint>
    </hints>
   </connection>
@@ -16713,8 +16862,8 @@ on stack</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>412</y>
+     <x>146</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>148</x>
@@ -17065,8 +17214,8 @@ on stack</string>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>288</x>
-     <y>422</y>
+     <x>286</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
      <x>475</x>
@@ -17081,12 +17230,12 @@ on stack</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>422</y>
+     <x>152</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
-     <x>488</x>
-     <y>459</y>
+     <x>486</x>
+     <y>437</y>
     </hint>
    </hints>
   </connection>
@@ -17097,8 +17246,8 @@ on stack</string>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>412</y>
+     <x>146</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -17129,8 +17278,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>288</x>
-     <y>422</y>
+     <x>286</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -17145,8 +17294,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>422</y>
+     <x>152</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
      <x>334</x>
@@ -17161,8 +17310,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>148</x>
-     <y>412</y>
+     <x>146</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>339</x>
@@ -17177,8 +17326,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>418</x>
-     <y>412</y>
+     <x>416</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>367</x>
@@ -17449,8 +17598,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -17465,8 +17614,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -17481,8 +17630,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>421</y>
+     <x>443</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17497,8 +17646,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -17513,8 +17662,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -17529,8 +17678,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17545,8 +17694,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>360</y>
+     <x>165</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17577,8 +17726,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>420</y>
+     <x>301</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -19225,8 +19374,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>255</x>
-     <y>422</y>
+     <x>259</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -19241,8 +19390,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>130</x>
-     <y>498</y>
+     <x>128</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>252</x>
@@ -19257,8 +19406,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>220</x>
-     <y>498</y>
+     <x>218</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>251</x>
@@ -19273,8 +19422,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>310</x>
-     <y>498</y>
+     <x>308</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>
@@ -19289,8 +19438,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>113</x>
-     <y>422</y>
+     <x>117</x>
+     <y>400</y>
     </hint>
     <hint type="destinationlabel">
      <x>220</x>
@@ -19305,8 +19454,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>232</x>
-     <y>454</y>
+     <x>230</x>
+     <y>432</y>
     </hint>
     <hint type="destinationlabel">
      <x>251</x>
@@ -19353,8 +19502,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>118</x>
-     <y>412</y>
+     <x>122</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>216</x>
@@ -19369,8 +19518,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>478</x>
-     <y>500</y>
+     <x>476</x>
+     <y>478</y>
     </hint>
     <hint type="destinationlabel">
      <x>319</x>
@@ -19497,8 +19646,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -19529,8 +19678,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>450</y>
+     <x>251</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19545,8 +19694,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>436</y>
+     <x>235</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -19561,8 +19710,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>474</y>
+     <x>235</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -19593,8 +19742,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>132</x>
-     <y>360</y>
+     <x>138</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -19609,8 +19758,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>195</x>
-     <y>420</y>
+     <x>201</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -19625,8 +19774,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>457</y>
+     <x>382</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -19641,8 +19790,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>420</y>
+     <x>241</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -20041,8 +20190,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>473</y>
+     <x>242</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -20057,8 +20206,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>360</y>
+     <x>94</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -20073,12 +20222,44 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>250</x>
-     <y>452</y>
+     <x>256</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
      <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobSSO_ScatterModel</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbOverride</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>332</x>
+     <y>253</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>124</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledSSO_EffWave</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbOverride</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>441</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>336</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>

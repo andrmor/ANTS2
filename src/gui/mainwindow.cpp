@@ -5189,11 +5189,46 @@ void MainWindow::on_cobDirectlyOrFromMaterial_currentIndexChanged(int index)
 
 void MainWindow::on_pbSSO_Load_clicked()
 {
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
 
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spectral data (Wave,Loss,Ref,Scatter)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    const QString err = ov->loadData(fileName);
+    if (err.isEmpty())
+    {
+        ReconstructDetector();
+        on_pbRefreshOverrides_clicked();
+    }
+    else message(err, this);
 }
 
+
+#include "TMultiGraph.h"
 void MainWindow::on_pbSSO_Show_clicked()
 {
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "Loss", 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "Reflection", 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "Scatter", 7);
+    mg->Add(gDiff, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+
 
 }
 

@@ -168,7 +168,7 @@ const QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<
 
             bool fOK = true;
             QVector<double> tmp;
-            if (fields.size() > Vsize )
+            if (fields.size() >= Vsize )
               {
                 for (int i=0; i<Vsize; i++)
                 {

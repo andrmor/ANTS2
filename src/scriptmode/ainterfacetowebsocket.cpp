@@ -9,6 +9,12 @@
 #include <QJsonDocument>
 #include <QFile>
 
+const QJsonObject strToObject(const QString& s)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+    return doc.object();
+}
+
 AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface() {}
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
@@ -97,12 +103,6 @@ void AInterfaceToWebSocket::Disconnect()
     if (socket) socket->Disconnect();
 }
 
-const QJsonObject strToObject(const QString& s)
-{
-    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
-    return doc.object();
-}
-
 const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);
@@ -157,6 +157,68 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
     return QString("Connected to ants2 server with ticket ") + ticket;
 }
 
+bool AInterfaceToWebSocket::SendConfig(QVariant config)
+{
+    QString reply = SendObject(config);
+    QJsonObject obj = strToObject(reply);
+    if ( !obj.contains("result") || !obj["result"].toBool() )
+    {
+        abort("Failed to send config");
+        return false;
+    }
+
+    QString Script = "var c = server.GetBufferAsObject();"
+                     "var ok = config.SetConfig(c);"
+                     "if (!ok) core.abort(\"Failed to set config\");";
+    reply = SendText(Script);
+    obj = strToObject(reply);
+    if ( !obj.contains("result") || !obj["result"].toBool() )
+    {
+        abort("Failed to set config at the remote server");
+        return false;
+    }
+    return true;
+}
+
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& SimTreeFileName, bool ReportProgress)
+{
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return false;
+    }
+
+    QString Script;
+    if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(true);";
+    Script += "sim.RunPhotonSources(" + QString::number(NumThreads) + ");";
+    Script += "var fileName = \"" + SimTreeFileName + "\";";
+    Script += "var ok = sim.SaveAsTree(fileName);";
+    Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
+    if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(false);";
+    Script += "server.SendFile(fileName);";
+    qDebug() << Script;
+
+    //execute the remote script
+    QString reply = SendText(Script);
+    if (reply.isEmpty()) return false; //this is on local abort, e.g. timeout
+    QJsonObject obj = strToObject(reply);
+    if (obj.contains("error"))
+    {
+        abort(obj["error"].toString());
+        return false;
+    }
+    while ( !obj.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"file\" }"
+    {
+        if (ReportProgress) emit showTextOnMessageWindow(reply);
+        reply = ResumeWaitForAnswer();
+        if (reply.isEmpty()) return false; //this is on local abort, e.g. timeout
+        obj = strToObject(reply);
+    }
+
+    if (ReportProgress) showTextOnMessageWindow("Finished!");
+    SaveBinaryReplyToFile(SimTreeFileName);
+}
+
 const QString AInterfaceToWebSocket::SendText(const QString &message)
 {
     if (!socket)
@@ -171,7 +233,7 @@ const QString AInterfaceToWebSocket::SendText(const QString &message)
     else
     {
         abort(socket->GetError());
-        return 0;
+        return "";
     }
 }
 
@@ -243,7 +305,7 @@ const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
     else
     {
         abort(socket->GetError());
-        return 0;
+        return "";
     }
 }
 

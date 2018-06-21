@@ -29,6 +29,8 @@ public slots:
     void           Disconnect();
 
     const QString  OpenSession(const QString& IP, int port, int threads);
+    bool           SendConfig(QVariant config);
+    bool           RemoteSimulatePhotonSources(int NumThreads, const QString& SimTreeFileName, bool ReportProgress);
 
     const QString  SendText(const QString& message);
     const QString  SendTicket(const QString& ticket);
@@ -42,9 +44,14 @@ public slots:
 
     void           SetTimeout(int milliseconds);
 
+
+
     //compatibility mode -> standalone - no persistent connection
     const QString  SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer = false);
     int            Ping(const QString& Url);
+
+signals:
+    void showTextOnMessageWindow(const QString text);
 
 private:
     AWebSocketStandaloneMessanger* compatibilitySocket = 0;

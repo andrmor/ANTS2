@@ -37,6 +37,7 @@ public:
 
     void  SetTimeout(int milliseconds) {timeout = milliseconds;}
     void  SetIntervalBetweenEventProcessing(int milliseconds) {sleepDuration = milliseconds;}
+    quint16 GetPeerPort() {return peerPort;} //used as part of the unique names for remote files
 
 public:
     enum  ServerState {Idle = 0, Connecting, ConnectionFailed, Connected, Aborted};
@@ -63,6 +64,8 @@ private:
 
     QString TextReply;
     QByteArray BinaryReply;
+
+    quint16 peerPort = 0;
 
 private:
     bool ConfirmSendPossible();

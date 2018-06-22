@@ -559,6 +559,7 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
   int TotalMsPassed = 0;
   while (threads.size()>0)
     {
+      QThread::usleep(100);
       for (int i=threads.size()-1; i>-1; i--)
         {
           //finished thread?

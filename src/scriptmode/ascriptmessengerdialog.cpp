@@ -57,6 +57,7 @@ void AScriptMessengerDialog::Clear()
 
 void AScriptMessengerDialog::Append(const QString &text)
 {
+    if (!D->isVisible()) D->show();
     e->appendHtml(text);
 }
 

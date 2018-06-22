@@ -577,7 +577,8 @@ bool InterfaceToSim::RunPhotonSources(int NumThreads)
 
     do
       {
-        qApp->processEvents();        
+        QThread::usleep(100);
+        qApp->processEvents();
       }
     while (!SimulationManager->fFinished);
     return SimulationManager->fSuccess;
@@ -594,7 +595,8 @@ bool InterfaceToSim::RunParticleSources(int NumThreads)
 
     do
       {
-        qApp->processEvents();        
+        QThread::usleep(100);
+        qApp->processEvents();
       }
     while (!SimulationManager->fFinished);
     return SimulationManager->fSuccess;

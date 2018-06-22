@@ -91,6 +91,8 @@ void MainWindow::createPythonScriptWindow()
   PythonScriptWindow->SetInterfaceObject(txt, "msg");
 
   AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+  QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
+  QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
   PythonScriptWindow->SetInterfaceObject(web, "web");
 
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);

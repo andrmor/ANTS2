@@ -180,13 +180,15 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& RemoteSimTreeFileName, const QString& LocalSimTreeFileName, bool ReportProgress)
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ReportProgress)
 {
     if (!socket)
     {
         abort("Web socket was not connected");
         return false;
     }
+
+    const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(socket->GetPeerPort()) + ".root";
 
     QString Script;
     if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(true);";
@@ -215,8 +217,14 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
         obj = strToObject(reply);
     }
 
-    if (ReportProgress) showTextOnMessageWindow("Finished!");
-    SaveBinaryReplyToFile(LocalSimTreeFileName);
+    if (ReportProgress) emit showTextOnMessageWindow("Evaluation on remote server finished");
+    bool bOK = SaveBinaryReplyToFile(LocalSimTreeFileName);
+    if (!bOK)
+    {
+        abort("Cannot save tree in file " + LocalSimTreeFileName);
+        return false;
+    }
+    emit showTextOnMessageWindow("Sim results saved in " + LocalSimTreeFileName);
     return true;
 }
 

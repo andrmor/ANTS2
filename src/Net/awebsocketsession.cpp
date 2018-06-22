@@ -65,7 +65,11 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
     }
     while (State == ConnectionFailed);  //on server start-up, it refuses connections -> wait for fully operational
 
-    if (Error.isEmpty()) return true;
+    if (Error.isEmpty())
+    {
+        peerPort = socket->peerPort();
+        return true;
+    }
     else
     {
         socket->close();

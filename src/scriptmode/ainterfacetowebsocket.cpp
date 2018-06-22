@@ -180,7 +180,7 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& SimTreeFileName, bool ReportProgress)
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& RemoteSimTreeFileName, const QString& LocalSimTreeFileName, bool ReportProgress)
 {
     if (!socket)
     {
@@ -191,7 +191,7 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
     QString Script;
     if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(true);";
     Script += "sim.RunPhotonSources(" + QString::number(NumThreads) + ");";
-    Script += "var fileName = \"" + SimTreeFileName + "\";";
+    Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
     if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(false);";
@@ -216,7 +216,8 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
     }
 
     if (ReportProgress) showTextOnMessageWindow("Finished!");
-    SaveBinaryReplyToFile(SimTreeFileName);
+    SaveBinaryReplyToFile(LocalSimTreeFileName);
+    return true;
 }
 
 const QString AInterfaceToWebSocket::SendText(const QString &message)

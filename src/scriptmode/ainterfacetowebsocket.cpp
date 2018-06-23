@@ -267,7 +267,7 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
     if (object.type() != QMetaType::QVariantMap)
     {
         abort("Argument type of SendObject() method should be object!");
-        return false;
+        return "";
     }
     QVariantMap vm = object.toMap();
     QJsonObject js = QJsonObject::fromVariantMap(vm);
@@ -278,7 +278,7 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
     else
     {
         abort(socket->GetError());
-        return 0;
+        return "";
     }
 }
 
@@ -296,7 +296,7 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
     else
     {
         abort(socket->GetError());
-        return 0;
+        return "";
     }
 }
 

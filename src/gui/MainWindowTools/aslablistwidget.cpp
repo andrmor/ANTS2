@@ -1,5 +1,6 @@
 #include "aslablistwidget.h"
-#include "slab.h"
+#include "aslab.h"
+#include "slabdelegate.h"
 #include "asandwich.h"
 #include "arootlineconfigurator.h"
 #include "ageoobject.h"

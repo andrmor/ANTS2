@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <utility>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QFileInfo>
 
 static const double Pi = 3.14159265359;

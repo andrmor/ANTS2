@@ -5,7 +5,7 @@
 #include <utility>
 
 #include <QDebug>
-#include <QApplication> //for qApp->processEvents();
+#include <QtWidgets/QApplication> //for qApp->processEvents();
 
 #include "alrf.h"
 #include "alrftypemanager.h"

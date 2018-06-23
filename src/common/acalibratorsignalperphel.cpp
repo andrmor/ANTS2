@@ -8,7 +8,7 @@
 #include "apositionenergyrecords.h"
 
 #include <QDebug>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 #include "TH1D.h"
 #include "TFitResultPtr.h"

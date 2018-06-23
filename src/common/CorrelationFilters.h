@@ -1,7 +1,7 @@
 #ifndef CORRELATIONFILTERS_H
 #define CORRELATIONFILTERS_H
 
-#include <QPolygonF>
+#include <QtGui/QPolygonF>
 #include <QString>
 #include <QJsonObject>
 #include <QJsonArray>

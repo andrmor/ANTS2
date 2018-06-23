@@ -1,5 +1,7 @@
 #include "ajavascriptmanager.h"
+#ifdef GUI
 #include "ainterfacetomessagewindow.h"
+#endif
 #include "coreinterfaces.h"
 #include "ascriptinterfacefactory.h"
 #include "ainterfacetomultithread.h"
@@ -7,7 +9,7 @@
 #include <QScriptEngine>
 #include <QDebug>
 #include <QScriptValueIterator>
-#include <QDialog>
+//#include <QDialog>
 #include <QElapsedTimer>
 
 AJavaScriptManager::AJavaScriptManager(TRandom2* RandGen) :
@@ -25,13 +27,14 @@ AJavaScriptManager::~AJavaScriptManager()
         engine->deleteLater();
         engine = 0;
     }
-
+#ifdef GUI
     for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
     {
         delete d;
         d = 0;
     }
     ThreadMessangerDialogs.clear();
+#endif
 }
 
 QString AJavaScriptManager::Evaluate(const QString& Script)
@@ -109,6 +112,7 @@ QScriptValue AJavaScriptManager::getMinimalizationFunction()
     return engine->globalObject().property(MiniFunctionName);
 }
 
+#ifdef GUI
 void AJavaScriptManager::hideAllMessengerWidgets()
 {
     for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
@@ -143,6 +147,24 @@ void AJavaScriptManager::closeAllMsgDialogs()
     for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
         if (d) d->Hide();
 }
+
+void AJavaScriptManager::hideMsgDialogs()
+{
+    AScriptManager::hideMsgDialogs();
+
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d) d->HideWidget();
+}
+
+void AJavaScriptManager::restoreMsgDialogs()
+{
+    AScriptManager::restoreMsgDialogs();
+
+    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
+        if (d)
+            if (d->IsShown()) d->RestoreWidget();
+}
+#endif
 
 void AJavaScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
@@ -197,22 +219,6 @@ int AJavaScriptManager::FindSyntaxError(const QString& script)
       }
 }
 
-void AJavaScriptManager::hideMsgDialogs()
-{
-    AScriptManager::hideMsgDialogs();
-
-    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
-        if (d) d->HideWidget();
-}
-
-void AJavaScriptManager::restoreMsgDialogs()
-{
-    AScriptManager::restoreMsgDialogs();
-
-    for (AScriptMessengerDialog* d : ThreadMessangerDialogs)
-        if (d)
-            if (d->IsShown()) d->RestoreWidget();
-}
 
 // ------------ multithreading -------------
 //https://stackoverflow.com/questions/5020459/deep-copy-of-a-qscriptvalue-as-global-object
@@ -431,6 +437,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
                 //qDebug() << "--this is mini";
                 mini->SetScriptManager(sm);
             }
+#ifdef GUI
             AInterfaceToMessageWindow* msg = dynamic_cast<AInterfaceToMessageWindow*>(copy);
             if (msg)
             {
@@ -456,7 +463,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
                     msg->Move(50 + threadNumber*50, 50 + threadNumber*30);
                 }
             }
-
+#endif
             // connecting the request for abort script
             AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
             if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
@@ -470,8 +477,10 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
     }
 
     //connect web and msg
-    AInterfaceToMessageWindow* msg = 0;
     AInterfaceToWebSocket* web = 0;
+
+#ifdef GUI
+    AInterfaceToMessageWindow* msg = 0;
     for (QObject* io : sm->interfaces)
     {
         AInterfaceToMessageWindow* ob = dynamic_cast<AInterfaceToMessageWindow*>(io);
@@ -482,12 +491,21 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
             if (ob) web = ob;
         }
     }
+#else
+    for (QObject* io : sm->interfaces)
+    {
+        AInterfaceToWebSocket* ob = dynamic_cast<AInterfaceToWebSocket*>(io);
+        if (ob) web = ob;
+    }
+#endif
+#ifdef GUI
     qDebug() << "-----------"<<msg << web;
     if (msg && web)
     {
         QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Append);
         QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Clear);
     }
+#endif
 
     QScriptValue global = engine->globalObject();
     ScriptCopier SC(*sm->engine);
@@ -516,10 +534,10 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
             //  qDebug() << "    Skipped: already have this property!";
           }
     }
-
+#ifdef GUI
     //connect core.print() to the ScriptManager of the GUI thread, as queued!
     connect(sm, &AJavaScriptManager::showMessage, this, &AJavaScriptManager::showMessage, Qt::QueuedConnection);
-
+#endif
     //  qDebug() << "  Scriptmanager created!"<<sm;
     return sm;
 }

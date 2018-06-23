@@ -9,7 +9,7 @@
 #include "apreprocessingsettings.h"
 #include "apmgroupsmanager.h"
 #include "asandwich.h"
-#include "slab.h"
+#include "aslab.h"
 #include "ageoobject.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
@@ -24,7 +24,7 @@
 #include <QFile>
 #include <QDir>
 #include <QPluginLoader> //To load lrf plugins
-#include <QApplication> //To get application path to load plugins
+#include <QtWidgets/QApplication> //To get application path to load plugins
 
 #include "TGeoManager.h"
 #include "TRandom2.h"

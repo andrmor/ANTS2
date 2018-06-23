@@ -3,8 +3,11 @@
 
 #include <QStringList>
 #include <QFile>
-#include <QMessageBox>
 #include <QDebug>
+
+#ifdef GUI
+#include <QMessageBox>
+#endif
 
 int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x)
 {
@@ -195,9 +198,11 @@ int SaveDoubleVectorsToFile(QString FileName, const QVector<double>* x, int coun
   if(!outFile.isOpen())
     {
       qDebug() << "- Error, unable to open" << FileName << "for output";
+#ifdef GUI
       QMessageBox mb;
       mb.setText("Unable to open file " +FileName+ " for writing!");
       mb.exec();
+#endif
       return 1;
     }
   QTextStream outStream(&outFile);
@@ -216,9 +221,11 @@ int SaveDoubleVectorsToFile(QString FileName, const QVector<double> *x, const QV
   if(!outFile.isOpen())
     {
       qDebug() << "- Error, unable to open" << FileName << "for output";
+ #ifdef GUI
       QMessageBox mb;
       mb.setText("Unable to open file " +FileName+ " for writing!");
       mb.exec();
+ #endif
       return 1;
     }
   QTextStream outStream(&outFile);
@@ -237,9 +244,11 @@ int SaveDoubleVectorsToFile(QString FileName, const QVector<double> *x, const QV
   if(!outFile.isOpen())
     {
       qDebug() << "- Error, unable to open" << FileName << "for output";
+ #ifdef GUI
       QMessageBox mb;
       mb.setText("Unable to open file " +FileName+ " for writing!");
       mb.exec();
+ #endif
       return 1;
     }
   QTextStream outStream(&outFile);
@@ -343,9 +352,11 @@ int SaveIntVectorsToFile(QString FileName, const QVector<int> *x, int count)
   if(!outFile.isOpen())
     {
       qDebug() << "- Error, unable to open" << FileName << "for output";
+ #ifdef GUI
       QMessageBox mb;
       mb.setText("Unable to open file " +FileName+ " for writing!");
       mb.exec();
+ #endif
       return 1;
     }
   QTextStream outStream(&outFile);
@@ -364,9 +375,11 @@ int SaveIntVectorsToFile(QString FileName, const QVector<int> *x, const QVector<
   if(!outFile.isOpen())
     {
       qDebug() << "- Error, unable to open" << FileName << "for output";
+ #ifdef GUI
       QMessageBox mb;
       mb.setText("Unable to open file " +FileName+ " for writing!");
       mb.exec();
+ #endif
       return 1;
     }
   QTextStream outStream(&outFile);

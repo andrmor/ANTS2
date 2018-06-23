@@ -2,7 +2,7 @@
 
 #include <QWebSocket>
 #include <QElapsedTimer>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>

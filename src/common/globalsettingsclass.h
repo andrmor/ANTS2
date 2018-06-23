@@ -69,7 +69,7 @@ public:
 
   //Network
   int DefaultWebSocketPort = 1234;
-  bool fRunWebSocketServerOnStart = false;
+  QString DefaultWebSocketIP = "127.0.0.1";
   int DefaultRootServerPort = 8080;
   bool fRunRootServerOnStart = false;
   QString ExternalJSROOT;

@@ -75,9 +75,9 @@ bool ANetworkModule::isRootServerRunning() const
   return false;
 }
 
-void ANetworkModule::StartWebSocketServer(quint16 port)
+void ANetworkModule::StartWebSocketServer(QHostAddress ip, quint16 port)
 {    
-    WebSocketServer->StartListen(port);
+    WebSocketServer->StartListen(ip, port);
     emit StatusChanged();
 
     if (bSingleConnectionMode)

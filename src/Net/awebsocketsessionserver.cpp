@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QNetworkInterface>
 #include <QFile>
+#include <QHostAddress>
 
 AWebSocketSessionServer::AWebSocketSessionServer(QObject *parent) :
     QObject(parent),
@@ -20,13 +21,12 @@ AWebSocketSessionServer::~AWebSocketSessionServer()
     server->close();
 }
 
-bool AWebSocketSessionServer::StartListen(quint16 port)
+bool AWebSocketSessionServer::StartListen(QHostAddress ip, quint16 port)
 {
-    //if ( !server->listen(QHostAddress::Any, port) )
-    if ( !server->listen(QHostAddress::AnyIPv4, port) )
-    //if ( !server->listen(QHostAddress::LocalHost, port) )
+    if ( !server->listen(ip, port) ) //QHostAddress::LocalHost QHostAddress::Any QHostAddress::AnyIPv4
     {
-        qCritical("WebSocket server was unable to start listen!");
+        QString s = QString("WebSocket was unable to start listening on IP ") + ip.toString() + " and port " + QString::number(port);
+        qCritical(s.toLatin1());
         return false;
     }
 
@@ -268,28 +268,7 @@ void AWebSocketSessionServer::DisconnectClient()
 
 const QString AWebSocketSessionServer::GetUrl() const
 {
-  //return server->serverUrl().toString();
-
-    QString pre = "ws://";
-    QString aft = QString(":") + QString::number(server->serverPort());
-
-    QString local = QHostAddress(QHostAddress::LocalHost).toString();
-
-    QString url = pre + local + aft;
-
-    QString ip;
-    for (const QHostAddress &address : QNetworkInterface::allAddresses())
-    {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
-        {
-            ip = address.toString();
-            break;
-        }
-    }
-    if ( !ip.isEmpty() )
-        url += QStringLiteral("  or  ") + pre + ip + aft;
-
-    return url;
+    return server->serverUrl().toString();
 }
 
 int AWebSocketSessionServer::GetPort() const

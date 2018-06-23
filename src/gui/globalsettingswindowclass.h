@@ -98,11 +98,13 @@ private slots:
 
   void on_leJSROOT_editingFinished();
 
-  void on_cbAutoRunWebSocketServer_clicked();
-
   void on_cbRunWebSocketServer_clicked(bool checked);
 
   void on_cbRunRootServer_clicked(bool checked);
+
+  void on_leWebSocketIP_editingFinished();
+
+  void on_cbRunWebSocketServer_toggled(bool checked);
 
 private:
   Ui::GlobalSettingsWindowClass *ui;

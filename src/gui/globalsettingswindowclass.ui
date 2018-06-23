@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="tabDirs">
      <attribute name="title">
@@ -913,7 +913,7 @@ used to draw a function</string>
        </rect>
       </property>
       <property name="text">
-       <string>1234</string>
+       <string>12345</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_14">
@@ -953,19 +953,6 @@ used to draw a function</string>
       </property>
       <property name="readOnly">
        <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbAutoRunWebSocketServer">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>36</y>
-        <width>311</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Automatically run on start (applies to GUI mode only)</string>
       </property>
      </widget>
      <widget class="Line" name="line_2">
@@ -1072,12 +1059,37 @@ used to draw a function</string>
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLabel" name="label_23">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>40</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>IP:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leWebSocketIP">
+      <property name="geometry">
+       <rect>
+        <x>88</x>
+        <y>39</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>127.0.0.1</string>
+      </property>
+     </widget>
      <zorder>cbRunWebSocketServer</zorder>
      <zorder>cbRunRootServer</zorder>
      <zorder>leWebSocketPort</zorder>
      <zorder>label_14</zorder>
      <zorder>label_16</zorder>
-     <zorder>cbAutoRunWebSocketServer</zorder>
      <zorder>line_2</zorder>
      <zorder>label_18</zorder>
      <zorder>leRootServerPort</zorder>
@@ -1087,6 +1099,8 @@ used to draw a function</string>
      <zorder>label_21</zorder>
      <zorder>leJSROOT</zorder>
      <zorder>leRootServerURL</zorder>
+     <zorder>label_23</zorder>
+     <zorder>leWebSocketIP</zorder>
     </widget>
    </widget>
    <widget class="QLabel" name="label">

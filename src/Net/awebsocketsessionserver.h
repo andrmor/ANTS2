@@ -7,6 +7,7 @@
 
 class QWebSocketServer;
 class QWebSocket;
+class QHostAddress;
 
 class AWebSocketSessionServer : public QObject
 {
@@ -15,7 +16,7 @@ public:
     explicit AWebSocketSessionServer(QObject *parent = 0);
     ~AWebSocketSessionServer();
 
-    bool StartListen(quint16 port);
+    bool StartListen(QHostAddress ip, quint16 port);
     void StopListen();
     bool IsRunning();
 

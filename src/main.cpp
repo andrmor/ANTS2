@@ -56,6 +56,7 @@
 #include <QLoggingCategory>
 #include <QtMessageHandler>
 #include <QCommandLineParser>
+#include <QHostAddress>
 
 //Root
 #include "TApplication.h"
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
         parser.addHelpOption();
         parser.addPositionalArgument("scriptFile", QCoreApplication::translate("main", "File with the script to run"));
         parser.addPositionalArgument("outputFile", QCoreApplication::translate("main", "File with the console output"));
+        parser.addPositionalArgument("ip", QCoreApplication::translate("main", "Web socket server IP"));
         parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
         parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
         parser.addPositionalArgument("maxThreads", QCoreApplication::translate("main", "Maximum number of threads in sim and rec"));
@@ -262,6 +264,11 @@ int main(int argc, char *argv[])
                 QCoreApplication::translate("main", "Redirect console to <outputFile>."),
                 QCoreApplication::translate("main", "outputFile"));
         parser.addOption(outputOption);
+
+        QCommandLineOption ipOption(QStringList() << "i" << "ip",
+                QCoreApplication::translate("main", "Sets server IP."),
+                QCoreApplication::translate("main", "ip"));
+        parser.addOption(ipOption);
 
         QCommandLineOption portOption(QStringList() << "p" << "port",
                 QCoreApplication::translate("main", "Sets server port."),
@@ -379,12 +386,23 @@ int main(int argc, char *argv[])
                 SimulationManager.MaxThreads = max;
                 ReconstructionManager.setMaxThread(max);
             }
+            QHostAddress ip = QHostAddress::Null;
+            if (parser.isSet(ipOption))
+            {
+                QString ips = parser.value(ipOption);
+                ip = QHostAddress(ips);
+            }
+            if (ip.isNull())
+            {
+                qCritical("IP is not provided, exiting!");
+                exit(12345);
+            }
             quint16 Port = parser.value(portOption).toUShort();
             QString ticket = parser.value(ticketOption);
-            qDebug() << "Starting server. Port ="<<Port<<"ticket="<<ticket;
+            qDebug() << "Starting server. IP ="<<ip.toString()<<"port ="<<Port<<"ticket ="<<ticket;
             if (!ticket.isEmpty()) Network.SetTicket(ticket);
             Network.SetExitOnDisconnect(true);
-            Network.StartWebSocketServer(Port);            
+            Network.StartWebSocketServer(ip, Port);
             qDebug() << "To connect, use "<< Network.getWebSocketServerURL();
             a.exec();
             qDebug() << "Finished!"<<QTime::currentTime().toString();

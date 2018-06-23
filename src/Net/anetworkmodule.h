@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QHostAddress>
 
-//class AWebSocketServer;
 class AWebSocketSessionServer;
 class ARootHttpServer;
 class TObject;
@@ -38,9 +38,10 @@ public:
 public: ARootHttpServer* RootHttpServer = 0;
 #endif
 
+    void StartWebSocketServer(QHostAddress ip, quint16 port);
+    void StopWebSocketServer();
+
 public slots:
-  void StartWebSocketServer(quint16 port);
-  void StopWebSocketServer();
   void StartRootHttpServer(unsigned int port = 8080, QString OptionalUrlJsRoot = "https://root.cern/js/latest/");
   void StopRootHttpServer();
 

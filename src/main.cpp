@@ -24,6 +24,7 @@
 #include "ainterfacetomultithread.h"
 #include "ainterfacetowebsocket.h"
 #include "awebserverinterface.h"
+
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
 #endif
@@ -40,8 +41,6 @@
 #ifdef GUI
 #include "mainwindow.h"
 #include "exampleswindow.h"
-#include "ajavascriptmanager.h"
-#include "ascriptwindow.h"
 #include "ainterfacetomessagewindow.h"
 #endif
 
@@ -128,9 +127,6 @@ int main(int argc, char *argv[])
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
     QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
     QObject::connect(&SimulationManager, &ASimulationManager::ProgressReport, &Network, &ANetworkModule::ProgressReport );
-      //in GlobSetWindow init now:
-      //Network.StartRootHttpServer();  //does nothing if compilation flag is not set
-      //Network.StartWebSocketServer(1234);
     qDebug() << "Network module created";
 
     GlobalSettingsClass GlobSet(&Network);
@@ -178,10 +174,6 @@ int main(int argc, char *argv[])
         parser.addPositionalArgument("port", QCoreApplication::translate("main", "Web socket server port"));
         parser.addPositionalArgument("ticket", QCoreApplication::translate("main", "Id for accessing ANTS2 server"));
         parser.addPositionalArgument("maxThreads", QCoreApplication::translate("main", "Maximum number of threads in sim and rec"));
-
-        QCommandLineOption batchOption(QStringList() << "b" << "batch",
-                QCoreApplication::translate("main", "Run ANTS2 in batch mode (deprecated)."));
-        parser.addOption(batchOption);
 
         QCommandLineOption serverOption(QStringList() << "s" << "server",
                 QCoreApplication::translate("main", "Run ANTS2 in server mode."));

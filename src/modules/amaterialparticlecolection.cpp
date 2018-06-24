@@ -15,6 +15,7 @@
 #include "TGeoMedium.h"
 #include "TGeoMaterial.h"
 #include "TH1D.h"
+#include "TString.h"
 
 AMaterialParticleCollection::AMaterialParticleCollection()
 {
@@ -349,7 +350,7 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   //qDebug()<<"Wavelength-resolved?"<<WavelengthResolved;
   //qDebug()<<"--updating wavelength-resolved properties for material index"<<imat;
   if (WavelengthResolved)
-    {
+  {
       //calculating histograms and "-Binned" for effective data
       MaterialCollectionData[imat]->nWaveBinned.clear();
       if (MaterialCollectionData[imat]->nWave_lambda.size() > 0)
@@ -410,27 +411,29 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
 
       for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
-          {
-            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(WaveFrom, WaveStep, WaveNodes);
-          }
-    }
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
+  }
   else
-    {
+  {
       //making empty histograms and "-Binned" for effective data
       MaterialCollectionData[imat]->nWaveBinned.clear();
       MaterialCollectionData[imat]->absWaveBinned.clear();
       MaterialCollectionData[imat]->reemissionProbBinned.clear();
       MaterialCollectionData[imat]->rayleighBinned.clear();
       if (MaterialCollectionData[imat]->PrimarySpectrumHist)
-        {
+      {
           delete MaterialCollectionData[imat]->PrimarySpectrumHist;
           MaterialCollectionData[imat]->PrimarySpectrumHist = 0;
-        }
+      }
       if (MaterialCollectionData[imat]->SecondarySpectrumHist)
-        {
+      {
           delete MaterialCollectionData[imat]->SecondarySpectrumHist;
           MaterialCollectionData[imat]->SecondarySpectrumHist = 0;
-        }
+      }
+
+      for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
+        if (MaterialCollectionData[imat]->OpticalOverrides[ior])
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(false, 0, 1, 1);
   }
 }
 

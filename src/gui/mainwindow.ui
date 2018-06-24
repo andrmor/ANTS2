@@ -20231,37 +20231,5 @@ on stack</string>
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>cobSSO_ScatterModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>332</x>
-     <y>253</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>314</x>
-     <y>124</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSSO_EffWave</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>441</x>
-     <y>243</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>128</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
 </ui>

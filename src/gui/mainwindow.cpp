@@ -749,6 +749,7 @@ void MainWindow::on_pbOverride_clicked()
 
         SpectralBasicOpticalOverride* sso = dynamic_cast<SpectralBasicOpticalOverride*>(ov);
         if (sso)
+            if (sso->Wave.size() > 1)
             {
                 QMessageBox msgBox;
                 msgBox.setText("Warning: configured spectral data will be lost!");

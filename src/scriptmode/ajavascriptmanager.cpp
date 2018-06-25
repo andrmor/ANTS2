@@ -469,6 +469,26 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
         }
     }
 
+    //connect web and msg
+    AInterfaceToMessageWindow* msg = 0;
+    AInterfaceToWebSocket* web = 0;
+    for (QObject* io : sm->interfaces)
+    {
+        AInterfaceToMessageWindow* ob = dynamic_cast<AInterfaceToMessageWindow*>(io);
+        if (ob) msg = ob;
+        else
+        {
+            AInterfaceToWebSocket* ob = dynamic_cast<AInterfaceToWebSocket*>(io);
+            if (ob) web = ob;
+        }
+    }
+    qDebug() << "-----------"<<msg << web;
+    if (msg && web)
+    {
+        QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Append);
+        QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Clear);
+    }
+
     QScriptValue global = engine->globalObject();
     ScriptCopier SC(*sm->engine);
     QScriptValueIterator it(global);

@@ -727,24 +727,43 @@ void MainWindow::on_pbOverride_clicked()
 
     AOpticalOverride* ov = (*MpCollection)[From]->OpticalOverrides[To];
 
-    if (ov)
+    if (ov)  //potential loss of data
       {
-        //potential loss of data for SurfaceWLS override
-        if (ov->getType() == "SurfaceWLS")
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Potential data loss:\nconfigured emission probability and spectrum will be lost!");
-            msgBox.setInformativeText("Continue?");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Cancel);
-            int ret = msgBox.exec();
-            if (ret == QMessageBox::Cancel)
+        AWaveshifterOverride* swo =  dynamic_cast<AWaveshifterOverride*>(ov);
+        if (swo)
+            if (!swo->ReemissionProbability_lambda.isEmpty() || !swo->EmissionSpectrum_lambda.isEmpty())
             {
-                MainWindow::on_pbRefreshOverrides_clicked();
-                return;
+                QMessageBox msgBox;
+                msgBox.setText("Warning: configured emission probability and spectrum will be lost!");
+                msgBox.setInformativeText("Continue?");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                int ret = msgBox.exec();
+                if (ret == QMessageBox::Cancel)
+                {
+                    on_pbRefreshOverrides_clicked();
+                    return;
+                }
             }
-        }
+
+        SpectralBasicOpticalOverride* sso = dynamic_cast<SpectralBasicOpticalOverride*>(ov);
+        if (sso)
+            if (sso->Wave.size() > 1)
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Warning: configured spectral data will be lost!");
+                msgBox.setInformativeText("Continue?");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                int ret = msgBox.exec();
+                if (ret == QMessageBox::Cancel)
+                {
+                    on_pbRefreshOverrides_clicked();
+                    return;
+                }
+            }
 
         delete ov;
         ov = 0;
@@ -807,6 +826,18 @@ void MainWindow::on_pbOverride_clicked()
           ui->pbSurfaceWLS_Show->setEnabled(false);
           ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
           break;
+        }
+      case 6:  // Simplistic spectral
+        {
+          ov = new SpectralBasicOpticalOverride(Detector->MpCollection, From, To, ui->cobSSO_ScatterModel->currentIndex(), ui->ledSSO_EffWave->text().toDouble());
+          ui->pbSSO_Show->setEnabled(false);
+          ui->pbSSO_Binned->setEnabled(false);
+          break;
+        }
+      default:
+        {
+            qDebug() << "Not existent override model!";
+            break;
         }
       }
 
@@ -893,6 +924,15 @@ void MainWindow::on_pbRefreshOverrides_clicked()
             AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
             ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
             ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
+          }
+        else if (model == "SimplisticSpectral_model")
+          {
+            ui->cobOpticalOverrideModel->setCurrentIndex(6);
+            SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
+            ui->pbSSO_Show->setEnabled(!ov->Wave.isEmpty());
+            ui->pbSSO_Binned->setEnabled(!ov->Wave.isEmpty());
+            ui->cobSSO_ScatterModel->setCurrentIndex(ov->scatterModel);
+            ui->ledSSO_EffWave->setText( QString::number(ov->effectiveWavelength) );
           }
         else
           {
@@ -1302,10 +1342,10 @@ void MainWindow::on_cbWaveResolved_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-    ui->fWaveTests->setEnabled(checked);
-    ui->fWaveOptions->setEnabled(checked);
-    ui->fPointSource_Wave->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
+//    ui->fWaveTests->setEnabled(checked);
+//    ui->fWaveOptions->setEnabled(checked);
+//    ui->fPointSource_Wave->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
 
     const int itype = ui->sbPMtype->value();
     const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
@@ -1317,8 +1357,8 @@ void MainWindow::on_cbTimeResolved_toggled(bool checked)
     ui->fTime->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(0, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(0, QIcon());
-    ui->fPointSource_Time->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
+//    ui->fPointSource_Time->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
 }
 
 void MainWindow::on_pbPMtypeShowCurrent_clicked()
@@ -5158,4 +5198,124 @@ void MainWindow::on_actionServer_settings_triggered()
 {
     GlobSetWindow->SetTab(5);
     GlobSetWindow->show();
+}
+
+void MainWindow::on_cobDirectlyOrFromMaterial_currentIndexChanged(int index)
+{
+    ui->frMatDirSelection->setVisible(index != 2);
+    ui->swPointSourceWaveTime->setCurrentIndex( (index == 0 ? 0 : 1) );
+}
+
+void MainWindow::on_pbSSO_Load_clicked()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spectral data (Wave,Loss,Ref,Scatter)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    const QString err = ov->loadData(fileName);
+    if (err.isEmpty())
+    {
+        ReconstructDetector();
+        on_pbRefreshOverrides_clicked();
+    }
+    else message(err, this);
+}
+
+
+#include "TMultiGraph.h"
+void MainWindow::on_pbSSO_Show_clicked()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    QVector<double> Fr;
+    for (int i=0; i<ov->Wave.size(); i++)
+        Fr << (1.0 - ov->ProbLoss.at(i) - ov->ProbRef.at(i) - ov->ProbDiff.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(ov->Wave, Fr, "Fresnel", "Wavelength, nm", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wavelength, nm");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+
+void MainWindow::on_pbSSO_Binned_clicked()
+{
+    if (!ui->cbWaveResolved->isChecked())
+    {
+        message("Activate wavelength-resolved simulation option!", this);
+        return;
+    }
+
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
+
+    QVector<double> waveIndex;
+    for (int i=0; i<WaveNodes; i++) waveIndex << i;
+
+    QVector<double> Fr;
+    for (int i=0; i<waveIndex.size(); i++)
+        Fr << (1.0 - ov->ProbLossBinned.at(i) - ov->ProbRefBinned.at(i) - ov->ProbDiffBinned.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(waveIndex, ov->ProbLossBinned, "Loss", "Wave index", "Loss", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(waveIndex, ov->ProbRefBinned, "Specular reflection", "Wave index", "Reflection", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(waveIndex, ov->ProbDiffBinned, "Diffuse scattering", "Wave index", "Scatter", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(waveIndex, Fr, "Fresnel", "Wave index", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wave index");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+
+void MainWindow::on_cobSSO_ScatterModel_activated(int index)
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->scatterModel = index;
+}
+
+void MainWindow::on_ledSSO_EffWave_editingFinished()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
 }

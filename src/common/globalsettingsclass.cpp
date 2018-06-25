@@ -141,7 +141,7 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["DefaultFontItalic_ScriptWindow"] = DefaultFontItalic_ScriptWindow;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
-  js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
+  js["DefaultWebSocketIP"] = DefaultWebSocketIP;
   js["DefaultRootServerPort"] = DefaultRootServerPort;
   js["RunRootServerOnStart"] = fRunRootServerOnStart;
   js["ExternalJSROOT"] = ExternalJSROOT;
@@ -196,13 +196,13 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
 
     //network
     DefaultWebSocketPort = 1234;
-    fRunWebSocketServerOnStart = false;
+    DefaultWebSocketIP = "127.0.0.1";
     DefaultRootServerPort = 8080;
     fRunRootServerOnStart = false;
     ExternalJSROOT = "https://root.cern/js/latest/";
 
     parseJson(js, "DefaultWebSocketPort", DefaultWebSocketPort);
-    parseJson(js, "RunWebSocketServerOnStart", fRunWebSocketServerOnStart);
+    parseJson(js, "DefaultWebSocketIP", DefaultWebSocketIP);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
 

@@ -4,8 +4,10 @@
 #include "globalsettingsclass.h"
 #include "anetworkmodule.h"
 #include "globalsettingswindowclass.h"
+#include "windownavigatorclass.h"
 
 #include <QDebug>
+#include <QHostAddress>
 
 AWebSocketServerDialog::AWebSocketServerDialog(MainWindow *MW) :
     QDialog(MW), MW(MW),
@@ -20,7 +22,6 @@ AWebSocketServerDialog::AWebSocketServerDialog(MainWindow *MW) :
     QObject::connect(MW->GlobSet->NetModule, &ANetworkModule::ReportTextToGUI, this, &AWebSocketServerDialog::addText);
 }
 
-#include "windownavigatorclass.h"
 void AWebSocketServerDialog::updateNetGui()
 {
   bool bW  = MW->GlobSet->NetModule->isWebSocketServerRunning();
@@ -59,7 +60,7 @@ AWebSocketServerDialog::~AWebSocketServerDialog()
 
 void AWebSocketServerDialog::on_pbStartWS_clicked()
 {
-    MW->GlobSet->NetModule->StartWebSocketServer(MW->GlobSet->DefaultWebSocketPort);
+    MW->GlobSet->NetModule->StartWebSocketServer(QHostAddress(MW->GlobSet->DefaultWebSocketIP), MW->GlobSet->DefaultWebSocketPort);
 }
 
 void AWebSocketServerDialog::on_pbStopWS_clicked()

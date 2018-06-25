@@ -5,7 +5,6 @@
 
 #include <QObject>
 #include <QVariant>
-#include <QThread>
 #include <QMap>
 
 class QWebSocketServer;
@@ -26,10 +25,15 @@ public:
     virtual void ForceStop();
 
 public slots:    
-    void           Connect(const QString& Url);
+    const QString  Connect(const QString& Url, bool GetAnswerOnConnection);
     void           Disconnect();
 
+    const QString  OpenSession(const QString& IP, int port, int threads);
+    bool           SendConfig(QVariant config);
+    bool           RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ReportProgress);
+
     const QString  SendText(const QString& message);
+    const QString  SendTicket(const QString& ticket);
     const QString  SendObject(const QVariant& object);
     const QString  SendFile(const QString& fileName);
 
@@ -44,15 +48,15 @@ public slots:
     const QString  SendTextMessage(const QString& Url, const QVariant &message, bool WaitForAnswer = false);
     int            Ping(const QString& Url);
 
-private:
-    AWebSocketStandaloneMessanger* compatibilitySocket;
-    AWebSocketSession* socket;
-
-    //QMap<QThread*, AWebSocketSession*> sockets;
+signals:
+    void showTextOnMessageWindow(const QString& text);
+    void clearTextOnMessageWindow();
 
 private:
-    //void initSocket();
-    //AWebSocketSession* getSocket() const;
+    AWebSocketStandaloneMessanger* compatibilitySocket = 0;
+    AWebSocketSession* socket = 0;
+
+    int TimeOut = 5000; //milliseconds
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

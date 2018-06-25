@@ -18,6 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QThread>
 
 // ------------------- CORE ----------------------
 
@@ -74,6 +75,7 @@ void AInterfaceToCore::sleep(int ms)
   t.restart();
   do
     {
+      QThread::usleep(100);
       qApp->processEvents();
       if (ScriptManager->isEvalAborted()) break;
     }

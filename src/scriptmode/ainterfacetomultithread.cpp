@@ -86,6 +86,7 @@ void AInterfaceToMultiThread::waitForAll()
 {
     while (countNotFinished() > 0)
       {
+        QThread::usleep(100);
         qApp->processEvents();
       }
 }
@@ -97,6 +98,7 @@ void AInterfaceToMultiThread::waitForOne(int IndexOfWorker)
 
   while (workers.at(IndexOfWorker)->isRunning())
     {
+      QThread::usleep(100);
       qApp->processEvents();
     }
 }

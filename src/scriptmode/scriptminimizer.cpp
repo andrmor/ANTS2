@@ -334,7 +334,7 @@ ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
 #ifdef __USE_ANTS_PYTHON__
 #include "apythonscriptmanager.h"
 #include "PythonQt.h"
-#include "PythonQt_QtAll.h"
+//#include "PythonQt_QtAll.h"
 #include "PythonQtConversion.h"
 
 double PythonScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object

@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
+#include <QThread>
 
 AWebSocketSession::AWebSocketSession() : QObject()
 {
@@ -15,6 +16,8 @@ AWebSocketSession::AWebSocketSession() : QObject()
     QObject::connect(socket, &QWebSocket::disconnected, this, &AWebSocketSession::onDisconnect);
     QObject::connect(socket, &QWebSocket::textMessageReceived, this, &AWebSocketSession::onTextMessageReceived);
     QObject::connect(socket, &QWebSocket::binaryMessageReceived, this, &AWebSocketSession::onBinaryMessageReceived);
+
+    //QObject::connect(socket, &QWebSocket::stateChanged, this, &AWebSocketSession::onStateChanged);
 }
 
 AWebSocketSession::~AWebSocketSession()
@@ -22,14 +25,15 @@ AWebSocketSession::~AWebSocketSession()
     socket->deleteLater();
 }
 
-bool AWebSocketSession::connect(const QString &Url)
+bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
 {
     fExternalAbort = false;
     Error.clear();
     TextReply.clear();
     BinaryReply.clear();
+    bWaitForAnswer = WaitForAnswer;
 
-    if (State != Idle)
+    if ( !(State == Idle || State == Aborted) )
     {
         Error = "Cannot connect: not idle";
         return false;
@@ -38,24 +42,34 @@ bool AWebSocketSession::connect(const QString &Url)
     QElapsedTimer timer;
     timer.start();
 
-    State = Connecting;
-    socket->open( QUrl(Url) );
-
     //waiting for connection
     do
     {
-        qApp->processEvents();
-        if (timer.elapsed() > timeout || fExternalAbort)
-        {
-            socket->abort();
-            State = Idle;
-            Error = "Connection timeout!";
-            return false;
-        }
-    }
-    while (State == Connecting);
+        State = Connecting;
+        Error.clear();
+        socket->open( QUrl(Url) );
 
-    if (Error.isEmpty()) return true;
+        do
+        {
+            QThread::msleep(sleepDuration);
+            qApp->processEvents();
+            if (timer.elapsed() > timeout || fExternalAbort)
+            {
+                socket->abort();
+                State = Idle;
+                Error = "Connection timeout!";
+                return false;
+            }
+        }
+        while (State == Connecting);
+    }
+    while (State == ConnectionFailed);  //on server start-up, it refuses connections -> wait for fully operational
+
+    if (Error.isEmpty())
+    {
+        peerPort = socket->peerPort();
+        return true;
+    }
     else
     {
         socket->close();
@@ -64,18 +78,32 @@ bool AWebSocketSession::connect(const QString &Url)
     }
 }
 
-void AWebSocketSession::disconnect()
+void AWebSocketSession::Disconnect()
 {
-    if (State == Connected)
-        socket->close();
-    //status change on actual disconnect! see slot onClientDisconnected()
+    QElapsedTimer timer;
+    timer.start();
+
+    socket->close();
+    while (socket->state() != QAbstractSocket::UnconnectedState)
+    {
+        if (fExternalAbort) break;
+        QThread::msleep(10);
+        qApp->processEvents();
+        if (timer.elapsed() > timeoutForDisconnect )
+        {
+            socket->abort();
+            break;
+        }
+    }
+
+    State = Idle;
 }
 
-int AWebSocketSession::ping()
+int AWebSocketSession::Ping()
 {
     if (State == Connected)
     {
-        bool bOK = sendText("");
+        bool bOK = SendText("");
         if (bOK)
             return TimeMs;
         else
@@ -88,16 +116,17 @@ int AWebSocketSession::ping()
     }
 }
 
-bool AWebSocketSession::confirmSendPossible()
+bool AWebSocketSession::ConfirmSendPossible()
 {
     Error.clear();
     TextReply.clear();
 
-    if (State != Connected)
+    if (State != Connected  ||  socket->state() != QAbstractSocket::ConnectedState)
     {
         Error = "Not connected to server";
         return false;
     }
+
     return true;
 }
 
@@ -109,6 +138,7 @@ bool AWebSocketSession::waitForReply()
 
     do
     {
+        QThread::msleep(sleepDuration);
         qApp->processEvents();
         if (timer.elapsed() > timeout || fExternalAbort)
         {
@@ -124,18 +154,18 @@ bool AWebSocketSession::waitForReply()
     return true;
 }
 
-bool AWebSocketSession::sendText(const QString &message)
+bool AWebSocketSession::SendText(const QString &message)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     socket->sendTextMessage(message);
 
     return waitForReply();
 }
 
-bool AWebSocketSession::sendJson(const QJsonObject &json)
+bool AWebSocketSession::SendJson(const QJsonObject &json)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     QJsonDocument doc(json);
     QByteArray ba = doc.toBinaryData();
@@ -145,9 +175,9 @@ bool AWebSocketSession::sendJson(const QJsonObject &json)
     return waitForReply();
 }
 
-bool AWebSocketSession::sendFile(const QString &fileName)
+bool AWebSocketSession::SendFile(const QString &fileName)
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
 
     QFile file(fileName);
     if ( !file.open(QIODevice::ReadOnly) )
@@ -163,19 +193,19 @@ bool AWebSocketSession::sendFile(const QString &fileName)
     return waitForReply();
 }
 
-bool AWebSocketSession::resumeWaitForAnswer()
+bool AWebSocketSession::ResumeWaitForAnswer()
 {
-    if ( !confirmSendPossible() ) return false;
+    if ( !ConfirmSendPossible() ) return false;
     return waitForReply();
 }
 
-void AWebSocketSession::clearReply()
+void AWebSocketSession::ClearReply()
 {
     TextReply.clear();
     BinaryReply.clear();
 }
 
-void AWebSocketSession::externalAbort()
+void AWebSocketSession::ExternalAbort()
 {
     State = Aborted;
     socket->abort();
@@ -184,8 +214,9 @@ void AWebSocketSession::externalAbort()
 
 void AWebSocketSession::onConnect()
 {
-    qDebug() << "Connected to server, checking busy status...";
-    bWaitForAnswer = true;
+    qDebug() << "Connected to server";
+    if (bWaitForAnswer) qDebug() << "Waiting for confirmation";
+    else State = Connected;
 }
 
 void AWebSocketSession::onDisconnect()
@@ -197,7 +228,7 @@ void AWebSocketSession::onDisconnect()
     }
     else if (bWaitForAnswer)
     {
-        qDebug() << "Abnormal disconnect detected";
+        qDebug() << "Disconnected while attempting to establish connection";
         if (State == Connecting)
             Error = "Server disconnected before confirming connection";
         else
@@ -238,3 +269,10 @@ void AWebSocketSession::onBinaryMessageReceived(const QByteArray &message)
     BinaryReply = message;
     bWaitForAnswer = false;
 }
+
+/*
+void AWebSocketSession::onStateChanged(QAbstractSocket::SocketState state)
+{
+    qDebug() << "State changed!"<< state;
+}
+*/

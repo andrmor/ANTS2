@@ -7,7 +7,10 @@
 #include <QFile>
 
 AWebServerInterface::AWebServerInterface(AWebSocketSessionServer &Server) :
-    AScriptInterface(), Server(Server) {}
+    AScriptInterface(), Server(Server)
+{
+    QObject::connect(&Server, &AWebSocketSessionServer::requestAbort, this, &AWebServerInterface::AbortScriptEvaluation);
+}
 
 void AWebServerInterface::SendText(const QString &message)
 {

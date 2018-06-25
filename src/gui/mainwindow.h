@@ -634,6 +634,18 @@ private slots:
 
     void on_actionServer_settings_triggered();
 
+    void on_cobDirectlyOrFromMaterial_currentIndexChanged(int index);
+
+    void on_pbSSO_Load_clicked();
+
+    void on_pbSSO_Show_clicked();
+
+    void on_pbSSO_Binned_clicked();
+
+    void on_cobSSO_ScatterModel_activated(int index);
+
+    void on_ledSSO_EffWave_editingFinished();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

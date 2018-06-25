@@ -440,6 +440,7 @@ if (scj.contains("CustomDistrib"))
     }  
   //Wavelength/decay options
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
+  ui->cobDirectlyOrFromMaterial->setCurrentIndex(2);
   JsonToComboBox(wdj, "Direct_Material", ui->cobDirectlyOrFromMaterial);
   JsonToSpinBox (wdj, "WaveIndex", ui->sbWaveIndexPointSource);
   JsonToLineEditDouble(wdj, "DecayTime", ui->ledDecayTime);
@@ -622,6 +623,14 @@ if (scj.contains("CustomDistrib"))
   MainWindow::on_pbRefreshStack_clicked();
 
   UpdateTestWavelengthProperties();
+
+  bool bWaveRes = ui->cbWaveResolved->isChecked();
+  ui->fWaveTests->setEnabled(bWaveRes);
+  ui->fWaveOptions->setEnabled(bWaveRes);
+  ui->fPointSource_Wave->setEnabled(bWaveRes);
+  bool bTimeRes = ui->cbTimeResolved->isChecked();
+  ui->fPointSource_Time->setEnabled(bTimeRes);
+  ui->fDirectOrmat->setEnabled(bWaveRes || bTimeRes);
 
   return true;
 }

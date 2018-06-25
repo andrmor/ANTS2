@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 8
+ANTS2_MINOR = 9
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -173,26 +173,24 @@ ants2_RootServer{
 ants2_Python{
     DEFINES += __USE_ANTS_PYTHON__
 
-    #http://pythonqt.sourceforge.net/
+    #http://pythonqt.sourceforge.net/ or https://github.com/Orochimarufan/PythonQt
+    #for PythonQt installation see instructions in PythonQtInstall.txt in the root of ANTS2 on GitHub
     win32:{
             INCLUDEPATH += c:/Python33/include
             LIBS += -Lc:/Python33/libs -lPython33
 
             INCLUDEPATH += C:/PythonQt3.2/src
-            INCLUDEPATH += C:/PythonQt3.2/extensions/PythonQt_QtAll
+            #INCLUDEPATH += D:/PythonQtTest/src
 
-            LIBS += -LC:/PythonQt3.2 -lPythonQt_QtAll-Qt5-Python333 -lPythonQt-Qt5-Python333
+            LIBS += -LC:/PythonQt3.2 -lPythonQt-Qt5-Python333
+            #LIBS += -LD:/PythonQtTest/lib -lPythonQt
     }
     linux-g++ || unix {
-            INCLUDEPATH += $$system(python-config --includes) #fix:  --includes returns in -I/path format, and Qt expects /path
-            LIBS += $$system(python-config --libs)
+            LIBS += $$system(python3.5-config --libs)
+            QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
 
-            INCLUDEPATH += usr/PythonQt3.2/src
-            INCLUDEPATH += usr/PythonQt3.2/extensions/PythonQt_QtAll
-
-            LIBS += -Lusr/PythonQt3.2/lib/ #only this?
-            LIBS += -Lusr/PythonQt3.2
-            LIBS += -lPythonQt_QtAll-Qt5-Python27 -lPythonQt-Qt5-Python27
+            INCLUDEPATH += /home/andr/PythonQt/src
+            LIBS += -L/home/andr/PythonQt/lib -lPythonQt
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h

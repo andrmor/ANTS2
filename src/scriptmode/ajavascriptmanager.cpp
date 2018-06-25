@@ -476,10 +476,11 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
         }
     }
 
-    //connect web and msg
-    AInterfaceToWebSocket* web = 0;
+
 
 #ifdef GUI
+    //connect web and msg
+    AInterfaceToWebSocket* web = 0;
     AInterfaceToMessageWindow* msg = 0;
     for (QObject* io : sm->interfaces)
     {
@@ -491,15 +492,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
             if (ob) web = ob;
         }
     }
-#else
-    for (QObject* io : sm->interfaces)
-    {
-        AInterfaceToWebSocket* ob = dynamic_cast<AInterfaceToWebSocket*>(io);
-        if (ob) web = ob;
-    }
-#endif
-#ifdef GUI
-    qDebug() << "-----------"<<msg << web;
+//    qDebug() << "-----------"<<msg << web;
     if (msg && web)
     {
         QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, msg, &AInterfaceToMessageWindow::Append);

@@ -79,7 +79,7 @@ void AInterfaceToMultiThread::onErrorInTread(AScriptThreadBase *workerWithError)
     QString errorMessage = workerWithError->Result.toString();
 
     QString msg = "Error in thread #" + QString::number(workerIndex) + ": " + errorMessage;
-    abort(msg);
+    if (bDistributeAbort) abort(msg);
 }
 
 void AInterfaceToMultiThread::waitForAll()
@@ -186,6 +186,12 @@ void AScriptThreadBase::abort()
     if (ScriptManager) ScriptManager->abortEvaluation();
 }
 
+bool AScriptThreadBase::isAborted() const
+{
+    if (!ScriptManager) return false;
+    return ScriptManager->isEvalAborted();
+}
+
 const QVariant AScriptThreadBase::resultToQVariant(const QScriptValue &result) const
 {
     if (result.isString()) return result.toString();
@@ -204,7 +210,7 @@ void AScriptThreadScr::Run()
     QScriptValue res = ScriptManager->EvaluationResult;
     if (res.isError())
     {
-        qDebug() << "EEEEEEEEEEEROR";
+        //qDebug() << "ERROR";
         Result = res.toString();
         emit errorFound(this);
     }

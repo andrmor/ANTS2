@@ -45,9 +45,13 @@ public slots:
     void          deleteAll();
     bool          deleteOne(int IndexOfWorker);
 
+    void          setAbortInThreadIsGlobal(bool flag) {bDistributeAbort = flag;}
+
 private:
     AJavaScriptManager *MasterScriptManager;
     QVector<AScriptThreadBase*> workers;
+
+    bool          bDistributeAbort = true;
 
     void          startEvaluation(AJavaScriptManager *sm, AScriptThreadBase* worker);
 
@@ -66,6 +70,7 @@ public:
     bool            isRunning() {return bRunning;}
     void            abort();
     QVariant        getResult() {return Result;}
+    bool            isAborted() const;
 
 public slots:
     virtual void    Run() = 0;

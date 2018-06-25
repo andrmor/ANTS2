@@ -103,12 +103,21 @@ void AInterfaceToWebSocket::Disconnect()
     if (socket) socket->Disconnect();
 }
 
-const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads)
+const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads, bool ShowOutput)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);
+
+    if (ShowOutput) emit clearTextOnMessageWindow();
+    if (ShowOutput) emit showTextOnMessageWindow(QString("Connecting to dispatcher ") + url);
+
     QString reply = Connect(url, true);
-    if (reply == "error") return "";
-    qDebug() << "Dispatcher reply onConnect: " << reply;
+    if (reply == "error")
+    {
+        if (ShowOutput) emit showTextOnMessageWindow( "Connection failed!" );
+        return "";
+    }
+
+    //  if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher reply onConnect: ") + reply );
     if ( !strToObject(reply)["result"].toBool() )
     {
         abort("Failed to connect to the ants2 dispatcher");
@@ -120,8 +129,11 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
     cn["threads"] = threads;
     QJsonDocument doc(cn);
     QString strCn(doc.toJson(QJsonDocument::Compact));
+
+    if (ShowOutput) emit showTextOnMessageWindow( "Requesting ants2 server" );
+
     reply = SendText( strCn ); //   SendText( '{ "command":"new", "threads":4 }' )
-    qDebug() << reply;
+    //  if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher reply: ") + reply );
     Disconnect();
 
     QJsonObject ro = strToObject(reply);
@@ -133,26 +145,27 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
 
     port = ro["port"].toInt();
     QString ticket = ro["ticket"].toString();
-    qDebug() << "Dispatcher allocated port: " << port << "  and ticket: "<< ticket;
-    qDebug() << "\nConnecting to ants2 server...";
+    if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher allocated port ") + port + "  and ticket " + ticket);
 
     url = "ws://" + IP + ':' + QString::number(port);
+    if (ShowOutput) emit showTextOnMessageWindow( QString("Connecting to ants2 server at ") + url);
     reply = Connect(url, true);
-    qDebug() << "Server reply onConnect: " << reply;
+    //  if (ShowOutput) emit showTextOnMessageWindow( QString("Server reply onConnect: ") + reply );
     if ( !strToObject(reply)["result"].toBool())
     {
         abort("Failed to connect to the ants2 server");
         return "";
     }
 
+    if (ShowOutput) emit showTextOnMessageWindow("Sending ticket " + ticket);
     reply = SendTicket( ticket );
-    qDebug() << "ants2 server reply message: " << reply;
+    //  if (ShowOutput) emit showTextOnMessageWindow( QString("Server reply message: ") + reply);
     if ( !strToObject(reply)["result"].toBool() )
     {
         abort("Server rejected the ticket!");
         return "";
     }
-    qDebug() << "   Connected!";
+    if (ShowOutput) emit showTextOnMessageWindow( "Connected!");
 
     return QString("Connected to ants2 server with ticket ") + ticket;
 }
@@ -180,7 +193,7 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ReportProgress)
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ShowOutput)
 {
     if (!socket)
     {
@@ -191,12 +204,12 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
     const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(socket->GetPeerPort()) + ".root";
 
     QString Script;
-    if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(true);";
+    if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(true);";
     Script += "sim.RunPhotonSources(" + QString::number(NumThreads) + ");";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
-    if (ReportProgress) Script += "server.SetAcceptExternalProgressReport(false);";
+    if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(false);";
     Script += "server.SendFile(fileName);";
     qDebug() << Script;
 
@@ -211,13 +224,13 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
     }
     while ( !obj.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"file\" }"
     {
-        if (ReportProgress) emit showTextOnMessageWindow(reply);
+        if (ShowOutput) emit showTextOnMessageWindow(reply);
         reply = ResumeWaitForAnswer();
         if (reply.isEmpty()) return false; //this is on local abort, e.g. timeout
         obj = strToObject(reply);
     }
 
-    if (ReportProgress) emit showTextOnMessageWindow("Evaluation on remote server finished");
+    if (ShowOutput) emit showTextOnMessageWindow("Evaluation on remote server finished");
     bool bOK = SaveBinaryReplyToFile(LocalSimTreeFileName);
     if (!bOK)
     {

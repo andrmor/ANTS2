@@ -201,7 +201,7 @@ ants2_Python{
 #----------
 
 #Modular compilation flags
-# CONFIG += ants2_GUI         #if disabled, GUI is not compiled
+CONFIG += ants2_GUI         #if disabled, GUI is not compiled
 CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
 
 #---ANTS2 files---

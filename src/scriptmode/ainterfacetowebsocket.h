@@ -30,7 +30,7 @@ public slots:
 
     const QString  OpenSession(const QString& IP, int port, int threads, bool ShowOutput = true);
     bool           SendConfig(QVariant config);
-    bool           RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ShowOutput);
+    bool           RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput);
 
     const QString  SendText(const QString& message);
     const QString  SendTicket(const QString& ticket);
@@ -55,6 +55,8 @@ signals:
 private:
     AWebSocketStandaloneMessanger* compatibilitySocket = 0;
     AWebSocketSession* socket = 0;
+
+    int RequestedThreads = 1;
 
     int TimeOut = 5000; //milliseconds
 };

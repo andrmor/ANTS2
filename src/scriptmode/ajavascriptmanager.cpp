@@ -408,7 +408,7 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     return copy;
 }
 
-AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
+AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber, bool bAbortIsGlobal)
 {
     AJavaScriptManager* sm = new AJavaScriptManager(RandGen);  // *** !!! make new RandGen one!!!
 
@@ -465,8 +465,11 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber)
             }
 #endif
             // connecting the request for abort script
-            AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-            if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
+            if (bAbortIsGlobal)
+            {
+                AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
+                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
+            }
 
             sm->SetInterfaceObject(copy, io->objectName());
         }

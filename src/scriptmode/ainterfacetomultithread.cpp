@@ -23,7 +23,7 @@ void AInterfaceToMultiThread::ForceStop()
 
 void AInterfaceToMultiThread::evaluateScript(const QString script)
 {
-    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
+    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size(), bAbortIsGlobal);
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
 
     AScriptThreadScr* worker = new AScriptThreadScr(sm, script);
@@ -48,7 +48,7 @@ void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QV
         return;
     }
 
-    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size());
+    AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size(), bAbortIsGlobal);
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
     //  qDebug() << "Master engine:"<<MasterScriptManager->engine<< "clone:"<<sm->engine;
 
@@ -79,7 +79,7 @@ void AInterfaceToMultiThread::onErrorInTread(AScriptThreadBase *workerWithError)
     QString errorMessage = workerWithError->Result.toString();
 
     QString msg = "Error in thread #" + QString::number(workerIndex) + ": " + errorMessage;
-    if (bDistributeAbort) abort(msg);
+    if (bAbortIsGlobal) abort(msg);
 }
 
 void AInterfaceToMultiThread::waitForAll()
@@ -140,6 +140,14 @@ QVariant AInterfaceToMultiThread::getResult(int IndexOfWorker)
   if (workers.at(IndexOfWorker)->isRunning()) return QString("Still running");
 
   return workers.at(IndexOfWorker)->getResult();
+}
+
+bool AInterfaceToMultiThread::isAborted(int IndexOfWorker)
+{
+    if (IndexOfWorker < 0 || IndexOfWorker >= workers.size()) return false;
+    if (workers.at(IndexOfWorker)->isRunning()) return false;
+
+    return workers.at(IndexOfWorker)->isAborted();
 }
 
 void AInterfaceToMultiThread::deleteAll()

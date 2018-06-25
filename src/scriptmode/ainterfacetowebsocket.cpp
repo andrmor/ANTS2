@@ -25,8 +25,8 @@ AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
 {
-    compatibilitySocket->deleteLater();
-    socket->deleteLater();
+    if (compatibilitySocket) compatibilitySocket->deleteLater();
+    if (socket) socket->deleteLater();
 }
 
 void AInterfaceToWebSocket::ForceStop()
@@ -106,6 +106,7 @@ void AInterfaceToWebSocket::Disconnect()
 const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads, bool ShowOutput)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);
+    RequestedThreads = threads;
 
     if (ShowOutput) emit clearTextOnMessageWindow();
     if (ShowOutput) emit showTextOnMessageWindow(QString("Connecting to dispatcher ") + url);
@@ -193,7 +194,7 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QString& LocalSimTreeFileName, bool ShowOutput)
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput)
 {
     if (!socket)
     {
@@ -205,7 +206,7 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(int NumThreads, const QS
 
     QString Script;
     if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(true);";
-    Script += "sim.RunPhotonSources(" + QString::number(NumThreads) + ");";
+    Script += "sim.RunPhotonSources(" + QString::number(RequestedThreads) + ");";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";

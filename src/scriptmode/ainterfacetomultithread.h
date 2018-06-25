@@ -41,17 +41,18 @@ public slots:
     int           countNotFinished();
 
     QVariant      getResult(int IndexOfWorker);
+    bool          isAborted(int IndexOfWorker);
 
     void          deleteAll();
     bool          deleteOne(int IndexOfWorker);
 
-    void          setAbortInThreadIsGlobal(bool flag) {bDistributeAbort = flag;}
+    void          setAbortInThreadIsGlobal(bool flag) {bAbortIsGlobal = flag;}
 
 private:
     AJavaScriptManager *MasterScriptManager;
     QVector<AScriptThreadBase*> workers;
 
-    bool          bDistributeAbort = true;
+    bool          bAbortIsGlobal = true;
 
     void          startEvaluation(AJavaScriptManager *sm, AScriptThreadBase* worker);
 

@@ -46,7 +46,7 @@ public:
     QScriptValue    getMinimalizationFunction();
 
     //for multithread-in-scripting
-    AJavaScriptManager* createNewScriptManager(int threadNumber); // *** !!!
+    AJavaScriptManager* createNewScriptManager(int threadNumber, bool bAbortIsGlobal); // *** !!!
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
     QScriptValue    EvaluationResult;

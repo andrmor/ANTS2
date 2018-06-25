@@ -62,15 +62,14 @@ QString AJavaScriptManager::Evaluate(const QString& Script)
     timeOfStart = timer->restart();
 
     fEngineIsRunning = true;
-    QScriptValue scriptreturn = engine->evaluate(Script);
+    EvaluationResult = engine->evaluate(Script);
     fEngineIsRunning = false;
 
     timerEvalTookMs = timer->elapsed();
     delete timer; timer = 0;
 
-    QString result = scriptreturn.toString();
+    QString result = EvaluationResult.toString();
     emit onFinish(result);
-
     return result;
 }
 

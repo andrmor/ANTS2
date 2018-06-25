@@ -28,9 +28,10 @@ public slots:
     const QString  Connect(const QString& Url, bool GetAnswerOnConnection);
     void           Disconnect();
 
+    int            GetAvailableThreads(const QString& IP, int port, bool ShowOutput = true);
     const QString  OpenSession(const QString& IP, int port, int threads, bool ShowOutput = true);
     bool           SendConfig(QVariant config);
-    bool           RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput);
+    bool           RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput = true);
 
     const QString  SendText(const QString& message);
     const QString  SendTicket(const QString& ticket);

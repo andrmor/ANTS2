@@ -215,6 +215,8 @@ void AScriptThreadScr::Run()
     bRunning = true;
     ScriptManager->Evaluate(Script);
 
+    qDebug() << "Worker finished eval, result:"<<ScriptManager->EvaluationResult.toString();
+
     QScriptValue res = ScriptManager->EvaluationResult;
     if (res.isError())
     {

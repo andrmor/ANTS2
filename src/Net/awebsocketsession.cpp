@@ -228,7 +228,7 @@ void AWebSocketSession::onDisconnect()
     }
     else if (bWaitForAnswer)
     {
-        qDebug() << "Disconnected while attempting to establish connection";
+        //qDebug() << "Disconnected while attempting to establish connection";
         if (State == Connecting)
             Error = "Server disconnected before confirming connection";
         else

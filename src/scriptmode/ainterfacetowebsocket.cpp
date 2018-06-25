@@ -103,6 +103,34 @@ void AInterfaceToWebSocket::Disconnect()
     if (socket) socket->Disconnect();
 }
 
+int AInterfaceToWebSocket::GetAvailableThreads(const QString &IP, int port, bool ShowOutput)
+{
+    QString url = "ws://" + IP + ':' + QString::number(port);
+
+    if (ShowOutput) emit clearTextOnMessageWindow();
+    if (ShowOutput) emit showTextOnMessageWindow(QString("Connecting to dispatcher ") + url);
+
+    QString reply = Connect(url, true);
+    if (reply == "error" || !strToObject(reply)["result"].toBool())
+    {
+        if (ShowOutput) emit showTextOnMessageWindow( "Connection failed!" );
+        return 0;
+    }
+
+    if (ShowOutput) emit showTextOnMessageWindow( "Requesting status" );
+    reply = SendText( "{ \"command\" : \"report\" }" );
+    if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher reply: ") + reply );
+    Disconnect();
+
+    int availableThreads = 0;
+    QJsonObject ro = strToObject(reply);
+    if (ro.contains("threads"))
+         availableThreads = ro["threads"].toInt();
+    if (ShowOutput) emit showTextOnMessageWindow( QString("Available threads: ") + QString::number(availableThreads) );
+
+    return availableThreads;
+}
+
 const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads, bool ShowOutput)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);

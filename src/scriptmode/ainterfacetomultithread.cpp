@@ -3,7 +3,7 @@
 
 #include <QThread>
 #include <QDebug>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QScriptEngine>
 
 AInterfaceToMultiThread::AInterfaceToMultiThread(AJavaScriptManager *ScriptManager) :

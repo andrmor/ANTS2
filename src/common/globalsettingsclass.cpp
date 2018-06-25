@@ -12,7 +12,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDebug>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QThread>
 
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)

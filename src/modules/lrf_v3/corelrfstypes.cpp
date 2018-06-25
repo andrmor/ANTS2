@@ -7,7 +7,7 @@
 #include <QJsonObject>
 #include <QScriptEngine>
 #include <QScriptValueIterator>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QDateTime>
 
 #include <Rtypes.h>
@@ -274,7 +274,7 @@ ALrf *AAxial3DType::lrfFromData(const QJsonObject &settings, bool fit_error,
 
   return new AAxial3D(id(), bsr, bse, compress);
 }
-
+#ifdef GUI
 QWidget *AAxial3DType::newSettingsWidget(QWidget *parent) const
 {
   return new Axial3DSettingsWidget(parent);
@@ -284,6 +284,7 @@ QWidget *AAxial3DType::newInternalsWidget(QWidget *parent) const
 {
   return new Axial3DInternalsWidget(parent);
 }
+#endif
 
 
 /***************************************************************************\
@@ -522,7 +523,7 @@ ALrf *ASlicedXYType::lrfFromData(const QJsonObject &settings, bool fit_error,
 
   return new ASlicedXY(id(), zmin, zmax, bsrs, bses);
 }
-
+#ifdef GUI
 QWidget *ASlicedXYType::newSettingsWidget(QWidget *parent) const
 {
   return new ASlicedXYSettingsWidget(parent);
@@ -532,7 +533,7 @@ QWidget *ASlicedXYType::newInternalsWidget(QWidget *parent) const
 {
   return new ASlicedXYInternalsWidget(parent);
 }
-
+#endif
 
 /***************************************************************************\
 *                   Implementation of Script and related                    *

@@ -1,7 +1,8 @@
 #include "ascriptmanager.h"
 #include "ascriptinterface.h"
+#ifdef GUI
 #include "ainterfacetomessagewindow.h"
-
+#endif
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QMetaMethod>
@@ -25,6 +26,7 @@ AScriptManager::~AScriptManager()
   delete timer;
 }
 
+#ifdef GUI
 void AScriptManager::hideMsgDialogs()
 {
   for (int i=0; i<interfaces.size(); i++)
@@ -42,6 +44,20 @@ void AScriptManager::restoreMsgDialogs()
       if (t) t->RestorelWidget();
   }
 }
+
+void AScriptManager::deleteMsgDialogs()
+{
+  for (int i=0; i<interfaces.size(); i++)
+  {
+      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      if (t)
+      {
+          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+          return;
+      }
+  }
+}
+#endif
 
 qint64 AScriptManager::getElapsedTime()
 {
@@ -96,19 +112,6 @@ const QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
   QString returnType = interfaces.at(unitIndex)->metaObject()->method(mi).typeName();
   //qDebug() << returnType;
   return returnType;
-}
-
-void AScriptManager::deleteMsgDialogs()
-{
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-      if (t)
-      {
-          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
-          return;
-      }
-  }
 }
 
 void AScriptManager::ifError_AbortAndReport()

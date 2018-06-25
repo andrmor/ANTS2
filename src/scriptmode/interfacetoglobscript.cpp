@@ -37,8 +37,8 @@
 #include <QFile>
 #include <QThread>
 #include <QDateTime>
-#include <QApplication>
-#include <QVector3D>
+#include <QtWidgets/QApplication>
+#include <QtGui/QVector3D>
 #include <QJsonDocument>
 #include <QDebug>
 

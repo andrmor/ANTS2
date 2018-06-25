@@ -45,7 +45,7 @@
 #endif
 
 //Qt
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QLocale>
 #include <QDebug>
 #include <QThread>

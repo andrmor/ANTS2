@@ -1,5 +1,5 @@
 #include "ageoobject.h"
-#include "slab.h"
+#include "aslab.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
 

@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 AConfiguration::AConfiguration(QObject *parent) :
   QObject(parent), Detector(0), ParticleSources(0) {}

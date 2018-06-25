@@ -13,7 +13,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QDebug>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>

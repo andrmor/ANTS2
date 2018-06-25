@@ -30,7 +30,7 @@
 #include <QTime>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 #include "TGeoManager.h"
 #include "TError.h"

@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 9
+ANTS2_MINOR = 10
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -19,12 +19,12 @@ CONFIG += ants2_SIM         #if disabled, simulation-related modules are not com
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread -llibSpectrum
+     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum #-llibMathMore
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum #-lMathMore
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
@@ -314,7 +314,8 @@ SOURCES += main.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
-    scriptmode/awebserverinterface.cpp
+    scriptmode/awebserverinterface.cpp \
+    common/agammarandomgenerator.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \

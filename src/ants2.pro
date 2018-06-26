@@ -345,7 +345,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
-    SplineLibrary/bspline3nu.h \
     SplineLibrary/spline.h \
     SplineLibrary/bspline.h \
     SplineLibrary/bspline3.h \

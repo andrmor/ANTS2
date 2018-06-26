@@ -15,7 +15,7 @@
 AOneEvent::AOneEvent(APmHub *PMs, TRandom2 *RandGen, ASimulationStatistics* SimStat) :
     SimStat(SimStat), PMs(PMs), RandGen(RandGen)
 {
-  GammaRandomGen = new AGammaRandomGenerator(); 
+  GammaRandomGen = new AGammaRandomGenerator(RandGen);
 }
 
 AOneEvent::~AOneEvent()

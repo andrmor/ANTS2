@@ -23,7 +23,7 @@ APmHub::APmHub(AMaterialParticleCollection *materialCollection, TRandom2 *randGe
    RandGen(randGen), MaterialCollection(materialCollection)
 {    
     APmHub::clear();
-    GammaRandomGen = new AGammaRandomGenerator();
+    GammaRandomGen = new AGammaRandomGenerator(RandGen);
     PMtypes.append(new APmType("Type1"));
 }
 

@@ -19,7 +19,7 @@ CONFIG += ants2_SIM         #if disabled, simulation-related modules are not com
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum #-llibMathMore
+     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum #-llibCint -llibMathMore
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {

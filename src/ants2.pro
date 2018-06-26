@@ -13,6 +13,9 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
+CONFIG += ants2_GUI         #if disabled, GUI is not compiled
+CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
+
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
@@ -200,9 +203,11 @@ ants2_Python{
 }
 #----------
 
-#Modular compilation flags
-CONFIG += ants2_GUI         #if disabled, GUI is not compiled
-CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
+#Can be used as command line option to force-disable GUI
+Headless {
+message("--> Compiling without GUI")
+CONFIG -= ants2_GUI
+}
 
 #---ANTS2 files---
 SOURCES += main.cpp \

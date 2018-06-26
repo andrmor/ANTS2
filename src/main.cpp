@@ -68,7 +68,11 @@
 
 int main(int argc, char *argv[])
 {
+#ifdef GUI
     QApplication a(argc, argv);
+#else
+    QCoreApplication a(argc, argv);
+#endif
     QLocale::setDefault(QLocale("en_US"));
 
     //setting up logging

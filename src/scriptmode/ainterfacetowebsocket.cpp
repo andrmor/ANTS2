@@ -174,7 +174,7 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
 
     port = ro["port"].toInt();
     QString ticket = ro["ticket"].toString();
-    if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher allocated port ") + port + "  and ticket " + ticket);
+    if (ShowOutput) emit showTextOnMessageWindow( QString("Dispatcher allocated port ") + QString::number(port) + "  and ticket " + ticket);
 
     url = "ws://" + IP + ':' + QString::number(port);
     if (ShowOutput) emit showTextOnMessageWindow( QString("Connecting to ants2 server at ") + url);

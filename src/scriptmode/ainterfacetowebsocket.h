@@ -32,6 +32,7 @@ public slots:
     const QString  OpenSession(const QString& IP, int port, int threads, bool ShowOutput = true);
     bool           SendConfig(QVariant config);
     bool           RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput = true);
+    bool           RemoteSimulateParticleSources(const QString& LocalSimTreeFileName, bool ShowOutput = true);
 
     const QString  SendText(const QString& message);
     const QString  SendTicket(const QString& ticket);
@@ -59,7 +60,10 @@ private:
 
     int RequestedThreads = 1;
 
-    int TimeOut = 5000; //milliseconds
+    int TimeOut = 3000; //milliseconds
+
+private:
+    bool remoteSimulate(bool bPhotonSource, const QString &LocalSimTreeFileName, bool ShowOutput);
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

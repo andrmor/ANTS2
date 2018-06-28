@@ -230,6 +230,16 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
 
 bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput)
 {
+    return remoteSimulate(true, LocalSimTreeFileName, ShowOutput);
+}
+
+bool AInterfaceToWebSocket::RemoteSimulateParticleSources(const QString &LocalSimTreeFileName, bool ShowOutput)
+{
+    return remoteSimulate(false, LocalSimTreeFileName, ShowOutput);
+}
+
+bool AInterfaceToWebSocket::remoteSimulate(bool bPhotonSource, const QString& LocalSimTreeFileName, bool ShowOutput)
+{
     if (!socket)
     {
         abort("Web socket was not connected");
@@ -240,7 +250,10 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimT
 
     QString Script;
     Script += "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    Script += "sim.RunPhotonSources(" + QString::number(RequestedThreads) + ");";
+    if (bPhotonSource)
+        Script += "sim.RunPhotonSources(" + QString::number(RequestedThreads) + ");";
+    else
+        Script += "sim.RunParticleSources(" + QString::number(RequestedThreads) + ");";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";

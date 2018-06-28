@@ -32,7 +32,7 @@
 #include "aopticaloverride.h"
 #include "phscatclaudiomodel.h"
 #include "scatteronmetal.h"
-#include "slab.h"
+#include "slabdelegate.h"
 #include "asandwich.h"
 #include "ajsontools.h"
 #include "dotstgeostruct.h"

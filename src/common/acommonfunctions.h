@@ -2,7 +2,7 @@
 #define ACOMMONFUNCTIONS_H
 
 #include <QVector>
-#include <QPolygon>
+#include <QtGui/QPolygon>
 
 #include <map>
 

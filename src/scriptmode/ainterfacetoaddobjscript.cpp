@@ -1,7 +1,7 @@
 #include "ainterfacetoaddobjscript.h"
 #include "amaterialparticlecolection.h"
 #include "ageoobject.h"
-#include "slab.h"
+#include "aslab.h"
 #include "asandwich.h"
 #include "detectorclass.h"
 #include "afiletools.h"

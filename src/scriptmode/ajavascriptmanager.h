@@ -2,7 +2,9 @@
 #define AJAVASCRIPTMANAGER_H
 
 #include "ascriptmanager.h"
+#ifdef GUI
 #include "ascriptmessengerdialog.h"
+#endif
 #include <QObject>
 #include <QVector>
 #include <QString>
@@ -11,7 +13,9 @@
 class QScriptEngine;
 class TRandom2;
 class QDialog;
+#ifdef GUI
 class AInterfaceToMessageWindow;
+#endif
 
 class AJavaScriptManager : public AScriptManager
 {
@@ -35,28 +39,31 @@ public:
     virtual bool    isUncaughtException() const override;
     virtual int     getUncaughtExceptionLineNumber() const override;
     virtual const QString getUncaughtExceptionString() const override;
-
+#ifdef GUI
     virtual void    hideMsgDialogs() override;
     virtual void    restoreMsgDialogs() override;
-
+#endif
     QScriptValue    getMinimalizationFunction();
 
     //for multithread-in-scripting
-    AJavaScriptManager* createNewScriptManager(int threadNumber); // *** !!!
+    AJavaScriptManager* createNewScriptManager(int threadNumber, bool bAbortIsGlobal); // *** !!!
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
     QScriptValue    EvaluationResult;
     AInterfaceToCore* coreObj = 0;  //core interface - to forward evaluate-script-in-script
 
 public slots:
+#ifdef GUI
     void            hideAllMessengerWidgets();
     void            showAllMessengerWidgets();
     void            clearUnusedMsgDialogs();
     void            closeAllMsgDialogs();
-
+#endif
 private:
-    QScriptEngine*  engine;    
+    QScriptEngine*  engine;
+#ifdef GUI
     QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
+#endif
 
 };
 

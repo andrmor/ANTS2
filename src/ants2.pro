@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 9
+ANTS2_MINOR = 10
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -13,15 +13,18 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
+CONFIG += ants2_GUI         #if disabled, GUI is not compiled
+CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
+
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibCint -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMathMore -llibMinuit2 -llibThread -llibSpectrum
+     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum #-llibCint -llibMathMore
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMathMore -lMinuit2 -lSpectrum
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum #-lMathMore
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 #-----------
@@ -200,9 +203,11 @@ ants2_Python{
 }
 #----------
 
-#Modular compilation flags
-CONFIG += ants2_GUI         #if disabled, GUI is not compiled
-CONFIG += ants2_SIM         #if disabled, simulation-related modules are not compiled
+#Can be used as command line option to force-disable GUI
+Headless {
+message("--> Compiling without GUI")
+CONFIG -= ants2_GUI
+}
 
 #---ANTS2 files---
 SOURCES += main.cpp \
@@ -256,7 +261,7 @@ SOURCES += main.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
-    gui/MainWindowTools/slab.cpp \
+    common/aslab.cpp \
     modules/lrf_v3/arecipe.cpp \
     modules/lrf_v3/alrftypemanager.cpp \
     modules/lrf_v3/arepository.cpp \
@@ -267,11 +272,8 @@ SOURCES += main.cpp \
     modules/lrf_v3/ainstructioninput.cpp \
     modules/lrf_v3/afitlayersensorgroup.cpp \
     modules/alrfmoduleselector.cpp \
-    common/acollapsiblegroupbox.cpp \
     common/ascriptvaluecopier.cpp \
-    gui/MainWindowTools/arootmarkerconfigurator.cpp \
     common/acustomrandomsampling.cpp \
-    gui/ahighlighters.cpp \
     common/amaterial.cpp \
     common/aparticle.cpp \
     modules/amaterialparticlecolection.cpp\
@@ -280,30 +282,19 @@ SOURCES += main.cpp \
     common/ainternetbrowser.cpp \
     Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
-    modules/lrf_v3/gui/atpspline3widget.cpp \
-    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
     scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
     common/aroothistappenders.cpp \
-    gui/MainWindowTools/amonitordelegateform.cpp \
     common/amonitorconfig.cpp \
     common/apeakfinder.cpp \
     common/amaterialcomposition.cpp \
-    gui/aelementandisotopedelegates.cpp \
-    gui/amatparticleconfigurator.cpp \
     common/aneutroninteractionelement.cpp \
-    gui/aneutronreactionsconfigurator.cpp \
-    gui/aneutronreactionwidget.cpp \
-    gui/aneutroninfodialog.cpp \
     scriptmode/ainterfacetodeposcript.cpp \
-    scriptmode/ainterfacetomessagewindow.cpp \
     scriptmode/coreinterfaces.cpp \
     scriptmode/localscriptinterfaces.cpp \
     scriptmode/histgraphinterfaces.cpp \
-    gui/GraphWindowTools/atoolboxscene.cpp \
     scriptmode/ainterfacetomultithread.cpp \
-    scriptmode/ascriptmessengerdialog.cpp \
     scriptmode/arootgraphrecord.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
@@ -315,19 +306,16 @@ SOURCES += main.cpp \
     common/apm.cpp \
     modules/apmhub.cpp \
     common/apmtype.cpp \
-    scriptmode/ainterfacetoguiscript.cpp \
     modules/aoneevent.cpp \
     scriptmode/ainterfacetottree.cpp \
     common/aroottreerecord.cpp \
-    gui/atextedit.cpp \
-    gui/alineedit.cpp \    
     scriptmode/ainterfacetoaddobjscript.cpp \
     scriptmode/ainterfacetogstylescript.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
-    gui/awebsocketserverdialog.cpp \
-    scriptmode/awebserverinterface.cpp
+    scriptmode/awebserverinterface.cpp \
+    common/agammarandomgenerator.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -350,15 +338,14 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageoobject.h \
     common/aopticaloverride.h \
     modules/detectorclass.h \
-    modules/particlesourcesclass.h \    
-    modules/flatfield.h \    
+    modules/particlesourcesclass.h \
+    modules/flatfield.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
     modules/dynamicpassiveshandler.h \
     modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
-    SplineLibrary/bspline3nu.h \
     SplineLibrary/spline.h \
     SplineLibrary/bspline.h \
     SplineLibrary/bspline3.h \
@@ -383,7 +370,7 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ascriptexampledatabase.h \
     scriptmode/ascriptinterface.h \
     modules/asandwich.h \
-    gui/MainWindowTools/slab.h \
+    common/aslab.h \
     common/aid.h \
     common/apoint.h \
     common/atransform.h \
@@ -404,11 +391,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v3/alrftypemanagerinterface.h \
     modules/lrf_v3/astateinterface.h \
     modules/alrfmoduleselector.h \
-    common/acollapsiblegroupbox.h \
     common/ascriptvaluecopier.h \
-    gui/MainWindowTools/arootmarkerconfigurator.h \
     common/acustomrandomsampling.h \
-    gui/ahighlighters.h \
     common/amaterial.h \
     common/aparticle.h \
     modules/amaterialparticlecolection.h\
@@ -417,33 +401,22 @@ HEADERS  += common/CorrelationFilters.h \
     common/ainternetbrowser.h \
     Net/aroothttpserver.h \
     Net/anetworkmodule.h \
-    modules/lrf_v3/gui/atpspline3widget.h \
-    modules/lrf_v3/gui/avladimircompressionwidget.h \
     SplineLibrary/eiquadprog.hpp \
     scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h \
     common/amonitor.h \
     common/aroothistappenders.h \
-    gui/MainWindowTools/amonitordelegateform.h \
     common/amonitorconfig.h \
     common/apeakfinder.h \
     common/amaterialcomposition.h \
-    gui/aelementandisotopedelegates.h \
-    gui/amatparticleconfigurator.h \
     common/aneutroninteractionelement.h \
-    gui/aneutronreactionsconfigurator.h \
-    gui/aneutronreactionwidget.h \
-    gui/aneutroninfodialog.h \
     scriptmode/ainterfacetodeposcript.h \
-    scriptmode/ainterfacetomessagewindow.h \
     scriptmode/coreinterfaces.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
     common/amessageoutput.h \
-    gui/GraphWindowTools/atoolboxscene.h \
     scriptmode/ainterfacetomultithread.h \
     scriptmode/ascriptinterfacefactory.h \
-    scriptmode/ascriptmessengerdialog.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
     scriptmode/aroothistrecord.h \
@@ -455,20 +428,15 @@ HEADERS  += common/CorrelationFilters.h \
     common/apm.h \
     modules/apmhub.h \
     common/apmtype.h \
-    scriptmode/ainterfacetoguiscript.h \
     modules/aoneevent.h \
     scriptmode/ainterfacetottree.h \
     common/aroottreerecord.h \
-    gui/atextedit.h \
-    gui/alineedit.h \
     scriptmode/ainterfacetoaddobjscript.h \
     scriptmode/ainterfacetogstylescript.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    gui/awebsocketserverdialog.h \
     scriptmode/awebserverinterface.h
-
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
@@ -560,7 +528,26 @@ ants2_GUI {
     modules/lrf_v3/gui/corelrfswidgets.cpp \
     modules/lrf_v3/gui/alrfwindowwidgets.cpp \
     modules/lrf_v3/gui/alrfwindow.cpp \
-    gui/alrfdraw.cpp
+    gui/alrfdraw.cpp \
+    gui/MainWindowTools/arootmarkerconfigurator.cpp \
+    gui/ahighlighters.cpp \
+    modules/lrf_v3/gui/atpspline3widget.cpp \
+    modules/lrf_v3/gui/avladimircompressionwidget.cpp \
+    gui/MainWindowTools/amonitordelegateform.cpp \
+    gui/aelementandisotopedelegates.cpp \
+    gui/amatparticleconfigurator.cpp \
+    gui/aneutronreactionsconfigurator.cpp \
+    gui/aneutronreactionwidget.cpp \
+    gui/aneutroninfodialog.cpp \
+    scriptmode/ainterfacetomessagewindow.cpp \
+    gui/GraphWindowTools/atoolboxscene.cpp \
+    scriptmode/ascriptmessengerdialog.cpp \
+    scriptmode/ainterfacetoguiscript.cpp \
+    gui/atextedit.cpp \
+    gui/alineedit.cpp \
+    gui/awebsocketserverdialog.cpp \
+    common/acollapsiblegroupbox.cpp \
+    gui/MainWindowTools/slabdelegate.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -595,8 +582,26 @@ HEADERS  += gui/mainwindow.h \
     modules/lrf_v3/gui/corelrfswidgets.h \
     modules/lrf_v3/gui/alrfwindowwidgets.h \
     modules/lrf_v3/gui/alrfwindow.h \
-    gui/alrfdraw.h
-
+    gui/alrfdraw.h \
+    gui/MainWindowTools/arootmarkerconfigurator.h \
+    gui/ahighlighters.h \
+    modules/lrf_v3/gui/atpspline3widget.h \
+    modules/lrf_v3/gui/avladimircompressionwidget.h \
+    gui/MainWindowTools/amonitordelegateform.h \
+    gui/aelementandisotopedelegates.h \
+    gui/amatparticleconfigurator.h \
+    gui/aneutronreactionsconfigurator.h \
+    gui/aneutronreactionwidget.h \
+    gui/aneutroninfodialog.h \
+    scriptmode/ainterfacetomessagewindow.h \
+    gui/GraphWindowTools/atoolboxscene.h \
+    scriptmode/ascriptmessengerdialog.h \
+    scriptmode/ainterfacetoguiscript.h \
+    gui/atextedit.h \
+    gui/alineedit.h \
+    gui/MainWindowTools/slabdelegate.h \
+    common/acollapsiblegroupbox.h \
+    gui/awebsocketserverdialog.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -618,16 +623,23 @@ FORMS += gui/mainwindow.ui \
     gui/MainWindowTools/agridelementdialog.ui \
     gui/ascriptexampleexplorer.ui \
     gui/ascriptwindow.ui \
-    modules/lrf_v3/gui/alrfwindow.ui
+    modules/lrf_v3/gui/alrfwindow.ui \
+    gui/MainWindowTools/amonitordelegateform.ui \
+    gui/amatparticleconfigurator.ui \
+    gui/aneutronreactionsconfigurator.ui \
+    gui/aneutronreactionwidget.ui \
+    gui/aneutroninfodialog.ui \
+    gui/awebsocketserverdialog.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
 INCLUDEPATH += gui/ReconstructionWindowTools
 INCLUDEPATH += modules/lrf_v3/gui
+INCLUDEPATH += gui/GraphWindowTools
 }
 
 INCLUDEPATH += gui/MainWindowTools
-INCLUDEPATH += gui/GraphWindowTools
+
 INCLUDEPATH += SplineLibrary
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
@@ -641,9 +653,15 @@ RESOURCES += \
 #-------------
 
 #---Qt kitchen---
-QT += core gui
-QT += websockets
+QT += core
+ants2_GUI {
+    QT += gui
+} else {
+    QT -= gui
+}
+# couldn't get of widgets yet due to funny compile erors - VS
 QT += widgets
+QT += websockets
 QT += script #scripts support
 win32:QT += winextras  #used in windownavigator only
 
@@ -713,10 +731,3 @@ unix {
 }
 #------------
 
-FORMS += \
-    gui/MainWindowTools/amonitordelegateform.ui \
-    gui/amatparticleconfigurator.ui \
-    gui/aneutronreactionsconfigurator.ui \
-    gui/aneutronreactionwidget.ui \
-    gui/aneutroninfodialog.ui \
-    gui/awebsocketserverdialog.ui

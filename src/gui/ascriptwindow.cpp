@@ -46,6 +46,7 @@
 #include <QDesktopServices>
 #include <QInputDialog>
 #include <QTextDocumentFragment>
+#include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),

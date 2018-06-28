@@ -11,7 +11,7 @@
 #include "amonitor.h"
 
 #include <QDebug>
-#include <QMessageBox>
+//#include <QMessageBox>
 #include <QtAlgorithms>
 
 #include "TMath.h"

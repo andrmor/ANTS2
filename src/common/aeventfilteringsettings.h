@@ -2,7 +2,7 @@
 #define AEVENTFILTERINGSETTINGS_H
 
 #include <QVector>
-#include <QPolygonF>
+#include <QtGui/QPolygonF>
 #include <QJsonObject>
 #include <QString>
 

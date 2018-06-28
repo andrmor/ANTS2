@@ -3223,22 +3223,22 @@ of the refracted beam:</string>
            </property>
            <item>
             <property name="text">
-             <string>Use constant factor</string>
+             <string>Constant factor</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Use normal distribution</string>
+             <string>Normal distribution</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Use gamma function</string>
+             <string>Gamma distribution</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>Use loaded distribution</string>
+             <string>Custom distribution</string>
             </property>
            </item>
           </widget>

@@ -1,10 +1,13 @@
 #include "ajsontools.h"
 #include "amessage.h"
 
+#ifdef GUI
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QLineEdit>
 #include <QComboBox>
+#endif
+
 #include <QJsonDocument>
 #include <QDebug>
 #include <QFile>
@@ -80,6 +83,7 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj)
     else return false;
 }
 
+#ifdef GUI
 void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
 {
   if (json.contains(key))
@@ -117,6 +121,7 @@ void JsonToComboBox(QJsonObject &json, QString key, QComboBox *qb)
       qb->setCurrentIndex(index);
     }
 }
+#endif
 
 bool LoadJsonFromFile(QJsonObject &json, QString fileName)
 {

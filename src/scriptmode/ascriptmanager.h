@@ -33,10 +33,11 @@ public:
   virtual void      collectGarbage(){}
   virtual void      abortEvaluation() = 0;
 
+#ifdef GUI
   virtual void      hideMsgDialogs();
   virtual void      restoreMsgDialogs();
-
-
+  void              deleteMsgDialogs();
+#endif
   bool              isEngineRunning() const {return fEngineIsRunning;}
   bool              isEvalAborted() const {return fAborted;}
 
@@ -44,7 +45,7 @@ public:
   qint64            getElapsedTime();
   const QString     getFunctionReturnType(const QString& UnitFunction);
 
-  void              deleteMsgDialogs();
+
 
   void              ifError_AbortAndReport();
 

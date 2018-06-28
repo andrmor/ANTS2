@@ -1,6 +1,6 @@
 #include "localscriptinterfaces.h"
 
-#include <QVector3D>
+#include <QtGui/QVector3D>
 #include <QDebug>
 
 InterfaceToPMscript::InterfaceToPMscript()

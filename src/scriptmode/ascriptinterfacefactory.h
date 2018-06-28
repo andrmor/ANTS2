@@ -7,8 +7,9 @@
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "ainterfacetowebsocket.h"
+#ifdef GUI
 #include "ainterfacetomessagewindow.h"
-#include "ainterfacetowebsocket.h"
+#endif
 
 #include <QObject>
 
@@ -43,10 +44,10 @@ public:
 
         const AInterfaceToGraph* graph = dynamic_cast<const AInterfaceToGraph*>(other);
         if (graph) return new AInterfaceToGraph(*graph);
-
+#ifdef GUI
         const AInterfaceToMessageWindow* msg = dynamic_cast<const AInterfaceToMessageWindow*>(other);
         if (msg) return new AInterfaceToMessageWindow(*msg);
-
+#endif
         const AInterfaceToWebSocket* web = dynamic_cast<const AInterfaceToWebSocket*>(other);
         if (web) return new AInterfaceToWebSocket(*web);
 

@@ -13,7 +13,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 EventsDataClass::EventsDataClass(const TString nameID) //nameaddon to make unique hist names in multithread
  : QObject()

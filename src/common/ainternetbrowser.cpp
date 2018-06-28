@@ -5,7 +5,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QElapsedTimer>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 AInternetBrowser::AInternetBrowser(int timeout_ms) :
   fWait(false), timeout(timeout_ms) {}

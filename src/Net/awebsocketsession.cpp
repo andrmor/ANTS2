@@ -2,7 +2,7 @@
 
 #include <QWebSocket>
 #include <QElapsedTimer>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -228,7 +228,7 @@ void AWebSocketSession::onDisconnect()
     }
     else if (bWaitForAnswer)
     {
-        qDebug() << "Disconnected while attempting to establish connection";
+        //qDebug() << "Disconnected while attempting to establish connection";
         if (State == Connecting)
             Error = "Server disconnected before confirming connection";
         else

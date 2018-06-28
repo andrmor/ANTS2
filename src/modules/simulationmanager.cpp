@@ -173,12 +173,14 @@ void ASimulatorRunner::updateGeoManager()  // *** obsolete!
         workers[i]->updateGeoManager();
 }
 
+/*
 void ASimulatorRunner::setWorkersSeed(int rngSeed)
 {
     TRandom2 rng(rngSeed);
     for(int i = 0; i < workers.count(); i++)
-        workers[i]->setRngSeed(rng.Rndm());
+        workers[i]->setRngSeed(rng.Rndm()*100000);
 }
+*/
 
 void ASimulatorRunner::updateStats()
 {

@@ -107,7 +107,7 @@ public:
 
     void setup(QJsonObject &json, int threadCount);
     void updateGeoManager();
-    void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
+    //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
     void updateStats();
     double getProgress() const { return progress; }

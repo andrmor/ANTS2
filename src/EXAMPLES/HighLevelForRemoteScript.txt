@@ -1,51 +1,57 @@
-//IP and port for the Ants2 server dispatchers
-var server1 = ["127.0.0.1", 1234]
-var server2 = ["11.11.11.11", 1234]
-var server3 = ["22.22.22.22", 12345]
+// enforcing flood sim mode for point source mode - the script will try to distribute simulation over all available remote servers from the list
+//the total number of events simulated will depends on the available serveres and threads
+config.Replace( "SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood" , 2 )
+var eventsPerThread = 200                       // events to simulate per available thread
+var localThreads = 4                                // local threads (on this PC) to use
+
+//IP and port for the Ants2 server dispatchers (https://github.com/andrmor/ServDisp)
+var server1 = ["127.0.0.1", 1234]             //ServDisp can be run on the same computer - the local IP can be used
+var server2 = ["11.11.11.11", 1234]         // <-- modify IP/port for the remote ServDisp!
+var server3 = ["22.22.22.22", 12345]       // <-- modify IP/port for the remote ServDisp!
+//....
 
 var Remote = [server1, server2, server3]  // list of remote server dispatchers  
 var FileTemplate = "SimTree"                      // filename pattern for the local simulation tree (filename will be: "<pattern>-1.root" for thread #1 )
-var eventsPerThread = 200                       // events to simulate per available thread
-var localThreads = 4                                    // local threads to use
 
 threads.deleteAll()
 threads.setAbortInThreadIsGlobal(false) // abort in one thread does not abort the rest
 
 for (var i = 0; i < Remote.length; i++)
-        threads.evaluateScript(  "web.GetAvailableThreads(  \"" + Remote[i][0] + "\"," + Remote[i][1]  + ")"  )
+        threads.evaluateScript(  "web.SetTimeout(3000); web.GetAvailableThreads(  \"" + Remote[i][0] + "\"," + Remote[i][1]  + ")"  )
 threads.waitForAll()
 
-var remThrs = 0
-var remSer = 0
+var remThrs = 0  // number of remote threads
+var remSer = 0    //number of remote servers   
 for (var i=threads.countAll()-1; i>-1; i--)
        if ( threads.isAborted(i)) Remote[i].push(0)
        else
        {
               thr =  threads.getResult(i); remThrs += thr; remSer++
-              Remote[i].push(thr)  // adding information how many threads to use
+              Remote[i].push(thr)  // adding information how many threads to use with this dispatcher
        }
 core.clearText(); core.print("Found " + remSer + " remote server(s) with " + remThrs + " total available threads" )
 threads.deleteAll()
 
-
-function threadWorker(iThr, Remote)
+if (remThrs > 0)
 {
-       var availableThreads = Remote[iThr][2]
-       if (availableThreads !== 0) 
-       {
-              var reply = web.OpenSession( Remote[iThr][0], Remote[iThr][1], availableThreads )
-              conf["SimulationConfig"]["PointSourcesConfig"]["FloodOptions"]["Nodes"] = availableThreads * eventsPerThread
-              web.SendConfig(conf)
-              web.RemoteSimulatePhotonSources(FileTemplate+"-"+iThr+".root", true)
-              web.Disconnect()
-       }       
-}
+       var conf = config.GetConfig()
+       core.print("-->Requesting to simulate " + remThrs * eventsPerThread + " events remotely...")
 
-config.Replace( "SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood" , 2 )   // enforcing flood sim mode
-var conf = config.GetConfig()
-core.print("-->Requesting to simulate " + remThrs * eventsPerThread + " events remotely...")
-for (var i = 0; i < Remote.length; i++)
-      threads.evaluateFunction(threadWorker, [i, Remote])
+       function threadWorker(iThr, Remote)
+       {
+              var availableThreads = Remote[iThr][2]
+              if (availableThreads !== 0) 
+                     {
+                            var reply = web.OpenSession( Remote[iThr][0], Remote[iThr][1], availableThreads )
+                            conf["SimulationConfig"]["PointSourcesConfig"]["FloodOptions"]["Nodes"] = availableThreads * eventsPerThread //modifying config: number of events to simulate
+                            web.SendConfig(conf)
+                            web.RemoteSimulatePhotonSources(FileTemplate+"-"+iThr+".root", true)
+                            web.Disconnect()
+                     }       
+       }      
+       for (var i = 0; i < Remote.length; i++) 
+              threads.evaluateFunction(threadWorker, [i, Remote])
+}
 
 events.ClearEvents()
 if (localThreads > 0)
@@ -54,20 +60,24 @@ if (localThreads > 0)
        core.print("-->Simulating " + numEv + " events locally...")
        config.Replace( "SimulationConfig.PointSourcesConfig.FloodOptions.Nodes", numEv)
        sim.RunPhotonSources(localThreads)
+       core.print("Local simulation finished")
 }
-core.print("Local simulation finished")
-threads.waitForAll()
 
-var remEv = 0
-for (var i = 0; i < Remote.length; i++)
+if (remThrs > 0)
 {
-       if ( !threads.isAborted(i) )
+       threads.waitForAll()
+       core.print("Remote simulation finished, attaching the received data...")
+       var remEv = 0
+       for (var i = 0; i < Remote.length; i++)
        {
-              events.LoadEventsTree(FileTemplate+"-"+i+".root", true)
-              remEv += Remote[i][2]
+              if ( Remote[i][2] >0 &&  !threads.isAborted(i) )
+              {
+                     events.LoadEventsTree(FileTemplate+"-"+i+".root", true)
+                     remEv += Remote[i][2]
+              }
        }
+       if (remThrs != remEv) core.print("There were errors, " + remEv * eventsPerThread + " events were simulated remotely!" )
 }
-core.print("Remote simulation finished")
-if (remThrs != remEv) core.print("Only " + remEv * eventsPerThread + " events were simulated remotely!" )
-       
+
+core.print("Simulation finished")     
 threads.deleteAll()       

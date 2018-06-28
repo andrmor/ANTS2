@@ -94,7 +94,7 @@ const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerO
     else
     {
         abort(socket->GetError());
-        return "error";
+        return "";
     }
 }
 
@@ -111,7 +111,7 @@ int AInterfaceToWebSocket::GetAvailableThreads(const QString &IP, int port, bool
     if (ShowOutput) emit showTextOnMessageWindow(QString("Connecting to dispatcher ") + url);
 
     QString reply = Connect(url, true);
-    if (reply == "error" || !strToObject(reply)["result"].toBool())
+    if (reply.isEmpty() || !strToObject(reply)["result"].toBool())
     {
         if (ShowOutput) emit showTextOnMessageWindow( "Connection failed!" );
         return 0;
@@ -140,7 +140,7 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
     if (ShowOutput) emit showTextOnMessageWindow(QString("Connecting to dispatcher ") + url);
 
     QString reply = Connect(url, true);
-    if (reply == "error")
+    if (reply.isEmpty())
     {
         if (ShowOutput) emit showTextOnMessageWindow( "Connection failed!" );
         return "";
@@ -201,6 +201,12 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
 
 bool AInterfaceToWebSocket::SendConfig(QVariant config)
 {
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return false;
+    }
+
     QString reply = SendObject(config);
     QJsonObject obj = strToObject(reply);
     if ( !obj.contains("result") || !obj["result"].toBool() )
@@ -233,7 +239,7 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimT
     const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(socket->GetPeerPort()) + ".root";
 
     QString Script;
-    if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(true);";
+    Script += "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
     Script += "sim.RunPhotonSources(" + QString::number(RequestedThreads) + ");";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
@@ -242,28 +248,46 @@ bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimT
     Script += "server.SendFile(fileName);";
     qDebug() << Script;
 
-    //execute the remote script
+    //execute the script on remote server
+    if (ShowOutput) emit showTextOnMessageWindow("Sending script to the server...");
     QString reply = SendText(Script);
-    if (reply.isEmpty()) return false; //this is on local abort, e.g. timeout
+    if (reply.isEmpty())
+    {
+        if (ShowOutput)
+        {
+            emit showTextOnMessageWindow("Script execution failed!");
+            emit showTextOnMessageWindow(socket->GetError());
+        }
+        return false; //this is on local abort, e.g. timeout
+    }
     QJsonObject obj = strToObject(reply);
     if (obj.contains("error"))
     {
-        abort(obj["error"].toString());
+        const QString err = obj["error"].toString();
+        emit showTextOnMessageWindow(err);
+        abort(err);
         return false;
     }
     while ( !obj.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"file\" }"
     {
         if (ShowOutput) emit showTextOnMessageWindow(reply);
         reply = ResumeWaitForAnswer();
-        if (reply.isEmpty()) return false; //this is on local abort, e.g. timeout
+        if (reply.isEmpty())
+        {
+            emit showTextOnMessageWindow("Script execution failed!");
+            emit showTextOnMessageWindow(socket->GetError());
+            return false; //this is on local abort, e.g. timeout
+        }
         obj = strToObject(reply);
     }
 
-    if (ShowOutput) emit showTextOnMessageWindow("Evaluation on remote server finished");
+    if (ShowOutput) emit showTextOnMessageWindow("Server has finished simulation");
     bool bOK = SaveBinaryReplyToFile(LocalSimTreeFileName);
     if (!bOK)
     {
-        abort("Cannot save tree in file " + LocalSimTreeFileName);
+        const QString err = QString("Cannot save tree in file ") + LocalSimTreeFileName;
+        emit showTextOnMessageWindow(err);
+        abort(err);
         return false;
     }
     emit showTextOnMessageWindow("Sim results saved in " + LocalSimTreeFileName);

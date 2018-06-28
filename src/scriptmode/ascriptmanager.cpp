@@ -24,6 +24,8 @@ AScriptManager::~AScriptManager()
   interfaces.clear();
 
   delete timer;
+
+  if (bOwnRandomGen) delete RandGen;
 }
 
 #ifdef GUI
@@ -148,7 +150,7 @@ void AScriptManager::AbortEvaluation(QString message)
       if (bi) bi->ForceStop();
     }
 
-  if (!message.isEmpty())
+  if (!message.isEmpty() && bShowAbortMessageInOutput)
   {
       message = "<font color=\"red\">"+ message +"</font><br>";
       emit showMessage(message);

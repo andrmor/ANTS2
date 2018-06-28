@@ -1,2 +1,0 @@
-ajavascriptmanager - L:480 - check logic - all section starting from "//connect web and msg" is not needed for no-gui mode
-afiletools - replace explicit messagebox with message

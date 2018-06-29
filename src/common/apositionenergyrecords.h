@@ -1,7 +1,7 @@
 #ifndef APOSITIONENERGYRECORDS
 #define APOSITIONENERGYRECORDS
 
-#include <QJsonArray>
+#include <QDataStream>
 
 struct APositionEnergyRecord
 {
@@ -9,19 +9,18 @@ struct APositionEnergyRecord
     double energy;
 };
 
-//FIXME: Very unsafe! Definitely not copyable!!
 class APositionEnergyBuffer
 {
  private:
     int numRecords;
 
-    APositionEnergyBuffer(const APositionEnergyBuffer &) { }
-    APositionEnergyBuffer &operator=(const APositionEnergyBuffer &) { return *this; }
+    APositionEnergyBuffer(const APositionEnergyBuffer &) { } // not copiable!
+    APositionEnergyBuffer &operator=(const APositionEnergyBuffer &) { return *this; } // not copiable!
+
  public:
     APositionEnergyRecord *rec; //pointer to array of position energy records
 
     APositionEnergyBuffer() { rec = new APositionEnergyRecord[1]; numRecords = 1;}   //by default 1 point!
-    //APositionEnergyBuffer(APositionEnergyBuffer &&other);
     ~APositionEnergyBuffer(){ delete [] rec; }
 
     //public functions
@@ -125,10 +124,45 @@ struct AReconRecord : public ABaseScanAndReconRecord
       target->fScriptFiltered = fScriptFiltered;
     }
 
-  void packToQJsonArray(QJsonArray& ar)
-  {
+  // future improvements: override (outisde the class!)
+  //QDataStream &operator<<(QDataStream &, const AReconRecord &);
+  //QDataStream &operator>>(QDataStream &, AReconRecord &);
 
+  void sendToQDataStream(QDataStream & out) const
+  {
+      out << Points.size();
+
+      for (int i=0; i<Points.size(); i++)
+      {
+          out << Points.at(i).r[0];
+          out << Points.at(i).r[1];
+          out << Points.at(i).r[2];
+          out << Points.at(i).energy;
+      }
+
+      out << chi2;
+      out << ReconstructionOK;
   }
+
+  void unpackFromQDataStream(QDataStream & in)
+  {
+      int numPoints;
+      in >> numPoints;
+      if (Points.size() != numPoints)
+          Points.Reinitialize(numPoints);
+
+      for (int iPoint=0; iPoint<numPoints; iPoint++)
+      {
+          in >> Points[iPoint].r[0];
+          in >> Points[iPoint].r[1];
+          in >> Points[iPoint].r[2];
+          in >> Points[iPoint].energy;
+      }
+
+      in >> chi2;
+      in >> ReconstructionOK;
+  }
+
 };
 
 #endif // APOSITIONENERGYRECORDS

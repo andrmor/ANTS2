@@ -164,6 +164,17 @@ void AWebSocketSessionServer::ReplyWithBinaryObject_asJSON(const QVariant &objec
     bReplied = true;
 }
 
+void AWebSocketSessionServer::ReplyWithQByteArray(const QByteArray &ba)
+{
+    if ( !assureCanReply() ) return;
+
+    qDebug() << "Binary reply: QByteArray";
+
+    client->sendBinaryMessage(ba);
+    client->sendTextMessage("{ \"binary\" : \"qbytearray\" }");
+    bReplied = true;
+}
+
 void AWebSocketSessionServer::ReplyProgress(int percents)
 {
     if ( !assureCanReply() ) return;

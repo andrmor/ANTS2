@@ -325,10 +325,11 @@ bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo
     }
 
     //sending events
-    QJsonObject json;
-    EventsDataHub->packEventsToJson(eventsFrom, eventsTo, json);
+    QByteArray ba;
+    EventsDataHub->packEventsToByteArray(eventsFrom, eventsTo, ba);
 
-    QString reply = sendQJsonObject(json);
+    if (ShowOutput) emit showTextOnMessageWindow("Sending events to the server...");
+    QString reply = sendQByteArray(ba);
     QJsonObject obj = strToObject(reply);
     if ( !obj.contains("result") || !obj["result"].toBool() )
     {
@@ -336,19 +337,57 @@ bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo
         return false;
     }
 
-    //sending script
-    QString Script;
-    Script += "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    Script += "if (events.GetNumPMs() != events.GetNumPMs()) core.abort(\"Not consistent number of PMs in config and in events\")";
+    if (ShowOutput) emit showTextOnMessageWindow("Setting event signals at the remote server...");
+    QString Script = "server.GetBufferAsEvents()";
+    reply = SendText(Script);
+    obj = strToObject(reply);
+    if ( !obj.contains("result") || !obj["result"].toBool() )
+    {
+        abort("Failed to set events on server. Check that configuration was transferred");
+        return false;
+    }
+
+    if (ShowOutput) emit showTextOnMessageWindow("Starting reconstruction...");
+    Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
     Script += "rec.ReconstructEvents(" + QString::number(RequestedThreads) + ", false);";
+    Script += "server.SendReconstructionData()";
+    reply = SendText(Script);
+    obj = strToObject(reply);
+    if (obj.contains("error"))
+    {
+        const QString err = obj["error"].toString();
+        emit showTextOnMessageWindow(err);
+        abort(err);
+        return false;
+    }
+    while ( !obj.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"qbytearray\" }"
+    {
+        if (ShowOutput) emit showTextOnMessageWindow(reply);
+        reply = ResumeWaitForAnswer();
+        if (reply.isEmpty())
+        {
+            emit showTextOnMessageWindow("Script execution failed!");
+            emit showTextOnMessageWindow(socket->GetError());
+            return false; //this is on local abort, e.g. timeout
+        }
+        obj = strToObject(reply);
+    }
+    if (ShowOutput) emit showTextOnMessageWindow("Remote reconstruction finished");
 
+    if (ShowOutput) emit showTextOnMessageWindow("Setting local reconstruction data...");
+    const QByteArray& baIn = socket->GetBinaryReply();
+    bool bOK = EventsDataHub->unpackReconstructedFromByteArray(eventsFrom, eventsTo, baIn);
+    if (!bOK)
+    {
+        QString err = "Failed to set reconstruction data using the obtained data";
+        emit showTextOnMessageWindow(err);
+        abort(err);
+        return false;
+    }
 
+    if (ShowOutput) emit showTextOnMessageWindow("Done!");
 
     /*
-    Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
-    Script += "var ok = sim.SaveAsTree(fileName);";
-    Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
-    if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(false);";
     Script += "server.SendFile(fileName);";
     qDebug() << Script;
 
@@ -427,6 +466,24 @@ const QString AInterfaceToWebSocket::sendQJsonObject(const QJsonObject& json)
     }
 
     bool bOK = socket->SendJson(json);
+    if (bOK)
+        return socket->GetTextReply();
+    else
+    {
+        abort(socket->GetError());
+        return "";
+    }
+}
+
+const QString AInterfaceToWebSocket::sendQByteArray(const QByteArray &ba)
+{
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
+    bool bOK = socket->SendQByteArray(ba);
     if (bOK)
         return socket->GetTextReply();
     else

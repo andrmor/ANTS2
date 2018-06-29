@@ -76,9 +76,10 @@ public:
     void copyReconstructedToTrue(int igroup = 0);
     void prepareStatisticsForEvents(const bool isAllLRFsDefined, int &GoodEvents, double &AvChi2, double &AvDeviation, int igroup = 0);
 
-    bool packEventsToJson(int from, int to, QJsonObject &json) const;
-    bool getEventsFromJson(QJsonObject &json);
-    bool packReconstructedToJson(QJsonObject &json) const;
+    bool packEventsToByteArray(int from, int to, QByteArray &ba) const;
+    bool unpackEventsFromByteArray(const QByteArray &ba);  // run by server - so no events range selection
+    bool packReconstructedToByteArray(QByteArray &ba) const;
+    bool unpackReconstructedFromByteArray(int from, int to, const QByteArray &ba);  //run by client -> should respect the event range
 
     //load data can have manifest file with holes/slits
     QVector<ManifestItemBaseClass*> Manifest;

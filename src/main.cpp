@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(threads, "threads");
         AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
         SM.SetInterfaceObject(web, "web");
-        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer);
+        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);
         SM.SetInterfaceObject(server, "server");
 #ifdef ANTS_FLANN
         AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);

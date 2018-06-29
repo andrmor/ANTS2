@@ -68,6 +68,7 @@ private:
 private:
     bool remoteSimulate(bool bPhotonSource, const QString &LocalSimTreeFileName, bool ShowOutput);
     const QString sendQJsonObject(const QJsonObject &json);
+    const QString sendQByteArray(const QByteArray &ba);
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

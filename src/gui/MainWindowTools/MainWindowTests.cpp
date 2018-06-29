@@ -39,39 +39,68 @@ static TVector3 NormViz;
 #include "TAttMarker.h"
 void MainWindow::on_pobTest_clicked()
 {
-   if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
-   if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+    QByteArray ba;
+    EventsDataHub->packEventsToByteArray(0, EventsDataHub->countEvents(), ba);
 
-   TGraph* g = new TGraph;
-   for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
-   {
-       g->SetPoint(ipm, TmpHub->ChPerPhEl_Peaks.at(ipm), TmpHub->ChPerPhEl_Sigma2.at(ipm));
-   }
-   GraphWindow->Draw(g, "A*");
+    EventsDataHub->clear();
+    EventsDataHub->unpackEventsFromByteArray(ba);
+
+//    ////////////////////////////////////////////////////////////////////
+//    QDataStream in(ba);
+//    QString st;
+//    int events;
+//    int numPMs;
+//    in >> st;
+//    in >> events;
+//    in >> numPMs;
+
+//    QVector<float> otherVector;
+//    in >> otherVector; //load
+//    qDebug() << st << events << numPMs;
+//    qDebug() << otherVector;
+
+
+//   if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+//   if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+
+//   TGraph* g = new TGraph;
+//   for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+//   {
+//       g->SetPoint(ipm, TmpHub->ChPerPhEl_Peaks.at(ipm), TmpHub->ChPerPhEl_Sigma2.at(ipm));
+//   }
+//   GraphWindow->Draw(g, "A*");
 }
 
 void MainWindow::on_pobTest_2_clicked()
 {
-    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
-    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+    QByteArray ba;
+    EventsDataHub->packReconstructedToByteArray(ba);
 
-    TGraph* g1 = new TGraph();
-    TGraph* g2 = new TGraph();
-    for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
-    {
-        g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
-        g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
-    }
-    g1->SetMarkerStyle(4);  //round
-    g2->SetMarkerStyle(3);  //star
-    g1->SetMarkerColor(4);  //blue
-    g2->SetMarkerColor(2);  //red
+    EventsDataHub->resetReconstructionData(0);
+    EventsDataHub->unpackReconstructedFromByteArray(0, EventsDataHub->countEvents(), ba);
+    EventsDataHub->fReconstructionDataReady = true;
+    emit EventsDataHub->requestEventsGuiUpdate();
 
-    g1->SetTitle("From peaks");
-    g2->SetTitle("From stat");
+//    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+//    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
 
-    GraphWindow->Draw(g1, "AP");
-    GraphWindow->Draw(g2, "P same");
+//    TGraph* g1 = new TGraph();
+//    TGraph* g2 = new TGraph();
+//    for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+//    {
+//        g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
+//        g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
+//    }
+//    g1->SetMarkerStyle(4);  //round
+//    g2->SetMarkerStyle(3);  //star
+//    g1->SetMarkerColor(4);  //blue
+//    g2->SetMarkerColor(2);  //red
+
+//    g1->SetTitle("From peaks");
+//    g2->SetTitle("From stat");
+
+//    GraphWindow->Draw(g1, "AP");
+//    GraphWindow->Draw(g2, "P same");
 }
 
 /*

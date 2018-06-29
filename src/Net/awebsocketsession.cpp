@@ -175,6 +175,15 @@ bool AWebSocketSession::SendJson(const QJsonObject &json)
     return waitForReply();
 }
 
+bool AWebSocketSession::SendQByteArray(const QByteArray &ba)
+{
+    if ( !ConfirmSendPossible() ) return false;
+
+    socket->sendBinaryMessage(ba);
+
+    return waitForReply();
+}
+
 bool AWebSocketSession::SendFile(const QString &fileName)
 {
     if ( !ConfirmSendPossible() ) return false;

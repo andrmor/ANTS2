@@ -435,7 +435,7 @@ int EventsDataClass::getTimeBins() const
 int EventsDataClass::getNumPMs() const
 {
     if (Events.isEmpty()) return 0;
-    return Events[0].size();
+    return Events.first().size();
 }
 
 const QVector<float> *EventsDataClass::getEvent(int iev) const
@@ -505,48 +505,82 @@ void EventsDataClass::prepareStatisticsForEvents(const bool isAllLRFsDefined, in
   else AvDeviation = -1;
 }
 
-bool EventsDataClass::packEventsToJson(int from, int to, QJsonObject &json) const
+bool EventsDataClass::packEventsToByteArray(int from, int to, QByteArray& ba) const
 {
     if (from < 0 || to > Events.size()) return false;
 
-    QJsonArray ar;
+    ba.clear();
+    QDataStream out(&ba, QIODevice::WriteOnly);
+
+    out << QString("events");
+    out << to - from;
+    out << getNumPMs();
     for (int ievent = from; ievent < to; ievent++)
-    {
-        QJsonArray el;
-        for (int iPM = 0; iPM < Events.at(0).size(); iPM++)
-            el << Events.at(ievent).at(iPM);
-        ar.append(el);
-    }
+        out << Events.at(ievent);
 
-    json["events"] = ar;
     return true;
 }
 
-bool EventsDataClass::getEventsFromJson(QJsonObject &json)
+bool EventsDataClass::unpackEventsFromByteArray(const QByteArray &ba)
 {
+    QDataStream in(ba);
+
+    QString st;
+    in >> st;
+    if (st != "events") return false;
+
+    int events;
+    in >> events;
+
+    int numPMs;
+    in >> numPMs;
+
     clear();
-    if (!json.contains("events")) return false;
-
-    QJsonArray ar = json["events"].toArray();
-    if (ar.isEmpty()) return false;
-    Events.resize(ar.size());
-    for (int i=0; i<ar.size(); i++)
+    Events.resize(events);
+    for (int iev=0; iev<events; iev++)
     {
-        QJsonArray el = ar.at(i).toArray();
-        for (int iPM = 0; iPM<el.size(); iPM++)
-            Events[i] << el.at(iPM).toDouble();
+        Events[iev].resize(numPMs);
+        in >> Events[iev];
     }
+
+    createDefaultReconstructionData(0);
+    emit requestEventsGuiUpdate();        //in the rare case server is with gui
     return true;
 }
 
-bool EventsDataClass::packReconstructedToJson(QJsonObject &json) const
+bool EventsDataClass::packReconstructedToByteArray(QByteArray &ba) const
 {
-    QJsonArray ar;
-    for (int irg = 0; irg < ReconstructionData.size(); irg++)
-    {
-        QJsonArray el;
+    if (ReconstructionData.isEmpty()) return false;
 
-    }
+    ba.clear();
+    QDataStream out(&ba, QIODevice::WriteOnly);
+
+    out << QString("reconstruction");
+    const int size = ReconstructionData.at(0).size();
+    out << size;
+
+    for (int ievent = 0; ievent < size; ievent++)
+        ReconstructionData.at(0).at(ievent)->sendToQDataStream(out);
+
+    return true;
+}
+
+bool EventsDataClass::unpackReconstructedFromByteArray(int from, int to, const QByteArray &ba)
+{
+    QDataStream in(ba);
+
+    QString st;
+    in >> st;
+    if (st != "reconstruction") return false;
+
+    int events;
+    in >> events;
+    if (events != (to - from) ) return false;
+
+    if (ReconstructionData.at(0).size() < to) return false;
+
+    for (int ievent = from; ievent < to; ievent++)
+        ReconstructionData[0][ievent]->unpackFromQDataStream(in);
 
     return true;
 }

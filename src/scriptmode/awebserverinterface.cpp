@@ -1,13 +1,14 @@
 #include "awebserverinterface.h"
 #include "awebsocketsessionserver.h"
+#include "eventsdataclass.h"
 
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
 
-AWebServerInterface::AWebServerInterface(AWebSocketSessionServer &Server) :
-    AScriptInterface(), Server(Server)
+AWebServerInterface::AWebServerInterface(AWebSocketSessionServer &Server, EventsDataClass *EventsDataHub) :
+    AScriptInterface(), Server(Server), EventsDataHub(EventsDataHub)
 {
     QObject::connect(&Server, &AWebSocketSessionServer::requestAbort, this, &AWebServerInterface::AbortScriptEvaluation);
 }
@@ -32,6 +33,14 @@ void AWebServerInterface::SendObjectAsJSON(const QVariant &object)
     Server.ReplyWithBinaryObject_asJSON(object);
 }
 
+void AWebServerInterface::SendReconstructionData()
+{
+    QByteArray ba;
+    EventsDataHub->packReconstructedToByteArray(ba);
+
+    Server.ReplyWithQByteArray(ba);
+}
+
 bool AWebServerInterface::IsBufferEmpty() const
 {
     return Server.isBinaryEmpty();
@@ -50,6 +59,16 @@ const QVariant AWebServerInterface::GetBufferAsObject() const
 
     QVariantMap vm = json.toVariantMap();
     return vm;
+}
+
+void AWebServerInterface::GetBufferAsEvents()
+{
+    const QByteArray& ba = Server.getBinary();
+
+    bool bOK = EventsDataHub->unpackEventsFromByteArray(ba);
+    if (!bOK)
+        abort("Failed to set events from the binary buffer.");
+    else Server.sendOK();
 }
 
 bool AWebServerInterface::SaveBufferToFile(const QString &fileName)

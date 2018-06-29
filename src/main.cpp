@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(depo, "depo");
         AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
         SM.SetInterfaceObject(threads, "threads");
-        AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+        AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
         SM.SetInterfaceObject(web, "web");
         AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer);
         SM.SetInterfaceObject(server, "server");

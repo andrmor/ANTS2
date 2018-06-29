@@ -1,6 +1,8 @@
 #ifndef APOSITIONENERGYRECORDS
 #define APOSITIONENERGYRECORDS
 
+#include <QJsonArray>
+
 struct APositionEnergyRecord
 {
     double r[3];
@@ -122,6 +124,11 @@ struct AReconRecord : public ABaseScanAndReconRecord
       target->ReconstructionOK = ReconstructionOK;
       target->fScriptFiltered = fScriptFiltered;
     }
+
+  void packToQJsonArray(QJsonArray& ar)
+  {
+
+  }
 };
 
 #endif // APOSITIONENERGYRECORDS

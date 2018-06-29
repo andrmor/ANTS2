@@ -505,6 +505,52 @@ void EventsDataClass::prepareStatisticsForEvents(const bool isAllLRFsDefined, in
   else AvDeviation = -1;
 }
 
+bool EventsDataClass::packEventsToJson(int from, int to, QJsonObject &json) const
+{
+    if (from < 0 || to > Events.size()) return false;
+
+    QJsonArray ar;
+    for (int ievent = from; ievent < to; ievent++)
+    {
+        QJsonArray el;
+        for (int iPM = 0; iPM < Events.at(0).size(); iPM++)
+            el << Events.at(ievent).at(iPM);
+        ar.append(el);
+    }
+
+    json["events"] = ar;
+    return true;
+}
+
+bool EventsDataClass::getEventsFromJson(QJsonObject &json)
+{
+    clear();
+    if (!json.contains("events")) return false;
+
+    QJsonArray ar = json["events"].toArray();
+    if (ar.isEmpty()) return false;
+    Events.resize(ar.size());
+    for (int i=0; i<ar.size(); i++)
+    {
+        QJsonArray el = ar.at(i).toArray();
+        for (int iPM = 0; iPM<el.size(); iPM++)
+            Events[i] << el.at(iPM).toDouble();
+    }
+    return true;
+}
+
+bool EventsDataClass::packReconstructedToJson(QJsonObject &json) const
+{
+    QJsonArray ar;
+    for (int irg = 0; irg < ReconstructionData.size(); irg++)
+    {
+        QJsonArray el;
+
+    }
+
+    return true;
+}
+
 void EventsDataClass::copyTrueToReconstructed(int igroup)
 {
   if (Scan.isEmpty()) return;

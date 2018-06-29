@@ -3,6 +3,7 @@
 #include "awebsocketstandalonemessanger.h"
 #include "awebsocketsession.h"
 #include "awebsocketsessionserver.h"
+#include "eventsdataclass.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -15,12 +16,14 @@ const QJsonObject strToObject(const QString& s)
     return doc.object();
 }
 
-AInterfaceToWebSocket::AInterfaceToWebSocket() : AScriptInterface() {}
+AInterfaceToWebSocket::AInterfaceToWebSocket(EventsDataClass *EventsDataHub) :
+    AScriptInterface(), EventsDataHub(EventsDataHub) {}
 
-AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &)
+AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &other)
 {
     compatibilitySocket = 0;
     socket = 0;
+    EventsDataHub = other.EventsDataHub;
 }
 
 AInterfaceToWebSocket::~AInterfaceToWebSocket()
@@ -228,14 +231,14 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput)
+bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& SimTreeFileNamePattern, bool ShowOutput)
 {
-    return remoteSimulate(true, LocalSimTreeFileName, ShowOutput);
+    return remoteSimulate(true, SimTreeFileNamePattern, ShowOutput);
 }
 
-bool AInterfaceToWebSocket::RemoteSimulateParticleSources(const QString &LocalSimTreeFileName, bool ShowOutput)
+bool AInterfaceToWebSocket::RemoteSimulateParticleSources(const QString &SimTreeFileNamePattern, bool ShowOutput)
 {
-    return remoteSimulate(false, LocalSimTreeFileName, ShowOutput);
+    return remoteSimulate(false, SimTreeFileNamePattern, ShowOutput);
 }
 
 bool AInterfaceToWebSocket::remoteSimulate(bool bPhotonSource, const QString& LocalSimTreeFileName, bool ShowOutput)
@@ -307,6 +310,73 @@ bool AInterfaceToWebSocket::remoteSimulate(bool bPhotonSource, const QString& Lo
     return true;
 }
 
+bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo, bool ShowOutput)
+{
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return false;
+    }
+
+    if (eventsFrom < 0 || eventsTo > EventsDataHub->countEvents() || eventsFrom >= eventsTo)
+    {
+        abort("Bad from/to events");
+        return false;
+    }
+
+    //sending events
+    QJsonObject json;
+    EventsDataHub->packEventsToJson(eventsFrom, eventsTo, json);
+
+    QString reply = sendQJsonObject(json);
+    QJsonObject obj = strToObject(reply);
+    if ( !obj.contains("result") || !obj["result"].toBool() )
+    {
+        abort("Failed to send events");
+        return false;
+    }
+
+    //sending script
+    QString Script;
+    Script += "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
+    Script += "if (events.GetNumPMs() != events.GetNumPMs()) core.abort(\"Not consistent number of PMs in config and in events\")";
+    Script += "rec.ReconstructEvents(" + QString::number(RequestedThreads) + ", false);";
+
+
+
+    /*
+    Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
+    Script += "var ok = sim.SaveAsTree(fileName);";
+    Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
+    if (ShowOutput) Script += "server.SetAcceptExternalProgressReport(false);";
+    Script += "server.SendFile(fileName);";
+    qDebug() << Script;
+
+    //execute the script on remote server
+    if (ShowOutput) emit showTextOnMessageWindow("Sending script to the server...");
+    reply = SendText(Script);
+    if (reply.isEmpty())
+    {
+        if (ShowOutput)
+        {
+            emit showTextOnMessageWindow("Script execution failed!");
+            emit showTextOnMessageWindow(socket->GetError());
+        }
+        return false; //this is on local abort, e.g. timeout
+    }
+    obj = strToObject(reply);
+    if (obj.contains("error"))
+    {
+        const QString err = obj["error"].toString();
+        emit showTextOnMessageWindow(err);
+        abort(err);
+        return false;
+    }
+*/
+
+    return true;
+}
+
 const QString AInterfaceToWebSocket::SendText(const QString &message)
 {
     if (!socket)
@@ -337,12 +407,6 @@ const QString AInterfaceToWebSocket::SendTicket(const QString &ticket)
 
 const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
 {
-    if (!socket)
-    {
-        abort("Web socket was not connected");
-        return "";
-    }
-
     if (object.type() != QMetaType::QVariantMap)
     {
         abort("Argument type of SendObject() method should be object!");
@@ -351,7 +415,18 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
     QVariantMap vm = object.toMap();
     QJsonObject js = QJsonObject::fromVariantMap(vm);
 
-    bool bOK = socket->SendJson(js);
+    return sendQJsonObject(js);
+}
+
+const QString AInterfaceToWebSocket::sendQJsonObject(const QJsonObject& json)
+{
+    if (!socket)
+    {
+        abort("Web socket was not connected");
+        return "";
+    }
+
+    bool bOK = socket->SendJson(json);
     if (bOK)
         return socket->GetTextReply();
     else

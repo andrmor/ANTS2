@@ -831,10 +831,10 @@ resolution:</string>
         <widget class="QPushButton" name="pbPriThelp">
          <property name="geometry">
           <rect>
-           <x>381</x>
-           <y>48</y>
+           <x>383</x>
+           <y>49</y>
            <width>31</width>
-           <height>21</height>
+           <height>22</height>
           </rect>
          </property>
          <property name="font">
@@ -974,10 +974,10 @@ resolution:</string>
         <widget class="QPushButton" name="pbPriT_test">
          <property name="geometry">
           <rect>
-           <x>367</x>
+           <x>368</x>
            <y>72</y>
            <width>61</width>
-           <height>21</height>
+           <height>22</height>
           </rect>
          </property>
          <property name="font">

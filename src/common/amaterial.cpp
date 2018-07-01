@@ -39,10 +39,81 @@ double AMaterial::getReemissionProbability(int iWave) const
     return reemissionProbBinned.at(iWave);
 }
 
+double AMaterial::ft(double A, double td, double tr, double t)
+{
+    return A * exp(-t / td) * ( 1.0 - exp(-t / tr) );
+}
+
 double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen)
 {
+    if (PriScintModel == 1) //Shao
+        if ( !PriScintDecayTimeVector.isEmpty() && PriScintRaiseTime != 0)
+        {
+            //Shao model, upgraded to have several decay components
+            double A;
+            double td;
 
-    return 0;
+            if (PriScintDecayTimeVector.size() == 1)
+            {
+                A = PriScintDecayTimeVector.first().first;
+                td =  PriScintDecayTimeVector.first().second;
+            }
+            else
+            {
+                //selecting component
+                const double generatedStatWeight = _PrimScintSumStatWeight * RandGen->Rndm();
+                double statWeight = 0;
+                for (int i=0; i<PriScintDecayTimeVector.size(); i++)
+                {
+                    statWeight += PriScintDecayTimeVector.at(i).first;
+                    if (generatedStatWeight < statWeight)
+                    {
+                        A = PriScintDecayTimeVector.at(i).first;
+                        td = PriScintDecayTimeVector.at(i).second;
+                        break;
+                    }
+                }
+            }
+
+            double	x = RandGen->Rndm();
+            double	z = RandGen->Rndm();
+
+            while (z * A * td * pow((td + PriScintRaiseTime) / PriScintRaiseTime, - (PriScintRaiseTime / td)) / (td + PriScintRaiseTime) > ft(A, td, PriScintRaiseTime, x * (100 * (PriScintRaiseTime + td))))
+            {
+                x = RandGen->Rndm();
+                z = RandGen->Rndm();
+            }
+
+            return x * (100 * (PriScintRaiseTime + td));
+        }
+
+    //"Sum" model
+    double t = (PriScintRaiseTime == 0 ? 0 : -PriScintRaiseTime * log(1.0 - RandGen->Rndm()) ); //delay due to raise time
+    if ( !PriScintDecayTimeVector.isEmpty() )
+    {
+        double tau;
+        if (PriScintDecayTimeVector.size() == 1) tau = PriScintDecayTimeVector.first().second;
+        else
+        {
+            //selecting component
+            const double generatedStatWeight = _PrimScintSumStatWeight * RandGen->Rndm();
+            double statWeight = 0;
+            for (int i=0; i<PriScintDecayTimeVector.size(); i++)
+            {
+                statWeight += PriScintDecayTimeVector.at(i).first;
+                if (generatedStatWeight < statWeight)
+                {
+                    tau = PriScintDecayTimeVector.at(i).second;
+                    break;
+                }
+            }
+        }
+
+        //adding delay due to decay
+        t += RandGen->Exp(tau);
+    }
+
+    return t;
 }
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
@@ -92,6 +163,11 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
     for (int iP=0; iP<MatParticle.size(); iP++)
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
            MatParticle[iP].Terminators[iTerm].UpdateNeutronCrossSections(bLogLogInterpolation);
+
+    //updating sum stat weights for primary scintillation time generator
+    _PrimScintSumStatWeight = 0;
+    for (const QPair<double,double>& pair : PriScintDecayTimeVector)
+        _PrimScintSumStatWeight += pair.first;
 }
 
 void AMaterial::clear()

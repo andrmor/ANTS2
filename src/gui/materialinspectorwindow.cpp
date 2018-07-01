@@ -32,6 +32,7 @@
 
 //Root
 #include "TGraph.h"
+#include "TH1.h"
 #include "TAxis.h"
 #include "TGeoManager.h"
 #include "TMultiGraph.h"
@@ -2733,10 +2734,31 @@ void MaterialInspectorWindow::on_pbPriThelp_clicked()
 
 void MaterialInspectorWindow::on_ledPriT_raise_textChanged(const QString &arg1)
 {
-    ui->cobPriT_model->setEnabled(arg1 != "0");
+    ui->cobPriT_model->setVisible(arg1 != "0");
 }
 
 void MaterialInspectorWindow::on_pbPriT_test_clicked()
 {
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation); //to update sum of stat weights
+
+    MW->WindowNavigator->BusyOn();
+    QMessageBox mb(this);
+    mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
+    mb.setStandardButtons(0);
+    mb.setText("calculating...");
+    mb.show();
+    QCoreApplication::processEvents();
+    TH1D* h = new TH1D("h1", "", 1000, 0, 0);
+    for (int i=0; i<1000000; i++)
+        h->Fill( tmpMaterial.GeneratePrimScintTime(Detector->RandGen) );
+    mb.hide();
+    MW->WindowNavigator->BusyOff();
+
+    h->GetXaxis()->SetTitle("Time, ns");
+    TString title = "Emission for ";
+    title += tmpMaterial.name.toLatin1().data();
+    h->SetTitle(title);
+    MW->GraphWindow->Draw(h);
 }

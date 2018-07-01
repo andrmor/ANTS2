@@ -84,6 +84,13 @@ public:
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 
   QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+
+private:
+  //run-time properties
+  double _PrimScintSumStatWeight;
+
+private:
+  double ft(double A, double td, double tr, double t);
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles

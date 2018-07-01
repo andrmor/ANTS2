@@ -39,9 +39,19 @@ double AMaterial::getReemissionProbability(int iWave) const
     return reemissionProbBinned.at(iWave);
 }
 
-double AMaterial::ft(double td, double tr, double t) const
+//double AMaterial::ft(double td, double tr, double t) const
+//{
+//    return exp(-t / td) * ( 1.0 - exp(-t / tr) );
+//}
+
+//double AMaterial::ft(double td, double tr, double t) const
+//{
+//    return 1.0 - ((tr + td) / td) * exp(- t / td) + (tr / td) * exp(- t * (1.0 / tr + 1.0 / td));
+//}
+
+double AMaterial::ft(double td, double t) const
 {
-    return exp(-t / td) * ( 1.0 - exp(-t / tr) );
+    return 1.0 - ((PriScintRaiseTime + td) / td) * exp(- t / td) + (PriScintRaiseTime / td) * exp(- t * (1.0 / PriScintRaiseTime + 1.0 / td));
 }
 
 double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
@@ -72,16 +82,31 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
                 }
             }
 
-            double x = RandGen->Rndm();
-            double z = RandGen->Rndm();
+            //            double x = RandGen->Rndm();
+            //            double z = RandGen->Rndm();
+            //            while (z * td * pow((td + PriScintRaiseTime) / PriScintRaiseTime, - (PriScintRaiseTime / td)) / (td + PriScintRaiseTime) > ft(td, PriScintRaiseTime, x * (100.0 * (PriScintRaiseTime + td))))
+            //            {
+            //                x = RandGen->Rndm();
+            //                z = RandGen->Rndm();
+            //            }
+            //            return x * (100.0 * (PriScintRaiseTime + td));
+            double	g = RandGen->Rndm(); //cannot be 0 or 1.0
+            double  t = 0;
+            //double  dt = 100.0 * (PriScintRaiseTime + td) / 2.0;
+            double  dt = 50.0 * (PriScintRaiseTime + td);
 
-            while (z * td * pow((td + PriScintRaiseTime) / PriScintRaiseTime, - (PriScintRaiseTime / td)) / (td + PriScintRaiseTime) > ft(td, PriScintRaiseTime, x * (100.0 * (PriScintRaiseTime + td))))
+            //while ( ((dt / 2.0) / (t + (dt / 2.0))) > pow(10.0, -5) )
+            while (  0.5*dt / (t + 0.5*dt) > 0.00001 )
             {
-                x = RandGen->Rndm();
-                z = RandGen->Rndm();
+                if ( (ft(td, t) - g) * (ft(td, t + dt) - g) > 0 )
+                    t += dt;
+                if ( (ft(td, t) - g) * (ft(td, t + dt) - g) < 0 )
+                    //dt = dt / 2.0;
+                    dt *= 0.5;
             }
-
-            return x * (100.0 * (PriScintRaiseTime + td));
+            //t += dt / 2.0;
+            t += 0.5 * dt;
+            return t;
         }
 
     //"Sum" model

@@ -90,7 +90,8 @@ private:
   double _PrimScintSumStatWeight;
 
 private:
-  double ft(double td, double tr, double t) const;
+  //double ft(double td, double tr, double t) const;
+  double ft(double td, double t) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles

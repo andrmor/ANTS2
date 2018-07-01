@@ -5,6 +5,7 @@
 #include "acommonfunctions.h"
 
 #include "TH1D.h"
+#include "TRandom2.h"
 
 #include <QDebug>
 
@@ -36,6 +37,12 @@ double AMaterial::getReemissionProbability(int iWave) const
     //qDebug() << "reemis->" << iWave << ( reemissionProbBinned.size() > 0 ? reemissionProbBinned.at(iWave) : reemissionProb );
     if (iWave == -1 || reemissionProbBinned.isEmpty()) return reemissionProb;
     return reemissionProbBinned.at(iWave);
+}
+
+double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen)
+{
+
+    return 0;
 }
 
 void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection)
@@ -90,9 +97,10 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
 void AMaterial::clear()
 {
   name = "Undefined";
-  n = 1;
+  n = 1.0;
   density = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
-  e_driftVelocity = W = SecYield = PriScintDecayTime = SecScintDecayTime = 0;
+  e_driftVelocity = W = SecYield = PriScintRaiseTime = PriScintModel = SecScintDecayTime = 0;
+  PriScintDecayTimeVector.clear();
   rayleighWave = 500.0;
   Comments = "";
 
@@ -146,7 +154,18 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["RayleighMFP"] = rayleighMFP;
   json["RayleighWave"] = rayleighWave;
   json["ReemissionProb"] = reemissionProb;
-  json["PrimScint_Tau"] = PriScintDecayTime;
+  json["PrimScint_Raise"] = PriScintRaiseTime;
+  json["PrimScint_Model"] = PriScintModel;
+  {
+    QJsonArray ar;
+    for (const QPair<double, double>& pair : PriScintDecayTimeVector)
+    {
+        QJsonArray el;
+        el << pair.first << pair.second;
+        ar.append(el);
+    }
+    json["PrimScint_Decay"] = ar;
+  }
   json["W"] = W;
   json["SecScint_PhYield"] = SecYield;
   json["SecScint_Tau"] = SecScintDecayTime;
@@ -314,7 +333,26 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "RayleighMFP", rayleighMFP);
   parseJson(json, "RayleighWave", rayleighWave);
   parseJson(json, "ReemissionProb", reemissionProb);
-  parseJson(json, "PrimScint_Tau", PriScintDecayTime);
+  parseJson(json, "PrimScint_Raise", PriScintRaiseTime);
+  parseJson(json, "PrimScint_Model", PriScintModel);
+  if (json.contains("PrimScint_Tau")) //compatibility
+  {
+      double tau = json["PrimScint_Tau"].toDouble();
+      PriScintDecayTimeVector << QPair<double,double>(1.0, tau);
+  }
+  if (json.contains("PrimScint_Decay"))
+  {
+      PriScintDecayTimeVector.clear();
+      QJsonArray ar = json["PrimScint_Decay"].toArray();
+      for (int i=0; i<ar.size(); i++)
+      {
+          QJsonArray el = ar.at(i).toArray();
+          if (el.size() == 2)
+            PriScintDecayTimeVector << QPair<double,double>(el.at(0).toDouble(), el.at(1).toDouble());
+          else
+              qWarning() << "Bad size of decay time pair, skipping!";
+      }
+  }
   parseJson(json, "W", W);
   parseJson(json, "SecScint_PhYield", SecYield);
   parseJson(json, "SecScint_Tau", SecScintDecayTime);

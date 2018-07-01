@@ -136,6 +136,8 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
+    if ( !parseDecayTime() ) return;
+
     MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 
     //checkig this material
@@ -286,8 +288,26 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     else ui->ledRayleigh->setText("");
     ui->ledRayleighWave->setText(QString::number(tmpMaterial.rayleighWave));
 
-    str.setNum(tmpMaterial.PriScintDecayTime, 'g');
-    ui->ledPriT->setText(str);
+    ui->ledPriT_raise->setText( QString::number(tmpMaterial.PriScintRaiseTime) );
+    ui->cobPriT_model->setCurrentIndex(tmpMaterial.PriScintModel);
+    if (tmpMaterial.PriScintDecayTimeVector.size() == 0)
+        str = "0";
+    else if (tmpMaterial.PriScintDecayTimeVector.size() == 1)
+        str = QString::number(tmpMaterial.PriScintDecayTimeVector.first().second);
+    else
+    {
+        str.clear();
+        for (const QPair<double,double>& pair : tmpMaterial.PriScintDecayTimeVector)
+        {
+            str += QString::number(pair.first);
+            str += ":";
+            str += QString::number(pair.second);
+            str += " & ";
+        }
+        str.chop(3);
+    }
+    ui->lePriT->setText(str);
+
     str.setNum(tmpMaterial.W*1000.0, 'g'); //keV->eV
     ui->ledW->setText(str);
     str.setNum(tmpMaterial.SecYield, 'g');
@@ -415,7 +435,8 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
-    tmpMaterial.PriScintDecayTime = ui->ledPriT->text().toDouble();
+    tmpMaterial.PriScintRaiseTime = ui->ledPriT_raise->text().toDouble();
+    tmpMaterial.PriScintModel = ui->cobPriT_model->currentIndex();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     if (ui->cbSameYieldForAll->isChecked())
@@ -2637,4 +2658,85 @@ void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QMod
         ui->cbShowIsotopes->setChecked(true);
         ShowTreeWithChemicalComposition();
     }
+}
+
+void MaterialInspectorWindow::on_lePriT_editingFinished()
+{
+    if (bMessageLock) return;
+
+    parseDecayTime();
+}
+
+bool MaterialInspectorWindow::parseDecayTime()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    QString s = ui->lePriT->text().simplified();
+
+    tmpMaterial.PriScintDecayTimeVector.clear();
+    bool bErrorDetected = false;
+
+    bool bSingle;
+    double tau = s.toDouble(&bSingle);
+    if (bSingle)
+        tmpMaterial.PriScintDecayTimeVector << QPair<double, double>(1.0, tau);
+    else
+    {
+        QStringList sl = s.split('&', QString::SkipEmptyParts);
+
+        for (const QString& sr : sl)
+        {
+            QStringList oneTau = sr.split(':', QString::SkipEmptyParts);
+            if (oneTau.size() == 2)
+            {
+                bool bOK1, bOK2;
+                double weight = oneTau.at(0).toDouble(&bOK1);
+                double tau    = oneTau.at(1).toDouble(&bOK2);
+                if (bOK1 && bOK2)
+                    tmpMaterial.PriScintDecayTimeVector << QPair<double, double>(weight, tau);
+                else
+                {
+                    bErrorDetected = true;
+                    break;
+                }
+            }
+            else bErrorDetected = true;
+        }
+        if (tmpMaterial.PriScintDecayTimeVector.isEmpty()) bErrorDetected = true;
+    }
+
+    if (bErrorDetected)
+    {
+        bMessageLock = true;
+        message("Decay time format error:\nuse a double value or weight1:decay1 & weight2:decay2 & ...", this);
+        bMessageLock = false;
+    }
+    else
+        on_pbUpdateTmpMaterial_clicked();
+
+    return !bErrorDetected;
+}
+
+void MaterialInspectorWindow::on_pbPriThelp_clicked()
+{
+    QString s = "Decay time: can be given as a single value or,\n"
+            "to configure several decay components, as\n"
+            "stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n\n"
+            "Raise time: single component, calculated as 1 - exp{-t/raise_time}\n\n"
+            "Model: If \"Sum\" is selected, when a photon is generated, first raise time is generated,\n"
+            "then decay time is generated and added to the raise time giving the delay\n"
+            "If \"Shao\" is selected, the delay is calculated as in:\n"
+            "Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117"
+            "http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf";
+    message(s, this);
+}
+
+void MaterialInspectorWindow::on_ledPriT_raise_textChanged(const QString &arg1)
+{
+    ui->cobPriT_model->setEnabled(arg1 != "0");
+}
+
+void MaterialInspectorWindow::on_pbPriT_test_clicked()
+{
+
 }

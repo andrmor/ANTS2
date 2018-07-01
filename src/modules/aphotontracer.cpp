@@ -607,8 +607,9 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                     navigator->SetCurrentDirection(p->v);
                     //qDebug() << "After:"<<p->WaveIndex;
 
-                    if (SimSet->fTimeResolved)
-                        p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+                    //if (SimSet->fTimeResolved)
+                    //    p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+                    p->time += (*MaterialCollection)[MatIndexFrom]->GeneratePrimScintTime(RandGen);
 
                     OneEvent->SimStat->Reemission++;
                     if (SimSet->bDoPhotonHistoryLog)

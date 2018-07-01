@@ -37,13 +37,108 @@ static TVector3 NormViz;
 //#include "TBufferJSON.h"
 #include "tmpobjhubclass.h"
 #include "TAttMarker.h"
+
+struct mydata{
+    double A;
+    double tau;
+
+    mydata(double a, double tau) : A(a), tau(tau) {}
+};
+
+istream& operator>>(istream& is, mydata& data) {
+    is >> data.A;
+    is >> data.tau;
+    return is;
+};
+
+ostream& operator<<(ostream& is, mydata& data) {
+    is << data.A;
+    is << data.tau;
+    return is;
+};
+
+double FT(double A, double td, double tr, double t)
+{
+    return A * exp(-t / td) * (1 - exp(-t / tr));
+}
+
+double RandomNTime(double tr, std::vector < mydata > AT)
+{
+    double	A = 0,
+            td = tr;
+
+    if (AT.size() == 1)
+    {
+        A = AT[0].A;
+        td = AT[0].tau;
+    }
+    else
+    {
+        double	g = (double)(rand()) / RAND_MAX,
+                S = 0;
+
+        for (int k = 0; k < AT.size(); k++)
+        {
+            if ((g >= S) && (g <= S + AT[k].A))
+            {
+                A = AT[k].A;
+                td = AT[k].tau;
+                break;
+            }
+            S += AT[k].A;
+        }
+
+    }
+
+    double	x = (double)(rand()) / RAND_MAX,
+            z = (double)(rand()) / RAND_MAX;
+
+    //int counter = 0;
+    while (z * A * td * pow((td + tr) / tr, - (tr / td)) / (td + tr) > FT(A, td, tr, x * (100 * (tr + td))))
+    {
+        x = (double)(rand()) / RAND_MAX,
+        z = (double)(rand()) / RAND_MAX;
+        //counter++;
+    }
+    //qDebug() << "counter:"<<counter;
+
+    return x * (100 * (tr + td));
+}
+
+#include "TH1D.h"
+#include "TGraph.h"
 void MainWindow::on_pobTest_clicked()
 {
-    QByteArray ba;
-    EventsDataHub->packEventsToByteArray(0, EventsDataHub->countEvents(), ba);
+    double tau1 = 100.0;
+    double tau2 = 100.0;
+    int num = 10000000;
 
-    EventsDataHub->clear();
-    EventsDataHub->unpackEventsFromByteArray(ba);
+    TH1D* h = new TH1D("h1", "", 1000, 0, 1000);
+    for (int i=0; i<num; i++)
+    {
+        double t = -1.0 * tau1 * log(1.0 - Detector->RandGen->Rndm());
+        t += Detector->RandGen->Exp(tau2);
+        h->Fill(t);
+    }
+    GraphWindow->Draw(h);
+    GraphWindow->AddCurrentToBasket("exp_pdf");
+
+    TGraph* g = new TGraph();
+    double a = tau1 * tau2 / (tau1 + tau2);
+    for (double t=0; t<1000; t++)
+    {
+        double f = 1.0 - (tau1 + tau2)/tau2 * exp(-t/tau2 ) + tau1/tau2 * exp(-t/a);
+        g->SetPoint(t, t, f*num);
+    }
+    GraphWindow->Draw(g, "AL");
+    GraphWindow->AddCurrentToBasket("formula");
+
+
+//    QByteArray ba;
+//    EventsDataHub->packEventsToByteArray(0, EventsDataHub->countEvents(), ba);
+
+//    EventsDataHub->clear();
+//    EventsDataHub->unpackEventsFromByteArray(ba);
 
 //    ////////////////////////////////////////////////////////////////////
 //    QDataStream in(ba);
@@ -71,15 +166,29 @@ void MainWindow::on_pobTest_clicked()
 //   GraphWindow->Draw(g, "A*");
 }
 
+#include <QElapsedTimer>
 void MainWindow::on_pobTest_2_clicked()
 {
-    QByteArray ba;
-    EventsDataHub->packReconstructedToByteArray(ba);
 
-    EventsDataHub->resetReconstructionData(0);
-    EventsDataHub->unpackReconstructedFromByteArray(0, EventsDataHub->countEvents(), ba);
-    EventsDataHub->fReconstructionDataReady = true;
-    emit EventsDataHub->requestEventsGuiUpdate();
+    std::vector<mydata> v;
+    v.push_back( mydata(1.0, 100.0) );
+
+    QElapsedTimer t;
+    t.start();
+    for (int i=0; i<1000000; i++)
+        RandomNTime(100.0, v);
+    int el = t.elapsed();
+    qDebug() << el;
+
+
+
+//    QByteArray ba;
+//    EventsDataHub->packReconstructedToByteArray(ba);
+
+//    EventsDataHub->resetReconstructionData(0);
+//    EventsDataHub->unpackReconstructedFromByteArray(0, EventsDataHub->countEvents(), ba);
+//    EventsDataHub->fReconstructionDataReady = true;
+//    emit EventsDataHub->requestEventsGuiUpdate();
 
 //    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
 //    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;

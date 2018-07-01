@@ -2,6 +2,7 @@
 #define AMATERIAL_H
 
 #include <QVector>
+#include <QPair>
 #include <QString>
 
 #include "aneutroninteractionelement.h"
@@ -16,6 +17,7 @@ class TGeoMedium;
 class AMaterialParticleCollection;
 struct NeutralTerminatorStructure;
 struct MatParticleStructure;
+class TRandom2;
 
 class AMaterial
 {
@@ -34,7 +36,10 @@ public:
   double e_driftVelocity;
   double W; //default W
   double SecYield;  // ph per secondary electron
-  double PriScintDecayTime;
+  QVector<QPair<double,double> > PriScintDecayTimeVector;
+  double PriScintRaiseTime = 0;
+  int PriScintModel = 0; //0=sum, 1=Shao
+
   double SecScintDecayTime;
   QString Comments;
 
@@ -68,6 +73,8 @@ public:
 
   TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
+
+  double GeneratePrimScintTime(TRandom2* RandGen);
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
   void updateRuntimeProperties(bool bLogLogInterpolation);

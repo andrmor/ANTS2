@@ -53,7 +53,7 @@ public:
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal=false);
   void AddNewMaterial(QString name);
-  void UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3);
+  void UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3); //use only for direct assign when dfault detector file not found
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties

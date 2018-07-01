@@ -375,7 +375,7 @@ Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
     RandGen = new TRandom2();    
     dataHub = new EventsDataClass(nameID);    
     OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
-    photonGenerator = new Photon_Generator(detector);
+    photonGenerator = new Photon_Generator(detector, RandGen);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
 }
 

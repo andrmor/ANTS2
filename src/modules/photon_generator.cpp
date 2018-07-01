@@ -13,8 +13,8 @@
 #include "TMath.h"
 #include "TH1D.h"
 
-Photon_Generator::Photon_Generator(const DetectorClass *Detector, QObject *parent) :
-    QObject(parent), Detector(Detector) {}
+Photon_Generator::Photon_Generator(const DetectorClass* Detector, TRandom2* RandGen, QObject *parent) :
+    QObject(parent), Detector(Detector), RandGen(RandGen) {}
 
 Photon_Generator::~Photon_Generator()
 {
@@ -26,8 +26,8 @@ void Photon_Generator::GenerateDirectionPrimary(APhoton* Photon)
     //Sphere function of Root:
     double a=0,b=0,r2=1;
     while (r2 > 0.25) {
-          a  = Detector->RandGen->Rndm() - 0.5;
-          b  = Detector->RandGen->Rndm() - 0.5;
+          a  = RandGen->Rndm() - 0.5;
+          b  = RandGen->Rndm() - 0.5;
           r2 =  a*a + b*b;
        }
     Photon->v[2] = ( -1. + 8.0 * r2 );
@@ -57,8 +57,8 @@ void Photon_Generator::GenerateDirectionSecondary(APhoton *Photon)
   //Sphere function of Root:
   double a=0,b=0,r2=1;
   while (r2 > 0.25) {
-        a  = Detector->RandGen->Rndm() - 0.5;
-        b  = Detector->RandGen->Rndm() - 0.5;
+        a  = RandGen->Rndm() - 0.5;
+        b  = RandGen->Rndm() - 0.5;
         r2 =  a*a + b*b;
      }
   Photon->v[2] = ( -1. + 8.0 * r2 );
@@ -86,7 +86,10 @@ void Photon_Generator::GenerateWaveTime(APhoton* Photon, int materialId)
   if (Photon->scint_type == 1)
     {
 //      qDebug()<<Photon->time;
-      if (SimSet->fTimeResolved) Photon->time += Detector->RandGen->Exp(  Material->PriScintDecayTime );
+      //if (SimSet->fTimeResolved)
+      //Photon->time += Detector->RandGen->Exp(  Material->PriScintDecayTime );
+      Photon->time += Material->GeneratePrimScintTime(RandGen);
+
 //      qDebug()<<"-->"<<Photon->time;
       if (SimSet->fWaveResolved && Material->PrimarySpectrumHist)
          {
@@ -99,7 +102,7 @@ void Photon_Generator::GenerateWaveTime(APhoton* Photon, int materialId)
   else
     {
       //secondary
-      if (SimSet->fTimeResolved) Photon->time += Detector->RandGen->Exp(  Material->SecScintDecayTime );
+      if (SimSet->fTimeResolved) Photon->time += RandGen->Exp(  Material->SecScintDecayTime );
 
       if (SimSet->fWaveResolved && Material->SecondarySpectrumHist)
         {
@@ -121,7 +124,7 @@ void Photon_Generator::GenerateSignalsForLrfMode(int NumPhotons, double* r, AOne
       {
         double avSignal = Detector->LRFs->getLRF(ipm, r) * energy;
         double avPhotEl = avSignal * SimSet->NumPhotElPerLrfUnity;
-        double numPhotEl = Detector->RandGen->Poisson(avPhotEl);
+        double numPhotEl = RandGen->Poisson(avPhotEl);
 
         float signal = numPhotEl / SimSet->NumPhotElPerLrfUnity;  // back to LRF units
         OneEvent->addSignals(ipm, signal);

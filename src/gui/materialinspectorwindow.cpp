@@ -2720,15 +2720,18 @@ bool MaterialInspectorWindow::parseDecayTime()
 
 void MaterialInspectorWindow::on_pbPriThelp_clicked()
 {
-    QString s = "Decay time: can be given as a single value or,\n"
-            "to configure several decay components, as\n"
-            "stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n\n"
-            "Raise time: single component, calculated as 1 - exp{-t/raise_time}\n\n"
-            "Model: If \"Sum\" is selected, when a photon is generated, first raise time is generated,\n"
-            "then decay time is generated and added to the raise time giving the delay\n"
-            "If \"Shao\" is selected, the delay is calculated as in:\n"
-            "Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117"
-            "http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf";
+    QString s = "Decay time:\n"
+            "  can be given as a single value or,\n"
+            "  to configure several decay components, e.g.\n"
+            "  stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n\n"
+            "Raise time:\n"
+            "  single component, calculated as 1 - exp{-t/raise_time}\n\n"
+            "Model:\n"
+            "  If \"Sum\" is selected, when a photon is generated, first raise time is generated,\n"
+            "  then decay time is generated and added to the raise time giving the delay\n"
+            "  If \"Shao\" is selected, the delay is calculated as in:\n"
+            "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
+            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf";
     message(s, this);
 }
 

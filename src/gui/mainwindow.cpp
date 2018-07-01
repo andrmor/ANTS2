@@ -4911,7 +4911,7 @@ void MainWindow::on_pbShowMCcrosstalk_clicked()
   int ipm = ui->sbElPMnumber->value();
   TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet->BinsX, 0, 0);
   for (int i=0; i<1000000; i++)
-      hist->Fill(PMs->at(ipm).MCsampl->sample()+1);
+      hist->Fill(PMs->at(ipm).MCsampl->sample(Detector->RandGen)+1);
 
   GraphWindow->Draw(hist);
 }

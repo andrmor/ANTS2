@@ -1349,7 +1349,7 @@ ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, 
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
-    ParticleSources = new ParticleSourcesClass(detector, nameID);
+    ParticleSources = new ParticleSourcesClass(detector, RandGen, nameID);
 }
 
 ParticleSourceSimulator::~ParticleSourceSimulator()
@@ -1698,7 +1698,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     this->EventsDataHub = EventsDataHub;
     this->Detector = Detector;
 
-    ParticleSources = new ParticleSourcesClass(Detector);
+    ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     //qDebug() << "->Container for particle sources created and configured";
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);

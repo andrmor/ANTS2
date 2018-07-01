@@ -20,8 +20,8 @@
 
 
 
-ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TString nameID)
-    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(Detector->RandGen), NameID(nameID), TotalActivity(0) {}
+ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen, TString nameID)
+    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen), NameID(nameID), TotalActivity(0) {}
 
 ParticleSourcesClass::~ParticleSourcesClass()
 {

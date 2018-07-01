@@ -104,7 +104,7 @@ class ParticleSourcesClass : public QObject
 {
     Q_OBJECT
 public:
-   ParticleSourcesClass(const DetectorClass* Detector, TString nameID = "");
+   ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen, TString nameID = "");
   ~ParticleSourcesClass();
 
   //MAIN usage

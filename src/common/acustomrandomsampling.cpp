@@ -4,8 +4,8 @@
 
 #include "TRandom2.h"
 
-ACustomRandomSampling::ACustomRandomSampling(TRandom2* RandGen, const QVector<double>* Probabilities)
-  : RandGen(RandGen), Probs(Probabilities)
+ACustomRandomSampling::ACustomRandomSampling(const QVector<double>* Probabilities)
+  : Probs(Probabilities)
 {
   fUndefined = true;
   if (Probs->isEmpty() || Probs->size() == 1) return;
@@ -40,7 +40,7 @@ void ACustomRandomSampling::reportSettings() const
     }
 }
 
-int ACustomRandomSampling::sample() const
+int ACustomRandomSampling::sample(TRandom2 *RandGen) const
 {
    if (fUndefined) return 0;
 

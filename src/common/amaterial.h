@@ -74,7 +74,7 @@ public:
   TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
   TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
 
-  double GeneratePrimScintTime(TRandom2* RandGen);
+  double GeneratePrimScintTime(TRandom2* RandGen) const;
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
   void updateRuntimeProperties(bool bLogLogInterpolation);
@@ -90,7 +90,7 @@ private:
   double _PrimScintSumStatWeight;
 
 private:
-  double ft(double A, double td, double tr, double t);
+  double ft(double td, double tr, double t) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles

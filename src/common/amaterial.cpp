@@ -39,23 +39,21 @@ double AMaterial::getReemissionProbability(int iWave) const
     return reemissionProbBinned.at(iWave);
 }
 
-double AMaterial::ft(double A, double td, double tr, double t)
+double AMaterial::ft(double td, double tr, double t) const
 {
-    return A * exp(-t / td) * ( 1.0 - exp(-t / tr) );
+    return exp(-t / td) * ( 1.0 - exp(-t / tr) );
 }
 
-double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen)
+double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
 {
     if (PriScintModel == 1) //Shao
         if ( !PriScintDecayTimeVector.isEmpty() && PriScintRaiseTime != 0)
         {
             //Shao model, upgraded to have several decay components
-            double A;
             double td;
 
             if (PriScintDecayTimeVector.size() == 1)
             {
-                A = PriScintDecayTimeVector.first().first;
                 td =  PriScintDecayTimeVector.first().second;
             }
             else
@@ -68,23 +66,22 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen)
                     statWeight += PriScintDecayTimeVector.at(i).first;
                     if (generatedStatWeight < statWeight)
                     {
-                        A = PriScintDecayTimeVector.at(i).first;
                         td = PriScintDecayTimeVector.at(i).second;
                         break;
                     }
                 }
             }
 
-            double	x = RandGen->Rndm();
-            double	z = RandGen->Rndm();
+            double x = RandGen->Rndm();
+            double z = RandGen->Rndm();
 
-            while (z * A * td * pow((td + PriScintRaiseTime) / PriScintRaiseTime, - (PriScintRaiseTime / td)) / (td + PriScintRaiseTime) > ft(A, td, PriScintRaiseTime, x * (100 * (PriScintRaiseTime + td))))
+            while (z * td * pow((td + PriScintRaiseTime) / PriScintRaiseTime, - (PriScintRaiseTime / td)) / (td + PriScintRaiseTime) > ft(td, PriScintRaiseTime, x * (100.0 * (PriScintRaiseTime + td))))
             {
                 x = RandGen->Rndm();
                 z = RandGen->Rndm();
             }
 
-            return x * (100 * (PriScintRaiseTime + td));
+            return x * (100.0 * (PriScintRaiseTime + td));
         }
 
     //"Sum" model

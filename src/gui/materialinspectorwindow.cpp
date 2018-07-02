@@ -2751,18 +2751,27 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 
     tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation); //to update sum of stat weights
 
-    MW->WindowNavigator->BusyOn();
     QMessageBox mb(this);
-    mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
-    mb.setStandardButtons(0);
-    mb.setText("calculating...");
-    mb.show();
-    QCoreApplication::processEvents();
+    if (ui->cobPriT_model->currentIndex() == 1)
+    {
+        MW->WindowNavigator->BusyOn();
+        mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
+        mb.setStandardButtons(0);
+        mb.setText("calculating...");
+        mb.show();
+        QCoreApplication::processEvents();
+    }
+
     TH1D* h = new TH1D("h1", "", 1000, 0, 0);
     for (int i=0; i<1000000; i++)
         h->Fill( tmpMaterial.GeneratePrimScintTime(Detector->RandGen) );
-    mb.hide();
-    MW->WindowNavigator->BusyOff();
+
+    if (ui->cobPriT_model->currentIndex() == 1)
+    {
+        mb.hide();
+        MW->WindowNavigator->BusyOff();
+    }
+
 
     h->GetXaxis()->SetTitle("Time, ns");
     TString title = "Emission for ";

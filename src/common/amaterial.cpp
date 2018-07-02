@@ -57,14 +57,19 @@ double AMaterial::ft(double td, double t) const
 double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
 {
     if (PriScintModel == 1) //Shao
-        if ( !PriScintDecayTimeVector.isEmpty() && PriScintRaiseTime != 0)
+    {
+        if ( PriScintRaiseTime == 0 || PriScintDecayTimeVector.isEmpty() || (PriScintDecayTimeVector.size()==1 && PriScintDecayTimeVector.at(0).second == 0) )
+        {
+            //then use "Sum" model
+        }
+        else
         {
             //Shao model, upgraded to have several decay components
             double td;
 
             if (PriScintDecayTimeVector.size() == 1)
             {
-                td =  PriScintDecayTimeVector.first().second;
+                td =  PriScintDecayTimeVector.at(0).second;
             }
             else
             {
@@ -108,13 +113,14 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
             t += 0.5 * dt;
             return t;
         }
+    }
 
     //"Sum" model
     double t = (PriScintRaiseTime == 0 ? 0 : -PriScintRaiseTime * log(1.0 - RandGen->Rndm()) ); //delay due to raise time
     if ( !PriScintDecayTimeVector.isEmpty() )
     {
         double tau;
-        if (PriScintDecayTimeVector.size() == 1) tau = PriScintDecayTimeVector.first().second;
+        if (PriScintDecayTimeVector.size() == 1) tau = PriScintDecayTimeVector.at(0).second;
         else
         {
             //selecting component

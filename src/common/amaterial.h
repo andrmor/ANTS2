@@ -36,7 +36,7 @@ public:
   double e_driftVelocity;
   double W; //default W
   double SecYield;  // ph per secondary electron
-  QVector<QPair<double,double> > PriScintDecayTimeVector;
+  QVector<QPair<double,double> > PriScintDecayTimeVector;  //first = stat weight, second = decay time (ns)
   double PriScintRaiseTime = 0;
   int PriScintModel = 0; //0=sum, 1=Shao
 

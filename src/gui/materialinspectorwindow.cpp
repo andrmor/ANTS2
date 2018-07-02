@@ -2721,17 +2721,22 @@ bool MaterialInspectorWindow::parseDecayTime()
 void MaterialInspectorWindow::on_pbPriThelp_clicked()
 {
     QString s = "Decay time:\n"
-            "  can be given as a single value or,\n"
-            "  to configure several decay components, e.g.\n"
-            "  stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n\n"
+            "  If there is only one exponential decay component,"
+            "  it can be given directly.\n"
+            "  To configure several exponential decay components, use\n"
+            "  stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n"
+            "  e.g., 1:25.5 & 1:250\n\n"
             "Raise time:\n"
-            "  single component, calculated as 1 - exp{-t/raise_time}\n\n"
+            "  Provide raise time, the emission delay is calculated as 1 - exp{-t/raise_time}\n\n"
             "Model:\n"
-            "  If \"Sum\" is selected, when a photon is generated, first raise time is generated,\n"
-            "  then decay time is generated and added to the raise time giving the delay\n"
-            "  If \"Shao\" is selected, the delay is calculated as in:\n"
+            "  If \"Sum\" is selected, the photon emission time is calculated as follows:\n"
+            "  first the delay due to the raise time is generated,\n"
+            "  then decay time is generated. The emission time is sum of those values.\n\n"
+            "  If \"Shao\" is selected, the emission time is calculated as in:\n"
             "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
-            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf";
+            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf\n"
+            "  The formula is generalised to have more than one decay components.\n"
+            "  Random generator was provided by Evgeny Tolotchko";
     message(s, this);
 }
 

@@ -164,7 +164,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(this, SIGNAL(RequestStopLoad()), EventsDataHub, SLOT(onRequestStopLoad()));
     QObject::connect(EventsDataHub, SIGNAL(requestClearKNNfilter()), ReconstructionManager, SLOT(onRequestClearKNNfilter()));
     QObject::connect(EventsDataHub, &EventsDataClass::cleared, this, &MainWindow::onRequestUpdateGuiForClearData);
-    QObject::connect(EventsDataHub, SIGNAL(requestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate())); 
+    QObject::connect(EventsDataHub, &EventsDataClass::requestEventsGuiUpdate, Rwindow, &ReconstructionWindow::onRequestEventsGuiUpdate);
 
     QObject::connect(ReconstructionManager, SIGNAL(ReconstructionFinished(bool, bool)), Rwindow, SLOT(onReconstructionFinished(bool, bool)));
     QObject::connect(ReconstructionManager, SIGNAL(RequestShowStatistics()), Rwindow, SLOT(ShowStatistics()));

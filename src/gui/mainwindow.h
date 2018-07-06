@@ -279,7 +279,6 @@ private slots:
     void on_pbTestGeneratorSecondary_clicked();
     void on_pbTestShowRefrIndex_clicked();
     void on_pbTestShowAbs_clicked();
-    void on_pbShowThisMatInfo_clicked();
     void on_sbWaveIndexPointSource_valueChanged(int arg1);
     void on_pbShowPDE_clicked();
     void on_pbLoadPDE_clicked();
@@ -633,8 +632,6 @@ private slots:
     void on_actionServer_window_triggered();
 
     void on_actionServer_settings_triggered();
-
-    void on_cobDirectlyOrFromMaterial_currentIndexChanged(int index);
 
     void on_pbSSO_Load_clicked();
 

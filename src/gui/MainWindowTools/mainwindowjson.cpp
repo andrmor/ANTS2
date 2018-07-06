@@ -440,11 +440,9 @@ if (scj.contains("CustomDistrib"))
     }  
   //Wavelength/decay options
   QJsonObject wdj = pojs["WaveTimeOptions"].toObject();
-  ui->cobDirectlyOrFromMaterial->setCurrentIndex(2);
-  JsonToComboBox(wdj, "Direct_Material", ui->cobDirectlyOrFromMaterial);
-  JsonToSpinBox (wdj, "WaveIndex", ui->sbWaveIndexPointSource);
-  JsonToLineEditDouble(wdj, "DecayTime", ui->ledDecayTime);
-  JsonToComboBox(wdj, "Material", ui->cobMatPointSource);
+  ui->cbFixWavelengthPointSource->setChecked(false);  //compatibility
+  JsonToCheckbox(wdj, "UseFixedWavelength", ui->cbFixWavelengthPointSource);
+  JsonToSpinBox(wdj, "WaveIndex", ui->sbFixedWaveIndexPointSource);
   //Photon direction options
   QJsonObject pdj = pojs["PhotonDirectionOptions"].toObject();
   JsonToLineEditDouble(pdj, "FixedX", ui->ledSingleDX);
@@ -627,10 +625,8 @@ if (scj.contains("CustomDistrib"))
   bool bWaveRes = ui->cbWaveResolved->isChecked();
   ui->fWaveTests->setEnabled(bWaveRes);
   ui->fWaveOptions->setEnabled(bWaveRes);
-  ui->fPointSource_Wave->setEnabled(bWaveRes);
-  bool bTimeRes = ui->cbTimeResolved->isChecked();
-  ui->fPointSource_Time->setEnabled(bTimeRes);
-  ui->fDirectOrmat->setEnabled(bWaveRes || bTimeRes);
+  ui->cbFixWavelengthPointSource->setEnabled(bWaveRes);
+  //bool bTimeRes = ui->cbTimeResolved->isChecked();
 
   return true;
 }

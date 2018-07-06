@@ -65,10 +65,13 @@ public:
   int               MiniNumVariables;
 
 protected:
+  bool              bOwnRandomGen = false;  //the main manager (GUI thread) does not own RandGen, but multithread managers do
+
   bool              fEngineIsRunning;
   bool              fAborted;
 
   QString           LastError;
+  bool              bShowAbortMessageInOutput = true; //can be false -> in multithread if abort is local to this thread
 
   QElapsedTimer*    timer;
   qint64            timeOfStart;

@@ -435,7 +435,7 @@ int EventsDataClass::getTimeBins() const
 int EventsDataClass::getNumPMs() const
 {
     if (Events.isEmpty()) return 0;
-    return Events[0].size();
+    return Events.first().size();
 }
 
 const QVector<float> *EventsDataClass::getEvent(int iev) const
@@ -503,6 +503,86 @@ void EventsDataClass::prepareStatisticsForEvents(const bool isAllLRFsDefined, in
 
   if (DoDeviation && GoodEvents>0) AvDeviation /= GoodEvents;
   else AvDeviation = -1;
+}
+
+bool EventsDataClass::packEventsToByteArray(int from, int to, QByteArray& ba) const
+{
+    if (from < 0 || to > Events.size()) return false;
+
+    ba.clear();
+    QDataStream out(&ba, QIODevice::WriteOnly);
+
+    out << QString("events");
+    out << to - from;
+    out << getNumPMs();
+    for (int ievent = from; ievent < to; ievent++)
+        out << Events.at(ievent);
+
+    return true;
+}
+
+bool EventsDataClass::unpackEventsFromByteArray(const QByteArray &ba)
+{
+    QDataStream in(ba);
+
+    QString st;
+    in >> st;
+    if (st != "events") return false;
+
+    int events;
+    in >> events;
+
+    int numPMs;
+    in >> numPMs;
+
+    clear();
+    Events.resize(events);
+    for (int iev=0; iev<events; iev++)
+    {
+        Events[iev].resize(numPMs);
+        in >> Events[iev];
+    }
+
+    createDefaultReconstructionData(0);
+    emit requestEventsGuiUpdate();        //in the rare case server is with gui
+    return true;
+}
+
+bool EventsDataClass::packReconstructedToByteArray(QByteArray &ba) const
+{
+    if (ReconstructionData.isEmpty()) return false;
+
+    ba.clear();
+    QDataStream out(&ba, QIODevice::WriteOnly);
+
+    out << QString("reconstruction");
+    const int size = ReconstructionData.at(0).size();
+    out << size;
+
+    for (int ievent = 0; ievent < size; ievent++)
+        ReconstructionData.at(0).at(ievent)->sendToQDataStream(out);
+
+    return true;
+}
+
+bool EventsDataClass::unpackReconstructedFromByteArray(int from, int to, const QByteArray &ba)
+{
+    QDataStream in(ba);
+
+    QString st;
+    in >> st;
+    if (st != "reconstruction") return false;
+
+    int events;
+    in >> events;
+    if (events != (to - from) ) return false;
+
+    if (ReconstructionData.at(0).size() < to) return false;
+
+    for (int ievent = from; ievent < to; ievent++)
+        ReconstructionData[0][ievent]->unpackFromQDataStream(in);
+
+    return true;
 }
 
 void EventsDataClass::copyTrueToReconstructed(int igroup)

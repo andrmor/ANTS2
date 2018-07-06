@@ -497,7 +497,7 @@ void APmHub::prepareMCcrosstalkForPM(int ipm)
     delete PMs[ipm].MCsampl; PMs[ipm].MCsampl = 0;
 
     if (fDoMCcrosstalk && PMs[ipm].MCmodel==0)
-      PMs[ipm].MCsampl = new ACustomRandomSampling(RandGen, &PMs.at(ipm).MCcrosstalk);
+      PMs[ipm].MCsampl = new ACustomRandomSampling(&PMs.at(ipm).MCcrosstalk);
 }
 
 void APmHub::updateADClevels()

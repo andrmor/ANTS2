@@ -22,6 +22,7 @@ public:
     int   Ping();
     bool  SendText(const QString& message);
     bool  SendJson(const QJsonObject& json);
+    bool  SendQByteArray(const QByteArray& ba);
     bool  SendFile(const QString& fileName);
 
     bool  ResumeWaitForAnswer();

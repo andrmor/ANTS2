@@ -25,6 +25,7 @@ public:
     void ReplyWithBinaryFile(const QString& fileName);
     void ReplyWithBinaryObject(const QVariant& object);
     void ReplyWithBinaryObject_asJSON(const QVariant& object);
+    void ReplyWithQByteArray(const QByteArray & ba);
 
     void ReplyProgress(int percents);
     void SetCanRetranslateProgress(bool flag) {bRetranslateProgress = flag;}

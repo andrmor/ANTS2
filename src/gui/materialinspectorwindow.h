@@ -144,6 +144,14 @@ private slots:
 
     void on_pbDeleteReemisProbLambda_clicked();
 
+    void on_lePriT_editingFinished();
+
+    void on_pbPriThelp_clicked();
+
+    void on_ledPriT_raise_textChanged(const QString &arg1);
+
+    void on_pbPriT_test_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -156,6 +164,8 @@ private:
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
+
+    bool bMessageLock = false;
 
     void UpdateWaveButtons();
     void UpdateActionButtons();
@@ -172,6 +182,7 @@ private:
     void autoloadMissingCrossSectionData();
 
     void SetWasModified(bool flag);
+    bool parseDecayTime();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

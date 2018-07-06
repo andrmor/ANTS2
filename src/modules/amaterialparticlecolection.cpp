@@ -213,7 +213,12 @@ void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double
   MaterialCollectionData[index]->n = n;
   MaterialCollectionData[index]->abs = abs;
 
-  MaterialCollectionData[index]->PriScintDecayTime = PriScintDecayTime;
+  MaterialCollectionData[index]->PriScintRaiseTime = 0;
+  MaterialCollectionData[index]->PriScintModel = 0;
+
+  MaterialCollectionData[index]->PriScintDecayTimeVector.clear();
+  if (PriScintDecayTime != 0)
+    MaterialCollectionData[index]->PriScintDecayTimeVector << QPair<double,double>(1.0, PriScintDecayTime);
 
   MaterialCollectionData[index]->W = W;
   MaterialCollectionData[index]->SecYield = SecYield;
@@ -241,7 +246,9 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.e_driftVelocity = 0;
   tmpMaterial.W = 0;
   tmpMaterial.SecYield = 0;
-  tmpMaterial.PriScintDecayTime = 0;
+  tmpMaterial.PriScintRaiseTime = 0;
+  tmpMaterial.PriScintModel = 0;
+  tmpMaterial.PriScintDecayTimeVector.clear();
   tmpMaterial.SecScintDecayTime = 0;
   tmpMaterial.Comments = "";
 

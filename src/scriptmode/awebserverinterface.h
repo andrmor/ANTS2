@@ -7,13 +7,14 @@
 #include <QVariant>
 
 class AWebSocketSessionServer;
+class EventsDataClass;
 
 class AWebServerInterface: public AScriptInterface
 {
   Q_OBJECT
 
 public:
-    AWebServerInterface(AWebSocketSessionServer& Server);
+    AWebServerInterface(AWebSocketSessionServer& Server, EventsDataClass* EventsDataHub);
     ~AWebServerInterface() {}
 
 public slots:
@@ -21,11 +22,13 @@ public slots:
     void           SendFile(const QString& fileName);
     void           SendObject(const QVariant& object);
     void           SendObjectAsJSON(const QVariant& object);
+    void           SendReconstructionData();
 
     bool           IsBufferEmpty() const;
     void           ClearBuffer();
 
     const QVariant GetBufferAsObject() const;
+    void           GetBufferAsEvents();  //abort on fail, otherwise reply with OK
     bool           SaveBufferToFile(const QString& fileName);
 
     void           SendProgressReport(int percents);
@@ -33,6 +36,7 @@ public slots:
 
 private:
     AWebSocketSessionServer& Server;
+    EventsDataClass* EventsDataHub;
 };
 
 #endif // AWEBSERVERINTERFACE_H

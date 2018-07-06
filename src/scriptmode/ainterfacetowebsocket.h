@@ -11,13 +11,14 @@ class QWebSocketServer;
 class QWebSocket;
 class AWebSocketStandaloneMessanger;
 class AWebSocketSession;
+class EventsDataClass;
 
 class AInterfaceToWebSocket: public AScriptInterface
 {
   Q_OBJECT
 
 public:
-    AInterfaceToWebSocket();
+    AInterfaceToWebSocket(EventsDataClass* EventsDataHub);
     AInterfaceToWebSocket(const AInterfaceToWebSocket& other);
     ~AInterfaceToWebSocket();
 
@@ -31,7 +32,9 @@ public slots:
     int            GetAvailableThreads(const QString& IP, int port, bool ShowOutput = true);
     const QString  OpenSession(const QString& IP, int port, int threads, bool ShowOutput = true);
     bool           SendConfig(QVariant config);
-    bool           RemoteSimulatePhotonSources(const QString& LocalSimTreeFileName, bool ShowOutput = true);
+    bool           RemoteSimulatePhotonSources(const QString& SimTreeFileNamePattern, bool ShowOutput = true);
+    bool           RemoteSimulateParticleSources(const QString& SimTreeFileNamePattern, bool ShowOutput = true);
+    bool           RemoteReconstructEvents(int eventsFrom, int eventsTo, bool ShowOutput = true);
 
     const QString  SendText(const QString& message);
     const QString  SendTicket(const QString& ticket);
@@ -54,12 +57,18 @@ signals:
     void clearTextOnMessageWindow();
 
 private:
+    EventsDataClass* EventsDataHub;
     AWebSocketStandaloneMessanger* compatibilitySocket = 0;
     AWebSocketSession* socket = 0;
 
     int RequestedThreads = 1;
 
-    int TimeOut = 5000; //milliseconds
+    int TimeOut = 3000; //milliseconds
+
+private:
+    bool remoteSimulate(bool bPhotonSource, const QString &LocalSimTreeFileName, bool ShowOutput);
+    const QString sendQJsonObject(const QJsonObject &json);
+    const QString sendQByteArray(const QByteArray &ba);
 };
 
 #endif // AINTERFACETOWEBSOCKET_H

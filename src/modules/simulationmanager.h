@@ -74,7 +74,7 @@ public:
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
     void Clear();
 
-    ParticleSourcesClass* ParticleSources;  //used to update JSON on config chamges and in GUI to configure; Simulateors use their loacl copies build from JSON
+    ParticleSourcesClass* ParticleSources;  //used to update JSON on config chamges and in GUI to configure; Simulateors use their local copies build from JSON
 
 private:
     EventsDataClass* EventsDataHub; //alias
@@ -107,7 +107,7 @@ public:
 
     void setup(QJsonObject &json, int threadCount);
     void updateGeoManager();
-    void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
+    //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
     void updateStats();
     double getProgress() const { return progress; }

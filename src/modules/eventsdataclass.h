@@ -19,6 +19,7 @@ class APmHub;
 struct AScanRecord;
 struct AReconRecord;
 class TRandom2;
+class QJsonObject;
 
 class EventsDataClass : public QObject
 {
@@ -37,10 +38,11 @@ public:
     // PM signal data
     QVector< QVector <float> > Events; //[event][pm]  - remember, if events energy is loaded, one MORE CHANNEL IS ADDED: last channel is numPMs+1
     QVector< QVector < QVector <float> > > TimedEvents; //event timebin pm
+    int  countEvents() const {return Events.size();}
     bool isEmpty() const {return Events.isEmpty();}
     bool isTimed() const {return !TimedEvents.isEmpty();}
-    int getTimeBins() const;
-    int getNumPMs() const;
+    int  getTimeBins() const;
+    int  getNumPMs() const;
     const QVector<float> *getEvent(int iev) const;
     const QVector<QVector<float> > *getTimedEvent(int iev);
 
@@ -69,10 +71,15 @@ public:
     bool BlurReconstructionDataZ(int type, double sigma, TRandom2 *RandGen, int igroup = -1); // 0 - uniform, 1 - gauss; igroup<0 -> apply to all groups
     void PurgeFilteredEvents(int igroup = 0);
     void Purge(int OnePer, int igroup = 0);    
-    int countGoodEvents(int igroup = 0);
+    int  countGoodEvents(int igroup = 0);
     void copyTrueToReconstructed(int igroup = 0);
     void copyReconstructedToTrue(int igroup = 0);
     void prepareStatisticsForEvents(const bool isAllLRFsDefined, int &GoodEvents, double &AvChi2, double &AvDeviation, int igroup = 0);
+
+    bool packEventsToByteArray(int from, int to, QByteArray &ba) const;
+    bool unpackEventsFromByteArray(const QByteArray &ba);  // run by server - so no events range selection
+    bool packReconstructedToByteArray(QByteArray &ba) const;
+    bool unpackReconstructedFromByteArray(int from, int to, const QByteArray &ba);  //run by client -> should respect the event range
 
     //load data can have manifest file with holes/slits
     QVector<ManifestItemBaseClass*> Manifest;

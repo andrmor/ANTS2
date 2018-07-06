@@ -32,6 +32,7 @@
 
 //Root
 #include "TGraph.h"
+#include "TH1.h"
 #include "TAxis.h"
 #include "TGeoManager.h"
 #include "TMultiGraph.h"
@@ -136,6 +137,8 @@ void MaterialInspectorWindow::on_pbAddNewMaterial_clicked()
 
 void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
+    if ( !parseDecayTime() ) return;
+
     MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 
     //checkig this material
@@ -286,8 +289,26 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     else ui->ledRayleigh->setText("");
     ui->ledRayleighWave->setText(QString::number(tmpMaterial.rayleighWave));
 
-    str.setNum(tmpMaterial.PriScintDecayTime, 'g');
-    ui->ledPriT->setText(str);
+    ui->ledPriT_raise->setText( QString::number(tmpMaterial.PriScintRaiseTime) );
+    ui->cobPriT_model->setCurrentIndex(tmpMaterial.PriScintModel);
+    if (tmpMaterial.PriScintDecayTimeVector.size() == 0)
+        str = "0";
+    else if (tmpMaterial.PriScintDecayTimeVector.size() == 1)
+        str = QString::number(tmpMaterial.PriScintDecayTimeVector.first().second);
+    else
+    {
+        str.clear();
+        for (const QPair<double,double>& pair : tmpMaterial.PriScintDecayTimeVector)
+        {
+            str += QString::number(pair.first);
+            str += ":";
+            str += QString::number(pair.second);
+            str += " & ";
+        }
+        str.chop(3);
+    }
+    ui->lePriT->setText(str);
+
     str.setNum(tmpMaterial.W*1000.0, 'g'); //keV->eV
     ui->ledW->setText(str);
     str.setNum(tmpMaterial.SecYield, 'g');
@@ -415,7 +436,8 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
-    tmpMaterial.PriScintDecayTime = ui->ledPriT->text().toDouble();
+    tmpMaterial.PriScintRaiseTime = ui->ledPriT_raise->text().toDouble();
+    tmpMaterial.PriScintModel = ui->cobPriT_model->currentIndex();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
     if (ui->cbSameYieldForAll->isChecked())
@@ -2637,4 +2659,123 @@ void MaterialInspectorWindow::on_trwChemicalComposition_doubleClicked(const QMod
         ui->cbShowIsotopes->setChecked(true);
         ShowTreeWithChemicalComposition();
     }
+}
+
+void MaterialInspectorWindow::on_lePriT_editingFinished()
+{
+    if (bMessageLock) return;
+
+    parseDecayTime();
+}
+
+bool MaterialInspectorWindow::parseDecayTime()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    QString s = ui->lePriT->text().simplified();
+
+    tmpMaterial.PriScintDecayTimeVector.clear();
+    bool bErrorDetected = false;
+
+    bool bSingle;
+    double tau = s.toDouble(&bSingle);
+    if (bSingle)
+        tmpMaterial.PriScintDecayTimeVector << QPair<double, double>(1.0, tau);
+    else
+    {
+        QStringList sl = s.split('&', QString::SkipEmptyParts);
+
+        for (const QString& sr : sl)
+        {
+            QStringList oneTau = sr.split(':', QString::SkipEmptyParts);
+            if (oneTau.size() == 2)
+            {
+                bool bOK1, bOK2;
+                double weight = oneTau.at(0).toDouble(&bOK1);
+                double tau    = oneTau.at(1).toDouble(&bOK2);
+                if (bOK1 && bOK2)
+                    tmpMaterial.PriScintDecayTimeVector << QPair<double, double>(weight, tau);
+                else
+                {
+                    bErrorDetected = true;
+                    break;
+                }
+            }
+            else bErrorDetected = true;
+        }
+        if (tmpMaterial.PriScintDecayTimeVector.isEmpty()) bErrorDetected = true;
+    }
+
+    if (bErrorDetected)
+    {
+        bMessageLock = true;
+        message("Decay time format error:\nuse a double value or weight1:decay1 & weight2:decay2 & ...", this);
+        bMessageLock = false;
+    }
+    else
+        on_pbUpdateTmpMaterial_clicked();
+
+    return !bErrorDetected;
+}
+
+void MaterialInspectorWindow::on_pbPriThelp_clicked()
+{
+    QString s = "Decay time:\n"
+            "  If there is only one exponential decay component,"
+            "  it can be given directly.\n"
+            "  To configure several exponential decay components, use\n"
+            "  stat_weight1:decay_time1 & stat_weight2:decay_time2 & ...\n"
+            "  e.g., 1:25.5 & 1:250\n\n"
+            "Raise time:\n"
+            "  Provide raise time, the emission delay is calculated as 1 - exp{-t/raise_time}\n\n"
+            "Model:\n"
+            "  If \"Sum\" is selected, the photon emission time is calculated as follows:\n"
+            "  first the delay due to the raise time is generated,\n"
+            "  then decay time is generated. The emission time is sum of those values.\n\n"
+            "  If \"Shao\" is selected, the emission time is calculated as in:\n"
+            "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
+            "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf\n"
+            "  The formula is generalised to have more than one decay components.\n"
+            "  Random generator was provided by Evgeny Tolotchko";
+    message(s, this);
+}
+
+void MaterialInspectorWindow::on_ledPriT_raise_textChanged(const QString &arg1)
+{
+    ui->cobPriT_model->setVisible(arg1 != "0");
+}
+
+void MaterialInspectorWindow::on_pbPriT_test_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation); //to update sum of stat weights
+
+    QMessageBox mb(this);
+    if (ui->cobPriT_model->currentIndex() == 1)
+    {
+        MW->WindowNavigator->BusyOn();
+        mb.setWindowFlags(mb.windowFlags() | Qt::WindowStaysOnTopHint);
+        mb.setStandardButtons(0);
+        mb.setText("calculating...");
+        mb.show();
+        QCoreApplication::processEvents();
+    }
+
+    TH1D* h = new TH1D("h1", "", 1000, 0, 0);
+    for (int i=0; i<1000000; i++)
+        h->Fill( tmpMaterial.GeneratePrimScintTime(Detector->RandGen) );
+
+    if (ui->cobPriT_model->currentIndex() == 1)
+    {
+        mb.hide();
+        MW->WindowNavigator->BusyOff();
+    }
+
+
+    h->GetXaxis()->SetTitle("Time, ns");
+    TString title = "Emission for ";
+    title += tmpMaterial.name.toLatin1().data();
+    h->SetTitle(title);
+    MW->GraphWindow->Draw(h);
 }

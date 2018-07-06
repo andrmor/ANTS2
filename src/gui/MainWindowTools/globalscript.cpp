@@ -103,12 +103,12 @@ void MainWindow::createScriptWindow()
     AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
-    AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+    AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
     QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
     QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
     ScriptWindow->SetInterfaceObject(web, "web");
 
-    AWebServerInterface* server = new AWebServerInterface(*NetModule->WebSocketServer);
+    AWebServerInterface* server = new AWebServerInterface(*NetModule->WebSocketServer, EventsDataHub);
     ScriptWindow->SetInterfaceObject(server, "server");
 
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);

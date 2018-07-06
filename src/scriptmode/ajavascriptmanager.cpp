@@ -407,9 +407,14 @@ QScriptValue ScriptCopier::copy(const QScriptValue& obj)
     return copy;
 }
 
+#include "TRandom2.h"
 AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber, bool bAbortIsGlobal)
 {
-    AJavaScriptManager* sm = new AJavaScriptManager(RandGen);  // *** !!! make new RandGen one!!!
+    int seed = RandGen->Rndm()*100000;
+    TRandom2* rnd = new TRandom2(seed);
+    AJavaScriptManager* sm = new AJavaScriptManager(rnd);
+    sm->bOwnRandomGen = true;
+    sm->bShowAbortMessageInOutput = bAbortIsGlobal;
 
     for (QObject* io : interfaces)
     {

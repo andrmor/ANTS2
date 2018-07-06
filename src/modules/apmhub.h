@@ -152,9 +152,9 @@ public:
     bool fDoDarkCounts = false;
 
 private:
-    TRandom2* RandGen;
+    TRandom2* RandGen;  //used only for tests from GUI
     AMaterialParticleCollection* MaterialCollection;
-    AGammaRandomGenerator* GammaRandomGen;
+    AGammaRandomGenerator* GammaRandomGen;  //used only for GUI!
 
     int numPMs = 0;
     QVector<APm> PMs;

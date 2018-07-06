@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>494</width>
-    <height>641</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -513,7 +513,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
           <x>20</x>
           <y>222</y>
           <width>431</width>
-          <height>161</height>
+          <height>188</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -538,7 +538,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>220</x>
-           <y>82</y>
+           <y>104</y>
            <width>71</width>
            <height>16</height>
           </rect>
@@ -560,7 +560,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>150</x>
-           <y>82</y>
+           <y>104</y>
            <width>60</width>
            <height>20</height>
           </rect>
@@ -579,7 +579,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>28</x>
-           <y>82</y>
+           <y>104</y>
            <width>80</width>
            <height>16</height>
           </rect>
@@ -598,7 +598,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>150</x>
-           <y>103</y>
+           <y>125</y>
            <width>141</width>
            <height>17</height>
           </rect>
@@ -620,7 +620,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>150</x>
-           <y>128</y>
+           <y>150</y>
            <width>60</width>
            <height>20</height>
           </rect>
@@ -642,7 +642,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <property name="geometry">
           <rect>
            <x>27</x>
-           <y>120</y>
+           <y>142</y>
            <width>110</width>
            <height>41</height>
           </rect>
@@ -725,7 +725,7 @@ resolution:</string>
          <property name="geometry">
           <rect>
            <x>28</x>
-           <y>53</y>
+           <y>51</y>
            <width>111</width>
            <height>16</height>
           </rect>
@@ -740,12 +740,12 @@ resolution:</string>
           <string>Emission decay time:</string>
          </property>
         </widget>
-        <widget class="QLineEdit" name="ledPriT">
+        <widget class="QLineEdit" name="lePriT">
          <property name="geometry">
           <rect>
            <x>150</x>
            <y>50</y>
-           <width>60</width>
+           <width>201</width>
            <height>20</height>
           </rect>
          </property>
@@ -754,25 +754,6 @@ resolution:</string>
            <weight>50</weight>
            <bold>false</bold>
           </font>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_24">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>53</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>ns</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_5">
@@ -798,7 +779,7 @@ resolution:</string>
          <property name="geometry">
           <rect>
            <x>287</x>
-           <y>77</y>
+           <y>99</y>
            <width>161</width>
            <height>31</height>
           </rect>
@@ -847,20 +828,189 @@ resolution:</string>
          <zorder>label_48</zorder>
          <zorder>cobYieldForParticle</zorder>
         </widget>
+        <widget class="QPushButton" name="pbPriThelp">
+         <property name="geometry">
+          <rect>
+           <x>383</x>
+           <y>49</y>
+           <width>31</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>?</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_24">
+         <property name="geometry">
+          <rect>
+           <x>28</x>
+           <y>74</y>
+           <width>111</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Emission raise time:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="ledPriT_raise">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>73</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_28">
+         <property name="geometry">
+          <rect>
+           <x>357</x>
+           <y>50</y>
+           <width>21</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>ns</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_29">
+         <property name="geometry">
+          <rect>
+           <x>197</x>
+           <y>74</y>
+           <width>21</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>ns</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="cobPriT_model">
+         <property name="geometry">
+          <rect>
+           <x>281</x>
+           <y>73</y>
+           <width>69</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <item>
+          <property name="text">
+           <string>Sum</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Shao</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QLabel" name="label_34">
+         <property name="geometry">
+          <rect>
+           <x>230</x>
+           <y>77</y>
+           <width>47</width>
+           <height>13</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>model:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbPriT_test">
+         <property name="geometry">
+          <rect>
+           <x>368</x>
+           <y>72</y>
+           <width>61</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Test</string>
+         </property>
+        </widget>
         <zorder>label_20</zorder>
         <zorder>label_16</zorder>
         <zorder>label_58</zorder>
         <zorder>label_8</zorder>
-        <zorder>label_24</zorder>
         <zorder>label_5</zorder>
         <zorder>pbLoadPrimSpectrum</zorder>
         <zorder>pbShowPrimSpectrum</zorder>
         <zorder>pbDeletePrimSpectrum</zorder>
         <zorder>ledPrimaryYield</zorder>
-        <zorder>ledPriT</zorder>
+        <zorder>lePriT</zorder>
         <zorder>ledIntEnergyRes</zorder>
         <zorder>cbSameYieldForAll</zorder>
         <zorder>frYieldSame</zorder>
+        <zorder>pbPriThelp</zorder>
+        <zorder>label_24</zorder>
+        <zorder>ledPriT_raise</zorder>
+        <zorder>label_28</zorder>
+        <zorder>label_29</zorder>
+        <zorder>cobPriT_model</zorder>
+        <zorder>label_34</zorder>
+        <zorder>pbPriT_test</zorder>
        </widget>
        <widget class="QGroupBox" name="gbOptical">
         <property name="geometry">
@@ -2586,7 +2736,7 @@ resolution:</string>
   <tabstop>ledDensity</tabstop>
   <tabstop>ledN</tabstop>
   <tabstop>ledAbs</tabstop>
-  <tabstop>ledPriT</tabstop>
+  <tabstop>lePriT</tabstop>
   <tabstop>ledW</tabstop>
   <tabstop>ledEDriftVelocity</tabstop>
   <tabstop>ledSecYield</tabstop>
@@ -2852,8 +3002,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>301</y>
+     <x>70</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2868,8 +3018,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>301</y>
+     <x>122</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2884,8 +3034,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>301</y>
+     <x>70</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
@@ -2900,8 +3050,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>301</y>
+     <x>122</x>
+     <y>285</y>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>
@@ -2948,12 +3098,12 @@ resolution:</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>213</x>
-     <y>575</y>
+     <x>237</x>
+     <y>611</y>
     </hint>
     <hint type="destinationlabel">
-     <x>380</x>
-     <y>577</y>
+     <x>404</x>
+     <y>613</y>
     </hint>
    </hints>
   </connection>
@@ -2964,8 +3114,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>237</x>
-     <y>525</y>
+     <x>240</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>381</x>
@@ -2980,8 +3130,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
-     <y>543</y>
+     <x>221</x>
+     <y>574</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2996,28 +3146,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
-     <y>543</y>
+     <x>239</x>
+     <y>574</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
      <y>113</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbSameYieldForAll</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>frYieldSame</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>310</x>
-     <y>543</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>351</x>
-     <y>531</y>
     </hint>
    </hints>
   </connection>
@@ -3028,8 +3162,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>200</x>
-     <y>571</y>
+     <x>211</x>
+     <y>602</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3038,7 +3172,7 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledPriT</sender>
+   <sender>lePriT</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
    <slot>click()</slot>
@@ -3054,22 +3188,6 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledPriT</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>240</x>
-     <y>493</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>483</x>
-     <y>121</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>ledReemissionProbability</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
@@ -3077,7 +3195,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>405</y>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3093,7 +3211,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>375</y>
+     <y>366</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3108,8 +3226,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>351</x>
-     <y>375</y>
+     <x>362</x>
+     <y>366</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -3124,8 +3242,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>230</x>
-     <y>375</y>
+     <x>240</x>
+     <y>366</y>
     </hint>
     <hint type="destinationlabel">
      <x>344</x>
@@ -3140,8 +3258,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>202</x>
-     <y>315</y>
+     <x>213</x>
+     <y>310</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3172,8 +3290,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>194</x>
-     <y>405</y>
+     <x>205</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3189,7 +3307,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>315</y>
+     <y>310</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3210,6 +3328,86 @@ resolution:</string>
     <hint type="destinationlabel">
      <x>483</x>
      <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSameYieldForAll</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frYieldSame</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>321</x>
+     <y>574</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>562</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledPriT_raise</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>214</x>
+     <y>519</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>90</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledPriT_raise</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>205</x>
+     <y>513</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>464</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobPriT_model</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>514</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobPriT_model</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>330</x>
+     <y>517</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>93</x>
+     <y>118</y>
     </hint>
    </hints>
   </connection>

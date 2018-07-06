@@ -173,12 +173,14 @@ void ASimulatorRunner::updateGeoManager()  // *** obsolete!
         workers[i]->updateGeoManager();
 }
 
+/*
 void ASimulatorRunner::setWorkersSeed(int rngSeed)
 {
     TRandom2 rng(rngSeed);
     for(int i = 0; i < workers.count(); i++)
-        workers[i]->setRngSeed(rng.Rndm());
+        workers[i]->setRngSeed(rng.Rndm()*100000);
 }
+*/
 
 void ASimulatorRunner::updateStats()
 {
@@ -373,7 +375,7 @@ Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
     RandGen = new TRandom2();    
     dataHub = new EventsDataClass(nameID);    
     OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
-    photonGenerator = new Photon_Generator(detector);
+    photonGenerator = new Photon_Generator(detector, RandGen);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
 }
 
@@ -1347,7 +1349,7 @@ ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, 
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
-    ParticleSources = new ParticleSourcesClass(detector, nameID);
+    ParticleSources = new ParticleSourcesClass(detector, RandGen, nameID);
 }
 
 ParticleSourceSimulator::~ParticleSourceSimulator()
@@ -1696,7 +1698,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     this->EventsDataHub = EventsDataHub;
     this->Detector = Detector;
 
-    ParticleSources = new ParticleSourcesClass(Detector);
+    ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     //qDebug() << "->Container for particle sources created and configured";
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);

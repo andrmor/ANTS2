@@ -124,13 +124,14 @@ int main(int argc, char *argv[])
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
     qDebug() << "Tmp objects hub created";
 
-    AReconstructionManager ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);
+    AReconstructionManager ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);    
     qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;
     QObject::connect(&Detector, &DetectorClass::newGeoManager, &Network, &ANetworkModule::onNewGeoManagerCreated);
     QObject::connect(&Network, &ANetworkModule::RootServerStarted, &Detector, &DetectorClass::onRequestRegisterGeoManager);
     QObject::connect(&SimulationManager, &ASimulationManager::ProgressReport, &Network, &ANetworkModule::ProgressReport );
+    QObject::connect(&ReconstructionManager, &AReconstructionManager::UpdateReady, &Network, &ANetworkModule::ProgressReport );
     qDebug() << "Network module created";
 
     GlobalSettingsClass GlobSet(&Network);
@@ -264,9 +265,9 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(depo, "depo");
         AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
         SM.SetInterfaceObject(threads, "threads");
-        AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+        AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
         SM.SetInterfaceObject(web, "web");
-        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer);
+        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);
         SM.SetInterfaceObject(server, "server");
 #ifdef ANTS_FLANN
         AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);

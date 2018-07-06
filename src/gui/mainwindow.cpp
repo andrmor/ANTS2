@@ -1538,7 +1538,7 @@ void MainWindow::on_pbTestShowAbs_clicked()
   GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
-void MainWindow::on_sbWaveIndexPointSource_valueChanged(int arg1)
+void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
 {
   if (arg1 > WaveNodes-1)
     {
@@ -3888,19 +3888,33 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
 
-   if (ui->cbNumberOfRuns->isChecked())
+   if (!ui->cbFixWavelengthPointSource->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(1, QIcon());
 
-   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+   if (ui->cbNumberOfRuns->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(2, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
+
+   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
+
+   if (ui->cobScintTypePointSource->currentIndex() != 0 )
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(4, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }

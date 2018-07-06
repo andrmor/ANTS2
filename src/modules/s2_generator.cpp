@@ -171,7 +171,8 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
                          continue;
                        }
 
-                     PhotonGenerator->GenerateWaveTime(&Photon, MatIndexSecScint);
+                     PhotonGenerator->GenerateWave(&Photon, MatIndexSecScint);
+                     PhotonGenerator->GenerateTime(&Photon, MatIndexSecScint);
     //                 qDebug()<<time + z / DriftVelocity;
                      PhotonTracker->TracePhoton(&Photon);
                    }

@@ -1008,24 +1008,21 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         //else it is already set
 
         //configure  wavelength index and emission time
-        PhotonOnStart.time = 0;
-        if (fUseGivenWaveIndex) //directly given properties
+        PhotonOnStart.time = 0;   //reset time offset to zero
+        TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+        TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
+        if (!node)
         {
-            //Wavelength and index are already set
-            if (simSettings->fTimeResolved) PhotonOnStart.time = 0;
+            //PhotonOnStart.waveIndex = -1;
+            qWarning() << "Node not found when generating photons (photon sources)";
+            //keeping the old value of waveIndex
         }
-        else //material according to the emission position
+        else
         {
-            TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
-            TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
-            if (!node) PhotonOnStart.waveIndex = -1;
-            else
-            {
-                int thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
-                photonGenerator->GenerateWaveTime(&PhotonOnStart, thisMatIndex);
-            }
+            int thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
+            if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
+            photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
         }
-
 
         if (scs->ScintType == 2) PhotonOnStart.r[2] = z1 + (z2-z1)*RandGen->Rndm();
 

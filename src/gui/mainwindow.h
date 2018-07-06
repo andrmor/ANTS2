@@ -279,7 +279,7 @@ private slots:
     void on_pbTestGeneratorSecondary_clicked();
     void on_pbTestShowRefrIndex_clicked();
     void on_pbTestShowAbs_clicked();
-    void on_sbWaveIndexPointSource_valueChanged(int arg1);
+    void on_sbFixedWaveIndexPointSource_valueChanged(int arg1);
     void on_pbShowPDE_clicked();
     void on_pbLoadPDE_clicked();
     void on_pbDeletePDE_clicked();

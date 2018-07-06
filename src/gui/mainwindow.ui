@@ -6366,7 +6366,7 @@ Constructor is disabled!</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>7</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="tabTime">
        <attribute name="title">
@@ -7914,7 +7914,7 @@ thermal neutrons:</string>
          <enum>QFrame::NoFrame</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="page_5">
          <widget class="QTabWidget" name="twSingleScan">
@@ -9406,7 +9406,7 @@ thermal neutrons:</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tabDirec">
             <attribute name="title">
@@ -9653,9 +9653,9 @@ thermal neutrons:</string>
              </property>
              <property name="geometry">
               <rect>
-               <x>60</x>
-               <y>60</y>
-               <width>237</width>
+               <x>40</x>
+               <y>40</y>
+               <width>301</width>
                <height>40</height>
               </rect>
              </property>
@@ -9665,53 +9665,69 @@ thermal neutrons:</string>
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <widget class="QLabel" name="label_14">
-                <property name="text">
-                 <string>Wavelength:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="labWavelengthPointSource">
-                <property name="text">
-                 <string>200 nm; index=</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="sbFixedWaveIndexPointSource">
-                <property name="maximumSize">
-                 <size>
-                  <width>75</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>If index is -1, photon is tracked without taking wavelength-resolved properties into account (scalar values are used)</string>
-                </property>
-                <property name="minimum">
-                 <number>-1</number>
-                </property>
-                <property name="maximum">
-                 <number>1000000</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="label_14">
+              <property name="geometry">
+               <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>62</width>
+                <height>16</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Wavelength:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+             <widget class="QLabel" name="labWavelengthPointSource">
+              <property name="geometry">
+               <rect>
+                <x>78</x>
+                <y>10</y>
+                <width>101</width>
+                <height>16</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>200 nm; index=</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+             <widget class="QSpinBox" name="sbFixedWaveIndexPointSource">
+              <property name="geometry">
+               <rect>
+                <x>187</x>
+                <y>9</y>
+                <width>67</width>
+                <height>20</height>
+               </rect>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>75</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>If index is -1, photon is tracked without taking wavelength-resolved properties into account (scalar values are used)</string>
+              </property>
+              <property name="minimum">
+               <number>-1</number>
+              </property>
+              <property name="maximum">
+               <number>1000000</number>
+              </property>
+             </widget>
             </widget>
             <widget class="QCheckBox" name="cbFixWavelengthPointSource">
              <property name="geometry">
               <rect>
-               <x>20</x>
-               <y>20</y>
+               <x>13</x>
+               <y>17</y>
                <width>221</width>
                <height>17</height>
               </rect>
@@ -10008,8 +10024,8 @@ double events:</string>
              </property>
              <property name="geometry">
               <rect>
-               <x>40</x>
-               <y>30</y>
+               <x>230</x>
+               <y>68</y>
                <width>131</width>
                <height>24</height>
               </rect>
@@ -10031,12 +10047,25 @@ double events:</string>
               </property>
              </item>
             </widget>
+            <widget class="QLabel" name="label_133">
+             <property name="geometry">
+              <rect>
+               <x>110</x>
+               <y>70</y>
+               <width>111</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Scintillation type:</string>
+             </property>
+            </widget>
            </widget>
           </widget>
           <widget class="QPushButton" name="pbYellow">
            <property name="geometry">
             <rect>
-             <x>380</x>
+             <x>300</x>
              <y>4</y>
              <width>51</width>
              <height>23</height>
@@ -16290,8 +16319,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>518</y>
+     <x>226</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16886,7 +16915,7 @@ on stack</string>
      <y>392</y>
     </hint>
     <hint type="destinationlabel">
-     <x>411</x>
+     <x>331</x>
      <y>355</y>
     </hint>
    </hints>
@@ -16902,7 +16931,7 @@ on stack</string>
      <y>392</y>
     </hint>
     <hint type="destinationlabel">
-     <x>408</x>
+     <x>328</x>
      <y>355</y>
     </hint>
    </hints>
@@ -16918,7 +16947,7 @@ on stack</string>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
-     <x>413</x>
+     <x>333</x>
      <y>355</y>
     </hint>
    </hints>
@@ -16934,7 +16963,7 @@ on stack</string>
      <y>382</y>
     </hint>
     <hint type="destinationlabel">
-     <x>439</x>
+     <x>359</x>
      <y>355</y>
     </hint>
    </hints>
@@ -17202,8 +17231,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -17218,8 +17247,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -17234,8 +17263,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>421</y>
+     <x>443</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17250,8 +17279,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -17266,8 +17295,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -17282,8 +17311,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17298,8 +17327,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>360</y>
+     <x>165</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17330,8 +17359,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>305</x>
-     <y>420</y>
+     <x>307</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -18226,8 +18255,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>304</x>
-     <y>450</y>
+     <x>311</x>
+     <y>429</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -18242,8 +18271,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>131</x>
-     <y>414</y>
+     <x>321</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -19202,8 +19231,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -19234,8 +19263,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>450</y>
+     <x>251</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19250,8 +19279,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>436</y>
+     <x>235</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -19266,8 +19295,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>474</y>
+     <x>235</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -19298,8 +19327,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>142</x>
-     <y>360</y>
+     <x>144</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -19314,8 +19343,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>420</y>
+     <x>207</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -19330,8 +19359,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
-     <y>457</y>
+     <x>388</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -19346,8 +19375,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>420</y>
+     <x>241</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -19746,8 +19775,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>473</y>
+     <x>248</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -19762,8 +19791,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>98</x>
-     <y>360</y>
+     <x>100</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -19778,8 +19807,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>260</x>
-     <y>452</y>
+     <x>262</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
@@ -19800,6 +19829,22 @@ on stack</string>
     <hint type="destinationlabel">
      <x>138</x>
      <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFixWavelengthPointSource</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateSimConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>389</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>570</y>
     </hint>
    </hints>
   </connection>

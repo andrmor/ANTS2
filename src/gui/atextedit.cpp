@@ -13,6 +13,8 @@
 #include <QTextEdit>
 #include <QPainter>
 #include <QTextBlock>
+#include <QTextDocumentFragment>
+#include <QClipboard>
 
 ATextEdit::ATextEdit(QWidget *parent) : QPlainTextEdit(parent), c(0)
 {
@@ -40,12 +42,21 @@ void ATextEdit::setCompleter(QCompleter *completer)
 
 void ATextEdit::keyPressEvent(QKeyEvent *e)
 {
-
     QTextCursor tc = this->textCursor();
 
     //simple cases handle with switch
     switch (e->key())
     {
+        case Qt::Key_V :
+        {
+            if (e->modifiers() & Qt::ControlModifier)
+            {
+                paste();
+                return;
+            }
+        }
+        break;
+
         case Qt::Key_Tab :
         {
             if (e->modifiers() == 0 && !(c && c->popup()->isVisible()) )
@@ -826,6 +837,124 @@ void ATextEdit::setTextCursorSilently(const QTextCursor &tc)
     bMonitorLineChange = false;
     setTextCursor(tc);
     bMonitorLineChange = true;
+}
+
+int ATextEdit::getIndent(const QString& line) const
+{
+    int indent = -1;
+    if (!line.isEmpty())
+    {
+        for (indent = 0; indent<line.size(); indent++)
+            if (line.at(indent) != ' ') break;
+
+        if (indent == line.size()) indent = -1;
+    }
+    return indent;
+}
+
+void ATextEdit::setIndent(QString &line, int indent)
+{
+    line = line.trimmed();
+
+    const QString spaces = QString(indent, ' ');
+    line.insert(0, spaces);
+}
+
+void ATextEdit::convertTabToSpaces(QString& line)
+{
+    for (int i=line.size()-1; i>-1; i--)
+        if (line.at(i) == '\t')
+        {
+            line.remove(i, 1);
+            const QString spaces = QString(ATextEdit::TabInSpaces, ' ');
+            line.insert(i, spaces);
+        }
+}
+
+int ATextEdit::getSectionCounterChange(const QString& line) const
+{
+    int counter = 0;
+    for (int i=0; i<line.size(); i++)
+    {
+        // ***!!! add ignore commented: // and inside /* */
+        if      (line.at(i) == '{' ) counter++;
+        else if (line.at(i) == '}' ) counter--;
+    }
+    return counter;
+}
+
+void ATextEdit::paste()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QString text = clipboard->text();
+    QStringList lines = text.split('\n');
+    if (text.isEmpty() || lines.isEmpty())
+    {
+        QPlainTextEdit::paste(); //just in case, but most likely it is empty
+        return;
+    }
+
+    QTextCursor tc = textCursor();
+    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+    QString s = tc.selectedText();
+    s.remove(' ');
+    if (s.isEmpty())
+    {
+        //  qDebug() << "Adjusting ident";
+        tc = textCursor();
+        int newIdent = textCursor().positionInBlock();
+
+        QString toInsert;
+        for (int i=0; i<lines.size(); i++)
+        {
+            QString modLine = lines.at(i) + "\n";
+            if (i != 0) modLine = QString(newIdent, ' ') + modLine;
+            toInsert += modLine;
+        }
+        tc.insertText( toInsert );
+    }
+    else
+    {
+        //  qDebug() << "Not empty, using regular paste";
+        QPlainTextEdit::paste(); //just in case, but most likely it is empty
+    }
+}
+
+void ATextEdit::align()
+{
+    QTextCursor tc = textCursor();
+    int start = tc.anchor();
+    int stop = tc.position();
+    if (start > stop) std::swap(start, stop);
+
+    tc.setPosition(stop, QTextCursor::MoveAnchor);
+    tc.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+    tc.setPosition(start, QTextCursor::KeepAnchor);
+    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+
+    QString text = tc.selection().toPlainText();
+    if (text.isEmpty()) return;
+
+    QStringList list = text.split('\n');
+    if (list.size() == 1) return;
+
+    for (QString& s : list) convertTabToSpaces(s);
+
+    int currentIndent = getIndent(list.first());
+
+    for (int i=1; i<list.size(); i++)
+    {
+        int deltaSections = getSectionCounterChange(list.at(i-1));
+        currentIndent += deltaSections * TabInSpaces;
+
+        if (list.at(i).trimmed().startsWith('}')) currentIndent -= TabInSpaces;
+
+        if (currentIndent < 0) currentIndent = 0;
+        setIndent(list[i], currentIndent);
+    }
+
+    QString res = list.join('\n');
+    tc.insertText(res);
 }
 
 QString ATextEdit::textUnderCursor() const

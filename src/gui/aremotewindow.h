@@ -33,6 +33,8 @@ private slots:
     void onNameWasChanged();
     void on_pbStatus_clicked();
 
+    void on_pbAdd_clicked();
+
 private:
     void AddNewServer();
 };

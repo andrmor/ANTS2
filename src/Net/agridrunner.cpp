@@ -7,8 +7,33 @@
 
 void AGridRunner::CheckStatus(QVector<ARemoteServerRecord>& Servers)
 {
+    QVector<AWebSocketWorker*> workers;
+
     for (int i = 0; i < Servers.size(); i++)
-        startCheckStatusOfServer(i, Servers[i]);
+        workers << startCheckStatusOfServer(i, Servers[i]);
+
+    qDebug() << "Waiting...";
+
+    bool bStillWorking;
+    do
+    {
+        bool bStillWorking = false;
+        for (AWebSocketWorker* w : workers)
+        {
+            if (w->isRunning())
+            {
+                bStillWorking = true;
+                break;
+            }
+        }
+        QCoreApplication::processEvents();
+        QThread::usleep(200);
+    }
+    while (bStillWorking);
+
+    qDebug() << "All threads finished!";
+
+    for (AWebSocketWorker* w : workers) delete w;
 }
 
 void AGridRunner::onRequestTextLog(int index, const QString message)
@@ -17,7 +42,7 @@ void AGridRunner::onRequestTextLog(int index, const QString message)
     emit requestTextLog(index, message);
 }
 
-void AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord& Server)
+AWebSocketWorker* AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord& Server)
 {
     qDebug() << index << Server.IP << Server.Port << TimeOut;
     AWebSocketWorker* worker = new AWebSocketWorker(index, Server, TimeOut);
@@ -35,13 +60,7 @@ void AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord& Serve
     worker->setStarted(); //otherwise problems on start - on check it will be still false
     t->start();
 
-    qDebug() << "Waiting...";
-    while (worker->isRunning())
-    {
-        QCoreApplication::processEvents();
-        QThread::usleep(200);
-    }
-    qDebug() << "Returned";
+    return worker;
 }
 
 AWebSocketWorker::AWebSocketWorker(int index, ARemoteServerRecord& rec, int timeOut) :

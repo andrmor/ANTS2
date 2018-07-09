@@ -24,6 +24,14 @@ ARemoteWindow::ARemoteWindow(QWidget *parent) :
     AddNewServer();
 }
 
+ARemoteWindow::~ARemoteWindow()
+{
+    delete ui;
+
+    for (AServerDelegate* d : Delegates) delete d;
+    Delegates.clear();
+}
+
 void ARemoteWindow::AddNewServer()
 {
     QListWidgetItem* item = new QListWidgetItem();
@@ -39,12 +47,9 @@ void ARemoteWindow::AddNewServer()
     ui->twLog->addTab(pte, "_name_");
 }
 
-ARemoteWindow::~ARemoteWindow()
+void ARemoteWindow::on_pbAdd_clicked()
 {
-    delete ui;
-
-    for (AServerDelegate* d : Delegates) delete d;
-    Delegates.clear();
+    AddNewServer();
 }
 
 void ARemoteWindow::onTextLogReceived(int index, const QString message)
@@ -170,7 +175,11 @@ void AServerDelegate::setProgressVisible(bool flag)
 void ARemoteWindow::on_pbStatus_clicked()
 {
     QVector<ARemoteServerRecord> servers;
-    servers << ARemoteServerRecord("127.0.0.1", 1234);
+    for (int i=0; i<Delegates.size(); i++)
+    {
+        ARemoteServerRecord rec(Delegates.at(i)->getIP(), Delegates.at(i)->getPort());
+        servers << rec;
+    }
 
     AGridRunner* GR = new AGridRunner();
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived, Qt::QueuedConnection);

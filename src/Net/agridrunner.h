@@ -5,6 +5,7 @@
 #include <QHostAddress>
 
 class AWebSocketSession;
+class AWebSocketWorker;
 
 class ARemoteServerRecord
 {
@@ -33,7 +34,7 @@ private:
     QVector<AWebSocketSession*> Sockets;
 
 private:
-    void startCheckStatusOfServer(int index, ARemoteServerRecord& Server);
+    AWebSocketWorker* startCheckStatusOfServer(int index, ARemoteServerRecord& Server);
 
 signals:
     void requestTextLog(int index, const QString message);

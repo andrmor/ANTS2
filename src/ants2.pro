@@ -315,7 +315,8 @@ SOURCES += main.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
     scriptmode/awebserverinterface.cpp \
-    common/agammarandomgenerator.cpp
+    common/agammarandomgenerator.cpp \
+    Net/agridrunner.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -436,7 +437,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    scriptmode/awebserverinterface.h
+    scriptmode/awebserverinterface.h \
+    Net/agridrunner.h
+
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
@@ -547,7 +550,8 @@ ants2_GUI {
     gui/alineedit.cpp \
     gui/awebsocketserverdialog.cpp \
     common/acollapsiblegroupbox.cpp \
-    gui/MainWindowTools/slabdelegate.cpp
+    gui/MainWindowTools/slabdelegate.cpp \
+    gui/aremotewindow.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -601,7 +605,8 @@ HEADERS  += gui/mainwindow.h \
     gui/alineedit.h \
     gui/MainWindowTools/slabdelegate.h \
     common/acollapsiblegroupbox.h \
-    gui/awebsocketserverdialog.h
+    gui/awebsocketserverdialog.h \
+    gui/aremotewindow.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -629,7 +634,8 @@ FORMS += gui/mainwindow.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
     gui/aneutroninfodialog.ui \
-    gui/awebsocketserverdialog.ui
+    gui/awebsocketserverdialog.ui \
+    gui/aremotewindow.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -730,4 +736,3 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-

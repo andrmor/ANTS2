@@ -40,4 +40,6 @@ bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja);
 
 bool isContainAllKeys(QJsonObject json, QStringList keys);
 
+const QJsonObject strToObject(const QString& s);
+
 #endif // AJSONTOOLS_H

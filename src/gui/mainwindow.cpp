@@ -5302,3 +5302,10 @@ void MainWindow::on_ledSSO_EffWave_editingFinished()
 
     ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
 }
+
+#include "aremotewindow.h"
+void MainWindow::on_actionGrid_triggered()
+{
+    ARemoteWindow* GridWin = new ARemoteWindow(this);
+    GridWin->show();
+}

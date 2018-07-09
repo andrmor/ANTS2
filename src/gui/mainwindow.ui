@@ -16092,6 +16092,8 @@ on stack</string>
     </property>
     <addaction name="actionServer_window"/>
     <addaction name="actionServer_settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionGrid"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindows"/>
@@ -16299,6 +16301,11 @@ on stack</string>
   <action name="actionServer_settings">
    <property name="text">
     <string>Server settings</string>
+   </property>
+  </action>
+  <action name="actionGrid">
+   <property name="text">
+    <string>Grid</string>
    </property>
   </action>
  </widget>

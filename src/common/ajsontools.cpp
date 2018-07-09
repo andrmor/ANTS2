@@ -251,3 +251,9 @@ bool isContainAllKeys(QJsonObject json, QStringList keys)
         if (!json.contains(key)) return false;
     return true;
 }
+
+const QJsonObject strToObject(const QString &s)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+    return doc.object();
+}

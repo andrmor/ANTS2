@@ -4,17 +4,18 @@
 #include "awebsocketsession.h"
 #include "awebsocketsessionserver.h"
 #include "eventsdataclass.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QFile>
 
-const QJsonObject strToObject(const QString& s)
-{
-    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
-    return doc.object();
-}
+//const QJsonObject strToObject(const QString& s)
+//{
+//    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+//    return doc.object();
+//}
 
 AInterfaceToWebSocket::AInterfaceToWebSocket(EventsDataClass *EventsDataHub) :
     AScriptInterface(), EventsDataHub(EventsDataHub) {}

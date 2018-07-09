@@ -534,6 +534,7 @@ void AReconstructionManager::onLRFsCopied()
     fDoingCopyLRFs.store(false);
 }
 
+#include <QThread>
 bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    
   fStopRequested = false;
@@ -549,7 +550,11 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
       reconstructorList[ithread]->moveToThread(threads.last());
       threads.last()->start();
 
-      do qApp->processEvents();
+      do
+      {
+          qApp->processEvents();
+          QThread::usleep(100);
+      }
       while (fDoingCopyLRFs.load());
     }
 

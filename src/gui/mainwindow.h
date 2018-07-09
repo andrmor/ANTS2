@@ -642,6 +642,8 @@ private slots:
 
     void on_ledSSO_EffWave_editingFinished();
 
+    void on_actionGrid_triggered();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

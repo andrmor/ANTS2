@@ -506,7 +506,6 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    ui->cobMatPointSource->clear();    
     int numMats = MpCollection->countMaterials();
     for (int i=0; i<numMats; i++)
         AddMaterialToCOBs( (*MpCollection)[i]->name );
@@ -531,7 +530,6 @@ void MainWindow::AddMaterialToCOBs(QString s)
     ui->cobMaterialForOverrides->addItem(s);
     ui->cobMaterialTo->addItem(s);
     ui->cobMaterialForWaveTests->addItem(s);
-    ui->cobMatPointSource->addItem(s);
 
     MIwindow->AddMatToCobs(s);
 }
@@ -1316,7 +1314,6 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 
    int i=0;
    if (checked) i=1;
-   ui->swLRFs->setCurrentIndex(i);
 
    if (checked) ui->cbScanFloodAddNoise->setChecked(false);
    ui->cbScanFloodAddNoise->setEnabled(!checked);
@@ -1451,7 +1448,7 @@ void MainWindow::CorrectWaveTo()
   WaveTo = to;   
   str.setNum(to,'g',5);
   ui->ledWaveTo->setText(str);
-  if (ui->sbWaveIndexPointSource->value() > WaveNodes-1) ui->sbWaveIndexPointSource->setValue(0);
+  if (ui->sbFixedWaveIndexPointSource->value() > WaveNodes-1) ui->sbFixedWaveIndexPointSource->setValue(0);
 }
 
 void MainWindow::on_cobMaterialForWaveTests_currentIndexChanged(int index)
@@ -1541,19 +1538,11 @@ void MainWindow::on_pbTestShowAbs_clicked()
   GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
-void MainWindow::on_pbShowThisMatInfo_clicked()
-{
-    MIwindow->show();
-    MIwindow->raise();
-    MIwindow->activateWindow();
-    MIwindow->SetMaterial(ui->cobMatPointSource->currentIndex());
-}
-
-void MainWindow::on_sbWaveIndexPointSource_valueChanged(int arg1)
+void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
 {
   if (arg1 > WaveNodes-1)
     {
-      ui->sbWaveIndexPointSource->setValue(WaveNodes-1);
+      ui->sbFixedWaveIndexPointSource->setValue(WaveNodes-1);
       return;
     }
 
@@ -3899,19 +3888,33 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
 
-   if (ui->cbNumberOfRuns->isChecked())
+   if (ui->cbFixWavelengthPointSource->isChecked() && ui->cbWaveResolved->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(1, QIcon());
 
-   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+   if (ui->cbNumberOfRuns->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(2, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
+
+   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
+
+   if (ui->cobScintTypePointSource->currentIndex() != 0 )
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(4, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -4351,20 +4354,6 @@ void MainWindow::UpdateCustomScanNodesIndication()
 {
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
   on_pbShowNodes_clicked();
-}
-
-void MainWindow::on_cobMatPointSource_activated(int index)
-{
-  if (!ui->cbWaveResolved->isChecked()) return;
-
-  if ( ui->cobScintTypePointSource->currentIndex() == 0 )
-    { //primary scint
-      if ( (*MpCollection)[index]->PrimarySpectrum_lambda.isEmpty() ) message("This material has no primary scintillation spectrum defined!", this);
-    }
-  else
-    { //secondary
-      if ( (*MpCollection)[index]->SecondarySpectrum_lambda.isEmpty() ) message("This material has no secondary scintillation spectrum defined!", this);
-    }
 }
 
 void MainWindow::on_actionOpen_settings_triggered()
@@ -5198,12 +5187,6 @@ void MainWindow::on_actionServer_settings_triggered()
 {
     GlobSetWindow->SetTab(5);
     GlobSetWindow->show();
-}
-
-void MainWindow::on_cobDirectlyOrFromMaterial_currentIndexChanged(int index)
-{
-    ui->frMatDirSelection->setVisible(index != 2);
-    ui->swPointSourceWaveTime->setCurrentIndex( (index == 0 ? 0 : 1) );
 }
 
 void MainWindow::on_pbSSO_Load_clicked()

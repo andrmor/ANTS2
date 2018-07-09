@@ -253,9 +253,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->fWaveOptions->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fWaveTests->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fTime->setEnabled(ui->cbTimeResolved->isChecked());
-    ui->fPointSource_Wave->setEnabled(ui->cbWaveResolved->isChecked());
-    ui->fPointSource_Time->setEnabled(ui->cbTimeResolved->isChecked());
-    ui->swPointSourceWaveTime->setCurrentIndex(ui->cobDirectlyOrFromMaterial->currentIndex());
+    ui->cbFixWavelengthPointSource->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fAngular->setEnabled(ui->cbAngularSensitive->isChecked());    
     ui->fScanSecond->setEnabled(ui->cbSecondAxis->isChecked());
     ui->fScanThird->setEnabled(ui->cbThirdAxis->isChecked());

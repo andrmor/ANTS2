@@ -6366,7 +6366,7 @@ Constructor is disabled!</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabTime">
        <attribute name="title">
@@ -7584,7 +7584,7 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>34</x>
-          <y>22</y>
+          <y>30</y>
           <width>61</width>
           <height>16</height>
          </rect>
@@ -7603,7 +7603,7 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>277</x>
-          <y>4</y>
+          <y>12</y>
           <width>231</width>
           <height>42</height>
          </rect>
@@ -7850,7 +7850,7 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>7</x>
-          <y>10</y>
+          <y>18</y>
           <width>111</width>
           <height>16</height>
          </rect>
@@ -7869,7 +7869,7 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>129</x>
-          <y>15</y>
+          <y>23</y>
           <width>131</width>
           <height>22</height>
          </rect>
@@ -7901,519 +7901,13 @@ thermal neutrons:</string>
          </property>
         </item>
        </widget>
-       <widget class="QStackedWidget" name="swLRFs">
-        <property name="geometry">
-         <rect>
-          <x>5</x>
-          <y>50</y>
-          <width>528</width>
-          <height>69</height>
-         </rect>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="page_3">
-         <widget class="QComboBox" name="cobScintTypePointSource">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>384</x>
-            <y>18</y>
-            <width>131</width>
-            <height>24</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <item>
-           <property name="text">
-            <string> Primary scintillation</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string> Secondary scintillation</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QFrame" name="fDirectOrmat">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>373</width>
-            <height>63</height>
-           </rect>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <property name="spacing">
-            <number>2</number>
-           </property>
-           <property name="leftMargin">
-            <number>2</number>
-           </property>
-           <property name="topMargin">
-            <number>4</number>
-           </property>
-           <property name="rightMargin">
-            <number>2</number>
-           </property>
-           <property name="bottomMargin">
-            <number>2</number>
-           </property>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="labWaveTime">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Wavelength &amp; decay time:</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cobDirectlyOrFromMaterial">
-               <property name="enabled">
-                <bool>true</bool>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>22</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
-               </property>
-               <item>
-                <property name="text">
-                 <string> specify directly</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> use specific material</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> automatic</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QFrame" name="frMatDirSelection">
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>2</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QStackedWidget" name="swPointSourceWaveTime">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="currentIndex">
-                 <number>0</number>
-                </property>
-                <widget class="QWidget" name="pageUseFixed">
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <property name="spacing">
-                   <number>2</number>
-                  </property>
-                  <property name="leftMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="rightMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>2</number>
-                  </property>
-                  <item>
-                   <widget class="QFrame" name="fPointSource_Wave">
-                    <property name="frameShape">
-                     <enum>QFrame::StyledPanel</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_4">
-                     <property name="spacing">
-                      <number>2</number>
-                     </property>
-                     <property name="leftMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="rightMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                      <number>0</number>
-                     </property>
-                     <item>
-                      <spacer name="horizontalSpacer_6">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="label_14">
-                       <property name="text">
-                        <string>Wavelength:</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="labWavelengthPointSource">
-                       <property name="text">
-                        <string>200 nm; index=</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QSpinBox" name="sbWaveIndexPointSource">
-                       <property name="maximumSize">
-                        <size>
-                         <width>75</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="toolTip">
-                        <string>If index is -1, photon is tracked without taking wavelength-resolved properties into account (scalar values are used)</string>
-                       </property>
-                       <property name="minimum">
-                        <number>-1</number>
-                       </property>
-                       <property name="maximum">
-                        <number>1000000</number>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                    <zorder>label_14</zorder>
-                    <zorder>labWavelengthPointSource</zorder>
-                    <zorder>sbWaveIndexPointSource</zorder>
-                    <zorder>horizontalSpacer_6</zorder>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_5">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QFrame" name="fPointSource_Time">
-                    <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Raised</enum>
-                    </property>
-                    <layout class="QHBoxLayout" name="horizontalLayout_5">
-                     <property name="spacing">
-                      <number>2</number>
-                     </property>
-                     <property name="leftMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="rightMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                      <number>0</number>
-                     </property>
-                     <item>
-                      <widget class="QLabel" name="label_134">
-                       <property name="text">
-                        <string>Decay time:</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="ledDecayTime">
-                       <property name="maximumSize">
-                        <size>
-                         <width>75</width>
-                         <height>16777215</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>0</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLabel" name="label_133">
-                       <property name="text">
-                        <string>ns</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_7">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QWidget" name="pageUseMaterial">
-                 <layout class="QHBoxLayout" name="horizontalLayout_3">
-                  <property name="spacing">
-                   <number>2</number>
-                  </property>
-                  <property name="leftMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="rightMargin">
-                   <number>2</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>2</number>
-                  </property>
-                  <item>
-                   <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="cobMatPointSource">
-                    <property name="enabled">
-                     <bool>true</bool>
-                    </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>200</width>
-                      <height>0</height>
-                     </size>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pbShowThisMatInfo">
-                    <property name="maximumSize">
-                     <size>
-                      <width>100</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>Show</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_8">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                 <zorder>pbShowThisMatInfo</zorder>
-                 <zorder>cobMatPointSource</zorder>
-                 <zorder>horizontalSpacer</zorder>
-                 <zorder>horizontalSpacer_2</zorder>
-                 <zorder>horizontalSpacer_8</zorder>
-                </widget>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_4"/>
-       </widget>
-       <widget class="QPushButton" name="pnShowHideAdvanced">
-        <property name="geometry">
-         <rect>
-          <x>12</x>
-          <y>133</y>
-          <width>261</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Show / hide advanced options</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
        <widget class="QStackedWidget" name="swAdVancedSim">
         <property name="geometry">
          <rect>
           <x>1</x>
-          <y>123</y>
+          <y>130</y>
           <width>532</width>
-          <height>249</height>
+          <height>241</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -8427,7 +7921,7 @@ thermal neutrons:</string>
           <property name="geometry">
            <rect>
             <x>10</x>
-            <y>50</y>
+            <y>11</y>
             <width>512</width>
             <height>153</height>
            </rect>
@@ -9767,7 +9261,7 @@ thermal neutrons:</string>
           <property name="geometry">
            <rect>
             <x>249</x>
-            <y>227</y>
+            <y>218</y>
             <width>118</width>
             <height>3</height>
            </rect>
@@ -9780,7 +9274,7 @@ thermal neutrons:</string>
           <property name="geometry">
            <rect>
             <x>360</x>
-            <y>219</y>
+            <y>210</y>
             <width>160</width>
             <height>17</height>
            </rect>
@@ -9802,7 +9296,7 @@ thermal neutrons:</string>
           <property name="geometry">
            <rect>
             <x>187</x>
-            <y>212</y>
+            <y>203</y>
             <width>141</width>
             <height>31</height>
            </rect>
@@ -9811,19 +9305,83 @@ thermal neutrons:</string>
            <string>Simulate</string>
           </property>
          </widget>
+         <widget class="QFrame" name="frLimitNodesTo">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>167</y>
+            <width>311</width>
+            <height>29</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QCheckBox" name="cbLimitNodesOutsideObject">
+           <property name="geometry">
+            <rect>
+             <x>6</x>
+             <y>0</y>
+             <width>141</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>If a node is outside of this object, skip it. If this object is not found, the option has no effect.</string>
+           </property>
+           <property name="text">
+            <string>Skip nodes outside of</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="leLimitNodesObject">
+           <property name="geometry">
+            <rect>
+             <x>140</x>
+             <y>1</y>
+             <width>141</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>If a node is outside of this object, skip it. If this object is not found, the option has no effect.</string>
+           </property>
+           <property name="text">
+            <string>PrScint</string>
+           </property>
+          </widget>
+         </widget>
          <zorder>line_11</zorder>
          <zorder>twSingleScan</zorder>
          <zorder>cbPointSourceBuildTracks</zorder>
          <zorder>pbSimulate</zorder>
+         <zorder>frLimitNodesTo</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">
           <property name="geometry">
            <rect>
             <x>2</x>
-            <y>2</y>
+            <y>0</y>
             <width>523</width>
-            <height>246</height>
+            <height>230</height>
            </rect>
           </property>
           <property name="frameShape">
@@ -9836,7 +9394,7 @@ thermal neutrons:</string>
            <property name="geometry">
             <rect>
              <x>7</x>
-             <y>43</y>
+             <y>10</y>
              <width>512</width>
              <height>200</height>
             </rect>
@@ -9848,11 +9406,14 @@ thermal neutrons:</string>
             </font>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
+           </property>
+           <property name="tabBarAutoHide">
+            <bool>false</bool>
            </property>
            <widget class="QWidget" name="tabDirec">
             <attribute name="title">
-             <string>Photon direction</string>
+             <string>Direction</string>
             </attribute>
             <widget class="QLabel" name="label_40">
              <property name="geometry">
@@ -10083,6 +9644,122 @@ thermal neutrons:</string>
              <zorder>ledSingleDX</zorder>
              <zorder>cobFixedDirOrCone</zorder>
              <zorder>fConeForPhotonGen</zorder>
+            </widget>
+           </widget>
+           <widget class="QWidget" name="tab_8">
+            <attribute name="title">
+             <string>Wavelength</string>
+            </attribute>
+            <widget class="QFrame" name="frame_10">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>451</width>
+               <height>80</height>
+              </rect>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <widget class="QFrame" name="fPointSourceWave">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="geometry">
+               <rect>
+                <x>50</x>
+                <y>30</y>
+                <width>301</width>
+                <height>40</height>
+               </rect>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <widget class="QLabel" name="label_14">
+               <property name="geometry">
+                <rect>
+                 <x>10</x>
+                 <y>10</y>
+                 <width>62</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Wavelength:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+              <widget class="QLabel" name="labWavelengthPointSource">
+               <property name="geometry">
+                <rect>
+                 <x>78</x>
+                 <y>10</y>
+                 <width>101</width>
+                 <height>16</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>200 nm; index=</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+              <widget class="QSpinBox" name="sbFixedWaveIndexPointSource">
+               <property name="geometry">
+                <rect>
+                 <x>187</x>
+                 <y>9</y>
+                 <width>67</width>
+                 <height>20</height>
+                </rect>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>75</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>If index is -1, photon is tracked without taking wavelength-resolved properties into account (scalar values are used)</string>
+               </property>
+               <property name="minimum">
+                <number>-1</number>
+               </property>
+               <property name="maximum">
+                <number>1000000</number>
+               </property>
+              </widget>
+             </widget>
+             <widget class="QCheckBox" name="cbFixWavelengthPointSource">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="geometry">
+               <rect>
+                <x>23</x>
+                <y>7</y>
+                <width>221</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Fix emission wavelength</string>
+              </property>
+             </widget>
             </widget>
            </widget>
            <widget class="QWidget" name="tabMultRun">
@@ -10362,12 +10039,59 @@ double events:</string>
             <zorder>frame_11</zorder>
             <zorder>cbScanFloodAddNoise</zorder>
            </widget>
+           <widget class="QWidget" name="tab_9">
+            <attribute name="title">
+             <string>Secondary</string>
+            </attribute>
+            <widget class="QComboBox" name="cobScintTypePointSource">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>230</x>
+               <y>68</y>
+               <width>131</width>
+               <height>24</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <weight>50</weight>
+               <bold>false</bold>
+              </font>
+             </property>
+             <item>
+              <property name="text">
+               <string> Primary scintillation</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string> Secondary scintillation</string>
+              </property>
+             </item>
+            </widget>
+            <widget class="QLabel" name="label_133">
+             <property name="geometry">
+              <rect>
+               <x>110</x>
+               <y>70</y>
+               <width>111</width>
+               <height>16</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Scintillation type:</string>
+             </property>
+            </widget>
+           </widget>
           </widget>
           <widget class="QPushButton" name="pbYellow">
            <property name="geometry">
             <rect>
-             <x>310</x>
-             <y>10</y>
+             <x>300</x>
+             <y>4</y>
              <width>51</width>
              <height>23</height>
             </rect>
@@ -10385,12 +10109,34 @@ double events:</string>
          </widget>
         </widget>
        </widget>
+       <widget class="QPushButton" name="pnShowHideAdvanced">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>95</y>
+          <width>330</width>
+          <height>27</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Show / hide advanced options</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
        <widget class="QLabel" name="labAdvancedOn">
         <property name="geometry">
          <rect>
-          <x>277</x>
-          <y>137</y>
-          <width>21</width>
+          <x>433</x>
+          <y>97</y>
+          <width>80</width>
           <height>21</height>
          </rect>
         </property>
@@ -10398,78 +10144,6 @@ double events:</string>
          <string>--</string>
         </property>
        </widget>
-       <widget class="QFrame" name="frLimitNodesTo">
-        <property name="geometry">
-         <rect>
-          <x>357</x>
-          <y>127</y>
-          <width>159</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QCheckBox" name="cbLimitNodesOutsideObject">
-         <property name="geometry">
-          <rect>
-           <x>6</x>
-           <y>0</y>
-           <width>145</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>If a node is outside of this object, skip it. If this object is not found, the option has no effect.</string>
-         </property>
-         <property name="text">
-          <string>Skip nodes outside of:</string>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="leLimitNodesObject">
-         <property name="geometry">
-          <rect>
-           <x>6</x>
-           <y>20</y>
-           <width>141</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>If a node is outside of this object, skip it. If this object is not found, the option has no effect.</string>
-         </property>
-         <property name="text">
-          <string>PrScint</string>
-         </property>
-        </widget>
-       </widget>
-       <zorder>swLRFs</zorder>
-       <zorder>labPerNode</zorder>
-       <zorder>swScan3</zorder>
-       <zorder>label_80</zorder>
-       <zorder>cobScanNumPhotonsMode</zorder>
-       <zorder>swAdVancedSim</zorder>
-       <zorder>pnShowHideAdvanced</zorder>
-       <zorder>labAdvancedOn</zorder>
-       <zorder>frLimitNodesTo</zorder>
       </widget>
       <widget class="QWidget" name="tabParticleSources">
        <attribute name="title">
@@ -16670,8 +16344,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>226</x>
-     <y>540</y>
+     <x>224</x>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16824,34 +16498,18 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobDirectlyOrFromMaterial</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>swPointSourceWaveTime</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>294</x>
-     <y>273</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>307</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cobScanFloodZtype</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>swScanFloodZ</receiver>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>465</y>
+     <x>368</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
-     <x>521</x>
-     <y>490</y>
+     <x>519</x>
+     <y>436</y>
     </hint>
    </hints>
   </connection>
@@ -16863,7 +16521,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>146</x>
-     <y>390</y>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>148</x>
@@ -16878,12 +16536,12 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>438</y>
+     <x>307</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
-     <x>255</x>
-     <y>447</y>
+     <x>257</x>
+     <y>437</y>
     </hint>
    </hints>
   </connection>
@@ -17215,7 +16873,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>286</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
      <x>475</x>
@@ -17231,11 +16889,11 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>152</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
-     <y>437</y>
+     <y>429</y>
     </hint>
    </hints>
   </connection>
@@ -17247,7 +16905,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>146</x>
-     <y>390</y>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>514</x>
@@ -17279,11 +16937,11 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>286</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>334</y>
+     <x>331</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
@@ -17295,11 +16953,11 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>152</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
-     <x>334</x>
-     <y>334</y>
+     <x>328</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
@@ -17311,11 +16969,11 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>146</x>
-     <y>390</y>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
-     <x>339</x>
-     <y>334</y>
+     <x>333</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
@@ -17327,11 +16985,11 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>416</x>
-     <y>390</y>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
-     <x>367</x>
-     <y>334</y>
+     <x>359</x>
+     <y>355</y>
     </hint>
    </hints>
   </connection>
@@ -17598,8 +17256,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -17614,8 +17272,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -17630,8 +17288,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>443</y>
+     <x>441</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17646,8 +17304,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -17662,8 +17320,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -17678,8 +17336,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17694,8 +17352,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>382</y>
+     <x>163</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17726,8 +17384,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>301</x>
-     <y>442</y>
+     <x>311</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -18616,50 +18274,18 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobDirectlyOrFromMaterial</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>239</x>
-     <y>273</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>218</x>
-     <y>591</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbWaveIndexPointSource</sender>
+   <sender>sbFixedWaveIndexPointSource</sender>
    <signal>editingFinished()</signal>
    <receiver>pbUpdateSimConfig</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>302</y>
+     <x>321</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
      <y>596</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledDecayTime</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>317</x>
-     <y>299</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>302</x>
-     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18670,28 +18296,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>464</x>
-     <y>268</y>
+     <x>321</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
      <y>598</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobMatPointSource</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>175</x>
-     <y>300</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>274</x>
-     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18702,8 +18312,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
-     <y>346</y>
+     <x>74</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
@@ -18718,8 +18328,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>365</y>
+     <x>235</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>291</x>
@@ -18735,7 +18345,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>503</x>
-     <y>502</y>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>282</x>
@@ -18766,8 +18376,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>451</y>
+     <x>225</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>
@@ -18782,8 +18392,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>451</y>
+     <x>315</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>290</x>
@@ -18798,8 +18408,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>407</x>
-     <y>451</y>
+     <x>405</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -18814,8 +18424,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>162</x>
-     <y>430</y>
+     <x>172</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>238</x>
@@ -18830,8 +18440,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>430</y>
+     <x>244</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>259</x>
@@ -18846,8 +18456,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>305</x>
-     <y>430</y>
+     <x>315</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -18862,8 +18472,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>472</y>
+     <x>166</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>229</x>
@@ -18878,8 +18488,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>472</y>
+     <x>208</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>246</x>
@@ -18894,8 +18504,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>472</y>
+     <x>250</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>245</x>
@@ -18910,8 +18520,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>307</x>
-     <y>473</y>
+     <x>317</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>281</x>
@@ -18926,8 +18536,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>406</x>
-     <y>472</y>
+     <x>416</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -18942,8 +18552,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>90</x>
-     <y>491</y>
+     <x>100</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>241</x>
@@ -18958,8 +18568,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>493</y>
+     <x>166</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>212</x>
@@ -18974,8 +18584,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>493</y>
+     <x>208</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>226</x>
@@ -18990,8 +18600,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>493</y>
+     <x>250</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>248</x>
@@ -19006,8 +18616,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>494</y>
+     <x>319</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>275</x>
@@ -19022,8 +18632,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>373</x>
-     <y>493</y>
+     <x>383</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -19038,8 +18648,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>512</y>
+     <x>119</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>242</x>
@@ -19054,8 +18664,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
-     <y>514</y>
+     <x>166</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -19070,8 +18680,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>514</y>
+     <x>208</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>234</x>
@@ -19086,8 +18696,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>240</x>
-     <y>514</y>
+     <x>250</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>248</x>
@@ -19102,8 +18712,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>306</x>
-     <y>515</y>
+     <x>316</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>273</x>
@@ -19118,8 +18728,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
-     <y>514</y>
+     <x>422</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
@@ -19134,8 +18744,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
-     <y>557</y>
+     <x>420</x>
+     <y>544</y>
     </hint>
     <hint type="destinationlabel">
      <x>319</x>
@@ -19150,8 +18760,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>152</x>
-     <y>438</y>
+     <x>156</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>234</x>
@@ -19166,8 +18776,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>298</x>
-     <y>438</y>
+     <x>307</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>249</x>
@@ -19182,8 +18792,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>468</y>
+     <x>127</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>238</x>
@@ -19198,8 +18808,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>490</y>
+     <x>127</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>255</x>
@@ -19214,8 +18824,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>468</y>
+     <x>223</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -19230,8 +18840,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>490</y>
+     <x>223</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>235</x>
@@ -19246,8 +18856,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>465</y>
+     <x>368</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>295</x>
@@ -19262,8 +18872,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>488</y>
+     <x>367</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
@@ -19278,8 +18888,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>470</y>
+     <x>157</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>229</x>
@@ -19294,8 +18904,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>491</y>
+     <x>157</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>231</x>
@@ -19310,8 +18920,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>470</y>
+     <x>237</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>266</x>
@@ -19326,8 +18936,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>491</y>
+     <x>237</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>256</x>
@@ -19342,8 +18952,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>488</y>
+     <x>368</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -19358,8 +18968,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>488</y>
+     <x>464</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -19375,7 +18985,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>259</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -19391,7 +19001,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>128</x>
-     <y>476</y>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>252</x>
@@ -19407,7 +19017,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>218</x>
-     <y>476</y>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>251</x>
@@ -19423,7 +19033,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>308</x>
-     <y>476</y>
+     <y>468</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>
@@ -19439,7 +19049,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>117</x>
-     <y>400</y>
+     <y>392</y>
     </hint>
     <hint type="destinationlabel">
      <x>220</x>
@@ -19455,7 +19065,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>230</x>
-     <y>432</y>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>251</x>
@@ -19503,7 +19113,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>122</x>
-     <y>390</y>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>216</x>
@@ -19519,7 +19129,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>476</x>
-     <y>478</y>
+     <y>470</y>
     </hint>
     <hint type="destinationlabel">
      <x>319</x>
@@ -19646,8 +19256,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -19678,8 +19288,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>472</y>
+     <x>249</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19694,8 +19304,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>458</y>
+     <x>233</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -19710,8 +19320,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>496</y>
+     <x>233</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -19742,8 +19352,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>138</x>
-     <y>382</y>
+     <x>148</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -19758,8 +19368,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>442</y>
+     <x>211</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -19774,8 +19384,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>382</x>
-     <y>479</y>
+     <x>390</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -19790,8 +19400,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>442</y>
+     <x>239</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -20190,8 +19800,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>242</x>
-     <y>495</y>
+     <x>249</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -20206,8 +19816,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>94</x>
-     <y>382</y>
+     <x>104</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -20222,12 +19832,60 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>474</y>
+     <x>266</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
      <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFixWavelengthPointSource</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>fPointSourceWave</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>112</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>154</x>
+     <y>430</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFixWavelengthPointSource</sender>
+   <signal>clicked()</signal>
+   <receiver>pbUpdateSimConfig</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>570</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbWaveResolved</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame_10</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>45</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>414</x>
+     <y>398</y>
     </hint>
    </hints>
   </connection>

@@ -156,15 +156,8 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerb
 
   //Wavelength/decay options
   QJsonObject wdjson;
-  int TypeWG = ui->cobDirectlyOrFromMaterial->currentIndex();
-  wdjson["Direct_Material"] = TypeWG; // 0-Direct, 1-Material determine wave/dec
-  //if (TypeWG == 0)
-  //  {
-      wdjson["WaveIndex"] = ui->sbWaveIndexPointSource->value();
-      wdjson["DecayTime"] = ui->ledDecayTime->text().toDouble();
-  //  }
-  //else
-      wdjson["Material"] = ui->cobMatPointSource->currentIndex();
+      wdjson["UseFixedWavelength"] = ui->cbFixWavelengthPointSource->isChecked();
+      wdjson["WaveIndex"] = ui->sbFixedWaveIndexPointSource->value();
   json["WaveTimeOptions"] = wdjson;
 
   //Photon direction options

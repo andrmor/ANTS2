@@ -20,7 +20,8 @@ public:
 
     void GenerateDirectionPrimary(APhoton *Photon);
     void GenerateDirectionSecondary(APhoton *Photon);
-    void GenerateWaveTime(APhoton *Photon, int materialId);
+    void GenerateWave(APhoton *Photon, int materialId);
+    void GenerateTime(APhoton *Photon, int materialId);
 
     void configure(const GeneralSimSettings *simSet, ASimulationStatistics* detStat) {SimSet = simSet; DetStat = detStat;}
 

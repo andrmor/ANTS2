@@ -279,8 +279,7 @@ private slots:
     void on_pbTestGeneratorSecondary_clicked();
     void on_pbTestShowRefrIndex_clicked();
     void on_pbTestShowAbs_clicked();
-    void on_pbShowThisMatInfo_clicked();
-    void on_sbWaveIndexPointSource_valueChanged(int arg1);
+    void on_sbFixedWaveIndexPointSource_valueChanged(int arg1);
     void on_pbShowPDE_clicked();
     void on_pbLoadPDE_clicked();
     void on_pbDeletePDE_clicked();
@@ -546,7 +545,6 @@ private slots:
     void on_pbShowNodes_clicked();
     void on_pbRunNodeScript_clicked();
     void on_cobPMdeviceType_activated(const QString &arg1);
-    void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
     void on_actionOpen_settings_triggered();
@@ -633,8 +631,6 @@ private slots:
     void on_actionServer_window_triggered();
 
     void on_actionServer_settings_triggered();
-
-    void on_cobDirectlyOrFromMaterial_currentIndexChanged(int index);
 
     void on_pbSSO_Load_clicked();
 

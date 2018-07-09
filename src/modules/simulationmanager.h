@@ -255,7 +255,7 @@ private:
     bool SimulateCustomNodes();
 
     //utilities
-    bool ReadPhotonSimOptions(QJsonObject &json);
+    //bool ReadPhotonSimOptions(QJsonObject &json);
     int PhotonsToRun();
     void GenerateTraceNphotons(AScanRecord *scs, int iPoint = 0);
     bool FindSecScintBounds(double *r, double *z1, double *z2);
@@ -296,11 +296,11 @@ private:
     bool fCone;
 
     //wavelength and time options
-    bool fDirectGeneration;
-    bool fAutomaticWaveTime = false;
-    double iWaveIndex;
-    double DecayTime;
-    int iMatIndex;
+    bool fUseGivenWaveIndex;
+    //bool fAutomaticWaveTime = false;
+    double iFixedWaveIndex;
+    //double DecayTime;
+    //int iMatIndex;
 
     //bad events options
     QVector<ScanFloodStructure> BadEventConfig;

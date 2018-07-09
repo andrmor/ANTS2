@@ -92,7 +92,8 @@ bool S1_Generator::Generate() //uses MW->EnergyVector as the input parameter
                 Photon.time = (*EnergyVector)[iEv]->time;  //will be changed if there is time dependence
                 PhotonGenerator->GenerateDirectionPrimary(&Photon);
     //            qDebug() << MatId;
-                PhotonGenerator->GenerateWaveTime(&Photon, MatId);
+                PhotonGenerator->GenerateWave(&Photon, MatId);
+                PhotonGenerator->GenerateTime(&Photon, MatId);
     //            qDebug() << "r, v, wave"<<Photon.r[0]<<Photon.r[1]<<Photon.r[2]<<Photon.v[0]<<Photon.v[1]<<Photon.v[2]<<Photon.WaveIndex;
                 PhotonTracker->TracePhoton(&Photon);
               }

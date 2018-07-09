@@ -618,7 +618,8 @@ if (scj.contains("CustomDistrib"))
   //MainWindow::on_cbTimeResolved_toggled(ui->cbTimeResolved->isChecked());
 
   //update indication
-  MainWindow::on_pbRefreshStack_clicked();
+  on_pbRefreshStack_clicked();
+  on_pbYellow_clicked(); //yellow marker for activated advanced options in point source sim
 
   UpdateTestWavelengthProperties();
 

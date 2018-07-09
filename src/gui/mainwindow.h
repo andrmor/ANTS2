@@ -545,7 +545,6 @@ private slots:
     void on_pbShowNodes_clicked();
     void on_pbRunNodeScript_clicked();
     void on_cobPMdeviceType_activated(const QString &arg1);
-    void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
     void on_actionOpen_settings_triggered();

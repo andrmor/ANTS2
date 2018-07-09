@@ -3888,7 +3888,7 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
 
-   if (!ui->cbFixWavelengthPointSource->isChecked())
+   if (ui->cbFixWavelengthPointSource->isChecked() && ui->cbWaveResolved->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
@@ -4354,20 +4354,6 @@ void MainWindow::UpdateCustomScanNodesIndication()
 {
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
   on_pbShowNodes_clicked();
-}
-
-void MainWindow::on_cobMatPointSource_activated(int index)
-{
-  if (!ui->cbWaveResolved->isChecked()) return;
-
-  if ( ui->cobScintTypePointSource->currentIndex() == 0 )
-    { //primary scint
-      if ( (*MpCollection)[index]->PrimarySpectrum_lambda.isEmpty() ) message("This material has no primary scintillation spectrum defined!", this);
-    }
-  else
-    { //secondary
-      if ( (*MpCollection)[index]->SecondarySpectrum_lambda.isEmpty() ) message("This material has no secondary scintillation spectrum defined!", this);
-    }
 }
 
 void MainWindow::on_actionOpen_settings_triggered()

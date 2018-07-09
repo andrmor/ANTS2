@@ -1010,19 +1010,20 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         //configure  wavelength index and emission time
         PhotonOnStart.time = 0;   //reset time offset to zero
         TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+
+        int thisMatIndex;
         TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
         if (!node)
         {
             //PhotonOnStart.waveIndex = -1;
-            qWarning() << "Node not found when generating photons (photon sources)";
-            //keeping the old value of waveIndex
+            thisMatIndex = detector->top->GetMaterial()->GetIndex(); //get material of the world
+            //qWarning() << "Node not found when generating photons (photon sources) - assuming material of the world!"<<thisMatIndex;
         }
         else
-        {
-            int thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
-            if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
-            photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
-        }
+            thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
+
+        if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
+        photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
 
         if (scs->ScintType == 2) PhotonOnStart.r[2] = z1 + (z2-z1)*RandGen->Rndm();
 

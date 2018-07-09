@@ -1,9 +1,9 @@
 
-On Linux: 
-Before start, make sure you have dev version of Python:
-sudo apt-get install python3-dev
+#On Linux: 
+#Before start, make sure you have dev version of Python:
+#sudo apt-get install python3-dev
 
-Common for Linux and Windows:
+#Common for Linux and Windows:
 # 1. Download PythonQt - e.g., from https://github.com/Orochimarufan/PythonQt
 # 2. In the text below, modify path to your Python installation (in the section of the approproiate OS - unix or win32)
 # 3. Save this file as PythonQt.pro in src directory of PythonQt
@@ -17,7 +17,7 @@ Common for Linux and Windows:
 # PythonQt was developed by Florian Link
 #---------------------------------------
 
-#Modify paths for your Python version!
+#Modify the paths!
 
 unix {
   unix:LIBS += $$system(python3.5-config --libs)

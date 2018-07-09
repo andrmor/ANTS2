@@ -19,16 +19,16 @@ public:
     QCompleter *completer() const {return c; }
 
     void SetFontSize(int size);
-
     void RefreshExtraHighlight();
-
     void setTextCursorSilently(const QTextCursor& tc);
 
     QStringList functionList;
-
     QString FindString;
-
     static const int TabInSpaces = 7;
+
+public slots:
+    void paste();
+    void align();
 
 protected:
     bool event(QEvent *event);
@@ -68,6 +68,12 @@ private:
     void checkBracketsOnRight(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
 
     bool TryShowFunctionTooltip(QTextCursor *cursor);
+
+    int getIndent(const QString &line) const;
+    void setIndent(QString &line, int indent);
+    void convertTabToSpaces(QString &line);
+    int getSectionCounterChange(const QString &line) const;
+
 signals:
     void requestHelp(QString);
     void editingFinished();

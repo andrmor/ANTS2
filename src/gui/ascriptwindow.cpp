@@ -45,7 +45,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QInputDialog>
-#include <QTextDocumentFragment>
+//#include <QTextDocumentFragment>
 #include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
@@ -255,7 +255,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
     QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
-    connect(DoAlign, &QShortcut::activated, [&](){onRequestAlignText(ScriptTabs[CurrentTab]->TextEdit->textCursor());});
+    connect(DoAlign, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->align();});
+    //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
+    //connect(DoPaste, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->paste();});
 
     if (!bLightMode)
         ReadFromJson();
@@ -1389,7 +1391,6 @@ void AScriptWindow::AddNewTab()
     connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
     connect(tab, &AScriptWindowTabItem::requestFindFunction, this, &AScriptWindow::onFindFunction);
     connect(tab, &AScriptWindowTabItem::requestFindVariable, this, &AScriptWindow::onFindVariable);
-    connect(tab, &AScriptWindowTabItem::requestAlignText, this, &AScriptWindow::onRequestAlignText);
 }
 
 QString AScriptWindow::createNewTabName()
@@ -1792,90 +1793,6 @@ void AScriptWindow::onFindVariable()
     te->setExtraSelections(esList);
 }
 
-void AScriptWindow::onRequestAlignText(const QTextCursor& textCursor)
-{
-    QTextCursor tc = textCursor;
-    int start = tc.anchor();
-    int stop = tc.position();
-    if (start > stop) std::swap(start, stop);
-
-    tc.setPosition(stop, QTextCursor::MoveAnchor);
-    tc.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
-    tc.setPosition(start, QTextCursor::KeepAnchor);
-    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
-
-    QString text = tc.selection().toPlainText();
-    if (text.isEmpty()) return;
-
-    QStringList list = text.split('\n');
-    if (list.size() == 1) return;
-
-    for (QString& s : list) convertTabToSpaces(s);
-
-    int currentIndent = getIndent(list.first());
-
-    for (int i=1; i<list.size(); i++)
-    {
-        int deltaSections = getSectionCounterChange(list.at(i-1));
-        currentIndent += deltaSections * ATextEdit::TabInSpaces;
-
-        if (list.at(i).trimmed().startsWith('}')) currentIndent -= ATextEdit::TabInSpaces;
-
-        if (currentIndent < 0) currentIndent = 0;
-        setIndent(list[i], currentIndent);
-    }
-
-    QString res = list.join('\n');
-    tc.insertText(res);
-}
-
-int AScriptWindow::getIndent(const QString& line)
-{
-    int indent = -1;
-    if (!line.isEmpty())
-    {
-        for (indent = 0; indent<line.size(); indent++)
-            if (line.at(indent) != ' ') break;
-
-        if (indent == line.size()) indent = -1;
-    }
-    return indent;
-}
-
-void AScriptWindow::setIndent(QString &line, int indent)
-{
-    //int oldIndent = getIndent(line);
-    //if (oldIndent == -1) return;
-    //line.remove(0, oldIndent);
-    line = line.trimmed();
-
-    const QString spaces = QString(indent, ' ');
-    line.insert(0, spaces);
-}
-
-int AScriptWindow::getSectionCounterChange(const QString& line)
-{
-    int counter = 0;
-    for (int i=0; i<line.size(); i++)
-    {
-        // ***!!! add ignore commented: // and inside /* */
-        if      (line.at(i) == '{' ) counter++;
-        else if (line.at(i) == '}' ) counter--;
-    }
-    return counter;
-}
-
-void AScriptWindow::convertTabToSpaces(QString& line)
-{
-    for (int i=line.size()-1; i>-1; i--)
-        if (line.at(i) == '\t')
-        {
-            line.remove(i, 1);
-            const QString spaces = QString(ATextEdit::TabInSpaces, ' ');
-            line.insert(i, spaces);
-        }
-}
-
 void AScriptWindow::onBack()
 {
     ScriptTabs[CurrentTab]->goBack();
@@ -2034,6 +1951,11 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
     menu.addSeparator();
     QAction* alignText = menu.addAction("Align selected text (Ctrl + I)");
+    menu.addSeparator();
+    QAction* cut = menu.addAction("Cut (Ctrl + X)");
+    QAction* copy = menu.addAction("Copy (Ctrl + C)");
+    QAction* paste = menu.addAction("Paste (Ctrl + V)");
+
 
     QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
@@ -2047,7 +1969,11 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     else if (selectedItem == shiftBack) goBack();
     else if (selectedItem == shiftForward) goForward();
 
-    else if (selectedItem == alignText) emit requestAlignText(TextEdit->textCursor());
+    else if (selectedItem == alignText) emit TextEdit->align();
+
+    else if (selectedItem == cut) TextEdit->cut();
+    else if (selectedItem == copy) TextEdit->copy();
+    else if (selectedItem == paste) TextEdit->paste();
 }
 
 void AScriptWindowTabItem::goBack()

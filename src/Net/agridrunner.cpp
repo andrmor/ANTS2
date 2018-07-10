@@ -92,6 +92,33 @@ void AGridRunner::startInNewThread(AWebSocketWorker_Base* worker)
 AWebSocketWorker_Base::AWebSocketWorker_Base(int index, ARemoteServerRecord *rec, int timeOut) :
     index(index), rec(rec), TimeOut(timeOut) {}
 
+AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
+{
+    bRunning = true;
+
+    const QString url = "ws://" + rec->IP + ':' + QString::number(port);
+    emit requestTextLog(index, QString("Trying to connect to ") + url + "...");
+
+    AWebSocketSession* socket = new AWebSocketSession();
+
+    socket->SetTimeout(TimeOut);
+    rec->NumThreads = 0;
+    qDebug() << "Connecting to"<<rec->IP << "on port"<<port;
+
+    rec->Status = ARemoteServerRecord::Connecting;
+
+    bool bOK = socket->Connect(url, true);
+    if (!bOK)
+    {
+        rec->Status = ARemoteServerRecord::Dead;
+        rec->Error = socket->GetError();
+        emit requestTextLog(index, QString("Connection failed: ") + socket->GetError());
+        delete socket;
+        socket = 0;
+    }
+    return socket;
+}
+
 AWebSocketWorker_Check::AWebSocketWorker_Check(int index, ARemoteServerRecord *rec, int timeOut) :
     AWebSocketWorker_Base(index, rec, timeOut) {}
 
@@ -106,15 +133,6 @@ void AWebSocketWorker_Check::run()
 {
     bRunning = true;
 
-    const QString url = "ws://" + rec->IP + ':' + QString::number(rec->Port);
-    qDebug() << url;
-    emit requestTextLog(index, QString("Connecting to dispatcher ") + url);
-
-    AWebSocketSession* socket = new AWebSocketSession();
-    socket->SetTimeout(TimeOut);
-    rec->NumThreads = 0;
-    qDebug() << "Connecting...";
-
     QTimer timer;
     timer.setInterval(timerInterval);
     timeElapsed = 0;
@@ -122,16 +140,9 @@ void AWebSocketWorker_Check::run()
     rec->Progress = 0;
     timer.start();
 
-    rec->Status = ARemoteServerRecord::Connecting;
-
-    bool bOK = socket->Connect(url, true);
-    if (!bOK)
-    {
-        rec->Status = ARemoteServerRecord::Dead;
-        rec->Error = socket->GetError();
-        emit requestTextLog(index, QString("Connection failed: ") + socket->GetError());
-    }
-    else
+    emit requestTextLog(index, "Connecting to dispatcher");
+    AWebSocketSession* socket = connectToServer(rec->Port);
+    if (socket)
     {
         QString reply = socket->GetTextReply();
         qDebug() << "On connect reply:"<<reply;
@@ -145,7 +156,7 @@ void AWebSocketWorker_Check::run()
         else
         {
             emit requestTextLog(index, "Requesting status");
-            bOK = socket->SendText( "{ \"command\" : \"report\" }" );
+            bool bOK = socket->SendText( "{ \"command\" : \"report\" }" );
             if (!bOK)
             {
                 rec->Status = ARemoteServerRecord::Dead;

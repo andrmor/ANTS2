@@ -54,6 +54,8 @@ protected:
 
     bool bRunning = false;
 
+    AWebSocketSession* connectToServer(int port);
+
 public slots:
     virtual void run() = 0;
 

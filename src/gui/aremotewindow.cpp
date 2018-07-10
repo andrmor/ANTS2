@@ -3,25 +3,29 @@
 #include "agridrunner.h"
 #include "aremoteserverrecord.h"
 #include "aserverdelegate.h"
+#include "mainwindow.h"
 
 #include <QPlainTextEdit>
 #include <QDebug>
 
-ARemoteWindow::ARemoteWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::ARemoteWindow)
+ARemoteWindow::ARemoteWindow(MainWindow *MW) :
+    MW(MW), ui(new Ui::ARemoteWindow)
 {
     ui->setupUi(this);
     ui->lwServers->setViewMode(QListView::ListMode);
     ui->lwServers->setSpacing(1);
-
     ui->twLog->clear();
 
     AddNewServer();
+
+    GR = new AGridRunner();
+    QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
+    QObject::connect(GR, &AGridRunner::requestGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
 }
 
 ARemoteWindow::~ARemoteWindow()
 {
+    delete GR;
     delete ui;
 
     for (ARemoteServerRecord* r : Records) delete r;
@@ -77,33 +81,11 @@ void ARemoteWindow::onNameWasChanged()
 
 void ARemoteWindow::on_pbStatus_clicked()
 {
-    AGridRunner* GR = new AGridRunner();
-    QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
-    QObject::connect(GR, &AGridRunner::requestGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
-
     GR->CheckStatus(Records);
-    GR->deleteLater();
+}
 
-    /*
-    for (int i=0; i<servers.size(); i++)
-    {
-        const ARemoteServerRecord& s = servers.at(i);
-
-        qDebug() << s.bEnabled << s.NumThreads;
-
-        if (!s.bEnabled) Delegates[i]->setIcon(0);
-        else
-        {
-            if (s.NumThreads == 0)
-            {
-                Delegates[i]->setIcon(2);
-            }
-            else
-            {
-                Delegates[i]->setIcon(1);
-                Delegates[i]->setThreads(s.NumThreads);
-            }
-        }
-    }
-    */
+#include "aconfiguration.h"
+void ARemoteWindow::on_pbSimulate_clicked()
+{
+    GR->Simulate(Records, &MW->Config->JSON);
 }

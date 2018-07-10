@@ -9,18 +9,33 @@
 
 void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
 {
-    QVector<AWebSocketWorker*> workers;
+    QVector<AWebSocketWorker_Base*> workers;
 
     for (int i = 0; i < Servers.size(); i++)
         workers << startCheckStatusOfServer(i, Servers[i]);
 
+    waitForWorkersToFinish(workers);
+}
+
+void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config)
+{
+    QVector<AWebSocketWorker_Base*> workers;
+
+    for (int i = 0; i < Servers.size(); i++)
+        workers << startSimulationOnServer(i, Servers[i], config);
+
+    waitForWorkersToFinish(workers);
+}
+
+void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)
+{
     qDebug() << "Waiting...";
 
     bool bStillWorking;
     do
     {
         bStillWorking = false;
-        for (AWebSocketWorker* w : workers)
+        for (AWebSocketWorker_Base* w : workers)
             if (w->isRunning()) bStillWorking = true;
         emit requestGuiUpdate();
         QCoreApplication::processEvents();
@@ -30,47 +45,64 @@ void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
 
     qDebug() << "All threads finished!";
 
-    for (AWebSocketWorker* w : workers) delete w;
+    for (AWebSocketWorker_Base* w : workers)
+        delete w;
 }
 
 void AGridRunner::onRequestTextLog(int index, const QString message)
 {
-    qDebug() << index << "--->" << message;
+    //qDebug() << index << "--->" << message;
     emit requestTextLog(index, message);
 }
 
-AWebSocketWorker* AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord* Server)
+AWebSocketWorker_Base* AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord* server)
 {
-    qDebug() << "Starting checking for record#" << index << Server->IP << Server->Port << TimeOut;
-    AWebSocketWorker* worker = new AWebSocketWorker(index, Server, TimeOut);
-    QObject::connect(worker, &AWebSocketWorker::requestTextLog, this, &AGridRunner::onRequestTextLog, Qt::QueuedConnection);
+    qDebug() << "Starting checking for record#" << index << server->IP << server->Port << TimeOut;
+    AWebSocketWorker_Base* worker = new AWebSocketWorker_Check(index, server, TimeOut);
 
-    qDebug() << "Worker made";
-
-    //worker->checkStatus();
-    QThread* t = new QThread();
-    QObject::connect(t, &QThread::started, worker, &AWebSocketWorker::checkStatus);
-    QObject::connect(worker, &AWebSocketWorker::finished, t, &QThread::quit);
-    QObject::connect(t, &QThread::finished, t, &QThread::deleteLater);
-    worker->moveToThread(t);
-
-    worker->setStarted(); //otherwise problems on start - on check it will be still false
-    t->start();
-
+    startInNewThread(worker);
     return worker;
 }
 
-AWebSocketWorker::AWebSocketWorker(int index, ARemoteServerRecord *rec, int timeOut) :
+AWebSocketWorker_Base* AGridRunner::startSimulationOnServer(int index, ARemoteServerRecord *server, const QJsonObject* config)
+{
+    qDebug() << "Starting simulation for server#" << index << server->IP;
+    AWebSocketWorker_Base* worker = new AWebSocketWorker_Sim(index, server, TimeOut, config);
+
+    startInNewThread(worker);
+    return worker;
+}
+
+void AGridRunner::startInNewThread(AWebSocketWorker_Base* worker)
+{
+    QObject::connect(worker, &AWebSocketWorker_Base::requestTextLog, this, &AGridRunner::onRequestTextLog, Qt::QueuedConnection);
+
+    QThread* t = new QThread();
+    QObject::connect(t, &QThread::started, worker, &AWebSocketWorker_Base::run);
+    QObject::connect(worker, &AWebSocketWorker_Base::finished, t, &QThread::quit);
+    QObject::connect(t, &QThread::finished, t, &QThread::deleteLater);
+    worker->moveToThread(t);
+
+    worker->setStarted(); //otherwise problems on start - in first check it will be still false
+    t->start();
+}
+
+// ----------------------- Workers ----------------------------
+
+AWebSocketWorker_Base::AWebSocketWorker_Base(int index, ARemoteServerRecord *rec, int timeOut) :
     index(index), rec(rec), TimeOut(timeOut) {}
 
-void AWebSocketWorker::onTimer()
+AWebSocketWorker_Check::AWebSocketWorker_Check(int index, ARemoteServerRecord *rec, int timeOut) :
+    AWebSocketWorker_Base(index, rec, timeOut) {}
+
+void AWebSocketWorker_Check::onTimer()
 {
     timeElapsed += timerInterval;
     rec->Progress = 100.0 * timeElapsed / TimeOut;
     //qDebug() << "Timer!"<<timeElapsed << "progress:" << rec->Progress;
 }
 
-void AWebSocketWorker::checkStatus()
+void AWebSocketWorker_Check::run()
 {
     bRunning = true;
 
@@ -86,7 +118,7 @@ void AWebSocketWorker::checkStatus()
     QTimer timer;
     timer.setInterval(timerInterval);
     timeElapsed = 0;
-    QObject::connect(&timer, &QTimer::timeout, this, &AWebSocketWorker::onTimer);
+    QObject::connect(&timer, &QTimer::timeout, this, &AWebSocketWorker_Check::onTimer);
     rec->Progress = 0;
     timer.start();
 
@@ -143,3 +175,10 @@ void AWebSocketWorker::checkStatus()
     emit finished();
 }
 
+AWebSocketWorker_Sim::AWebSocketWorker_Sim(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
+    AWebSocketWorker_Base(index, rec, timeOut), config(config) {}
+
+void AWebSocketWorker_Sim::run()
+{
+
+}

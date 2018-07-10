@@ -317,8 +317,7 @@ SOURCES += main.cpp \
     scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
-    Net/aremoteserverrecord.cpp \
-    gui/aserverdelegate.cpp
+    Net/aremoteserverrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -441,8 +440,7 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsession.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
-    Net/aremoteserverrecord.h \
-    gui/aserverdelegate.h
+    Net/aremoteserverrecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -555,7 +553,8 @@ ants2_GUI {
     gui/awebsocketserverdialog.cpp \
     common/acollapsiblegroupbox.cpp \
     gui/MainWindowTools/slabdelegate.cpp \
-    gui/aremotewindow.cpp
+    gui/aremotewindow.cpp \
+    gui/aserverdelegate.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -610,7 +609,8 @@ HEADERS  += gui/mainwindow.h \
     gui/MainWindowTools/slabdelegate.h \
     common/acollapsiblegroupbox.h \
     gui/awebsocketserverdialog.h \
-    gui/aremotewindow.h
+    gui/aremotewindow.h \
+    gui/aserverdelegate.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \

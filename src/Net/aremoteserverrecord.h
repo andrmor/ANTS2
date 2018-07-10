@@ -16,11 +16,15 @@ public:
     QString Name = "_name_";
     QString IP = "000.000.000.000";
     int     Port = 1234;
-
     bool    bEnabled = true;
-    bool    bLive = false;
+
+    // all properties below are runtime-only
     int     NumThreads = -1;
     int     Progress = 0;
+
+    bool    AntsServerAllocated = false;
+    int     AntsServerPort = -1;
+    QString AntsServerTicket = "---";
 
     QString Error;
 };

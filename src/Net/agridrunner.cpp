@@ -105,8 +105,6 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
     rec->NumThreads = 0;
     qDebug() << "Connecting to"<<rec->IP << "on port"<<port;
 
-    rec->Status = ARemoteServerRecord::Connecting;
-
     bool bOK = socket->Connect(url, true);
     if (bOK)
     {
@@ -127,6 +125,50 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
     }
 
     return socket;
+}
+
+bool AWebSocketWorker_Base::allocateAntsServer()
+{
+    rec->AntsServerAllocated = false;
+    bool bOK = false;
+
+    emit requestTextLog(index, "Connecting to dispatcher");
+    AWebSocketSession* socket = connectToServer(rec->Port);
+    if (socket)
+    {
+        emit requestTextLog(index, "Requesting ANTS2 server...");
+        QJsonObject cn;
+        cn["command"] = "new";
+        cn["threads"] = rec->NumThreads;
+        QString strCn = jsonToString(cn);
+
+        bOK = socket->SendText( strCn );
+        if (!bOK)
+            emit requestTextLog(index, "Failed to send request");
+        else
+        {
+            QString reply = socket->GetTextReply();
+            emit requestTextLog(index, QString("Dispatcher reply: ") + reply );
+            QJsonObject ro = strToObject(reply);
+            if ( !ro.contains("result") || !ro["result"].toBool())
+            {
+                bOK = false;
+                emit requestTextLog(index, "Dispatcher refused to provide ANTS2 server!");
+            }
+            else
+            {
+                rec->AntsServerPort = ro["port"].toInt();
+                rec->AntsServerTicket = ro["ticket"].toString();
+                rec->AntsServerAllocated = true;
+                emit requestTextLog(index, QString("Dispatcher allocated port ") + QString::number(rec->AntsServerPort) + "  and ticket " + rec->AntsServerTicket);
+            }
+        }
+
+        socket->Disconnect();
+        socket->deleteLater();
+    }
+
+    return bOK;
 }
 
 AWebSocketWorker_Check::AWebSocketWorker_Check(int index, ARemoteServerRecord *rec, int timeOut) :
@@ -151,6 +193,7 @@ void AWebSocketWorker_Check::run()
     timer.start();
 
     emit requestTextLog(index, "Connecting to dispatcher");
+    rec->Status = ARemoteServerRecord::Connecting;
     AWebSocketSession* socket = connectToServer(rec->Port);
     if (socket)
     {
@@ -189,5 +232,14 @@ AWebSocketWorker_Sim::AWebSocketWorker_Sim(int index, ARemoteServerRecord *rec, 
 
 void AWebSocketWorker_Sim::run()
 {
+    bRunning = true;
 
+    bool bOK = allocateAntsServer();
+    if (bOK)
+    {
+        qDebug() << "Now will try to connect to the server!";
+    }
+
+    bRunning = false;
+    emit finished();
 }

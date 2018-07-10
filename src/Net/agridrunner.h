@@ -55,6 +55,7 @@ protected:
     bool bRunning = false;
 
     AWebSocketSession* connectToServer(int port);
+    bool               allocateAntsServer();
 
 public slots:
     virtual void run() = 0;

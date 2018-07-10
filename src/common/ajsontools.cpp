@@ -257,3 +257,10 @@ const QJsonObject strToObject(const QString &s)
     QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
     return doc.object();
 }
+
+const QString jsonToString(const QJsonObject &json)
+{
+    QJsonDocument doc(json);
+    QString s( doc.toJson(QJsonDocument::Compact) );
+    return s;
+}

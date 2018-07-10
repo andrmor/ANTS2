@@ -316,7 +316,9 @@ SOURCES += main.cpp \
     Net/awebsocketsession.cpp \
     scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
-    Net/agridrunner.cpp
+    Net/agridrunner.cpp \
+    Net/aremoteserverrecord.cpp \
+    gui/aserverdelegate.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -438,7 +440,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
     scriptmode/awebserverinterface.h \
-    Net/agridrunner.h
+    Net/agridrunner.h \
+    Net/aremoteserverrecord.h \
+    gui/aserverdelegate.h
 
 # --- SIM ---
 ants2_SIM {

@@ -10,10 +10,8 @@ namespace Ui {
 class ARemoteWindow;
 }
 
+class ARemoteServerRecord;
 class AServerDelegate;
-class QLineEdit;
-class QSpinBox;
-class QProgressBar;
 
 class ARemoteWindow : public QMainWindow
 {
@@ -25,10 +23,13 @@ public:
 
 private:
     Ui::ARemoteWindow *ui;
+
+    QVector<ARemoteServerRecord*> Records;
     QVector<AServerDelegate*> Delegates;
 
 private slots:
     void onTextLogReceived(int index, const QString message);
+    void onGuiUpdate();
 
     void onNameWasChanged();
     void on_pbStatus_clicked();
@@ -37,34 +38,6 @@ private slots:
 
 private:
     void AddNewServer();
-};
-
-class AServerDelegate : public QFrame//QWidget
-{
-    Q_OBJECT
-public:
-    AServerDelegate(const QString& ip, int port);
-
-    const QString  getName() const;
-    const QString  getIP() const;
-    int            getPort() const;
-
-    void           setIP(const QString& ip);
-    void           setPort(int port);
-
-    void           setThreads(int threads);
-    void           setProgress(int progress);
-    void           setProgressVisible(bool flag);
-
-private:
-    QLineEdit*     leName;
-    QLineEdit*     leIP;
-    QSpinBox*      sbPort;
-    QLineEdit*     leThreads;
-    QProgressBar*  pbProgress;
-
-signals:
-    void           nameWasChanged();
 
 };
 

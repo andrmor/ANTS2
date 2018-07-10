@@ -108,6 +108,15 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
     rec->Status = ARemoteServerRecord::Connecting;
 
     bool bOK = socket->Connect(url, true);
+    if (bOK)
+    {
+        QString reply = socket->GetTextReply();
+        qDebug() << "On connect reply:"<<reply;
+        QJsonObject json = strToObject(reply);
+        if (!json.contains("result") || !json["result"].toBool())
+            bOK = false;
+    }
+
     if (!bOK)
     {
         rec->Status = ARemoteServerRecord::Dead;
@@ -116,6 +125,7 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
         delete socket;
         socket = 0;
     }
+
     return socket;
 }
 
@@ -144,44 +154,32 @@ void AWebSocketWorker_Check::run()
     AWebSocketSession* socket = connectToServer(rec->Port);
     if (socket)
     {
-        QString reply = socket->GetTextReply();
-        qDebug() << "On connect reply:"<<reply;
-        QJsonObject json = strToObject(reply);
-        if (!json.contains("result") || !json["result"].toBool())
+        emit requestTextLog(index, "Requesting status...");
+        bool bOK = socket->SendText( "{ \"command\" : \"report\" }" );
+        if (!bOK)
         {
             rec->Status = ARemoteServerRecord::Dead;
             rec->Error = socket->GetError();
-            emit requestTextLog(index, QString("Connection failed: ") + socket->GetError());
+            emit requestTextLog(index, "Failed to acquire status!");
         }
         else
         {
-            emit requestTextLog(index, "Requesting status");
-            bool bOK = socket->SendText( "{ \"command\" : \"report\" }" );
-            if (!bOK)
-            {
-                rec->Status = ARemoteServerRecord::Dead;
-                rec->Error = socket->GetError();
-                emit requestTextLog(index, "Failed to receive status!");
-            }
-            else
-            {
-                reply = socket->GetTextReply();
-                qDebug() << "On request status reply:"<< reply;
-                emit requestTextLog(index, QString("Dispatcher reply: ") + reply);
+            QString reply = socket->GetTextReply();
+            qDebug() << "On request status reply:"<< reply;
+            emit requestTextLog(index, QString("Dispatcher reply: ") + reply);
 
-                socket->Disconnect();
+            socket->Disconnect();
 
-                json = strToObject(reply);
-                parseJson(json, "threads", rec->NumThreads);
-                qDebug() << "Available threads:"<<rec->NumThreads;
-                rec->Status = ARemoteServerRecord::Alive;
-                emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads));
-            }
+            QJsonObject json = strToObject(reply);
+            parseJson(json, "threads", rec->NumThreads);
+            qDebug() << "Available threads:"<<rec->NumThreads;
+            rec->Status = ARemoteServerRecord::Alive;
+            emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads));
         }
     }
 
     timer.stop();
-    socket->deleteLater();
+    if (socket) socket->deleteLater();
     bRunning = false;
     emit finished();
 }

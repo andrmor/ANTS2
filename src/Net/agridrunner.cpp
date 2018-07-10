@@ -237,7 +237,34 @@ void AWebSocketWorker_Sim::run()
     bool bOK = allocateAntsServer();
     if (bOK)
     {
-        qDebug() << "Now will try to connect to the server!";
+        emit requestTextLog(index, "Connecting to ants2 server");
+        AWebSocketSession* socket = connectToServer(rec->AntsServerPort);
+        if (socket)
+        {
+            emit requestTextLog(index, QString("Sending ticket ") + rec->AntsServerTicket);
+
+            QString m = "__";
+            m += "{\"ticket\" : \"";
+            m += rec->AntsServerTicket;
+            m += "\"}";
+
+            bOK = socket->SendText(m);
+            if (!bOK)
+            {
+                emit requestTextLog(index, "Failed to send tiket!");
+            }
+            else
+            {
+                QString reply = socket->GetTextReply();
+                QJsonObject ro = strToObject(reply);
+                if ( !ro.contains("result") || !ro["result"].toBool() )
+                {
+                    emit requestTextLog(index, "Server rejected the ticket!");
+                }
+
+                emit requestTextLog(index, "Ants2 server is ready");
+            }
+        }
     }
 
     bRunning = false;

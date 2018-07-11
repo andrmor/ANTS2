@@ -25,6 +25,10 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     GR = new AGridRunner();
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(GR, &AGridRunner::requestGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
+
+    QIntValidator* intVal = new QIntValidator(this);
+    intVal->setRange(1, 100000000);
+    ui->leiTimeout->setValidator(intVal);
 }
 
 ARemoteWindow::~ARemoteWindow()
@@ -142,10 +146,41 @@ void ARemoteWindow::onNameWasChanged()
 
 void ARemoteWindow::on_pbStatus_clicked()
 {
+    WriteConfig();
+
     GR->CheckStatus(Records);
 }
 
 void ARemoteWindow::on_pbSimulate_clicked()
 {
+    WriteConfig();
+
     GR->Simulate(Records, &MW->Config->JSON);
+}
+
+void ARemoteWindow::on_leiTimeout_editingFinished()
+{
+    GR->SetTimeout(ui->leiTimeout->text().toInt());
+}
+
+#include <QMessageBox>
+void ARemoteWindow::on_pbRemove_clicked()
+{
+    int index = ui->lwServers->currentRow();
+    if (index < 0) return;
+
+    ARemoteServerRecord* r = Records.at(index);
+
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Remove server", QString("Remove server ") + r->Name + "?",
+                                    QMessageBox::Yes|QMessageBox::Cancel);
+    if (reply == QMessageBox::Cancel) return;
+
+    delete r;
+    Records.remove(index);
+
+    delete Delegates.at(index);
+    Delegates.remove(index);
+    delete ui->lwServers->takeItem(index);
+
+    ui->twLog->removeTab(index);
 }

@@ -132,7 +132,6 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
     qDebug() << "Timeout set to:"<<TimeOut;
     socket->SetTimeout(TimeOut);
 
-    rec->NumThreads = 0;
     qDebug() << "Connecting to"<<rec->IP << "on port"<<port;
 
     bool bOK = socket->Connect(url, true);
@@ -265,6 +264,7 @@ void AWebSocketWorker_Check::run()
 
     emit requestTextLog(index, "Connecting to dispatcher");
     rec->Status = ARemoteServerRecord::Connecting;
+    rec->NumThreads = 0;
     AWebSocketSession* socket = connectToServer(rec->Port);
     if (socket)
     {
@@ -370,7 +370,7 @@ void AWebSocketWorker_Sim::runSimulation()
 
                     Script.clear();
                     Script += "server.SetAcceptExternalProgressReport(true);";
-                    rec->NumThreads = 4;
+                    //rec->NumThreads = 4;
                     if (bPhotonSource)
                         Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads) + ");";
                     else

@@ -16,6 +16,8 @@ public:
     void CheckStatus(QVector<ARemoteServerRecord *> &Servers);
     void Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
 
+    void SetTimeout(int timeout) {TimeOut = timeout;}
+
 public slots:
     void onRequestTextLog(int index, const QString message);
 

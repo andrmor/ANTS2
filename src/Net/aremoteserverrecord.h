@@ -23,7 +23,7 @@ public:
     bool    bEnabled = true;
 
     // all properties below are runtime-only
-    int     NumThreads = -1;
+    int     NumThreads = 0;
     int     Progress = 0;
     bool    AntsServerAllocated = false;
     int     AntsServerPort = -1;

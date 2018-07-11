@@ -38,14 +38,16 @@ private:
 private slots:
     void onTextLogReceived(int index, const QString message);
     void onGuiUpdate();
-
     void onNameWasChanged();
+    void onUpdateSizeHint(AServerDelegate *d);
+
+    //GUI user-driven actions
     void on_pbStatus_clicked();
     void on_pbSimulate_clicked();
+    void on_pbAdd_clicked();    
+    void on_leiTimeout_editingFinished();
 
-    void on_pbAdd_clicked();
-
-    void onUpdateSizeHint(AServerDelegate *d);
+    void on_pbRemove_clicked();
 
 private:
     void Clear();

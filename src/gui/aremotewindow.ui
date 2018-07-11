@@ -210,7 +210,11 @@
      </layout>
     </item>
     <item>
-     <widget class="QLineEdit" name="leStatus"/>
+     <widget class="QLineEdit" name="leStatus">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">

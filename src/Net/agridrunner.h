@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QHostAddress>
 
+class EventsDataClass;
+class APmHub;
 class ARemoteServerRecord;
 class AWebSocketSession;
 class AWebSocketWorker_Base;
@@ -13,6 +15,8 @@ class AGridRunner : public QObject
 {
     Q_OBJECT
 public:
+    AGridRunner(EventsDataClass* EventsDataHub, APmHub *PMs);
+
     void CheckStatus(QVector<ARemoteServerRecord *> &Servers);
     void Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
 
@@ -22,6 +26,8 @@ public slots:
     void onRequestTextLog(int index, const QString message);
 
 private:
+    EventsDataClass* EventsDataHub;
+    APmHub *PMs;
     int TimeOut = 5000;
     QVector<AWebSocketSession*> Sockets;
 
@@ -36,6 +42,7 @@ private:
 
 signals:
     void requestTextLog(int index, const QString message);
+    void requestStatusLog(const QString message);
     void requestGuiUpdate();
 
 };

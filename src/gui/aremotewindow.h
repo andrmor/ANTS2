@@ -27,6 +27,9 @@ public:
     void WriteConfig();
     void ReadConfig();
 
+public slots:
+    void onBusy(bool flag);
+
 private:
     MainWindow *MW;
     Ui::ARemoteWindow *ui;
@@ -37,6 +40,7 @@ private:
 
 private slots:
     void onTextLogReceived(int index, const QString message);
+    void onStatusLogReceived(const QString message);
     void onGuiUpdate();
     void onNameWasChanged();
     void onUpdateSizeHint(AServerDelegate *d);

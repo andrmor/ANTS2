@@ -28,6 +28,7 @@ public:
     bool    AntsServerAllocated = false;
     int     AntsServerPort = -1;
     QString AntsServerTicket = "---";
+    QString FileName; //local file where sim tree is saved
 
     QString Error;
 

@@ -1,6 +1,9 @@
 #include "agridrunner.h"
 #include "awebsocketsession.h"
 #include "aremoteserverrecord.h"
+#include "eventsdataclass.h"
+#include "apmhub.h"
+
 #include "ajsontools.h"
 
 #include <QThread>
@@ -8,8 +11,12 @@
 #include <QTimer>
 #include <QFile>
 
+AGridRunner::AGridRunner(EventsDataClass *EventsDataHub, APmHub *PMs) :
+    EventsDataHub(EventsDataHub), PMs(PMs) {}
+
 void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
 {
+    emit requestStatusLog("Checking status of servers...");
     QVector<AWebSocketWorker_Base*> workers;
 
     for (int i = 0; i < Servers.size(); i++)
@@ -19,10 +26,22 @@ void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
 
     for (AWebSocketWorker_Base* w : workers) delete w;
     workers.clear();
+
+    int ser = 0;
+    int th = 0;
+    for (const ARemoteServerRecord* r : Servers)
+        if (r->NumThreads > 0)
+        {
+            ser++;
+            th += r->NumThreads;
+        }
+    QString s = (th > 0 ? QString("Found %1 servers with %2 available threads").arg(ser).arg(th) : "There are no servers with available threads" );
+    emit requestStatusLog(s);
 }
 
 void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config)
 {
+    emit requestStatusLog("Starting remote simulation...");
     QVector<AWebSocketWorker_Base*> workers;
 
     qDebug() << "-----------------Opening sessions--------------";
@@ -38,6 +57,12 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
 
     for (AWebSocketWorker_Base* w : workers) delete w;
     workers.clear();
+
+    //loading simulated events
+    //EventsDataHub->clear();
+    //EventsDataHub->loadSimulatedEventsFromTree()
+
+    emit requestStatusLog("Done!");
 }
 
 void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)
@@ -129,7 +154,7 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
     emit requestTextLog(index, QString("Trying to connect to ") + url + "...");
 
     AWebSocketSession* socket = new AWebSocketSession();
-    qDebug() << "Timeout set to:"<<TimeOut;
+    //  qDebug() << "Timeout set to:"<<TimeOut;
     socket->SetTimeout(TimeOut);
 
     qDebug() << "Connecting to"<<rec->IP << "on port"<<port;
@@ -248,7 +273,7 @@ void AWebSocketWorker_Check::onTimer()
 {
     timeElapsed += timerInterval;
     rec->Progress = 100.0 * timeElapsed / TimeOut;
-    qDebug() << "Timer!"<<timeElapsed << "progress:" << rec->Progress;
+    //  qDebug() << "Timer!"<<timeElapsed << "progress:" << rec->Progress;
 }
 
 void AWebSocketWorker_Check::run()
@@ -306,11 +331,14 @@ void AWebSocketWorker_Sim::run()
 {
     bRunning = true;
 
+    rec->FileName.clear();
+
     bool bOK = runSession();
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
         rec->Status = ARemoteServerRecord::Dead;
+        rec->Progress = 0;
     }
     else
     {
@@ -433,6 +461,7 @@ void AWebSocketWorker_Sim::runSimulation()
                                     {
                                         saveFile.write(ba);
                                         saveFile.close();
+                                        rec->FileName = LocalSimTreeFileName;
                                         emit requestTextLog(index, QString("Sim results saved in ") + LocalSimTreeFileName);
                                     }
                                 }

@@ -154,6 +154,9 @@ void AServerDelegate::updateModel()
 
 void AServerDelegate::setBackgroundGray(bool flag)
 {
+    return;
+
+
     QString ns = ( flag ? "background-color: lightgray" : "");
 
     QString ss = styleSheet();

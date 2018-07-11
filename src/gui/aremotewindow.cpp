@@ -10,6 +10,7 @@
 #include "ajsontools.h"
 
 #include <QPlainTextEdit>
+#include <QMessageBox>
 #include <QDebug>
 
 ARemoteWindow::ARemoteWindow(MainWindow *MW) :
@@ -17,13 +18,17 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
 {
     ui->setupUi(this);
     ui->lwServers->setViewMode(QListView::ListMode);
+    //ui->lwServers->setDragDropMode(QAbstractItemView::InternalMove);
+    //ui->lwServers->setDragEnabled(true);
     ui->lwServers->setSpacing(1);
     ui->twLog->clear();
 
     AddNewServer();
 
-    GR = new AGridRunner();
+    GR = new AGridRunner(MW->EventsDataHub, MW->PMs);
+    GR->SetTimeout(ui->leiTimeout->text().toInt());
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
+    QObject::connect(GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(GR, &AGridRunner::requestGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
 
     QIntValidator* intVal = new QIntValidator(this);
@@ -58,6 +63,7 @@ void ARemoteWindow::ReadConfig()
 
     Clear();
     JsonToLineEditInt(json, "Timeout", ui->leiTimeout);
+    GR->SetTimeout(ui->leiTimeout->text().toInt());
 
     QJsonArray ar = json["Servers"].toArray();
     for (int i=0; i<ar.size(); i++)
@@ -69,6 +75,17 @@ void ARemoteWindow::ReadConfig()
 
         AddNewServer(record);
     }
+}
+
+void ARemoteWindow::onBusy(bool flag)
+{
+    flag = !flag;
+    ui->pbAdd->setEnabled(flag);
+    ui->pbRemove->setEnabled(flag);
+    //ui->lwServers->setEnabled(flag);
+    ui->pbStatus->setEnabled(flag);
+    ui->pbSimulate->setEnabled(flag);
+    ui->pbReconstruct->setEnabled(flag);
 }
 
 void ARemoteWindow::AddNewServer(ARemoteServerRecord* record)
@@ -131,6 +148,11 @@ void ARemoteWindow::onTextLogReceived(int index, const QString message)
 
 }
 
+void ARemoteWindow::onStatusLogReceived(const QString message)
+{
+    ui->leStatus->setText(message);
+}
+
 void ARemoteWindow::onGuiUpdate()
 {
     for (AServerDelegate* d : Delegates)
@@ -148,14 +170,18 @@ void ARemoteWindow::on_pbStatus_clicked()
 {
     WriteConfig();
 
+    onBusy(true);
     GR->CheckStatus(Records);
+    onBusy(false);
 }
 
 void ARemoteWindow::on_pbSimulate_clicked()
 {
     WriteConfig();
 
+    onBusy(true);
     GR->Simulate(Records, &MW->Config->JSON);
+    onBusy(false);
 }
 
 void ARemoteWindow::on_leiTimeout_editingFinished()
@@ -163,7 +189,6 @@ void ARemoteWindow::on_leiTimeout_editingFinished()
     GR->SetTimeout(ui->leiTimeout->text().toInt());
 }
 
-#include <QMessageBox>
 void ARemoteWindow::on_pbRemove_clicked()
 {
     int index = ui->lwServers->currentRow();

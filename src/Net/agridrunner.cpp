@@ -59,8 +59,18 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
     workers.clear();
 
     //loading simulated events
-    //EventsDataHub->clear();
-    //EventsDataHub->loadSimulatedEventsFromTree()
+    EventsDataHub->clear();
+    for (int i=0; i<Servers.size(); i++)
+        if ( !Servers.at(i)->FileName.isEmpty() )
+        {
+            int numEv = EventsDataHub->loadSimulatedEventsFromTree( Servers.at(i)->FileName, PMs );
+            QString s;
+            if (EventsDataHub->ErrorString.isEmpty())
+                s = QString("%1 events were registered").arg(numEv);
+            else
+                s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub->ErrorString;
+            requestTextLog(i, s);
+        }
 
     emit requestStatusLog("Done!");
 }
@@ -75,9 +85,9 @@ void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& worker
         bStillWorking = false;
         for (AWebSocketWorker_Base* w : workers)
             if (w->isRunning()) bStillWorking = true;
-        emit requestGuiUpdate();
+        emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
-        QThread::usleep(100);
+        QThread::usleep(250);
     }
     while (bStillWorking);
 
@@ -94,7 +104,7 @@ void AGridRunner::waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *>
         bStillWorking = false;
         for (AWebSocketWorker_Base* w : workers)
             if (!w->isPausedOrFinished()) bStillWorking = true;
-        emit requestGuiUpdate();
+        emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
         QThread::usleep(100);
     }

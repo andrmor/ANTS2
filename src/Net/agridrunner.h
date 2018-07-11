@@ -43,7 +43,7 @@ private:
 signals:
     void requestTextLog(int index, const QString message);
     void requestStatusLog(const QString message);
-    void requestGuiUpdate();
+    void requestDelegateGuiUpdate();
 
 };
 

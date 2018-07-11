@@ -29,7 +29,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     GR->SetTimeout(ui->leiTimeout->text().toInt());
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
-    QObject::connect(GR, &AGridRunner::requestGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
+    QObject::connect(GR, &AGridRunner::requestDelegateGuiUpdate, this, &ARemoteWindow::onGuiUpdate/*, Qt::QueuedConnection*/);
 
     QIntValidator* intVal = new QIntValidator(this);
     intVal->setRange(1, 100000000);
@@ -175,6 +175,8 @@ void ARemoteWindow::on_pbStatus_clicked()
     onBusy(false);
 }
 
+#include "reconstructionwindow.h"
+#include "outputwindow.h"
 void ARemoteWindow::on_pbSimulate_clicked()
 {
     WriteConfig();
@@ -182,6 +184,9 @@ void ARemoteWindow::on_pbSimulate_clicked()
     onBusy(true);
     GR->Simulate(Records, &MW->Config->JSON);
     onBusy(false);
+
+    MW->Owindow->RefreshData();
+    MW->Rwindow->OnEventsDataAdded();
 }
 
 void ARemoteWindow::on_leiTimeout_editingFinished()

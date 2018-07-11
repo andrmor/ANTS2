@@ -3,6 +3,9 @@
 
 #include <QString>
 
+class AWebSocketSession;
+class QThread;
+
 class ARemoteServerRecord
 {
 public:
@@ -21,7 +24,6 @@ public:
     // all properties below are runtime-only
     int     NumThreads = -1;
     int     Progress = 0;
-
     bool    AntsServerAllocated = false;
     int     AntsServerPort = -1;
     QString AntsServerTicket = "---";

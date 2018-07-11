@@ -48,7 +48,6 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
         State = Connecting;
         Error.clear();
         socket->open( QUrl(Url) );
-
         do
         {
             QThread::msleep(sleepDuration);

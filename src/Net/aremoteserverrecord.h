@@ -12,7 +12,7 @@ public:
     ARemoteServerRecord(QString Name, QString IP, int Port) : Name(Name), IP(IP), Port(Port) {}
     ARemoteServerRecord() {}
 
-    enum ServerStatus {Unknown = 0, Connecting, Alive, Dead};
+    enum ServerStatus {Unknown = 0, Connecting, Alive, Progressing, Dead};
 
     ServerStatus Status = Unknown;
 

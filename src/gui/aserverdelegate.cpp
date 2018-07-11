@@ -105,6 +105,11 @@ void AServerDelegate::updateGui()
         setIcon(0);
         pbProgress->setVisible(true);
         break;
+    case ARemoteServerRecord::Progressing:
+        setBackgroundGray(false);
+        setIcon(1);
+        pbProgress->setVisible(true);
+        break;
     case ARemoteServerRecord::Alive:
         setBackgroundGray(false);
         setIcon(1);

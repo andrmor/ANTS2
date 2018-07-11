@@ -399,6 +399,7 @@ void AWebSocketWorker_Sim::runSimulation()
                                 rec->Error = obj["error"].toString();
                             else
                             {
+                                rec->Status = ARemoteServerRecord::Progressing;
                                 while ( !obj.contains("binary") ) //after server send back the file with sim, the reply is "{ \"binary\" : \"file\" }"
                                 {
                                     emit requestTextLog(index, reply);
@@ -410,8 +411,10 @@ void AWebSocketWorker_Sim::runSimulation()
                                         break;
                                     }
                                     obj = strToObject(reply);
-                                    //progress !!!!!!!!!!!!!
+                                    if (obj.contains("progress"))
+                                        rec->Progress = obj["progress"].toInt();
                                 }
+                                rec->Status = ARemoteServerRecord::Alive;
 
                                 if (rec->Error.isEmpty())
                                 {

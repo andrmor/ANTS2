@@ -19,6 +19,8 @@
 #include "ascriptwindow.h"
 #include "apmgroupsmanager.h"
 #include "guiutils.h"
+#include "alrfwindow.h"
+#include "aremotewindow.h"
 
 //Qt
 #include <QFileDialog>
@@ -95,7 +97,6 @@ void MainWindow::on_actionGain_evaluation_triggered()
   Rwindow->ShowGainWindow();
 }
 
-#include "alrfwindow.h"
 void MainWindow::on_actionReset_position_of_windows_triggered()
 {
    QList<QMainWindow*> list;
@@ -167,6 +168,7 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   addWindow("Graph", GraphWindow, json);
   addWindow("DA", DAwindow, json);
   addWindow("ScriptWindow", ScriptWindow, json);
+  addWindow("RemoteWindow", RemoteWindow, json);
   if (PythonScriptWindow) addWindow("PythonScriptWindow", PythonScriptWindow, json);
 
   if (GenScriptWindow)
@@ -240,6 +242,7 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       readXYwindow("Graph", GraphWindow, true, json);
       readXYwindow("DA", DAwindow, true, json);
       if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
+      if (json.contains("RemoteWindow")) readXYwindow("RemoteWindow", RemoteWindow, true, json);
       if (json.contains("PythonScriptWindow") && PythonScriptWindow) readXYwindow("PythonScriptWindow", PythonScriptWindow, true, json);
 
       if (json.contains("Script"))
@@ -353,7 +356,10 @@ void MainWindow::setFontSizeAllWindows(int size)
   font.setPointSize(size);
 
   QList<QMainWindow*> wins;
-  wins << (QMainWindow*)this << (QMainWindow*)Rwindow << (QMainWindow*)Owindow << (QMainWindow*)MIwindow << (QMainWindow*)lrfwindow << (QMainWindow*)WindowNavigator << (QMainWindow*)GeometryWindow << (QMainWindow*)GraphWindow << (QMainWindow*)ELwindow << (QMainWindow*)DAwindow << (QMainWindow*)GlobSetWindow << (QMainWindow*)CheckUpWindow;
+  wins << (QMainWindow*)this << (QMainWindow*)Rwindow << (QMainWindow*)Owindow << (QMainWindow*)MIwindow
+       << (QMainWindow*)lrfwindow << (QMainWindow*)WindowNavigator << (QMainWindow*)GeometryWindow
+       << (QMainWindow*)GraphWindow << (QMainWindow*)ELwindow << (QMainWindow*)DAwindow
+       << (QMainWindow*)GlobSetWindow << (QMainWindow*)CheckUpWindow << (QMainWindow*)RemoteWindow;
   if (GainWindow) wins << (QMainWindow*)GainWindow;
   if (PythonScriptWindow) wins << (QMainWindow*)PythonScriptWindow;
 

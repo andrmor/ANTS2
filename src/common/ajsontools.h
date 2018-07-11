@@ -24,6 +24,7 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj);
 void JsonToCheckbox(QJsonObject& json, QString key, QCheckBox* cb);
 void JsonToSpinBox(QJsonObject& json, QString key, QSpinBox* sb);
 void JsonToLineEditDouble(QJsonObject& json, QString key, QLineEdit* le);
+void JsonToLineEditInt(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToLineEditText(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
 

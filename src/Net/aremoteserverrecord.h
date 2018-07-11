@@ -2,6 +2,7 @@
 #define AREMOTESERVERRECORD_H
 
 #include <QString>
+#include <QJsonObject>
 
 class AWebSocketSession;
 class QThread;
@@ -29,6 +30,9 @@ public:
     QString AntsServerTicket = "---";
 
     QString Error;
+
+    const QJsonObject WriteToJson();
+    void              ReadFromJson(const QJsonObject& json);
 };
 
 #endif // AREMOTESERVERRECORD_H

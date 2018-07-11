@@ -146,6 +146,8 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["RunRootServerOnStart"] = fRunRootServerOnStart;
   js["ExternalJSROOT"] = ExternalJSROOT;
 
+  js["RemoteServers"] = RemoteServers;
+
   json["ANTS2config"] = js;
 }
 
@@ -200,11 +202,12 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     DefaultRootServerPort = 8080;
     fRunRootServerOnStart = false;
     ExternalJSROOT = "https://root.cern/js/latest/";
-
     parseJson(js, "DefaultWebSocketPort", DefaultWebSocketPort);
     parseJson(js, "DefaultWebSocketIP", DefaultWebSocketIP);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
+
+    parseJson(js, "RemoteServers", RemoteServers);
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

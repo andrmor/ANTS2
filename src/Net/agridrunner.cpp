@@ -293,6 +293,7 @@ void AWebSocketWorker_Check::run()
     }
 
     timer.stop();
+    rec->Progress = 0;
     if (socket) delete socket;
     bRunning = false;
     emit finished();
@@ -415,6 +416,7 @@ void AWebSocketWorker_Sim::runSimulation()
                                         rec->Progress = obj["progress"].toInt();
                                 }
                                 rec->Status = ARemoteServerRecord::Alive;
+                                rec->Progress = 100;
 
                                 if (rec->Error.isEmpty())
                                 {

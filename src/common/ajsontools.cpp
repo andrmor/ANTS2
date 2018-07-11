@@ -106,6 +106,12 @@ void JsonToLineEditDouble(QJsonObject &json, QString key, QLineEdit *le)
     le->setText( QString::number(json[key].toDouble()) );
 }
 
+void JsonToLineEditInt(QJsonObject &json, QString key, QLineEdit *le)
+{
+    if (json.contains(key))
+        le->setText( QString::number(json[key].toInt()) );
+}
+
 void JsonToLineEditText(QJsonObject &json, QString key, QLineEdit *le)
 {
     if (json.contains(key))
@@ -264,3 +270,4 @@ const QString jsonToString(const QJsonObject &json)
     QString s( doc.toJson(QJsonDocument::Compact) );
     return s;
 }
+

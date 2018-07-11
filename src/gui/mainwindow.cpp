@@ -52,6 +52,7 @@
 #include "particlesourcesclass.h"
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
+#include "aremotewindow.h"
 
 //Qt
 #include <QDebug>
@@ -209,7 +210,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
-           qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
+           //qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
            ReconstructionManager->requestStop();
            SimulationManager->StopSimulation();
            qApp->processEvents();
@@ -234,6 +235,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
+   qDebug() << "<Saving remote servers";
+   RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet->SaveANTSconfiguration();
 
@@ -267,7 +270,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
      {
        GenScriptWindow->close();
        qDebug() << "<-Deleting local script window";
-       delete GenScriptWindow;
+       delete GenScriptWindow; GenScriptWindow = 0;
      }
 
 #ifdef ANTS_FANN
@@ -351,6 +354,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
        delete CheckUpWindow;
        CheckUpWindow = 0;
      }
+   if (RemoteWindow)
+   {
+       qDebug() << "<-Deleting remote simulation/reconstruction window";
+       delete RemoteWindow;
+       RemoteWindow = 0;
+   }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
    qDebug() << "<MainWindow close event processing finished";
 }
@@ -5303,9 +5312,7 @@ void MainWindow::on_ledSSO_EffWave_editingFinished()
     ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
 }
 
-#include "aremotewindow.h"
 void MainWindow::on_actionGrid_triggered()
 {
-    ARemoteWindow* GridWin = new ARemoteWindow(this);
-    GridWin->show();
+    RemoteWindow->show();
 }

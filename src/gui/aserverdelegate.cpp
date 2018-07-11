@@ -33,16 +33,17 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
 
         leName = new QLineEdit("_name_");
             leName->setMaximumWidth(100);
-            leName->setMinimumWidth(70);
+            leName->setMinimumWidth(100);
             QObject::connect(leName, &QLineEdit::editingFinished, this, &AServerDelegate::updateModel);
             QObject::connect(leName, &QLineEdit::editingFinished, this, &AServerDelegate::nameWasChanged);
         l->addWidget(leName);
 
         QLabel* lab = new QLabel("ws://");
+            lab->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         l->addWidget(lab);
 
         leIP = new QLineEdit(modelRecord->IP);
-            leIP->setMaximumWidth(150);
+            leIP->setMaximumWidth(100);
             leIP->setMinimumWidth(100);
             QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
             // You may want to use QRegularExpression for new code with Qt 5 (not mandatory).
@@ -56,6 +57,8 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
         l->addWidget(leIP);
 
         lab = new QLabel(":");
+            lab->setAlignment(Qt::AlignCenter);
+            lab->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         l->addWidget(lab);
 
         sbPort = new QSpinBox();
@@ -65,6 +68,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
         l->addWidget(sbPort);
 
         lab = new QLabel("#thr:");
+            lab->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         l->addWidget(lab);
 
         leiThreads = new QLineEdit("0");
@@ -77,12 +81,17 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
             QObject::connect(leiThreads, &QLineEdit::editingFinished, this, &AServerDelegate::updateModel);
         l->addWidget(leiThreads);
 
+        lab = new QLabel(" ");
+            lab->setAlignment(Qt::AlignHCenter);
+        l->addWidget(lab);
+
         pbProgress = new QProgressBar();
             pbProgress->setAlignment(Qt::AlignHCenter);
             pbProgress->setMaximumHeight(15);
+            pbProgress->setMaximumWidth(125);
         l->addWidget(pbProgress);
 
-        l->addStretch();
+        //l->addStretch();
         this->setLayout(l);
 
         // done
@@ -98,27 +107,29 @@ void AServerDelegate::updateGui()
     case ARemoteServerRecord::Unknown:
         setBackgroundGray(true);
         setIcon(0);
-        pbProgress->setVisible(false);
+        pbProgress->setEnabled(false);
+        pbProgress->setValue(0);
         break;
     case ARemoteServerRecord::Connecting:
         setBackgroundGray(true);
         setIcon(0);
-        pbProgress->setVisible(true);
+        pbProgress->setEnabled(true);
         break;
     case ARemoteServerRecord::Progressing:
         setBackgroundGray(false);
         setIcon(1);
-        pbProgress->setVisible(true);
+        pbProgress->setEnabled(true);
         break;
     case ARemoteServerRecord::Alive:
         setBackgroundGray(false);
         setIcon(1);
-        pbProgress->setVisible(false);
+        pbProgress->setEnabled(false);
         break;
     case ARemoteServerRecord::Dead:
         setBackgroundGray(true);
         setIcon(2);
-        pbProgress->setVisible(false);
+        pbProgress->setEnabled(false);
+        pbProgress->setValue(0);
         break;
     }
 
@@ -129,6 +140,7 @@ void AServerDelegate::updateGui()
     leiThreads->setText( QString::number(modelRecord->NumThreads) );
     pbProgress->setValue(modelRecord->Progress);
 
+    emit updateSizeHint(this);
 }
 
 void AServerDelegate::updateModel()

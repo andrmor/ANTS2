@@ -74,6 +74,9 @@ public:
   bool fRunRootServerOnStart = false;
   QString ExternalJSROOT;
 
+  //RemoteServers
+  QJsonObject RemoteServers;
+
   ANetworkModule* NetModule;
 };
 

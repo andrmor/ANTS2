@@ -44,6 +44,7 @@ private:
 
 signals:
     void           nameWasChanged();
+    void           updateSizeHint(AServerDelegate*);
 
 };
 

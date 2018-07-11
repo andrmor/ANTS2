@@ -23,6 +23,10 @@ public:
     explicit ARemoteWindow(MainWindow *MW);
     ~ARemoteWindow();
 
+    //save/load config
+    void WriteConfig();
+    void ReadConfig();
+
 private:
     MainWindow *MW;
     Ui::ARemoteWindow *ui;
@@ -41,8 +45,11 @@ private slots:
 
     void on_pbAdd_clicked();
 
+    void onUpdateSizeHint(AServerDelegate *d);
+
 private:
-    void AddNewServer();
+    void Clear();
+    void AddNewServer(ARemoteServerRecord* record = 0);
 
 };
 

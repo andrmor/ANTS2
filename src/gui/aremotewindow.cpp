@@ -4,6 +4,10 @@
 #include "aremoteserverrecord.h"
 #include "aserverdelegate.h"
 #include "mainwindow.h"
+#include "aconfiguration.h"
+#include "globalsettingsclass.h"
+
+#include "ajsontools.h"
 
 #include <QPlainTextEdit>
 #include <QDebug>
@@ -25,18 +29,47 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
 
 ARemoteWindow::~ARemoteWindow()
 {
+    Clear();
+
     delete GR;
     delete ui;
-
-    for (ARemoteServerRecord* r : Records) delete r;
-    Records.clear();
-    for (AServerDelegate* d : Delegates) delete d;
-    Delegates.clear();
 }
 
-void ARemoteWindow::AddNewServer()
+void ARemoteWindow::WriteConfig()
 {
-    ARemoteServerRecord* record = new ARemoteServerRecord();
+    QJsonObject json;
+
+    json["Timeout"] = ui->leiTimeout->text().toInt();
+    QJsonArray ar;
+        for (ARemoteServerRecord* r : Records) ar << r->WriteToJson();
+    json["Servers"] = ar;
+
+    MW->GlobSet->RemoteServers = json;
+}
+
+void ARemoteWindow::ReadConfig()
+{
+    QJsonObject& json = MW->GlobSet->RemoteServers;
+    if (json.isEmpty()) return;
+
+    Clear();
+    JsonToLineEditInt(json, "Timeout", ui->leiTimeout);
+
+    QJsonArray ar = json["Servers"].toArray();
+    for (int i=0; i<ar.size(); i++)
+    {
+        ARemoteServerRecord* record = new ARemoteServerRecord();
+
+        QJsonObject js = ar.at(i).toObject();
+        record->ReadFromJson(js);
+
+        AddNewServer(record);
+    }
+}
+
+void ARemoteWindow::AddNewServer(ARemoteServerRecord* record)
+{
+    if (!record) record = new ARemoteServerRecord();
     Records << record;
     AServerDelegate* delegate = new AServerDelegate(record);
     Delegates << delegate;
@@ -46,6 +79,7 @@ void ARemoteWindow::AddNewServer()
     ui->lwServers->setItemWidget(item, delegate);
     item->setSizeHint(delegate->sizeHint());
     QObject::connect(delegate, &AServerDelegate::nameWasChanged, this, &ARemoteWindow::onNameWasChanged);
+    QObject::connect(delegate, &AServerDelegate::updateSizeHint, this, &ARemoteWindow::onUpdateSizeHint);
     ui->lwServers->updateGeometry();
 
     QPlainTextEdit* pte = new QPlainTextEdit();
@@ -55,6 +89,33 @@ void ARemoteWindow::AddNewServer()
 void ARemoteWindow::on_pbAdd_clicked()
 {
     AddNewServer();
+}
+
+void ARemoteWindow::onUpdateSizeHint(AServerDelegate* d)
+{
+    for (int i=0; i<Delegates.size(); i++)
+    {
+        if (d == Delegates.at(i))
+        {
+            d->updateGeometry();
+            if (i < ui->lwServers->count())
+                ui->lwServers->item(i)->setSizeHint(d->sizeHint());
+            d->updateGeometry();
+            return;
+        }
+    }
+}
+
+void ARemoteWindow::Clear()
+{
+    for (AServerDelegate* d : Delegates) delete d;
+    Delegates.clear();
+
+    for (ARemoteServerRecord* r : Records) delete r;
+    Records.clear();
+
+    ui->lwServers->clear();
+    ui->twLog->clear();
 }
 
 void ARemoteWindow::onTextLogReceived(int index, const QString message)
@@ -84,7 +145,6 @@ void ARemoteWindow::on_pbStatus_clicked()
     GR->CheckStatus(Records);
 }
 
-#include "aconfiguration.h"
 void ARemoteWindow::on_pbSimulate_clicked()
 {
     GR->Simulate(Records, &MW->Config->JSON);

@@ -55,6 +55,7 @@ class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
 struct ParticleSourceStructure;
+class ARemoteWindow;
 class AWebSocketServerDialog;
 
 #ifdef ANTS_FANN
@@ -112,6 +113,7 @@ public:
     AScriptWindow* ScriptWindow = 0;                //global script window
     ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module
     AScriptWindow* PythonScriptWindow = 0;
+    ARemoteWindow* RemoteWindow = 0;
     AWebSocketServerDialog* ServerDialog = 0;
 
 #ifdef ANTS_FANN

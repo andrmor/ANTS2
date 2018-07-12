@@ -14,7 +14,7 @@ public:
     ARemoteServerRecord(QString Name, QString IP, int Port) : Name(Name), IP(IP), Port(Port) {}
     ARemoteServerRecord() {}
 
-    enum ServerStatus {Unknown = 0, Connecting, Alive, Progressing, Dead};
+    enum ServerStatus {Unknown = 0, Connecting, Alive, Dead};
 
     ServerStatus Status = Unknown;
 
@@ -26,6 +26,7 @@ public:
     // all properties below are runtime-only
     int     NumThreads = 0;
     int     Progress = 0;
+    bool    bShowProgress = false;
     bool    AntsServerAllocated = false;
     int     AntsServerPort = -1;
     QString AntsServerTicket = "---";

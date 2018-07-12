@@ -124,7 +124,8 @@ int main(int argc, char *argv[])
     QObject::connect(&EventsDataHub, &EventsDataClass::cleared, &TmpHub, &TmpObjHubClass::Clear);
     qDebug() << "Tmp objects hub created";
 
-    AReconstructionManager ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);    
+    AReconstructionManager ReconstructionManager(&EventsDataHub, &Detector, &TmpHub);
+    QObject::connect(&EventsDataHub, &EventsDataClass::requestFilterEvents, &ReconstructionManager, &AReconstructionManager::onRequestFilterAndAskToUpdateGui);
     qDebug() << "Reconstruction manager created";
 
     ANetworkModule Network;

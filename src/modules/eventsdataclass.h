@@ -140,6 +140,8 @@ signals:
     void requestClearKNNfilter();
     void cleared();
     void requestEventsGuiUpdate();
+
+    void requestFilterEvents(); //use by remote rec event loader
 };
 
 #endif // EVENTSDATACLASS_H

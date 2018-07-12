@@ -155,27 +155,9 @@ void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJs
     else
     {
         EventsDataHub->fReconstructionDataReady = true;
+        emit EventsDataHub->requestFilterEvents();
         emit requestStatusLog("Done!");
     }
-
-
-    /*
-    //loading simulated events
-    EventsDataHub->clear();
-    for (int i=0; i<Servers.size(); i++)
-        if ( !Servers.at(i)->FileName.isEmpty() )
-        {
-            int numEv = EventsDataHub->loadSimulatedEventsFromTree( Servers.at(i)->FileName, PMs );
-            QString s;
-            if (EventsDataHub->ErrorString.isEmpty())
-                s = QString("%1 events were registered").arg(numEv);
-            else
-                s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub->ErrorString;
-            requestTextLog(i, s);
-        }
-    */
-
-    emit requestStatusLog("Done!");
 }
 
 void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)
@@ -474,6 +456,12 @@ void AWebSocketWorker_Sim::run()
     else
     {
         runSimulation();
+        if (!rec->Error.isEmpty())
+        {
+            rec->Progress = 0;
+            emit requestTextLog(index, rec->Error);
+        }
+        else rec->Progress = 100;
     }
 
     bRunning = false;
@@ -485,119 +473,118 @@ void AWebSocketWorker_Sim::runSimulation()
     rec->Error.clear();
 
     if (!ants2socket || !ants2socket->ConfirmSendPossible())
-        rec->Error = "There is no connection to ANTS2 server";
-    else
     {
-        if (!config || !config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
-            rec->Error = "Config does not contain detector or simulation settings";
-        else
-        {
-            qDebug() << "Sending config...";
-            emit requestTextLog(index, "Sending config file...");
-            bool bOK = ants2socket->SendJson(*config);
-            QString reply = ants2socket->GetTextReply();
-            QJsonObject ro = strToObject(reply);
-            if (!bOK || !ro.contains("result") || !ro["result"].toBool())
-                rec->Error = "Failed to send config";
-            else
-            {
-                emit requestTextLog(index, "Sending script to setup configuration...");
-                QString Script = "var c = server.GetBufferAsObject();"
-                                 "var ok = config.SetConfig(c);"
-                                 "if (!ok) core.abort(\"Failed to set config\");";
-                bOK = ants2socket->SendText(Script);
-                reply = ants2socket->GetTextReply();
-                ro = strToObject(reply);
-                if (!bOK || !ro.contains("result") || !ro["result"].toBool())
-                    rec->Error = "failed to setup config on the ants2 server";
-                else
-                {
-                    QJsonObject jsSimSet = (*config)["SimulationConfig"].toObject();
-                    QString modeSetup = jsSimSet["Mode"].toString();
-                    bool bPhotonSource = (modeSetup == "PointSim"); //Photon simulator
-                    const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(index) + ".root";
-
-                    Script.clear();
-                    Script += "server.SetAcceptExternalProgressReport(true);";
-                    //rec->NumThreads = 4;
-                    if (bPhotonSource)
-                        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads) + ");";
-                    else
-                        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads) + ");";
-                    Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
-                    Script += "var ok = sim.SaveAsTree(fileName);";
-                    Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
-                    Script += "server.SetAcceptExternalProgressReport(false);";
-                    Script += "server.SendFile(fileName);";
-                    //  qDebug() << Script;
-
-                    //execute the script on remote server
-                    emit requestTextLog(index, "Sending simulation script...");
-                    bool bOK = ants2socket->SendText(Script);
-                    if (!bOK)
-                        rec->Error = "Failed to send script to ANTS2 server";
-                    else
-                    {
-                        QString reply = ants2socket->GetTextReply();
-                        if (reply.isEmpty())
-                            rec->Error = "Got no reply after sending a script to ANTS2 server";
-                        else
-                        {
-                            emit requestTextLog(index, reply);
-                            QJsonObject obj = strToObject(reply);
-                            if (obj.contains("error"))
-                                rec->Error = obj["error"].toString();
-                            else
-                            {
-                                rec->Status = ARemoteServerRecord::Progressing;
-                                while ( !obj.contains("binary") ) //after server send back the file with sim, the reply is "{ \"binary\" : \"file\" }"
-                                {
-                                    emit requestTextLog(index, reply);
-                                    bool bOK = ants2socket->ResumeWaitForAnswer();
-                                    reply = ants2socket->GetTextReply();
-                                    if (!bOK || reply.isEmpty())
-                                    {
-                                        rec->Error = ants2socket->GetError();
-                                        break;
-                                    }
-                                    obj = strToObject(reply);
-                                    if (obj.contains("progress"))
-                                        rec->Progress = obj["progress"].toInt();
-                                }
-                                rec->Status = ARemoteServerRecord::Alive;
-                                rec->Progress = 100;
-
-                                if (rec->Error.isEmpty())
-                                {
-                                    emit requestTextLog(index, "Server has finished simulation");
-
-                                    const QByteArray& ba = ants2socket->GetBinaryReply();
-                                    qDebug() << "ByteArray to save size:"<<ba.size();
-
-                                    QString LocalSimTreeFileName = RemoteSimTreeFileName; // !!!!!!!!!!!!!!
-                                    QFile saveFile(LocalSimTreeFileName);
-                                    if ( !saveFile.open(QIODevice::WriteOnly) )
-                                        rec->Error = QString("Failed to save sim data to file: ") + LocalSimTreeFileName;
-                                    else
-                                    {
-                                        saveFile.write(ba);
-                                        saveFile.close();
-                                        rec->FileName = LocalSimTreeFileName;
-                                        emit requestTextLog(index, QString("Sim results saved in ") + LocalSimTreeFileName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-            }
-        }
+        rec->Error = "There is no connection to ANTS2 server";
+        return;
     }
 
-    if (!rec->Error.isEmpty())
-        emit requestTextLog(index, rec->Error);
+    if (!config || !config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
+    {
+        rec->Error = "Config does not contain detector or simulation settings";
+        return;
+    }
+
+    emit requestTextLog(index, "Sending config file...");
+    bool bOK = ants2socket->SendJson(*config);
+    QString reply = ants2socket->GetTextReply();
+    QJsonObject ro = strToObject(reply);
+    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "Failed to send config";
+        return;
+    }
+
+    emit requestTextLog(index, "Sending script to setup configuration...");
+    QString Script = "var c = server.GetBufferAsObject();"
+                     "var ok = config.SetConfig(c);"
+                     "if (!ok) core.abort(\"Failed to set config\");";
+    bOK = ants2socket->SendText(Script);
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "failed to setup config on the ants2 server";
+        return;
+    }
+
+    QJsonObject jsSimSet = (*config)["SimulationConfig"].toObject();
+    QString modeSetup = jsSimSet["Mode"].toString();
+    bool bPhotonSource = (modeSetup == "PointSim"); //Photon simulator
+    const QString RemoteSimTreeFileName = QString("SimTree-") + QString::number(index) + ".root";
+
+    Script.clear();
+    Script += "server.SetAcceptExternalProgressReport(true);";
+    if (bPhotonSource)
+        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads) + ");";
+    else
+        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads) + ");";
+    Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
+    Script += "var ok = sim.SaveAsTree(fileName);";
+    Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
+    Script += "server.SetAcceptExternalProgressReport(false);";
+    Script += "server.SendFile(fileName);";
+    //  qDebug() << Script;
+
+    //execute the script on remote server
+    emit requestTextLog(index, "Sending simulation script...");
+    bOK = ants2socket->SendText(Script);
+    if (!bOK)
+    {
+        rec->Error = "Failed to send script to ANTS2 server";
+        return;
+    }
+
+    reply = ants2socket->GetTextReply();
+    if (reply.isEmpty())
+    {
+        rec->Error = "Got no reply after sending a script to ANTS2 server";
+        return;
+    }
+    emit requestTextLog(index, reply);
+    QJsonObject obj = strToObject(reply);
+    if (obj.contains("error"))
+    {
+        rec->Error = obj["error"].toString();
+        return;
+    }
+
+    rec->bShowProgress = true;
+    while ( !obj.contains("binary") ) //after server send back the file with sim, the reply is "{ \"binary\" : \"file\" }"
+    {
+        emit requestTextLog(index, reply);
+        bool bOK = ants2socket->ResumeWaitForAnswer();
+        reply = ants2socket->GetTextReply();
+        if (!bOK || reply.isEmpty())
+        {
+            rec->Error = ants2socket->GetError();
+            break;
+        }
+        obj = strToObject(reply);
+        if (obj.contains("progress"))
+            rec->Progress = obj["progress"].toInt();
+    }
+
+    if (rec->Error.isEmpty())
+    {
+        rec->Progress = 100;
+        emit requestTextLog(index, "Server has finished simulation");
+
+        const QByteArray& ba = ants2socket->GetBinaryReply();
+        qDebug() << "ByteArray to save size:"<<ba.size();
+
+        QString LocalSimTreeFileName = RemoteSimTreeFileName; // !!!!!!!!!!!!!!
+        QFile saveFile(LocalSimTreeFileName);
+        if ( !saveFile.open(QIODevice::WriteOnly) )
+            rec->Error = QString("Failed to save sim data to file: ") + LocalSimTreeFileName;
+        else
+        {
+            saveFile.write(ba);
+            saveFile.close();
+            rec->FileName = LocalSimTreeFileName;
+            emit requestTextLog(index, QString("Sim results saved in ") + LocalSimTreeFileName);
+        }
+    }
+    else rec->Progress = 0;
 }
 
 AWebSocketWorker_Rec::AWebSocketWorker_Rec(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
@@ -626,7 +613,12 @@ void AWebSocketWorker_Rec::run()
         if (!bExternalAbort)
         {
             runReconstruction();
-            if (!rec->Error.isEmpty()) emit requestTextLog(index, rec->Error);
+            if (!rec->Error.isEmpty())
+            {
+                rec->Progress = 0;
+                emit requestTextLog(index, rec->Error);
+            }
+            else rec->Progress = 100;
         }
     }
 
@@ -698,7 +690,7 @@ void AWebSocketWorker_Rec::runReconstruction()
     }
 
     emit requestTextLog(index, "Starting reconstruction...");
-    rec->Status = ARemoteServerRecord::Progressing;
+    rec->bShowProgress = true;
     Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
     Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads) + ", false);";
     Script += "server.SendReconstructionData()";

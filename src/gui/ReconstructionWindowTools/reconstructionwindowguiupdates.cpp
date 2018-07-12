@@ -104,7 +104,7 @@ void ReconstructionWindow::ShowStatistics(bool bCopyToTextLog)
   txt += "Good events: "+QString::number(GoodEvents);
 
   ui->leoEventsPassingAllFilters->setText( QString::number(GoodEvents));
-  if (AvChi2 != -1)
+  if (AvChi2 != -1 && AvChi2 != 0)
   {
       ui->leoAverageChi2->setText( QString::number(AvChi2) );
       txt += "   Average chi2: "+QString::number(AvChi2);

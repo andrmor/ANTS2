@@ -476,11 +476,7 @@ void EventsDataClass::prepareStatisticsForEvents(const bool isAllLRFsDefined, in
   AvChi2 = 0;
   AvDeviation = 0;
   bool DoDeviation = (isScanEmpty() || !isReconstructionReady(igroup)) ?  false : true;
-  bool fIsCoG = true;
-  if (igroup>-1 && igroup<RecSettings.size())
-      if (RecSettings.at(igroup).ReconstructionAlgorithm != 0)
-          fIsCoG = false;
-  bool fDoChi2 = (!isReconstructionReady(igroup) || fIsCoG || !isAllLRFsDefined) ? false : true;
+  bool fDoChi2 = (!isReconstructionReady(igroup) || !isAllLRFsDefined) ? false : true;
 
   for (int iev=0; iev<ReconstructionData[igroup].size(); iev++)
     if (ReconstructionData[igroup][iev]->GoodEvent)

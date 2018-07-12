@@ -534,6 +534,12 @@ void AReconstructionManager::onLRFsCopied()
     fDoingCopyLRFs.store(false);
 }
 
+#include "aconfiguration.h"
+void AReconstructionManager::onRequestFilterAndAskToUpdateGui()
+{
+    filterEvents(Detector->Config->JSON, 1);
+}
+
 #include <QThread>
 bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    

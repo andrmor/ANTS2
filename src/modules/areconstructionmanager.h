@@ -106,6 +106,7 @@ public slots:
   void requestStop() {fStopRequested = true;}
   void onRequestClearKNNfilter();
   void onLRFsCopied();
+  void onRequestFilterAndAskToUpdateGui(); //for gui remote, triggered by EventsDataHub
 
 signals:
   void UpdateReady(int Progress, double MsPerEv);

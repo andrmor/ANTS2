@@ -48,12 +48,11 @@ private slots:
     //GUI user-driven actions
     void on_pbStatus_clicked();
     void on_pbSimulate_clicked();
-    void on_pbAdd_clicked();    
-    void on_leiTimeout_editingFinished();
-
-    void on_pbRemove_clicked();
-
     void on_pbReconstruct_clicked();
+    void on_pbRateServers_clicked();
+    void on_leiTimeout_editingFinished();
+    void on_pbAdd_clicked();    
+    void on_pbRemove_clicked();
 
 private:
     void Clear();

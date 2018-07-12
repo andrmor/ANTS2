@@ -160,6 +160,35 @@ void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJs
     }
 }
 
+void AGridRunner::RateServers(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
+{
+    emit requestStatusLog("Rating servers...");
+    QVector<AWebSocketWorker_Base*> workers;
+
+    for (int i = 0; i < Servers.size(); i++)
+        workers << startSim(i, Servers[i], config);
+
+    waitForWorkersToPauseOrFinish(workers);
+
+    for (int i = 0; i < workers.size(); i++)
+        workers[i]->setPaused(false);
+
+    waitForWorkersToFinish(workers);
+
+    for (AWebSocketWorker_Base* w : workers) delete w;
+    workers.clear();
+
+    for (int i=0; i<Servers.size(); i++)
+        if ( Servers.at(i)->TimeElapsed > 0 )
+        {
+            Servers[i]->PerformanceFactor = 5000.0 / Servers.at(i)->TimeElapsed; //factor of 1 corresponds to 5s sim
+            requestTextLog(i, QString("Elapsed time %1 ms").arg(Servers.at(i)->TimeElapsed));
+            requestTextLog(i, QString("Attributed performance factor of %1").arg(Servers.at(i)->PerformanceFactor));
+        }
+
+    emit requestStatusLog("Done!");
+}
+
 void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)
 {
     qDebug() << "Waiting for all threads to finish...";
@@ -468,6 +497,7 @@ void AWebSocketWorker_Sim::run()
     emit finished();
 }
 
+#include <QElapsedTimer>
 void AWebSocketWorker_Sim::runSimulation()
 {
     rec->Error.clear();
@@ -525,6 +555,10 @@ void AWebSocketWorker_Sim::runSimulation()
     Script += "server.SendFile(fileName);";
     //  qDebug() << Script;
 
+    rec->TimeElapsed = 0;
+    QElapsedTimer timer;
+    timer.start();
+
     //execute the script on remote server
     emit requestTextLog(index, "Sending simulation script...");
     bOK = ants2socket->SendText(Script);
@@ -566,6 +600,7 @@ void AWebSocketWorker_Sim::runSimulation()
 
     if (rec->Error.isEmpty())
     {
+        rec->TimeElapsed = timer.elapsed();
         rec->Progress = 100;
         emit requestTextLog(index, "Server has finished simulation");
 

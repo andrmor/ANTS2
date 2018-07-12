@@ -198,6 +198,29 @@ void ARemoteWindow::on_pbReconstruct_clicked()
     onBusy(false);
 }
 
+void ARemoteWindow::on_pbRateServers_clicked()
+{
+    WriteConfig();
+
+    const QString DefDet = MW->GlobSet->ExamplesDir + "/StartupDetector.json";
+    QJsonObject js;
+    bool bOK = LoadJsonFromFile(js, DefDet);
+    if (!bOK) return;
+
+    //setting flood sim (1000 ev by default)
+    QJsonObject sc = js["SimulationConfig"].toObject();
+        QJsonObject psc = sc["PointSourcesConfig"].toObject();
+            QJsonObject co = psc["ControlOptions"].toObject();
+                co["Single_Scan_Flood"] = 2;
+            psc["ControlOptions"] = co;
+        sc["PointSourcesConfig"] = psc;
+    js["SimulationConfig"] = sc;
+
+    onBusy(true);
+    GR->RateServers(Records, &js);
+    onBusy(false);
+}
+
 void ARemoteWindow::on_leiTimeout_editingFinished()
 {
     GR->SetTimeout(ui->leiTimeout->text().toInt());

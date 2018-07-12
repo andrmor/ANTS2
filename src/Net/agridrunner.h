@@ -20,6 +20,7 @@ public:
     void CheckStatus(QVector<ARemoteServerRecord *> &Servers);
     void Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
     void Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
+    void RateServers(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
 
     void SetTimeout(int timeout) {TimeOut = timeout;}
 

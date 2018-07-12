@@ -22,7 +22,7 @@ public:
     QString IP = "000.000.000.000";
     int     Port = 1234;
     bool    bEnabled = true;
-    double  PerformanceFactor = 1.0;
+    double  SpeedFactor = 1.0;
 
     // all properties below are runtime-only
     int     NumThreads = 0;

@@ -219,6 +219,9 @@ void ARemoteWindow::on_pbRateServers_clicked()
     onBusy(true);
     GR->RateServers(Records, &js);
     onBusy(false);
+
+    for (AServerDelegate* d : Delegates)
+        d->updateGui();
 }
 
 void ARemoteWindow::on_leiTimeout_editingFinished()

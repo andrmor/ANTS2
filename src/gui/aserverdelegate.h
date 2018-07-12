@@ -18,10 +18,6 @@ class AServerDelegate : public QFrame
 public:
     AServerDelegate(ARemoteServerRecord *modelRecord = 0);
 
-    void           setThreads(int threads);
-    void           setProgress(int progress);
-    void           setProgressVisible(bool flag);
-
     void           updateGui();
 
 private:
@@ -32,7 +28,9 @@ private:
     QCheckBox*     cbEnabled;
     QLineEdit*     leIP;
     QSpinBox*      sbPort;
-    QLineEdit*     leiThreads;
+    //QLineEdit*     leiThreads;
+    QLabel*        labThreads;
+    QLabel*        labSpeedFactor;
     QProgressBar*  pbProgress;
 
 private slots:

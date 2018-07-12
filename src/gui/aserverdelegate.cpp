@@ -67,6 +67,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
             QObject::connect(sbPort, &QSpinBox::editingFinished, this, &AServerDelegate::updateModel);
         l->addWidget(sbPort);
 
+        /*
         lab = new QLabel("#thr:");
             lab->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         l->addWidget(lab);
@@ -84,6 +85,19 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
         lab = new QLabel(" ");
             lab->setAlignment(Qt::AlignHCenter);
         l->addWidget(lab);
+        */
+
+        labThreads = new QLabel(" #Th: 0");
+            labThreads->setAlignment(Qt::AlignCenter);
+        l->addWidget(labThreads);
+
+//        lab = new QLabel(" ");
+//            lab->setAlignment(Qt::AlignHCenter);
+//        l->addWidget(lab);
+
+        labSpeedFactor = new QLabel(" SF: 1.00 ");
+            labSpeedFactor->setAlignment(Qt::AlignCenter);
+        l->addWidget(labSpeedFactor);
 
         pbProgress = new QProgressBar();
             pbProgress->setAlignment(Qt::AlignHCenter);
@@ -95,9 +109,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
         this->setLayout(l);
 
         // done
-
         updateGui();
-        //qDebug() << "STYLEEEEEEEEEEEEEE"<<styleSheet();
 }
 
 void AServerDelegate::updateGui()
@@ -132,7 +144,9 @@ void AServerDelegate::updateGui()
     leName->setText(modelRecord->Name);
     leIP->setText(modelRecord->IP);
     sbPort->setValue(modelRecord->Port);
-    leiThreads->setText( QString::number(modelRecord->NumThreads) );
+    //leiThreads->setText( QString::number(modelRecord->NumThreads) );
+    labThreads->setText( QString(" #Thr: %1").arg(modelRecord->NumThreads));
+    labSpeedFactor->setText( QString(" SF: %1 ").arg(modelRecord->SpeedFactor, 3, 'f', 2) );
     pbProgress->setValue(modelRecord->Progress);
 
     emit updateSizeHint(this);
@@ -144,7 +158,7 @@ void AServerDelegate::updateModel()
     modelRecord->Name = leName->text();
     modelRecord->IP = leIP->text();
     modelRecord->Port = sbPort->value();
-    modelRecord->NumThreads = leiThreads->text().toInt();
+    //modelRecord->NumThreads = leiThreads->text().toInt();
 }
 
 void AServerDelegate::setBackgroundGray(bool flag)
@@ -177,19 +191,4 @@ void AServerDelegate::setIcon(int option)
     b.setBrush(QBrush(color));
     b.drawEllipse(0, 2, 10, 10);
     labStatus->setPixmap(pm);
-}
-
-void AServerDelegate::setThreads(int threads)
-{
-    leiThreads->setText( QString::number(threads) );
-}
-
-void AServerDelegate::setProgress(int progress)
-{
-    pbProgress->setValue(progress);
-}
-
-void AServerDelegate::setProgressVisible(bool flag)
-{
-    pbProgress->setVisible(flag);
 }

@@ -181,9 +181,9 @@ void AGridRunner::RateServers(QVector<ARemoteServerRecord *> &Servers, const QJs
     for (int i=0; i<Servers.size(); i++)
         if ( Servers.at(i)->TimeElapsed > 0 )
         {
-            Servers[i]->PerformanceFactor = 5000.0 / Servers.at(i)->TimeElapsed; //factor of 1 corresponds to 5s sim
+            Servers[i]->SpeedFactor = 7000.0 / Servers.at(i)->TimeElapsed; //factor of 1 corresponds to 7s sim
             requestTextLog(i, QString("Elapsed time %1 ms").arg(Servers.at(i)->TimeElapsed));
-            requestTextLog(i, QString("Attributed performance factor of %1").arg(Servers.at(i)->PerformanceFactor));
+            requestTextLog(i, QString("Attributed performance factor of %1").arg(Servers.at(i)->SpeedFactor));
         }
 
     emit requestStatusLog("Done!");

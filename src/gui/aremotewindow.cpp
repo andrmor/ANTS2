@@ -86,6 +86,7 @@ void ARemoteWindow::onBusy(bool flag)
     ui->pbStatus->setEnabled(flag);
     ui->pbSimulate->setEnabled(flag);
     ui->pbReconstruct->setEnabled(flag);
+    ui->pbRateServers->setEnabled(flag);
 }
 
 void ARemoteWindow::AddNewServer(ARemoteServerRecord* record)

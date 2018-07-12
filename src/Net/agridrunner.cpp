@@ -662,6 +662,18 @@ void AWebSocketWorker_Rec::runReconstruction()
         rec->Error = "Failed to send config";
         return;
     }
+    emit requestTextLog(index, "Sending script to setup configuration...");
+    QString Script = "var c = server.GetBufferAsObject();"
+                     "var ok = config.SetConfig(c);"
+                     "if (!ok) core.abort(\"Failed to set config\");";
+    bOK = ants2socket->SendText(Script);
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "failed to setup config on the ants2 server";
+        return;
+    }
 
     //sending events
     emit requestTextLog(index, "Sending events to the server...");
@@ -675,7 +687,7 @@ void AWebSocketWorker_Rec::runReconstruction()
     }
 
     emit requestTextLog(index, "Setting event signals at the remote server...");
-    QString Script = "server.GetBufferAsEvents()";
+    Script = "server.GetBufferAsEvents()";
     bOK = ants2socket->SendText(Script);
     reply = ants2socket->GetTextReply();
     ro = strToObject(reply);

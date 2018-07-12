@@ -25,7 +25,7 @@ public:
     double  SpeedFactor = 1.0;
 
     // all properties below are runtime-only
-    int     NumThreads = 0;
+    int     NumThreads = 1;
     int     Progress = 0;
     bool    bShowProgress = false;
     bool    AntsServerAllocated = false;

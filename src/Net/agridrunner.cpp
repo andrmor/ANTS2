@@ -343,6 +343,7 @@ bool AWebSocketWorker_Base::allocateAntsServer()
             }
             else
             {
+                rec->Status = ARemoteServerRecord::Alive;
                 rec->AntsServerPort = ro["port"].toInt();
                 rec->AntsServerTicket = ro["ticket"].toString();
                 rec->AntsServerAllocated = true;

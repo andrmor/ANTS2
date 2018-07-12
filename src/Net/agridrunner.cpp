@@ -39,8 +39,62 @@ void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
     emit requestStatusLog(s);
 }
 
-void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config)
+const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config)
 {
+    if (!config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
+        return "Configuration does not contain simulation or detector settings";
+
+    QJsonObject jSimulationConfig = (*config)["SimulationConfig"].toObject();
+
+        QJsonObject jParticleSourcesConfig = jSimulationConfig["ParticleSourcesConfig"].toObject();
+            QJsonObject jSourceControlOptions = jParticleSourcesConfig["SourceControlOptions"].toObject();
+
+        QJsonObject jPointSourcesConfig = jSimulationConfig["PointSourcesConfig"].toObject();
+            QJsonObject jControlOptions = jPointSourcesConfig["ControlOptions"].toObject();
+            QJsonObject jFloodOptions =  jPointSourcesConfig["FloodOptions"].toObject();
+
+    bool pPointSourceSim = (jSimulationConfig["Mode"].toString() == "PointSim");
+    int  numEvents = 0;
+    int  PointSourceSimType = 0;
+    bool bMultiRun = false;
+    int numRuns = 1;
+    if (pPointSourceSim)
+    {
+        // mode:
+        //    SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood  0/1/2/3 = single/scan/flood/custom
+        PointSourceSimType = jControlOptions["Single_Scan_Flood"].toInt();
+        //     for flood:  SimulationConfig.PointSourcesConfig.FloodOptions.Nodes
+        numEvents = jFloodOptions["Nodes"].toInt();
+        // multirun:
+        //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRuns
+        bMultiRun = jControlOptions["MultipleRuns"].toBool();
+        //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber
+        numRuns = jControlOptions["MultipleRunsNumber"].toInt();
+
+        if (PointSourceSimType == 2 || bMultiRun)
+        {
+            //OK
+            //Flood beats Multirun (distribute events, not runs) if both activated
+        }
+        else
+            return "This simulation mode is not implemeted for distributed simulation.\nFor Point source sim one can use flood or any mode with multirun enabled.";
+    }
+    else
+    {
+        // SimulationConfig.ParticleSourcesConfig.SourceControlOptions.EventsToDo
+        numEvents = jSourceControlOptions["EventsToDo"].toInt();
+    }
+
+/*
+            QJsonObject co = psc["ControlOptions"].toObject();
+                co["Single_Scan_Flood"] = 2;
+            psc["ControlOptions"] = co;
+        sc["PointSourcesConfig"] = psc;
+    js["SimulationConfig"] = sc;
+*/
+
+
+
     emit requestStatusLog("Starting remote simulation...");
     QVector<AWebSocketWorker_Base*> workers;
 
@@ -48,6 +102,8 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
         workers << startSim(i, Servers[i], config);
 
     waitForWorkersToPauseOrFinish(workers);
+
+    //distributing load
 
     for (int i = 0; i < workers.size(); i++)
         workers[i]->setPaused(false);
@@ -72,6 +128,8 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
         }
 
     emit requestStatusLog("Done!");
+
+    return "";
 }
 
 void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)

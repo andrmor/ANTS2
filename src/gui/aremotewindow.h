@@ -53,6 +53,8 @@ private slots:
 
     void on_pbRemove_clicked();
 
+    void on_pbReconstruct_clicked();
+
 private:
     void Clear();
     void AddNewServer(ARemoteServerRecord* record = 0);

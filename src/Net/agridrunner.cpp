@@ -44,14 +44,13 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
     emit requestStatusLog("Starting remote simulation...");
     QVector<AWebSocketWorker_Base*> workers;
 
-    qDebug() << "-----------------Opening sessions--------------";
     for (int i = 0; i < Servers.size(); i++)
         workers << startSim(i, Servers[i], config);
 
     waitForWorkersToPauseOrFinish(workers);
 
     for (int i = 0; i < workers.size(); i++)
-        workers[i]->setNotPaused();
+        workers[i]->setPaused(false);
 
     waitForWorkersToFinish(workers);
 
@@ -71,6 +70,110 @@ void AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonO
                 s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub->ErrorString;
             requestTextLog(i, s);
         }
+
+    emit requestStatusLog("Done!");
+}
+
+void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
+{
+    emit requestStatusLog("Starting remote reconstruction...");
+    QVector<AWebSocketWorker_Base*> workers;
+
+    for (int i = 0; i < Servers.size(); i++)
+        workers << startRec(i, Servers[i], config);
+
+    waitForWorkersToPauseOrFinish(workers);
+
+    int numSer = 0;
+    int numThr = 0;
+    for (int i = 0; i < workers.size(); i++)
+    {
+        if (Servers.at(i)->NumThreads > 0)
+        {
+            numSer++;
+            numThr += Servers.at(i)->NumThreads;
+        }
+    }
+    qDebug() << "Found"<<numSer<<"servers. Thread pool:"<<numThr;
+    if (numThr == 0)
+    {
+        emit requestStatusLog("Cannot reconstruct: there are no available servers");
+        return;
+    }
+    int numEvents = EventsDataHub->countEvents();
+    int eventsPerOneThread = numEvents / numThr;
+    if (eventsPerOneThread * numThr < numEvents) eventsPerOneThread++;
+
+    int from = 0;
+    for (int i = 0; i < workers.size(); i++)
+    {
+        Servers[i]->ByteArrayReceived.clear();
+        Servers[i]->EventsFrom = 0;
+        Servers[i]->EventsTo = 0;
+
+        if (Servers.at(i)->NumThreads > 0)
+        {
+            Servers[i]->EventsFrom = from;
+            int toDo = Servers.at(i)->NumThreads * eventsPerOneThread;
+            if (from + toDo > numEvents) toDo = numEvents - from;
+            Servers[i]->EventsTo = from + toDo;
+            from += toDo;
+
+            EventsDataHub->packEventsToByteArray(Servers[i]->EventsFrom, Servers[i]->EventsTo, Servers[i]->ByteArrayToSend);
+        }
+        workers[i]->setPaused(false);
+    }
+
+    waitForWorkersToFinish(workers);
+
+    for (AWebSocketWorker_Base* w : workers) delete w;
+    workers.clear();
+
+    bool bRecFailed = false;
+    for (int i = 0; i < Servers.size(); i++)
+    {
+        Servers[i]->ByteArrayToSend.clear();
+        Servers[i]->ByteArrayToSend.squeeze();
+
+        if (Servers.at(i)->EventsTo > 0)
+        {
+            if (!Servers.at(i)->Error.isEmpty()) bRecFailed = true;
+            else
+            {
+                bool bOK = EventsDataHub->unpackReconstructedFromByteArray(Servers.at(i)->EventsFrom, Servers.at(i)->EventsTo, Servers.at(i)->ByteArrayReceived);
+                if (!bOK)
+                {
+                    Servers[i]->Error = "Failed to set reconstruction data using the obtained data";
+                    emit requestTextLog(i, Servers[i]->Error);
+                    bRecFailed = true;
+                }
+            }
+        }
+    }
+
+    if (bRecFailed) emit requestStatusLog("Reconstruction failed!");
+    else
+    {
+        EventsDataHub->fReconstructionDataReady = true;
+        emit requestStatusLog("Done!");
+    }
+
+
+    /*
+    //loading simulated events
+    EventsDataHub->clear();
+    for (int i=0; i<Servers.size(); i++)
+        if ( !Servers.at(i)->FileName.isEmpty() )
+        {
+            int numEv = EventsDataHub->loadSimulatedEventsFromTree( Servers.at(i)->FileName, PMs );
+            QString s;
+            if (EventsDataHub->ErrorString.isEmpty())
+                s = QString("%1 events were registered").arg(numEv);
+            else
+                s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub->ErrorString;
+            requestTextLog(i, s);
+        }
+    */
 
     emit requestStatusLog("Done!");
 }
@@ -119,18 +222,26 @@ void AGridRunner::onRequestTextLog(int index, const QString message)
     emit requestTextLog(index, message);
 }
 
-AWebSocketWorker_Base* AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord* server)
+AWebSocketWorker_Base* AGridRunner::startCheckStatusOfServer(int index, ARemoteServerRecord* serverRecord)
 {
-    qDebug() << "Starting checking for record#" << index << server->IP << server->Port << TimeOut;
-    AWebSocketWorker_Base* worker = new AWebSocketWorker_Check(index, server, TimeOut);
+    qDebug() << "Starting checking for record#" << index << serverRecord->IP << serverRecord->Port << TimeOut;
+    AWebSocketWorker_Base* worker = new AWebSocketWorker_Check(index, serverRecord, TimeOut);
 
     startInNewThread(worker);
     return worker;
 }
 
-AWebSocketWorker_Base *AGridRunner::startSim(int index, ARemoteServerRecord *server, const QJsonObject* config)
+AWebSocketWorker_Base *AGridRunner::startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config)
 {
-    AWebSocketWorker_Base* worker = new AWebSocketWorker_Sim(index, server, TimeOut, config);
+    AWebSocketWorker_Base* worker = new AWebSocketWorker_Sim(index, serverRecord, TimeOut, config);
+
+    startInNewThread(worker);
+    return worker;
+}
+
+AWebSocketWorker_Base *AGridRunner::startRec(int index, ARemoteServerRecord *serverrecord, const QJsonObject *config)
+{
+    AWebSocketWorker_Base* worker = new AWebSocketWorker_Rec(index, serverrecord, TimeOut, config);
 
     startInNewThread(worker);
     return worker;
@@ -153,8 +264,8 @@ void AGridRunner::startInNewThread(AWebSocketWorker_Base* worker)
 
 // ----------------------- Workers ----------------------------
 
-AWebSocketWorker_Base::AWebSocketWorker_Base(int index, ARemoteServerRecord *rec, int timeOut) :
-    index(index), rec(rec), TimeOut(timeOut) {}
+AWebSocketWorker_Base::AWebSocketWorker_Base(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
+    index(index), rec(rec), TimeOut(timeOut), config(config) {}
 
 AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
 {
@@ -235,7 +346,7 @@ bool AWebSocketWorker_Base::allocateAntsServer()
     return bOK;
 }
 
-AWebSocketSession* AWebSocketWorker_Base::establishSessionWithAntsServer()
+AWebSocketSession* AWebSocketWorker_Base::connectToAntsServer()
 {
     emit requestTextLog(index, "Connecting to ants2 server");
 
@@ -274,6 +385,16 @@ AWebSocketSession* AWebSocketWorker_Base::establishSessionWithAntsServer()
     }
 
     return socket;
+}
+
+bool AWebSocketWorker_Base::establishSession()
+{
+    ants2socket = 0;
+    bool bOK = allocateAntsServer();
+    if (bOK)
+        ants2socket = connectToAntsServer();
+
+    return ants2socket;
 }
 
 AWebSocketWorker_Check::AWebSocketWorker_Check(int index, ARemoteServerRecord *rec, int timeOut) :
@@ -335,7 +456,7 @@ void AWebSocketWorker_Check::run()
 }
 
 AWebSocketWorker_Sim::AWebSocketWorker_Sim(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
-    AWebSocketWorker_Base(index, rec, timeOut), config(config) {}
+    AWebSocketWorker_Base(index, rec, timeOut, config) {}
 
 void AWebSocketWorker_Sim::run()
 {
@@ -343,7 +464,7 @@ void AWebSocketWorker_Sim::run()
 
     rec->FileName.clear();
 
-    bool bOK = runSession();
+    bool bOK = establishSession();
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
@@ -359,16 +480,6 @@ void AWebSocketWorker_Sim::run()
     emit finished();
 }
 
-bool AWebSocketWorker_Sim::runSession()
-{
-    ants2socket = 0;
-    bool bOK = allocateAntsServer();
-    if (bOK)
-        ants2socket = establishSessionWithAntsServer();
-
-    return ants2socket;
-}
-
 void AWebSocketWorker_Sim::runSimulation()
 {
     rec->Error.clear();
@@ -377,7 +488,7 @@ void AWebSocketWorker_Sim::runSimulation()
         rec->Error = "There is no connection to ANTS2 server";
     else
     {
-        if (!config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
+        if (!config || !config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
             rec->Error = "Config does not contain detector or simulation settings";
         else
         {
@@ -487,4 +598,124 @@ void AWebSocketWorker_Sim::runSimulation()
 
     if (!rec->Error.isEmpty())
         emit requestTextLog(index, rec->Error);
+}
+
+AWebSocketWorker_Rec::AWebSocketWorker_Rec(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
+    AWebSocketWorker_Base(index, rec, timeOut, config) {}
+
+void AWebSocketWorker_Rec::run()
+{
+    bRunning = true;
+
+    bool bOK = establishSession();
+    if (!bOK)
+    {
+        qDebug() << "failed to get server, aborting the thread and updating status";
+        rec->Status = ARemoteServerRecord::Dead;
+        rec->Progress = 0;
+    }
+    else
+    {
+        bPaused = true;
+        //waiting while main thread will set events to reconstruct
+        while (bPaused && !bExternalAbort)
+        {
+            QThread::usleep(100);
+            QCoreApplication::processEvents();
+        }
+        if (!bExternalAbort)
+        {
+            runReconstruction();
+            if (!rec->Error.isEmpty()) emit requestTextLog(index, rec->Error);
+        }
+    }
+
+    bRunning = false;
+    emit finished();
+}
+
+void AWebSocketWorker_Rec::runReconstruction()
+{
+    emit requestTextLog(index, QString("Reconstructing events from %1 to %2").arg(rec->EventsFrom).arg(rec->EventsTo));
+
+    rec->Error.clear();
+
+    if (!ants2socket || !ants2socket->ConfirmSendPossible())
+    {
+        rec->Error = "There is no connection to ANTS2 server";
+        return;
+    }
+
+    if (!config || !config->contains("ReconstructionConfig") || !config->contains("DetectorConfig"))
+    {
+        rec->Error = "Config does not contain detector or reconstruction settings";
+        return;
+    }
+
+    qDebug() << "Sending config...";
+    emit requestTextLog(index, "Sending config file...");
+    bool bOK = ants2socket->SendJson(*config);
+    QString reply = ants2socket->GetTextReply();
+    QJsonObject ro = strToObject(reply);
+    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "Failed to send config";
+        return;
+    }
+
+    //sending events
+    emit requestTextLog(index, "Sending events to the server...");
+    bOK = ants2socket->SendQByteArray(rec->ByteArrayToSend);
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+    {
+        rec->Error = "Failed to send events to remote server";
+        return;
+    }
+
+    emit requestTextLog(index, "Setting event signals at the remote server...");
+    QString Script = "server.GetBufferAsEvents()";
+    bOK = ants2socket->SendText(Script);
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if ( !bOK || !ro.contains("result") || !ro["result"].toBool() )
+    {
+        rec->Error = "Failed to set events on server.";
+        return;
+    }
+
+    emit requestTextLog(index, "Starting reconstruction...");
+    rec->Status = ARemoteServerRecord::Progressing;
+    Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
+    Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads) + ", false);";
+    Script += "server.SendReconstructionData()";
+    bOK = ants2socket->SendText(Script);
+    reply = ants2socket->GetTextReply();
+    ro = strToObject(reply);
+    if ( !bOK || ro.contains("error") )
+    {
+        const QString err = ro["error"].toString();
+        rec->Error = "Server reported error:<br>" + err;
+        return;
+    }
+
+    while ( !ro.contains("binary") ) //after sending the file, the reply is "{ \"binary\" : \"qbytearray\" }"
+    {
+        emit requestTextLog(index, reply);
+        bOK = ants2socket->ResumeWaitForAnswer();
+        reply = ants2socket->GetTextReply();
+        ro = strToObject(reply);
+        if (!bOK)
+        {
+            emit requestTextLog(index, "Reconstruction failed!");
+            emit requestTextLog(index, ants2socket->GetError());
+            return;
+        }
+        if (ro.contains("progress"))
+            rec->Progress = ro["progress"].toInt();
+    }
+
+    rec->ByteArrayReceived = ants2socket->GetBinaryReply();
+    emit requestTextLog(index, "Remote reconstruction finished");
 }

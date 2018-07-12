@@ -1373,7 +1373,7 @@ void AInterfaceToData::SetReconstructionReady()
   }
 
   EventsDataHub->fReconstructionDataReady = true;
-  emit RequestEventsGuiUpdate();
+  emit EventsDataHub->requestEventsGuiUpdate();
 }
 
 void AInterfaceToData::ResetReconstructionData(int numGroups)

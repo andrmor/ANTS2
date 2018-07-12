@@ -189,6 +189,15 @@ void ARemoteWindow::on_pbSimulate_clicked()
     MW->Rwindow->OnEventsDataAdded();
 }
 
+void ARemoteWindow::on_pbReconstruct_clicked()
+{
+    WriteConfig();
+
+    onBusy(true);
+    GR->Reconstruct(Records, &MW->Config->JSON);
+    onBusy(false);
+}
+
 void ARemoteWindow::on_leiTimeout_editingFinished()
 {
     GR->SetTimeout(ui->leiTimeout->text().toInt());

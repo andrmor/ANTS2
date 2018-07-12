@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QJsonObject>
+#include <QByteArray>
 
 class AWebSocketSession;
 class QThread;
@@ -29,9 +30,14 @@ public:
     int     AntsServerPort = -1;
     QString AntsServerTicket = "---";
     QString FileName; //local file where sim tree is saved
+    int     EventsFrom;
+    int     EventsTo;
+    QByteArray ByteArrayToSend;
+    QByteArray ByteArrayReceived;
 
     QString Error;
 
+public:
     const QJsonObject WriteToJson();
     void              ReadFromJson(const QJsonObject& json);
 };

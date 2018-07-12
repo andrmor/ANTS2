@@ -19,6 +19,7 @@ public:
 
     void CheckStatus(QVector<ARemoteServerRecord *> &Servers);
     void Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
+    void Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
 
     void SetTimeout(int timeout) {TimeOut = timeout;}
 
@@ -32,8 +33,9 @@ private:
     QVector<AWebSocketSession*> Sockets;
 
 private:
-    AWebSocketWorker_Base* startCheckStatusOfServer(int index, ARemoteServerRecord *server);
-    AWebSocketWorker_Base* startSim(int index, ARemoteServerRecord *server, const QJsonObject* config);
+    AWebSocketWorker_Base* startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
+    AWebSocketWorker_Base* startSim(int index, ARemoteServerRecord *serverRecord, const QJsonObject* config);
+    AWebSocketWorker_Base* startRec(int index, ARemoteServerRecord *server, const QJsonObject* config);
 
     void startInNewThread(AWebSocketWorker_Base *worker);
 
@@ -52,13 +54,13 @@ class AWebSocketWorker_Base : public QObject
 {
     Q_OBJECT
 public:
-    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut);
+    AWebSocketWorker_Base(int index, ARemoteServerRecord* rec, int timeOut,  const QJsonObject* config = 0);
     virtual ~AWebSocketWorker_Base() {}
 
     bool isRunning() const {return bRunning;}
     bool isPausedOrFinished() const {return bPaused || !bRunning;}
     void setStarted() {bRunning = true;}
-    void setNotPaused() {bPaused = false;}
+    void setPaused(bool flag) {bPaused = flag;}
 
     ARemoteServerRecord* getRecord() {return rec;}
 
@@ -72,10 +74,15 @@ protected:
 
     bool bRunning = false;
     bool bPaused = false;
+    bool bExternalAbort = false;
+
+    const QJsonObject* config;
+    AWebSocketSession* ants2socket = 0;
 
     AWebSocketSession* connectToServer(int port);
     bool               allocateAntsServer();
-    AWebSocketSession* establishSessionWithAntsServer();
+    AWebSocketSession* connectToAntsServer();
+    bool               establishSession();
 
 signals:
     void finished();
@@ -109,12 +116,21 @@ public:
 public slots:
     virtual void run() override;
 
-private:
-    const QJsonObject* config;
-    AWebSocketSession* ants2socket = 0;
-
-    bool runSession();
+private:    
     void runSimulation();
+};
+
+class AWebSocketWorker_Rec : public AWebSocketWorker_Base
+{
+    Q_OBJECT
+public:
+    AWebSocketWorker_Rec(int index, ARemoteServerRecord* rec, int timeOut, const QJsonObject* config);
+
+public slots:
+    virtual void run() override;
+
+private:
+    void runReconstruction();
 };
 
 #endif // AGRIDRUNNER_H

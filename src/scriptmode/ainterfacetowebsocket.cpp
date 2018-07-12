@@ -11,12 +11,6 @@
 #include <QJsonDocument>
 #include <QFile>
 
-//const QJsonObject strToObject(const QString& s)
-//{
-//    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
-//    return doc.object();
-//}
-
 AInterfaceToWebSocket::AInterfaceToWebSocket(EventsDataClass *EventsDataHub) :
     AScriptInterface(), EventsDataHub(EventsDataHub) {}
 
@@ -387,32 +381,6 @@ bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo
     }
 
     if (ShowOutput) emit showTextOnMessageWindow("Done!");
-
-    /*
-    Script += "server.SendFile(fileName);";
-    qDebug() << Script;
-
-    //execute the script on remote server
-    if (ShowOutput) emit showTextOnMessageWindow("Sending script to the server...");
-    reply = SendText(Script);
-    if (reply.isEmpty())
-    {
-        if (ShowOutput)
-        {
-            emit showTextOnMessageWindow("Script execution failed!");
-            emit showTextOnMessageWindow(socket->GetError());
-        }
-        return false; //this is on local abort, e.g. timeout
-    }
-    obj = strToObject(reply);
-    if (obj.contains("error"))
-    {
-        const QString err = obj["error"].toString();
-        emit showTextOnMessageWindow(err);
-        abort(err);
-        return false;
-    }
-*/
 
     return true;
 }

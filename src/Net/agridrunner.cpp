@@ -46,15 +46,6 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
 
     QJsonObject jSimulationConfig = (*config)["SimulationConfig"].toObject();
 
-        QJsonObject jParticleSourcesConfig = jSimulationConfig["ParticleSourcesConfig"].toObject();
-            QJsonObject jSourceControlOptions = jParticleSourcesConfig["SourceControlOptions"].toObject();
-
-        QJsonObject jPointSourcesConfig = jSimulationConfig["PointSourcesConfig"].toObject();
-            QJsonObject jControlOptions = jPointSourcesConfig["ControlOptions"].toObject();
-            QJsonObject jFloodOptions =  jPointSourcesConfig["FloodOptions"].toObject();
-            QJsonObject jCustomNodesOptions = jPointSourcesConfig["CustomNodesOptions"].toObject();
-            QJsonObject jRegularScanOptions = jPointSourcesConfig["RegularScanOptions"].toObject();
-
     bool pPointSourceSim = (jSimulationConfig["Mode"].toString() == "PointSim");
     int  numEvents = 0;
     int  PointSourceSimType = 0;
@@ -62,6 +53,9 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
 
     if (pPointSourceSim)
     {
+        QJsonObject jPointSourcesConfig = jSimulationConfig["PointSourcesConfig"].toObject();
+            QJsonObject jControlOptions = jPointSourcesConfig["ControlOptions"].toObject();
+
         PointSourceSimType = jControlOptions["Single_Scan_Flood"].toInt();
 
         switch (PointSourceSimType)
@@ -72,22 +66,33 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
             numEvents = jControlOptions["MultipleRunsNumber"].toInt();
             break;
         case 1:
+        {
+            QJsonObject jRegularScanOptions = jPointSourcesConfig["RegularScanOptions"].toObject();
             regularToCustomNodes(jRegularScanOptions, nodesAr);
             numEvents = nodesAr.size();
             break;
+        }
         case 2:
+        {
+            QJsonObject jFloodOptions =  jPointSourcesConfig["FloodOptions"].toObject();
             numEvents = jFloodOptions["Nodes"].toInt();
             break;
+        }
         case 3:
+        {
+            QJsonObject jCustomNodesOptions = jPointSourcesConfig["CustomNodesOptions"].toObject();
             nodesAr = jCustomNodesOptions["Nodes"].toArray();
             numEvents = nodesAr.size();
             break;
+        }
         default:;
         }
     }
     else
     {
-        // SimulationConfig.ParticleSourcesConfig.SourceControlOptions.EventsToDo
+        QJsonObject jParticleSourcesConfig = jSimulationConfig["ParticleSourcesConfig"].toObject();
+            QJsonObject jSourceControlOptions = jParticleSourcesConfig["SourceControlOptions"].toObject();
+
         numEvents = jSourceControlOptions["EventsToDo"].toInt();
     }
 
@@ -101,10 +106,20 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
 
     //init distributor of load
     double sumSpeedfactor = 0;
+    int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
         if (Servers.at(i)->NumThreads > 0)
+        {
+            numThr++;
             sumSpeedfactor += Servers.at(i)->SpeedFactor;
+        }
+    if (numThr == 0)
+    {
+        emit requestStatusLog("Cannot simulate: there are no active servers");
+        return "Cannot simulate: there are no active servers";
+    }
 
+    //distributing load over servers and resuming workers
     int counter = 0;
     for (int i = 0; i < workers.size(); i++)
     {
@@ -166,7 +181,7 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
             counter += numEventsToDo;
         }
 
-        workers[i]->setPaused(false);
+        workers[i]->setPaused(false); //resume worker
     }
 
     waitForWorkersToFinish(workers);
@@ -193,7 +208,7 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     return "";
 }
 
-void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
+const QString AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
 {
     emit requestStatusLog("Starting remote reconstruction...");
     QVector<AWebSocketWorker_Base*> workers;
@@ -203,26 +218,24 @@ void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJs
 
     waitForWorkersToPauseOrFinish(workers);
 
-    int numSer = 0;
+    //init distributor of load
+    double sumSpeedfactor = 0;
     int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
-    {
         if (Servers.at(i)->NumThreads > 0)
         {
-            numSer++;
-            numThr += Servers.at(i)->NumThreads;
+            numThr++;
+            sumSpeedfactor += Servers.at(i)->SpeedFactor;
         }
-    }
-    qDebug() << "Found"<<numSer<<"servers. Thread pool:"<<numThr;
     if (numThr == 0)
     {
-        emit requestStatusLog("Cannot reconstruct: there are no available servers");
-        return;
+        emit requestStatusLog("Cannot reconstruct: there are no active servers");
+        return "Cannot reconstruct: there are no active servers";
     }
     int numEvents = EventsDataHub->countEvents();
-    int eventsPerOneThread = numEvents / numThr;
-    if (eventsPerOneThread * numThr < numEvents) eventsPerOneThread++;
+    double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
 
+    //distributing load and resuming workers
     int from = 0;
     for (int i = 0; i < workers.size(); i++)
     {
@@ -233,14 +246,17 @@ void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJs
         if (Servers.at(i)->NumThreads > 0)
         {
             Servers[i]->EventsFrom = from;
-            int toDo = Servers.at(i)->NumThreads * eventsPerOneThread;
+            int toDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
             if (from + toDo > numEvents) toDo = numEvents - from;
+
             Servers[i]->EventsTo = from + toDo;
             from += toDo;
 
             EventsDataHub->packEventsToByteArray(Servers[i]->EventsFrom, Servers[i]->EventsTo, Servers[i]->ByteArrayToSend);
+            qDebug() << "Server #"<<i << "will reconstruct events from "<<Servers[i]->EventsFrom <<"to"<<Servers[i]->EventsTo;
         }
-        workers[i]->setPaused(false);
+
+        workers[i]->setPaused(false); //resume worker
     }
 
     waitForWorkersToFinish(workers);
@@ -277,6 +293,8 @@ void AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJs
         emit EventsDataHub->requestFilterEvents();
         emit requestStatusLog("Done!");
     }
+
+    return "";
 }
 
 void AGridRunner::RateServers(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)

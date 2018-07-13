@@ -53,6 +53,7 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
             QJsonObject jControlOptions = jPointSourcesConfig["ControlOptions"].toObject();
             QJsonObject jFloodOptions =  jPointSourcesConfig["FloodOptions"].toObject();
 
+    qDebug() << jSimulationConfig["Mode"].toString();
     bool pPointSourceSim = (jSimulationConfig["Mode"].toString() == "PointSim");
     int  numEvents = 0;
     int  PointSourceSimType = 0;
@@ -85,16 +86,6 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
         numEvents = jSourceControlOptions["EventsToDo"].toInt();
     }
 
-/*
-            QJsonObject co = psc["ControlOptions"].toObject();
-                co["Single_Scan_Flood"] = 2;
-            psc["ControlOptions"] = co;
-        sc["PointSourcesConfig"] = psc;
-    js["SimulationConfig"] = sc;
-*/
-
-
-
     emit requestStatusLog("Starting remote simulation...");
     QVector<AWebSocketWorker_Base*> workers;
 
@@ -103,10 +94,63 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
 
     waitForWorkersToPauseOrFinish(workers);
 
-    //distributing load
-
+    //init distributor of load
+    double sumSpeedfactor = 0;
     for (int i = 0; i < workers.size(); i++)
+        if (Servers.at(i)->NumThreads > 0)
+            sumSpeedfactor += Servers.at(i)->SpeedFactor;
+
+
+
+
+    int counter = 0;
+    for (int i = 0; i < workers.size(); i++)
+    {
+        if (Servers.at(i)->NumThreads > 0)
+        {
+            QString modScript;
+
+            if (pPointSourceSim)
+            {
+                qDebug() << "-------- Photon sources ----------";
+                switch (PointSourceSimType)
+                {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    {
+                        qDebug() << "--- flood ---";
+                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
+                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
+                        counter += numEventsToDo;
+                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"flood events";
+                        modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
+                    }
+                    break;
+                case 3:
+                    break;
+                default: qWarning() << "Not implemented point source sim type "<< PointSourceSimType;
+                }
+            }
+            else
+            {
+                qDebug() << "-------- Particle sources ----------";
+                double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
+                int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+                if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
+                counter += numEventsToDo;
+                qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"particle source events";
+                modScript = QString("config.Replace(\"SimulationConfig.ParticleSourcesConfig.SourceControlOptions.EventsToDo\", %1)").arg(numEventsToDo);
+            }
+
+            workers[i]->setExtraScript(modScript);
+        }
+
         workers[i]->setPaused(false);
+    }
 
     waitForWorkersToFinish(workers);
 
@@ -543,13 +587,23 @@ void AWebSocketWorker_Sim::run()
     }
     else
     {
-        runSimulation();
-        if (!rec->Error.isEmpty())
+        bPaused = true;
+        //waiting while main thread will set events to reconstruct
+        while (bPaused && !bExternalAbort)
         {
-            rec->Progress = 0;
-            emit requestTextLog(index, rec->Error);
+            QThread::usleep(100);
+            QCoreApplication::processEvents();
         }
-        else rec->Progress = 100;
+        if (!bExternalAbort)
+        {
+            runSimulation();
+            if (!rec->Error.isEmpty())
+            {
+                rec->Progress = 0;
+                emit requestTextLog(index, rec->Error);
+            }
+            else rec->Progress = 100;
+        }
     }
 
     bRunning = false;
@@ -594,6 +648,19 @@ void AWebSocketWorker_Sim::runSimulation()
     {
         rec->Error = "failed to setup config on the ants2 server";
         return;
+    }
+
+    if (!extraScript.isEmpty())
+    {
+        emit requestTextLog(index, "Sending script to modify configuration...");
+        bOK = ants2socket->SendText(extraScript);
+        reply = ants2socket->GetTextReply();
+        ro = strToObject(reply);
+        if (!bOK || !ro.contains("result") || !ro["result"].toBool())
+        {
+            rec->Error = "Failed to modify config on the ants2 server";
+            return;
+        }
     }
 
     QJsonObject jsSimSet = (*config)["SimulationConfig"].toObject();

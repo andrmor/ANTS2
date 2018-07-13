@@ -2,6 +2,7 @@
 #define AGRIDRUNNER_H
 
 #include <QObject>
+#include <QJsonObject>
 #include <QHostAddress>
 
 class EventsDataClass;
@@ -63,6 +64,8 @@ public:
     void setStarted() {bRunning = true;}
     void setPaused(bool flag) {bPaused = flag;}
 
+    void setExtraScript(const QString& script) {extraScript = script;}
+
     ARemoteServerRecord* getRecord() {return rec;}
 
 public slots:
@@ -79,6 +82,8 @@ protected:
 
     const QJsonObject* config;
     AWebSocketSession* ants2socket = 0;
+
+    QString extraScript; //e.g. script to modify config according to distribution of sim events
 
     AWebSocketSession* connectToServer(int port);
     bool               allocateAntsServer();

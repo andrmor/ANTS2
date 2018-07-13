@@ -55,30 +55,21 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
             QJsonObject jCustomNodesOptions = jPointSourcesConfig["CustomNodesOptions"].toObject();
             QJsonObject jRegularScanOptions = jPointSourcesConfig["RegularScanOptions"].toObject();
 
-    qDebug() << jSimulationConfig["Mode"].toString();
     bool pPointSourceSim = (jSimulationConfig["Mode"].toString() == "PointSim");
     int  numEvents = 0;
     int  PointSourceSimType = 0;
-    bool bMultiRun = false;
-    int numRuns = 1;
     QJsonArray nodesAr;
 
     if (pPointSourceSim)
     {
-        // mode:
-        //    SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood  0/1/2/3 = single/scan/flood/custom
         PointSourceSimType = jControlOptions["Single_Scan_Flood"].toInt();
-        // multirun:
-        //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRuns
-        bMultiRun = jControlOptions["MultipleRuns"].toBool();
-        //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber
-        numRuns = jControlOptions["MultipleRunsNumber"].toInt();
-
 
         switch (PointSourceSimType)
         {
         case 0:
-            numEvents = numRuns;
+            if ( !jControlOptions["MultipleRuns"].toBool() )
+                return "Cannot distribute sim single event when multirun is not activated!";
+            numEvents = jControlOptions["MultipleRunsNumber"].toInt();
             break;
         case 1:
             regularToCustomNodes(jRegularScanOptions, nodesAr);
@@ -93,15 +84,6 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
             break;
         default:;
         }
-        /*
-        if (PointSourceSimType == 2 || bMultiRun)
-        {
-            //OK
-            //Flood beats Multirun (distribute events, not runs) if both activated
-        }
-        else
-            return "This simulation mode is not implemeted for distributed simulation.\nFor Point source sim one can use flood or any mode with multirun enabled.";
-        */
     }
     else
     {
@@ -123,9 +105,6 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
         if (Servers.at(i)->NumThreads > 0)
             sumSpeedfactor += Servers.at(i)->SpeedFactor;
 
-
-
-
     int counter = 0;
     for (int i = 0; i < workers.size(); i++)
     {
@@ -133,51 +112,38 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
         {
             QString modScript;
 
+            double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
+            int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+            if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
+
             if (pPointSourceSim)
             {
                 qDebug() << "-------- Photon sources ----------";
                 switch (PointSourceSimType)
                 {
                 case 0:
-                    {
-                        qDebug() << "--- single ---";
-                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
-                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
-                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"runs at single position";
-                        modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber\", %1)").arg(numEventsToDo);
-                        counter += numEventsToDo;
-                    }
+                    qDebug() << "--- single ---";
+                    qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"runs at single position";
+                    modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber\", %1)").arg(numEventsToDo);
                     break;
                 case 2:
-                    {
-                        qDebug() << "--- flood ---";
-                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
-                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
-                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"flood events";
-                        modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
-                        counter += numEventsToDo;
-                    }
+                    qDebug() << "--- flood ---";
+                    qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"flood events";
+                    modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
                     break;
                 case 1:
                 case 3:
                     {
                         qDebug() << "--- custom (and regular->custom) nodes ---";
-                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
-                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
                         qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"custom nodes";
                         QJsonArray ar;
                         for (int i = counter; i < counter + numEventsToDo; i++)
                             ar.append( nodesAr.at(i) );
-                        qDebug() << ar;
                         QJsonObject json;
                         json["Nodes"] = ar;
                         modScript  = "var obj = ";
                         modScript += jsonToString(json);
                         modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.CustomNodesOptions\", obj)";
-                        counter += numEventsToDo;
                     }
                     break;
                 default: qWarning() << "Not implemented point source sim type "<< PointSourceSimType;
@@ -188,20 +154,16 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
                     qDebug() << "Fix for regular nodes: change to custom mode";
                     modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood\", 3)";
                 }
-
             }
             else
             {
                 qDebug() << "-------- Particle sources ----------";
-                double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-                int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
-                if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
-                counter += numEventsToDo;
                 qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"particle source events";
                 modScript = QString("config.Replace(\"SimulationConfig.ParticleSourcesConfig.SourceControlOptions.EventsToDo\", %1)").arg(numEventsToDo);
             }
 
             workers[i]->setExtraScript(modScript);
+            counter += numEventsToDo;
         }
 
         workers[i]->setPaused(false);

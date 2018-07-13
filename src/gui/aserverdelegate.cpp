@@ -29,6 +29,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
         cbEnabled = new QCheckBox("");
             cbEnabled->setChecked(true);
             QObject::connect(cbEnabled, &QCheckBox::clicked, this, &AServerDelegate::updateModel);
+            cbEnabled->setToolTip("Enable / disable this dispatcher. Disabled ones are not used in all operations including status checks.");
         l->addWidget(cbEnabled);
 
         leName = new QLineEdit("_name_");
@@ -36,6 +37,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
             leName->setMinimumWidth(100);
             QObject::connect(leName, &QLineEdit::editingFinished, this, &AServerDelegate::updateModel);
             QObject::connect(leName, &QLineEdit::editingFinished, this, &AServerDelegate::nameWasChanged);
+            leName->setToolTip("Name of the dispatcher. It has only cosmetic function.");
         l->addWidget(leName);
 
         QLabel* lab = new QLabel("ws://");
@@ -54,6 +56,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
             QRegExpValidator *ipValidator = new QRegExpValidator(ipRegex, this);
             leIP->setValidator(ipValidator);
             QObject::connect(leIP, &QLineEdit::editingFinished, this, &AServerDelegate::updateModel);
+            leIP->setToolTip("IP address of the server dispatcher.");
         l->addWidget(leIP);
 
         lab = new QLabel(":");
@@ -65,6 +68,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
             sbPort->setMaximum(99999);
             sbPort->setValue(modelRecord->Port);
             QObject::connect(sbPort, &QSpinBox::editingFinished, this, &AServerDelegate::updateModel);
+            sbPort->setToolTip("Port of the server dispatcher.");
         l->addWidget(sbPort);
 
         /*
@@ -89,6 +93,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
 
         labThreads = new QLabel(" #Th: 0");
             labThreads->setAlignment(Qt::AlignCenter);
+            labThreads->setToolTip("Number of threads to be used with this dispatcher.");
         l->addWidget(labThreads);
 
 //        lab = new QLabel(" ");
@@ -97,6 +102,7 @@ AServerDelegate::AServerDelegate(ARemoteServerRecord* modelRecord) : QFrame(), m
 
         labSpeedFactor = new QLabel(" SF: 1.00 ");
             labSpeedFactor->setAlignment(Qt::AlignCenter);
+            labSpeedFactor->setToolTip("Speed factor of this dispatcher (the larger is the factor, the more load will be given to this server).");
         l->addWidget(labSpeedFactor);
 
         pbProgress = new QProgressBar();
@@ -141,7 +147,7 @@ void AServerDelegate::updateGui()
         break;
     }
 
-    cbEnabled->setEnabled(modelRecord->bEnabled);
+    cbEnabled->setChecked(modelRecord->bEnabled);
     leName->setText(modelRecord->Name);
     leIP->setText(modelRecord->IP);
     sbPort->setValue(modelRecord->Port);
@@ -157,6 +163,13 @@ void AServerDelegate::updateGui()
     labSpeedFactor->setText( QString(" SF: %1 ").arg(modelRecord->SpeedFactor, 3, 'f', 2) );
     pbProgress->setValue(modelRecord->Progress);
 
+    bool bEnabled = cbEnabled->isChecked();
+    {
+        leName->setEnabled(bEnabled);
+        leIP->setEnabled(bEnabled);
+        sbPort->setEnabled(bEnabled);
+    }
+
     emit updateSizeHint(this);
 }
 
@@ -167,6 +180,8 @@ void AServerDelegate::updateModel()
     modelRecord->IP = leIP->text();
     modelRecord->Port = sbPort->value();
     //modelRecord->NumThreads = leiThreads->text().toInt();
+
+    updateGui();
 }
 
 void AServerDelegate::setBackgroundGray(bool flag)
@@ -190,7 +205,7 @@ void AServerDelegate::setIcon(int option)
     QPainter b(&pm);
 
     QColor color;
-    if (option == 0) color = Qt::gray;
+    if (option == 0 || !cbEnabled->isChecked()) color = Qt::gray;
     else if (option == 1) color = Qt::green;
     else if (option == 2) color = Qt::red;
     else color = Qt::yellow;

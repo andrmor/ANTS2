@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Distributed simulation / reconstruction</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -63,6 +63,9 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QPushButton" name="pbAdd">
+          <property name="toolTip">
+           <string>Add new ANTS2 server dispatcher</string>
+          </property>
           <property name="text">
            <string>New</string>
           </property>
@@ -77,6 +80,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbRemove">
+          <property name="toolTip">
+           <string>Remove selected ANTS2 server dispatcher</string>
+          </property>
           <property name="text">
            <string>Remove</string>
           </property>
@@ -132,6 +138,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Check status of configured ANTS2 server dispatchers</string>
+          </property>
           <property name="text">
            <string>Check status of servers</string>
           </property>
@@ -139,6 +148,12 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbRateServers">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Find relative speed of servers to be used in division of load</string>
+          </property>
           <property name="text">
            <string>Rate servers</string>
           </property>
@@ -157,6 +172,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QPushButton" name="pbSimulate">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -174,6 +192,9 @@
             <weight>75</weight>
             <bold>true</bold>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>Simulate remotely using current configuration</string>
           </property>
           <property name="text">
            <string>Simulate</string>
@@ -182,6 +203,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbReconstruct">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -199,6 +223,9 @@
             <weight>75</weight>
             <bold>true</bold>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>Reconstruct events remotely</string>
           </property>
           <property name="text">
            <string>Reconstruct</string>
@@ -209,6 +236,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pbAbort">
+        <property name="toolTip">
+         <string>Abort running operation</string>
+        </property>
         <property name="text">
          <string>Abort</string>
         </property>

@@ -19,10 +19,10 @@ class AGridRunner : public QObject
 public:
     AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs);
 
-    void CheckStatus();
+    const QString CheckStatus();
     const QString Simulate(const QJsonObject* config);
     const QString Reconstruct(const QJsonObject* config);
-    void RateServers(const QJsonObject* config);
+    const QString RateServers(const QJsonObject* config);
 
     void Abort();
 

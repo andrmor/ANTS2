@@ -6,6 +6,7 @@
 #include "mainwindow.h"
 #include "aconfiguration.h"
 #include "globalsettingsclass.h"
+#include "amessage.h"
 
 #include "ajsontools.h"
 
@@ -172,8 +173,16 @@ void ARemoteWindow::on_pbStatus_clicked()
     WriteConfig();
 
     onBusy(true);
-    GR->CheckStatus();
+    QString err = GR->CheckStatus();
     onBusy(false);
+
+    if (!err.isEmpty()) message(err, this);
+    else
+    {
+        ui->pbRateServers->setEnabled(true);
+        ui->pbSimulate->setEnabled(true);
+        ui->pbReconstruct->setEnabled(true);
+    }
 }
 
 #include "reconstructionwindow.h"
@@ -183,8 +192,11 @@ void ARemoteWindow::on_pbSimulate_clicked()
     WriteConfig();
 
     onBusy(true);
-    GR->Simulate(&MW->Config->JSON);
+    QString err = GR->Simulate(&MW->Config->JSON);
     onBusy(false);
+
+    if (!err.isEmpty())
+        message(err, this);
 
     MW->Owindow->RefreshData();
     MW->Rwindow->OnEventsDataAdded();
@@ -218,8 +230,11 @@ void ARemoteWindow::on_pbRateServers_clicked()
     js["SimulationConfig"] = sc;
 
     onBusy(true);
-    GR->RateServers(&js);
+    QString err = GR->RateServers(&js);
     onBusy(false);
+
+    if (!err.isEmpty())
+        message(err, this);
 
     for (AServerDelegate* d : Delegates)
         d->updateGui();

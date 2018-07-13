@@ -14,8 +14,21 @@
 AGridRunner::AGridRunner(QVector<ARemoteServerRecord *> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs) :
     ServerRecords(ServerRecords), EventsDataHub(EventsDataHub), PMs(PMs) {}
 
-void AGridRunner::CheckStatus()
+const QString AGridRunner::CheckStatus()
 {
+    if (ServerRecords.isEmpty())
+        return "Configure at least one dispatcher record!";
+
+    bool bEmpty = true;
+    for (ARemoteServerRecord* r : ServerRecords)
+        if (r->bEnabled)
+        {
+            bEmpty = false;
+            break;
+        }
+    if (bEmpty)
+        return "All dispatcher records are disabled!";
+
     bAbortRequested = false;
 
     emit requestStatusLog("Checking status of servers...");
@@ -39,6 +52,8 @@ void AGridRunner::CheckStatus()
         }
     QString s = (th > 0 ? QString("Found %1 servers with %2 available threads").arg(ser).arg(th) : "There are no servers with available threads" );
     emit requestStatusLog(s);
+
+    return "";
 }
 
 const QString AGridRunner::Simulate(const QJsonObject* config)
@@ -68,7 +83,7 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
         {
         case 0:
             if ( !jControlOptions["MultipleRuns"].toBool() )
-                return "Cannot distribute sim single event when multirun is not activated!";
+                return "Point source / single position simulation:\nDistributed simulation is only possible when multirun is activated";
             numEvents = jControlOptions["MultipleRunsNumber"].toInt();
             break;
         case 1:
@@ -216,6 +231,9 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
 
 const QString AGridRunner::Reconstruct(const QJsonObject *config)
 {
+    if (EventsDataHub.isEmpty())
+        return "There are no events to reconstruct!";
+
     bAbortRequested = false;
     for (ARemoteServerRecord* r : ServerRecords) r->Progress = 0;
     emit requestDelegateGuiUpdate();
@@ -307,8 +325,21 @@ const QString AGridRunner::Reconstruct(const QJsonObject *config)
     return "";
 }
 
-void AGridRunner::RateServers(const QJsonObject *config)
+const QString AGridRunner::RateServers(const QJsonObject *config)
 {
+    if (ServerRecords.isEmpty())
+        return "Configure at least one dispatcher record!";
+
+    bool bEmpty = true;
+    for (ARemoteServerRecord* r : ServerRecords)
+        if (r->bEnabled)
+        {
+            bEmpty = false;
+            break;
+        }
+    if (bEmpty)
+        return "All dispatcher records are disabled!";
+
     bAbortRequested = false;
 
     emit requestStatusLog("Rating servers...");
@@ -336,6 +367,8 @@ void AGridRunner::RateServers(const QJsonObject *config)
         }
 
     emit requestStatusLog("Done!");
+
+    return "";
 }
 
 void AGridRunner::Abort()
@@ -643,9 +676,14 @@ AWebSocketSession* AWebSocketWorker_Base::connectToAntsServer()
 bool AWebSocketWorker_Base::establishSession()
 {
     ants2socket = 0;
-    bool bOK = allocateAntsServer();
-    if (bOK)
-        ants2socket = connectToAntsServer();
+
+    if (rec->bEnabled)
+    {
+        bool bOK = allocateAntsServer();
+        if (bOK)
+            ants2socket = connectToAntsServer();
+    }
+    else rec->NumThreads_Allocated = 0;
 
     return ants2socket;
 }
@@ -662,53 +700,58 @@ void AWebSocketWorker_Check::onTimer()
 
 void AWebSocketWorker_Check::run()
 {
-    bRunning = true;
-
-    QTimer timer;
-    timer.setInterval(timerInterval);
-    timeElapsed = 0;
-    QObject::connect(&timer, &QTimer::timeout, this, &AWebSocketWorker_Check::onTimer);
-    rec->Progress = 0;
-    timer.start();
-
-    emit requestTextLog(index, "Connecting to dispatcher");
-    rec->Status = ARemoteServerRecord::Connecting;
-    rec->NumThreads_Allocated = 0;
-    AWebSocketSession* socket = connectToServer(rec->Port);
-    if (socket)
+    if (rec->bEnabled)
     {
-        emit requestTextLog(index, "Requesting status...");
-        bool bOK = socket->SendText( "{ \"command\" : \"report\" }" );
-        if (!bOK)
-        {
-            rec->Status = ARemoteServerRecord::Dead;
-            rec->Error = socket->GetError();
-            emit requestTextLog(index, "Failed to acquire status!");
-        }
-        else
-        {
-            QString reply = socket->GetTextReply();
-            qDebug() << "On request status reply:"<< reply;
-            emit requestTextLog(index, QString("Dispatcher reply: ") + reply);
+        bRunning = true;
 
-            socket->Disconnect();
+        QTimer timer;
+        timer.setInterval(timerInterval);
+        timeElapsed = 0;
+        QObject::connect(&timer, &QTimer::timeout, this, &AWebSocketWorker_Check::onTimer);
+        rec->Progress = 0;
+        timer.start();
 
-            QJsonObject json = strToObject(reply);
-            parseJson(json, "threads", rec->NumThreads_Allocated);
-            qDebug() << "Available threads:"<<rec->NumThreads_Allocated;
-            if (rec->NumThreads_Allocated > 0)
+        emit requestTextLog(index, "Connecting to dispatcher");
+        rec->Status = ARemoteServerRecord::Connecting;
+        rec->NumThreads_Allocated = 0;
+        AWebSocketSession* socket = connectToServer(rec->Port);
+        if (socket)
+        {
+            emit requestTextLog(index, "Requesting status...");
+            bool bOK = socket->SendText( "{ \"command\" : \"report\" }" );
+            if (!bOK)
             {
-                rec->Status = ARemoteServerRecord::Alive;
-                rec->NumThreads_Possible = rec->NumThreads_Allocated;
+                rec->Status = ARemoteServerRecord::Dead;
+                rec->Error = socket->GetError();
+                emit requestTextLog(index, "Failed to acquire status!");
             }
-            else rec->Status = ARemoteServerRecord::Busy;
-            emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads_Possible));
-        }
-    }
+            else
+            {
+                QString reply = socket->GetTextReply();
+                qDebug() << "On request status reply:"<< reply;
+                emit requestTextLog(index, QString("Dispatcher reply: ") + reply);
 
-    timer.stop();
-    rec->Progress = 0;
-    if (socket) delete socket;
+                socket->Disconnect();
+
+                QJsonObject json = strToObject(reply);
+                parseJson(json, "threads", rec->NumThreads_Allocated);
+                qDebug() << "Available threads:"<<rec->NumThreads_Allocated;
+                if (rec->NumThreads_Allocated > 0)
+                {
+                    rec->Status = ARemoteServerRecord::Alive;
+                    rec->NumThreads_Possible = rec->NumThreads_Allocated;
+                }
+                else rec->Status = ARemoteServerRecord::Busy;
+                emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads_Possible));
+            }
+        }
+
+        timer.stop();
+        rec->Progress = 0;
+        if (socket) delete socket;
+    }
+    else rec->NumThreads_Allocated = 0;
+
     bRunning = false;
     emit finished();
 }

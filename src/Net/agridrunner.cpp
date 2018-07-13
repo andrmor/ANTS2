@@ -52,6 +52,8 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
         QJsonObject jPointSourcesConfig = jSimulationConfig["PointSourcesConfig"].toObject();
             QJsonObject jControlOptions = jPointSourcesConfig["ControlOptions"].toObject();
             QJsonObject jFloodOptions =  jPointSourcesConfig["FloodOptions"].toObject();
+            QJsonObject jCustomNodesOptions = jPointSourcesConfig["CustomNodesOptions"].toObject();
+            QJsonObject jRegularScanOptions = jPointSourcesConfig["RegularScanOptions"].toObject();
 
     qDebug() << jSimulationConfig["Mode"].toString();
     bool pPointSourceSim = (jSimulationConfig["Mode"].toString() == "PointSim");
@@ -59,19 +61,39 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     int  PointSourceSimType = 0;
     bool bMultiRun = false;
     int numRuns = 1;
+    QJsonArray nodesAr;
+
     if (pPointSourceSim)
     {
         // mode:
         //    SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood  0/1/2/3 = single/scan/flood/custom
         PointSourceSimType = jControlOptions["Single_Scan_Flood"].toInt();
-        //     for flood:  SimulationConfig.PointSourcesConfig.FloodOptions.Nodes
-        numEvents = jFloodOptions["Nodes"].toInt();
         // multirun:
         //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRuns
         bMultiRun = jControlOptions["MultipleRuns"].toBool();
         //    SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber
         numRuns = jControlOptions["MultipleRunsNumber"].toInt();
 
+
+        switch (PointSourceSimType)
+        {
+        case 0:
+            numEvents = numRuns;
+            break;
+        case 1:
+            regularToCustomNodes(jRegularScanOptions, nodesAr);
+            numEvents = nodesAr.size();
+            break;
+        case 2:
+            numEvents = jFloodOptions["Nodes"].toInt();
+            break;
+        case 3:
+            nodesAr = jCustomNodesOptions["Nodes"].toArray();
+            numEvents = nodesAr.size();
+            break;
+        default:;
+        }
+        /*
         if (PointSourceSimType == 2 || bMultiRun)
         {
             //OK
@@ -79,6 +101,7 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
         }
         else
             return "This simulation mode is not implemeted for distributed simulation.\nFor Point source sim one can use flood or any mode with multirun enabled.";
+        */
     }
     else
     {
@@ -116,8 +139,15 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
                 switch (PointSourceSimType)
                 {
                 case 0:
-                    break;
-                case 1:
+                    {
+                        qDebug() << "--- single ---";
+                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
+                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
+                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"runs at single position";
+                        modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.MultipleRunsNumber\", %1)").arg(numEventsToDo);
+                        counter += numEventsToDo;
+                    }
                     break;
                 case 2:
                     {
@@ -125,15 +155,40 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
                         double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
                         int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
                         if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
-                        counter += numEventsToDo;
                         qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"flood events";
                         modScript = QString("config.Replace(\"SimulationConfig.PointSourcesConfig.FloodOptions.Nodes\", %1)").arg(numEventsToDo);
+                        counter += numEventsToDo;
                     }
                     break;
+                case 1:
                 case 3:
+                    {
+                        qDebug() << "--- custom (and regular->custom) nodes ---";
+                        double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
+                        int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+                        if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
+                        qDebug() << "Server #"<<i << "will simulate"<<numEventsToDo<<"custom nodes";
+                        QJsonArray ar;
+                        for (int i = counter; i < counter + numEventsToDo; i++)
+                            ar.append( nodesAr.at(i) );
+                        qDebug() << ar;
+                        QJsonObject json;
+                        json["Nodes"] = ar;
+                        modScript  = "var obj = ";
+                        modScript += jsonToString(json);
+                        modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.CustomNodesOptions\", obj)";
+                        counter += numEventsToDo;
+                    }
                     break;
                 default: qWarning() << "Not implemented point source sim type "<< PointSourceSimType;
                 }
+
+                if (PointSourceSimType == 1)
+                {
+                    qDebug() << "Fix for regular nodes: change to custom mode";
+                    modScript += "; config.Replace(\"SimulationConfig.PointSourcesConfig.ControlOptions.Single_Scan_Flood\", 3)";
+                }
+
             }
             else
             {
@@ -327,6 +382,65 @@ void AGridRunner::waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *>
     while (bStillWorking);
 
     qDebug() << "All threads paused or finished!";
+}
+
+void AGridRunner::regularToCustomNodes(const QJsonObject &RegularScanOptions, QJsonArray &toArray)
+{
+    // "SimulationConfig.PointSourcesConfig.RegularScanOptions"
+
+    double RegGridOrigin[3]; //grid origin
+    RegGridOrigin[0] = RegularScanOptions["ScanX0"].toDouble();
+    RegGridOrigin[1] = RegularScanOptions["ScanY0"].toDouble();
+    RegGridOrigin[2] = RegularScanOptions["ScanZ0"].toDouble();
+    //
+    double RegGridStep[3][3]; //vector [axis] [step]
+    int RegGridNodes[3]; //number of nodes along the 3 axes
+    bool RegGridFlagPositive[3]; //Axes option
+    //
+    QJsonArray rsdataArr = RegularScanOptions["AxesData"].toArray();
+    for (int ic=0; ic<3; ic++)
+    {
+        if(ic < rsdataArr.count())
+        {
+            QJsonObject adjson = rsdataArr[ic].toObject();
+            RegGridStep[ic][0] = adjson["dX"].toDouble();
+            RegGridStep[ic][1] = adjson["dY"].toDouble();
+            RegGridStep[ic][2] = adjson["dZ"].toDouble();
+            RegGridNodes[ic] = adjson["Nodes"].toInt(); //1 is disabled axis
+            RegGridFlagPositive[ic] = adjson["Option"].toInt();
+        }
+        else
+        {
+            RegGridStep[ic][0] = 0;
+            RegGridStep[ic][1] = 0;
+            RegGridStep[ic][2] = 0;
+            RegGridNodes[ic] = 1; //1 is disabled axis
+            RegGridFlagPositive[ic] = true;
+        }
+    }
+
+    int iAxis[3];
+    for (iAxis[0]=0; iAxis[0]<RegGridNodes[0]; iAxis[0]++)
+        for (iAxis[1]=0; iAxis[1]<RegGridNodes[1]; iAxis[1]++)
+            for (iAxis[2]=0; iAxis[2]<RegGridNodes[2]; iAxis[2]++)  //iAxis - counters along the axes!!!
+            {
+                double r[3];
+                for (int i=0; i<3; i++)
+                    r[i] = RegGridOrigin[i];
+                //shift from the origin
+                for (int axis=0; axis<3; axis++)
+                { //going axis by axis
+                    double ioffset = 0;
+                    if (!RegGridFlagPositive[axis])
+                        ioffset = -0.5*( RegGridNodes[axis] - 1 );
+                    for (int i=0; i<3; i++)
+                        r[i] += (ioffset + iAxis[axis]) * RegGridStep[axis][i];
+                }
+
+                QJsonArray ar;
+                for (int i=0; i<3; i++) ar << r[i];
+                toArray.append(ar);
+            }
 }
 
 void AGridRunner::onRequestTextLog(int index, const QString message)

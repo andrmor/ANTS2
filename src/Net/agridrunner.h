@@ -44,6 +44,8 @@ private:
     void waitForWorkersToFinish(QVector<AWebSocketWorker_Base *> &workers);
     void waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *> &workers);
 
+    void regularToCustomNodes(const QJsonObject & RegularScanOptions, QJsonArray & toArray);
+
 signals:
     void requestTextLog(int index, const QString message);
     void requestStatusLog(const QString message);

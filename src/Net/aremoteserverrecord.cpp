@@ -11,7 +11,7 @@ const QJsonObject ARemoteServerRecord::WriteToJson()
     json["Port"] = Port;
     json["Enabled"] = bEnabled;
     json["SpeedFactor"] = SpeedFactor;
-    json["NumThreads"] = NumThreads;
+    json["NumThreads"] = NumThreads_Possible;
 
     return json;
 }
@@ -23,5 +23,5 @@ void ARemoteServerRecord::ReadFromJson(const QJsonObject &json)
     parseJson(json, "Port", Port);
     parseJson(json, "Enabled", bEnabled);
     parseJson(json, "SpeedFactor", SpeedFactor);
-    parseJson(json, "NumThreads", NumThreads);
+    parseJson(json, "NumThreads", NumThreads_Possible);
 }

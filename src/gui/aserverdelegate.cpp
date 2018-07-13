@@ -117,24 +117,25 @@ void AServerDelegate::updateGui()
     switch (modelRecord->Status)
     {
     case ARemoteServerRecord::Unknown:
-        setBackgroundGray(true);
         setIcon(0);
         pbProgress->setEnabled(false);
         pbProgress->setValue(0);
         break;
     case ARemoteServerRecord::Connecting:
-        setBackgroundGray(true);
         setIcon(0);
         pbProgress->setEnabled(true);
         break;
     case ARemoteServerRecord::Alive:
-        setBackgroundGray(false);
         setIcon(1);
-        pbProgress->setEnabled(false);
+        pbProgress->setEnabled(true);
         break;
     case ARemoteServerRecord::Dead:
-        setBackgroundGray(true);
         setIcon(2);
+        pbProgress->setEnabled(false);
+        pbProgress->setValue(0);
+        break;
+    case ARemoteServerRecord::Busy:
+        setIcon(3);
         pbProgress->setEnabled(false);
         pbProgress->setValue(0);
         break;
@@ -144,8 +145,15 @@ void AServerDelegate::updateGui()
     leName->setText(modelRecord->Name);
     leIP->setText(modelRecord->IP);
     sbPort->setValue(modelRecord->Port);
+
     //leiThreads->setText( QString::number(modelRecord->NumThreads) );
-    labThreads->setText( QString(" #Thr: %1").arg(modelRecord->NumThreads));
+    QString st;
+    if (modelRecord->NumThreads_Allocated < modelRecord->NumThreads_Possible)
+        st =QString(" #Thr: %1/%2").arg(modelRecord->NumThreads_Allocated).arg(modelRecord->NumThreads_Possible);
+    else
+        st = QString(" #Thr: %1").arg(modelRecord->NumThreads_Allocated);
+    labThreads->setText( st );
+
     labSpeedFactor->setText( QString(" SF: %1 ").arg(modelRecord->SpeedFactor, 3, 'f', 2) );
     pbProgress->setValue(modelRecord->Progress);
 
@@ -163,9 +171,6 @@ void AServerDelegate::updateModel()
 
 void AServerDelegate::setBackgroundGray(bool flag)
 {
-    return;
-
-
     QString ns = ( flag ? "background-color: lightgray" : "");
 
     QString ss = styleSheet();
@@ -187,7 +192,8 @@ void AServerDelegate::setIcon(int option)
     QColor color;
     if (option == 0) color = Qt::gray;
     else if (option == 1) color = Qt::green;
-    else color = Qt::red;
+    else if (option == 2) color = Qt::red;
+    else color = Qt::yellow;
     b.setBrush(QBrush(color));
     b.drawEllipse(0, 2, 10, 10);
     labStatus->setPixmap(pm);

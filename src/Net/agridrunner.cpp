@@ -32,10 +32,10 @@ void AGridRunner::CheckStatus()
     int ser = 0;
     int th = 0;
     for (const ARemoteServerRecord* r : ServerRecords)
-        if (r->NumThreads > 0)
+        if (r->NumThreads_Allocated > 0)
         {
             ser++;
-            th += r->NumThreads;
+            th += r->NumThreads_Allocated;
         }
     QString s = (th > 0 ? QString("Found %1 servers with %2 available threads").arg(ser).arg(th) : "There are no servers with available threads" );
     emit requestStatusLog(s);
@@ -44,6 +44,8 @@ void AGridRunner::CheckStatus()
 const QString AGridRunner::Simulate(const QJsonObject* config)
 {
     bAbortRequested = false;
+    for (ARemoteServerRecord* r : ServerRecords) r->Progress = 0;
+    emit requestDelegateGuiUpdate();
 
     if (!config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
         return "Configuration does not contain simulation or detector settings";
@@ -112,7 +114,7 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
     double sumSpeedfactor = 0;
     int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
-        if (ServerRecords.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads_Allocated > 0)
         {
             numThr++;
             sumSpeedfactor += ServerRecords.at(i)->SpeedFactor;
@@ -127,7 +129,7 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
     int counter = 0;
     for (int i = 0; i < workers.size(); i++)
     {
-        if (ServerRecords.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads_Allocated > 0)
         {
             QString modScript;
 
@@ -215,6 +217,8 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
 const QString AGridRunner::Reconstruct(const QJsonObject *config)
 {
     bAbortRequested = false;
+    for (ARemoteServerRecord* r : ServerRecords) r->Progress = 0;
+    emit requestDelegateGuiUpdate();
 
     emit requestStatusLog("Starting remote reconstruction...");
     QVector<AWebSocketWorker_Base*> workers;
@@ -228,7 +232,7 @@ const QString AGridRunner::Reconstruct(const QJsonObject *config)
     double sumSpeedfactor = 0;
     int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
-        if (ServerRecords.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads_Allocated > 0)
         {
             numThr++;
             sumSpeedfactor += ServerRecords.at(i)->SpeedFactor;
@@ -249,7 +253,7 @@ const QString AGridRunner::Reconstruct(const QJsonObject *config)
         ServerRecords[i]->EventsFrom = 0;
         ServerRecords[i]->EventsTo = 0;
 
-        if (ServerRecords.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads_Allocated > 0)
         {
             ServerRecords[i]->EventsFrom = from;
             int toDo = std::ceil(perUnitSpeed * ServerRecords.at(i)->SpeedFactor);
@@ -543,7 +547,8 @@ AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
 
 bool AWebSocketWorker_Base::allocateAntsServer()
 {
-    rec->AntsServerAllocated = false;
+    rec->AntsServerTicket.clear();
+    rec->NumThreads_Allocated = 0;
     bool bOK = false;
 
     emit requestTextLog(index, "Connecting to dispatcher");
@@ -553,12 +558,15 @@ bool AWebSocketWorker_Base::allocateAntsServer()
         emit requestTextLog(index, "Requesting ANTS2 server...");
         QJsonObject cn;
         cn["command"] = "new";
-        cn["threads"] = rec->NumThreads;
+        cn["threads"] = rec->NumThreads_Possible;
         QString strCn = jsonToString(cn);
 
         bOK = socket->SendText( strCn );
         if (!bOK)
+        {
             emit requestTextLog(index, "Failed to send request");
+            rec->Status = ARemoteServerRecord::Dead;
+        }
         else
         {
             QString reply = socket->GetTextReply();
@@ -568,13 +576,14 @@ bool AWebSocketWorker_Base::allocateAntsServer()
             {
                 bOK = false;
                 emit requestTextLog(index, "Dispatcher refused to provide ANTS2 server!");
+                rec->Status = ARemoteServerRecord::Busy;
             }
             else
             {
                 rec->Status = ARemoteServerRecord::Alive;
                 rec->AntsServerPort = ro["port"].toInt();
                 rec->AntsServerTicket = ro["ticket"].toString();
-                rec->AntsServerAllocated = true;
+                rec->NumThreads_Allocated = rec->NumThreads_Possible;
                 emit requestTextLog(index, QString("Dispatcher allocated port ") + QString::number(rec->AntsServerPort) + "  and ticket " + rec->AntsServerTicket);
             }
         }
@@ -582,6 +591,8 @@ bool AWebSocketWorker_Base::allocateAntsServer()
         socket->Disconnect();
         delete socket;
     }
+    else
+        rec->Status = ARemoteServerRecord::Dead;
 
     return bOK;
 }
@@ -621,6 +632,8 @@ AWebSocketSession* AWebSocketWorker_Base::connectToAntsServer()
             socket->Disconnect();
             delete socket;
             socket = 0;
+            rec->Status = ARemoteServerRecord::Dead;
+            rec->NumThreads_Allocated = 0;
         }
     }
 
@@ -660,7 +673,7 @@ void AWebSocketWorker_Check::run()
 
     emit requestTextLog(index, "Connecting to dispatcher");
     rec->Status = ARemoteServerRecord::Connecting;
-    rec->NumThreads = 0;
+    rec->NumThreads_Allocated = 0;
     AWebSocketSession* socket = connectToServer(rec->Port);
     if (socket)
     {
@@ -681,10 +694,15 @@ void AWebSocketWorker_Check::run()
             socket->Disconnect();
 
             QJsonObject json = strToObject(reply);
-            parseJson(json, "threads", rec->NumThreads);
-            qDebug() << "Available threads:"<<rec->NumThreads;
-            rec->Status = ARemoteServerRecord::Alive;
-            emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads));
+            parseJson(json, "threads", rec->NumThreads_Allocated);
+            qDebug() << "Available threads:"<<rec->NumThreads_Allocated;
+            if (rec->NumThreads_Allocated > 0)
+            {
+                rec->Status = ARemoteServerRecord::Alive;
+                rec->NumThreads_Possible = rec->NumThreads_Allocated;
+            }
+            else rec->Status = ARemoteServerRecord::Busy;
+            emit requestTextLog(index, QString("Available threads: ") + QString::number(rec->NumThreads_Possible));
         }
     }
 
@@ -708,7 +726,6 @@ void AWebSocketWorker_Sim::run()
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
-        rec->Status = ARemoteServerRecord::Dead;
         rec->Progress = 0;
     }
     else
@@ -798,9 +815,9 @@ void AWebSocketWorker_Sim::runSimulation()
     Script.clear();
     Script += "server.SetAcceptExternalProgressReport(true);";
     if (bPhotonSource)
-        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads) + ");";
+        Script += "sim.RunPhotonSources(" + QString::number(rec->NumThreads_Allocated) + ");";
     else
-        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads) + ");";
+        Script += "sim.RunParticleSources(" + QString::number(rec->NumThreads_Allocated) + ");";
     Script += "var fileName = \"" + RemoteSimTreeFileName + "\";";
     Script += "var ok = sim.SaveAsTree(fileName);";
     Script += "if (!ok) core.abort(\"Failed to save simulation data\");";
@@ -886,7 +903,6 @@ void AWebSocketWorker_Rec::run()
     if (!bOK)
     {
         qDebug() << "failed to get server, aborting the thread and updating status";
-        rec->Status = ARemoteServerRecord::Dead;
         rec->Progress = 0;
     }
     else
@@ -980,7 +996,7 @@ void AWebSocketWorker_Rec::runReconstruction()
     emit requestTextLog(index, "Starting reconstruction...");
     rec->bShowProgress = true;
     Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
-    Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads) + ", false);";
+    Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads_Allocated) + ", false);";
     Script += "server.SendReconstructionData()";
     bOK = ants2socket->SendText(Script);
     reply = ants2socket->GetTextReply();

@@ -38,7 +38,7 @@ private slots:
 
 private:
     void           setBackgroundGray(bool flag);
-    void           setIcon(int option); // 1 is grey, 2 is green, 3+ is red
+    void           setIcon(int option); // 0 is grey, 1 is green, 2 is red, 3 is yellow
 
 signals:
     void           nameWasChanged();

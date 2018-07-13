@@ -14,7 +14,7 @@ public:
     ARemoteServerRecord(QString Name, QString IP, int Port) : Name(Name), IP(IP), Port(Port) {}
     ARemoteServerRecord() {}
 
-    enum ServerStatus {Unknown = 0, Connecting, Alive, Dead};
+    enum ServerStatus {Unknown = 0, Connecting, Alive, Dead, Busy};
 
     ServerStatus Status = Unknown;
 
@@ -23,12 +23,12 @@ public:
     int     Port = 1234;
     bool    bEnabled = true;
     double  SpeedFactor = 1.0;
+    int     NumThreads_Possible = 1;
 
     // all properties below are runtime-only
-    int     NumThreads = 1;
+    int     NumThreads_Allocated = 0;
     int     Progress = 0;
     bool    bShowProgress = false;
-    bool    AntsServerAllocated = false;
     int     AntsServerPort = -1;
     QString AntsServerTicket;
     QString FileName; //local file where sim tree is saved

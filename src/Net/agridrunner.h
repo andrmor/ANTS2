@@ -2,6 +2,7 @@
 #define AGRIDRUNNER_H
 
 #include <QObject>
+#include <QVector>
 #include <QJsonObject>
 #include <QHostAddress>
 
@@ -16,12 +17,14 @@ class AGridRunner : public QObject
 {
     Q_OBJECT
 public:
-    AGridRunner(EventsDataClass* EventsDataHub, APmHub *PMs);
+    AGridRunner(QVector<ARemoteServerRecord*> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs);
 
-    void CheckStatus(QVector<ARemoteServerRecord *> &Servers);
-    const QString Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
-    const QString Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
-    void RateServers(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config);
+    void CheckStatus();
+    const QString Simulate(const QJsonObject* config);
+    const QString Reconstruct(const QJsonObject* config);
+    void RateServers(const QJsonObject* config);
+
+    void Abort();
 
     void SetTimeout(int timeout) {TimeOut = timeout;}
 
@@ -29,10 +32,13 @@ public slots:
     void onRequestTextLog(int index, const QString message);
 
 private:
-    EventsDataClass* EventsDataHub;
-    APmHub *PMs;
+    QVector<ARemoteServerRecord *> & ServerRecords;
+    EventsDataClass & EventsDataHub;
+    const APmHub & PMs;
     int TimeOut = 5000;
-    QVector<AWebSocketSession*> Sockets;
+    //QVector<AWebSocketSession*> Sockets;
+
+    bool bAbortRequested = false;
 
 private:
     AWebSocketWorker_Base* startCheckStatusOfServer(int index, ARemoteServerRecord *serverRecord);
@@ -45,6 +51,8 @@ private:
     void waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *> &workers);
 
     void regularToCustomNodes(const QJsonObject & RegularScanOptions, QJsonArray & toArray);
+
+    void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 
 signals:
     void requestTextLog(int index, const QString message);
@@ -67,6 +75,8 @@ public:
     void setPaused(bool flag) {bPaused = flag;}
 
     void setExtraScript(const QString& script) {extraScript = script;}
+
+    void RequestAbort();
 
     ARemoteServerRecord* getRecord() {return rec;}
 

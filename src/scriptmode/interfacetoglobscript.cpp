@@ -1397,7 +1397,7 @@ void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumE
     }
 
   if (!Append) EventsDataHub->clear();
-  EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
+  EventsDataHub->loadSimulatedEventsFromTree(fileName, *Config->GetDetector()->PMs, MaxNumEvents);
   //EventsDataHub->clearReconstruction();
   EventsDataHub->createDefaultReconstructionData();
   //RManager->filterEvents(Config->JSON);

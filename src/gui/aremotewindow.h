@@ -53,6 +53,7 @@ private slots:
     void on_leiTimeout_editingFinished();
     void on_pbAdd_clicked();    
     void on_pbRemove_clicked();
+    void on_pbAbort_clicked();
 
 private:
     void Clear();

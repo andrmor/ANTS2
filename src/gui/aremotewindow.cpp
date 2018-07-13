@@ -25,7 +25,7 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
 
     AddNewServer();
 
-    GR = new AGridRunner(MW->EventsDataHub, MW->PMs);
+    GR = new AGridRunner(Records, *MW->EventsDataHub, *MW->PMs);
     GR->SetTimeout(ui->leiTimeout->text().toInt());
     QObject::connect(GR, &AGridRunner::requestTextLog, this, &ARemoteWindow::onTextLogReceived/*, Qt::QueuedConnection*/);
     QObject::connect(GR, &AGridRunner::requestStatusLog, this, &ARemoteWindow::onStatusLogReceived/*, Qt::QueuedConnection*/);
@@ -172,7 +172,7 @@ void ARemoteWindow::on_pbStatus_clicked()
     WriteConfig();
 
     onBusy(true);
-    GR->CheckStatus(Records);
+    GR->CheckStatus();
     onBusy(false);
 }
 
@@ -183,7 +183,7 @@ void ARemoteWindow::on_pbSimulate_clicked()
     WriteConfig();
 
     onBusy(true);
-    GR->Simulate(Records, &MW->Config->JSON);
+    GR->Simulate(&MW->Config->JSON);
     onBusy(false);
 
     MW->Owindow->RefreshData();
@@ -195,7 +195,7 @@ void ARemoteWindow::on_pbReconstruct_clicked()
     WriteConfig();
 
     onBusy(true);
-    GR->Reconstruct(Records, &MW->Config->JSON);
+    GR->Reconstruct(&MW->Config->JSON);
     onBusy(false);
 }
 
@@ -218,7 +218,7 @@ void ARemoteWindow::on_pbRateServers_clicked()
     js["SimulationConfig"] = sc;
 
     onBusy(true);
-    GR->RateServers(Records, &js);
+    GR->RateServers(&js);
     onBusy(false);
 
     for (AServerDelegate* d : Delegates)
@@ -249,4 +249,10 @@ void ARemoteWindow::on_pbRemove_clicked()
     delete ui->lwServers->takeItem(index);
 
     ui->twLog->removeTab(index);
+}
+
+void ARemoteWindow::on_pbAbort_clicked()
+{
+    GR->Abort();
+    onStatusLogReceived("Aborted!");
 }

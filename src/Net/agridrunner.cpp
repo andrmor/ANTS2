@@ -11,16 +11,18 @@
 #include <QTimer>
 #include <QFile>
 
-AGridRunner::AGridRunner(EventsDataClass *EventsDataHub, APmHub *PMs) :
-    EventsDataHub(EventsDataHub), PMs(PMs) {}
+AGridRunner::AGridRunner(QVector<ARemoteServerRecord *> & ServerRecords, EventsDataClass & EventsDataHub, const APmHub & PMs) :
+    ServerRecords(ServerRecords), EventsDataHub(EventsDataHub), PMs(PMs) {}
 
-void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
+void AGridRunner::CheckStatus()
 {
+    bAbortRequested = false;
+
     emit requestStatusLog("Checking status of servers...");
     QVector<AWebSocketWorker_Base*> workers;
 
-    for (int i = 0; i < Servers.size(); i++)
-        workers << startCheckStatusOfServer(i, Servers[i]);
+    for (int i = 0; i < ServerRecords.size(); i++)
+        workers << startCheckStatusOfServer(i, ServerRecords[i]);
 
     waitForWorkersToFinish(workers);
 
@@ -29,7 +31,7 @@ void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
 
     int ser = 0;
     int th = 0;
-    for (const ARemoteServerRecord* r : Servers)
+    for (const ARemoteServerRecord* r : ServerRecords)
         if (r->NumThreads > 0)
         {
             ser++;
@@ -39,8 +41,10 @@ void AGridRunner::CheckStatus(QVector<ARemoteServerRecord*>& Servers)
     emit requestStatusLog(s);
 }
 
-const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, const QJsonObject* config)
+const QString AGridRunner::Simulate(const QJsonObject* config)
 {
+    bAbortRequested = false;
+
     if (!config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
         return "Configuration does not contain simulation or detector settings";
 
@@ -99,8 +103,8 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     emit requestStatusLog("Starting remote simulation...");
     QVector<AWebSocketWorker_Base*> workers;
 
-    for (int i = 0; i < Servers.size(); i++)
-        workers << startSim(i, Servers[i], config);
+    for (int i = 0; i < ServerRecords.size(); i++)
+        workers << startSim(i, ServerRecords[i], config);
 
     waitForWorkersToPauseOrFinish(workers);
 
@@ -108,10 +112,10 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     double sumSpeedfactor = 0;
     int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
-        if (Servers.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads > 0)
         {
             numThr++;
-            sumSpeedfactor += Servers.at(i)->SpeedFactor;
+            sumSpeedfactor += ServerRecords.at(i)->SpeedFactor;
         }
     if (numThr == 0)
     {
@@ -123,12 +127,12 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     int counter = 0;
     for (int i = 0; i < workers.size(); i++)
     {
-        if (Servers.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads > 0)
         {
             QString modScript;
 
             double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
-            int numEventsToDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+            int numEventsToDo = std::ceil(perUnitSpeed * ServerRecords.at(i)->SpeedFactor);
             if (counter + numEventsToDo > numEvents) numEventsToDo = numEvents - counter;
 
             if (pPointSourceSim)
@@ -190,16 +194,16 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     workers.clear();
 
     //loading simulated events
-    EventsDataHub->clear();
-    for (int i=0; i<Servers.size(); i++)
-        if ( !Servers.at(i)->FileName.isEmpty() )
+    EventsDataHub.clear();
+    for (int i=0; i<ServerRecords.size(); i++)
+        if ( !ServerRecords.at(i)->FileName.isEmpty() )
         {
-            int numEv = EventsDataHub->loadSimulatedEventsFromTree( Servers.at(i)->FileName, PMs );
+            int numEv = EventsDataHub.loadSimulatedEventsFromTree( ServerRecords.at(i)->FileName, PMs );
             QString s;
-            if (EventsDataHub->ErrorString.isEmpty())
+            if (EventsDataHub.ErrorString.isEmpty())
                 s = QString("%1 events were registered").arg(numEv);
             else
-                s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub->ErrorString;
+                s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub.ErrorString;
             requestTextLog(i, s);
         }
 
@@ -208,13 +212,15 @@ const QString AGridRunner::Simulate(QVector<ARemoteServerRecord *> &Servers, con
     return "";
 }
 
-const QString AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
+const QString AGridRunner::Reconstruct(const QJsonObject *config)
 {
+    bAbortRequested = false;
+
     emit requestStatusLog("Starting remote reconstruction...");
     QVector<AWebSocketWorker_Base*> workers;
 
-    for (int i = 0; i < Servers.size(); i++)
-        workers << startRec(i, Servers[i], config);
+    for (int i = 0; i < ServerRecords.size(); i++)
+        workers << startRec(i, ServerRecords[i], config);
 
     waitForWorkersToPauseOrFinish(workers);
 
@@ -222,38 +228,38 @@ const QString AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, 
     double sumSpeedfactor = 0;
     int numThr = 0;
     for (int i = 0; i < workers.size(); i++)
-        if (Servers.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads > 0)
         {
             numThr++;
-            sumSpeedfactor += Servers.at(i)->SpeedFactor;
+            sumSpeedfactor += ServerRecords.at(i)->SpeedFactor;
         }
     if (numThr == 0)
     {
         emit requestStatusLog("Cannot reconstruct: there are no active servers");
         return "Cannot reconstruct: there are no active servers";
     }
-    int numEvents = EventsDataHub->countEvents();
+    int numEvents = EventsDataHub.countEvents();
     double perUnitSpeed = 1.0 * numEvents / sumSpeedfactor;
 
     //distributing load and resuming workers
     int from = 0;
     for (int i = 0; i < workers.size(); i++)
     {
-        Servers[i]->ByteArrayReceived.clear();
-        Servers[i]->EventsFrom = 0;
-        Servers[i]->EventsTo = 0;
+        ServerRecords[i]->ByteArrayReceived.clear();
+        ServerRecords[i]->EventsFrom = 0;
+        ServerRecords[i]->EventsTo = 0;
 
-        if (Servers.at(i)->NumThreads > 0)
+        if (ServerRecords.at(i)->NumThreads > 0)
         {
-            Servers[i]->EventsFrom = from;
-            int toDo = std::ceil(perUnitSpeed * Servers.at(i)->SpeedFactor);
+            ServerRecords[i]->EventsFrom = from;
+            int toDo = std::ceil(perUnitSpeed * ServerRecords.at(i)->SpeedFactor);
             if (from + toDo > numEvents) toDo = numEvents - from;
 
-            Servers[i]->EventsTo = from + toDo;
+            ServerRecords[i]->EventsTo = from + toDo;
             from += toDo;
 
-            EventsDataHub->packEventsToByteArray(Servers[i]->EventsFrom, Servers[i]->EventsTo, Servers[i]->ByteArrayToSend);
-            qDebug() << "Server #"<<i << "will reconstruct events from "<<Servers[i]->EventsFrom <<"to"<<Servers[i]->EventsTo;
+            EventsDataHub.packEventsToByteArray(ServerRecords[i]->EventsFrom, ServerRecords[i]->EventsTo, ServerRecords[i]->ByteArrayToSend);
+            qDebug() << "Server #"<<i << "will reconstruct events from "<<ServerRecords[i]->EventsFrom <<"to"<<ServerRecords[i]->EventsTo;
         }
 
         workers[i]->setPaused(false); //resume worker
@@ -265,21 +271,21 @@ const QString AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, 
     workers.clear();
 
     bool bRecFailed = false;
-    for (int i = 0; i < Servers.size(); i++)
+    for (int i = 0; i < ServerRecords.size(); i++)
     {
-        Servers[i]->ByteArrayToSend.clear();
-        Servers[i]->ByteArrayToSend.squeeze();
+        ServerRecords[i]->ByteArrayToSend.clear();
+        ServerRecords[i]->ByteArrayToSend.squeeze();
 
-        if (Servers.at(i)->EventsTo > 0)
+        if (ServerRecords.at(i)->EventsTo > 0)
         {
-            if (!Servers.at(i)->Error.isEmpty()) bRecFailed = true;
+            if (!ServerRecords.at(i)->Error.isEmpty()) bRecFailed = true;
             else
             {
-                bool bOK = EventsDataHub->unpackReconstructedFromByteArray(Servers.at(i)->EventsFrom, Servers.at(i)->EventsTo, Servers.at(i)->ByteArrayReceived);
+                bool bOK = EventsDataHub.unpackReconstructedFromByteArray(ServerRecords.at(i)->EventsFrom, ServerRecords.at(i)->EventsTo, ServerRecords.at(i)->ByteArrayReceived);
                 if (!bOK)
                 {
-                    Servers[i]->Error = "Failed to set reconstruction data using the obtained data";
-                    emit requestTextLog(i, Servers[i]->Error);
+                    ServerRecords[i]->Error = "Failed to set reconstruction data using the obtained data";
+                    emit requestTextLog(i, ServerRecords[i]->Error);
                     bRecFailed = true;
                 }
             }
@@ -289,21 +295,23 @@ const QString AGridRunner::Reconstruct(QVector<ARemoteServerRecord *> &Servers, 
     if (bRecFailed) emit requestStatusLog("Reconstruction failed!");
     else
     {
-        EventsDataHub->fReconstructionDataReady = true;
-        emit EventsDataHub->requestFilterEvents();
+        EventsDataHub.fReconstructionDataReady = true;
+        emit EventsDataHub.requestFilterEvents();
         emit requestStatusLog("Done!");
     }
 
     return "";
 }
 
-void AGridRunner::RateServers(QVector<ARemoteServerRecord *> &Servers, const QJsonObject *config)
+void AGridRunner::RateServers(const QJsonObject *config)
 {
+    bAbortRequested = false;
+
     emit requestStatusLog("Rating servers...");
     QVector<AWebSocketWorker_Base*> workers;
 
-    for (int i = 0; i < Servers.size(); i++)
-        workers << startSim(i, Servers[i], config);
+    for (int i = 0; i < ServerRecords.size(); i++)
+        workers << startSim(i, ServerRecords[i], config);
 
     waitForWorkersToPauseOrFinish(workers);
 
@@ -315,15 +323,20 @@ void AGridRunner::RateServers(QVector<ARemoteServerRecord *> &Servers, const QJs
     for (AWebSocketWorker_Base* w : workers) delete w;
     workers.clear();
 
-    for (int i=0; i<Servers.size(); i++)
-        if ( Servers.at(i)->TimeElapsed > 0 )
+    for (int i=0; i<ServerRecords.size(); i++)
+        if ( ServerRecords.at(i)->TimeElapsed > 0 )
         {
-            Servers[i]->SpeedFactor = 7000.0 / Servers.at(i)->TimeElapsed; //factor of 1 corresponds to 7s sim
-            requestTextLog(i, QString("Elapsed time %1 ms").arg(Servers.at(i)->TimeElapsed));
-            requestTextLog(i, QString("Attributed performance factor of %1").arg(Servers.at(i)->SpeedFactor));
+            ServerRecords[i]->SpeedFactor = 7000.0 / ServerRecords.at(i)->TimeElapsed; //factor of 1 corresponds to 7s sim
+            requestTextLog(i, QString("Elapsed time %1 ms").arg(ServerRecords.at(i)->TimeElapsed));
+            requestTextLog(i, QString("Attributed performance factor of %1").arg(ServerRecords.at(i)->SpeedFactor));
         }
 
     emit requestStatusLog("Done!");
+}
+
+void AGridRunner::Abort()
+{
+    bAbortRequested = true;
 }
 
 void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& workers)
@@ -339,6 +352,8 @@ void AGridRunner::waitForWorkersToFinish(QVector<AWebSocketWorker_Base*>& worker
         emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
         QThread::usleep(250);
+
+        if (bAbortRequested) doAbort(workers);
     }
     while (bStillWorking);
 
@@ -357,7 +372,9 @@ void AGridRunner::waitForWorkersToPauseOrFinish(QVector<AWebSocketWorker_Base *>
             if (!w->isPausedOrFinished()) bStillWorking = true;
         emit requestDelegateGuiUpdate();
         QCoreApplication::processEvents();
-        QThread::usleep(100);
+        QThread::usleep(250);
+
+        if (bAbortRequested) doAbort(workers);
     }
     while (bStillWorking);
 
@@ -423,6 +440,15 @@ void AGridRunner::regularToCustomNodes(const QJsonObject &RegularScanOptions, QJ
             }
 }
 
+void AGridRunner::doAbort(QVector<AWebSocketWorker_Base *> &workers)
+{
+    for (AWebSocketWorker_Base* w : workers)
+    {
+        w->RequestAbort();
+        emit w->finished();
+    }
+}
+
 void AGridRunner::onRequestTextLog(int index, const QString message)
 {
     //qDebug() << index << "--->" << message;
@@ -473,6 +499,12 @@ void AGridRunner::startInNewThread(AWebSocketWorker_Base* worker)
 
 AWebSocketWorker_Base::AWebSocketWorker_Base(int index, ARemoteServerRecord *rec, int timeOut, const QJsonObject *config) :
     index(index), rec(rec), TimeOut(timeOut), config(config) {}
+
+void AWebSocketWorker_Base::RequestAbort()
+{
+    if (ants2socket) ants2socket->ExternalAbort();
+    bExternalAbort = true;
+}
 
 AWebSocketSession* AWebSocketWorker_Base::connectToServer(int port)
 {
@@ -697,6 +729,7 @@ void AWebSocketWorker_Sim::run()
                 emit requestTextLog(index, rec->Error);
             }
             else rec->Progress = 100;
+            ants2socket->Disconnect();
         }
     }
 

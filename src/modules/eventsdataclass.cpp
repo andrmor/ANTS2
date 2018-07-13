@@ -1551,7 +1551,7 @@ bool EventsDataClass::overlayAsciiFile(QString fileName, bool fAddMulti, APmHub*
   return true;
 }
 
-int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, int maxEvents)
+int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents)
 {
   ErrorString = "";
   bool limitNumEvents = (maxEvents>0);
@@ -1573,7 +1573,7 @@ int EventsDataClass::loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, 
   //if there are no scan data - in any later files scan data is ignored
   //if scan data present - any later files without scan data will NOT be loaded
 
-  int numPMs = PMs->count();
+  int numPMs = PMs.count();
   int numEv = T->GetEntries();
   //qDebug() << "Number of events found: "+QString::number(numEv);
 

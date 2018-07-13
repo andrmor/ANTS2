@@ -966,6 +966,7 @@ void AWebSocketWorker_Rec::run()
                 emit requestTextLog(index, rec->Error);
             }
             else rec->Progress = 100;
+            ants2socket->Disconnect();
         }
     }
 

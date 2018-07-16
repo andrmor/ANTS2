@@ -19,6 +19,8 @@ const QString AGridRunner::CheckStatus()
     if (ServerRecords.isEmpty())
         return "Configure at least one dispatcher record!";
 
+    onStart();
+
     bool bEmpty = true;
     for (ARemoteServerRecord* r : ServerRecords)
         if (r->bEnabled)
@@ -28,8 +30,6 @@ const QString AGridRunner::CheckStatus()
         }
     if (bEmpty)
         return "All dispatcher records are disabled!";
-
-    bAbortRequested = false;
 
     emit requestStatusLog("Checking status of servers...");
     QVector<AWebSocketWorker_Base*> workers;
@@ -58,9 +58,7 @@ const QString AGridRunner::CheckStatus()
 
 const QString AGridRunner::Simulate(const QJsonObject* config)
 {
-    bAbortRequested = false;
-    for (ARemoteServerRecord* r : ServerRecords) r->Progress = 0;
-    emit requestDelegateGuiUpdate();
+    onStart();
 
     if (!config->contains("SimulationConfig") || !config->contains("DetectorConfig"))
         return "Configuration does not contain simulation or detector settings";
@@ -211,8 +209,10 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
     workers.clear();
 
     //loading simulated events
+    bool bError = false;
     EventsDataHub.clear();
     for (int i=0; i<ServerRecords.size(); i++)
+    {
         if ( !ServerRecords.at(i)->FileName.isEmpty() )
         {
             int numEv = EventsDataHub.loadSimulatedEventsFromTree( ServerRecords.at(i)->FileName, PMs );
@@ -220,11 +220,29 @@ const QString AGridRunner::Simulate(const QJsonObject* config)
             if (EventsDataHub.ErrorString.isEmpty())
                 s = QString("%1 events were registered").arg(numEv);
             else
+            {
                 s = QString("Error loading events from the TTree file sent by the remote host:\n") + EventsDataHub.ErrorString;
+                ServerRecords[i]->Error = s;
+                bError = true;
+            }
             requestTextLog(i, s);
         }
+    else
+        {
+            if ( !ServerRecords.at(i)->Error.isEmpty() )
+                bError = true;
+        }
+    }
 
-    emit requestStatusLog("Done!");
+    if (bError)
+    {
+        emit requestStatusLog("Finished. There were errors!");
+    }
+    else
+    {
+        emit requestStatusLog("Done!");
+    }
+    requestDelegateGuiUpdate();
 
     return "";
 }
@@ -234,9 +252,7 @@ const QString AGridRunner::Reconstruct(const QJsonObject *config)
     if (EventsDataHub.isEmpty())
         return "There are no events to reconstruct!";
 
-    bAbortRequested = false;
-    for (ARemoteServerRecord* r : ServerRecords) r->Progress = 0;
-    emit requestDelegateGuiUpdate();
+    onStart();
 
     emit requestStatusLog("Starting remote reconstruction...");
     QVector<AWebSocketWorker_Base*> workers;
@@ -330,6 +346,8 @@ const QString AGridRunner::RateServers(const QJsonObject *config)
     if (ServerRecords.isEmpty())
         return "Configure at least one dispatcher record!";
 
+    onStart();
+
     bool bEmpty = true;
     for (ARemoteServerRecord* r : ServerRecords)
         if (r->bEnabled)
@@ -339,8 +357,6 @@ const QString AGridRunner::RateServers(const QJsonObject *config)
         }
     if (bEmpty)
         return "All dispatcher records are disabled!";
-
-    bAbortRequested = false;
 
     emit requestStatusLog("Rating servers...");
     QVector<AWebSocketWorker_Base*> workers;
@@ -484,6 +500,17 @@ void AGridRunner::doAbort(QVector<AWebSocketWorker_Base *> &workers)
         w->RequestAbort();
         emit w->finished();
     }
+}
+
+void AGridRunner::onStart()
+{
+    bAbortRequested = false;
+    for (ARemoteServerRecord* r : ServerRecords)
+    {
+        r->Progress = 0;
+        r->Error.clear();
+    }
+    emit requestDelegateGuiUpdate();
 }
 
 void AGridRunner::onRequestTextLog(int index, const QString message)
@@ -895,7 +922,6 @@ void AWebSocketWorker_Sim::runSimulation()
         return;
     }
 
-    rec->bShowProgress = true;
     while ( !obj.contains("binary") ) //after server send back the file with sim, the reply is "{ \"binary\" : \"file\" }"
     {
         emit requestTextLog(index, reply);
@@ -1038,7 +1064,6 @@ void AWebSocketWorker_Rec::runReconstruction()
     }
 
     emit requestTextLog(index, "Starting reconstruction...");
-    rec->bShowProgress = true;
     Script = "server.SetAcceptExternalProgressReport(true);"; //even if not showing to the user, still want to send reports to see that the server is alive
     Script += "rec.ReconstructEvents(" + QString::number(rec->NumThreads_Allocated) + ", false);";
     Script += "server.SendReconstructionData()";

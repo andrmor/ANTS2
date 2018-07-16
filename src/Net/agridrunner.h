@@ -54,6 +54,8 @@ private:
 
     void doAbort(QVector<AWebSocketWorker_Base *> &workers);
 
+    void onStart();
+
 signals:
     void requestTextLog(int index, const QString message);
     void requestStatusLog(const QString message);

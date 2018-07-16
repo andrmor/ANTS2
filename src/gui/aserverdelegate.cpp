@@ -170,6 +170,24 @@ void AServerDelegate::updateGui()
         sbPort->setEnabled(bEnabled);
     }
 
+    if (cbEnabled->isChecked())
+    {
+        if ( modelRecord->Error.isEmpty() )
+            pbProgress->setFormat("%p%");
+        else
+        {
+            pbProgress->setFormat("Error");
+            pbProgress->setValue(0);
+        }
+    }
+    else
+    {
+        pbProgress->setFormat("");
+        pbProgress->setValue(0);
+    }
+
+
+
     emit updateSizeHint(this);
 }
 

@@ -35,6 +35,8 @@ ARemoteWindow::ARemoteWindow(MainWindow *MW) :
     QIntValidator* intVal = new QIntValidator(this);
     intVal->setRange(1, 100000000);
     ui->leiTimeout->setValidator(intVal);
+
+    ui->cbShowLog->setChecked(false);
 }
 
 ARemoteWindow::~ARemoteWindow()

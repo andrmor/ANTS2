@@ -28,7 +28,6 @@ public:
     // all properties below are runtime-only
     int     NumThreads_Allocated = 0;
     int     Progress = 0;
-    bool    bShowProgress = false;
     int     AntsServerPort = -1;
     QString AntsServerTicket;
     QString FileName; //local file where sim tree is saved

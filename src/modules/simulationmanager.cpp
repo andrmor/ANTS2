@@ -230,13 +230,7 @@ QString ASimulatorRunner::getErrorMessages() const
         return "Simulation not finished yet";
     if(fStopRequested)
         return "Simulation stopped by user";
-    QTextStream msgBuilder(&msg);
-    for(int i = 0; i < workers.count(); i++)
-    {
-        if(workers[i]->wasSuccessful()) continue;
-        msgBuilder<<"Thread "<<i<<"/"<<workers.count()<<": "<<workers[i]->getErrorString()<<endl;
-    }
-    return msg;
+    return ErrorString;
 }
 
 void ASimulatorRunner::clearWorkers()
@@ -314,8 +308,15 @@ void ASimulatorRunner::simulate()
     //Dump data in dataHub
     dataHub->fSimulatedData = true;
     dataHub->LastSimSet = simSettings;
+
+    ErrorString.clear();
     for(int i = 0; i < workers.count(); i++)
+    {
         workers[i]->appendToDataHub(dataHub);
+        QString err = workers.at(i)->getErrorString();
+        if (!err.isEmpty())
+            ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
+    }
 
     //qDebug()<<"Simulation finished!";
 
@@ -842,6 +843,7 @@ bool PointSourceSimulator::SimulateFlood()
     //Do flood
     int nodeCount = (eventEnd - eventBegin);
     eventCurrent = 0;
+    int WatchdogThreshold = 100000;
     double updateFactor = 100.0 / (NumRuns*nodeCount);
     for (int inode = 0; inode < nodeCount; inode++)
     {
@@ -865,6 +867,13 @@ bool PointSourceSimulator::SimulateFlood()
         else r[2] = Zfrom + (Zto-Zfrom)*RandGen->Rndm();
         if (fLimitNodesToObject && !isInsideLimitingObject(r))
         {
+            WatchdogThreshold--;
+            if (WatchdogThreshold < 0 && inode == 0)
+            {
+                ErrorString = "100000 attempts to generate a point inside the limiting object has failed!";
+                return false;
+            }
+
             inode--;
             continue;
         }

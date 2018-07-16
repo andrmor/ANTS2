@@ -158,6 +158,8 @@ private:
     double progress;
     double usPerEvent;
 
+    QString ErrorString;
+
 public slots:
     void simulate();
     void requestStop();

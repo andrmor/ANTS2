@@ -1025,7 +1025,7 @@ bool EventsDataClass::saveSimulationAsTree(QString fileName)
   return (result == 0) ? false : true;
 }
 
-bool EventsDataClass::saveSimulationAsText(QString fileName)
+bool EventsDataClass::saveSimulationAsText(const QString& fileName, bool addNumPhotons, bool addPositions)
 {
   QFile outputFile(fileName);
   outputFile.open(QIODevice::WriteOnly);
@@ -1057,10 +1057,14 @@ bool EventsDataClass::saveSimulationAsText(QString fileName)
             outStream << "    "; //5 spaces including trailing one
             for (int ip=0; ip<Scan[iev]->Points.size(); ip++)
               {
-                outStream << (int)Scan[iev]->Points[ip].energy << " ";
-                outStream << Scan[iev]->Points[ip].r[0] << " "
-                          << Scan[iev]->Points[ip].r[1] << " "
-                          << Scan[iev]->Points[ip].r[2] << "   "; //3 spaces
+                if (addNumPhotons) outStream << (int)Scan[iev]->Points[ip].energy << " ";
+                if (addPositions)
+                {
+                    outStream << Scan[iev]->Points[ip].r[0] << " "
+                              << Scan[iev]->Points[ip].r[1] << " "
+                              << Scan[iev]->Points[ip].r[2] << "   "; //3 spaces
+                }
+
               }
           }
         outStream<<"\r\n";

@@ -662,9 +662,9 @@ bool InterfaceToSim::SaveAsTree(QString fileName)
   return EventsDataHub->saveSimulationAsTree(fileName);
 }
 
-bool InterfaceToSim::SaveAsText(QString fileName)
+bool InterfaceToSim::SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons)
 {
-  return EventsDataHub->saveSimulationAsText(fileName);
+  return EventsDataHub->saveSimulationAsText(fileName, IncludeTruePositionAndNumPhotons, IncludeTruePositionAndNumPhotons);
 }
 
 int InterfaceToSim::countMonitors()

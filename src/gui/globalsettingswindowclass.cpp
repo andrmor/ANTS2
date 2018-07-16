@@ -79,6 +79,9 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->cbSaveRecAsTree_IncludeRho->setChecked(GlobSet->RecTreeSave_IncludeRho);
   ui->cbSaveRecAsTree_IncludeTrue->setChecked(GlobSet->RecTreeSave_IncludeTrue);
 
+  ui->cbSaveSimAsText_IncludeNumPhotons->setChecked(GlobSet->SimTextSave_IncludeNumPhotons);
+  ui->cbSaveSimAsText_IncludePositions->setChecked(GlobSet->SimTextSave_IncludePositions);
+
   updateNetGui();
 }
 
@@ -452,4 +455,14 @@ void GlobalSettingsWindowClass::on_leJSROOT_editingFinished()
 void GlobalSettingsWindowClass::on_cbRunWebSocketServer_toggled(bool checked)
 {
     if (!checked) ui->leWebSocketURL->clear();
+}
+
+void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked)
+{
+    GlobSet->SimTextSave_IncludeNumPhotons = checked;
+}
+
+void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludePositions_clicked(bool checked)
+{
+    GlobSet->SimTextSave_IncludePositions = checked;
 }

@@ -132,6 +132,9 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
   js["RecTreeSave_IncludeTrue"] = RecTreeSave_IncludeTrue;
 
+  js["SimTextSave_IncludeNumPhotons"] = SimTextSave_IncludeNumPhotons;
+  js["SimTextSave_IncludePositions"] = SimTextSave_IncludePositions;
+
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
   js["PythonScriptWindowJson"] = PythonScriptWindowJson;
@@ -180,6 +183,9 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "RecTreeSave_IncludePMsignals", RecTreeSave_IncludePMsignals);
     parseJson(js, "RecTreeSave_IncludeRho", RecTreeSave_IncludeRho);
     parseJson(js, "RecTreeSave_IncludeTrue", RecTreeSave_IncludeTrue);
+
+    parseJson(js, "SimTextSave_IncludeNumPhotons", SimTextSave_IncludeNumPhotons);
+    parseJson(js, "SimTextSave_IncludePositions", SimTextSave_IncludePositions);
 
     parseJson(js, "PerformAutomaticGeometryCheck", PerformAutomaticGeometryCheck);
 

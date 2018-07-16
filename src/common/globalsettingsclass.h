@@ -50,6 +50,9 @@ public:
   bool RecTreeSave_IncludeRho = true;
   bool RecTreeSave_IncludeTrue = true;
 
+  bool SimTextSave_IncludeNumPhotons = true;
+  bool SimTextSave_IncludePositions = true;
+
   bool PerformAutomaticGeometryCheck = true;
 
   bool fOpenImageExternalEditor = true;

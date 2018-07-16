@@ -325,7 +325,7 @@ public slots:
   bool SetCustomNodes(QVariant ArrayOfArray3);
 
   bool SaveAsTree(QString fileName);
-  bool SaveAsText(QString fileName);
+  bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);
 
   //monitors
   int countMonitors();

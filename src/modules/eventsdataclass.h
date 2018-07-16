@@ -113,7 +113,7 @@ public:
                                   int igroup = 0);
     bool saveReconstructionAsText(QString fileName, int igroup=0);
     bool saveSimulationAsTree(QString fileName);
-    bool saveSimulationAsText(QString fileName);
+    bool saveSimulationAsText(const QString &fileName, bool addNumPhotons, bool addPositions);
 
     //Data Load - ascii
     bool fLoadedEventsHaveEnergyInfo;

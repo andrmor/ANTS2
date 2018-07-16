@@ -3673,7 +3673,7 @@ void MainWindow::SaveSimulationDataAsText()
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".dat";
 
-  bool ok = EventsDataHub->saveSimulationAsText(fileName);
+  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet->SimTextSave_IncludeNumPhotons, GlobSet->SimTextSave_IncludePositions);
   if (!ok) message("Error writing to file!", this);
 }
 

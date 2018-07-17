@@ -480,11 +480,7 @@ void MainWindow::ShowGraphWindow()
 
 void MainWindow::ShowTracks()
 {   
-  if (GeometryDrawDisabled) return;
-
-  GeometryWindow->SetAsActiveRootWindow();
-  Detector->GeoManager->DrawTracks();
-  GeometryWindow->UpdateRootCanvas();
+  GeometryWindow->DrawTracks();
 }
 
 void MainWindow::on_pbRebuildDetector_clicked()
@@ -567,7 +563,7 @@ void MainWindow::UpdateMaterialListEdit()
     if (fFound) tmpStr += "  (override)";
 
     QListWidgetItem* pItem =new QListWidgetItem(tmpStr);
-    if (ColorByMaterial)
+    if (GeometryWindow->isColorByMaterial())
       {
         TColor* rc = gROOT->GetColor(i+1);
         QColor qc = QColor(255*rc->GetRed(), 255*rc->GetGreen(), 255*rc->GetBlue(), 255*rc->GetAlpha());

@@ -421,7 +421,7 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
           }
       }
 
-    MW->GeometryWindow->ShowGeometry(false);
+    ShowGeometry(false);
     MW->Detector->GeoManager->DrawTracks();
     UpdateRootCanvas();
 }
@@ -481,11 +481,11 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //coloring volumes
     if (ColorUpdateAllowed)
       {
-        if (MW->ColorByMaterial) MW->Detector->colorVolumes(1);
+        if (ColorByMaterial) MW->Detector->colorVolumes(1);
         else MW->Detector->colorVolumes(0);
       }
     //top volume visibility
-    if (MW->ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
+    if (ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
     else MW->Detector->GeoManager->SetTopVisible(false);
 
     //transparency setup
@@ -532,37 +532,46 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
 
 void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
 {
-  MW->setShowTop(checked);
-  ShowGeometry();
+  ShowTop = checked;
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
-  MW->setColorByMaterial(checked);
-  ShowGeometry();
+  ColorByMaterial = checked;
   MW->UpdateMaterialListEdit();
+  on_pbShowGeometry_clicked();
 }
 
 void GeometryWindowClass::on_pbShowPMnumbers_clicked()
 {
-  MW->GeometryWindow->ShowPMnumbers();
+  ShowPMnumbers();
 }
 
 void GeometryWindowClass::on_pbShowTracks_clicked()
 {
-  MW->ShowTracks();
+    DrawTracks();
+}
+
+void GeometryWindowClass::DrawTracks()
+{
+  if (MW->GeometryDrawDisabled) return;
+
+  SetAsActiveRootWindow();
+  MW->Detector->GeoManager->DrawTracks();
+  UpdateRootCanvas();
 }
 
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
   MW->Detector->GeoManager->ClearTracks();
-  ShowGeometry();
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbClearDots_clicked()
 { 
   MW->clearGeoMarkers();
-  ShowGeometry();
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbSaveAs_clicked()
@@ -664,7 +673,9 @@ void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
   RasterWindow->fCanvas->Update();
   readRasterWindowProperties();
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
   RasterWindow->setInvertedXYforDrag( index==1 );
+#endif
 }
 
 void GeometryWindowClass::on_cbShowAxes_toggled(bool /*checked*/)

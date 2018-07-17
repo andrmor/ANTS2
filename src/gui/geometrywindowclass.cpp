@@ -799,6 +799,7 @@ void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
         tv->SetLineWidth(LWidth);
       }
 
+    // for all WorldTree objects
     MW->Detector->changeLineWidthOfVolumes(deltaWidth);
 
     on_pbShowGeometry_clicked();

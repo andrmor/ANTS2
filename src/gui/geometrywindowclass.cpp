@@ -527,7 +527,7 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
   RasterWindow->ForceResize();
   fRecallWindow = false;
 
-  ShowGeometry(false, false); //not doing "same" option!
+  ShowGeometry(true, false); //not doing "same" option!
 }
 
 void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
@@ -777,32 +777,31 @@ void GeometryWindowClass::on_actionDefault_zoom_to_0_triggered()
 
 void GeometryWindowClass::on_actionSet_line_width_for_objects_triggered()
 {
-    TObjArray* list = MW->Detector->GeoManager->GetListOfVolumes();
-    int numVolumes = list->GetEntries();
-    qDebug() << numVolumes;
-    for (int i=0; i<numVolumes; i++)
-      {
-        TGeoVolume* tv = (TGeoVolume*)list->At(i);
-        int LWidth = tv->GetLineWidth() + 1;
-        tv->SetLineWidth(LWidth);
-      }
-    SetAsActiveRootWindow();
-    MW->Detector->top->Draw("");
+    doChangeLineWidth(1);
 }
 
 void GeometryWindowClass::on_actionDecrease_line_width_triggered()
 {
+    doChangeLineWidth(-1);
+}
+
+void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
+{
+    // for all WorldTree objects the following will be overriden. Still affects, e.g., PMs
     TObjArray* list = MW->Detector->GeoManager->GetListOfVolumes();
     int numVolumes = list->GetEntries();
     for (int i=0; i<numVolumes; i++)
       {
         TGeoVolume* tv = (TGeoVolume*)list->At(i);
-        int LWidth = tv->GetLineWidth() - 1;
+        int LWidth = tv->GetLineWidth() + deltaWidth;
         if (LWidth <1) LWidth = 1;
+        qDebug() << i << tv->GetName() << LWidth;
         tv->SetLineWidth(LWidth);
       }
-    SetAsActiveRootWindow();
-    MW->Detector->top->Draw("");
+
+    MW->Detector->changeLineWidthOfVolumes(deltaWidth);
+
+    on_pbShowGeometry_clicked();
 }
 
 #include "anetworkmodule.h"

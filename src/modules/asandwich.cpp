@@ -891,7 +891,12 @@ void ASandwich::DeleteMaterial(int imat)
 
 bool ASandwich::isVolumeExist(QString name)
 {
-   return (World->findObjectByName(name) != 0);
+    return (World->findObjectByName(name) != 0);
+}
+
+void ASandwich::changeLineWidthOfVolumes(int delta)
+{
+    World->changeLineWidthRecursive(delta);
 }
 
 void ASandwich::writeToJson(QJsonObject &json)

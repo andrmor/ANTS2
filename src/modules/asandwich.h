@@ -75,6 +75,7 @@ public:
   //int FindSlabByName(QString name); //returns -1 if not found
   void DeleteMaterial(int imat);
   bool isVolumeExist(QString name);
+  void changeLineWidthOfVolumes(int delta);
 
   // JSON
   void writeToJson(QJsonObject& json);

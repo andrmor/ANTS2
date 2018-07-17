@@ -107,6 +107,9 @@ private:
   //flags
   bool BarShown;
   bool ColdStart;
+
+private:
+  void doChangeLineWidth(int deltaWidth);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

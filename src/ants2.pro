@@ -25,7 +25,7 @@ win32 {
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
      LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum #-lMathMore
-     ants2_RootServer {LIBS += -llibRHTTP}
+     ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------
 
@@ -179,14 +179,11 @@ ants2_Python{
     #http://pythonqt.sourceforge.net/ or https://github.com/Orochimarufan/PythonQt
     #for PythonQt installation see instructions in PythonQtInstall.txt in the root of ANTS2 on GitHub
     win32:{
-            INCLUDEPATH += c:/Python33/include
-            LIBS += -Lc:/Python33/libs -lPython33
+            INCLUDEPATH += 'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/include'
+            LIBS += -L'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/libs' -lPython36
 
             INCLUDEPATH += C:/PythonQt3.2/src
-            #INCLUDEPATH += D:/PythonQtTest/src
-
-            LIBS += -LC:/PythonQt3.2 -lPythonQt-Qt5-Python333
-            #LIBS += -LD:/PythonQtTest/lib -lPythonQt
+            LIBS += -LC:/PythonQt3.2/lib -lPythonQt
     }
     linux-g++ || unix {
             LIBS += $$system(python3.5-config --libs)

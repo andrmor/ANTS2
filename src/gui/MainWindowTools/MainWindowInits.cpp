@@ -29,6 +29,7 @@
 #include "gui/alrfwindow.h"
 #include "anetworkmodule.h"
 #include "awebsocketserverdialog.h"
+#include "aremotewindow.h"
 
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
@@ -141,6 +142,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Creating Python script window";
     createPythonScriptWindow();
 #endif
+    qDebug()<<">Creating remote simulation/reconstruction window";
+    RemoteWindow = new ARemoteWindow(this);
     ServerDialog = new AWebSocketServerDialog(this);
     qDebug()<<">All windows created";
 
@@ -292,6 +295,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     qDebug() << ">Init for Reconstruction window...";
     Rwindow->InitWindow();
+
+    qDebug() << ">Init for Remote sim/reconstruction window...";
+    RemoteWindow->ReadConfig();
 
     qDebug()<<">Showing geometry";
     GeometryWindow->show();

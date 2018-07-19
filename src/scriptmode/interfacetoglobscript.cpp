@@ -662,9 +662,9 @@ bool InterfaceToSim::SaveAsTree(QString fileName)
   return EventsDataHub->saveSimulationAsTree(fileName);
 }
 
-bool InterfaceToSim::SaveAsText(QString fileName)
+bool InterfaceToSim::SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons)
 {
-  return EventsDataHub->saveSimulationAsText(fileName);
+  return EventsDataHub->saveSimulationAsText(fileName, IncludeTruePositionAndNumPhotons, IncludeTruePositionAndNumPhotons);
 }
 
 int InterfaceToSim::countMonitors()
@@ -1373,7 +1373,7 @@ void AInterfaceToData::SetReconstructionReady()
   }
 
   EventsDataHub->fReconstructionDataReady = true;
-  emit RequestEventsGuiUpdate();
+  emit EventsDataHub->requestEventsGuiUpdate();
 }
 
 void AInterfaceToData::ResetReconstructionData(int numGroups)
@@ -1397,7 +1397,7 @@ void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumE
     }
 
   if (!Append) EventsDataHub->clear();
-  EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
+  EventsDataHub->loadSimulatedEventsFromTree(fileName, *Config->GetDetector()->PMs, MaxNumEvents);
   //EventsDataHub->clearReconstruction();
   EventsDataHub->createDefaultReconstructionData();
   //RManager->filterEvents(Config->JSON);

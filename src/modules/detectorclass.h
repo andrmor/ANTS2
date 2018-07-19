@@ -91,6 +91,8 @@ public:
   void writeGDMLtoJson(QJsonObject &json);
   void writePreprocessingToJson(QJsonObject &json);
 
+  void changeLineWidthOfVolumes(int delta);
+
 public slots:
   void onRequestRegisterGeoManager();
 

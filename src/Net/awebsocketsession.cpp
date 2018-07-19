@@ -48,12 +48,18 @@ bool AWebSocketSession::Connect(const QString &Url, bool WaitForAnswer)
         State = Connecting;
         Error.clear();
         socket->open( QUrl(Url) );
-
         do
         {
             QThread::msleep(sleepDuration);
             qApp->processEvents();
-            if (timer.elapsed() > timeout || fExternalAbort)
+            if (fExternalAbort)
+            {
+                socket->abort();
+                State = Aborted;
+                Error = "Aborted!";
+                return false;
+            }
+            if (timer.elapsed() > timeout)
             {
                 socket->abort();
                 State = Idle;
@@ -140,7 +146,14 @@ bool AWebSocketSession::waitForReply()
     {
         QThread::msleep(sleepDuration);
         qApp->processEvents();
-        if (timer.elapsed() > timeout || fExternalAbort)
+        if (fExternalAbort)
+        {
+            socket->abort();
+            State = Aborted;
+            Error = "Aborted!";
+            return false;
+        }
+        if (timer.elapsed() > timeout)
         {
             socket->abort();
             State = Idle;
@@ -216,9 +229,9 @@ void AWebSocketSession::ClearReply()
 
 void AWebSocketSession::ExternalAbort()
 {
-    State = Aborted;
-    socket->abort();
-    fExternalAbort = true; //paranoic
+    //State = Aborted;
+    //socket->abort();
+    fExternalAbort = true;
 }
 
 void AWebSocketSession::onConnect()

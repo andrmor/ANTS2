@@ -106,6 +106,10 @@ private slots:
 
   void on_cbRunWebSocketServer_toggled(bool checked);
 
+  void on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked);
+
+  void on_cbSaveSimAsText_IncludePositions_clicked(bool checked);
+
 private:
   Ui::GlobalSettingsWindowClass *ui;
 

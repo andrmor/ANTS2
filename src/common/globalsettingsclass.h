@@ -50,6 +50,9 @@ public:
   bool RecTreeSave_IncludeRho = true;
   bool RecTreeSave_IncludeTrue = true;
 
+  bool SimTextSave_IncludeNumPhotons = true;
+  bool SimTextSave_IncludePositions = true;
+
   bool PerformAutomaticGeometryCheck = true;
 
   bool fOpenImageExternalEditor = true;
@@ -73,6 +76,9 @@ public:
   int DefaultRootServerPort = 8080;
   bool fRunRootServerOnStart = false;
   QString ExternalJSROOT;
+
+  //RemoteServers
+  QJsonObject RemoteServers;
 
   ANetworkModule* NetModule;
 };

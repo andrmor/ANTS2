@@ -528,7 +528,7 @@
         <string>Limit visibility</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
       <widget class="QLabel" name="label">
@@ -548,6 +548,9 @@
        </property>
       </widget>
       <widget class="QSpinBox" name="sbLimitVisibility">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="geometry">
         <rect>
          <x>58</x>

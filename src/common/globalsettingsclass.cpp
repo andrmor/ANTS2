@@ -132,6 +132,9 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
   js["RecTreeSave_IncludeTrue"] = RecTreeSave_IncludeTrue;
 
+  js["SimTextSave_IncludeNumPhotons"] = SimTextSave_IncludeNumPhotons;
+  js["SimTextSave_IncludePositions"] = SimTextSave_IncludePositions;
+
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
   js["PythonScriptWindowJson"] = PythonScriptWindowJson;
@@ -145,6 +148,8 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["DefaultRootServerPort"] = DefaultRootServerPort;
   js["RunRootServerOnStart"] = fRunRootServerOnStart;
   js["ExternalJSROOT"] = ExternalJSROOT;
+
+  js["RemoteServers"] = RemoteServers;
 
   json["ANTS2config"] = js;
 }
@@ -179,6 +184,9 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "RecTreeSave_IncludeRho", RecTreeSave_IncludeRho);
     parseJson(js, "RecTreeSave_IncludeTrue", RecTreeSave_IncludeTrue);
 
+    parseJson(js, "SimTextSave_IncludeNumPhotons", SimTextSave_IncludeNumPhotons);
+    parseJson(js, "SimTextSave_IncludePositions", SimTextSave_IncludePositions);
+
     parseJson(js, "PerformAutomaticGeometryCheck", PerformAutomaticGeometryCheck);
 
     parseJson(js, "GlobScript", GlobScript);
@@ -200,11 +208,12 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     DefaultRootServerPort = 8080;
     fRunRootServerOnStart = false;
     ExternalJSROOT = "https://root.cern/js/latest/";
-
     parseJson(js, "DefaultWebSocketPort", DefaultWebSocketPort);
     parseJson(js, "DefaultWebSocketIP", DefaultWebSocketIP);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
+
+    parseJson(js, "RemoteServers", RemoteServers);
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

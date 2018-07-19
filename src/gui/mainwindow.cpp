@@ -52,6 +52,7 @@
 #include "particlesourcesclass.h"
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
+#include "aremotewindow.h"
 
 //Qt
 #include <QDebug>
@@ -209,7 +210,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
-           qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
+           //qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
            ReconstructionManager->requestStop();
            SimulationManager->StopSimulation();
            qApp->processEvents();
@@ -234,6 +235,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
+   qDebug() << "<Saving remote servers";
+   RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet->SaveANTSconfiguration();
 
@@ -267,7 +270,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
      {
        GenScriptWindow->close();
        qDebug() << "<-Deleting local script window";
-       delete GenScriptWindow;
+       delete GenScriptWindow; GenScriptWindow = 0;
      }
 
 #ifdef ANTS_FANN
@@ -351,6 +354,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
        delete CheckUpWindow;
        CheckUpWindow = 0;
      }
+   if (RemoteWindow)
+   {
+       qDebug() << "<-Deleting remote simulation/reconstruction window";
+       delete RemoteWindow;
+       RemoteWindow = 0;
+   }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
    qDebug() << "<MainWindow close event processing finished";
 }
@@ -471,11 +480,7 @@ void MainWindow::ShowGraphWindow()
 
 void MainWindow::ShowTracks()
 {   
-  if (GeometryDrawDisabled) return;
-
-  GeometryWindow->SetAsActiveRootWindow();
-  Detector->GeoManager->DrawTracks();
-  GeometryWindow->UpdateRootCanvas();
+  GeometryWindow->DrawTracks();
 }
 
 void MainWindow::on_pbRebuildDetector_clicked()
@@ -558,7 +563,7 @@ void MainWindow::UpdateMaterialListEdit()
     if (fFound) tmpStr += "  (override)";
 
     QListWidgetItem* pItem =new QListWidgetItem(tmpStr);
-    if (ColorByMaterial)
+    if (GeometryWindow->isColorByMaterial())
       {
         TColor* rc = gROOT->GetColor(i+1);
         QColor qc = QColor(255*rc->GetRed(), 255*rc->GetGreen(), 255*rc->GetBlue(), 255*rc->GetAlpha());
@@ -3664,7 +3669,7 @@ void MainWindow::SaveSimulationDataAsText()
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".dat";
 
-  bool ok = EventsDataHub->saveSimulationAsText(fileName);
+  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet->SimTextSave_IncludeNumPhotons, GlobSet->SimTextSave_IncludePositions);
   if (!ok) message("Error writing to file!", this);
 }
 
@@ -5301,4 +5306,9 @@ void MainWindow::on_ledSSO_EffWave_editingFinished()
     if (!ov) return;
 
     ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
+}
+
+void MainWindow::on_actionGrid_triggered()
+{
+    RemoteWindow->show();
 }

@@ -589,7 +589,7 @@ AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calcul
     return BasicOpticalOverride::calculate(RandGen, Photon, NormalVector);
 }
 
-void SpectralBasicOpticalOverride::printConfiguration(int iWave)
+void SpectralBasicOpticalOverride::printConfiguration(int /*iWave*/)
 {
     qDebug() << "-------Configuration:-------";
     qDebug() << "Wavelength:"<<Wave;

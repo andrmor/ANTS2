@@ -113,14 +113,14 @@ public:
                                   int igroup = 0);
     bool saveReconstructionAsText(QString fileName, int igroup=0);
     bool saveSimulationAsTree(QString fileName);
-    bool saveSimulationAsText(QString fileName);
+    bool saveSimulationAsText(const QString &fileName, bool addNumPhotons, bool addPositions);
 
     //Data Load - ascii
     bool fLoadedEventsHaveEnergyInfo;
     int loadEventsFromTxtFile(QString fileName, QJsonObject &jsonPreprocessJson, APmHub *PMs); //returns -1 if failed, otherwise number of events added
 
     //data load - Tree
-    int loadSimulatedEventsFromTree(QString fileName, APmHub *PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
+    int loadSimulatedEventsFromTree(QString fileName, const APmHub &PMs, int maxEvents = -1); //returns -1 if failed, otherwise number of events added
     bool overlayAsciiFile(QString fileName, bool fAddMulti, APmHub *PMs); //true = success, if not, see ErrorString
 
     //Misc
@@ -140,6 +140,8 @@ signals:
     void requestClearKNNfilter();
     void cleared();
     void requestEventsGuiUpdate();
+
+    void requestFilterEvents(); //use by remote rec event loader
 };
 
 #endif // EVENTSDATACLASS_H

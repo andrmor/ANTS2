@@ -25,7 +25,7 @@ win32 {
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
      LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum #-lMathMore
-     ants2_RootServer {LIBS += -llibRHTTP}
+     ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------
 
@@ -179,14 +179,11 @@ ants2_Python{
     #http://pythonqt.sourceforge.net/ or https://github.com/Orochimarufan/PythonQt
     #for PythonQt installation see instructions in PythonQtInstall.txt in the root of ANTS2 on GitHub
     win32:{
-            INCLUDEPATH += c:/Python33/include
-            LIBS += -Lc:/Python33/libs -lPython33
+            INCLUDEPATH += 'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/include'
+            LIBS += -L'C:/Program Files (x86)/Microsoft Visual Studio/Shared/Python36_86/libs' -lPython36
 
             INCLUDEPATH += C:/PythonQt3.2/src
-            #INCLUDEPATH += D:/PythonQtTest/src
-
-            LIBS += -LC:/PythonQt3.2 -lPythonQt-Qt5-Python333
-            #LIBS += -LD:/PythonQtTest/lib -lPythonQt
+            LIBS += -LC:/PythonQt3.2/lib -lPythonQt
     }
     linux-g++ || unix {
             LIBS += $$system(python3.5-config --libs)
@@ -315,7 +312,9 @@ SOURCES += main.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
     scriptmode/awebserverinterface.cpp \
-    common/agammarandomgenerator.cpp
+    common/agammarandomgenerator.cpp \
+    Net/agridrunner.cpp \
+    Net/aremoteserverrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -436,7 +435,10 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    scriptmode/awebserverinterface.h
+    scriptmode/awebserverinterface.h \
+    Net/agridrunner.h \
+    Net/aremoteserverrecord.h
+
 # --- SIM ---
 ants2_SIM {
     DEFINES += SIM
@@ -547,7 +549,9 @@ ants2_GUI {
     gui/alineedit.cpp \
     gui/awebsocketserverdialog.cpp \
     common/acollapsiblegroupbox.cpp \
-    gui/MainWindowTools/slabdelegate.cpp
+    gui/MainWindowTools/slabdelegate.cpp \
+    gui/aremotewindow.cpp \
+    gui/aserverdelegate.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -601,7 +605,9 @@ HEADERS  += gui/mainwindow.h \
     gui/alineedit.h \
     gui/MainWindowTools/slabdelegate.h \
     common/acollapsiblegroupbox.h \
-    gui/awebsocketserverdialog.h
+    gui/awebsocketserverdialog.h \
+    gui/aremotewindow.h \
+    gui/aserverdelegate.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -629,7 +635,8 @@ FORMS += gui/mainwindow.ui \
     gui/aneutronreactionsconfigurator.ui \
     gui/aneutronreactionwidget.ui \
     gui/aneutroninfodialog.ui \
-    gui/awebsocketserverdialog.ui
+    gui/awebsocketserverdialog.ui \
+    gui/aremotewindow.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -730,4 +737,3 @@ unix {
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-

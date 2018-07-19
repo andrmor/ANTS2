@@ -1242,15 +1242,18 @@ void AGeoWidget::ClearGui()
 
   if (GeoObjectDelegate)
     {
-      //delete CurrentObjectDelegate->Widget;
       delete GeoObjectDelegate;
       GeoObjectDelegate = 0;
     }    
   if (SlabDelegate)
     {
-      //delete CurrentSlabDelegate->frMain;
       delete SlabDelegate;
       SlabDelegate = 0;
+    }
+  if (GridDelegate)
+    {
+      delete GridDelegate;
+      GridDelegate = 0;
     }
   if (MonitorDelegate)
     {
@@ -1622,17 +1625,17 @@ void AGeoWidget::onConfirmPressed()
     }
   else if (!GeoObjectDelegate)
     {
-      qWarning() << "Confirm triggered without CurrentObject!";
+      qWarning() << "|||---Confirm triggered without CurrentObject!";
       exitEditingMode();
       tw->UpdateGui();
       return;
     }
 
-  //qDebug() << "Validating update data for object" << CurrentObject->Name;
+  //    qDebug() << "Validating update data for object" << CurrentObject->Name;
   bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
   if (!ok) return;
 
-  //qDebug() << "Validation success, can assign new values!";
+  //    qDebug() << "Validation success, can assign new values!";
   getValuesFromNonSlabDelegates(CurrentObject);
 
   //finalizing
@@ -2334,7 +2337,7 @@ AGridElementDelegate::AGridElementDelegate(QString name)
 
     QPushButton* pbAuto = new QPushButton();
     connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
-    pbAuto->setText("Open generation dialog");
+    pbAuto->setText("Open generation/edit dialog");
     pbAuto->setMinimumWidth(200);
     pbAuto->setMaximumWidth(200);
     vl->addWidget(pbAuto);
@@ -2409,8 +2412,17 @@ void AGridElementDelegate::onInstructionsForGridRequested()
                 "2. Photons are allowed to leave the grid element only\n"
                 "   when they exit the grid object:\n"
                 "   the user has to properly position the wires inside the\n"
-                "   grid element, so photons cannot cross the border \"sideways\"\n\n"
-                "   Grid generation dialog generates a correct grid element automatically";
+                "   grid element, so photons cannot cross the border \"sideways\"\n"
+                "   \n"
+                "Grid generation dialog generates a correct grid element automatically\n"
+                "   \n "
+                "For modification of all properties of the grid except\n"
+                "  - the position/orientation/XYsize of the grid bulk\n"
+                "  - materials of the bulk and the wires\n"
+                "it is _strongly_ recommended to use the auto-generation dialog.\n"
+                "\n"
+                "Press the \"Open generation/edit dialog\" button";
+
 
     QMessageBox::information(this, "", s);
 }

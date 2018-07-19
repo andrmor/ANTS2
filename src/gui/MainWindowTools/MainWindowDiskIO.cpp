@@ -262,7 +262,7 @@ void MainWindow::updateLoaded(int events, int progress)
 
 int MainWindow::LoadSimulationDataFromTree(QString fileName, int numEvents)
 {    
-  int numEv = EventsDataHub->loadSimulatedEventsFromTree(fileName, Detector->PMs, numEvents);
+  int numEv = EventsDataHub->loadSimulatedEventsFromTree(fileName, *Detector->PMs, numEvents);
 
   ui->leoTotalLoadedEvents->setText(QString::number(EventsDataHub->Events.size()));
   if (numEv != -1)

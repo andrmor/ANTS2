@@ -534,6 +534,13 @@ void AReconstructionManager::onLRFsCopied()
     fDoingCopyLRFs.store(false);
 }
 
+#include "aconfiguration.h"
+void AReconstructionManager::onRequestFilterAndAskToUpdateGui()
+{
+    filterEvents(Detector->Config->JSON, 1);
+}
+
+#include <QThread>
 bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    
   fStopRequested = false;
@@ -549,7 +556,11 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
       reconstructorList[ithread]->moveToThread(threads.last());
       threads.last()->start();
 
-      do qApp->processEvents();
+      do
+      {
+          qApp->processEvents();
+          QThread::usleep(100);
+      }
       while (fDoingCopyLRFs.load());
     }
 

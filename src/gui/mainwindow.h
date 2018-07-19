@@ -55,6 +55,7 @@ class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
 struct ParticleSourceStructure;
+class ARemoteWindow;
 class AWebSocketServerDialog;
 
 #ifdef ANTS_FANN
@@ -112,6 +113,7 @@ public:
     AScriptWindow* ScriptWindow = 0;                //global script window
     ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module
     AScriptWindow* PythonScriptWindow = 0;
+    ARemoteWindow* RemoteWindow = 0;
     AWebSocketServerDialog* ServerDialog = 0;
 
 #ifdef ANTS_FANN
@@ -170,8 +172,6 @@ public:
     void ImportDeposition(QFile &file);
 
     //configuration from outside
-    void setShowTop(bool flag) {ShowTop = flag;}
-    void setColorByMaterial(bool flag) {ColorByMaterial = flag;}
     void SetProgress(int val);
 
     //gains and ch per ph.el
@@ -181,10 +181,8 @@ public:
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
-    bool GeometryDrawDisabled = false; //no drawing of th geometry or tracks
+    bool GeometryDrawDisabled = false; //no drawing of the geometry or tracks
     bool fStartedFromGUI = false;          //flag indicating that an action was run from GUI, e.g. simulation
-    bool ShowTop = false;
-    bool ColorByMaterial = false;
 
     bool isWavelengthResolved() const;
     double WaveFrom, WaveTo, WaveStep;
@@ -641,6 +639,8 @@ private slots:
     void on_cobSSO_ScatterModel_activated(int index);
 
     void on_ledSSO_EffWave_editingFinished();
+
+    void on_actionGrid_triggered();
 
 public slots:
     void on_pbRebuildDetector_clicked();

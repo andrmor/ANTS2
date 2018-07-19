@@ -514,6 +514,15 @@ AGeoObject *AGeoObject::findObjectByName(const QString name)
   return 0; //not found
 }
 
+void AGeoObject::changeLineWidthRecursive(int delta)
+{
+    width += delta;
+    if (width < 1) width = 1;
+
+    for (int i=0; i<HostedObjects.size(); i++)
+        HostedObjects[i]->changeLineWidthRecursive(delta);
+}
+
 bool AGeoObject::isNameExists(const QString name)
 {
   return (findObjectByName(name)) ? true : false;

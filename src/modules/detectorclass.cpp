@@ -210,6 +210,11 @@ void DetectorClass::writePreprocessingToJson(QJsonObject &json)
     json["LoadExpDataConfig"] = PreprocessingJson;
 }
 
+void DetectorClass::changeLineWidthOfVolumes(int delta)
+{
+    Sandwich->changeLineWidthOfVolumes(delta);
+}
+
 void DetectorClass::writePMarraysToJson(QJsonObject &json)
 {
   QJsonArray arr;

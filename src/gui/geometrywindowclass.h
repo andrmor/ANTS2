@@ -42,6 +42,8 @@ public:
   void onBusyOn();
   void onBusyOff();
 
+  bool isColorByMaterial() {return ColorByMaterial;}
+
   bool fRecallWindow;
   Double_t CenterX, CenterY, HWidth, HHeight, Phi, Theta;
 
@@ -61,6 +63,7 @@ protected:
 
 public slots:
     void on_pbShowGeometry_clicked();
+    void DrawTracks();
     void ShowPMnumbers();
     void ShowTextOnPMs(QVector<QString> strData, Color_t color);
     void on_pbTop_clicked();
@@ -107,6 +110,11 @@ private:
   //flags
   bool BarShown;
   bool ColdStart;
+  bool ShowTop = false;
+  bool ColorByMaterial = false;
+
+private:
+  void doChangeLineWidth(int deltaWidth);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

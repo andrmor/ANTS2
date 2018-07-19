@@ -77,8 +77,6 @@ public slots:
     void on_pbClearDots_clicked();
 
 private slots:
-    void on_pbHideBar_clicked();
-    void on_pbShowBar_clicked();
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
@@ -103,7 +101,6 @@ private:
   Ui::GeometryWindowClass *ui;
   MainWindow* MW;
   RasterWindowBaseClass *RasterWindow;
-  QWidget *QWinContainer;
 
   bool TMPignore;
 

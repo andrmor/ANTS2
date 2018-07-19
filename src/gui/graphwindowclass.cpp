@@ -111,11 +111,11 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   RasterWindow->ForceResize();
 
   //creating QWindow container and placing the raster window in it
-  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
+//  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
 
-  QMargins margins = RasterWindow->frameMargins();
-  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
-  QWinContainer->setVisible(true);
+//  QMargins margins = RasterWindow->frameMargins();
+//  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
+//  QWinContainer->setVisible(true);
 
   //connecting signals-slots
   connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);

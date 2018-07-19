@@ -13,30 +13,8 @@
 #include "TBox.h"
 #include "TPolyLine.h"
 
-RasterWindowGraphClass::RasterWindowGraphClass(QMainWindow *parent) : RasterWindowBaseClass(parent)
-{
-  //init
-  ExtractionComplete = false;
-  ExtractionOfXStarted = false;
-  ExtractionOfXPending = false;
-  ExtractionOf2DLinePending = false;
-  ExtractionOf2DLineStarted = false;
-  ExtractionOf2DEllipsePending = false;
-  ExtractionOf2DEllipsePhase = 0;
-  ExtractionOf2DBoxStarted = false;
-  ExtractionOf2DBoxPending = false;
-  ExtractionOf2DPolygonStarted = false;
-  ExtractionOf2DPolygonPending = false;
-
-  ShowCursorPosition = true;
-
-  extractedX = 0;
-  VertLine1 = 0;
-  Line2D = 0;
-  Box2D = 0;
-  Ellipse = 0;
-  Polygon = 0; 
-}
+RasterWindowGraphClass::RasterWindowGraphClass(QMainWindow *MasterWindow) :
+    RasterWindowBaseClass(MasterWindow) {}
 
 RasterWindowGraphClass::~RasterWindowGraphClass()
 { 
@@ -72,39 +50,13 @@ bool RasterWindowGraphClass::event(QEvent *event)
         event->ignore();
         return true;
 
+/*         ***!!!
     case QEvent::UpdateRequest :
    //     qDebug()<<"canvas update request received";
         if (isExposed())
           if (fCanvas) fCanvas->Update();
         return true;
-
- /*  // TO CHANGE FUNCTIONALITY ON MW   !!!
-    case QEvent::Move :
-            MW->DefaultGraphSize.setX(this->geometry().x());
-            MW->DefaultGraphSize.setY(this->geometry().y());
-            MW->DefaultGraphSize.setWidth(this->geometry().width());
-            MW->DefaultGraphSize.setHeight(this->geometry().height());
-        break;
-  */
-
-
-  /*   //  MOVE TO QMAINWINDOWCONTAINER !!!
-    case QEvent::Show :
-          if (MW->WindowNavigator)
-            {
-              if (typeRW == 1) MW->WindowNavigator->ShowWindowTriggered("geometry");
-              else MW->WindowNavigator->ShowWindowTriggered("graph");
-            }
-        break;
-
-    case QEvent::Hide :
-        if (MW->WindowNavigator)
-          {
-            if (typeRW == 1) MW->WindowNavigator->HideWindowTriggered("geometry");
-            else MW->WindowNavigator->HideWindowTriggered("graph");
-          }
-        break;
-  */
+*/
 
    /*
     case QEvent::WindowStateChange :
@@ -113,7 +65,7 @@ bool RasterWindowGraphClass::event(QEvent *event)
     default:
         break;
     }
-  return QWindow::event(event);
+  return QWidget::event(event);
 }
 
 void RasterWindowGraphClass::mousePressEvent(QMouseEvent *event)

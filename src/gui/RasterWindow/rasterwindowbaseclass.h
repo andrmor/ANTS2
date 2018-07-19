@@ -1,17 +1,17 @@
 #ifndef RASTERWINDOWBASECLASS_H
 #define RASTERWINDOWBASECLASS_H
 
-#include <QWindow>
+#include <QWidget>
 #include <TMathBase.h>
 
 class TCanvas;
 class QMainWindow;
 
-class RasterWindowBaseClass : public QWindow
+class RasterWindowBaseClass : public QWidget
 {
     Q_OBJECT
 public:
-    explicit RasterWindowBaseClass(QMainWindow *parent);
+    explicit RasterWindowBaseClass(QMainWindow *MasterWindow);
     virtual ~RasterWindowBaseClass();
 
     TCanvas* fCanvas;
@@ -36,21 +36,24 @@ signals:
     void UserChangedWindow(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta);
 
 protected:
-    void exposeEvent(QExposeEvent *event);
+    //void exposeEvent(QExposeEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
+    virtual void    paintEvent( QPaintEvent *event ) override;
+    virtual void    resizeEvent(QResizeEvent *event ) override;
+
 protected:
     QMainWindow *MasterWindow;
     int wid;
-    bool PressEventRegistered; //to avoid Qt bug - "leaking" of events to another window
+    bool PressEventRegistered = false; //to avoid Qt bug - "leaking" of events to another window
     int lastX, lastY;
     double lastCenterX, lastCenterY;
-    bool fBlockEvents;
+    bool fBlockEvents = false;
 
-    bool fInvertedXYforDrag;
+    bool fInvertedXYforDrag = false;
 
 };
 

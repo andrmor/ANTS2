@@ -303,7 +303,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->show();
     GeometryWindow->resize(GeometryWindow->width()+1, GeometryWindow->height());
     GeometryWindow->resize(GeometryWindow->width()-1, GeometryWindow->height());
-    QThread::msleep(50);
+    //QThread::msleep(50);
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 

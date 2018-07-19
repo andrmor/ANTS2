@@ -8,21 +8,36 @@
 #include "TView.h"
 #include "TView3D.h"
 
-RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *parent) : QWindow()
+RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *MasterWindow) : QWidget(MasterWindow), MasterWindow(MasterWindow)
 {
-  //qDebug()<<"->Creating raster window";
-  MasterWindow = parent;
-  fBlockEvents = false;
-  fInvertedXYforDrag = false;
+  qDebug()<<"->Creating raster window";
+
+/*
   create();
-
   setGeometry(50, 50, 500, 500);
-
   wid = gVirtualX->AddWindow(QWindow::winId(), QWindow::width(), QWindow::height());
   fCanvas = new TCanvas("fCanvas", 100, 100, wid);
+*/
 
-  PressEventRegistered = false;
-  //qDebug() << "  ->Root canvas created";
+  // set options needed to properly update the canvas when resizing the widget
+  // and to properly handle context menus and mouse move events
+  setAttribute(Qt::WA_PaintOnScreen, false);
+  setAttribute(Qt::WA_OpaquePaintEvent, true);
+  setAttribute(Qt::WA_NativeWindow, true);
+  setUpdatesEnabled(false);
+  setMouseTracking(true);
+  setMinimumSize(300, 200);
+
+  // register the QWidget in TVirtualX, giving its native window id
+  int wid = gVirtualX->AddWindow((ULong_t)winId(), width(), height());
+  // create the ROOT TCanvas, giving as argument the QWidget registered id
+  fCanvas = new TCanvas("Root Canvas", width(), height(), wid);
+  //TQObject::Connect("TGPopupMenu", "PoppedDown()", "TCanvas", fCanvas, "Update()");
+
+  fCanvas->SetBorderMode(0);
+  fCanvas->SetFillColor(0);
+
+  qDebug() << "  ->Root canvas created";
 }
 
 RasterWindowBaseClass::~RasterWindowBaseClass()
@@ -54,6 +69,7 @@ void RasterWindowBaseClass::UpdateRootCanvas()
   fCanvas->Update();
 }
 
+/*
 void RasterWindowBaseClass::exposeEvent(QExposeEvent *)
 {
   if (!fCanvas) return;
@@ -61,6 +77,7 @@ void RasterWindowBaseClass::exposeEvent(QExposeEvent *)
   //qDebug() << "raster window -> Expose event";
   if (isExposed()) fCanvas->Update();
 }
+*/
 
 void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
 {
@@ -193,6 +210,25 @@ void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
   Double_t phi = fCanvas->GetView()->GetLongitude();
 
   emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
+}
+
+void RasterWindowBaseClass::paintEvent(QPaintEvent *event)
+{
+    if (fCanvas)
+    {
+       fCanvas->Resize();
+       fCanvas->Update();
+    }
+}
+
+void RasterWindowBaseClass::resizeEvent(QResizeEvent *event)
+{
+    if (fCanvas)
+    {
+       fCanvas->SetCanvasSize(event->size().width(), event->size().height());
+       fCanvas->Resize();
+       fCanvas->Update();
+    }
 }
 
 void RasterWindowBaseClass::ForceResize()

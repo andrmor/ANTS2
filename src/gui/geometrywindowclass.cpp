@@ -25,7 +25,6 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
   ui(new Ui::GeometryWindowClass)
 {    
   RasterWindow = 0;
-  QWinContainer = 0;
   ColdStart = 0;
   BarShown = true;
   TMPignore = false;
@@ -47,11 +46,10 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
   this->setMinimumWidth(200);
   RasterWindow = new RasterWindowBaseClass(this);
-  RasterWindow->resize(400, 400);
-  RasterWindow->ForceResize();
+  //RasterWindow->resize(400, 400);
+  centralWidget()->layout()->addWidget(RasterWindow);
+  //RasterWindow->ForceResize();
 
-  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
-  QWinContainer->setVisible(true);
   connect(RasterWindow, SIGNAL(UserChangedWindow(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)),
           this, SLOT(onRasterWindowChange(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)));  
 
@@ -99,7 +97,7 @@ void GeometryWindowClass::ClearRootCanvas()
 
 void GeometryWindowClass::UpdateRootCanvas()
 {
-  //RasterWindow->fCanvas->Modified();
+  RasterWindow->fCanvas->Modified();
   RasterWindow->fCanvas->Update();
 }
 
@@ -130,12 +128,11 @@ void GeometryWindowClass::ResetView()
 
 void GeometryWindowClass::setHideUpdate(bool flag)
 {
-  QWinContainer->setVisible(!flag);
+  RasterWindow->setVisible(!flag);
 }
 
 void GeometryWindowClass::PostDraw()
 {  
-  //TView3D *v = (TView3D*)RasterWindow->fCanvas->GetView();
   TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
   if (!v) return;
 
@@ -215,17 +212,8 @@ bool GeometryWindowClass::IsWorldVisible()
 
 void GeometryWindowClass::resizeEvent(QResizeEvent *)
 {
-  //tool bar box height fits the window
-  ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 3);
-
-  double width = this->width() - (3 + ui->fUIbox->width() + 3);
-  double height = this->height() - (3 + 3);
-
-//  qDebug()<<ui->fUIbox->x()+ui->fUIbox->width()+3<<width<<height;
-// the second parameter adjusted to show menubar - VS
-  if (QWinContainer) QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() +2,
-                                                this->menuBar()->height()+3, width, height);
-  if (RasterWindow) RasterWindow->ForceResize();
+  //if (RasterWindow) RasterWindow->ForceResize();
+  //ShowGeometry(true, false);
 }
 
 bool GeometryWindowClass::event(QEvent *event)
@@ -444,24 +432,6 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
     AddLineToGeometry(poly[i], poly[i+1], color, width);
 }
 
-void GeometryWindowClass::on_pbHideBar_clicked()
-{
-  BarShown = false;
-  ui->fUIbox->resize(23,500);
-  ui->swToolBar->setCurrentIndex(1);
-
-  GeometryWindowClass::resizeEvent(0);
-}
-
-void GeometryWindowClass::on_pbShowBar_clicked()
-{
-  BarShown = true;
-  ui->fUIbox->resize(107,500);
-  ui->swToolBar->setCurrentIndex(0);
-
-  GeometryWindowClass::resizeEvent(0);
-}
-
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 // default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
 {
@@ -472,7 +442,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //with or without activation (focussing) of this window
     if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
     else SetAsActiveRootWindow(); //no activation in this mode
-
     MW->Detector->GeoManager->SetNsegments(MW->GlobSet->NumSegments);
     int level = ui->sbLimitVisibility->value();
     if (!ui->cbLimitVisibility->isChecked()) level = -1;

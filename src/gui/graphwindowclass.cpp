@@ -117,6 +117,10 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
 //  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
 //  QWinContainer->setVisible(true);
 
+  QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
+  if (l) l->insertWidget(1, RasterWindow);
+  else message("Unexpected layout!", this);
+
   //connecting signals-slots
   connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
 
@@ -631,10 +635,13 @@ void GraphWindowClass::startOverlayMode()
         return;
 
     QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
-    gvOver->setGeometry(QWinContainer->geometry());
-    scene->setSceneRect(0, 0, QWinContainer->width(), QWinContainer->height());
+    gvOver->resize(RasterWindow->width(), RasterWindow->height());
+    //gvOver->move(RasterWindow->x(), RasterWindow->y());
+    gvOver->move(RasterWindow->x(), menuBar()->height());
+    //gvOver->setGeometry(RasterWindow->geometry());
+    scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
     scene->setBackgroundBrush(map);
-    QWinContainer->setVisible(false);// map.save("TestMap.png");
+    //RasterWindow->setVisible(false);// map.save("TestMap.png");
 
     QPointF origin;
     RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
@@ -653,8 +660,10 @@ void GraphWindowClass::endOverlayMode()
         return;
 
     gvOver->hide();
-    QWinContainer->setVisible(true);
+    //RasterWindow->setVisible(true);
     setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+    RasterWindow->fCanvas->Update();
 }
 
 void GraphWindowClass::OnBusyOn()
@@ -677,31 +686,28 @@ void GraphWindowClass::switchOffBasket()
 void GraphWindowClass::resizeEvent(QResizeEvent *)
 {
   //tool bar box height and basket fit the window
-  ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
-  ui->fBasket->resize(ui->fBasket->width(), this->height());
-  ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
+  //ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
+  //ui->fBasket->resize(ui->fBasket->width(), this->height());
+  //ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
 
-  int deltaBasket = 0;
-  if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
+  //int deltaBasket = 0;
+  //if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
 
-  int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
-  int height = this->height() - (3 + 3);
+  //int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
+  //int height = this->height() - (3 + 3);
 //  qDebug()<<width<<height;
 
-  int mh = 0;
-  if (ui->menuBar) mh =  ui->menuBar->height();
-  if (QWinContainer) QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
-  if (RasterWindow) RasterWindow->ForceResize();
+  //int mh = 0;
+  //if (ui->menuBar) mh =  ui->menuBar->height();
+  //if (RasterWindow) RasterWindow->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
+  //if (RasterWindow) RasterWindow->ForceResize();
 
-  if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
-
-//  if (QWinContainer && RasterWindow && gvOver)
-  //    if (ui->cbProjectionTool->isChecked()) GraphWindowClass::on_pbPrepareOverlay_clicked();
+  //if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
 }
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
-    if(QWinContainer->isVisible())
+    if(RasterWindow->isVisible())
     {
         QMainWindow::mouseMoveEvent(event);
         return;
@@ -1683,7 +1689,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     }
     else
     {
-        endOverlayMode();
+      endOverlayMode();
     }
     gvOver->update();
 }
@@ -3499,7 +3505,7 @@ void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
 
    double XperP = fabs(RasterWindow->getXperPixel());
    double YperP = fabs(RasterWindow->getYperPixel());
-   double CanvasWidth = QWinContainer->width();
+   double CanvasWidth = RasterWindow->width();
    double NewCanvasWidth = CanvasWidth * XperP/YperP;
    double delta = NewCanvasWidth - CanvasWidth;
    resize(width()+delta, height());

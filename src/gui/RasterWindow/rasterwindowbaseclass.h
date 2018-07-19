@@ -33,7 +33,7 @@ public:
 
 signals:
     void LeftMouseButtonReleased();
-    void UserChangedWindow(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta);
+    void UserChangedWindow(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
 
 protected:
     //void exposeEvent(QExposeEvent *event);

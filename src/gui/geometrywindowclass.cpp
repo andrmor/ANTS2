@@ -21,21 +21,9 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  QMainWindow(parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
-  RasterWindow = 0;
-  ColdStart = 0;
-  BarShown = true;
-  TMPignore = false;
-  ModePerspective = true;
-  fRecallWindow = false;
-  GeoMarkerSize = 2;
-  GeoMarkerStyle = 6;
-  ZoomLevel = 2;
-  fNeedZoom = true;
-
-  MW = mw;
   ui->setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -50,8 +38,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
   centralWidget()->layout()->addWidget(RasterWindow);
   //RasterWindow->ForceResize();
 
-  connect(RasterWindow, SIGNAL(UserChangedWindow(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)),
-          this, SLOT(onRasterWindowChange(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)));  
+  connect(RasterWindow, &RasterWindowBaseClass::UserChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
 
   QActionGroup* group = new QActionGroup( this );
   ui->actionSmall_dot->setActionGroup(group);
@@ -595,7 +582,7 @@ void GeometryWindowClass::on_pbFront_clicked()
   readRasterWindowProperties();
 }
 
-void GeometryWindowClass::onRasterWindowChange(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta)
+void GeometryWindowClass::onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
 {
   fRecallWindow = true;
   CenterX = centerX;

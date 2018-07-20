@@ -75,6 +75,8 @@ void ANeutronInteractionElement::writeToJson(QJsonObject &json, AMaterialParticl
     writeTwoQVectorsToJArray(Energy, CrossSection, ar);
     json["CrossSection"] = ar;
 
+    json["Header"] = CSfileHeader;
+
     QJsonArray crArr;
     for (const ADecayScenario& cr : DecayScenarios)
         crArr << cr.writeToJson(MpCollection);
@@ -98,6 +100,9 @@ void ANeutronInteractionElement::readFromJson(const QJsonObject &json, AMaterial
     CrossSection.clear();
     QJsonArray ar = json["CrossSection"].toArray();
     readTwoQVectorsFromJArray(ar, Energy, CrossSection);
+
+    CSfileHeader.clear();
+    parseJson(json, "Header", CSfileHeader);
 
     DecayScenarios.clear();
     ar = json["DecayScenarios"].toArray();

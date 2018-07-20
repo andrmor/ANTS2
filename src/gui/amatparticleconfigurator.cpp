@@ -112,6 +112,21 @@ const QString AMatParticleConfigurator::getNatAbundFileName() const
     return ui->leNatAbundFile->text();
 }
 
+const QString AMatParticleConfigurator::getCrossSectionDataDir() const
+{
+    return ui->leDir->text();
+}
+
+const QString AMatParticleConfigurator::getHeaderLineId() const
+{
+    return ui->leHeaderId->text();
+}
+
+int AMatParticleConfigurator::getNumCommentLines() const
+{
+    return ui->sbNumHeaderLines->value();
+}
+
 void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
 {
     json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();
@@ -119,16 +134,19 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
-    json["NaturalAbundanciesFile"] = ui->leNatAbundFile->text();
+    json["NaturalAbundanciesFileName"] = ui->leNatAbundFile->text();
 
-    json["AutoLoad"] = ui->cbAuto->isChecked();
-    json["Dir"] = ui->leDir->text();
+    json["EnableAutoLoad"] = ui->cbAuto->isChecked();
+    json["CrossSectionsDir"] = ui->leDir->text();
     json["PreName"] = ui->lePreName->text();
     json["MidName"] = ui->leSeparatorInName->text();
     json["EndName"] = ui->leEndName->text();
     json["PreNameAbs"] = ui->lePreNameAbs->text();
     json["MidNameAbs"] = ui->leSeparatorInNameAbs->text();
     json["EndNameAbs"] = ui->leEndNameAbs->text();
+
+    json["HeaderId"] = ui->leHeaderId->text();
+    json["HeaderNumLines"] = ui->sbNumHeaderLines->value();
 }
 
 void AMatParticleConfigurator::readFromJson(QJsonObject &json)
@@ -138,16 +156,19 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditDouble(json, "MinEnergy", ui->ledMinEnergy);
     JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);
 
-    JsonToLineEditText(json, "NaturalAbundanciesFile", ui->leNatAbundFile);
+    JsonToLineEditText(json, "NaturalAbundanciesFileName", ui->leNatAbundFile);
 
-    JsonToCheckbox(json, "AutoLoad", ui->cbAuto);
-    JsonToLineEditText(json, "Dir", ui->leDir);
+    JsonToCheckbox(json, "EnableAutoLoad", ui->cbAuto);
+    JsonToLineEditText(json, "CrossSectionsDir", ui->leDir);
     JsonToLineEditText(json, "PreName", ui->lePreName);
     JsonToLineEditText(json, "MidName", ui->leSeparatorInName);
     JsonToLineEditText(json, "EndName", ui->leEndName);
     JsonToLineEditText(json, "PreNameAbs", ui->lePreNameAbs);
     JsonToLineEditText(json, "MidNameAbs", ui->leSeparatorInNameAbs);
     JsonToLineEditText(json, "EndNameAbs", ui->leEndNameAbs);
+
+    JsonToLineEditText(json, "HeaderId", ui->leHeaderId);
+    JsonToSpinBox(json, "HeaderNumLines", ui->sbNumHeaderLines);
 }
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()

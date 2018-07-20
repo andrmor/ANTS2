@@ -564,16 +564,6 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   return true;
 }
 
-MatParticleStructure::MatParticleStructure()
-{
-  PhYield = 0;
-  IntrEnergyRes = 0;
-  TrackingAllowed = false;
-  MaterialIsTransparent = true;
-  bCaptureEnabled = true;
-  bEllasticEnabled = false;
-}
-
 bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mismatch in binning of the data
 {
   InteractionDataX = Terminators[0].PartialCrossSectionEnergy;
@@ -585,6 +575,26 @@ bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mi
           InteractionDataF[j] += Terminators[i].PartialCrossSection[j];
         }
   return true;
+}
+
+void MatParticleStructure::Clear()
+{
+    TrackingAllowed = true;
+    MaterialIsTransparent = true;
+    PhYield = 0;
+    IntrEnergyRes = 0;
+
+    bCaptureEnabled = false;
+    bEllasticEnabled = false;
+    bAllowAbsentCsData = false;
+
+    InteractionDataX.clear();
+    InteractionDataF.clear();
+
+    Terminators.clear();
+
+    DataSource.clear();
+    DataString.clear();
 }
 
 ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionElement(int index)

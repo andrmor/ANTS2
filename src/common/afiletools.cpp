@@ -52,8 +52,16 @@ int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x)
    return 0;
 }
 
-int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<double>* y)
+int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<double>* y, QString * header, int numLines)
 {
+  bool bGetHeader = (header && !header->isEmpty());
+  QString HeaderId;
+  if (bGetHeader)
+  {
+      HeaderId = *header;
+      header->clear();
+  }
+
   if (FileName.isEmpty())
       {
           message("Error: empty name was given to file loader!");
@@ -74,6 +82,15 @@ int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<doub
   while(!in.atEnd())
        {
           QString line = in.readLine();
+
+          if (bGetHeader && line.startsWith(HeaderId) && numLines > 0)
+          {
+              if ( !header->isEmpty() ) *header += "\n";
+              *header += line.remove(0, HeaderId.length());
+              numLines--;
+              continue;
+          }
+
           QStringList fields = line.split(rx, QString::SkipEmptyParts);
 
           bool ok1=false, ok2;

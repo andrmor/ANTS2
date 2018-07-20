@@ -117,6 +117,16 @@ const QString AMatParticleConfigurator::getCrossSectionDataDir() const
     return ui->leDir->text();
 }
 
+const QString AMatParticleConfigurator::getHeaderLineId() const
+{
+    return ui->leHeaderId->text();
+}
+
+int AMatParticleConfigurator::getNumCommentLines() const
+{
+    return ui->sbNumHeaderLines->value();
+}
+
 void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
 {
     json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();
@@ -134,6 +144,9 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["PreNameAbs"] = ui->lePreNameAbs->text();
     json["MidNameAbs"] = ui->leSeparatorInNameAbs->text();
     json["EndNameAbs"] = ui->leEndNameAbs->text();
+
+    json["HeaderId"] = ui->leHeaderId->text();
+    json["HeaderNumLines"] = ui->sbNumHeaderLines->value();
 }
 
 void AMatParticleConfigurator::readFromJson(QJsonObject &json)
@@ -153,6 +166,9 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditText(json, "PreNameAbs", ui->lePreNameAbs);
     JsonToLineEditText(json, "MidNameAbs", ui->leSeparatorInNameAbs);
     JsonToLineEditText(json, "EndNameAbs", ui->leEndNameAbs);
+
+    JsonToLineEditText(json, "HeaderId", ui->leHeaderId);
+    JsonToSpinBox(json, "HeaderNumLines", ui->sbNumHeaderLines);
 }
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()

@@ -51,6 +51,8 @@ public:
     QVector<double> Energy;
     QVector<double> CrossSection;
 
+    QString CSfileHeader;
+
     QVector<ADecayScenario> DecayScenarios;  // only for absorption
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;

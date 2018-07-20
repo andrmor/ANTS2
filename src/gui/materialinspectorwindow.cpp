@@ -2081,7 +2081,9 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
 bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
 {
     QVector<double> x, y;
-    int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
+    QString header = OptionsConfigurator->getHeaderLineId();
+    int hLines = OptionsConfigurator->getNumCommentLines();
+    int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &header, hLines);
     if (res == 0)
     {
         double Multiplier;
@@ -2115,6 +2117,7 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
 
         element->Energy = x;
         element->CrossSection = y;
+        element->CSfileHeader = header;
         on_pbWasModified_clicked();
         return true;
     }
@@ -2580,6 +2583,9 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         graphOver->SetLineColor(kRed);
         graphOver->SetLineWidth(1);
         MW->GraphWindow->Draw(graphOver, "L same");
+
+        if (!element->CSfileHeader.isEmpty())
+            MW->GraphWindow->AddText(element->CSfileHeader, true, 0);
     }
     // -- Load --
     else if (Action.contains("Load"))

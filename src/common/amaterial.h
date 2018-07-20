@@ -142,6 +142,8 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   QString DataString;     //for gamma  - can be used to store composition   obsolete!!!
 
   bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
+
+  void Clear();
 };
 
 #endif // AMATERIAL_H

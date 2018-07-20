@@ -2728,7 +2728,7 @@ resolution:</string>
    </widget>
    <widget class="QMenu" name="menuClear">
     <property name="title">
-     <string>Clear</string>
+     <string>Operations</string>
     </property>
     <addaction name="actionClear_Interaction_for_this_particle"/>
     <addaction name="actionClear_interaction_for_all_particles"/>

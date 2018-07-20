@@ -431,13 +431,6 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->cbAllowAbsentCsData->setChecked(mp.bAllowAbsentCsData);
 
           FillNeutronTable();
-
-          bool bWarn = false;
-          if (mp.bCaptureEnabled || mp.bAllowAbsentCsData)
-          {
-
-          }
-
       }
       else if (type == AParticle::_gamma_)
       {
@@ -1713,7 +1706,7 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
 {
   QMessageBox *msgBox = new QMessageBox( this );
   msgBox->setWindowTitle("Confirmation");
-  msgBox->setText("Clear interaction data for the selected material and particle?");
+  msgBox->setText( QString("Clear ALL interaction data of material %1 for particle %2?").arg(ui->leName->text()).arg(ui->cobParticle->currentText()) );
   msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -1724,21 +1717,10 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
     }
   if (msgBox) delete msgBox;
 
-    int i = ui->cobParticle->currentIndex();
+    int iPart = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    tmpMaterial.MatParticle[i].TrackingAllowed = true;
-    tmpMaterial.MatParticle[i].MaterialIsTransparent = true;
-    tmpMaterial.MatParticle[i].PhYield=0;
-    tmpMaterial.MatParticle[i].IntrEnergyRes=0;
-    tmpMaterial.MatParticle[i].InteractionDataX.resize(0);
-    tmpMaterial.MatParticle[i].InteractionDataF.resize(0);
-    tmpMaterial.MatParticle[i].Terminators.resize(0);
-
-    tmpMaterial.MatParticle[i].DataSource.clear();
-    tmpMaterial.MatParticle[i].DataString.clear();
-    tmpMaterial.MatParticle[i].bCaptureEnabled = true;
-    tmpMaterial.MatParticle[i].bEllasticEnabled = false;
+    tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
@@ -1748,7 +1730,7 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
 {
   QMessageBox *msgBox = new QMessageBox( this );
   msgBox->setWindowTitle("Confirmation");
-  msgBox->setText("Clear interaction data for the selected material and ALL particles?");
+  msgBox->setText( QString("Clear ALL interaction data of material %1 for ALL particles?").arg(ui->leName->text()) );
   msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -1762,21 +1744,8 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
     //for (int i=0; i<Detector->ParticleCollection.size(); i++)
-    for (int i=0; i<Detector->MpCollection->countParticles(); i++)
-    {
-        tmpMaterial.MatParticle[i].TrackingAllowed = true;
-        tmpMaterial.MatParticle[i].MaterialIsTransparent = true;
-        tmpMaterial.MatParticle[i].PhYield=0;
-        tmpMaterial.MatParticle[i].IntrEnergyRes=0;
-        tmpMaterial.MatParticle[i].bCaptureEnabled=true;
-        tmpMaterial.MatParticle[i].bEllasticEnabled=false;
-        tmpMaterial.MatParticle[i].InteractionDataX.resize(0);
-        tmpMaterial.MatParticle[i].InteractionDataF.resize(0);
-        tmpMaterial.MatParticle[i].Terminators.resize(0);
-
-        tmpMaterial.MatParticle[i].DataSource.clear();
-        tmpMaterial.MatParticle[i].DataString.clear();
-    }
+    for (int iPart=0; iPart<Detector->MpCollection->countParticles(); iPart++)
+        tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
@@ -2137,7 +2106,7 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
     if (fileName.isEmpty()) return false;
     if ( !QFileInfo(fileName).exists() ) return false;
 
-    qDebug() << "Autoload cross-section from file: " <<fileName;
+    //qDebug() << "Autoload cross-section from file: " <<fileName;
 
     return doLoadCrossSection(element, fileName);
 }

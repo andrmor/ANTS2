@@ -577,6 +577,26 @@ bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mi
   return true;
 }
 
+void MatParticleStructure::Clear()
+{
+    TrackingAllowed = true;
+    MaterialIsTransparent = true;
+    PhYield = 0;
+    IntrEnergyRes = 0;
+
+    bCaptureEnabled = false;
+    bEllasticEnabled = false;
+    bAllowAbsentCsData = false;
+
+    InteractionDataX.clear();
+    InteractionDataF.clear();
+
+    Terminators.clear();
+
+    DataSource.clear();
+    DataString.clear();
+}
+
 ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionElement(int index)
 {
     if (index<0 || index>=IsotopeRecords.size()) return 0;

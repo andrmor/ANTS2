@@ -99,7 +99,6 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_pbConfigureAutoElastic_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
@@ -152,6 +151,8 @@ private slots:
 
     void on_pbPriT_test_clicked();
 
+    void on_actionNeutrons_triggered();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -167,8 +168,8 @@ private:
 
     bool bMessageLock = false;
 
-    void UpdateWaveButtons();
-    void UpdateActionButtons();
+    void updateWaveButtons();
+    void updateActionButtons();
 
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
@@ -183,6 +184,7 @@ private:
 
     void SetWasModified(bool flag);
     bool parseDecayTime();
+    void updateWarningIcons();
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

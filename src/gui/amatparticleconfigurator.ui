@@ -117,7 +117,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Automatically look for neutron coss-section files</string>
+    <string>Auto-load neutron interaction coss-section data</string>
    </property>
    <property name="checked">
     <bool>false</bool>
@@ -258,7 +258,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Elastic scattering file name structure:</string>
+     <string>Elastic scattering file name template:</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lePreNameAbs">
@@ -284,7 +284,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Absorption file name structure:</string>
+     <string>Absorption file name template:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">

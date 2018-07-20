@@ -564,16 +564,6 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   return true;
 }
 
-MatParticleStructure::MatParticleStructure()
-{
-  PhYield = 0;
-  IntrEnergyRes = 0;
-  TrackingAllowed = false;
-  MaterialIsTransparent = true;
-  bCaptureEnabled = true;
-  bEllasticEnabled = false;
-}
-
 bool MatParticleStructure::CalculateTotalForGamma() //true - success, false - mismatch in binning of the data
 {
   InteractionDataX = Terminators[0].PartialCrossSectionEnergy;

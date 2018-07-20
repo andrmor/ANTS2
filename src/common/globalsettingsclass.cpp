@@ -49,6 +49,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
     //dir where examples will be copied
   ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES";
 
+  //dir where examples will be copied
+  ResourcesDir = QDir::current().absolutePath() + "/DATA";
+
 #ifdef Q_OS_WIN32
   if (!QDir(ExamplesDir).exists())  //direct call of ants2.exe
   {
@@ -74,7 +77,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
 //  qDebug() << "-conf-"<<ConfigDir;
 
   //natutal abundances data default filename
-  MaterialsAndParticlesSettings["NaturalAbundanciesFile"] = ExamplesDir+"/"+"IsotopeNaturalAbundances.txt";
+  MaterialsAndParticlesSettings["NaturalAbundanciesFileName"] = ResourcesDir+"/Neutrons/IsotopeNaturalAbundances.txt";
+  MaterialsAndParticlesSettings["CrossSectionsDir"] = ResourcesDir+"/Neutrons/CrossSections";
+  MaterialsAndParticlesSettings["EnableAutoLoad"] = true;
 
   //if exists,load file fith ANTS2 settings, otherwise create config dir
   if (!QDir(ConfigDir).exists())

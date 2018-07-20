@@ -123,17 +123,15 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
 {
-  MatParticleStructure();
-
-  bool TrackingAllowed;
-  bool MaterialIsTransparent;
-  double PhYield;         // Photon yield of the primary scintillation
-  double IntrEnergyRes; // intrinsic energy resolution
+  bool TrackingAllowed = false;
+  bool MaterialIsTransparent = true;
+  double PhYield = 0;         // Photon yield of the primary scintillation
+  double IntrEnergyRes = 0; // intrinsic energy resolution
 
   //for neutrons - separate activation of capture and ellastic scattering is possible
-  bool bCaptureEnabled;
-  bool bEllasticEnabled;
-  bool bAllowAbsentCsData;
+  bool bCaptureEnabled = true;
+  bool bEllasticEnabled = false;
+  bool bAllowAbsentCsData = false;
 
   QVector<double> InteractionDataX; //energy in keV
   QVector<double> InteractionDataF; //stopping power (for charged) or total interaction cross-section (neutrals)

@@ -112,6 +112,11 @@ const QString AMatParticleConfigurator::getNatAbundFileName() const
     return ui->leNatAbundFile->text();
 }
 
+const QString AMatParticleConfigurator::getCrossSectionDataDir() const
+{
+    return ui->leDir->text();
+}
+
 void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
 {
     json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();
@@ -119,10 +124,10 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
-    json["NaturalAbundanciesFile"] = ui->leNatAbundFile->text();
+    json["NaturalAbundanciesFileName"] = ui->leNatAbundFile->text();
 
-    json["AutoLoad"] = ui->cbAuto->isChecked();
-    json["Dir"] = ui->leDir->text();
+    json["EnableAutoLoad"] = ui->cbAuto->isChecked();
+    json["CrossSectionsDir"] = ui->leDir->text();
     json["PreName"] = ui->lePreName->text();
     json["MidName"] = ui->leSeparatorInName->text();
     json["EndName"] = ui->leEndName->text();
@@ -138,10 +143,10 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditDouble(json, "MinEnergy", ui->ledMinEnergy);
     JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);
 
-    JsonToLineEditText(json, "NaturalAbundanciesFile", ui->leNatAbundFile);
+    JsonToLineEditText(json, "NaturalAbundanciesFileName", ui->leNatAbundFile);
 
-    JsonToCheckbox(json, "AutoLoad", ui->cbAuto);
-    JsonToLineEditText(json, "Dir", ui->leDir);
+    JsonToCheckbox(json, "EnableAutoLoad", ui->cbAuto);
+    JsonToLineEditText(json, "CrossSectionsDir", ui->leDir);
     JsonToLineEditText(json, "PreName", ui->lePreName);
     JsonToLineEditText(json, "MidName", ui->leSeparatorInName);
     JsonToLineEditText(json, "EndName", ui->leEndName);

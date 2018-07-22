@@ -603,19 +603,11 @@ void AMaterialParticleCollection::registerNewParticle()
   for (int imat=0; imat<MaterialCollectionData.size();imat++)
     {
       MaterialCollectionData[imat]->MatParticle.resize(index+1);
-      MaterialCollectionData[imat]->MatParticle[index].InteractionDataF.resize(0);
-      MaterialCollectionData[imat]->MatParticle[index].InteractionDataX.resize(0);
-      MaterialCollectionData[imat]->MatParticle[index].PhYield = 0;
-      MaterialCollectionData[imat]->MatParticle[index].IntrEnergyRes = 0;
-      MaterialCollectionData[imat]->MatParticle[index].Terminators.resize(0);
+      MaterialCollectionData[imat]->MatParticle[index].Clear();
     }
 
   tmpMaterial.MatParticle.resize(index+1);
-  tmpMaterial.MatParticle[index].InteractionDataF.resize(0);
-  tmpMaterial.MatParticle[index].InteractionDataX.resize(0);
-  tmpMaterial.MatParticle[index].PhYield = 0;
-  tmpMaterial.MatParticle[index].IntrEnergyRes = 0;
-  tmpMaterial.MatParticle[index].Terminators.resize(0);
+  tmpMaterial.MatParticle[index].Clear();
 }
 
 bool AMaterialParticleCollection::DeleteMaterial(int imat)

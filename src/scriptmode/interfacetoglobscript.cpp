@@ -701,6 +701,8 @@ QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
           else if (whichOne == "energy") h = mon->getEnergy();
           else return vl;
 
+          if (!h) return vl;
+
           TAxis* axis = h->GetXaxis();
           for (int i=1; i<axis->GetNbins()+1; i++)
           {
@@ -781,6 +783,9 @@ AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* Even
                           "After all events are reconstructed, SetReconstructionReady() has to be called!";
 
   H["GetStatistics"] = "Returns (if available) an array with GoodEvents, Average_Chi2, Average_XY_deviation";
+
+  H["GetTruePoints"] = "Return array of true (scan) points for the event. Array elements are [x, y, z, energy]";
+  H["GetTrueNumberPoints"] = "Return number of true (scan) points for the given event";
 }
 
 double AInterfaceToData::GetPMsignal(int ievent, int ipm)
@@ -978,7 +983,7 @@ bool AInterfaceToData::checkSetReconstructionDataRequest(int ievent)
   return true;
 }
 
-bool AInterfaceToData::checkTrueDataRequest(int ievent)
+bool AInterfaceToData::checkTrueDataRequest(int ievent, int iPoint)
 {
   if (EventsDataHub->isScanEmpty())
     {
@@ -991,6 +996,11 @@ bool AInterfaceToData::checkTrueDataRequest(int ievent)
       abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
       return false;
     }
+  if (iPoint<0 || iPoint >= EventsDataHub->Scan.at(ievent)->Points.size())
+  {
+      abort( QString("Bad scan point number: event #%1 has %2 point(s)").arg(ievent).arg( EventsDataHub->Scan.at(ievent)->Points.size() ));
+      return false;
+  }
   return true;
 }
 
@@ -1114,34 +1124,46 @@ int AInterfaceToData::countReconstructedPoints(int igroup, int ievent)
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points.size();
 }
 
-double AInterfaceToData::GetTrueX(int ievent)
+double AInterfaceToData::GetTrueX(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[0];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[0];
 }
 
-double AInterfaceToData::GetTrueY(int ievent)
+double AInterfaceToData::GetTrueY(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[1];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[1];
 }
 
-double AInterfaceToData::GetTrueZ(int ievent)
+double AInterfaceToData::GetTrueZ(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[2];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[2];
 }
 
-double AInterfaceToData::GetTrueEnergy(int ievent)
+double AInterfaceToData::GetTrueEnergy(int ievent, int iPoint)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].energy;
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].energy;
 }
 
-int AInterfaceToData::GetTruePoints(int ievent)
+const QVariant AInterfaceToData::GetTruePoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points.size();
+
+  QVariantList list;
+  const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
+  for (int i=0; i<p.size(); i++)
+  {
+      QVariantList el;
+      el << p.at(i).r[0];
+      el << p.at(i).r[1];
+      el << p.at(i).r[2];
+      el << p.at(i).energy;
+      list.push_back(el);
+  }
+  return list;
 }
 
 bool AInterfaceToData::IsTrueGoodEvent(int ievent)
@@ -1150,7 +1172,7 @@ bool AInterfaceToData::IsTrueGoodEvent(int ievent)
   return EventsDataHub->Scan.at(ievent)->GoodEvent;
 }
 
-bool AInterfaceToData::GetTrueNumberPoints(int ievent)
+int AInterfaceToData::GetTrueNumberPoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points.size();

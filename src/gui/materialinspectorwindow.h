@@ -165,6 +165,7 @@ private:
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
+    bool bLockTmpMaterial = false;
 
     bool bMessageLock = false;
 
@@ -180,11 +181,13 @@ private:
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    void autoloadMissingCrossSectionData();
+    int autoloadMissingCrossSectionData(); //returns number of particles added to the collection
 
     void SetWasModified(bool flag);
     bool parseDecayTime();
     void updateWarningIcons();
+    int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
+    void updateTmpMatOnPartCollChange(int newPartAdded);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

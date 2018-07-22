@@ -190,13 +190,14 @@ public slots:
   int countReconstructedPoints(int igroup, int ievent);
 
   // True values known in sim or from a calibration dataset
-  double GetTrueX(int ievent);
-  double GetTrueY(int ievent);
-  double GetTrueZ(int ievent);
-  double GetTrueEnergy(int ievent);
-  int GetTruePoints(int ievent);
+  double GetTrueX(int ievent, int iPoint = 0);
+  double GetTrueY(int ievent, int iPoint = 0);
+  double GetTrueZ(int ievent, int iPoint = 0);
+  double GetTrueEnergy(int ievent, int iPoint = 0);
+  const QVariant GetTruePoints(int ievent);
   bool IsTrueGoodEvent(int ievent);
-  bool GetTrueNumberPoints(int ievent);
+  int  GetTrueNumberPoints(int ievent);
+
   void SetScanX(int ievent, double value);
   void SetScanY(int ievent, double value);
   void SetScanZ(int ievent, double value);
@@ -256,7 +257,7 @@ private:
   bool checkEventNumber(int ievent);
   bool checkEventNumber(int igroup, int ievent, int ipoint);
   bool checkPM(int ipm);
-  bool checkTrueDataRequest(int ievent);
+  bool checkTrueDataRequest(int ievent, int iPoint = 0);
   bool checkSetReconstructionDataRequest(int ievent);
 
 signals:

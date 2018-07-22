@@ -58,6 +58,8 @@ public:
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
+
+    void readScenariosFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection);
 };
 
 #endif // ANEUTRONINTERACTIONELEMENT_H

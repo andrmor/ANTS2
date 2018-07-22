@@ -124,6 +124,8 @@ void MaterialInspectorWindow::SetWasModified(bool flag)
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
 {   
+    if (bLockTmpMaterial) return;
+
     int current = ui->cobActiveMaterials->currentIndex();
 
     ui->cobActiveMaterials->clear();    
@@ -2256,7 +2258,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     if (OptionsConfigurator->isAutoloadEnabled())
         numNewPart += autoloadMissingCrossSectionData();
 
-    if (ui->cobParticle->currentIndex() == MW->MpCollection->getNeutronIndex()) FillNeutronTable(); //fill table if neutron is selected
+    FillNeutronTable(); //fill table if neutron is selected
 
     if (numNewPart > 0)
         updateTmpMatOnPartCollChange(numNewPart);
@@ -2275,10 +2277,17 @@ void MaterialInspectorWindow::updateTmpMatOnPartCollChange(int newPartAdded)
         for (int i=0; i<newPartAdded; i++)
         {
             int ipart = MW->MpCollection->countParticles() - newPartAdded + i;
-            if (ipart > 0) s+= QString("\n  %1").arg(MW->MpCollection->getParticleName(ipart));
-            message(s, this);
+            QString partName = MW->MpCollection->getParticleName(ipart);
+            ui->cobParticle->addItem(partName);
+            s+= QString("\n  %1").arg(partName);
         }
-        MW->onRequestDetectorGuiUpdate();
+        s += "\n\nDo not forget to provide interaction cross-sections for the new particles!";
+        message(s, this);
+
+        //forbid the general update of MIwindow - otherwise changes in tmpmat will be lost
+        bLockTmpMaterial = true;
+            MW->onRequestDetectorGuiUpdate();
+        bLockTmpMaterial = false;
     }
 }
 
@@ -2342,6 +2351,9 @@ void flagButton(QPushButton* pb, bool flag)
 
 void MaterialInspectorWindow::FillNeutronTable()
 {
+    int particleId = ui->cobParticle->currentIndex();
+    if (particleId != MW->MpCollection->getNeutronIndex()) return;
+
     //      qDebug() << "Filling neutron table";
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
@@ -2352,7 +2364,6 @@ void MaterialInspectorWindow::FillNeutronTable()
     if (!bCapture && !bElastic) return;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    int particleId = ui->cobParticle->currentIndex();
     QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
@@ -2533,16 +2544,32 @@ void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QP
 
 void MaterialInspectorWindow::on_cbCapture_clicked()
 {
-    if (OptionsConfigurator->isAutoloadEnabled()) autoloadMissingCrossSectionData();
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
 
-    FillNeutronTable();
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
+
+    on_pbWasModified_clicked();
+    updateWarningIcons();
 }
 
 void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 {
-    if (OptionsConfigurator->isAutoloadEnabled()) autoloadMissingCrossSectionData();
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
 
-    FillNeutronTable();
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
+
+    on_pbWasModified_clicked();
+    updateWarningIcons();
 }
 
 void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action)

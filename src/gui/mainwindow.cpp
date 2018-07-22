@@ -503,7 +503,7 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     int OvFrom = ui->cobMaterialForOverrides->currentIndex();
     int OvTo = ui->cobMaterialTo->currentIndex();
 
-    MainWindow::UpdateMaterialListEdit();      
+    UpdateMaterialListEdit();
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
     //updating material selectors on the Detector tab   

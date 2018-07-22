@@ -165,6 +165,7 @@ private:
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
+    bool bLockTmpMaterial = false;
 
     bool bMessageLock = false;
 

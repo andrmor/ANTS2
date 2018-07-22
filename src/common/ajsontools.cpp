@@ -1,5 +1,4 @@
 #include "ajsontools.h"
-#include "amessage.h"
 
 #ifdef GUI
 #include <QCheckBox>
@@ -138,14 +137,14 @@ bool LoadJsonFromFile(QJsonObject &json, QString fileName)
         QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
         json = loadDoc.object();
         loadFile.close();
-        //qDebug()<<"  Loaded Json from file:"<<fileName;
+        //  qDebug()<<"  Loaded Json from file:"<<fileName;
+        return true;
       }
     else
       {
-        message("Cannot open file: "+fileName);
+        //  qDebug() << "Cannot open file:" << fileName;
         return false;
       }
-    return true;
 }
 
 bool SaveJsonToFile(QJsonObject &json, QString fileName)
@@ -158,14 +157,13 @@ bool SaveJsonToFile(QJsonObject &json, QString fileName)
       saveFile.write(saveDoc.toJson());
       saveFile.close();
       //  qDebug()<<"  Saved Json to file:"<<fileName;
+      return true;
     }
   else
     {
-      message("Couldn't save json to file: "+fileName);
+      //  qDebug() << "Couldn't save json to file: "<<fileName;
       return false;
     }
-
-  return true;
 }
 
 bool writeTH1ItoJsonArr(TH1I* hist, QJsonArray &ja)

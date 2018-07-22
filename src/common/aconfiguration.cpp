@@ -233,7 +233,7 @@ void AConfiguration::UpdateParticlesJson()
   QJsonObject djson = JSON["DetectorConfig"].toObject();
   Detector->MpCollection->writeParticleCollectionToJson(djson);
   JSON["DetectorConfig"] = djson;
-  emit requestDetectorGuiUpdate();
+  //emit requestDetectorGuiUpdate();
 }
 
 void AConfiguration::UpdateSourcesJson(QJsonObject &sourcesJson)

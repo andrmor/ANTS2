@@ -220,7 +220,11 @@ void ARemoteWindow::on_pbRateServers_clicked()
     const QString DefDet = MW->GlobSet->ExamplesDir + "/StartupDetector.json";
     QJsonObject js;
     bool bOK = LoadJsonFromFile(js, DefDet);
-    if (!bOK) return;
+    if (!bOK)
+    {
+        message("Cannot open config file StartupDetector.json", this);
+        return;
+    }
 
     //setting flood sim (1000 ev by default)
     QJsonObject sc = js["SimulationConfig"].toObject();

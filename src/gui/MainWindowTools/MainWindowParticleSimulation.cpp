@@ -919,7 +919,8 @@ void MainWindow::on_pbSaveParticleSource_clicked()
   QJsonObject json, js;
   ParticleSources->writeSourceToJson(ui->cobParticleSource->currentIndex(), json);
   js["ParticleSource"] = json;
-  SaveJsonToFile(js, fileName);
+  bool bOK = SaveJsonToFile(js, fileName);
+  if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void MainWindow::on_pbLoadParticleSource_clicked()
@@ -938,7 +939,11 @@ void MainWindow::on_pbLoadParticleSource_clicked()
   int iSource = ui->cobParticleSource->currentIndex();
   QJsonObject json, js;
   bool ok = LoadJsonFromFile(json, fileName);
-  if (!ok) return;
+  if (!ok)
+  {
+      message("Cannot open file: "+fileName, this);
+      return;
+  }
   if (!json.contains("ParticleSource"))
     {
       message("Json file format error", this);
@@ -950,8 +955,8 @@ void MainWindow::on_pbLoadParticleSource_clicked()
   ParticleSources->readSourceFromJson(iSource, js);
   ui->cobParticleSource->setItemText(iSource, ParticleSources->getSource(iSource)->name);
 
-  MainWindow::on_pbUpdateSourcesIndication_clicked();
-  //int newPartCollSize = Detector->ParticleCollection.size();
+  onRequestDetectorGuiUpdate();
+
   int newPartCollSize = Detector->MpCollection->countParticles();
   if (oldPartCollSize != newPartCollSize)
     {
@@ -966,8 +971,6 @@ void MainWindow::on_pbLoadParticleSource_clicked()
       str += "\nSet the interaction data for the detector materials!";
       message(str,this);
     }
-
-  MainWindow::ListActiveParticles(); //also updates all cobs with particle names!
 }
 
 void MainWindow::on_pbSingleSourceShow_clicked()

@@ -40,7 +40,6 @@ public:
 
 private slots:
     void on_pbChangeDir_clicked();
-    void on_pbChangeNatAbFile_clicked();
     void on_pbUpdateGlobSet_clicked();
 
 private:

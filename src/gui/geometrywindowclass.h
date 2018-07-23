@@ -106,7 +106,6 @@ private:
 
   //flags
   bool BarShown = true;
-  bool ColdStart = false;
   bool ShowTop = false;
   bool ColorByMaterial = false;
 

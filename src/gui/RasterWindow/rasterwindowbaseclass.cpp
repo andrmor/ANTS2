@@ -212,7 +212,7 @@ void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
   emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
 }
 
-void RasterWindowBaseClass::paintEvent(QPaintEvent *event)
+void RasterWindowBaseClass::paintEvent(QPaintEvent * /*event*/)
 {
     if (fCanvas)
     {
@@ -255,7 +255,7 @@ void RasterWindowBaseClass::SetWindowTitle(const QString &title)
   MasterWindow->setWindowTitle(title);
 }
 
-void RasterWindowBaseClass::getWindowProperties(Double_t &centerX, Double_t &centerY, Double_t &hWidth, Double_t &hHeight, Double_t &phi, Double_t &theta)
+void RasterWindowBaseClass::getWindowProperties(double &centerX, double &centerY, double &hWidth, double &hHeight, double &phi, double &theta)
 {
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();
@@ -264,7 +264,7 @@ void RasterWindowBaseClass::getWindowProperties(Double_t &centerX, Double_t &cen
   phi = fCanvas->GetView()->GetLongitude();
 }
 
-void RasterWindowBaseClass::setWindowProperties(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta)
+void RasterWindowBaseClass::setWindowProperties(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
 {
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();

@@ -203,6 +203,7 @@ void AMaterial::clear()
   name = "Undefined";
   n = 1.0;
   density = p1 = p2 = p3 = abs = rayleighMFP = reemissionProb = 0;
+  temperature = 298.0;
   e_driftVelocity = W = SecYield = PriScintRaiseTime = PriScintModel = SecScintDecayTime = 0;
   PriScintDecayTimeVector.clear();
   rayleighWave = 500.0;
@@ -252,6 +253,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   //general data
   json["*MaterialName"] = name;
   json["Density"] = density;
+  json["Temperature"] = temperature;
   json["ChemicalComposition"] = ChemicalComposition.writeToJson();
   json["RefractiveIndex"] = n;
   json["BulkAbsorption"] = abs;
@@ -426,6 +428,8 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   //general data
   parseJson(json, "*MaterialName", name);
   parseJson(json, "Density", density);
+  temperature = 298.0; //compatibility
+  parseJson(json, "Temperature", temperature);
   if (json.contains("ChemicalComposition"))
   {
       QJsonObject ccjson = json["ChemicalComposition"].toObject();

@@ -284,6 +284,8 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     str.setNum(tmpMaterial.density, 'g');
     ui->ledDensity->setText(str);
 
+    ui->ledT->setText( QString::number(tmpMaterial.temperature) );
+
     ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
     ShowTreeWithChemicalComposition();
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
@@ -461,6 +463,7 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 
     tmpMaterial.name = ui->leName->text();
     tmpMaterial.density = ui->ledDensity->text().toDouble();    
+    tmpMaterial.temperature = ui->ledT->text().toDouble();
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
@@ -2888,4 +2891,14 @@ void MaterialInspectorWindow::on_actionNeutrons_triggered()
 {
     OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
     OptionsConfigurator->showNormal();
+}
+
+void MaterialInspectorWindow::on_pbShowNcmat_clicked()
+{
+
+}
+
+void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
+{
+
 }

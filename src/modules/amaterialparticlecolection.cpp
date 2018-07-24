@@ -197,7 +197,7 @@ void AMaterialParticleCollection::AddNewMaterial(QString name)
     MaterialCollectionData.last()->name = name;
 }
 
-void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime,
+void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double temperature, double n, double abs, double PriScintDecayTime,
                                              double W, double SecYield, double SecScintDecayTime, double e_driftVelocity,
                                              double p1, double p2, double p3)
 {
@@ -210,6 +210,7 @@ void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double
   MaterialCollectionData[index]->name = name;
 
   MaterialCollectionData[index]->density = density;
+  MaterialCollectionData[index]->temperature = temperature;
   MaterialCollectionData[index]->n = n;
   MaterialCollectionData[index]->abs = abs;
 
@@ -236,6 +237,7 @@ void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
   tmpMaterial.density = 0;
+  tmpMaterial.temperature = 298.0;
   tmpMaterial.p1 = 0;
   tmpMaterial.p2 = 0;
   tmpMaterial.p3 = 0;

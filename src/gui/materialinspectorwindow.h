@@ -153,6 +153,10 @@ private slots:
 
     void on_actionNeutrons_triggered();
 
+    void on_pbShowNcmat_clicked();
+
+    void on_pbLoadNcmat_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

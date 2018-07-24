@@ -62,7 +62,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Only load neutron cross-section data for energy in range:</string>
+    <string>Load neutron cross-section data in energy in range:</string>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -211,7 +211,7 @@
    </widget>
    <widget class="QLineEdit" name="leCustomDataDir">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -221,13 +221,16 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>If you download your own cross-section files, put them in this directory. Then they will be save during update of ANTS2</string>
+    </property>
     <property name="readOnly">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="pbChangeDir">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -390,17 +393,17 @@
      <number>2</number>
     </property>
    </widget>
-   <widget class="QCheckBox" name="cbCrossSectionDirOverriden">
+   <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>16</x>
-      <y>7</y>
-      <width>381</width>
-      <height>17</height>
+      <x>20</x>
+      <y>10</y>
+      <width>361</width>
+      <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Override default path to neutron cross-section data:</string>
+     <string>Look for cross-section files first in this dir (then in system one):</string>
     </property>
    </widget>
   </widget>
@@ -718,54 +721,6 @@
     <hint type="destinationlabel">
      <x>431</x>
      <y>49</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbCrossSectionDirOverriden</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>leCustomDataDir</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>70</x>
-     <y>134</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>67</x>
-     <y>164</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbCrossSectionDirOverriden</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pbChangeDir</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>392</x>
-     <y>133</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>160</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbCrossSectionDirOverriden</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateGlobSet</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>309</x>
-     <y>130</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>417</x>
-     <y>48</y>
     </hint>
    </hints>
   </connection>

@@ -21,13 +21,18 @@ public:
 
     const QString getElasticScatteringFileName(QString Element, QString Mass) const;
     const QString getAbsorptionFileName(QString Element, QString Mass) const;
-    int           getCrossSectionLoadOption() const;
+
+    int           getCrossSectionLoadOption() const; //meV=0, eV, keV, MeV
+
     bool          isAutoloadEnabled() const;
+
     bool          isEnergyRangeLimited() const;
     double        getMinEnergy() const;
     double        getMaxEnergy() const;
+
     const QString getNatAbundFileName() const;
-    const QString getCrossSectionDataDir() const;
+
+    const QString getCrossSectionFirstDataDir() const; //For GUI only
     const QString getHeaderLineId() const;
     int           getNumCommentLines() const;
 
@@ -46,6 +51,8 @@ private:
     Ui::AMatParticleConfigurator *ui;
     GlobalSettingsClass* GlobSet;
     QString StarterDir;
+
+    QString CrossSectionSystemDir;
 };
 
 #endif // AMATPARTICLECONFIGURATOR_H

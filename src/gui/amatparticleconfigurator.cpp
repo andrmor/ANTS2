@@ -15,6 +15,8 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
     ui->pbUpdateGlobSet->setVisible(false);
     ui->cobUnitsForEllastic->setCurrentIndex(1);
 
+    CrossSectionSystemDir = GlobSet->ResourcesDir + "/Neutrons/CrossSections";
+
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);
     ui->ledMinEnergy->setValidator(val);
@@ -32,15 +34,25 @@ AMatParticleConfigurator::~AMatParticleConfigurator()
 const QString AMatParticleConfigurator::getElasticScatteringFileName(QString Element, QString Mass) const
 {
     if (!ui->cbAuto->isEnabled()) return "";
-    QString str = getCrossSectionDataDir() + "/" + ui->lePreName->text() + Element + ui->leSeparatorInName->text() + Mass + ui->leEndName->text();
-    return str;
+
+    QString str = "/" + ui->lePreName->text() + Element + ui->leSeparatorInName->text() + Mass + ui->leEndName->text();
+
+    QString fileName = ui->leCustomDataDir->text() + str;
+    if ( QFile(fileName).exists() ) return fileName;
+
+    return CrossSectionSystemDir + str;
 }
 
 const QString AMatParticleConfigurator::getAbsorptionFileName(QString Element, QString Mass) const
 {
     if (!ui->cbAuto->isEnabled()) return "";
-    QString str = getCrossSectionDataDir() + "/" + ui->lePreNameAbs->text() + Element + ui->leSeparatorInNameAbs->text() + Mass + ui->leEndNameAbs->text();
-    return str;
+
+    QString str = "/" + ui->lePreNameAbs->text() + Element + ui->leSeparatorInNameAbs->text() + Mass + ui->leEndNameAbs->text();
+
+    QString fileName = ui->leCustomDataDir->text() + str;
+    if ( QFile(fileName).exists() ) return fileName;
+
+    return CrossSectionSystemDir + str;
 }
 
 int AMatParticleConfigurator::getCrossSectionLoadOption() const
@@ -108,12 +120,10 @@ const QString AMatParticleConfigurator::getNatAbundFileName() const
     return GlobSet->ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt";
 }
 
-const QString AMatParticleConfigurator::getCrossSectionDataDir() const
+const QString AMatParticleConfigurator::getCrossSectionFirstDataDir() const
 {
-    if (ui->cbCrossSectionDirOverriden->isChecked())
-        return ui->leCustomDataDir->text();
-    else
-        return GlobSet->ResourcesDir + "/Neutrons/CrossSections";
+    if ( ui->leCustomDataDir->text().isEmpty() ) return CrossSectionSystemDir;
+    else return ui->leCustomDataDir->text();
 }
 
 const QString AMatParticleConfigurator::getHeaderLineId() const
@@ -134,7 +144,6 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
     json["EnableAutoLoad"] = ui->cbAuto->isChecked();
-    json["EnableCustomDataDir"] = ui->cbCrossSectionDirOverriden->isChecked();
     json["CustomDir"] = ui->leCustomDataDir->text();
     json["PreName"] = ui->lePreName->text();
     json["MidName"] = ui->leSeparatorInName->text();
@@ -156,8 +165,6 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
 
     ui->cbAuto->setChecked(true);
     JsonToCheckbox(json, "EnableAutoLoad", ui->cbAuto);
-    ui->cbCrossSectionDirOverriden->setChecked(false);
-    JsonToCheckbox(json, "EnableCustomDataDir", ui->cbCrossSectionDirOverriden);
     ui->leCustomDataDir->setText("");
     JsonToLineEditText(json, "CustomDir", ui->leCustomDataDir);
 
@@ -174,7 +181,8 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with custom neutron cross-section data", StarterDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with custom neutron cross-section data", StarterDir,
+                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) return;
     ui->leCustomDataDir->setText(dir);
     on_pbUpdateGlobSet_clicked();

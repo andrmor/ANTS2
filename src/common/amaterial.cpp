@@ -613,8 +613,21 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
+#include "NCrystal/NCrystal.hh"
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
+    if (!NCrystal_Ncmat.isEmpty())
+    {
+        //if (NCrystal_scatter) NCrystal_scatter->unref();
+
+        QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(NCrystal_Ncmat).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
+        //NCrystal_scatter = NCrystal::createScatter( "Al_sg225.ncmat;dcutoff=0.5;temp=25C" );
+        qDebug() << "Settings:"<<settings;
+        //NCrystal_scatter = NCrystal::createScatter( settings.toLatin1().data() );
+        //NCrystal_scatter->ref();
+        return;
+    }
+
     if (Type == ElasticScattering || Type == Absorption)
         if (!IsotopeRecords.isEmpty())
         {

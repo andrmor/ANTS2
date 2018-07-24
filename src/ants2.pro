@@ -208,7 +208,7 @@ ants2_NCrystal{
 
     win32:{
             #Currently it is not possible to compile NCrystal on Win, issue has been posted on Github
-            #INCLUDEPATH += C:/PathToNcrystal
+            INCLUDEPATH += C:/NCrystal/ncrystal_core/include
             #LIBS += -LC:/PathToNcrystal/lib -lNCrystal
     }
     linux-g++ || unix {

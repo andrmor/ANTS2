@@ -18,6 +18,7 @@ class AMaterialParticleCollection;
 struct NeutralTerminatorStructure;
 struct MatParticleStructure;
 class TRandom2;
+namespace NCrystal { class Scatter; }
 
 class AMaterial
 {
@@ -124,6 +125,10 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QString NCrystal_Ncmat;
   double NCrystal_Dcutoff = 0;
   double NCrystal_Packing = 1.0;
+
+#ifdef  __USE_ANTS_NCRYSTAL__
+  const NCrystal::Scatter * NCrystal_scatter = 0;
+#endif
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

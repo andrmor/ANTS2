@@ -47,6 +47,10 @@ private slots:
     void on_pbChangeDir_clicked();
     void on_pbUpdateGlobSet_clicked();
 
+    void on_pbShowSystemDir_clicked();
+
+    void on_pbChangeDir_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::AMatParticleConfigurator *ui;
     GlobalSettingsClass* GlobSet;

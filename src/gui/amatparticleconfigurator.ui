@@ -240,6 +240,12 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::CustomContextMenu</enum>
+    </property>
+    <property name="toolTip">
+     <string>Right-click to open</string>
+    </property>
     <property name="text">
      <string>Change</string>
     </property>
@@ -479,6 +485,19 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbShowSystemDir">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>98</y>
+     <width>210</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Show current system dir</string>
    </property>
   </widget>
  </widget>

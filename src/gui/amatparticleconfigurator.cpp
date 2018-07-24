@@ -181,8 +181,10 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with custom neutron cross-section data", StarterDir,
-                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString st = ui->leCustomDataDir->text();
+    if (st.isEmpty()) st = StarterDir;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with custom neutron cross-section data", st,
+                                                    QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) return;
     ui->leCustomDataDir->setText(dir);
     on_pbUpdateGlobSet_clicked();
@@ -191,4 +193,17 @@ void AMatParticleConfigurator::on_pbChangeDir_clicked()
 void AMatParticleConfigurator::on_pbUpdateGlobSet_clicked()
 {
     writeToJson(GlobSet->MaterialsAndParticlesSettings);
+}
+
+#include <QDesktopServices>
+void AMatParticleConfigurator::on_pbShowSystemDir_clicked()
+{
+    QDesktopServices::openUrl(QUrl("file:///"+CrossSectionSystemDir, QUrl::TolerantMode));
+}
+
+void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &pos)
+{
+    QString st = ui->leCustomDataDir->text();
+    if (!st.isEmpty())
+        QDesktopServices::openUrl(QUrl("file:///"+st, QUrl::TolerantMode));
 }

@@ -436,10 +436,13 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 
           FillNeutronTable();
 
+          ui->cbUseNCrystal->setChecked( mp.bUseNCrystal );
           const NeutralTerminatorStructure& t = mp.Terminators.last();
-          ui->cbUseNCrystal->setChecked( t.bUseNCrystal );
           ui->ledNCmatDcutoff->setText( QString::number( t.NCrystal_Dcutoff ) );
           ui->ledNcmatPacking->setText( QString::number( t.NCrystal_Packing ) );
+          bool bHaveData = !t.NCrystal_Ncmat.isEmpty();
+          ui->labNCmatNotDefined->setVisible(!bHaveData);
+          ui->pbShowNcmat->setVisible(bHaveData);
       }
       else if (type == AParticle::_gamma_)
       {
@@ -2925,6 +2928,7 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 
     NeutralTerminatorStructure& t = mp.Terminators.last();
     LoadTextFromFile(fileName, t.NCrystal_Ncmat);
+    on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
 }
 
@@ -2933,9 +2937,8 @@ void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
-    NeutralTerminatorStructure& t = mp.Terminators.last();
 
-    t.bUseNCrystal = checked;
+    mp.bUseNCrystal = checked;
 
     FillNeutronTable();
 }

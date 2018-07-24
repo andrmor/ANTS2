@@ -189,8 +189,10 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
 void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
 {
     for (int iP=0; iP<MatParticle.size(); iP++)
+    {
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
-           MatParticle[iP].Terminators[iTerm].UpdateNeutronCrossSections(bLogLogInterpolation);
+           MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation);
+    }
 
     //updating sum stat weights for primary scintillation time generator
     _PrimScintSumStatWeight = 0;
@@ -334,6 +336,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       jMatParticle["DataString"] = MatParticle[ip].DataString;
       jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
       jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
+      jMatParticle["UseNCrystal"] = MatParticle[ip].bUseNCrystal;
       jMatParticle["AllowAbsentCsData"] = MatParticle[ip].bAllowAbsentCsData;
 
       QJsonArray iar;
@@ -531,6 +534,9 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       MatParticle[ip].bEllasticEnabled = false; //compatibility
       parseJson(jMatParticle, "CaptureEnabled", MatParticle[ip].bCaptureEnabled);
       parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bEllasticEnabled);
+      MatParticle[ip].bUseNCrystal = false; //compatibility
+      parseJson(jMatParticle, "UseNCrystal", MatParticle[ip].bUseNCrystal);
+
       MatParticle[ip].bAllowAbsentCsData = false;
       parseJson(jMatParticle, "AllowAbsentCsData", MatParticle[ip].bAllowAbsentCsData);
 
@@ -607,7 +613,7 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
-void NeutralTerminatorStructure::UpdateNeutronCrossSections(bool bUseLogLog)
+void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
     if (Type == ElasticScattering || Type == Absorption)
         if (!IsotopeRecords.isEmpty())
@@ -659,7 +665,6 @@ void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticl
 
     if (Type == ElasticScattering)
     {
-        json["UseNCrystal"] = bUseNCrystal;
         json["NCrystal_Ncmat"] = NCrystal_Ncmat;
         json["NCystal_CutOff"] = NCrystal_Dcutoff;
         json["NCystal_Packing"] = NCrystal_Packing;
@@ -688,14 +693,12 @@ void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterial
         }
     }
 
-    bUseNCrystal = false;
-    if (json.contains("UseNCrystal"))
-    {
-        parseJson(json, "UseNCrystal", bUseNCrystal);
-        parseJson(json, "NCrystal_Ncmat", NCrystal_Ncmat);
-        parseJson(json, "NCystal_CutOff", NCrystal_Dcutoff);
-        parseJson(json, "NCystal_Packing", NCrystal_Packing);
-    }
+    NCrystal_Ncmat.clear();
+    NCrystal_Dcutoff = 0;
+    NCrystal_Packing = 1.0;
+    parseJson(json, "NCrystal_Ncmat", NCrystal_Ncmat);
+    parseJson(json, "NCystal_CutOff", NCrystal_Dcutoff);
+    parseJson(json, "NCystal_Packing", NCrystal_Packing);
 }
 
 bool NeutralTerminatorStructure::isParticleOneOfSecondaries(int iPart) const

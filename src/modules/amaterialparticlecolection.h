@@ -32,7 +32,8 @@ private:
 public:
   //configuration
   void SetWave(bool wavelengthResolved, double waveFrom, double waveTo, double waveStep, int waveNodes);
-  void UpdateWavelengthBinning(GeneralSimSettings *SimSet);
+
+  void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet);
 
   //info requests
     //materials

@@ -111,7 +111,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateNeutronCrossSections(bool bUseLogLog);   //
+  void UpdateRunTimeProperties(bool bUseLogLog);
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 
@@ -121,7 +121,6 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
 
-  bool bUseNCrystal = false;
   QString NCrystal_Ncmat;
   double NCrystal_Dcutoff = 0;
   double NCrystal_Packing = 1.0;
@@ -137,6 +136,7 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   //for neutrons - separate activation of capture and ellastic scattering is possible
   bool bCaptureEnabled = true;
   bool bEllasticEnabled = false;
+  bool bUseNCrystal = false;
   bool bAllowAbsentCsData = false;
 
   QVector<double> InteractionDataX; //energy in keV

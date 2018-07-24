@@ -409,6 +409,6 @@ void AConfiguration::UpdateSimSettingsOfDetector()
         GeneralSimSettings simSettings;
         simSettings.readFromJson(SimJson);
         Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
-        Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+        Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings);
     }
 }

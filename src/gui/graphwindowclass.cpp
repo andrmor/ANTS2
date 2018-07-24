@@ -3623,17 +3623,7 @@ void GraphWindowClass::on_pbAddText_clicked()
 
 void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
 {
-  double xc1, yc1, xc2, yc2;
-  RasterWindow->fCanvas->GetRange(xc1, yc1, xc2, yc2);
-
-  double deltaX = xc2-xc1;
-  double deltaY = yc2-yc1;
-  double x1 = xc1 + 0.15*deltaX;
-  double y1 = yc1 + 0.75*deltaY;
-  double x2 = xc1 + 0.5*deltaX;
-  double y2 = yc1 + 0.85*deltaY;
-
-  TPaveText* la = new TPaveText(x1, y1, x2, y2);
+  TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
   la->SetFillColor(0);
   la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);

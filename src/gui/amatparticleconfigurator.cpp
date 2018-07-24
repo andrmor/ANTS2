@@ -12,9 +12,10 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
     QDialog(parent), ui(new Ui::AMatParticleConfigurator), GlobSet(GlobSet)
 {
     ui->setupUi(this);
-    ui->frame->setEnabled(false);
     ui->pbUpdateGlobSet->setVisible(false);
     ui->cobUnitsForEllastic->setCurrentIndex(1);
+
+    CrossSectionSystemDir = GlobSet->ResourcesDir + "/Neutrons/CrossSections";
 
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);
@@ -23,9 +24,6 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
 
     if (!GlobSet->MaterialsAndParticlesSettings.isEmpty())
         readFromJson(GlobSet->MaterialsAndParticlesSettings);
-
-    if (ui->leNatAbundFile->text().isEmpty())
-        ui->leNatAbundFile->setText(GlobSet->ExamplesDir + "/IsotopeNaturalAbundances.txt");
 }
 
 AMatParticleConfigurator::~AMatParticleConfigurator()
@@ -36,15 +34,25 @@ AMatParticleConfigurator::~AMatParticleConfigurator()
 const QString AMatParticleConfigurator::getElasticScatteringFileName(QString Element, QString Mass) const
 {
     if (!ui->cbAuto->isEnabled()) return "";
-    QString str = ui->leDir->text() + "/" + ui->lePreName->text() + Element + ui->leSeparatorInName->text() + Mass + ui->leEndName->text();
-    return str;
+
+    QString str = "/" + ui->lePreName->text() + Element + ui->leSeparatorInName->text() + Mass + ui->leEndName->text();
+
+    QString fileName = ui->leCustomDataDir->text() + str;
+    if ( QFile(fileName).exists() ) return fileName;
+
+    return CrossSectionSystemDir + str;
 }
 
 const QString AMatParticleConfigurator::getAbsorptionFileName(QString Element, QString Mass) const
 {
     if (!ui->cbAuto->isEnabled()) return "";
-    QString str = ui->leDir->text() + "/" + ui->lePreNameAbs->text() + Element + ui->leSeparatorInNameAbs->text() + Mass + ui->leEndNameAbs->text();
-    return str;
+
+    QString str = "/" + ui->lePreNameAbs->text() + Element + ui->leSeparatorInNameAbs->text() + Mass + ui->leEndNameAbs->text();
+
+    QString fileName = ui->leCustomDataDir->text() + str;
+    if ( QFile(fileName).exists() ) return fileName;
+
+    return CrossSectionSystemDir + str;
 }
 
 int AMatParticleConfigurator::getCrossSectionLoadOption() const
@@ -56,7 +64,7 @@ const QVector<QPair<int, double> > AMatParticleConfigurator::getIsotopes(QString
 {
     QVector<QPair<int, double> > tmp;
     QString Table;
-    bool bOK = LoadTextFromFile(ui->leNatAbundFile->text(), Table);
+    bool bOK = LoadTextFromFile(getNatAbundFileName(), Table);
     if (!bOK) return tmp;
 
     QMap<QString, QVector<QPair<int, double> > > IsotopeMap;  //Key - element name, contains QVector<mass, abund>
@@ -109,12 +117,13 @@ double AMatParticleConfigurator::getMaxEnergy() const
 
 const QString AMatParticleConfigurator::getNatAbundFileName() const
 {
-    return ui->leNatAbundFile->text();
+    return GlobSet->ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt";
 }
 
-const QString AMatParticleConfigurator::getCrossSectionDataDir() const
+const QString AMatParticleConfigurator::getCrossSectionFirstDataDir() const
 {
-    return ui->leDir->text();
+    if ( ui->leCustomDataDir->text().isEmpty() ) return CrossSectionSystemDir;
+    else return ui->leCustomDataDir->text();
 }
 
 const QString AMatParticleConfigurator::getHeaderLineId() const
@@ -134,10 +143,8 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
     json["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
 
-    json["NaturalAbundanciesFileName"] = ui->leNatAbundFile->text();
-
     json["EnableAutoLoad"] = ui->cbAuto->isChecked();
-    json["CrossSectionsDir"] = ui->leDir->text();
+    json["CustomDir"] = ui->leCustomDataDir->text();
     json["PreName"] = ui->lePreName->text();
     json["MidName"] = ui->leSeparatorInName->text();
     json["EndName"] = ui->leEndName->text();
@@ -156,10 +163,11 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
     JsonToLineEditDouble(json, "MinEnergy", ui->ledMinEnergy);
     JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);
 
-    JsonToLineEditText(json, "NaturalAbundanciesFileName", ui->leNatAbundFile);
-
+    ui->cbAuto->setChecked(true);
     JsonToCheckbox(json, "EnableAutoLoad", ui->cbAuto);
-    JsonToLineEditText(json, "CrossSectionsDir", ui->leDir);
+    ui->leCustomDataDir->setText("");
+    JsonToLineEditText(json, "CustomDir", ui->leCustomDataDir);
+
     JsonToLineEditText(json, "PreName", ui->lePreName);
     JsonToLineEditText(json, "MidName", ui->leSeparatorInName);
     JsonToLineEditText(json, "EndName", ui->leEndName);
@@ -173,9 +181,12 @@ void AMatParticleConfigurator::readFromJson(QJsonObject &json)
 
 void AMatParticleConfigurator::on_pbChangeDir_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with neutron cross-section data", StarterDir, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString st = ui->leCustomDataDir->text();
+    if (st.isEmpty()) st = StarterDir;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select directory with custom neutron cross-section data", st,
+                                                    QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) return;
-    ui->leDir->setText(dir);
+    ui->leCustomDataDir->setText(dir);
     on_pbUpdateGlobSet_clicked();
 }
 
@@ -184,10 +195,15 @@ void AMatParticleConfigurator::on_pbUpdateGlobSet_clicked()
     writeToJson(GlobSet->MaterialsAndParticlesSettings);
 }
 
-void AMatParticleConfigurator::on_pbChangeNatAbFile_clicked()
+#include <QDesktopServices>
+void AMatParticleConfigurator::on_pbShowSystemDir_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Select file listing isotope natural abundances", StarterDir, "Data files (*.dat *.txt);;All files (*)");
-    if (fileName.isEmpty()) return;
-    ui->leNatAbundFile->setText(fileName);
-    on_pbUpdateGlobSet_clicked();
+    QDesktopServices::openUrl(QUrl("file:///"+CrossSectionSystemDir, QUrl::TolerantMode));
+}
+
+void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &pos)
+{
+    QString st = ui->leCustomDataDir->text();
+    if (!st.isEmpty())
+        QDesktopServices::openUrl(QUrl("file:///"+st, QUrl::TolerantMode));
 }

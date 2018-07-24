@@ -62,14 +62,6 @@ void GeometryWindowClass::ShowAndFocus()
   this->show();
   this->activateWindow();
   this->raise();
-
-  if (ColdStart)
-    {
-      //first time this window is shown
-      ColdStart = false;
-      this->resize(width()+1, height());
-      this->resize(width()-1, height());
-    }
 }
 
 void GeometryWindowClass::SetAsActiveRootWindow()

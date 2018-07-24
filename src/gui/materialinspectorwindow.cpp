@@ -2715,7 +2715,7 @@ void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
 
 void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
 {
-    QString dir = OptionsConfigurator->getCrossSectionDataDir();
+    QString dir = OptionsConfigurator->getCrossSectionFirstDataDir();
     if (!dir.isEmpty())
        QDesktopServices::openUrl(QUrl("file:///"+dir, QUrl::TolerantMode));
 

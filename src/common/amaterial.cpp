@@ -614,17 +614,28 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
 }
 
 #include "NCrystal/NCrystal.hh"
+#include "afiletools.h"
+#include <QFile>
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
     if (!NCrystal_Ncmat.isEmpty())
     {
         //if (NCrystal_scatter) NCrystal_scatter->unref();
 
-        QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(NCrystal_Ncmat).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
+        QString tmpFileName = "___tmp.ncmat";
+        SaveTextToFile(tmpFileName, NCrystal_Ncmat);
+        //create tmp file
+        //write there NCrystal_Ncmat
+
+        QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
         //NCrystal_scatter = NCrystal::createScatter( "Al_sg225.ncmat;dcutoff=0.5;temp=25C" );
         qDebug() << "Settings:"<<settings;
         //NCrystal_scatter = NCrystal::createScatter( settings.toLatin1().data() );
         //NCrystal_scatter->ref();
+
+        //delete tmp file
+        QFile f(tmpFileName);
+        f.remove();
         return;
     }
 

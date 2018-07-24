@@ -40,10 +40,15 @@ public:
   double getCanvasMinY();
   double getCanvasMaxY();
 
-  void PixelToXY(int ix, int iy, double& x, double& y);
-  void XYtoPixel(double x, double y, int& ix, int& iy);
-  double getXperPixel();
-  double getYperPixel();
+  void PixelToXY(int ix, int iy, double& x, double& y) const;
+  void XYtoPixel(double x, double y, int& ix, int& iy) const;
+  void getRange(double& x1, double& y1, double& x2, double& y2) const; //bottom-left and top-right
+  void getRangeLogAware(double& x1, double& y1, double& x2, double& y2) const; //bottom-left and top-right
+  double getXperPixel() const;
+  double getYperPixel() const;
+
+  bool isLogX() const;
+  bool isLogY() const;
 
 protected:
   bool event(QEvent *event);

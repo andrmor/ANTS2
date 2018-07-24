@@ -3800,54 +3800,6 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>cbUseNCrystal</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>369</x>
-     <y>322</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>408</x>
-     <y>104</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledNCmatDcutoff</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>145</x>
-     <y>374</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>434</x>
-     <y>109</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledNcmatPacking</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>283</x>
-     <y>378</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>453</x>
-     <y>108</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>ledT</sender>
    <signal>editingFinished()</signal>
    <receiver>pbUpdateTmpMaterial</receiver>
@@ -3876,6 +3828,54 @@ resolution:</string>
     <hint type="destinationlabel">
      <x>71</x>
      <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledNCmatDcutoff</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>145</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>107</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledNcmatPacking</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>367</x>
+     <y>368</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>42</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbUseNCrystal</sender>
+   <signal>clicked()</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>379</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>19</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>

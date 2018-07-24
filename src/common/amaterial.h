@@ -120,6 +120,11 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
+
+  bool bUseNCrystal = false;
+  QString NCrystal_Ncmat;
+  double NCrystal_Dcutoff = 0;
+  double NCrystal_Packing = 1.0;
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

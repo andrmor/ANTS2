@@ -656,6 +656,14 @@ void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticl
     for (int i=0; i<IsotopeRecords.size(); i++)
         irAr << IsotopeRecords[i].writeToJson(MpCollection);
     json["IsotopeRecords"] = irAr;
+
+    if (Type == ElasticScattering)
+    {
+        json["UseNCrystal"] = bUseNCrystal;
+        json["NCrystal_Ncmat"] = NCrystal_Ncmat;
+        json["NCystal_CutOff"] = NCrystal_Dcutoff;
+        json["NCystal_Packing"] = NCrystal_Packing;
+    }
 }
 
 void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
@@ -678,6 +686,15 @@ void NeutralTerminatorStructure::readFromJson(const QJsonObject &json, AMaterial
             el.readFromJson(js, MpCollection);
             IsotopeRecords << el;
         }
+    }
+
+    bUseNCrystal = false;
+    if (json.contains("UseNCrystal"))
+    {
+        parseJson(json, "UseNCrystal", bUseNCrystal);
+        parseJson(json, "NCrystal_Ncmat", NCrystal_Ncmat);
+        parseJson(json, "NCystal_CutOff", NCrystal_Dcutoff);
+        parseJson(json, "NCystal_Packing", NCrystal_Packing);
     }
 }
 

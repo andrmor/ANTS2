@@ -435,6 +435,11 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->cbAllowAbsentCsData->setChecked(mp.bAllowAbsentCsData);
 
           FillNeutronTable();
+
+          const NeutralTerminatorStructure& t = mp.Terminators.last();
+          ui->cbUseNCrystal->setChecked( t.bUseNCrystal );
+          ui->ledNCmatDcutoff->setText( QString::number( t.NCrystal_Dcutoff ) );
+          ui->ledNcmatPacking->setText( QString::number( t.NCrystal_Packing ) );
       }
       else if (type == AParticle::_gamma_)
       {
@@ -2363,7 +2368,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->setColumnCount(0);
 
     bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked() && !ui->cbUseNCrystal->isChecked();
     if (!bCapture && !bElastic) return;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2895,10 +2900,62 @@ void MaterialInspectorWindow::on_actionNeutrons_triggered()
 
 void MaterialInspectorWindow::on_pbShowNcmat_clicked()
 {
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
 
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+    QString s = t.NCrystal_Ncmat;
+    if (s.isEmpty()) s = "NCmat record is empty!";
+
+    message(s, this);
 }
 
 void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 {
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, "Load NCrystal ncmat file", MW->GlobSet->LastOpenDir, "Ncmat files (*.ncmat)");
+    if (fileName.isEmpty()) return;
 
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+    LoadTextFromFile(fileName, t.NCrystal_Ncmat);
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    t.bUseNCrystal = checked;
+
+    FillNeutronTable();
+}
+
+void MaterialInspectorWindow::on_ledNCmatDcutoff_editingFinished()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    t.NCrystal_Dcutoff = ui->ledNCmatDcutoff->text().toDouble();
+}
+
+void MaterialInspectorWindow::on_ledNcmatPacking_editingFinished()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    t.NCrystal_Packing = ui->ledNcmatPacking->text().toDouble();
 }

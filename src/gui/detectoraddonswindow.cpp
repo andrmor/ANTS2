@@ -379,9 +379,10 @@ void DetectorAddOnsWindow::ShowObject(QString name)
   DetectorAddOnsWindow::HighlightVolume(name);
   MW->GeometryWindow->SetAsActiveRootWindow();
   Detector->GeoManager->ClearTracks();
-  Detector->top->Draw();
-  MW->GeometryWindow->PostDraw();
-  MW->GeometryWindow->UpdateRootCanvas();
+  //Detector->top->Draw();
+  //MW->GeometryWindow->PostDraw();
+  MW->GeometryWindow->ShowGeometry(true, false, false);
+  //MW->GeometryWindow->UpdateRootCanvas();
 }
 
 bool drawIfFound(TGeoNode* node, TString name)

@@ -294,8 +294,7 @@ void GraphWindowClass::ClearRootCanvas()
 
 void GraphWindowClass::UpdateRootCanvas()
 {
-  //RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
+  RasterWindow->UpdateRootCanvas();
 }
 
 void GraphWindowClass::SetModifiedFlag()
@@ -731,6 +730,9 @@ bool GraphWindowClass::event(QEvent *event)
       if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("graph");
       else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("graph");
     }
+
+  if (event->type() == QEvent::WindowActivate)
+      RasterWindow->UpdateRootCanvas();
 
   return QMainWindow::event(event);
 }

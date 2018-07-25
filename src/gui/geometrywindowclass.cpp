@@ -76,8 +76,9 @@ void GeometryWindowClass::ClearRootCanvas()
 
 void GeometryWindowClass::UpdateRootCanvas()
 {
-  RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
+  //RasterWindow->fCanvas->Modified();
+  //RasterWindow->fCanvas->Update();
+    RasterWindow->UpdateRootCanvas();
 }
 
 void GeometryWindowClass::SaveAs(const QString filename)
@@ -202,6 +203,9 @@ bool GeometryWindowClass::event(QEvent *event)
       if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("geometry");
       else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("geometry");
     }
+
+  if (event->type() == QEvent::WindowActivate)
+      RasterWindow->UpdateRootCanvas();
 
   return QMainWindow::event(event);
 }

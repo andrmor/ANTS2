@@ -35,15 +35,11 @@ private slots:
 
     void on_pbNCrystal_Angle_clicked();
 
-    void on_pbNCrystal_DeltaEnergy_clicked();
-
     void on_pbNCrystal_Energy_clicked();
 
     void on_ledEnergy_editingFinished();
 
     void on_ledWave_editingFinished();
-
-    void on_pbNCrystalRun_clicked();
 
 private:
     Ui::ANeutronInfoDialog *ui;
@@ -54,14 +50,10 @@ private:
     bool bShowScat;
     GraphWindowClass *GraphWindow;
 
-    TH1D * angleHist = 0;
-    TH1D * energyHist = 0;
-    TH1D * deltaHist = 0;
-
     void update();
     void updateIsotopeTable();
     void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, const TString &xTitle);
-    void doDraw(TH1D *hist);
+    void RunNCrystal(bool bAngle);
 
 signals:
     void requestDraw(TH1D* histCopy);

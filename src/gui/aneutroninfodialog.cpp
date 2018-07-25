@@ -53,10 +53,6 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
 ANeutronInfoDialog::~ANeutronInfoDialog()
 {
     delete ui;
-
-    delete angleHist; angleHist = 0;
-    delete energyHist; energyHist = 0;
-    delete deltaHist; deltaHist = 0;
 }
 
 void ANeutronInfoDialog::update()
@@ -340,13 +336,10 @@ bool ATableWidgetDoubleItem::operator< (const QTableWidgetItem &other) const
 
     return val > otherVal;
 }
-#include "NCrystal/NCrystal.hh"
-void ANeutronInfoDialog::on_pbNCrystalRun_clicked()
+
+void ANeutronInfoDialog::RunNCrystal(bool bAngle)
 {
 #ifdef __USE_ANTS_NCRYSTAL__
-    delete angleHist; angleHist = 0;
-    delete energyHist; energyHist = 0;
-    delete deltaHist; deltaHist = 0;
 
     if (!bShowScat) return;
     if (!mat) return;
@@ -357,65 +350,52 @@ void ANeutronInfoDialog::on_pbNCrystalRun_clicked()
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
     if (!termSc.NCrystal_scatter) return;
 
-    angleHist = new TH1D("", "Angle of scattered neutron", 180, 0, 180);
-    energyHist = new TH1D("", "Energy of scattered neutron", 100, 0, 0);
-    deltaHist = new TH1D("", "Delta energy of scattered neutron", 100, 0, 0);
+    TH1D* hist;
 
-    int num = ui->sbNCrystal_events->value();
+    if (bAngle)
+    {
+        hist = new TH1D("", "Angle of scattered neutron", 180, 0, 180);
+        hist->GetXaxis()->SetTitle("Angle, degrees");
+    }
+    else
+    {
+        hist = new TH1D("", "Energy of scattered neutron", 100, 0, 0);
+        hist->GetXaxis()->SetTitle("Energy, meV");
+    }
 
     double en = ui->ledEnergy->text().toDouble() * 0.001; // in eV
     double angle,delta_ekin;
 
-    for (int i=0; i<num; i++)
+    bool bSkipBragg = ui->cbNCrystalSkipBragg->isChecked();
+
+    for (int i=0; i<1000000; i++)
     {
         termSc.NCrystal_scatter->generateScatteringNonOriented( en, angle, delta_ekin );
 
-        angleHist->Fill(angle * 57.2957795131);
-        deltaHist->Fill(delta_ekin * 1000.0);
-        energyHist->Fill( (en + delta_ekin)*1000.0 );
+        if (delta_ekin == 0 && bSkipBragg) continue;
+
+        if (bAngle)
+            hist->Fill(angle * 57.2957795131);
+        else
+            hist->Fill( (en + delta_ekin)*1000.0 );
     }
 
-    on_pbNCrystal_Angle_clicked();
+    TH1D* h = new TH1D(*hist);
+    GraphWindow->Draw(h, "hist");
+
+    delete hist;
+
 #endif
 }
 
 void ANeutronInfoDialog::on_pbNCrystal_Angle_clicked()
 {
-    if (!angleHist)
-        message("Histogram was not yet generated - click \"Run\"", this);
-    else
-    {
-        angleHist->GetXaxis()->SetTitle("Angle, degrees");
-        doDraw(angleHist);
-    }
-}
-
-void ANeutronInfoDialog::on_pbNCrystal_DeltaEnergy_clicked()
-{
-    if (!deltaHist)
-        message("Histogram was not yet generated - click \"Run\"", this);
-    else
-    {
-        deltaHist->GetXaxis()->SetTitle("Delta energy, meV");
-        doDraw(deltaHist);
-    }
+    RunNCrystal(true);
 }
 
 void ANeutronInfoDialog::on_pbNCrystal_Energy_clicked()
 {
-    if (!energyHist)
-        message("Histogram was not yet generated - click \"Run\"", this);
-    else
-    {
-        energyHist->GetXaxis()->SetTitle("Energy, meV");
-        doDraw(energyHist);
-    }
-}
-
-void ANeutronInfoDialog::doDraw(TH1D* hist)
-{
-    TH1D* h = new TH1D(*hist);
-    GraphWindow->Draw(h, "hist");
+    RunNCrystal(false);
 }
 
 void ANeutronInfoDialog::on_ledEnergy_editingFinished()

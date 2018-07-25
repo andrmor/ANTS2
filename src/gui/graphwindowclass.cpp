@@ -669,13 +669,15 @@ void GraphWindowClass::endOverlayMode()
 void GraphWindowClass::OnBusyOn()
 {
   ui->fUIbox->setEnabled(false);
-  RasterWindow->setBlockEvents(true);
+  ui->lwBasket->setEnabled(false);
+  //RasterWindow->setBlockEvents(true);
 }
 
 void GraphWindowClass::OnBusyOff()
 {
   ui->fUIbox->setEnabled(true);
-  RasterWindow->setBlockEvents(false);
+  ui->lwBasket->setEnabled(true);
+  //RasterWindow->setBlockEvents(false);
 }
 
 void GraphWindowClass::switchOffBasket()

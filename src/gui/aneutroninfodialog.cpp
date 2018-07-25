@@ -11,6 +11,14 @@
 
 #include "TString.h"
 #include "TGraph.h"
+#include "TH1D.h"
+
+#ifdef __USE_ANTS_NCRYSTAL__
+#include "NCrystal/NCrystal.hh"
+#endif
+
+static bool bEnergyGiven = true;
+static QString startText = "25";
 
 ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLogLog, bool bShowAbs, bool bShowScat, GraphWindowClass* GraphWindow, QWidget *parent) :
     QDialog(parent), ui(new Ui::ANeutronInfoDialog), mat(mat), ipart(ipart), bLogLog(bLogLog), bShowAbs(bShowAbs), bShowScat(bShowScat), GraphWindow(GraphWindow)
@@ -20,9 +28,18 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);
     ui->ledEnergy->setValidator(val);
+    ui->ledWave->setValidator(val);
 
-    ui->ledEnergy->setText("25");
-    on_ledEnergy_editingFinished(); //updates all GUI
+    if (bEnergyGiven)
+    {
+        ui->ledEnergy->setText(startText);
+        on_ledEnergy_editingFinished(); //updates all GUI
+    }
+    else
+    {
+        ui->ledWave->setText(startText);
+        on_ledWave_editingFinished(); //updates all GUI
+    }
 
     ui->ledEnergy->setFocus();
     ui->pbClose->setAutoDefault(false);
@@ -36,6 +53,10 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
 ANeutronInfoDialog::~ANeutronInfoDialog()
 {
     delete ui;
+
+    delete angleHist; angleHist = 0;
+    delete energyHist; energyHist = 0;
+    delete deltaHist; deltaHist = 0;
 }
 
 void ANeutronInfoDialog::update()
@@ -152,7 +173,7 @@ void ANeutronInfoDialog::updateIsotopeTable()
     if (bShowScat)
       if (!termSc.PartialCrossSectionEnergy.isEmpty())
         totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
-    qDebug() << "Tot xs abs and scat: " << totCS_abs << totCS_scat;
+    // qDebug() << "Tot xs abs and scat: " << totCS_abs << totCS_scat;
 
     int row = 0;
     for (int iElement=0; iElement<mat->ChemicalComposition.countElements(); iElement++)
@@ -188,7 +209,7 @@ void ANeutronInfoDialog::updateIsotopeTable()
                 {
                     double cs_scat = GetInterpolatedValue(energy, &termSc.IsotopeRecords.at(row).Energy, &termSc.IsotopeRecords.at(row).CrossSection, bLogLog);
                     double fraction = cs_scat * termSc.IsotopeRecords.at(row).MolarFraction/ totCS_scat * 100.0;
-                    qDebug() << "sc> frac, thisx, MF, totXS"<<fraction << cs_scat << termSc.IsotopeRecords.at(row).MolarFraction << totCS_scat;
+                    //  qDebug() << "sc> frac, thisx, MF, totXS"<<fraction << cs_scat << termSc.IsotopeRecords.at(row).MolarFraction << totCS_scat;
                     s = QString::number(fraction, 'g', 4);
                 }
                 else s = "0";
@@ -319,20 +340,82 @@ bool ATableWidgetDoubleItem::operator< (const QTableWidgetItem &other) const
 
     return val > otherVal;
 }
+#include "NCrystal/NCrystal.hh"
+void ANeutronInfoDialog::on_pbNCrystalRun_clicked()
+{
+#ifdef __USE_ANTS_NCRYSTAL__
+    delete angleHist; angleHist = 0;
+    delete energyHist; energyHist = 0;
+    delete deltaHist; deltaHist = 0;
+
+    if (!bShowScat) return;
+    if (!mat) return;
+    if (mat->MatParticle.isEmpty()) return;
+    if (ipart<0 || ipart>=mat->MatParticle.size()) return;
+    if (mat->MatParticle.at(ipart).Terminators.size() != 2) return;
+
+    const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
+    if (!termSc.NCrystal_scatter) return;
+
+    angleHist = new TH1D("", "Angle of scattered neutron", 180, 0, 180);
+    energyHist = new TH1D("", "Energy of scattered neutron", 100, 0, 0);
+    deltaHist = new TH1D("", "Delta energy of scattered neutron", 100, 0, 0);
+
+    int num = ui->sbNCrystal_events->value();
+
+    double en = ui->ledEnergy->text().toDouble() * 0.001; // in eV
+    double angle,delta_ekin;
+
+    for (int i=0; i<num; i++)
+    {
+        termSc.NCrystal_scatter->generateScatteringNonOriented( en, angle, delta_ekin );
+
+        angleHist->Fill(angle * 57.2957795131);
+        deltaHist->Fill(delta_ekin * 1000.0);
+        energyHist->Fill( (en + delta_ekin)*1000.0 );
+    }
+
+    on_pbNCrystal_Angle_clicked();
+#endif
+}
 
 void ANeutronInfoDialog::on_pbNCrystal_Angle_clicked()
 {
-
+    if (!angleHist)
+        message("Histogram was not yet generated - click \"Run\"", this);
+    else
+    {
+        angleHist->GetXaxis()->SetTitle("Angle, degrees");
+        doDraw(angleHist);
+    }
 }
 
 void ANeutronInfoDialog::on_pbNCrystal_DeltaEnergy_clicked()
 {
-
+    if (!deltaHist)
+        message("Histogram was not yet generated - click \"Run\"", this);
+    else
+    {
+        deltaHist->GetXaxis()->SetTitle("Delta energy, meV");
+        doDraw(deltaHist);
+    }
 }
 
 void ANeutronInfoDialog::on_pbNCrystal_Energy_clicked()
 {
+    if (!energyHist)
+        message("Histogram was not yet generated - click \"Run\"", this);
+    else
+    {
+        energyHist->GetXaxis()->SetTitle("Energy, meV");
+        doDraw(energyHist);
+    }
+}
 
+void ANeutronInfoDialog::doDraw(TH1D* hist)
+{
+    TH1D* h = new TH1D(*hist);
+    GraphWindow->Draw(h, "hist");
 }
 
 void ANeutronInfoDialog::on_ledEnergy_editingFinished()
@@ -347,6 +430,9 @@ void ANeutronInfoDialog::on_ledEnergy_editingFinished()
     {
         double wave_Anstr = sqrt( 081.804209605330899 / Energy_meV );
         ui->ledWave->setText( QString::number(wave_Anstr, 'g', 4) );
+
+        bEnergyGiven = true;
+        startText = ui->ledEnergy->text();
     }
 
     update();
@@ -364,6 +450,9 @@ void ANeutronInfoDialog::on_ledWave_editingFinished()
 
     double Energy_eV = 0.081804209605330899 / ( Wave_A * Wave_A );
     ui->ledEnergy->setText( QString::number(Energy_eV*1000.0, 'g', 4) );
+
+    bEnergyGiven = false;
+    startText = ui->ledWave->text();
 
     update();
 }

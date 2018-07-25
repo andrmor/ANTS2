@@ -416,7 +416,20 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label_4">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbNCrystalRun">
           <property name="text">
            <string>Run</string>
           </property>
@@ -441,7 +454,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>events and show  the distribution for scattered neutrons:</string>
+           <string>neutrons and show the distribution of scattered:</string>
           </property>
          </widget>
         </item>

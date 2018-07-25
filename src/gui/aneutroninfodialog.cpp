@@ -3,6 +3,7 @@
 #include "amaterial.h"
 #include "acommonfunctions.h"
 #include "graphwindowclass.h"
+#include "amessage.h"
 
 #include <QString>
 #include <QDoubleValidator>
@@ -20,7 +21,8 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
     val->setBottom(0);
     ui->ledEnergy->setValidator(val);
 
-    update();
+    ui->ledEnergy->setText("25");
+    on_ledEnergy_editingFinished(); //updates all GUI
 
     ui->ledEnergy->setFocus();
     ui->pbClose->setAutoDefault(false);
@@ -36,11 +38,6 @@ ANeutronInfoDialog::~ANeutronInfoDialog()
     delete ui;
 }
 
-void ANeutronInfoDialog::on_ledEnergy_textChanged(const QString&)
-{
-    update();
-}
-
 void ANeutronInfoDialog::update()
 {
     QString energyStr = ui->ledEnergy->text();
@@ -51,10 +48,15 @@ void ANeutronInfoDialog::update()
     energy *= 1.0e-6; // meV -> keV
     //      qDebug() << "Energy:" << energy;
 
-    if (!mat) return;
-    if (mat->MatParticle.isEmpty()) return;
-    if (ipart<0 || ipart>=mat->MatParticle.size()) return;
-    if (mat->MatParticle.at(ipart).Terminators.size() != 2) return;
+    if ( !mat ||
+         mat->MatParticle.isEmpty() ||
+         ipart < 0 ||
+         ipart >= mat->MatParticle.size() ||
+         mat->MatParticle.at(ipart).Terminators.size() != 2  )
+    {
+        message("Configuration error!", this);
+        return;
+    }
 
     const NeutralTerminatorStructure& termAb = mat->MatParticle.at(ipart).Terminators.at(0);
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
@@ -68,7 +70,9 @@ void ANeutronInfoDialog::update()
     double AtDens = Density / MeanAtMass / 1.66054e-24;
     ui->ad->setText( QString::number(AtDens, 'g', 4) );
 
-    ui->tabwMain->clearContents();
+    bool bNCrystal = mat->MatParticle.at(ipart).bUseNCrystal;
+    ui->frNCrystal->setVisible(bNCrystal);
+
     double cs_abs = 0;
     QString s_cs = "-off-";
     QString s_mfp = "-off-";
@@ -79,6 +83,8 @@ void ANeutronInfoDialog::update()
         double mfp = 10.0/cs_abs/AtDens;
         s_mfp = QString::number(mfp, 'g', 4);
     }
+
+    ui->tabwMain->clearContents();
     QTableWidgetItem* twi = new QTableWidgetItem(s_cs);
     twi->setTextAlignment(Qt::AlignCenter);
     ui->tabwMain->setItem(0, 1, twi);
@@ -89,12 +95,22 @@ void ANeutronInfoDialog::update()
     double cs_scat = 0;
     s_cs = "-off-";
     s_mfp = "-off-";
-    if (bShowScat && !termSc.PartialCrossSectionEnergy.isEmpty())
+    if (bShowScat)
     {
-        cs_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
-        s_cs = QString::number(cs_scat*1.0e24, 'g', 4);  //in barns
-        double mfp = 10.0/cs_scat/AtDens;
-        s_mfp = QString::number(mfp, 'g', 4);
+        if (bNCrystal)
+        {
+            cs_scat = termSc.getNCrystalCrossSectionBarns(energy);
+            cs_scat *= 1.0e-24; //in cm2
+        }
+        else if ( !termSc.PartialCrossSectionEnergy.isEmpty() )
+            cs_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
+
+        if (cs_scat != 0)
+        {
+            s_cs = QString::number(cs_scat*1.0e24, 'g', 4); //in barns here
+            double mfp = 10.0/cs_scat/AtDens;
+            s_mfp = QString::number(mfp, 'g', 4);
+        }
     }
     twi = new QTableWidgetItem(s_cs);
     twi->setTextAlignment(Qt::AlignCenter);
@@ -118,24 +134,25 @@ void ANeutronInfoDialog::update()
 void ANeutronInfoDialog::updateIsotopeTable()
 {
     //      qDebug() << "Updating isotope table";
-
-    ui->tabwIso->clearContents();
-
     const NeutralTerminatorStructure& termAb = mat->MatParticle.at(ipart).Terminators.at(0);
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
 
+    ui->tabwIso->clearContents();
     ui->tabwIso->setRowCount(mat->ChemicalComposition.countIsotopes());
+
+    bool bNCrystal = mat->MatParticle.at(ipart).bUseNCrystal;
 
     double energy = ui->ledEnergy->text().toDouble() * 1.0e-6;
     double totCS_abs  = 0;
     if (bShowAbs)
       if (!termAb.PartialCrossSectionEnergy.isEmpty())
         totCS_abs  = GetInterpolatedValue(energy, &termAb.PartialCrossSectionEnergy, &termAb.PartialCrossSection, bLogLog);
+
     double totCS_scat = 0;
     if (bShowScat)
       if (!termSc.PartialCrossSectionEnergy.isEmpty())
         totCS_scat = GetInterpolatedValue(energy, &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
-    //      qDebug() << totCS_abs << totCS_scat;
+    qDebug() << "Tot xs abs and scat: " << totCS_abs << totCS_scat;
 
     int row = 0;
     for (int iElement=0; iElement<mat->ChemicalComposition.countElements(); iElement++)
@@ -164,12 +181,14 @@ void ANeutronInfoDialog::updateIsotopeTable()
             ui->tabwIso->setItem(row, 1, twdi);
 
             s = "-off-";
-            if (bShowScat)
+            if (bNCrystal) s = "-n.a.-";
+            else if (bShowScat)
             {
                 if (!termSc.IsotopeRecords.at(row).Energy.isEmpty())
                 {
                     double cs_scat = GetInterpolatedValue(energy, &termSc.IsotopeRecords.at(row).Energy, &termSc.IsotopeRecords.at(row).CrossSection, bLogLog);
                     double fraction = cs_scat * termSc.IsotopeRecords.at(row).MolarFraction/ totCS_scat * 100.0;
+                    qDebug() << "sc> frac, thisx, MF, totXS"<<fraction << cs_scat << termSc.IsotopeRecords.at(row).MolarFraction << totCS_scat;
                     s = QString::number(fraction, 'g', 4);
                 }
                 else s = "0";
@@ -299,4 +318,52 @@ bool ATableWidgetDoubleItem::operator< (const QTableWidgetItem &other) const
     if (!bOK) return true;
 
     return val > otherVal;
+}
+
+void ANeutronInfoDialog::on_pbNCrystal_Angle_clicked()
+{
+
+}
+
+void ANeutronInfoDialog::on_pbNCrystal_DeltaEnergy_clicked()
+{
+
+}
+
+void ANeutronInfoDialog::on_pbNCrystal_Energy_clicked()
+{
+
+}
+
+void ANeutronInfoDialog::on_ledEnergy_editingFinished()
+{
+    double Energy_meV = ui->ledEnergy->text().toDouble();
+    if (Energy_meV == 0)
+    {
+        message("Energy cannot be set to zero!", this);
+        ui->ledEnergy->setText("25");
+    }
+    else
+    {
+        double wave_Anstr = sqrt( 081.804209605330899 / Energy_meV );
+        ui->ledWave->setText( QString::number(wave_Anstr, 'g', 4) );
+    }
+
+    update();
+}
+
+void ANeutronInfoDialog::on_ledWave_editingFinished()
+{
+    double Wave_A = ui->ledWave->text().toDouble();
+    if (Wave_A == 0)
+    {
+        message("Wavelength cannot be set to zero!", this);
+        on_ledEnergy_editingFinished();
+        return;
+    }
+
+    double Energy_eV = 0.081804209605330899 / ( Wave_A * Wave_A );
+    ui->ledEnergy->setText( QString::number(Energy_eV*1000.0, 'g', 4) );
+
+    update();
 }

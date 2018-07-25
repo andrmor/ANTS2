@@ -3,10 +3,16 @@
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
 #include "acommonfunctions.h"
+#include "afiletools.h"
+
+#ifdef __USE_ANTS_NCRYSTAL__
+#include "NCrystal/NCrystal.hh"
+#endif
 
 #include "TH1D.h"
 #include "TRandom2.h"
 
+#include <QFile>
 #include <QDebug>
 
 AMaterial::AMaterial()
@@ -191,7 +197,10 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
     for (int iP=0; iP<MatParticle.size(); iP++)
     {
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
+       {
+           //qDebug() << "-----"<<name << iP << iTerm;
            MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation);
+       }
     }
 
     //updating sum stat weights for primary scintillation time generator
@@ -613,30 +622,22 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
-#include "NCrystal/NCrystal.hh"
-#include "afiletools.h"
-#include <QFile>
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
     if (!NCrystal_Ncmat.isEmpty())
     {
-        //if (NCrystal_scatter) NCrystal_scatter->unref();
+        //Scattering is handled by NCrystal library
+        if (NCrystal_scatter) NCrystal_scatter->unref(); NCrystal_scatter = 0;
 
         QString tmpFileName = "___tmp.ncmat";
         SaveTextToFile(tmpFileName, NCrystal_Ncmat);
-        //create tmp file
-        //write there NCrystal_Ncmat
 
         QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
-        //NCrystal_scatter = NCrystal::createScatter( "Al_sg225.ncmat;dcutoff=0.5;temp=25C" );
-        qDebug() << "Settings:"<<settings;
-        //NCrystal_scatter = NCrystal::createScatter( settings.toLatin1().data() );
-        //NCrystal_scatter->ref();
+        NCrystal_scatter = NCrystal::createScatter( settings.toLatin1().data() );
+        NCrystal_scatter->ref();
 
-        //delete tmp file
         QFile f(tmpFileName);
         f.remove();
-        return;
     }
 
     if (Type == ElasticScattering || Type == Absorption)
@@ -649,8 +650,8 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
             for (int iElement=0; iElement<IsotopeRecords.size(); iElement++)
             {
                 ANeutronInteractionElement& nie = IsotopeRecords[iElement];
-                //      qDebug() << nie.Name << "-" << nie.Mass << "  with molar fraction:"<<nie.MolarFraction;
-                //      qDebug() << "size of cross-section dataset"<<nie.Energy.size() << nie.CrossSection.size();
+                //  qDebug() << nie.Name << "-" << nie.Mass << "  with molar fraction:"<<nie.MolarFraction;
+                //  qDebug() << "size of cross-section dataset"<<nie.Energy.size() << nie.CrossSection.size();
                 if (nie.Energy.isEmpty()) continue;
                 if (PartialCrossSectionEnergy.isEmpty())
                 {
@@ -749,6 +750,13 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
                 if (thisParticle > iPart) thisParticle--;
             }
 }
+
+#ifdef  __USE_ANTS_NCRYSTAL__
+double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV) const
+{
+    return NCrystal_scatter->crossSectionNonOriented(energy_keV * 1000.0); //energy in eV
+}
+#endif
 
 QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
 {

@@ -128,6 +128,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
 #ifdef  __USE_ANTS_NCRYSTAL__
   const NCrystal::Scatter * NCrystal_scatter = 0;
+  double getNCrystalCrossSectionBarns(double energy_keV) const;
 #endif
 };
 

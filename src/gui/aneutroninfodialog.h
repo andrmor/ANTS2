@@ -22,8 +22,6 @@ public:
     ~ANeutronInfoDialog();
 
 private slots:
-    void on_ledEnergy_textChanged(const QString &arg1);
-
     void on_pbClose_clicked();
 
     void on_pbTotal_clicked();
@@ -33,6 +31,16 @@ private slots:
     void on_pbScatter_clicked();
 
     void onIsotopeTable_ColumnSelected(int column);
+
+    void on_pbNCrystal_Angle_clicked();
+
+    void on_pbNCrystal_DeltaEnergy_clicked();
+
+    void on_pbNCrystal_Energy_clicked();
+
+    void on_ledEnergy_editingFinished();
+
+    void on_ledWave_editingFinished();
 
 private:
     Ui::ANeutronInfoDialog *ui;

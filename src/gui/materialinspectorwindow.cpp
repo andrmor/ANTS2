@@ -2198,6 +2198,9 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+
     NeutronInfoDialog = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
                                                     ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
 
@@ -2207,6 +2210,7 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
     NeutronInfoDialog->setEnabled(true);
     do
     {
+        QThread::usleep(200);
         qApp->processEvents();
         if (!NeutronInfoDialog) return;
     }

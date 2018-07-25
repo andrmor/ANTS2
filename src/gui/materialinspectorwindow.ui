@@ -1895,7 +1895,7 @@ resolution:</string>
                   <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="pageGamma">
                   <widget class="QFrame" name="fGamma">
@@ -2438,6 +2438,32 @@ resolution:</string>
                    <item>
                     <layout class="QHBoxLayout" name="horizontalLayout_11">
                      <item>
+                      <spacer name="horizontalSpacer_10">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labAssumeZeroForEmpty">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>--</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <widget class="QCheckBox" name="cbAllowAbsentCsData">
                        <property name="text">
                         <string>Assume zero value for missing cross-section data</string>
@@ -2445,9 +2471,22 @@ resolution:</string>
                       </widget>
                      </item>
                      <item>
+                      <spacer name="horizontalSpacer_9">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
                       <widget class="QPushButton" name="pbAutoLoadMissingNeutronCrossSections">
                        <property name="text">
-                        <string>Auto-load missing data</string>
+                        <string>   Auto-load missing data   </string>
                        </property>
                       </widget>
                      </item>
@@ -2635,24 +2674,37 @@ resolution:</string>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbComments">
         <property name="text">
-         <string>Comments for this material</string>
+         <string>   Comments for this material   </string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbConfigureAutoElastic">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
+       <spacer name="horizontalSpacer_8">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>Options</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -2669,14 +2721,14 @@ resolution:</string>
    </property>
    <widget class="QMenu" name="menuLibrary">
     <property name="title">
-     <string>Materials</string>
+     <string>File</string>
     </property>
     <addaction name="actionSave_material"/>
     <addaction name="actionLoad_material"/>
    </widget>
    <widget class="QMenu" name="menuClear">
     <property name="title">
-     <string>Clear</string>
+     <string>Operations</string>
     </property>
     <addaction name="actionClear_Interaction_for_this_particle"/>
     <addaction name="actionClear_interaction_for_all_particles"/>
@@ -2687,6 +2739,13 @@ resolution:</string>
     </property>
     <addaction name="actionUse_log_log_interpolation"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionNeutrons"/>
+   </widget>
+   <addaction name="menuSettings"/>
    <addaction name="menuLibrary"/>
    <addaction name="menuClear"/>
    <addaction name="menuInterpolation"/>
@@ -2726,6 +2785,11 @@ resolution:</string>
    </property>
    <property name="toolTip">
     <string>Log-log interpolation is slower!</string>
+   </property>
+  </action>
+  <action name="actionNeutrons">
+   <property name="text">
+    <string>Neutrons</string>
    </property>
   </action>
  </widget>
@@ -3018,8 +3082,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>285</y>
+     <x>362</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3050,8 +3114,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>122</x>
-     <y>285</y>
+     <x>362</x>
+     <y>301</y>
     </hint>
     <hint type="destinationlabel">
      <x>343</x>

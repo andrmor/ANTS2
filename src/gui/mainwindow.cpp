@@ -503,7 +503,7 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     int OvFrom = ui->cobMaterialForOverrides->currentIndex();
     int OvTo = ui->cobMaterialTo->currentIndex();
 
-    MainWindow::UpdateMaterialListEdit();      
+    UpdateMaterialListEdit();
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
     //updating material selectors on the Detector tab   
@@ -4260,7 +4260,8 @@ void MainWindow::on_pbSavePMtype_clicked()
   QJsonObject jsmat;
   MpCollection->writeMaterialToJson(imat, jsmat);
   json["Material"] = jsmat;
-  SaveJsonToFile(json, fileName);
+  bool bOK = SaveJsonToFile(json, fileName);
+  if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void MainWindow::on_pbLoadPMtype_clicked()
@@ -4271,10 +4272,15 @@ void MainWindow::on_pbLoadPMtype_clicked()
   if (fileName.isEmpty()) return;
 
   QJsonObject json;
-  LoadJsonFromFile(json, fileName);
+  bool bOK = LoadJsonFromFile(json, fileName);
+  if (!bOK)
+  {
+      message("Cannot open file: "+fileName, this);
+      return;
+  }
   if (json.isEmpty())
     {
-      message("Frong file format: Json is empty!");
+      message("Wrong file format: Json is empty!");
       return;
     }
   if (!json.contains("Material"))

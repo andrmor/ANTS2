@@ -188,7 +188,8 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   //if (!QDir(configDir).exists()) QDir().mkdir(configDir);
   QString fileName = GlobSet->ConfigDir + "/WindowConfig.ini";
-  SaveJsonToFile(json, fileName);
+  bool bOK = SaveJsonToFile(json, fileName);
+  if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
@@ -219,7 +220,6 @@ void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
 
 void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
 {
-
   QString fileName = GlobSet->ConfigDir + "/WindowConfig.ini";
   if (QFile(fileName).exists())
     {

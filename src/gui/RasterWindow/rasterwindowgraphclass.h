@@ -14,10 +14,10 @@ class TPolyLine;
 class RasterWindowGraphClass : public RasterWindowBaseClass
 {
 public:  
-  explicit RasterWindowGraphClass(QMainWindow *parent);
+  explicit RasterWindowGraphClass(QMainWindow *MasterWindow);
   ~RasterWindowGraphClass();
 
-  double extractedX;
+  double extractedX = 0;
   double extracted2DLineA, extracted2DLineB, extracted2DLineC;
   double Line2DstartX, Line2DstopX, Line2DstartY, Line2DstopY;
   double extracted2DEllipseX, extracted2DEllipseY, extracted2DEllipseR1, extracted2DEllipseR2, extracted2DEllipseTheta;
@@ -40,10 +40,15 @@ public:
   double getCanvasMinY();
   double getCanvasMaxY();
 
-  void PixelToXY(int ix, int iy, double& x, double& y);
-  void XYtoPixel(double x, double y, int& ix, int& iy);
-  double getXperPixel();
-  double getYperPixel();
+  void PixelToXY(int ix, int iy, double& x, double& y) const;
+  void XYtoPixel(double x, double y, int& ix, int& iy) const;
+  void getRange(double& x1, double& y1, double& x2, double& y2) const; //bottom-left and top-right
+  void getRangeLogAware(double& x1, double& y1, double& x2, double& y2) const; //bottom-left and top-right
+  double getXperPixel() const;
+  double getYperPixel() const;
+
+  bool isLogX() const;
+  bool isLogY() const;
 
 protected:
   bool event(QEvent *event);
@@ -54,30 +59,30 @@ protected:
 private:
 //  QString LastDistributionShown; // "" = nothing was shown
 
-  bool ExtractionComplete;  
+  bool ExtractionComplete = false;
        //for X extraction
-  bool ExtractionOfXPending;
-  bool ExtractionOfXStarted;
+  bool ExtractionOfXPending = false;
+  bool ExtractionOfXStarted = false;
        //2D line
-  bool ExtractionOf2DLinePending;
-  bool ExtractionOf2DLineStarted;
+  bool ExtractionOf2DLinePending = false;
+  bool ExtractionOf2DLineStarted = false;
        //Ellipse
-  bool ExtractionOf2DEllipsePending;
-  int ExtractionOf2DEllipsePhase;
+  bool ExtractionOf2DEllipsePending = false;
+  int ExtractionOf2DEllipsePhase = 0;
        // 2D box
-  bool ExtractionOf2DBoxStarted;
-  bool ExtractionOf2DBoxPending;
+  bool ExtractionOf2DBoxStarted = false;
+  bool ExtractionOf2DBoxPending = false;
        //Polygon
-  bool ExtractionOf2DPolygonStarted;
-  bool ExtractionOf2DPolygonPending;
+  bool ExtractionOf2DPolygonStarted = false;
+  bool ExtractionOf2DPolygonPending = false;
 
-  TLine* VertLine1;
-  TLine* Line2D;
-  TBox* Box2D;
-  TEllipse* Ellipse;
-  TPolyLine* Polygon;
+  TLine* VertLine1 = 0;
+  TLine* Line2D = 0;
+  TBox* Box2D = 0;
+  TEllipse* Ellipse = 0;
+  TPolyLine* Polygon = 0;
 
-  bool ShowCursorPosition;
+  bool ShowCursorPosition = true;
 
   void DrawVerticalLine();
   void Draw2DLine();

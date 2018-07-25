@@ -259,7 +259,7 @@ private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;
     RasterWindowGraphClass *RasterWindow = 0;
-    QWidget *QWinContainer = 0;
+    //QWidget *QWinContainer = 0;
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 

@@ -1572,7 +1572,8 @@ void AScriptWindow::on_actionStore_all_tabs_triggered()
 
     QJsonObject json;
     WriteToJson(json);
-    SaveJsonToFile(json, fileName);
+    bool bOK = SaveJsonToFile(json, fileName);
+    if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void AScriptWindow::on_actionRestore_session_triggered()
@@ -1598,8 +1599,9 @@ void AScriptWindow::on_actionRestore_session_triggered()
     if (fileName.isEmpty()) return;
 
     QJsonObject json;
-    LoadJsonFromFile(json, fileName);
-    ReadFromJson(json);
+    bool bOK = LoadJsonFromFile(json, fileName);
+    if (!bOK) message("Cannot open file: "+fileName, this);
+    else ReadFromJson(json);
 }
 
 void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()

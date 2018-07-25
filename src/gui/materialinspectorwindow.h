@@ -99,7 +99,6 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_pbConfigureAutoElastic_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
@@ -152,6 +151,8 @@ private slots:
 
     void on_pbPriT_test_clicked();
 
+    void on_actionNeutrons_triggered();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -164,11 +165,12 @@ private:
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
+    bool bLockTmpMaterial = false;
 
     bool bMessageLock = false;
 
-    void UpdateWaveButtons();
-    void UpdateActionButtons();
+    void updateWaveButtons();
+    void updateActionButtons();
 
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
@@ -179,10 +181,13 @@ private:
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    void autoloadMissingCrossSectionData();
+    int autoloadMissingCrossSectionData(); //returns number of particles added to the collection
 
     void SetWasModified(bool flag);
     bool parseDecayTime();
+    void updateWarningIcons();
+    int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
+    void updateTmpMatOnPartCollChange(int newPartAdded);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

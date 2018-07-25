@@ -136,6 +136,7 @@ void MainWindow::on_pbAddparticleToActive_clicked()
       //new particle
       bool fOk = MpCollection->AddParticle(name, type, charge, mass);
       if (fOk) ui->cobParticleToInspect->setCurrentIndex(ui->cobParticleToInspect->count()-1);
+      onRequestDetectorGuiUpdate();
     }
 }
 

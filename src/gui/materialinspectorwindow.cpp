@@ -92,6 +92,14 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->pbImportXCOM->setToolTip(str);
 
     OptionsConfigurator = new AMatParticleConfigurator(MW->GlobSet, this);
+
+
+    QPixmap pm(QSize(16,16));
+    pm.fill(Qt::transparent);
+    QPainter b(&pm);
+    b.setBrush(QBrush(Qt::yellow));
+    b.drawEllipse(0, 2, 10, 10);
+    ui->labAssumeZeroForEmpty->setPixmap(pm);
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
@@ -116,6 +124,8 @@ void MaterialInspectorWindow::SetWasModified(bool flag)
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
 {   
+    if (bLockTmpMaterial) return;
+
     int current = ui->cobActiveMaterials->currentIndex();
 
     ui->cobActiveMaterials->clear();    
@@ -211,7 +221,7 @@ void MaterialInspectorWindow::on_cobActiveMaterials_activated(int index)
     ui->pbRename->setText("Rename "+ui->cobActiveMaterials->currentText());
 }
 
-void MaterialInspectorWindow::UpdateWaveButtons()
+void MaterialInspectorWindow::updateWaveButtons()
 {   
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
@@ -347,14 +357,32 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     else ui->cobParticle->setCurrentIndex(0);
     on_pbUpdateInteractionIndication_clicked();
 
-    MaterialInspectorWindow::UpdateWaveButtons();
+    updateWaveButtons();
+    updateWarningIcons();
+}
+
+void MaterialInspectorWindow::updateWarningIcons()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+
+    if (tmpMaterial.ChemicalComposition.countElements() == 0)
+    {
+        QPixmap pm(QSize(16,16));
+        pm.fill(Qt::transparent);
+        QPainter b(&pm);
+        b.setBrush(QBrush(Qt::yellow));
+        b.drawEllipse(0, 2, 10, 10);
+        ui->twProperties->setTabIcon(0, QIcon(pm));
+    }
+    else ui->twProperties->setTabIcon(0, QIcon());
 }
 
 void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 {
-  //qDebug() << "on_pbUpdateIndication_clicked";
-  int particleId = ui->cobParticle->currentIndex();
+  //    qDebug() << "on_pbUpdateIndication_clicked";
+
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  int particleId = ui->cobParticle->currentIndex();
 
   flagDisreguardChange = true; //to skip auto-update "modified!" sign
 
@@ -1242,7 +1270,7 @@ void MaterialInspectorWindow::on_pbWasModified_clicked()
   if (flagDisreguardChange) return;
   SetWasModified(true);
 
-  UpdateActionButtons();
+  updateActionButtons();
 }
 
 bool MaterialInspectorWindow::event(QEvent * e)
@@ -1375,10 +1403,10 @@ void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
     tmpMaterial.PrimarySpectrumHist = 0;
     tmpMaterial.SecondarySpectrumHist = 0;
 
-    UpdateActionButtons();
+    updateActionButtons();
 }
 
-void MaterialInspectorWindow::UpdateActionButtons()
+void MaterialInspectorWindow::updateActionButtons()
 {
     //Buttons status
     QString name = ui->leName->text();
@@ -1647,7 +1675,8 @@ void MaterialInspectorWindow::on_actionSave_material_triggered()
   QJsonObject json, js;
   Detector->MpCollection->writeMaterialToJson(imat, json);
   js["Material"] = json;
-  SaveJsonToFile(js, fileName);
+  bool bOK = SaveJsonToFile(js, fileName);
+  if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void MaterialInspectorWindow::on_actionLoad_material_triggered()
@@ -1657,7 +1686,12 @@ void MaterialInspectorWindow::on_actionLoad_material_triggered()
   if (fileName.isEmpty()) return;
 
   QJsonObject json, js;
-  LoadJsonFromFile(json, fileName);
+  bool bOK = LoadJsonFromFile(json, fileName);
+  if (!bOK)
+  {
+      message("Cannot open file: "+fileName, this);
+      return;
+  }
   if (!json.contains("Material"))
     {
       message("File format error: Json with material settings not found", this);
@@ -1667,12 +1701,12 @@ void MaterialInspectorWindow::on_actionLoad_material_triggered()
   Detector->MpCollection->tmpMaterial.readFromJson(js, Detector->MpCollection);
 
   MaterialInspectorWindow::on_pbWasModified_clicked();
-  MaterialInspectorWindow::UpdateWaveButtons();
+  MaterialInspectorWindow::updateWaveButtons();
   MW->ListActiveParticles();
 
   ui->cobActiveMaterials->setCurrentIndex(-1); //to avoid confusion (and update is disabled for -1)
   MaterialInspectorWindow::UpdateIndicationTmpMaterial(); //refresh indication of tmpMaterial
-  MaterialInspectorWindow::UpdateWaveButtons(); //refresh button state for Wave-resolved properties
+  MaterialInspectorWindow::updateWaveButtons(); //refresh button state for Wave-resolved properties
   SetParticleSelection(0);
 }
 
@@ -1680,7 +1714,7 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
 {
   QMessageBox *msgBox = new QMessageBox( this );
   msgBox->setWindowTitle("Confirmation");
-  msgBox->setText("Clear interaction data for the selected material and particle?");
+  msgBox->setText( QString("Clear ALL interaction data of material %1 for particle %2?").arg(ui->leName->text()).arg(ui->cobParticle->currentText()) );
   msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -1691,21 +1725,10 @@ void MaterialInspectorWindow::on_actionClear_Interaction_for_this_particle_trigg
     }
   if (msgBox) delete msgBox;
 
-    int i = ui->cobParticle->currentIndex();
+    int iPart = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    tmpMaterial.MatParticle[i].TrackingAllowed = true;
-    tmpMaterial.MatParticle[i].MaterialIsTransparent = true;
-    tmpMaterial.MatParticle[i].PhYield=0;
-    tmpMaterial.MatParticle[i].IntrEnergyRes=0;
-    tmpMaterial.MatParticle[i].InteractionDataX.resize(0);
-    tmpMaterial.MatParticle[i].InteractionDataF.resize(0);
-    tmpMaterial.MatParticle[i].Terminators.resize(0);
-
-    tmpMaterial.MatParticle[i].DataSource.clear();
-    tmpMaterial.MatParticle[i].DataString.clear();
-    tmpMaterial.MatParticle[i].bCaptureEnabled = true;
-    tmpMaterial.MatParticle[i].bEllasticEnabled = false;
+    tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
@@ -1715,7 +1738,7 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
 {
   QMessageBox *msgBox = new QMessageBox( this );
   msgBox->setWindowTitle("Confirmation");
-  msgBox->setText("Clear interaction data for the selected material and ALL particles?");
+  msgBox->setText( QString("Clear ALL interaction data of material %1 for ALL particles?").arg(ui->leName->text()) );
   msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -1729,21 +1752,8 @@ void MaterialInspectorWindow::on_actionClear_interaction_for_all_particles_trigg
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
     //for (int i=0; i<Detector->ParticleCollection.size(); i++)
-    for (int i=0; i<Detector->MpCollection->countParticles(); i++)
-    {
-        tmpMaterial.MatParticle[i].TrackingAllowed = true;
-        tmpMaterial.MatParticle[i].MaterialIsTransparent = true;
-        tmpMaterial.MatParticle[i].PhYield=0;
-        tmpMaterial.MatParticle[i].IntrEnergyRes=0;
-        tmpMaterial.MatParticle[i].bCaptureEnabled=true;
-        tmpMaterial.MatParticle[i].bEllasticEnabled=false;
-        tmpMaterial.MatParticle[i].InteractionDataX.resize(0);
-        tmpMaterial.MatParticle[i].InteractionDataF.resize(0);
-        tmpMaterial.MatParticle[i].Terminators.resize(0);
-
-        tmpMaterial.MatParticle[i].DataSource.clear();
-        tmpMaterial.MatParticle[i].DataString.clear();
-    }
+    for (int iPart=0; iPart<Detector->MpCollection->countParticles(); iPart++)
+        tmpMaterial.MatParticle[iPart].Clear();
 
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
@@ -2048,7 +2058,9 @@ void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1
 bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
 {
     QVector<double> x, y;
-    int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
+    QString header = OptionsConfigurator->getHeaderLineId();
+    int hLines = OptionsConfigurator->getNumCommentLines();
+    int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &header, hLines);
     if (res == 0)
     {
         double Multiplier;
@@ -2082,6 +2094,7 @@ bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *ele
 
         element->Energy = x;
         element->CrossSection = y;
+        element->CSfileHeader = header;
         on_pbWasModified_clicked();
         return true;
     }
@@ -2101,15 +2114,31 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
     if (fileName.isEmpty()) return false;
     if ( !QFileInfo(fileName).exists() ) return false;
 
-    qDebug() << "Autoload cross-section from file: " <<fileName;
+    //qDebug() << "Autoload cross-section from file: " <<fileName;
 
     return doLoadCrossSection(element, fileName);
 }
 
-void MaterialInspectorWindow::on_pbConfigureAutoElastic_clicked()
+int MaterialInspectorWindow::autoLoadReaction(ANeutronInteractionElement& element)
 {
-   OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
-   OptionsConfigurator->showNormal();
+    QString fileName = QString("%1/Neutrons/Reactions/%2-%3.json").arg(MW->GlobSet->ResourcesDir).arg(element.Name).arg(element.Mass);
+    //  qDebug() << "Is there file for reaction? "<<fileName;
+
+    int delta = 0;
+    if (QFile(fileName).exists())
+    {
+        QJsonObject json;
+        bool bOK = LoadJsonFromFile(json, fileName);
+        if (bOK)
+        {
+            int numPartBefore = MW->MpCollection->countParticles();
+            //  qDebug() << "File found! Loading reaction data...";
+            element.readScenariosFromJson(json, MW->MpCollection);
+            int numPartAfter = MW->MpCollection->countParticles();
+            delta+= numPartAfter - numPartBefore;
+        }
+    }
+    return delta;
 }
 
 //--------------------------------------------------
@@ -2225,11 +2254,41 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
     tmpMaterial.updateNeutronDataOnCompositionChange(MW->MpCollection);
 
-    if (OptionsConfigurator->isAutoloadEnabled()) autoloadMissingCrossSectionData();
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
 
-    if (ui->cobParticle->currentIndex() == MW->MpCollection->getNeutronIndex()) FillNeutronTable(); //fill table if neutron is selected
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
 
     on_pbWasModified_clicked();
+    updateWarningIcons();
+}
+
+void MaterialInspectorWindow::updateTmpMatOnPartCollChange(int newPartAdded)
+{
+    if (newPartAdded > 0)
+    {
+        QString s = QString("Added %1 new particle").arg(newPartAdded);
+        if (newPartAdded > 1) s += "s";
+        s+= ":\n";
+        for (int i=0; i<newPartAdded; i++)
+        {
+            int ipart = MW->MpCollection->countParticles() - newPartAdded + i;
+            QString partName = MW->MpCollection->getParticleName(ipart);
+            ui->cobParticle->addItem(partName);
+            s+= QString("\n  %1").arg(partName);
+        }
+        s += "\n\nDo not forget to provide interaction cross-sections for the new particles!";
+        message(s, this);
+
+        //forbid the general update of MIwindow - otherwise changes in tmpmat will be lost
+        bLockTmpMaterial = true;
+            MW->onRequestDetectorGuiUpdate();
+        bLockTmpMaterial = false;
+    }
 }
 
 void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
@@ -2292,6 +2351,9 @@ void flagButton(QPushButton* pb, bool flag)
 
 void MaterialInspectorWindow::FillNeutronTable()
 {
+    int particleId = ui->cobParticle->currentIndex();
+    if (particleId != MW->MpCollection->getNeutronIndex()) return;
+
     //      qDebug() << "Filling neutron table";
     ui->tabwNeutron->clearContents();
     ui->tabwNeutron->setRowCount(0);
@@ -2302,7 +2364,6 @@ void MaterialInspectorWindow::FillNeutronTable()
     if (!bCapture && !bElastic) return;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    int particleId = ui->cobParticle->currentIndex();
     QVector<NeutralTerminatorStructure>& Terminators = tmpMaterial.MatParticle[particleId].Terminators;
 
     int numElements = tmpMaterial.ChemicalComposition.countElements();
@@ -2333,6 +2394,7 @@ void MaterialInspectorWindow::FillNeutronTable()
 
     int row = 0;
     bool bIgnore = tmpMaterial.MatParticle[particleId].bAllowAbsentCsData;
+    bool bFoundMissing = false;
     for (int iElement=0; iElement<numElements; iElement++)
     {
         const AChemicalElement* el = tmpMaterial.ChemicalComposition.getElement(iElement);
@@ -2363,15 +2425,17 @@ void MaterialInspectorWindow::FillNeutronTable()
                   pbShow->setMaximumWidth(50);
                   l->addWidget(pbShow);
                   QPushButton* pbLoad = new QPushButton("Load");
-                  if (!bIgnore)
-                    if (absEl->Energy.isEmpty())
-                        flagButton(pbLoad, true);
+                  if (absEl->Energy.isEmpty())
+                  {
+                      if (!bIgnore) flagButton(pbLoad, true);
+                      bFoundMissing = true;
+                  }
                   pbLoad->setMaximumWidth(50);
                   l->addWidget(pbLoad);
                   QPushButton* pbReaction = new QPushButton("Reactions");
                   l->addWidget(pbReaction);
                   QLabel* lab = new QLabel("  ");
-                  QIcon YellowIcon = createColorCircleIcon( QSize(12,12), ( absEl->DecayScenarios.isEmpty() ? Qt::white : Qt::yellow ) );
+                  QIcon YellowIcon = createColorCircleIcon( QSize(12,12), ( absEl->DecayScenarios.isEmpty() ? Qt::white : Qt::green ) );
                   lab->setPixmap(YellowIcon.pixmap(16,16));
                   l->addWidget( lab );
                 w->setLayout(l);
@@ -2401,9 +2465,12 @@ void MaterialInspectorWindow::FillNeutronTable()
                 pbShow->setEnabled(!scatEl->Energy.isEmpty());
                 l->addWidget(pbShow);
                 QPushButton* pbLoad = new QPushButton("Load");
-                if (!bIgnore)
-                    if (scatEl->Energy.isEmpty())
-                        flagButton(pbLoad, true);
+                if (scatEl->Energy.isEmpty())
+                {
+                    if (!bIgnore) flagButton(pbLoad, true);
+                    bFoundMissing = true;
+                }
+
                 pbLoad->setMaximumWidth(50);
                 l->addWidget(pbLoad);
                 w->setLayout(l);
@@ -2415,32 +2482,37 @@ void MaterialInspectorWindow::FillNeutronTable()
             row++;
         }
     }
+
+    ui->labAssumeZeroForEmpty->setVisible(bFoundMissing && bIgnore); //warning - yellow circle
+
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
 
     tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
 }
 
-void MaterialInspectorWindow::autoloadMissingCrossSectionData()
+int MaterialInspectorWindow::autoloadMissingCrossSectionData()
 {
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
+    int newParticlesDefined = 0;
+
     //for neutron
     int neutronId = MW->MpCollection->getNeutronIndex();
-    if (neutronId != -1) //otherwise not dfefined in this configuration
+    if (neutronId != -1) //otherwise not defined in this configuration
     {
         MatParticleStructure& mp = tmpMaterial.MatParticle[neutronId];
 
         bool bCapture = mp.bCaptureEnabled;
         bool bElastic = mp.bEllasticEnabled;
-        if (!bCapture && !bElastic) return;
+        if (!bCapture && !bElastic) return 0;
 
         QVector<NeutralTerminatorStructure>& Terminators = mp.Terminators;
 
         if (Terminators.size() != 2)
         {
             qWarning() << "||| Terminators size is not equal to two!";
-            return;
+            return 0;
         }
         NeutralTerminatorStructure& termAbs = Terminators[0];
         NeutralTerminatorStructure& termScat = Terminators[1];
@@ -2449,15 +2521,20 @@ void MaterialInspectorWindow::autoloadMissingCrossSectionData()
         {
             for (int iEl = 0; iEl<termAbs.IsotopeRecords.size(); iEl++)
                 if (termAbs.IsotopeRecords.at(iEl).Energy.isEmpty())
-                    autoLoadCrossSection( &termAbs.IsotopeRecords[iEl], "absorption");
+                {
+                    autoLoadCrossSection(&termAbs.IsotopeRecords[iEl], "absorption");
+                    newParticlesDefined += autoLoadReaction(termAbs.IsotopeRecords[iEl]);
+                }
         }
         if (bElastic)
         {
             for (int iEl = 0; iEl<termScat.IsotopeRecords.size(); iEl++)
                 if (termScat.IsotopeRecords.at(iEl).Energy.isEmpty())
-                    autoLoadCrossSection( &termScat.IsotopeRecords[iEl], "elastic scattering");
+                    autoLoadCrossSection(&termScat.IsotopeRecords[iEl], "elastic scattering");
         }
     }
+
+    return newParticlesDefined;
 }
 
 void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QPoint &pos)
@@ -2467,18 +2544,38 @@ void MaterialInspectorWindow::on_tabwNeutron_customContextMenuRequested(const QP
 
 void MaterialInspectorWindow::on_cbCapture_clicked()
 {
-    FillNeutronTable();
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
+
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
+
+    on_pbWasModified_clicked();
+    updateWarningIcons();
 }
 
 void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 {
-    FillNeutronTable();
+    int numNewPart = 0;
+    if (OptionsConfigurator->isAutoloadEnabled())
+        numNewPart += autoloadMissingCrossSectionData();
+
+    FillNeutronTable(); //fill table if neutron is selected
+
+    if (numNewPart > 0)
+        updateTmpMatOnPartCollChange(numNewPart);
+
+    on_pbWasModified_clicked();
+    updateWarningIcons();
 }
 
 void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action)
 {
     if (MW->GlobSet->MaterialsAndParticlesSettings.isEmpty())
-        on_pbConfigureAutoElastic_clicked();
+        on_actionNeutrons_triggered();
 
     //      qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2539,6 +2636,9 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
         graphOver->SetLineColor(kRed);
         graphOver->SetLineWidth(1);
         MW->GraphWindow->Draw(graphOver, "L same");
+
+        if (!element->CSfileHeader.isEmpty())
+            MW->GraphWindow->AddText(element->CSfileHeader, true, 0);
     }
     // -- Load --
     else if (Action.contains("Load"))
@@ -2615,6 +2715,10 @@ void MaterialInspectorWindow::on_pbAutoLoadMissingNeutronCrossSections_clicked()
 
 void MaterialInspectorWindow::on_pbHelpNeutron_clicked()
 {
+    QString dir = OptionsConfigurator->getCrossSectionFirstDataDir();
+    if (!dir.isEmpty())
+       QDesktopServices::openUrl(QUrl("file:///"+dir, QUrl::TolerantMode));
+
     QDialog* d = new QDialog(this);
 
     QVBoxLayout* l = new QVBoxLayout();
@@ -2778,4 +2882,10 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
     title += tmpMaterial.name.toLatin1().data();
     h->SetTitle(title);
     MW->GraphWindow->Draw(h);
+}
+
+void MaterialInspectorWindow::on_actionNeutrons_triggered()
+{
+    OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
+    OptionsConfigurator->showNormal();
 }

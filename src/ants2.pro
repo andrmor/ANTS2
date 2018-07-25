@@ -19,12 +19,12 @@ CONFIG += ants2_SIM         #if disabled, simulation-related modules are not com
 #---CERN ROOT---
 win32 {
      INCLUDEPATH += c:/root/include
-     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibRint -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum #-llibCint -llibMathMore
+     LIBS += -Lc:/root/lib/ -llibCore -llibRIO -llibNet -llibHist -llibGraf -llibGraf3d -llibGpad -llibTree -llibRint -llibPostscript -llibMatrix -llibPhysics -llibMathCore -llibGeom -llibGeomPainter -llibGeomBuilder -llibMinuit2 -llibThread -llibSpectrum
      ants2_RootServer {LIBS += -llibRHTTP}
 }
 linux-g++ || unix {
      INCLUDEPATH += $$system(root-config --incdir)
-     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum #-lMathMore
+     LIBS += $$system(root-config --libs) -lGeom -lGeomPainter -lGeomBuilder -lMinuit2 -lSpectrum
      ants2_RootServer {LIBS += -lRHTTP  -lXMLIO}
 }
 #-----------
@@ -721,6 +721,12 @@ win32 {
         todir ~= s,/,\\,g
         fromdir ~= s,/,\\,g
         QMAKE_POST_LINK = $$quote(cmd /c xcopy \"$${fromdir}\" \"$${todir}\" /y /e /i$$escape_expand(\n\t))
+
+        todir = $${OUT_PWD}/DATA
+        fromdir = $${PWD}/DATA
+        todir ~= s,/,\\,g
+        fromdir ~= s,/,\\,g
+        QMAKE_POST_LINK = $$quote(cmd /c xcopy \"$${fromdir}\" \"$${todir}\" /y /e /i$$escape_expand(\n\t))
       }
 
 linux-g++ {
@@ -728,12 +734,20 @@ linux-g++ {
    todir = $${OUT_PWD}
    fromdir = $${PWD}/EXAMPLES
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
+
+   todir = $${OUT_PWD}
+   fromdir = $${PWD}/DATA
+   QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 
 unix {
    #todir = $${OUT_PWD}/..
    todir = $${OUT_PWD}
    fromdir = $${PWD}/EXAMPLES
+   QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
+
+   todir = $${OUT_PWD}
+   fromdir = $${PWD}/DATA
    QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------

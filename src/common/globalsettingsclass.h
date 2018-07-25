@@ -20,6 +20,7 @@ public:
   QString ConfigDir;   // AntsbaseDir + "/Config"
   QString QuicksaveDir;// AntsbaseDir + "/Quicksave"
   QString ExamplesDir; // AntsbaseDir + "/Examples"
+  QString ResourcesDir; // AntsbaseDir + "/Examples"
   QString TmpDir;      // AntsbaseDir + "/Tmp"
 
   QString LastOpenDir; // last open directory using save and load dialog

@@ -239,15 +239,15 @@ void ANeutronInfoDialog::on_pbTotal_clicked()
 
     TString xTitle("Total cross-section, barns");
 
-    if (!bShowAbs)
-        drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, xTitle);
-    else if (!bShowScat)
+    if (!bShowScat)
         drawCrossSection(termAb.PartialCrossSectionEnergy, termAb.PartialCrossSection, xTitle);
+    else if (!bShowAbs)
+        on_pbScatter_clicked();
     else
     {
         if (termAb.PartialCrossSectionEnergy.isEmpty())
-            drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, xTitle);
-        else if (termSc.PartialCrossSectionEnergy.isEmpty())
+            on_pbScatter_clicked();
+        else if (termSc.PartialCrossSectionEnergy.isEmpty() && !mat->MatParticle.at(ipart).bUseNCrystal)
             drawCrossSection(termAb.PartialCrossSectionEnergy, termAb.PartialCrossSection, xTitle);
         else
         {
@@ -255,7 +255,11 @@ void ANeutronInfoDialog::on_pbTotal_clicked()
             QVector<double> cs = termAb.PartialCrossSection;
             for (int i=0; i<energy.size(); i++)
             {
-                double val = GetInterpolatedValue(energy.at(i), &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
+                double val;
+                if (mat->MatParticle.at(ipart).bUseNCrystal)
+                    val = termSc.getNCrystalCrossSectionBarns(energy.at(i)) * 1.0e-24; //to cm2
+                else
+                    val = GetInterpolatedValue(energy.at(i), &termSc.PartialCrossSectionEnergy, &termSc.PartialCrossSection, bLogLog);
                 cs[i] += val;
             }
             drawCrossSection(energy, cs, xTitle);
@@ -288,6 +292,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
 
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
 
+#ifdef  __USE_ANTS_NCRYSTAL__
     if (mat->MatParticle.at(ipart).bUseNCrystal)
     {
         if (!termSc.NCrystal_scatter)
@@ -316,6 +321,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
         }
     }
     else
+#endif
         drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Ellastic scattering cross-section, barns"));
 }
 

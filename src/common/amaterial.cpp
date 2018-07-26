@@ -624,6 +624,7 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
 
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
+#ifdef  __USE_ANTS_NCRYSTAL__
     if (!NCrystal_Ncmat.isEmpty())
     {
         //Scattering is handled by NCrystal library
@@ -639,6 +640,7 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
         QFile f(tmpFileName);
         f.remove();
     }
+#endif
 
     if (Type == ElasticScattering || Type == Absorption)
         if (!IsotopeRecords.isEmpty())
@@ -751,12 +753,14 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
             }
 }
 
-#ifdef  __USE_ANTS_NCRYSTAL__
 double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV) const
 {
-    return NCrystal_scatter->crossSectionNonOriented(energy_keV * 1000.0); //energy in eV
-}
+#ifdef  __USE_ANTS_NCRYSTAL__
+    return NCrystal_scatter->crossSectionNonOriented(energy_keV * 1000.0); //energy to eV
+#else
+    return 0;
 #endif
+}
 
 QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
 {

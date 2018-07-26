@@ -288,7 +288,35 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
 
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
 
-    drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Ellastic scattering cross-section, barns"));
+    if (mat->MatParticle.at(ipart).bUseNCrystal)
+    {
+        if (!termSc.NCrystal_scatter)
+        {
+            message("Configuration is not complete - no NCRystal scatter found!", this);
+            return;
+        }
+        else
+        {
+            QVector<double> x,y;
+            double energy = 0.001; // in meV
+            do
+            {
+                x << energy;
+                y << termSc.getNCrystalCrossSectionBarns(energy * 1.0e-6);
+                energy *= 1.1;
+            }
+            while (energy < 1000);
+
+            GraphWindow->ShowAndFocus();
+            TGraph* gr = GraphWindow->ConstructTGraph(x, y, mat->name.toLocal8Bit(),
+                                                      "Energy, meV", "Ellastic scattering cross-section, barns",
+                                                      kRed, 2, 1, kRed, 1, 2);
+            GraphWindow->Draw(gr, "AL");
+            GraphWindow->UpdateRootCanvas();
+        }
+    }
+    else
+        drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Ellastic scattering cross-section, barns"));
 }
 
 void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const QVector<double>& cs, const TString &xTitle)

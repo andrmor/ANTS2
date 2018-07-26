@@ -726,7 +726,7 @@ win32 {
         fromdir = $${PWD}/DATA
         todir ~= s,/,\\,g
         fromdir ~= s,/,\\,g
-        QMAKE_POST_LINK = $$quote(cmd /c xcopy \"$${fromdir}\" \"$${todir}\" /y /e /i$$escape_expand(\n\t))
+        QMAKE_PRE_LINK = $$quote(cmd /c xcopy \"$${fromdir}\" \"$${todir}\" /y /e /i$$escape_expand(\n\t))
       }
 
 linux-g++ {
@@ -737,7 +737,7 @@ linux-g++ {
 
    todir = $${OUT_PWD}
    fromdir = $${PWD}/DATA
-   QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
+   QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 
 unix {
@@ -748,6 +748,6 @@ unix {
 
    todir = $${OUT_PWD}
    fromdir = $${PWD}/DATA
-   QMAKE_POST_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
+   QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------

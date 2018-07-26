@@ -130,6 +130,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   const NCrystal::Scatter * NCrystal_scatter = 0;
 #endif
   double getNCrystalCrossSectionBarns(double energy_keV) const;
+  void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV ) const;
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

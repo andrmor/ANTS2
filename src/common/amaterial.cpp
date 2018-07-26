@@ -625,11 +625,10 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
-    if (!NCrystal_Ncmat.isEmpty())
-    {
-        //Scattering is handled by NCrystal library
-        if (NCrystal_scatter) NCrystal_scatter->unref(); NCrystal_scatter = 0;
+    if (NCrystal_scatter) NCrystal_scatter->unref(); NCrystal_scatter = 0;
 
+    if ( !NCrystal_Ncmat.isEmpty() )
+    {
         QString tmpFileName = "___tmp.ncmat";
         SaveTextToFile(tmpFileName, NCrystal_Ncmat);
 
@@ -759,6 +758,17 @@ double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_ke
     return NCrystal_scatter->crossSectionNonOriented(energy_keV * 1000.0); //energy to eV
 #else
     return 0;
+#endif
+}
+
+void NeutralTerminatorStructure::generateScatteringNonOriented(double energy_keV, double &angle, double &delta_ekin_keV) const
+{
+#ifdef  __USE_ANTS_NCRYSTAL__
+    NCrystal_scatter->generateScatteringNonOriented(energy_keV * 1000.0, angle, delta_ekin_keV); //input energy to eV, output is actually in eV !
+    delta_ekin_keV *= 0.001; //from eV to keV
+#else
+    angle = 0;
+    delta_ekin_keV = 0;
 #endif
 }
 

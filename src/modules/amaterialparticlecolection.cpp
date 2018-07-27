@@ -46,13 +46,13 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, int numThreads)
+void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
   for (int i=0; i<MaterialCollectionData.size(); i++)
   {
     UpdateWaveResolvedProperties(i);
-    UpdateNeutronProperties(i);
+    UpdateNeutronProperties(i, RandGen, numThreads);
   }
 }
 
@@ -446,9 +446,9 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   }
 }
 
-void AMaterialParticleCollection::UpdateNeutronProperties(int imat, int numThreads)
+void AMaterialParticleCollection::UpdateNeutronProperties(int imat, TRandom2* RandGen, int numThreads)
 {
-    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation);
+    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation, RandGen, numThreads);
 }
 
 bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)

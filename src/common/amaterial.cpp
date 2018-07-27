@@ -192,14 +192,14 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
     }
 }
 
-void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation, int numThreads)
+void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* RandGen, int numThreads)
 {
     for (int iP=0; iP<MatParticle.size(); iP++)
     {
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
        {
            //qDebug() << "-----"<<name << iP << iTerm;
-           MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation);
+           MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation, RandGen, numThreads);
        }
     }
 
@@ -622,7 +622,8 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
-void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, int numThreads)
+#include "arandomgenncrystal.h"
+void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
     for (const NCrystal::Scatter * sc : NCrystal_scatters) sc->unref();
@@ -639,7 +640,11 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, int nu
         for (int i=0; i<numThreads; i++)
         {
             const NCrystal::Scatter * sc = NCrystal::createScatter( settings.toLatin1().data() );
+            ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
+            //rnd->ref(); //need?
+            const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
             sc->ref();
+
             NCrystal_scatters.append(sc);
         }
 

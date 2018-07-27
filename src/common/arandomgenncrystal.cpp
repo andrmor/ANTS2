@@ -1,6 +1,11 @@
 #include "arandomgenncrystal.h"
 
-ARandomGenNCrystal::ARandomGenNCrystal()
-{
+#include "TRandom2.h"
 
+ARandomGenNCrystal::ARandomGenNCrystal(TRandom2 &RandGen) :
+    RandomBase(), RandGen(RandGen) {}
+
+double ARandomGenNCrystal::generate()
+{
+    return RandGen.Rndm();
 }

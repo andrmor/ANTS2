@@ -79,7 +79,7 @@ public:
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
-  void updateRuntimeProperties(bool bLogLogInterpolation, int numThreads = 1);
+  void updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* RandGen, int numThreads = 1);
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
@@ -112,7 +112,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateRunTimeProperties(bool bUseLogLog, int numThreads = 1);
+  void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads = 1);
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 

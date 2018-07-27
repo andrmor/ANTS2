@@ -149,7 +149,7 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
     if ( !parseDecayTime() ) return;
 
-    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 
     //checkig this material
     QString error = MW->MpCollection->CheckTmpMaterial();
@@ -2199,7 +2199,7 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 
     NeutronInfoDialog = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
                                                     ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
@@ -2503,7 +2503,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 }
 
 int MaterialInspectorWindow::autoloadMissingCrossSectionData()
@@ -2868,7 +2868,7 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 {
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation); //to update sum of stat weights
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
 
     QMessageBox mb(this);
     if (ui->cobPriT_model->currentIndex() == 1)

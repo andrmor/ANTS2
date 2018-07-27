@@ -209,6 +209,15 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* Ran
         _PrimScintSumStatWeight += pair.first;
 }
 
+void AMaterial::UpdateRandGen(int ID, TRandom2 *RandGen)
+{
+    for (int iP=0; iP<MatParticle.size(); iP++)
+    {
+       for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
+           MatParticle[iP].Terminators[iTerm].UpdateRandGen(ID, RandGen);
+    }
+}
+
 void AMaterial::clear()
 {
   name = "Undefined";
@@ -687,6 +696,24 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
             }
         }
     //      qDebug() << "...done!";
+}
+
+
+void NeutralTerminatorStructure::UpdateRandGen(int ID, TRandom2 *RandGen)
+{
+#ifdef  __USE_ANTS_NCRYSTAL__
+    if (ID > -1 && ID < NCrystal_scatters.size())
+    {
+        const NCrystal::Scatter * sc = NCrystal_scatters.at(ID);
+        ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
+        //rnd->ref(); //need?
+        const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
+    }
+    else
+    {
+        qWarning() << "|||---Error: Bad thread index" << ID << "while"<<NCrystal_scatters.size()<<"NCrystal scatters are defined!";
+    }
+#endif
 }
 
 void NeutralTerminatorStructure::writeToJson(QJsonObject &json, AMaterialParticleCollection *MpCollection) const

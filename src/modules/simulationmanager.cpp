@@ -1342,6 +1342,9 @@ ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, 
     Simulator(detector, ID)
 {
     totalEventCount = 0;
+
+    detector->MpCollection->updateRandomGenForThread(ID, RandGen);
+
     ParticleTracker = new PrimaryParticleTracker(detector->GeoManager,
                                                  RandGen,                                                 
                                                  detector->MpCollection,

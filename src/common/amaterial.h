@@ -81,6 +81,8 @@ public:
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
   void updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* RandGen, int numThreads = 1);
 
+  void UpdateRandGen(int ID, TRandom2* RandGen);
+
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
@@ -131,6 +133,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 #endif
   double getNCrystalCrossSectionBarns(double energy_keV, int threadIndex = 0) const;
   void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV, int threadIndex = 0) const;
+  void   UpdateRandGen(int ID, TRandom2 *RandGen);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

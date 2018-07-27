@@ -49,11 +49,17 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
-  for (int i=0; i<MaterialCollectionData.size(); i++)
+  for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
   {
-    UpdateWaveResolvedProperties(i);
-    UpdateNeutronProperties(i, RandGen, numThreads);
+    UpdateWaveResolvedProperties(imat);
+    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation, RandGen, numThreads);
   }
+}
+
+void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* RandGen)
+{
+    for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
+        MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)
@@ -444,11 +450,6 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
             MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(false, 0, 1, 1);
   }
-}
-
-void AMaterialParticleCollection::UpdateNeutronProperties(int imat, TRandom2* RandGen, int numThreads)
-{
-    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation, RandGen, numThreads);
 }
 
 bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)

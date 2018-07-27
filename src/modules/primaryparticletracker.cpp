@@ -25,10 +25,11 @@ PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
                                                QVector<AParticleOnStack*>* particleStack,
                                                QVector<AEnergyDepositionCell*>* energyVector,
                                                QVector<EventHistoryStructure*>* eventHistory,
-                                               ASimulationStatistics *simStat,
+                                               ASimulationStatistics *simStat, int threadIndex,
                                                QObject *parent) :
   QObject(parent), GeoManager(geoManager), RandGen (RandomGenerator),
-  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat)
+  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat),
+  threadIndex(threadIndex)
 {
   BuildTracks = true;
   RemoveTracksIfNoEnergyDepo = true;
@@ -291,7 +292,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                                                                  &(*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].PartialCrossSection,
                                                                                  MpCollection->fLogLogInterpolation);
                           else
-                            InteractionCoefficient = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].getNCrystalCrossSectionBarns(energy) * 1.0e-24; //in cm2
+                            InteractionCoefficient = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].getNCrystalCrossSectionBarns(energy, threadIndex) * 1.0e-24; //in cm2
 
                           //  qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
 
@@ -608,7 +609,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     //NCRYSTAL handles scattering
                                     double angle;
                                     double deltaE;
-                                    term.generateScatteringNonOriented(energy, angle, deltaE);
+                                    term.generateScatteringNonOriented(energy, angle, deltaE, threadIndex);
 
                                     TVector3 original(v);
                                     TVector3 orthogonal_to_original = original.Orthogonal();

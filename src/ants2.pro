@@ -336,7 +336,8 @@ SOURCES += main.cpp \
     scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
-    Net/aremoteserverrecord.cpp
+    Net/aremoteserverrecord.cpp \
+    common/arandomgenncrystal.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -459,7 +460,8 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsession.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
-    Net/aremoteserverrecord.h
+    Net/aremoteserverrecord.h \
+    common/arandomgenncrystal.h
 
 # --- SIM ---
 ants2_SIM {

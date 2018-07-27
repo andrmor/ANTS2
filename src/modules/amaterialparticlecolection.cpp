@@ -46,7 +46,7 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet)
+void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
   for (int i=0; i<MaterialCollectionData.size(); i++)
@@ -446,13 +446,8 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   }
 }
 
-void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
+void AMaterialParticleCollection::UpdateNeutronProperties(int imat, int numThreads)
 {
-    //for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
-    //{
-    //    for (NeutralTerminatorStructure& term : mp.Terminators )
-    //        term.UpdateRunTimeProperties(fLogLogInterpolation);
-    //}
     MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation);
 }
 

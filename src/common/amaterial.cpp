@@ -192,7 +192,7 @@ void AMaterial::updateNeutronDataOnCompositionChange(const AMaterialParticleColl
     }
 }
 
-void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation)
+void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation, int numThreads)
 {
     for (int iP=0; iP<MatParticle.size(); iP++)
     {
@@ -622,10 +622,11 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
-void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
+void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, int numThreads)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
-    if (NCrystal_scatter) NCrystal_scatter->unref(); NCrystal_scatter = 0;
+    for (const NCrystal::Scatter * sc : NCrystal_scatters) sc->unref();
+    NCrystal_scatters.clear();
 
     if ( !NCrystal_Ncmat.isEmpty() )
     {
@@ -633,8 +634,14 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog)
         SaveTextToFile(tmpFileName, NCrystal_Ncmat);
 
         QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
-        NCrystal_scatter = NCrystal::createScatter( settings.toLatin1().data() );
-        NCrystal_scatter->ref();
+
+        if (numThreads < 1) numThreads = 1;
+        for (int i=0; i<numThreads; i++)
+        {
+            const NCrystal::Scatter * sc = NCrystal::createScatter( settings.toLatin1().data() );
+            sc->ref();
+            NCrystal_scatters.append(sc);
+        }
 
         QFile f(tmpFileName);
         f.remove();
@@ -752,20 +759,37 @@ void NeutralTerminatorStructure::prepareForParticleRemove(int iPart)
             }
 }
 
-double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV) const
+double NeutralTerminatorStructure::getNCrystalCrossSectionBarns(double energy_keV, int threadIndex) const
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
-    return NCrystal_scatter->crossSectionNonOriented(energy_keV * 1000.0); //energy to eV
+    if (threadIndex < NCrystal_scatters.size())
+    {
+        return NCrystal_scatters.at(threadIndex)->crossSectionNonOriented(energy_keV * 1000.0); //energy to eV
+    }
+    else
+    {
+        qWarning() << "|||---Error: Bad thread index" << threadIndex << "while"<<NCrystal_scatters.size()<<"NCrystal scatters are defined!";
+        return 0;
+    }
 #else
     return 0;
 #endif
 }
 
-void NeutralTerminatorStructure::generateScatteringNonOriented(double energy_keV, double &angle, double &delta_ekin_keV) const
+void NeutralTerminatorStructure::generateScatteringNonOriented(double energy_keV, double &angle, double &delta_ekin_keV, int threadIndex) const
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
-    NCrystal_scatter->generateScatteringNonOriented(energy_keV * 1000.0, angle, delta_ekin_keV); //input energy to eV, output is actually in eV !
-    delta_ekin_keV *= 0.001; //from eV to keV
+    if (threadIndex < NCrystal_scatters.size())
+    {
+        NCrystal_scatters.at(threadIndex)->generateScatteringNonOriented(energy_keV * 1000.0, angle, delta_ekin_keV); //input energy to eV, output is actually in eV !
+        delta_ekin_keV *= 0.001; //from eV to keV
+    }
+    else
+    {
+        qWarning() << "|||---Error: Bad thread index" << threadIndex << "while"<<NCrystal_scatters.size()<<"NCrystal scatters are defined!";
+        angle = 0;
+        delta_ekin_keV = 0;
+    }
 #else
     angle = 0;
     delta_ekin_keV = 0;

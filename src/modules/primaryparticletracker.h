@@ -28,6 +28,7 @@ public:
                                     QVector<AEnergyDepositionCell*>* energyVector,
                                     QVector<EventHistoryStructure*>* eventHistory,
                                     ASimulationStatistics* simStat,
+                                    int threadIndex,
                                     QObject *parent = 0);
     //main usage
     bool TrackParticlesInStack(int eventId = 0);
@@ -58,6 +59,8 @@ private:
     QVector<AEnergyDepositionCell*>* EnergyVector;
     QVector<EventHistoryStructure*>* EventHistory;
     ASimulationStatistics* SimStat;
+
+    int threadIndex = 0;
 
     const GeneralSimSettings* SimSet;
     bool BuildTracks;

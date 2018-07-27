@@ -79,7 +79,7 @@ public:
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
-  void updateRuntimeProperties(bool bLogLogInterpolation);
+  void updateRuntimeProperties(bool bLogLogInterpolation, int numThreads = 1);
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
@@ -112,7 +112,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateRunTimeProperties(bool bUseLogLog);
+  void UpdateRunTimeProperties(bool bUseLogLog, int numThreads = 1);
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 
@@ -127,10 +127,10 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   double NCrystal_Packing = 1.0;
 
 #ifdef  __USE_ANTS_NCRYSTAL__
-  const NCrystal::Scatter * NCrystal_scatter = 0;
+  QVector<const NCrystal::Scatter *> NCrystal_scatters;
 #endif
-  double getNCrystalCrossSectionBarns(double energy_keV) const;
-  void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV ) const;
+  double getNCrystalCrossSectionBarns(double energy_keV, int threadIndex = 0) const;
+  void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV, int threadIndex = 0) const;
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure

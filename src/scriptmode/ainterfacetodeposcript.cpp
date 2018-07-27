@@ -226,7 +226,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     simSettings.fLogsStat = true; //force to populate logs
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
     pss->setSimSettings(&simSettings);
     pss->setup(json);
     pss->initSimStat();

@@ -33,7 +33,7 @@ public:
   //configuration
   void SetWave(bool wavelengthResolved, double waveFrom, double waveTo, double waveStep, int waveNodes);
 
-  void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet);
+  void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, int numThreads = 1);
 
   //info requests
     //materials
@@ -58,7 +58,7 @@ public:
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
-  void UpdateNeutronProperties(int imat);  //update neutron run-time properties
+  void UpdateNeutronProperties(int imat, int numThreads = 1);  //update neutron run-time properties
 
   //Particles handling
   bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);

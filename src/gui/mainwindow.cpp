@@ -4090,7 +4090,7 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings)
+ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
 {
     //============ prepare config ============
     QJsonObject json;
@@ -4107,7 +4107,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     qApp->processEvents();
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
 
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);

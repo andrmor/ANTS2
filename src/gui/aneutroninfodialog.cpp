@@ -295,7 +295,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
 #ifdef  __USE_ANTS_NCRYSTAL__
     if (mat->MatParticle.at(ipart).bUseNCrystal)
     {
-        if (!termSc.NCrystal_scatter)
+        if ( termSc.NCrystal_scatters.isEmpty() )
         {
             message("Configuration is not complete - no NCRystal scatter found!", this);
             return;
@@ -307,7 +307,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
             do
             {
                 x << energy;
-                y << termSc.getNCrystalCrossSectionBarns(energy * 1.0e-6);
+                y << termSc.getNCrystalCrossSectionBarns(energy * 1.0e-6); //to keV
                 energy *= 1.1;
             }
             while (energy < 1000);
@@ -382,7 +382,7 @@ void ANeutronInfoDialog::RunNCrystal(bool bAngle)
     if (mat->MatParticle.at(ipart).Terminators.size() != 2) return;
 
     const NeutralTerminatorStructure& termSc = mat->MatParticle.at(ipart).Terminators.at(1);
-    if (!termSc.NCrystal_scatter) return;
+    if ( termSc.NCrystal_scatters.isEmpty() ) return;
 
     TH1D* hist;
 
@@ -397,21 +397,21 @@ void ANeutronInfoDialog::RunNCrystal(bool bAngle)
         hist->GetXaxis()->SetTitle("Energy, meV");
     }
 
-    double en = ui->ledEnergy->text().toDouble() * 0.001; // in eV
-    double angle,delta_ekin;
+    double en_keV = ui->ledEnergy->text().toDouble() * 1.0e-6; // in keV
+    double angle, delta_ekin_keV;
 
     bool bSkipBragg = ui->cbNCrystalSkipBragg->isChecked();
 
     for (int i=0; i<1000000; i++)
     {
-        termSc.NCrystal_scatter->generateScatteringNonOriented( en, angle, delta_ekin );
+        termSc.generateScatteringNonOriented( en_keV, angle, delta_ekin_keV );
 
-        if (delta_ekin == 0 && bSkipBragg) continue;
+        if (delta_ekin_keV == 0 && bSkipBragg) continue;
 
         if (bAngle)
             hist->Fill(angle * 57.2957795131);
         else
-            hist->Fill( (en + delta_ekin)*1000.0 );
+            hist->Fill( (en_keV + delta_ekin_keV) * 1.0e6 ); //keV -> meV
     }
 
     TH1D* h = new TH1D(*hist);

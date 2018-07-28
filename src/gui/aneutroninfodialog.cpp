@@ -308,7 +308,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
             {
                 x << energy;
                 y << termSc.getNCrystalCrossSectionBarns(energy * 1.0e-6); //to keV
-                energy *= 1.1;
+                energy *= 1.02;
             }
             while (energy < 1000);
 

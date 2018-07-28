@@ -702,6 +702,7 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
 void NeutralTerminatorStructure::UpdateRandGen(int ID, TRandom2 *RandGen)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
+    if (NCrystal_scatters.isEmpty()) return; //nothing to update
     if (ID > -1 && ID < NCrystal_scatters.size())
     {
         const NCrystal::Scatter * sc = NCrystal_scatters.at(ID);

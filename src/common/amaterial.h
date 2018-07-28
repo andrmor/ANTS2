@@ -27,7 +27,7 @@ public:
 
   QString name;
   double density; //in g/cm3
-  double temperature = 298; //in K
+  double temperature = 298.0; //in K
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
@@ -114,7 +114,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads = 1);
+  void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads, double temp = 298.0);
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 

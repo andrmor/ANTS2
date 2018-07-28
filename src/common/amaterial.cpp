@@ -125,7 +125,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
     double t = (PriScintRaiseTime == 0 ? 0 : -PriScintRaiseTime * log(1.0 - RandGen->Rndm()) ); //delay due to raise time
     if ( !PriScintDecayTimeVector.isEmpty() )
     {
-        double tau;
+        double tau = 0;
         if (PriScintDecayTimeVector.size() == 1) tau = PriScintDecayTimeVector.at(0).second;
         else
         {
@@ -199,7 +199,7 @@ void AMaterial::updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* Ran
        for (int iTerm=0; iTerm<MatParticle[iP].Terminators.size(); iTerm++)
        {
            //qDebug() << "-----"<<name << iP << iTerm;
-           MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation, RandGen, numThreads);
+           MatParticle[iP].Terminators[iTerm].UpdateRunTimeProperties(bLogLogInterpolation, RandGen, numThreads, temperature);
        }
     }
 
@@ -632,7 +632,7 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
 }
 
 #include "arandomgenncrystal.h"
-void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads)
+void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads, double temp)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
     for (const NCrystal::Scatter * sc : NCrystal_scatters) sc->unref();
@@ -643,7 +643,8 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
         QString tmpFileName = "___tmp.ncmat";
         SaveTextToFile(tmpFileName, NCrystal_Ncmat);
 
-        QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg("298");
+        QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg(temp);
+        //  qDebug() << "NCrystal options line:"<<settings;
 
         if (numThreads < 1) numThreads = 1;
         for (int i=0; i<numThreads; i++)

@@ -352,16 +352,19 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       jMatParticle["IntrEnergyRes"] = MatParticle[ip].IntrEnergyRes;
       jMatParticle["DataSource"] = MatParticle[ip].DataSource;
       jMatParticle["DataString"] = MatParticle[ip].DataString;
-      jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
-      jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
-      jMatParticle["UseNCrystal"] = MatParticle[ip].bUseNCrystal;
-      jMatParticle["AllowAbsentCsData"] = MatParticle[ip].bAllowAbsentCsData;
+
+      if ( MpCollection->getParticleType(ip) == AParticle::_neutron_ )
+      {
+          jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
+          jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
+          jMatParticle["UseNCrystal"] = MatParticle[ip].bUseNCrystal;
+          jMatParticle["AllowAbsentCsData"] = MatParticle[ip].bAllowAbsentCsData;
+      }
 
       QJsonArray iar;
       writeTwoQVectorsToJArray(MatParticle[ip].InteractionDataX, MatParticle[ip].InteractionDataF, iar);
       jMatParticle["TotalInteraction"] = iar;
 
-      //if ( ((*ParticleCollection)[ip]->type != AParticle::_charged_))
       if ( MpCollection->getParticleType(ip) != AParticle::_charged_)
       {
           QJsonArray ar;
@@ -372,67 +375,6 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
               ar << jterm;
           }
           jMatParticle["Terminators"] = ar;
-
-//          //gamma-specific data
-//          if ((*ParticleCollection)[ip]->type == AParticle::_gamma_)
-//          {
-//              QJsonArray jgamma;
-//              int iTerminators = MatParticle[ip].Terminators.size();
-//              for (int iTerm=0; iTerm<iTerminators; iTerm++)
-//              {
-//                  QJsonObject jterm;
-//                  jterm["ReactionType"] = MatParticle[ip].Terminators[iTerm].Type;
-//                  QJsonArray ar;
-//                  writeTwoQVectorsToJArray(MatParticle[ip].Terminators[iTerm].PartialCrossSectionEnergy, MatParticle[ip].Terminators[iTerm].PartialCrossSection, ar);
-//                  jterm["InteractionData"] = ar;
-//                  jgamma.append(jterm);
-//              }
-//              jMatParticle["GammaTerminators"] = jgamma;
-//          }
-
-//          //neutron-specific data
-//          if ((*ParticleCollection)[ip]->type == AParticle::_neutron_)
-//          {
-//              QJsonArray jneutron;
-//              int iTerminators = MatParticle[ip].Terminators.size();
-//              for (int iTerm=0; iTerm<iTerminators; iTerm++)
-//              {
-//                  QJsonObject jterm;
-//                jterm["Branching"] = MatParticle[ip].Terminators[iTerm].branching;
-//                  jterm["ReactionType"] = (int)MatParticle[ip].Terminators[iTerm].Type;
-//                  if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::ElasticScattering)
-//                  {
-//                      QJsonArray ellAr;
-//                      for (int i=0; i<MatParticle[ip].Terminators[iTerm].ScatterElements.size(); i++)
-//                          ellAr << MatParticle[ip].Terminators[iTerm].ScatterElements[i].writeToJson();
-//                      jterm["ScatterElements"] = ellAr;
-//                  }
-
-//                  if (MatParticle[ip].Terminators[iTerm].Type == NeutralTerminatorStructure::Capture)
-//                  {
-//                      QJsonArray capAr;
-//                      for (int i=0; i<MatParticle[ip].Terminators[iTerm].AbsorptionElements.size(); i++)
-//                          capAr << MatParticle[ip].Terminators[iTerm].AbsorptionElements[i].writeToJson(MpCollection);
-//                      jterm["CaptureElements"] = capAr;
-//                  }
-
-//                  //going through secondary particles
-//                  QJsonArray jsecondaries;
-//                  for (int is=0; is<MatParticle[ip].Terminators[iTerm].GeneratedParticles.size();is++ )
-//                  {
-//                      QJsonObject jsecpart;
-//                      int pa = MatParticle[ip].Terminators[iTerm].GeneratedParticles[is];
-//                      QJsonObject jj;
-//                      (*ParticleCollection)[pa]->writeToJson(jj);
-//                      jsecpart["SecParticle"] = jj;
-//                      jsecpart["energy"] = MatParticle[ip].Terminators[iTerm].GeneratedParticleEnergies[is];
-//                      jsecondaries.append(jsecpart);
-//                  }
-//                  jterm["Secondaries"] = jsecondaries;
-//                  jneutron.append(jterm);
-//              }
-//              jMatParticle["NeutronTerminators"] = jneutron;
-//          }
       }
 
       //appending this particle entry to the json array
@@ -1044,4 +986,14 @@ const QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollect
     }
 
   return ""; //passed all tests
+}
+
+bool AMaterial::isNCrystalInUse() const
+{
+    for (const MatParticleStructure& mp : MatParticle)
+        if (mp.TrackingAllowed && !mp.MaterialIsTransparent)
+            if (mp.bEllasticEnabled && mp.bUseNCrystal)
+                return true;
+
+    return false;
 }

@@ -40,11 +40,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           JSON["DetectorConfig"] = DetJson;
           Detector->BuildDetector(true); //if GUI present, update will trigger automatically //suppress sim gui update, json is stuill old!
         }
-      else
-        {
-          ErrorString = "Json does not contain detector settings!";
-          qWarning() << ErrorString;
-        }
+      else ErrorString = "Json does not contain detector settings!";
     }
 
   //    qDebug() << "Loading simulation config";
@@ -61,11 +57,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           emit requestSimulationGuiUpdate();
           emit requestSelectFirstActiveParticleSource();
         }
-      else
-        {
-          ErrorString = "Json does not contain simulation settings!";
-          qWarning() << ErrorString;
-        }
+      else ErrorString = "Json does not contain simulation settings!";
     }
   else
   {
@@ -97,11 +89,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           emit requestReconstructionGuiUpdate();
           AskForLRFGuiUpdate();
         }
-      else
-      {
-          ErrorString = "Json does not contain reconstruction settings!";
-          qWarning() << ErrorString;
-      }
+      else ErrorString = "Json does not contain reconstruction settings!";
     }
 
   if (json.contains("GUI"))
@@ -139,6 +127,13 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           JSON["ReconstructionConfig"] = js;
       }
   }
+
+#ifndef __USE_ANTS_NCRYSTAL__
+  if (Detector->MpCollection->isNCrystalInUse())
+      ErrorString = "Loaded config has material(s) configured for NCrystal library,\nwhich was disabled during ANTS2 compilation";
+#endif
+
+  if (!ErrorString.isEmpty()) qWarning() << ErrorString;
 
   emit NewConfigLoaded();
   //qDebug() << ">>> Load done";

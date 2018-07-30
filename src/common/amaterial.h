@@ -89,6 +89,8 @@ public:
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
+  bool isNCrystalInUse() const;
+
 private:
   //run-time properties
   double _PrimScintSumStatWeight;

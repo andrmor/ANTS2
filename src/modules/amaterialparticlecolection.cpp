@@ -452,6 +452,13 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   }
 }
 
+bool AMaterialParticleCollection::isNCrystalInUse() const
+{
+    for (const AMaterial* m : MaterialCollectionData)
+        if (m->isNCrystalInUse()) return true;
+    return false;
+}
+
 bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)
 {
   if (getParticleId(name) != -1) return false;

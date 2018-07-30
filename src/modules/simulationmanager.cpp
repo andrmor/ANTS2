@@ -85,14 +85,14 @@ ASimulatorRunner::~ASimulatorRunner()
     //delete randGen;
 }
 
-void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
+bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 {
   //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
   if (!json.contains("SimulationConfig"))
     {
-      message("Json does not contain simulation config!");
-      return;
+      ErrorString = "Json does not contain simulation config!";
+      return false;
     }
   QJsonObject jsSimSet = json["SimulationConfig"].toObject();
   totalEventCount = 0;
@@ -103,7 +103,21 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   fStopRequested = false;
 
   bool fRunThreads = threadCount > 0;
-  simSettings.readFromJson(jsSimSet);
+  bool bOK = simSettings.readFromJson(jsSimSet);
+  if (!bOK)
+  {
+      ErrorString = simSettings.ErrorString;
+      return false;
+  }
+
+#ifndef __USE_ANTS_NCRYSTAL__
+  if (detector->MpCollection->isNCrystalInUse())
+  {
+      ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+      return false;
+  }
+#endif
+
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
   modeSetup = jsSimSet["Mode"].toString();
@@ -166,6 +180,8 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   simState = SSetup;
   //qDebug() << "\n and now multi?"<< detector->GeoManager->IsMultiThread();
   //qDebug() << "Num of workers:"<< workers.size();
+
+  return true;
 }
 
 void ASimulatorRunner::updateGeoManager()  // *** obsolete!
@@ -1744,7 +1760,12 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         threads = MaxThreads;
     }
 
-    Runner->setup(json, threads);
+    bool bOK = Runner->setup(json, threads);
+    if (!bOK)
+    {
+        fFinished = true;
+        fSuccess = false;
+    }
 
     simThread.start();
     simTimerGuiUpdate.start();

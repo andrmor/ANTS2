@@ -105,7 +105,7 @@ public:
     explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, QObject *parent = 0);
     virtual ~ASimulatorRunner();
 
-    void setup(QJsonObject &json, int threadCount);
+    bool setup(QJsonObject &json, int threadCount);
     void updateGeoManager();
     //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }

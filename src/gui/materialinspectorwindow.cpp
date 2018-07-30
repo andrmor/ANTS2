@@ -2248,7 +2248,6 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
     L->addWidget(new QLabel("C2 H5 OH"));
     L->addWidget(new QLabel("C22H10N205"));
-    L->addWidget(new QLabel("\nWarning: pressing \"Confirm\" button resets custom isotope composition!"));
     d->setLayout(L);
 
     while (d->exec() != 0)
@@ -2258,7 +2257,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
         mc.configureNaturalAbunances(OptionsConfigurator->getNatAbundFileName());
-        QString error = mc.setCompositionString(le->text());
+        QString error = mc.setCompositionString(le->text(), true);
         if (!error.isEmpty())
         {
             message(error, d);

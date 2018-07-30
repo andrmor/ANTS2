@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
+    <width>541</width>
     <height>768</height>
    </rect>
   </property>
@@ -221,7 +221,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -574,7 +574,6 @@ Can be used to automatically configure gamma interaction cross-sections and neut
        <zorder>frame_2</zorder>
        <zorder>label_12</zorder>
        <zorder>label_17</zorder>
-       <zorder>horizontalLayoutWidget_2</zorder>
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -3007,8 +3006,8 @@ resolution:</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>494</width>
-     <height>21</height>
+     <width>541</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLibrary">

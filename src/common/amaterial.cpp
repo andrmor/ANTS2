@@ -573,7 +573,9 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
+#ifdef  __USE_ANTS_NCRYSTAL__
 #include "arandomgenncrystal.h"
+#endif
 #include <QStandardPaths>
 static int fixCounter = 0;
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads, double temp)

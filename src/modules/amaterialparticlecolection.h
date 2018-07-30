@@ -84,10 +84,10 @@ public:
   int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);
   int findOrCreateParticle(QJsonObject &json);
 
-  QString CheckMaterial(const AMaterial *mat, int iPart) const; //"" - check passed, otherwise error
-  QString CheckMaterial(int iMat, int iPart) const;       //"" - check passed, otherwise error
-  QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
-  QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
+  const QString CheckMaterial(const AMaterial *mat, int iPart) const; //"" - check passed, otherwise error
+  const QString CheckMaterial(int iMat, int iPart) const;       //"" - check passed, otherwise error
+  const QString CheckMaterial(int iMat) const;                  //"" - check passed, otherwise error
+  const QString CheckTmpMaterial() const;                       //"" - check passed, otherwise error
 
   int CheckParticleEnergyInRange(int iPart, double Energy); //check all materials - if this particle is tracable and mat is not-tansparent,
   //check that the particle energy is withing the defined energy range of the total interaction.

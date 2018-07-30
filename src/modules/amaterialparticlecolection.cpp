@@ -560,18 +560,18 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
   return FindCreateParticle(p.ParticleName, p.type, p.charge, p.mass, false);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
 {
   return mat->CheckMaterial(iPart, this);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
 {
   if (iMat<0 || iMat>MaterialCollectionData.size()-1) return "Wrong material index: " + QString::number(iMat);
   return CheckMaterial(MaterialCollectionData[iMat], iPart);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat) const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
@@ -581,7 +581,7 @@ QString AMaterialParticleCollection::CheckMaterial(int iMat) const
   return "";
 }
 
-QString AMaterialParticleCollection::CheckTmpMaterial() const
+const QString AMaterialParticleCollection::CheckTmpMaterial() const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {

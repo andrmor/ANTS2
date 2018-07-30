@@ -632,6 +632,8 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
 }
 
 #include "arandomgenncrystal.h"
+#include <QStandardPaths>
+static int fixCounter = 0;
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads, double temp)
 {
 #ifdef  __USE_ANTS_NCRYSTAL__
@@ -640,22 +642,34 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
 
     if ( !NCrystal_Ncmat.isEmpty() )
     {
-        QString tmpFileName = "___tmp.ncmat";
+        //    qDebug() << "Text in config:"<<NCrystal_Ncmat;
+        QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+        QString tmpFileName = dir + QString("/___tmp%1.ncmat").arg(fixCounter++); //NCrystal rememebers configs by name... and replaces with old if the name matches! :)
+        //    qDebug() << "tmp file:"<<tmpFileName;
         SaveTextToFile(tmpFileName, NCrystal_Ncmat);
 
         QString settings = QString("%1;dcutoff=%2Aa;packfact=%3;temp=%4K").arg(tmpFileName).arg(NCrystal_Dcutoff).arg(NCrystal_Packing).arg(temp);
-        //  qDebug() << "NCrystal options line:"<<settings;
+        //    qDebug() << "NCrystal options line:"<<settings;
 
-        if (numThreads < 1) numThreads = 1;
-        for (int i=0; i<numThreads; i++)
+        try
         {
-            const NCrystal::Scatter * sc = NCrystal::createScatter( settings.toLatin1().data() );
-            ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
-            //rnd->ref(); //need?
-            const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
-            sc->ref();
+            if (numThreads < 1) numThreads = 1;
+            //  qDebug() << "Num threads:"<<numThreads;
+            for (int i=0; i<numThreads; i++)
+            {
+                const NCrystal::Scatter * sc = NCrystal::createScatter( settings.toLatin1().data() );
+                sc->ref();
 
-            NCrystal_scatters.append(sc);
+                ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
+                //rnd->ref(); //need?
+                const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
+
+                NCrystal_scatters.append(sc);
+            }
+        }
+        catch (...)
+        {
+            qWarning() << "NCrystal has rejected the provided configuration!";
         }
 
         QFile f(tmpFileName);
@@ -699,6 +713,29 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
     //      qDebug() << "...done!";
 }
 
+void NeutralTerminatorStructure::ClearProperties()
+{
+#ifdef  __USE_ANTS_NCRYSTAL__
+    for (const NCrystal::Scatter * sc : NCrystal_scatters) sc->unref();
+    NCrystal_scatters.clear();
+
+    NCrystal_Ncmat.clear();
+    NCrystal_Dcutoff = 0;
+    NCrystal_Packing = 1.0;
+#endif
+
+    PartialCrossSectionEnergy.clear();
+    PartialCrossSection.clear();
+
+    for (int iElement=0; iElement<IsotopeRecords.size(); iElement++)
+    {
+        ANeutronInteractionElement& nie = IsotopeRecords[iElement];
+        //  qDebug() << nie.Name << "-" << nie.Mass << "  with molar fraction:"<<nie.MolarFraction;
+        //  qDebug() << "size of cross-section dataset"<<nie.Energy.size() << nie.CrossSection.size();
+        nie.Energy.clear();
+        nie.CrossSection.clear();
+    }
+}
 
 void NeutralTerminatorStructure::UpdateRandGen(int ID, TRandom2 *RandGen)
 {
@@ -830,7 +867,7 @@ void NeutralTerminatorStructure::generateScatteringNonOriented(double energy_keV
 #endif
 }
 
-QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
+const QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* MpCollection) const
 {
   const QString errInComposition = ChemicalComposition.checkForErrors();
   if (!errInComposition.isEmpty())
@@ -841,42 +878,44 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
 
   const MatParticleStructure* mp = &MatParticle.at(iPart);
   //shortcuts - if particle tracking is disabled or material is transparent - no checks
-  if ( !mp->TrackingAllowed) return "";
-  if (  mp->MaterialIsTransparent) return "";
+  if ( !mp->TrackingAllowed ) return "";
+  if (  mp->MaterialIsTransparent ) return "";
 
   const AParticle::ParticleType& pt = MpCollection->getParticleType(iPart);
 
-  //check TotalInteraction
   int interSize = mp->InteractionDataX.size();
-  //check needed only for charged particles - they used it (stopping power is provided there)
+
   if (pt == AParticle::_charged_)
   {
       if (interSize == 0 || mp->InteractionDataF.size() == 0) return "Empty stopping power data";
-      if (interSize<2 || mp->InteractionDataF.size()<2) return "Stopping power data size is less than 2 points";
       if (interSize != mp->InteractionDataF.size()) return "Mismatch in total interaction (X and F) length";
-      for (int i=1; i<interSize; i++) //protected against length = 0 or 1
-          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i]) return "Stopping power data: total energy binning is not non-decreasing";
-      return ""; //nothing else is needed to be checked
+      if (interSize < 2) return "Stopping power data size is less than 2 points";
+      for (int i=1; i<interSize; i++)
+          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i])
+              return "Stopping power data: total energy binning is not non-decreasing";
+      return ""; //nothing else is needed to be checked for charged
   }
 
   if (pt == AParticle::_gamma_)
     {
+      if (interSize == 0 || mp->InteractionDataF.size() == 0) return "Empty total interaction cross-section data";
+      if (interSize != mp->InteractionDataF.size()) return "Mismatch in total interaction (X and F) length";
+      if (interSize < 2) return "Total interaction cross-section data size is less than 2 points";
+      for (int i=1; i<interSize; i++)
+          if (mp->InteractionDataX[i-1] > mp->InteractionDataX[i])
+              return "Total interaction cross-section data: total energy binning is not non-decreasing";
+
       const int terms = mp->Terminators.size();
-      if (mp->Terminators.isEmpty()) return "No terminator defined for gamma";
+      if (mp->Terminators.isEmpty()) return "No terminators defined for gamma";
       if (terms<2 || terms>3) return "Invalid number of terminators for gamma";
 
-      if (terms == 2) //compatibility - no pair production
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering
-            ) return "Invalid terminators for gamma";
-
+      if (mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric)
+          return "First terminator has to be photoelectric!";
+      if (mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering)
+          return "Second terminator has to be compton!";
       if (terms == 3)
-        if (
-             mp->Terminators[0].Type != NeutralTerminatorStructure::Photoelectric ||
-             mp->Terminators[1].Type != NeutralTerminatorStructure::ComptonScattering ||
-             mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction
-            ) return "Invalid terminators for gamma";
+        if (mp->Terminators[2].Type != NeutralTerminatorStructure::PairProduction)
+            return "Third terminator has to be pair production!";
 
       //checking partial crossection for terminators
       for (int iTerm=0; iTerm<terms; iTerm++)
@@ -913,40 +952,56 @@ QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollection* M
       if (numTerm != 2 ) return "Wrong number of terminators for neutrons";
 
       //confirming terminators type is "capture" or "ellastic"
-      if (mp->Terminators[0].Type != NeutralTerminatorStructure::Absorption ||
-          mp->Terminators[1].Type != NeutralTerminatorStructure::ElasticScattering)
-          return "Wrong terminator types for neutrons";
+      if (mp->Terminators.at(0).Type != NeutralTerminatorStructure::Absorption)
+          return "First terminator has to be absorption";
+      if (mp->Terminators.at(1).Type != NeutralTerminatorStructure::ElasticScattering)
+          return "Second terminator has to be scattering";
 
-      //checking all terminator one by one
+      //checking all terminators one by one
       if (mp->bEllasticEnabled)
       {
-          const NeutralTerminatorStructure& term = mp->Terminators[1];
-          if (term.IsotopeRecords.isEmpty())
-              return QString("No elements defined for neutron ellastic scattering");
+          const NeutralTerminatorStructure& term = mp->Terminators.at(1);
 
-          if (term.PartialCrossSection.isEmpty())
-              return QString("Total elastic scaterring cross-section is not defined");
+          if (mp->bUseNCrystal)
+          {
+#ifdef __USE_ANTS_NCRYSTAL__
+              if (term.NCrystal_Ncmat.isEmpty())
+                  return "Configuration of NCrystal-related properties (ncmat) was not provided";
+              if (term.NCrystal_scatters.isEmpty())
+                return "Invalid NCrystal ncmat was provided!";
+#else
+              return "Scattering is configured to use NCrystal, but ANTS2 was compiled without NCrystal support!";
+#endif
+          }
+          else
+          {
+              if (term.IsotopeRecords.isEmpty())
+                  return QString("No elements defined for neutron ellastic scattering");
 
-          for (int i=0; i<term.IsotopeRecords.size(); i++)
-            {
-                const ANeutronInteractionElement& se = term.IsotopeRecords.at(i);
+              if (term.PartialCrossSection.isEmpty())
+                  return QString("Total elastic scaterring cross-section is not defined");
 
-                QString isoName = se.Name+"-"+QString::number(se.Mass);
+              for (int i=0; i<term.IsotopeRecords.size(); i++)
+                {
+                    const ANeutronInteractionElement& se = term.IsotopeRecords.at(i);
 
-                if (!mp->bAllowAbsentCsData)
-                    if (se.Energy.isEmpty())
-                        return isoName + " has no cross-section data for elastic scaterring";
+                    QString isoName = se.Name+"-"+QString::number(se.Mass);
 
-                if (se.Energy.size() != se.CrossSection.size())
-                    return isoName + " - mismatch in cross-section data for elastic scattering";
-            }
+                    if (!mp->bAllowAbsentCsData)
+                        if (se.Energy.isEmpty())
+                            return isoName + " has no cross-section data for elastic scaterring";
+
+                    if (se.Energy.size() != se.CrossSection.size())
+                        return isoName + " - mismatch in cross-section data for elastic scattering";
+                }
+          }
       }
 
       if (mp->bCaptureEnabled)
       {
           for (int iTerm=0; iTerm<numTerm; iTerm++)
           {
-              const NeutralTerminatorStructure& term = mp->Terminators[0];
+              const NeutralTerminatorStructure& term = mp->Terminators.at(0);
 
               if (term.IsotopeRecords.isEmpty())
                   return QString("No elements defined for neutron absorption");

@@ -87,7 +87,7 @@ public:
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 
-  QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+  const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
 private:
   //run-time properties
@@ -115,6 +115,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
   void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads, double temp = 298.0);
+  void ClearProperties();
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 

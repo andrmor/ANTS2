@@ -39,6 +39,10 @@
 #include "TAttLine.h"
 #include "TAttMarker.h"
 
+#ifdef __USE_ANTS_NCRYSTAL__
+#include "NCrystal/NCrystal.hh"
+#endif
+
 MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw, DetectorClass* detector) :
     QMainWindow(parent),
     ui(new Ui::MaterialInspectorWindow)
@@ -152,7 +156,7 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 
     //checkig this material
-    QString error = MW->MpCollection->CheckTmpMaterial();
+    const QString error = MW->MpCollection->CheckTmpMaterial();
     if (!error.isEmpty())
       {
         message(error, this);
@@ -1667,7 +1671,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 void MaterialInspectorWindow::on_actionSave_material_triggered()
 {
   //checkig this material
-  QString error = MW->MpCollection->CheckTmpMaterial();
+  const QString error = MW->MpCollection->CheckTmpMaterial();
   if ( !error.isEmpty() )
     {
       message(error, this);
@@ -2925,13 +2929,28 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
     fileName = QFileDialog::getOpenFileName(this, "Load NCrystal ncmat file", MW->GlobSet->LastOpenDir, "Ncmat files (*.ncmat)");
     if (fileName.isEmpty()) return;
 
+#ifdef __USE_ANTS_NCRYSTAL__
+    try
+    {
+            const NCrystal::Scatter * sc = NCrystal::createScatter( fileName.toLatin1().data() );
+            sc->ref();
+            sc->unref();
+    }
+    catch (...)
+    {
+        message("NCrystal has rejected the provided configuration file!", this);
+        return;
+    }
+#endif
+
+
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
-
     MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
-
     NeutralTerminatorStructure& t = mp.Terminators.last();
+
     LoadTextFromFile(fileName, t.NCrystal_Ncmat);
+
     on_pbUpdateInteractionIndication_clicked();
     on_pbWasModified_clicked();
 }

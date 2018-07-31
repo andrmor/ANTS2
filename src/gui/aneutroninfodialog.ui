@@ -436,6 +436,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pbDummy">
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <spacer name="horizontalSpacer_9">
@@ -579,6 +586,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>pbDummy</tabstop>
+  <tabstop>leName</tabstop>
+  <tabstop>ledDensity</tabstop>
+  <tabstop>leMAM</tabstop>
+  <tabstop>ad</tabstop>
+  <tabstop>pbTotal</tabstop>
+  <tabstop>pbAbs</tabstop>
+  <tabstop>pbScatter</tabstop>
+  <tabstop>ledEnergy</tabstop>
+  <tabstop>ledWave</tabstop>
+  <tabstop>pbNCrystal_Angle</tabstop>
+  <tabstop>pbNCrystal_Energy</tabstop>
+  <tabstop>cbNCrystalSkipBragg</tabstop>
+  <tabstop>pbClose</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

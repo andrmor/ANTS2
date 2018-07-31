@@ -25,6 +25,8 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
 {
     ui->setupUi(this);
 
+    ui->pbDummy->setVisible(false);
+
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);
     ui->ledEnergy->setValidator(val);

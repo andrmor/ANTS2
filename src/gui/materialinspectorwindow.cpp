@@ -2214,7 +2214,7 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
     NeutronInfoDialog->setEnabled(true);
     do
     {
-        QThread::usleep(200);
+        QThread::msleep(1);
         qApp->processEvents();
         if (!NeutronInfoDialog) return;
     }

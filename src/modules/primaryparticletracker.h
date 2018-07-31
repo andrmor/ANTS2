@@ -65,6 +65,7 @@ private:
     const GeneralSimSettings* SimSet;
     bool BuildTracks;
     bool RemoveTracksIfNoEnergyDepo;
+    bool SuppressFirstTrackOnEvent = false; //except the very first event in the track container
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;
 

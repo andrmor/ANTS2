@@ -694,21 +694,31 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
 
   //stack is empty, no errors found
 
-  if (TrackCandidates.size()>0)
+  if (TrackCandidates.size() > 0)
     {
       if (RemoveTracksIfNoEnergyDepo && EnergyVector->isEmpty() )
-        {
+      {
           //clear all particle tracks - there were no energy deposition - nothing will be added to Geomanager later
           for (int i=0; i<TrackCandidates.size(); i++)
-            delete TrackCandidates[i];
-        }
+              delete TrackCandidates.at(i);
+      }
       else
-        {
-          for (int i=0; i<TrackCandidates.size(); i++)
-            Tracks->append(TrackCandidates.at(i)); // delete later when create GeoManager tracks
-        }
+      {
+          int i = 0;
+          if (SuppressFirstTrackOnEvent)
+          {
+              if (Tracks->isEmpty()) //if Tracks are still empty, transfer there the first candidate
+                  Tracks->append(TrackCandidates.at(0));
+              else
+                  delete TrackCandidates.at(0);
+              i++;
+          }
+
+          for (; i < TrackCandidates.size(); i++)
+              Tracks->append(TrackCandidates.at(i));
+      }
       TrackCandidates.clear();
-    }
+    }// delete later when create GeoManager tracks
 
   return true; //success
 }

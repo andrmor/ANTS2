@@ -3828,43 +3828,60 @@ void MainWindow::on_actionVersion_triggered()
                 "\n"
                 "ROOT version:  " + gROOT->GetVersion() + "\n"
                 "\n"
-                "Compilation options:\n"
-                "   CUDA (gpu):  "
+                "Compilation options:"
+                "\n"
+
+
 #ifdef __USE_ANTS_CUDA__
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FANN (neural networks):  "
+          " - CUDA (GPU-based reconstruction)\n"
+
+
 #ifdef ANTS_FANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FLANN (kNN search):  "
+          " - FANN (neural networks)\n"
+
 #ifdef ANTS_FLANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Eigen3 (for fast LRF fitting):  "
+      " - FLANN (kNN searches)\n"
+
 #ifdef USE_EIGEN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Root html server (for JSROOT):  "
+     " - Eigen3 (fast LRF fitting)\n"
+
 #ifdef USE_ROOT_HTML
- "on"
+ "  on"
 #else
- "off"
+ "  off"
 #endif
-                "\n   Python scripting:  "
+          " - Root html server (JSROOT visualization)  \n"
+
 #ifdef __USE_ANTS_PYTHON__
- "on" + " -> Python " + PythonVersion + ""
+ "  on - Python script (Python v." + PythonVersion + ")   "
 #else
- "off"
+ "  off - Python script"
 #endif
+            "\n"
+
+#ifdef __USE_ANTS_NCRYSTAL__
+ "  on"
+#else
+ "  off"
+#endif
+            " - NCrystal library (neutron scattering)   \n"
+
                 "";
 
   message(out, this);

@@ -337,11 +337,13 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
   }
 
   MW->GeometryDrawDisabled = true;
-  MW->Config->LoadConfig(fileName);
+  bool bOK = MW->Config->LoadConfig(fileName);
   MW->GeometryDrawDisabled = false;
 
   this->close();
   if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+
+  if (!bOK) message(MW->Config->ErrorString, MW);
 }
 
 QString ExamplesWindow::getQuickSlotMessage(int i)

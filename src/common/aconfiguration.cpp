@@ -128,16 +128,20 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       }
   }
 
+  bool bRes = true;
 #ifndef __USE_ANTS_NCRYSTAL__
   if (Detector->MpCollection->isNCrystalInUse())
+  {
       ErrorString = "Loaded config has material(s) configured for NCrystal library,\nwhich was disabled during ANTS2 compilation";
+      bRes = false;
+  }
 #endif
 
   if (!ErrorString.isEmpty()) qWarning() << ErrorString;
 
   emit NewConfigLoaded();
   //qDebug() << ">>> Load done";
-  return true;
+  return bRes;
 }
 
 void AConfiguration::SaveConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)

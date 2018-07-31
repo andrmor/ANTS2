@@ -110,8 +110,10 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       return false;
   }
 
+  modeSetup = jsSimSet["Mode"].toString();
+
 #ifndef __USE_ANTS_NCRYSTAL__
-  if (detector->MpCollection->isNCrystalInUse())
+  if ( modeSetup != "PointSim" && detector->MpCollection->isNCrystalInUse())
   {
       ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
       return false;
@@ -120,7 +122,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
-  modeSetup = jsSimSet["Mode"].toString();
+
   //qDebug() << "-------------";
   //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
   //qDebug() << "Simulation mode:" << modeSetup;
@@ -138,7 +140,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   for(int i = 0; i < threadCount; i++)
     {
       Simulator *worker;
-      if(modeSetup == "PointSim") //Photon simulator
+      if (modeSetup == "PointSim") //Photon simulator
         worker = new PointSourceSimulator(detector, i);
       else //Particle simulator
         worker = new ParticleSourceSimulator(detector, i);
@@ -1763,17 +1765,27 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     bool bOK = Runner->setup(json, threads);
     if (!bOK)
     {
-        fFinished = true;
-        fSuccess = false;
+        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
     }
-
-    simThread.start();
-    simTimerGuiUpdate.start();
+    else
+    {
+        simThread.start();
+        simTimerGuiUpdate.start();
+    }
 }
 
 void ASimulationManager::StopSimulation()
 {
     emit RequestStopSimulation();
+}
+
+void ASimulationManager::onSimFailedToStart()
+{
+    fFinished = true;
+    fSuccess = false;
+    Runner->setFinished();
+
+    emit SimulationFinished();
 }
 
 void ASimulationManager::Clear()

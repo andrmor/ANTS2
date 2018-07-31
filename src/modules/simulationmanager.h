@@ -88,6 +88,9 @@ public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
 
+private slots:
+    void onSimFailedToStart();
+
 signals:
     void RequestStopSimulation();
     void SimulationFinished();
@@ -114,6 +117,7 @@ public:
     //double getmsPerEvent() const { return usPerEvent; }
     bool wasSuccessful() const;
     bool isFinished() const {return simState == SFinished;}
+    void setFinished() {simState = SFinished;}
     QString getErrorMessages() const;
     //Use as read-only. Anything else is undefined behaviour! If your toast gets burnt, it's not my fault!
     //Also remember that simulators will be deleted on setup()!

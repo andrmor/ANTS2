@@ -601,6 +601,7 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
             //  qDebug() << "Num threads:"<<numThreads;
             for (int i=0; i<numThreads; i++)
             {
+                NCrystal::disableCaching();
                 const NCrystal::Scatter * sc = NCrystal::createScatter( settings.toLatin1().data() );
                 sc->ref();
 

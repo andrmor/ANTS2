@@ -2931,6 +2931,7 @@ void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 #ifdef __USE_ANTS_NCRYSTAL__
     try
     {
+            NCrystal::disableCaching();
             const NCrystal::Scatter * sc = NCrystal::createScatter( fileName.toLatin1().data() );
             sc->ref();
             sc->unref();

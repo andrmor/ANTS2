@@ -276,7 +276,9 @@ void ExamplesWindow::on_pbLoadExample_clicked()
 
   QString filename = MW->GlobSet->ExamplesDir + "/" + Examples[ListedExamples[ExamplePointer]].filename;
 
-  MW->Config->LoadConfig(filename);
+  bool bOK = MW->Config->LoadConfig(filename);
+  if (!bOK) message(MW->Config->ErrorString, MW);
+
   MW->show();
   MW->raise();
   MW->GeometryWindow->show();

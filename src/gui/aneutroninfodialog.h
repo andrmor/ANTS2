@@ -41,6 +41,8 @@ private slots:
 
     void on_ledWave_editingFinished();
 
+    void on_cbNCrystalSkipBragg_toggled(bool checked);
+
 private:
     Ui::ANeutronInfoDialog *ui;
     const AMaterial* mat;
@@ -54,6 +56,10 @@ private:
     void updateIsotopeTable();
     void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, const TString &xTitle);
     void RunNCrystal(bool bAngle);
+
+protected:
+    void moveEvent(QMoveEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 signals:
     void requestDraw(TH1D* histCopy);

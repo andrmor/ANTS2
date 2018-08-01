@@ -19,11 +19,16 @@
 
 static bool bEnergyGiven = true;
 static QString startText = "25";
+static bool bShowBrag = true;
+static int xx = 25, yy = 25, ww = -1, hh = -1;
 
 ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLogLog, bool bShowAbs, bool bShowScat, GraphWindowClass* GraphWindow, QWidget *parent) :
     QDialog(parent), ui(new Ui::ANeutronInfoDialog), mat(mat), ipart(ipart), bLogLog(bLogLog), bShowAbs(bShowAbs), bShowScat(bShowScat), GraphWindow(GraphWindow)
 {
+    setWindowTitle("Neutron interaction");
     ui->setupUi(this);
+    move(xx, yy);
+    if (ww != -1 && hh != -1) resize(ww, hh);
 
     ui->pbDummy->setVisible(false);
 
@@ -42,6 +47,7 @@ ANeutronInfoDialog::ANeutronInfoDialog(const AMaterial *mat, int ipart, bool bLo
         ui->ledWave->setText(startText);
         on_ledWave_editingFinished(); //updates all GUI
     }
+    ui->cbNCrystalSkipBragg->setChecked(!bShowBrag);
 
     ui->ledEnergy->setFocus();
     ui->pbClose->setAutoDefault(false);
@@ -424,6 +430,20 @@ void ANeutronInfoDialog::RunNCrystal(bool bAngle)
 #endif
 }
 
+#include <QMoveEvent>
+void ANeutronInfoDialog::moveEvent(QMoveEvent * /*event*/)
+{
+    xx = x();
+    yy = y();
+}
+
+#include <QResizeEvent>
+void ANeutronInfoDialog::resizeEvent(QResizeEvent * /*event*/)
+{
+    ww = width();
+    hh = height();
+}
+
 void ANeutronInfoDialog::on_pbNCrystal_Angle_clicked()
 {
     RunNCrystal(true);
@@ -471,4 +491,9 @@ void ANeutronInfoDialog::on_ledWave_editingFinished()
     startText = ui->ledWave->text();
 
     update();
+}
+
+void ANeutronInfoDialog::on_cbNCrystalSkipBragg_toggled(bool checked)
+{
+    bShowBrag = checked;
 }

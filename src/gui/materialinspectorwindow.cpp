@@ -104,6 +104,12 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     b.setBrush(QBrush(Qt::yellow));
     b.drawEllipse(0, 2, 10, 10);
     ui->labAssumeZeroForEmpty->setPixmap(pm);
+
+#ifndef __USE_ANTS_NCRYSTAL__
+    ui->cbUseNCrystal->setText("Use NCrystal - library not available");
+    ui->cbUseNCrystal->setToolTip("ANTS2 was compiled without support for NCrystal library!\nSee ants2.pro");
+    on_cbUseNCrystal_toggled(ui->cbUseNCrystal->isChecked());
+#endif
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
@@ -2964,6 +2970,11 @@ void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
     mp.bUseNCrystal = checked;
 
     FillNeutronTable();
+
+#ifndef __USE_ANTS_NCRYSTAL__
+    if (checked)
+        message("ANTS2 was compiled without support for NCrystal library, check ants2.pro file", this);
+#endif
 }
 
 void MaterialInspectorWindow::on_ledNCmatDcutoff_editingFinished()
@@ -2984,4 +2995,12 @@ void MaterialInspectorWindow::on_ledNcmatPacking_editingFinished()
     NeutralTerminatorStructure& t = mp.Terminators.last();
 
     t.NCrystal_Packing = ui->ledNcmatPacking->text().toDouble();
+}
+
+void MaterialInspectorWindow::on_cbUseNCrystal_toggled(bool checked)
+{
+#ifndef __USE_ANTS_NCRYSTAL__
+    if (checked) ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: red }");
+    else ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: gray }");
+#endif
 }

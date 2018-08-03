@@ -163,6 +163,8 @@ private slots:
 
     void on_cbUseNCrystal_clicked(bool checked);
 
+    void on_cbUseNCrystal_toggled(bool checked);
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

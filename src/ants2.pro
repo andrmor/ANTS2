@@ -7,7 +7,7 @@ ANTS2_MINOR = 11
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
 
@@ -720,6 +720,7 @@ linux-g++ || unix {
 win32 {
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
+  DEFINES  += _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER #disables warning C4068: unknown pragma
   #DEFINES += WINDOWSBIN                #enable for compilation in Windows binary-only mode
 }
 #------------

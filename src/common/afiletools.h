@@ -20,6 +20,7 @@ int SaveIntVectorsToFile(QString FileName, const QVector<int>* x, const QVector<
 int LoadIntVectorsFromFile(QString FileName, QVector<int>* x);
 int LoadIntVectorsFromFile(QString FileName, QVector<int>* x, QVector<int>* y);
 
-bool LoadTextFromFile(QString FileName, QString& string);
+bool LoadTextFromFile(const QString& FileName, QString& string);
+bool SaveTextToFile(const QString& FileName, const QString& text);
 
 #endif // AFILETOOLS_H

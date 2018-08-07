@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 10
+ANTS2_MINOR = 11
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -9,6 +9,7 @@ ANTS2_MINOR = 10
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
+#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -199,6 +200,30 @@ ants2_Python{
     SOURCES += gui/MainWindowTools/pythonscript.cpp
 }
 #----------
+
+#---NCrystal---
+#see https://github.com/mctools/ncrystal
+ants2_NCrystal{
+    DEFINES += __USE_ANTS_NCRYSTAL__
+
+    win32:{
+            #Currently it is not possible to compile NCrystal on Win, issue has been posted on Github
+            INCLUDEPATH += C:/NCrystal/ncrystal_core/include
+            #LIBS += -LC:/PathToNcrystal/lib -lNCrystal
+    }
+    linux-g++ || unix {
+            INCLUDEPATH += /home/andr/Work/NCrystal/include
+
+            LIBS += -L/home/andr/Work/NCrystal/lib/
+            LIBS += -lNCrystal
+
+            SOURCES += common/arandomgenncrystal.cpp
+            HEADERS += common/arandomgenncrystal.h
+    }
+}
+#----------
+
+
 
 #Can be used as command line option to force-disable GUI
 Headless {

@@ -29,7 +29,7 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
       ErrorString = "Json sent to simulator does not contain general sim config data!";
       return false;
     }
-  ErrorString = "";
+  ErrorString.clear();
 
   QJsonObject json = Json["GeneralSimConfig"].toObject();
   //reading wavelength options

@@ -28,6 +28,7 @@ public:
                                     QVector<AEnergyDepositionCell*>* energyVector,
                                     QVector<EventHistoryStructure*>* eventHistory,
                                     ASimulationStatistics* simStat,
+                                    int threadIndex,
                                     QObject *parent = 0);
     //main usage
     bool TrackParticlesInStack(int eventId = 0);
@@ -59,9 +60,12 @@ private:
     QVector<EventHistoryStructure*>* EventHistory;
     ASimulationStatistics* SimStat;
 
+    int threadIndex = 0;
+
     const GeneralSimSettings* SimSet;
     bool BuildTracks;
     bool RemoveTracksIfNoEnergyDepo;
+    bool SuppressFirstTrackOnEvent = false; //except the very first event in the track container
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;
 

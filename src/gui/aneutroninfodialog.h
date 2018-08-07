@@ -12,6 +12,7 @@ class ANeutronInfoDialog;
 class AMaterial;
 class GraphWindowClass;
 class TString;
+class TH1D;
 
 class ANeutronInfoDialog : public QDialog
 {
@@ -22,8 +23,6 @@ public:
     ~ANeutronInfoDialog();
 
 private slots:
-    void on_ledEnergy_textChanged(const QString &arg1);
-
     void on_pbClose_clicked();
 
     void on_pbTotal_clicked();
@@ -33,6 +32,16 @@ private slots:
     void on_pbScatter_clicked();
 
     void onIsotopeTable_ColumnSelected(int column);
+
+    void on_pbNCrystal_Angle_clicked();
+
+    void on_pbNCrystal_Energy_clicked();
+
+    void on_ledEnergy_editingFinished();
+
+    void on_ledWave_editingFinished();
+
+    void on_cbNCrystalSkipBragg_toggled(bool checked);
 
 private:
     Ui::ANeutronInfoDialog *ui;
@@ -46,6 +55,14 @@ private:
     void update();
     void updateIsotopeTable();
     void drawCrossSection(const QVector<double> &energy, const QVector<double> &cs, const TString &xTitle);
+    void RunNCrystal(bool bAngle);
+
+protected:
+    void moveEvent(QMoveEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+
+signals:
+    void requestDraw(TH1D* histCopy);
 };
 
 class ATableWidgetDoubleItem : public QTableWidgetItem

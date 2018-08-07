@@ -530,7 +530,7 @@ private slots:
 public:
     void startSimulation(QJsonObject &json);
 private:
-    ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings);
+    ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings); //Single thread only!
 signals:
     void StopRequested();
 private slots:

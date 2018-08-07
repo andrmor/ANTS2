@@ -18,6 +18,7 @@ class AMaterialParticleCollection;
 struct NeutralTerminatorStructure;
 struct MatParticleStructure;
 class TRandom2;
+namespace NCrystal { class Scatter; }
 
 class AMaterial
 {
@@ -26,6 +27,7 @@ public:
 
   QString name;
   double density; //in g/cm3
+  double temperature = 298.0; //in K
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
@@ -77,13 +79,17 @@ public:
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
-  void updateRuntimeProperties(bool bLogLogInterpolation);
+  void updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* RandGen, int numThreads = 1);
+
+  void UpdateRandGen(int ID, TRandom2* RandGen);
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 
-  QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+  const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+
+  bool isNCrystalInUse() const;
 
 private:
   //run-time properties
@@ -110,7 +116,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateNeutronCrossSections(bool bUseLogLog);   //
+  void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads, double temp = 298.0);
+  void ClearProperties();
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 
@@ -119,6 +126,17 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
+
+  QString NCrystal_Ncmat;
+  double NCrystal_Dcutoff = 0;
+  double NCrystal_Packing = 1.0;
+
+#ifdef  __USE_ANTS_NCRYSTAL__
+  QVector<const NCrystal::Scatter *> NCrystal_scatters;
+#endif
+  double getNCrystalCrossSectionBarns(double energy_keV, int threadIndex = 0) const;
+  void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV, int threadIndex = 0) const;
+  void   UpdateRandGen(int ID, TRandom2 *RandGen);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
@@ -131,6 +149,7 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   //for neutrons - separate activation of capture and ellastic scattering is possible
   bool bCaptureEnabled = true;
   bool bEllasticEnabled = false;
+  bool bUseNCrystal = false;
   bool bAllowAbsentCsData = false;
 
   QVector<double> InteractionDataX; //energy in keV

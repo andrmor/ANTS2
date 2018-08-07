@@ -46,14 +46,20 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::UpdateWavelengthBinning(GeneralSimSettings *SimSet)
+void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
-  for (int i=0; i<MaterialCollectionData.size(); i++)
+  for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
   {
-    UpdateWaveResolvedProperties(i);
-    UpdateNeutronProperties(i);
+    UpdateWaveResolvedProperties(imat);
+    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation, RandGen, numThreads);
   }
+}
+
+void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* RandGen)
+{
+    for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
+        MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)
@@ -197,7 +203,7 @@ void AMaterialParticleCollection::AddNewMaterial(QString name)
     MaterialCollectionData.last()->name = name;
 }
 
-void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime,
+void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double temperature, double n, double abs, double PriScintDecayTime,
                                              double W, double SecYield, double SecScintDecayTime, double e_driftVelocity,
                                              double p1, double p2, double p3)
 {
@@ -210,6 +216,7 @@ void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double
   MaterialCollectionData[index]->name = name;
 
   MaterialCollectionData[index]->density = density;
+  MaterialCollectionData[index]->temperature = temperature;
   MaterialCollectionData[index]->n = n;
   MaterialCollectionData[index]->abs = abs;
 
@@ -236,6 +243,7 @@ void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
   tmpMaterial.density = 0;
+  tmpMaterial.temperature = 298.0;
   tmpMaterial.p1 = 0;
   tmpMaterial.p2 = 0;
   tmpMaterial.p3 = 0;
@@ -444,13 +452,11 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   }
 }
 
-void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
+bool AMaterialParticleCollection::isNCrystalInUse() const
 {
-    for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
-    {
-        for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateNeutronCrossSections(fLogLogInterpolation);
-    }
+    for (const AMaterial* m : MaterialCollectionData)
+        if (m->isNCrystalInUse()) return true;
+    return false;
 }
 
 bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)
@@ -561,18 +567,18 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
   return FindCreateParticle(p.ParticleName, p.type, p.charge, p.mass, false);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
 {
   return mat->CheckMaterial(iPart, this);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
 {
   if (iMat<0 || iMat>MaterialCollectionData.size()-1) return "Wrong material index: " + QString::number(iMat);
   return CheckMaterial(MaterialCollectionData[iMat], iPart);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat) const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
@@ -582,7 +588,7 @@ QString AMaterialParticleCollection::CheckMaterial(int iMat) const
   return "";
 }
 
-QString AMaterialParticleCollection::CheckTmpMaterial() const
+const QString AMaterialParticleCollection::CheckTmpMaterial() const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {

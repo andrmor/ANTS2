@@ -39,6 +39,10 @@
 #include "TAttLine.h"
 #include "TAttMarker.h"
 
+#ifdef __USE_ANTS_NCRYSTAL__
+#include "NCrystal/NCrystal.hh"
+#endif
+
 MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw, DetectorClass* detector) :
     QMainWindow(parent),
     ui(new Ui::MaterialInspectorWindow)
@@ -100,6 +104,12 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     b.setBrush(QBrush(Qt::yellow));
     b.drawEllipse(0, 2, 10, 10);
     ui->labAssumeZeroForEmpty->setPixmap(pm);
+
+#ifndef __USE_ANTS_NCRYSTAL__
+    ui->cbUseNCrystal->setText("Use NCrystal - library not available");
+    ui->cbUseNCrystal->setToolTip("ANTS2 was compiled without support for NCrystal library!\nSee ants2.pro");
+    on_cbUseNCrystal_toggled(ui->cbUseNCrystal->isChecked());
+#endif
 }
 
 MaterialInspectorWindow::~MaterialInspectorWindow()
@@ -149,10 +159,10 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
 {
     if ( !parseDecayTime() ) return;
 
-    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+    MW->MpCollection->tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 
     //checkig this material
-    QString error = MW->MpCollection->CheckTmpMaterial();
+    const QString error = MW->MpCollection->CheckTmpMaterial();
     if (!error.isEmpty())
       {
         message(error, this);
@@ -283,6 +293,8 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
 
     str.setNum(tmpMaterial.density, 'g');
     ui->ledDensity->setText(str);
+
+    ui->ledT->setText( QString::number(tmpMaterial.temperature) );
 
     ui->leChemicalComposition->setText( tmpMaterial.ChemicalComposition.getCompositionString() );
     ShowTreeWithChemicalComposition();
@@ -433,6 +445,14 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
           ui->cbAllowAbsentCsData->setChecked(mp.bAllowAbsentCsData);
 
           FillNeutronTable();
+
+          ui->cbUseNCrystal->setChecked( mp.bUseNCrystal );
+          const NeutralTerminatorStructure& t = mp.Terminators.last();
+          ui->ledNCmatDcutoff->setText( QString::number( t.NCrystal_Dcutoff ) );
+          ui->ledNcmatPacking->setText( QString::number( t.NCrystal_Packing ) );
+          bool bHaveData = !t.NCrystal_Ncmat.isEmpty();
+          ui->labNCmatNotDefined->setVisible(!bHaveData);
+          ui->pbShowNcmat->setVisible(bHaveData);
       }
       else if (type == AParticle::_gamma_)
       {
@@ -461,6 +481,7 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 
     tmpMaterial.name = ui->leName->text();
     tmpMaterial.density = ui->ledDensity->text().toDouble();    
+    tmpMaterial.temperature = ui->ledT->text().toDouble();
     tmpMaterial.n = ui->ledN->text().toDouble();
     tmpMaterial.abs = ui->ledAbs->text().toDouble();
     tmpMaterial.reemissionProb = ui->ledReemissionProbability->text().toDouble();
@@ -1656,7 +1677,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 void MaterialInspectorWindow::on_actionSave_material_triggered()
 {
   //checkig this material
-  QString error = MW->MpCollection->CheckTmpMaterial();
+  const QString error = MW->MpCollection->CheckTmpMaterial();
   if ( !error.isEmpty() )
     {
       message(error, this);
@@ -2187,6 +2208,9 @@ void MaterialInspectorWindow::IsotopePropertiesChanged(const AChemicalElement * 
 
 void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
 {
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
+
     NeutronInfoDialog = new ANeutronInfoDialog(&MW->MpCollection->tmpMaterial, ui->cobParticle->currentIndex(), MW->MpCollection->fLogLogInterpolation,
                                                     ui->cbCapture->isChecked(), ui->cbEnableScatter->isChecked(), MW->GraphWindow, this);
 
@@ -2196,6 +2220,7 @@ void MaterialInspectorWindow::on_pbShowStatisticsOnElastic_clicked()
     NeutronInfoDialog->setEnabled(true);
     do
     {
+        QThread::msleep(1);
         qApp->processEvents();
         if (!NeutronInfoDialog) return;
     }
@@ -2229,7 +2254,6 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
     L->addWidget(new QLabel("H2O:9 + NaCl:0.2 - means 9 parts of H2O and 0.2 parts of NaCl"));
     L->addWidget(new QLabel("C2 H5 OH"));
     L->addWidget(new QLabel("C22H10N205"));
-    L->addWidget(new QLabel("\nWarning: pressing \"Confirm\" button resets custom isotope composition!"));
     d->setLayout(L);
 
     while (d->exec() != 0)
@@ -2239,7 +2263,7 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
         mc.configureNaturalAbunances(OptionsConfigurator->getNatAbundFileName());
-        QString error = mc.setCompositionString(le->text());
+        QString error = mc.setCompositionString(le->text(), true);
         if (!error.isEmpty())
         {
             message(error, d);
@@ -2360,7 +2384,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->setColumnCount(0);
 
     bool bCapture = ui->cbCapture->isChecked();
-    bool bElastic = ui->cbEnableScatter->isChecked();
+    bool bElastic = ui->cbEnableScatter->isChecked() && !ui->cbUseNCrystal->isChecked();
     if (!bCapture && !bElastic) return;
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -2488,7 +2512,7 @@ void MaterialInspectorWindow::FillNeutronTable()
     ui->tabwNeutron->resizeColumnsToContents();
     ui->tabwNeutron->resizeRowsToContents();
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation);
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen);
 }
 
 int MaterialInspectorWindow::autoloadMissingCrossSectionData()
@@ -2853,7 +2877,7 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 {
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
-    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation); //to update sum of stat weights
+    tmpMaterial.updateRuntimeProperties(MW->MpCollection->fLogLogInterpolation, Detector->RandGen); //to update sum of stat weights
 
     QMessageBox mb(this);
     if (ui->cobPriT_model->currentIndex() == 1)
@@ -2888,4 +2912,95 @@ void MaterialInspectorWindow::on_actionNeutrons_triggered()
 {
     OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
     OptionsConfigurator->showNormal();
+}
+
+void MaterialInspectorWindow::on_pbShowNcmat_clicked()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+    QString s = t.NCrystal_Ncmat;
+    if (s.isEmpty()) s = "NCmat record is empty!";
+
+    message(s, this);
+}
+
+void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, "Load NCrystal ncmat file", MW->GlobSet->LastOpenDir, "Ncmat files (*.ncmat)");
+    if (fileName.isEmpty()) return;
+
+#ifdef __USE_ANTS_NCRYSTAL__
+    try
+    {
+            NCrystal::disableCaching();
+            const NCrystal::Scatter * sc = NCrystal::createScatter( fileName.toLatin1().data() );
+            sc->ref();
+            sc->unref();
+    }
+    catch (...)
+    {
+        message("NCrystal has rejected the provided configuration file!", this);
+        return;
+    }
+#endif
+
+
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    LoadTextFromFile(fileName, t.NCrystal_Ncmat);
+
+    on_pbUpdateInteractionIndication_clicked();
+    on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_cbUseNCrystal_clicked(bool checked)
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+
+    mp.bUseNCrystal = checked;
+
+    FillNeutronTable();
+
+#ifndef __USE_ANTS_NCRYSTAL__
+    if (checked)
+        message("ANTS2 was compiled without support for NCrystal library, check ants2.pro file", this);
+#endif
+}
+
+void MaterialInspectorWindow::on_ledNCmatDcutoff_editingFinished()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    t.NCrystal_Dcutoff = ui->ledNCmatDcutoff->text().toDouble();
+}
+
+void MaterialInspectorWindow::on_ledNcmatPacking_editingFinished()
+{
+    AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    int particleId = ui->cobParticle->currentIndex();
+    MatParticleStructure& mp = tmpMaterial.MatParticle[particleId];
+    NeutralTerminatorStructure& t = mp.Terminators.last();
+
+    t.NCrystal_Packing = ui->ledNcmatPacking->text().toDouble();
+}
+
+void MaterialInspectorWindow::on_cbUseNCrystal_toggled(bool checked)
+{
+#ifndef __USE_ANTS_NCRYSTAL__
+    if (checked) ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: red }");
+    else ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: gray }");
+#endif
 }

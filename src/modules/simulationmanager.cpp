@@ -85,14 +85,14 @@ ASimulatorRunner::~ASimulatorRunner()
     //delete randGen;
 }
 
-void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
+bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 {
   //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
   if (!json.contains("SimulationConfig"))
     {
-      message("Json does not contain simulation config!");
-      return;
+      ErrorString = "Json does not contain simulation config!";
+      return false;
     }
   QJsonObject jsSimSet = json["SimulationConfig"].toObject();
   totalEventCount = 0;
@@ -103,30 +103,47 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   fStopRequested = false;
 
   bool fRunThreads = threadCount > 0;
-  simSettings.readFromJson(jsSimSet);
+  bool bOK = simSettings.readFromJson(jsSimSet);
+  if (!bOK)
+  {
+      ErrorString = simSettings.ErrorString;
+      return false;
+  }
+
+  modeSetup = jsSimSet["Mode"].toString();
+
+#ifndef __USE_ANTS_NCRYSTAL__
+  if ( modeSetup != "PointSim" && detector->MpCollection->isNCrystalInUse())
+  {
+      ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+      return false;
+  }
+#endif
+
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
-  modeSetup = jsSimSet["Mode"].toString();
+
   //qDebug() << "-------------";
   //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
   //qDebug() << "Simulation mode:" << modeSetup;
   //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
 
+  threadCount = std::max(threadCount, 1);
+
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
   //qDebug() << "Updating MaterialColecftion module according to sim settings";
-  detector->MpCollection->UpdateWavelengthBinning(&simSettings); //update wave-resolved properties of materials and runtime properties for neutrons
+  detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector->RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
 
   clearWorkers(); //just rebuild them all everytime, it's easier
-  threadCount = std::max(threadCount, 1);
+
   for(int i = 0; i < threadCount; i++)
     {
-      TString workerName = "simulationWorker"+TString::Itoa(i, 10);
       Simulator *worker;
-      if(modeSetup == "PointSim") //Photon simulator
-        worker = new PointSourceSimulator(detector, workerName);
+      if (modeSetup == "PointSim") //Photon simulator
+        worker = new PointSourceSimulator(detector, i);
       else //Particle simulator
-        worker = new ParticleSourceSimulator(detector, workerName);
+        worker = new ParticleSourceSimulator(detector, i);
 
       worker->setSimSettings(&simSettings);
       int seed = detector->RandGen->Rndm()*100000;
@@ -165,6 +182,8 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   simState = SSetup;
   //qDebug() << "\n and now multi?"<< detector->GeoManager->IsMultiThread();
   //qDebug() << "Num of workers:"<< workers.size();
+
+  return true;
 }
 
 void ASimulatorRunner::updateGeoManager()  // *** obsolete!
@@ -365,16 +384,16 @@ void ASimulatorRunner::updateGui()
 /******************************************************************************\
 *                  Simulator base class (per-thread instance)                  |
 \******************************************************************************/
-Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
+Simulator::Simulator(const DetectorClass *detector, const int ID)
 {
-    this->nameID = nameID;
+    this->ID = ID;
     this->detector = detector;
     this->simSettings = 0;
     eventBegin = 0;
     eventEnd = 0;
     progress = 0;
     RandGen = new TRandom2();    
-    dataHub = new EventsDataClass(nameID);    
+    dataHub = new EventsDataClass(ID);
     OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
     photonGenerator = new Photon_Generator(detector, RandGen);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
@@ -463,8 +482,8 @@ void Simulator::ReserveSpace(int expectedNumEvents)
 /******************************************************************************\
 *                          Point Source Simulator                              |
 \******************************************************************************/
-PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, const TString &nameID) :
-    Simulator(detector, nameID)
+PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, int ID) :
+    Simulator(detector, ID)
 {  
     CustomHist = 0;
     totalEventCount = 0;
@@ -558,7 +577,9 @@ bool PointSourceSimulator::setup(QJsonObject &json)
             xx[i] = ja[i].toArray()[0].toDouble();
             yy[i] = ja[i].toArray()[1].toInt();
         }
-        CustomHist = new TH1I("hPhotDistr"+nameID,"Photon distribution", size-1, xx);
+        TString hName = "hPhotDistr";
+        hName += ID;
+        CustomHist = new TH1I(hName, "Photon distribution", size-1, xx);
         for (int i = 1; i<size+1; i++)  CustomHist->SetBinContent(i, yy[i-1]);
         CustomHist->GetIntegral(); //will be thread safe after this
         delete[] xx;
@@ -1335,21 +1356,27 @@ void PointSourceSimulator::addLastScanPointToMarkers(bool fLimitNumber) //we do 
 /******************************************************************************\
 *                         Particle Source Simulator                            |
 \******************************************************************************/
-ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, const TString &nameID) :
-    Simulator(detector, nameID)
+ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, int ID) :
+    Simulator(detector, ID)
 {
     totalEventCount = 0;
+
+    detector->MpCollection->updateRandomGenForThread(ID, RandGen);
+
     ParticleTracker = new PrimaryParticleTracker(detector->GeoManager,
                                                  RandGen,                                                 
                                                  detector->MpCollection,
                                                  &ParticleStack,
                                                  &EnergyVector,
                                                  &dataHub->EventHistory,
-                                                 dataHub->SimStat);
+                                                 dataHub->SimStat,
+                                                 ID);
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
-    ParticleSources = new ParticleSourcesClass(detector, RandGen, nameID);
+    TString SName = "PartSource";
+    SName += ID;
+    ParticleSources = new ParticleSourcesClass(detector, RandGen, SName);
 }
 
 ParticleSourceSimulator::~ParticleSourceSimulator()
@@ -1735,15 +1762,30 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         threads = MaxThreads;
     }
 
-    Runner->setup(json, threads);
-
-    simThread.start();
-    simTimerGuiUpdate.start();
+    bool bOK = Runner->setup(json, threads);
+    if (!bOK)
+    {
+        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
+    }
+    else
+    {
+        simThread.start();
+        simTimerGuiUpdate.start();
+    }
 }
 
 void ASimulationManager::StopSimulation()
 {
     emit RequestStopSimulation();
+}
+
+void ASimulationManager::onSimFailedToStart()
+{
+    fFinished = true;
+    fSuccess = false;
+    Runner->setFinished();
+
+    emit SimulationFinished();
 }
 
 void ASimulationManager::Clear()

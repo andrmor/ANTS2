@@ -7,6 +7,8 @@
 #include <QElapsedTimer>
 #include <QMetaMethod>
 
+#include "TRandom2.h"
+
 AScriptManager::AScriptManager(TRandom2 *RandGen) : RandGen(RandGen)
 {
   fEngineIsRunning = false;

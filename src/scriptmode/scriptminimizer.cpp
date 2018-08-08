@@ -95,7 +95,8 @@ void AInterfaceToMinimizerScript::AddUpperLimitedVariable(QString name, double v
 
 void AInterfaceToMinimizerScript::AddAllVariables(QVariant array)
 {
-  if (array.type() != QMetaType::QVariantList )
+  //if (array.type() != QMetaType::QVariantList )
+  if (array.type() != QVariant::List )
   {
       abort("DefineAllVariables(): has to be an array containing initializers of the variables");
       return;

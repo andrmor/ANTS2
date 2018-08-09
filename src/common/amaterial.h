@@ -38,8 +38,8 @@ public:
   double e_driftVelocity;
   double W; //default W
   double SecYield;  // ph per secondary electron
-  QVector<QPair<double,double> > PriScintDecayTimeVector;  //first = stat weight, second = decay time (ns)
-  double PriScintRaiseTime = 0;
+  QVector<QPair<double,double> > PriScint_DecayTimeVector;  //first = stat weight, second = decay time (ns)
+  QVector<QPair<double,double> > PriScint__RaiseTimeVector;  //first = stat weight, second = decay time (ns)
   int PriScintModel = 0; //0=sum, 1=Shao
 
   double SecScintDecayTime;
@@ -68,13 +68,13 @@ public:
 
   QVector<double> PrimarySpectrum_lambda;
   QVector<double> PrimarySpectrum;
-  TH1D* PrimarySpectrumHist;    //pointer!
+  TH1D* PrimarySpectrumHist = 0;
   QVector<double> SecondarySpectrum_lambda;
   QVector<double> SecondarySpectrum;
-  TH1D* SecondarySpectrumHist;  //pointer!
+  TH1D* SecondarySpectrumHist = 0;
 
-  TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
-  TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
+  TGeoMaterial* GeoMat = 0; // handled by TGEoManager
+  TGeoMedium* GeoMed = 0;   // handled by TGEoManager
 
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
@@ -93,11 +93,11 @@ public:
 
 private:
   //run-time properties
-  double _PrimScintSumStatWeight;
+  double _PrimScintSumStatWeight_Decay;
+  double _PrimScintSumStatWeight__Raise;
 
 private:
-  //double ft(double td, double tr, double t) const;
-  double ft(double td, double t) const;
+  double FT(double td, double tr, double t) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles

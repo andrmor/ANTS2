@@ -203,42 +203,6 @@ void AMaterialParticleCollection::AddNewMaterial(QString name)
     MaterialCollectionData.last()->name = name;
 }
 
-void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double temperature, double n, double abs, double PriScintDecayTime,
-                                             double W, double SecYield, double SecScintDecayTime, double e_driftVelocity,
-                                             double p1, double p2, double p3)
-{
-  if (index <0 || index > MaterialCollectionData.size()-1)
-    {
-      qWarning()<<"Attempt to update non-existing material in UpdateMaterial!";
-      return;
-    }
-
-  MaterialCollectionData[index]->name = name;
-
-  MaterialCollectionData[index]->density = density;
-  MaterialCollectionData[index]->temperature = temperature;
-  MaterialCollectionData[index]->n = n;
-  MaterialCollectionData[index]->abs = abs;
-
-  MaterialCollectionData[index]->PriScintRaiseTime = 0;
-  MaterialCollectionData[index]->PriScintModel = 0;
-
-  MaterialCollectionData[index]->PriScintDecayTimeVector.clear();
-  if (PriScintDecayTime != 0)
-    MaterialCollectionData[index]->PriScintDecayTimeVector << QPair<double,double>(1.0, PriScintDecayTime);
-
-  MaterialCollectionData[index]->W = W;
-  MaterialCollectionData[index]->SecYield = SecYield;
-  MaterialCollectionData[index]->SecScintDecayTime = SecScintDecayTime;
-  MaterialCollectionData[index]->e_driftVelocity = e_driftVelocity;
-
-  MaterialCollectionData[index]->p1 = p1;
-  MaterialCollectionData[index]->p2 = p2;
-  MaterialCollectionData[index]->p3 = p3;
-
-  generateMaterialsChangedSignal();
-}
-
 void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
@@ -254,11 +218,14 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.e_driftVelocity = 0;
   tmpMaterial.W = 0;
   tmpMaterial.SecYield = 0;
-  tmpMaterial.PriScintRaiseTime = 0;
-  tmpMaterial.PriScintModel = 0;
-  tmpMaterial.PriScintDecayTimeVector.clear();
   tmpMaterial.SecScintDecayTime = 0;
   tmpMaterial.Comments = "";
+
+  tmpMaterial.PriScintModel = 0;
+  tmpMaterial.PriScint_DecayTimeVector.clear();
+  tmpMaterial.PriScint_DecayTimeVector << QPair<double, double>(1.0, 0);
+  tmpMaterial.PriScint__RaiseTimeVector.clear();
+  tmpMaterial.PriScint__RaiseTimeVector << QPair<double, double>(1.0, 0);
 
   int particles = ParticleCollection.size();
   tmpMaterial.MatParticle.resize(particles);

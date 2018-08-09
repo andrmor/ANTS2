@@ -56,7 +56,6 @@ public:
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal=false);
   void AddNewMaterial(QString name);
-  void UpdateMaterial(int index, QString name, double density, double temperature, double n, double abs, double PriScintDecayTime, double W, double SecYield, double SecScintDecayTime, double e_driftVelocity, double p1, double p2, double p3); //use only for direct assign when dfault detector file not found
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
@@ -69,6 +68,7 @@ public:
   int getNeutronIndex() const; //returns -1 if not in the collection
 
   //tmpMaterial - related
+  // ***!!! todo: remove ClearTmpMaterial and use clear method of the AMaterial
   void ClearTmpMaterial(); //deletes all objects pointed by the class pointers!!!
   void CopyTmpToMaterialCollection(); //creates a copy of all pointers // true is new material was added to material collection
   void CopyMaterialToTmp(int imat);

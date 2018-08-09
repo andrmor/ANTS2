@@ -221,7 +221,7 @@
     <item>
      <widget class="QTabWidget" name="twProperties">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_6">
        <attribute name="title">
@@ -584,7 +584,7 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          <rect>
           <x>20</x>
           <y>222</y>
-          <width>431</width>
+          <width>481</width>
           <height>188</height>
          </rect>
         </property>
@@ -817,7 +817,7 @@ resolution:</string>
           <rect>
            <x>150</x>
            <y>50</y>
-           <width>201</width>
+           <width>171</width>
            <height>20</height>
           </rect>
          </property>
@@ -903,7 +903,7 @@ resolution:</string>
         <widget class="QPushButton" name="pbPriThelp">
          <property name="geometry">
           <rect>
-           <x>383</x>
+           <x>349</x>
            <y>49</y>
            <width>31</width>
            <height>22</height>
@@ -938,12 +938,12 @@ resolution:</string>
           <string>Emission raise time:</string>
          </property>
         </widget>
-        <widget class="QLineEdit" name="ledPriT_raise">
+        <widget class="QLineEdit" name="lePriT_raise">
          <property name="geometry">
           <rect>
            <x>150</x>
            <y>73</y>
-           <width>41</width>
+           <width>171</width>
            <height>20</height>
           </rect>
          </property>
@@ -954,14 +954,14 @@ resolution:</string>
           </font>
          </property>
          <property name="text">
-          <string>5</string>
+          <string>0</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_28">
          <property name="geometry">
           <rect>
-           <x>357</x>
-           <y>50</y>
+           <x>325</x>
+           <y>51</y>
            <width>21</width>
            <height>16</height>
           </rect>
@@ -979,7 +979,7 @@ resolution:</string>
         <widget class="QLabel" name="label_29">
          <property name="geometry">
           <rect>
-           <x>197</x>
+           <x>325</x>
            <y>74</y>
            <width>21</width>
            <height>16</height>
@@ -995,10 +995,29 @@ resolution:</string>
           <string>ns</string>
          </property>
         </widget>
+        <widget class="QPushButton" name="pbPriT_test">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>50</y>
+           <width>71</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Test</string>
+         </property>
+        </widget>
         <widget class="QComboBox" name="cobPriT_model">
          <property name="geometry">
           <rect>
-           <x>281</x>
+           <x>401</x>
            <y>73</y>
            <width>69</width>
            <height>20</height>
@@ -1021,11 +1040,11 @@ resolution:</string>
           </property>
          </item>
         </widget>
-        <widget class="QLabel" name="label_34">
+        <widget class="QLabel" name="labModel">
          <property name="geometry">
           <rect>
-           <x>230</x>
-           <y>77</y>
+           <x>350</x>
+           <y>76</y>
            <width>47</width>
            <height>13</height>
           </rect>
@@ -1043,25 +1062,6 @@ resolution:</string>
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QPushButton" name="pbPriT_test">
-         <property name="geometry">
-          <rect>
-           <x>368</x>
-           <y>72</y>
-           <width>61</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Test</string>
-         </property>
-        </widget>
         <zorder>label_20</zorder>
         <zorder>label_16</zorder>
         <zorder>label_58</zorder>
@@ -1077,19 +1077,19 @@ resolution:</string>
         <zorder>frYieldSame</zorder>
         <zorder>pbPriThelp</zorder>
         <zorder>label_24</zorder>
-        <zorder>ledPriT_raise</zorder>
+        <zorder>lePriT_raise</zorder>
         <zorder>label_28</zorder>
         <zorder>label_29</zorder>
-        <zorder>cobPriT_model</zorder>
-        <zorder>label_34</zorder>
         <zorder>pbPriT_test</zorder>
+        <zorder>cobPriT_model</zorder>
+        <zorder>labModel</zorder>
        </widget>
        <widget class="QGroupBox" name="gbOptical">
         <property name="geometry">
          <rect>
           <x>20</x>
           <y>5</y>
-          <width>430</width>
+          <width>481</width>
           <height>214</height>
          </rect>
         </property>
@@ -3007,7 +3007,7 @@ resolution:</string>
      <x>0</x>
      <y>0</y>
      <width>541</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLibrary">
@@ -3329,8 +3329,8 @@ resolution:</string>
      <y>238</y>
     </hint>
     <hint type="destinationlabel">
-     <x>359</x>
-     <y>120</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3393,8 +3393,8 @@ resolution:</string>
      <y>285</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>110</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3409,8 +3409,8 @@ resolution:</string>
      <y>326</y>
     </hint>
     <hint type="destinationlabel">
-     <x>343</x>
-     <y>109</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3425,8 +3425,8 @@ resolution:</string>
      <y>359</y>
     </hint>
     <hint type="destinationlabel">
-     <x>349</x>
-     <y>120</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3585,8 +3585,8 @@ resolution:</string>
      <y>366</y>
     </hint>
     <hint type="destinationlabel">
-     <x>337</x>
-     <y>99</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3601,8 +3601,8 @@ resolution:</string>
      <y>366</y>
     </hint>
     <hint type="destinationlabel">
-     <x>344</x>
-     <y>100</y>
+     <x>530</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>
@@ -3703,7 +3703,7 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledPriT_raise</sender>
+   <sender>lePriT_raise</sender>
    <signal>textChanged(QString)</signal>
    <receiver>pbWasModified</receiver>
    <slot>click()</slot>
@@ -3719,30 +3719,14 @@ resolution:</string>
    </hints>
   </connection>
   <connection>
-   <sender>ledPriT_raise</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>205</x>
-     <y>513</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>464</x>
-     <y>105</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cobPriT_model</sender>
    <signal>activated(int)</signal>
    <receiver>pbUpdateTmpMaterial</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>337</x>
-     <y>514</y>
+     <x>468</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -3757,8 +3741,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>330</x>
-     <y>517</y>
+     <x>461</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>93</x>

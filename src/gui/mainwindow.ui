@@ -6683,7 +6683,7 @@ Constructor is disabled!</string>
       </widget>
       <widget class="QWidget" name="tabAngular">
        <attribute name="title">
-        <string>Angular</string>
+        <string>Angle</string>
        </attribute>
        <widget class="QCheckBox" name="cbAngularSensitive">
         <property name="geometry">
@@ -6852,7 +6852,7 @@ Constructor is disabled!</string>
       </widget>
       <widget class="QWidget" name="tabTrackers">
        <attribute name="title">
-        <string>Track</string>
+        <string>Tracking</string>
        </attribute>
        <widget class="QLineEdit" name="ledMinStep">
         <property name="geometry">
@@ -16013,7 +16013,7 @@ on stack</string>
      <x>0</x>
      <y>0</y>
      <width>550</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

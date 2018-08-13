@@ -58,8 +58,10 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
       QDir dir = QDir::current();
       dir.cdUp();
       QString candidate = dir.absolutePath() + "/EXAMPLES";
-      if (QDir(candidate).exists())
-          ExamplesDir = candidate;
+      if (QDir(candidate).exists()) ExamplesDir = candidate;
+
+      candidate = dir.absolutePath() + "/DATA";
+      if (QDir(candidate).exists()) ResourcesDir = candidate;
   }
 #endif
 //   qDebug() << "-examples-"<<ExamplesDir;

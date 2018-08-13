@@ -463,7 +463,7 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
       {
           ui->swNeutral->setCurrentIndex(1);
           ui->cbCapture->setChecked(mp.bCaptureEnabled);
-          ui->cbEnableScatter->setChecked(mp.bEllasticEnabled);
+          ui->cbEnableScatter->setChecked(mp.bElasticEnabled);
           ui->cbAllowAbsentCsData->setChecked(mp.bAllowAbsentCsData);
 
           FillNeutronTable();
@@ -520,7 +520,7 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     const int ParticleId = ui->cobParticle->currentIndex();
     tmpMaterial.MatParticle[ParticleId].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
     tmpMaterial.MatParticle[ParticleId].bCaptureEnabled = ui->cbCapture->isChecked();
-    tmpMaterial.MatParticle[ParticleId].bEllasticEnabled = ui->cbEnableScatter->isChecked();
+    tmpMaterial.MatParticle[ParticleId].bElasticEnabled = ui->cbEnableScatter->isChecked();
 
     tmpMaterial.W = ui->ledW->text().toDouble()*0.001; //eV -> keV
     tmpMaterial.SecYield = ui->ledSecYield->text().toDouble();
@@ -2365,9 +2365,6 @@ void MaterialInspectorWindow::ShowTreeWithChemicalComposition()
                 ui->trwChemicalComposition->setItemWidget(twi, 0, isotopDel);
                 QObject::connect(isotopDel, &AIsotopeDelegate::RemoveIsotope, this, &MaterialInspectorWindow::onRemoveIsotope, Qt::QueuedConnection);
                 QObject::connect(isotopDel, &AIsotopeDelegate::IsotopePropertiesChanged, this, &MaterialInspectorWindow::IsotopePropertiesChanged, Qt::QueuedConnection);
-                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::LoadClicked, this, &MaterialInspectorWindow::onLoadElementCrossClicked, Qt::QueuedConnection);
-                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_pbWasModified_clicked, Qt::QueuedConnection);
-                //        QObject::connect(isotopDel, &AElasticIsotopeDelegate::RequestActivateModifiedStatus, this, &MaterialInspectorWindow::on_ledMFPenergyEllastic_editingFinished, Qt::QueuedConnection);
             }
     }
 }
@@ -2549,7 +2546,7 @@ int MaterialInspectorWindow::autoloadMissingCrossSectionData()
         MatParticleStructure& mp = tmpMaterial.MatParticle[neutronId];
 
         bool bCapture = mp.bCaptureEnabled;
-        bool bElastic = mp.bEllasticEnabled;
+        bool bElastic = mp.bElasticEnabled;
         if (!bCapture && !bElastic) return 0;
 
         QVector<NeutralTerminatorStructure>& Terminators = mp.Terminators;

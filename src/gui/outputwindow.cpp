@@ -347,7 +347,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
       case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
       case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
-      case EventHistoryStructure::EllasticScattering:       s += "elastic"; break;
+      case EventHistoryStructure::ElasticScattering:       s += "elastic"; break;
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
       case EventHistoryStructure::PairProduction:           s += "pair production"; break;

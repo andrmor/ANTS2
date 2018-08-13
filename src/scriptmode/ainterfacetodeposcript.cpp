@@ -320,7 +320,7 @@ QString AInterfaceToDepoScript::terminationStr(int i)
     case 7:  return "was created outside of the world";
     case 8:  return "entered material with tracking forbidden";
     case 9:  return "pair production";
-    case 10: return "ellastic";
+    case 10: return "elastic";
     case 11: return "stopped by monitor";
     default: return "unknown termination";
     }

@@ -146,9 +146,9 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   double PhYield = 0;         // Photon yield of the primary scintillation
   double IntrEnergyRes = 0; // intrinsic energy resolution
 
-  //for neutrons - separate activation of capture and ellastic scattering is possible
+  //for neutrons - separate activation of capture and elastic scattering is possible
   bool bCaptureEnabled = true;
-  bool bEllasticEnabled = false;
+  bool bElasticEnabled = false;
   bool bUseNCrystal = false;
   bool bAllowAbsentCsData = false;
 

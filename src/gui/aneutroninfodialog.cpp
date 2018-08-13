@@ -322,7 +322,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
 
             GraphWindow->ShowAndFocus();
             TGraph* gr = GraphWindow->ConstructTGraph(x, y, mat->name.toLocal8Bit(),
-                                                      "Energy, meV", "Ellastic scattering cross-section, barns",
+                                                      "Energy, meV", "Elastic scattering cross-section, barns",
                                                       kRed, 2, 1, kRed, 1, 2);
             GraphWindow->Draw(gr, "AL");
             GraphWindow->UpdateRootCanvas();
@@ -330,7 +330,7 @@ void ANeutronInfoDialog::on_pbScatter_clicked()
     }
     else
 #endif
-        drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Ellastic scattering cross-section, barns"));
+        drawCrossSection(termSc.PartialCrossSectionEnergy, termSc.PartialCrossSection, TString("Elastic scattering cross-section, barns"));
 }
 
 void ANeutronInfoDialog::drawCrossSection(const QVector<double>& energy, const QVector<double>& cs, const TString &xTitle)

@@ -388,7 +388,7 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
       if ( MpCollection->getParticleType(ip) == AParticle::_neutron_ )
       {
           jMatParticle["CaptureEnabled"] = MatParticle[ip].bCaptureEnabled;
-          jMatParticle["EllasticEnabled"] = MatParticle[ip].bEllasticEnabled;
+          jMatParticle["ElasticEnabled"] = MatParticle[ip].bElasticEnabled;
           jMatParticle["UseNCrystal"] = MatParticle[ip].bUseNCrystal;
           jMatParticle["AllowAbsentCsData"] = MatParticle[ip].bAllowAbsentCsData;
       }
@@ -555,9 +555,10 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       parseJson(jMatParticle, "DataString", MatParticle[ip].DataString);
 
       MatParticle[ip].bCaptureEnabled = true; //compatibility
-      MatParticle[ip].bEllasticEnabled = false; //compatibility
+      MatParticle[ip].bElasticEnabled = false; //compatibility
       parseJson(jMatParticle, "CaptureEnabled", MatParticle[ip].bCaptureEnabled);
-      parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bEllasticEnabled);
+      parseJson(jMatParticle, "EllasticEnabled", MatParticle[ip].bElasticEnabled); //old configs were with this typo
+      parseJson(jMatParticle, "ElasticEnabled", MatParticle[ip].bElasticEnabled);
       MatParticle[ip].bUseNCrystal = false; //compatibility
       parseJson(jMatParticle, "UseNCrystal", MatParticle[ip].bUseNCrystal);
 
@@ -619,7 +620,7 @@ void MatParticleStructure::Clear()
     IntrEnergyRes = 0;
 
     bCaptureEnabled = false;
-    bEllasticEnabled = false;
+    bElasticEnabled = false;
     bAllowAbsentCsData = false;
 
     InteractionDataX.clear();
@@ -955,19 +956,19 @@ const QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollect
 
   if (pt == AParticle::_neutron_)
     {
-      if (!mp->bCaptureEnabled && !mp->bEllasticEnabled) return "";
+      if (!mp->bCaptureEnabled && !mp->bElasticEnabled) return "";
 
       int numTerm = mp->Terminators.size();
       if (numTerm != 2 ) return "Wrong number of terminators for neutrons";
 
-      //confirming terminators type is "capture" or "ellastic"
+      //confirming terminators type is "capture" or "elastic"
       if (mp->Terminators.at(0).Type != NeutralTerminatorStructure::Absorption)
           return "First terminator has to be absorption";
       if (mp->Terminators.at(1).Type != NeutralTerminatorStructure::ElasticScattering)
           return "Second terminator has to be scattering";
 
       //checking all terminators one by one
-      if (mp->bEllasticEnabled)
+      if (mp->bElasticEnabled)
       {
           const NeutralTerminatorStructure& term = mp->Terminators.at(1);
 
@@ -985,7 +986,7 @@ const QString AMaterial::CheckMaterial(int iPart, const AMaterialParticleCollect
           else
           {
               if (term.IsotopeRecords.isEmpty())
-                  return QString("No elements defined for neutron ellastic scattering");
+                  return QString("No elements defined for neutron elastic scattering");
 
               if (term.PartialCrossSection.isEmpty())
                   return QString("Total elastic scaterring cross-section is not defined");
@@ -1059,7 +1060,7 @@ bool AMaterial::isNCrystalInUse() const
 {
     for (const MatParticleStructure& mp : MatParticle)
         if (mp.TrackingAllowed && !mp.MaterialIsTransparent)
-            if (mp.bEllasticEnabled && mp.bUseNCrystal)
+            if (mp.bElasticEnabled && mp.bUseNCrystal)
                 return true;
 
     return false;

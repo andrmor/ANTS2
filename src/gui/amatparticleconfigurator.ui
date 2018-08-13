@@ -68,7 +68,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QComboBox" name="cobUnitsForEllastic">
+  <widget class="QComboBox" name="cobUnits">
    <property name="geometry">
     <rect>
      <x>239</x>
@@ -552,7 +552,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>cobUnitsForEllastic</sender>
+   <sender>cobUnits</sender>
    <signal>activated(int)</signal>
    <receiver>pbUpdateGlobSet</receiver>
    <slot>click()</slot>

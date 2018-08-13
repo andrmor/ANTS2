@@ -178,7 +178,6 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundary();
           const Double_t MaxLength  = navigator->GetStep();
 
-          //if ( (*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX.size() < 2 ) ; <-- cannot use this protection anymore because neutron ellastic scattering is currently not added to total interaction cross-section
           if ( (*MpCollection)[MatId]->MatParticle[ParticleId].MaterialIsTransparent )
             {
               // pass this medium
@@ -258,14 +257,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                     {
                       double SoFarShortestId = 0;
                       double SoFarShortest = 1.0e10;
-                      double TotalCrossSection; //used by neutrons - ellastic scattering or absorption
+                      double TotalCrossSection; //used by neutrons - elastic scattering or absorption
                       for (int iProcess=0; iProcess<numProcesses; iProcess++)
                         {
                           //        qDebug()<<"---Process #:"<<iProcess;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
 
                           bool bUseNCrystal = false;
-                          //for neutrons have additional flags to suppress capture and ellastic and if it NCrystal lib which handles scattering
+                          //for neutrons have additional flags to suppress capture and elastic and if it NCrystal lib which handles scattering
                           if (ParticleType == AParticle::_neutron_)
                           {
                               if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
@@ -276,9 +275,9 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                   }
                               if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::ElasticScattering)
                               {
-                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bEllasticEnabled )
+                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bElasticEnabled )
                                   {
-                                      //        qDebug() << "Skipping ellastic - it is disabled";
+                                      //        qDebug() << "Skipping elastic - it is disabled";
                                       continue;
                                   }
                                   bUseNCrystal = (*MpCollection)[MatId]->MatParticle[ParticleId].bUseNCrystal;
@@ -555,7 +554,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     //selected element iselected
                                     //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
-                                    //performing ellastic scattering in this element
+                                    //performing elastic scattering in this element
                                     // "energy" is the neutron energy in keV
                                     // vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
                                     double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
@@ -645,7 +644,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     energyHistory = energy;
                                 }
 
-                                terminationStatus = EventHistoryStructure::EllasticScattering;
+                                terminationStatus = EventHistoryStructure::ElasticScattering;
                                 distanceHistory = SoFarShortest;
 
                                 break; //switch-break

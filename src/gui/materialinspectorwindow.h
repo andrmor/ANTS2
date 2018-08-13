@@ -165,6 +165,8 @@ private slots:
 
     void on_lePriT_raise_editingFinished();
 
+    void on_pbNew_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;

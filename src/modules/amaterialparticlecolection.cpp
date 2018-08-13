@@ -157,34 +157,6 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
   //inicialize empty MatParticle vector for all defined particles
   int numParticles = ParticleCollection.size();
   m->MatParticle.resize(numParticles);
-  for (int i=0; i<numParticles; i++)
-    {
-      m->MatParticle[i].TrackingAllowed = false;
-      m->MatParticle[i].PhYield=0;
-      m->MatParticle[i].IntrEnergyRes=0;
-      m->MatParticle[i].bCaptureEnabled=true;
-      m->MatParticle[i].bEllasticEnabled=false;
-      m->MatParticle[i].InteractionDataX.resize(0);
-      m->MatParticle[i].InteractionDataF.resize(0);
-      m->MatParticle[i].Terminators.resize(0);
-    }
-
-  //initialize wavelength-resolved data
-  m->PrimarySpectrum_lambda.clear();
-  m->PrimarySpectrum.clear();
-  m->PrimarySpectrumHist = 0;
-  m->SecondarySpectrum_lambda.clear();
-  m->SecondarySpectrum.clear();
-  m->SecondarySpectrumHist = 0;
-  m->nWave_lambda.clear();
-  m->nWave.clear();
-  m->nWaveBinned.clear();
-  m->absWave_lambda.clear();
-  m->absWave.clear();
-  m->absWaveBinned.clear();
-  m->reemisProbWave.clear();
-  m->reemisProbWave_lambda.clear();
-  m->reemissionProbBinned.clear();
 
   //appending to the material collection
   MaterialCollectionData.append(m);
@@ -197,10 +169,13 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
   if (!fSuppressChangedSignal) generateMaterialsChangedSignal();
 }
 
-void AMaterialParticleCollection::AddNewMaterial(QString name)
+void AMaterialParticleCollection::AddNewMaterial(QString name, bool fSuppressChangedSignal)
 {
-    AddNewMaterial();
+    AddNewMaterial(true);
     MaterialCollectionData.last()->name = name;
+    ensureMatNameIsUnique(MaterialCollectionData.last());
+
+    if (!fSuppressChangedSignal) generateMaterialsChangedSignal();
 }
 
 void AMaterialParticleCollection::ClearTmpMaterial()
@@ -781,23 +756,32 @@ void AMaterialParticleCollection::AddNewMaterial(QJsonObject &json) //have to be
   AddNewMaterial();
   AMaterial* mat = MaterialCollectionData.last();
   mat->readFromJson(json, this);
-  QString name = mat->name;
-  bool fFound;
-  do
-    {
-      fFound = false;
-      for (int i=0; i<MaterialCollectionData.size()-2; i++)  //-1 -1 - excluding itself
-        if (MaterialCollectionData[i]->name == name)
-          {
-            fFound = true;
-            name += "*";
-            break;
-          }
-    }
-  while (fFound);
-  mat->name = name;
+
+  ensureMatNameIsUnique(mat);
 
   generateMaterialsChangedSignal();
+}
+
+void AMaterialParticleCollection::ensureMatNameIsUnique(AMaterial* mat)
+{
+    QString name = mat->name;
+    bool fFound;
+    do
+      {
+        fFound = false;
+        for (int i=0; i<MaterialCollectionData.size(); i++)  //-1 -1 - excluding itself
+        {
+          if (mat == MaterialCollectionData[i]) continue;
+          if (MaterialCollectionData[i]->name == name)
+            {
+              fFound = true;
+              name += "*";
+              break;
+            }
+        }
+      }
+    while (fFound);
+    mat->name = name;
 }
 
 int AMaterialParticleCollection::CheckParticleEnergyInRange(int iPart, double Energy)

@@ -141,7 +141,7 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
 {
-  bool TrackingAllowed = false;
+  bool TrackingAllowed = true;
   bool MaterialIsTransparent = true;
   double PhYield = 0;         // Photon yield of the primary scintillation
   double IntrEnergyRes = 0; // intrinsic energy resolution

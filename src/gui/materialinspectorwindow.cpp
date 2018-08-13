@@ -127,9 +127,10 @@ MaterialInspectorWindow::~MaterialInspectorWindow()
 
 void MaterialInspectorWindow::SetWasModified(bool flag)
 {
-  QString s = "  ";
+  QString s = " ";
   if (flag) s = "<html><head/><body><p><span style=\" font-size:10pt; color:#ff0000;\">Material was modified: Click one of above to confirm</span></p></body></html>";
   ui->labMatWasModified->setText(s);
+
 }
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
@@ -3030,4 +3031,24 @@ void MaterialInspectorWindow::on_cbUseNCrystal_toggled(bool checked)
     if (checked) ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: red }");
     else ui->cbUseNCrystal->setStyleSheet("QCheckBox { color: gray }");
 #endif
+}
+
+void MaterialInspectorWindow::on_pbNew_clicked()
+{
+    if ( !ui->labMatWasModified->text().simplified().isEmpty() )
+    {
+        int res = QMessageBox::question(this, "Define new material", "All unsaved changes will be lost. Continue?", QMessageBox::Yes | QMessageBox::Cancel);
+        if (res == QMessageBox::Cancel)
+            return;
+    }
+
+    Detector->MpCollection->AddNewMaterial("Not_defined", true);
+    MW->ReconstructDetector(true);
+
+    int index = ui->cobActiveMaterials->count() - 1;
+    if (index > -1)
+    {
+        ui->cobActiveMaterials->setCurrentIndex(index);
+        on_cobActiveMaterials_activated(index);
+    }
 }

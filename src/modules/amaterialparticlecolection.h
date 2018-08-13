@@ -54,8 +54,8 @@ public:
   const AParticle* getParticle(int particleIndex) const;
 
   //Material handling
-  void AddNewMaterial(bool fSuppressChangedSignal=false);
-  void AddNewMaterial(QString name);
+  void AddNewMaterial(bool fSuppressChangedSignal = false);
+  void AddNewMaterial(QString name, bool fSuppressChangedSignal = false);
   int FindMaterial(QString name); //if not found, returns -1; if found, returns material index
   bool DeleteMaterial(int imat); //takes care of overrides of materials with index larger than imat!
   void UpdateWaveResolvedProperties(int imat); //updates wavelength-resolved material properties
@@ -107,7 +107,8 @@ private:
   void clearParticleCollection();
   void registerNewParticle(); //called after a particle was added to particle collection. It updates terminations om MatParticles
   bool readParticleCollectionFromJson(QJsonObject &json);
-  void generateMaterialsChangedSignal();
+  void generateMaterialsChangedSignal();  
+  void ensureMatNameIsUnique(AMaterial *mat);
 
 public slots:
   void OnRequestListOfParticles(QStringList &definedParticles);

@@ -5,6 +5,7 @@
 #include "scanfloodstructure.h"
 #include "aphoton.h"
 #include "dotstgeostruct.h"
+#include "atrackbuildoptions.h"
 
 #include <QVector>
 #include <QObject>
@@ -75,6 +76,7 @@ public:
     void Clear();
 
     ParticleSourcesClass* ParticleSources;  //used to update JSON on config chamges and in GUI to configure; Simulateors use their local copies build from JSON
+    ATrackBuildOptions TrackBuildOptions;
 
 private:
     EventsDataClass* EventsDataHub; //alias

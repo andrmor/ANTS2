@@ -339,7 +339,9 @@ SOURCES += main.cpp \
     scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
-    Net/aremoteserverrecord.cpp
+    Net/aremoteserverrecord.cpp \
+    gui/MainWindowTools/atrackdrawdialog.cpp \
+    gui/atrackbuildoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -462,7 +464,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsession.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
-    Net/aremoteserverrecord.h
+    Net/aremoteserverrecord.h \
+    gui/MainWindowTools/atrackdrawdialog.h \
+    gui/atrackbuildoptions.h
 
 # --- SIM ---
 ants2_SIM {
@@ -777,3 +781,6 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/MainWindowTools/atrackdrawdialog.ui

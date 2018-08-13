@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -9275,7 +9275,7 @@ thermal neutrons:</string>
            <rect>
             <x>360</x>
             <y>210</y>
-            <width>160</width>
+            <width>131</width>
             <height>17</height>
            </rect>
           </property>
@@ -9286,7 +9286,7 @@ thermal neutrons:</string>
            </font>
           </property>
           <property name="text">
-           <string>Build and show tracks</string>
+           <string>Build photon tracks</string>
           </property>
           <property name="checked">
            <bool>false</bool>
@@ -9368,11 +9368,31 @@ thermal neutrons:</string>
            </property>
           </widget>
          </widget>
+         <widget class="QPushButton" name="pbOpenTrackProperties_Phot">
+          <property name="geometry">
+           <rect>
+            <x>489</x>
+            <y>208</y>
+            <width>31</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Set</string>
+          </property>
+         </widget>
          <zorder>line_11</zorder>
          <zorder>twSingleScan</zorder>
          <zorder>cbPointSourceBuildTracks</zorder>
          <zorder>pbSimulate</zorder>
          <zorder>frLimitNodesTo</zorder>
+         <zorder>pbOpenTrackProperties_Phot</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">

@@ -5335,3 +5335,10 @@ void MainWindow::on_actionGrid_triggered()
 {
     RemoteWindow->show();
 }
+
+#include "atrackdrawdialog.h"
+void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
+{
+    ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions);
+    d->exec();
+}

@@ -565,7 +565,9 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     double va[3];
                                     const double m = elements.at(iselected).Mass; //mass of atom in atomic units
                                     //        qDebug() << "atom - mass:"<<m;
-                                    double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
+                                    //double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
+                                    const double& Temperature = (*MpCollection)[MatId]->temperature;
+                                    double a = sqrt(1.38065e-23*Temperature/m/1.6605e-27);
                                     bool bCannotCollide;
                                     do
                                     {

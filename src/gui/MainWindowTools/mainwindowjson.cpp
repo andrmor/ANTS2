@@ -348,7 +348,7 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   QJsonObject acj = gjs["AcceleratorConfig"].toObject();
   JsonToSpinBox (acj, "MaxNumTransitions", ui->sbMaxNumbPhTransitions);
   JsonToCheckbox(acj, "CheckBeforeTrack", ui->cbRndCheckBeforeTrack);
-  JsonToCheckbox(acj, "OnlyTracksOnPMs", ui->cbOnlyBuildTracksOnPMs);
+  //JsonToCheckbox(acj, "OnlyTracksOnPMs", ui->cbOnlyBuildTracksOnPMs);
   JsonToCheckbox(acj, "LogsStatistics", ui->cbDoLogsAndStatistics);
   //JsonToSpinBox(acj, "NumberThreads", ui->sbNumberThreads);
   //Sec scint
@@ -375,7 +375,7 @@ if (scj.contains("CustomDistrib"))
       }
   }
 */
-  JsonToCheckbox(gjs, "BuildPhotonTracks", ui->cbPointSourceBuildTracks); //general now
+  //JsonToCheckbox(gjs, "BuildPhotonTracks", ui->cbPointSourceBuildTracks); //general now
   QJsonObject tbojs;
     parseJson(gjs, "TrackBuildingOptions", tbojs);
   SimulationManager->TrackBuildOptions.readFromJson(tbojs);
@@ -393,7 +393,7 @@ if (scj.contains("CustomDistrib"))
       ui->twSingleScan->blockSignals(false);
   }  
   JsonToComboBox(pcj, "Primary_Secondary", ui->cobScintTypePointSource);
-  JsonToCheckbox(pcj, "BuildTracks", ui->cbPointSourceBuildTracks);
+  //JsonToCheckbox(pcj, "BuildTracks", ui->cbPointSourceBuildTracks);
   JsonToCheckbox(pcj, "MultipleRuns", ui->cbNumberOfRuns);
   JsonToSpinBox (pcj, "MultipleRunsNumber", ui->sbNumberOfRuns);
   ui->cbLimitNodesOutsideObject->setChecked(false);  //compatibility
@@ -572,10 +572,10 @@ if (scj.contains("CustomDistrib"))
   JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
   JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);
   JsonToCheckbox(csjs, "DoS2", ui->cbDoS2tester);
-  JsonToCheckbox(csjs, "ParticleTracks", ui->cbGunParticleTracks);
-  JsonToCheckbox(csjs, "ParticleTracks", ui->cbBuildParticleTrackstester);
-  JsonToCheckbox(csjs, "PhotonTracks", ui->cbGunPhotonTracks);
-  JsonToCheckbox(csjs, "PhotonTracks", ui->cbBuilPhotonTrackstester);
+  //JsonToCheckbox(csjs, "ParticleTracks", ui->cbGunParticleTracks);
+  //JsonToCheckbox(csjs, "ParticleTracks", ui->cbBuildParticleTrackstester);
+  //JsonToCheckbox(csjs, "PhotonTracks", ui->cbGunPhotonTracks);
+  //JsonToCheckbox(csjs, "PhotonTracks", ui->cbBuilPhotonTrackstester);
   ui->cbIgnoreEventsWithNoHits->setChecked(false);//compatibility
   JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
   ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(true);//compatibility

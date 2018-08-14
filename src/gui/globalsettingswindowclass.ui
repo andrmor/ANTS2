@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>361</height>
+    <width>445</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Global settings</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="twMain">
     <property name="geometry">
      <rect>
-      <x>4</x>
-      <y>27</y>
+      <x>5</x>
+      <y>4</y>
       <width>436</width>
       <height>331</height>
      </rect>
@@ -1160,22 +1160,6 @@ used to draw a function</string>
      <zorder>label_23</zorder>
      <zorder>leWebSocketIP</zorder>
     </widget>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>26</x>
-      <y>4</y>
-      <width>291</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>ANTS2 global settings</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
    </widget>
    <widget class="QGroupBox" name="gbSaveOnExit">
     <property name="geometry">

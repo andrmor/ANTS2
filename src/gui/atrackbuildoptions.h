@@ -22,6 +22,9 @@ class ATrackBuildOptions
 public:
     ATrackBuildOptions();
 
+    bool bBuildPhotonTracks = false;
+    bool bBuildParticleTracks = false;
+
     //Photons
     ATrackAttributes TA_Photons;
 

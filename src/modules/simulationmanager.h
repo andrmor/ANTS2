@@ -353,7 +353,7 @@ private:
     double timeFrom, timeRange;
 
     //Control
-    bool fBuildParticleTracks;    
+    bool fBuildParticleTracks;   //can be dropped and use directly TrackBuildOptions od simSettings
     bool fDoS1;
     bool fDoS2;
     bool fAllowMultiple; //multiple particles per event?

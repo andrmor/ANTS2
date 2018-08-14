@@ -10,49 +10,48 @@
 class GeneralSimSettings
 {
 public:
-  GeneralSimSettings();
-  ~GeneralSimSettings() {}      //if (SecScintThetaHist) delete SecScintThetaHist;
+  //~GeneralSimSettings() {}      //if (SecScintThetaHist) delete SecScintThetaHist;
 
-  bool   fTimeResolved;
-  double TimeFrom;
-  double TimeTo;
-  int    TimeBins;
+  bool   fTimeResolved = false;
+  double TimeFrom = 0;
+  double TimeTo = 1;
+  int    TimeBins = 1;
 
-  bool   fWaveResolved;
-  double WaveFrom;
-  double WaveTo;
-  double WaveStep;
-  int    WaveNodes;
+  bool   fWaveResolved = false;
+  double WaveFrom = 200.0;
+  double WaveTo = 800.0;
+  double WaveStep = 1.0;
+  int    WaveNodes = 601;
 
-  bool   fAreaResolved;
-  bool   fAngResolved;
-  int    CosBins;
+  bool   fAreaResolved = false;
+  bool   fAngResolved = false;
+  int    CosBins = 1000;
 
-  bool   fLRFsim;               // true = use LRF for signal evaluation
-  int    NumPhotsForLrfUnity;   // the total number of photons per event for unitary LRF
-  double NumPhotElPerLrfUnity;  // the number of photoelectrons per unit value LRF
+  bool   fLRFsim = false;               // true = use LRF for signal evaluation
+  int    NumPhotsForLrfUnity = 1;    // the total number of photons per event for unitary LRF
+  double NumPhotElPerLrfUnity = 1.0;  // the number of photoelectrons per unit value LRF
 
   double MinStep;
   double MaxStep;
   double dE;
   double MinEnergy;
-  double MinEnergyNeutrons;
+  double MinEnergyNeutrons = 0.01; //in meV
   double Safety;
-  int    TrackColorAdd;
+  int    TrackColorAdd = 0;
 
-  int    MaxNumTrans;
-  bool   fTracksOnPMsOnly;
-  bool   fQEaccelerator;
-  bool   fLogsStat;             //generate logs and statistics of detected photons
-  bool   bDoPhotonHistoryLog; //detailed photon history, activated by "photon" script!
+  int    MaxNumTrans = 500;
+  //bool   fTracksOnPMsOnly;
+  bool   fQEaccelerator = false;
+  bool   fLogsStat = false;             //generate logs and statistics of detected photons
+  bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
   int    NumThreads;
 
   int    DetStatNumBins;        //number of bins in fetection statistics
 
-  int    SecScintGenMode;
+  int    SecScintGenMode = 0;
   //TH1D *SecScintThetaHist;
 
-  bool   fBuildPhotonTracks;
+  //bool   fBuildPhotonTracks; //moved to TrackBuildOptions
   int    MaxNumberOfTracks;
 
   ATrackBuildOptions TrackBuildOptions;

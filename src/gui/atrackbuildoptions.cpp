@@ -36,6 +36,9 @@ ATrackBuildOptions::ATrackBuildOptions()
 
 void ATrackBuildOptions::writeToJson(QJsonObject &json) const
 {
+    json["BuildPhotonTracks"] = bBuildPhotonTracks;
+    json["BuildParticleTracks"] = bBuildParticleTracks;
+
     json["GeneralPhoton_Attributes"] = TA_Photons.writeToJson();
 
     json["PhotonSpecialRule_HittingPMs"] = bPhotonSpecialRule_HittingPMs;
@@ -51,6 +54,9 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
 {
     clear();
     if (json.isEmpty()) return;
+
+    parseJson(json, "BuildPhotonTracks", bBuildPhotonTracks);
+    parseJson(json, "BuildParticleTracks", bBuildParticleTracks);
 
     QJsonObject js;
     parseJson(json, "GeneralPhoton_Attributes", js);
@@ -69,6 +75,9 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
 
 void ATrackBuildOptions::clear()
 {
+    bBuildPhotonTracks = false;
+    bBuildParticleTracks = false;
+
     TA_Photons.reset();
 
     TA_PhotonsHittingPMs.reset();

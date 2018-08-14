@@ -32,6 +32,10 @@ private slots:
 
     void on_cbSpecialRule_secScint_clicked(bool checked);
 
+    void on_cbBuildPhotonTracks_clicked(bool checked);
+
+    void on_cbBuildParticleTracks_clicked(bool checked);
+
 private:
     ATrackBuildOptions* settings;
     Ui::ATrackDrawProperties *ui;

@@ -182,7 +182,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    ui->pbExportDeposition->setEnabled(false);
     ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
     Owindow->RefreshData();
@@ -3013,56 +3012,6 @@ void MainWindow::on_twSingleScan_currentChanged(int index)
   ui->frLimitNodesTo->setVisible( index != 0 );
 }
 
-void MainWindow::on_pbExportDeposition_clicked()
-{
-  if (EnergyVector.isEmpty())
-    {
-      message("No data to save!", this);
-      return;
-    }
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("dat");
-  QString fileName = fileDialog->getSaveFileName(this,
-                                                 "Save energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".dat";
-  qDebug()<<fileName;
-
-  QFile outputFile(fileName);
-  outputFile.open(QIODevice::WriteOnly);
-
-  if(!outputFile.isOpen())
-    {
-          qDebug() << "- Error, unable to open" << fileName << "for output";
-          message("Unable to open file " +fileName+ " for writing!", this);
-          return;
-     }   
-   MainWindow::ExportDeposition(outputFile);
-   outputFile.close();
-}
-
-void MainWindow::on_pbImportDeposition_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-
-  QFile file(fileName);
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  if(!file.open(QIODevice::ReadOnly | QFile::Text))
-      {          
-          message("Error while opening deposition file "+fileName+"\n"+file.errorString(), this);
-          return;
-      }
-  MainWindow::ImportDeposition(file); //MainWindowDiskIO
-
-  file.close();
-}
-
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
 {
   if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);
@@ -3955,22 +3904,6 @@ void MainWindow::on_pbReconstruction_2_clicked()
   Rwindow->activateWindow();
 }
 
-void MainWindow::on_cbPointSourceBuildTracks_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbGunPhotonTracks_toggled(bool checked)
-{
-  ui->cbPointSourceBuildTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbBuilPhotonTrackstester_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbPointSourceBuildTracks->setChecked(checked);
-}
-
 void MainWindow::on_pbSimulate_clicked()
 {
   ELwindow->QuickSave(0);
@@ -4033,7 +3966,8 @@ void MainWindow::simulationFinished()
     bool showTracks = false;
     if (SimulationManager->LastSimType == 0) //PointSources sim
     {        
-        showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        //showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearGeoMarkers();
         GeoMarkers = SimulationManager->GeoMarkers;
         SimulationManager->GeoMarkers.clear(); //to avoid delete content
@@ -4055,7 +3989,8 @@ void MainWindow::simulationFinished()
     }
     if (SimulationManager->LastSimType == 1) //ParticleSources sim
     {
-        showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        //showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearEnergyVector();
         EnergyVector = SimulationManager->EnergyVector;
         SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
@@ -4160,7 +4095,8 @@ void MainWindow::on_pbTrackStack_clicked()
           //qDebug() << "-------------En vector size:"<<EnergyVector.size();
 
         //track handling
-        if (ui->cbBuildParticleTrackstester->isChecked())
+        //if (ui->cbBuildParticleTrackstester->isChecked())
+        if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
           {
             int numTracks = 0;
               //qDebug() << "Tracks collected:"<<pss->tracks.size();
@@ -4191,13 +4127,13 @@ void MainWindow::on_pbTrackStack_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         //report data saved in history
         pss->appendToDataHub(EventsDataHub);
           //qDebug() << "Event history imported";
 
-        ui->pbExportDeposition->setEnabled(true);
         ui->pbGenerateLight->setEnabled(true);
         Owindow->SetCurrentEvent(0);
     }
@@ -4228,7 +4164,8 @@ void MainWindow::on_pbGenerateLight_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         pss->appendToDataHub(EventsDataHub);
         //Owindow->SetCurrentEvent(0);
@@ -5342,4 +5279,15 @@ void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
 {
     ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions);
     d->exec();
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsGun_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsStack_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
 }

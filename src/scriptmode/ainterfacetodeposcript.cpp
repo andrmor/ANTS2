@@ -213,7 +213,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
             cjs["AllowMultipleParticles"] = false;
             cjs["DoS1"] = false;
             cjs["DoS2"] = false;
-            cjs["ParticleTracks"] = bDoTracks;
+            //cjs["ParticleTracks"] = bDoTracks;
             cjs["IgnoreNoHitsEvents"] = false;
             cjs["IgnoreNoDepoEvents"] = false;
         js["SourceControlOptions"] = cjs;
@@ -224,6 +224,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     GeneralSimSettings simSettings;
     simSettings.readFromJson(json);
     simSettings.fLogsStat = true; //force to populate logs
+    simSettings.TrackBuildOptions.bBuildParticleTracks = bDoTracks;
 
     //========== prepare simulator ==========
     ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);

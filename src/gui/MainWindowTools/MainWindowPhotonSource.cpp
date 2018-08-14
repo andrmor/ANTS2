@@ -67,13 +67,13 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   QJsonObject acjson;
   acjson["MaxNumTransitions"] = ui->sbMaxNumbPhTransitions->value();
   acjson["CheckBeforeTrack"] = ui->cbRndCheckBeforeTrack->isChecked();
-  acjson["OnlyTracksOnPMs"] = ui->cbOnlyBuildTracksOnPMs->isChecked();
+  //acjson["OnlyTracksOnPMs"] = ui->cbOnlyBuildTracksOnPMs->isChecked();
   acjson["LogsStatistics"] = ui->cbDoLogsAndStatistics->isChecked();
   //acjson["NumberThreads"] = ui->sbNumberThreads->value();
   json["AcceleratorConfig"] = acjson;
 
   //tracks
-  json["BuildPhotonTracks"] = ui->cbGunPhotonTracks->isChecked(); //all BuildPhotTracks cb are connected!
+  //json["BuildPhotonTracks"] = ui->cbGunPhotonTracks->isChecked(); //moved to TrackBuildOptions
   json["MaxNumberOfTracks"] = GlobSet->MaxNumberOfTracks;
 
   //DetStat binning

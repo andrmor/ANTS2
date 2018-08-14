@@ -7,8 +7,12 @@ ATrackDrawDialog::ATrackDrawDialog(QWidget *parent, ATrackBuildOptions *settings
     QDialog(parent), settings(settings),
     ui(new Ui::ATrackDrawProperties)
 {
+    setWindowTitle("Track build options");
     ui->setupUi(this);
     ui->pbClose->setDefault(true);
+
+    ui->cbBuildPhotonTracks->setChecked(settings->bBuildPhotonTracks);
+    ui->cbBuildParticleTracks->setChecked(settings->bBuildParticleTracks);
 
     ui->cbSkipPhotonsMissingPMs->setChecked(settings->bSkipPhotonsMissingPMs);
 
@@ -63,4 +67,14 @@ void ATrackDrawDialog::on_cbSpecialRule_secScint_clicked(bool checked)
 void ATrackDrawDialog::on_pbClose_clicked()
 {
     accept();
+}
+
+void ATrackDrawDialog::on_cbBuildPhotonTracks_clicked(bool checked)
+{
+    settings->bBuildPhotonTracks = checked;
+}
+
+void ATrackDrawDialog::on_cbBuildParticleTracks_clicked(bool checked)
+{
+    settings->bBuildParticleTracks = checked;
 }

@@ -167,9 +167,6 @@ public:
     //save data to file - public due to batch mode usage
     int LoadSimulationDataFromTree(QString fileName, int maxEvents = -1);
     int LoadPMsignals(QString fileName);
-    //
-    void ExportDeposition(QFile &outputFile);
-    void ImportDeposition(QFile &file);
 
     //configuration from outside
     void SetProgress(int val);
@@ -359,8 +356,6 @@ private slots:
     void on_actionLoad_positions_and_status_of_all_windows_triggered();
     void on_actionMaterial_inspector_window_triggered();
     void on_twSingleScan_currentChanged(int index);
-    void on_pbExportDeposition_clicked();
-    void on_pbImportDeposition_clicked();
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
     void on_cobSecScintillationGenType_currentIndexChanged(int index);
@@ -521,11 +516,6 @@ private slots:
     void on_pbShowComptonEnergies_clicked();
     void on_pbCheckRandomGen_clicked();
 
-private slots:
-    void on_cbPointSourceBuildTracks_toggled(bool checked);
-    void on_cbGunPhotonTracks_toggled(bool checked);
-    void on_cbBuilPhotonTrackstester_toggled(bool checked);
-
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);
@@ -643,6 +633,10 @@ private slots:
     void on_actionGrid_triggered();
 
     void on_pbOpenTrackProperties_Phot_clicked();
+
+    void on_pbTrackOptionsGun_clicked();
+
+    void on_pbTrackOptionsStack_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

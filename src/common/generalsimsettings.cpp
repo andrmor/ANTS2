@@ -3,25 +3,6 @@
 
 #include <QDebug>
 
-GeneralSimSettings::GeneralSimSettings()
-{
-  SecScintGenMode = 0;
-  ErrorString = "";
-  MaxNumTrans = 100;
-  fQEaccelerator = false;
-  fTracksOnPMsOnly = false;
-  fLogsStat = false;
-  TrackColorAdd = 0;
-  //SecScintThetaHist = 0;
-  fTimeResolved = false;
-  TimeBins = 1;
-  TimeFrom = 0;
-  TimeTo = TimeBins;
-  WaveStep = 1.0;
-  bDoPhotonHistoryLog = false;
-  MinEnergyNeutrons = 0.01; //in meV
-}
-
 bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
 {
   if (!Json.contains("GeneralSimConfig"))
@@ -84,12 +65,12 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   QJsonObject acjson = json["AcceleratorConfig"].toObject();
   MaxNumTrans = acjson["MaxNumTransitions"].toInt();
   fQEaccelerator = acjson["CheckBeforeTrack"].toBool();
-  fTracksOnPMsOnly = acjson["OnlyTracksOnPMs"].toBool();
+  //fTracksOnPMsOnly = acjson["OnlyTracksOnPMs"].toBool();
   fLogsStat = acjson["LogsStatistics"].toBool();
   NumThreads = acjson["NumberThreads"].toInt();
 
   //Photon tracks
-  fBuildPhotonTracks = json["BuildPhotonTracks"].toBool();
+  //fBuildPhotonTracks = json["BuildPhotonTracks"].toBool();
   MaxNumberOfTracks = 1000;
   MaxNumberOfTracks = json["MaxNumberOfTracks"].toInt();
 

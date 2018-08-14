@@ -446,7 +446,8 @@ void Simulator::divideThreadWork(int threadId, int threadCount)
 bool Simulator::setup(QJsonObject &json)
 {
     fUpdateGUI = json["DoGuiUpdate"].toBool();
-    fBuildPhotonTracks = fUpdateGUI && simSettings->fBuildPhotonTracks;
+    //fBuildPhotonTracks = fUpdateGUI && simSettings->fBuildPhotonTracks;
+    fBuildPhotonTracks = fUpdateGUI && simSettings->TrackBuildOptions.bBuildPhotonTracks;
 
     //inits
     dataHub->clear();
@@ -1421,7 +1422,8 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
     TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
     fDoS1 = cjs["DoS1"].toBool();
     fDoS2 = cjs["DoS2"].toBool();
-    fBuildParticleTracks = cjs["ParticleTracks"].toBool();
+    //fBuildParticleTracks = cjs["ParticleTracks"].toBool();
+    fBuildParticleTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
     fIgnoreNoHitsEvents = false; //compatibility
     parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
     fIgnoreNoDepoEvents = true; //compatibility

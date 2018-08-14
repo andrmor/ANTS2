@@ -95,6 +95,11 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
 
   DetStatNumBins = json["DetStatNumBins"].toInt(100);
 
+  //track building options
+  QJsonObject tbojs;
+    parseJson(json, "TrackBuildingOptions", tbojs);
+  TrackBuildOptions.readFromJson(tbojs);
+
   //Secondary scint options
   QJsonObject scjson = json["SecScintConfig"].toObject();
   SecScintGenMode = scjson["Type"].toInt();  //0-4Pi, 1-2PiUp, 2-2Pidown, // obsolete: 3-custom

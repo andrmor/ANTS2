@@ -4075,6 +4075,7 @@ void MainWindow::simulationFinished()
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
             track->SetLineColor(th->Color);
             track->SetLineWidth(th->Width);
+            track->SetLineStyle(th->Style);
             for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                 track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
             if (track->GetNpoints()>1)

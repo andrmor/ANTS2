@@ -1,6 +1,8 @@
 #ifndef GENERALSIMSETTINGS_H
 #define GENERALSIMSETTINGS_H
 
+#include "atrackbuildoptions.h"
+
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QString>
@@ -52,6 +54,8 @@ public:
 
   bool   fBuildPhotonTracks;
   int    MaxNumberOfTracks;
+
+  ATrackBuildOptions TrackBuildOptions;
 
   //utility
   QString ErrorString;

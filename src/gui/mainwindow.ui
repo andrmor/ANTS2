@@ -7565,7 +7565,7 @@ thermal neutrons:</string>
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9257,23 +9257,10 @@ thermal neutrons:</string>
            </widget>
           </widget>
          </widget>
-         <widget class="Line" name="line_11">
-          <property name="geometry">
-           <rect>
-            <x>249</x>
-            <y>218</y>
-            <width>118</width>
-            <height>3</height>
-           </rect>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
          <widget class="QCheckBox" name="cbPointSourceBuildTracks">
           <property name="geometry">
            <rect>
-            <x>360</x>
+            <x>337</x>
             <y>210</y>
             <width>131</width>
             <height>17</height>
@@ -9371,10 +9358,10 @@ thermal neutrons:</string>
          <widget class="QPushButton" name="pbOpenTrackProperties_Phot">
           <property name="geometry">
            <rect>
-            <x>489</x>
+            <x>460</x>
             <y>208</y>
-            <width>31</width>
-            <height>23</height>
+            <width>41</width>
+            <height>21</height>
            </rect>
           </property>
           <property name="font">
@@ -9383,16 +9370,13 @@ thermal neutrons:</string>
             <bold>false</bold>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Track build options</string>
+          </property>
           <property name="text">
-           <string>Set</string>
+           <string>opt</string>
           </property>
          </widget>
-         <zorder>line_11</zorder>
-         <zorder>twSingleScan</zorder>
-         <zorder>cbPointSourceBuildTracks</zorder>
-         <zorder>pbSimulate</zorder>
-         <zorder>frLimitNodesTo</zorder>
-         <zorder>pbOpenTrackProperties_Phot</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">
@@ -11743,7 +11727,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QCheckBox" name="cbGunPhotonTracks">
         <property name="geometry">
          <rect>
-          <x>416</x>
+          <x>398</x>
           <y>351</y>
           <width>110</width>
           <height>17</height>
@@ -11765,8 +11749,8 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QCheckBox" name="cbGunDoS1">
         <property name="geometry">
          <rect>
-          <x>265</x>
-          <y>331</y>
+          <x>256</x>
+          <y>333</y>
           <width>144</width>
           <height>17</height>
          </rect>
@@ -11790,7 +11774,7 @@ If material with this name does not exist, this limitation is not applied.</stri
         </property>
         <property name="geometry">
          <rect>
-          <x>265</x>
+          <x>256</x>
           <y>351</y>
           <width>142</width>
           <height>17</height>
@@ -11809,8 +11793,8 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QCheckBox" name="cbGunParticleTracks">
         <property name="geometry">
          <rect>
-          <x>416</x>
-          <y>331</y>
+          <x>398</x>
+          <y>333</y>
           <width>110</width>
           <height>17</height>
          </rect>
@@ -12085,6 +12069,25 @@ If material with this name does not exist, this limitation is not applied.</stri
          <number>10</number>
         </property>
        </widget>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="geometry">
+         <rect>
+          <x>493</x>
+          <y>340</y>
+          <width>33</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>opt</string>
+        </property>
+       </widget>
        <zorder>line_16</zorder>
        <zorder>frSelectSource</zorder>
        <zorder>line_21</zorder>
@@ -12104,6 +12107,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        <zorder>cbIgnoreEventsWithNoHits</zorder>
        <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
        <zorder>sbGunEvents</zorder>
+       <zorder>pushButton_2</zorder>
       </widget>
      </widget>
      <widget class="QFrame" name="fSaveExport">
@@ -12218,7 +12222,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <widget class="QPushButton" name="pbUpdateSimConfig">
       <property name="geometry">
        <rect>
-        <x>200</x>
+        <x>0</x>
         <y>500</y>
         <width>130</width>
         <height>50</height>

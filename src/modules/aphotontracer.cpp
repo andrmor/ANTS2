@@ -484,13 +484,29 @@ void APhotonTracer::AppendHistoryRecord()
     }
 }
 
+#include "atrackbuildoptions.h"
 void APhotonTracer::AppendTrack()
 {
   //color track according to PM hit status and scintillation type
-  if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
+  //if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
+  if ( SimSet->TrackBuildOptions.bSkipPhotonsMissingPMs && fMissPM )
+      delete track;
   else
     {
       track->UserIndex = 22;
+
+      ATrackAttributes ta;
+      if (!fMissPM && SimSet->TrackBuildOptions.bPhotonSpecialRule_HittingPMs)
+          ta = SimSet->TrackBuildOptions.TA_PhotonsHittingPMs;
+      else if (p->scint_type == 2 && SimSet->TrackBuildOptions.bPhotonSpecialRule_SecScint)
+          ta = SimSet->TrackBuildOptions.TA_PhotonsSecScint;
+      else
+          ta = SimSet->TrackBuildOptions.TA_Photons;
+
+      track->Color = ta.color;
+      track->Width = ta.width;
+      track->Style = ta.style;
+/*
       track->Width = 1;
       if (fMissPM)
         {
@@ -501,7 +517,9 @@ void APhotonTracer::AppendTrack()
             default: track->Color = kGray;
             }
         }
-      else track->Color = 2;//kRed
+      else track->Color = kRed;
+*/
+
       Tracks->append(track);
     }
 }

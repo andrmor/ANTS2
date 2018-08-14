@@ -71,9 +71,6 @@ ASimulatorRunner::ASimulatorRunner(DetectorClass *detector, EventsDataClass *dat
     this->dataHub = dataHub;
     startTime.start(); //can restart be done without start() ?
     simState = SClean;
-    //We don't need it to be secret, just random
-    //randGen = new TRandom2(QDateTime::currentMSecsSinceEpoch());
-    //randGen = detector->RandGen;
 }
 
 ASimulatorRunner::~ASimulatorRunner()
@@ -82,7 +79,6 @@ ASimulatorRunner::~ASimulatorRunner()
     for(int i = 0; i < threads.count(); i++)
         delete threads[i];
     threads.clear();
-    //delete randGen;
 }
 
 bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)

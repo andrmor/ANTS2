@@ -4,6 +4,7 @@
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
 #include "amessage.h"
+#include "simulationmanager.h"
 
 //Qt
 #include <QDebug>
@@ -93,6 +94,10 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
 //            }
 //        }
   json["SecScintConfig"] = scjson;
+
+  QJsonObject tbojs;
+    SimulationManager->TrackBuildOptions.writeToJson(tbojs);
+  json["TrackBuildingOptions"] = tbojs;
 
   //adding to master json
   jsonMaster["GeneralSimConfig"] = json;

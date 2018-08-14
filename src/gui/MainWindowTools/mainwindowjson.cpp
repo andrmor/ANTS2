@@ -15,6 +15,7 @@
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "reconstructionwindow.h"
+#include "simulationmanager.h"
 
 #include <QJsonObject>
 #include <QDebug>
@@ -375,6 +376,9 @@ if (scj.contains("CustomDistrib"))
   }
 */
   JsonToCheckbox(gjs, "BuildPhotonTracks", ui->cbPointSourceBuildTracks); //general now
+  QJsonObject tbojs;
+    parseJson(gjs, "TrackBuildingOptions", tbojs);
+  SimulationManager->TrackBuildOptions.readFromJson(tbojs);
 
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();

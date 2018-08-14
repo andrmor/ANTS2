@@ -13,6 +13,8 @@ public:
     void writeToJson(QJsonObject& json) const;
     const QJsonObject writeToJson() const;
     void readFromJson(const QJsonObject& json);
+
+    void reset();
 };
 
 class ATrackBuildOptions
@@ -36,6 +38,9 @@ public:
     //JSON
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
+
+    //init
+    void clear(); //clear and reset to default values
 };
 
 #endif // ATRACKDRAWOPTIONS_H

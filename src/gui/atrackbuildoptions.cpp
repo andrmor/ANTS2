@@ -22,10 +22,16 @@ void ATrackAttributes::readFromJson(const QJsonObject &json)
     parseJson(json, "style", style);
 }
 
+void ATrackAttributes::reset()
+{
+    color = 7;
+    width = 1;
+    style = 1;
+}
+
 ATrackBuildOptions::ATrackBuildOptions()
 {
-    TA_PhotonsHittingPMs.color = 2;
-    TA_PhotonsSecScint.color = 6;
+    clear();
 }
 
 void ATrackBuildOptions::writeToJson(QJsonObject &json) const
@@ -43,6 +49,9 @@ void ATrackBuildOptions::writeToJson(QJsonObject &json) const
 
 void ATrackBuildOptions::readFromJson(const QJsonObject &json)
 {
+    clear();
+    if (json.isEmpty()) return;
+
     QJsonObject js;
     parseJson(json, "GeneralPhoton_Attributes", js);
     TA_Photons.readFromJson(js);
@@ -56,4 +65,19 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
     TA_PhotonsSecScint.readFromJson(js);
 
     parseJson(json, "SkipPhotonsMissingPMs", bSkipPhotonsMissingPMs);
+}
+
+void ATrackBuildOptions::clear()
+{
+    TA_Photons.reset();
+
+    TA_PhotonsHittingPMs.reset();
+    bPhotonSpecialRule_HittingPMs = true;
+    TA_PhotonsHittingPMs.color = 2;
+
+    TA_PhotonsSecScint.reset();
+    bPhotonSpecialRule_SecScint = true;
+    TA_PhotonsSecScint.color = 6;
+
+    bSkipPhotonsMissingPMs = false;
 }

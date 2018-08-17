@@ -7,13 +7,15 @@
 
 #ifdef __USE_ANTS_NCRYSTAL__
 #include "NCrystal/NCrystal.hh"
+#include "arandomgenncrystal.h"
 #endif
+
+#include <QStandardPaths>
+#include <QFile>
+#include <QDebug>
 
 #include "TH1D.h"
 #include "TRandom2.h"
-
-#include <QFile>
-#include <QDebug>
 
 AMaterial::AMaterial()
 {
@@ -638,10 +640,6 @@ ANeutronInteractionElement *NeutralTerminatorStructure::getNeutronInteractionEle
     return &IsotopeRecords[index];
 }
 
-#ifdef  __USE_ANTS_NCRYSTAL__
-#include "arandomgenncrystal.h"
-#endif
-#include <QStandardPaths>
 static int fixCounter = 0;
 void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRandom2* RandGen, int numThreads, double temp)
 {
@@ -671,7 +669,6 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
                 sc->ref();
 
                 ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
-                //rnd->ref(); //need?
                 const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
 
                 NCrystal_scatters.append(sc);
@@ -753,9 +750,8 @@ void NeutralTerminatorStructure::UpdateRandGen(int ID, TRandom2 *RandGen)
     if (NCrystal_scatters.isEmpty()) return; //nothing to update
     if (ID > -1 && ID < NCrystal_scatters.size())
     {
-        const NCrystal::Scatter * sc = NCrystal_scatters.at(ID);
         ARandomGenNCrystal* rnd = new ARandomGenNCrystal(*RandGen);
-        //rnd->ref(); //need?
+        const NCrystal::Scatter * sc = NCrystal_scatters.at(ID);
         const_cast<NCrystal::Scatter *>(sc)->setRandomGenerator(rnd);
     }
     else

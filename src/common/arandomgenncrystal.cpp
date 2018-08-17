@@ -1,5 +1,4 @@
 #include "arandomgenncrystal.h"
-
 #include "TRandom2.h"
 
 ARandomGenNCrystal::ARandomGenNCrystal(TRandom2 &RandGen) :

@@ -107,6 +107,7 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
     for (int i=0; i<ar.size(); i++)
         DefaultParticle_Colors << ar.at(i).toInt(1);
 
+    clearCustomParticleAttributes();
     ar = QJsonArray();
     parseJson(json, "Particle_CustomAttribtes", ar);
     for (int i=0; i<ar.size(); i++)
@@ -143,4 +144,13 @@ void ATrackBuildOptions::clear()
     TA_DefaultParticle.color = 15;
     DefaultParticle_Colors.clear();
     DefaultParticle_Colors << 1 << 2 << 3 << 4 << 6 << 7 << 8 << 9 << 28 << 30 << 36 << 38 << 39 << 40 << 46 << 49;
+
+    clearCustomParticleAttributes();
+}
+
+void ATrackBuildOptions::clearCustomParticleAttributes()
+{
+    for (ATrackAttributes* t : CustomParticle_Attributes)
+        delete t;
+    CustomParticle_Attributes.clear();
 }

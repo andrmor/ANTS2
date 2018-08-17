@@ -119,7 +119,7 @@ void ATrackDrawDialog::updateParticleAttributes()
     if ( iParticle  < settings->CustomParticle_Attributes.size() )
         if ( settings->CustomParticle_Attributes.at(iParticle) )
         {
-            ui->swCustomParticle->setCurrentIndex(0);
+            ui->swCustomParticle->setCurrentIndex(1);
             const ATrackAttributes* s = settings->CustomParticle_Attributes.at(iParticle);
             ui->frCustom->setVisible(true);
             TColor *tc = gROOT->GetColor(s->color);
@@ -139,10 +139,42 @@ void ATrackDrawDialog::updateParticleAttributes()
 
     //else undefined
     ui->frCustom->setVisible(false);
-    ui->swCustomParticle->setCurrentIndex(1);
+    ui->swCustomParticle->setCurrentIndex(0);
 }
 
 void ATrackDrawDialog::on_pbEditCustom_clicked()
 {
+    int iParticle = ui->sbParticle->value();
 
+    ATrackAttributes* s;
+    if ( iParticle  < settings->CustomParticle_Attributes.size() &&
+         settings->CustomParticle_Attributes.at(iParticle) )
+            s = settings->CustomParticle_Attributes[iParticle];
+    else
+    {
+        s = new ATrackAttributes();
+        *s = settings->TA_DefaultParticle;
+        while (iParticle >= settings->CustomParticle_Attributes.size())
+            settings->CustomParticle_Attributes << 0;
+        settings->CustomParticle_Attributes[iParticle] = s;
+    }
+
+    ARootLineConfigurator* rlc = new ARootLineConfigurator(&s->color,
+                                                           &s->width,
+                                                           &s->style, this);
+    rlc->exec();
+
+    updateParticleAttributes();
+}
+
+void ATrackDrawDialog::on_pbCustomDelete_clicked()
+{
+    int iParticle = ui->sbParticle->value();
+    if ( iParticle  < settings->CustomParticle_Attributes.size() )
+        if ( settings->CustomParticle_Attributes.at(iParticle) )
+        {
+            delete settings->CustomParticle_Attributes.at(iParticle);
+            settings->CustomParticle_Attributes[iParticle] = 0;
+        }
+    updateParticleAttributes();
 }

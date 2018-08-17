@@ -50,8 +50,9 @@ public:
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
 
-    //init
+private:
     void clear(); //clear and reset to default values
+    void clearCustomParticleAttributes();
 };
 
 #endif // ATRACKDRAWOPTIONS_H

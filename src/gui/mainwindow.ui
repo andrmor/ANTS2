@@ -9324,7 +9324,7 @@ thermal neutrons:</string>
            <rect>
             <x>350</x>
             <y>208</y>
-            <width>101</width>
+            <width>111</width>
             <height>21</height>
            </rect>
           </property>
@@ -9338,7 +9338,7 @@ thermal neutrons:</string>
            <string>Track build options</string>
           </property>
           <property name="text">
-           <string>track options</string>
+           <string>tracks options</string>
           </property>
          </widget>
          <widget class="Line" name="line_11">
@@ -12010,7 +12010,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        <widget class="QPushButton" name="pbTrackOptionsGun">
         <property name="geometry">
          <rect>
-          <x>422</x>
+          <x>424</x>
           <y>340</y>
           <width>101</width>
           <height>21</height>
@@ -12023,7 +12023,7 @@ If material with this name does not exist, this limitation is not applied.</stri
          </font>
         </property>
         <property name="text">
-         <string>track options</string>
+         <string>tracks options</string>
         </property>
        </widget>
        <zorder>line_16</zorder>
@@ -15677,14 +15677,14 @@ on stack</string>
        <widget class="QPushButton" name="pbTrackOptionsStack">
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>390</x>
           <y>250</y>
-          <width>91</width>
+          <width>101</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
-         <string>track options</string>
+         <string>tracks options</string>
         </property>
        </widget>
       </widget>

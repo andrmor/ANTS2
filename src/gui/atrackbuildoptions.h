@@ -1,6 +1,8 @@
 #ifndef ATRACKDRAWOPTIONS_H
 #define ATRACKDRAWOPTIONS_H
 
+#include <QVector>
+
 class QJsonObject;
 
 class ATrackAttributes
@@ -37,6 +39,12 @@ public:
     bool bSkipPhotonsMissingPMs = false;
 
     //Particles
+    ATrackAttributes TA_DefaultParticle;  //default width/style and color for particle # beyound covered in DefaultParticle_Colors
+    QVector<int> DefaultParticle_Colors;
+    QVector<ATrackAttributes*> CustomParticle_Attributes;
+
+    bool bSkipPrimaries = false;
+    bool bSkipSecondaries = false;
 
     //JSON
     void writeToJson(QJsonObject& json) const;

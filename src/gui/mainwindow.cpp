@@ -5277,7 +5277,9 @@ void MainWindow::on_actionGrid_triggered()
 #include "atrackdrawdialog.h"
 void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
 {
-    ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions);
+    QStringList pl;
+    MpCollection->OnRequestListOfParticles(pl);
+    ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions, pl);
     d->exec();
     on_pbUpdateSimConfig_clicked();
 }

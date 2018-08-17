@@ -48,6 +48,24 @@ void ATrackBuildOptions::writeToJson(QJsonObject &json) const
     json["PhotonSecScint_Attributes"] = TA_PhotonsSecScint.writeToJson();
 
     json["SkipPhotonsMissingPMs"] = bSkipPhotonsMissingPMs;
+
+    // ----
+
+    json["SkipParticles_Primary"] = bSkipPrimaries;
+    json["SkipParticles_Secondary"] = bSkipSecondaries;
+
+    json["Particle_DefaultAttributes"] = TA_DefaultParticle.writeToJson();
+    QJsonArray ar;
+    for (const int& c : DefaultParticle_Colors) ar << c;
+    json["Particle_DefaultColors"] = ar;
+    ar = QJsonArray();
+    for (ATrackAttributes* ta : CustomParticle_Attributes)
+    {
+        QJsonObject js;
+        if (ta) ta->writeToJson(js);
+        ar << js;
+    }
+    json["Particle_CustomAttribtes"] = ar;
 }
 
 void ATrackBuildOptions::readFromJson(const QJsonObject &json)
@@ -63,14 +81,45 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
     TA_Photons.readFromJson(js);
 
     parseJson(json, "PhotonSpecialRule_HittingPMs", bPhotonSpecialRule_HittingPMs);
+    js = QJsonObject();
     parseJson(json, "PhotonHittingPM_Attributes", js);
     TA_PhotonsHittingPMs.readFromJson(js);
 
     parseJson(json, "PhotonSpecialRule_SecScint", bPhotonSpecialRule_SecScint);
+    js = QJsonObject();
     parseJson(json, "PhotonSecScint_Attributes", js);
     TA_PhotonsSecScint.readFromJson(js);
 
     parseJson(json, "SkipPhotonsMissingPMs", bSkipPhotonsMissingPMs);
+
+    // -----
+
+    parseJson(json, "SkipParticles_Primary", bSkipPrimaries);
+    parseJson(json, "SkipParticles_Secondary", bSkipSecondaries);
+
+    js = QJsonObject();
+    parseJson(json, "Particle_DefaultAttributes", js);
+    TA_DefaultParticle.readFromJson(js);
+
+    QJsonArray ar;
+    parseJson(json, "Particle_DefaultColors", ar);
+    DefaultParticle_Colors.clear();
+    for (int i=0; i<ar.size(); i++)
+        DefaultParticle_Colors << ar.at(i).toInt(1);
+
+    ar = QJsonArray();
+    parseJson(json, "Particle_CustomAttribtes", ar);
+    for (int i=0; i<ar.size(); i++)
+    {
+        QJsonObject js = ar.at(i).toObject();
+        ATrackAttributes* ta = 0;
+        if (!js.isEmpty())
+        {
+            ta = new ATrackAttributes();
+            ta->readFromJson(js);
+        }
+        CustomParticle_Attributes << ta;
+    }
 }
 
 void ATrackBuildOptions::clear()
@@ -89,4 +138,9 @@ void ATrackBuildOptions::clear()
     TA_PhotonsSecScint.color = 6;
 
     bSkipPhotonsMissingPMs = false;
+
+    //----particles----
+    TA_DefaultParticle.color = 15;
+    DefaultParticle_Colors.clear();
+    DefaultParticle_Colors << 1 << 2 << 3 << 4 << 6 << 7 << 8 << 9 << 28 << 30 << 36 << 38 << 39 << 40 << 46 << 49;
 }

@@ -3,8 +3,11 @@
 #include "atrackbuildoptions.h"
 #include "arootlineconfigurator.h"
 
-ATrackDrawDialog::ATrackDrawDialog(QWidget *parent, ATrackBuildOptions *settings) :
-    QDialog(parent), settings(settings),
+#include "TColor.h"
+#include "TROOT.h"
+
+ATrackDrawDialog::ATrackDrawDialog(QWidget *parent, ATrackBuildOptions *settings, const QStringList& ParticleNames) :
+    QDialog(parent), settings(settings), ParticleNames(ParticleNames),
     ui(new Ui::ATrackDrawProperties)
 {
     setWindowTitle("Track build options");
@@ -18,6 +21,11 @@ ATrackDrawDialog::ATrackDrawDialog(QWidget *parent, ATrackBuildOptions *settings
 
     ui->cbSpecialRule_hitPM->setChecked(settings->bPhotonSpecialRule_HittingPMs);
     ui->cbSpecialRule_secScint->setChecked(settings->bPhotonSpecialRule_SecScint);
+
+    ui->cbSkipPrimaries->setChecked(settings->bSkipPrimaries);
+    ui->cbSkipSecondaries->setChecked(settings->bSkipSecondaries);
+
+    updateParticleAttributes();
 }
 
 ATrackDrawDialog::~ATrackDrawDialog()
@@ -77,4 +85,64 @@ void ATrackDrawDialog::on_cbBuildPhotonTracks_clicked(bool checked)
 void ATrackDrawDialog::on_cbBuildParticleTracks_clicked(bool checked)
 {
     settings->bBuildParticleTracks = checked;
+}
+
+void ATrackDrawDialog::on_cbSkipPrimaries_clicked(bool checked)
+{
+    settings->bSkipPrimaries = checked;
+}
+
+void ATrackDrawDialog::on_cbSkipSecondaries_clicked(bool checked)
+{
+    settings->bSkipSecondaries = checked;
+}
+
+void ATrackDrawDialog::on_pbDefaultParticleAtt_clicked()
+{
+    ARootLineConfigurator* rlc = new ARootLineConfigurator(&settings->TA_DefaultParticle.color,
+                                                           &settings->TA_DefaultParticle.width,
+                                                           &settings->TA_DefaultParticle.style, this);
+    rlc->exec();
+}
+
+void ATrackDrawDialog::on_sbParticle_valueChanged(int /*arg1*/)
+{
+    updateParticleAttributes();
+}
+
+void ATrackDrawDialog::updateParticleAttributes()
+{
+    int iParticle = ui->sbParticle->value();
+
+    ui->labParticleName->setText( iParticle < ParticleNames.size() ? ParticleNames.at(iParticle) : "");
+
+    if ( iParticle  < settings->CustomParticle_Attributes.size() )
+        if ( settings->CustomParticle_Attributes.at(iParticle) )
+        {
+            ui->swCustomParticle->setCurrentIndex(0);
+            const ATrackAttributes* s = settings->CustomParticle_Attributes.at(iParticle);
+            ui->frCustom->setVisible(true);
+            TColor *tc = gROOT->GetColor(s->color);
+            int red = 255;
+            int green = 255;
+            int blue = 255;
+            if (tc)
+            {
+                red = 255*tc->GetRed();
+                green = 255*tc->GetGreen();
+                blue = 255*tc->GetBlue();
+            }
+            ui->frCustom->setStyleSheet(  QString("background-color:rgb(%1,%2,%3)").arg(red).arg(green).arg(blue)  );
+
+            return;
+        }
+
+    //else undefined
+    ui->frCustom->setVisible(false);
+    ui->swCustomParticle->setCurrentIndex(1);
+}
+
+void ATrackDrawDialog::on_pbEditCustom_clicked()
+{
+
 }

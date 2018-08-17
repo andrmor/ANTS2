@@ -14,7 +14,7 @@ class ATrackDrawDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ATrackDrawDialog(QWidget *parent, ATrackBuildOptions* settings);
+    explicit ATrackDrawDialog(QWidget *parent, ATrackBuildOptions* settings, const QStringList& ParticleNames);
     ~ATrackDrawDialog();
 
 private slots:
@@ -36,10 +36,22 @@ private slots:
 
     void on_cbBuildParticleTracks_clicked(bool checked);
 
+    void on_cbSkipPrimaries_clicked(bool checked);
+
+    void on_cbSkipSecondaries_clicked(bool checked);
+
+    void on_pbDefaultParticleAtt_clicked();
+
+    void on_sbParticle_valueChanged(int arg1);
+
+    void on_pbEditCustom_clicked();
+
 private:
     ATrackBuildOptions* settings;
+    const QStringList& ParticleNames;
     Ui::ATrackDrawProperties *ui;
 
+    void updateParticleAttributes();
 };
 
 #endif // ATRACKDRAWPROPERTIES_H

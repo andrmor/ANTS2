@@ -68,13 +68,6 @@
 
 int main(int argc, char *argv[])
 {
-#ifdef GUI
-    QApplication a(argc, argv);
-#else
-    QCoreApplication a(argc, argv);
-#endif
-    QLocale::setDefault(QLocale("en_US"));
-
     //setting up logging
     int debug_verbosity = DEBUG_VERBOSITY;
     qDebug() << "Debug verbosity is set to level "<<debug_verbosity;
@@ -92,21 +85,32 @@ int main(int argc, char *argv[])
     default:
         qInstallMessageHandler(0);
     }
+
+    //starting cern ROOT application
+    int rootargc=1;
+    char *rootargv[] = {(char*)"qqq"};
+    TApplication RootApp("My ROOT", &rootargc, rootargv);
+    qDebug() << "Cern Root application created";
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
+    TThread::Initialize();
+    qDebug() << ">TThread initialized";
+#endif
+
+#ifdef GUI
+    QApplication a(argc, argv);
+#else
+    QCoreApplication a(argc, argv);
+#endif
+    qDebug() << "Qt application created";
+
+    QLocale::setDefault(QLocale("en_US"));
     FilterRules += "\nqt.network.ssl.warning=false"; //to suppress warnings about ssl
     //QLoggingCategory::setFilterRules("qt.network.ssl.warning=false");
     QLoggingCategory::setFilterRules(FilterRules);
 
     AConfiguration Config;
-    int rootargc=1;
-    char *rootargv[] = {(char*)"qqq"};
-    TApplication RootApp("My ROOT", &rootargc, rootargv);
-    qDebug() << "Root App created";
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
-    TThread::Initialize();
-    qDebug() << "TThread initialized";
-#endif
+    qDebug() << "Config hub created";
     EventsDataClass EventsDataHub;
-
     qDebug() << "EventsDataHub created";
     DetectorClass Detector(&Config);
     Config.SetDetector(&Detector);

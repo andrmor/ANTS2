@@ -48,6 +48,10 @@ private slots:
 
     void on_pbCustomDelete_clicked();
 
+    void on_pbSave_clicked();
+
+    void on_pbLoad_clicked();
+
 private:
     ATrackBuildOptions* settings;
     const QStringList& ParticleNames;

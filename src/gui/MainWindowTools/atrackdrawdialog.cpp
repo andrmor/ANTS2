@@ -178,3 +178,23 @@ void ATrackDrawDialog::on_pbCustomDelete_clicked()
         }
     updateParticleAttributes();
 }
+
+#include <QFileDialog>
+#include "ajsontools.h"
+void ATrackDrawDialog::on_pbSave_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save track drawing settings", "", "Json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+    QJsonObject json;
+    settings->writeToJson(json);
+    SaveJsonToFile(json, fileName);
+}
+
+void ATrackDrawDialog::on_pbLoad_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load track drawing settings", "", "Json files (*.json);;All files (*.*)");
+    if (fileName.isEmpty()) return;
+    QJsonObject json;
+    LoadJsonFromFile(json, fileName);
+    settings->readFromJson(json);
+}

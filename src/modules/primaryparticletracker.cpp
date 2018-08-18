@@ -33,7 +33,6 @@ PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
 {
   BuildTracks = true;
   RemoveTracksIfNoEnergyDepo = true;
-  AddColorIndex = 0;
   counter = -1;
 }
 
@@ -42,14 +41,13 @@ void PrimaryParticleTracker::configure(const GeneralSimSettings* simSet, bool fb
   SimSet = simSet;
   BuildTracks = fbuildTracks;
   RemoveTracksIfNoEnergyDepo = fremoveEmptyTracks;
-  AddColorIndex = simSet->TrackColorAdd;
   Tracks = tracks;
 }
 
-bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
+bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
 {
   while (ParticleStack->size())
-    {//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ beginning cycle over the elements of the stack
+  {//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ beginning cycle over the particles on the stack
       //reading data for the top particle at the stack
       counter ++; //new particle
       const int ParticleId = ParticleStack->at(0)->Id; //id of the particle
@@ -105,21 +103,33 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       EventHistoryStructure::TerminationTypes terminationStatus = EventHistoryStructure::NotFinished; //NotFinished (0) - continue
 
       TrackHolderClass *track;
-      if (BuildTracks)
-        {
+      bool bBuildThisTrack = BuildTracks;
+      if (bBuildThisTrack)
+      {
           if (Tracks->size() < SimSet->MaxNumberOfTracks)
-            {
-              track = new TrackHolderClass();
-              track->UserIndex = 22;
-              track->Color = ParticleId+1+ AddColorIndex;
-              track->Width = 2;
-              track->Nodes.append(TrackNodeStruct(r, time));
-            }
-          else BuildTracks = false;
-        }
+          {
+              if (SimSet->TrackBuildOptions.bSkipPrimaries && ParticleStack->at(0)->secondaryOf == -1)
+                  bBuildThisTrack = false;
+              else if (SimSet->TrackBuildOptions.bSkipSecondaries && ParticleStack->at(0)->secondaryOf != -1)
+                  bBuildThisTrack = false;
+              else
+              {
+                  track = new TrackHolderClass();
+                  track->UserIndex = 22;
+                  SimSet->TrackBuildOptions.applyToParticleTrack(track, ParticleId);
+                  track->Nodes.append(TrackNodeStruct(r, time));
+              }
+          }
+          else
+          {
+              bBuildThisTrack = false;
+              BuildTracks = false;
+          }
+      }
 
       //--------------------- loop over tracking-allowed materials on the path --------------------------
-      do {
+      do
+      {
           //           qDebug()<<"cycle starts for the new material: "<<GeoManager->GetPath();
           double distanceHistory = 0; //for diagnostics - travelled distance and deposited energy in THIS material
           double energyHistory = 0;
@@ -672,11 +682,12 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundaryAndStep();
           MatId = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
           //            qDebug()<<"Next material id: "<<MatId;
-        } while (terminationStatus == EventHistoryStructure::NotFinished); //0, repeat if tracking is OK
+      }
+      while (terminationStatus == EventHistoryStructure::NotFinished); //0, repeat if tracking is OK
       //--------------- END of loop over tracking-allowed materials on the path-------------------
 
       //particle escaped, stopped or captured     do-breaks are collected here!
-      if (BuildTracks)
+      if (bBuildThisTrack)
         {
           track->Nodes.append(TrackNodeStruct(r, time));
           TrackCandidates.append(track);
@@ -691,12 +702,12 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       //delete the particle record and remove from the stack
       delete ParticleStack->at(0);
       ParticleStack->remove(0);
-    }//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ end while cycle over the elements of the stack
+  }//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ end while cycle over the particles on the stack
 
   //stack is empty, no errors found
 
   if (TrackCandidates.size() > 0)
-    {
+  {
       if (RemoveTracksIfNoEnergyDepo && EnergyVector->isEmpty() )
       {
           //clear all particle tracks - there were no energy deposition - nothing will be added to Geomanager later
@@ -705,21 +716,11 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       }
       else
       {
-          int i = 0;
-          if (SuppressFirstTrackOnEvent)
-          {
-              if (Tracks->isEmpty()) //if Tracks are still empty, transfer there the first candidate
-                  Tracks->append(TrackCandidates.at(0));
-              else
-                  delete TrackCandidates.at(0);
-              i++;
-          }
-
-          for (; i < TrackCandidates.size(); i++)
+          for (int i = 0; i < TrackCandidates.size(); i++)
               Tracks->append(TrackCandidates.at(i));
       }
       TrackCandidates.clear();
-    }// delete later when create GeoManager tracks
+  }// delete later when creating GeoManager tracks
 
   return true; //success
 }

@@ -343,7 +343,6 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   JsonToLineEditDouble(trj, "MinEnergy", ui->ledMinEnergy);
   JsonToLineEditDouble(trj, "MinEnergyNeutrons", ui->ledMinEnergyNeutrons);
   JsonToLineEditDouble(trj, "Safety", ui->ledSafety);
-  JsonToSpinBox(trj, "TrackColorAdd", ui->sbParticleTrackColorIndexAdd);
   //Accelerators
   QJsonObject acj = gjs["AcceleratorConfig"].toObject();
   JsonToSpinBox (acj, "MaxNumTransitions", ui->sbMaxNumbPhTransitions);

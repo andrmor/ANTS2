@@ -31,7 +31,7 @@ public:
                                     int threadIndex,
                                     QObject *parent = 0);
     //main usage
-    bool TrackParticlesInStack(int eventId = 0);
+    bool TrackParticlesOnStack(int eventId = 0);
 
     //configure
     void setBuildTracks(bool opt){ BuildTracks = opt;}
@@ -45,7 +45,6 @@ public:
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} //will be absolete
     void resetCounter() {counter = -1;}  //will be absolute
-    void setAddColorIndex(int val) {AddColorIndex = val;}
 
 signals:
     
@@ -65,7 +64,6 @@ private:
     const GeneralSimSettings* SimSet;
     bool BuildTracks;
     bool RemoveTracksIfNoEnergyDepo;
-    bool SuppressFirstTrackOnEvent = false; //except the very first event in the track container
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;
 
@@ -75,7 +73,6 @@ private:
     //double v[3];          //direction vector
 
     int counter;          //particle "serial" number - can be reset from outside
-    int AddColorIndex;    //shift in track color
 
     void GenerateRandomDirection(double* vv);
 };

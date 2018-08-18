@@ -37,7 +37,6 @@ public:
   double MinEnergy;
   double MinEnergyNeutrons = 0.01; //in meV
   double Safety;
-  int    TrackColorAdd = 0;
 
   int    MaxNumTrans = 500;
   //bool   fTracksOnPMsOnly;

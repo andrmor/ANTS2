@@ -4,6 +4,7 @@
 #include <QVector>
 
 class QJsonObject;
+class TrackHolderClass;
 
 class ATrackAttributes
 {
@@ -15,6 +16,8 @@ public:
     void writeToJson(QJsonObject& json) const;
     const QJsonObject writeToJson() const;
     void readFromJson(const QJsonObject& json);
+
+    void setTrackAttributes(TrackHolderClass* track) const;
 
     void reset();
 };
@@ -49,6 +52,8 @@ public:
     //JSON
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
+
+    void applyToParticleTrack(TrackHolderClass* track, int ParticleId) const;
 
 private:
     void clear(); //clear and reset to default values

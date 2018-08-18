@@ -59,7 +59,6 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   MinEnergy = trjson["MinEnergy"].toDouble();
   MinEnergyNeutrons = trjson["MinEnergyNeutrons"].toDouble();
   Safety = trjson["Safety"].toDouble();
-  TrackColorAdd = trjson["TrackColorAdd"].toInt();
 
   //Accelerators options
   QJsonObject acjson = json["AcceleratorConfig"].toObject();

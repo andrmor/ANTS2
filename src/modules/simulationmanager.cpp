@@ -1527,7 +1527,7 @@ void ParticleSourceSimulator::simulate()
         } //event prepared
         //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
 
-        ParticleTracker->TrackParticlesInStack(eventCurrent);
+        ParticleTracker->TrackParticlesOnStack(eventCurrent);
         //energy vector is ready
 
         //if it is an empty event, ignore it!
@@ -1605,7 +1605,7 @@ bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleOnStack *> *
     //qDebug() << ">Cloned";
     ParticleTracker->setRemoveTracksIfNoEnergyDepo(false);
     //qDebug() << ">Start tracking...";
-    return ParticleTracker->TrackParticlesInStack();
+    return ParticleTracker->TrackParticlesOnStack();
 }
 
 bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionCell *> *energyVector)

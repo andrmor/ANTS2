@@ -60,7 +60,6 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   trjson["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
   trjson["MinEnergyNeutrons"] = ui->ledMinEnergyNeutrons->text().toDouble();
   trjson["Safety"] = ui->ledSafety->text().toDouble();
-  trjson["TrackColorAdd"] = ui->sbParticleTrackColorIndexAdd->value();
   json["TrackingConfig"] = trjson;
 
   //Accelerators options

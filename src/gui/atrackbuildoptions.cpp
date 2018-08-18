@@ -1,5 +1,6 @@
 #include "atrackbuildoptions.h"
 #include "ajsontools.h"
+#include "atrackrecords.h"
 
 void ATrackAttributes::writeToJson(QJsonObject &json) const
 {
@@ -20,6 +21,13 @@ void ATrackAttributes::readFromJson(const QJsonObject &json)
     parseJson(json, "color", color);
     parseJson(json, "width", width);
     parseJson(json, "style", style);
+}
+
+void ATrackAttributes::setTrackAttributes(TrackHolderClass *track) const
+{
+    track->Color = color;
+    track->Width = width;
+    track->Style = style;
 }
 
 void ATrackAttributes::reset()
@@ -121,6 +129,21 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
         }
         CustomParticle_Attributes << ta;
     }
+}
+
+void ATrackBuildOptions::applyToParticleTrack(TrackHolderClass *track, int ParticleId) const
+{
+    if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
+    {
+        //custom properties defined for this particle
+        CustomParticle_Attributes.at(ParticleId)->setTrackAttributes(track);
+        return;
+    }
+
+    TA_DefaultParticle.setTrackAttributes(track);
+
+    if ( ParticleId < DefaultParticle_Colors.size())
+        track->Color = DefaultParticle_Colors.at(ParticleId);
 }
 
 void ATrackBuildOptions::clear()

@@ -65,7 +65,7 @@ void RasterWindowBaseClass::ClearRootCanvas()
 
 void RasterWindowBaseClass::UpdateRootCanvas()
 {
-  //fCanvas->Modified();
+  fCanvas->Modified();
   fCanvas->Update();
 }
 

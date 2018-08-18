@@ -51,7 +51,11 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
 {
     double t = 0;  // photon emission delay time
 
-    if (PriScintModel == 0)
+    if (
+            PriScintModel == 0 ||
+            ( PriScint__RaiseTimeVector.size() == 1 && PriScint__RaiseTimeVector.first().second == 0 ) ||
+            (  PriScint_DecayTimeVector.size() == 1 &&  PriScint_DecayTimeVector.first().second  == 0 )
+        )
     {
         // --- "Sum" model ---
 

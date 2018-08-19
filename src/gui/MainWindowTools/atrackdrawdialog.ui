@@ -584,7 +584,7 @@ The selected color is used for particles with index &gt; max in defaultColors an
    <hints>
     <hint type="sourcelabel">
      <x>142</x>
-     <y>86</y>
+     <y>80</y>
     </hint>
     <hint type="destinationlabel">
      <x>129</x>
@@ -621,6 +621,38 @@ The selected color is used for particles with index &gt; max in defaultColors an
     <hint type="destinationlabel">
      <x>87</x>
      <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildPhotonTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbMaxPhotonTracks</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>177</x>
+     <y>32</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>223</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbMaxParticleTracks</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>74</y>
     </hint>
    </hints>
   </connection>

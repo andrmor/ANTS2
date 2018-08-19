@@ -45,6 +45,7 @@ public:
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} //will be absolete
     void resetCounter() {counter = -1;}  //will be absolute
+    void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
 signals:
     
@@ -63,6 +64,8 @@ private:
 
     const GeneralSimSettings* SimSet;
     bool BuildTracks;
+    int MaxTracks = 10;
+    int ParticleTracksAdded = 0;
     bool RemoveTracksIfNoEnergyDepo;
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;

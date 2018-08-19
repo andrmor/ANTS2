@@ -42,8 +42,10 @@ void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEv
 {
    SimSet = simSet;
    OneEvent = oneEvent;
+   MaxTracks = simSet->TrackBuildOptions.MaxPhotonTracks; //default, can be adjusted later (setMaxTracks() methof) if multithread
    this->fBuildTracks = fBuildTracks;
    Tracks = tracks;
+   PhotonTracksAdded = 0;
 }
 
 void APhotonTracer::TracePhoton(const APhoton* Photon)
@@ -95,7 +97,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
 
    if (fBuildTracks)
      {
-       if (Tracks->size() < SimSet->TrackBuildOptions.MaxPhotonTracks)
+       if (PhotonTracksAdded < MaxTracks)
          {
            track = new TrackHolderClass();
            track->Nodes.append(TrackNodeStruct(p->r, p->time));
@@ -399,7 +401,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
 force_stop_tracing:
    if (SimSet->bDoPhotonHistoryLog)
      {
-       AppendHistoryRecord(); //Add tracks is alsow there, it has extra filtering
+       AppendHistoryRecord(); //Add tracks is also there, it has extra filtering
      }
    else
      {
@@ -520,6 +522,7 @@ void APhotonTracer::AppendTrack()
 */
 
       Tracks->append(track);
+      PhotonTracksAdded++;
     }
 }
 

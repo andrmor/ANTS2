@@ -209,6 +209,7 @@ public:
 protected:
     virtual void ReserveSpace(int expectedNumEvents);
     int evenDivisionOfLabor(int totalEventCount);
+    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
     const DetectorClass *detector;
     TRandom2 *RandGen;
@@ -313,6 +314,7 @@ private:
     bool fBadEventsOn;
     double BadEventTotalProbability;
     double SigmaDouble; //Gaussian distribution is used to position second event
+
 };
 
 class ParticleSourceSimulator : public Simulator
@@ -335,6 +337,9 @@ public:
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition 
     bool standaloneTrackStack(QVector<AParticleOnStack*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
+
+protected:
+    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
 private:
     //utilities

@@ -134,7 +134,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   clearWorkers(); //just rebuild them all everytime, it's easier
 
   for(int i = 0; i < threadCount; i++)
-    {
+  {
       Simulator *worker;
       if (modeSetup == "PointSim") //Photon simulator
         worker = new PointSourceSimulator(detector, i);
@@ -158,7 +158,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
         }
       totalEventCount += worker->getEventCount();
       workers.append(worker);
-    }
+  }
 
   if(fRunThreads)
     {
@@ -434,13 +434,26 @@ void Simulator::requestStop()
 
 void Simulator::divideThreadWork(int threadId, int threadCount)
 {
+    //  qDebug() <<  "This thread:" << threadId << "Count treads:"<<threadCount;
     int totalEventCount = getTotalEventCount();
     int nodesPerThread = totalEventCount / threadCount;
     int remainingNodes = totalEventCount % threadCount;
     //The first <remainingNodes> threads get an extra node each
     eventBegin = threadId*nodesPerThread + std::min(threadId, remainingNodes);
     eventEnd = eventBegin + nodesPerThread + (threadId >= remainingNodes ? 0 : 1);
-    //qDebug()<<"Thread"<<(threadId+1)<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount();
+    //  qDebug()<<"Thread"<<threadId<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount()<<"/"<<getTotalEventCount();
+
+    //dividing track building
+    int maxPhotonTracks;
+    if (simSettings->TrackBuildOptions.bBuildPhotonTracks)
+        maxPhotonTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxPhotonTracks );
+    else maxPhotonTracks = 0;
+    int maxParticleTracks;
+    if (simSettings->TrackBuildOptions.bBuildParticleTracks)
+        maxParticleTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxParticleTracks );
+    else maxParticleTracks = 0;
+    updateMaxTracks(maxPhotonTracks, maxParticleTracks);
+    //  qDebug() << maxPhotonTracks << maxParticleTracks;
 }
 
 bool Simulator::setup(QJsonObject &json)
@@ -474,6 +487,11 @@ void Simulator::ReserveSpace(int expectedNumEvents)
     dataHub->Events.reserve(expectedNumEvents);
     if (simSettings->fTimeResolved) dataHub->TimedEvents.reserve(expectedNumEvents);
     dataHub->Scan.reserve(expectedNumEvents);
+}
+
+void Simulator::updateMaxTracks(int maxPhotonTracks, int /*maxParticleTracks*/)
+{
+    photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
 /******************************************************************************\
@@ -1640,6 +1658,12 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
     dataHub->Events.append(OneEvent->PMsignals);
     if(timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
     return true;
+}
+
+void ParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParticleTracks)
+{
+    ParticleTracker->setMaxTracks(maxParticleTracks);
+    photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
 void ParticleSourceSimulator::EnergyVectorToScan()

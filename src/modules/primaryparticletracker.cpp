@@ -32,6 +32,7 @@ PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
   threadIndex(threadIndex)
 {
   BuildTracks = true;
+
   RemoveTracksIfNoEnergyDepo = true;
   counter = -1;
 }
@@ -40,8 +41,10 @@ void PrimaryParticleTracker::configure(const GeneralSimSettings* simSet, bool fb
 {
   SimSet = simSet;
   BuildTracks = fbuildTracks;
+  MaxTracks = simSet->TrackBuildOptions.MaxParticleTracks; // in multithread is overriden using setMaxTracks()
   RemoveTracksIfNoEnergyDepo = fremoveEmptyTracks;
   Tracks = tracks;
+  ParticleTracksAdded = 0;
 }
 
 bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
@@ -106,7 +109,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       bool bBuildThisTrack = BuildTracks;
       if (bBuildThisTrack)
       {
-          if (Tracks->size() < SimSet->TrackBuildOptions.MaxParticleTracks)
+          if (ParticleTracksAdded < MaxTracks)
           {
               if (SimSet->TrackBuildOptions.bSkipPrimaries && ParticleStack->at(0)->secondaryOf == -1)
                   bBuildThisTrack = false;
@@ -694,8 +697,9 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       //particle escaped, stopped or captured     do-breaks are collected here!
       if (bBuildThisTrack)
         {
-          track->Nodes.append(TrackNodeStruct(r, time));
+          track->Nodes.append(TrackNodeStruct(r, time));          
           TrackCandidates.append(track);
+          ParticleTracksAdded++;
         }
       //finalizing diagnostics
       if (SimSet->fLogsStat)
@@ -715,9 +719,10 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
   {
       if (RemoveTracksIfNoEnergyDepo && EnergyVector->isEmpty() )
       {
-          //clear all particle tracks - there were no energy deposition - nothing will be added to Geomanager later
+          //clear all particle tracks - there were no energy deposition - nothing will be added to GeoManager later
           for (int i=0; i<TrackCandidates.size(); i++)
               delete TrackCandidates.at(i);
+          ParticleTracksAdded -= TrackCandidates.size();
       }
       else
       {

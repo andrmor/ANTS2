@@ -52,6 +52,12 @@ private slots:
 
     void on_pbLoad_clicked();
 
+    void on_cbSkipPrimariesNoInteraction_clicked(bool checked);
+
+    void on_sbMaxPhotonTracks_editingFinished();
+
+    void on_sbMaxParticleTracks_editingFinished();
+
 private:
     ATrackBuildOptions* settings;
     const QStringList& ParticleNames;

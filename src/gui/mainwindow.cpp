@@ -3996,7 +3996,7 @@ void MainWindow::simulationFinished()
         SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
     }
 
-    //tracks?
+    //tracks
     if (showTracks)
       {
         TmpHub->ClearTracks();
@@ -4004,9 +4004,9 @@ void MainWindow::simulationFinished()
         SimulationManager->Tracks.clear(); //to avoid delete content
 
         int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() && numTracks<GlobSet->MaxNumberOfTracks; iTr++)
+        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet->MaxNumberOfTracks */; iTr++)
           {
-            TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
+            const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
             track->SetLineColor(th->Color);
             track->SetLineWidth(th->Width);
@@ -4021,9 +4021,6 @@ void MainWindow::simulationFinished()
             else delete track;
           }
       }
-
-    //CLEAR TEMPORARY OBJECTS IN SIMULATION MANAGER
-    //SimulationManager->Clear();  /// in manager now!
 
     //Additional GUI updates
     if (GeometryWindow->isVisible())
@@ -4098,29 +4095,30 @@ void MainWindow::on_pbTrackStack_clicked()
         //if (ui->cbBuildParticleTrackstester->isChecked())
         if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
           {
-            int numTracks = 0;
+            //int numTracks = 0;
               //qDebug() << "Tracks collected:"<<pss->tracks.size();
             for (int iTr=0; iTr<pss->tracks.size(); iTr++)
-              {
-                TrackHolderClass* th = pss->tracks[iTr];
+            {
+                const TrackHolderClass* th = pss->tracks[iTr];
 
-                if (numTracks<GlobSet->MaxNumberOfTracks)
-                {
+                //if (numTracks<GlobSet->MaxNumberOfTracks)
+                //{
                     TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                     track->SetLineColor(th->Color);
                     track->SetLineWidth(th->Width);
+                    track->SetLineStyle(th->Style);
                     for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                       track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
 
                     if (track->GetNpoints()>1)
                       {
-                        numTracks++;
+                        //numTracks++;
                         Detector->GeoManager->AddTrack(track);
                       }
                     else delete track;
-                }
+                //}
                 delete th;
-              }
+            }
             pss->tracks.clear();
           }
         //if tracks are visible, show them

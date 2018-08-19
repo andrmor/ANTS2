@@ -70,7 +70,6 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->sbNumPointsFunctionY->setValue(GlobSet->FunctionPointsY);
 
   ui->sbNumSegments->setValue(GlobSet->NumSegments);
-  ui->sbMaxNumTracks->setValue(GlobSet->MaxNumberOfTracks);
 
   ui->sbNumTreads->setValue(GlobSet->NumThreads);
   ui->sbRecNumTreads->setValue(GlobSet->RecNumTreads);
@@ -342,11 +341,6 @@ void GlobalSettingsWindowClass::on_sbNumSegments_editingFinished()
     GlobSet->NumSegments = ui->sbNumSegments->value();
     MW->Detector->GeoManager->SetNsegments(GlobSet->NumSegments);
     MW->GeometryWindow->ShowGeometry(false);
-}
-
-void GlobalSettingsWindowClass::on_sbMaxNumTracks_editingFinished()
-{
-   GlobSet->MaxNumberOfTracks = ui->sbMaxNumTracks->value();
 }
 
 void GlobalSettingsWindowClass::on_sbNumPointsFunctionX_editingFinished()

@@ -129,7 +129,6 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["FunctionPointsX"] = FunctionPointsX;
   js["FunctionPointsY"] = FunctionPointsY;
   js["NumSegments"] = NumSegments;
-  js["MaxNumberOfTracks"] = MaxNumberOfTracks;
   js["PerformAutomaticGeometryCheck"] = PerformAutomaticGeometryCheck;
   js["NumThreads"] = NumThreads;
 
@@ -184,7 +183,6 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "FunctionPointsX", FunctionPointsX);
     parseJson(js, "FunctionPointsY", FunctionPointsY);
     parseJson(js, "NumSegments", NumSegments);
-    parseJson(js, "MaxNumberOfTracks", MaxNumberOfTracks);
     parseJson(js, "NumThreads", NumThreads);
 
     parseJson(js, "RecTreeSave_IncludePMsignals", RecTreeSave_IncludePMsignals);

@@ -63,15 +63,9 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   //Accelerators options
   QJsonObject acjson = json["AcceleratorConfig"].toObject();
   MaxNumTrans = acjson["MaxNumTransitions"].toInt();
-  fQEaccelerator = acjson["CheckBeforeTrack"].toBool();
-  //fTracksOnPMsOnly = acjson["OnlyTracksOnPMs"].toBool();
+  fQEaccelerator = acjson["CheckBeforeTrack"].toBool();  
   fLogsStat = acjson["LogsStatistics"].toBool();
   NumThreads = acjson["NumberThreads"].toInt();
-
-  //Photon tracks
-  //fBuildPhotonTracks = json["BuildPhotonTracks"].toBool();
-  MaxNumberOfTracks = 1000;
-  MaxNumberOfTracks = json["MaxNumberOfTracks"].toInt();
 
   DetStatNumBins = json["DetStatNumBins"].toInt(100);
 

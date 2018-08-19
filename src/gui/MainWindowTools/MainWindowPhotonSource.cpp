@@ -71,10 +71,6 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   //acjson["NumberThreads"] = ui->sbNumberThreads->value();
   json["AcceleratorConfig"] = acjson;
 
-  //tracks
-  //json["BuildPhotonTracks"] = ui->cbGunPhotonTracks->isChecked(); //moved to TrackBuildOptions
-  json["MaxNumberOfTracks"] = GlobSet->MaxNumberOfTracks;
-
   //DetStat binning
   json["DetStatNumBins"] = GlobSet->BinsX;
 

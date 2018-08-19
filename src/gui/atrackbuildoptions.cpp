@@ -47,6 +47,9 @@ void ATrackBuildOptions::writeToJson(QJsonObject &json) const
     json["BuildPhotonTracks"] = bBuildPhotonTracks;
     json["BuildParticleTracks"] = bBuildParticleTracks;
 
+    json["MaxPhotonTracks"] = MaxPhotonTracks;
+    json["MaxParticleTracks"] = MaxParticleTracks;
+
     json["GeneralPhoton_Attributes"] = TA_Photons.writeToJson();
 
     json["PhotonSpecialRule_HittingPMs"] = bPhotonSpecialRule_HittingPMs;
@@ -60,6 +63,7 @@ void ATrackBuildOptions::writeToJson(QJsonObject &json) const
     // ----
 
     json["SkipParticles_Primary"] = bSkipPrimaries;
+    json["SkipParticles_PrimaryNoInteraction"] = bSkipPrimariesNoInteraction;
     json["SkipParticles_Secondary"] = bSkipSecondaries;
 
     json["Particle_DefaultAttributes"] = TA_DefaultParticle.writeToJson();
@@ -84,6 +88,9 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
     parseJson(json, "BuildPhotonTracks", bBuildPhotonTracks);
     parseJson(json, "BuildParticleTracks", bBuildParticleTracks);
 
+    parseJson(json, "MaxPhotonTracks", MaxPhotonTracks);
+    parseJson(json, "MaxParticleTracks", MaxParticleTracks);
+
     QJsonObject js;
     parseJson(json, "GeneralPhoton_Attributes", js);
     TA_Photons.readFromJson(js);
@@ -103,6 +110,7 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
     // -----
 
     parseJson(json, "SkipParticles_Primary", bSkipPrimaries);
+    parseJson(json, "SkipParticles_PrimaryNoInteraction", bSkipPrimariesNoInteraction);
     parseJson(json, "SkipParticles_Secondary", bSkipSecondaries);
 
     js = QJsonObject();
@@ -165,6 +173,7 @@ void ATrackBuildOptions::clear()
 
     //----particles----
     TA_DefaultParticle.color = 15;
+    TA_DefaultParticle.width = 2;
     DefaultParticle_Colors.clear();
     DefaultParticle_Colors << 1 << 2 << 3 << 4 << 6 << 7 << 8 << 9 << 28 << 30 << 36 << 38 << 39 << 40 << 46 << 49;
 

@@ -95,10 +95,9 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
 
    if (fBuildTracks)
      {
-       if (Tracks->size()<SimSet->MaxNumberOfTracks)
+       if (Tracks->size() < SimSet->TrackBuildOptions.MaxPhotonTracks)
          {
            track = new TrackHolderClass();
-           //qDebug() << "Track starts from:"<<p->r[0]<<p->r[1]<<p->r[2];
            track->Nodes.append(TrackNodeStruct(p->r, p->time));
          }
        else fBuildTracks = false;

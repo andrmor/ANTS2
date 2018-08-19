@@ -17,12 +17,16 @@ ATrackDrawDialog::ATrackDrawDialog(QWidget *parent, ATrackBuildOptions *settings
     ui->cbBuildPhotonTracks->setChecked(settings->bBuildPhotonTracks);
     ui->cbBuildParticleTracks->setChecked(settings->bBuildParticleTracks);
 
+    ui->sbMaxPhotonTracks->setValue(settings->MaxPhotonTracks);
+    ui->sbMaxParticleTracks->setValue(settings->MaxParticleTracks);
+
     ui->cbSkipPhotonsMissingPMs->setChecked(settings->bSkipPhotonsMissingPMs);
 
     ui->cbSpecialRule_hitPM->setChecked(settings->bPhotonSpecialRule_HittingPMs);
     ui->cbSpecialRule_secScint->setChecked(settings->bPhotonSpecialRule_SecScint);
 
     ui->cbSkipPrimaries->setChecked(settings->bSkipPrimaries);
+    ui->cbSkipPrimariesNoInteraction->setChecked(settings->bSkipPrimariesNoInteraction);
     ui->cbSkipSecondaries->setChecked(settings->bSkipSecondaries);
 
     updateParticleAttributes();
@@ -90,6 +94,11 @@ void ATrackDrawDialog::on_cbBuildParticleTracks_clicked(bool checked)
 void ATrackDrawDialog::on_cbSkipPrimaries_clicked(bool checked)
 {
     settings->bSkipPrimaries = checked;
+}
+
+void ATrackDrawDialog::on_cbSkipPrimariesNoInteraction_clicked(bool checked)
+{
+    settings->bSkipPrimariesNoInteraction = checked;
 }
 
 void ATrackDrawDialog::on_cbSkipSecondaries_clicked(bool checked)
@@ -197,4 +206,14 @@ void ATrackDrawDialog::on_pbLoad_clicked()
     QJsonObject json;
     LoadJsonFromFile(json, fileName);
     settings->readFromJson(json);
+}
+
+void ATrackDrawDialog::on_sbMaxPhotonTracks_editingFinished()
+{
+    settings->MaxPhotonTracks = ui->sbMaxPhotonTracks->value();
+}
+
+void ATrackDrawDialog::on_sbMaxParticleTracks_editingFinished()
+{
+    settings->MaxParticleTracks = ui->sbMaxParticleTracks->value();
 }

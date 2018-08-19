@@ -106,7 +106,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       bool bBuildThisTrack = BuildTracks;
       if (bBuildThisTrack)
       {
-          if (Tracks->size() < SimSet->MaxNumberOfTracks)
+          if (Tracks->size() < SimSet->TrackBuildOptions.MaxParticleTracks)
           {
               if (SimSet->TrackBuildOptions.bSkipPrimaries && ParticleStack->at(0)->secondaryOf == -1)
                   bBuildThisTrack = false;
@@ -141,6 +141,11 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
             {
               //              qDebug()<<"Escaped from the defined geometry!";
               terminationStatus = EventHistoryStructure::Escaped;//1
+              if (bBuildThisTrack && (ParticleStack->at(0)->secondaryOf == -1) && SimSet->TrackBuildOptions.bSkipPrimariesNoInteraction)
+              {
+                  delete track;
+                  bBuildThisTrack = false;
+              }
               break; //do-break
             }
 

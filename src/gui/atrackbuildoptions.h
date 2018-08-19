@@ -47,7 +47,11 @@ public:
     QVector<ATrackAttributes*> CustomParticle_Attributes;
 
     bool bSkipPrimaries = false;
+    bool bSkipPrimariesNoInteraction = false;
     bool bSkipSecondaries = false;
+
+    int MaxPhotonTracks = 1000;
+    int MaxParticleTracks = 1000;
 
     //JSON
     void writeToJson(QJsonObject& json) const;

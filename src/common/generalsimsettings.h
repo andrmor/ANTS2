@@ -38,8 +38,7 @@ public:
   double MinEnergyNeutrons = 0.01; //in meV
   double Safety;
 
-  int    MaxNumTrans = 500;
-  //bool   fTracksOnPMsOnly;
+  int    MaxNumTrans = 500;  
   bool   fQEaccelerator = false;
   bool   fLogsStat = false;             //generate logs and statistics of detected photons
   bool   bDoPhotonHistoryLog = false; //detailed photon history, activated by "photon" script!
@@ -49,9 +48,6 @@ public:
 
   int    SecScintGenMode = 0;
   //TH1D *SecScintThetaHist;
-
-  //bool   fBuildPhotonTracks; //moved to TrackBuildOptions
-  int    MaxNumberOfTracks;
 
   ATrackBuildOptions TrackBuildOptions;
 

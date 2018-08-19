@@ -37,7 +37,6 @@ public:
   int FunctionPointsX = 30;
   int FunctionPointsY = 30;
   int NumSegments = 20;     // number of segments in drawing, e.g., round objects
-  int MaxNumberOfTracks = 1000;
 
   bool ShowExamplesOnStart = true; //pop-up examples window
   bool SaveLoadWindows = true; //save windows on exit, load them on ANTS2 start

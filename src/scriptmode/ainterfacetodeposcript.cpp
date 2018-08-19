@@ -180,6 +180,8 @@ void AInterfaceToDepoScript::populateParticleRecords()
 }
 
 #include "aconfiguration.h"
+#include "apmhub.h"
+#include "amaterialparticlecolection.h"
 bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
 {
     clearEnergyVector();
@@ -234,6 +236,8 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
 
     EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
+    Detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
+    Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen, 1); //update wave-resolved properties of materials and runtime properties for neutrons
 
     bool fOK = pss->standaloneTrackStack(&ParticleStack);
     if (!fOK)
@@ -259,7 +263,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
         {
             TrackHolderClass* th = pss->tracks[iTr];
 
-            if (numTracks < GlobSet->MaxNumberOfTracks)
+            if (numTracks < simSettings.TrackBuildOptions.MaxParticleTracks)
             {
                 TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                 track->SetLineColor(th->Color);

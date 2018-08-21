@@ -314,18 +314,18 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     ui->ledRayleighWave->setText(QString::number(tmpMaterial.rayleighWave));
 
     //decay time
-    if (tmpMaterial.PriScint_DecayTimeVector.size() == 0)
+    if (tmpMaterial.PriScint_Decay.size() == 0)
         str = "0";
-    else if (tmpMaterial.PriScint_DecayTimeVector.size() == 1)
-        str = QString::number(tmpMaterial.PriScint_DecayTimeVector.first().second);
+    else if (tmpMaterial.PriScint_Decay.size() == 1)
+        str = QString::number(tmpMaterial.PriScint_Decay.first().value);
     else
     {
         str.clear();
-        for (const QPair<double,double>& pair : tmpMaterial.PriScint_DecayTimeVector)
+        for (const APair_ValueAndWeight& pair : tmpMaterial.PriScint_Decay)
         {
-            str += QString::number(pair.first);
+            str += QString::number(pair.value);
             str += ":";
-            str += QString::number(pair.second);
+            str += QString::number(pair.statWeight);
             str += " & ";
         }
         str.chop(3);
@@ -333,18 +333,18 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     ui->lePriT->setText(str);
     //raise time
         //ui->ledPriT_raise->setText( QString::number(tmpMaterial.PriScintRaiseTime) );
-    if (tmpMaterial.PriScint__RaiseTimeVector.size() == 0)
+    if (tmpMaterial.PriScint_Raise.size() == 0)
         str = "0";
-    else if (tmpMaterial.PriScint__RaiseTimeVector.size() == 1)
-        str = QString::number(tmpMaterial.PriScint__RaiseTimeVector.first().second);
+    else if (tmpMaterial.PriScint_Raise.size() == 1)
+        str = QString::number(tmpMaterial.PriScint_Raise.first().value);
     else
     {
         str.clear();
-        for (const QPair<double,double>& pair : tmpMaterial.PriScint__RaiseTimeVector)
+        for (const APair_ValueAndWeight& pair : tmpMaterial.PriScint_Raise)
         {
-            str += QString::number(pair.first);
+            str += QString::number(pair.value);
             str += ":";
-            str += QString::number(pair.second);
+            str += QString::number(pair.statWeight);
             str += " & ";
         }
         str.chop(3);
@@ -2826,8 +2826,8 @@ bool MaterialInspectorWindow::parseDecayOrRaiseTime(bool doParseDecay)
     QString s = ( doParseDecay ? ui->lePriT->text() : ui->lePriT_raise->text() );
     s = s.simplified();
 
-    QVector<QPair<double,double> > & vec =
-            ( doParseDecay ? tmpMaterial.PriScint_DecayTimeVector : tmpMaterial.PriScint__RaiseTimeVector);
+    QVector<APair_ValueAndWeight> & vec =
+            ( doParseDecay ? tmpMaterial.PriScint_Decay : tmpMaterial.PriScint_Raise);
 
     vec.clear();
     bool bErrorDetected = false;
@@ -2835,7 +2835,7 @@ bool MaterialInspectorWindow::parseDecayOrRaiseTime(bool doParseDecay)
     bool bSingle;
     double tau = s.toDouble(&bSingle);
     if (bSingle)
-        vec << QPair<double, double>(1.0, tau);
+        vec << APair_ValueAndWeight(tau, 1.0);
     else
     {
         QStringList sl = s.split('&', QString::SkipEmptyParts);
@@ -2846,10 +2846,10 @@ bool MaterialInspectorWindow::parseDecayOrRaiseTime(bool doParseDecay)
             if (oneTau.size() == 2)
             {
                 bool bOK1, bOK2;
-                double weight = oneTau.at(0).toDouble(&bOK1);
-                double tau    = oneTau.at(1).toDouble(&bOK2);
+                double tau    = oneTau.at(0).toDouble(&bOK1);
+                double weight = oneTau.at(1).toDouble(&bOK2);
                 if (bOK1 && bOK2)
-                    vec << QPair<double, double>(weight, tau);
+                    vec << APair_ValueAndWeight(tau, weight);
                 else
                 {
                     bErrorDetected = true;
@@ -2867,7 +2867,7 @@ bool MaterialInspectorWindow::parseDecayOrRaiseTime(bool doParseDecay)
         QString s = ( doParseDecay ? "Decay" : "Raise" );
         s += " time format error:\n\nUse a single double value of the time constant or,\n"
              "to define several exponential components, use this format:\n"
-             "\n stat_weight1 : time_constant1  &  stat_weight2 : time_constant2  &  ...\ne.g., 0.25 : 25.5  &  0.75 : 250\n";
+             "\n time_constant1 : stat_weight1  &  time_constant2 : stat_weight2  &  ...\ne.g., 25.5 : 0.25  &  250 : 0.75\n";
         message(s, this);
         bMessageLock = false;
     }
@@ -2883,13 +2883,15 @@ void MaterialInspectorWindow::on_pbPriThelp_clicked()
             "  If there is only one exponential component,"
             "  the time constant (\"decay time\") can be given directly.\n"
             "  To configure several exponential components, use\n"
-            "  stat_weight1:time_constant1 & stat_weight2:time_constant2 & ...\n"
-            "  e.g., 1:25.5 & 1:250\n"
+            "  time_constant1 : stat_weight1  &  time_constant2 : stat_weight2  &  ...\n"
+            "  e.g., 25.5 : 0.25  &  250 : 0.75\n"
             "  \n"
             "Model:\n"
             "  If \"Sum\" is selected, the photon emission time is calculated as follows:\n"
             "  first the delay due to the raise time is generated,\n"
-            "  then decay time is generated. The emission time is sum of those values.\n\n"
+            "  then decay time is generated. The emission time is sum of those values.\n"
+            "  This model can be used if, e.g., the emitting state is populated from upper states.\n"
+            "\n"
             "  If \"Shao\" is selected, the emission time is calculated as in:\n"
             "  Yiping Shao, Phys. Med. Biol. 52 (2007) 1103–1117\n"
             "  http://www.iss.infn.it/topem/TOF-PET/shao-model-timing.pdf\n"

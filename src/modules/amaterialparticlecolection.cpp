@@ -197,10 +197,10 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.Comments = "";
 
   tmpMaterial.PriScintModel = 0;
-  tmpMaterial.PriScint_DecayTimeVector.clear();
-  tmpMaterial.PriScint_DecayTimeVector << QPair<double, double>(1.0, 0);
-  tmpMaterial.PriScint__RaiseTimeVector.clear();
-  tmpMaterial.PriScint__RaiseTimeVector << QPair<double, double>(1.0, 0);
+  tmpMaterial.PriScint_Decay.clear();
+  tmpMaterial.PriScint_Decay << APair_ValueAndWeight(0, 1.0);
+  tmpMaterial.PriScint_Raise.clear();
+  tmpMaterial.PriScint_Raise << APair_ValueAndWeight(0, 1.0);
 
   int particles = ParticleCollection.size();
   tmpMaterial.MatParticle.resize(particles);

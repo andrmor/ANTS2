@@ -18,6 +18,7 @@ class AMaterialParticleCollection;
 struct NeutralTerminatorStructure;
 struct MatParticleStructure;
 class TRandom2;
+class APair_ValueAndWeight;
 namespace NCrystal { class Scatter; }
 
 class AMaterial
@@ -38,8 +39,8 @@ public:
   double e_driftVelocity;
   double W; //default W
   double SecYield;  // ph per secondary electron
-  QVector<QPair<double,double> > PriScint_DecayTimeVector;  //first = stat weight, second = decay time (ns)
-  QVector<QPair<double,double> > PriScint__RaiseTimeVector;  //first = stat weight, second = decay time (ns)
+  QVector<APair_ValueAndWeight> PriScint_Decay;
+  QVector<APair_ValueAndWeight> PriScint_Raise;
   int PriScintModel = 0; //0=sum, 1=Shao
 
   double SecScintDecayTime;
@@ -163,6 +164,16 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 
   void Clear();
+};
+
+class APair_ValueAndWeight
+{
+public:
+    double value;
+    double statWeight;
+
+    APair_ValueAndWeight(double value, double statWeight) : value(value), statWeight(statWeight) {}
+    APair_ValueAndWeight() {}
 };
 
 #endif // AMATERIAL_H

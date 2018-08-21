@@ -12,13 +12,6 @@ RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *MasterWindow) : QWidge
 {
   qDebug()<<"->Creating raster window";
 
-/*
-  create();
-  setGeometry(50, 50, 500, 500);
-  wid = gVirtualX->AddWindow(QWindow::winId(), QWindow::width(), QWindow::height());
-  fCanvas = new TCanvas("fCanvas", 100, 100, wid);
-*/
-
   // set options needed to properly update the canvas when resizing the widget
   // and to properly handle context menus and mouse move events
   setAttribute(Qt::WA_PaintOnScreen, false);
@@ -45,10 +38,10 @@ RasterWindowBaseClass::~RasterWindowBaseClass()
   //qDebug()<< "     <--Starting cleanup for raster window base...";
 
   fCanvas->Clear();
-  delete fCanvas;
+  delete fCanvas; fCanvas = 0;
   //qDebug()<<"        canvas deleted";
 
-  gVirtualX->RemoveWindow(wid);
+  //gVirtualX->RemoveWindow(wid); //causes strange warnings !!!***
   //qDebug()<<"        window unregistered in Root";
   //qDebug()<< "  <-Done";
 }

@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>361</height>
+    <width>445</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Global settings</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="twMain">
     <property name="geometry">
      <rect>
-      <x>4</x>
-      <y>27</y>
+      <x>5</x>
+      <y>4</y>
       <width>436</width>
       <height>331</height>
      </rect>
@@ -669,41 +669,6 @@
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
      </widget>
-     <widget class="QSpinBox" name="sbMaxNumTracks">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>254</y>
-        <width>79</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>1000000</number>
-      </property>
-      <property name="value">
-       <number>1000</number>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>22</x>
-        <y>254</y>
-        <width>180</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Maximum number of drawn tracks:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_8">
       <property name="geometry">
        <rect>
@@ -799,8 +764,6 @@ used to draw a function</string>
      <zorder>label_5</zorder>
      <zorder>sbNumSegments</zorder>
      <zorder>label_6</zorder>
-     <zorder>sbMaxNumTracks</zorder>
-     <zorder>label_7</zorder>
      <zorder>label_8</zorder>
      <zorder>label_9</zorder>
      <zorder>sbNumPointsFunctionX</zorder>
@@ -1160,22 +1123,6 @@ used to draw a function</string>
      <zorder>label_23</zorder>
      <zorder>leWebSocketIP</zorder>
     </widget>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>26</x>
-      <y>4</y>
-      <width>291</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>ANTS2 global settings</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
    </widget>
    <widget class="QGroupBox" name="gbSaveOnExit">
     <property name="geometry">

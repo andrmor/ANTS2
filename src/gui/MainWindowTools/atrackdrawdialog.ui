@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ATrackDrawProperties</class>
+ <widget class="QDialog" name="ATrackDrawProperties">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>312</width>
+    <height>451</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Track building options</string>
+  </property>
+  <widget class="QFrame" name="frPhotons">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>167</y>
+     <width>300</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>27</y>
+      <width>198</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Photon track attributes:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbPhotons_norm">
+    <property name="geometry">
+     <rect>
+      <x>212</x>
+      <y>23</y>
+      <width>82</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show / edit</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbPhotons_PM">
+    <property name="geometry">
+     <rect>
+      <x>212</x>
+      <y>50</y>
+      <width>82</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show / edit</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbPhotons_sec">
+    <property name="geometry">
+     <rect>
+      <x>212</x>
+      <y>77</y>
+      <width>82</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show / edit</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cbSpecialRule_hitPM">
+    <property name="geometry">
+     <rect>
+      <x>22</x>
+      <y>53</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>For photons hitting PMs:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="cbSpecialRule_secScint">
+    <property name="geometry">
+     <rect>
+      <x>22</x>
+      <y>79</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>For photons of secondary scint:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>3</y>
+      <width>291</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Photon tracks</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="pbClose">
+   <property name="geometry">
+    <rect>
+     <x>7</x>
+     <y>412</y>
+     <width>228</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbBuildPhotonTracks">
+   <property name="geometry">
+    <rect>
+     <x>34</x>
+     <y>24</y>
+     <width>151</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Photon tracks</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbBuildParticleTracks">
+   <property name="geometry">
+    <rect>
+     <x>34</x>
+     <y>66</y>
+     <width>141</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Particle tracks</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>4</y>
+     <width>131</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>In simulations, build:</string>
+   </property>
+  </widget>
+  <widget class="QFrame" name="frame">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>276</y>
+     <width>300</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>1</y>
+      <width>291</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Particle tracks</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>18</x>
+      <y>24</y>
+      <width>191</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Defaul track attributes:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbDefaultParticleAtt">
+    <property name="geometry">
+     <rect>
+      <x>212</x>
+      <y>23</y>
+      <width>82</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Default width and style for particle tracks. 
+The selected color is used for particles with index &gt; max in defaultColors and custom particles</string>
+    </property>
+    <property name="text">
+     <string>Show / edit</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sbParticle">
+    <property name="geometry">
+     <rect>
+      <x>87</x>
+      <y>66</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>19</x>
+      <y>45</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Custom attributes:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>33</x>
+      <y>70</y>
+      <width>50</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>index:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labParticleName">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>69</y>
+      <width>110</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Particle name</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frCustom">
+    <property name="geometry">
+     <rect>
+      <x>35</x>
+      <y>99</y>
+      <width>31</width>
+      <height>10</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pbEditCustom">
+    <property name="geometry">
+     <rect>
+      <x>86</x>
+      <y>92</y>
+      <width>82</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show / edit</string>
+    </property>
+   </widget>
+   <widget class="QStackedWidget" name="swCustomParticle">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>91</y>
+      <width>120</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="page">
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>3</x>
+        <y>2</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Not defined</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_2">
+     <widget class="QPushButton" name="pbCustomDelete">
+      <property name="geometry">
+       <rect>
+        <x>44</x>
+        <y>0</y>
+        <width>31</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QCheckBox" name="cbSkipPhotonsMissingPMs">
+   <property name="geometry">
+    <rect>
+     <x>63</x>
+     <y>45</y>
+     <width>283</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip tracks missing PMs</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbSkipSecondaries">
+   <property name="geometry">
+    <rect>
+     <x>63</x>
+     <y>124</y>
+     <width>251</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip all secondaries</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbSkipPrimaries">
+   <property name="geometry">
+    <rect>
+     <x>63</x>
+     <y>86</y>
+     <width>251</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip all primaries</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbSave">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>422</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pbLoad">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>401</y>
+     <width>64</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cbSkipPrimariesNoInteraction">
+   <property name="geometry">
+    <rect>
+     <x>63</x>
+     <y>105</y>
+     <width>251</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip primaries with no interaction</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="sbMaxPhotonTracks">
+   <property name="geometry">
+    <rect>
+     <x>201</x>
+     <y>24</y>
+     <width>61</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>10000</number>
+   </property>
+   <property name="value">
+    <number>1000</number>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="sbMaxParticleTracks">
+   <property name="geometry">
+    <rect>
+     <x>201</x>
+     <y>64</y>
+     <width>61</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
+   <property name="maximum">
+    <number>10000</number>
+   </property>
+   <property name="value">
+    <number>1000</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>266</x>
+     <y>27</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>max</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>266</x>
+     <y>68</y>
+     <width>47</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>max</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_11">
+   <property name="geometry">
+    <rect>
+     <x>21</x>
+     <y>148</y>
+     <width>221</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Line attributes for tracks:</string>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>pbPhotons_norm</tabstop>
+  <tabstop>cbSpecialRule_hitPM</tabstop>
+  <tabstop>pbPhotons_PM</tabstop>
+  <tabstop>cbSpecialRule_secScint</tabstop>
+  <tabstop>pbPhotons_sec</tabstop>
+  <tabstop>cbSkipPhotonsMissingPMs</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>cbBuildPhotonTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbSkipPhotonsMissingPMs</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>112</x>
+     <y>61</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbSkipPrimaries</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>142</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>129</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbSkipSecondaries</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>153</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbSkipPrimariesNoInteraction</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>87</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildPhotonTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbMaxPhotonTracks</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>177</x>
+     <y>32</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>223</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>sbMaxParticleTracks</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>74</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildPhotonTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frPhotons</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>15</x>
+     <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBuildParticleTracks</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>47</x>
+     <y>76</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>31</x>
+     <y>360</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

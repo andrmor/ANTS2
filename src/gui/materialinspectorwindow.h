@@ -147,11 +147,25 @@ private slots:
 
     void on_pbPriThelp_clicked();
 
-    void on_ledPriT_raise_textChanged(const QString &arg1);
-
     void on_pbPriT_test_clicked();
 
     void on_actionNeutrons_triggered();
+
+    void on_pbShowNcmat_clicked();
+
+    void on_pbLoadNcmat_clicked();
+
+    void on_ledNCmatDcutoff_editingFinished();
+
+    void on_ledNcmatPacking_editingFinished();
+
+    void on_cbUseNCrystal_clicked(bool checked);
+
+    void on_cbUseNCrystal_toggled(bool checked);
+
+    void on_lePriT_raise_editingFinished();
+
+    void on_pbNew_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;
@@ -184,7 +198,7 @@ private:
     int autoloadMissingCrossSectionData(); //returns number of particles added to the collection
 
     void SetWasModified(bool flag);
-    bool parseDecayTime();
+    bool parseDecayOrRaiseTime(bool doParseDecay);
     void updateWarningIcons();
     int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
     void updateTmpMatOnPartCollChange(int newPartAdded);

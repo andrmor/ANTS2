@@ -29,7 +29,7 @@
       <x>0</x>
       <y>9</y>
       <width>546</width>
-      <height>611</height>
+      <height>614</height>
      </rect>
     </property>
     <property name="tabPosition">
@@ -51,7 +51,7 @@
         <x>3</x>
         <y>227</y>
         <width>538</width>
-        <height>322</height>
+        <height>327</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -66,8 +66,8 @@
          <rect>
           <x>0</x>
           <y>1</y>
-          <width>531</width>
-          <height>299</height>
+          <width>536</width>
+          <height>295</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -4960,7 +4960,7 @@ of the refracted beam:</string>
         <x>0</x>
         <y>4</y>
         <width>541</width>
-        <height>217</height>
+        <height>219</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -5244,7 +5244,7 @@ of the refracted beam:</string>
         <property name="geometry">
          <rect>
           <x>4</x>
-          <y>164</y>
+          <y>159</y>
           <width>91</width>
           <height>23</height>
          </rect>
@@ -5369,7 +5369,7 @@ materials</string>
           <x>2</x>
           <y>18</y>
           <width>166</width>
-          <height>140</height>
+          <height>137</height>
          </rect>
         </property>
         <property name="contextMenuPolicy">
@@ -5380,7 +5380,7 @@ materials</string>
         <property name="geometry">
          <rect>
           <x>105</x>
-          <y>164</y>
+          <y>159</y>
           <width>61</width>
           <height>23</height>
          </rect>
@@ -5409,7 +5409,7 @@ materials</string>
          </rect>
         </property>
         <property name="text">
-         <string>Define/edit override for interface with:</string>
+         <string>Override for interface with:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -5419,7 +5419,7 @@ materials</string>
         <property name="geometry">
          <rect>
           <x>265</x>
-          <y>115</y>
+          <y>113</y>
           <width>269</width>
           <height>73</height>
          </rect>
@@ -5447,7 +5447,7 @@ materials</string>
            </rect>
           </property>
           <property name="text">
-           <string>Overrides not defined</string>
+           <string>Override not defined</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -6112,7 +6112,7 @@ back in 2Pi:</string>
         <property name="geometry">
          <rect>
           <x>213</x>
-          <y>147</y>
+          <y>145</y>
           <width>52</width>
           <height>10</height>
          </rect>
@@ -6125,7 +6125,7 @@ back in 2Pi:</string>
         <property name="geometry">
          <rect>
           <x>179</x>
-          <y>140</y>
+          <y>138</y>
           <width>77</width>
           <height>23</height>
          </rect>
@@ -6173,7 +6173,7 @@ back in 2Pi:</string>
         <property name="geometry">
          <rect>
           <x>185</x>
-          <y>121</y>
+          <y>119</y>
           <width>47</width>
           <height>20</height>
          </rect>
@@ -6362,7 +6362,7 @@ Constructor is disabled!</string>
         <x>3</x>
         <y>15</y>
         <width>536</width>
-        <height>99</height>
+        <height>103</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -6394,9 +6394,9 @@ Constructor is disabled!</string>
        <widget class="QFrame" name="fTime">
         <property name="geometry">
          <rect>
-          <x>61</x>
+          <x>31</x>
           <y>33</y>
-          <width>411</width>
+          <width>481</width>
           <height>31</height>
          </rect>
         </property>
@@ -6409,7 +6409,7 @@ Constructor is disabled!</string>
         <widget class="QSpinBox" name="sbTimeBins">
          <property name="geometry">
           <rect>
-           <x>330</x>
+           <x>380</x>
            <y>3</y>
            <width>51</width>
            <height>22</height>
@@ -6425,7 +6425,7 @@ Constructor is disabled!</string>
         <widget class="QLabel" name="label_5">
          <property name="geometry">
           <rect>
-           <x>135</x>
+           <x>139</x>
            <y>5</y>
            <width>81</width>
            <height>16</height>
@@ -6438,9 +6438,9 @@ Constructor is disabled!</string>
         <widget class="QLabel" name="label_6">
          <property name="geometry">
           <rect>
-           <x>260</x>
+           <x>290</x>
            <y>5</y>
-           <width>71</width>
+           <width>81</width>
            <height>16</height>
           </rect>
          </property>
@@ -6451,9 +6451,9 @@ Constructor is disabled!</string>
         <widget class="QLabel" name="label_4">
          <property name="geometry">
           <rect>
-           <x>17</x>
+           <x>5</x>
            <y>5</y>
-           <width>61</width>
+           <width>67</width>
            <height>16</height>
           </rect>
          </property>
@@ -6464,7 +6464,7 @@ Constructor is disabled!</string>
         <widget class="QLineEdit" name="ledTimeFrom">
          <property name="geometry">
           <rect>
-           <x>70</x>
+           <x>74</x>
            <y>4</y>
            <width>61</width>
            <height>20</height>
@@ -6477,7 +6477,7 @@ Constructor is disabled!</string>
         <widget class="QLineEdit" name="ledTimeTo">
          <property name="geometry">
           <rect>
-           <x>196</x>
+           <x>220</x>
            <y>4</y>
            <width>60</width>
            <height>20</height>
@@ -6683,7 +6683,7 @@ Constructor is disabled!</string>
       </widget>
       <widget class="QWidget" name="tabAngular">
        <attribute name="title">
-        <string>Angular</string>
+        <string>Angle</string>
        </attribute>
        <widget class="QCheckBox" name="cbAngularSensitive">
         <property name="geometry">
@@ -6701,9 +6701,9 @@ Constructor is disabled!</string>
        <widget class="QFrame" name="fAngular">
         <property name="geometry">
          <rect>
-          <x>131</x>
+          <x>81</x>
           <y>32</y>
-          <width>271</width>
+          <width>351</width>
           <height>31</height>
          </rect>
         </property>
@@ -6716,7 +6716,7 @@ Constructor is disabled!</string>
         <widget class="QSpinBox" name="sbCosBins">
          <property name="geometry">
           <rect>
-           <x>197</x>
+           <x>250</x>
            <y>4</y>
            <width>59</width>
            <height>22</height>
@@ -6737,7 +6737,7 @@ Constructor is disabled!</string>
           <rect>
            <x>6</x>
            <y>6</y>
-           <width>191</width>
+           <width>231</width>
            <height>16</height>
           </rect>
          </property>
@@ -6852,7 +6852,7 @@ Constructor is disabled!</string>
       </widget>
       <widget class="QWidget" name="tabTrackers">
        <attribute name="title">
-        <string>Track</string>
+        <string>Tracking</string>
        </attribute>
        <widget class="QLineEdit" name="ledMinStep">
         <property name="geometry">
@@ -7052,36 +7052,6 @@ charged particles:</string>
          <string>mm</string>
         </property>
        </widget>
-       <widget class="QSpinBox" name="sbParticleTrackColorIndexAdd">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>450</x>
-          <y>41</y>
-          <width>50</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_48">
-        <property name="geometry">
-         <rect>
-          <x>324</x>
-          <y>29</y>
-          <width>119</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Shift in particle
-track color: +</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
        <widget class="QLabel" name="label_146">
         <property name="geometry">
          <rect>
@@ -7181,24 +7151,11 @@ thermal neutrons:</string>
          <bool>true</bool>
         </property>
        </widget>
-       <widget class="QCheckBox" name="cbOnlyBuildTracksOnPMs">
-        <property name="geometry">
-         <rect>
-          <x>287</x>
-          <y>28</y>
-          <width>240</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Do not build photon tracks missing PMs</string>
-        </property>
-       </widget>
        <widget class="QCheckBox" name="cbDoLogsAndStatistics">
         <property name="geometry">
          <rect>
           <x>287</x>
-          <y>50</y>
+          <y>40</y>
           <width>240</width>
           <height>17</height>
          </rect>
@@ -7229,7 +7186,6 @@ thermal neutrons:</string>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
-       <zorder>cbOnlyBuildTracksOnPMs</zorder>
        <zorder>cbDoLogsAndStatistics</zorder>
        <zorder>pbConfigureNumberOfThreads</zorder>
       </widget>
@@ -7446,7 +7402,7 @@ thermal neutrons:</string>
         <x>3</x>
         <y>520</y>
         <width>541</width>
-        <height>31</height>
+        <height>34</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -7923,7 +7879,7 @@ thermal neutrons:</string>
             <x>10</x>
             <y>11</y>
             <width>512</width>
-            <height>153</height>
+            <height>155</height>
            </rect>
           </property>
           <property name="font">
@@ -8684,7 +8640,7 @@ thermal neutrons:</string>
            <widget class="QSpinBox" name="sbScanFloodNodes">
             <property name="geometry">
              <rect>
-              <x>60</x>
+              <x>70</x>
               <y>23</y>
               <width>80</width>
               <height>22</height>
@@ -8873,7 +8829,7 @@ thermal neutrons:</string>
            <widget class="QComboBox" name="cobScanFloodShape">
             <property name="geometry">
              <rect>
-              <x>200</x>
+              <x>210</x>
               <y>23</y>
               <width>91</width>
               <height>22</height>
@@ -9257,41 +9213,6 @@ thermal neutrons:</string>
            </widget>
           </widget>
          </widget>
-         <widget class="Line" name="line_11">
-          <property name="geometry">
-           <rect>
-            <x>249</x>
-            <y>218</y>
-            <width>118</width>
-            <height>3</height>
-           </rect>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-         <widget class="QCheckBox" name="cbPointSourceBuildTracks">
-          <property name="geometry">
-           <rect>
-            <x>360</x>
-            <y>210</y>
-            <width>160</width>
-            <height>17</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Build and show tracks</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
          <widget class="QPushButton" name="pbSimulate">
           <property name="geometry">
            <rect>
@@ -9348,7 +9269,7 @@ thermal neutrons:</string>
           <widget class="QLineEdit" name="leLimitNodesObject">
            <property name="geometry">
             <rect>
-             <x>140</x>
+             <x>160</x>
              <y>1</y>
              <width>141</width>
              <height>20</height>
@@ -9368,11 +9289,46 @@ thermal neutrons:</string>
            </property>
           </widget>
          </widget>
+         <widget class="QPushButton" name="pbOpenTrackProperties_Phot">
+          <property name="geometry">
+           <rect>
+            <x>350</x>
+            <y>208</y>
+            <width>111</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Track build options</string>
+          </property>
+          <property name="text">
+           <string>tracks options</string>
+          </property>
+         </widget>
+         <widget class="Line" name="line_11">
+          <property name="geometry">
+           <rect>
+            <x>270</x>
+            <y>218</y>
+            <width>118</width>
+            <height>3</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
          <zorder>line_11</zorder>
          <zorder>twSingleScan</zorder>
-         <zorder>cbPointSourceBuildTracks</zorder>
          <zorder>pbSimulate</zorder>
          <zorder>frLimitNodesTo</zorder>
+         <zorder>pbOpenTrackProperties_Phot</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
          <widget class="QFrame" name="fAdvOptionsSim">
@@ -9676,12 +9632,12 @@ thermal neutrons:</string>
                <rect>
                 <x>50</x>
                 <y>30</y>
-                <width>301</width>
+                <width>351</width>
                 <height>40</height>
                </rect>
               </property>
               <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Raised</enum>
@@ -9689,10 +9645,10 @@ thermal neutrons:</string>
               <widget class="QLabel" name="label_14">
                <property name="geometry">
                 <rect>
-                 <x>10</x>
-                 <y>10</y>
-                 <width>62</width>
-                 <height>16</height>
+                 <x>-6</x>
+                 <y>8</y>
+                 <width>101</width>
+                 <height>20</height>
                 </rect>
                </property>
                <property name="text">
@@ -9705,7 +9661,7 @@ thermal neutrons:</string>
               <widget class="QLabel" name="labWavelengthPointSource">
                <property name="geometry">
                 <rect>
-                 <x>78</x>
+                 <x>101</x>
                  <y>10</y>
                  <width>101</width>
                  <height>16</height>
@@ -9721,7 +9677,7 @@ thermal neutrons:</string>
               <widget class="QSpinBox" name="sbFixedWaveIndexPointSource">
                <property name="geometry">
                 <rect>
-                 <x>187</x>
+                 <x>210</x>
                  <y>9</y>
                  <width>67</width>
                  <height>20</height>
@@ -9828,7 +9784,7 @@ thermal neutrons:</string>
              <widget class="QSpinBox" name="sbNumberOfRuns">
               <property name="geometry">
                <rect>
-                <x>134</x>
+                <x>161</x>
                 <y>4</y>
                 <width>61</width>
                 <height>22</height>
@@ -9847,7 +9803,7 @@ thermal neutrons:</string>
              <widget class="QLabel" name="label_235">
               <property name="geometry">
                <rect>
-                <x>202</x>
+                <x>240</x>
                 <y>8</y>
                 <width>46</width>
                 <height>13</height>
@@ -10319,7 +10275,7 @@ double events:</string>
            <x>10</x>
            <y>37</y>
            <width>507</width>
-           <height>160</height>
+           <height>162</height>
           </rect>
          </property>
          <property name="font">
@@ -10621,9 +10577,9 @@ double events:</string>
             <widget class="QLabel" name="label_165">
              <property name="geometry">
               <rect>
-               <x>7</x>
+               <x>5</x>
                <y>3</y>
-               <width>61</width>
+               <width>64</width>
                <height>16</height>
               </rect>
              </property>
@@ -10663,7 +10619,7 @@ double events:</string>
             <widget class="QLabel" name="label_185">
              <property name="geometry">
               <rect>
-               <x>169</x>
+               <x>174</x>
                <y>2</y>
                <width>31</width>
                <height>16</height>
@@ -10695,7 +10651,7 @@ double events:</string>
             <widget class="QLineEdit" name="ledGunEnergy">
              <property name="geometry">
               <rect>
-               <x>42</x>
+               <x>47</x>
                <y>1</y>
                <width>80</width>
                <height>20</height>
@@ -10708,9 +10664,9 @@ double events:</string>
             <widget class="QLabel" name="label_186">
              <property name="geometry">
               <rect>
-               <x>126</x>
+               <x>131</x>
                <y>0</y>
-               <width>21</width>
+               <width>31</width>
                <height>21</height>
               </rect>
              </property>
@@ -11321,10 +11277,10 @@ If material with this name does not exist, this limitation is not applied.</stri
            <widget class="QLabel" name="label_168">
             <property name="geometry">
              <rect>
-              <x>4</x>
-              <y>0</y>
-              <width>51</width>
-              <height>16</height>
+              <x>-6</x>
+              <y>-2</y>
+              <width>71</width>
+              <height>20</height>
              </rect>
             </property>
             <property name="text">
@@ -11720,34 +11676,12 @@ If material with this name does not exist, this limitation is not applied.</stri
          <string>Define new source</string>
         </property>
        </widget>
-       <widget class="QCheckBox" name="cbGunPhotonTracks">
-        <property name="geometry">
-         <rect>
-          <x>416</x>
-          <y>351</y>
-          <width>110</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Photon tracks</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
        <widget class="QCheckBox" name="cbGunDoS1">
         <property name="geometry">
          <rect>
           <x>265</x>
-          <y>331</y>
-          <width>144</width>
+          <y>332</y>
+          <width>154</width>
           <height>17</height>
          </rect>
         </property>
@@ -11771,8 +11705,8 @@ If material with this name does not exist, this limitation is not applied.</stri
         <property name="geometry">
          <rect>
           <x>265</x>
-          <y>351</y>
-          <width>142</width>
+          <y>352</y>
+          <width>152</width>
           <height>17</height>
          </rect>
         </property>
@@ -11784,28 +11718,6 @@ If material with this name does not exist, this limitation is not applied.</stri
         </property>
         <property name="text">
          <string>Secondary scintillation</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbGunParticleTracks">
-        <property name="geometry">
-         <rect>
-          <x>416</x>
-          <y>331</y>
-          <width>110</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Particle tracks </string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
         </property>
        </widget>
        <widget class="Line" name="line_21">
@@ -12065,6 +11977,25 @@ If material with this name does not exist, this limitation is not applied.</stri
          <number>10</number>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbTrackOptionsGun">
+        <property name="geometry">
+         <rect>
+          <x>424</x>
+          <y>340</y>
+          <width>101</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>tracks options</string>
+        </property>
+       </widget>
        <zorder>line_16</zorder>
        <zorder>frSelectSource</zorder>
        <zorder>line_21</zorder>
@@ -12075,15 +12006,14 @@ If material with this name does not exist, this limitation is not applied.</stri
        <zorder>fParticleSources</zorder>
        <zorder>labPartSourcesDefined</zorder>
        <zorder>pbAddSource</zorder>
-       <zorder>cbGunPhotonTracks</zorder>
        <zorder>cbGunDoS1</zorder>
        <zorder>cbGunDoS2</zorder>
-       <zorder>cbGunParticleTracks</zorder>
        <zorder>label_253</zorder>
        <zorder>pbParticleSourcesSimulate</zorder>
        <zorder>cbIgnoreEventsWithNoHits</zorder>
        <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
        <zorder>sbGunEvents</zorder>
+       <zorder>pbTrackOptionsGun</zorder>
       </widget>
      </widget>
      <widget class="QFrame" name="fSaveExport">
@@ -12198,7 +12128,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <widget class="QPushButton" name="pbUpdateSimConfig">
       <property name="geometry">
        <rect>
-        <x>200</x>
+        <x>0</x>
         <y>500</y>
         <width>130</width>
         <height>50</height>
@@ -12464,12 +12394,12 @@ config</string>
           <rect>
            <x>12</x>
            <y>74</y>
-           <width>259</width>
+           <width>281</width>
            <height>17</height>
           </rect>
          </property>
          <property name="text">
-          <string>Ignore event if  any raw PM signal is less than:</string>
+          <string>Ignore event if any raw PM signal is less than:</string>
          </property>
         </widget>
         <widget class="QLineEdit" name="ledIgnoreThresholdMax">
@@ -12478,7 +12408,7 @@ config</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>412</x>
+           <x>455</x>
            <y>73</y>
            <width>60</width>
            <height>20</height>
@@ -12560,7 +12490,7 @@ using this file</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>222</x>
+           <x>250</x>
            <y>137</y>
            <width>55</width>
            <height>22</height>
@@ -12605,7 +12535,7 @@ using this file</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>271</x>
+           <x>296</x>
            <y>73</y>
            <width>60</width>
            <height>20</height>
@@ -12618,9 +12548,9 @@ using this file</string>
         <widget class="QLabel" name="label_215">
          <property name="geometry">
           <rect>
-           <x>330</x>
+           <x>359</x>
            <y>74</y>
-           <width>81</width>
+           <width>94</width>
            <height>16</height>
           </rect>
          </property>
@@ -12628,7 +12558,7 @@ using this file</string>
           <string>or more than:</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
         <widget class="QPushButton" name="pbClearMulti">
@@ -12820,7 +12750,7 @@ using this file</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>222</x>
+           <x>250</x>
            <y>158</y>
            <width>55</width>
            <height>22</height>
@@ -12833,9 +12763,9 @@ using this file</string>
         <widget class="QLabel" name="label_260">
          <property name="geometry">
           <rect>
-           <x>281</x>
+           <x>310</x>
            <y>160</y>
-           <width>37</width>
+           <width>45</width>
            <height>16</height>
           </rect>
          </property>
@@ -12852,7 +12782,7 @@ using this file</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>320</x>
+           <x>359</x>
            <y>158</y>
            <width>50</width>
            <height>22</height>
@@ -12903,7 +12833,7 @@ using this file</string>
          </property>
          <property name="geometry">
           <rect>
-           <x>222</x>
+           <x>250</x>
            <y>179</y>
            <width>55</width>
            <height>22</height>
@@ -12939,13 +12869,13 @@ using this file</string>
         <zorder>label_260</zorder>
         <zorder>line_44</zorder>
         <zorder>sbFirstNevents</zorder>
-        <zorder>ledIgnoreThresholdMax</zorder>
-        <zorder>ledIgnoreThresholdMin</zorder>
         <zorder>cbLoadedDataHasZPosition</zorder>
         <zorder>sbLoadedEnergyChannelNumber</zorder>
         <zorder>sbLoadASCIIpositionXchannel</zorder>
         <zorder>sbLoadASCIIpositionYchannel</zorder>
         <zorder>sbLoadASCIIpositionZchannel</zorder>
+        <zorder>ledIgnoreThresholdMax</zorder>
+        <zorder>ledIgnoreThresholdMin</zorder>
        </widget>
        <widget class="QListWidget" name="lwLoadedEventsFiles">
         <property name="geometry">
@@ -13008,9 +12938,9 @@ using this file</string>
          <property name="geometry">
           <rect>
            <x>26</x>
-           <y>8</y>
+           <y>5</y>
            <width>110</width>
-           <height>13</height>
+           <height>21</height>
           </rect>
          </property>
          <property name="toolTip">
@@ -13523,7 +13453,7 @@ multiply to loaded data</string>
         <widget class="QComboBox" name="cobMaterialForWaveTests">
          <property name="geometry">
           <rect>
-           <x>57</x>
+           <x>70</x>
            <y>22</y>
            <width>161</width>
            <height>22</height>
@@ -14451,7 +14381,7 @@ multiply to loaded data</string>
           <widget class="QComboBox" name="conST_heightModel">
            <property name="geometry">
             <rect>
-             <x>296</x>
+             <x>326</x>
              <y>3</y>
              <width>131</width>
              <height>22</height>
@@ -14478,7 +14408,7 @@ multiply to loaded data</string>
             <rect>
              <x>0</x>
              <y>4</y>
-             <width>72</width>
+             <width>87</width>
              <height>16</height>
             </rect>
            </property>
@@ -14492,10 +14422,10 @@ multiply to loaded data</string>
           <widget class="QLabel" name="label_305">
            <property name="geometry">
             <rect>
-             <x>150</x>
+             <x>161</x>
              <y>6</y>
-             <width>142</width>
-             <height>16</height>
+             <width>161</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -14508,10 +14438,10 @@ multiply to loaded data</string>
           <widget class="QLabel" name="label_306">
            <property name="geometry">
             <rect>
-             <x>151</x>
+             <x>160</x>
              <y>27</y>
-             <width>140</width>
-             <height>16</height>
+             <width>161</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
@@ -14524,7 +14454,7 @@ multiply to loaded data</string>
           <widget class="QComboBox" name="cobST_slopeModel">
            <property name="geometry">
             <rect>
-             <x>296</x>
+             <x>326</x>
              <y>26</y>
              <width>131</width>
              <height>22</height>
@@ -14549,7 +14479,7 @@ multiply to loaded data</string>
           <widget class="QLineEdit" name="ledST_SigmaAlpha">
            <property name="geometry">
             <rect>
-             <x>74</x>
+             <x>90</x>
              <y>4</y>
              <width>71</width>
              <height>20</height>
@@ -14564,7 +14494,7 @@ multiply to loaded data</string>
             <rect>
              <x>2</x>
              <y>25</y>
-             <width>68</width>
+             <width>83</width>
              <height>16</height>
             </rect>
            </property>
@@ -14578,7 +14508,7 @@ multiply to loaded data</string>
           <widget class="QLineEdit" name="ledST_SigmaSpike">
            <property name="geometry">
             <rect>
-             <x>74</x>
+             <x>90</x>
              <y>24</y>
              <width>71</width>
              <height>20</height>
@@ -14593,7 +14523,7 @@ multiply to loaded data</string>
             <rect>
              <x>2</x>
              <y>45</y>
-             <width>68</width>
+             <width>83</width>
              <height>16</height>
             </rect>
            </property>
@@ -14607,7 +14537,7 @@ multiply to loaded data</string>
           <widget class="QLineEdit" name="ledST_albedo">
            <property name="geometry">
             <rect>
-             <x>74</x>
+             <x>90</x>
              <y>44</y>
              <width>71</width>
              <height>20</height>
@@ -14620,7 +14550,7 @@ multiply to loaded data</string>
           <widget class="QComboBox" name="cobST_ClaudioModelVersion">
            <property name="geometry">
             <rect>
-             <x>296</x>
+             <x>326</x>
              <y>49</y>
              <width>131</width>
              <height>22</height>
@@ -14650,7 +14580,7 @@ multiply to loaded data</string>
           <widget class="QLabel" name="label_268">
            <property name="geometry">
             <rect>
-             <x>190</x>
+             <x>220</x>
              <y>48</y>
              <width>100</width>
              <height>20</height>
@@ -14676,7 +14606,7 @@ multiply to loaded data</string>
             <rect>
              <x>27</x>
              <y>26</y>
-             <width>301</width>
+             <width>320</width>
              <height>20</height>
             </rect>
            </property>
@@ -14690,7 +14620,7 @@ multiply to loaded data</string>
           <widget class="QLineEdit" name="ledImNAfter">
            <property name="geometry">
             <rect>
-             <x>332</x>
+             <x>350</x>
              <y>27</y>
              <width>60</width>
              <height>20</height>
@@ -15471,120 +15401,11 @@ multiply to loaded data</string>
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
-       <widget class="QCheckBox" name="cbReassignMatIndex">
-        <property name="geometry">
-         <rect>
-          <x>380</x>
-          <y>211</y>
-          <width>144</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Reassign material indeces</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbBuildParticleTrackstester">
-        <property name="geometry">
-         <rect>
-          <x>140</x>
-          <y>224</y>
-          <width>122</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Build particle tracks </string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="Line" name="line_56">
-        <property name="geometry">
-         <rect>
-          <x>258</x>
-          <y>208</y>
-          <width>20</width>
-          <height>48</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbImportDeposition">
-        <property name="geometry">
-         <rect>
-          <x>275</x>
-          <y>210</y>
-          <width>101</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Load deposition</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbExportDeposition">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>275</x>
-          <y>234</y>
-          <width>101</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Save deposition</string>
-        </property>
-       </widget>
-       <widget class="Line" name="line_6">
-        <property name="geometry">
-         <rect>
-          <x>-14</x>
-          <y>260</y>
-          <width>541</width>
-          <height>11</height>
-         </rect>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="lineWidth">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbBuilPhotonTrackstester">
-        <property name="geometry">
-         <rect>
-          <x>141</x>
-          <y>281</y>
-          <width>121</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Build photon tracks</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
        <widget class="QCheckBox" name="cbDoS1tester">
         <property name="geometry">
          <rect>
-          <x>277</x>
-          <y>270</y>
+          <x>214</x>
+          <y>269</y>
           <width>141</width>
           <height>17</height>
          </rect>
@@ -15608,8 +15429,8 @@ multiply to loaded data</string>
         </property>
         <property name="geometry">
          <rect>
-          <x>277</x>
-          <y>293</y>
+          <x>214</x>
+          <y>290</y>
           <width>171</width>
           <height>17</height>
          </rect>
@@ -15627,7 +15448,7 @@ multiply to loaded data</string>
        <widget class="QPushButton" name="pbTrackStack">
         <property name="geometry">
          <rect>
-          <x>3</x>
+          <x>70</x>
           <y>214</y>
           <width>131</width>
           <height>38</height>
@@ -15647,7 +15468,7 @@ on stack</string>
        <widget class="QPushButton" name="pbGenerateLight">
         <property name="geometry">
          <rect>
-          <x>3</x>
+          <x>70</x>
           <y>270</y>
           <width>131</width>
           <height>38</height>
@@ -15676,7 +15497,7 @@ on stack</string>
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="lineWidth">
-         <number>2</number>
+         <number>1</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -15823,66 +15644,19 @@ on stack</string>
         <zorder>line_57</zorder>
         <zorder>bpResults_2</zorder>
        </widget>
-       <widget class="Line" name="line_51">
+       <widget class="QPushButton" name="pbTrackOptionsStack">
         <property name="geometry">
          <rect>
-          <x>310</x>
-          <y>220</y>
-          <width>76</width>
-          <height>3</height>
+          <x>390</x>
+          <y>250</y>
+          <width>101</width>
+          <height>23</height>
          </rect>
         </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+        <property name="text">
+         <string>tracks options</string>
         </property>
        </widget>
-       <zorder>line_51</zorder>
-       <zorder>label_102</zorder>
-       <zorder>label_51</zorder>
-       <zorder>label_104</zorder>
-       <zorder>teParticleStack</zorder>
-       <zorder>label_112</zorder>
-       <zorder>label_2</zorder>
-       <zorder>label_106</zorder>
-       <zorder>cbHideStackText</zorder>
-       <zorder>ledParticleStackX</zorder>
-       <zorder>label_110</zorder>
-       <zorder>label_107</zorder>
-       <zorder>label_109</zorder>
-       <zorder>cobParticleToStack</zorder>
-       <zorder>pbAddParticleToStack</zorder>
-       <zorder>pbClearAllStack</zorder>
-       <zorder>ledParticleStackEnergy</zorder>
-       <zorder>line_4</zorder>
-       <zorder>sbStackElement</zorder>
-       <zorder>label_103</zorder>
-       <zorder>label_105</zorder>
-       <zorder>ledParticleStackZ</zorder>
-       <zorder>label_111</zorder>
-       <zorder>pbRefreshStack</zorder>
-       <zorder>label_113</zorder>
-       <zorder>ledParticleStackVx</zorder>
-       <zorder>ledParticleStackTime</zorder>
-       <zorder>label_108</zorder>
-       <zorder>sbNumCopies</zorder>
-       <zorder>ledParticleStackVz</zorder>
-       <zorder>ledParticleStackVy</zorder>
-       <zorder>ledParticleStackY</zorder>
-       <zorder>pbRemoveFromStack</zorder>
-       <zorder>line_5</zorder>
-       <zorder>cbReassignMatIndex</zorder>
-       <zorder>cbBuildParticleTrackstester</zorder>
-       <zorder>line_56</zorder>
-       <zorder>pbImportDeposition</zorder>
-       <zorder>pbExportDeposition</zorder>
-       <zorder>line_6</zorder>
-       <zorder>cbBuilPhotonTrackstester</zorder>
-       <zorder>cbDoS1tester</zorder>
-       <zorder>cbDoS2tester</zorder>
-       <zorder>pbTrackStack</zorder>
-       <zorder>pbGenerateLight</zorder>
-       <zorder>line_19</zorder>
-       <zorder>fParticleDepositionChecker</zorder>
       </widget>
      </widget>
      <widget class="QPushButton" name="pbShowCheckUpWindow">
@@ -16351,8 +16125,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>226</x>
-     <y>540</y>
+     <x>224</x>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16623,7 +16397,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
+     <x>417</x>
      <y>363</y>
     </hint>
     <hint type="destinationlabel">
@@ -16639,7 +16413,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
+     <x>417</x>
      <y>394</y>
     </hint>
     <hint type="destinationlabel">
@@ -16655,7 +16429,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>416</x>
+     <x>417</x>
      <y>424</y>
     </hint>
     <hint type="destinationlabel">
@@ -16819,7 +16593,7 @@ on stack</string>
      <y>380</y>
     </hint>
     <hint type="destinationlabel">
-     <x>452</x>
+     <x>465</x>
      <y>382</y>
     </hint>
    </hints>
@@ -16851,8 +16625,8 @@ on stack</string>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>494</x>
-     <y>314</y>
+     <x>504</x>
+     <y>336</y>
     </hint>
    </hints>
   </connection>
@@ -17087,8 +16861,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>344</y>
+     <x>203</x>
+     <y>366</y>
     </hint>
     <hint type="destinationlabel">
      <x>442</x>
@@ -17263,8 +17037,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -17279,8 +17053,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -17295,8 +17069,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>443</y>
+     <x>441</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17311,8 +17085,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -17327,8 +17101,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -17343,8 +17117,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17359,8 +17133,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>382</y>
+     <x>163</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17375,8 +17149,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>493</x>
-     <y>259</y>
+     <x>497</x>
+     <y>257</y>
     </hint>
     <hint type="destinationlabel">
      <x>294</x>
@@ -17392,7 +17166,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>317</x>
-     <y>442</y>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -17427,7 +17201,7 @@ on stack</string>
      <y>466</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
+     <x>369</x>
      <y>469</y>
     </hint>
    </hints>
@@ -17487,8 +17261,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
-     <y>217</y>
+     <x>390</x>
+     <y>215</y>
     </hint>
     <hint type="destinationlabel">
      <x>289</x>
@@ -17503,8 +17277,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>393</x>
-     <y>237</y>
+     <x>396</x>
+     <y>235</y>
     </hint>
     <hint type="destinationlabel">
      <x>306</x>
@@ -17519,8 +17293,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>382</x>
-     <y>257</y>
+     <x>386</x>
+     <y>255</y>
     </hint>
     <hint type="destinationlabel">
      <x>297</x>
@@ -17535,8 +17309,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>476</x>
-     <y>231</y>
+     <x>480</x>
+     <y>229</y>
     </hint>
     <hint type="destinationlabel">
      <x>318</x>
@@ -17551,8 +17325,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>506</x>
-     <y>252</y>
+     <x>510</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>321</x>
@@ -17616,7 +17390,7 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>396</x>
-     <y>225</y>
+     <y>223</y>
     </hint>
     <hint type="destinationlabel">
      <x>326</x>
@@ -17631,8 +17405,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>252</y>
+     <x>373</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -17647,8 +17421,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>468</x>
-     <y>244</y>
+     <x>472</x>
+     <y>242</y>
     </hint>
     <hint type="destinationlabel">
      <x>262</x>
@@ -17711,8 +17485,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>449</x>
-     <y>368</y>
+     <x>465</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>126</x>
@@ -17759,8 +17533,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>457</y>
+     <x>260</x>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
      <x>141</x>
@@ -17891,8 +17665,8 @@ on stack</string>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>220</x>
-     <y>600</y>
+     <x>22</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -17907,7 +17681,7 @@ on stack</string>
      <y>136</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
+     <x>19</x>
      <y>601</y>
     </hint>
    </hints>
@@ -17923,7 +17697,7 @@ on stack</string>
      <y>158</y>
     </hint>
     <hint type="destinationlabel">
-     <x>257</x>
+     <x>59</x>
      <y>601</y>
     </hint>
    </hints>
@@ -17939,7 +17713,7 @@ on stack</string>
      <y>123</y>
     </hint>
     <hint type="destinationlabel">
-     <x>265</x>
+     <x>67</x>
      <y>601</y>
     </hint>
    </hints>
@@ -17955,23 +17729,7 @@ on stack</string>
      <y>123</y>
     </hint>
     <hint type="destinationlabel">
-     <x>322</x>
-     <y>601</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sbParticleTrackColorIndexAdd</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>500</x>
-     <y>151</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>328</x>
+     <x>124</x>
      <y>601</y>
     </hint>
    </hints>
@@ -17987,7 +17745,7 @@ on stack</string>
      <y>113</y>
     </hint>
     <hint type="destinationlabel">
-     <x>292</x>
+     <x>94</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18003,23 +17761,7 @@ on stack</string>
      <y>155</y>
     </hint>
     <hint type="destinationlabel">
-     <x>232</x>
-     <y>601</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbOnlyBuildTracksOnPMs</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>465</x>
-     <y>133</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>326</x>
+     <x>34</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18032,10 +17774,10 @@ on stack</string>
    <hints>
     <hint type="sourcelabel">
      <x>445</x>
-     <y>155</y>
+     <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>331</x>
+     <x>131</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18051,7 +17793,7 @@ on stack</string>
      <y>144</y>
     </hint>
     <hint type="destinationlabel">
-     <x>238</x>
+     <x>40</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18067,7 +17809,7 @@ on stack</string>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>226</x>
+     <x>28</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18079,12 +17821,12 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>174</x>
+     <x>172</x>
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>224</x>
-     <y>596</y>
+     <x>26</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18099,8 +17841,8 @@ on stack</string>
      <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>263</x>
-     <y>596</y>
+     <x>65</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18115,7 +17857,7 @@ on stack</string>
      <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>325</x>
+     <x>127</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18131,7 +17873,7 @@ on stack</string>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>218</x>
+     <x>20</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18147,7 +17889,7 @@ on stack</string>
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>234</x>
+     <x>36</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18163,7 +17905,7 @@ on stack</string>
      <y>146</y>
     </hint>
     <hint type="destinationlabel">
-     <x>330</x>
+     <x>131</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18179,7 +17921,7 @@ on stack</string>
      <y>137</y>
     </hint>
     <hint type="destinationlabel">
-     <x>281</x>
+     <x>83</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18195,7 +17937,7 @@ on stack</string>
      <y>235</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
+     <x>31</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18211,7 +17953,7 @@ on stack</string>
      <y>235</y>
     </hint>
     <hint type="destinationlabel">
-     <x>327</x>
+     <x>129</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18227,8 +17969,8 @@ on stack</string>
      <y>240</y>
     </hint>
     <hint type="destinationlabel">
-     <x>309</x>
-     <y>594</y>
+     <x>111</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18243,7 +17985,7 @@ on stack</string>
      <y>240</y>
     </hint>
     <hint type="destinationlabel">
-     <x>315</x>
+     <x>117</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18259,8 +18001,8 @@ on stack</string>
      <y>238</y>
     </hint>
     <hint type="destinationlabel">
-     <x>317</x>
-     <y>596</y>
+     <x>119</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18275,7 +18017,7 @@ on stack</string>
      <y>238</y>
     </hint>
     <hint type="destinationlabel">
-     <x>312</x>
+     <x>114</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18291,8 +18033,8 @@ on stack</string>
      <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>256</x>
-     <y>596</y>
+     <x>58</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18307,8 +18049,8 @@ on stack</string>
      <y>430</y>
     </hint>
     <hint type="destinationlabel">
-     <x>316</x>
-     <y>598</y>
+     <x>118</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18323,8 +18065,8 @@ on stack</string>
      <y>516</y>
     </hint>
     <hint type="destinationlabel">
-     <x>308</x>
-     <y>588</y>
+     <x>110</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18339,8 +18081,8 @@ on stack</string>
      <y>516</y>
     </hint>
     <hint type="destinationlabel">
-     <x>291</x>
-     <y>596</y>
+     <x>93</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18355,7 +18097,7 @@ on stack</string>
      <y>492</y>
     </hint>
     <hint type="destinationlabel">
-     <x>282</x>
+     <x>84</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18371,7 +18113,7 @@ on stack</string>
      <y>187</y>
     </hint>
     <hint type="destinationlabel">
-     <x>295</x>
+     <x>97</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18387,8 +18129,8 @@ on stack</string>
      <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
-     <y>597</y>
+     <x>46</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18403,7 +18145,7 @@ on stack</string>
      <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>290</x>
+     <x>92</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18419,7 +18161,7 @@ on stack</string>
      <y>419</y>
     </hint>
     <hint type="destinationlabel">
-     <x>310</x>
+     <x>112</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18435,8 +18177,8 @@ on stack</string>
      <y>398</y>
     </hint>
     <hint type="destinationlabel">
-     <x>238</x>
-     <y>595</y>
+     <x>40</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18451,7 +18193,7 @@ on stack</string>
      <y>398</y>
     </hint>
     <hint type="destinationlabel">
-     <x>259</x>
+     <x>61</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18467,7 +18209,7 @@ on stack</string>
      <y>398</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
+     <x>88</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18483,7 +18225,7 @@ on stack</string>
      <y>440</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
+     <x>31</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18499,8 +18241,8 @@ on stack</string>
      <y>440</y>
     </hint>
     <hint type="destinationlabel">
-     <x>246</x>
-     <y>597</y>
+     <x>48</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18515,7 +18257,7 @@ on stack</string>
      <y>440</y>
     </hint>
     <hint type="destinationlabel">
-     <x>245</x>
+     <x>47</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18531,7 +18273,7 @@ on stack</string>
      <y>441</y>
     </hint>
     <hint type="destinationlabel">
-     <x>281</x>
+     <x>83</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18547,7 +18289,7 @@ on stack</string>
      <y>440</y>
     </hint>
     <hint type="destinationlabel">
-     <x>299</x>
+     <x>101</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18563,7 +18305,7 @@ on stack</string>
      <y>459</y>
     </hint>
     <hint type="destinationlabel">
-     <x>241</x>
+     <x>43</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18579,8 +18321,8 @@ on stack</string>
      <y>461</y>
     </hint>
     <hint type="destinationlabel">
-     <x>212</x>
-     <y>592</y>
+     <x>14</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18595,7 +18337,7 @@ on stack</string>
      <y>461</y>
     </hint>
     <hint type="destinationlabel">
-     <x>226</x>
+     <x>28</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18611,8 +18353,8 @@ on stack</string>
      <y>461</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
-     <y>597</y>
+     <x>50</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18627,8 +18369,8 @@ on stack</string>
      <y>462</y>
     </hint>
     <hint type="destinationlabel">
-     <x>275</x>
-     <y>598</y>
+     <x>77</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18643,8 +18385,8 @@ on stack</string>
      <y>461</y>
     </hint>
     <hint type="destinationlabel">
-     <x>320</x>
-     <y>595</y>
+     <x>122</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18659,7 +18401,7 @@ on stack</string>
      <y>480</y>
     </hint>
     <hint type="destinationlabel">
-     <x>242</x>
+     <x>44</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18675,7 +18417,7 @@ on stack</string>
      <y>482</y>
     </hint>
     <hint type="destinationlabel">
-     <x>250</x>
+     <x>52</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18691,8 +18433,8 @@ on stack</string>
      <y>482</y>
     </hint>
     <hint type="destinationlabel">
-     <x>234</x>
-     <y>598</y>
+     <x>36</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18707,7 +18449,7 @@ on stack</string>
      <y>482</y>
     </hint>
     <hint type="destinationlabel">
-     <x>248</x>
+     <x>50</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18723,7 +18465,7 @@ on stack</string>
      <y>483</y>
     </hint>
     <hint type="destinationlabel">
-     <x>273</x>
+     <x>75</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18739,23 +18481,7 @@ on stack</string>
      <y>482</y>
     </hint>
     <hint type="destinationlabel">
-     <x>309</x>
-     <y>601</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbPointSourceBuildTracks</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>420</x>
-     <y>544</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>319</x>
+     <x>111</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18771,7 +18497,7 @@ on stack</string>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>234</x>
+     <x>36</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18787,7 +18513,7 @@ on stack</string>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>249</x>
+     <x>51</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18803,7 +18529,7 @@ on stack</string>
      <y>436</y>
     </hint>
     <hint type="destinationlabel">
-     <x>238</x>
+     <x>40</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18819,7 +18545,7 @@ on stack</string>
      <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>255</x>
+     <x>57</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18835,8 +18561,8 @@ on stack</string>
      <y>436</y>
     </hint>
     <hint type="destinationlabel">
-     <x>256</x>
-     <y>600</y>
+     <x>58</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18851,8 +18577,8 @@ on stack</string>
      <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>235</x>
-     <y>600</y>
+     <x>37</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18867,7 +18593,7 @@ on stack</string>
      <y>433</y>
     </hint>
     <hint type="destinationlabel">
-     <x>295</x>
+     <x>97</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18883,7 +18609,7 @@ on stack</string>
      <y>456</y>
     </hint>
     <hint type="destinationlabel">
-     <x>308</x>
+     <x>110</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18899,7 +18625,7 @@ on stack</string>
      <y>438</y>
     </hint>
     <hint type="destinationlabel">
-     <x>229</x>
+     <x>31</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18915,7 +18641,7 @@ on stack</string>
      <y>459</y>
     </hint>
     <hint type="destinationlabel">
-     <x>231</x>
+     <x>33</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18931,8 +18657,8 @@ on stack</string>
      <y>438</y>
     </hint>
     <hint type="destinationlabel">
-     <x>266</x>
-     <y>595</y>
+     <x>68</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -18947,7 +18673,7 @@ on stack</string>
      <y>459</y>
     </hint>
     <hint type="destinationlabel">
-     <x>256</x>
+     <x>58</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18963,7 +18689,7 @@ on stack</string>
      <y>456</y>
     </hint>
     <hint type="destinationlabel">
-     <x>317</x>
+     <x>119</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18979,7 +18705,7 @@ on stack</string>
      <y>456</y>
     </hint>
     <hint type="destinationlabel">
-     <x>320</x>
+     <x>122</x>
      <y>601</y>
     </hint>
    </hints>
@@ -18995,8 +18721,8 @@ on stack</string>
      <y>372</y>
     </hint>
     <hint type="destinationlabel">
-     <x>247</x>
-     <y>592</y>
+     <x>49</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19011,7 +18737,7 @@ on stack</string>
      <y>448</y>
     </hint>
     <hint type="destinationlabel">
-     <x>252</x>
+     <x>54</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19027,8 +18753,8 @@ on stack</string>
      <y>448</y>
     </hint>
     <hint type="destinationlabel">
-     <x>251</x>
-     <y>599</y>
+     <x>53</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19043,7 +18769,7 @@ on stack</string>
      <y>448</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
+     <x>46</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19059,8 +18785,8 @@ on stack</string>
      <y>372</y>
     </hint>
     <hint type="destinationlabel">
-     <x>220</x>
-     <y>591</y>
+     <x>22</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19075,7 +18801,7 @@ on stack</string>
      <y>404</y>
     </hint>
     <hint type="destinationlabel">
-     <x>251</x>
+     <x>53</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19091,7 +18817,7 @@ on stack</string>
      <y>108</y>
     </hint>
     <hint type="destinationlabel">
-     <x>246</x>
+     <x>48</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19107,7 +18833,7 @@ on stack</string>
      <y>134</y>
     </hint>
     <hint type="destinationlabel">
-     <x>258</x>
+     <x>60</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19123,8 +18849,8 @@ on stack</string>
      <y>362</y>
     </hint>
     <hint type="destinationlabel">
-     <x>216</x>
-     <y>594</y>
+     <x>18</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19139,8 +18865,8 @@ on stack</string>
      <y>450</y>
     </hint>
     <hint type="destinationlabel">
-     <x>319</x>
-     <y>589</y>
+     <x>121</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19155,8 +18881,8 @@ on stack</string>
      <y>495</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
-     <y>596</y>
+     <x>19</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19171,8 +18897,8 @@ on stack</string>
      <y>515</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
-     <y>589</y>
+     <x>46</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19187,8 +18913,8 @@ on stack</string>
      <y>517</y>
     </hint>
     <hint type="destinationlabel">
-     <x>311</x>
-     <y>590</y>
+     <x>113</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19203,7 +18929,7 @@ on stack</string>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
-     <x>264</x>
+     <x>66</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19219,39 +18945,7 @@ on stack</string>
      <y>566</y>
     </hint>
     <hint type="destinationlabel">
-     <x>278</x>
-     <y>601</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunParticleTracks</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>502</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>323</x>
-     <y>590</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbGunPhotonTracks</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateSimConfig</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>513</x>
-     <y>566</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>314</x>
+     <x>80</x>
      <y>601</y>
     </hint>
    </hints>
@@ -19263,8 +18957,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -19295,8 +18989,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>472</y>
+     <x>249</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19311,8 +19005,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>458</y>
+     <x>233</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -19327,8 +19021,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>496</y>
+     <x>233</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -19359,8 +19053,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>154</x>
-     <y>382</y>
+     <x>164</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -19375,8 +19069,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>217</x>
-     <y>442</y>
+     <x>227</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -19391,8 +19085,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>392</x>
-     <y>479</y>
+     <x>390</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -19407,8 +19101,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>442</y>
+     <x>239</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -19423,7 +19117,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
+     <x>208</x>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
@@ -19439,11 +19133,11 @@ on stack</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>176</x>
+     <x>186</x>
      <y>406</y>
     </hint>
     <hint type="destinationlabel">
-     <x>169</x>
+     <x>179</x>
      <y>432</y>
     </hint>
    </hints>
@@ -19455,7 +19149,7 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
+     <x>237</x>
      <y>432</y>
     </hint>
     <hint type="destinationlabel">
@@ -19475,8 +19169,8 @@ on stack</string>
      <y>158</y>
     </hint>
     <hint type="destinationlabel">
-     <x>290</x>
-     <y>595</y>
+     <x>92</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19507,8 +19201,8 @@ on stack</string>
      <y>560</y>
     </hint>
     <hint type="destinationlabel">
-     <x>215</x>
-     <y>571</y>
+     <x>17</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19523,8 +19217,8 @@ on stack</string>
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
-     <x>321</x>
-     <y>573</y>
+     <x>123</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19539,8 +19233,8 @@ on stack</string>
      <y>516</y>
     </hint>
     <hint type="destinationlabel">
-     <x>281</x>
-     <y>580</y>
+     <x>83</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>
@@ -19573,22 +19267,6 @@ on stack</string>
     <hint type="destinationlabel">
      <x>418</x>
      <y>254</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbBuildParticleTrackstester</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbGunParticleTracks</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>257</x>
-     <y>324</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>526</x>
-     <y>546</y>
     </hint>
    </hints>
   </connection>
@@ -19689,22 +19367,6 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cbGunParticleTracks</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>cbBuildParticleTrackstester</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>526</x>
-     <y>546</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>246</x>
-     <y>324</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cbHideStackText</sender>
    <signal>clicked()</signal>
    <receiver>pbRefreshStack</receiver>
@@ -19727,8 +19389,8 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>349</x>
-     <y>393</y>
+     <x>353</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -19747,8 +19409,8 @@ on stack</string>
      <y>566</y>
     </hint>
     <hint type="destinationlabel">
-     <x>329</x>
-     <y>393</y>
+     <x>333</x>
+     <y>390</y>
     </hint>
    </hints>
   </connection>
@@ -19759,8 +19421,8 @@ on stack</string>
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>344</x>
-     <y>370</y>
+     <x>348</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>357</x>
@@ -19779,8 +19441,8 @@ on stack</string>
      <y>546</y>
     </hint>
     <hint type="destinationlabel">
-     <x>329</x>
-     <y>370</y>
+     <x>333</x>
+     <y>369</y>
     </hint>
    </hints>
   </connection>
@@ -19807,8 +19469,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>495</y>
+     <x>249</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -19823,8 +19485,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>382</y>
+     <x>120</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -19839,8 +19501,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>272</x>
-     <y>474</y>
+     <x>282</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
@@ -19875,8 +19537,8 @@ on stack</string>
      <y>362</y>
     </hint>
     <hint type="destinationlabel">
-     <x>217</x>
-     <y>570</y>
+     <x>19</x>
+     <y>601</y>
     </hint>
    </hints>
   </connection>

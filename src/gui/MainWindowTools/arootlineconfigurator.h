@@ -6,6 +6,7 @@
 class QPainter;
 class QSpinBox;
 class QComboBox;
+class QFrame;
 
 class ARootLineConfigurator : public QDialog
 {
@@ -25,10 +26,13 @@ private:
   QSpinBox* sbWidth;
   QComboBox* comStyle;
   QSpinBox* sbColor;
+  QFrame* frCol;
 
   void PaintColorRow(QPainter *p, int row, int colorBase);
 
 private slots:
+  void updateColorFrame();
+  void previewColor();
   void onAccept();
 };
 

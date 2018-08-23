@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 10
+ANTS2_MINOR = 12
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -9,6 +9,7 @@ ANTS2_MINOR = 10
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
+#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -200,6 +201,30 @@ ants2_Python{
 }
 #----------
 
+#---NCrystal---
+#see https://github.com/mctools/ncrystal
+ants2_NCrystal{
+    DEFINES += __USE_ANTS_NCRYSTAL__
+
+    win32:{
+            INCLUDEPATH += C:/NCrystal/ncrystal_core/include
+            LIBS += -LC:/NCrystal/lib -lNCrystal
+    }
+    linux-g++ || unix {
+            INCLUDEPATH += /home/andr/Work/NCrystal/include
+
+            LIBS += -L/home/andr/Work/NCrystal/lib/
+            #LIBS += -lNCrystal
+            LIBS += NCrystal.dll
+    }
+
+    SOURCES += common/arandomgenncrystal.cpp
+    HEADERS += common/arandomgenncrystal.h
+}
+#----------
+
+
+
 #Can be used as command line option to force-disable GUI
 Headless {
 message("--> Compiling without GUI")
@@ -314,7 +339,8 @@ SOURCES += main.cpp \
     scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
-    Net/aremoteserverrecord.cpp
+    Net/aremoteserverrecord.cpp \
+    common/atrackbuildoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -437,7 +463,8 @@ HEADERS  += common/CorrelationFilters.h \
     Net/awebsocketsession.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
-    Net/aremoteserverrecord.h
+    Net/aremoteserverrecord.h \
+    common/atrackbuildoptions.h
 
 # --- SIM ---
 ants2_SIM {
@@ -551,7 +578,9 @@ ants2_GUI {
     common/acollapsiblegroupbox.cpp \
     gui/MainWindowTools/slabdelegate.cpp \
     gui/aremotewindow.cpp \
+    gui/MainWindowTools/atrackdrawdialog.cpp \
     gui/aserverdelegate.cpp
+
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -607,6 +636,7 @@ HEADERS  += gui/mainwindow.h \
     common/acollapsiblegroupbox.h \
     gui/awebsocketserverdialog.h \
     gui/aremotewindow.h \
+    gui/MainWindowTools/atrackdrawdialog.h \
     gui/aserverdelegate.h
 
 FORMS += gui/mainwindow.ui \
@@ -636,7 +666,8 @@ FORMS += gui/mainwindow.ui \
     gui/aneutronreactionwidget.ui \
     gui/aneutroninfodialog.ui \
     gui/awebsocketserverdialog.ui \
-    gui/aremotewindow.ui
+    gui/aremotewindow.ui \
+    gui/MainWindowTools/atrackdrawdialog.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -695,6 +726,7 @@ linux-g++ || unix {
 win32 {
   #CONFIG   += console                  #enable to add standalone console for Windows
   DEFINES  += _CRT_SECURE_NO_WARNINGS   #disable microsoft spam
+  DEFINES  += _LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER #disables warning C4068: unknown pragma
   #DEFINES += WINDOWSBIN                #enable for compilation in Windows binary-only mode
 }
 #------------

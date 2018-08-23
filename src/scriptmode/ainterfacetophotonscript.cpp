@@ -445,7 +445,7 @@ bool AInterfaceToPhotonScript::initTracer()
     simSet.bDoPhotonHistoryLog = true;
     simSet.fQEaccelerator = false;    
     simSet.fLogsStat = true;
-    simSet.MaxNumberOfTracks = MaxNumberTracks - AlreadyStoredTracks;
+    simSet.TrackBuildOptions.MaxParticleTracks = MaxNumberTracks - AlreadyStoredTracks;
 
     Event->configure(&simSet);
     bool bBuildTracksThisTime = bBuildTracks && (AlreadyStoredTracks < MaxNumberTracks);

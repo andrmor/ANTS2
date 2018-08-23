@@ -41,7 +41,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
   cjs["DoS1"] = ui->cbGunDoS1->isChecked();
   cjs["DoS2"] = ui->cbGunDoS2->isChecked();
-  cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
+  //cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
   cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
   cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
   masterjs["SourceControlOptions"] = cjs;

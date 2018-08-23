@@ -26,7 +26,7 @@ bool AWebSocketSessionServer::StartListen(QHostAddress ip, quint16 port)
     if ( !server->listen(ip, port) ) //QHostAddress::LocalHost QHostAddress::Any QHostAddress::AnyIPv4
     {
         QString s = QString("WebSocket was unable to start listening on IP ") + ip.toString() + " and port " + QString::number(port);
-        qCritical(s.toLatin1());
+        qCritical() << s;
         return false;
     }
 

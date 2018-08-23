@@ -180,6 +180,8 @@ void AInterfaceToDepoScript::populateParticleRecords()
 }
 
 #include "aconfiguration.h"
+#include "apmhub.h"
+#include "amaterialparticlecolection.h"
 bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
 {
     clearEnergyVector();
@@ -213,7 +215,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
             cjs["AllowMultipleParticles"] = false;
             cjs["DoS1"] = false;
             cjs["DoS2"] = false;
-            cjs["ParticleTracks"] = bDoTracks;
+            //cjs["ParticleTracks"] = bDoTracks;
             cjs["IgnoreNoHitsEvents"] = false;
             cjs["IgnoreNoDepoEvents"] = false;
         js["SourceControlOptions"] = cjs;
@@ -224,15 +226,18 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     GeneralSimSettings simSettings;
     simSettings.readFromJson(json);
     simSettings.fLogsStat = true; //force to populate logs
+    simSettings.TrackBuildOptions.bBuildParticleTracks = bDoTracks;
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
     pss->setSimSettings(&simSettings);
     pss->setup(json);
     pss->initSimStat();
     pss->setRngSeed(Detector->RandGen->Rndm()*1000000);
 
     EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
+    Detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
+    Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen, 1); //update wave-resolved properties of materials and runtime properties for neutrons
 
     bool fOK = pss->standaloneTrackStack(&ParticleStack);
     if (!fOK)
@@ -258,7 +263,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
         {
             TrackHolderClass* th = pss->tracks[iTr];
 
-            if (numTracks < GlobSet->MaxNumberOfTracks)
+            if (numTracks < simSettings.TrackBuildOptions.MaxParticleTracks)
             {
                 TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                 track->SetLineColor(th->Color);
@@ -320,7 +325,7 @@ QString AInterfaceToDepoScript::terminationStr(int i)
     case 7:  return "was created outside of the world";
     case 8:  return "entered material with tracking forbidden";
     case 9:  return "pair production";
-    case 10: return "ellastic";
+    case 10: return "elastic";
     case 11: return "stopped by monitor";
     default: return "unknown termination";
     }

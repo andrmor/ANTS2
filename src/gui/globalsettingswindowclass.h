@@ -74,8 +74,6 @@ private slots:
 
   void on_sbNumSegments_editingFinished();
 
-  void on_sbMaxNumTracks_editingFinished();
-
   void on_sbNumPointsFunctionX_editingFinished();
 
   void on_sbNumPointsFunctionY_editingFinished();

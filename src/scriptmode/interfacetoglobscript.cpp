@@ -523,7 +523,8 @@ bool AInterfaceToConfig::SetConfig(const QVariant &conf)
         return false;
       }
 
-    if (conf.type() == QMetaType::QVariantMap)
+    //if (conf.type() == QMetaType::QVariantMap)
+    if (conf.type() == QVariant::Map)
     {
         QVariantMap vm = conf.toMap();
         QJsonObject json = QJsonObject::fromVariantMap(vm);

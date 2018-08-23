@@ -46,14 +46,20 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
-void AMaterialParticleCollection::UpdateWavelengthBinning(GeneralSimSettings *SimSet)
+void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
-  for (int i=0; i<MaterialCollectionData.size(); i++)
+  for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
   {
-    UpdateWaveResolvedProperties(i);
-    UpdateNeutronProperties(i);
+    UpdateWaveResolvedProperties(imat);
+    MaterialCollectionData[imat]->updateRuntimeProperties(fLogLogInterpolation, RandGen, numThreads);
   }
+}
+
+void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* RandGen)
+{
+    for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
+        MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)
@@ -151,34 +157,6 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
   //inicialize empty MatParticle vector for all defined particles
   int numParticles = ParticleCollection.size();
   m->MatParticle.resize(numParticles);
-  for (int i=0; i<numParticles; i++)
-    {
-      m->MatParticle[i].TrackingAllowed = false;
-      m->MatParticle[i].PhYield=0;
-      m->MatParticle[i].IntrEnergyRes=0;
-      m->MatParticle[i].bCaptureEnabled=true;
-      m->MatParticle[i].bEllasticEnabled=false;
-      m->MatParticle[i].InteractionDataX.resize(0);
-      m->MatParticle[i].InteractionDataF.resize(0);
-      m->MatParticle[i].Terminators.resize(0);
-    }
-
-  //initialize wavelength-resolved data
-  m->PrimarySpectrum_lambda.clear();
-  m->PrimarySpectrum.clear();
-  m->PrimarySpectrumHist = 0;
-  m->SecondarySpectrum_lambda.clear();
-  m->SecondarySpectrum.clear();
-  m->SecondarySpectrumHist = 0;
-  m->nWave_lambda.clear();
-  m->nWave.clear();
-  m->nWaveBinned.clear();
-  m->absWave_lambda.clear();
-  m->absWave.clear();
-  m->absWaveBinned.clear();
-  m->reemisProbWave.clear();
-  m->reemisProbWave_lambda.clear();
-  m->reemissionProbBinned.clear();
 
   //appending to the material collection
   MaterialCollectionData.append(m);
@@ -191,51 +169,20 @@ void AMaterialParticleCollection::AddNewMaterial(bool fSuppressChangedSignal)
   if (!fSuppressChangedSignal) generateMaterialsChangedSignal();
 }
 
-void AMaterialParticleCollection::AddNewMaterial(QString name)
+void AMaterialParticleCollection::AddNewMaterial(QString name, bool fSuppressChangedSignal)
 {
-    AddNewMaterial();
+    AddNewMaterial(true);
     MaterialCollectionData.last()->name = name;
-}
+    ensureMatNameIsUnique(MaterialCollectionData.last());
 
-void AMaterialParticleCollection::UpdateMaterial(int index, QString name, double density, double n, double abs, double PriScintDecayTime,
-                                             double W, double SecYield, double SecScintDecayTime, double e_driftVelocity,
-                                             double p1, double p2, double p3)
-{
-  if (index <0 || index > MaterialCollectionData.size()-1)
-    {
-      qWarning()<<"Attempt to update non-existing material in UpdateMaterial!";
-      return;
-    }
-
-  MaterialCollectionData[index]->name = name;
-
-  MaterialCollectionData[index]->density = density;
-  MaterialCollectionData[index]->n = n;
-  MaterialCollectionData[index]->abs = abs;
-
-  MaterialCollectionData[index]->PriScintRaiseTime = 0;
-  MaterialCollectionData[index]->PriScintModel = 0;
-
-  MaterialCollectionData[index]->PriScintDecayTimeVector.clear();
-  if (PriScintDecayTime != 0)
-    MaterialCollectionData[index]->PriScintDecayTimeVector << QPair<double,double>(1.0, PriScintDecayTime);
-
-  MaterialCollectionData[index]->W = W;
-  MaterialCollectionData[index]->SecYield = SecYield;
-  MaterialCollectionData[index]->SecScintDecayTime = SecScintDecayTime;
-  MaterialCollectionData[index]->e_driftVelocity = e_driftVelocity;
-
-  MaterialCollectionData[index]->p1 = p1;
-  MaterialCollectionData[index]->p2 = p2;
-  MaterialCollectionData[index]->p3 = p3;
-
-  generateMaterialsChangedSignal();
+    if (!fSuppressChangedSignal) generateMaterialsChangedSignal();
 }
 
 void AMaterialParticleCollection::ClearTmpMaterial()
 {
   tmpMaterial.name = "";
   tmpMaterial.density = 0;
+  tmpMaterial.temperature = 298.0;
   tmpMaterial.p1 = 0;
   tmpMaterial.p2 = 0;
   tmpMaterial.p3 = 0;
@@ -246,11 +193,14 @@ void AMaterialParticleCollection::ClearTmpMaterial()
   tmpMaterial.e_driftVelocity = 0;
   tmpMaterial.W = 0;
   tmpMaterial.SecYield = 0;
-  tmpMaterial.PriScintRaiseTime = 0;
-  tmpMaterial.PriScintModel = 0;
-  tmpMaterial.PriScintDecayTimeVector.clear();
   tmpMaterial.SecScintDecayTime = 0;
   tmpMaterial.Comments = "";
+
+  tmpMaterial.PriScintModel = 0;
+  tmpMaterial.PriScint_Decay.clear();
+  tmpMaterial.PriScint_Decay << APair_ValueAndWeight(0, 1.0);
+  tmpMaterial.PriScint_Raise.clear();
+  tmpMaterial.PriScint_Raise << APair_ValueAndWeight(0, 1.0);
 
   int particles = ParticleCollection.size();
   tmpMaterial.MatParticle.resize(particles);
@@ -444,13 +394,11 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
   }
 }
 
-void AMaterialParticleCollection::UpdateNeutronProperties(int imat)
+bool AMaterialParticleCollection::isNCrystalInUse() const
 {
-    for ( MatParticleStructure& mp : MaterialCollectionData[imat]->MatParticle )
-    {
-        for (NeutralTerminatorStructure& term : mp.Terminators )
-            term.UpdateNeutronCrossSections(fLogLogInterpolation);
-    }
+    for (const AMaterial* m : MaterialCollectionData)
+        if (m->isNCrystalInUse()) return true;
+    return false;
 }
 
 bool AMaterialParticleCollection::AddParticle(QString name, AParticle::ParticleType type, int charge, double mass)
@@ -561,18 +509,18 @@ int AMaterialParticleCollection::findOrCreateParticle(QJsonObject &json)
   return FindCreateParticle(p.ParticleName, p.type, p.charge, p.mass, false);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(const AMaterial* mat, int iPart) const
 {
   return mat->CheckMaterial(iPart, this);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat, int iPart) const
 {
   if (iMat<0 || iMat>MaterialCollectionData.size()-1) return "Wrong material index: " + QString::number(iMat);
   return CheckMaterial(MaterialCollectionData[iMat], iPart);
 }
 
-QString AMaterialParticleCollection::CheckMaterial(int iMat) const
+const QString AMaterialParticleCollection::CheckMaterial(int iMat) const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
@@ -582,7 +530,7 @@ QString AMaterialParticleCollection::CheckMaterial(int iMat) const
   return "";
 }
 
-QString AMaterialParticleCollection::CheckTmpMaterial() const
+const QString AMaterialParticleCollection::CheckTmpMaterial() const
 {
   for (int iPart=0; iPart<ParticleCollection.size(); iPart++)
     {
@@ -808,23 +756,32 @@ void AMaterialParticleCollection::AddNewMaterial(QJsonObject &json) //have to be
   AddNewMaterial();
   AMaterial* mat = MaterialCollectionData.last();
   mat->readFromJson(json, this);
-  QString name = mat->name;
-  bool fFound;
-  do
-    {
-      fFound = false;
-      for (int i=0; i<MaterialCollectionData.size()-2; i++)  //-1 -1 - excluding itself
-        if (MaterialCollectionData[i]->name == name)
-          {
-            fFound = true;
-            name += "*";
-            break;
-          }
-    }
-  while (fFound);
-  mat->name = name;
+
+  ensureMatNameIsUnique(mat);
 
   generateMaterialsChangedSignal();
+}
+
+void AMaterialParticleCollection::ensureMatNameIsUnique(AMaterial* mat)
+{
+    QString name = mat->name;
+    bool fFound;
+    do
+      {
+        fFound = false;
+        for (int i=0; i<MaterialCollectionData.size(); i++)  //-1 -1 - excluding itself
+        {
+          if (mat == MaterialCollectionData[i]) continue;
+          if (MaterialCollectionData[i]->name == name)
+            {
+              fFound = true;
+              name += "*";
+              break;
+            }
+        }
+      }
+    while (fFound);
+    mat->name = name;
 }
 
 int AMaterialParticleCollection::CheckParticleEnergyInRange(int iPart, double Energy)

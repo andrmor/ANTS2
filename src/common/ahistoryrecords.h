@@ -24,7 +24,7 @@ struct EventHistoryStructure
                           CreatedOutside = 7,   // created outside defined geometry
                           FoundUntrackableMaterial = 8,
                           PairProduction = 9,
-                          EllasticScattering = 10,
+                          ElasticScattering = 10,
                           StoppedOnMonitor = 11
                          };  // keep the numbers - scripts operate with int
 
@@ -45,7 +45,7 @@ struct EventHistoryStructure
     static QStringList getAllDefinedTerminationTypes() {return QStringList({"NotFinished", "Escaped", "AllEnergyDisspated", "Photoelectric",
                                                                             "ComptonScattering", "NeutronAbsorption", "ErrorDuringTracking",
                                                                             "CreatedOutside", "FoundUntrackableMaterial", "PairProduction",
-                                                                            "EllasticScattering", "StoppedOnMonitor"});}
+                                                                            "ElasticScattering", "StoppedOnMonitor"});}
 };
 
 struct GeneratedPhotonsHistoryStructure

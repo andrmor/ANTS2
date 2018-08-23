@@ -60,12 +60,14 @@ AIsotopeDelegate::AIsotopeDelegate(AChemicalElement *element, int isotopeIndexIn
         lay->setSpacing(2);
         lay->addWidget(new QLabel("    " + element->Symbol + "-"));
         leiMass = new QLineEdit( QString::number(element->Isotopes.at(isotopeIndexInElement).Mass) );
+        leiMass->setMinimumWidth(50);
         lay->addWidget(leiMass);
         lay->addWidget(new QLabel("   "));
         ledAbund = new QLineEdit( QString::number(element->Isotopes.at(isotopeIndexInElement).Abundancy, 'g', 4) );
+        ledAbund->setMinimumWidth(50);
         lay->addWidget(ledAbund);
         lay->addWidget(new QLabel("%") );
-        lay->addItem( new QSpacerItem(1000, 0, QSizePolicy::Expanding, QSizePolicy::Expanding ) );
+        lay->addItem( new QSpacerItem(100, 0, QSizePolicy::Expanding, QSizePolicy::Expanding ) );
     }
     setLayout(lay);
 

@@ -28,9 +28,10 @@ public:
                                     QVector<AEnergyDepositionCell*>* energyVector,
                                     QVector<EventHistoryStructure*>* eventHistory,
                                     ASimulationStatistics* simStat,
+                                    int threadIndex,
                                     QObject *parent = 0);
     //main usage
-    bool TrackParticlesInStack(int eventId = 0);
+    bool TrackParticlesOnStack(int eventId = 0);
 
     //configure
     void setBuildTracks(bool opt){ BuildTracks = opt;}
@@ -44,7 +45,7 @@ public:
 
     void UpdateGeoManager(TGeoManager* NewGeoManager) {GeoManager = NewGeoManager;} //will be absolete
     void resetCounter() {counter = -1;}  //will be absolute
-    void setAddColorIndex(int val) {AddColorIndex = val;}
+    void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
 signals:
     
@@ -59,8 +60,12 @@ private:
     QVector<EventHistoryStructure*>* EventHistory;
     ASimulationStatistics* SimStat;
 
+    int threadIndex = 0;
+
     const GeneralSimSettings* SimSet;
     bool BuildTracks;
+    int MaxTracks = 10;
+    int ParticleTracksAdded = 0;
     bool RemoveTracksIfNoEnergyDepo;
     QVector<TrackHolderClass*> TrackCandidates;
     QVector<TrackHolderClass*> *Tracks;
@@ -71,7 +76,6 @@ private:
     //double v[3];          //direction vector
 
     int counter;          //particle "serial" number - can be reset from outside
-    int AddColorIndex;    //shift in track color
 
     void GenerateRandomDirection(double* vv);
 };

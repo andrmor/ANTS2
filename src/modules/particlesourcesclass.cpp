@@ -122,7 +122,7 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
   if (NumSources>1)
     {
       double rnd = RandGen->Rndm()*TotalActivity;
-      for (isource; isource<NumSources-1; isource++)
+      for (; isource<NumSources-1; isource++)
         {
           if (ParticleSourcesData[isource]->Activity >= rnd) break; //this source selected
           rnd -= ParticleSourcesData[isource]->Activity;

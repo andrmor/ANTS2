@@ -18,6 +18,8 @@ class AMaterialParticleCollection;
 struct NeutralTerminatorStructure;
 struct MatParticleStructure;
 class TRandom2;
+class APair_ValueAndWeight;
+namespace NCrystal { class Scatter; }
 
 class AMaterial
 {
@@ -26,6 +28,7 @@ public:
 
   QString name;
   double density; //in g/cm3
+  double temperature = 298.0; //in K
   double p1,p2,p3; //parameters for TGeoManager
   double n;   //refractive index for monochrome
   double abs; //exp absorption per mm   for monochrome    (I = I0*exp(-abs*length[mm]))
@@ -36,8 +39,8 @@ public:
   double e_driftVelocity;
   double W; //default W
   double SecYield;  // ph per secondary electron
-  QVector<QPair<double,double> > PriScintDecayTimeVector;  //first = stat weight, second = decay time (ns)
-  double PriScintRaiseTime = 0;
+  QVector<APair_ValueAndWeight> PriScint_Decay;
+  QVector<APair_ValueAndWeight> PriScint_Raise;
   int PriScintModel = 0; //0=sum, 1=Shao
 
   double SecScintDecayTime;
@@ -66,32 +69,36 @@ public:
 
   QVector<double> PrimarySpectrum_lambda;
   QVector<double> PrimarySpectrum;
-  TH1D* PrimarySpectrumHist;    //pointer!
+  TH1D* PrimarySpectrumHist = 0;
   QVector<double> SecondarySpectrum_lambda;
   QVector<double> SecondarySpectrum;
-  TH1D* SecondarySpectrumHist;  //pointer!
+  TH1D* SecondarySpectrumHist = 0;
 
-  TGeoMaterial* GeoMat; //pointer, but it is taken care of by TGEoManager
-  TGeoMedium* GeoMed;   //pointer, but it is taken care of by TGEoManager
+  TGeoMaterial* GeoMat = 0; // handled by TGEoManager
+  TGeoMedium* GeoMed = 0;   // handled by TGEoManager
 
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
   void updateNeutronDataOnCompositionChange(const AMaterialParticleCollection *MPCollection);
-  void updateRuntimeProperties(bool bLogLogInterpolation);
+  void updateRuntimeProperties(bool bLogLogInterpolation, TRandom2* RandGen, int numThreads = 1);
+
+  void UpdateRandGen(int ID, TRandom2* RandGen);
 
   void clear();
   void writeToJson (QJsonObject &json, AMaterialParticleCollection* MpCollection);  //does not save overrides!
   bool readFromJson(QJsonObject &json, AMaterialParticleCollection* MpCollection);
 
-  QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+  const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
+
+  bool isNCrystalInUse() const;
 
 private:
   //run-time properties
-  double _PrimScintSumStatWeight;
+  double _PrimScintSumStatWeight_Decay;
+  double _PrimScintSumStatWeight__Raise;
 
 private:
-  //double ft(double td, double tr, double t) const;
-  double ft(double td, double t) const;
+  double FT(double td, double tr, double t) const;
 };
 
 struct NeutralTerminatorStructure //descriptor for the interaction scenarios for neutral particles
@@ -110,7 +117,8 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
   // exclusive for neutrons
   QVector<ANeutronInteractionElement> IsotopeRecords;
 
-  void UpdateNeutronCrossSections(bool bUseLogLog);   //
+  void UpdateRunTimeProperties(bool bUseLogLog,  TRandom2 *RandGen, int numThreads, double temp = 298.0);
+  void ClearProperties();
 
   ANeutronInteractionElement* getNeutronInteractionElement(int index);  //0 if wrong index
 
@@ -119,18 +127,30 @@ struct NeutralTerminatorStructure //descriptor for the interaction scenarios for
 
   bool isParticleOneOfSecondaries(int iPart) const;
   void prepareForParticleRemove(int iPart);
+
+  QString NCrystal_Ncmat;
+  double NCrystal_Dcutoff = 0;
+  double NCrystal_Packing = 1.0;
+
+#ifdef  __USE_ANTS_NCRYSTAL__
+  QVector<const NCrystal::Scatter *> NCrystal_scatters;
+#endif
+  double getNCrystalCrossSectionBarns(double energy_keV, int threadIndex = 0) const;
+  void   generateScatteringNonOriented(double energy_eV, double & angle, double & delta_ekin_keV, int threadIndex = 0) const;
+  void   UpdateRandGen(int ID, TRandom2 *RandGen);
 };
 
 struct MatParticleStructure  //each paticle have this entry in MaterialStructure
 {
-  bool TrackingAllowed = false;
+  bool TrackingAllowed = true;
   bool MaterialIsTransparent = true;
   double PhYield = 0;         // Photon yield of the primary scintillation
   double IntrEnergyRes = 0; // intrinsic energy resolution
 
-  //for neutrons - separate activation of capture and ellastic scattering is possible
+  //for neutrons - separate activation of capture and elastic scattering is possible
   bool bCaptureEnabled = true;
-  bool bEllasticEnabled = false;
+  bool bElasticEnabled = false;
+  bool bUseNCrystal = false;
   bool bAllowAbsentCsData = false;
 
   QVector<double> InteractionDataX; //energy in keV
@@ -144,6 +164,16 @@ struct MatParticleStructure  //each paticle have this entry in MaterialStructure
   bool CalculateTotalForGamma();  //true - success, false - mismatch in binning of the data
 
   void Clear();
+};
+
+class APair_ValueAndWeight
+{
+public:
+    double value;
+    double statWeight;
+
+    APair_ValueAndWeight(double value, double statWeight) : value(value), statWeight(statWeight) {}
+    APair_ValueAndWeight() {}
 };
 
 #endif // AMATERIAL_H

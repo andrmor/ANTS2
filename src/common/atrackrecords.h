@@ -23,6 +23,7 @@ public:
   QVector<TrackNodeStruct> Nodes;
   Color_t Color;
   Int_t Width;
+  Int_t Style = 1;
   Int_t UserIndex;
 
   TrackHolderClass(Int_t index, Color_t color = kBlack) {UserIndex = index; Color = color;}

@@ -68,7 +68,7 @@ public slots:
   //7 - created outside defined geometry
   //8 - found untrackable material
   //9 - PairProduction
-  //10- EllasticScattering
+  //10- ElasticScattering
   //11- StoppedOnMonitor
   QString terminationStr(int i);
   double dX(int i);

@@ -13,7 +13,7 @@ AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet,
 {
     ui->setupUi(this);
     ui->pbUpdateGlobSet->setVisible(false);
-    ui->cobUnitsForEllastic->setCurrentIndex(1);
+    ui->cobUnits->setCurrentIndex(1);
 
     CrossSectionSystemDir = GlobSet->ResourcesDir + "/Neutrons/CrossSections";
 
@@ -57,7 +57,7 @@ const QString AMatParticleConfigurator::getAbsorptionFileName(QString Element, Q
 
 int AMatParticleConfigurator::getCrossSectionLoadOption() const
 {
-    return ui->cobUnitsForEllastic->currentIndex();
+    return ui->cobUnits->currentIndex();
 }
 
 const QVector<QPair<int, double> > AMatParticleConfigurator::getIsotopes(QString ElementName) const
@@ -138,7 +138,7 @@ int AMatParticleConfigurator::getNumCommentLines() const
 
 void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
 {
-    json["CSunits"] = ui->cobUnitsForEllastic->currentIndex();
+    json["CSunits"] = ui->cobUnits->currentIndex();
     json["OnlyLoadEnergyInRange"] = ui->cbOnlyInRange->isChecked();
     json["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
     json["MaxEnergy"] = ui->ledMaxEnergy->text().toDouble();
@@ -158,7 +158,7 @@ void AMatParticleConfigurator::writeToJson(QJsonObject &json) const
 
 void AMatParticleConfigurator::readFromJson(QJsonObject &json)
 {
-    JsonToComboBox(json, "CSunits", ui->cobUnitsForEllastic);
+    JsonToComboBox(json, "CSunits", ui->cobUnits);
     JsonToCheckbox (json, "OnlyLoadEnergyInRange", ui->cbOnlyInRange);
     JsonToLineEditDouble(json, "MinEnergy", ui->ledMinEnergy);
     JsonToLineEditDouble(json, "MaxEnergy", ui->ledMaxEnergy);

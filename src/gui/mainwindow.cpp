@@ -182,7 +182,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    ui->pbExportDeposition->setEnabled(false);
     ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
     Owindow->RefreshData();
@@ -3013,56 +3012,6 @@ void MainWindow::on_twSingleScan_currentChanged(int index)
   ui->frLimitNodesTo->setVisible( index != 0 );
 }
 
-void MainWindow::on_pbExportDeposition_clicked()
-{
-  if (EnergyVector.isEmpty())
-    {
-      message("No data to save!", this);
-      return;
-    }
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("dat");
-  QString fileName = fileDialog->getSaveFileName(this,
-                                                 "Save energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".dat";
-  qDebug()<<fileName;
-
-  QFile outputFile(fileName);
-  outputFile.open(QIODevice::WriteOnly);
-
-  if(!outputFile.isOpen())
-    {
-          qDebug() << "- Error, unable to open" << fileName << "for output";
-          message("Unable to open file " +fileName+ " for writing!", this);
-          return;
-     }   
-   MainWindow::ExportDeposition(outputFile);
-   outputFile.close();
-}
-
-void MainWindow::on_pbImportDeposition_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-
-  QFile file(fileName);
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  if(!file.open(QIODevice::ReadOnly | QFile::Text))
-      {          
-          message("Error while opening deposition file "+fileName+"\n"+file.errorString(), this);
-          return;
-      }
-  MainWindow::ImportDeposition(file); //MainWindowDiskIO
-
-  file.close();
-}
-
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
 {
   if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);
@@ -3828,43 +3777,60 @@ void MainWindow::on_actionVersion_triggered()
                 "\n"
                 "ROOT version:  " + gROOT->GetVersion() + "\n"
                 "\n"
-                "Compilation options:\n"
-                "   CUDA (gpu):  "
+                "Compilation options:"
+                "\n"
+
+
 #ifdef __USE_ANTS_CUDA__
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FANN (neural networks):  "
+          " - CUDA (GPU-based reconstruction)\n"
+
+
 #ifdef ANTS_FANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FLANN (kNN search):  "
+          " - FANN (neural networks)\n"
+
 #ifdef ANTS_FLANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Eigen3 (for fast LRF fitting):  "
+      " - FLANN (kNN searches)\n"
+
 #ifdef USE_EIGEN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Root html server (for JSROOT):  "
+     " - Eigen3 (fast LRF fitting)\n"
+
 #ifdef USE_ROOT_HTML
- "on"
+ "  on"
 #else
- "off"
+ "  off"
 #endif
-                "\n   Python scripting:  "
+          " - Root html server (JSROOT visualization)  \n"
+
 #ifdef __USE_ANTS_PYTHON__
- "on" + " -> Python " + PythonVersion + ""
+ "  on - Python script (Python v." + PythonVersion + ")   "
 #else
- "off"
+ "  off - Python script"
 #endif
+            "\n"
+
+#ifdef __USE_ANTS_NCRYSTAL__
+ "  on"
+#else
+ "  off"
+#endif
+            " - NCrystal library (neutron scattering)   \n"
+
                 "";
 
   message(out, this);
@@ -3938,22 +3904,6 @@ void MainWindow::on_pbReconstruction_2_clicked()
   Rwindow->activateWindow();
 }
 
-void MainWindow::on_cbPointSourceBuildTracks_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbGunPhotonTracks_toggled(bool checked)
-{
-  ui->cbPointSourceBuildTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbBuilPhotonTrackstester_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbPointSourceBuildTracks->setChecked(checked);
-}
-
 void MainWindow::on_pbSimulate_clicked()
 {
   ELwindow->QuickSave(0);
@@ -4016,7 +3966,8 @@ void MainWindow::simulationFinished()
     bool showTracks = false;
     if (SimulationManager->LastSimType == 0) //PointSources sim
     {        
-        showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        //showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearGeoMarkers();
         GeoMarkers = SimulationManager->GeoMarkers;
         SimulationManager->GeoMarkers.clear(); //to avoid delete content
@@ -4038,13 +3989,14 @@ void MainWindow::simulationFinished()
     }
     if (SimulationManager->LastSimType == 1) //ParticleSources sim
     {
-        showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        //showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearEnergyVector();
         EnergyVector = SimulationManager->EnergyVector;
         SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
     }
 
-    //tracks?
+    //tracks
     if (showTracks)
       {
         TmpHub->ClearTracks();
@@ -4052,12 +4004,13 @@ void MainWindow::simulationFinished()
         SimulationManager->Tracks.clear(); //to avoid delete content
 
         int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() && numTracks<GlobSet->MaxNumberOfTracks; iTr++)
+        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet->MaxNumberOfTracks */; iTr++)
           {
-            TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
+            const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
             track->SetLineColor(th->Color);
             track->SetLineWidth(th->Width);
+            track->SetLineStyle(th->Style);
             for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                 track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
             if (track->GetNpoints()>1)
@@ -4068,9 +4021,6 @@ void MainWindow::simulationFinished()
             else delete track;
           }
       }
-
-    //CLEAR TEMPORARY OBJECTS IN SIMULATION MANAGER
-    //SimulationManager->Clear();  /// in manager now!
 
     //Additional GUI updates
     if (GeometryWindow->isVisible())
@@ -4090,7 +4040,7 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings)
+ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
 {
     //============ prepare config ============
     QJsonObject json;
@@ -4107,7 +4057,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     qApp->processEvents();
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
 
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
@@ -4142,44 +4092,46 @@ void MainWindow::on_pbTrackStack_clicked()
           //qDebug() << "-------------En vector size:"<<EnergyVector.size();
 
         //track handling
-        if (ui->cbBuildParticleTrackstester->isChecked())
+        //if (ui->cbBuildParticleTrackstester->isChecked())
+        if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
           {
-            int numTracks = 0;
+            //int numTracks = 0;
               //qDebug() << "Tracks collected:"<<pss->tracks.size();
             for (int iTr=0; iTr<pss->tracks.size(); iTr++)
-              {
-                TrackHolderClass* th = pss->tracks[iTr];
+            {
+                const TrackHolderClass* th = pss->tracks[iTr];
 
-                if (numTracks<GlobSet->MaxNumberOfTracks)
-                {
+                //if (numTracks<GlobSet->MaxNumberOfTracks)
+                //{
                     TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                     track->SetLineColor(th->Color);
                     track->SetLineWidth(th->Width);
+                    track->SetLineStyle(th->Style);
                     for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                       track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
 
                     if (track->GetNpoints()>1)
                       {
-                        numTracks++;
+                        //numTracks++;
                         Detector->GeoManager->AddTrack(track);
                       }
                     else delete track;
-                }
+                //}
                 delete th;
-              }
+            }
             pss->tracks.clear();
           }
         //if tracks are visible, show them
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         //report data saved in history
         pss->appendToDataHub(EventsDataHub);
           //qDebug() << "Event history imported";
 
-        ui->pbExportDeposition->setEnabled(true);
         ui->pbGenerateLight->setEnabled(true);
         Owindow->SetCurrentEvent(0);
     }
@@ -4210,7 +4162,8 @@ void MainWindow::on_pbGenerateLight_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         pss->appendToDataHub(EventsDataHub);
         //Owindow->SetCurrentEvent(0);
@@ -5317,4 +5270,24 @@ void MainWindow::on_ledSSO_EffWave_editingFinished()
 void MainWindow::on_actionGrid_triggered()
 {
     RemoteWindow->show();
+}
+
+#include "atrackdrawdialog.h"
+void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
+{
+    QStringList pl;
+    MpCollection->OnRequestListOfParticles(pl);
+    ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions, pl);
+    d->exec();
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsGun_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsStack_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
 }

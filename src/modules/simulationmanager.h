@@ -5,6 +5,7 @@
 #include "scanfloodstructure.h"
 #include "aphoton.h"
 #include "dotstgeostruct.h"
+#include "atrackbuildoptions.h"
 
 #include <QVector>
 #include <QObject>
@@ -75,6 +76,7 @@ public:
     void Clear();
 
     ParticleSourcesClass* ParticleSources;  //used to update JSON on config chamges and in GUI to configure; Simulateors use their local copies build from JSON
+    ATrackBuildOptions TrackBuildOptions;
 
 private:
     EventsDataClass* EventsDataHub; //alias
@@ -87,6 +89,9 @@ private:
 public slots:
     void onSimulationFinished(); //processing of simulation results!
     void StopSimulation();
+
+private slots:
+    void onSimFailedToStart();
 
 signals:
     void RequestStopSimulation();
@@ -105,7 +110,7 @@ public:
     explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, QObject *parent = 0);
     virtual ~ASimulatorRunner();
 
-    void setup(QJsonObject &json, int threadCount);
+    bool setup(QJsonObject &json, int threadCount);
     void updateGeoManager();
     //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
@@ -114,6 +119,7 @@ public:
     //double getmsPerEvent() const { return usPerEvent; }
     bool wasSuccessful() const;
     bool isFinished() const {return simState == SFinished;}
+    void setFinished() {simState = SFinished;}
     QString getErrorMessages() const;
     //Use as read-only. Anything else is undefined behaviour! If your toast gets burnt, it's not my fault!
     //Also remember that simulators will be deleted on setup()!
@@ -173,7 +179,7 @@ signals:
 class Simulator
 {
 public:
-    Simulator(const DetectorClass *detector, const TString &nameID);
+    Simulator(const DetectorClass *detector, const int ID);
     virtual ~Simulator();
 
     const DetectorClass *getDetector() { return detector; }
@@ -200,11 +206,10 @@ public:
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
-    TString getNameId() const {return nameID;}
-
 protected:
     virtual void ReserveSpace(int expectedNumEvents);
     int evenDivisionOfLabor(int totalEventCount);
+    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
     const DetectorClass *detector;
     TRandom2 *RandGen;
@@ -212,7 +217,7 @@ protected:
     EventsDataClass *dataHub;
     Photon_Generator *photonGenerator;
     QString ErrorString; //last error
-    TString nameID;
+    int ID;
 
     APhotonTracer* photonTracker;
 
@@ -236,7 +241,7 @@ private:
 class PointSourceSimulator : public Simulator
 {
 public:
-    explicit PointSourceSimulator(const DetectorClass *detector, const TString &nameID);
+    explicit PointSourceSimulator(const DetectorClass *detector, int ID);
     ~PointSourceSimulator();
 
     virtual int getEventCount() const;
@@ -309,12 +314,13 @@ private:
     bool fBadEventsOn;
     double BadEventTotalProbability;
     double SigmaDouble; //Gaussian distribution is used to position second event
+
 };
 
 class ParticleSourceSimulator : public Simulator
 {
 public:
-    explicit ParticleSourceSimulator(const DetectorClass *detector, const TString &nameID);
+    explicit ParticleSourceSimulator(const DetectorClass *detector, int ID);
     ~ParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }
@@ -331,6 +337,9 @@ public:
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition 
     bool standaloneTrackStack(QVector<AParticleOnStack*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
+
+protected:
+    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
 private:
     //utilities
@@ -349,7 +358,7 @@ private:
     double timeFrom, timeRange;
 
     //Control
-    bool fBuildParticleTracks;    
+    bool fBuildParticleTracks;   //can be dropped and use directly TrackBuildOptions od simSettings
     bool fDoS1;
     bool fDoS2;
     bool fAllowMultiple; //multiple particles per event?

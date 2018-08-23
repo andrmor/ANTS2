@@ -247,8 +247,8 @@ void MainWindow::on_pbST_AngleCos_clicked()
 
 AOpticalOverride* InitOverride(Ui::MainWindow *ui, AMaterialParticleCollection& MatCol)
 {
-  MatCol.AddNewMaterial();
-  MatCol.AddNewMaterial();
+  MatCol.AddNewMaterial(true);
+  MatCol.AddNewMaterial(true);
   MatCol[0]->n = ui->ledST_Ref1->text().toDouble();
   MatCol[1]->n = ui->ledST_Ref2->text().toDouble();
   double wave = ui->ledST_wave->text().toDouble();

@@ -44,9 +44,11 @@ void AMaterialComposition::configureNaturalAbunances(const QString FileName_Natu
     }
 }
 
-QString AMaterialComposition::setCompositionString(const QString composition)
+QString AMaterialComposition::setCompositionString(const QString composition, bool KeepIsotopComposition)
 {
     if (NaturalAbundancies.isEmpty()) return "Configuration error: Table with natural abundancies was not loaded";
+
+    QVector<AChemicalElement> OldElementComposition = ElementComposition;
 
     QString str = composition.simplified();
     str.replace(" ","+");
@@ -154,9 +156,28 @@ QString AMaterialComposition::setCompositionString(const QString composition)
         double MolarFraction = map[ElementName] / sumFractions;
         //qDebug() << ElementName << MolarFraction;
 
-        AChemicalElement element(ElementName, MolarFraction);
-        QString error = fillIsotopesWithNaturalAbundances(element);
-        if (!error.isEmpty()) return error;
+        bool bMakeNew = true;
+        AChemicalElement element;
+
+        if (KeepIsotopComposition)
+        {
+            for (AChemicalElement& el : OldElementComposition)
+                if (el.Symbol == ElementName)
+                {
+                    element = el;
+                    element.MolarFraction = MolarFraction;
+                    bMakeNew = false;
+                    break;
+                }
+        }
+
+        if ( bMakeNew )
+        {
+            element = AChemicalElement(ElementName, MolarFraction);
+            QString error = fillIsotopesWithNaturalAbundances(element);
+            if (!error.isEmpty()) return error;
+        }
+
         tmpElements << element;
       }
 

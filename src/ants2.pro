@@ -8,8 +8,8 @@ ANTS2_MINOR = 12
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-#CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
-#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
+CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
+CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -190,8 +190,8 @@ ants2_Python{
             LIBS += $$system(python3.5-config --libs)
             QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
 
-            INCLUDEPATH += /home/andr/PythonQt/src
-            LIBS += -L/home/andr/PythonQt/lib -lPythonQt
+            INCLUDEPATH += /home/andr/Work/PythonQt/src
+            LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h
@@ -214,8 +214,7 @@ ants2_NCrystal{
             INCLUDEPATH += /home/andr/Work/NCrystal/include
 
             LIBS += -L/home/andr/Work/NCrystal/lib/
-            #LIBS += -lNCrystal
-            LIBS += NCrystal.dll
+            LIBS += -lNCrystal
     }
 
     SOURCES += common/arandomgenncrystal.cpp

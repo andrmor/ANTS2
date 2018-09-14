@@ -168,7 +168,7 @@ int LoadDoubleVectorsFromFile(QString FileName, QVector<double>* x, QVector<doub
   return 0;
 }
 
-const QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double> *> V)
+const QString LoadDoubleVectorsFromFile(const QString FileName, QVector<QVector<double> *>& V)
 {
     if (FileName.isEmpty()) return("Empty file name");
 

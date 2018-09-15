@@ -37,6 +37,8 @@ public:
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");
+    void UpdateAllTabs(); //highlighter, helper etc
+
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
     void AddNewTab();  // new tab !
@@ -155,6 +157,7 @@ private:
     QStringList functionList; //functions to populate tooltip helper
     QHash<QString, QString> DeprecatedOrRemovedMethods;
     QStringList ListOfDeprecatedOrRemovedMethods;
+    QStringList ListOfConstants;
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);

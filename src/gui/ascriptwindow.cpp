@@ -322,12 +322,12 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     //completitionModel->setStringList(functions);
 
     // update highlighters and tooltips of already existing tabs
-    for (int i=0; i<ScriptTabs.size(); i++)
-    {
-        //ScriptTabs[i]->highlighter->setHighlighterRules(newFunctions, ListOfDeprecatedOrRemovedMethods, QStringList());
-        //ScriptTabs[i]->TextEdit->functionList = functionList;
-        UpdateTab(ScriptTabs[i]);
-    }
+    //for (int i=0; i<ScriptTabs.size(); i++)
+    //{
+    //    //ScriptTabs[i]->highlighter->setHighlighterRules(newFunctions, ListOfDeprecatedOrRemovedMethods, QStringList());
+    //    //ScriptTabs[i]->TextEdit->functionList = functionList;
+    //    UpdateTab(ScriptTabs[i]);
+    //}
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
@@ -335,6 +335,12 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 
     if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
+}
+
+void AScriptWindow::UpdateAllTabs()
+{
+    for (int i=0; i<ScriptTabs.size(); i++)
+        UpdateTab(ScriptTabs[i]);
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -1390,7 +1396,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
 {
-    tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, QStringList());
+    tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
     tab->TextEdit->functionList = functionList;
     tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
 }

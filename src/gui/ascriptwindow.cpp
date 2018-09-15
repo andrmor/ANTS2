@@ -321,13 +321,8 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     functions << newFunctions;
     //completitionModel->setStringList(functions);
 
-    // update highlighters and tooltips of already existing tabs
-    //for (int i=0; i<ScriptTabs.size(); i++)
-    //{
-    //    //ScriptTabs[i]->highlighter->setHighlighterRules(newFunctions, ListOfDeprecatedOrRemovedMethods, QStringList());
-    //    //ScriptTabs[i]->TextEdit->functionList = functionList;
-    //    UpdateTab(ScriptTabs[i]);
-    //}
+    //if standalone script, update the tab
+    if (name.isEmpty()) UpdateAllTabs();
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"

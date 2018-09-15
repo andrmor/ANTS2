@@ -54,6 +54,8 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["setCurveFitter"] = "Create splie fitter for curve y(x) in the range x from min to max and nInt nodes";
   H["getFitted"] = "Used with setCurveFitter. Extracts the fitted value of y for x";
   H["getFittedArr"] = "Used with setCurveFitter. Extracts the fitted values of y for an array of x";
+
+  //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
 }
 
 AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :

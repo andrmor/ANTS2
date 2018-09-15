@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QSet>
+#include <QHash>
+#include <QString>
 
 class AHighlighterScriptWindow;
 class QAbstractItemModel;
@@ -151,6 +153,8 @@ private:
 
     QSet<QString> ExpandedItemsInJsonTW;
     QStringList functionList; //functions to populate tooltip helper
+    QHash<QString, QString> DeprecatedOrRemovedMethods;
+    QStringList ListOfDeprecatedOrRemovedMethods;
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -159,6 +163,7 @@ private:
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
+    void appendDeprecatedOrRemovedMethods(const QObject *obj, const QString& name);
 
     void ReadFromJson(QJsonObject &json);
     void WriteToJson(QJsonObject &json);
@@ -172,6 +177,7 @@ private:
     void applyTextFindState();
     void findText(bool bForward);
 
+    void UpdateTab(AScriptWindowTabItem *tab);
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);

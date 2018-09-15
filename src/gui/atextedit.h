@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QWidget>
+#include <QSet>
 
 class QCompleter;
 class ALeftField;
@@ -22,9 +23,12 @@ public:
     void RefreshExtraHighlight();
     void setTextCursorSilently(const QTextCursor& tc);
 
+    void setDeprecatedOrRemovedMethods(const QHash<QString, QString>* DepRem) {DeprecatedOrRemovedMethods = DepRem;}
+
     QStringList functionList;
     QString FindString;
     static const int TabInSpaces = 7;
+    const QHash<QString, QString>* DeprecatedOrRemovedMethods = 0;
 
 public slots:
     void paste();

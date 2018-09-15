@@ -298,20 +298,20 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 
         AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core");
-        newFunctions << getCustomCommandsOfObject(&core, "core", false);
+        newFunctions << getListOfMethods(&core, "core", false);
         appendDeprecatedOrRemovedMethods(&core, "core");
 
         AInterfaceToMath math(0); //dummy to extract methods
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         fillHelper(&math, mathName);
-        newFunctions << getCustomCommandsOfObject(&math, mathName, false);
+        newFunctions << getListOfMethods(&math, mathName, false);
         appendDeprecatedOrRemovedMethods(&math, mathName);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
         fillHelper(interfaceObject, name);
-        newFunctions << getCustomCommandsOfObject(interfaceObject, name, false);
+        newFunctions << getListOfMethods(interfaceObject, name, false);
         appendDeprecatedOrRemovedMethods(interfaceObject, name);
     }
 
@@ -321,7 +321,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     functions << newFunctions;
     //completitionModel->setStringList(functions);
 
-    //if standalone script, update the tab
+    //if standalone script, update the highlighter and tooltip
     if (name.isEmpty()) UpdateAllTabs();
 
     //special "needs" of particular interface objects
@@ -775,7 +775,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       if (ScriptLanguage == _PythonScript_) UnitDescription.remove("Multithread-capable");
     }
 
-  QStringList functions = getCustomCommandsOfObject(obj, module, true);
+  QStringList functions = getListOfMethods(obj, module, true);
   functions.sort();
 
   QTreeWidgetItem *objItem = new QTreeWidgetItem(trwHelp);
@@ -1142,7 +1142,7 @@ void AScriptWindow::onProgressChanged(int percent)
     qApp->processEvents();
 }
 
-QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)
+QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
   int methods = obj->metaObject()->methodCount();

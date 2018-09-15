@@ -165,7 +165,7 @@ private:
     void fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
-    QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
+    QStringList getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
     void appendDeprecatedOrRemovedMethods(const QObject *obj, const QString& name);
 
     void ReadFromJson(QJsonObject &json);

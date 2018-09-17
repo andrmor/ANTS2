@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>229</height>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -405,6 +405,69 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_11">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_19">
+         <property name="toolTip">
+          <string>Typically the material of the volume containing the grid</string>
+         </property>
+         <property name="text">
+          <string>Bulk material:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_18">
+         <property name="toolTip">
+          <string>Make sure to adjust the optical overrides:
+photons should not be able to enter the wires!</string>
+         </property>
+         <property name="text">
+          <string>Wire material:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QComboBox" name="cobBulkMaterial">
+         <property name="toolTip">
+          <string>Typically the material of the volume containing the grid</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cobWireMaterial">
+         <property name="toolTip">
+          <string>Make sure to adjust the optical overrides:
+photons should not be able to enter the wires!</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </item>
    <item>
     <spacer name="verticalSpacer">

@@ -111,6 +111,51 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
    return true;
 }
 
+bool AInterfaceToPhotonScript::TracePhotonsS2Isotropic(int copies, double x, double y, double zStart, double zStop, int iWave, double time, double dZmm_dTns, bool AddToPreviousEvent)
+{
+    if (!initTracer()) return false;
+
+    double r[3];
+    r[0]=x;
+    r[1]=y;
+    double zSpan = zStop-zStart;
+    if (zSpan < 0) return false;
+    double invVelo = 1.0 / dZmm_dTns;
+
+    double v[3];  //will be defined for each photon individually
+    APhoton* phot = new APhoton(r, v, iWave, time);
+    phot->SimStat = EventsDataHub->SimStat;
+
+    for (int i=0; i<copies; i++)
+    {
+        //Generating direction ('Sphere' function of Root)
+        double a=0, b=0, r2=1.0;
+        while (r2 > 0.25)
+          {
+              a  = Detector->RandGen->Rndm() - 0.5;
+              b  = Detector->RandGen->Rndm() - 0.5;
+              r2 =  a*a + b*b;
+          }
+        phot->v[2] = ( -1.0 + 8.0 * r2 );
+        double scale = 8.0 * TMath::Sqrt(0.25 - r2);
+        phot->v[0] = a*scale;
+        phot->v[1] = b*scale;
+
+        //generating z
+        double dz = zSpan * Detector->RandGen->Rndm();
+        phot->r[2] = zStart + dz;
+        phot->time = time + dz * invVelo;
+
+        //tracing photons
+        Tracer->TracePhoton(phot);
+    }
+
+    handleEventData(AddToPreviousEvent);
+
+    delete phot;
+    return true;
+}
+
 void AInterfaceToPhotonScript::handleEventData(bool AddToPreviousEvent)
 {
     Event->HitsToSignal();

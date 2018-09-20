@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -7138,11 +7138,14 @@ thermal neutrons:</string>
        <widget class="QCheckBox" name="cbRndCheckBeforeTrack">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>50</y>
+          <x>30</x>
+          <y>52</y>
           <width>271</width>
           <height>17</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>Do not use if PMs register light after wavelength shifting!</string>
         </property>
         <property name="text">
          <string>Before photon tracking, test against max Q.E.</string>
@@ -7155,13 +7158,13 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>287</x>
-          <y>40</y>
+          <y>29</y>
           <width>240</width>
           <height>17</height>
          </rect>
         </property>
         <property name="toolTip">
-         <string>Slows down simulation!</string>
+         <string>Slows down simulations and uses a lot of memory!</string>
         </property>
         <property name="text">
          <string>Do logs and statistics</string>
@@ -7183,11 +7186,28 @@ thermal neutrons:</string>
          <string>Configure number of threads</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbQEacceleratorWarning">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>49</y>
+          <width>22</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Do not use if PMs register light after wavelength shifting!</string>
+        </property>
+        <property name="text">
+         <string>!</string>
+        </property>
+       </widget>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
        <zorder>cbDoLogsAndStatistics</zorder>
        <zorder>pbConfigureNumberOfThreads</zorder>
+       <zorder>pbQEacceleratorWarning</zorder>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
@@ -7541,7 +7561,7 @@ thermal neutrons:</string>
          <rect>
           <x>34</x>
           <y>30</y>
-          <width>61</width>
+          <width>89</width>
           <height>16</height>
          </rect>
         </property>
@@ -7807,7 +7827,7 @@ thermal neutrons:</string>
          <rect>
           <x>7</x>
           <y>18</y>
-          <width>111</width>
+          <width>119</width>
           <height>16</height>
          </rect>
         </property>
@@ -9246,7 +9266,7 @@ thermal neutrons:</string>
             <rect>
              <x>6</x>
              <y>0</y>
-             <width>141</width>
+             <width>151</width>
              <height>21</height>
             </rect>
            </property>

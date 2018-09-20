@@ -5291,3 +5291,16 @@ void MainWindow::on_pbTrackOptionsStack_clicked()
 {
     on_pbOpenTrackProperties_Phot_clicked();
 }
+
+void MainWindow::on_pbQEacceleratorWarning_clicked()
+{
+    QString s = "Activation of this option allows to speed up simulations\n"
+            "by skipping tracking of photons which will definitely fail\n"
+            "the detection test by the PMs the photon will hit.\n"
+            "For this purpose the random number to be compared with the\n"
+            "Quantum Efficiency of the PM is generated before\n"
+            "tracking and checked against the maximum QE over all PMs.\n"
+            "If detection is failed, the tracking is skipped.\n\n"
+            "Important warning:\nDo not activate this feature\nif PMs can register light after wavelength shifting!";
+    message(s, this);
+}

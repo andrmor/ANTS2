@@ -638,6 +638,8 @@ private slots:
 
     void on_pbTrackOptionsStack_clicked();
 
+    void on_pbQEacceleratorWarning_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

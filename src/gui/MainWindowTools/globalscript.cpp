@@ -123,8 +123,8 @@ void MainWindow::createScriptWindow()
 #endif
 
 #ifdef ANTS_FANN
-    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-    ScriptWindow->SetInterfaceObject(ann, "ann");
+    //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    //ScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 
     // Interfaces which rely on MainWindow

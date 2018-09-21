@@ -107,8 +107,8 @@ void MainWindow::createPythonScriptWindow()
 #endif
 
 #ifdef ANTS_FANN
-  AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-  PythonScriptWindow->SetInterfaceObject(ann, "ann");
+  //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+  //PythonScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 
   // Interfaces which rely on MainWindow

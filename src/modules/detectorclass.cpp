@@ -764,6 +764,7 @@ TGeoVolume *DetectorClass::generateVolume(const char *Name, TGeoMedium *Medium, 
         ((TGeoPcon*)tgv->GetShape())->DefineSection(1, +SizeZ, 0, SizeX);
         return tgv;
       }
+    case 3: return GeoManager->MakeSphere(Name, Medium, SizeX-SizeZ, SizeX, 0, SizeY);
     default:
       ErrorString = "Error: unrecognized volume type!";
       qWarning() << ErrorString;

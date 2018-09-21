@@ -93,7 +93,9 @@ ants2_fann {
         INCLUDEPATH += c:/FANN-2.2.0-Source/src/include
         DEFINES += NOMINMAX
      }
-     linux-g++ || unix { LIBS += -lfann }
+     linux-g++ || unix {
+        LIBS += -L/usr/local/lib/ -lfann
+     }
 
      #main module
     HEADERS += modules/neuralnetworksmodule.h
@@ -339,8 +341,7 @@ SOURCES += main.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
-    common/atrackbuildoptions.cpp \
-    scriptmode/ascriptinterface.cpp
+    common/atrackbuildoptions.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \

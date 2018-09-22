@@ -234,7 +234,7 @@ bool DetectorClass::readPMarraysFromJson(QJsonObject &json)
       qWarning()<<"Json file does not contain PM arrays data";
       return false;
     }
-  /// next to lines: CANNOT do it! Otherwise address of the script for position PMs will be changed -> crash!
+  /// next two lines: CANNOT do it! Otherwise address of the script for position PMs will be changed -> crash!
   //PMarrays.clear();
   //PMarrays.resize(2); //protection
 
@@ -750,7 +750,9 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
   return;
 }
 
-TGeoVolume *DetectorClass::generateVolume(const char *Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides)
+#include "TGeoCompositeShape.h"
+#include "TMath.h"
+TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides)
 {
   //Shape 0 -  box, 1 - cylinder, 2 - polygon
   switch (Shape)
@@ -764,7 +766,28 @@ TGeoVolume *DetectorClass::generateVolume(const char *Name, TGeoMedium *Medium, 
         ((TGeoPcon*)tgv->GetShape())->DefineSection(1, +SizeZ, 0, SizeX);
         return tgv;
       }
-    case 3: return GeoManager->MakeSphere(Name, Medium, SizeX-SizeZ, SizeX, 0, SizeY);
+    case 3:
+    {
+      double alphaDeg = 35.0;
+      double angle = alphaDeg * TMath::Pi()/180.0;
+      double r = SizeX * sin(angle);
+      double hHalf = 0.5 * SizeX * (1.0 - cos(angle));
+      qDebug() << "halfThick:"<<hHalf;
+
+      TString tubeName = Name + "_tube";
+      TGeoVolume* tube = GeoManager->MakeTube(tubeName, Medium, 0, r, hHalf);
+      tube->RegisterYourself(); //need?
+
+      TString sphereName = Name + "_sphere";
+      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, alphaDeg);
+      sphere->RegisterYourself(); //need?
+      TString transName = Name + "_m";
+      TGeoTranslation* tr = new TGeoTranslation(transName, 0, 0, -SizeX + hHalf);
+      tr->RegisterYourself();
+
+      TGeoShape* shape = new TGeoCompositeShape(tubeName +"*" + sphereName + ":" + transName);
+      return new TGeoVolume(Name, shape, Medium);
+    }
     default:
       ErrorString = "Error: unrecognized volume type!";
       qWarning() << ErrorString;
@@ -812,7 +835,7 @@ void DetectorClass::positionPMs()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(itype);
-      pmTypes[itype] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
+      pmTypes[itype] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmTypes[itype]->SetLineColor(kGreen);
       pmTypes[itype]->SetTitle("P");
@@ -987,7 +1010,7 @@ void DetectorClass::positionDummies()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(i);
-      pmtDummy[i] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
+      pmtDummy[i] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
                                           tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
       pmtDummy[i]->SetLineColor(30);
       pmtDummy[i]->SetTitle("p");

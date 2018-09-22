@@ -2733,6 +2733,8 @@ void MainWindow::on_cobPMshape_currentIndexChanged(int index)
 
   if (index == 0) ui->fRectangularPM->setVisible(true);
   else ui->fRectangularPM->setVisible(false);
+
+  ui->frSphericalPm->setVisible( index == 3);
 }
 
 void MainWindow::on_pbElGainLoadDistr_clicked()

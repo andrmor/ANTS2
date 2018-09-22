@@ -108,7 +108,7 @@ private:
   bool processGDML(); //check validity, discard if bad and return to sandwich  
 
   Double_t UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
-  TGeoVolume *generateVolume(const char *Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides);
+  TGeoVolume *generatePmVolume(TString Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides);
   void populatePMs();
   void positionPMs();
   void calculatePmsXY(int ul);

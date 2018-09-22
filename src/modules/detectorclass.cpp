@@ -771,6 +771,9 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
       }
     case 3:
     {
+      if (tp->AngleSphere == 90.0 || tp->AngleSphere == 180.0)
+          return GeoManager->MakeSphere(Name, Medium, 0, SizeX, 0, tp->AngleSphere);
+
       double r = tp->getProjectionRadiusSpherical();
       double hHalf = tp->getHalfHeightSpherical();
 

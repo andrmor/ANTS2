@@ -640,6 +640,8 @@ private slots:
 
     void on_pbQEacceleratorWarning_clicked();
 
+    void on_ledSphericalPMAngle_editingFinished();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

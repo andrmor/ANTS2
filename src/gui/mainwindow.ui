@@ -55,7 +55,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDetector">
        <attribute name="title">
@@ -19646,22 +19646,6 @@ on stack</string>
     <hint type="destinationlabel">
      <x>414</x>
      <y>398</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSphericalPMAngle</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdatePMproperties</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>318</x>
-     <y>405</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>275</x>
-     <y>328</y>
     </hint>
    </hints>
   </connection>

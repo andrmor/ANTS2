@@ -7,7 +7,7 @@ ANTS2_MINOR = 12
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting - experimental feature, work in progress!
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering) - experimental feature, work in progress!
 

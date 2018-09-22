@@ -2736,7 +2736,7 @@ void MainWindow::on_sbPreprocessigPMnumber_valueChanged(int arg1)
 
 void MainWindow::on_cobPMshape_currentIndexChanged(int index)
 {
-  if (index == 1) ui->labSizeDiameterPM->setText("Diameter:");
+  if (index == 1 || index == 3) ui->labSizeDiameterPM->setText("Diameter:");
   else ui->labSizeDiameterPM->setText("Size:");
 
   if (index == 0) ui->fRectangularPM->setVisible(true);
@@ -5314,4 +5314,16 @@ void MainWindow::on_pbQEacceleratorWarning_clicked()
             "If detection is failed, the tracking is skipped.\n\n"
             "Important warning:\nDo not activate this feature\nif PMs can register light after wavelength shifting!";
     message(s, this);
+}
+
+void MainWindow::on_ledSphericalPMAngle_editingFinished()
+{
+    double val = ui->ledSphericalPMAngle->text().toDouble();
+    if (val<=0 || val >180)
+    {
+        ui->ledSphericalPMAngle->setText("90");
+        message("Angle should be a positive value not larger than 180", this);
+    }
+
+    on_pbUpdatePMproperties_clicked();
 }

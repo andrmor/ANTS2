@@ -132,6 +132,8 @@ double APmType::getHalfHeightSpherical() const
 
 double APmType::getProjectionRadiusSpherical() const
 {
+    if (AngleSphere > 90.0) return 0.5 * SizeX;
+
     double angle = AngleSphere * TMath::Pi()/180.0;
     return 0.5 * SizeX * sin(angle);
 }

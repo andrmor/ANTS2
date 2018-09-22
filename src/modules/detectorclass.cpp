@@ -30,6 +30,7 @@
 #include "TRandom2.h"
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
+#include "TGeoCompositeShape.h"
 
 static void autoLoadPlugins() {
   typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
@@ -750,8 +751,6 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
   return;
 }
 
-#include "TGeoCompositeShape.h"
-#include "TMath.h"
 TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
 {
   double SizeX = 0.5 * tp->SizeX;
@@ -772,10 +771,8 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
       }
     case 3:
     {
-      double angle = tp->AngleSphere * TMath::Pi()/180.0;
-      double r = SizeX * sin(angle);
-      double hHalf = 0.5 * SizeX * (1.0 - cos(angle));
-      qDebug() << "halfThick:"<<hHalf;
+      double r = tp->getProjectionRadiusSpherical();
+      double hHalf = tp->getHalfHeightSpherical();
 
       TString tubeName = Name + "_tube";
       TGeoVolume* tube = GeoManager->MakeTube(tubeName, Medium, 0, r, hHalf);
@@ -813,7 +810,7 @@ void DetectorClass::populatePMs()
               for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
               {
                 int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
-                double halfWidth = 0.5*PMs->getType(itype)->SizeZ;
+                double halfWidth = ( PMs->getType(itype)->Shape == 3 ? PMs->getType(itype)->getHalfHeightSpherical() : 0.5*PMs->getType(itype)->SizeZ);
                 double Z = (ul == 0) ? UpperEdge+halfWidth : LowerEdge-halfWidth;
                 PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
               }

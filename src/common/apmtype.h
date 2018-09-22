@@ -46,6 +46,9 @@ public:
   void    clear();
   void    writeToJson(QJsonObject &json) const;
   void    readFromJson(const QJsonObject &json);
+
+  double  getHalfHeightSpherical() const;
+  double  getProjectionRadiusSpherical() const;
 };
 
 

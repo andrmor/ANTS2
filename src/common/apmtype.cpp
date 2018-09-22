@@ -3,6 +3,8 @@
 
 #include <QJsonObject>
 
+#include "TMath.h"
+
 void APmType::clear()
 {
   PDE_lambda.clear();
@@ -119,5 +121,17 @@ void APmType::readFromJson(const QJsonObject &json)
       parseJson(areaj, "AreaStepY", AreaStepY);
       QJsonArray ar = areaj["ResponseVsXY"].toArray();
       read2DQVectorFromJArray(ar, AreaSensitivity);
-    }
+  }
+}
+
+double APmType::getHalfHeightSpherical() const
+{
+    double angle = AngleSphere * TMath::Pi()/180.0;
+    return 0.25 * SizeX * (1.0 - cos(angle));
+}
+
+double APmType::getProjectionRadiusSpherical() const
+{
+    double angle = AngleSphere * TMath::Pi()/180.0;
+    return 0.5 * SizeX * sin(angle);
 }

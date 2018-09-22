@@ -1126,6 +1126,10 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     str.setNum(type->RecoveryTime, 'g', 4);
     ui->ledSiPMrecoveryTime->setText(str);
 
+    //for spherical:
+    if (type->Shape == 3) //sphere
+        ui->labSphericalPMinfo->setText( QString("%1 / %2").arg(type->getProjectionRadiusSpherical()).arg(2.0*type->getHalfHeightSpherical()) );
+
     str.setNum(type->EffectivePDE, 'g', 4);
     ui->ledPDE->setText(str);
     ui->pbShowPDE->setEnabled(type->PDE_lambda.size());

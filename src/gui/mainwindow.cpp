@@ -1116,6 +1116,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->ledSizeY->setText(str);
     str.setNum(type->SizeZ, 'g', 4);
     ui->ledSizeZ->setText(str);
+    ui->ledSphericalPMAngle->setText( QString::number(type->AngleSphere, 'g', 4) );
     ui->sbSiPMnumx->setValue(type->PixelsX);
     ui->sbSiPMnumy->setValue(type->PixelsY);
     str.setNum(type->PixelsX * type->PixelsY);
@@ -1163,6 +1164,9 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->SizeX = ui->ledSizeX->text().toDouble();
    type->SizeY = ui->ledSizeY->text().toDouble();
    type->SizeZ = ui->ledSizeZ->text().toDouble();
+
+   type->AngleSphere = ui->ledSphericalPMAngle->text().toDouble();
+
    type->PixelsX = ui->sbSiPMnumx->value();
    type->PixelsY = ui->sbSiPMnumy->value();
    type->DarkCountRate = ui->ledSiPMdarCountRate->text().toDouble();
@@ -2735,6 +2739,7 @@ void MainWindow::on_cobPMshape_currentIndexChanged(int index)
   else ui->fRectangularPM->setVisible(false);
 
   ui->frSphericalPm->setVisible( index == 3);
+  ui->ledSizeZ->setDisabled(index == 3);
 }
 
 void MainWindow::on_pbElGainLoadDistr_clicked()

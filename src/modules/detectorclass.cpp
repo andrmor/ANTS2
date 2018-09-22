@@ -752,24 +752,27 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
 
 #include "TGeoCompositeShape.h"
 #include "TMath.h"
-TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides)
+TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
 {
-  //Shape 0 -  box, 1 - cylinder, 2 - polygon
-  switch (Shape)
+  double SizeX = 0.5 * tp->SizeX;
+  double SizeY = 0.5 * tp->SizeY;
+  double SizeZ = 0.5 * tp->SizeZ;
+
+  //Shape 0 -  box, 1 - cylinder, 2 - polygon, 3 - sphere
+  switch (tp->Shape)
     {
     case 0: return GeoManager->MakeBox (Name, Medium, SizeX, SizeY, SizeZ); //box
     case 1: return GeoManager->MakeTube(Name, Medium, 0, SizeX, SizeZ);    //tube
     case 2:
       { //polygon
-        TGeoVolume* tgv = GeoManager->MakePgon(Name, Medium, 0, 360.0, Sides, 2);
+        TGeoVolume* tgv = GeoManager->MakePgon(Name, Medium, 0, 360.0, 6, 2);
         ((TGeoPcon*)tgv->GetShape())->DefineSection(0, -SizeZ, 0, SizeX);
         ((TGeoPcon*)tgv->GetShape())->DefineSection(1, +SizeZ, 0, SizeX);
         return tgv;
       }
     case 3:
     {
-      double alphaDeg = 35.0;
-      double angle = alphaDeg * TMath::Pi()/180.0;
+      double angle = tp->AngleSphere * TMath::Pi()/180.0;
       double r = SizeX * sin(angle);
       double hHalf = 0.5 * SizeX * (1.0 - cos(angle));
       qDebug() << "halfThick:"<<hHalf;
@@ -779,7 +782,7 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, in
       tube->RegisterYourself(); //need?
 
       TString sphereName = Name + "_sphere";
-      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, alphaDeg);
+      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, tp->AngleSphere);
       sphere->RegisterYourself(); //need?
       TString transName = Name + "_m";
       TGeoTranslation* tr = new TGeoTranslation(transName, 0, 0, -SizeX + hHalf);
@@ -835,8 +838,7 @@ void DetectorClass::positionPMs()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(itype);
-      pmTypes[itype] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
-          tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
+      pmTypes[itype] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmTypes[itype]->SetLineColor(kGreen);
       pmTypes[itype]->SetTitle("P");
     }
@@ -1010,8 +1012,7 @@ void DetectorClass::positionDummies()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(i);
-      pmtDummy[i] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
-                                          tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
+      pmtDummy[i] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmtDummy[i]->SetLineColor(30);
       pmtDummy[i]->SetTitle("p");
     }

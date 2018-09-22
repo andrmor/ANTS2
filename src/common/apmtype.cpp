@@ -29,6 +29,7 @@ void APmType::writeToJson(QJsonObject &json) const
   genj["SizeX"] = SizeX;
   genj["SizeY"] = SizeY;
   genj["SizeZ"] = SizeZ;
+  genj["AngleSphere"] = AngleSphere;
   genj["SiPM"] = SiPM;
   json["General"] = genj;
 
@@ -83,6 +84,8 @@ void APmType::readFromJson(const QJsonObject &json)
   parseJson(genj, "Shape", Shape);
   parseJson(genj, "SizeX", SizeX);
   parseJson(genj, "SizeY", SizeY);
+  AngleSphere = 35.0;
+  parseJson(genj, "AngleSphere", AngleSphere);
   SizeZ = 0.01; //compatibility
   parseJson(genj, "SizeZ", SizeZ);
   parseJson(genj, "SiPM", SiPM);

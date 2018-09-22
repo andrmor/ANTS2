@@ -626,20 +626,21 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
           if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
 
       QGraphicsItem* tmp;
-      if (MW->PMs->getType(PM.type)->Shape == 0)
+      const APmType* tp = MW->PMs->getType(PM.type);
+      if (tp->Shape == 0)
         {
-          double sizex = MW->PMs->getType(PM.type)->SizeX*GVscale;
-          double sizey = MW->PMs->getType(PM.type)->SizeY*GVscale;
+          double sizex = tp->SizeX*GVscale;
+          double sizey = tp->SizeY*GVscale;
           tmp = scene->addRect(-0.5*sizex, -0.5*sizey, sizex, sizey, pen, brush);
         }
-      else if (MW->PMs->getType(PM.type)->Shape == 1)
+      else if (tp->Shape == 1 || tp->Shape == 3)
         {
-          double diameter = MW->PMs->getType(PM.type)->SizeX*GVscale;
+          double diameter = ( tp->Shape == 1 ? tp->SizeX*GVscale : 2.0*tp->getProjectionRadiusSpherical()*GVscale );
           tmp = scene->addEllipse( -0.5*diameter, -0.5*diameter, diameter, diameter, pen, brush);
         }
       else
         {
-          double radius = 0.5*MW->PMs->getType(PM.type)->SizeX*GVscale;
+          double radius = 0.5*tp->SizeX*GVscale;
           QPolygon polygon;
           for (int j=0; j<7; j++)
             {

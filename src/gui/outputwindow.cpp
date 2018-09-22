@@ -654,7 +654,8 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
       if (ui->cbViewFromBelow->isChecked()) tmp->setZValue(-PM.z);
       else tmp->setZValue(PM.z);
 
-      tmp->setRotation(-PM.psi);
+      if (PM.phi != 0) tmp->setRotation(-PM.phi);
+        else if (PM.psi != 0) tmp->setRotation(-PM.psi);
       tmp->setTransform(QTransform().translate(PM.x*GVscale, -PM.y*GVscale)); //minus!!!!
     }
 }

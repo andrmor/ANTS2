@@ -5949,7 +5949,7 @@ materials</string>
           <property name="geometry">
            <rect>
             <x>137</x>
-            <y>14</y>
+            <y>19</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5962,7 +5962,7 @@ materials</string>
           <property name="geometry">
            <rect>
             <x>202</x>
-            <y>14</y>
+            <y>19</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5974,15 +5974,14 @@ materials</string>
          <widget class="QLabel" name="label_8">
           <property name="geometry">
            <rect>
-            <x>2</x>
-            <y>7</y>
+            <x>10</x>
+            <y>20</y>
             <width>123</width>
-            <height>35</height>
+            <height>20</height>
            </rect>
           </property>
           <property name="text">
-           <string>Reemission probability
-back in 2Pi:</string>
+           <string>reemission probability:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -5992,7 +5991,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>3</x>
-            <y>40</y>
+            <y>45</y>
             <width>121</width>
             <height>20</height>
            </rect>
@@ -6008,7 +6007,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>202</x>
-            <y>40</y>
+            <y>45</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -6021,7 +6020,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>137</x>
-            <y>40</y>
+            <y>45</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -6029,6 +6028,34 @@ back in 2Pi:</string>
           <property name="text">
            <string>Show</string>
           </property>
+         </widget>
+         <widget class="QComboBox" name="cobSurfaceWLS_Model">
+          <property name="geometry">
+           <rect>
+            <x>9</x>
+            <y>4</y>
+            <width>121</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Isotropic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, back (2Pi)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, forw (2Pi)</string>
+           </property>
+          </item>
          </widget>
         </widget>
         <widget class="QWidget" name="page_26">

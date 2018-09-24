@@ -642,6 +642,8 @@ private slots:
 
     void on_ledSphericalPMAngle_editingFinished();
 
+    void on_cobSurfaceWLS_Model_activated(int index);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

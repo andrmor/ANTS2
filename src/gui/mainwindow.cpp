@@ -824,7 +824,8 @@ void MainWindow::on_pbOverride_clicked()
         }
       case 5:  // Surface WLS
         {
-          ov = new AWaveshifterOverride(Detector->MpCollection, From, To);
+          ui->cobSurfaceWLS_Model->setCurrentIndex(1);
+          ov = new AWaveshifterOverride(Detector->MpCollection, From, To, 1);
           ui->pbSurfaceWLS_Show->setEnabled(false);
           ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
           break;
@@ -926,6 +927,7 @@ void MainWindow::on_pbRefreshOverrides_clicked()
             AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
             ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
             ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
+            ui->cobSurfaceWLS_Model->setCurrentIndex(ov->ReemissionModel);
           }
         else if (model == "SimplisticSpectral_model")
           {
@@ -4655,6 +4657,19 @@ void MainWindow::on_pbSurfaceWLS_Show_clicked()
   gr->SetMinimum(0);
 
   GraphWindow->Draw(gr, "apl");
+}
+
+void MainWindow::on_cobSurfaceWLS_Model_activated(int index)
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->ReemissionModel = index;
+    ReconstructDetector();
+    //MainWindow::on_pbRefreshOverrides_clicked();
 }
 
 void MainWindow::on_pbSurfaceWLS_Load_clicked()

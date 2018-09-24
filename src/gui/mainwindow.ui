@@ -1118,7 +1118,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            </rect>
           </property>
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
@@ -9464,12 +9464,15 @@ thermal neutrons:</string>
               <rect>
                <x>10</x>
                <y>15</y>
-               <width>120</width>
+               <width>156</width>
                <height>19</height>
               </rect>
              </property>
              <property name="text">
               <string>Photon direction vector:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QCheckBox" name="cbRandomDir">
@@ -9478,7 +9481,7 @@ thermal neutrons:</string>
              </property>
              <property name="geometry">
               <rect>
-               <x>150</x>
+               <x>170</x>
                <y>17</y>
                <width>121</width>
                <height>17</height>
@@ -9815,7 +9818,7 @@ thermal neutrons:</string>
               <rect>
                <x>13</x>
                <y>17</y>
-               <width>124</width>
+               <width>230</width>
                <height>17</height>
               </rect>
              </property>
@@ -9859,14 +9862,17 @@ thermal neutrons:</string>
              <widget class="QLabel" name="label_79">
               <property name="geometry">
                <rect>
-                <x>20</x>
+                <x>10</x>
                 <y>6</y>
-                <width>141</width>
+                <width>150</width>
                 <height>16</height>
                </rect>
               </property>
               <property name="text">
                <string>At each node simulate</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
              <widget class="QSpinBox" name="sbNumberOfRuns">
@@ -9891,9 +9897,9 @@ thermal neutrons:</string>
              <widget class="QLabel" name="label_235">
               <property name="geometry">
                <rect>
-                <x>240</x>
+                <x>228</x>
                 <y>8</y>
-                <width>46</width>
+                <width>70</width>
                 <height>13</height>
                </rect>
               </property>
@@ -9912,7 +9918,7 @@ thermal neutrons:</string>
               <rect>
                <x>10</x>
                <y>7</y>
-               <width>121</width>
+               <width>170</width>
                <height>17</height>
               </rect>
              </property>
@@ -10069,6 +10075,9 @@ double events:</string>
               </property>
               <property name="text">
                <string>Total probability:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
              <zorder>tabwidScanFlood</zorder>

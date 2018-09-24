@@ -782,7 +782,7 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
       tube->RegisterYourself(); //need?
 
       TString sphereName = Name + "_sphere";
-      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, tp->AngleSphere);
+      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, (tp->AngleSphere > 90.0 ? 180.0 : tp->AngleSphere) );
       sphere->RegisterYourself(); //need?
       TString transName = Name + "_m";
       TGeoTranslation* tr = new TGeoTranslation(transName, 0, 0, -SizeX + hHalf);

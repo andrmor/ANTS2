@@ -2235,9 +2235,20 @@ void InterfaceToGraphWin::ConfigureXYplot(int binsX, double X0, double X1, int b
    MW->Rwindow->updateGUIsettingsInConfig();
 }
 
+void InterfaceToGraphWin::ConfigureXYplotExtra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY)
+{
+    MW->Rwindow->ConfigurePlotXYextra(suppress0, plotVsTrue, showPMs, showManifest, invertX, invertY);
+    MW->Rwindow->updateGUIsettingsInConfig();
+}
+
 void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 {
-  MW->GraphWindow->SetLog(Xaxis, Yaxis);
+    MW->GraphWindow->SetLog(Xaxis, Yaxis);
+}
+
+void InterfaceToGraphWin::SetStatPanelVisible(bool flag)
+{
+    MW->GraphWindow->SetStatPanelVisible(flag);
 }
 
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)

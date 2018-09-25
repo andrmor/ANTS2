@@ -145,6 +145,7 @@ public slots:
   //can be triggered by script
   void on_pbReconstructAll_clicked();
   void ConfigurePlotXY(int binsX, double X0, double X1, int binsY, double Y0, double Y1);
+  void ConfigurePlotXYextra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY);
   void DoPlotXY(int i);
   void DoBlur(double sigma, int type = 0);  //type 0 - uniform, type 1 - gauss
   void DoCenterShift(int ipm);

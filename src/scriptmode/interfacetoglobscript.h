@@ -442,8 +442,11 @@ public slots:
   void PlotEnergyXY();
   void PlotChi2XY();
   void ConfigureXYplot(int binsX, double X0, double X1, int binsY, double Y0, double Y1);
+  void ConfigureXYplotExtra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY);
 
   void SetLog(bool Xaxis, bool Yaxis);
+
+  void SetStatPanelVisible(bool flag);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
   void SetLegendBorder(int color, int style, int size);

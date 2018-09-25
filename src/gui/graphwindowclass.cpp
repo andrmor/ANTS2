@@ -3649,7 +3649,12 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
 //     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
 //  }
 
-//  RedrawAll();
+  //  RedrawAll();
+}
+
+void GraphWindowClass::SetStatPanelVisible(bool flag)
+{
+    ui->cbShowLegend->setChecked(flag);
 }
 
 void GraphWindowClass::on_pbRemoveText_clicked()

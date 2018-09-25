@@ -80,10 +80,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
     this->GlobSet = GlobSet;
-    //SetStarterDir(GlobSet->LibScripts);
-    ScriptManager->LibScripts = GlobSet->LibScripts;
-    ScriptManager->LastOpenDir = GlobSet->LastOpenDir;
-    ScriptManager->ExamplesDir = GlobSet->ExamplesDir;
+    ScriptManager->LibScripts  = &GlobSet->LibScripts;
+    ScriptManager->LastOpenDir = &GlobSet->LastOpenDir;
+    ScriptManager->ExamplesDir = &GlobSet->ExamplesDir;
 
     ShowEvalResult = true;
     ui->setupUi(this);

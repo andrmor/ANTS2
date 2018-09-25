@@ -444,17 +444,20 @@ QVariant AInterfaceToCore::loadObject(QString fileName)
 
 QString AInterfaceToCore::GetWorkDir()
 {
-  return ScriptManager->LastOpenDir;
+    if (!ScriptManager->LastOpenDir) return QString();
+    else return *ScriptManager->LastOpenDir;
 }
 
 QString AInterfaceToCore::GetScriptDir()
 {
-  return ScriptManager->LibScripts;
+    if (!ScriptManager->LibScripts) return QString();
+    else return *ScriptManager->LibScripts;
 }
 
 QString AInterfaceToCore::GetExamplesDir()
 {
-  return ScriptManager->ExamplesDir;
+    if (!ScriptManager->ExamplesDir) return QString();
+    else return *ScriptManager->ExamplesDir;
 }
 
 QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fileNamePattern)

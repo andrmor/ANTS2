@@ -586,8 +586,10 @@ bool AInterfaceToCore::deleteFile(QString fileName)
 
 bool AInterfaceToCore::createDir(QString path)
 {
-    QDir dir(path);
-    return dir.mkdir(".");
+    //QDir dir(path);
+    //return dir.mkdir(".");
+    QDir dir("");
+    return dir.mkpath(path);
 }
 
 QString AInterfaceToCore::getCurrentDir()

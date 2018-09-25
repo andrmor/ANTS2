@@ -89,6 +89,8 @@ public slots:
   void ReconstructEvents(int NumThreads = -1, bool fShow = true);
   void UpdateFilters(int NumThreads = -1);
 
+  double GetChi2valueToCutTop(double cutUpper_fraction, int sensorGroup = 0);
+
   void DoBlurUniform(double range, bool fUpdateFilters = true);
   void DoBlurGauss(double sigma, bool fUpdateFilters = true);
 

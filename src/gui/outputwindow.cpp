@@ -1544,31 +1544,54 @@ void OutputWindow::on_pbMonitorShowWave_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
+    MW->GraphWindow->Draw(h, "hist", true, true);
+}
+
+void OutputWindow::on_pbShowWavelength_clicked()
+{
     if (!MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-        TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
-        MW->GraphWindow->Draw(h, "", true, true);
+        on_pbMonitorShowWave_clicked();
+        return;
     }
-    else
-    {
+
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+
         TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
         int nbins = h->GetXaxis()->GetNbins();
 
-        double WaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
-        double WaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
-        double WaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+        double gsWaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+        double gsWaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+        double gsWaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+        if (gsWaveBins > 1) gsWaveBins--;
+        double wavePerBin = (gsWaveTo - gsWaveFrom) / gsWaveBins;
 
-        TH1D *hnew = new TH1D("", "", nbins, WaveFrom, WaveTo);
+        double binFrom = h->GetBinLowEdge(1);
+        double waveFrom = gsWaveFrom + (binFrom - 0.5) * wavePerBin;
+        double binTo = h->GetBinLowEdge(nbins+1);
+        double waveTo = gsWaveFrom + (binTo - 0.5) * wavePerBin;
+
+//        TH1D *hnew = new TH1D(*h);
+//        double* new_bins = new double[nbins+1];
+//        for (int i=0; i <= nbins; i++)
+//            new_bins[i] = WaveFrom + wavePerBin * h->GetBinLowEdge(i+1);
+//        hnew->SetBins(nbins, new_bins);
+
+        TH1D *hnew = new TH1D("", "", nbins, waveFrom, waveTo);
         for (int i=1; i <= nbins; i++)
         {
             double y = h->GetBinContent(i);
-            double index = h->GetXaxis()->GetBinCenter(i);
-            double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
-            hnew->Fill(x, y);
+            //double index = h->GetXaxis()->GetBinCenter(i);
+            //double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
+            //hnew->Fill(x, y);
+            hnew->SetBinContent(i, y);
         }
         hnew->SetXTitle("Wavelength, nm");
-        MW->GraphWindow->Draw(hnew, "", true, true);
-    }
+        MW->GraphWindow->Draw(hnew, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowEnergy_clicked()

@@ -2033,6 +2033,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <height>27</height>
            </rect>
           </property>
+          <property name="toolTip">
+           <string>Two columns (XY) for 'custom with auto-Z'
+Three columns (XYZ) for 'fully custom' array</string>
+          </property>
           <property name="text">
            <string>Load PM positions (X,Y)</string>
           </property>

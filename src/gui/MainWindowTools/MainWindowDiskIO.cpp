@@ -342,7 +342,7 @@ void MainWindow::on_pbLoadPMcenters_clicked()
   if (reg == 1) str = "Load PM center positions (X,Y) for "+str;
   else str = "Load PM center positions (X,Y,Z) for "+str;
 
-  QString fileName = QFileDialog::getOpenFileName(this, str, GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+  QString fileName = QFileDialog::getOpenFileName(this, str, GlobSet->LastOpenDir, "ASCII files (*.dat *.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
 
@@ -363,9 +363,10 @@ void MainWindow::on_pbLoadPMcenters_clicked()
         PMar->PositionsAnglesTypes.append(APmPosAngTypeRecord(x[i], y[i], z[i], 0,0,0, 0));
     }
   MainWindow::ReconstructDetector();
-  MainWindow::ShowPMcount();
-  MainWindow::ClearData();
-  Owindow->RefreshData();
+  GeometryWindow->ShowGeometry(false, false);
+  //MainWindow::ShowPMcount();
+  //MainWindow::ClearData();
+  //Owindow->RefreshData();
 }
 
 void MainWindow::on_pbSavePMcenters_clicked()

@@ -3,6 +3,8 @@
 
 #include <QJsonObject>
 
+#include "TMath.h"
+
 void APmType::clear()
 {
   PDE_lambda.clear();
@@ -29,6 +31,7 @@ void APmType::writeToJson(QJsonObject &json) const
   genj["SizeX"] = SizeX;
   genj["SizeY"] = SizeY;
   genj["SizeZ"] = SizeZ;
+  genj["AngleSphere"] = AngleSphere;
   genj["SiPM"] = SiPM;
   json["General"] = genj;
 
@@ -83,6 +86,8 @@ void APmType::readFromJson(const QJsonObject &json)
   parseJson(genj, "Shape", Shape);
   parseJson(genj, "SizeX", SizeX);
   parseJson(genj, "SizeY", SizeY);
+  AngleSphere = 35.0;
+  parseJson(genj, "AngleSphere", AngleSphere);
   SizeZ = 0.01; //compatibility
   parseJson(genj, "SizeZ", SizeZ);
   parseJson(genj, "SiPM", SiPM);
@@ -116,5 +121,19 @@ void APmType::readFromJson(const QJsonObject &json)
       parseJson(areaj, "AreaStepY", AreaStepY);
       QJsonArray ar = areaj["ResponseVsXY"].toArray();
       read2DQVectorFromJArray(ar, AreaSensitivity);
-    }
+  }
+}
+
+double APmType::getHalfHeightSpherical() const
+{
+    double angle = AngleSphere * TMath::Pi()/180.0;
+    return 0.25 * SizeX * (1.0 - cos(angle));
+}
+
+double APmType::getProjectionRadiusSpherical() const
+{
+    if (AngleSphere > 90.0) return 0.5 * SizeX;
+
+    double angle = AngleSphere * TMath::Pi()/180.0;
+    return 0.5 * SizeX * sin(angle);
 }

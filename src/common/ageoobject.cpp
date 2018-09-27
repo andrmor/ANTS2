@@ -894,9 +894,18 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
 
 bool AGeoObject::isMaterialInUse(int imat)
 {
-    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material
+    //qDebug() << Name << "--->"<<Material;
 
-    if (Material == imat) return true;
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+
+    //if (ObjectType->isGridElement()) qDebug() << "----Grid element!";
+    //if (ObjectType->isCompositeContainer()) qDebug() << "----Composite container!";
+
+    if (Material == imat)
+    {
+        if ( !ObjectType->isGridElement() && !ObjectType->isCompositeContainer() )
+            return true;
+    }
 
     for (int i=0; i<HostedObjects.size(); i++)
         if (HostedObjects[i]->isMaterialInUse(imat)) return true;

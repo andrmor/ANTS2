@@ -56,8 +56,10 @@ public:
   QVector<QObject*> interfaces;  //registered interfaces (units)
   TRandom2*         RandGen;     //math module uses it
 
-  //starter dirs
-  QString           LibScripts, LastOpenDir, ExamplesDir;
+  //pointers to starter dirs
+  QString*          LibScripts = 0;
+  QString*          LastOpenDir = 0;
+  QString*          ExamplesDir = 0;
 
   //for minimizer
   QString           MiniFunctionName;

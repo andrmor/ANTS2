@@ -67,22 +67,17 @@ AHighlighterScriptWindow::AHighlighterScriptWindow(QTextDocument *parent)
     commentEndExpression = QRegularExpression("\\*/");
 }
 
-void AHighlighterScriptWindow::setCustomCommands(QStringList functions, QStringList constants)
+void AHighlighterScriptWindow::setHighlighterRules(const QStringList& functions, const QStringList& deprecatedOrRemoved, const QStringList& constants)
 {
     QVector<HighlightingRule> hr;
 
     HighlightingRule rule;
+    QSet<QString> units;
 
     QColor color = Qt::darkCyan;
     customKeywordFormat.setForeground(color.darker(110));
-    //customKeywordFormat.setForeground(Qt::darkCyan);
     //customKeywordFormat.setFontWeight(QFont::Bold);
     //customKeywordFormat.setFontItalic(true);
-
-    color = Qt::darkMagenta;
-    unitFormat.setForeground(color);
-
-    QSet<QString> units;
     for (const QString& pattern : functions)
     {
         rule.pattern = QRegularExpression("\\b"+pattern+"(?=\\()");
@@ -91,19 +86,34 @@ void AHighlighterScriptWindow::setCustomCommands(QStringList functions, QStringL
 
         QStringList f = pattern.split(".", QString::SkipEmptyParts);
         if (f.size() > 1 && !f.first().isEmpty()) units << f.first();
+    }    
+
+    color = Qt::red;
+    deprecatedOrRemovedFormat.setForeground(color.darker(110));
+    for (const QString& pattern : deprecatedOrRemoved)
+    {
+        rule.pattern = QRegularExpression("\\b"+pattern+"(?=\\()");
+        rule.format = deprecatedOrRemovedFormat;
+        hr.append(rule);
     }
+
+    color = Qt::darkMagenta;
+    unitFormat.setForeground(color);
     for (const QString& pattern : units)
     {
         rule.pattern = QRegularExpression("\\b"+pattern+"\\b");
         rule.format = unitFormat;
         hr.append(rule);
     }
+
+    /*
     for (const QString &pattern : constants)
     {
         rule.pattern = QRegularExpression("\\b"+pattern+"\\b(?![\\(\\{\\[])");
         rule.format = customKeywordFormat;
         hr.append(rule);
     }
+    */
 
     highlightingRules = hr + highlightingRules; //so e.g. comments and quatation rule have higher priority
 }

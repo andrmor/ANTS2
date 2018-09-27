@@ -505,6 +505,12 @@ void ATextEdit::insertCompletion(const QString &completion)
 
 bool ATextEdit::findInList(QString text, QString& tmp) const
 {
+    if (DeprecatedOrRemovedMethods && DeprecatedOrRemovedMethods->contains(text))
+    {
+        tmp = DeprecatedOrRemovedMethods->value(text);
+        return true;
+    }
+
   for (int i=0; i<functionList.size(); i++)
     {
       tmp = functionList.at(i);

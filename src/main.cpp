@@ -279,8 +279,8 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(knn, "knn");
 #endif
 #ifdef ANTS_FANN
-        AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-        SM.SetInterfaceObject(ann, "ann");
+        //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+        //SM.SetInterfaceObject(ann, "ann");
 #endif
 
         if ( parser.isSet(scriptOption) )

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QSet>
+#include <QHash>
+#include <QString>
 
 class AHighlighterScriptWindow;
 class QAbstractItemModel;
@@ -35,6 +37,8 @@ public:
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");
+    void UpdateAllTabs(); //highlighter, helper etc
+
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
     void AddNewTab();  // new tab !
@@ -151,6 +155,9 @@ private:
 
     QSet<QString> ExpandedItemsInJsonTW;
     QStringList functionList; //functions to populate tooltip helper
+    QHash<QString, QString> DeprecatedOrRemovedMethods;
+    QStringList ListOfDeprecatedOrRemovedMethods;
+    QStringList ListOfConstants;
 
     void fillSubObject(QTreeWidgetItem* parent, const QJsonObject& obj);
     void fillSubArray(QTreeWidgetItem* parent, const QJsonArray& arr);
@@ -158,7 +165,8 @@ private:
     void fillHelper(QObject* obj, QString module);  //fill help TreeWidget according to the data in the obj
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
-    QStringList getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments = false);
+    QStringList getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
+    void appendDeprecatedOrRemovedMethods(const QObject *obj, const QString& name);
 
     void ReadFromJson(QJsonObject &json);
     void WriteToJson(QJsonObject &json);
@@ -172,6 +180,7 @@ private:
     void applyTextFindState();
     void findText(bool bForward);
 
+    void UpdateTab(AScriptWindowTabItem *tab);
 protected:
   virtual void closeEvent(QCloseEvent *e);
   virtual bool event(QEvent * e);

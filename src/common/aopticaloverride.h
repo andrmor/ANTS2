@@ -97,7 +97,7 @@ public:
 class AWaveshifterOverride : public AOpticalOverride
 {
 public:
-  AWaveshifterOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
+  AWaveshifterOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, int ReemissionModel = 1);
   virtual ~AWaveshifterOverride();
 
   void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
@@ -112,6 +112,7 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
   //-- parameters --
+  int ReemissionModel = 1; //0-isotropic (4Pi), 1-Lamb back (2Pi), 2-Lamb forward (2Pi)
   QVector<double> ReemissionProbability_lambda;
   QVector<double> ReemissionProbability;
   QVector<double> ReemissionProbabilityBinned;  

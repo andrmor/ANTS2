@@ -422,25 +422,18 @@ void APmHub::remove(int ipm)
 bool APmHub::removePMtype(int itype)
 {
   int numTypes = PMtypes.size();
-  if (numTypes < 2) return false;
-  bool inUse = false;
+  if (numTypes <= 1) return false;
+
   for (int ipm = 0; ipm < numPMs; ipm++)
     {
       if (PMs[ipm].type == itype)
-        {
-          inUse = true;
-          break;
-        }
+      return false;
     }
-  if (inUse) return false;
 
   PMtypes.remove(itype);
   //shifting existing ones
   for (int ipm = 0; ipm < numPMs; ipm++)
-    {
-      int it = PMs[ipm].type;
-      if ( it > itype ) PMs[ipm].type = it-1;
-    }
+      if ( PMs[ipm].type > itype ) PMs[ipm].type--;
   return true;
 }
 

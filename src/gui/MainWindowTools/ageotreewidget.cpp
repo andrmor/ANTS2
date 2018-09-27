@@ -152,7 +152,7 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
     if (!obj->getGridElement()) return;
     ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(obj->getGridElement()->ObjectType);
 
-    AGridElementDialog* d = new AGridElementDialog(this);
+    AGridElementDialog* d = new AGridElementDialog(Sandwich->Materials, this);
     switch (GE->shape)
      {
       case 0: d->setValues(0, GE->size1, GE->size2, obj->getGridElement()->Shape->getHeight()-0.001); break;
@@ -166,6 +166,15 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
       }
     }
 
+    //setting materials
+    d->setBulkMaterial(obj->Material);
+    if (!obj->HostedObjects.isEmpty())
+        if (!obj->HostedObjects.first()->HostedObjects.isEmpty())
+        {
+            int wireMat = obj->HostedObjects.first()->HostedObjects.first()->Material;
+            d->setWireMaterial(wireMat);
+        }
+
     int res = d->exec();
 
     if (res != 0)
@@ -173,12 +182,14 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
         //qDebug() << "Accepted!";
         switch (d->shape())
         {
-        case 0: Sandwich->shapeGrid(obj, 0, d->pitch(), d->length(), d->diameter()); break;
-        case 1: Sandwich->shapeGrid(obj, 1, d->pitchX(), d->pitchY(), d->diameter()); break;
-        case 2: Sandwich->shapeGrid(obj, 2, d->outer(), d->inner(), d->height()); break;
+        case 0: Sandwich->shapeGrid(obj, 0, d->pitch(), d->length(), d->diameter(), d->wireMaterial()); break;
+        case 1: Sandwich->shapeGrid(obj, 1, d->pitchX(), d->pitchY(), d->diameter(), d->wireMaterial()); break;
+        case 2: Sandwich->shapeGrid(obj, 2, d->outer(), d->inner(), d->height(), d->wireMaterial()); break;
         default:
             qWarning() << "Unknown grid type!";
         }
+
+        obj->Material = d->bulkMaterial();
 
         emit RequestRebuildDetector();
         UpdateGui(objName);
@@ -914,6 +925,7 @@ void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
   while (World->isNameExists(newObj->Name));
   if (newObj->Shape) delete newObj->Shape;
   newObj->Shape = new AGeoBox(50, 50, 0.501);
+  newObj->Material = ContObj->Material;
 
   newObj->color = 1;
   ContObj->addObjectFirst(newObj);

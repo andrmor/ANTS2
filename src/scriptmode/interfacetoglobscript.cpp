@@ -1966,6 +1966,27 @@ void InterfaceToReconstructor::UpdateFilters(int NumThreads)
   RManager->filterEvents(Config->JSON, NumThreads);
 }
 
+double InterfaceToReconstructor::GetChi2valueToCutTop(double cutUpper_fraction, int sensorGroup)
+{
+    const int numBins = 1000;
+
+    if (!EventsDataHub->isReconstructionReady(sensorGroup)) return 0;
+
+    TH1D* h = new TH1D("h","", numBins, 0, 0);
+    for (int ievent = 0; ievent < EventsDataHub->ReconstructionData[sensorGroup].size(); ievent++)
+        h->Fill(EventsDataHub->ReconstructionData[sensorGroup][ievent]->chi2);
+
+    double integral = h->Integral();
+    double sum = 0;
+    for (int ibin = numBins; ibin > -1; ibin--)
+    {
+        sum += h->GetBinContent(ibin);
+        if(sum >= integral * cutUpper_fraction)
+           return ibin * h->GetBinWidth(0);
+    }
+    return 0;
+}
+
 void InterfaceToReconstructor::DoBlurUniform(double range, bool fUpdateFilters)
 {
   EventsDataHub->BlurReconstructionData(0, range, Config->GetDetector()->RandGen);
@@ -2235,9 +2256,20 @@ void InterfaceToGraphWin::ConfigureXYplot(int binsX, double X0, double X1, int b
    MW->Rwindow->updateGUIsettingsInConfig();
 }
 
+void InterfaceToGraphWin::ConfigureXYplotExtra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY)
+{
+    MW->Rwindow->ConfigurePlotXYextra(suppress0, plotVsTrue, showPMs, showManifest, invertX, invertY);
+    MW->Rwindow->updateGUIsettingsInConfig();
+}
+
 void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 {
-  MW->GraphWindow->SetLog(Xaxis, Yaxis);
+    MW->GraphWindow->SetLog(Xaxis, Yaxis);
+}
+
+void InterfaceToGraphWin::SetStatPanelVisible(bool flag)
+{
+    MW->GraphWindow->SetStatPanelVisible(flag);
 }
 
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)

@@ -847,6 +847,11 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <string>Hexagonal</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Sphere</string>
+           </property>
+          </item>
          </widget>
          <widget class="QLabel" name="labShape">
           <property name="geometry">
@@ -1103,6 +1108,83 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
+         <widget class="QFrame" name="frSphericalPm">
+          <property name="geometry">
+           <rect>
+            <x>200</x>
+            <y>58</y>
+            <width>311</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QLabel" name="label_48">
+           <property name="geometry">
+            <rect>
+             <x>3</x>
+             <y>6</y>
+             <width>101</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Angle from 0 to:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledSphericalPMAngle">
+           <property name="geometry">
+            <rect>
+             <x>108</x>
+             <y>7</y>
+             <width>50</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>45</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_134">
+           <property name="geometry">
+            <rect>
+             <x>163</x>
+             <y>0</y>
+             <width>10</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>o</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="labSphericalPMinfo">
+           <property name="geometry">
+            <rect>
+             <x>180</x>
+             <y>8</y>
+             <width>131</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string>XY projection radius [mm] / Full Z height [mm]</string>
+           </property>
+           <property name="text">
+            <string>xx.xxx / yy.yyy</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </widget>
         </widget>
         <widget class="QComboBox" name="cobPMdeviceType">
          <property name="geometry">
@@ -1195,31 +1277,34 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
         <widget class="QStackedWidget" name="swPMTvsSiPM">
          <property name="geometry">
           <rect>
-           <x>229</x>
-           <y>61</y>
+           <x>233</x>
+           <y>92</y>
            <width>291</width>
-           <height>92</height>
+           <height>61</height>
           </rect>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="pagePMT"/>
          <widget class="QWidget" name="pageSiPM">
           <widget class="QLabel" name="label_100">
            <property name="geometry">
             <rect>
-             <x>21</x>
-             <y>35</y>
-             <width>81</width>
+             <x>2</x>
+             <y>36</y>
+             <width>74</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
-            <string>Dark count rate:</string>
+            <string>Dark rate:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_97">
@@ -1238,7 +1323,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLineEdit" name="ledSiPMdarCountRate">
            <property name="geometry">
             <rect>
-             <x>105</x>
+             <x>92</x>
              <y>35</y>
              <width>51</width>
              <height>20</height>
@@ -1251,8 +1336,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_101">
            <property name="geometry">
             <rect>
-             <x>162</x>
-             <y>36</y>
+             <x>149</x>
+             <y>35</y>
              <width>21</width>
              <height>16</height>
             </rect>
@@ -1264,9 +1349,9 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLineEdit" name="ledSiPMrecoveryTime">
            <property name="geometry">
             <rect>
-             <x>105</x>
-             <y>64</y>
-             <width>51</width>
+             <x>228</x>
+             <y>34</y>
+             <width>31</width>
              <height>20</height>
             </rect>
            </property>
@@ -1277,36 +1362,42 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_63">
            <property name="geometry">
             <rect>
-             <x>27</x>
-             <y>65</y>
-             <width>81</width>
+             <x>167</x>
+             <y>35</y>
+             <width>60</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
-            <string>Recovery time:</string>
+            <string>Recovery:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_98">
            <property name="geometry">
             <rect>
-             <x>69</x>
-             <y>0</y>
-             <width>33</width>
-             <height>28</height>
+             <x>7</x>
+             <y>4</y>
+             <width>63</width>
+             <height>20</height>
             </rect>
            </property>
            <property name="text">
             <string>Pixels:</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
           </widget>
           <widget class="QLabel" name="labTotalPixels">
            <property name="geometry">
             <rect>
-             <x>242</x>
-             <y>8</y>
-             <width>46</width>
-             <height>13</height>
+             <x>224</x>
+             <y>5</y>
+             <width>61</width>
+             <height>16</height>
             </rect>
            </property>
            <property name="text">
@@ -1316,8 +1407,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbSiPMnumy">
            <property name="geometry">
             <rect>
-             <x>185</x>
-             <y>4</y>
+             <x>167</x>
+             <y>3</y>
              <width>51</width>
              <height>22</height>
             </rect>
@@ -1335,8 +1426,8 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QSpinBox" name="sbSiPMnumx">
            <property name="geometry">
             <rect>
-             <x>105</x>
-             <y>4</y>
+             <x>73</x>
+             <y>3</y>
              <width>51</width>
              <height>22</height>
             </rect>
@@ -1354,53 +1445,30 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
           <widget class="QLabel" name="label_99">
            <property name="geometry">
             <rect>
-             <x>164</x>
-             <y>6</y>
-             <width>16</width>
+             <x>130</x>
+             <y>5</y>
+             <width>27</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
             <string>by</string>
            </property>
-          </widget>
-          <widget class="Line" name="line_59">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>5</y>
-             <width>10</width>
-             <height>80</height>
-            </rect>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
           <widget class="QLabel" name="label_135">
            <property name="geometry">
             <rect>
-             <x>162</x>
-             <y>65</y>
+             <x>263</x>
+             <y>35</y>
              <width>21</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
             <string>ns</string>
-           </property>
-          </widget>
-          <widget class="Line" name="line_72">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>45</y>
-             <width>14</width>
-             <height>3</height>
-            </rect>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </widget>
@@ -1964,6 +2032,10 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <width>150</width>
             <height>27</height>
            </rect>
+          </property>
+          <property name="toolTip">
+           <string>Two columns (XY) for 'custom with auto-Z'
+Three columns (XYZ) for 'fully custom' array</string>
           </property>
           <property name="text">
            <string>Load PM positions (X,Y)</string>
@@ -5881,7 +5953,7 @@ materials</string>
           <property name="geometry">
            <rect>
             <x>137</x>
-            <y>14</y>
+            <y>19</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5894,7 +5966,7 @@ materials</string>
           <property name="geometry">
            <rect>
             <x>202</x>
-            <y>14</y>
+            <y>19</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5906,15 +5978,14 @@ materials</string>
          <widget class="QLabel" name="label_8">
           <property name="geometry">
            <rect>
-            <x>2</x>
-            <y>7</y>
+            <x>10</x>
+            <y>20</y>
             <width>123</width>
-            <height>35</height>
+            <height>20</height>
            </rect>
           </property>
           <property name="text">
-           <string>Reemission probability
-back in 2Pi:</string>
+           <string>reemission probability:</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -5924,7 +5995,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>3</x>
-            <y>40</y>
+            <y>45</y>
             <width>121</width>
             <height>20</height>
            </rect>
@@ -5940,7 +6011,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>202</x>
-            <y>40</y>
+            <y>45</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5953,7 +6024,7 @@ back in 2Pi:</string>
           <property name="geometry">
            <rect>
             <x>137</x>
-            <y>40</y>
+            <y>45</y>
             <width>60</width>
             <height>23</height>
            </rect>
@@ -5961,6 +6032,34 @@ back in 2Pi:</string>
           <property name="text">
            <string>Show</string>
           </property>
+         </widget>
+         <widget class="QComboBox" name="cobSurfaceWLS_Model">
+          <property name="geometry">
+           <rect>
+            <x>9</x>
+            <y>4</y>
+            <width>121</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Isotropic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, back (2Pi)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Lamb, forw (2Pi)</string>
+           </property>
+          </item>
          </widget>
         </widget>
         <widget class="QWidget" name="page_26">
@@ -7138,11 +7237,14 @@ thermal neutrons:</string>
        <widget class="QCheckBox" name="cbRndCheckBeforeTrack">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>50</y>
+          <x>30</x>
+          <y>52</y>
           <width>271</width>
           <height>17</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>Do not use if PMs register light after wavelength shifting!</string>
         </property>
         <property name="text">
          <string>Before photon tracking, test against max Q.E.</string>
@@ -7155,13 +7257,13 @@ thermal neutrons:</string>
         <property name="geometry">
          <rect>
           <x>287</x>
-          <y>40</y>
+          <y>29</y>
           <width>240</width>
           <height>17</height>
          </rect>
         </property>
         <property name="toolTip">
-         <string>Slows down simulation!</string>
+         <string>Slows down simulations and uses a lot of memory!</string>
         </property>
         <property name="text">
          <string>Do logs and statistics</string>
@@ -7183,11 +7285,28 @@ thermal neutrons:</string>
          <string>Configure number of threads</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbQEacceleratorWarning">
+        <property name="geometry">
+         <rect>
+          <x>4</x>
+          <y>49</y>
+          <width>22</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Do not use if PMs register light after wavelength shifting!</string>
+        </property>
+        <property name="text">
+         <string>!</string>
+        </property>
+       </widget>
        <zorder>label_41</zorder>
        <zorder>sbMaxNumbPhTransitions</zorder>
        <zorder>cbRndCheckBeforeTrack</zorder>
        <zorder>cbDoLogsAndStatistics</zorder>
        <zorder>pbConfigureNumberOfThreads</zorder>
+       <zorder>pbQEacceleratorWarning</zorder>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
@@ -7541,7 +7660,7 @@ thermal neutrons:</string>
          <rect>
           <x>34</x>
           <y>30</y>
-          <width>61</width>
+          <width>89</width>
           <height>16</height>
          </rect>
         </property>
@@ -7807,7 +7926,7 @@ thermal neutrons:</string>
          <rect>
           <x>7</x>
           <y>18</y>
-          <width>111</width>
+          <width>119</width>
           <height>16</height>
          </rect>
         </property>
@@ -9246,7 +9365,7 @@ thermal neutrons:</string>
             <rect>
              <x>6</x>
              <y>0</y>
-             <width>141</width>
+             <width>151</width>
              <height>21</height>
             </rect>
            </property>
@@ -9376,12 +9495,15 @@ thermal neutrons:</string>
               <rect>
                <x>10</x>
                <y>15</y>
-               <width>120</width>
+               <width>156</width>
                <height>19</height>
               </rect>
              </property>
              <property name="text">
               <string>Photon direction vector:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
             <widget class="QCheckBox" name="cbRandomDir">
@@ -9390,7 +9512,7 @@ thermal neutrons:</string>
              </property>
              <property name="geometry">
               <rect>
-               <x>150</x>
+               <x>170</x>
                <y>17</y>
                <width>121</width>
                <height>17</height>
@@ -9727,7 +9849,7 @@ thermal neutrons:</string>
               <rect>
                <x>13</x>
                <y>17</y>
-               <width>124</width>
+               <width>230</width>
                <height>17</height>
               </rect>
              </property>
@@ -9771,14 +9893,17 @@ thermal neutrons:</string>
              <widget class="QLabel" name="label_79">
               <property name="geometry">
                <rect>
-                <x>20</x>
+                <x>10</x>
                 <y>6</y>
-                <width>141</width>
+                <width>150</width>
                 <height>16</height>
                </rect>
               </property>
               <property name="text">
                <string>At each node simulate</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
              <widget class="QSpinBox" name="sbNumberOfRuns">
@@ -9803,9 +9928,9 @@ thermal neutrons:</string>
              <widget class="QLabel" name="label_235">
               <property name="geometry">
                <rect>
-                <x>240</x>
+                <x>228</x>
                 <y>8</y>
-                <width>46</width>
+                <width>70</width>
                 <height>13</height>
                </rect>
               </property>
@@ -9824,7 +9949,7 @@ thermal neutrons:</string>
               <rect>
                <x>10</x>
                <y>7</y>
-               <width>121</width>
+               <width>170</width>
                <height>17</height>
               </rect>
              </property>
@@ -9982,6 +10107,9 @@ double events:</string>
               <property name="text">
                <string>Total probability:</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
              <zorder>tabwidScanFlood</zorder>
              <zorder>label_221</zorder>
@@ -10005,9 +10133,9 @@ double events:</string>
              </property>
              <property name="geometry">
               <rect>
-               <x>230</x>
+               <x>222</x>
                <y>68</y>
-               <width>131</width>
+               <width>191</width>
                <height>24</height>
               </rect>
              </property>
@@ -10031,14 +10159,17 @@ double events:</string>
             <widget class="QLabel" name="label_133">
              <property name="geometry">
               <rect>
-               <x>110</x>
-               <y>70</y>
-               <width>111</width>
-               <height>16</height>
+               <x>74</x>
+               <y>69</y>
+               <width>141</width>
+               <height>20</height>
               </rect>
              </property>
              <property name="text">
               <string>Scintillation type:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </widget>
@@ -16093,8 +16224,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>395</x>
-     <y>448</y>
+     <x>386</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16125,8 +16256,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>518</y>
+     <x>226</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -16973,8 +17104,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>468</x>
-     <y>419</y>
+     <x>458</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>334</x>
@@ -16989,8 +17120,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>419</y>
+     <x>346</x>
+     <y>449</y>
     </hint>
     <hint type="destinationlabel">
      <x>292</x>
@@ -17037,8 +17168,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -17053,8 +17184,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -17069,8 +17200,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>421</y>
+     <x>443</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -17085,8 +17216,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -17101,8 +17232,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>450</y>
+     <x>443</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -17117,8 +17248,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>360</y>
+     <x>295</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17133,8 +17264,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>360</y>
+     <x>165</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -17165,8 +17296,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>420</y>
+     <x>319</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -17773,8 +17904,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>445</x>
-     <y>145</y>
+     <x>449</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>131</x>
@@ -18957,8 +19088,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>179</x>
-     <y>452</y>
+     <x>181</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -18989,8 +19120,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>450</y>
+     <x>251</x>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -19005,8 +19136,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>436</y>
+     <x>235</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -19021,8 +19152,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>474</y>
+     <x>235</x>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -19053,8 +19184,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>164</x>
-     <y>360</y>
+     <x>170</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -19069,8 +19200,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>420</y>
+     <x>233</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -19085,8 +19216,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>457</y>
+     <x>392</x>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -19101,8 +19232,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>420</y>
+     <x>241</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -19469,8 +19600,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>249</x>
-     <y>473</y>
+     <x>251</x>
+     <y>495</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -19485,8 +19616,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>120</x>
-     <y>360</y>
+     <x>126</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -19501,8 +19632,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>282</x>
-     <y>452</y>
+     <x>288</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>

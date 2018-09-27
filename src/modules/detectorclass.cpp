@@ -30,6 +30,7 @@
 #include "TRandom2.h"
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
+#include "TGeoCompositeShape.h"
 
 static void autoLoadPlugins() {
   typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
@@ -234,7 +235,7 @@ bool DetectorClass::readPMarraysFromJson(QJsonObject &json)
       qWarning()<<"Json file does not contain PM arrays data";
       return false;
     }
-  /// next to lines: CANNOT do it! Otherwise address of the script for position PMs will be changed -> crash!
+  /// next two lines: CANNOT do it! Otherwise address of the script for position PMs will be changed -> crash!
   //PMarrays.clear();
   //PMarrays.resize(2); //protection
 
@@ -750,20 +751,70 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
   return;
 }
 
-TGeoVolume *DetectorClass::generateVolume(const char *Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides)
+const QString DetectorClass::removePMtype(int itype)
 {
-  //Shape 0 -  box, 1 - cylinder, 2 - polygon
-  switch (Shape)
+    if (PMs->countPMtypes() <= 1) return "Cannot remove the last type";
+
+    //no need to check PMarrays -> if type is in use, PMs module will report it
+    for (const PMdummyStructure& ad : PMdummies)
+        if (ad.PMtype == itype) return "Cannot remove: at least one of the dummy PMs belongs to this type";
+
+    bool bOK = PMs->removePMtype(itype);
+    if (!bOK) return "Cannot remove: at least one of the PMs belongs to this type";
+
+    //shifting data in the arrays
+    for (APmArrayData& ad : PMarrays)
+    {
+        if (ad.PMtype > itype) ad.PMtype--;
+        for (APmPosAngTypeRecord& r : ad.PositionsAnglesTypes)
+            if (r.type > itype) r.type--;
+    }
+    for (PMdummyStructure& ad : PMdummies)
+        if (ad.PMtype > itype) ad.PMtype--;
+
+    return "";
+}
+
+TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
+{
+  double SizeX = 0.5 * tp->SizeX;
+  double SizeY = 0.5 * tp->SizeY;
+  double SizeZ = 0.5 * tp->SizeZ;
+
+  //Shape 0 -  box, 1 - cylinder, 2 - polygon, 3 - sphere
+  switch (tp->Shape)
     {
     case 0: return GeoManager->MakeBox (Name, Medium, SizeX, SizeY, SizeZ); //box
     case 1: return GeoManager->MakeTube(Name, Medium, 0, SizeX, SizeZ);    //tube
     case 2:
       { //polygon
-        TGeoVolume* tgv = GeoManager->MakePgon(Name, Medium, 0, 360.0, Sides, 2);
+        TGeoVolume* tgv = GeoManager->MakePgon(Name, Medium, 0, 360.0, 6, 2);
         ((TGeoPcon*)tgv->GetShape())->DefineSection(0, -SizeZ, 0, SizeX);
         ((TGeoPcon*)tgv->GetShape())->DefineSection(1, +SizeZ, 0, SizeX);
         return tgv;
       }
+    case 3:
+    {
+      if (tp->AngleSphere == 90.0 || tp->AngleSphere == 180.0)
+          return GeoManager->MakeSphere(Name, Medium, 0, SizeX, 0, tp->AngleSphere);
+
+      double r = tp->getProjectionRadiusSpherical();
+      double hHalf = tp->getHalfHeightSpherical();
+
+      TString tubeName = Name + "_tube";
+      TGeoVolume* tube = GeoManager->MakeTube(tubeName, Medium, 0, r, hHalf);
+      tube->RegisterYourself(); //need?
+
+      TString sphereName = Name + "_sphere";
+      TGeoVolume* sphere = GeoManager->MakeSphere(sphereName, Medium, 0, SizeX, 0, (tp->AngleSphere > 90.0 ? 180.0 : tp->AngleSphere) );
+      sphere->RegisterYourself(); //need?
+      TString transName = Name + "_m";
+      TGeoTranslation* tr = new TGeoTranslation(transName, 0, 0, -SizeX + hHalf);
+      tr->RegisterYourself();
+
+      TGeoShape* shape = new TGeoCompositeShape(tubeName +"*" + sphereName + ":" + transName);
+      return new TGeoVolume(Name, shape, Medium);
+    }
     default:
       ErrorString = "Error: unrecognized volume type!";
       qWarning() << ErrorString;
@@ -786,7 +837,7 @@ void DetectorClass::populatePMs()
               for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
               {
                 int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
-                double halfWidth = 0.5*PMs->getType(itype)->SizeZ;
+                double halfWidth = ( PMs->getType(itype)->Shape == 3 ? PMs->getType(itype)->getHalfHeightSpherical() : 0.5*PMs->getType(itype)->SizeZ);
                 double Z = (ul == 0) ? UpperEdge+halfWidth : LowerEdge-halfWidth;
                 PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
               }
@@ -811,8 +862,7 @@ void DetectorClass::positionPMs()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(itype);
-      pmTypes[itype] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
-          tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
+      pmTypes[itype] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmTypes[itype]->SetLineColor(kGreen);
       pmTypes[itype]->SetTitle("P");
     }
@@ -986,8 +1036,7 @@ void DetectorClass::positionDummies()
       QByteArray ba = str.toLocal8Bit();
       char *name = ba.data();
       const APmType *tp = PMs->getType(i);
-      pmtDummy[i] = generateVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed,
-                                          tp->Shape, 0.5*tp->SizeX, 0.5*tp->SizeY, 0.5*tp->SizeZ, 6);
+      pmtDummy[i] = generatePmVolume(name, (*MpCollection)[tp->MaterialIndex]->GeoMed, tp);
       pmtDummy[i]->SetLineColor(30);
       pmtDummy[i]->SetTitle("p");
     }

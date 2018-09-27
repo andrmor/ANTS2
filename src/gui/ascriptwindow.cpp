@@ -80,10 +80,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
     this->GlobSet = GlobSet;
-    //SetStarterDir(GlobSet->LibScripts);
-    ScriptManager->LibScripts = GlobSet->LibScripts;
-    ScriptManager->LastOpenDir = GlobSet->LastOpenDir;
-    ScriptManager->ExamplesDir = GlobSet->ExamplesDir;
+    ScriptManager->LibScripts  = &GlobSet->LibScripts;
+    ScriptManager->LastOpenDir = &GlobSet->LastOpenDir;
+    ScriptManager->ExamplesDir = &GlobSet->ExamplesDir;
 
     ShowEvalResult = true;
     ui->setupUi(this);
@@ -289,31 +288,30 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 
     // populating help
     QStringList newFunctions;
+
     if(name.isEmpty())
     { // empty name means the main module
         // populating help for main, math and core units
         trwHelp->clear();
         if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
+
         AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core");
-        newFunctions << getCustomCommandsOfObject(&core, "core", false);
+        newFunctions << getListOfMethods(&core, "core", false);
+        appendDeprecatedOrRemovedMethods(&core, "core");
+
         AInterfaceToMath math(0); //dummy to extract methods
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         fillHelper(&math, mathName);
-        newFunctions << getCustomCommandsOfObject(&math, mathName, false);
+        newFunctions << getListOfMethods(&math, mathName, false);
+        appendDeprecatedOrRemovedMethods(&math, mathName);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
         fillHelper(interfaceObject, name);
-        newFunctions << getCustomCommandsOfObject(interfaceObject, name, false);
-    }
-
-    // auto-read list of public slots for highlighter    
-    for (int i=0; i<ScriptTabs.size(); i++)
-    {
-        ScriptTabs[i]->highlighter->setCustomCommands(newFunctions);
-        ScriptTabs[i]->TextEdit->functionList = functionList;
+        newFunctions << getListOfMethods(interfaceObject, name, false);
+        appendDeprecatedOrRemovedMethods(interfaceObject, name);
     }
 
     //filling autocompleter
@@ -322,12 +320,21 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     functions << newFunctions;
     //completitionModel->setStringList(functions);
 
+    //if standalone script, update the highlighter and tooltip
+    if (name.isEmpty()) UpdateAllTabs();
+
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 
     if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
+}
+
+void AScriptWindow::UpdateAllTabs()
+{
+    for (int i=0; i<ScriptTabs.size(); i++)
+        UpdateTab(ScriptTabs[i]);
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -767,7 +774,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       if (ScriptLanguage == _PythonScript_) UnitDescription.remove("Multithread-capable");
     }
 
-  QStringList functions = getCustomCommandsOfObject(obj, module, true);
+  QStringList functions = getListOfMethods(obj, module, true);
   functions.sort();
 
   QTreeWidgetItem *objItem = new QTreeWidgetItem(trwHelp);
@@ -1134,7 +1141,7 @@ void AScriptWindow::onProgressChanged(int percent)
     qApp->processEvents();
 }
 
-QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)
+QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
   int methods = obj->metaObject()->methodCount();
@@ -1180,6 +1187,26 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
         }
     }
   return commands;
+}
+
+void AScriptWindow::appendDeprecatedOrRemovedMethods(const QObject *obj, const QString &name)
+{
+    const AScriptInterface* unit = dynamic_cast<const AScriptInterface*>(obj);
+
+    if (unit)
+    {
+        QHashIterator<QString, QString> iter(unit->getDeprecatedOrRemovedMethods());
+        while (iter.hasNext())
+        {
+            iter.next();
+
+            QString key = iter.key();
+            if (!name.isEmpty()) key = name + "." + key;
+
+            DeprecatedOrRemovedMethods[key] = iter.value();
+            ListOfDeprecatedOrRemovedMethods << key;
+        }
+    }
 }
 
 AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language) :
@@ -1361,11 +1388,20 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
    ScriptTabs.swap(from, to);
 }
 
+void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
+{
+    tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
+    tab->TextEdit->functionList = functionList;
+    tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
+}
+
 void AScriptWindow::AddNewTab()
 {
     AScriptWindowTabItem* tab = new AScriptWindowTabItem(functions, ScriptLanguage);
-    tab->highlighter->setCustomCommands(functions);
-    tab->TextEdit->functionList = functionList;
+
+    //tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, QStringList());
+    //tab->TextEdit->functionList = functionList;
+    UpdateTab(tab);
 
     if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
       {

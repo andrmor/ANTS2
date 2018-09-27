@@ -824,7 +824,8 @@ void MainWindow::on_pbOverride_clicked()
         }
       case 5:  // Surface WLS
         {
-          ov = new AWaveshifterOverride(Detector->MpCollection, From, To);
+          ui->cobSurfaceWLS_Model->setCurrentIndex(1);
+          ov = new AWaveshifterOverride(Detector->MpCollection, From, To, 1);
           ui->pbSurfaceWLS_Show->setEnabled(false);
           ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
           break;
@@ -926,6 +927,7 @@ void MainWindow::on_pbRefreshOverrides_clicked()
             AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
             ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
             ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
+            ui->cobSurfaceWLS_Model->setCurrentIndex(ov->ReemissionModel);
           }
         else if (model == "SimplisticSpectral_model")
           {
@@ -1116,6 +1118,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->ledSizeY->setText(str);
     str.setNum(type->SizeZ, 'g', 4);
     ui->ledSizeZ->setText(str);
+    ui->ledSphericalPMAngle->setText( QString::number(type->AngleSphere, 'g', 4) );
     ui->sbSiPMnumx->setValue(type->PixelsX);
     ui->sbSiPMnumy->setValue(type->PixelsY);
     str.setNum(type->PixelsX * type->PixelsY);
@@ -1124,6 +1127,10 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->ledSiPMdarCountRate->setText(str);
     str.setNum(type->RecoveryTime, 'g', 4);
     ui->ledSiPMrecoveryTime->setText(str);
+
+    //for spherical:
+    if (type->Shape == 3) //sphere
+        ui->labSphericalPMinfo->setText( QString("%1 / %2").arg(type->getProjectionRadiusSpherical()).arg(2.0*type->getHalfHeightSpherical()) );
 
     str.setNum(type->EffectivePDE, 'g', 4);
     ui->ledPDE->setText(str);
@@ -1163,6 +1170,9 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->SizeX = ui->ledSizeX->text().toDouble();
    type->SizeY = ui->ledSizeY->text().toDouble();
    type->SizeZ = ui->ledSizeZ->text().toDouble();
+
+   type->AngleSphere = ui->ledSphericalPMAngle->text().toDouble();
+
    type->PixelsX = ui->sbSiPMnumx->value();
    type->PixelsY = ui->sbSiPMnumy->value();
    type->DarkCountRate = ui->ledSiPMdarCountRate->text().toDouble();
@@ -1238,17 +1248,19 @@ void MainWindow::on_pbRemoveThisPMtype_clicked()
         return;
       }
 
-    bool fOK = PMs->removePMtype(itype);
-    if (!fOK)
-      {        
-        message("Type in use! Cannot delete", this);
-        return;
-      }
+    const QString err = Detector->removePMtype(itype);
+    if (!err.isEmpty())
+        message(err, this);
+    else
+        ReconstructDetector();
+
+    /*
     //tmpPMtype = PMs->getType(itype-1);
     MainWindow::on_pbShowPMsArrayRegularData_clicked(); //refresh indication
     ui->sbPMtype->setValue(itype-1);
     //updating all comboboxes with PM type names
     MainWindow::updateCOBsWithPMtypeNames();
+    */
 }
 
 void MainWindow::on_pbAddNewPMtype_clicked()
@@ -2728,11 +2740,14 @@ void MainWindow::on_sbPreprocessigPMnumber_valueChanged(int arg1)
 
 void MainWindow::on_cobPMshape_currentIndexChanged(int index)
 {
-  if (index == 1) ui->labSizeDiameterPM->setText("Diameter:");
+  if (index == 1 || index == 3) ui->labSizeDiameterPM->setText("Diameter:");
   else ui->labSizeDiameterPM->setText("Size:");
 
   if (index == 0) ui->fRectangularPM->setVisible(true);
   else ui->fRectangularPM->setVisible(false);
+
+  ui->frSphericalPm->setVisible( index == 3);
+  ui->ledSizeZ->setDisabled(index == 3);
 }
 
 void MainWindow::on_pbElGainLoadDistr_clicked()
@@ -4646,6 +4661,19 @@ void MainWindow::on_pbSurfaceWLS_Show_clicked()
   GraphWindow->Draw(gr, "apl");
 }
 
+void MainWindow::on_cobSurfaceWLS_Model_activated(int index)
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->ReemissionModel = index;
+    ReconstructDetector();
+    //MainWindow::on_pbRefreshOverrides_clicked();
+}
+
 void MainWindow::on_pbSurfaceWLS_Load_clicked()
 {
   int MatFrom = ui->cobMaterialForOverrides->currentIndex();
@@ -5290,4 +5318,29 @@ void MainWindow::on_pbTrackOptionsGun_clicked()
 void MainWindow::on_pbTrackOptionsStack_clicked()
 {
     on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbQEacceleratorWarning_clicked()
+{
+    QString s = "Activation of this option allows to speed up simulations\n"
+            "by skipping tracking of photons which will definitely fail\n"
+            "the detection test by the PMs the photon will hit.\n"
+            "For this purpose the random number to be compared with the\n"
+            "Quantum Efficiency of the PM is generated before\n"
+            "tracking and checked against the maximum QE over all PMs.\n"
+            "If detection is failed, the tracking is skipped.\n\n"
+            "Important warning:\nDo not activate this feature\nif PMs can register light after wavelength shifting!";
+    message(s, this);
+}
+
+void MainWindow::on_ledSphericalPMAngle_editingFinished()
+{
+    double val = ui->ledSphericalPMAngle->text().toDouble();
+    if (val<=0 || val >180)
+    {
+        ui->ledSphericalPMAngle->setText("90");
+        message("Angle should be a positive value not larger than 180", this);
+    }
+
+    on_pbUpdatePMproperties_clicked();
 }

@@ -1399,17 +1399,31 @@ right-click on a volume in the tree-viewer and click &quot;Add monitor&quot;</st
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pbMonitorShowWave">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>22</height>
-                  </size>
+                <layout class="QHBoxLayout" name="horizontalLayout_17">
+                 <property name="topMargin">
+                  <number>0</number>
                  </property>
-                 <property name="text">
-                  <string>Wave index</string>
-                 </property>
-                </widget>
+                 <item>
+                  <widget class="QPushButton" name="pbMonitorShowWave">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>22</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>WaveIndex</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pbShowWavelength">
+                   <property name="text">
+                    <string>Wavelength</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item>
                 <widget class="QPushButton" name="pbMonitorShowEnergy">

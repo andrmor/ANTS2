@@ -19,6 +19,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QThread>
+#include <QRegularExpression>
 
 // ------------------- CORE ----------------------
 
@@ -44,11 +45,17 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
                     "For Windows users: pathes have to use \"/\" character, e.g. c:/tmp/file.txt\n";
   H["isFileExists"] = "Return true if file exists";
   H["loadColumn"] = "Load a column with ascii numeric data from the file.\nSecond argument is the column number starting from 0.";
-  H["loadArray"] = "Load an array of numerics (or an array of numeric arrays if columns>1).\nColumns parameter can be from 1 to 3.";
+  H["loadArray"] = "Load an array of numerics (or an array of numeric arrays).\nSecond argument is used to limit the number of columns to read";
   H["evaluate"] = "Evaluate script during another script evaluation. See example ScriptInsideScript.txt";
 
   H["SetNewFileFinder"] = "Configurer for GetNewFiles() function. dir is the search directory, fileNamePattern: *.* for all files. Function return all filenames found.";
   H["GetNewFiles"] = "Get list (array) of names of new files appeared in the directory configured with SetNewFileFinder()";
+
+  H["setCurveFitter"] = "Create splie fitter for curve y(x) in the range x from min to max and nInt nodes";
+  H["getFitted"] = "Used with setCurveFitter. Extracts the fitted value of y for x";
+  H["getFittedArr"] = "Used with setCurveFitter. Extracts the fitted values of y for an array of x";
+
+  //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
 }
 
 AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :
@@ -223,18 +230,38 @@ bool AInterfaceToCore::saveObject(QString FileName, QVariant Object, bool CanOve
 
 QVariant AInterfaceToCore::loadColumn(QString fileName, int column)
 {
+  QVector< QVector<double>* > vec;
+  for (int i=0; i<column+1; i++)
+      vec << new QVector<double>();
+
+  QVariantList l;
+
+  QString err = LoadDoubleVectorsFromFile(fileName, vec);
+  if (err.isEmpty())
+  {
+      for (int i=0; i < vec.at(column)->size(); i++)
+          l << vec.at(column)->at(i);
+  }
+
+  for (QVector<double>* v : vec) delete v;
+
+  if (!err.isEmpty()) abort(err);
+
+  return l;
+
+
+    /*
   if (column<0 || column>2)
     {
       abort ("Supported loadColumn with column # 0, 1 and 2");
       return QVariant();
     }
 
-  if (!QFileInfo(fileName).exists())
-  {
-    //abort("File does not exist: " + fileName);
-    qWarning() << "File does not exist: " << fileName;
-    return QVariant();
-  }
+    if (!QFileInfo(fileName).exists())
+    {
+      abort("File does not exist: " + fileName);
+      return QVariant();
+    }
 
   QVector<double> v1, v2, v3;
   int res;
@@ -259,10 +286,37 @@ QVariant AInterfaceToCore::loadColumn(QString fileName, int column)
     }
 
   return l;
+  */
 }
 
 QVariant AInterfaceToCore::loadArray(QString fileName, int columns)
 {
+    QVariantList l;
+    if (columns == 0) return l;
+
+    QVector< QVector<double>* > vec;
+    for (int i=0; i<columns; i++)
+        vec << new QVector<double>();
+
+    QString err = LoadDoubleVectorsFromFile(fileName, vec);
+    if (err.isEmpty())
+    {
+        for (int irow = 0; irow < vec.at(0)->size(); irow++)
+        {
+            QVariantList el;
+            for (int icol = 0; icol < columns; icol++)
+                el << vec.at(icol)->at(irow);
+            l.push_back(el);
+        }
+    }
+
+    for (QVector<double>* v : vec) delete v;
+
+    if (!err.isEmpty()) abort(err);
+
+    return l;
+
+    /*
   if (columns<0 || columns>2)
     {
       abort ("Supported 1, 2 and 3 columns");
@@ -271,8 +325,7 @@ QVariant AInterfaceToCore::loadArray(QString fileName, int columns)
 
   if (!QFileInfo(fileName).exists())
   {
-    //abort("File does not exist: " + fileName);
-    qWarning() << "File does not exist: " << fileName;
+    abort("File does not exist: " + fileName);
     return QVariant();
   }
 
@@ -303,6 +356,54 @@ QVariant AInterfaceToCore::loadArray(QString fileName, int columns)
       l << r;
     }
   return l;
+  */
+}
+
+QVariant AInterfaceToCore::loadArray(QString fileName)
+{
+    if (!QFileInfo(fileName).exists())
+    {
+        abort("File does not exist: " + fileName);
+        return QVariant();
+    }
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        abort("Cannot open file: "+fileName);
+        return QVariant();
+    }
+
+    QTextStream in(&file);
+    QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+    QVariantList vl;
+
+    while(!in.atEnd())
+    {
+        QString line = in.readLine();
+
+        QStringList fields = line.split(rx, QString::SkipEmptyParts);
+
+        if (fields.isEmpty()) continue;
+        bool bOK;
+        double first = fields.at(0).toDouble(&bOK);
+        if (!bOK) continue;
+
+        if (fields.size() == 1)
+            vl.append(first);
+        else
+        {
+            QVariantList el;
+            el << first;
+            for (int i=1; i<fields.size(); i++)
+                el << fields.at(i).toDouble();
+            vl.push_back(el);
+        }
+    }
+
+    file.close();
+    return vl;
 }
 
 QString AInterfaceToCore::loadText(QString fileName)
@@ -343,17 +444,20 @@ QVariant AInterfaceToCore::loadObject(QString fileName)
 
 QString AInterfaceToCore::GetWorkDir()
 {
-  return ScriptManager->LastOpenDir;
+    if (!ScriptManager->LastOpenDir) return QString();
+    else return *ScriptManager->LastOpenDir;
 }
 
 QString AInterfaceToCore::GetScriptDir()
 {
-  return ScriptManager->LibScripts;
+    if (!ScriptManager->LibScripts) return QString();
+    else return *ScriptManager->LibScripts;
 }
 
 QString AInterfaceToCore::GetExamplesDir()
 {
-  return ScriptManager->ExamplesDir;
+    if (!ScriptManager->ExamplesDir) return QString();
+    else return *ScriptManager->ExamplesDir;
 }
 
 QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fileNamePattern)
@@ -482,8 +586,10 @@ bool AInterfaceToCore::deleteFile(QString fileName)
 
 bool AInterfaceToCore::createDir(QString path)
 {
-    QDir dir(path);
-    return dir.mkdir(".");
+    //QDir dir(path);
+    //return dir.mkdir(".");
+    QDir dir("");
+    return dir.mkpath(path);
 }
 
 QString AInterfaceToCore::getCurrentDir()

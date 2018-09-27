@@ -102,7 +102,8 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRan
           //normal is in the positive direction in respect to the original direction!
           if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
             {
-              // qDebug()<<"   scattering back";              
+              // qDebug()<<"   scattering back";
+              Status = LambertianReflection;
               return Back;
             }
           // qDebug()<<"   continuing to the next volume";
@@ -410,8 +411,8 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
     return false;
 }
 
-AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo)
+AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ReemissionModel)
+    : AOpticalOverride(MatCollection, MatFrom, MatTo), ReemissionModel(ReemissionModel)
 {
     Spectrum = 0;
 }
@@ -464,7 +465,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
 
     double prob = ReemissionProbabilityBinned.at(Photon->waveIndex); // probability of reemission
     if (RandGen->Rndm() < prob)
-      {
+    {
         //triggered!
 
         //generating new wavelength and waveindex
@@ -486,23 +487,57 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
         while (waveIndex < Photon->waveIndex); //conserving energy
 
         Photon->waveIndex = waveIndex;
+        Photon->SimStat->OverrideWLSshift++;
 
-        // qDebug()<<"2Pi lambertian scattering backward";
-        double norm2;
+        if (ReemissionModel == 0)
+        {
+            RandomDir(RandGen, Photon);
+            //enering new volume or backscattering?
+            //normal is in the positive direction in respect to the original direction!
+            if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
+              {
+                // qDebug()<<"   scattering back";
+                Status = LambertianReflection;
+                return Back;
+              }
+            // qDebug()<<"   continuing to the next volume";
+            Status = Transmission;
+            return Forward;
+        }
+
+        double norm2 = 0;
+        if (ReemissionModel == 1)
+        {
+            // qDebug()<<"2Pi lambertian scattering backward";
+            do
+            {
+                RandomDir(RandGen, Photon);
+                Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
+                norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
+            }
+            while (norm2 < 0.000001);
+
+            double normInverted = 1.0/TMath::Sqrt(norm2);
+            Photon->v[0] *= normInverted; Photon->v[1] *= normInverted; Photon->v[2] *= normInverted;
+            Status = LambertianReflection;
+
+            return Back;
+        }
+
+        // qDebug()<<"2Pi lambertian scattering forward";
         do
           {
             RandomDir(RandGen, Photon);
-            Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
+            Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
             norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
           }
         while (norm2 < 0.000001);
 
         double normInverted = 1.0/TMath::Sqrt(norm2);
         Photon->v[0] *= normInverted; Photon->v[1] *= normInverted; Photon->v[2] *= normInverted;
-        Status = LambertianReflection;
-        Photon->SimStat->OverrideWLSshift++;
-        return Back;
-      }
+        Status = Transmission;
+        return Forward;
+    }
 
     // else absorption
     Status = Absorption;
@@ -542,6 +577,7 @@ void AWaveshifterOverride::writeToJson(QJsonObject &json)
     QJsonArray arEm;
     writeTwoQVectorsToJArray(EmissionSpectrum_lambda, EmissionSpectrum, arEm);
     json["EmissionSpectrum"] = arEm;
+    json["ReemissionModel"] = ReemissionModel;
 }
 
 bool AWaveshifterOverride::readFromJson(QJsonObject &json)
@@ -554,6 +590,9 @@ bool AWaveshifterOverride::readFromJson(QJsonObject &json)
     readTwoQVectorsFromJArray(arRP, ReemissionProbability_lambda, ReemissionProbability);
     QJsonArray arEm = json["EmissionSpectrum"].toArray();
     readTwoQVectorsFromJArray(arEm, EmissionSpectrum_lambda, EmissionSpectrum);
+
+    ReemissionModel = 1;
+    parseJson(json, "ReemissionModel", ReemissionModel);
 
     return true;
 }

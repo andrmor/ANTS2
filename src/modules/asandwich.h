@@ -52,7 +52,7 @@ public:
 
   //grid
   void convertObjToGrid(AGeoObject *obj);
-  void shapeGrid(AGeoObject* obj, int shape, double p0, double p1, double p2);
+  void shapeGrid(AGeoObject* obj, int shape, double p0, double p1, double p2, int wireMat);
   //parallel - 0, pitch, length, wireDiameter
   //mesh - 1, pitchX, pitchY, wireDiameter
   //hexa - 2, outer circle diameter, inner circle diameter, full height

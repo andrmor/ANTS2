@@ -751,6 +751,30 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
   return;
 }
 
+const QString DetectorClass::removePMtype(int itype)
+{
+    if (PMs->countPMtypes() <= 1) return "Cannot remove the last type";
+
+    //no need to check PMarrays -> if type is in use, PMs module will report it
+    for (const PMdummyStructure& ad : PMdummies)
+        if (ad.PMtype == itype) return "Cannot remove: at least one of the dummy PMs belongs to this type";
+
+    bool bOK = PMs->removePMtype(itype);
+    if (!bOK) return "Cannot remove: at least one of the PMs belongs to this type";
+
+    //shifting data in the arrays
+    for (APmArrayData& ad : PMarrays)
+    {
+        if (ad.PMtype > itype) ad.PMtype--;
+        for (APmPosAngTypeRecord& r : ad.PositionsAnglesTypes)
+            if (r.type > itype) r.type--;
+    }
+    for (PMdummyStructure& ad : PMdummies)
+        if (ad.PMtype > itype) ad.PMtype--;
+
+    return "";
+}
+
 TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp)
 {
   double SizeX = 0.5 * tp->SizeX;

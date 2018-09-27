@@ -84,6 +84,7 @@ public:
   void colorVolumes(int scheme, int id = 0);
   int pmCount() const; // Raimundo: so it's not necessary to #include<pms.h> just to clear LRFs
   void findPM(int ipm, int &ul, int &index);
+  const QString removePMtype(int itype);
 
   //write to Json - can be used from outside
   void writeWorldFixedToJson(QJsonObject &json);

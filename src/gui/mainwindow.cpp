@@ -1248,17 +1248,19 @@ void MainWindow::on_pbRemoveThisPMtype_clicked()
         return;
       }
 
-    bool fOK = PMs->removePMtype(itype);
-    if (!fOK)
-      {        
-        message("Type in use! Cannot delete", this);
-        return;
-      }
+    const QString err = Detector->removePMtype(itype);
+    if (!err.isEmpty())
+        message(err, this);
+    else
+        ReconstructDetector();
+
+    /*
     //tmpPMtype = PMs->getType(itype-1);
     MainWindow::on_pbShowPMsArrayRegularData_clicked(); //refresh indication
     ui->sbPMtype->setValue(itype-1);
     //updating all comboboxes with PM type names
     MainWindow::updateCOBsWithPMtypeNames();
+    */
 }
 
 void MainWindow::on_pbAddNewPMtype_clicked()

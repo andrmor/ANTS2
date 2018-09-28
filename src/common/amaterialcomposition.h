@@ -47,7 +47,7 @@ public:
 
     void configureNaturalAbunances(const QString FileName_NaturalAbundancies);
 
-    QString setCompositionString(const QString composition);  // return error string if invalid composition, else returns ""
+    QString setCompositionString(const QString composition, bool KeepIsotopComposition = false);  // return error string if invalid composition, else returns ""
     QString getCompositionString() const {return ElementCompositionString;}
 
     int countElements() const {return ElementComposition.size();}

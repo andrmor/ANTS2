@@ -1,11 +1,14 @@
 #include "agridelementdialog.h"
 #include "ui_agridelementdialog.h"
 
-AGridElementDialog::AGridElementDialog(QWidget *parent) :
+AGridElementDialog::AGridElementDialog(const QStringList& MaterialList, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AGridElementDialog)
 {
     ui->setupUi(this);
+
+    ui->cobBulkMaterial->insertItems(0, MaterialList);
+    ui->cobWireMaterial->insertItems(0, MaterialList);
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -39,6 +42,18 @@ void AGridElementDialog::setValues(int shape, double p0, double p1, double p2)
         ui->ledHeight->setText(QString::number(2.0*p2));
         break;
     }
+}
+
+void AGridElementDialog::setBulkMaterial(int iMat)
+{
+    if (iMat < ui->cobBulkMaterial->count())
+        ui->cobBulkMaterial->setCurrentIndex(iMat);
+}
+
+void AGridElementDialog::setWireMaterial(int iMat)
+{
+    if (iMat < ui->cobWireMaterial->count())
+        ui->cobWireMaterial->setCurrentIndex(iMat);
 }
 
 int AGridElementDialog::shape()
@@ -84,6 +99,16 @@ double AGridElementDialog::outer()
 double AGridElementDialog::height()
 {
     return ui->ledHeight->text().toDouble();
+}
+
+int AGridElementDialog::bulkMaterial()
+{
+    return ui->cobBulkMaterial->currentIndex();
+}
+
+int AGridElementDialog::wireMaterial()
+{
+    return ui->cobWireMaterial->currentIndex();
 }
 
 void AGridElementDialog::on_cobGridType_currentIndexChanged(int index)

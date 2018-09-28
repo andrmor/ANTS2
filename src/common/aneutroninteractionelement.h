@@ -51,11 +51,15 @@ public:
     QVector<double> Energy;
     QVector<double> CrossSection;
 
+    QString CSfileHeader;
+
     QVector<ADecayScenario> DecayScenarios;  // only for absorption
 
     void writeToJson(QJsonObject& json, AMaterialParticleCollection *MpCollection) const;
     const QJsonObject writeToJson(AMaterialParticleCollection *MpCollection) const;
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
+
+    void readScenariosFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection);
 };
 
 #endif // ANEUTRONINTERACTIONELEMENT_H

@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QObject>
 #include <QWidget>
+#include <QSet>
 
 class QCompleter;
 class ALeftField;
@@ -19,16 +20,19 @@ public:
     QCompleter *completer() const {return c; }
 
     void SetFontSize(int size);
-
     void RefreshExtraHighlight();
-
     void setTextCursorSilently(const QTextCursor& tc);
 
+    void setDeprecatedOrRemovedMethods(const QHash<QString, QString>* DepRem) {DeprecatedOrRemovedMethods = DepRem;}
+
     QStringList functionList;
-
     QString FindString;
-
     static const int TabInSpaces = 7;
+    const QHash<QString, QString>* DeprecatedOrRemovedMethods = 0;
+
+public slots:
+    void paste();
+    void align();
 
 protected:
     bool event(QEvent *event);
@@ -68,6 +72,12 @@ private:
     void checkBracketsOnRight(QList<QTextEdit::ExtraSelection> &extraSelections, const QColor &color);
 
     bool TryShowFunctionTooltip(QTextCursor *cursor);
+
+    int getIndent(const QString &line) const;
+    void setIndent(QString &line, int indent);
+    void convertTabToSpaces(QString &line);
+    int getSectionCounterChange(const QString &line) const;
+
 signals:
     void requestHelp(QString);
     void editingFinished();

@@ -19,14 +19,12 @@ void ReconstructionWindow::onRequestEventsGuiUpdate()
 
     ui->dLoadedEnergy->setEnabled(EventsDataHub->fLoadedEventsHaveEnergyInfo || !EventsDataHub->isScanEmpty());
     if (!EventsDataHub->fLoadedEventsHaveEnergyInfo) ui->cbActivateLoadedEnergyFilter->setChecked(false);
-    //if (EventsDataHub->isScanEmpty()) ui->cbShowActualPosition->setChecked(false);
     ui->fAnalysisAreaScan->setEnabled(false);
 
     if (EventsDataHub->ScanNumberOfRuns>1) //clearData sets ScanNumberOfRuns to 1
       if (EventsDataHub->Scan.size() > EventsDataHub->ScanNumberOfRuns) //if not single point scan
         ui->fAnalysisAreaScan->setEnabled(true);
     bool fScanEmpty = EventsDataHub->isScanEmpty();
-    //ui->cbShowActualPosition->setEnabled(!fScanEmpty);
     if (fScanEmpty) ui->cbPlotVsActualPosition->setChecked(false);
     ui->cbPlotVsActualPosition->setEnabled(!fScanEmpty);
     onManifestItemsGuiUpdate();
@@ -106,7 +104,7 @@ void ReconstructionWindow::ShowStatistics(bool bCopyToTextLog)
   txt += "Good events: "+QString::number(GoodEvents);
 
   ui->leoEventsPassingAllFilters->setText( QString::number(GoodEvents));
-  if (AvChi2 != -1)
+  if (AvChi2 != -1 && AvChi2 != 0)
   {
       ui->leoAverageChi2->setText( QString::number(AvChi2) );
       txt += "   Average chi2: "+QString::number(AvChi2);

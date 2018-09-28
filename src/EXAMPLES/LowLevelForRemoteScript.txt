@@ -1,0 +1,49 @@
+web.SetTimeout(10000)
+var ip = "ws://192.168.2.76:"
+var reply = web.Connect(ip + "1234", true)
+//core.print("Dispatcher reply onConnect: " + reply)
+if ( !JSON.parse(reply)["result"]) core.abort("Failed to connect to the ants2 dispatcher")
+
+reply = web.SendText( '{ "command":"new", "threads":4 }' )
+//core.print("Dsipatcher reply message: " + reply)
+web.Disconnect()
+if ( !JSON.parse(reply)["result"]) core.abort("Dispatcher rejected request for the new server: " + reply)
+var ro = JSON.parse(reply)
+var port = ro["port"]
+var ticket = ro["ticket"]
+core.print("Dispatcher allocated port: " + port + "  and ticket: "+ ticket)
+core.print("\nConnecting to ants2 server...")
+
+reply = web.Connect(ip + port, true)
+//core.print("Server reply onConnect: " + reply)
+if ( !JSON.parse(reply)["result"]) core.abort("Failed to connect to the ants2 server")
+reply = web.SendTicket( ticket )
+//core.print("ants2 server reply message: " + reply)
+if ( !JSON.parse(reply)["result"]) core.abort("Server rejected the ticket!")
+core.print("   Connected!")
+
+var conf = config.GetConfig()
+reply = web.SendObject(conf)
+if ( !JSON.parse(reply)["result"]) core.abort("Failed to send config")
+
+//reply = web.SendText("var c = server.GetBufferAsObject(); config.SetConfig(c); sim.RunPhotonSources(8); rec.ReconstructEvents(7); events.GetReconstructedX(0)")
+function toEval()
+{
+       var c = server.GetBufferAsObject()
+       config.SetConfig(c)
+       sim.RunPhotonSources()
+       rec.ReconstructEvents()
+       return events.GetReconstructedX(0)
+}
+var script = toEval.toString() + "; toEval()" 
+reply = web.SendText(script)
+ro = JSON.parse(reply)
+if ( !ro["result"]) core.print("Evaluation failed!")
+else
+{
+       var res = ro["evaluation"]
+       if ( res !== "") core.print("Result: " + res)
+       else core.print("Evaluation returned success")
+}
+web.Disconnect()
+

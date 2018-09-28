@@ -347,7 +347,7 @@ void OutputWindow::showParticleHistString(int iRec, int level)
       case EventHistoryStructure::Photoelectric:            s += "photoelectric"; break;
       case EventHistoryStructure::ComptonScattering:        s += "compton"; break;
       case EventHistoryStructure::NeutronAbsorption:                  s += "capture"; break;
-      case EventHistoryStructure::EllasticScattering:       s += "elastic"; break;
+      case EventHistoryStructure::ElasticScattering:       s += "elastic"; break;
       case EventHistoryStructure::CreatedOutside:           s += "created outside the defined geometry"; break;
       case EventHistoryStructure::FoundUntrackableMaterial: s += "found untrackable material"; break;
       case EventHistoryStructure::PairProduction:           s += "pair production"; break;
@@ -626,20 +626,21 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
           if (Passives->isPassive(ipm)) brush.setColor(Qt::black);
 
       QGraphicsItem* tmp;
-      if (MW->PMs->getType(PM.type)->Shape == 0)
+      const APmType* tp = MW->PMs->getType(PM.type);
+      if (tp->Shape == 0)
         {
-          double sizex = MW->PMs->getType(PM.type)->SizeX*GVscale;
-          double sizey = MW->PMs->getType(PM.type)->SizeY*GVscale;
+          double sizex = tp->SizeX*GVscale;
+          double sizey = tp->SizeY*GVscale;
           tmp = scene->addRect(-0.5*sizex, -0.5*sizey, sizex, sizey, pen, brush);
         }
-      else if (MW->PMs->getType(PM.type)->Shape == 1)
+      else if (tp->Shape == 1 || tp->Shape == 3)
         {
-          double diameter = MW->PMs->getType(PM.type)->SizeX*GVscale;
+          double diameter = ( tp->Shape == 1 ? tp->SizeX*GVscale : 2.0*tp->getProjectionRadiusSpherical()*GVscale );
           tmp = scene->addEllipse( -0.5*diameter, -0.5*diameter, diameter, diameter, pen, brush);
         }
       else
         {
-          double radius = 0.5*MW->PMs->getType(PM.type)->SizeX*GVscale;
+          double radius = 0.5*tp->SizeX*GVscale;
           QPolygon polygon;
           for (int j=0; j<7; j++)
             {
@@ -654,7 +655,8 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
       if (ui->cbViewFromBelow->isChecked()) tmp->setZValue(-PM.z);
       else tmp->setZValue(PM.z);
 
-      tmp->setRotation(-PM.psi);
+      if (PM.phi != 0) tmp->setRotation(-PM.phi);
+        else if (PM.psi != 0) tmp->setRotation(-PM.psi);
       tmp->setTransform(QTransform().translate(PM.x*GVscale, -PM.y*GVscale)); //minus!!!!
     }
 }
@@ -1542,31 +1544,54 @@ void OutputWindow::on_pbMonitorShowWave_clicked()
     if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
 
     MW->GraphWindow->ShowAndFocus();
+    TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
+    MW->GraphWindow->Draw(h, "hist", true, true);
+}
+
+void OutputWindow::on_pbShowWavelength_clicked()
+{
     if (!MW->EventsDataHub->LastSimSet.fWaveResolved)
     {
-        TH1D* h = new TH1D(*EventsDataHub->SimStat->Monitors[imon]->getWave());
-        MW->GraphWindow->Draw(h, "", true, true);
+        on_pbMonitorShowWave_clicked();
+        return;
     }
-    else
-    {
+
+    int imon = ui->cobMonitor->currentIndex();
+    if (imon >= EventsDataHub->SimStat->Monitors.size()) return;
+
+    MW->GraphWindow->ShowAndFocus();
+
         TH1D* h = EventsDataHub->SimStat->Monitors[imon]->getWave();
         int nbins = h->GetXaxis()->GetNbins();
 
-        double WaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
-        double WaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
-        double WaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+        double gsWaveFrom = MW->EventsDataHub->LastSimSet.WaveFrom;
+        double gsWaveTo = MW->EventsDataHub->LastSimSet.WaveTo;
+        double gsWaveBins = MW->EventsDataHub->LastSimSet.WaveNodes;
+        if (gsWaveBins > 1) gsWaveBins--;
+        double wavePerBin = (gsWaveTo - gsWaveFrom) / gsWaveBins;
 
-        TH1D *hnew = new TH1D("", "", nbins, WaveFrom, WaveTo);
+        double binFrom = h->GetBinLowEdge(1);
+        double waveFrom = gsWaveFrom + (binFrom - 0.5) * wavePerBin;
+        double binTo = h->GetBinLowEdge(nbins+1);
+        double waveTo = gsWaveFrom + (binTo - 0.5) * wavePerBin;
+
+//        TH1D *hnew = new TH1D(*h);
+//        double* new_bins = new double[nbins+1];
+//        for (int i=0; i <= nbins; i++)
+//            new_bins[i] = WaveFrom + wavePerBin * h->GetBinLowEdge(i+1);
+//        hnew->SetBins(nbins, new_bins);
+
+        TH1D *hnew = new TH1D("", "", nbins, waveFrom, waveTo);
         for (int i=1; i <= nbins; i++)
         {
             double y = h->GetBinContent(i);
-            double index = h->GetXaxis()->GetBinCenter(i);
-            double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
-            hnew->Fill(x, y);
+            //double index = h->GetXaxis()->GetBinCenter(i);
+            //double x = (WaveTo-WaveFrom)*index/(WaveBins-1) + WaveFrom;
+            //hnew->Fill(x, y);
+            hnew->SetBinContent(i, y);
         }
         hnew->SetXTitle("Wavelength, nm");
-        MW->GraphWindow->Draw(hnew, "", true, true);
-    }
+        MW->GraphWindow->Draw(hnew, "hist", true, true);
 }
 
 void OutputWindow::on_pbMonitorShowEnergy_clicked()

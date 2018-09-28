@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 AConfiguration::AConfiguration(QObject *parent) :
   QObject(parent), Detector(0), ParticleSources(0) {}
@@ -40,11 +40,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           JSON["DetectorConfig"] = DetJson;
           Detector->BuildDetector(true); //if GUI present, update will trigger automatically //suppress sim gui update, json is stuill old!
         }
-      else
-        {
-          ErrorString = "Json does not contain detector settings!";
-          qWarning() << ErrorString;
-        }
+      else ErrorString = "Json does not contain detector settings!";
     }
 
   //    qDebug() << "Loading simulation config";
@@ -61,11 +57,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           emit requestSimulationGuiUpdate();
           emit requestSelectFirstActiveParticleSource();
         }
-      else
-        {
-          ErrorString = "Json does not contain simulation settings!";
-          qWarning() << ErrorString;
-        }
+      else ErrorString = "Json does not contain simulation settings!";
     }
   else
   {
@@ -97,11 +89,7 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
           emit requestReconstructionGuiUpdate();
           AskForLRFGuiUpdate();
         }
-      else
-      {
-          ErrorString = "Json does not contain reconstruction settings!";
-          qWarning() << ErrorString;
-      }
+      else ErrorString = "Json does not contain reconstruction settings!";
     }
 
   if (json.contains("GUI"))
@@ -140,9 +128,20 @@ bool AConfiguration::LoadConfig(QJsonObject &json, bool DetConstructor, bool Sim
       }
   }
 
+  bool bRes = true;
+#ifndef __USE_ANTS_NCRYSTAL__
+  if (Detector->MpCollection->isNCrystalInUse())
+  {
+      ErrorString = "Loaded config has material(s) configured for NCrystal library,\nwhich was disabled during ANTS2 compilation";
+      bRes = false;
+  }
+#endif
+
+  if (!ErrorString.isEmpty()) qWarning() << ErrorString;
+
   emit NewConfigLoaded();
   //qDebug() << ">>> Load done";
-  return true;
+  return bRes;
 }
 
 void AConfiguration::SaveConfig(QJsonObject &json, bool DetConstructor, bool SimSettings, bool ReconstrSettings)
@@ -233,7 +232,7 @@ void AConfiguration::UpdateParticlesJson()
   QJsonObject djson = JSON["DetectorConfig"].toObject();
   Detector->MpCollection->writeParticleCollectionToJson(djson);
   JSON["DetectorConfig"] = djson;
-  emit requestDetectorGuiUpdate();
+  //emit requestDetectorGuiUpdate();
 }
 
 void AConfiguration::UpdateSourcesJson(QJsonObject &sourcesJson)
@@ -409,6 +408,6 @@ void AConfiguration::UpdateSimSettingsOfDetector()
         GeneralSimSettings simSettings;
         simSettings.readFromJson(SimJson);
         Detector->PMs->configure(&simSettings); //wave, angle properties + rebin, prepare crosstalk
-        Detector->MpCollection->UpdateWavelengthBinning(&simSettings);
+        Detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, Detector->RandGen);
     }
 }

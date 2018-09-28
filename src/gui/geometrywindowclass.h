@@ -19,9 +19,9 @@ public:
   explicit GeometryWindowClass(QWidget *parent, MainWindow *mw);
   ~GeometryWindowClass();
 
-  bool ModePerspective;
-  int  ZoomLevel; //0 is fastest, +2 is typically the most "natural"
-  bool fNeedZoom; //set to true by "ShowGeometry", which force-resets the view
+  bool ModePerspective = true;
+  int  ZoomLevel = 0; //0 is fastest, +2 is typically the most "natural"
+  bool fNeedZoom = true; //set to true by "ShowGeometry", which force-resets the view
 
   void ShowAndFocus();
   void SetAsActiveRootWindow(); //focus root on this Raster Window
@@ -42,14 +42,16 @@ public:
   void onBusyOn();
   void onBusyOff();
 
-  bool fRecallWindow;
+  bool isColorByMaterial() {return ColorByMaterial;}
+
+  bool fRecallWindow = false;
   Double_t CenterX, CenterY, HWidth, HHeight, Phi, Theta;
 
   void writeWindowPropsToJson(QJsonObject &json);
   void readWindowPropsFromJson(QJsonObject &json);
 
-  int GeoMarkerSize;
-  int GeoMarkerStyle;
+  int GeoMarkerSize = 2;
+  int GeoMarkerStyle = 6;
 
   bool IsWorldVisible();
 
@@ -61,11 +63,12 @@ protected:
 
 public slots:
     void on_pbShowGeometry_clicked();
+    void DrawTracks();
     void ShowPMnumbers();
     void ShowTextOnPMs(QVector<QString> strData, Color_t color);
     void on_pbTop_clicked();
     void on_pbFront_clicked();
-    void onRasterWindowChange(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta);
+    void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
     void readRasterWindowProperties();
 
     void on_pbShowPMnumbers_clicked();
@@ -74,8 +77,6 @@ public slots:
     void on_pbClearDots_clicked();
 
 private slots:
-    void on_pbHideBar_clicked();
-    void on_pbShowBar_clicked();
     void on_cbShowTop_toggled(bool checked);
     void on_cbColor_toggled(bool checked);
     void on_pbSaveAs_clicked();
@@ -99,14 +100,17 @@ private slots:
 private:
   Ui::GeometryWindowClass *ui;
   MainWindow* MW;
-  RasterWindowBaseClass *RasterWindow;
-  QWidget *QWinContainer;
+  RasterWindowBaseClass *RasterWindow = 0;
 
-  bool TMPignore;
+  bool TMPignore = false;
 
   //flags
-  bool BarShown;
-  bool ColdStart;
+  bool BarShown = true;
+  bool ShowTop = false;
+  bool ColorByMaterial = false;
+
+private:
+  void doChangeLineWidth(int deltaWidth);
 };
 
 #endif // GEOMETRYWINDOWCLASS_H

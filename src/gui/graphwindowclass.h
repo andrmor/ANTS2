@@ -155,6 +155,8 @@ public:
     void RegisterTObject(TObject* obj); //ONLY use to register objects which were NOT drawn using Draw method of this window (but root Draw method instead)    
     void ShowTextPanel(const QString Text, bool bShowFrame=true, int AlignLeftCenterRight=0);
 
+    void SetStatPanelVisible(bool flag);
+
 protected:
     void resizeEvent(QResizeEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -259,7 +261,7 @@ private:
     Ui::GraphWindowClass *ui;
     MainWindow *MW;
     RasterWindowGraphClass *RasterWindow = 0;
-    QWidget *QWinContainer = 0;
+    //QWidget *QWinContainer = 0;
     bool ExtractionCanceled = false;
     int LastOptStat = 1111;
 

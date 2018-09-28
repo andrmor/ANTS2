@@ -1,6 +1,8 @@
 #ifndef AINTERFACETOANNSCRIPT_H
 #define AINTERFACETOANNSCRIPT_H
 
+/*
+
 #include "ascriptinterface.h"
 
 #include <QObject>
@@ -38,5 +40,7 @@ private:
 
   bool convertQVariantToVectorOfVectors(QVariant* var, QVector< QVector<float> >* vec , int fixedSize = -1);
 };
+
+*/
 
 #endif // AINTERFACETOANNSCRIPT_H

@@ -1,31 +1,33 @@
-#include "mainwindow.h"
 #include "ajavascriptmanager.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "globalsettingsclass.h"
 #include "interfacetoglobscript.h"
-#include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "ainterfacetoaddobjscript.h"
 #include "ainterfacetodeposcript.h"
-#include "graphwindowclass.h"
-#include "geometrywindowclass.h"
 #include "aconfiguration.h"
-#include "reconstructionwindow.h"
 #include "areconstructionmanager.h"
-#include "windownavigatorclass.h"
 #include "simulationmanager.h"
-#include "lrfwindow.h"
-#include "ascriptwindow.h"
-#include "checkupwindowclass.h"
 #include "ainterfacetowebsocket.h"
+#include "awebserverinterface.h"
 #include "anetworkmodule.h"
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 #include "ainterfacetoguiscript.h"
 #include "ainterfacetottree.h"
+
+#include "mainwindow.h"
+#include "graphwindowclass.h"
+#include "geometrywindowclass.h"
+#include "ainterfacetomessagewindow.h"
+#include "reconstructionwindow.h"
+#include "windownavigatorclass.h"
+#include "lrfwindow.h"
+#include "ascriptwindow.h"
+#include "checkupwindowclass.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -101,8 +103,13 @@ void MainWindow::createScriptWindow()
     AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(SM, ScriptWindow);
     ScriptWindow->SetInterfaceObject(txt, "msg");
 
-    AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+    AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
+    QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
+    QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
     ScriptWindow->SetInterfaceObject(web, "web");
+
+    AWebServerInterface* server = new AWebServerInterface(*NetModule->WebSocketServer, EventsDataHub);
+    ScriptWindow->SetInterfaceObject(server, "server");
 
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(photon, "photon");
@@ -116,8 +123,8 @@ void MainWindow::createScriptWindow()
 #endif
 
 #ifdef ANTS_FANN
-    AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-    ScriptWindow->SetInterfaceObject(ann, "ann");
+    //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    //ScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 
     // Interfaces which rely on MainWindow
@@ -134,6 +141,10 @@ void MainWindow::createScriptWindow()
     AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
     ScriptWindow->SetInterfaceObject(out, "outwin");
 
+
+    // window inits
+
+    ScriptWindow->UpdateAllTabs(); //highlighers etc
     ScriptWindow->SetShowEvaluationResult(true);
 
     QObject::connect(ScriptWindow, SIGNAL(onStart()), this, SLOT(onGlobalScriptStarted()));

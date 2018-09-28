@@ -1,0 +1,64 @@
+{
+"DecayScenarios": [
+	{
+		"Branching": 0.9390000000000001,
+		"GeneratedParticles": [
+			{
+				"Energy": 1470,
+				"OpositeDirectionWithPrevious": false,
+				"Particle": {
+					"Charge": 2,
+					"Mass": 4,
+					"Name": "alpha",
+					"Type": 1
+				}
+			},
+			{
+				"Energy": 840,
+				"OpositeDirectionWithPrevious": true,
+				"Particle": {
+					"Charge": 3,
+					"Mass": 7,
+					"Name": "lithium",
+					"Type": 1
+				}
+			},
+			{
+				"Energy": 478,
+				"OpositeDirectionWithPrevious": false,
+				"Particle": {
+					"Charge": 0,
+					"Mass": 0,
+					"Name": "gamma",
+					"Type": 0
+				}
+			}
+		]
+	},
+	{
+		"Branching": 0.061,
+		"GeneratedParticles": [
+			{
+				"Energy": 1780,
+				"OpositeDirectionWithPrevious": false,
+				"Particle": {
+					"Charge": 2,
+					"Mass": 4,
+					"Name": "alpha",
+					"Type": 1
+				}
+			},
+			{
+				"Energy": 1010,
+				"OpositeDirectionWithPrevious": true,
+				"Particle": {
+					"Charge": 3,
+					"Mass": 7,
+					"Name": "lithium",
+					"Type": 1
+				}
+			}
+		]
+	}
+]
+}

@@ -12,10 +12,12 @@ class AGridElementDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AGridElementDialog(QWidget *parent = 0);
+    explicit AGridElementDialog(const QStringList& MaterialList, QWidget *parent = 0);
     ~AGridElementDialog();
 
     void setValues(int shape, double p0, double p1, double p2);
+    void setBulkMaterial(int iMat);
+    void setWireMaterial(int iMat);
 
     int shape();
     double pitch();
@@ -26,6 +28,8 @@ public:
     double inner();
     double outer();
     double height();
+    int    bulkMaterial();
+    int    wireMaterial();
 
 private slots:
     void on_cobGridType_currentIndexChanged(int index);

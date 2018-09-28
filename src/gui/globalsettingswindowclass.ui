@@ -6,25 +6,25 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>361</height>
+    <width>445</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Global settings</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="twMain">
     <property name="geometry">
      <rect>
-      <x>4</x>
-      <y>27</y>
+      <x>5</x>
+      <y>4</y>
       <width>436</width>
       <height>331</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabDirs">
      <attribute name="title">
@@ -669,41 +669,6 @@
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
      </widget>
-     <widget class="QSpinBox" name="sbMaxNumTracks">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>254</y>
-        <width>79</width>
-        <height>22</height>
-       </rect>
-      </property>
-      <property name="minimum">
-       <number>1</number>
-      </property>
-      <property name="maximum">
-       <number>1000000</number>
-      </property>
-      <property name="value">
-       <number>1000</number>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>22</x>
-        <y>254</y>
-        <width>180</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Maximum number of drawn tracks:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_8">
       <property name="geometry">
        <rect>
@@ -799,8 +764,6 @@ used to draw a function</string>
      <zorder>label_5</zorder>
      <zorder>sbNumSegments</zorder>
      <zorder>label_6</zorder>
-     <zorder>sbMaxNumTracks</zorder>
-     <zorder>label_7</zorder>
      <zorder>label_8</zorder>
      <zorder>label_9</zorder>
      <zorder>sbNumPointsFunctionX</zorder>
@@ -872,6 +835,64 @@ used to draw a function</string>
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="Line" name="line_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>96</y>
+        <width>411</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbSaveSimAsText_IncludeNumPhotons">
+      <property name="geometry">
+       <rect>
+        <x>31</x>
+        <y>140</y>
+        <width>311</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Number of emitted photons</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbSaveSimAsText_IncludePositions">
+      <property name="geometry">
+       <rect>
+        <x>31</x>
+        <y>160</y>
+        <width>371</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Positions</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>120</y>
+        <width>321</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Simulation data saved as text includes in addition to PM signals:</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -913,7 +934,7 @@ used to draw a function</string>
        </rect>
       </property>
       <property name="text">
-       <string>1234</string>
+       <string>12345</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_14">
@@ -953,19 +974,6 @@ used to draw a function</string>
       </property>
       <property name="readOnly">
        <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbAutoRunWebSocketServer">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>36</y>
-        <width>311</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Automatically run on start (applies to GUI mode only)</string>
       </property>
      </widget>
      <widget class="Line" name="line_2">
@@ -1072,12 +1080,37 @@ used to draw a function</string>
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLabel" name="label_23">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>40</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>IP:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="leWebSocketIP">
+      <property name="geometry">
+       <rect>
+        <x>88</x>
+        <y>39</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>127.0.0.1</string>
+      </property>
+     </widget>
      <zorder>cbRunWebSocketServer</zorder>
      <zorder>cbRunRootServer</zorder>
      <zorder>leWebSocketPort</zorder>
      <zorder>label_14</zorder>
      <zorder>label_16</zorder>
-     <zorder>cbAutoRunWebSocketServer</zorder>
      <zorder>line_2</zorder>
      <zorder>label_18</zorder>
      <zorder>leRootServerPort</zorder>
@@ -1087,23 +1120,9 @@ used to draw a function</string>
      <zorder>label_21</zorder>
      <zorder>leJSROOT</zorder>
      <zorder>leRootServerURL</zorder>
+     <zorder>label_23</zorder>
+     <zorder>leWebSocketIP</zorder>
     </widget>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>26</x>
-      <y>4</y>
-      <width>291</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>ANTS2 global settings</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
    </widget>
    <widget class="QGroupBox" name="gbSaveOnExit">
     <property name="geometry">

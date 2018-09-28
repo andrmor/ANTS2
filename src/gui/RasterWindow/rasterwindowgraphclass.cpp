@@ -13,30 +13,8 @@
 #include "TBox.h"
 #include "TPolyLine.h"
 
-RasterWindowGraphClass::RasterWindowGraphClass(QMainWindow *parent) : RasterWindowBaseClass(parent)
-{
-  //init
-  ExtractionComplete = false;
-  ExtractionOfXStarted = false;
-  ExtractionOfXPending = false;
-  ExtractionOf2DLinePending = false;
-  ExtractionOf2DLineStarted = false;
-  ExtractionOf2DEllipsePending = false;
-  ExtractionOf2DEllipsePhase = 0;
-  ExtractionOf2DBoxStarted = false;
-  ExtractionOf2DBoxPending = false;
-  ExtractionOf2DPolygonStarted = false;
-  ExtractionOf2DPolygonPending = false;
-
-  ShowCursorPosition = true;
-
-  extractedX = 0;
-  VertLine1 = 0;
-  Line2D = 0;
-  Box2D = 0;
-  Ellipse = 0;
-  Polygon = 0; 
-}
+RasterWindowGraphClass::RasterWindowGraphClass(QMainWindow *MasterWindow) :
+    RasterWindowBaseClass(MasterWindow) {}
 
 RasterWindowGraphClass::~RasterWindowGraphClass()
 { 
@@ -72,39 +50,13 @@ bool RasterWindowGraphClass::event(QEvent *event)
         event->ignore();
         return true;
 
+/*         ***!!!
     case QEvent::UpdateRequest :
    //     qDebug()<<"canvas update request received";
         if (isExposed())
           if (fCanvas) fCanvas->Update();
         return true;
-
- /*  // TO CHANGE FUNCTIONALITY ON MW   !!!
-    case QEvent::Move :
-            MW->DefaultGraphSize.setX(this->geometry().x());
-            MW->DefaultGraphSize.setY(this->geometry().y());
-            MW->DefaultGraphSize.setWidth(this->geometry().width());
-            MW->DefaultGraphSize.setHeight(this->geometry().height());
-        break;
-  */
-
-
-  /*   //  MOVE TO QMAINWINDOWCONTAINER !!!
-    case QEvent::Show :
-          if (MW->WindowNavigator)
-            {
-              if (typeRW == 1) MW->WindowNavigator->ShowWindowTriggered("geometry");
-              else MW->WindowNavigator->ShowWindowTriggered("graph");
-            }
-        break;
-
-    case QEvent::Hide :
-        if (MW->WindowNavigator)
-          {
-            if (typeRW == 1) MW->WindowNavigator->HideWindowTriggered("geometry");
-            else MW->WindowNavigator->HideWindowTriggered("graph");
-          }
-        break;
-  */
+*/
 
    /*
     case QEvent::WindowStateChange :
@@ -113,7 +65,7 @@ bool RasterWindowGraphClass::event(QEvent *event)
     default:
         break;
     }
-  return QWindow::event(event);
+  return QWidget::event(event);
 }
 
 void RasterWindowGraphClass::mousePressEvent(QMouseEvent *event)
@@ -623,7 +575,7 @@ double RasterWindowGraphClass::getCanvasMaxY()
   return fCanvas->GetUymax();
 }
 
-void RasterWindowGraphClass::PixelToXY(int ix, int iy, double &x, double &y)
+void RasterWindowGraphClass::PixelToXY(int ix, int iy, double &x, double &y) const
 {
   x = fCanvas->AbsPixeltoX(ix);
   y = fCanvas->AbsPixeltoY(iy);
@@ -631,14 +583,34 @@ void RasterWindowGraphClass::PixelToXY(int ix, int iy, double &x, double &y)
   if (fCanvas->GetLogy()) y = TMath::Power(10.0, y);
 }
 
-void RasterWindowGraphClass::XYtoPixel(double x, double y, int &ix, int &iy)
+void RasterWindowGraphClass::XYtoPixel(double x, double y, int &ix, int &iy) const
 {
   //TO DO exp scale
   ix = fCanvas->XtoAbsPixel(x);
   iy = fCanvas->YtoAbsPixel(y);
 }
 
-double RasterWindowGraphClass::getXperPixel()
+void RasterWindowGraphClass::getRange(double &x1, double &y1, double &x2, double &y2) const
+{
+    fCanvas->GetRange(x1, y1, x2, y2);
+}
+
+void RasterWindowGraphClass::getRangeLogAware(double &x1, double &y1, double &x2, double &y2) const
+{
+    fCanvas->GetRange(x1, y1, x2, y2);
+    if (fCanvas->GetLogx())
+    {
+        x1 = TMath::Power(10.0, x1);
+        x2 = TMath::Power(10.0, x2);
+    }
+    if (fCanvas->GetLogy())
+    {
+        y1 = TMath::Power(10.0, y1);
+        y2 = TMath::Power(10.0, y2);
+    }
+}
+
+double RasterWindowGraphClass::getXperPixel() const
 {
   double xmin = fCanvas->GetUxmin();
   double xmax = fCanvas->GetUxmax();
@@ -648,7 +620,7 @@ double RasterWindowGraphClass::getXperPixel()
   return ( xmax - xmin) / dix;
 }
 
-double RasterWindowGraphClass::getYperPixel()
+double RasterWindowGraphClass::getYperPixel() const
 {
   double ymin = fCanvas->GetUymin();
   double ymax = fCanvas->GetUymax();
@@ -656,4 +628,14 @@ double RasterWindowGraphClass::getYperPixel()
   int diy = - fCanvas->YtoAbsPixel(ymax) + fCanvas->YtoAbsPixel(ymin);
 
   return ( ymax - ymin) / diy;
+}
+
+bool RasterWindowGraphClass::isLogX() const
+{
+    return fCanvas->GetLogx();
+}
+
+bool RasterWindowGraphClass::isLogY() const
+{
+    return fCanvas->GetLogy();
 }

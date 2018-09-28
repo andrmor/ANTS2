@@ -276,7 +276,9 @@ void ExamplesWindow::on_pbLoadExample_clicked()
 
   QString filename = MW->GlobSet->ExamplesDir + "/" + Examples[ListedExamples[ExamplePointer]].filename;
 
-  MW->Config->LoadConfig(filename);
+  bool bOK = MW->Config->LoadConfig(filename);
+  if (!bOK) message(MW->Config->ErrorString, MW);
+
   MW->show();
   MW->raise();
   MW->GeometryWindow->show();
@@ -337,11 +339,13 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
   }
 
   MW->GeometryDrawDisabled = true;
-  MW->Config->LoadConfig(fileName);
+  bool bOK = MW->Config->LoadConfig(fileName);
   MW->GeometryDrawDisabled = false;
 
   this->close();
   if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry();
+
+  if (!bOK) message(MW->Config->ErrorString, MW);
 }
 
 QString ExamplesWindow::getQuickSlotMessage(int i)

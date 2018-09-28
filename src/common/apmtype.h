@@ -14,10 +14,11 @@ public:
 
   QString Name;
   int     MaterialIndex = 0;
-  int     Shape = 1;  //0-square, 1-round, 2-hexa
+  int     Shape = 1;  //0-square, 1-round, 2-hexa, 3-spherical
   double  SizeX = 25.0;
   double  SizeY = 25.0;
   double  SizeZ = 0.01;
+  double  AngleSphere = 35.0;
 
   bool    SiPM = false;
 
@@ -45,6 +46,9 @@ public:
   void    clear();
   void    writeToJson(QJsonObject &json) const;
   void    readFromJson(const QJsonObject &json);
+
+  double  getHalfHeightSpherical() const;
+  double  getProjectionRadiusSpherical() const;
 };
 
 

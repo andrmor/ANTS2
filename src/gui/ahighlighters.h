@@ -11,7 +11,7 @@ public:
     AHighlighterScriptWindow(QTextDocument *parent = 0);
     virtual ~AHighlighterScriptWindow() {}
 
-    void setCustomCommands(QStringList functions, QStringList constants = QStringList());
+    void setHighlighterRules(const QStringList &functions, const QStringList &deprecatedOrRemoved, const QStringList &constants);
 
 protected:
     void highlightBlock(const QString &text);
@@ -36,6 +36,7 @@ protected:
     QTextCharFormat quotationFormat;
     QTextCharFormat charFormat;
 //    QTextCharFormat functionFormat;
+    QTextCharFormat deprecatedOrRemovedFormat;
 };
 
 class AHighlighterLrfScript : public AHighlighterScriptWindow

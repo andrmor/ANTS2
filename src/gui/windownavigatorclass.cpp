@@ -270,7 +270,7 @@ void WindowNavigatorClass::BusyOn()
   MW->MIwindow->setEnabled(false);
   MW->ELwindow->setEnabled(false);
   if (MW->GainWindow) MW->GainWindow->setEnabled(false);
-  MW->GraphWindow->setEnabled(false);//OnBusyOn();
+  MW->GraphWindow->OnBusyOn(); //setEnabled(false);
   MW->GeometryWindow->onBusyOn();
   MW->Owindow->setEnabled(false);
 
@@ -316,7 +316,7 @@ void WindowNavigatorClass::BusyOff(bool fShowTime)
   //gain evaluator
   if (MW->GainWindow) MW->GainWindow->setEnabled(true);
 
-  MW->GraphWindow->setEnabled(true);//OnBusyOff();
+  MW->GraphWindow->OnBusyOff();//setEnabled(true);
 
   MW->GeometryWindow->onBusyOff();
 

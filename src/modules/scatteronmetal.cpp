@@ -67,7 +67,7 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *
 //    }
 //  double Refl = calculateReflectivity(CosTheta, RealN/Rindex1, ImaginaryN/Rindex1);
 
-  double Refl = calculateReflectivity(CosTheta, RealN, ImaginaryN);
+  double Refl = calculateReflectivity(CosTheta, RealN, ImaginaryN, Photon->waveIndex);
   //qDebug() << "Dielectric-metal override: Cos theta="<<CosTheta<<" Reflectivity:"<<Refl;
 
   if ( RandGen->Rndm() > Refl )
@@ -89,17 +89,22 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *
   return Back;
 }
 
-double ScatterOnMetal::calculateReflectivity(double CosTheta, double RealN, double ImaginaryN)
+double ScatterOnMetal::calculateReflectivity(double CosTheta, double RealN, double ImaginaryN, int waveIndex)
 {
   //qDebug() << "cosTheta, n, k: "<< CosTheta << RealN << ImaginaryN;
 
   TComplex N(RealN, ImaginaryN);
   TComplex U(1,0);
-  double SinTheta = (CosTheta < 0.9999999) ? sqrt(1.0 - CosTheta*CosTheta) : 0;
-  TComplex CosPhi = TMath::Sqrt( U - SinTheta*SinTheta/(N*N));
 
-  TComplex rs = (CosTheta - N*CosPhi) / (CosTheta + N*CosPhi);
-  TComplex rp = ( -N*CosTheta + CosPhi) / (N*CosTheta + CosPhi);
+  double SinTheta = (CosTheta < 0.9999999) ? sqrt(1.0 - CosTheta*CosTheta) : 0;
+//  TComplex CosPhi = TMath::Sqrt( U - SinTheta*SinTheta/(N*N));
+  double nFrom = (*MatCollection)[MatFrom]->getRefractiveIndex(waveIndex);
+  TComplex CosPhi = TMath::Sqrt( U - SinTheta*SinTheta/ (N*N/nFrom/nFrom) );
+
+//  TComplex rs = (CosTheta - N*CosPhi) / (CosTheta + N*CosPhi);
+  TComplex rs = (nFrom*CosTheta - N*CosPhi) / (nFrom*CosTheta + N*CosPhi);
+//  TComplex rp = ( -N*CosTheta + CosPhi) / (N*CosTheta + CosPhi);
+  TComplex rp = ( -N*CosTheta + nFrom*CosPhi) / (N*CosTheta + nFrom*CosPhi);
 
   double RS = rs.Rho2();
   double RP = rp.Rho2();

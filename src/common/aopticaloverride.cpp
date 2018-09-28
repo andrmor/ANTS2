@@ -3,6 +3,7 @@
 #include "aphoton.h"
 #include "acommonfunctions.h"
 #include "ajsontools.h"
+#include "afiletools.h"
 #include "asimulationstatistics.h"
 
 #ifdef SIM
@@ -50,14 +51,10 @@ void AOpticalOverride::RandomDir(TRandom2 *RandGen, APhoton *Photon)
 
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, double probLoss, double probRef, double probDiff, int scatterModel)
     : AOpticalOverride(MatCollection, MatFrom, MatTo),
-      probLoss(probLoss), probRef(probRef), probDiff(probDiff), scatterModel(scatterModel)
-{
-}
+      probLoss(probLoss), probRef(probRef), probDiff(probDiff), scatterModel(scatterModel) {}
 
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo)
-{
-}
+    : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
 
 AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
 {
@@ -105,7 +102,8 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRan
           //normal is in the positive direction in respect to the original direction!
           if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
             {
-              // qDebug()<<"   scattering back";              
+              // qDebug()<<"   scattering back";
+              Status = LambertianReflection;
               return Back;
             }
           // qDebug()<<"   continuing to the next volume";
@@ -238,7 +236,8 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
 {
    if (model == "Simplistic_model")
      return new BasicOpticalOverride(MatCollection, MatFrom, MatTo);
-#ifdef SIM
+   if (model == "SimplisticSpectral_model")
+     return new SpectralBasicOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V1")
      return new PhScatClaudioModelV1(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V2")
@@ -251,7 +250,6 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
      return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
    else if (model == "DielectricToMetal")
      return new ScatterOnMetal(MatCollection, MatFrom, MatTo);
-#endif
    else if (model=="FS_NP" || model=="Neves_model")
      return new FSNPOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model=="SurfaceWLS")
@@ -413,8 +411,8 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
     return false;
 }
 
-AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo)
+AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ReemissionModel)
+    : AOpticalOverride(MatCollection, MatFrom, MatTo), ReemissionModel(ReemissionModel)
 {
     Spectrum = 0;
 }
@@ -424,24 +422,32 @@ AWaveshifterOverride::~AWaveshifterOverride()
     if (Spectrum) delete Spectrum;
 }
 
-void AWaveshifterOverride::initializeWaveResolved(double waveFrom, double waveStep, int waveNodes)
+void AWaveshifterOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
 {
-    WaveFrom = waveFrom;
-    WaveStep = waveStep;
-    WaveNodes = waveNodes;
+    if (bWaveResolved)
+    {
+        WaveFrom = waveFrom;
+        WaveStep = waveStep;
+        WaveNodes = waveNodes;
 
-    ConvertToStandardWavelengthes(&ReemissionProbability_lambda, &ReemissionProbability, WaveFrom, WaveStep, WaveNodes, &ReemissionProbabilityBinned);
+        ConvertToStandardWavelengthes(&ReemissionProbability_lambda, &ReemissionProbability, WaveFrom, WaveStep, WaveNodes, &ReemissionProbabilityBinned);
 
-    QVector<double> y;
-    ConvertToStandardWavelengthes(&EmissionSpectrum_lambda, &EmissionSpectrum, WaveFrom, WaveStep, WaveNodes, &y);
-    TString name = "WLSEmSpec";
-    name += MatFrom;
-    name += "to";
-    name += MatTo;
-    if (Spectrum) delete Spectrum;
-    Spectrum = new TH1D(name,"", WaveNodes, WaveFrom, WaveFrom+WaveStep*WaveNodes);
-    for (int j = 1; j<WaveNodes+1; j++)  Spectrum->SetBinContent(j, y[j-1]);
-    Spectrum->GetIntegral(); //to make thread safe
+        QVector<double> y;
+        ConvertToStandardWavelengthes(&EmissionSpectrum_lambda, &EmissionSpectrum, WaveFrom, WaveStep, WaveNodes, &y);
+        TString name = "WLSEmSpec";
+        name += MatFrom;
+        name += "to";
+        name += MatTo;
+        if (Spectrum) delete Spectrum;
+        Spectrum = new TH1D(name,"", WaveNodes, WaveFrom, WaveFrom+WaveStep*WaveNodes);
+        for (int j = 1; j<WaveNodes+1; j++)  Spectrum->SetBinContent(j, y[j-1]);
+        Spectrum->GetIntegral(); //to make thread safe
+    }
+    else
+    {
+        ReemissionProbabilityBinned.clear();
+        delete Spectrum; Spectrum = 0;
+    }
 }
 
 AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
@@ -459,7 +465,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
 
     double prob = ReemissionProbabilityBinned.at(Photon->waveIndex); // probability of reemission
     if (RandGen->Rndm() < prob)
-      {
+    {
         //triggered!
 
         //generating new wavelength and waveindex
@@ -481,23 +487,57 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
         while (waveIndex < Photon->waveIndex); //conserving energy
 
         Photon->waveIndex = waveIndex;
+        Photon->SimStat->OverrideWLSshift++;
 
-        // qDebug()<<"2Pi lambertian scattering backward";
-        double norm2;
+        if (ReemissionModel == 0)
+        {
+            RandomDir(RandGen, Photon);
+            //enering new volume or backscattering?
+            //normal is in the positive direction in respect to the original direction!
+            if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
+              {
+                // qDebug()<<"   scattering back";
+                Status = LambertianReflection;
+                return Back;
+              }
+            // qDebug()<<"   continuing to the next volume";
+            Status = Transmission;
+            return Forward;
+        }
+
+        double norm2 = 0;
+        if (ReemissionModel == 1)
+        {
+            // qDebug()<<"2Pi lambertian scattering backward";
+            do
+            {
+                RandomDir(RandGen, Photon);
+                Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
+                norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
+            }
+            while (norm2 < 0.000001);
+
+            double normInverted = 1.0/TMath::Sqrt(norm2);
+            Photon->v[0] *= normInverted; Photon->v[1] *= normInverted; Photon->v[2] *= normInverted;
+            Status = LambertianReflection;
+
+            return Back;
+        }
+
+        // qDebug()<<"2Pi lambertian scattering forward";
         do
           {
             RandomDir(RandGen, Photon);
-            Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
+            Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
             norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
           }
         while (norm2 < 0.000001);
 
         double normInverted = 1.0/TMath::Sqrt(norm2);
         Photon->v[0] *= normInverted; Photon->v[1] *= normInverted; Photon->v[2] *= normInverted;
-        Status = LambertianReflection;
-        Photon->SimStat->OverrideWLSshift++;
-        return Back;
-      }
+        Status = Transmission;
+        return Forward;
+    }
 
     // else absorption
     Status = Absorption;
@@ -537,6 +577,7 @@ void AWaveshifterOverride::writeToJson(QJsonObject &json)
     QJsonArray arEm;
     writeTwoQVectorsToJArray(EmissionSpectrum_lambda, EmissionSpectrum, arEm);
     json["EmissionSpectrum"] = arEm;
+    json["ReemissionModel"] = ReemissionModel;
 }
 
 bool AWaveshifterOverride::readFromJson(QJsonObject &json)
@@ -550,5 +591,165 @@ bool AWaveshifterOverride::readFromJson(QJsonObject &json)
     QJsonArray arEm = json["EmissionSpectrum"].toArray();
     readTwoQVectorsFromJArray(arEm, EmissionSpectrum_lambda, EmissionSpectrum);
 
+    ReemissionModel = 1;
+    parseJson(json, "ReemissionModel", ReemissionModel);
+
     return true;
+}
+
+// ---------------- SpectralSimplistic -------------------
+SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
+    : BasicOpticalOverride(MatCollection, MatFrom, MatTo, 0,0,0, 1), effectiveWavelength(500)
+{
+    Wave << 500;
+    ProbLoss << 0;
+    ProbRef << 0;
+    ProbDiff << 0;
+}
+
+SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ScatterModel, double EffWave)
+    : BasicOpticalOverride(MatCollection, MatFrom, MatTo, 0,0,0, ScatterModel), effectiveWavelength(EffWave)
+{
+    Wave << 500;
+    ProbLoss << 0;
+    ProbRef << 0;
+    ProbDiff << 0;
+}
+
+AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+{
+    int waveIndex = Photon->waveIndex;
+    if (waveIndex == -1) waveIndex = effectiveWaveIndex;
+
+    probLoss = ProbLossBinned.at(waveIndex);
+    probDiff = ProbDiffBinned.at(waveIndex);
+    probRef  = ProbRefBinned.at(waveIndex);
+
+    return BasicOpticalOverride::calculate(RandGen, Photon, NormalVector);
+}
+
+void SpectralBasicOpticalOverride::printConfiguration(int /*iWave*/)
+{
+    qDebug() << "-------Configuration:-------";
+    qDebug() << "Wavelength:"<<Wave;
+    qDebug() << "Absorption fraction:"<<ProbLoss;
+    qDebug() << "Specular fraction:"<<ProbRef;
+    qDebug() << "Scatter fraction:"<<ProbDiff;
+    qDebug() << "Scatter model (4Pi/LambBack/LambForward):"<<scatterModel;
+    qDebug() << "----------------------------";
+}
+
+QString SpectralBasicOpticalOverride::getReportLine()
+{
+    QString s = "to " + (*MatCollection)[MatTo]->name;
+    s += "->";
+
+    if (Wave.isEmpty()) return s + " To be defined"; //not defined - shown during configuration phase only
+
+    s += " Spectral data with " + QString::number(Wave.size()) + " points";
+    return s;
+}
+
+void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json)
+{
+    AOpticalOverride::writeToJson(json);
+
+    json["ScatMode"] = scatterModel;
+    json["EffWavelength"] = effectiveWavelength;
+
+    if (Wave.size() != ProbLoss.size() || Wave.size() != ProbRef.size() || Wave.size() != ProbDiff.size())
+    {
+        qWarning() << "Mismatch in data size for SpectralBasicOverride! skipping data!";
+        return;
+    }
+    QJsonArray sp;
+    for (int i=0; i<Wave.size(); i++)
+    {
+        QJsonArray ar;
+        ar << Wave.at(i) << ProbLoss.at(i) << ProbRef.at(i) << ProbDiff.at(i);
+        sp << ar;
+    }
+    json["Data"] = sp;
+}
+
+bool SpectralBasicOpticalOverride::readFromJson(QJsonObject &json)
+{
+    if (!AOpticalOverride::readFromJson(json)) return false;
+
+    parseJson(json, "ScatMode", scatterModel);
+    parseJson(json, "EffWavelength", effectiveWavelength);
+
+    //after constructor vectors are not empty!
+    Wave.clear();
+    ProbLoss.clear();
+    ProbRef.clear();
+    ProbDiff.clear();
+
+    QJsonArray sp;
+    parseJson(json, "Data", sp);
+    for (int i=0; i<sp.size(); i++)
+    {
+        QJsonArray ar = sp.at(i).toArray();
+        Wave     << ar.at(0).toDouble();
+        ProbLoss << ar.at(1).toDouble();
+        ProbRef  << ar.at(2).toDouble();
+        ProbDiff << ar.at(3).toDouble();
+    }
+
+    return true;
+}
+
+void SpectralBasicOpticalOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
+{
+    if (bWaveResolved)
+    {
+        ConvertToStandardWavelengthes(&Wave, &ProbLoss, waveFrom, waveStep, waveNodes, &ProbLossBinned);
+        ConvertToStandardWavelengthes(&Wave, &ProbRef, waveFrom, waveStep, waveNodes, &ProbRefBinned);
+        ConvertToStandardWavelengthes(&Wave, &ProbDiff, waveFrom, waveStep, waveNodes, &ProbDiffBinned);
+
+        effectiveWaveIndex = (effectiveWavelength - waveFrom) / waveStep;
+        if (effectiveWaveIndex < 0) effectiveWaveIndex = 0;
+        else if (effectiveWaveIndex >= waveNodes ) effectiveWaveIndex = waveNodes - 1;
+        //qDebug() << "Eff wave"<<effectiveWavelength << "assigned index:"<<effectiveWaveIndex;
+    }
+    else
+    {
+        int isize = Wave.size();
+        int i = 0;
+        if (isize != 1)  //esle use i = 0
+        {
+            for (; i < isize; i++)
+                if (Wave.at(i) > effectiveWavelength) break;
+
+            //closest is i-1 or i
+            if (i != 0)
+                if ( fabs(Wave.at(i-1) - effectiveWavelength) < fabs(Wave.at(i) - effectiveWavelength) ) i--;
+        }
+
+        //qDebug() << "Selected i = "<< i << "with wave"<<Wave.at(i) << Wave;
+        effectiveWaveIndex = 0;
+        ProbLossBinned = QVector<double>(1, ProbLoss.at(i));
+        ProbRefBinned = QVector<double>(1, ProbRef.at(i));
+        ProbDiffBinned = QVector<double>(1, ProbDiff.at(i));
+        //qDebug() << "LossRefDiff"<<ProbLossBinned.at(effectiveWaveIndex)<<ProbRefBinned.at(effectiveWaveIndex)<<ProbDiffBinned.at(effectiveWaveIndex);
+    }
+}
+
+const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
+{
+    QVector< QVector<double>* > vec;
+    vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;
+    QString err = LoadDoubleVectorsFromFile(fileName, vec);
+    if (!err.isEmpty()) return err;
+
+    for (int i=0; i<Wave.size(); i++)
+    {
+        double sum = ProbLoss.at(i) + ProbRef.at(i) + ProbDiff.at(i);
+        if (sum > 1.0) return QString("Sum of probabilities is larger than 1.0 for wavelength of ") + QString::number(Wave.at(i)) + " nm";
+    }
+
+    if (Wave.isEmpty())
+        return "No data were read from the file!";
+
+    return "";
 }

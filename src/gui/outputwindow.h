@@ -93,6 +93,8 @@ private slots:
 
     void on_pbShowAverageOverAll_clicked();
 
+    void on_pbShowWavelength_clicked();
+
 protected:
     bool event(QEvent *event);   
 

@@ -21,6 +21,7 @@ class AConfiguration;
 class APreprocessingSettings;
 class ASandwich;
 class APmGroupsManager;
+class APmType;
 
 struct PMdummyStructure
 {
@@ -83,6 +84,7 @@ public:
   void colorVolumes(int scheme, int id = 0);
   int pmCount() const; // Raimundo: so it's not necessary to #include<pms.h> just to clear LRFs
   void findPM(int ipm, int &ul, int &index);
+  const QString removePMtype(int itype);
 
   //write to Json - can be used from outside
   void writeWorldFixedToJson(QJsonObject &json);
@@ -90,6 +92,8 @@ public:
   void writeDummyPMsToJson(QJsonObject &json);  
   void writeGDMLtoJson(QJsonObject &json);
   void writePreprocessingToJson(QJsonObject &json);
+
+  void changeLineWidthOfVolumes(int delta);
 
 public slots:
   void onRequestRegisterGeoManager();
@@ -106,7 +110,7 @@ private:
   bool processGDML(); //check validity, discard if bad and return to sandwich  
 
   Double_t UpperEdge, LowerEdge; //used to calculate Z positions of detector elements
-  TGeoVolume *generateVolume(const char *Name, TGeoMedium *Medium, int Shape, Double_t SizeX, Double_t SizeY, Double_t SizeZ, int Sides);
+  TGeoVolume *generatePmVolume(TString Name, TGeoMedium *Medium, const APmType *tp);
   void populatePMs();
   void positionPMs();
   void calculatePmsXY(int ul);

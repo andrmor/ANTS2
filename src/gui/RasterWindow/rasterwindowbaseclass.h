@@ -1,20 +1,20 @@
 #ifndef RASTERWINDOWBASECLASS_H
 #define RASTERWINDOWBASECLASS_H
 
-#include <QWindow>
-#include <TMathBase.h>
+#include <QWidget>
+//#include <TMathBase.h>
 
 class TCanvas;
 class QMainWindow;
 
-class RasterWindowBaseClass : public QWindow
+class RasterWindowBaseClass : public QWidget
 {
     Q_OBJECT
 public:
-    explicit RasterWindowBaseClass(QMainWindow *parent);
+    explicit RasterWindowBaseClass(QMainWindow *MasterWindow);
     virtual ~RasterWindowBaseClass();
 
-    TCanvas* fCanvas;
+    TCanvas* fCanvas = 0;
 
     void setBlockEvents(bool flag) {fBlockEvents = flag;}
     void setInvertedXYforDrag(bool flag) {fInvertedXYforDrag = flag;} //fix ROOT inversion in x-y for parallel view of geometry
@@ -28,29 +28,32 @@ public:
     void SaveAs(const QString filename);
     void SetWindowTitle(const QString &title);
 
-    void getWindowProperties(Double_t &centerX, Double_t &centerY, Double_t &hWidth, Double_t &hHeight, Double_t &phi, Double_t &theta);
-    void setWindowProperties(Double_t  centerX, Double_t  centerY, Double_t  hWidth, Double_t  hHeight, Double_t  phi, Double_t  theta);
+    void getWindowProperties(double &centerX, double &centerY, double &hWidth, double &hHeight, double &phi, double &theta);
+    void setWindowProperties(double  centerX, double  centerY, double  hWidth, double  hHeight, double  phi, double  theta);
 
 signals:
     void LeftMouseButtonReleased();
-    void UserChangedWindow(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta);
+    void UserChangedWindow(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
 
 protected:
-    void exposeEvent(QExposeEvent *event);
+    //void exposeEvent(QExposeEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
+    virtual void    paintEvent( QPaintEvent *event ) override;
+    virtual void    resizeEvent(QResizeEvent *event ) override;
+
 protected:
-    QMainWindow *MasterWindow;
+    QMainWindow *MasterWindow = 0;
     int wid;
-    bool PressEventRegistered; //to avoid Qt bug - "leaking" of events to another window
+    bool PressEventRegistered = false; //to avoid Qt bug - "leaking" of events to another window
     int lastX, lastY;
     double lastCenterX, lastCenterY;
-    bool fBlockEvents;
+    bool fBlockEvents = false;
 
-    bool fInvertedXYforDrag;
+    bool fInvertedXYforDrag = false;
 
 };
 

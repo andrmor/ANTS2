@@ -30,9 +30,9 @@ public:
     int    angleBins = 100;
     double angleFrom = 0;
     double angleTo = 90.0;
-    int    waveBins = 100;
-    double waveFrom = 0;
-    double waveTo = 0;
+    int    waveBins = 150;
+    double waveFrom = -1;
+    double waveTo = 148;
     int    energyBins = 100;
     double energyFrom = 0;
     double energyTo = 0;

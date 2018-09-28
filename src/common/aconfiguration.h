@@ -55,7 +55,7 @@ public slots:
   void UpdateLRFv3makeJson();
   void UpdateReconstructionSettings(QJsonObject& jsonRec, int iGroup);
   void UpdateFilterSettings(QJsonObject& jsonFilt, int iGroup);
-  void UpdateParticlesJson();
+  void UpdateParticlesJson();  //does not trigger gui update anymore!
   void UpdateSourcesJson(QJsonObject& sourcesJson);  
 
 signals:

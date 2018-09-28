@@ -52,6 +52,9 @@ public slots:
   bool Load(QString FileName);
   bool Save(QString FileName);
 
+  const QVariant GetConfig() const;
+  bool SetConfig(const QVariant& conf);
+
   bool Replace(QString Key, QVariant val);
   QVariant GetKeyValue(QString Key);
 
@@ -85,6 +88,8 @@ public:
 public slots:
   void ReconstructEvents(int NumThreads = -1, bool fShow = true);
   void UpdateFilters(int NumThreads = -1);
+
+  double GetChi2valueToCutTop(double cutUpper_fraction, int sensorGroup = 0);
 
   void DoBlurUniform(double range, bool fUpdateFilters = true);
   void DoBlurGauss(double sigma, bool fUpdateFilters = true);
@@ -187,13 +192,14 @@ public slots:
   int countReconstructedPoints(int igroup, int ievent);
 
   // True values known in sim or from a calibration dataset
-  double GetTrueX(int ievent);
-  double GetTrueY(int ievent);
-  double GetTrueZ(int ievent);
-  double GetTrueEnergy(int ievent);
-  int GetTruePoints(int ievent);
+  double GetTrueX(int ievent, int iPoint = 0);
+  double GetTrueY(int ievent, int iPoint = 0);
+  double GetTrueZ(int ievent, int iPoint = 0);
+  double GetTrueEnergy(int ievent, int iPoint = 0);
+  const QVariant GetTruePoints(int ievent);
   bool IsTrueGoodEvent(int ievent);
-  bool GetTrueNumberPoints(int ievent);
+  int  GetTrueNumberPoints(int ievent);
+
   void SetScanX(int ievent, double value);
   void SetScanY(int ievent, double value);
   void SetScanZ(int ievent, double value);
@@ -253,7 +259,7 @@ private:
   bool checkEventNumber(int ievent);
   bool checkEventNumber(int igroup, int ievent, int ipoint);
   bool checkPM(int ipm);
-  bool checkTrueDataRequest(int ievent);
+  bool checkTrueDataRequest(int ievent, int iPoint = 0);
   bool checkSetReconstructionDataRequest(int ievent);
 
 signals:
@@ -322,7 +328,7 @@ public slots:
   bool SetCustomNodes(QVariant ArrayOfArray3);
 
   bool SaveAsTree(QString fileName);
-  bool SaveAsText(QString fileName);
+  bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);
 
   //monitors
   int countMonitors();
@@ -438,8 +444,11 @@ public slots:
   void PlotEnergyXY();
   void PlotChi2XY();
   void ConfigureXYplot(int binsX, double X0, double X1, int binsY, double Y0, double Y1);
+  void ConfigureXYplotExtra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY);
 
   void SetLog(bool Xaxis, bool Yaxis);
+
+  void SetStatPanelVisible(bool flag);
 
   void AddLegend(double x1, double y1, double x2, double y2, QString title);
   void SetLegendBorder(int color, int style, int size);

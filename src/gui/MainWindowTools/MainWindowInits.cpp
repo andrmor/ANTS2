@@ -28,6 +28,8 @@
 #include "alrfmoduleselector.h"
 #include "gui/alrfwindow.h"
 #include "anetworkmodule.h"
+#include "awebsocketserverdialog.h"
+#include "aremotewindow.h"
 
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
@@ -140,6 +142,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Creating Python script window";
     createPythonScriptWindow();
 #endif
+    qDebug()<<">Creating remote simulation/reconstruction window";
+    RemoteWindow = new ARemoteWindow(this);
+    ServerDialog = new AWebSocketServerDialog(this);
     qDebug()<<">All windows created";
 
     //root update cycle
@@ -162,7 +167,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(this, SIGNAL(RequestStopLoad()), EventsDataHub, SLOT(onRequestStopLoad()));
     QObject::connect(EventsDataHub, SIGNAL(requestClearKNNfilter()), ReconstructionManager, SLOT(onRequestClearKNNfilter()));
     QObject::connect(EventsDataHub, &EventsDataClass::cleared, this, &MainWindow::onRequestUpdateGuiForClearData);
-    QObject::connect(EventsDataHub, SIGNAL(requestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate())); 
+    QObject::connect(EventsDataHub, &EventsDataClass::requestEventsGuiUpdate, Rwindow, &ReconstructionWindow::onRequestEventsGuiUpdate);
 
     QObject::connect(ReconstructionManager, SIGNAL(ReconstructionFinished(bool, bool)), Rwindow, SLOT(onReconstructionFinished(bool, bool)));
     QObject::connect(ReconstructionManager, SIGNAL(RequestShowStatistics()), Rwindow, SLOT(ShowStatistics()));
@@ -251,9 +256,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->fWaveOptions->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fWaveTests->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fTime->setEnabled(ui->cbTimeResolved->isChecked());
-    ui->fPointSource_Wave->setEnabled(ui->cbWaveResolved->isChecked());
-    ui->fPointSource_Time->setEnabled(ui->cbTimeResolved->isChecked());
-    ui->swPointSourceWaveTime->setCurrentIndex(ui->cobDirectlyOrFromMaterial->currentIndex());
+    ui->cbFixWavelengthPointSource->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fAngular->setEnabled(ui->cbAngularSensitive->isChecked());    
     ui->fScanSecond->setEnabled(ui->cbSecondAxis->isChecked());
     ui->fScanThird->setEnabled(ui->cbThirdAxis->isChecked());
@@ -293,15 +296,18 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">Init for Reconstruction window...";
     Rwindow->InitWindow();
 
+    qDebug() << ">Init for Remote sim/reconstruction window...";
+    RemoteWindow->ReadConfig();
+
     qDebug()<<">Showing geometry";
     GeometryWindow->show();
     GeometryWindow->resize(GeometryWindow->width()+1, GeometryWindow->height());
     GeometryWindow->resize(GeometryWindow->width()-1, GeometryWindow->height());
-    QThread::msleep(50);
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
     ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back
+    ui->cobSSO_ScatterModel->setCurrentIndex(1); //default to Lambertian back
     //MainWindow::on_pbRefreshOverrides_clicked();  //already in load detector
     MainWindow::updateCOBsWithPMtypeNames();
 

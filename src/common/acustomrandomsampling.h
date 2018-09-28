@@ -8,13 +8,12 @@ class TRandom2;
 class ACustomRandomSampling
 {
 public:
-  ACustomRandomSampling(TRandom2* RandGen, const QVector<double> *Probabilities);
+  ACustomRandomSampling(const QVector<double> *Probabilities);
 
-  int sample() const;  //always returns 0 if fUndefined
+  int sample(TRandom2* RandGen) const;  //always returns 0 if fUndefined
   void reportSettings() const;
 
 private:
-  TRandom2* RandGen;
   const QVector<double> *Probs;
 
   double Sum;

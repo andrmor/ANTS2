@@ -37,8 +37,8 @@
 #include <QFile>
 #include <QThread>
 #include <QDateTime>
-#include <QApplication>
-#include <QVector3D>
+#include <QtWidgets/QApplication>
+#include <QtGui/QVector3D>
 #include <QJsonDocument>
 #include <QDebug>
 
@@ -510,6 +510,36 @@ bool AInterfaceToConfig::Save(QString FileName)
     return SaveJsonToFile(Config->JSON, FileName);
 }
 
+const QVariant AInterfaceToConfig::GetConfig() const
+{
+    return Config->JSON.toVariantMap();
+}
+
+bool AInterfaceToConfig::SetConfig(const QVariant &conf)
+{
+    if (!bGuiThread)
+      {
+        abort("Script in threads: cannot modify detector configuration!");
+        return false;
+      }
+
+    //if (conf.type() == QMetaType::QVariantMap)
+    if (conf.type() == QVariant::Map)
+    {
+        QVariantMap vm = conf.toMap();
+        QJsonObject json = QJsonObject::fromVariantMap(vm);
+
+        if ( json.contains("DetectorConfig") && json.contains("SimulationConfig") && json.contains("ReconstructionConfig"))
+        {
+            Config->LoadConfig(json, true, true, true);
+            return true;
+        }
+    }
+
+    abort("Failed to set config from object: it does not seens to be a valid configuration");
+    return false;
+}
+
 #ifdef SIM
 //----------------------------------
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
@@ -548,7 +578,8 @@ bool InterfaceToSim::RunPhotonSources(int NumThreads)
 
     do
       {
-        qApp->processEvents();        
+        QThread::usleep(100);
+        qApp->processEvents();
       }
     while (!SimulationManager->fFinished);
     return SimulationManager->fSuccess;
@@ -565,7 +596,8 @@ bool InterfaceToSim::RunParticleSources(int NumThreads)
 
     do
       {
-        qApp->processEvents();        
+        QThread::usleep(100);
+        qApp->processEvents();
       }
     while (!SimulationManager->fFinished);
     return SimulationManager->fSuccess;
@@ -631,9 +663,9 @@ bool InterfaceToSim::SaveAsTree(QString fileName)
   return EventsDataHub->saveSimulationAsTree(fileName);
 }
 
-bool InterfaceToSim::SaveAsText(QString fileName)
+bool InterfaceToSim::SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons)
 {
-  return EventsDataHub->saveSimulationAsText(fileName);
+  return EventsDataHub->saveSimulationAsText(fileName, IncludeTruePositionAndNumPhotons, IncludeTruePositionAndNumPhotons);
 }
 
 int InterfaceToSim::countMonitors()
@@ -669,6 +701,8 @@ QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
           else if (whichOne == "wave")   h = mon->getWave();
           else if (whichOne == "energy") h = mon->getEnergy();
           else return vl;
+
+          if (!h) return vl;
 
           TAxis* axis = h->GetXaxis();
           for (int i=1; i<axis->GetNbins()+1; i++)
@@ -750,6 +784,9 @@ AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* Even
                           "After all events are reconstructed, SetReconstructionReady() has to be called!";
 
   H["GetStatistics"] = "Returns (if available) an array with GoodEvents, Average_Chi2, Average_XY_deviation";
+
+  H["GetTruePoints"] = "Return array of true (scan) points for the event. Array elements are [x, y, z, energy]";
+  H["GetTrueNumberPoints"] = "Return number of true (scan) points for the given event";
 }
 
 double AInterfaceToData::GetPMsignal(int ievent, int ipm)
@@ -947,7 +984,7 @@ bool AInterfaceToData::checkSetReconstructionDataRequest(int ievent)
   return true;
 }
 
-bool AInterfaceToData::checkTrueDataRequest(int ievent)
+bool AInterfaceToData::checkTrueDataRequest(int ievent, int iPoint)
 {
   if (EventsDataHub->isScanEmpty())
     {
@@ -960,6 +997,11 @@ bool AInterfaceToData::checkTrueDataRequest(int ievent)
       abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
       return false;
     }
+  if (iPoint<0 || iPoint >= EventsDataHub->Scan.at(ievent)->Points.size())
+  {
+      abort( QString("Bad scan point number: event #%1 has %2 point(s)").arg(ievent).arg( EventsDataHub->Scan.at(ievent)->Points.size() ));
+      return false;
+  }
   return true;
 }
 
@@ -1083,34 +1125,46 @@ int AInterfaceToData::countReconstructedPoints(int igroup, int ievent)
     return EventsDataHub->ReconstructionData.at(igroup).at(ievent)->Points.size();
 }
 
-double AInterfaceToData::GetTrueX(int ievent)
+double AInterfaceToData::GetTrueX(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[0];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[0];
 }
 
-double AInterfaceToData::GetTrueY(int ievent)
+double AInterfaceToData::GetTrueY(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[1];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[1];
 }
 
-double AInterfaceToData::GetTrueZ(int ievent)
+double AInterfaceToData::GetTrueZ(int ievent, int iPoint)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].r[2];
+  if (!checkTrueDataRequest(ievent, iPoint)) return 0; //anyway aborted
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].r[2];
 }
 
-double AInterfaceToData::GetTrueEnergy(int ievent)
+double AInterfaceToData::GetTrueEnergy(int ievent, int iPoint)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points[0].energy;
+  return EventsDataHub->Scan.at(ievent)->Points[iPoint].energy;
 }
 
-int AInterfaceToData::GetTruePoints(int ievent)
+const QVariant AInterfaceToData::GetTruePoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
-  return EventsDataHub->Scan.at(ievent)->Points.size();
+
+  QVariantList list;
+  const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
+  for (int i=0; i<p.size(); i++)
+  {
+      QVariantList el;
+      el << p.at(i).r[0];
+      el << p.at(i).r[1];
+      el << p.at(i).r[2];
+      el << p.at(i).energy;
+      list.push_back(el);
+  }
+  return list;
 }
 
 bool AInterfaceToData::IsTrueGoodEvent(int ievent)
@@ -1119,7 +1173,7 @@ bool AInterfaceToData::IsTrueGoodEvent(int ievent)
   return EventsDataHub->Scan.at(ievent)->GoodEvent;
 }
 
-bool AInterfaceToData::GetTrueNumberPoints(int ievent)
+int AInterfaceToData::GetTrueNumberPoints(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points.size();
@@ -1342,7 +1396,7 @@ void AInterfaceToData::SetReconstructionReady()
   }
 
   EventsDataHub->fReconstructionDataReady = true;
-  emit RequestEventsGuiUpdate();
+  emit EventsDataHub->requestEventsGuiUpdate();
 }
 
 void AInterfaceToData::ResetReconstructionData(int numGroups)
@@ -1366,7 +1420,7 @@ void AInterfaceToData::LoadEventsTree(QString fileName, bool Append, int MaxNumE
     }
 
   if (!Append) EventsDataHub->clear();
-  EventsDataHub->loadSimulatedEventsFromTree(fileName, Config->GetDetector()->PMs, MaxNumEvents);
+  EventsDataHub->loadSimulatedEventsFromTree(fileName, *Config->GetDetector()->PMs, MaxNumEvents);
   //EventsDataHub->clearReconstruction();
   EventsDataHub->createDefaultReconstructionData();
   //RManager->filterEvents(Config->JSON);
@@ -1912,6 +1966,27 @@ void InterfaceToReconstructor::UpdateFilters(int NumThreads)
   RManager->filterEvents(Config->JSON, NumThreads);
 }
 
+double InterfaceToReconstructor::GetChi2valueToCutTop(double cutUpper_fraction, int sensorGroup)
+{
+    const int numBins = 1000;
+
+    if (!EventsDataHub->isReconstructionReady(sensorGroup)) return 0;
+
+    TH1D* h = new TH1D("h","", numBins, 0, 0);
+    for (int ievent = 0; ievent < EventsDataHub->ReconstructionData[sensorGroup].size(); ievent++)
+        h->Fill(EventsDataHub->ReconstructionData[sensorGroup][ievent]->chi2);
+
+    double integral = h->Integral();
+    double sum = 0;
+    for (int ibin = numBins; ibin > -1; ibin--)
+    {
+        sum += h->GetBinContent(ibin);
+        if(sum >= integral * cutUpper_fraction)
+           return ibin * h->GetBinWidth(0);
+    }
+    return 0;
+}
+
 void InterfaceToReconstructor::DoBlurUniform(double range, bool fUpdateFilters)
 {
   EventsDataHub->BlurReconstructionData(0, range, Config->GetDetector()->RandGen);
@@ -2181,9 +2256,20 @@ void InterfaceToGraphWin::ConfigureXYplot(int binsX, double X0, double X1, int b
    MW->Rwindow->updateGUIsettingsInConfig();
 }
 
+void InterfaceToGraphWin::ConfigureXYplotExtra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY)
+{
+    MW->Rwindow->ConfigurePlotXYextra(suppress0, plotVsTrue, showPMs, showManifest, invertX, invertY);
+    MW->Rwindow->updateGUIsettingsInConfig();
+}
+
 void InterfaceToGraphWin::SetLog(bool Xaxis, bool Yaxis)
 {
-  MW->GraphWindow->SetLog(Xaxis, Yaxis);
+    MW->GraphWindow->SetLog(Xaxis, Yaxis);
+}
+
+void InterfaceToGraphWin::SetStatPanelVisible(bool flag)
+{
+    MW->GraphWindow->SetStatPanelVisible(flag);
 }
 
 void InterfaceToGraphWin::AddLegend(double x1, double y1, double x2, double y2, QString title)

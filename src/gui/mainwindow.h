@@ -55,6 +55,8 @@ class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
 struct ParticleSourceStructure;
+class ARemoteWindow;
+class AWebSocketServerDialog;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -111,6 +113,8 @@ public:
     AScriptWindow* ScriptWindow = 0;                //global script window
     ALrfWindow* newLrfWindow = 0;                   //window of the v3 LRF module
     AScriptWindow* PythonScriptWindow = 0;
+    ARemoteWindow* RemoteWindow = 0;
+    AWebSocketServerDialog* ServerDialog = 0;
 
 #ifdef ANTS_FANN
     NeuralNetworksWindow* NNwindow = 0;
@@ -163,13 +167,8 @@ public:
     //save data to file - public due to batch mode usage
     int LoadSimulationDataFromTree(QString fileName, int maxEvents = -1);
     int LoadPMsignals(QString fileName);
-    //
-    void ExportDeposition(QFile &outputFile);
-    void ImportDeposition(QFile &file);
 
     //configuration from outside
-    void setShowTop(bool flag) {ShowTop = flag;}
-    void setColorByMaterial(bool flag) {ColorByMaterial = flag;}
     void SetProgress(int val);
 
     //gains and ch per ph.el
@@ -179,10 +178,8 @@ public:
 
     //public flags
     bool DoNotUpdateGeometry;  //if GUI is in bulk-update, we do not detector geometry be updated on each line
-    bool GeometryDrawDisabled = false; //no drawing of th geometry or tracks
+    bool GeometryDrawDisabled = false; //no drawing of the geometry or tracks
     bool fStartedFromGUI = false;          //flag indicating that an action was run from GUI, e.g. simulation
-    bool ShowTop = false;
-    bool ColorByMaterial = false;
 
     bool isWavelengthResolved() const;
     double WaveFrom, WaveTo, WaveStep;
@@ -277,8 +274,7 @@ private slots:
     void on_pbTestGeneratorSecondary_clicked();
     void on_pbTestShowRefrIndex_clicked();
     void on_pbTestShowAbs_clicked();
-    void on_pbShowThisMatInfo_clicked();
-    void on_sbWaveIndexPointSource_valueChanged(int arg1);
+    void on_sbFixedWaveIndexPointSource_valueChanged(int arg1);
     void on_pbShowPDE_clicked();
     void on_pbLoadPDE_clicked();
     void on_pbDeletePDE_clicked();
@@ -360,8 +356,6 @@ private slots:
     void on_actionLoad_positions_and_status_of_all_windows_triggered();
     void on_actionMaterial_inspector_window_triggered();
     void on_twSingleScan_currentChanged(int index);
-    void on_pbExportDeposition_clicked();
-    void on_pbImportDeposition_clicked();
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
     void on_cobSecScintillationGenType_currentIndexChanged(int index);
@@ -386,7 +380,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    QTimer *RootUpdateTimer; //root update timer
+    QTimer *RootUpdateTimer = 0; //root update timer
     QMessageBox *msBox = 0; //box to be used to confirm discard or save sim data on data clear; 0 if not activated
 
     //flags
@@ -522,16 +516,11 @@ private slots:
     void on_pbShowComptonEnergies_clicked();
     void on_pbCheckRandomGen_clicked();
 
-private slots:
-    void on_cbPointSourceBuildTracks_toggled(bool checked);
-    void on_cbGunPhotonTracks_toggled(bool checked);
-    void on_cbBuilPhotonTrackstester_toggled(bool checked);
-
     /************************* Simulation *************************/
 public:
     void startSimulation(QJsonObject &json);
 private:
-    ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings);
+    ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings); //Single thread only!
 signals:
     void StopRequested();
 private slots:
@@ -544,7 +533,6 @@ private slots:
     void on_pbShowNodes_clicked();
     void on_pbRunNodeScript_clicked();
     void on_cobPMdeviceType_activated(const QString &arg1);
-    void on_cobMatPointSource_activated(int index);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();
     void on_actionOpen_settings_triggered();
@@ -627,6 +615,34 @@ private slots:
     void on_cobDarkCounts_Model_currentIndexChanged(int index);
 
     void on_cobDarkCounts_LoadOptions_currentIndexChanged(int index);
+
+    void on_actionServer_window_triggered();
+
+    void on_actionServer_settings_triggered();
+
+    void on_pbSSO_Load_clicked();
+
+    void on_pbSSO_Show_clicked();
+
+    void on_pbSSO_Binned_clicked();
+
+    void on_cobSSO_ScatterModel_activated(int index);
+
+    void on_ledSSO_EffWave_editingFinished();
+
+    void on_actionGrid_triggered();
+
+    void on_pbOpenTrackProperties_Phot_clicked();
+
+    void on_pbTrackOptionsGun_clicked();
+
+    void on_pbTrackOptionsStack_clicked();
+
+    void on_pbQEacceleratorWarning_clicked();
+
+    void on_ledSphericalPMAngle_editingFinished();
+
+    void on_cobSurfaceWLS_Model_activated(int index);
 
 public slots:
     void on_pbRebuildDetector_clicked();

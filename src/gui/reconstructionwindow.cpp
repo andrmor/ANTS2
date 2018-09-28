@@ -5680,6 +5680,16 @@ void ReconstructionWindow::ConfigurePlotXY(int binsX, double X0, double X1, int 
     ui->ledYto->setText(QString::number(Y1));
 }
 
+void ReconstructionWindow::ConfigurePlotXYextra(bool suppress0, bool plotVsTrue, bool showPMs, bool showManifest, bool invertX, bool invertY)
+{
+    ui->cbSuppress0bins->setChecked(suppress0);
+    ui->cbPlotVsActualPosition->setChecked(plotVsTrue);
+    ui->cbShowPMs->setChecked(showPMs);
+    ui->cbShowManifestItems->setChecked(showManifest);
+    ui->cbInvertX->setChecked(invertX);
+    ui->cbInvertY->setChecked(invertY);
+}
+
 void ReconstructionWindow::ReconstructAll(bool fShow)
 {
   MW->fStartedFromGUI = true;

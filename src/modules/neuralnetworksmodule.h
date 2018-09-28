@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <cfloat>
 
 #include "fann.h"
 #include <stdio.h>

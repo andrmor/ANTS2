@@ -1,5 +1,5 @@
 #include "PythonQt.h"
-#include "PythonQt_QtAll.h"
+//#include "PythonQt_QtAll.h"
 
 #include "apythonscriptmanager.h"
 #include "coreinterfaces.h"
@@ -8,7 +8,7 @@ APythonScriptManager::APythonScriptManager(TRandom2 *RandGen) :
   AScriptManager(RandGen)
 {
   PythonQt::init(PythonQt::RedirectStdOut);
-  PythonQt_QtAll::init();
+  //PythonQt_QtAll::init();
 
   connect(PythonQt::self(), SIGNAL(pythonStdOut(const QString&)), this, SLOT(stdOut(const QString&)));
   connect(PythonQt::self(), SIGNAL(pythonStdErr(const QString&)), this, SLOT(stdErr(const QString&)));

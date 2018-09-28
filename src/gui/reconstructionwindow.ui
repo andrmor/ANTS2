@@ -3250,7 +3250,7 @@
       <rect>
        <x>28</x>
        <y>0</y>
-       <width>61</width>
+       <width>70</width>
        <height>20</height>
       </rect>
      </property>
@@ -6988,14 +6988,17 @@ Individual sensors can belong to multiple groups!</string>
           <widget class="QLabel" name="label_145">
            <property name="geometry">
             <rect>
-             <x>108</x>
+             <x>40</x>
              <y>83</y>
-             <width>101</width>
+             <width>160</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
             <string>Maximum distance:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QCheckBox" name="cbActivateNNfilter">
@@ -7049,14 +7052,17 @@ Individual sensors can belong to multiple groups!</string>
           <widget class="QLabel" name="label_148">
            <property name="geometry">
             <rect>
-             <x>113</x>
+             <x>70</x>
              <y>54</y>
-             <width>92</width>
+             <width>130</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
             <string>Minimum distance:</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QLineEdit" name="ledNNmin">
@@ -7135,7 +7141,7 @@ Individual sensors can belong to multiple groups!</string>
             <rect>
              <x>281</x>
              <y>142</y>
-             <width>141</width>
+             <width>220</width>
              <height>17</height>
             </rect>
            </property>
@@ -7162,14 +7168,17 @@ Individual sensors can belong to multiple groups!</string>
           <widget class="QLabel" name="label_150">
            <property name="geometry">
             <rect>
-             <x>129</x>
+             <x>40</x>
              <y>110</y>
-             <width>70</width>
+             <width>159</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
             <string>Average over </string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QSpinBox" name="sbNNaverageOver">
@@ -7246,14 +7255,17 @@ Individual sensors can belong to multiple groups!</string>
          <widget class="QLabel" name="labFLANNenabled">
           <property name="geometry">
            <rect>
-            <x>90</x>
+            <x>10</x>
             <y>94</y>
-            <width>311</width>
-            <height>16</height>
+            <width>491</width>
+            <height>20</height>
            </rect>
           </property>
           <property name="text">
            <string>Nearest Neighbour filter requires FLANN library to be enabled!</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </widget>
@@ -7287,7 +7299,7 @@ Individual sensors can belong to multiple groups!</string>
          <rect>
           <x>50</x>
           <y>4</y>
-          <width>135</width>
+          <width>180</width>
           <height>17</height>
          </rect>
         </property>
@@ -7353,7 +7365,7 @@ Individual sensors can belong to multiple groups!</string>
          <rect>
           <x>50</x>
           <y>27</y>
-          <width>132</width>
+          <width>184</width>
           <height>17</height>
          </rect>
         </property>
@@ -7372,7 +7384,7 @@ Individual sensors can belong to multiple groups!</string>
          <rect>
           <x>430</x>
           <y>26</y>
-          <width>21</width>
+          <width>70</width>
           <height>16</height>
          </rect>
         </property>
@@ -7653,7 +7665,7 @@ Individual sensors can belong to multiple groups!</string>
              <rect>
               <x>190</x>
               <y>7</y>
-              <width>181</width>
+              <width>210</width>
               <height>17</height>
              </rect>
             </property>
@@ -7740,9 +7752,9 @@ Individual sensors can belong to multiple groups!</string>
             <widget class="QLabel" name="label_101">
              <property name="geometry">
               <rect>
-               <x>5</x>
+               <x>0</x>
                <y>6</y>
-               <width>94</width>
+               <width>100</width>
                <height>16</height>
               </rect>
              </property>
@@ -7786,9 +7798,9 @@ Individual sensors can belong to multiple groups!</string>
            <widget class="QLabel" name="label_43">
             <property name="geometry">
              <rect>
-              <x>208</x>
+              <x>201</x>
               <y>63</y>
-              <width>58</width>
+              <width>66</width>
               <height>13</height>
              </rect>
             </property>
@@ -9003,7 +9015,7 @@ Individual sensors can belong to multiple groups!</string>
             <property name="geometry">
              <rect>
               <x>50</x>
-              <y>60</y>
+              <y>46</y>
               <width>75</width>
               <height>23</height>
              </rect>
@@ -9012,185 +9024,207 @@ Individual sensors can belong to multiple groups!</string>
              <string>...update</string>
             </property>
            </widget>
-           <widget class="QGroupBox" name="groupBox">
+           <widget class="Line" name="line_86">
             <property name="geometry">
              <rect>
-              <x>26</x>
-              <y>72</y>
-              <width>203</width>
-              <height>64</height>
+              <x>260</x>
+              <y>70</y>
+              <width>3</width>
+              <height>61</height>
              </rect>
             </property>
-            <property name="title">
-             <string>Calibration settings</string>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-            <widget class="QSpinBox" name="sbKNNnumNeighbours">
-             <property name="geometry">
-              <rect>
-               <x>139</x>
-               <y>12</y>
-               <width>51</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>1000000</number>
-             </property>
-             <property name="value">
-              <number>50</number>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_146">
-             <property name="geometry">
-              <rect>
-               <x>4</x>
-               <y>12</y>
-               <width>130</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Number of neighbours:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_147">
-             <property name="geometry">
-              <rect>
-               <x>19</x>
-               <y>36</y>
-               <width>111</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Number of trees:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-            <widget class="QSpinBox" name="sbKNNnumTrees">
-             <property name="geometry">
-              <rect>
-               <x>139</x>
-               <y>36</y>
-               <width>51</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>16</number>
-             </property>
-             <property name="value">
-              <number>4</number>
-             </property>
-            </widget>
            </widget>
-           <widget class="QGroupBox" name="groupBox_2">
+           <widget class="QLabel" name="label_204">
             <property name="geometry">
              <rect>
-              <x>282</x>
-              <y>72</y>
-              <width>227</width>
-              <height>64</height>
+              <x>30</x>
+              <y>70</y>
+              <width>171</width>
+              <height>16</height>
              </rect>
             </property>
-            <property name="title">
-             <string>Reconstruction settings</string>
+            <property name="text">
+             <string>Calibration settings:</string>
             </property>
-            <widget class="QSpinBox" name="sbKNNuseNeighboursInRec">
-             <property name="geometry">
-              <rect>
-               <x>165</x>
-               <y>12</y>
-               <width>51</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <property name="toolTip">
-              <string>Cannot be larger than 'number neighbours' parameter used in calibration!</string>
-             </property>
-             <property name="minimum">
-              <number>10</number>
-             </property>
-             <property name="maximum">
-              <number>100000</number>
-             </property>
-            </widget>
-            <widget class="QLabel" name="label_179">
-             <property name="geometry">
-              <rect>
-               <x>7</x>
-               <y>17</y>
-               <width>151</width>
-               <height>13</height>
-              </rect>
-             </property>
+           </widget>
+           <widget class="QSpinBox" name="sbKNNnumTrees">
+            <property name="geometry">
+             <rect>
+              <x>170</x>
+              <y>110</y>
+              <width>51</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>16</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_147">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>110</y>
+              <width>111</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Number of trees:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QSpinBox" name="sbKNNnumNeighbours">
+            <property name="geometry">
+             <rect>
+              <x>170</x>
+              <y>86</y>
+              <width>51</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_146">
+            <property name="geometry">
+             <rect>
+              <x>35</x>
+              <y>86</y>
+              <width>130</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Number of neighbours:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_211">
+            <property name="geometry">
+             <rect>
+              <x>270</x>
+              <y>70</y>
+              <width>211</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Reconstruction settings:</string>
+            </property>
+           </widget>
+           <widget class="QSpinBox" name="sbKNNuseNeighboursInRec">
+            <property name="geometry">
+             <rect>
+              <x>445</x>
+              <y>86</y>
+              <width>49</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string>Cannot be larger than 'number neighbours' parameter used in calibration!</string>
+            </property>
+            <property name="minimum">
+             <number>10</number>
+            </property>
+            <property name="maximum">
+             <number>100000</number>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="cobKNNweighting">
+            <property name="geometry">
+             <rect>
+              <x>370</x>
+              <y>110</y>
+              <width>123</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <item>
              <property name="text">
-              <string>Use calibration neighbours:</string>
+              <string>No weighting</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-            <widget class="QComboBox" name="cobKNNweighting">
-             <property name="geometry">
-              <rect>
-               <x>90</x>
-               <y>36</y>
-               <width>125</width>
-               <height>22</height>
-              </rect>
-             </property>
-             <item>
-              <property name="text">
-               <string>No weighting</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1/distance</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1/distance^2</string>
-              </property>
-             </item>
-            </widget>
-            <widget class="QLabel" name="label_186">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>38</y>
-               <width>71</width>
-               <height>16</height>
-              </rect>
-             </property>
+            </item>
+            <item>
              <property name="text">
-              <string>Weighting:</string>
+              <string>1/distance</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </item>
+            <item>
+             <property name="text">
+              <string>1/distance^2</string>
              </property>
-            </widget>
+            </item>
+           </widget>
+           <widget class="QLabel" name="label_179">
+            <property name="geometry">
+             <rect>
+              <x>287</x>
+              <y>91</y>
+              <width>149</width>
+              <height>13</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Use calibration neighbours:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_186">
+            <property name="geometry">
+             <rect>
+              <x>290</x>
+              <y>112</y>
+              <width>69</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Weighting:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
            <zorder>line_90</zorder>
            <zorder>cobKNNcalibration</zorder>
            <zorder>stackedWidget</zorder>
            <zorder>label_149</zorder>
            <zorder>pbKNNupdate</zorder>
-           <zorder>groupBox</zorder>
-           <zorder>groupBox_2</zorder>
+           <zorder>line_86</zorder>
+           <zorder>label_204</zorder>
+           <zorder>sbKNNnumTrees</zorder>
+           <zorder>label_147</zorder>
+           <zorder>sbKNNnumNeighbours</zorder>
+           <zorder>label_146</zorder>
+           <zorder>label_211</zorder>
+           <zorder>sbKNNuseNeighboursInRec</zorder>
+           <zorder>cobKNNweighting</zorder>
+           <zorder>label_179</zorder>
+           <zorder>label_186</zorder>
           </widget>
          </widget>
          <widget class="QLabel" name="label_99">

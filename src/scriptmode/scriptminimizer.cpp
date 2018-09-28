@@ -95,7 +95,8 @@ void AInterfaceToMinimizerScript::AddUpperLimitedVariable(QString name, double v
 
 void AInterfaceToMinimizerScript::AddAllVariables(QVariant array)
 {
-  if (array.type() != QMetaType::QVariantList )
+  //if (array.type() != QMetaType::QVariantList )
+  if (array.type() != QVariant::List )
   {
       abort("DefineAllVariables(): has to be an array containing initializers of the variables");
       return;
@@ -334,7 +335,7 @@ ROOT::Math::Functor* AInterfaceToMinimizerJavaScript::configureFunctor()
 #ifdef __USE_ANTS_PYTHON__
 #include "apythonscriptmanager.h"
 #include "PythonQt.h"
-#include "PythonQt_QtAll.h"
+//#include "PythonQt_QtAll.h"
 #include "PythonQtConversion.h"
 
 double PythonScriptFunctor(const double *p) //last parameter contains the pointer to MainWindow object

@@ -12,34 +12,13 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDebug>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QThread>
 
 GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(NetModule)
 {
-  SaveLoadWindows = true;
-  ShowExamplesOnStart = true;
-  PerformAutomaticGeometryCheck = true;
-
-  fOpenImageExternalEditor = true;
-  TextLogPrecision = 4;
-  BinsX = BinsY = BinsZ = 100;
-  FunctionPointsX = FunctionPointsY = 30;
-  NumSegments = 20;
-  MaxNumberOfTracks = 1000;
-
-  DefaultFontSize_ScriptWindow = 12;
-  DefaultFontFamily_ScriptWindow = ""; //undefined - Qt standard settings will be used
-  DefaultFontWeight_ScriptWindow = false;
-  DefaultFontItalic_ScriptWindow = false;
-
-  NumThreads = -1; //if not loaded - set it using recommended settings
-  RecNumTreads = QThread::idealThreadCount()-1;
-  if (RecNumTreads<1) RecNumTreads = 1;
-
-  RecTreeSave_IncludePMsignals = true;
-  RecTreeSave_IncludeRho = true;
-  RecTreeSave_IncludeTrue = true;
+  RecNumTreads = QThread::idealThreadCount() - 1;
+  if (RecNumTreads < 1) RecNumTreads = 1;
 
   //default font size
 #ifdef Q_OS_LINUX // fix font size on Linux
@@ -70,14 +49,19 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
     //dir where examples will be copied
   ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES";
 
+  //dir where examples will be copied
+  ResourcesDir = QDir::current().absolutePath() + "/DATA";
+
 #ifdef Q_OS_WIN32
   if (!QDir(ExamplesDir).exists())  //direct call of ants2.exe
   {
       QDir dir = QDir::current();
       dir.cdUp();
       QString candidate = dir.absolutePath() + "/EXAMPLES";
-      if (QDir(candidate).exists())
-          ExamplesDir = candidate;
+      if (QDir(candidate).exists()) ExamplesDir = candidate;
+
+      candidate = dir.absolutePath() + "/DATA";
+      if (QDir(candidate).exists()) ResourcesDir = candidate;
   }
 #endif
 //   qDebug() << "-examples-"<<ExamplesDir;
@@ -95,7 +79,9 @@ GlobalSettingsClass::GlobalSettingsClass(ANetworkModule *NetModule) : NetModule(
 //  qDebug() << "-conf-"<<ConfigDir;
 
   //natutal abundances data default filename
-  MaterialsAndParticlesSettings["NaturalAbundanciesFile"] = ExamplesDir+"/"+"IsotopeNaturalAbundances.txt";
+  MaterialsAndParticlesSettings["NaturalAbundanciesFileName"] = ResourcesDir+"/Neutrons/IsotopeNaturalAbundances.txt";
+  MaterialsAndParticlesSettings["CrossSectionsDir"] = ResourcesDir+"/Neutrons/CrossSections";
+  MaterialsAndParticlesSettings["EnableAutoLoad"] = true;
 
   //if exists,load file fith ANTS2 settings, otherwise create config dir
   if (!QDir(ConfigDir).exists())
@@ -143,7 +129,6 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["FunctionPointsX"] = FunctionPointsX;
   js["FunctionPointsY"] = FunctionPointsY;
   js["NumSegments"] = NumSegments;
-  js["MaxNumberOfTracks"] = MaxNumberOfTracks;
   js["PerformAutomaticGeometryCheck"] = PerformAutomaticGeometryCheck;
   js["NumThreads"] = NumThreads;
 
@@ -152,6 +137,9 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["RecTreeSave_IncludePMsignals"] = RecTreeSave_IncludePMsignals;
   js["RecTreeSave_IncludeRho"] = RecTreeSave_IncludeRho;
   js["RecTreeSave_IncludeTrue"] = RecTreeSave_IncludeTrue;
+
+  js["SimTextSave_IncludeNumPhotons"] = SimTextSave_IncludeNumPhotons;
+  js["SimTextSave_IncludePositions"] = SimTextSave_IncludePositions;
 
   js["GlobScript"] = GlobScript;
   js["ScriptWindowJson"] = ScriptWindowJson;
@@ -162,10 +150,12 @@ void GlobalSettingsClass::writeToJson(QJsonObject &json)
   js["DefaultFontItalic_ScriptWindow"] = DefaultFontItalic_ScriptWindow;
 
   js["DefaultWebSocketPort"] = DefaultWebSocketPort;
-  js["RunWebSocketServerOnStart"] = fRunWebSocketServerOnStart;
+  js["DefaultWebSocketIP"] = DefaultWebSocketIP;
   js["DefaultRootServerPort"] = DefaultRootServerPort;
   js["RunRootServerOnStart"] = fRunRootServerOnStart;
   js["ExternalJSROOT"] = ExternalJSROOT;
+
+  js["RemoteServers"] = RemoteServers;
 
   json["ANTS2config"] = js;
 }
@@ -193,12 +183,14 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
     parseJson(js, "FunctionPointsX", FunctionPointsX);
     parseJson(js, "FunctionPointsY", FunctionPointsY);
     parseJson(js, "NumSegments", NumSegments);
-    parseJson(js, "MaxNumberOfTracks", MaxNumberOfTracks);
     parseJson(js, "NumThreads", NumThreads);
 
     parseJson(js, "RecTreeSave_IncludePMsignals", RecTreeSave_IncludePMsignals);
     parseJson(js, "RecTreeSave_IncludeRho", RecTreeSave_IncludeRho);
     parseJson(js, "RecTreeSave_IncludeTrue", RecTreeSave_IncludeTrue);
+
+    parseJson(js, "SimTextSave_IncludeNumPhotons", SimTextSave_IncludeNumPhotons);
+    parseJson(js, "SimTextSave_IncludePositions", SimTextSave_IncludePositions);
 
     parseJson(js, "PerformAutomaticGeometryCheck", PerformAutomaticGeometryCheck);
 
@@ -217,15 +209,16 @@ void GlobalSettingsClass::readFromJson(QJsonObject &json)
 
     //network
     DefaultWebSocketPort = 1234;
-    fRunWebSocketServerOnStart = false;
+    DefaultWebSocketIP = "127.0.0.1";
     DefaultRootServerPort = 8080;
     fRunRootServerOnStart = false;
     ExternalJSROOT = "https://root.cern/js/latest/";
-
     parseJson(js, "DefaultWebSocketPort", DefaultWebSocketPort);
-    parseJson(js, "RunWebSocketServerOnStart", fRunWebSocketServerOnStart);
+    parseJson(js, "DefaultWebSocketIP", DefaultWebSocketIP);
     parseJson(js, "DefaultRootServerPort", DefaultRootServerPort);
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
+
+    parseJson(js, "RemoteServers", RemoteServers);
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

@@ -32,7 +32,7 @@
 #include "aopticaloverride.h"
 #include "phscatclaudiomodel.h"
 #include "scatteronmetal.h"
-#include "slab.h"
+#include "slabdelegate.h"
 #include "asandwich.h"
 #include "ajsontools.h"
 #include "dotstgeostruct.h"
@@ -52,6 +52,7 @@
 #include "particlesourcesclass.h"
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
+#include "aremotewindow.h"
 
 //Qt
 #include <QDebug>
@@ -135,12 +136,12 @@ void MainWindow::onBusyOff()
 
 void MainWindow::startRootUpdate()
 {
-  RootUpdateTimer->start();
+  if (RootUpdateTimer) RootUpdateTimer->start();
 }
 
 void MainWindow::stopRootUpdate()
 {
-  RootUpdateTimer->stop();
+  if (RootUpdateTimer) RootUpdateTimer->stop();
 }
 
 static bool DontAskAgainPlease = false;
@@ -181,7 +182,6 @@ void MainWindow::onRequestUpdateGuiForClearData()
     ui->leoLoadedEvents->setText("");
     ui->leoTotalLoadedEvents->setText("");
     ui->lwLoadedSims->clear();
-    ui->pbExportDeposition->setEnabled(false);
     ui->pbGenerateLight->setEnabled(false);
     Owindow->SiPMpixels.clear();
     Owindow->RefreshData();
@@ -209,7 +209,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
-           qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
+           //qDebug() << "<-Reconstruction manager is busy, terminating and trying again in 100us";
            ReconstructionManager->requestStop();
            SimulationManager->StopSimulation();
            qApp->processEvents();
@@ -234,6 +234,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
        qDebug() << "<Saving Python scripts";
        PythonScriptWindow->WriteToJson();
    }
+   qDebug() << "<Saving remote servers";
+   RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
    GlobSet->SaveANTSconfiguration();
 
@@ -267,7 +269,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
      {
        GenScriptWindow->close();
        qDebug() << "<-Deleting local script window";
-       delete GenScriptWindow;
+       delete GenScriptWindow; GenScriptWindow = 0;
      }
 
 #ifdef ANTS_FANN
@@ -351,6 +353,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
        delete CheckUpWindow;
        CheckUpWindow = 0;
      }
+   if (RemoteWindow)
+   {
+       qDebug() << "<-Deleting remote simulation/reconstruction window";
+       delete RemoteWindow;
+       RemoteWindow = 0;
+   }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
    qDebug() << "<MainWindow close event processing finished";
 }
@@ -471,11 +479,7 @@ void MainWindow::ShowGraphWindow()
 
 void MainWindow::ShowTracks()
 {   
-  if (GeometryDrawDisabled) return;
-
-  GeometryWindow->SetAsActiveRootWindow();
-  Detector->GeoManager->DrawTracks();
-  GeometryWindow->UpdateRootCanvas();
+  GeometryWindow->DrawTracks();
 }
 
 void MainWindow::on_pbRebuildDetector_clicked()
@@ -498,7 +502,7 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     int OvFrom = ui->cobMaterialForOverrides->currentIndex();
     int OvTo = ui->cobMaterialTo->currentIndex();
 
-    MainWindow::UpdateMaterialListEdit();      
+    UpdateMaterialListEdit();
     bool tmpBool = DoNotUpdateGeometry;
     DoNotUpdateGeometry = true;
     //updating material selectors on the Detector tab   
@@ -506,7 +510,6 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    ui->cobMatPointSource->clear();    
     int numMats = MpCollection->countMaterials();
     for (int i=0; i<numMats; i++)
         AddMaterialToCOBs( (*MpCollection)[i]->name );
@@ -531,7 +534,6 @@ void MainWindow::AddMaterialToCOBs(QString s)
     ui->cobMaterialForOverrides->addItem(s);
     ui->cobMaterialTo->addItem(s);
     ui->cobMaterialForWaveTests->addItem(s);
-    ui->cobMatPointSource->addItem(s);
 
     MIwindow->AddMatToCobs(s);
 }
@@ -560,7 +562,7 @@ void MainWindow::UpdateMaterialListEdit()
     if (fFound) tmpStr += "  (override)";
 
     QListWidgetItem* pItem =new QListWidgetItem(tmpStr);
-    if (ColorByMaterial)
+    if (GeometryWindow->isColorByMaterial())
       {
         TColor* rc = gROOT->GetColor(i+1);
         QColor qc = QColor(255*rc->GetRed(), 255*rc->GetGreen(), 255*rc->GetBlue(), 255*rc->GetAlpha());
@@ -727,24 +729,43 @@ void MainWindow::on_pbOverride_clicked()
 
     AOpticalOverride* ov = (*MpCollection)[From]->OpticalOverrides[To];
 
-    if (ov)
+    if (ov)  //potential loss of data
       {
-        //potential loss of data for SurfaceWLS override
-        if (ov->getType() == "SurfaceWLS")
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Potential data loss:\nconfigured emission probability and spectrum will be lost!");
-            msgBox.setInformativeText("Continue?");
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Cancel);
-            int ret = msgBox.exec();
-            if (ret == QMessageBox::Cancel)
+        AWaveshifterOverride* swo =  dynamic_cast<AWaveshifterOverride*>(ov);
+        if (swo)
+            if (!swo->ReemissionProbability_lambda.isEmpty() || !swo->EmissionSpectrum_lambda.isEmpty())
             {
-                MainWindow::on_pbRefreshOverrides_clicked();
-                return;
+                QMessageBox msgBox;
+                msgBox.setText("Warning: configured emission probability and spectrum will be lost!");
+                msgBox.setInformativeText("Continue?");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                int ret = msgBox.exec();
+                if (ret == QMessageBox::Cancel)
+                {
+                    on_pbRefreshOverrides_clicked();
+                    return;
+                }
             }
-        }
+
+        SpectralBasicOpticalOverride* sso = dynamic_cast<SpectralBasicOpticalOverride*>(ov);
+        if (sso)
+            if (sso->Wave.size() > 1)
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Warning: configured spectral data will be lost!");
+                msgBox.setInformativeText("Continue?");
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                int ret = msgBox.exec();
+                if (ret == QMessageBox::Cancel)
+                {
+                    on_pbRefreshOverrides_clicked();
+                    return;
+                }
+            }
 
         delete ov;
         ov = 0;
@@ -803,10 +824,23 @@ void MainWindow::on_pbOverride_clicked()
         }
       case 5:  // Surface WLS
         {
-          ov = new AWaveshifterOverride(Detector->MpCollection, From, To);
+          ui->cobSurfaceWLS_Model->setCurrentIndex(1);
+          ov = new AWaveshifterOverride(Detector->MpCollection, From, To, 1);
           ui->pbSurfaceWLS_Show->setEnabled(false);
           ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
           break;
+        }
+      case 6:  // Simplistic spectral
+        {
+          ov = new SpectralBasicOpticalOverride(Detector->MpCollection, From, To, ui->cobSSO_ScatterModel->currentIndex(), ui->ledSSO_EffWave->text().toDouble());
+          ui->pbSSO_Show->setEnabled(false);
+          ui->pbSSO_Binned->setEnabled(false);
+          break;
+        }
+      default:
+        {
+            qDebug() << "Not existent override model!";
+            break;
         }
       }
 
@@ -893,6 +927,16 @@ void MainWindow::on_pbRefreshOverrides_clicked()
             AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
             ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
             ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
+            ui->cobSurfaceWLS_Model->setCurrentIndex(ov->ReemissionModel);
+          }
+        else if (model == "SimplisticSpectral_model")
+          {
+            ui->cobOpticalOverrideModel->setCurrentIndex(6);
+            SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
+            ui->pbSSO_Show->setEnabled(!ov->Wave.isEmpty());
+            ui->pbSSO_Binned->setEnabled(!ov->Wave.isEmpty());
+            ui->cobSSO_ScatterModel->setCurrentIndex(ov->scatterModel);
+            ui->ledSSO_EffWave->setText( QString::number(ov->effectiveWavelength) );
           }
         else
           {
@@ -1074,6 +1118,7 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->ledSizeY->setText(str);
     str.setNum(type->SizeZ, 'g', 4);
     ui->ledSizeZ->setText(str);
+    ui->ledSphericalPMAngle->setText( QString::number(type->AngleSphere, 'g', 4) );
     ui->sbSiPMnumx->setValue(type->PixelsX);
     ui->sbSiPMnumy->setValue(type->PixelsY);
     str.setNum(type->PixelsX * type->PixelsY);
@@ -1082,6 +1127,10 @@ void MainWindow::on_pbRefreshPMproperties_clicked()
     ui->ledSiPMdarCountRate->setText(str);
     str.setNum(type->RecoveryTime, 'g', 4);
     ui->ledSiPMrecoveryTime->setText(str);
+
+    //for spherical:
+    if (type->Shape == 3) //sphere
+        ui->labSphericalPMinfo->setText( QString("%1 / %2").arg(type->getProjectionRadiusSpherical()).arg(2.0*type->getHalfHeightSpherical()) );
 
     str.setNum(type->EffectivePDE, 'g', 4);
     ui->ledPDE->setText(str);
@@ -1121,6 +1170,9 @@ void MainWindow::on_pbUpdatePMproperties_clicked()
    type->SizeX = ui->ledSizeX->text().toDouble();
    type->SizeY = ui->ledSizeY->text().toDouble();
    type->SizeZ = ui->ledSizeZ->text().toDouble();
+
+   type->AngleSphere = ui->ledSphericalPMAngle->text().toDouble();
+
    type->PixelsX = ui->sbSiPMnumx->value();
    type->PixelsY = ui->sbSiPMnumy->value();
    type->DarkCountRate = ui->ledSiPMdarCountRate->text().toDouble();
@@ -1196,17 +1248,19 @@ void MainWindow::on_pbRemoveThisPMtype_clicked()
         return;
       }
 
-    bool fOK = PMs->removePMtype(itype);
-    if (!fOK)
-      {        
-        message("Type in use! Cannot delete", this);
-        return;
-      }
+    const QString err = Detector->removePMtype(itype);
+    if (!err.isEmpty())
+        message(err, this);
+    else
+        ReconstructDetector();
+
+    /*
     //tmpPMtype = PMs->getType(itype-1);
     MainWindow::on_pbShowPMsArrayRegularData_clicked(); //refresh indication
     ui->sbPMtype->setValue(itype-1);
     //updating all comboboxes with PM type names
     MainWindow::updateCOBsWithPMtypeNames();
+    */
 }
 
 void MainWindow::on_pbAddNewPMtype_clicked()
@@ -1276,7 +1330,6 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 
    int i=0;
    if (checked) i=1;
-   ui->swLRFs->setCurrentIndex(i);
 
    if (checked) ui->cbScanFloodAddNoise->setChecked(false);
    ui->cbScanFloodAddNoise->setEnabled(!checked);
@@ -1302,10 +1355,10 @@ void MainWindow::on_cbWaveResolved_toggled(bool checked)
     if (checked) ui->twOption->setTabIcon(1, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(1, QIcon());
 
-    ui->fWaveTests->setEnabled(checked);
-    ui->fWaveOptions->setEnabled(checked);
-    ui->fPointSource_Wave->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
+//    ui->fWaveTests->setEnabled(checked);
+//    ui->fWaveOptions->setEnabled(checked);
+//    ui->fPointSource_Wave->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(checked || ui->cbTimeResolved->isChecked());
 
     const int itype = ui->sbPMtype->value();
     const bool bHavePDE = (itype < PMs->countPMtypes() && !PMs->getType(itype)->PDE_lambda.isEmpty());
@@ -1317,8 +1370,8 @@ void MainWindow::on_cbTimeResolved_toggled(bool checked)
     ui->fTime->setEnabled(checked);
     if (checked) ui->twOption->setTabIcon(0, Rwindow->YellowIcon);
     else         ui->twOption->setTabIcon(0, QIcon());
-    ui->fPointSource_Time->setEnabled(checked);
-    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
+//    ui->fPointSource_Time->setEnabled(checked);
+//    ui->fDirectOrmat->setEnabled(ui->cbWaveResolved->isChecked() || ui->cbTimeResolved->isChecked());
 }
 
 void MainWindow::on_pbPMtypeShowCurrent_clicked()
@@ -1411,7 +1464,7 @@ void MainWindow::CorrectWaveTo()
   WaveTo = to;   
   str.setNum(to,'g',5);
   ui->ledWaveTo->setText(str);
-  if (ui->sbWaveIndexPointSource->value() > WaveNodes-1) ui->sbWaveIndexPointSource->setValue(0);
+  if (ui->sbFixedWaveIndexPointSource->value() > WaveNodes-1) ui->sbFixedWaveIndexPointSource->setValue(0);
 }
 
 void MainWindow::on_cobMaterialForWaveTests_currentIndexChanged(int index)
@@ -1501,19 +1554,11 @@ void MainWindow::on_pbTestShowAbs_clicked()
   GraphWindow->MakeGraph(&x, &(*MpCollection)[matId]->absWaveBinned, kRed, "Wavelength, nm", "Attenuation coefficient, mm-1");
 }
 
-void MainWindow::on_pbShowThisMatInfo_clicked()
-{
-    MIwindow->show();
-    MIwindow->raise();
-    MIwindow->activateWindow();
-    MIwindow->SetMaterial(ui->cobMatPointSource->currentIndex());
-}
-
-void MainWindow::on_sbWaveIndexPointSource_valueChanged(int arg1)
+void MainWindow::on_sbFixedWaveIndexPointSource_valueChanged(int arg1)
 {
   if (arg1 > WaveNodes-1)
     {
-      ui->sbWaveIndexPointSource->setValue(WaveNodes-1);
+      ui->sbFixedWaveIndexPointSource->setValue(WaveNodes-1);
       return;
     }
 
@@ -2695,11 +2740,14 @@ void MainWindow::on_sbPreprocessigPMnumber_valueChanged(int arg1)
 
 void MainWindow::on_cobPMshape_currentIndexChanged(int index)
 {
-  if (index == 1) ui->labSizeDiameterPM->setText("Diameter:");
+  if (index == 1 || index == 3) ui->labSizeDiameterPM->setText("Diameter:");
   else ui->labSizeDiameterPM->setText("Size:");
 
   if (index == 0) ui->fRectangularPM->setVisible(true);
   else ui->fRectangularPM->setVisible(false);
+
+  ui->frSphericalPm->setVisible( index == 3);
+  ui->ledSizeZ->setDisabled(index == 3);
 }
 
 void MainWindow::on_pbElGainLoadDistr_clicked()
@@ -2977,56 +3025,6 @@ void MainWindow::on_pbInitializeScanFloodNoise_clicked()
 void MainWindow::on_twSingleScan_currentChanged(int index)
 {  
   ui->frLimitNodesTo->setVisible( index != 0 );
-}
-
-void MainWindow::on_pbExportDeposition_clicked()
-{
-  if (EnergyVector.isEmpty())
-    {
-      message("No data to save!", this);
-      return;
-    }
-  QFileDialog *fileDialog = new QFileDialog;
-  fileDialog->setDefaultSuffix("dat");
-  QString fileName = fileDialog->getSaveFileName(this,
-                                                 "Save energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QFileInfo file(fileName);
-  if(file.suffix().isEmpty()) fileName += ".dat";
-  qDebug()<<fileName;
-
-  QFile outputFile(fileName);
-  outputFile.open(QIODevice::WriteOnly);
-
-  if(!outputFile.isOpen())
-    {
-          qDebug() << "- Error, unable to open" << fileName << "for output";
-          message("Unable to open file " +fileName+ " for writing!", this);
-          return;
-     }   
-   MainWindow::ExportDeposition(outputFile);
-   outputFile.close();
-}
-
-void MainWindow::on_pbImportDeposition_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy deposition data", GlobSet->LastOpenDir, "Data files (*.dat);;text files (*.txt);;All files (*.*)");
-  if (fileName.isEmpty()) return;
-
-  QFile file(fileName);
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  if(!file.open(QIODevice::ReadOnly | QFile::Text))
-      {          
-          message("Error while opening deposition file "+fileName+"\n"+file.errorString(), this);
-          return;
-      }
-  MainWindow::ImportDeposition(file); //MainWindowDiskIO
-
-  file.close();
 }
 
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
@@ -3635,7 +3633,7 @@ void MainWindow::SaveSimulationDataAsText()
   GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".dat";
 
-  bool ok = EventsDataHub->saveSimulationAsText(fileName);
+  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet->SimTextSave_IncludeNumPhotons, GlobSet->SimTextSave_IncludePositions);
   if (!ok) message("Error writing to file!", this);
 }
 
@@ -3794,43 +3792,60 @@ void MainWindow::on_actionVersion_triggered()
                 "\n"
                 "ROOT version:  " + gROOT->GetVersion() + "\n"
                 "\n"
-                "Compilation options:\n"
-                "   CUDA (gpu):  "
+                "Compilation options:"
+                "\n"
+
+
 #ifdef __USE_ANTS_CUDA__
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FANN (neural networks):  "
+          " - CUDA (GPU-based reconstruction)\n"
+
+
 #ifdef ANTS_FANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   FLANN (kNN search):  "
+          " - FANN (neural networks)\n"
+
 #ifdef ANTS_FLANN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Eigen3 (for fast LRF fitting):  "
+      " - FLANN (kNN searches)\n"
+
 #ifdef USE_EIGEN
-  "on"
+  "  on"
 #else
-  "off"
+  "  off"
 #endif
-                "\n   Root html server (for JSROOT):  "
+     " - Eigen3 (fast LRF fitting)\n"
+
 #ifdef USE_ROOT_HTML
- "on"
+ "  on"
 #else
- "off"
+ "  off"
 #endif
-                "\n   Python scripting:  "
+          " - Root html server (JSROOT visualization)  \n"
+
 #ifdef __USE_ANTS_PYTHON__
- "on" + " -> Python " + PythonVersion + ""
+ "  on - Python script (Python v." + PythonVersion + ")   "
 #else
- "off"
+ "  off - Python script"
 #endif
+            "\n"
+
+#ifdef __USE_ANTS_NCRYSTAL__
+ "  on"
+#else
+ "  off"
+#endif
+            " - NCrystal library (neutron scattering)   \n"
+
                 "";
 
   message(out, this);
@@ -3859,19 +3874,33 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(0, QIcon());
 
-   if (ui->cbNumberOfRuns->isChecked())
+   if (ui->cbFixWavelengthPointSource->isChecked() && ui->cbWaveResolved->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(1, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(1, QIcon());
 
-   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+   if (ui->cbNumberOfRuns->isChecked())
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(2, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
+
+   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
+
+   if (ui->cobScintTypePointSource->currentIndex() != 0 )
+     {
+       fYellow = true;
+       ui->twAdvSimOpt->tabBar()->setTabIcon(4, Rwindow->YellowIcon);
+     }
+   else ui->twAdvSimOpt->tabBar()->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -3888,22 +3917,6 @@ void MainWindow::on_pbReconstruction_2_clicked()
   Rwindow->showNormal();
   Rwindow->raise();
   Rwindow->activateWindow();
-}
-
-void MainWindow::on_cbPointSourceBuildTracks_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbGunPhotonTracks_toggled(bool checked)
-{
-  ui->cbPointSourceBuildTracks->setChecked(checked);
-  ui->cbBuilPhotonTrackstester->setChecked(checked);
-}
-void MainWindow::on_cbBuilPhotonTrackstester_toggled(bool checked)
-{
-  ui->cbGunPhotonTracks->setChecked(checked);
-  ui->cbPointSourceBuildTracks->setChecked(checked);
 }
 
 void MainWindow::on_pbSimulate_clicked()
@@ -3968,7 +3981,8 @@ void MainWindow::simulationFinished()
     bool showTracks = false;
     if (SimulationManager->LastSimType == 0) //PointSources sim
     {        
-        showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        //showTracks = ui->cbPointSourceBuildTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearGeoMarkers();
         GeoMarkers = SimulationManager->GeoMarkers;
         SimulationManager->GeoMarkers.clear(); //to avoid delete content
@@ -3990,13 +4004,14 @@ void MainWindow::simulationFinished()
     }
     if (SimulationManager->LastSimType == 1) //ParticleSources sim
     {
-        showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        //showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
+        showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearEnergyVector();
         EnergyVector = SimulationManager->EnergyVector;
         SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
     }
 
-    //tracks?
+    //tracks
     if (showTracks)
       {
         TmpHub->ClearTracks();
@@ -4004,12 +4019,13 @@ void MainWindow::simulationFinished()
         SimulationManager->Tracks.clear(); //to avoid delete content
 
         int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() && numTracks<GlobSet->MaxNumberOfTracks; iTr++)
+        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet->MaxNumberOfTracks */; iTr++)
           {
-            TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
+            const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
             track->SetLineColor(th->Color);
             track->SetLineWidth(th->Width);
+            track->SetLineStyle(th->Style);
             for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                 track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
             if (track->GetNpoints()>1)
@@ -4020,9 +4036,6 @@ void MainWindow::simulationFinished()
             else delete track;
           }
       }
-
-    //CLEAR TEMPORARY OBJECTS IN SIMULATION MANAGER
-    //SimulationManager->Clear();  /// in manager now!
 
     //Additional GUI updates
     if (GeometryWindow->isVisible())
@@ -4042,7 +4055,7 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings)
+ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
 {
     //============ prepare config ============
     QJsonObject json;
@@ -4059,7 +4072,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     qApp->processEvents();
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, "TestSimulator");
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
 
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
@@ -4094,44 +4107,46 @@ void MainWindow::on_pbTrackStack_clicked()
           //qDebug() << "-------------En vector size:"<<EnergyVector.size();
 
         //track handling
-        if (ui->cbBuildParticleTrackstester->isChecked())
+        //if (ui->cbBuildParticleTrackstester->isChecked())
+        if (SimulationManager->TrackBuildOptions.bBuildParticleTracks)
           {
-            int numTracks = 0;
+            //int numTracks = 0;
               //qDebug() << "Tracks collected:"<<pss->tracks.size();
             for (int iTr=0; iTr<pss->tracks.size(); iTr++)
-              {
-                TrackHolderClass* th = pss->tracks[iTr];
+            {
+                const TrackHolderClass* th = pss->tracks[iTr];
 
-                if (numTracks<GlobSet->MaxNumberOfTracks)
-                {
+                //if (numTracks<GlobSet->MaxNumberOfTracks)
+                //{
                     TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                     track->SetLineColor(th->Color);
                     track->SetLineWidth(th->Width);
+                    track->SetLineStyle(th->Style);
                     for (int iNode=0; iNode<th->Nodes.size(); iNode++)
                       track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
 
                     if (track->GetNpoints()>1)
                       {
-                        numTracks++;
+                        //numTracks++;
                         Detector->GeoManager->AddTrack(track);
                       }
                     else delete track;
-                }
+                //}
                 delete th;
-              }
+            }
             pss->tracks.clear();
           }
         //if tracks are visible, show them
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         //report data saved in history
         pss->appendToDataHub(EventsDataHub);
           //qDebug() << "Event history imported";
 
-        ui->pbExportDeposition->setEnabled(true);
         ui->pbGenerateLight->setEnabled(true);
         Owindow->SetCurrentEvent(0);
     }
@@ -4162,7 +4177,8 @@ void MainWindow::on_pbGenerateLight_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
         }
         pss->appendToDataHub(EventsDataHub);
         //Owindow->SetCurrentEvent(0);
@@ -4212,7 +4228,8 @@ void MainWindow::on_pbSavePMtype_clicked()
   QJsonObject jsmat;
   MpCollection->writeMaterialToJson(imat, jsmat);
   json["Material"] = jsmat;
-  SaveJsonToFile(json, fileName);
+  bool bOK = SaveJsonToFile(json, fileName);
+  if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void MainWindow::on_pbLoadPMtype_clicked()
@@ -4223,10 +4240,15 @@ void MainWindow::on_pbLoadPMtype_clicked()
   if (fileName.isEmpty()) return;
 
   QJsonObject json;
-  LoadJsonFromFile(json, fileName);
+  bool bOK = LoadJsonFromFile(json, fileName);
+  if (!bOK)
+  {
+      message("Cannot open file: "+fileName, this);
+      return;
+  }
   if (json.isEmpty())
     {
-      message("Frong file format: Json is empty!");
+      message("Wrong file format: Json is empty!");
       return;
     }
   if (!json.contains("Material"))
@@ -4311,20 +4333,6 @@ void MainWindow::UpdateCustomScanNodesIndication()
 {
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
   on_pbShowNodes_clicked();
-}
-
-void MainWindow::on_cobMatPointSource_activated(int index)
-{
-  if (!ui->cbWaveResolved->isChecked()) return;
-
-  if ( ui->cobScintTypePointSource->currentIndex() == 0 )
-    { //primary scint
-      if ( (*MpCollection)[index]->PrimarySpectrum_lambda.isEmpty() ) message("This material has no primary scintillation spectrum defined!", this);
-    }
-  else
-    { //secondary
-      if ( (*MpCollection)[index]->SecondarySpectrum_lambda.isEmpty() ) message("This material has no secondary scintillation spectrum defined!", this);
-    }
 }
 
 void MainWindow::on_actionOpen_settings_triggered()
@@ -4653,6 +4661,19 @@ void MainWindow::on_pbSurfaceWLS_Show_clicked()
   GraphWindow->Draw(gr, "apl");
 }
 
+void MainWindow::on_cobSurfaceWLS_Model_activated(int index)
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->ReemissionModel = index;
+    ReconstructDetector();
+    //MainWindow::on_pbRefreshOverrides_clicked();
+}
+
 void MainWindow::on_pbSurfaceWLS_Load_clicked()
 {
   int MatFrom = ui->cobMaterialForOverrides->currentIndex();
@@ -4871,7 +4892,7 @@ void MainWindow::on_pbShowMCcrosstalk_clicked()
   int ipm = ui->sbElPMnumber->value();
   TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet->BinsX, 0, 0);
   for (int i=0; i<1000000; i++)
-      hist->Fill(PMs->at(ipm).MCsampl->sample()+1);
+      hist->Fill(PMs->at(ipm).MCsampl->sample(Detector->RandGen)+1);
 
   GraphWindow->Draw(hist);
 }
@@ -5146,4 +5167,180 @@ void MainWindow::on_cobDarkCounts_Model_currentIndexChanged(int index)
 void MainWindow::on_cobDarkCounts_LoadOptions_currentIndexChanged(int index)
 {
     ui->sbDarkCounts_IntegralRange->setEnabled(index > 1);
+}
+
+#include "awebsocketserverdialog.h"
+void MainWindow::on_actionServer_window_triggered()
+{
+    ServerDialog->show();
+}
+
+void MainWindow::on_actionServer_settings_triggered()
+{
+    GlobSetWindow->SetTab(5);
+    GlobSetWindow->show();
+}
+
+void MainWindow::on_pbSSO_Load_clicked()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Load spectral data (Wave,Loss,Ref,Scatter)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    const QString err = ov->loadData(fileName);
+    if (err.isEmpty())
+    {
+        ReconstructDetector();
+        on_pbRefreshOverrides_clicked();
+    }
+    else message(err, this);
+}
+
+
+#include "TMultiGraph.h"
+void MainWindow::on_pbSSO_Show_clicked()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    QVector<double> Fr;
+    for (int i=0; i<ov->Wave.size(); i++)
+        Fr << (1.0 - ov->ProbLoss.at(i) - ov->ProbRef.at(i) - ov->ProbDiff.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(ov->Wave, Fr, "Fresnel", "Wavelength, nm", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wavelength, nm");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+
+void MainWindow::on_pbSSO_Binned_clicked()
+{
+    if (!ui->cbWaveResolved->isChecked())
+    {
+        message("Activate wavelength-resolved simulation option!", this);
+        return;
+    }
+
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
+
+    QVector<double> waveIndex;
+    for (int i=0; i<WaveNodes; i++) waveIndex << i;
+
+    QVector<double> Fr;
+    for (int i=0; i<waveIndex.size(); i++)
+        Fr << (1.0 - ov->ProbLossBinned.at(i) - ov->ProbRefBinned.at(i) - ov->ProbDiffBinned.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(waveIndex, ov->ProbLossBinned, "Loss", "Wave index", "Loss", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(waveIndex, ov->ProbRefBinned, "Specular reflection", "Wave index", "Reflection", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(waveIndex, ov->ProbDiffBinned, "Diffuse scattering", "Wave index", "Scatter", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(waveIndex, Fr, "Fresnel", "Wave index", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wave index");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+
+void MainWindow::on_cobSSO_ScatterModel_activated(int index)
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->scatterModel = index;
+}
+
+void MainWindow::on_ledSSO_EffWave_editingFinished()
+{
+    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+    int MatTo = ui->cobMaterialTo->currentIndex();
+
+    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
+    if (!ov) return;
+
+    ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
+}
+
+void MainWindow::on_actionGrid_triggered()
+{
+    RemoteWindow->show();
+}
+
+#include "atrackdrawdialog.h"
+void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
+{
+    QStringList pl;
+    MpCollection->OnRequestListOfParticles(pl);
+    ATrackDrawDialog* d = new ATrackDrawDialog(this, &SimulationManager->TrackBuildOptions, pl);
+    d->exec();
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsGun_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsStack_clicked()
+{
+    on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbQEacceleratorWarning_clicked()
+{
+    QString s = "Activation of this option allows to speed up simulations\n"
+            "by skipping tracking of photons which will definitely fail\n"
+            "the detection test by the PMs the photon will hit.\n"
+            "For this purpose the random number to be compared with the\n"
+            "Quantum Efficiency of the PM is generated before\n"
+            "tracking and checked against the maximum QE over all PMs.\n"
+            "If detection is failed, the tracking is skipped.\n\n"
+            "Important warning:\nDo not activate this feature\nif PMs can register light after wavelength shifting!";
+    message(s, this);
+}
+
+void MainWindow::on_ledSphericalPMAngle_editingFinished()
+{
+    double val = ui->ledSphericalPMAngle->text().toDouble();
+    if (val<=0 || val >180)
+    {
+        ui->ledSphericalPMAngle->setText("90");
+        message("Angle should be a positive value not larger than 180", this);
+    }
+
+    on_pbUpdatePMproperties_clicked();
 }

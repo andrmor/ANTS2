@@ -8,21 +8,29 @@
 #include "TView.h"
 #include "TView3D.h"
 
-RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *parent) : QWindow()
+RasterWindowBaseClass::RasterWindowBaseClass(QMainWindow *MasterWindow) : QWidget(MasterWindow), MasterWindow(MasterWindow)
 {
-  //qDebug()<<"->Creating raster window";
-  MasterWindow = parent;
-  fBlockEvents = false;
-  fInvertedXYforDrag = false;
-  create();
+  qDebug()<<"->Creating raster window";
 
-  setGeometry(50, 50, 500, 500);
+  // set options needed to properly update the canvas when resizing the widget
+  // and to properly handle context menus and mouse move events
+  setAttribute(Qt::WA_PaintOnScreen, false);
+  setAttribute(Qt::WA_OpaquePaintEvent, true);
+  setAttribute(Qt::WA_NativeWindow, true);
+  setUpdatesEnabled(false);
+  setMouseTracking(true);
+  setMinimumSize(300, 200);
 
-  wid = gVirtualX->AddWindow(QWindow::winId(), QWindow::width(), QWindow::height());
-  fCanvas = new TCanvas("fCanvas", 100, 100, wid);
+  // register the QWidget in TVirtualX, giving its native window id
+  int wid = gVirtualX->AddWindow((ULong_t)winId(), width(), height());
+  // create the ROOT TCanvas, giving as argument the QWidget registered id
+  fCanvas = new TCanvas("Root Canvas", width(), height(), wid);
+  //TQObject::Connect("TGPopupMenu", "PoppedDown()", "TCanvas", fCanvas, "Update()");
 
-  PressEventRegistered = false;
-  //qDebug() << "  ->Root canvas created";
+  fCanvas->SetBorderMode(0);
+  fCanvas->SetFillColor(0);
+
+  qDebug() << "  ->Root canvas created";
 }
 
 RasterWindowBaseClass::~RasterWindowBaseClass()
@@ -30,10 +38,10 @@ RasterWindowBaseClass::~RasterWindowBaseClass()
   //qDebug()<< "     <--Starting cleanup for raster window base...";
 
   fCanvas->Clear();
-  delete fCanvas;
+  delete fCanvas; fCanvas = 0;
   //qDebug()<<"        canvas deleted";
 
-  gVirtualX->RemoveWindow(wid);
+  //gVirtualX->RemoveWindow(wid); //causes strange warnings !!!***
   //qDebug()<<"        window unregistered in Root";
   //qDebug()<< "  <-Done";
 }
@@ -50,10 +58,11 @@ void RasterWindowBaseClass::ClearRootCanvas()
 
 void RasterWindowBaseClass::UpdateRootCanvas()
 {
-  //fCanvas->Modified();
+  fCanvas->Modified();
   fCanvas->Update();
 }
 
+/*
 void RasterWindowBaseClass::exposeEvent(QExposeEvent *)
 {
   if (!fCanvas) return;
@@ -61,6 +70,7 @@ void RasterWindowBaseClass::exposeEvent(QExposeEvent *)
   //qDebug() << "raster window -> Expose event";
   if (isExposed()) fCanvas->Update();
 }
+*/
 
 void RasterWindowBaseClass::mouseMoveEvent(QMouseEvent *event)
 {
@@ -195,6 +205,25 @@ void RasterWindowBaseClass::wheelEvent(QWheelEvent *event)
   emit UserChangedWindow(centerX, centerY, viewSizeX, viewSizeY, phi, theta);
 }
 
+void RasterWindowBaseClass::paintEvent(QPaintEvent * /*event*/)
+{
+    if (fCanvas)
+    {
+       fCanvas->Resize();
+       fCanvas->Update();
+    }
+}
+
+void RasterWindowBaseClass::resizeEvent(QResizeEvent *event)
+{
+    if (fCanvas)
+    {
+       fCanvas->SetCanvasSize(event->size().width(), event->size().height());
+       fCanvas->Resize();
+       fCanvas->Update();
+    }
+}
+
 void RasterWindowBaseClass::ForceResize()
 {
   if (fCanvas)
@@ -219,7 +248,7 @@ void RasterWindowBaseClass::SetWindowTitle(const QString &title)
   MasterWindow->setWindowTitle(title);
 }
 
-void RasterWindowBaseClass::getWindowProperties(Double_t &centerX, Double_t &centerY, Double_t &hWidth, Double_t &hHeight, Double_t &phi, Double_t &theta)
+void RasterWindowBaseClass::getWindowProperties(double &centerX, double &centerY, double &hWidth, double &hHeight, double &phi, double &theta)
 {
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();
@@ -228,7 +257,7 @@ void RasterWindowBaseClass::getWindowProperties(Double_t &centerX, Double_t &cen
   phi = fCanvas->GetView()->GetLongitude();
 }
 
-void RasterWindowBaseClass::setWindowProperties(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta)
+void RasterWindowBaseClass::setWindowProperties(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
 {
   if (!fCanvas->HasViewer3D() || !fCanvas->GetView()) return;
   fCanvas->cd();

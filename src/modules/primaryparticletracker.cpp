@@ -11,7 +11,7 @@
 #include "amonitor.h"
 
 #include <QDebug>
-#include <QMessageBox>
+//#include <QMessageBox>
 #include <QtAlgorithms>
 
 #include "TMath.h"
@@ -25,14 +25,15 @@ PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
                                                QVector<AParticleOnStack*>* particleStack,
                                                QVector<AEnergyDepositionCell*>* energyVector,
                                                QVector<EventHistoryStructure*>* eventHistory,
-                                               ASimulationStatistics *simStat,
+                                               ASimulationStatistics *simStat, int threadIndex,
                                                QObject *parent) :
   QObject(parent), GeoManager(geoManager), RandGen (RandomGenerator),
-  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat)
+  MpCollection(MpCollection), ParticleStack(particleStack), EnergyVector(energyVector), EventHistory(eventHistory), SimStat(simStat),
+  threadIndex(threadIndex)
 {
   BuildTracks = true;
+
   RemoveTracksIfNoEnergyDepo = true;
-  AddColorIndex = 0;
   counter = -1;
 }
 
@@ -40,15 +41,16 @@ void PrimaryParticleTracker::configure(const GeneralSimSettings* simSet, bool fb
 {
   SimSet = simSet;
   BuildTracks = fbuildTracks;
+  MaxTracks = simSet->TrackBuildOptions.MaxParticleTracks; // in multithread is overriden using setMaxTracks()
   RemoveTracksIfNoEnergyDepo = fremoveEmptyTracks;
-  AddColorIndex = simSet->TrackColorAdd;
   Tracks = tracks;
+  ParticleTracksAdded = 0;
 }
 
-bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
+bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
 {
   while (ParticleStack->size())
-    {//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ beginning cycle over the elements of the stack
+  {//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ beginning cycle over the particles on the stack
       //reading data for the top particle at the stack
       counter ++; //new particle
       const int ParticleId = ParticleStack->at(0)->Id; //id of the particle
@@ -104,21 +106,33 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       EventHistoryStructure::TerminationTypes terminationStatus = EventHistoryStructure::NotFinished; //NotFinished (0) - continue
 
       TrackHolderClass *track;
-      if (BuildTracks)
-        {
-          if (Tracks->size() < SimSet->MaxNumberOfTracks)
-            {
-              track = new TrackHolderClass();
-              track->UserIndex = 22;
-              track->Color = ParticleId+1+ AddColorIndex;
-              track->Width = 2;
-              track->Nodes.append(TrackNodeStruct(r, time));
-            }
-          else BuildTracks = false;
-        }
+      bool bBuildThisTrack = BuildTracks;
+      if (bBuildThisTrack)
+      {
+          if (ParticleTracksAdded < MaxTracks)
+          {
+              if (SimSet->TrackBuildOptions.bSkipPrimaries && ParticleStack->at(0)->secondaryOf == -1)
+                  bBuildThisTrack = false;
+              else if (SimSet->TrackBuildOptions.bSkipSecondaries && ParticleStack->at(0)->secondaryOf != -1)
+                  bBuildThisTrack = false;
+              else
+              {
+                  track = new TrackHolderClass();
+                  track->UserIndex = 22;
+                  SimSet->TrackBuildOptions.applyToParticleTrack(track, ParticleId);
+                  track->Nodes.append(TrackNodeStruct(r, time));
+              }
+          }
+          else
+          {
+              bBuildThisTrack = false;
+              BuildTracks = false;
+          }
+      }
 
       //--------------------- loop over tracking-allowed materials on the path --------------------------
-      do {
+      do
+      {
           //           qDebug()<<"cycle starts for the new material: "<<GeoManager->GetPath();
           double distanceHistory = 0; //for diagnostics - travelled distance and deposited energy in THIS material
           double energyHistory = 0;
@@ -130,6 +144,11 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
             {
               //              qDebug()<<"Escaped from the defined geometry!";
               terminationStatus = EventHistoryStructure::Escaped;//1
+              if (bBuildThisTrack && (ParticleStack->at(0)->secondaryOf == -1) && SimSet->TrackBuildOptions.bSkipPrimariesNoInteraction)
+              {
+                  delete track;
+                  bBuildThisTrack = false;
+              }
               break; //do-break
             }
 
@@ -177,7 +196,6 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundary();
           const Double_t MaxLength  = navigator->GetStep();
 
-          //if ( (*MpCollection)[MatId]->MatParticle[ParticleId].InteractionDataX.size() < 2 ) ; <-- cannot use this protection anymore because neutron ellastic scattering is currently not added to total interaction cross-section
           if ( (*MpCollection)[MatId]->MatParticle[ParticleId].MaterialIsTransparent )
             {
               // pass this medium
@@ -257,13 +275,14 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                     {
                       double SoFarShortestId = 0;
                       double SoFarShortest = 1.0e10;
-                      double TotalCrossSection; //used by neutrons - ellastic scattering or absorption
+                      double TotalCrossSection; //used by neutrons - elastic scattering or absorption
                       for (int iProcess=0; iProcess<numProcesses; iProcess++)
                         {
                           //        qDebug()<<"---Process #:"<<iProcess;
                           //calculating (random) how much this particle would travel before this kind of interaction happens
 
-                          //for neutrons have additional flags to suppress capture and ellastic
+                          bool bUseNCrystal = false;
+                          //for neutrons have additional flags to suppress capture and elastic and if it NCrystal lib which handles scattering
                           if (ParticleType == AParticle::_neutron_)
                           {
                               if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::Absorption)
@@ -273,26 +292,34 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                       continue;
                                   }
                               if ((*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].Type == NeutralTerminatorStructure::ElasticScattering)
-                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bEllasticEnabled )
+                              {
+                                  if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bElasticEnabled )
                                   {
-                                      //        qDebug() << "Skipping ellastic - it is disabled";
+                                      //        qDebug() << "Skipping elastic - it is disabled";
                                       continue;
                                   }
+                                  bUseNCrystal = (*MpCollection)[MatId]->MatParticle[ParticleId].bUseNCrystal;
+                              }
                           }
 
-                          const double InteractionCoefficient = GetInterpolatedValue(energy,
+                          double InteractionCoefficient;
+                          if (!bUseNCrystal)
+                            InteractionCoefficient = GetInterpolatedValue(energy,
                                                                                  &(*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].PartialCrossSectionEnergy,
                                                                                  &(*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].PartialCrossSection,
                                                                                  MpCollection->fLogLogInterpolation);
-                          //        qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
+                          else
+                            InteractionCoefficient = (*MpCollection)[MatId]->MatParticle[ParticleId].Terminators[iProcess].getNCrystalCrossSectionBarns(energy, threadIndex) * 1.0e-24; //in cm2
+
+                          //  qDebug()<<"energy and cross-section:"<<energy<<InteractionCoefficient;
 
                           double MeanFreePath;
                           if (ParticleType == AParticle::_neutron_)
                             { //for capture using atomic density and cross-section in barns
                               const double AtDens = Density / (*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass() / 1.66054e-24;
                               MeanFreePath = 10.0/InteractionCoefficient/AtDens;  //1/(cm2)/(1/cm3) - need in mm (so that 10.)
-                              //        qDebug() <<"Density:"<<Density <<"MAM:"<<(*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass()<<"Effective atomic density:"<<AtDens;
-                              //        qDebug() <<"Energy:"<<energy<<"CS:"<< InteractionCoefficient<< "MFP:"<<MeanFreePath;
+                              //    qDebug() <<"Density:"<<Density <<"MAM:"<<(*MpCollection)[MatId]->ChemicalComposition.getMeanAtomMass()<<"Effective atomic density:"<<AtDens;
+                              //    qDebug() <<"Energy:"<<energy<<"CS:"<< InteractionCoefficient<< "MFP:"<<MeanFreePath;
                             }
                           else
                             {
@@ -508,104 +535,118 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                               }
                             case (NeutralTerminatorStructure::ElasticScattering): //4
                               {
-                                //      qDebug()<<"------ elastic scattering triggered!";
-                                const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
+                                //  qDebug()<<"------ elastic scattering triggered!";
 
-                                //selecting element according to its contribution to the total cross-section
-                                //      qDebug() << "Def elements:" << elements.size();
-                                int iselected = 0;
-                                if (elements.size() > 1)
+                                double newEnergy; // scattered neutron energy
+                                double vnew[3];   // scattered neutron velocity in the lab frame
+                                double vnewMod;   // magnitude of the scattered neutron velocity
+
+                                if ( !(*MpCollection)[MatId]->MatParticle[ParticleId].bUseNCrystal )
                                 {
-                                    double rnd = RandGen->Rndm();
+                                    const QVector<ANeutronInteractionElement> &elements = term.IsotopeRecords;
 
-//                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
-//                                    //this procedure is vulnerable to rounding errors - sum of individual crossections vs interpolated sum crossection
-//                                    for (; iselected<max; iselected++)
-//                                      {
-//                                        const AElasticScatterElement& el = elements.at(iselected);
-//                                        double crossSection = 0;  // will be zero if this element has no cross-section ("Can leave empty option is activated")
-//                                        if (!elements.at(iselected).Energy.isEmpty())
-//                                            crossSection = GetInterpolatedValue(energy,
-//                                                                                &elements.at(iselected).Energy, &elements.at(iselected).CrossSection,
-//                                                                                MpCollection->fLogLogInterpolation);
-//                                        // fraction of this element in the total cross section:
-//                                        const double thisOne = (crossSection * el.MolarFraction) / TotalCrossSection;
-//                                              qDebug() << "--Scatter->checking element"<<el.Name<<"-"<<el.Mass<<"  molar fraction:"<<el.MolarFraction;
-//                                              qDebug() << "  cs:"<<crossSection<<"total:"<<TotalCrossSection<<"-> fraction in total cross-section:"<<thisOne;
-//                                        if (rnd < thisOne) break;
-//                                        rnd -= thisOne;
-//                                      }
-
-                                    // slow but more accurate
-                                    QVector<double> mfcs(elements.size(), 0);
-                                    double trueSum = 0;
-                                    for (int i=0; i<elements.size(); i++)
+                                    //selecting element according to its contribution to the total cross-section
+                                    //      qDebug() << "Def elements:" << elements.size();
+                                    int iselected = 0;
+                                    if (elements.size() > 1)
                                     {
-                                        if (!elements.at(i).Energy.isEmpty())
+                                        double rnd = RandGen->Rndm();
+                                        QVector<double> mfcs(elements.size(), 0);
+                                        double trueSum = 0;
+                                        for (int i=0; i<elements.size(); i++)
                                         {
-                                            mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
-                                            trueSum += mfcs[i];
+                                            if (!elements.at(i).Energy.isEmpty())
+                                            {
+                                                mfcs[i] = elements.at(i).MolarFraction * GetInterpolatedValue(energy, &elements.at(i).Energy, &elements.at(i).CrossSection, MpCollection->fLogLogInterpolation);
+                                                trueSum += mfcs[i];
+                                            }
+                                        }
+                                        const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
+                                        for (; iselected<max; iselected++)
+                                        {
+                                            const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
+                                            if (rnd <= thisOne) break;
+                                            rnd -= thisOne;
                                         }
                                     }
-                                    const int max = elements.size()-1;  //if before-last failed, the last is selected automatically
-                                    for (; iselected<max; iselected++)
-                                    {
-                                        const double thisOne = mfcs.at(iselected) / trueSum; // fraction of this element in the total effective cross section
-                                        if (rnd <= thisOne) break;
-                                        rnd -= thisOne;
-                                    }
-                                }
-                                //selected element iselected
-                                //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
+                                    //selected element iselected
+                                    //        qDebug() << "Elastic scattering triggered for"<< elements.at(iselected).Name <<"-"<<elements.at(iselected).Mass;
 
-                                //performing ellastic scattering in this element
-                                // "energy" is the neutron energy in keV
-                                // vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
-                                double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
-                                // vn[i] = vnMod * v[i]
-                                //        qDebug() << "Neutron energy: "<<energy << "keV   Velocity:" << vnMod << " m/s";
-                                // va[] is randomly generated from Gauss(0, sqrt(kT/m)
-                                double va[3];                                
-                                const double m = elements.at(iselected).Mass; //mass of atom in atomic units
-                                //        qDebug() << "atom - mass:"<<m;
-                                double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
-                                bool bCannotCollide;
-                                do
+                                    //performing elastic scattering in this element
+                                    // "energy" is the neutron energy in keV
+                                    // vn[3], va[] - velocitis of neutron and atom in lab frame in m/s
+                                    double vnMod = sqrt(energy*1.9131e11); //vnMod = sqrt(2*energy*e*1000/Mn) = sqrt(energy*1.9131e11)  //for thermal: ~2200.0
+                                    // vn[i] = vnMod * v[i]
+                                    //        qDebug() << "Neutron energy: "<<energy << "keV   Velocity:" << vnMod << " m/s";
+                                    // va[] is randomly generated from Gauss(0, sqrt(kT/m)
+                                    double va[3];
+                                    const double m = elements.at(iselected).Mass; //mass of atom in atomic units
+                                    //        qDebug() << "atom - mass:"<<m;
+                                    //double a = sqrt(1.38065e-23*300.0/m/1.6605e-27);  //assuming temperature of 300K
+                                    const double& Temperature = (*MpCollection)[MatId]->temperature;
+                                    double a = sqrt(1.38065e-23*Temperature/m/1.6605e-27);
+                                    bool bCannotCollide;
+                                    do
+                                    {
+                                        for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
+                                        //        qDebug() << "  Speed of atom in lab frame, m/s"<<va[0]<<va[1]<<va[2];
+                                        //calculating projection on the neutron direction
+                                        double proj = 0;
+                                        for (int i=0; i<3; i++) proj += v[i] * va[i];  //v[i] is the direction vector of neutron (unitary length)
+                                        //        qDebug() << "  Projection:"<<proj<<"m/s";
+                                        // proj has "+" if atom moves in the same direction as the neutron, "-" if opposite
+                                        if (proj > vnMod)
+                                        {
+                                            bCannotCollide = true;
+                                            //        qDebug() << "  Rejected - generating atom velocity again";
+                                        }
+                                        else bCannotCollide = false;
+                                    }
+                                    while (bCannotCollide);
+                                    //transition to the center of mass frame
+                                    const double sumM = m + 1.0;
+                                    double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
+                                    for (int i=0; i<3; i++)
+                                        vcm[i] = (vnMod*v[i]+m*va[i])/sumM;
+                                    double V[3]; //neutron velocity in the center of mass frame
+                                    for (int i=0; i<3; i++)
+                                        V[i] = vnMod*v[i] - vcm[i];
+                                    double Vmod = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]); //abs value of the velocity
+                                    double Vnew[3]; //neutron velocity after scatter in thecenter of mass frame
+                                    GenerateRandomDirection(Vnew);
+                                    for (int i=0; i<3; i++) Vnew[i] *= Vmod;
+
+                                    //double vnew[3]; //neutrn velocity in the lab frame
+                                    for (int i=0; i<3; i++)
+                                        vnew[i] = Vnew[i] + vcm[i];
+                                    vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
+                                    newEnergy = 0.52270e-11 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
+                                    //        qDebug() << "new neutron velocity and energy:"<<vnewMod<<newEnergy;
+                                }
+                                else
                                 {
-                                    for (int i=0; i<3; i++) va[i] = RandGen->Gaus(0, a); //maxwell!
-                                    //        qDebug() << "  Speed of atom in lab frame, m/s"<<va[0]<<va[1]<<va[2];
-                                    //calculating projection on the neutron direction
-                                    double proj = 0;
-                                    for (int i=0; i<3; i++) proj += v[i] * va[i];  //v[i] is the direction vector of neutron (unitary length)
-                                    //        qDebug() << "  Projection:"<<proj<<"m/s";
-                                    // proj has "+" if atom moves in the same direction as the neutron, "-" if opposite
-                                    if (proj > vnMod)
-                                    {
-                                        bCannotCollide = true;
-                                        //        qDebug() << "  Rejected - generating atom velocity again";
-                                    }
-                                    else bCannotCollide = false;
-                                }
-                                while (bCannotCollide);
-                                //transition to the center of mass frame
-                                const double sumM = m + 1.0;
-                                double vcm[3]; //center of mass velocity in lab frame: (1*vn + m*va)/(1+m)
-                                for (int i=0; i<3; i++)
-                                    vcm[i] = (vnMod*v[i]+m*va[i])/sumM;
-                                double V[3]; //neutron velocity in the center of mass frame
-                                for (int i=0; i<3; i++)
-                                    V[i] = vnMod*v[i] - vcm[i];
-                                double Vmod = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]); //abs value of the velocity
-                                double Vnew[3]; //neutron velocity after scatter in thecenter of mass frame
-                                GenerateRandomDirection(Vnew);
-                                for (int i=0; i<3; i++) Vnew[i] *= Vmod;
+                                    //NCRYSTAL handles scattering
+                                    double angle;
+                                    double deltaE;
+                                    term.generateScatteringNonOriented(energy, angle, deltaE, threadIndex);
 
-                                double vnew[3]; //neutrn velocity in the lab frame
-                                for (int i=0; i<3; i++)
-                                    vnew[i] = Vnew[i] + vcm[i];
-                                double vnewMod = sqrt(vnew[0]*vnew[0] + vnew[1]*vnew[1] + vnew[2]*vnew[2]); //abs value of the neutron velocity
-                                double newEnergy = 0.52270e-11 * vnewMod * vnewMod;   // Mn*V*V/2/e/1000 [keV]
-                                //        qDebug() << "new neutron velocity and energy:"<<vnewMod<<newEnergy;
+                                    TVector3 original(v);
+                                    TVector3 orthogonal_to_original = original.Orthogonal();
+
+                                    TVector3 scattered(original);
+                                    scattered.Rotate(angle, orthogonal_to_original);
+
+                                    double phi = 6.283185307 * RandGen->Rndm(); //0..2Pi
+                                    scattered.Rotate(phi, original);
+
+                                    // need only direction, magnitude of velosity is not needed, just to reuse in the scattered particle constructor below
+                                    TVector3 unit_scat = scattered.Unit();
+                                    for (int i=0; i<3; i++)
+                                        vnew[i] = unit_scat(i);
+                                    vnewMod = 1.0;
+
+                                    newEnergy = energy + deltaE;
+                                }
 
                                 if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV to compare
                                 {
@@ -621,7 +662,7 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
                                     energyHistory = energy;
                                 }
 
-                                terminationStatus = EventHistoryStructure::EllasticScattering;
+                                terminationStatus = EventHistoryStructure::ElasticScattering;
                                 distanceHistory = SoFarShortest;
 
                                 break; //switch-break
@@ -649,14 +690,16 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
           navigator->FindNextBoundaryAndStep();
           MatId = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
           //            qDebug()<<"Next material id: "<<MatId;
-        } while (terminationStatus == EventHistoryStructure::NotFinished); //0, repeat if tracking is OK
+      }
+      while (terminationStatus == EventHistoryStructure::NotFinished); //0, repeat if tracking is OK
       //--------------- END of loop over tracking-allowed materials on the path-------------------
 
       //particle escaped, stopped or captured     do-breaks are collected here!
-      if (BuildTracks)
+      if (bBuildThisTrack)
         {
-          track->Nodes.append(TrackNodeStruct(r, time));
+          track->Nodes.append(TrackNodeStruct(r, time));          
           TrackCandidates.append(track);
+          ParticleTracksAdded++;
         }
       //finalizing diagnostics
       if (SimSet->fLogsStat)
@@ -668,25 +711,26 @@ bool PrimaryParticleTracker::TrackParticlesInStack(int eventId)
       //delete the particle record and remove from the stack
       delete ParticleStack->at(0);
       ParticleStack->remove(0);
-    }//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ end while cycle over the elements of the stack
+  }//-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/ end while cycle over the particles on the stack
 
   //stack is empty, no errors found
 
-  if (TrackCandidates.size()>0)
-    {
+  if (TrackCandidates.size() > 0)
+  {
       if (RemoveTracksIfNoEnergyDepo && EnergyVector->isEmpty() )
-        {
-          //clear all particle tracks - there were no energy deposition - nothing will be added to Geomanager later
+      {
+          //clear all particle tracks - there were no energy deposition - nothing will be added to GeoManager later
           for (int i=0; i<TrackCandidates.size(); i++)
-            delete TrackCandidates[i];
-        }
+              delete TrackCandidates.at(i);
+          ParticleTracksAdded -= TrackCandidates.size();
+      }
       else
-        {
-          for (int i=0; i<TrackCandidates.size(); i++)
-            Tracks->append(TrackCandidates.at(i)); // delete later when create GeoManager tracks
-        }
+      {
+          for (int i = 0; i < TrackCandidates.size(); i++)
+              Tracks->append(TrackCandidates.at(i));
+      }
       TrackCandidates.clear();
-    }
+  }// delete later when creating GeoManager tracks
 
   return true; //success
 }

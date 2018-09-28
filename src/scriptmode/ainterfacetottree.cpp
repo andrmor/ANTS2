@@ -13,9 +13,11 @@ AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
     TmpHub(TmpHub)
 {
     Description = "Interface to CERN ROOT Trees";
+
+    H["LoadTree"] = "If the third argument is not provided, the first tree found in the file is loaded";
 }
 
-void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileName, const QString& TreeNameInFile)
+void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileName, const QString TreeNameInFile)
 {
     if (!bGuiThread)
     {

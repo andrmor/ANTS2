@@ -50,6 +50,12 @@ public slots:
     void textAppendHtml(const QString name, const QString text);
     const QString textGet(const QString name);
 
+    void checkboxNew(const QString name, const QString addTo, const QString text = "", bool checked = false);
+    void checkboxSetText(const QString name, const QString text);
+    void checkboxSetChecked(const QString name, bool checked);
+    bool checkboxIsChecked(const QString name);
+    void checkboxOnClick(const QString name, const QVariant scriptFunction);
+
     void addStretch(const QString addTo);
     void addHoizontalLine(const QString addTo);
 

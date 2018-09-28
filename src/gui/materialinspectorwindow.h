@@ -99,7 +99,6 @@ private slots:
     void on_pbShowXCOMdata_clicked();
     void on_cobYieldForParticle_activated(int index);
     void on_pbShowPairProduction_clicked();
-    void on_pbConfigureAutoElastic_clicked();
     void on_pbShowStatisticsOnElastic_clicked();
 
     //user or code controlled change - safe or only GUI
@@ -144,6 +143,30 @@ private slots:
 
     void on_pbDeleteReemisProbLambda_clicked();
 
+    void on_lePriT_editingFinished();
+
+    void on_pbPriThelp_clicked();
+
+    void on_pbPriT_test_clicked();
+
+    void on_actionNeutrons_triggered();
+
+    void on_pbShowNcmat_clicked();
+
+    void on_pbLoadNcmat_clicked();
+
+    void on_ledNCmatDcutoff_editingFinished();
+
+    void on_ledNcmatPacking_editingFinished();
+
+    void on_cbUseNCrystal_clicked(bool checked);
+
+    void on_cbUseNCrystal_toggled(bool checked);
+
+    void on_lePriT_raise_editingFinished();
+
+    void on_pbNew_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -156,9 +179,12 @@ private:
     bool flagDisreguardChange;
     bool fLockTable;
     int LastSelectedParticle;
+    bool bLockTmpMaterial = false;
 
-    void UpdateWaveButtons();
-    void UpdateActionButtons();
+    bool bMessageLock = false;
+
+    void updateWaveButtons();
+    void updateActionButtons();
 
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
@@ -169,9 +195,13 @@ private:
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);
     void ShowTreeWithChemicalComposition();
     void FillNeutronTable();
-    void autoloadMissingCrossSectionData();
+    int autoloadMissingCrossSectionData(); //returns number of particles added to the collection
 
     void SetWasModified(bool flag);
+    bool parseDecayOrRaiseTime(bool doParseDecay);
+    void updateWarningIcons();
+    int autoLoadReaction(ANeutronInteractionElement &element); //returns number of particles added to the collection
+    void updateTmpMatOnPartCollChange(int newPartAdded);
 };
 
 #endif // MATERIALINSPECTORWINDOW_H

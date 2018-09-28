@@ -15,7 +15,7 @@
 AOneEvent::AOneEvent(APmHub *PMs, TRandom2 *RandGen, ASimulationStatistics* SimStat) :
     SimStat(SimStat), PMs(PMs), RandGen(RandGen)
 {
-  GammaRandomGen = new AGammaRandomGenerator(); 
+  GammaRandomGen = new AGammaRandomGenerator(RandGen);
 }
 
 AOneEvent::~AOneEvent()
@@ -149,7 +149,7 @@ bool AOneEvent::CheckSiPMhit(int ipm, double time, int WaveIndex, double x, doub
 
   if (PMs->isDoMCcrosstalk() && PMs->at(ipm).MCmodel==0)
     {
-      int num = PMs->at(ipm).MCsampl->sample() + 1;
+      int num = PMs->at(ipm).MCsampl->sample(RandGen) + 1;
       registerSiPMhit(ipm, iTime, binX, binY, num);
     }
   else

@@ -4,10 +4,10 @@ ANTS2_MINOR = 12
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
-CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+#CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)
 
@@ -725,8 +725,8 @@ RC_FILE = myapp.rc
 #---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  QMAKE_CXXFLAGS_RELEASE -= -O2
-  QMAKE_CXXFLAGS_RELEASE *= -Od
+  #QMAKE_CXXFLAGS_RELEASE -= -O2
+  #QMAKE_CXXFLAGS_RELEASE *= -Od
 }
 linux-g++ || unix {
     QMAKE_CXXFLAGS += -march=native

@@ -4,8 +4,8 @@ ANTS2_MINOR = 12
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
-#CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
-#CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
@@ -69,12 +69,16 @@ ants2_matrix { # use matrix algebra for TP splines
 
 #---FLANN---
 ants2_flann {
-     DEFINES += ANTS_FLANN
+    DEFINES += ANTS_FLANN
 
-     win32 {
-        LIBS += -LC:/FLANN/lib -lflann
-        INCLUDEPATH += C:/FLANN/include
-     }
+    win32 {
+       LIBS += -LC:/FLANN/lib -lflann
+       INCLUDEPATH += C:/FLANN/include
+    }
+    linux-g++ || unix {
+        LIBS += -lflann
+        ants2_docker{ LIBS += -llz4 }
+    }
 
     HEADERS += modules/nnmoduleclass.h
     SOURCES += modules/nnmoduleclass.cpp
@@ -94,7 +98,7 @@ ants2_fann {
         DEFINES += NOMINMAX
      }
      linux-g++ || unix {
-        LIBS += -L/usr/local/lib/ -lfann
+        LIBS += -L/usr/local/lib -lfann
      }
 
      #main module
@@ -230,6 +234,12 @@ ants2_NCrystal{
 Headless {
 message("--> Compiling without GUI")
 CONFIG -= ants2_GUI
+}
+
+#Options to be in effect only during compilation for docker
+Ants2Docker {
+message("--> Compiling for docker")
+CONFIG += ants2_docker
 }
 
 #---ANTS2 files---

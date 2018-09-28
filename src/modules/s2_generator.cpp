@@ -30,7 +30,7 @@ S2_Generator::S2_Generator(Photon_Generator *photonGenerator, APhotonTracer *pho
 
 bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
 {
-    if (EnergyVector->isEmpty()) return false; //no data
+    if (EnergyVector->isEmpty()) return true; //no deposition data -> no secondary to generate
 
     double Remainer = 0.0;
     double ElRemainer = 0.0;

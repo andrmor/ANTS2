@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QScrollBar>
 #include <QJsonDocument>
+#include <QButtonGroup>
 
 #include "amessage.h"
 #include "alrfmouseexplorer.h"

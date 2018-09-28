@@ -21,22 +21,9 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  QMainWindow(parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
-  RasterWindow = 0;
-  QWinContainer = 0;
-  ColdStart = 0;
-  BarShown = true;
-  TMPignore = false;
-  ModePerspective = true;
-  fRecallWindow = false;
-  GeoMarkerSize = 2;
-  GeoMarkerStyle = 6;
-  ZoomLevel = 2;
-  fNeedZoom = true;
-
-  MW = mw;
   ui->setupUi(this);
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
@@ -47,13 +34,11 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
 
   this->setMinimumWidth(200);
   RasterWindow = new RasterWindowBaseClass(this);
-  RasterWindow->resize(400, 400);
-  RasterWindow->ForceResize();
+  //RasterWindow->resize(400, 400);
+  centralWidget()->layout()->addWidget(RasterWindow);
+  //RasterWindow->ForceResize();
 
-  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
-  QWinContainer->setVisible(true);
-  connect(RasterWindow, SIGNAL(UserChangedWindow(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)),
-          this, SLOT(onRasterWindowChange(Double_t,Double_t,Double_t,Double_t,Double_t,Double_t)));  
+  connect(RasterWindow, &RasterWindowBaseClass::UserChangedWindow, this, &GeometryWindowClass::onRasterWindowChange);
 
   QActionGroup* group = new QActionGroup( this );
   ui->actionSmall_dot->setActionGroup(group);
@@ -77,14 +62,6 @@ void GeometryWindowClass::ShowAndFocus()
   this->show();
   this->activateWindow();
   this->raise();
-
-  if (ColdStart)
-    {
-      //first time this window is shown
-      ColdStart = false;
-      this->resize(width()+1, height());
-      this->resize(width()-1, height());
-    }
 }
 
 void GeometryWindowClass::SetAsActiveRootWindow()
@@ -100,7 +77,8 @@ void GeometryWindowClass::ClearRootCanvas()
 void GeometryWindowClass::UpdateRootCanvas()
 {
   //RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
+  //RasterWindow->fCanvas->Update();
+    RasterWindow->UpdateRootCanvas();
 }
 
 void GeometryWindowClass::SaveAs(const QString filename)
@@ -130,12 +108,11 @@ void GeometryWindowClass::ResetView()
 
 void GeometryWindowClass::setHideUpdate(bool flag)
 {
-  QWinContainer->setVisible(!flag);
+  RasterWindow->setVisible(!flag);
 }
 
 void GeometryWindowClass::PostDraw()
 {  
-  //TView3D *v = (TView3D*)RasterWindow->fCanvas->GetView();
   TView3D *v = dynamic_cast<TView3D*>(RasterWindow->fCanvas->GetView());
   if (!v) return;
 
@@ -215,17 +192,8 @@ bool GeometryWindowClass::IsWorldVisible()
 
 void GeometryWindowClass::resizeEvent(QResizeEvent *)
 {
-  //tool bar box height fits the window
-  ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 3);
-
-  double width = this->width() - (3 + ui->fUIbox->width() + 3);
-  double height = this->height() - (3 + 3);
-
-//  qDebug()<<ui->fUIbox->x()+ui->fUIbox->width()+3<<width<<height;
-// the second parameter adjusted to show menubar - VS
-  if (QWinContainer) QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() +2,
-                                                this->menuBar()->height()+3, width, height);
-  if (RasterWindow) RasterWindow->ForceResize();
+  //if (RasterWindow) RasterWindow->ForceResize();
+  //ShowGeometry(true, false);
 }
 
 bool GeometryWindowClass::event(QEvent *event)
@@ -235,6 +203,9 @@ bool GeometryWindowClass::event(QEvent *event)
       if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("geometry");
       else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("geometry");
     }
+
+  if (event->type() == QEvent::WindowActivate)
+      RasterWindow->UpdateRootCanvas();
 
   return QMainWindow::event(event);
 }
@@ -421,7 +392,7 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
           }
       }
 
-    MW->GeometryWindow->ShowGeometry(false);
+    ShowGeometry(false);
     MW->Detector->GeoManager->DrawTracks();
     UpdateRootCanvas();
 }
@@ -444,24 +415,6 @@ void GeometryWindowClass::AddPolygonfToGeometry(QPolygonF& poly, Color_t color, 
     AddLineToGeometry(poly[i], poly[i+1], color, width);
 }
 
-void GeometryWindowClass::on_pbHideBar_clicked()
-{
-  BarShown = false;
-  ui->fUIbox->resize(23,500);
-  ui->swToolBar->setCurrentIndex(1);
-
-  GeometryWindowClass::resizeEvent(0);
-}
-
-void GeometryWindowClass::on_pbShowBar_clicked()
-{
-  BarShown = true;
-  ui->fUIbox->resize(107,500);
-  ui->swToolBar->setCurrentIndex(0);
-
-  GeometryWindowClass::resizeEvent(0);
-}
-
 void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool ColorUpdateAllowed)
 // default:  ActivateWindow = true,  SAME = true,  ColorUpdateAllowed = true
 {
@@ -472,7 +425,6 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //with or without activation (focussing) of this window
     if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
     else SetAsActiveRootWindow(); //no activation in this mode
-
     MW->Detector->GeoManager->SetNsegments(MW->GlobSet->NumSegments);
     int level = ui->sbLimitVisibility->value();
     if (!ui->cbLimitVisibility->isChecked()) level = -1;
@@ -481,11 +433,11 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //coloring volumes
     if (ColorUpdateAllowed)
       {
-        if (MW->ColorByMaterial) MW->Detector->colorVolumes(1);
+        if (ColorByMaterial) MW->Detector->colorVolumes(1);
         else MW->Detector->colorVolumes(0);
       }
     //top volume visibility
-    if (MW->ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
+    if (ShowTop) MW->Detector->GeoManager->SetTopVisible(true); // the TOP is generally invisible
     else MW->Detector->GeoManager->SetTopVisible(false);
 
     //transparency setup
@@ -527,42 +479,51 @@ void GeometryWindowClass::on_pbShowGeometry_clicked()
   RasterWindow->ForceResize();
   fRecallWindow = false;
 
-  ShowGeometry(false, false); //not doing "same" option!
+  ShowGeometry(true, false); //not doing "same" option!
 }
 
 void GeometryWindowClass::on_cbShowTop_toggled(bool checked)
 {
-  MW->setShowTop(checked);
-  ShowGeometry();
+  ShowTop = checked;
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_cbColor_toggled(bool checked)
 {
-  MW->setColorByMaterial(checked);
-  ShowGeometry();
+  ColorByMaterial = checked;
   MW->UpdateMaterialListEdit();
+  on_pbShowGeometry_clicked();
 }
 
 void GeometryWindowClass::on_pbShowPMnumbers_clicked()
 {
-  MW->GeometryWindow->ShowPMnumbers();
+  ShowPMnumbers();
 }
 
 void GeometryWindowClass::on_pbShowTracks_clicked()
 {
-  MW->ShowTracks();
+    DrawTracks();
+}
+
+void GeometryWindowClass::DrawTracks()
+{
+  if (MW->GeometryDrawDisabled) return;
+
+  SetAsActiveRootWindow();
+  MW->Detector->GeoManager->DrawTracks();
+  UpdateRootCanvas();
 }
 
 void GeometryWindowClass::on_pbClearTracks_clicked()
 {
   MW->Detector->GeoManager->ClearTracks();
-  ShowGeometry();
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbClearDots_clicked()
 { 
   MW->clearGeoMarkers();
-  ShowGeometry();
+  ShowGeometry(true, false);
 }
 
 void GeometryWindowClass::on_pbSaveAs_clicked()
@@ -617,7 +578,7 @@ void GeometryWindowClass::on_pbFront_clicked()
   readRasterWindowProperties();
 }
 
-void GeometryWindowClass::onRasterWindowChange(Double_t centerX, Double_t centerY, Double_t hWidth, Double_t hHeight, Double_t phi, Double_t theta)
+void GeometryWindowClass::onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta)
 {
   fRecallWindow = true;
   CenterX = centerX;
@@ -664,7 +625,9 @@ void GeometryWindowClass::on_cobViewType_currentIndexChanged(int index)
   RasterWindow->fCanvas->Update();
   readRasterWindowProperties();
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
   RasterWindow->setInvertedXYforDrag( index==1 );
+#endif
 }
 
 void GeometryWindowClass::on_cbShowAxes_toggled(bool /*checked*/)
@@ -777,32 +740,32 @@ void GeometryWindowClass::on_actionDefault_zoom_to_0_triggered()
 
 void GeometryWindowClass::on_actionSet_line_width_for_objects_triggered()
 {
-    TObjArray* list = MW->Detector->GeoManager->GetListOfVolumes();
-    int numVolumes = list->GetEntries();
-    qDebug() << numVolumes;
-    for (int i=0; i<numVolumes; i++)
-      {
-        TGeoVolume* tv = (TGeoVolume*)list->At(i);
-        int LWidth = tv->GetLineWidth() + 1;
-        tv->SetLineWidth(LWidth);
-      }
-    SetAsActiveRootWindow();
-    MW->Detector->top->Draw("");
+    doChangeLineWidth(1);
 }
 
 void GeometryWindowClass::on_actionDecrease_line_width_triggered()
 {
+    doChangeLineWidth(-1);
+}
+
+void GeometryWindowClass::doChangeLineWidth(int deltaWidth)
+{
+    // for all WorldTree objects the following will be overriden. Still affects, e.g., PMs
     TObjArray* list = MW->Detector->GeoManager->GetListOfVolumes();
     int numVolumes = list->GetEntries();
     for (int i=0; i<numVolumes; i++)
       {
         TGeoVolume* tv = (TGeoVolume*)list->At(i);
-        int LWidth = tv->GetLineWidth() - 1;
+        int LWidth = tv->GetLineWidth() + deltaWidth;
         if (LWidth <1) LWidth = 1;
+        qDebug() << i << tv->GetName() << LWidth;
         tv->SetLineWidth(LWidth);
       }
-    SetAsActiveRootWindow();
-    MW->Detector->top->Draw("");
+
+    // for all WorldTree objects
+    MW->Detector->changeLineWidthOfVolumes(deltaWidth);
+
+    on_pbShowGeometry_clicked();
 }
 
 #include "anetworkmodule.h"

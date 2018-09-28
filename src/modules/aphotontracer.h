@@ -35,6 +35,8 @@ public:
 
     AOneEvent* getEvent() {return OneEvent;}  //only used in LRF-based sim
 
+    void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
+
 private:    
     TRandom2* RandGen;
     TGeoManager* GeoManager;
@@ -46,6 +48,9 @@ private:
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;
+
+    int MaxTracks = 10;
+    int PhotonTracksAdded = 0;
 
     int Counter; //number of photon transitions - there is a limit on this set by user
     APhoton* p; //the photon which is traced

@@ -1,0 +1,72 @@
+//IP and port for the Ants2 server dispatchers (https://github.com/andrmor/ServDisp)
+var server1 = ["127.0.0.1", 1234]             // ServDisp can be run on the same computer - the local IP can be used
+var server2 = ["192.168.2.76", 1234]      // <-- modify IP/port for the remote ServDisp!
+//....
+
+var Remote = [server1, server2]  // list of remote server dispatchers  
+var conf = config.GetConfig()
+
+threads.deleteAll()
+threads.setAbortInThreadIsGlobal(true) // abort in one of the threads aborts all reconstruction
+
+for (var i = 0; i < Remote.length; i++)
+        threads.evaluateScript(  "web.SetTimeout(10000); web.GetAvailableThreads(  \"" + Remote[i][0] + "\"," + Remote[i][1]  + ")"  )
+threads.waitForAll()
+
+var numThreads = 0
+var remSer = 0
+for (var i=threads.countAll()-1; i>-1; i--)
+       if ( threads.isAborted(i)) Remote[i].push(0)
+       else
+       {
+              thr =  threads.getResult(i); numThreads += thr; remSer++
+              Remote[i].push(thr)  // adding information how many threads to use
+       }
+core.clearText(); core.print("Found " + remSer + " remote server(s) with " + numThreads + " total available threads" )
+threads.deleteAll()
+
+var numEvents = events.GetNumEvents()
+var perOne = numEvents / numThreads
+if (perOne * numThreads < numEvents) perOne++
+
+function threadWorker(iThr, Remote, from, to)
+{
+       web.SetTimeout(10000)
+       var reply = web.OpenSession( Remote[iThr][0], Remote[iThr][1],  Remote[iThr][2] ) //will abort if failed
+       msg.Append(reply)
+       web.SendConfig(conf)
+       web.RemoteReconstructEvents(from, to)
+       web.Disconnect()
+}
+
+core.print("Starting remote reconstruction...")
+var from = 0
+for (var iThr = 0; iThr < Remote.length; iThr++)
+{
+       var availableThreads = Remote[iThr][2]
+       if (availableThreads == 0) continue
+       
+       var deltaEvents = perOne * availableThreads
+       var to = from + deltaEvents
+       if (to > numEvents) to = numEvents
+       
+       threads.evaluateFunction(threadWorker, [iThr, Remote, from, to])
+
+       from += deltaEvents
+}
+while (from < numEvents)
+
+core.sleep(100)
+threads.waitForAll()
+core.print("Finished!")
+
+for (var iThr = 0; iThr < Remote.length; iThr++)
+{
+       if (Remote[iThr][2] === 0) continue
+       if ( threads.isAborted(iThr) ) core.abort("Remote reconstructor failed: " +Remote[iThr][0] ) //paranoic
+}
+threads.deleteAll()    
+
+events.SetReconstructionReady()
+rec.UpdateFilters()
+core.print("Reconstruiction finished")

@@ -90,7 +90,9 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(PSM, PythonScriptWindow);
   PythonScriptWindow->SetInterfaceObject(txt, "msg");
 
-  AInterfaceToWebSocket* web = new AInterfaceToWebSocket();
+  AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
+  QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
+  QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
   PythonScriptWindow->SetInterfaceObject(web, "web");
 
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
@@ -105,8 +107,8 @@ void MainWindow::createPythonScriptWindow()
 #endif
 
 #ifdef ANTS_FANN
-  AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-  PythonScriptWindow->SetInterfaceObject(ann, "ann");
+  //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+  //PythonScriptWindow->SetInterfaceObject(ann, "ann");
 #endif
 
   // Interfaces which rely on MainWindow

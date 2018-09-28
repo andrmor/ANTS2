@@ -1,6 +1,6 @@
 #include "aqtmessageredirector.h"
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QtDebug>
 #include <QFile>
 #include <QTextStream>

@@ -111,11 +111,15 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   RasterWindow->ForceResize();
 
   //creating QWindow container and placing the raster window in it
-  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
+//  QWinContainer = QWidget::createWindowContainer(RasterWindow, this);
 
-  QMargins margins = RasterWindow->frameMargins();
-  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
-  QWinContainer->setVisible(true);
+//  QMargins margins = RasterWindow->frameMargins();
+//  QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width() + 3 + margins.left(), 3 + margins.top(), 600, 600);
+//  QWinContainer->setVisible(true);
+
+  QHBoxLayout* l = dynamic_cast<QHBoxLayout*>(centralWidget()->layout());
+  if (l) l->insertWidget(1, RasterWindow);
+  else message("Unexpected layout!", this);
 
   //connecting signals-slots
   connect(RasterWindow, &RasterWindowGraphClass::LeftMouseButtonReleased, this, &GraphWindowClass::UpdateControls);
@@ -290,8 +294,7 @@ void GraphWindowClass::ClearRootCanvas()
 
 void GraphWindowClass::UpdateRootCanvas()
 {
-  //RasterWindow->fCanvas->Modified();
-  RasterWindow->fCanvas->Update();
+  RasterWindow->UpdateRootCanvas();
 }
 
 void GraphWindowClass::SetModifiedFlag()
@@ -631,10 +634,13 @@ void GraphWindowClass::startOverlayMode()
         return;
 
     QPixmap map = qApp->screens().first()->grabWindow(RasterWindow->winId());//QApplication::desktop()->winId());
-    gvOver->setGeometry(QWinContainer->geometry());
-    scene->setSceneRect(0, 0, QWinContainer->width(), QWinContainer->height());
+    gvOver->resize(RasterWindow->width(), RasterWindow->height());
+    //gvOver->move(RasterWindow->x(), RasterWindow->y());
+    gvOver->move(RasterWindow->x(), menuBar()->height());
+    //gvOver->setGeometry(RasterWindow->geometry());
+    scene->setSceneRect(0, 0, RasterWindow->width(), RasterWindow->height());
     scene->setBackgroundBrush(map);
-    QWinContainer->setVisible(false);// map.save("TestMap.png");
+    //RasterWindow->setVisible(false);// map.save("TestMap.png");
 
     QPointF origin;
     RasterWindow->PixelToXY(0, 0, origin.rx(), origin.ry());
@@ -653,20 +659,24 @@ void GraphWindowClass::endOverlayMode()
         return;
 
     gvOver->hide();
-    QWinContainer->setVisible(true);
+    //RasterWindow->setVisible(true);
     setFixedSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+    RasterWindow->fCanvas->Update();
 }
 
 void GraphWindowClass::OnBusyOn()
 {
   ui->fUIbox->setEnabled(false);
-  RasterWindow->setBlockEvents(true);
+  ui->lwBasket->setEnabled(false);
+  //RasterWindow->setBlockEvents(true);
 }
 
 void GraphWindowClass::OnBusyOff()
 {
   ui->fUIbox->setEnabled(true);
-  RasterWindow->setBlockEvents(false);
+  ui->lwBasket->setEnabled(true);
+  //RasterWindow->setBlockEvents(false);
 }
 
 void GraphWindowClass::switchOffBasket()
@@ -677,31 +687,28 @@ void GraphWindowClass::switchOffBasket()
 void GraphWindowClass::resizeEvent(QResizeEvent *)
 {
   //tool bar box height and basket fit the window
-  ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
-  ui->fBasket->resize(ui->fBasket->width(), this->height());
-  ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
+  //ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
+  //ui->fBasket->resize(ui->fBasket->width(), this->height());
+  //ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
 
-  int deltaBasket = 0;
-  if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
+  //int deltaBasket = 0;
+  //if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
 
-  int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
-  int height = this->height() - (3 + 3);
+  //int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
+  //int height = this->height() - (3 + 3);
 //  qDebug()<<width<<height;
 
-  int mh = 0;
-  if (ui->menuBar) mh =  ui->menuBar->height();
-  if (QWinContainer) QWinContainer->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
-  if (RasterWindow) RasterWindow->ForceResize();
+  //int mh = 0;
+  //if (ui->menuBar) mh =  ui->menuBar->height();
+  //if (RasterWindow) RasterWindow->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
+  //if (RasterWindow) RasterWindow->ForceResize();
 
-  if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
-
-//  if (QWinContainer && RasterWindow && gvOver)
-  //    if (ui->cbProjectionTool->isChecked()) GraphWindowClass::on_pbPrepareOverlay_clicked();
+  //if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
 }
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
-    if(QWinContainer->isVisible())
+    if(RasterWindow->isVisible())
     {
         QMainWindow::mouseMoveEvent(event);
         return;
@@ -723,6 +730,9 @@ bool GraphWindowClass::event(QEvent *event)
       if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("graph");
       else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("graph");
     }
+
+  if (event->type() == QEvent::WindowActivate)
+      RasterWindow->UpdateRootCanvas();
 
   return QMainWindow::event(event);
 }
@@ -1683,7 +1693,7 @@ void GraphWindowClass::on_cbToolBox_toggled(bool checked)
     }
     else
     {
-        endOverlayMode();
+      endOverlayMode();
     }
     gvOver->update();
 }
@@ -3499,7 +3509,7 @@ void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
 
    double XperP = fabs(RasterWindow->getXperPixel());
    double YperP = fabs(RasterWindow->getYperPixel());
-   double CanvasWidth = QWinContainer->width();
+   double CanvasWidth = RasterWindow->width();
    double NewCanvasWidth = CanvasWidth * XperP/YperP;
    double delta = NewCanvasWidth - CanvasWidth;
    resize(width()+delta, height());
@@ -3617,17 +3627,7 @@ void GraphWindowClass::on_pbAddText_clicked()
 
 void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int AlignLeftCenterRight)
 {
-  double xc1, yc1, xc2, yc2;
-  RasterWindow->fCanvas->GetRange(xc1, yc1, xc2, yc2);
-
-  double deltaX = xc2-xc1;
-  double deltaY = yc2-yc1;
-  double x1 = xc1 + 0.15*deltaX;
-  double y1 = yc1 + 0.75*deltaY;
-  double x2 = xc1 + 0.5*deltaX;
-  double y2 = yc1 + 0.85*deltaY;
-
-  TPaveText* la = new TPaveText(x1, y1, x2, y2);
+  TPaveText* la = new TPaveText(0.15, 0.75, 0.5, 0.85, "NDC");
   la->SetFillColor(0);
   la->SetBorderSize(bShowFrame ? 1 : 0);
   la->SetLineColor(1);
@@ -3649,7 +3649,12 @@ void GraphWindowClass::ShowTextPanel(const QString Text, bool bShowFrame, int Al
 //     Basket[CurrentBasketItem].DrawObjects.append(DrawObjectStructure(la, "same"));
 //  }
 
-//  RedrawAll();
+  //  RedrawAll();
+}
+
+void GraphWindowClass::SetStatPanelVisible(bool flag)
+{
+    ui->cbShowLegend->setChecked(flag);
 }
 
 void GraphWindowClass::on_pbRemoveText_clicked()

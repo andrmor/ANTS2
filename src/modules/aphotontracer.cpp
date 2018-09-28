@@ -42,8 +42,10 @@ void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEv
 {
    SimSet = simSet;
    OneEvent = oneEvent;
+   MaxTracks = simSet->TrackBuildOptions.MaxPhotonTracks; //default, can be adjusted later (setMaxTracks() methof) if multithread
    this->fBuildTracks = fBuildTracks;
    Tracks = tracks;
+   PhotonTracksAdded = 0;
 }
 
 void APhotonTracer::TracePhoton(const APhoton* Photon)
@@ -95,10 +97,9 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
 
    if (fBuildTracks)
      {
-       if (Tracks->size()<SimSet->MaxNumberOfTracks)
+       if (PhotonTracksAdded < MaxTracks)
          {
            track = new TrackHolderClass();
-           //qDebug() << "Track starts from:"<<p->r[0]<<p->r[1]<<p->r[2];
            track->Nodes.append(TrackNodeStruct(p->r, p->time));
          }
        else fBuildTracks = false;
@@ -400,7 +401,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
 force_stop_tracing:
    if (SimSet->bDoPhotonHistoryLog)
      {
-       AppendHistoryRecord(); //Add tracks is alsow there, it has extra filtering
+       AppendHistoryRecord(); //Add tracks is also there, it has extra filtering
      }
    else
      {
@@ -484,13 +485,29 @@ void APhotonTracer::AppendHistoryRecord()
     }
 }
 
+#include "atrackbuildoptions.h"
 void APhotonTracer::AppendTrack()
 {
   //color track according to PM hit status and scintillation type
-  if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
+  //if ( SimSet->fTracksOnPMsOnly && fMissPM ) delete track;
+  if ( SimSet->TrackBuildOptions.bSkipPhotonsMissingPMs && fMissPM )
+      delete track;
   else
     {
       track->UserIndex = 22;
+
+      ATrackAttributes ta;
+      if (!fMissPM && SimSet->TrackBuildOptions.bPhotonSpecialRule_HittingPMs)
+          ta = SimSet->TrackBuildOptions.TA_PhotonsHittingPMs;
+      else if (p->scint_type == 2 && SimSet->TrackBuildOptions.bPhotonSpecialRule_SecScint)
+          ta = SimSet->TrackBuildOptions.TA_PhotonsSecScint;
+      else
+          ta = SimSet->TrackBuildOptions.TA_Photons;
+
+      track->Color = ta.color;
+      track->Width = ta.width;
+      track->Style = ta.style;
+/*
       track->Width = 1;
       if (fMissPM)
         {
@@ -501,8 +518,11 @@ void APhotonTracer::AppendTrack()
             default: track->Color = kGray;
             }
         }
-      else track->Color = 2;//kRed
+      else track->Color = kRed;
+*/
+
       Tracks->append(track);
+      PhotonTracksAdded++;
     }
 }
 
@@ -607,8 +627,9 @@ APhotonTracer::AbsRayEnum APhotonTracer::AbsorptionAndRayleigh()
                     navigator->SetCurrentDirection(p->v);
                     //qDebug() << "After:"<<p->WaveIndex;
 
-                    if (SimSet->fTimeResolved)
-                        p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+                    //if (SimSet->fTimeResolved)
+                    //    p->time += RandGen->Exp(  MaterialFrom->PriScintDecayTime );
+                    p->time += (*MaterialCollection)[MatIndexFrom]->GeneratePrimScintTime(RandGen);
 
                     OneEvent->SimStat->Reemission++;
                     if (SimSet->bDoPhotonHistoryLog)

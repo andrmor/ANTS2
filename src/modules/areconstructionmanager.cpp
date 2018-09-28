@@ -30,7 +30,7 @@
 #include <QTime>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 
 #include "TGeoManager.h"
 #include "TError.h"
@@ -85,6 +85,13 @@ bool AReconstructionManager::reconstructAll(QJsonObject &json, int numThreads, b
     //qDebug() << "  Sensor groups configured:"<< RecSet.size();
   NumThreads = numThreads;
   if (NumThreads<1) NumThreads = 1;
+
+  if (MaxThreads > 0 && NumThreads > MaxThreads)
+  {
+      qDebug() << "Reconstruction manager: Enforcing max threads to " << MaxThreads;
+      NumThreads = MaxThreads;
+  }
+
     //qDebug() << "  Using threads:"<<NumThreads;
   EventsDataHub->resetReconstructionData(RecSet.size()); //does some clear too, keeps EventId
 
@@ -527,6 +534,13 @@ void AReconstructionManager::onLRFsCopied()
     fDoingCopyLRFs.store(false);
 }
 
+#include "aconfiguration.h"
+void AReconstructionManager::onRequestFilterAndAskToUpdateGui()
+{
+    filterEvents(Detector->Config->JSON, 1);
+}
+
+#include <QThread>
 bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
 {    
   fStopRequested = false;
@@ -542,7 +556,11 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
       reconstructorList[ithread]->moveToThread(threads.last());
       threads.last()->start();
 
-      do qApp->processEvents();
+      do
+      {
+          qApp->processEvents();
+          QThread::usleep(100);
+      }
       while (fDoingCopyLRFs.load());
     }
 
@@ -552,6 +570,7 @@ bool AReconstructionManager::run(QList<ProcessorClass *> reconstructorList)
   int TotalMsPassed = 0;
   while (threads.size()>0)
     {
+      QThread::usleep(100);
       for (int i=threads.size()-1; i>-1; i--)
         {
           //finished thread?
@@ -612,6 +631,13 @@ void AReconstructionManager::filterEvents(QJsonObject &json, int numThreads)
 
   NumThreads = numThreads;
   if (NumThreads<1) NumThreads = 1;
+
+  if (MaxThreads > 0 && NumThreads > MaxThreads)
+  {
+      qDebug() << "Reconstruction manager: Enforcing max threads to " << MaxThreads;
+      NumThreads = MaxThreads;
+  }
+
   //qDebug() << "Filter settings ok, Number of threads:" << NumThreads;
   assureReconstructionDataContainersExist();  //important - can be the first call after new data were simulated/loaded
   //qDebug() << "Rec data containers synchronized";

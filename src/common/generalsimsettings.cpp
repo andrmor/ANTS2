@@ -3,25 +3,6 @@
 
 #include <QDebug>
 
-GeneralSimSettings::GeneralSimSettings()
-{
-  SecScintGenMode = 0;
-  ErrorString = "";
-  MaxNumTrans = 100;
-  fQEaccelerator = false;
-  fTracksOnPMsOnly = false;
-  fLogsStat = false;
-  TrackColorAdd = 0;
-  //SecScintThetaHist = 0;
-  fTimeResolved = false;
-  TimeBins = 1;
-  TimeFrom = 0;
-  TimeTo = TimeBins;
-  WaveStep = 1.0;
-  bDoPhotonHistoryLog = false;
-  MinEnergyNeutrons = 0.01; //in meV
-}
-
 bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
 {
   if (!Json.contains("GeneralSimConfig"))
@@ -29,7 +10,7 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
       ErrorString = "Json sent to simulator does not contain general sim config data!";
       return false;
     }
-  ErrorString = "";
+  ErrorString.clear();
 
   QJsonObject json = Json["GeneralSimConfig"].toObject();
   //reading wavelength options
@@ -78,22 +59,20 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
   MinEnergy = trjson["MinEnergy"].toDouble();
   MinEnergyNeutrons = trjson["MinEnergyNeutrons"].toDouble();
   Safety = trjson["Safety"].toDouble();
-  TrackColorAdd = trjson["TrackColorAdd"].toInt();
 
   //Accelerators options
   QJsonObject acjson = json["AcceleratorConfig"].toObject();
   MaxNumTrans = acjson["MaxNumTransitions"].toInt();
-  fQEaccelerator = acjson["CheckBeforeTrack"].toBool();
-  fTracksOnPMsOnly = acjson["OnlyTracksOnPMs"].toBool();
+  fQEaccelerator = acjson["CheckBeforeTrack"].toBool();  
   fLogsStat = acjson["LogsStatistics"].toBool();
   NumThreads = acjson["NumberThreads"].toInt();
 
-  //Photon tracks
-  fBuildPhotonTracks = json["BuildPhotonTracks"].toBool();
-  MaxNumberOfTracks = 1000;
-  MaxNumberOfTracks = json["MaxNumberOfTracks"].toInt();
-
   DetStatNumBins = json["DetStatNumBins"].toInt(100);
+
+  //track building options
+  QJsonObject tbojs;
+    parseJson(json, "TrackBuildingOptions", tbojs);
+  TrackBuildOptions.readFromJson(tbojs);
 
   //Secondary scint options
   QJsonObject scjson = json["SecScintConfig"].toObject();

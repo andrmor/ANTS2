@@ -71,9 +71,6 @@ ASimulatorRunner::ASimulatorRunner(DetectorClass *detector, EventsDataClass *dat
     this->dataHub = dataHub;
     startTime.start(); //can restart be done without start() ?
     simState = SClean;
-    //We don't need it to be secret, just random
-    //randGen = new TRandom2(QDateTime::currentMSecsSinceEpoch());
-    //randGen = detector->RandGen;
 }
 
 ASimulatorRunner::~ASimulatorRunner()
@@ -82,17 +79,16 @@ ASimulatorRunner::~ASimulatorRunner()
     for(int i = 0; i < threads.count(); i++)
         delete threads[i];
     threads.clear();
-    //delete randGen;
 }
 
-void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
+bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 {
   //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
   if (!json.contains("SimulationConfig"))
     {
-      message("Json does not contain simulation config!");
-      return;
+      ErrorString = "Json does not contain simulation config!";
+      return false;
     }
   QJsonObject jsSimSet = json["SimulationConfig"].toObject();
   totalEventCount = 0;
@@ -103,30 +99,47 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   fStopRequested = false;
 
   bool fRunThreads = threadCount > 0;
-  simSettings.readFromJson(jsSimSet);
+  bool bOK = simSettings.readFromJson(jsSimSet);
+  if (!bOK)
+  {
+      ErrorString = simSettings.ErrorString;
+      return false;
+  }
+
+  modeSetup = jsSimSet["Mode"].toString();
+
+#ifndef __USE_ANTS_NCRYSTAL__
+  if ( modeSetup != "PointSim" && detector->MpCollection->isNCrystalInUse())
+  {
+      ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+      return false;
+  }
+#endif
+
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
-  modeSetup = jsSimSet["Mode"].toString();
+
   //qDebug() << "-------------";
   //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
   //qDebug() << "Simulation mode:" << modeSetup;
   //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
 
+  threadCount = std::max(threadCount, 1);
+
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
   //qDebug() << "Updating MaterialColecftion module according to sim settings";
-  detector->MpCollection->UpdateWavelengthBinning(&simSettings); //update wave-resolved properties of materials and runtime properties for neutrons
+  detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector->RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
 
   clearWorkers(); //just rebuild them all everytime, it's easier
-  threadCount = std::max(threadCount, 1);
+
   for(int i = 0; i < threadCount; i++)
-    {
-      TString workerName = "simulationWorker"+TString::Itoa(i, 10);
+  {
       Simulator *worker;
-      if(modeSetup == "PointSim") //Photon simulator
-        worker = new PointSourceSimulator(detector, workerName);
+      if (modeSetup == "PointSim") //Photon simulator
+        worker = new PointSourceSimulator(detector, i);
       else //Particle simulator
-        worker = new ParticleSourceSimulator(detector, workerName);
+        worker = new ParticleSourceSimulator(detector, i);
 
       worker->setSimSettings(&simSettings);
       int seed = detector->RandGen->Rndm()*100000;
@@ -145,7 +158,7 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
         }
       totalEventCount += worker->getEventCount();
       workers.append(worker);
-    }
+  }
 
   if(fRunThreads)
     {
@@ -165,6 +178,8 @@ void ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   simState = SSetup;
   //qDebug() << "\n and now multi?"<< detector->GeoManager->IsMultiThread();
   //qDebug() << "Num of workers:"<< workers.size();
+
+  return true;
 }
 
 void ASimulatorRunner::updateGeoManager()  // *** obsolete!
@@ -173,12 +188,14 @@ void ASimulatorRunner::updateGeoManager()  // *** obsolete!
         workers[i]->updateGeoManager();
 }
 
+/*
 void ASimulatorRunner::setWorkersSeed(int rngSeed)
 {
     TRandom2 rng(rngSeed);
     for(int i = 0; i < workers.count(); i++)
-        workers[i]->setRngSeed(rng.Rndm());
+        workers[i]->setRngSeed(rng.Rndm()*100000);
 }
+*/
 
 void ASimulatorRunner::updateStats()
 {
@@ -228,13 +245,7 @@ QString ASimulatorRunner::getErrorMessages() const
         return "Simulation not finished yet";
     if(fStopRequested)
         return "Simulation stopped by user";
-    QTextStream msgBuilder(&msg);
-    for(int i = 0; i < workers.count(); i++)
-    {
-        if(workers[i]->wasSuccessful()) continue;
-        msgBuilder<<"Thread "<<i<<"/"<<workers.count()<<": "<<workers[i]->getErrorString()<<endl;
-    }
-    return msg;
+    return ErrorString;
 }
 
 void ASimulatorRunner::clearWorkers()
@@ -312,8 +323,15 @@ void ASimulatorRunner::simulate()
     //Dump data in dataHub
     dataHub->fSimulatedData = true;
     dataHub->LastSimSet = simSettings;
+
+    ErrorString.clear();
     for(int i = 0; i < workers.count(); i++)
+    {
         workers[i]->appendToDataHub(dataHub);
+        QString err = workers.at(i)->getErrorString();
+        if (!err.isEmpty())
+            ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
+    }
 
     //qDebug()<<"Simulation finished!";
 
@@ -362,18 +380,18 @@ void ASimulatorRunner::updateGui()
 /******************************************************************************\
 *                  Simulator base class (per-thread instance)                  |
 \******************************************************************************/
-Simulator::Simulator(const DetectorClass *detector, const TString &nameID)
+Simulator::Simulator(const DetectorClass *detector, const int ID)
 {
-    this->nameID = nameID;
+    this->ID = ID;
     this->detector = detector;
     this->simSettings = 0;
     eventBegin = 0;
     eventEnd = 0;
     progress = 0;
     RandGen = new TRandom2();    
-    dataHub = new EventsDataClass(nameID);    
+    dataHub = new EventsDataClass(ID);
     OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
-    photonGenerator = new Photon_Generator(detector);
+    photonGenerator = new Photon_Generator(detector, RandGen);
     photonTracker = new APhotonTracer(detector->GeoManager, RandGen, detector->MpCollection, detector->PMs, &detector->Sandwich->GridRecords);
 }
 
@@ -416,19 +434,33 @@ void Simulator::requestStop()
 
 void Simulator::divideThreadWork(int threadId, int threadCount)
 {
+    //  qDebug() <<  "This thread:" << threadId << "Count treads:"<<threadCount;
     int totalEventCount = getTotalEventCount();
     int nodesPerThread = totalEventCount / threadCount;
     int remainingNodes = totalEventCount % threadCount;
     //The first <remainingNodes> threads get an extra node each
     eventBegin = threadId*nodesPerThread + std::min(threadId, remainingNodes);
     eventEnd = eventBegin + nodesPerThread + (threadId >= remainingNodes ? 0 : 1);
-    //qDebug()<<"Thread"<<(threadId+1)<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount();
+    //  qDebug()<<"Thread"<<threadId<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount()<<"/"<<getTotalEventCount();
+
+    //dividing track building
+    int maxPhotonTracks;
+    if (simSettings->TrackBuildOptions.bBuildPhotonTracks)
+        maxPhotonTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxPhotonTracks );
+    else maxPhotonTracks = 0;
+    int maxParticleTracks;
+    if (simSettings->TrackBuildOptions.bBuildParticleTracks)
+        maxParticleTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxParticleTracks );
+    else maxParticleTracks = 0;
+    updateMaxTracks(maxPhotonTracks, maxParticleTracks);
+    //  qDebug() << maxPhotonTracks << maxParticleTracks;
 }
 
 bool Simulator::setup(QJsonObject &json)
 {
     fUpdateGUI = json["DoGuiUpdate"].toBool();
-    fBuildPhotonTracks = fUpdateGUI && simSettings->fBuildPhotonTracks;
+    //fBuildPhotonTracks = fUpdateGUI && simSettings->fBuildPhotonTracks;
+    fBuildPhotonTracks = fUpdateGUI && simSettings->TrackBuildOptions.bBuildPhotonTracks;
 
     //inits
     dataHub->clear();
@@ -457,11 +489,16 @@ void Simulator::ReserveSpace(int expectedNumEvents)
     dataHub->Scan.reserve(expectedNumEvents);
 }
 
+void Simulator::updateMaxTracks(int maxPhotonTracks, int /*maxParticleTracks*/)
+{
+    photonTracker->setMaxTracks(maxPhotonTracks);
+}
+
 /******************************************************************************\
 *                          Point Source Simulator                              |
 \******************************************************************************/
-PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, const TString &nameID) :
-    Simulator(detector, nameID)
+PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, int ID) :
+    Simulator(detector, ID)
 {  
     CustomHist = 0;
     totalEventCount = 0;
@@ -555,7 +592,9 @@ bool PointSourceSimulator::setup(QJsonObject &json)
             xx[i] = ja[i].toArray()[0].toDouble();
             yy[i] = ja[i].toArray()[1].toInt();
         }
-        CustomHist = new TH1I("hPhotDistr"+nameID,"Photon distribution", size-1, xx);
+        TString hName = "hPhotDistr";
+        hName += ID;
+        CustomHist = new TH1I(hName, "Photon distribution", size-1, xx);
         for (int i = 1; i<size+1; i++)  CustomHist->SetBinContent(i, yy[i-1]);
         CustomHist->GetIntegral(); //will be thread safe after this
         delete[] xx;
@@ -564,12 +603,10 @@ bool PointSourceSimulator::setup(QJsonObject &json)
 
     //reading wavelength/decay options
     QJsonObject wdjson = js["WaveTimeOptions"].toObject();
-    fDirectGeneration = !(bool)wdjson["Direct_Material"].toInt(); //0-direct, 1-from material
+    fUseGivenWaveIndex = false; //compatibility
+    parseJson(wdjson, "UseFixedWavelength", fUseGivenWaveIndex);
     PhotonOnStart.waveIndex = wdjson["WaveIndex"].toInt();
-    //PhotonOnStart.wavelength = simSettings->WaveFrom + simSettings->WaveStep*PhotonOnStart.waveIndex;
     if (!simSettings->fWaveResolved) PhotonOnStart.waveIndex = -1;
-    DecayTime = wdjson["DecayTime"].toDouble();
-    iMatIndex = wdjson["Material"].toInt();
 
     //reading direction info
     QJsonObject pdjson = js["PhotonDirectionOptions"].toObject();
@@ -842,6 +879,7 @@ bool PointSourceSimulator::SimulateFlood()
     //Do flood
     int nodeCount = (eventEnd - eventBegin);
     eventCurrent = 0;
+    int WatchdogThreshold = 100000;
     double updateFactor = 100.0 / (NumRuns*nodeCount);
     for (int inode = 0; inode < nodeCount; inode++)
     {
@@ -865,6 +903,13 @@ bool PointSourceSimulator::SimulateFlood()
         else r[2] = Zfrom + (Zto-Zfrom)*RandGen->Rndm();
         if (fLimitNodesToObject && !isInsideLimitingObject(r))
         {
+            WatchdogThreshold--;
+            if (WatchdogThreshold < 0 && inode == 0)
+            {
+                ErrorString = "100000 attempts to generate a point inside the limiting object has failed!";
+                return false;
+            }
+
             inode--;
             continue;
         }
@@ -1008,18 +1053,23 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         //else it is already set
 
         //configure  wavelength index and emission time
-        if (fDirectGeneration)
+        PhotonOnStart.time = 0;   //reset time offset to zero
+        TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
+
+        int thisMatIndex;
+        TGeoNode* node = navigator->FindNode(PhotonOnStart.r[0], PhotonOnStart.r[1], PhotonOnStart.r[2]);
+        if (!node)
         {
-            //directly given properties
-            //Wavelength and index are already set
-            if (simSettings->fTimeResolved) PhotonOnStart.time = RandGen->Exp(DecayTime);
+            //PhotonOnStart.waveIndex = -1;
+            thisMatIndex = detector->top->GetMaterial()->GetIndex(); //get material of the world
+            //qWarning() << "Node not found when generating photons (photon sources) - assuming material of the world!"<<thisMatIndex;
         }
         else
-        {
-            //material defined properties
-            PhotonOnStart.time = 0;
-            photonGenerator->GenerateWaveTime(&PhotonOnStart, iMatIndex);
-        }
+            thisMatIndex = node->GetVolume()->GetMaterial()->GetIndex();
+
+        if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
+        photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
+
         if (scs->ScintType == 2) PhotonOnStart.r[2] = z1 + (z2-z1)*RandGen->Rndm();
 
         PhotonOnStart.SimStat = OneEvent->SimStat;
@@ -1321,21 +1371,27 @@ void PointSourceSimulator::addLastScanPointToMarkers(bool fLimitNumber) //we do 
 /******************************************************************************\
 *                         Particle Source Simulator                            |
 \******************************************************************************/
-ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, const TString &nameID) :
-    Simulator(detector, nameID)
+ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, int ID) :
+    Simulator(detector, ID)
 {
     totalEventCount = 0;
+
+    detector->MpCollection->updateRandomGenForThread(ID, RandGen);
+
     ParticleTracker = new PrimaryParticleTracker(detector->GeoManager,
                                                  RandGen,                                                 
                                                  detector->MpCollection,
                                                  &ParticleStack,
                                                  &EnergyVector,
                                                  &dataHub->EventHistory,
-                                                 dataHub->SimStat);
+                                                 dataHub->SimStat,
+                                                 ID);
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
-    ParticleSources = new ParticleSourcesClass(detector, nameID);
+    TString SName = "PartSource";
+    SName += ID;
+    ParticleSources = new ParticleSourcesClass(detector, RandGen, SName);
 }
 
 ParticleSourceSimulator::~ParticleSourceSimulator()
@@ -1384,7 +1440,8 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
     TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
     fDoS1 = cjs["DoS1"].toBool();
     fDoS2 = cjs["DoS2"].toBool();
-    fBuildParticleTracks = cjs["ParticleTracks"].toBool();
+    //fBuildParticleTracks = cjs["ParticleTracks"].toBool();
+    fBuildParticleTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
     fIgnoreNoHitsEvents = false; //compatibility
     parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
     fIgnoreNoDepoEvents = true; //compatibility
@@ -1488,7 +1545,7 @@ void ParticleSourceSimulator::simulate()
         } //event prepared
         //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
 
-        ParticleTracker->TrackParticlesInStack(eventCurrent);
+        ParticleTracker->TrackParticlesOnStack(eventCurrent);
         //energy vector is ready
 
         //if it is an empty event, ignore it!
@@ -1566,7 +1623,7 @@ bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleOnStack *> *
     //qDebug() << ">Cloned";
     ParticleTracker->setRemoveTracksIfNoEnergyDepo(false);
     //qDebug() << ">Start tracking...";
-    return ParticleTracker->TrackParticlesInStack();
+    return ParticleTracker->TrackParticlesOnStack();
 }
 
 bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionCell *> *energyVector)
@@ -1601,6 +1658,12 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
     dataHub->Events.append(OneEvent->PMsignals);
     if(timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
     return true;
+}
+
+void ParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParticleTracks)
+{
+    ParticleTracker->setMaxTracks(maxParticleTracks);
+    photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
 void ParticleSourceSimulator::EnergyVectorToScan()
@@ -1684,7 +1747,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     this->EventsDataHub = EventsDataHub;
     this->Detector = Detector;
 
-    ParticleSources = new ParticleSourcesClass(Detector);
+    ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     //qDebug() << "->Container for particle sources created and configured";
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
@@ -1697,6 +1760,8 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 
     simTimerGuiUpdate.setInterval(1000);
     QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), Runner, SLOT(updateGui()), Qt::DirectConnection);
+
+    QObject::connect(Runner, &ASimulatorRunner::updateReady, this, &ASimulationManager::ProgressReport);
 }
 
 ASimulationManager::~ASimulationManager()
@@ -1713,15 +1778,36 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     fSuccess = false;
     fStartedFromGui = fFromGui;
 
-    Runner->setup(json, threads);
+    if (MaxThreads > 0 && threads > MaxThreads)
+    {
+        qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
+        threads = MaxThreads;
+    }
 
-    simThread.start();
-    if (fFromGui) simTimerGuiUpdate.start();
+    bool bOK = Runner->setup(json, threads);
+    if (!bOK)
+    {
+        QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
+    }
+    else
+    {
+        simThread.start();
+        simTimerGuiUpdate.start();
+    }
 }
 
 void ASimulationManager::StopSimulation()
 {
     emit RequestStopSimulation();
+}
+
+void ASimulationManager::onSimFailedToStart()
+{
+    fFinished = true;
+    fSuccess = false;
+    Runner->setFinished();
+
+    emit SimulationFinished();
 }
 
 void ASimulationManager::Clear()

@@ -28,7 +28,7 @@ public:
   //data
   double RealN, ImaginaryN;
 private:
-  double calculateReflectivity(double CosTheta, double RealN, double ImaginaryN);
+  double calculateReflectivity(double CosTheta, double RealN, double ImaginaryN, int waveIndex);
 
 };
 

@@ -27,6 +27,12 @@ public slots:
     bool TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent = false);
     bool TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time, bool AddToPreviousEvent = false);
 
+    bool TracePhotonsS2Isotropic(int copies,
+                                 double x, double y,
+                                 double zStart, double zStop,
+                                 int iWave, double time, double dZOverdT,
+                                 bool AddToPreviousEvent = false);
+
     void SetBuildTracks(bool flag) {bBuildTracks = flag;}
     void SetTrackColor(int color) {TrackColor = color;}
     void SetTrackWidth(int width) {TrackWidth = width;}

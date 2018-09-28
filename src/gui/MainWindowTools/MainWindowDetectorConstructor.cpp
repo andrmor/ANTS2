@@ -12,7 +12,8 @@
 #include "materialinspectorwindow.h"
 #include "checkupwindowclass.h"
 #include "asandwich.h"
-#include "slab.h"
+#include "aslab.h"
+#include "slabdelegate.h"
 #include "aslablistwidget.h"
 #include "ageoobject.h"
 #include "ageotreewidget.h"
@@ -71,10 +72,9 @@ bool MainWindow::startupDetector()
 
       //Generate MaterialCollection
       MpCollection->AddNewMaterial();
-      MpCollection->UpdateMaterial(MpCollection->countMaterials()-1, "Air", 1.2041e-3, 1, 0, 5, 100, 2, 5, 1, 0, 0, 0);
       AddDefaultPMtype();
-      MainWindow::on_pbRefreshMaterials_clicked();
-      MainWindow::on_pbRefreshOverrides_clicked();
+      //MainWindow::on_pbRefreshMaterials_clicked();
+      //MainWindow::on_pbRefreshOverrides_clicked();
       //create detector geometry and visualize
       qDebug()<<"-> Pre-building make-shift detector";
       Detector->PMarrays[0].fActive = ui->cbUPM->isChecked();

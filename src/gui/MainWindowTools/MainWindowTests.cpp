@@ -35,43 +35,114 @@ static QVector<TrackHolderClass> tracks;
 static TVector3 NormViz;
 
 //#include "TBufferJSON.h"
-#include "tmpobjhubclass.h"
-#include "TAttMarker.h"
+//#include "tmpobjhubclass.h"
+//#include "TAttMarker.h"
+
+//#include "TH1D.h"
+//#include "TGraph.h"
 void MainWindow::on_pobTest_clicked()
 {
-   if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
-   if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+//    double tau1 = 100.0;
+//    double tau2 = 100.0;
+//    int num = 10000000;
 
-   TGraph* g = new TGraph;
-   for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
-   {
-       g->SetPoint(ipm, TmpHub->ChPerPhEl_Peaks.at(ipm), TmpHub->ChPerPhEl_Sigma2.at(ipm));
-   }
-   GraphWindow->Draw(g, "A*");
+//    TH1D* h = new TH1D("h1", "", 1000, 0, 1000);
+//    for (int i=0; i<num; i++)
+//    {
+//        double t = -1.0 * tau1 * log(1.0 - Detector->RandGen->Rndm());
+//        t += Detector->RandGen->Exp(tau2);
+//        h->Fill(t);
+//    }
+//    GraphWindow->Draw(h);
+//    GraphWindow->AddCurrentToBasket("exp_pdf");
+
+//    TGraph* g = new TGraph();
+//    double a = tau1 * tau2 / (tau1 + tau2);
+//    for (double t=0; t<1000; t++)
+//    {
+//        double f = 1.0 - (tau1 + tau2)/tau2 * exp(-t/tau2 ) + tau1/tau2 * exp(-t/a);
+//        g->SetPoint(t, t, f*num);
+//    }
+//    GraphWindow->Draw(g, "AL");
+//    GraphWindow->AddCurrentToBasket("formula");
+
+
+//    QByteArray ba;
+//    EventsDataHub->packEventsToByteArray(0, EventsDataHub->countEvents(), ba);
+
+//    EventsDataHub->clear();
+//    EventsDataHub->unpackEventsFromByteArray(ba);
+
+//    ////////////////////////////////////////////////////////////////////
+//    QDataStream in(ba);
+//    QString st;
+//    int events;
+//    int numPMs;
+//    in >> st;
+//    in >> events;
+//    in >> numPMs;
+
+//    QVector<float> otherVector;
+//    in >> otherVector; //load
+//    qDebug() << st << events << numPMs;
+//    qDebug() << otherVector;
+
+
+//   if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+//   if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+
+//   TGraph* g = new TGraph;
+//   for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+//   {
+//       g->SetPoint(ipm, TmpHub->ChPerPhEl_Peaks.at(ipm), TmpHub->ChPerPhEl_Sigma2.at(ipm));
+//   }
+//   GraphWindow->Draw(g, "A*");
 }
 
+//include <QElapsedTimer>
 void MainWindow::on_pobTest_2_clicked()
 {
-    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
-    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
 
-    TGraph* g1 = new TGraph();
-    TGraph* g2 = new TGraph();
-    for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
-    {
-        g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
-        g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
-    }
-    g1->SetMarkerStyle(4);  //round
-    g2->SetMarkerStyle(3);  //star
-    g1->SetMarkerColor(4);  //blue
-    g2->SetMarkerColor(2);  //red
+//    std::vector<mydata> v;
+//    v.push_back( mydata(1.0, 100.0) );
 
-    g1->SetTitle("From peaks");
-    g2->SetTitle("From stat");
+//    QElapsedTimer t;
+//    t.start();
+//    for (int i=0; i<1000000; i++)
+//        RandomNTime(100.0, v);
+//    int el = t.elapsed();
+//    qDebug() << el;
 
-    GraphWindow->Draw(g1, "AP");
-    GraphWindow->Draw(g2, "P same");
+
+
+//    QByteArray ba;
+//    EventsDataHub->packReconstructedToByteArray(ba);
+
+//    EventsDataHub->resetReconstructionData(0);
+//    EventsDataHub->unpackReconstructedFromByteArray(0, EventsDataHub->countEvents(), ba);
+//    EventsDataHub->fReconstructionDataReady = true;
+//    emit EventsDataHub->requestEventsGuiUpdate();
+
+//    if (TmpHub->ChPerPhEl_Peaks.size() != TmpHub->ChPerPhEl_Sigma2.size()) return;
+//    if (TmpHub->ChPerPhEl_Peaks.size() == 0) return;
+
+//    TGraph* g1 = new TGraph();
+//    TGraph* g2 = new TGraph();
+//    for (int ipm = 0; ipm < TmpHub->ChPerPhEl_Peaks.size(); ipm++)
+//    {
+//        g1->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Peaks.at(ipm));
+//        g2->SetPoint(ipm, ipm, TmpHub->ChPerPhEl_Sigma2.at(ipm));
+//    }
+//    g1->SetMarkerStyle(4);  //round
+//    g2->SetMarkerStyle(3);  //star
+//    g1->SetMarkerColor(4);  //blue
+//    g2->SetMarkerColor(2);  //red
+
+//    g1->SetTitle("From peaks");
+//    g2->SetTitle("From stat");
+
+//    GraphWindow->Draw(g1, "AP");
+//    GraphWindow->Draw(g2, "P same");
 }
 
 /*
@@ -176,8 +247,8 @@ void MainWindow::on_pbST_AngleCos_clicked()
 
 AOpticalOverride* InitOverride(Ui::MainWindow *ui, AMaterialParticleCollection& MatCol)
 {
-  MatCol.AddNewMaterial();
-  MatCol.AddNewMaterial();
+  MatCol.AddNewMaterial(true);
+  MatCol.AddNewMaterial(true);
   MatCol[0]->n = ui->ledST_Ref1->text().toDouble();
   MatCol[1]->n = ui->ledST_Ref2->text().toDouble();
   double wave = ui->ledST_wave->text().toDouble();

@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QDebug>
+#include <QHostAddress>
 
 #include "TGeoManager.h"
 
@@ -35,8 +36,6 @@ GlobalSettingsWindowClass::GlobalSettingsWindowClass(MainWindow *parent) :
 
   if (GlobSet->fRunRootServerOnStart)
     GlobSet->NetModule->StartRootHttpServer(GlobSet->DefaultRootServerPort, GlobSet->ExternalJSROOT);  //does nothing if compilation flag is not set
-  if (GlobSet->fRunWebSocketServerOnStart)
-    GlobSet->NetModule->StartWebSocketServer(GlobSet->DefaultWebSocketPort);
 }
 
 GlobalSettingsWindowClass::~GlobalSettingsWindowClass()
@@ -71,7 +70,6 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->sbNumPointsFunctionY->setValue(GlobSet->FunctionPointsY);
 
   ui->sbNumSegments->setValue(GlobSet->NumSegments);
-  ui->sbMaxNumTracks->setValue(GlobSet->MaxNumberOfTracks);
 
   ui->sbNumTreads->setValue(GlobSet->NumThreads);
   ui->sbRecNumTreads->setValue(GlobSet->RecNumTreads);
@@ -80,19 +78,24 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->cbSaveRecAsTree_IncludeRho->setChecked(GlobSet->RecTreeSave_IncludeRho);
   ui->cbSaveRecAsTree_IncludeTrue->setChecked(GlobSet->RecTreeSave_IncludeTrue);
 
+  ui->cbSaveSimAsText_IncludeNumPhotons->setChecked(GlobSet->SimTextSave_IncludeNumPhotons);
+  ui->cbSaveSimAsText_IncludePositions->setChecked(GlobSet->SimTextSave_IncludePositions);
+
   updateNetGui();
 }
 
 void GlobalSettingsWindowClass::updateNetGui()
 {
+  ui->leWebSocketIP->setText(GlobSet->DefaultWebSocketIP);
+  ui->leWebSocketPort->setText(QString::number(GlobSet->DefaultWebSocketPort));
+
   bool fWebSocketRunning = GlobSet->NetModule->isWebSocketServerRunning();
   ui->cbRunWebSocketServer->setChecked( fWebSocketRunning );
-  ui->cbAutoRunWebSocketServer->setChecked( GlobSet->fRunWebSocketServerOnStart );
   if (fWebSocketRunning)
     {
       int port = GlobSet->NetModule->getWebSocketPort();
       ui->leWebSocketPort->setText(QString::number(port));
-      ui->leWebSocketURL->setText(GlobSet->NetModule->getWebSocketURL());
+      ui->leWebSocketURL->setText(GlobSet->NetModule->getWebSocketServerURL());
     }
 
   bool fRootServerRunning = GlobSet->NetModule->isRootServerRunning();
@@ -340,11 +343,6 @@ void GlobalSettingsWindowClass::on_sbNumSegments_editingFinished()
     MW->GeometryWindow->ShowGeometry(false);
 }
 
-void GlobalSettingsWindowClass::on_sbMaxNumTracks_editingFinished()
-{
-   GlobSet->MaxNumberOfTracks = ui->sbMaxNumTracks->value();
-}
-
 void GlobalSettingsWindowClass::on_sbNumPointsFunctionX_editingFinished()
 {
    GlobSet->FunctionPointsX = ui->sbNumPointsFunctionX->value();
@@ -382,26 +380,42 @@ void GlobalSettingsWindowClass::on_cbSaveRecAsTree_IncludeTrue_clicked(bool chec
 
 void GlobalSettingsWindowClass::on_cbRunWebSocketServer_clicked(bool checked)
 {
-  if (checked)
-    GlobSet->NetModule->StartWebSocketServer(GlobSet->DefaultWebSocketPort);
-  else
-    GlobSet->NetModule->StopWebSocketServer();
-}
+  GlobSet->NetModule->StopWebSocketServer();
 
-void GlobalSettingsWindowClass::on_cbAutoRunWebSocketServer_clicked()
-{
-  GlobSet->fRunWebSocketServerOnStart = ui->cbAutoRunWebSocketServer->isChecked();
+  if (checked)
+      GlobSet->NetModule->StartWebSocketServer(QHostAddress(GlobSet->DefaultWebSocketIP), GlobSet->DefaultWebSocketPort);
 }
 
 void GlobalSettingsWindowClass::on_leWebSocketPort_editingFinished()
 {
   int oldp = GlobSet->DefaultWebSocketPort;
   int newp = ui->leWebSocketPort->text().toInt();
-  if (oldp == newp) return;
 
-  GlobSet->DefaultWebSocketPort = newp;
-  if (ui->cbRunWebSocketServer->isChecked())
-      GlobSet->NetModule->StartWebSocketServer(GlobSet->DefaultWebSocketPort);
+  if (oldp != newp)
+  {
+      GlobSet->DefaultWebSocketPort = newp;
+      ui->cbRunWebSocketServer->setChecked(false);
+      GlobSet->DefaultWebSocketPort = newp;
+      ui->leWebSocketPort->setText(QString::number(newp));
+  }
+}
+
+void GlobalSettingsWindowClass::on_leWebSocketIP_editingFinished()
+{
+    QString newIP = ui->leWebSocketIP->text();
+    if (newIP == GlobSet->DefaultWebSocketIP) return;
+
+    QHostAddress ip = QHostAddress(newIP);
+    if (ip.isNull())
+    {
+        ui->leWebSocketIP->setText(GlobSet->DefaultWebSocketIP);
+        message("Bad format of IP: use, e.g., 127.0.0.1", this);
+    }
+    else
+    {
+        GlobSet->DefaultWebSocketIP = newIP;
+        ui->cbRunWebSocketServer->setChecked(false);
+    }
 }
 
 void GlobalSettingsWindowClass::on_cbRunRootServer_clicked(bool checked)
@@ -419,16 +433,30 @@ void GlobalSettingsWindowClass::on_cbAutoRunRootServer_clicked()
 
 void GlobalSettingsWindowClass::on_leRootServerPort_editingFinished()
 {
-  int oldp = GlobSet->DefaultWebSocketPort;
+  int oldp = GlobSet->DefaultRootServerPort;
   int newp = ui->leRootServerPort->text().toInt();
   if (oldp == newp) return;
-  GlobSet->DefaultRootServerPort = ui->leRootServerPort->text().toInt();
+  GlobSet->DefaultRootServerPort = newp;
 
-  if (ui->cbRunRootServer->isChecked())
-  GlobSet->NetModule->StartRootHttpServer(GlobSet->DefaultRootServerPort, GlobSet->ExternalJSROOT);  //does nothing if compilation flag is not set
+  ui->cbRunRootServer->setChecked(false);
 }
 
 void GlobalSettingsWindowClass::on_leJSROOT_editingFinished()
 {
   GlobSet->ExternalJSROOT = ui->leJSROOT->text();
+}
+
+void GlobalSettingsWindowClass::on_cbRunWebSocketServer_toggled(bool checked)
+{
+    if (!checked) ui->leWebSocketURL->clear();
+}
+
+void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked)
+{
+    GlobSet->SimTextSave_IncludeNumPhotons = checked;
+}
+
+void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludePositions_clicked(bool checked)
+{
+    GlobSet->SimTextSave_IncludePositions = checked;
 }

@@ -1,10 +1,12 @@
 #include "ajsontools.h"
-#include "amessage.h"
 
+#ifdef GUI
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QLineEdit>
 #include <QComboBox>
+#endif
+
 #include <QJsonDocument>
 #include <QDebug>
 #include <QFile>
@@ -80,6 +82,7 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj)
     else return false;
 }
 
+#ifdef GUI
 void JsonToCheckbox(QJsonObject &json, QString key, QCheckBox *cb)
 {
   if (json.contains(key))
@@ -102,6 +105,12 @@ void JsonToLineEditDouble(QJsonObject &json, QString key, QLineEdit *le)
     le->setText( QString::number(json[key].toDouble()) );
 }
 
+void JsonToLineEditInt(QJsonObject &json, QString key, QLineEdit *le)
+{
+    if (json.contains(key))
+        le->setText( QString::number(json[key].toInt()) );
+}
+
 void JsonToLineEditText(QJsonObject &json, QString key, QLineEdit *le)
 {
     if (json.contains(key))
@@ -117,6 +126,7 @@ void JsonToComboBox(QJsonObject &json, QString key, QComboBox *qb)
       qb->setCurrentIndex(index);
     }
 }
+#endif
 
 bool LoadJsonFromFile(QJsonObject &json, QString fileName)
 {
@@ -127,14 +137,14 @@ bool LoadJsonFromFile(QJsonObject &json, QString fileName)
         QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
         json = loadDoc.object();
         loadFile.close();
-        //qDebug()<<"  Loaded Json from file:"<<fileName;
+        //  qDebug()<<"  Loaded Json from file:"<<fileName;
+        return true;
       }
     else
       {
-        message("Cannot open file: "+fileName);
+        //  qDebug() << "Cannot open file:" << fileName;
         return false;
       }
-    return true;
 }
 
 bool SaveJsonToFile(QJsonObject &json, QString fileName)
@@ -147,14 +157,13 @@ bool SaveJsonToFile(QJsonObject &json, QString fileName)
       saveFile.write(saveDoc.toJson());
       saveFile.close();
       //  qDebug()<<"  Saved Json to file:"<<fileName;
+      return true;
     }
   else
     {
-      message("Couldn't save json to file: "+fileName);
+      //  qDebug() << "Couldn't save json to file: "<<fileName;
       return false;
     }
-
-  return true;
 }
 
 bool writeTH1ItoJsonArr(TH1I* hist, QJsonArray &ja)
@@ -246,3 +255,17 @@ bool isContainAllKeys(QJsonObject json, QStringList keys)
         if (!json.contains(key)) return false;
     return true;
 }
+
+const QJsonObject strToObject(const QString &s)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(s.toUtf8());
+    return doc.object();
+}
+
+const QString jsonToString(const QJsonObject &json)
+{
+    QJsonDocument doc(json);
+    QString s( doc.toJson(QJsonDocument::Compact) );
+    return s;
+}
+

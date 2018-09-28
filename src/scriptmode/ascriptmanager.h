@@ -33,10 +33,11 @@ public:
   virtual void      collectGarbage(){}
   virtual void      abortEvaluation() = 0;
 
+#ifdef GUI
   virtual void      hideMsgDialogs();
   virtual void      restoreMsgDialogs();
-
-
+  void              deleteMsgDialogs();
+#endif
   bool              isEngineRunning() const {return fEngineIsRunning;}
   bool              isEvalAborted() const {return fAborted;}
 
@@ -44,7 +45,7 @@ public:
   qint64            getElapsedTime();
   const QString     getFunctionReturnType(const QString& UnitFunction);
 
-  void              deleteMsgDialogs();
+
 
   void              ifError_AbortAndReport();
 
@@ -55,8 +56,10 @@ public:
   QVector<QObject*> interfaces;  //registered interfaces (units)
   TRandom2*         RandGen;     //math module uses it
 
-  //starter dirs
-  QString           LibScripts, LastOpenDir, ExamplesDir;
+  //pointers to starter dirs
+  QString*          LibScripts = 0;
+  QString*          LastOpenDir = 0;
+  QString*          ExamplesDir = 0;
 
   //for minimizer
   QString           MiniFunctionName;
@@ -64,10 +67,13 @@ public:
   int               MiniNumVariables;
 
 protected:
+  bool              bOwnRandomGen = false;  //the main manager (GUI thread) does not own RandGen, but multithread managers do
+
   bool              fEngineIsRunning;
   bool              fAborted;
 
   QString           LastError;
+  bool              bShowAbortMessageInOutput = true; //can be false -> in multithread if abort is local to this thread
 
   QElapsedTimer*    timer;
   qint64            timeOfStart;

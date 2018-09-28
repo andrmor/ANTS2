@@ -1,7 +1,7 @@
 #ifndef AMESSAGEOUTPUT_H
 #define AMESSAGEOUTPUT_H
 
-#include <qapplication.h>
+#include <QtWidgets/qapplication.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>

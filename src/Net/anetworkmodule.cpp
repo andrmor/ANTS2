@@ -1,12 +1,24 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 
-#include "awebsocketserver.h"
+//#include "awebsocketserver.h"
+#include "awebsocketsessionserver.h"
 #ifdef USE_ROOT_HTML
 #include "aroothttpserver.h"
 #endif
 
 #include <QDebug>
+
+ANetworkModule::ANetworkModule()
+{
+    WebSocketServer = new AWebSocketSessionServer();
+
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::textMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::reportToGUI, this, &ANetworkModule::ReportTextToGUI);
+    QObject::connect(WebSocketServer, &AWebSocketSessionServer::clientDisconnected, this, &ANetworkModule::OnClientDisconnected);
+
+    QObject::connect(this, &ANetworkModule::ProgressReport, WebSocketServer, &AWebSocketSessionServer::onProgressChanged);
+}
 
 ANetworkModule::~ANetworkModule()
 {
@@ -22,13 +34,18 @@ void ANetworkModule::SetScriptManager(AJavaScriptManager* man)
   ScriptManager = man;
 }
 
-int ANetworkModule::getWebSocketPort() const
+bool ANetworkModule::isWebSocketServerRunning() const
 {
-  if (!WebSocketServer) return 0;
-  return WebSocketServer->GetPort();
+    return WebSocketServer->IsRunning();
 }
 
-const QString ANetworkModule::getWebSocketURL() const
+int ANetworkModule::getWebSocketPort() const
+{
+    if (!WebSocketServer) return 0;
+    return WebSocketServer->GetPort();
+}
+
+const QString ANetworkModule::getWebSocketServerURL() const
 {
   if (!WebSocketServer) return "";
   return WebSocketServer->GetUrl();
@@ -36,7 +53,18 @@ const QString ANetworkModule::getWebSocketURL() const
 
 int ANetworkModule::getRootServerPort() const
 {
-  return RootServerPort;
+    return RootServerPort;
+}
+
+const QString ANetworkModule::getWebSocketServerURL()
+{
+    return WebSocketServer->GetUrl();
+}
+
+void ANetworkModule::SetTicket(const QString &ticket)
+{
+    Ticket = ticket;
+    bTicketChecked = false;
 }
 
 bool ANetworkModule::isRootServerRunning() const
@@ -47,20 +75,23 @@ bool ANetworkModule::isRootServerRunning() const
   return false;
 }
 
-void ANetworkModule::StartWebSocketServer(quint16 port)
-{
-  if (WebSocketServer) WebSocketServer->deleteLater();
-    WebSocketServer = new AWebSocketServer(port, fDebug);
-    QObject::connect(WebSocketServer, &AWebSocketServer::NotifyTextMessageReceived, this, &ANetworkModule::OnWebSocketTextMessageReceived);
-
+void ANetworkModule::StartWebSocketServer(QHostAddress ip, quint16 port)
+{    
+    WebSocketServer->StartListen(ip, port);
     emit StatusChanged();
+
+    if (bSingleConnectionMode)
+    {
+        IdleTimer.setInterval(SelfDestructOnIdle);
+        IdleTimer.setSingleShot(true);
+        QObject::connect(&IdleTimer, &QTimer::timeout, this, &ANetworkModule::onIdleTimerTriggered);
+        IdleTimer.start();
+    }
 }
 
 void ANetworkModule::StopWebSocketServer()
 {
-    WebSocketServer->deleteLater();
-    WebSocketServer = 0;
-
+    WebSocketServer->StopListen();
     qDebug() << "ANTS2 web socket server has stopped listening";
     emit StatusChanged();
 }
@@ -97,21 +128,95 @@ void ANetworkModule::onNewGeoManagerCreated(TObject *GeoManager)
 #endif
 }
 
+#include <QJsonObject>
+#include <QJsonDocument>
 void ANetworkModule::OnWebSocketTextMessageReceived(QString message)
 {
-    qDebug() << "attempting to use as script the message received by websocket server";
-    int line = ScriptManager->FindSyntaxError(message);
-    if (line != -1)
+    if (bSingleConnectionMode) IdleTimer.stop();
+
+    if (message.startsWith("__"))
     {
-       qDebug() << "Syntaxt error!";
-       WebSocketServer->ReplyAndClose("Syntax error!");
+        qDebug() << "WebSocket server received system message:"<<message;
+        message.remove(0, 2);
+        QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8());
+        QJsonObject json = doc.object();
+
+        if (json.contains("ticket"))
+        {
+            QString receivedTicket = json["ticket"].toString();
+            qDebug() << "  Ticket presented" << receivedTicket;
+            if ( receivedTicket == Ticket || Ticket.isEmpty() )
+            {
+                bTicketChecked = true;
+                qDebug() << "  Ticket is valid!";
+                WebSocketServer->sendOK();
+            }
+            else
+            {
+                qDebug() << "  Invalid ticket!";
+                WebSocketServer->sendError("Invalid ticket");
+                WebSocketServer->DisconnectClient();
+                return;
+            }
+        }
+        else
+        {
+            qDebug() << "  System message not recognized!";
+            WebSocketServer->sendError("Unknown system message");
+            WebSocketServer->DisconnectClient();
+            return;
+        }
     }
     else
     {
-        QString res = ScriptManager->Evaluate(message);
-        qDebug() << "Result:"<<res;
-        WebSocketServer->ReplyAndClose("UpdateGeometry");
+        qDebug() << "Websocket server: Message (script) received";
+        if (!bTicketChecked)
+        {
+            qDebug() << "  Ticket is required, but has not been validated, disconnecting";
+            WebSocketServer->sendError("Ticket was not validated");
+            WebSocketServer->DisconnectClient();
+            return;
+        }
+
+        qDebug() << "  Evaluating as JavaScript";
+
+        int line = ScriptManager->FindSyntaxError(message);
+        if (line != -1)
+        {
+           qDebug() << "Syntaxt error!";
+           WebSocketServer->sendError("  Syntax check failed - message is not a valid JavaScript");
+        }
+        else
+        {
+            QString res = ScriptManager->Evaluate(message);
+            qDebug() << "  Script evaluation result:"<<res;
+
+            if (ScriptManager->isEvalAborted())
+            {
+                qDebug() << "  Was aborted:" << ScriptManager->getLastError();
+                WebSocketServer->sendError("Aborted -> " + ScriptManager->getLastError());
+            }
+            else
+            {
+                if ( !WebSocketServer->isReplied() )
+                {
+                    if (res == "undefined") WebSocketServer->sendOK();
+                    else WebSocketServer->ReplyWithText("{ \"result\" : true, \"evaluation\" : \"" + res + "\" }");
+                }
+            }
+        }
     }
+
+    if (bSingleConnectionMode) IdleTimer.start();
 }
 
+void ANetworkModule::OnClientDisconnected()
+{
+    if (bSingleConnectionMode) exit(0);
+}
 
+void ANetworkModule::onIdleTimerTriggered()
+{
+    qDebug() << "Idle time limit reached, exiting";
+    exit(1);
+}

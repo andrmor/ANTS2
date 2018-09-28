@@ -1,3 +1,5 @@
+/*
+
 #include "ainterfacetoannscript.h"
 
 #include <QJsonArray>
@@ -149,3 +151,5 @@ bool AInterfaceToANNScript::convertQVariantToVectorOfVectors(QVariant *var, QVec
     }
   return true;
 }
+
+*/

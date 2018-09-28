@@ -3,7 +3,8 @@
 #include "ashapehelpdialog.h"
 #include "arootlineconfigurator.h"
 #include "aslablistwidget.h"
-#include "slab.h"
+#include "slabdelegate.h"
+#include "aslab.h"
 #include "asandwich.h"
 #include "agridelementdialog.h"
 #include "amonitordelegateform.h"
@@ -151,7 +152,7 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
     if (!obj->getGridElement()) return;
     ATypeGridElementObject* GE = static_cast<ATypeGridElementObject*>(obj->getGridElement()->ObjectType);
 
-    AGridElementDialog* d = new AGridElementDialog(this);
+    AGridElementDialog* d = new AGridElementDialog(Sandwich->Materials, this);
     switch (GE->shape)
      {
       case 0: d->setValues(0, GE->size1, GE->size2, obj->getGridElement()->Shape->getHeight()-0.001); break;
@@ -165,6 +166,15 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
       }
     }
 
+    //setting materials
+    d->setBulkMaterial(obj->Material);
+    if (!obj->HostedObjects.isEmpty())
+        if (!obj->HostedObjects.first()->HostedObjects.isEmpty())
+        {
+            int wireMat = obj->HostedObjects.first()->HostedObjects.first()->Material;
+            d->setWireMaterial(wireMat);
+        }
+
     int res = d->exec();
 
     if (res != 0)
@@ -172,12 +182,14 @@ void AGeoTreeWidget::onGridReshapeRequested(QString objName)
         //qDebug() << "Accepted!";
         switch (d->shape())
         {
-        case 0: Sandwich->shapeGrid(obj, 0, d->pitch(), d->length(), d->diameter()); break;
-        case 1: Sandwich->shapeGrid(obj, 1, d->pitchX(), d->pitchY(), d->diameter()); break;
-        case 2: Sandwich->shapeGrid(obj, 2, d->outer(), d->inner(), d->height()); break;
+        case 0: Sandwich->shapeGrid(obj, 0, d->pitch(), d->length(), d->diameter(), d->wireMaterial()); break;
+        case 1: Sandwich->shapeGrid(obj, 1, d->pitchX(), d->pitchY(), d->diameter(), d->wireMaterial()); break;
+        case 2: Sandwich->shapeGrid(obj, 2, d->outer(), d->inner(), d->height(), d->wireMaterial()); break;
         default:
             qWarning() << "Unknown grid type!";
         }
+
+        obj->Material = d->bulkMaterial();
 
         emit RequestRebuildDetector();
         UpdateGui(objName);
@@ -913,6 +925,7 @@ void AGeoTreeWidget::menuActionAddNewGrid(QString ContainerName)
   while (World->isNameExists(newObj->Name));
   if (newObj->Shape) delete newObj->Shape;
   newObj->Shape = new AGeoBox(50, 50, 0.501);
+  newObj->Material = ContObj->Material;
 
   newObj->color = 1;
   ContObj->addObjectFirst(newObj);
@@ -1241,15 +1254,18 @@ void AGeoWidget::ClearGui()
 
   if (GeoObjectDelegate)
     {
-      //delete CurrentObjectDelegate->Widget;
       delete GeoObjectDelegate;
       GeoObjectDelegate = 0;
     }    
   if (SlabDelegate)
     {
-      //delete CurrentSlabDelegate->frMain;
       delete SlabDelegate;
       SlabDelegate = 0;
+    }
+  if (GridDelegate)
+    {
+      delete GridDelegate;
+      GridDelegate = 0;
     }
   if (MonitorDelegate)
     {
@@ -1621,17 +1637,17 @@ void AGeoWidget::onConfirmPressed()
     }
   else if (!GeoObjectDelegate)
     {
-      qWarning() << "Confirm triggered without CurrentObject!";
+      qWarning() << "|||---Confirm triggered without CurrentObject!";
       exitEditingMode();
       tw->UpdateGui();
       return;
     }
 
-  //qDebug() << "Validating update data for object" << CurrentObject->Name;
+  //    qDebug() << "Validating update data for object" << CurrentObject->Name;
   bool ok = checkNonSlabObjectDelegateValidity(CurrentObject);
   if (!ok) return;
 
-  //qDebug() << "Validation success, can assign new values!";
+  //    qDebug() << "Validation success, can assign new values!";
   getValuesFromNonSlabDelegates(CurrentObject);
 
   //finalizing
@@ -2333,7 +2349,7 @@ AGridElementDelegate::AGridElementDelegate(QString name)
 
     QPushButton* pbAuto = new QPushButton();
     connect(pbAuto, SIGNAL(clicked(bool)), this, SLOT(StartDialog()));
-    pbAuto->setText("Open generation dialog");
+    pbAuto->setText("Open generation/edit dialog");
     pbAuto->setMinimumWidth(200);
     pbAuto->setMaximumWidth(200);
     vl->addWidget(pbAuto);
@@ -2408,8 +2424,17 @@ void AGridElementDelegate::onInstructionsForGridRequested()
                 "2. Photons are allowed to leave the grid element only\n"
                 "   when they exit the grid object:\n"
                 "   the user has to properly position the wires inside the\n"
-                "   grid element, so photons cannot cross the border \"sideways\"\n\n"
-                "   Grid generation dialog generates a correct grid element automatically";
+                "   grid element, so photons cannot cross the border \"sideways\"\n"
+                "   \n"
+                "Grid generation dialog generates a correct grid element automatically\n"
+                "   \n "
+                "For modification of all properties of the grid except\n"
+                "  - the position/orientation/XYsize of the grid bulk\n"
+                "  - materials of the bulk and the wires\n"
+                "it is _strongly_ recommended to use the auto-generation dialog.\n"
+                "\n"
+                "Press the \"Open generation/edit dialog\" button";
+
 
     QMessageBox::information(this, "", s);
 }

@@ -4,6 +4,7 @@
 #include "globalsettingsclass.h"
 #include "ajsontools.h"
 #include "amessage.h"
+#include "simulationmanager.h"
 
 //Qt
 #include <QDebug>
@@ -59,21 +60,16 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   trjson["MinEnergy"] = ui->ledMinEnergy->text().toDouble();
   trjson["MinEnergyNeutrons"] = ui->ledMinEnergyNeutrons->text().toDouble();
   trjson["Safety"] = ui->ledSafety->text().toDouble();
-  trjson["TrackColorAdd"] = ui->sbParticleTrackColorIndexAdd->value();
   json["TrackingConfig"] = trjson;
 
   //Accelerators options
   QJsonObject acjson;
   acjson["MaxNumTransitions"] = ui->sbMaxNumbPhTransitions->value();
   acjson["CheckBeforeTrack"] = ui->cbRndCheckBeforeTrack->isChecked();
-  acjson["OnlyTracksOnPMs"] = ui->cbOnlyBuildTracksOnPMs->isChecked();
+  //acjson["OnlyTracksOnPMs"] = ui->cbOnlyBuildTracksOnPMs->isChecked();
   acjson["LogsStatistics"] = ui->cbDoLogsAndStatistics->isChecked();
   //acjson["NumberThreads"] = ui->sbNumberThreads->value();
   json["AcceleratorConfig"] = acjson;
-
-  //tracks
-  json["BuildPhotonTracks"] = ui->cbGunPhotonTracks->isChecked(); //all BuildPhotTracks cb are connected!
-  json["MaxNumberOfTracks"] = GlobSet->MaxNumberOfTracks;
 
   //DetStat binning
   json["DetStatNumBins"] = GlobSet->BinsX;
@@ -93,6 +89,10 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
 //            }
 //        }
   json["SecScintConfig"] = scjson;
+
+  QJsonObject tbojs;
+    SimulationManager->TrackBuildOptions.writeToJson(tbojs);
+  json["TrackBuildingOptions"] = tbojs;
 
   //adding to master json
   jsonMaster["GeneralSimConfig"] = json;
@@ -156,15 +156,8 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerb
 
   //Wavelength/decay options
   QJsonObject wdjson;
-  int TypeWG = ui->cobDirectlyOrFromMaterial->currentIndex();
-  wdjson["Direct_Material"] = TypeWG; // 0-Direct, 1-Material determine wave/dec
-  //if (TypeWG == 0)
-  //  {
-      wdjson["WaveIndex"] = ui->sbWaveIndexPointSource->value();
-      wdjson["DecayTime"] = ui->ledDecayTime->text().toDouble();
-  //  }
-  //else
-      wdjson["Material"] = ui->cobMatPointSource->currentIndex();
+      wdjson["UseFixedWavelength"] = ui->cbFixWavelengthPointSource->isChecked();
+      wdjson["WaveIndex"] = ui->sbFixedWaveIndexPointSource->value();
   json["WaveTimeOptions"] = wdjson;
 
   //Photon direction options

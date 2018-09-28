@@ -1,10 +1,13 @@
 #include "ascriptmanager.h"
 #include "ascriptinterface.h"
+#ifdef GUI
 #include "ainterfacetomessagewindow.h"
-
+#endif
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QMetaMethod>
+
+#include "TRandom2.h"
 
 AScriptManager::AScriptManager(TRandom2 *RandGen) : RandGen(RandGen)
 {
@@ -23,8 +26,11 @@ AScriptManager::~AScriptManager()
   interfaces.clear();
 
   delete timer;
+
+  if (bOwnRandomGen) delete RandGen;
 }
 
+#ifdef GUI
 void AScriptManager::hideMsgDialogs()
 {
   for (int i=0; i<interfaces.size(); i++)
@@ -42,6 +48,20 @@ void AScriptManager::restoreMsgDialogs()
       if (t) t->RestorelWidget();
   }
 }
+
+void AScriptManager::deleteMsgDialogs()
+{
+  for (int i=0; i<interfaces.size(); i++)
+  {
+      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      if (t)
+      {
+          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
+          return;
+      }
+  }
+}
+#endif
 
 qint64 AScriptManager::getElapsedTime()
 {
@@ -98,19 +118,6 @@ const QString AScriptManager::getFunctionReturnType(const QString &UnitFunction)
   return returnType;
 }
 
-void AScriptManager::deleteMsgDialogs()
-{
-  for (int i=0; i<interfaces.size(); i++)
-  {
-      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
-      if (t)
-      {
-          // *** !!! t->deleteDialog(); //need by GenScriptWindow ?
-          return;
-      }
-  }
-}
-
 void AScriptManager::ifError_AbortAndReport()
 {
     if (isUncaughtException())
@@ -145,7 +152,7 @@ void AScriptManager::AbortEvaluation(QString message)
       if (bi) bi->ForceStop();
     }
 
-  if (!message.isEmpty())
+  if (!message.isEmpty() && bShowAbortMessageInOutput)
   {
       message = "<font color=\"red\">"+ message +"</font><br>";
       emit showMessage(message);

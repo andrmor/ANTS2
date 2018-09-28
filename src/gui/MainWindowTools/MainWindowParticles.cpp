@@ -9,6 +9,8 @@
 #include "particlesourcesclass.h"
 #include "amessage.h"
 #include "aconfiguration.h"
+#include "atrackrecords.h"
+#include "simulationmanager.h"
 
 //Qt
 #include <QMessageBox>
@@ -37,7 +39,12 @@ void MainWindow::on_pbShowColorCoding_pressed()
 {
   for (int i=0; i<ui->lwParticles->count(); i++)
     {
-      TColor* rc = gROOT->GetColor(i +1 +ui->sbParticleTrackColorIndexAdd->value());
+      //TColor* rc = gROOT->GetColor(i +1 +ui->sbParticleTrackColorIndexAdd->value());
+      TrackHolderClass th;
+      SimulationManager->TrackBuildOptions.applyToParticleTrack(&th, i);
+      TColor* rc = gROOT->GetColor(th.Color);
+
+      if (!rc) continue;
       QColor qc = QColor(255*rc->GetRed(), 255*rc->GetGreen(), 255*rc->GetBlue(), 255*rc->GetAlpha());
 
       QListWidgetItem* pItem = ui->lwParticles->item(i);
@@ -136,6 +143,7 @@ void MainWindow::on_pbAddparticleToActive_clicked()
       //new particle
       bool fOk = MpCollection->AddParticle(name, type, charge, mass);
       if (fOk) ui->cobParticleToInspect->setCurrentIndex(ui->cobParticleToInspect->count()-1);
+      onRequestDetectorGuiUpdate();
     }
 }
 

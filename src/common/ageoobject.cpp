@@ -1,5 +1,5 @@
 #include "ageoobject.h"
-#include "slab.h"
+#include "aslab.h"
 #include "ajsontools.h"
 #include "agridelementrecord.h"
 
@@ -514,6 +514,15 @@ AGeoObject *AGeoObject::findObjectByName(const QString name)
   return 0; //not found
 }
 
+void AGeoObject::changeLineWidthRecursive(int delta)
+{
+    width += delta;
+    if (width < 1) width = 1;
+
+    for (int i=0; i<HostedObjects.size(); i++)
+        HostedObjects[i]->changeLineWidthRecursive(delta);
+}
+
 bool AGeoObject::isNameExists(const QString name)
 {
   return (findObjectByName(name)) ? true : false;
@@ -885,9 +894,18 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
 
 bool AGeoObject::isMaterialInUse(int imat)
 {
-    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material
+    //qDebug() << Name << "--->"<<Material;
 
-    if (Material == imat) return true;
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+
+    //if (ObjectType->isGridElement()) qDebug() << "----Grid element!";
+    //if (ObjectType->isCompositeContainer()) qDebug() << "----Composite container!";
+
+    if (Material == imat)
+    {
+        if ( !ObjectType->isGridElement() && !ObjectType->isCompositeContainer() )
+            return true;
+    }
 
     for (int i=0; i<HostedObjects.size(); i++)
         if (HostedObjects[i]->isMaterialInUse(imat)) return true;

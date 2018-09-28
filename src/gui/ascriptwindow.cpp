@@ -45,7 +45,8 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QInputDialog>
-#include <QTextDocumentFragment>
+//#include <QTextDocumentFragment>
+#include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
@@ -79,10 +80,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
     this->GlobSet = GlobSet;
-    //SetStarterDir(GlobSet->LibScripts);
-    ScriptManager->LibScripts = GlobSet->LibScripts;
-    ScriptManager->LastOpenDir = GlobSet->LastOpenDir;
-    ScriptManager->ExamplesDir = GlobSet->ExamplesDir;
+    ScriptManager->LibScripts  = &GlobSet->LibScripts;
+    ScriptManager->LastOpenDir = &GlobSet->LastOpenDir;
+    ScriptManager->ExamplesDir = &GlobSet->ExamplesDir;
 
     ShowEvalResult = true;
     ui->setupUi(this);
@@ -254,7 +254,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QShortcut* GoForward = new QShortcut(QKeySequence("Alt+Right"), this);
     connect(GoForward, &QShortcut::activated, this, &AScriptWindow::onForward);
     QShortcut* DoAlign = new QShortcut(QKeySequence("Ctrl+I"), this);
-    connect(DoAlign, &QShortcut::activated, [&](){onRequestAlignText(ScriptTabs[CurrentTab]->TextEdit->textCursor());});
+    connect(DoAlign, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->align();});
+    //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
+    //connect(DoPaste, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->paste();});
 
     if (!bLightMode)
         ReadFromJson();
@@ -286,31 +288,30 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 
     // populating help
     QStringList newFunctions;
+
     if(name.isEmpty())
     { // empty name means the main module
         // populating help for main, math and core units
         trwHelp->clear();
         if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
+
         AInterfaceToCore core(0); //dummy to extract methods
         fillHelper(&core, "core");
-        newFunctions << getCustomCommandsOfObject(&core, "core", false);
+        newFunctions << getListOfMethods(&core, "core", false);
+        appendDeprecatedOrRemovedMethods(&core, "core");
+
         AInterfaceToMath math(0); //dummy to extract methods
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         fillHelper(&math, mathName);
-        newFunctions << getCustomCommandsOfObject(&math, mathName, false);
+        newFunctions << getListOfMethods(&math, mathName, false);
+        appendDeprecatedOrRemovedMethods(&math, mathName);
         trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
         fillHelper(interfaceObject, name);
-        newFunctions << getCustomCommandsOfObject(interfaceObject, name, false);
-    }
-
-    // auto-read list of public slots for highlighter    
-    for (int i=0; i<ScriptTabs.size(); i++)
-    {
-        ScriptTabs[i]->highlighter->setCustomCommands(newFunctions);
-        ScriptTabs[i]->TextEdit->functionList = functionList;
+        newFunctions << getListOfMethods(interfaceObject, name, false);
+        appendDeprecatedOrRemovedMethods(interfaceObject, name);
     }
 
     //filling autocompleter
@@ -319,12 +320,21 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     functions << newFunctions;
     //completitionModel->setStringList(functions);
 
+    //if standalone script, update the highlighter and tooltip
+    if (name.isEmpty()) UpdateAllTabs();
+
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
        QObject::connect(interfaceObject, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
 
     if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
+}
+
+void AScriptWindow::UpdateAllTabs()
+{
+    for (int i=0; i<ScriptTabs.size(); i++)
+        UpdateTab(ScriptTabs[i]);
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -764,7 +774,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       if (ScriptLanguage == _PythonScript_) UnitDescription.remove("Multithread-capable");
     }
 
-  QStringList functions = getCustomCommandsOfObject(obj, module, true);
+  QStringList functions = getListOfMethods(obj, module, true);
   functions.sort();
 
   QTreeWidgetItem *objItem = new QTreeWidgetItem(trwHelp);
@@ -1131,7 +1141,7 @@ void AScriptWindow::onProgressChanged(int percent)
     qApp->processEvents();
 }
 
-QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjName, bool fWithArguments)
+QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
   int methods = obj->metaObject()->methodCount();
@@ -1177,6 +1187,26 @@ QStringList AScriptWindow::getCustomCommandsOfObject(QObject *obj, QString ObjNa
         }
     }
   return commands;
+}
+
+void AScriptWindow::appendDeprecatedOrRemovedMethods(const QObject *obj, const QString &name)
+{
+    const AScriptInterface* unit = dynamic_cast<const AScriptInterface*>(obj);
+
+    if (unit)
+    {
+        QHashIterator<QString, QString> iter(unit->getDeprecatedOrRemovedMethods());
+        while (iter.hasNext())
+        {
+            iter.next();
+
+            QString key = iter.key();
+            if (!name.isEmpty()) key = name + "." + key;
+
+            DeprecatedOrRemovedMethods[key] = iter.value();
+            ListOfDeprecatedOrRemovedMethods << key;
+        }
+    }
 }
 
 AScriptWindowTabItem::AScriptWindowTabItem(const QStringList& functions, AScriptWindow::ScriptLanguageEnum language) :
@@ -1358,11 +1388,20 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
    ScriptTabs.swap(from, to);
 }
 
+void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
+{
+    tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
+    tab->TextEdit->functionList = functionList;
+    tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
+}
+
 void AScriptWindow::AddNewTab()
 {
     AScriptWindowTabItem* tab = new AScriptWindowTabItem(functions, ScriptLanguage);
-    tab->highlighter->setCustomCommands(functions);
-    tab->TextEdit->functionList = functionList;
+
+    //tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, QStringList());
+    //tab->TextEdit->functionList = functionList;
+    UpdateTab(tab);
 
     if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
       {
@@ -1388,7 +1427,6 @@ void AScriptWindow::AddNewTab()
     connect(tab, &AScriptWindowTabItem::requestReplaceText, this, &AScriptWindow::onReplaceSelected);
     connect(tab, &AScriptWindowTabItem::requestFindFunction, this, &AScriptWindow::onFindFunction);
     connect(tab, &AScriptWindowTabItem::requestFindVariable, this, &AScriptWindow::onFindVariable);
-    connect(tab, &AScriptWindowTabItem::requestAlignText, this, &AScriptWindow::onRequestAlignText);
 }
 
 QString AScriptWindow::createNewTabName()
@@ -1570,7 +1608,8 @@ void AScriptWindow::on_actionStore_all_tabs_triggered()
 
     QJsonObject json;
     WriteToJson(json);
-    SaveJsonToFile(json, fileName);
+    bool bOK = SaveJsonToFile(json, fileName);
+    if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void AScriptWindow::on_actionRestore_session_triggered()
@@ -1596,8 +1635,9 @@ void AScriptWindow::on_actionRestore_session_triggered()
     if (fileName.isEmpty()) return;
 
     QJsonObject json;
-    LoadJsonFromFile(json, fileName);
-    ReadFromJson(json);
+    bool bOK = LoadJsonFromFile(json, fileName);
+    if (!bOK) message("Cannot open file: "+fileName, this);
+    else ReadFromJson(json);
 }
 
 void AScriptWindow::on_pbCloseFindReplaceFrame_clicked()
@@ -1791,90 +1831,6 @@ void AScriptWindow::onFindVariable()
     te->setExtraSelections(esList);
 }
 
-void AScriptWindow::onRequestAlignText(const QTextCursor& textCursor)
-{
-    QTextCursor tc = textCursor;
-    int start = tc.anchor();
-    int stop = tc.position();
-    if (start > stop) std::swap(start, stop);
-
-    tc.setPosition(stop, QTextCursor::MoveAnchor);
-    tc.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
-    tc.setPosition(start, QTextCursor::KeepAnchor);
-    tc.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
-
-    QString text = tc.selection().toPlainText();
-    if (text.isEmpty()) return;
-
-    QStringList list = text.split('\n');
-    if (list.size() == 1) return;
-
-    for (QString& s : list) convertTabToSpaces(s);
-
-    int currentIndent = getIndent(list.first());
-
-    for (int i=1; i<list.size(); i++)
-    {
-        int deltaSections = getSectionCounterChange(list.at(i-1));
-        currentIndent += deltaSections * ATextEdit::TabInSpaces;
-
-        if (list.at(i).trimmed().startsWith('}')) currentIndent -= ATextEdit::TabInSpaces;
-
-        if (currentIndent < 0) currentIndent = 0;
-        setIndent(list[i], currentIndent);
-    }
-
-    QString res = list.join('\n');
-    tc.insertText(res);
-}
-
-int AScriptWindow::getIndent(const QString& line)
-{
-    int indent = -1;
-    if (!line.isEmpty())
-    {
-        for (indent = 0; indent<line.size(); indent++)
-            if (line.at(indent) != " ") break;
-
-        if (indent == line.size()) indent = -1;
-    }
-    return indent;
-}
-
-void AScriptWindow::setIndent(QString &line, int indent)
-{
-    //int oldIndent = getIndent(line);
-    //if (oldIndent == -1) return;
-    //line.remove(0, oldIndent);
-    line = line.trimmed();
-
-    const QString spaces = QString(indent, ' ');
-    line.insert(0, spaces);
-}
-
-int AScriptWindow::getSectionCounterChange(const QString& line)
-{
-    int counter = 0;
-    for (int i=0; i<line.size(); i++)
-    {
-        // ***!!! add ignore commented: // and inside /* */
-        if      (line.at(i) == "{" ) counter++;
-        else if (line.at(i) == "}" ) counter--;
-    }
-    return counter;
-}
-
-void AScriptWindow::convertTabToSpaces(QString& line)
-{
-    for (int i=line.size()-1; i>-1; i--)
-        if (line.at(i) == '\t')
-        {
-            line.remove(i, 1);
-            const QString spaces = QString(ATextEdit::TabInSpaces, ' ');
-            line.insert(i, spaces);
-        }
-}
-
 void AScriptWindow::onBack()
 {
     ScriptTabs[CurrentTab]->goBack();
@@ -2033,6 +1989,11 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     QAction* shiftForward = menu.addAction("Go forward (Alt + Right)");
     menu.addSeparator();
     QAction* alignText = menu.addAction("Align selected text (Ctrl + I)");
+    menu.addSeparator();
+    QAction* cut = menu.addAction("Cut (Ctrl + X)");
+    QAction* copy = menu.addAction("Copy (Ctrl + C)");
+    QAction* paste = menu.addAction("Paste (Ctrl + V)");
+
 
     QAction* selectedItem = menu.exec(TextEdit->mapToGlobal(pos));
     if (!selectedItem) return; //nothing was selected
@@ -2046,7 +2007,11 @@ void AScriptWindowTabItem::onCustomContextMenuRequested(const QPoint& pos)
     else if (selectedItem == shiftBack) goBack();
     else if (selectedItem == shiftForward) goForward();
 
-    else if (selectedItem == alignText) emit requestAlignText(TextEdit->textCursor());
+    else if (selectedItem == alignText) emit TextEdit->align();
+
+    else if (selectedItem == cut) TextEdit->cut();
+    else if (selectedItem == copy) TextEdit->copy();
+    else if (selectedItem == paste) TextEdit->paste();
 }
 
 void AScriptWindowTabItem::goBack()

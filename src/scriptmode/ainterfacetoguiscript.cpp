@@ -9,7 +9,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSpacerItem>
-//#include <QLineEdit>
+#include <QCheckBox>
 #include <QPlainTextEdit>
 #include <QComboBox>
 #include <QFont>
@@ -470,6 +470,88 @@ const QString AInterfaceToGuiScript::textGet(const QString name)
         return "";
     }
     return t->document()->toPlainText();
+}
+
+void AInterfaceToGuiScript::checkboxNew(const QString name, const QString addTo, const QString text, bool checked)
+{
+    if (Widgets.contains(name))
+    {
+        abort("Widget " + name + " already exists");
+        return;
+    }
+    QLayout* lay = Layouts.value(addTo, 0);
+    if (!lay)
+    {
+        abort("Layout " + addTo + " does not exist");
+        return;
+    }
+    QCheckBox* cb = new QCheckBox(text);
+    cb->setChecked(checked);
+    Widgets.insert(name, cb);
+    lay->addWidget(cb);
+}
+
+void AInterfaceToGuiScript::checkboxSetText(const QString name, const QString text)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
+    if (!cb) abort("Checkbox " + name + " does not exist");
+    else cb->setText(text);
+}
+
+void AInterfaceToGuiScript::checkboxSetChecked(const QString name, bool checked)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
+    if (!cb) abort("Checkbox " + name + " does not exist");
+    else cb->setChecked(checked);
+}
+
+bool AInterfaceToGuiScript::checkboxIsChecked(const QString name)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
+    if (!cb)
+    {
+        abort("Checkbox " + name + " does not exist");
+        return false;
+    }
+    return cb->isChecked();
+}
+
+void AInterfaceToGuiScript::checkboxOnClick(const QString name, const QVariant scriptFunction)
+{
+    QWidget* w = Widgets.value(name, 0);
+    QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
+    if (!cb)
+    {
+        abort("Checkbox " + name + " does not exist");
+        return;
+    }
+
+    QString functionName;
+    QString typeArr = scriptFunction.typeName();
+    if (typeArr == "QString") functionName = scriptFunction.toString();
+    else if (typeArr == "QVariantMap")
+    {
+        QVariantMap vm = scriptFunction.toMap();
+        functionName = vm["name"].toString();
+    }
+    if (functionName.isEmpty())
+    {
+        abort("checkboxOnClick() function requires function or its name as the second argument!");
+        return;
+    }
+
+    QScriptValue func = ScriptManager->getProperty(functionName);
+    if (!func.isValid() || !func.isFunction())
+    {
+        abort("checkboxOnClick() function requires function or its name as the second argument!");
+        return;
+    }
+
+    connect(cb, &QCheckBox::clicked,
+            [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
 void AInterfaceToGuiScript::addStretch(const QString addTo)

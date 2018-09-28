@@ -74,8 +74,6 @@ private slots:
 
   void on_sbNumSegments_editingFinished();
 
-  void on_sbMaxNumTracks_editingFinished();
-
   void on_sbNumPointsFunctionX_editingFinished();
 
   void on_sbNumPointsFunctionY_editingFinished();
@@ -98,11 +96,17 @@ private slots:
 
   void on_leJSROOT_editingFinished();
 
-  void on_cbAutoRunWebSocketServer_clicked();
-
   void on_cbRunWebSocketServer_clicked(bool checked);
 
   void on_cbRunRootServer_clicked(bool checked);
+
+  void on_leWebSocketIP_editingFinished();
+
+  void on_cbRunWebSocketServer_toggled(bool checked);
+
+  void on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked);
+
+  void on_cbSaveSimAsText_IncludePositions_clicked(bool checked);
 
 private:
   Ui::GlobalSettingsWindowClass *ui;

@@ -24,6 +24,7 @@ bool parseJson(const QJsonObject &json, const QString &key, QJsonObject &obj);
 void JsonToCheckbox(QJsonObject& json, QString key, QCheckBox* cb);
 void JsonToSpinBox(QJsonObject& json, QString key, QSpinBox* sb);
 void JsonToLineEditDouble(QJsonObject& json, QString key, QLineEdit* le);
+void JsonToLineEditInt(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToLineEditText(QJsonObject& json, QString key, QLineEdit* le);
 void JsonToComboBox(QJsonObject& json, QString key, QComboBox* qb);
 
@@ -39,5 +40,8 @@ bool writeTH1ItoJsonArr(TH1I *hist, QJsonArray &ja);
 bool writeTH1DtoJsonArr(TH1D* hist, QJsonArray &ja);
 
 bool isContainAllKeys(QJsonObject json, QStringList keys);
+
+const QJsonObject strToObject(const QString& s);
+const QString jsonToString(const QJsonObject& json);
 
 #endif // AJSONTOOLS_H

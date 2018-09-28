@@ -104,7 +104,7 @@ class ParticleSourcesClass : public QObject
 {
     Q_OBJECT
 public:
-   ParticleSourcesClass(const DetectorClass* Detector, TString nameID = "");
+   ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen, TString nameID = "");
   ~ParticleSourcesClass();
 
   //MAIN usage
@@ -131,11 +131,9 @@ public:
   // save
   bool writeSourceToJson(int iSource, QJsonObject &json); //only one source
   bool writeToJson(QJsonObject &json); //all config
-  bool SaveSourceToJsonFile(QString fileName, int iSource);
   // load
   bool readSourceFromJson(int iSource, QJsonObject &json);
   bool readFromJson(QJsonObject &json); // all config
-  bool LoadSourceFromJsonFile(QString fileName, int iSource);
   bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 
   TVector3 GenerateRandomDirection();  

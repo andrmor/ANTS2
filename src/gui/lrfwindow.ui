@@ -1557,7 +1557,7 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>127</x>
+       <x>162</x>
        <y>310</y>
        <width>52</width>
        <height>22</height>
@@ -1577,7 +1577,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Only for PM#:</string>
+      <string>Only for PM group#:</string>
      </property>
     </widget>
     <widget class="Line" name="line_14">

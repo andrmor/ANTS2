@@ -54,6 +54,8 @@ public:
   QString getErrorString() {return ErrorString;}
   double getUsPerEvent() {return usPerEvent;}
 
+  void setMaxThread(int maxThreads) {MaxThreads = maxThreads;}
+
   //kNN module, can be directly accessed from outside
 #ifdef ANTS_FLANN
   NNmoduleClass* KNNmodule;
@@ -79,6 +81,7 @@ private:
   int CurrentGroup;
   QVector<AEventFilteringSettings> FiltSet;
   int NumThreads;
+  int MaxThreads = -1;
 
   bool bBusy;
 
@@ -103,6 +106,7 @@ public slots:
   void requestStop() {fStopRequested = true;}
   void onRequestClearKNNfilter();
   void onLRFsCopied();
+  void onRequestFilterAndAskToUpdateGui(); //for gui remote, triggered by EventsDataHub
 
 signals:
   void UpdateReady(int Progress, double MsPerEv);

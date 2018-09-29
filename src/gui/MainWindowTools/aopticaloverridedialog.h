@@ -21,11 +21,8 @@ public:
 
 private slots:
     void on_pbAccept_clicked();
-
     void on_pbCancel_clicked();
-
     void on_cobType_activated(int index);
-
     void on_pbTestOverride_clicked();
 
 private:

@@ -2,6 +2,7 @@
 #include "ui_aopticaloverridedialog.h"
 #include "aopticaloverride.h"
 #include "amaterialparticlecolection.h"
+#include "amessage.h";
 
 #include <QJsonObject>
 #include <QVBoxLayout>
@@ -68,6 +69,16 @@ void AOpticalOverrideDialog::updateGui()
 
 void AOpticalOverrideDialog::on_pbAccept_clicked()
 {
+    if (ovLocal)
+    {
+        QString err = ovLocal->checkValidity();
+        if (!err.isEmpty())
+        {
+            message(err, this);
+            return;
+        }
+    }
+
     delete (*MatCollection)[matFrom]->OpticalOverrides[matTo];
     (*MatCollection)[matFrom]->OpticalOverrides[matTo] = ovLocal;
     accept();

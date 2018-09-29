@@ -5,6 +5,7 @@
 #include "ajsontools.h"
 #include "afiletools.h"
 #include "asimulationstatistics.h"
+#include "amessage.h"  //GUI?
 
 #ifdef SIM
 #include "phscatclaudiomodel.h"
@@ -25,6 +26,7 @@
 #include <QLineEdit>
 #include <QFrame>
 #include <QDoubleValidator>
+#include <QComboBox>
 
 void AOpticalOverride::writeToJson(QJsonObject &json)
 {
@@ -249,6 +251,66 @@ bool BasicOpticalOverride::readFromJson(QJsonObject &json)
   return true;
 }
 
+QWidget *BasicOpticalOverride::getEditWidget()
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QHBoxLayout* hl = new QHBoxLayout(f);
+        QVBoxLayout* l = new QVBoxLayout();
+            QLabel* lab = new QLabel("Absorption:");
+        l->addWidget(lab);
+            lab = new QLabel("Specular reflection:");
+        l->addWidget(lab);
+            lab = new QLabel("Scattering:");
+        l->addWidget(lab);
+    hl->addLayout(l);
+        l = new QVBoxLayout();
+            QLineEdit* le = new QLineEdit(QString::number(probLoss));
+            QDoubleValidator* val = new QDoubleValidator(f);
+            val->setNotation(QDoubleValidator::StandardNotation);
+            val->setBottom(0);
+            //val->setTop(1.0); //Qt(5.8.0) BUG: check does not work
+            val->setDecimals(6);
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->probLoss = le->text().toDouble(); } );
+        l->addWidget(le);
+            le = new QLineEdit(QString::number(probRef));
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->probRef = le->text().toDouble(); } );
+        l->addWidget(le);
+            le = new QLineEdit(QString::number(probDiff));
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->probDiff = le->text().toDouble(); } );
+        l->addWidget(le);
+    hl->addLayout(l);
+        l = new QVBoxLayout();
+            lab = new QLabel("");
+        l->addWidget(lab);
+            lab = new QLabel("");
+        l->addWidget(lab);
+            QComboBox* com = new QComboBox();
+            com->addItem("Isotropic (4Pi)"); com->addItem("Lambertian, 2Pi back"); com->addItem("Lambertian, 2Pi forward");
+            com->setCurrentIndex(scatterModel);
+            //QObject::connect(com, &QComboBox::activated, [com, this](int index) { this->scatterModel = index; } );
+            QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->scatterModel = index; } );
+        l->addWidget(com);
+    hl->addLayout(l);
+
+    return f;
+}
+
+const QString BasicOpticalOverride::checkValidity() const
+{
+    if (probLoss<0 || probLoss>1.0) return "Absorption probability should be within [0, 1.0]";
+    if (probRef <0 || probRef >1.0) return "Reflection probability should be within [0, 1.0]";
+    if (probDiff<0 || probDiff>1.0) return "Scattering probability should be within [0, 1.0]";
+
+    if (probLoss + probRef + probDiff > 1.0) return "Sum of all process probabilities cannot exceed 1.0";
+
+    return "";
+}
+
 AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
 {
    if (model == "Simplistic_model")
@@ -439,7 +501,6 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
       return false;
 }
 
-#include "amessage.h"
 QWidget *FSNPOpticalOverride::getEditWidget()
 {
     QFrame* f = new QFrame();

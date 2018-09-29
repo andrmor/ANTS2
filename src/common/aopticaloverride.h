@@ -44,6 +44,8 @@ public:
 
   virtual QWidget* getEditWidget();
 
+  virtual const QString checkValidity() const {return "";} //TODO after all are done, make = 0
+
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!
 
@@ -72,6 +74,10 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+  virtual QWidget* getEditWidget() override;
+
+  virtual const QString checkValidity() const override;
+
   double probLoss = 0; //probability of absorption
   double probRef = 0;  //probability of specular reflection
   double probDiff = 0; //probability of scattering
@@ -97,7 +103,7 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
-  virtual QWidget* getEditWidget();
+  virtual QWidget* getEditWidget() override;
 
   //-- parameters --
   double Albedo;

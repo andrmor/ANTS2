@@ -4,12 +4,17 @@
 #include <QVector>
 #include <QString>
 
+class AOpticalOverride;
 class APhoton;
 class AMaterialParticleCollection;
 class TRandom2;
 class TH1I;
 class QJsonObject;
 class TH1D;
+class QWidget;
+
+AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
+const QStringList GetListOvAvailableOverrides();
 
 class AOpticalOverride
 {
@@ -36,6 +41,8 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
+
+  virtual QWidget* getEditWidget();
 
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!
@@ -77,7 +84,7 @@ public:
   FSNPOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, double albedo)
     : AOpticalOverride(MatCollection, MatFrom, MatTo), Albedo(albedo) {}
   FSNPOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo) {Albedo = 1;}
+    : AOpticalOverride(MatCollection, MatFrom, MatTo) {Albedo = 0.95;}
   virtual ~FSNPOpticalOverride() {}
 
   virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
@@ -89,6 +96,8 @@ public:
   // save/load config is not used for this type!
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
+
+  virtual QWidget* getEditWidget();
 
   //-- parameters --
   double Albedo;
@@ -157,7 +166,5 @@ public:
   double effectiveWavelength = 500; //if waveIndex of photon is -1, index correspinding to this wavelength will be used
   double effectiveWaveIndex;
 };
-
-AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
 
 #endif // OPTICALOVERRIDECLASS_H

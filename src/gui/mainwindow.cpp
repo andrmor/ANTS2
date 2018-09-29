@@ -861,6 +861,25 @@ void MainWindow::on_pbOverride_clicked()
     ui->lwMaterials->setCurrentRow(i);
 }
 
+#include "aopticaloverridedialog.h"
+void MainWindow::on_pbEditOverride_clicked()
+{
+    int From = ui->cobMaterialForOverrides->currentIndex();
+    int To =   ui->cobMaterialTo->currentIndex();
+
+    AOpticalOverrideDialog d(MpCollection, From, To, this);
+    int res = d.exec();
+    if (res == 1)
+    {
+        ReconstructDetector(true);
+
+        on_pbRefreshOverrides_clicked();
+        int i = ui->lwMaterials->currentRow();
+        UpdateMaterialListEdit(); //to update (*) status
+        ui->lwMaterials->setCurrentRow(i);
+    }
+}
+
 void MainWindow::on_pbRefreshOverrides_clicked()
 {
     //qDebug() << "->Updating overrides indication";
@@ -5344,3 +5363,4 @@ void MainWindow::on_ledSphericalPMAngle_editingFinished()
 
     on_pbUpdatePMproperties_clicked();
 }
+

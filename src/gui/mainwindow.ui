@@ -6304,6 +6304,19 @@ materials</string>
          </rect>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbEditOverride">
+        <property name="geometry">
+         <rect>
+          <x>179</x>
+          <y>164</y>
+          <width>75</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+       </widget>
        <zorder>lwOverrides</zorder>
        <zorder>lwMaterials</zorder>
        <zorder>pbStartMaterialInspector</zorder>
@@ -6322,6 +6335,7 @@ materials</string>
        <zorder>cobOpticalOverrideModel</zorder>
        <zorder>label_149</zorder>
        <zorder>pbRefreshOverrides</zorder>
+       <zorder>pbEditOverride</zorder>
       </widget>
      </widget>
      <widget class="QLabel" name="laBackground">
@@ -14700,11 +14714,6 @@ multiply to loaded data</string>
            <item>
             <property name="text">
              <string>V2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>V1</string>
             </property>
            </item>
           </widget>

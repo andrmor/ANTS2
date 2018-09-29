@@ -77,6 +77,14 @@ QString AMaterialParticleCollection::getMaterialName(int matIndex)
   return MaterialCollectionData.at(matIndex)->name;
 }
 
+const QStringList AMaterialParticleCollection::getListOfMaterialNames() const
+{
+    QStringList l;
+    for (AMaterial* m : MaterialCollectionData)
+        l << m->name;
+    return l;
+}
+
 int AMaterialParticleCollection::getParticleId(QString name) const
 {
   for (int i=0; i<ParticleCollection.size(); i++)

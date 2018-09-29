@@ -78,19 +78,4 @@ public:
   virtual QString getReportLine();
 };
 
-class PhScatClaudioModelV1 : public PhScatClaudioModel
-{
-public:
-  PhScatClaudioModelV1(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
-    : PhScatClaudioModel(MatCollection, MatFrom, MatTo) {}
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector);
-  virtual QString getType() const {return "Claudio_Model_V1";}
-  virtual QString getReportLine();
-
-protected:
-  virtual double GnFunc(double cost);
-  virtual double SlopeAngle(double random_num);
-};
-
-
 #endif // PHSCATCLAUDIOMODEL_H

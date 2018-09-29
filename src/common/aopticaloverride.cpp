@@ -19,6 +19,13 @@
 #include "TH1I.h"
 #include "TH1.h"
 
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QFrame>
+#include <QDoubleValidator>
+
 void AOpticalOverride::writeToJson(QJsonObject &json)
 {
     json["Model"] = getType();
@@ -31,6 +38,16 @@ bool AOpticalOverride::readFromJson(QJsonObject &json)
     QString type = json["Model"].toString();
     if (type != getType()) return false; //file for wrong model!
     return true;
+}
+
+#include <QFrame>
+QWidget *AOpticalOverride::getEditWidget()
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+    f->setMinimumHeight(100);
+
+    return f;
 }
 
 void AOpticalOverride::RandomDir(TRandom2 *RandGen, APhoton *Photon)
@@ -238,8 +255,6 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
      return new BasicOpticalOverride(MatCollection, MatFrom, MatTo);
    if (model == "SimplisticSpectral_model")
      return new SpectralBasicOpticalOverride(MatCollection, MatFrom, MatTo);
-   else if (model == "Claudio_Model_V1")
-     return new PhScatClaudioModelV1(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V2")
      return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
    else if (model == "Claudio_Model_V2d1")
@@ -250,13 +265,26 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
      return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
    else if (model == "DielectricToMetal")
      return new ScatterOnMetal(MatCollection, MatFrom, MatTo);
-   else if (model=="FS_NP" || model=="Neves_model")
+   else if (model == "FS_NP" || model=="Neves_model")
      return new FSNPOpticalOverride(MatCollection, MatFrom, MatTo);
-   else if (model=="SurfaceWLS")
+   else if (model == "SurfaceWLS")
      return new AWaveshifterOverride(MatCollection, MatFrom, MatTo);
    return NULL; //undefined override type!
 }
 
+const QStringList GetListOvAvailableOverrides()
+{
+    QStringList l;
+
+    l << "Simplistic_model"
+      << "SimplisticSpectral_model"
+      << "Claudio_Model_V2d2"
+      << "DielectricToMetal"
+      << "FS_NP"
+      << "SurfaceWLS";
+
+    return l;
+}
 
 AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
 {
@@ -408,7 +436,36 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
       return true;
     }
   else
-    return false;
+      return false;
+}
+
+#include "amessage.h"
+QWidget *FSNPOpticalOverride::getEditWidget()
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QHBoxLayout* l = new QHBoxLayout(f);
+        QLabel* lab = new QLabel("Albedo:");
+    l->addWidget(lab);
+        QLineEdit* le = new QLineEdit(QString::number(Albedo));
+        QDoubleValidator* val = new QDoubleValidator(f);
+        val->setNotation(QDoubleValidator::StandardNotation);
+        val->setBottom(0);
+        //val->setTop(1.0); //Qt(5.8.0) BUG: check does not work
+        val->setDecimals(6);
+        le->setValidator(val);
+        QObject::connect(le, &QLineEdit::editingFinished,
+                         [le, f, this]()
+                              {
+                                if (le->text().toDouble()>1.0)
+                                    {le->setText("1.0"); message("Max albedo is 1.0", f);}
+                                this->Albedo = le->text().toDouble();
+                              }
+                         );
+    l->addWidget(le);
+
+    return f;
 }
 
 AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ReemissionModel)

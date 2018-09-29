@@ -44,6 +44,8 @@ public:
   void getFirstOverridenMaterial(int &ifrom, int &ito);
   double convertWaveIndexToWavelength(int index) {return WaveFrom + WaveStep * index;}
   QString getMaterialName(int matIndex);
+  const QStringList getListOfMaterialNames() const;
+
     //particle
   int countParticles() const {return ParticleCollection.size();}
   int getParticleId(QString name) const;

@@ -9,7 +9,9 @@ ANTS2_MINOR = 12
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 #CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
-#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)
+#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+
+# You may need to modify paths CERN ROOT and the enabled libraries! See the corresponding sections below
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -236,12 +238,6 @@ message("--> Compiling without GUI")
 CONFIG -= ants2_GUI
 }
 
-#Options to be in effect only during compilation for docker
-Ants2Docker {
-message("--> Compiling for docker")
-CONFIG += ants2_docker
-}
-
 #---ANTS2 files---
 SOURCES += main.cpp \
     common/jsonparser.cpp \
@@ -351,7 +347,8 @@ SOURCES += main.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
-    common/atrackbuildoptions.cpp
+    common/atrackbuildoptions.cpp \
+    gui/MainWindowTools/aopticaloverridedialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -475,7 +472,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
-    common/atrackbuildoptions.h
+    common/atrackbuildoptions.h \
+    gui/MainWindowTools/aopticaloverridedialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -725,8 +723,8 @@ RC_FILE = myapp.rc
 #---Optimization of compilation---
 win32 {
   #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  #QMAKE_CXXFLAGS_RELEASE -= -O2
-  #QMAKE_CXXFLAGS_RELEASE *= -Od
+  QMAKE_CXXFLAGS_RELEASE -= -O2
+  QMAKE_CXXFLAGS_RELEASE *= -Od
 }
 linux-g++ || unix {
     QMAKE_CXXFLAGS += -march=native
@@ -794,3 +792,6 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/MainWindowTools/aopticaloverridedialog.ui

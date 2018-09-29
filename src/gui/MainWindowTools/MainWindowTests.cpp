@@ -269,9 +269,6 @@ AOpticalOverride* InitOverride(Ui::MainWindow *ui, AMaterialParticleCollection& 
         case 2:
           sc = new PhScatClaudioModelV2(&MatCol, 0, 1);
           break;
-        case 3:
-          sc = new PhScatClaudioModelV1(&MatCol, 0, 1);
-          break;
         default:
           message("Unexpected scattering model index");
           exit(666);

@@ -516,17 +516,16 @@ QWidget *FSNPOpticalOverride::getEditWidget()
         //val->setTop(1.0); //Qt(5.8.0) BUG: check does not work
         val->setDecimals(6);
         le->setValidator(val);
-        QObject::connect(le, &QLineEdit::editingFinished,
-                         [le, f, this]()
-                              {
-                                if (le->text().toDouble()>1.0)
-                                    {le->setText("1.0"); message("Max albedo is 1.0", f);}
-                                this->Albedo = le->text().toDouble();
-                              }
-                         );
+        QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->Albedo = le->text().toDouble(); } );
     l->addWidget(le);
 
     return f;
+}
+
+const QString FSNPOpticalOverride::checkValidity() const
+{
+    if (Albedo<0 || Albedo>1.0) return "Albedo should be within [0, 1.0]";
+    return "";
 }
 
 AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, int ReemissionModel)

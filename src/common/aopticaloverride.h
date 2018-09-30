@@ -105,6 +105,8 @@ public:
 
   virtual QWidget* getEditWidget() override;
 
+  virtual const QString checkValidity() const override;
+
   //-- parameters --
   double Albedo;
 };

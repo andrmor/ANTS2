@@ -25,8 +25,13 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+  virtual QWidget* getEditWidget() override;
+
+  virtual const QString checkValidity() const override;
+
   //data
-  double RealN, ImaginaryN;
+  double RealN = 1.07;
+  double ImaginaryN = 0.6;
 private:
   double calculateReflectivity(double CosTheta, double RealN, double ImaginaryN, int waveIndex);
 

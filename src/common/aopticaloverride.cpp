@@ -27,6 +27,8 @@
 #include <QFrame>
 #include <QDoubleValidator>
 #include <QComboBox>
+#include <QPushButton>
+#include <QFileDialog>
 
 void AOpticalOverride::writeToJson(QJsonObject &json)
 {
@@ -869,4 +871,58 @@ const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
         return "No data were read from the file!";
 
     return "";
+}
+
+void SpectralBasicOpticalOverride::loadSpectralData()
+{
+    QString fileName = QFileDialog::getOpenFileName(0, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", "", "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+
+    QVector< QVector<double>* > vec;
+    vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;
+    QString err = LoadDoubleVectorsFromFile(fileName, vec);
+    if (!err.isEmpty()) message(err, 0);
+}
+
+QWidget *SpectralBasicOpticalOverride::getEditWidget()
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QVBoxLayout* vl = new QVBoxLayout(f);
+        QHBoxLayout* l = new QHBoxLayout();
+            QLabel* lab = new QLabel("Absorption, reflection and scattering:");
+        l->addWidget(lab);
+            QPushButton* pb = new QPushButton("Load");
+            QObject::connect(pb, &QPushButton::clicked, [this] {loadSpectralData();});
+        l->addWidget(pb);
+    vl->addLayout(l);
+        l = new QHBoxLayout();
+            lab = new QLabel("Scattering model:");
+        l->addWidget(lab);
+            QComboBox* com = new QComboBox();
+            com->addItem("Isotropic (4Pi)"); com->addItem("Lambertian, 2Pi back"); com->addItem("Lambertian, 2Pi forward");
+            com->setCurrentIndex(scatterModel);
+            QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->scatterModel = index; } );
+        l->addWidget(com);
+    vl->addLayout(l);
+        l = new QHBoxLayout();
+            lab = new QLabel("For photons with WaveIndex=-1, assume wavelength of:");
+        l->addWidget(lab);
+            QLineEdit* le = new QLineEdit(QString::number(effectiveWavelength));
+            QDoubleValidator* val = new QDoubleValidator(f);
+            val->setNotation(QDoubleValidator::StandardNotation);
+            val->setBottom(0);
+            val->setDecimals(6);
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->effectiveWavelength = le->text().toDouble(); } );
+        l->addWidget(le);
+    vl->addLayout(l);
+
+    return f;
+}
+
+const QString SpectralBasicOpticalOverride::checkValidity() const
+{
+    return "aaaaaaaaaahaaa";
 }

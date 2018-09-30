@@ -164,6 +164,11 @@ public:
   virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
   const QString loadData(const QString& fileName);
 
+  virtual QWidget* getEditWidget() override;
+
+  virtual const QString checkValidity() const override;
+
+  //parameters
   QVector<double> Wave;
   QVector<double> ProbLoss; //probability of absorption
   QVector<double> ProbLossBinned; //probability of absorption
@@ -173,6 +178,9 @@ public:
   QVector<double> ProbDiffBinned; //probability of scattering
   double effectiveWavelength = 500; //if waveIndex of photon is -1, index correspinding to this wavelength will be used
   double effectiveWaveIndex;
+
+private:
+  void loadSpectralData();
 };
 
 #endif // OPTICALOVERRIDECLASS_H

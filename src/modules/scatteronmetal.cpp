@@ -9,6 +9,15 @@
 #include "TComplex.h"
 #include "TRandom2.h"
 
+#ifdef GUI
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#endif
+
 void ScatterOnMetal::printConfiguration(int /*iWave*/)
 {
   qDebug() << "-------Configuration:-------";
@@ -48,12 +57,7 @@ bool ScatterOnMetal::readFromJson(QJsonObject &json)
   return true;
 }
 
-#include <QFrame>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QDoubleValidator>
+#ifdef GUI
 QWidget *ScatterOnMetal::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
@@ -83,6 +87,7 @@ QWidget *ScatterOnMetal::getEditWidget(QWidget *)
 
     return f;
 }
+#endif
 
 const QString ScatterOnMetal::checkValidity() const
 {

@@ -42,8 +42,9 @@ public:
 
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
 
+#ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller);
-
+#endif
   virtual const QString checkValidity() const {return "";} //TODO after all are done, make = 0
 
   // read-out variables for standalone checker only (not multithreaded)
@@ -74,8 +75,9 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+#ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller) override;
-
+#endif
   virtual const QString checkValidity() const override;
 
   double probLoss = 0; //probability of absorption
@@ -103,8 +105,9 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+#ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller) override;
-
+#endif
   virtual const QString checkValidity() const override;
 
   //-- parameters --
@@ -164,8 +167,9 @@ public:
   virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
   const QString loadData(const QString& fileName);
 
+#ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller) override;
-
+#endif
   virtual const QString checkValidity() const override;
 
   //parameters

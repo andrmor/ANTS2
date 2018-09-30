@@ -5,7 +5,6 @@
 #include "ajsontools.h"
 #include "afiletools.h"
 #include "asimulationstatistics.h"
-#include "amessage.h"  //GUI?
 
 #ifdef SIM
 #include "phscatclaudiomodel.h"
@@ -20,6 +19,7 @@
 #include "TH1I.h"
 #include "TH1.h"
 
+#ifdef GUI
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -29,6 +29,8 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QFileDialog>
+#include "amessage.h"
+#endif
 
 void AOpticalOverride::writeToJson(QJsonObject &json)
 {
@@ -44,6 +46,7 @@ bool AOpticalOverride::readFromJson(QJsonObject &json)
     return true;
 }
 
+#ifdef GUI
 #include <QFrame>
 QWidget *AOpticalOverride::getEditWidget(QWidget *)
 {
@@ -53,6 +56,7 @@ QWidget *AOpticalOverride::getEditWidget(QWidget *)
 
     return f;
 }
+#endif
 
 void AOpticalOverride::RandomDir(TRandom2 *RandGen, APhoton *Photon)
 {
@@ -253,6 +257,7 @@ bool BasicOpticalOverride::readFromJson(QJsonObject &json)
   return true;
 }
 
+#ifdef GUI
 QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
 {
     QFrame* f = new QFrame();
@@ -301,6 +306,7 @@ QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
 
     return f;
 }
+#endif
 
 const QString BasicOpticalOverride::checkValidity() const
 {
@@ -503,6 +509,7 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
       return false;
 }
 
+#ifdef GUI
 QWidget *FSNPOpticalOverride::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
@@ -523,6 +530,7 @@ QWidget *FSNPOpticalOverride::getEditWidget(QWidget *)
 
     return f;
 }
+#endif
 
 const QString FSNPOpticalOverride::checkValidity() const
 {
@@ -884,6 +892,7 @@ void SpectralBasicOpticalOverride::loadSpectralData(QWidget* caller)
     if (!err.isEmpty()) message(err, caller);
 }
 
+#ifdef GUI
 QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
 {
     QFrame* f = new QFrame();
@@ -894,7 +903,14 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
             QLabel* lab = new QLabel("Absorption, reflection and scattering:");
         l->addWidget(lab);
             QPushButton* pb = new QPushButton("Load");
+            pb->setToolTip("Every line of the file should contain 4 numbers:\nwavelength[nm] absorption_prob[0..1] reflection_prob[0..1] scattering_prob[0..1]");
             QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
+        l->addWidget(pb);
+            pb = new QPushButton("Show");
+            //QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
+        l->addWidget(pb);
+            pb = new QPushButton("Binned");
+            //QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
         l->addWidget(pb);
     vl->addLayout(l);
         l = new QHBoxLayout();
@@ -917,12 +933,32 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
             le->setValidator(val);
             QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->effectiveWavelength = le->text().toDouble(); } );
         l->addWidget(le);
+            lab = new QLabel("nm");
+        l->addWidget(lab);
     vl->addLayout(l);
 
     return f;
 }
+#endif
 
 const QString SpectralBasicOpticalOverride::checkValidity() const
 {
-    return "aaaaaaaaaahaaa";
+    //checking spectrum
+    if (Wave.size() == 0) return "Spectral data are not defined";
+    if (Wave.size() != ProbLoss.size() || Wave.size() != ProbRef.size() || Wave.size() != ProbDiff.size()) return "Spectral data do not match in size";
+    for (int i=0; i<Wave.size(); i++)
+    {
+        if (Wave.at(i) < 0) return "negative wavelength are not allowed";
+        if (ProbLoss.at(i) < 0 || ProbLoss.at(i) > 1.0) return "absorption probability has to be in the range of [0, 1.0]";
+        if (ProbDiff.at(i) < 0 || ProbDiff.at(i) > 1.0) return "scattering probability has to be in the range of [0, 1.0]";
+        if (ProbRef.at(i) < 0 || ProbRef.at(i) > 1.0) return "scattering probability has to be in the range of [0, 1.0]";
+        double sum = ProbLoss.at(i) + ProbRef.at(i) + ProbDiff.at(i);
+        if (sum > 1.0) return QString("Sum of probabilities is larger than 1.0 for wavelength of %1 nm").arg(Wave.at(i));
+    }
+    if (scatterModel < 0 || scatterModel > 2) return "unknown scattering model";
+
+    //TODO check effective wavelength
+    //TODO check binned
+
+    return "";
 }

@@ -28,8 +28,9 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+#ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller) override;
-
+#endif
   virtual const QString checkValidity() const override;
 
   // interface properties

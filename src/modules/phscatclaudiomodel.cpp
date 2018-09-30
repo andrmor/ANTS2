@@ -10,6 +10,16 @@
 #include "TRandom2.h"
 #include "TVector3.h"
 
+#ifdef GUI
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QFrame>
+#include <QDoubleValidator>
+#include <QComboBox>
+#endif
+
 #define MODEL_VERSION 3
 
 void PhScatClaudioModel::printConfiguration(int iWave)
@@ -65,13 +75,7 @@ bool PhScatClaudioModel::readFromJson(QJsonObject &json)
   return true;
 }
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QFrame>
-#include <QDoubleValidator>
-#include <QComboBox>
+#ifdef GUI
 QWidget *PhScatClaudioModel::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
@@ -121,6 +125,7 @@ QWidget *PhScatClaudioModel::getEditWidget(QWidget *)
 
     return f;
 }
+#endif
 
 const QString PhScatClaudioModel::checkValidity() const
 {

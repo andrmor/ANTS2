@@ -898,6 +898,16 @@ void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWin
 
 const QString AWaveshifterOverride::checkOverrideData()
 {
+    if (ReemissionProbability_lambda.isEmpty())
+        return "Reemission probability not loaded";
+    if (ReemissionProbability_lambda.size() != ReemissionProbability.size())
+        return "Mismatch in reemission probability data";
+
+    if (EmissionSpectrum_lambda.isEmpty())
+        return "Emission spectrum not loaded";
+    if (EmissionSpectrum_lambda.size() != EmissionSpectrum.size())
+        return "Mismatch in emission spectrum data";
+
     bool bWR;
     double WaveFrom, WaveTo, WaveStep;
     int WaveNodes;

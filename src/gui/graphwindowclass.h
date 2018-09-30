@@ -177,6 +177,7 @@ public slots:
     QVector<double> Get2DArray(); //for temporary script command
 
     void DrawStrOpt(TObject* obj, QString options = "", bool DoUpdate = true);
+    void onDrawRequest(TObject* obj, const QString options, bool transferOwnership, bool focusWindow);
     bool DrawTree(TTree* tree, const QString& what, const QString& cond, const QString& how,
                   const QVariantList binsAndRanges = QVariantList(), const QVariantList markersAndLines = QVariantList(),
                   QString *result = 0);

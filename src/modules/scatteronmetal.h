@@ -26,9 +26,9 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller) override;
+  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkValidity() const override;
+  virtual const QString checkOverrideData() const override;
 
   //data
   double RealN = 1.07;

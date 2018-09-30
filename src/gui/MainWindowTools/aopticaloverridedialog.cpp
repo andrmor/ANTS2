@@ -8,8 +8,8 @@
 #include <QVBoxLayout>
 
 AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * MatCollection,
-                                               int matFrom, int matTo, QWidget *parent) :
-    QDialog(parent), ui(new Ui::AOpticalOverrideDialog),
+                                               int matFrom, int matTo, GraphWindowClass * GraphWindow, QWidget * parent) :
+    QDialog(parent), ui(new Ui::AOpticalOverrideDialog), GraphWindow(GraphWindow),
     MatCollection(MatCollection), matFrom(matFrom), matTo(matTo), matNames(MatCollection->getListOfMaterialNames())
 {
     ui->setupUi(this);
@@ -57,7 +57,7 @@ void AOpticalOverrideDialog::updateGui()
         ui->cobType->setCurrentIndex(index+1);
 
         QVBoxLayout* l = static_cast<QVBoxLayout*>(layout());
-        customWidget = ovLocal->getEditWidget(this);
+        customWidget = ovLocal->getEditWidget(this, GraphWindow);
         l->insertWidget(customWidgetPositionInLayout, customWidget);
     }
     else
@@ -71,7 +71,7 @@ void AOpticalOverrideDialog::on_pbAccept_clicked()
 {
     if (ovLocal)
     {
-        QString err = ovLocal->checkValidity();
+        QString err = ovLocal->checkOverrideData();
         if (!err.isEmpty())
         {
             message(err, this);

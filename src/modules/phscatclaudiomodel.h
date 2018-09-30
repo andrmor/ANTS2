@@ -29,9 +29,9 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller) override;
+  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkValidity() const override;
+  virtual const QString checkOverrideData() const override;
 
   // interface properties
   double sigma_alpha = 0.18;                          // r.m.s. (or similar) of the slope distribution

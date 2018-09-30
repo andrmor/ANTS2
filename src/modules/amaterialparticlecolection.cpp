@@ -46,6 +46,20 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
+void AMaterialParticleCollection::GetWave(bool &wavelengthResolved, double &waveFrom, double &waveTo, double &waveStep, int &waveNodes) const
+{
+    wavelengthResolved = WavelengthResolved;
+    waveFrom = WaveFrom;
+    waveTo = WaveTo;
+    waveStep = WaveStep;
+    waveNodes = WaveNodes;
+}
+
+bool AMaterialParticleCollection::IsWaveResolved() const
+{
+    return WavelengthResolved;
+}
+
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);

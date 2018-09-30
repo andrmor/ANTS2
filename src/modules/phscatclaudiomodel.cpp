@@ -76,7 +76,7 @@ bool PhScatClaudioModel::readFromJson(QJsonObject &json)
 }
 
 #ifdef GUI
-QWidget *PhScatClaudioModel::getEditWidget(QWidget *)
+QWidget *PhScatClaudioModel::getEditWidget(QWidget *, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -127,7 +127,7 @@ QWidget *PhScatClaudioModel::getEditWidget(QWidget *)
 }
 #endif
 
-const QString PhScatClaudioModel::checkValidity() const
+const QString PhScatClaudioModel::checkOverrideData() const
 {
     if (sigma_alpha < 0) return "sigma alpha should be >= 0";
     if (sigma_h < 0) return "sigma h should be >= 0";

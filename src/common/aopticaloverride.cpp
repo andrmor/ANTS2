@@ -48,7 +48,7 @@ bool AOpticalOverride::readFromJson(QJsonObject &json)
 
 #ifdef GUI
 #include <QFrame>
-QWidget *AOpticalOverride::getEditWidget(QWidget *)
+QWidget *AOpticalOverride::getEditWidget(QWidget *, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -258,7 +258,7 @@ bool BasicOpticalOverride::readFromJson(QJsonObject &json)
 }
 
 #ifdef GUI
-QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
+QWidget *BasicOpticalOverride::getEditWidget(QWidget*, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -299,7 +299,6 @@ QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
             QComboBox* com = new QComboBox();
             com->addItem("Isotropic (4Pi)"); com->addItem("Lambertian, 2Pi back"); com->addItem("Lambertian, 2Pi forward");
             com->setCurrentIndex(scatterModel);
-            //QObject::connect(com, &QComboBox::activated, [com, this](int index) { this->scatterModel = index; } );
             QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->scatterModel = index; } );
         l->addWidget(com);
     hl->addLayout(l);
@@ -308,7 +307,7 @@ QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
 }
 #endif
 
-const QString BasicOpticalOverride::checkValidity() const
+const QString BasicOpticalOverride::checkOverrideData() const
 {
     if (probLoss<0 || probLoss>1.0) return "Absorption probability should be within [0, 1.0]";
     if (probRef <0 || probRef >1.0) return "Reflection probability should be within [0, 1.0]";
@@ -510,7 +509,7 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
 }
 
 #ifdef GUI
-QWidget *FSNPOpticalOverride::getEditWidget(QWidget *)
+QWidget *FSNPOpticalOverride::getEditWidget(QWidget *, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -532,7 +531,7 @@ QWidget *FSNPOpticalOverride::getEditWidget(QWidget *)
 }
 #endif
 
-const QString FSNPOpticalOverride::checkValidity() const
+const QString FSNPOpticalOverride::checkOverrideData() const
 {
     if (Albedo<0 || Albedo>1.0) return "Albedo should be within [0, 1.0]";
     return "";
@@ -881,6 +880,7 @@ const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
     return "";
 }
 
+#ifdef GUI
 void SpectralBasicOpticalOverride::loadSpectralData(QWidget* caller)
 {
     QString fileName = QFileDialog::getOpenFileName(caller, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", "", "Data files (*.dat *.txt);;All files (*)");
@@ -892,8 +892,80 @@ void SpectralBasicOpticalOverride::loadSpectralData(QWidget* caller)
     if (!err.isEmpty()) message(err, caller);
 }
 
+#include "TMultiGraph.h"
+#include "TGraph.h"
+#include "graphwindowclass.h"
+void SpectralBasicOpticalOverride::showLoaded(GraphWindowClass* GraphWindow)
+{
+    QVector<double> Fr;
+    for (int i=0; i<Wave.size(); i++)
+        Fr << (1.0 - ProbLoss.at(i) - ProbRef.at(i) - ProbDiff.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(Wave, ProbLoss, "Absorption", "Wavelength, nm", "", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(Wave, ProbRef, "Specular reflection", "Wavelength, nm", "", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(Wave, ProbDiff, "Diffuse scattering", "Wavelength, nm", "", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(Wave, Fr, "Fresnel", "Wavelength, nm", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wavelength, nm");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+
+void SpectralBasicOpticalOverride::showBinned(QWidget *widget, GraphWindowClass *GraphWindow)
+{
+    bool bWR;
+    double WaveFrom, WaveTo, WaveStep;
+    int WaveNodes;
+    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
+    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+
+    //TODO run checker
+
+    if (!bWR)
+    {
+        QString s = "Simulation is configured as not wavelength-resolved\n";
+        s +=        "All photons will have the same properties:\n";
+        s +=QString("Absorption: %1").arg(probLoss) + "\n";
+        s +=QString("Specular reflection: %1").arg(probRef) + "\n";
+        s +=QString("Scattering: %1").arg(probDiff);
+        message(s, widget);
+        return;
+    }
+
+    QVector<double> waveIndex;
+    for (int i=0; i<WaveNodes; i++) waveIndex << i;
+
+    QVector<double> Fr;
+    for (int i=0; i<waveIndex.size(); i++)
+        Fr << (1.0 - ProbLossBinned.at(i) - ProbRefBinned.at(i) - ProbDiffBinned.at(i));
+
+    TMultiGraph* mg = new TMultiGraph();
+    TGraph* gLoss = GraphWindow->ConstructTGraph(waveIndex, ProbLossBinned, "Loss", "Wave index", "Loss", 2, 20, 1, 2);
+    mg->Add(gLoss, "LP");
+    TGraph* gRef = GraphWindow->ConstructTGraph(waveIndex, ProbRefBinned, "Specular reflection", "Wave index", "Reflection", 4, 21, 1, 4);
+    mg->Add(gRef, "LP");
+    TGraph* gDiff = GraphWindow->ConstructTGraph(waveIndex, ProbDiffBinned, "Diffuse scattering", "Wave index", "Scatter", 7, 22, 1, 7);
+    mg->Add(gDiff, "LP");
+    TGraph* gFr = GraphWindow->ConstructTGraph(waveIndex, Fr, "Fresnel", "Wave index", "", 1, 24, 1, 1, 1, 1);
+    mg->Add(gFr, "LP");
+
+    mg->SetMinimum(0);
+    GraphWindow->Draw(mg, "apl");
+    mg->GetXaxis()->SetTitle("Wave index");
+    mg->GetYaxis()->SetTitle("Probability");
+    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
+}
+#endif
+
 #ifdef GUI
-QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
+QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *GraphWindow)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -907,10 +979,10 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
             QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
         l->addWidget(pb);
             pb = new QPushButton("Show");
-            //QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
+            QObject::connect(pb, &QPushButton::clicked, [GraphWindow, this] {showLoaded(GraphWindow);});
         l->addWidget(pb);
             pb = new QPushButton("Binned");
-            //QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
+            QObject::connect(pb, &QPushButton::clicked, [caller, GraphWindow, this] {showBinned(caller, GraphWindow);});
         l->addWidget(pb);
     vl->addLayout(l);
         l = new QHBoxLayout();
@@ -941,7 +1013,7 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
 }
 #endif
 
-const QString SpectralBasicOpticalOverride::checkValidity() const
+const QString SpectralBasicOpticalOverride::checkOverrideData() const
 {
     //checking spectrum
     if (Wave.size() == 0) return "Spectral data are not defined";

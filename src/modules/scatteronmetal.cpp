@@ -58,7 +58,7 @@ bool ScatterOnMetal::readFromJson(QJsonObject &json)
 }
 
 #ifdef GUI
-QWidget *ScatterOnMetal::getEditWidget(QWidget *)
+QWidget *ScatterOnMetal::getEditWidget(QWidget *, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -89,7 +89,7 @@ QWidget *ScatterOnMetal::getEditWidget(QWidget *)
 }
 #endif
 
-const QString ScatterOnMetal::checkValidity() const
+const QString ScatterOnMetal::checkOverrideData() const
 {
     return "";
 }

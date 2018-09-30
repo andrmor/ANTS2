@@ -12,6 +12,8 @@ class TH1I;
 class QJsonObject;
 class TH1D;
 class QWidget;
+class TObject;
+class GraphWindowClass;
 
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
 const QStringList GetListOvAvailableOverrides();
@@ -43,9 +45,9 @@ public:
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller);
+  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
 #endif
-  virtual const QString checkValidity() const {return "";} //TODO after all are done, make = 0
+  virtual const QString checkOverrideData() const {return "";} //TODO after all are done, make = 0
 
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!
@@ -55,7 +57,6 @@ protected:
   int MatFrom, MatTo;   // material index of material before(from) and after(to) the optical interface
 
   void RandomDir(TRandom2* RandGen, APhoton* Photon);
-
 };
 
 class BasicOpticalOverride : public AOpticalOverride
@@ -76,9 +77,9 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget *caller) override;
+  virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkValidity() const override;
+  virtual const QString checkOverrideData() const override;
 
   double probLoss = 0; //probability of absorption
   double probRef = 0;  //probability of specular reflection
@@ -106,9 +107,9 @@ public:
   virtual bool readFromJson(QJsonObject &json);
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller) override;
+  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkValidity() const override;
+  virtual const QString checkOverrideData() const override;
 
   //-- parameters --
   double Albedo;
@@ -168,9 +169,10 @@ public:
   const QString loadData(const QString& fileName);
 
 #ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller) override;
+  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkValidity() const override;
+
+  virtual const QString checkOverrideData() const override;
 
   //parameters
   QVector<double> Wave;
@@ -184,7 +186,11 @@ public:
   double effectiveWaveIndex;
 
 private:
+#ifdef GUI
   void loadSpectralData(QWidget *caller);
+  void showLoaded(GraphWindowClass *GraphWindow);
+  void showBinned(QWidget *widget, GraphWindowClass *GraphWindow);
+#endif
 };
 
 #endif // OPTICALOVERRIDECLASS_H

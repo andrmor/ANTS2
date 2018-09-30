@@ -867,7 +867,7 @@ void MainWindow::on_pbEditOverride_clicked()
     int From = ui->cobMaterialForOverrides->currentIndex();
     int To =   ui->cobMaterialTo->currentIndex();
 
-    AOpticalOverrideDialog d(MpCollection, From, To, this);
+    AOpticalOverrideDialog d(MpCollection, From, To, GraphWindow, this);
     int res = d.exec();
     if (res == 1)
     {

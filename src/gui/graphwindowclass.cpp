@@ -1433,6 +1433,14 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
 }
 
+void GraphWindowClass::onDrawRequest(TObject *obj, const QString options, bool transferOwnership, bool focusWindow)
+{
+    if (focusWindow)
+        Draw(obj, options.toLatin1().data(), true, transferOwnership);
+    else
+        DrawWithoutFocus(obj, options.toLatin1().data(), true, transferOwnership);
+}
+
 void SetMarkerAttributes(TAttMarker* m, const QVariantList& vl)
 {
     m->SetMarkerColor(vl.at(0).toInt());

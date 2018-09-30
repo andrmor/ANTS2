@@ -82,6 +82,10 @@ public:
   bool readFromJson(QJsonObject &json);
   void AddNewMaterial(QJsonObject &json);
 
+  //general purpose requests
+  void GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
+  bool IsWaveResolved() const;
+
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);
   int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);

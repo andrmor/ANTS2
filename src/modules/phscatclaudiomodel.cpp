@@ -65,6 +65,73 @@ bool PhScatClaudioModel::readFromJson(QJsonObject &json)
   return true;
 }
 
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QFrame>
+#include <QDoubleValidator>
+#include <QComboBox>
+QWidget *PhScatClaudioModel::getEditWidget()
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QHBoxLayout* hl = new QHBoxLayout(f);
+        QVBoxLayout* l = new QVBoxLayout();
+            QLabel* lab = new QLabel("Sigma alpha:");
+        l->addWidget(lab);
+            lab = new QLabel("Sigma spike:");
+        l->addWidget(lab);
+            lab = new QLabel("Albedo:");
+        l->addWidget(lab);
+            lab = new QLabel("Hight distribution:");
+        l->addWidget(lab);
+            lab = new QLabel("Slope distribution:");
+        l->addWidget(lab);
+    hl->addLayout(l);
+        l = new QVBoxLayout();
+            QLineEdit* le = new QLineEdit(QString::number(sigma_alpha));
+            QDoubleValidator* val = new QDoubleValidator(f);
+            val->setNotation(QDoubleValidator::StandardNotation);
+            val->setBottom(0);
+            val->setDecimals(6);
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->sigma_alpha = le->text().toDouble(); } );
+        l->addWidget(le);
+            le = new QLineEdit(QString::number(sigma_h));
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->sigma_h = le->text().toDouble(); } );
+        l->addWidget(le);
+            le = new QLineEdit(QString::number(albedo));
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->albedo = le->text().toDouble(); } );
+        l->addWidget(le);
+            QComboBox* com = new QComboBox();
+            com->addItems(QStringList({"empirical", "gaussian", "exponential"}));
+            com->setCurrentIndex(HeightDistribution);
+            QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->HeightDistribution = static_cast<HeightDistrEnum>(index); } );
+        l->addWidget(com);
+            com = new QComboBox();
+            com->addItems(QStringList({"trowbridgereitz", "cooktorrance", "bivariatecauchy"}));
+            com->setCurrentIndex(SlopeDistribution);
+            QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->SlopeDistribution = static_cast<SlopeDistrEnum>(index); } );
+        l->addWidget(com);
+    hl->addLayout(l);
+
+    return f;
+}
+
+const QString PhScatClaudioModel::checkValidity() const
+{
+    if (sigma_alpha < 0) return "sigma alpha should be >= 0";
+    if (sigma_h < 0) return "sigma h should be >= 0";
+    if (albedo < 0 || albedo > 1.0) return "albedo should be within [0, 1.0] range";
+    if (HeightDistribution < 0 || HeightDistribution > 2) return "hight distribution model can be 0, 1 or 2";
+    if (SlopeDistribution < 0 || SlopeDistribution > 2) return "slope distribution model can be 0, 1 or 2";
+    return "";
+}
+
 double PhScatClaudioModel::SpikeIntensity(int iWave, double costi)
 {
   if (HeightDistribution == empirical)  // for the empirical function observed by C. Silva

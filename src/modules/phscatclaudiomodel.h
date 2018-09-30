@@ -28,12 +28,16 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+  virtual QWidget* getEditWidget() override;
+
+  virtual const QString checkValidity() const override;
+
   // interface properties
-  double sigma_alpha;                     // r.m.s. (or similar) of the slope distribution
-  double sigma_h;                         // r.m.s (or similar) of the height distribution
-  double albedo;                          // multiple diffuse albedo
-  HeightDistrEnum HeightDistribution;     // model for heights distribution
-  SlopeDistrEnum SlopeDistribution;       // model for distribution of slopes
+  double sigma_alpha = 0.18;                          // r.m.s. (or similar) of the slope distribution
+  double sigma_h = 1.0;                               // r.m.s (or similar) of the height distribution
+  double albedo = 0.97;                               // multiple diffuse albedo
+  HeightDistrEnum HeightDistribution = empirical;     // model for heights distribution
+  SlopeDistrEnum SlopeDistribution = trowbridgereitz; // model for distribution of slopes
 
 protected:
   double SpikeIntensity(int iWave, double costi);

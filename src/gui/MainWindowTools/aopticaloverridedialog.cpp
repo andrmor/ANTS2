@@ -2,7 +2,7 @@
 #include "ui_aopticaloverridedialog.h"
 #include "aopticaloverride.h"
 #include "amaterialparticlecolection.h"
-#include "amessage.h";
+#include "amessage.h"
 
 #include <QJsonObject>
 #include <QVBoxLayout>

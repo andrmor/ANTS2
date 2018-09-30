@@ -49,7 +49,7 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
 #endif
-  virtual const QString checkOverrideData() const {return "";} //TODO after all are done, make = 0
+  virtual const QString checkOverrideData() {return "";} //TODO after all are done, make = 0
 
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!
@@ -81,7 +81,7 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkOverrideData() const override;
+  virtual const QString checkOverrideData() override;
 
   double probLoss = 0; //probability of absorption
   double probRef = 0;  //probability of specular reflection
@@ -111,7 +111,7 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkOverrideData() const override;
+  virtual const QString checkOverrideData() override;
 
   //-- parameters --
   double Albedo;
@@ -137,7 +137,7 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkOverrideData() const override;
+  virtual const QString checkOverrideData() override;
 
   //-- parameters --
   int ReemissionModel = 1; //0-isotropic (4Pi), 1-Lamb back (2Pi), 2-Lamb forward (2Pi)
@@ -189,7 +189,7 @@ public:
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
 
-  virtual const QString checkOverrideData() const override;
+  virtual const QString checkOverrideData() override;
 
   //parameters
   QVector<double> Wave;

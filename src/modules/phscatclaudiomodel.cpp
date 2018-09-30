@@ -127,7 +127,7 @@ QWidget *PhScatClaudioModel::getEditWidget(QWidget *, GraphWindowClass *)
 }
 #endif
 
-const QString PhScatClaudioModel::checkOverrideData() const
+const QString PhScatClaudioModel::checkOverrideData()
 {
     if (sigma_alpha < 0) return "sigma alpha should be >= 0";
     if (sigma_h < 0) return "sigma h should be >= 0";

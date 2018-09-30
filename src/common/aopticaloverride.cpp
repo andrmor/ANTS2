@@ -309,7 +309,7 @@ QWidget *BasicOpticalOverride::getEditWidget(QWidget*, GraphWindowClass *)
 }
 #endif
 
-const QString BasicOpticalOverride::checkOverrideData() const
+const QString BasicOpticalOverride::checkOverrideData()
 {
     if (probLoss<0 || probLoss>1.0) return "Absorption probability should be within [0, 1.0]";
     if (probRef <0 || probRef >1.0) return "Reflection probability should be within [0, 1.0]";
@@ -533,7 +533,7 @@ QWidget *FSNPOpticalOverride::getEditWidget(QWidget *, GraphWindowClass *)
 }
 #endif
 
-const QString FSNPOpticalOverride::checkOverrideData() const
+const QString FSNPOpticalOverride::checkOverrideData()
 {
     if (Albedo<0 || Albedo>1.0) return "Albedo should be within [0, 1.0]";
     return "";
@@ -819,8 +819,7 @@ void AWaveshifterOverride::showReemissionProbability(GraphWindowClass *GraphWind
         message("No data were loaded", caller);
         return;
     }
-    TGraph* gr = GraphWindow->MakeGraph(&ReemissionProbability_lambda, &ReemissionProbability,   4, "Wavelength, nm", "Reemission probability", 20, 1, 0, 0, "", true);
-    gr->SetTitle("Reemission probability");
+    TGraph* gr = GraphWindow->ConstructTGraph(ReemissionProbability_lambda, ReemissionProbability, "Reemission probability", "Wavelength, nm", "Reemission probability, a.u.", 2, 20, 1, 2, 2);
     gr->SetMinimum(0);
     GraphWindow->Draw(gr, "apl");
 }
@@ -832,8 +831,10 @@ void AWaveshifterOverride::showEmissionSpectrum(GraphWindowClass *GraphWindow, Q
         message("No data were loaded", caller);
         return;
     }
-    TGraph* gr = GraphWindow->MakeGraph(&EmissionSpectrum_lambda, &EmissionSpectrum,   2, "Wavelength, nm", "Relative intensity, a.u.", 20, 1, 0, 0, "", true);
-    gr->SetTitle("Emission spectrum");
+    TGraph* gr = GraphWindow->ConstructTGraph(EmissionSpectrum_lambda, EmissionSpectrum,
+                                              "Emission spectrum", "Wavelength, nm", "Relative intensity, a.u.",
+                                              4, 20, 1,
+                                              4, 2);
     gr->SetMinimum(0);
     GraphWindow->Draw(gr, "apl");
 }
@@ -856,7 +857,10 @@ void AWaveshifterOverride::showBinnedReemissionProbability(GraphWindowClass *Gra
 
     QVector<double> waveIndex;
     for (int i=0; i<WaveNodes; i++) waveIndex << i;
-    TGraph* gr = GraphWindow->ConstructTGraph(waveIndex, ReemissionProbabilityBinned, "Reemission probability (binned)", "Wave index", "Reemission probability, a.u.", 2, 20, 1, 2);
+    TGraph* gr = GraphWindow->ConstructTGraph(waveIndex, ReemissionProbabilityBinned,
+                                              "Reemission probability (binned)", "Wave index", "Reemission probability, a.u.",
+                                              2, 20, 1,
+                                              2, 2);
     gr->SetMinimum(0);
     GraphWindow->Draw(gr, "apl");
 }
@@ -886,14 +890,22 @@ void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWin
 
     TH1D* SpectrumCopy = new TH1D(*Spectrum);
     SpectrumCopy->SetTitle("Binned emission spectrum");
-    SpectrumCopy->GetXaxis()->SetTitle("Wave index");
+    SpectrumCopy->GetXaxis()->SetTitle("Wavelength, nm");
     SpectrumCopy->GetYaxis()->SetTitle("Relative intensity, a.u.");
-    GraphWindow->Draw(SpectrumCopy, "hist");
+    GraphWindow->Draw(SpectrumCopy, "hist"); //gets ownership of the copy
 }
 #endif
 
-const QString AWaveshifterOverride::checkOverrideData() const
+const QString AWaveshifterOverride::checkOverrideData()
 {
+    bool bWR;
+    double WaveFrom, WaveTo, WaveStep;
+    int WaveNodes;
+    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
+    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+
+    if (bWR && Spectrum->ComputeIntegral() <= 0)
+            return "Binned emission spectrum: integral should be > 0";
     return "";
 }
 
@@ -1187,7 +1199,7 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller, GraphWindo
 }
 #endif
 
-const QString SpectralBasicOpticalOverride::checkOverrideData() const
+const QString SpectralBasicOpticalOverride::checkOverrideData()
 {
     //checking spectrum
     if (Wave.size() == 0) return "Spectral data are not defined";

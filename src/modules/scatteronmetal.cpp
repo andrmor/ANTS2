@@ -89,7 +89,7 @@ QWidget *ScatterOnMetal::getEditWidget(QWidget *, GraphWindowClass *)
 }
 #endif
 
-const QString ScatterOnMetal::checkOverrideData() const
+const QString ScatterOnMetal::checkOverrideData()
 {
     return "";
 }

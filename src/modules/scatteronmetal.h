@@ -28,7 +28,7 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
-  virtual const QString checkOverrideData() const override;
+  virtual const QString checkOverrideData() override;
 
   //data
   double RealN = 1.07;

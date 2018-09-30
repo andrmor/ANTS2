@@ -57,7 +57,7 @@ void AOpticalOverrideDialog::updateGui()
         ui->cobType->setCurrentIndex(index+1);
 
         QVBoxLayout* l = static_cast<QVBoxLayout*>(layout());
-        customWidget = ovLocal->getEditWidget();
+        customWidget = ovLocal->getEditWidget(this);
         l->insertWidget(customWidgetPositionInLayout, customWidget);
     }
     else

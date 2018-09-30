@@ -42,7 +42,7 @@ public:
 
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
 
-  virtual QWidget* getEditWidget();
+  virtual QWidget* getEditWidget(QWidget* caller);
 
   virtual const QString checkValidity() const {return "";} //TODO after all are done, make = 0
 
@@ -74,7 +74,7 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
-  virtual QWidget* getEditWidget() override;
+  virtual QWidget* getEditWidget(QWidget *caller) override;
 
   virtual const QString checkValidity() const override;
 
@@ -103,7 +103,7 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
-  virtual QWidget* getEditWidget() override;
+  virtual QWidget* getEditWidget(QWidget* caller) override;
 
   virtual const QString checkValidity() const override;
 
@@ -164,7 +164,7 @@ public:
   virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
   const QString loadData(const QString& fileName);
 
-  virtual QWidget* getEditWidget() override;
+  virtual QWidget* getEditWidget(QWidget* caller) override;
 
   virtual const QString checkValidity() const override;
 
@@ -180,7 +180,7 @@ public:
   double effectiveWaveIndex;
 
 private:
-  void loadSpectralData();
+  void loadSpectralData(QWidget *caller);
 };
 
 #endif // OPTICALOVERRIDECLASS_H

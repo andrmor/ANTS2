@@ -54,7 +54,7 @@ bool ScatterOnMetal::readFromJson(QJsonObject &json)
 #include <QLabel>
 #include <QLineEdit>
 #include <QDoubleValidator>
-QWidget *ScatterOnMetal::getEditWidget()
+QWidget *ScatterOnMetal::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);

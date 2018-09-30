@@ -72,7 +72,7 @@ bool PhScatClaudioModel::readFromJson(QJsonObject &json)
 #include <QFrame>
 #include <QDoubleValidator>
 #include <QComboBox>
-QWidget *PhScatClaudioModel::getEditWidget()
+QWidget *PhScatClaudioModel::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);

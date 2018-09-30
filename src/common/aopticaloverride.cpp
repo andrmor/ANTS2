@@ -45,7 +45,7 @@ bool AOpticalOverride::readFromJson(QJsonObject &json)
 }
 
 #include <QFrame>
-QWidget *AOpticalOverride::getEditWidget()
+QWidget *AOpticalOverride::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -253,7 +253,7 @@ bool BasicOpticalOverride::readFromJson(QJsonObject &json)
   return true;
 }
 
-QWidget *BasicOpticalOverride::getEditWidget()
+QWidget *BasicOpticalOverride::getEditWidget(QWidget*)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -503,7 +503,7 @@ bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
       return false;
 }
 
-QWidget *FSNPOpticalOverride::getEditWidget()
+QWidget *FSNPOpticalOverride::getEditWidget(QWidget *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -873,18 +873,18 @@ const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
     return "";
 }
 
-void SpectralBasicOpticalOverride::loadSpectralData()
+void SpectralBasicOpticalOverride::loadSpectralData(QWidget* caller)
 {
-    QString fileName = QFileDialog::getOpenFileName(0, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", "", "Data files (*.dat *.txt);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", "", "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
 
     QVector< QVector<double>* > vec;
     vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;
     QString err = LoadDoubleVectorsFromFile(fileName, vec);
-    if (!err.isEmpty()) message(err, 0);
+    if (!err.isEmpty()) message(err, caller);
 }
 
-QWidget *SpectralBasicOpticalOverride::getEditWidget()
+QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
@@ -894,7 +894,7 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget()
             QLabel* lab = new QLabel("Absorption, reflection and scattering:");
         l->addWidget(lab);
             QPushButton* pb = new QPushButton("Load");
-            QObject::connect(pb, &QPushButton::clicked, [this] {loadSpectralData();});
+            QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
         l->addWidget(pb);
     vl->addLayout(l);
         l = new QHBoxLayout();

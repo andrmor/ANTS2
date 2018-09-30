@@ -30,6 +30,8 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include "amessage.h"
+#include "TGraph.h"
+#include "graphwindowclass.h"
 #endif
 
 void AOpticalOverride::writeToJson(QJsonObject &json)
@@ -341,7 +343,7 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
    return NULL; //undefined override type!
 }
 
-const QStringList GetListOvAvailableOverrides()
+const QStringList ListOvAllOpticalOverrideTypes()
 {
     QStringList l;
 
@@ -721,6 +723,178 @@ bool AWaveshifterOverride::readFromJson(QJsonObject &json)
     parseJson(json, "ReemissionModel", ReemissionModel);
 
     return true;
+}
+
+#ifdef GUI
+QWidget *AWaveshifterOverride::getEditWidget(QWidget *caller, GraphWindowClass *GraphWindow)
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QVBoxLayout* vl = new QVBoxLayout(f);
+        QHBoxLayout* l = new QHBoxLayout();
+            QLabel* lab = new QLabel("Reemission generation:");
+        l->addWidget(lab);
+            QComboBox* com = new QComboBox();
+            com->addItem("Isotropic (4Pi)"); com->addItem("Lambertian, 2Pi back"); com->addItem("Lambertian, 2Pi forward");
+            com->setCurrentIndex(ReemissionModel);
+            QObject::connect(com, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), [this](int index) { this->ReemissionModel = index; } );
+        l->addWidget(com);
+    vl->addLayout(l);
+        l = new QHBoxLayout();
+            QVBoxLayout* vv = new QVBoxLayout();
+                lab = new QLabel("Reemission probability:");
+            vv->addWidget(lab);
+                lab = new QLabel("Emission spectrum:");
+            vv->addWidget(lab);
+        l->addLayout(vv);
+            vv = new QVBoxLayout();
+                QPushButton* pb = new QPushButton("Load");
+                pb->setToolTip("Every line of the file should contain 2 numbers:\nwavelength[nm] reemission_probability[0..1]");
+                QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadReemissionProbability(caller);});
+            vv->addWidget(pb);
+                pb = new QPushButton("Load");
+                pb->setToolTip("Every line of the file should contain 2 numbers:\nwavelength[nm] relative_intencity[>=0]");
+                QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadEmissionSpectrum(caller);});
+            vv->addWidget(pb);
+        l->addLayout(vv);
+            vv = new QVBoxLayout();
+                pb = new QPushButton("Show");
+                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showReemissionProbability(GraphWindow, caller);});
+            vv->addWidget(pb);
+                pb = new QPushButton("Show");
+                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showEmissionSpectrum(GraphWindow, caller);});
+            vv->addWidget(pb);
+        l->addLayout(vv);
+            vv = new QVBoxLayout();
+                pb = new QPushButton("Binned");
+                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedReemissionProbability(GraphWindow, caller);});
+            vv->addWidget(pb);
+                pb = new QPushButton("Binned");
+                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedEmissionSpectrum(GraphWindow, caller);});
+            vv->addWidget(pb);
+        l->addLayout(vv);
+    vl->addLayout(l);
+        lab = new QLabel("If simulation is NOT wavelength-resolved, this override does nothing!");
+        lab->setAlignment(Qt::AlignCenter);
+    vl->addWidget(lab);
+
+    return f;
+}
+#endif
+
+#ifdef GUI
+void AWaveshifterOverride::loadReemissionProbability(QWidget* caller)
+{
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load reemission probability", "", "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    //GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    QVector<double> X, Y;
+    int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
+    if (ret == 0)
+    {
+        ReemissionProbability_lambda = X;
+        ReemissionProbability = Y;
+    }
+}
+
+void AWaveshifterOverride::loadEmissionSpectrum(QWidget *caller)
+{
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load emission spectrum", "", "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    //GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    QVector<double> X, Y;
+    int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
+    if (ret == 0)
+    {
+        EmissionSpectrum_lambda = X;
+        EmissionSpectrum = Y;
+    }
+}
+
+void AWaveshifterOverride::showReemissionProbability(GraphWindowClass *GraphWindow, QWidget* caller)
+{
+    if (ReemissionProbability_lambda.isEmpty())
+    {
+        message("No data were loaded", caller);
+        return;
+    }
+    TGraph* gr = GraphWindow->MakeGraph(&ReemissionProbability_lambda, &ReemissionProbability,   4, "Wavelength, nm", "Reemission probability", 20, 1, 0, 0, "", true);
+    gr->SetTitle("Reemission probability");
+    gr->SetMinimum(0);
+    GraphWindow->Draw(gr, "apl");
+}
+
+void AWaveshifterOverride::showEmissionSpectrum(GraphWindowClass *GraphWindow, QWidget *caller)
+{
+    if (EmissionSpectrum_lambda.isEmpty())
+    {
+        message("No data were loaded", caller);
+        return;
+    }
+    TGraph* gr = GraphWindow->MakeGraph(&EmissionSpectrum_lambda, &EmissionSpectrum,   2, "Wavelength, nm", "Relative intensity, a.u.", 20, 1, 0, 0, "", true);
+    gr->SetTitle("Emission spectrum");
+    gr->SetMinimum(0);
+    GraphWindow->Draw(gr, "apl");
+}
+
+void AWaveshifterOverride::showBinnedReemissionProbability(GraphWindowClass *GraphWindow, QWidget *caller)
+{
+    bool bWR;
+    double WaveFrom, WaveTo, WaveStep;
+    int WaveNodes;
+    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
+    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+
+    //TODO run checker
+
+    if (!bWR)
+    {
+        message("Simulation is NOT wavelength resolved, override is inactive!", caller);
+        return;
+    }
+
+    QVector<double> waveIndex;
+    for (int i=0; i<WaveNodes; i++) waveIndex << i;
+    TGraph* gr = GraphWindow->ConstructTGraph(waveIndex, ReemissionProbabilityBinned, "Reemission probability (binned)", "Wave index", "Reemission probability, a.u.", 2, 20, 1, 2);
+    gr->SetMinimum(0);
+    GraphWindow->Draw(gr, "apl");
+}
+
+void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWindow, QWidget *caller)
+{
+    bool bWR;
+    double WaveFrom, WaveTo, WaveStep;
+    int WaveNodes;
+    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
+    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+
+    //TODO run checker
+
+    if (!bWR)
+    {
+        message("Simulation is NOT wavelength resolved, override is inactive!", caller);
+        return;
+    }
+
+    double integral = Spectrum->ComputeIntegral();
+    if (integral <= 0)
+    {
+        message("Binned emission spectrum: integral <=0, override will report an error!", caller);
+        return;
+    }
+
+    TH1D* SpectrumCopy = new TH1D(*Spectrum);
+    SpectrumCopy->SetTitle("Binned emission spectrum");
+    SpectrumCopy->GetXaxis()->SetTitle("Wave index");
+    SpectrumCopy->GetYaxis()->SetTitle("Relative intensity, a.u.");
+    GraphWindow->Draw(SpectrumCopy, "hist");
+}
+#endif
+
+const QString AWaveshifterOverride::checkOverrideData() const
+{
+    return "";
 }
 
 // ---------------- SpectralSimplistic -------------------

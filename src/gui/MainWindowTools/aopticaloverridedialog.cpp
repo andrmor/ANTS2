@@ -20,7 +20,7 @@ AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * Mat
     ui->leMatFrom->setText(matNames.at(matFrom));
     ui->leMatTo->setText(matNames.at(matTo));
     ui->cobType->addItem("No special rule");
-    QStringList avOv = GetListOvAvailableOverrides();
+    QStringList avOv = ListOvAllOpticalOverrideTypes();
     ui->cobType->addItems(avOv);
 
     AOpticalOverride* ov = (*MatCollection)[matFrom]->OpticalOverrides[matTo];
@@ -52,7 +52,7 @@ void AOpticalOverrideDialog::updateGui()
         ui->frNoOverride->setVisible(false);
         ui->pbTestOverride->setVisible(true);
 
-        QStringList avOv = GetListOvAvailableOverrides();
+        QStringList avOv = ListOvAllOpticalOverrideTypes();
         int index = avOv.indexOf(ovLocal->getType()); //TODO -> if not found?
         ui->cobType->setCurrentIndex(index+1);
 

@@ -15,8 +15,9 @@ class QWidget;
 class TObject;
 class GraphWindowClass;
 
+//modify these two functions if you want to register a new override type!
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
-const QStringList GetListOvAvailableOverrides();
+const QStringList ListOvAllOpticalOverrideTypes();
 
 class AOpticalOverride
 {
@@ -36,6 +37,7 @@ public:
   virtual void printConfiguration(int iWave) = 0;
   virtual QString getType() const = 0;
   virtual QString getReportLine() = 0; // for GUI: reports override status "to material blabla (#id): properies"
+  //TODO: initializeWaveResolved() -> no need to transfer data, MatCollection knows the settings
   virtual void initializeWaveResolved(bool /*bWaveResolved*/, double /*waveFrom*/, double /*waveStep*/, int /*waveNodes*/) {}  //override if override has wavelength-resolved data
 
   // save/load config
@@ -132,6 +134,11 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+#ifdef GUI
+  virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
+#endif
+  virtual const QString checkOverrideData() const override;
+
   //-- parameters --
   int ReemissionModel = 1; //0-isotropic (4Pi), 1-Lamb back (2Pi), 2-Lamb forward (2Pi)
   QVector<double> ReemissionProbability_lambda;
@@ -146,6 +153,16 @@ public:
   double WaveFrom;
   double WaveStep;
   int WaveNodes;
+
+private:
+#ifdef GUI
+  void loadReemissionProbability(QWidget *caller);
+  void loadEmissionSpectrum(QWidget *caller);
+  void showReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
+  void showEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
+  void showBinnedReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
+  void showBinnedEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
+#endif
 };
 
 class SpectralBasicOpticalOverride : public BasicOpticalOverride

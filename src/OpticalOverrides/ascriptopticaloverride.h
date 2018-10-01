@@ -41,6 +41,10 @@ private:
   //will be moved to a separate class and made thread-safe
   QScriptEngine* ScriptEngine;
   AOpticalOverrideScriptInterface* interfaceObject;
+
+#ifdef GUI
+  void openScriptWindow(QWidget* parent);
+#endif
 };
 
 #endif // ASCRIPTOPTICALOVERRIDE_H

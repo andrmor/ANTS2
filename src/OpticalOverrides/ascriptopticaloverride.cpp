@@ -78,14 +78,54 @@ bool AScriptOpticalOverride::readFromJson(QJsonObject &json)
 }
 
 #ifdef GUI
-QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *GraphWindow)
+#include <QFrame>
+//#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *)
 {
-    return AOpticalOverride::getEditWidget(caller, GraphWindow);
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QVBoxLayout* l = new QVBoxLayout(f);
+        QLabel* lab = new QLabel("");
+    l->addWidget(lab);
+        QPushButton* pb = new QPushButton("Load / Edit script");
+        QObject::connect(pb, &QPushButton::clicked, [caller, this] {openScriptWindow(caller);});
+    l->addWidget(pb);
+        lab = new QLabel("");
+    l->addWidget(lab);
+
+    return f;
 }
 #endif
 
 const QString AScriptOpticalOverride::checkOverrideData()
 {
     if (Script.isEmpty()) return "Script not defined!";
+
+    //TODO check syntax!
+
     return "";
 }
+
+#ifdef GUI
+#include "ascriptwindow.h"
+#include "ajavascriptmanager.h"
+#include "globalsettingsclass.h"
+#include "TRandom2.h"
+void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
+{
+    QString example = "photon.Absorbed()";
+
+    TRandom2* RandGen = new TRandom2(); //leak!
+    AJavaScriptManager* sm = new AJavaScriptManager(RandGen); //leak!
+    AScriptWindow* sw = new AScriptWindow(sm, new GlobalSettingsClass(0), true, parent); //leak!
+    sw->ConfigureForLightMode(&Script, "Optical override: custom script", example);
+
+    //sw->SetInterfaceObject(0);
+    sw->SetInterfaceObject(interfaceObject, "photon"); //steals ownership!
+    sw->show();
+}
+#endif

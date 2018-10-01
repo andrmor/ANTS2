@@ -959,7 +959,7 @@ void MainWindow::on_pbRefreshOverrides_clicked()
           }
         else
           {
-             message("Unknown override model: "+model, this);
+             //message("Unknown override model: "+model, this);
              ui->cobOpticalOverrideModel->setCurrentIndex(0);
           }
       }

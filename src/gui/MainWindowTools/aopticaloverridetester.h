@@ -1,6 +1,8 @@
 #ifndef AOPTICALOVERRIDETESTER_H
 #define AOPTICALOVERRIDETESTER_H
 
+#include "atracerstateful.h"
+
 #include <QMainWindow>
 
 namespace Ui {
@@ -10,6 +12,7 @@ class AOpticalOverrideTester;
 class AMaterialParticleCollection;
 class AOpticalOverride;
 class GraphWindowClass;
+class TRandom2;
 
 class AOpticalOverrideTester : public QMainWindow
 {
@@ -31,6 +34,8 @@ private:
     int MatTo;
     AOpticalOverride* ov;
     GraphWindowClass* GraphWindow;
+    TRandom2* RandGen;
+    ATracerStateful Resources;
 };
 
 #endif // AOPTICALOVERRIDETESTER_H

@@ -62,22 +62,6 @@ QWidget *AOpticalOverride::getEditWidget(QWidget *, GraphWindowClass *)
 }
 #endif
 
-void AOpticalOverride::RandomDir(TRandom2 *RandGen, APhoton *Photon)
-{
-  //Sphere function of Root:
-  double a=0, b=0, r2=1;
-  while (r2 > 0.25)
-    {
-      a  = RandGen->Rndm() - 0.5;
-      b  = RandGen->Rndm() - 0.5;
-      r2 =  a*a + b*b;
-    }
-  Photon->v[2] = ( -1.0 + 8.0 * r2 );
-  double scale = 8.0 * TMath::Sqrt(0.25 - r2);
-  Photon->v[0] = a*scale;
-  Photon->v[1] = b*scale;
-}
-
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo, double probLoss, double probRef, double probDiff, int scatterModel)
     : AOpticalOverride(MatCollection, MatFrom, MatTo),
       probLoss(probLoss), probRef(probRef), probDiff(probDiff), scatterModel(scatterModel) {}
@@ -124,7 +108,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(ATra
         {
         case 0: //4Pi scattering
           // qDebug()<<"4Pi scatter";
-          RandomDir(Resources.RandGen, Photon);
+          Photon->RandomDir(Resources.RandGen);
           // qDebug()<<"New direction:"<<K[0]<<K[1]<<K[2];
 
           //enering new volume or backscattering?
@@ -145,7 +129,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(ATra
             double norm2;
             do
               {
-                RandomDir(Resources.RandGen, Photon);
+                Photon->RandomDir(Resources.RandGen);
                 Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
               }
@@ -162,7 +146,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(ATra
             double norm2;
             do
               {
-                RandomDir(Resources.RandGen, Photon);
+                Photon->RandomDir(Resources.RandGen);
                 Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
               }
@@ -425,7 +409,7 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
   double norm2;
   do
     {
-      RandomDir(Resources.RandGen, Photon);
+      Photon->RandomDir(Resources.RandGen);
       Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
       norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
     }
@@ -625,7 +609,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
 
         if (ReemissionModel == 0)
         {
-            RandomDir(Resources.RandGen, Photon);
+            Photon->RandomDir(Resources.RandGen);
             //enering new volume or backscattering?
             //normal is in the positive direction in respect to the original direction!
             if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
@@ -645,7 +629,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
             // qDebug()<<"2Pi lambertian scattering backward";
             do
             {
-                RandomDir(Resources.RandGen, Photon);
+                Photon->RandomDir(Resources.RandGen);
                 Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
             }
@@ -661,7 +645,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
         // qDebug()<<"2Pi lambertian scattering forward";
         do
           {
-            RandomDir(Resources.RandGen, Photon);
+            Photon->RandomDir(Resources.RandGen);
             Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
             norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
           }

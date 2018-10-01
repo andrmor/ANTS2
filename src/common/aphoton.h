@@ -1,62 +1,27 @@
 #ifndef APHOTON
 #define APHOTON
 
-#include <math.h>
-
 class ASimulationStatistics;
+class TRandom2;
 
 class APhoton
 {
 public:
-    APhoton() : fSkipThisPhoton(false), SimStat(0) {}
-    APhoton(double* xyz, double* Vxyz, int waveIndex=-1, double time=0) :
-        time(time), waveIndex(waveIndex), scint_type(0), fSkipThisPhoton(false), SimStat(0)
-    {
-      r[0]=xyz[0];  r[1]=xyz[1];  r[2]=xyz[2];
-      v[0]=Vxyz[0]; v[1]=Vxyz[1]; v[2]=Vxyz[2];
-    }
+    APhoton();
+    APhoton(double* xyz, double* Vxyz, int waveIndex=-1, double time=0);
 
     double r[3]; //position
     double v[3]; //direction (must be already normalized to unit vector!!!)
     double time; //time stamp
     int waveIndex; //wavelength is always binned during simulations
     int scint_type; //1 - primary //2 - secondary // 0 - undefined
-    bool fSkipThisPhoton; //flag to skip this photon due to e.g. direction check
+    bool fSkipThisPhoton = false; //flag to skip this photon due to e.g. direction check
 
-    ASimulationStatistics* SimStat;
+    ASimulationStatistics* SimStat = 0;
 
-    void CopyFrom(const APhoton* CopyFrom)
-      {
-        r[0] = CopyFrom->r[0];
-        r[1] = CopyFrom->r[1];
-        r[2] = CopyFrom->r[2];
-
-        v[0] = CopyFrom->v[0];
-        v[1] = CopyFrom->v[1];
-        v[2] = CopyFrom->v[2];
-
-        time = CopyFrom->time;
-        waveIndex = CopyFrom->waveIndex;
-        scint_type = CopyFrom->scint_type;
-        fSkipThisPhoton = CopyFrom->fSkipThisPhoton;
-
-        SimStat = CopyFrom->SimStat;
-      }
-
-    void ensureUnitaryLength()
-    {
-        double mod;
-        for (int i=0; i<3; i++)
-            mod += ( v[i] * v[i] );
-        mod = sqrt(mod);
-
-        if (mod != 0)
-            for (int i=0; i<3; i++) v[i] /= mod;
-        else
-        {
-            v[0] = 0; v[1] = 0; v[2] = 1.0;
-        }
-    }
+    void CopyFrom(const APhoton* CopyFrom);
+    void EnsureUnitaryLength();
+    void RandomDir(TRandom2* RandGen);
 };
 
 #endif // APHOTON

@@ -28,11 +28,11 @@ AScriptOpticalOverride::~AScriptOpticalOverride() {}
 AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     //qDebug() << "Configuring script interface";
-    Resources.interfaceObject->configure(Photon, NormalVector);
+    Resources.interfaceObject->configure(Resources.RandGen, Photon, NormalVector);
     //qDebug() << "Evaluating script";
     Resources.evaluateScript(Script);
-    qDebug() << "Photon status:"<<Resources.interfaceObject->getResult();
-    return Resources.interfaceObject->getResult();
+    qDebug() << "Photon result:"<<Resources.interfaceObject->getResult(Status)<<"Status"<<Status;;
+    return Resources.interfaceObject->getResult(Status);
 }
 
 void AScriptOpticalOverride::printConfiguration(int)
@@ -118,7 +118,7 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     normal[0] = 0; normal[1] = 0; normal[2] = 1.0;
 
     AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
-    interfaceObject->configure(&phot, normal);
+    interfaceObject->configure(RandGen, &phot, normal);
     interfaceObject->setObjectName("photon");
 
     //sw->SetInterfaceObject(0);
@@ -131,6 +131,6 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
         QCoreApplication::processEvents();
         QThread::usleep(200);
     }
-    qDebug() << "exit script:"<<Script;
+    //qDebug() << "Script reports:"<<Script;
 }
 #endif

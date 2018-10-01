@@ -352,7 +352,8 @@ SOURCES += main.cpp \
     OpticalOverrides/aopticaloverridescriptinterface.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
-    gui/MainWindowTools/aopticaloverridetester.cpp
+    gui/MainWindowTools/aopticaloverridetester.cpp \
+    common/aphoton.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \

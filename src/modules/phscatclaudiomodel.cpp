@@ -244,7 +244,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
           counter--;
           if (counter == 0)
             {
-              Status = ErrorDetected;
+              Status = Error;
               return _Error_;
             }
 
@@ -418,7 +418,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
           counter--;
           if (counter == 0)
             {
-              Status = ErrorDetected;
+              Status = Error;
               return _Error_;
             }
 
@@ -594,7 +594,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
             counter--;
             if (counter == 0)
               {
-                Status = ErrorDetected;
+                Status = Error;
                 return _Error_;
               }
 

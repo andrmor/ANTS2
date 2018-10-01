@@ -26,8 +26,8 @@ class AOpticalOverride
 public:
   //return status for photon tracing:
   enum OpticalOverrideResultEnum {NotTriggered, Absorbed, Forward, Back, _Error_};
-  //detailed status for statistics only:
-  enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection, Absorption, Transmission, ErrorDetected};
+  //detailed status for statistics only - used by override tester only
+  enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection, Absorption, Transmission, Error, UnclassifiedReflection, Empty, Fresnel};
 
 
   AOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
@@ -60,8 +60,6 @@ public:
 protected:  
   AMaterialParticleCollection* MatCollection;
   int MatFrom, MatTo;   // material index of material before(from) and after(to) the optical interface
-
-  void RandomDir(TRandom2* RandGen, APhoton* Photon);
 };
 
 class BasicOpticalOverride : public AOpticalOverride

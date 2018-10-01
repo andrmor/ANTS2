@@ -5,6 +5,8 @@
 #include "ajsontools.h"
 #include "acommonfunctions.h"
 #include "atracerstateful.h"
+#include "ascriptopticaloverride.h"
+#include "aopticaloverridescriptinterface.h"
 
 #include <QtDebug>
 #include <QJsonObject>
@@ -78,11 +80,8 @@ void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* Ran
         MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
-#include "ascriptopticaloverride.h"
-#include "aopticaloverridescriptinterface.h"
 void AMaterialParticleCollection::registerOpticalOverrideScriptInterfaces(ATracerStateful &record)
 {
-    qDebug() << "Registering ov for the thread...";
     AOpticalOverrideScriptInterface* interfaceObj = 0;
     for (AMaterial* mat : MaterialCollectionData)
     {

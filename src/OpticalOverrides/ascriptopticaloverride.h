@@ -5,8 +5,6 @@
 
 #include <QString>
 
-//to move away
-class QScriptEngine;
 class AOpticalOverrideScriptInterface;
 
 class AScriptOpticalOverride : public AOpticalOverride

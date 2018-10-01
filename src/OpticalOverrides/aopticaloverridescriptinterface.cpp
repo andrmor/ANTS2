@@ -3,10 +3,7 @@
 
 #include <QDebug>
 
-AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface()
-{
-
-}
+AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface() {}
 
 void AOpticalOverrideScriptInterface::configure(APhoton *photon, const double *normalVector)
 {

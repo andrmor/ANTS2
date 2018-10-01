@@ -373,6 +373,8 @@ void AScriptWindow::HighlightErrorLine(int line)
 
 void AScriptWindow::WriteToJson()
 {
+    if (bLightMode) return;
+
     QJsonObject* ScriptWindowJsonPtr = 0;
     if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
     else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
@@ -403,6 +405,8 @@ void AScriptWindow::WriteToJson(QJsonObject& json)
 
 void AScriptWindow::ReadFromJson()
 {
+    if (bLightMode) return;
+
     QJsonObject* ScriptWindowJsonPtr = 0;
     if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
     else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;

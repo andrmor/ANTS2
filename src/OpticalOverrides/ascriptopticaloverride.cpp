@@ -1,15 +1,25 @@
 #include "ascriptopticaloverride.h"
 #include "amaterialparticlecolection.h"
 #include "atracerstateful.h"
-
 #include "aopticaloverridescriptinterface.h"
+
+#ifdef GUI
+#include "ascriptwindow.h"
+#include "ajavascriptmanager.h"
+#include "globalsettingsclass.h"
+#include "TRandom2.h"
+#include "aphoton.h"
+#include <QFrame>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QCoreApplication>
+#include <QThread>
+#endif
 
 #include <QDebug>
 #include <QJsonObject>
-#include <QScriptEngine> //?
 
-
-#include "coreinterfaces.h"
 AScriptOpticalOverride::AScriptOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
 
@@ -62,11 +72,6 @@ AOpticalOverrideScriptInterface *AScriptOpticalOverride::generateInterfaceScript
 }
 
 #ifdef GUI
-#include <QFrame>
-//#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
 QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
@@ -95,11 +100,6 @@ const QString AScriptOpticalOverride::checkOverrideData()
 }
 
 #ifdef GUI
-#include "ascriptwindow.h"
-#include "ajavascriptmanager.h"
-#include "globalsettingsclass.h"
-#include "TRandom2.h"
-#include "aphoton.h"
 void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
 {
     QString example = "photon.Absorbed()";
@@ -119,9 +119,18 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
 
     AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
     interfaceObject->configure(&phot, normal);
+    interfaceObject->setObjectName("photon");
 
     //sw->SetInterfaceObject(0);
     sw->SetInterfaceObject(interfaceObject, "photon"); //steals ownership!
+    sw->setWindowModality(Qt::ApplicationModal);
     sw->show();
+
+    while (sw->isVisible())
+    {
+        QCoreApplication::processEvents();
+        QThread::usleep(200);
+    }
+    qDebug() << "exit script:"<<Script;
 }
 #endif

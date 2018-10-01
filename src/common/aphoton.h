@@ -9,7 +9,7 @@ class APhoton
 {
 public:
     APhoton() : fSkipThisPhoton(false), SimStat(0) {}
-    APhoton(double* xyz, double* Vxyz, int waveIndex=0, double time=0) :
+    APhoton(double* xyz, double* Vxyz, int waveIndex=-1, double time=0) :
         time(time), waveIndex(waveIndex), scint_type(0), fSkipThisPhoton(false), SimStat(0)
     {
       r[0]=xyz[0];  r[1]=xyz[1];  r[2]=xyz[2];

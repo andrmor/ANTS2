@@ -115,6 +115,7 @@ const QString AScriptOpticalOverride::checkOverrideData()
 #include "ajavascriptmanager.h"
 #include "globalsettingsclass.h"
 #include "TRandom2.h"
+#include "aphoton.h"
 void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
 {
     QString example = "photon.Absorbed()";
@@ -123,6 +124,15 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     AJavaScriptManager* sm = new AJavaScriptManager(RandGen); //leak!
     AScriptWindow* sw = new AScriptWindow(sm, new GlobalSettingsClass(0), true, parent); //leak!
     sw->ConfigureForLightMode(&Script, "Optical override: custom script", example);
+
+    double vx[3];
+    vx[0] = 0; vx[1] = 0; vx[3] = 1;
+    double r[3];
+    r[0] = 0; r[1] = 0; r[2] = 0;
+    APhoton phot(vx, r, -1, 0);
+    double normal[3];
+    normal[0] = 0; normal[1] = 0; normal[2] = 1.0;
+    interfaceObject->configure(RandGen, &phot, normal);
 
     //sw->SetInterfaceObject(0);
     sw->SetInterfaceObject(interfaceObject, "photon"); //steals ownership!

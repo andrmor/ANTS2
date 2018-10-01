@@ -34,7 +34,9 @@ public:
   virtual const QString checkOverrideData() override;
 
 private:
-  QString Script = "photon.Absorb()";
+  QString Script = "photon.SetDirection(0, 0, 1)";
+  //QString Script = "photon.Fresnel()";
+  //QString Script = "photon.Absorb()";
 
   //will be moved to a separate class and made thread-safe
   QScriptEngine* ScriptEngine;

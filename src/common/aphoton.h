@@ -1,6 +1,8 @@
 #ifndef APHOTON
 #define APHOTON
 
+#include <math.h>
+
 class ASimulationStatistics;
 
 class APhoton
@@ -40,6 +42,21 @@ public:
 
         SimStat = CopyFrom->SimStat;
       }
+
+    void ensureUnitaryLength()
+    {
+        double mod;
+        for (int i=0; i<3; i++)
+            mod += ( v[i] * v[i] );
+        mod = sqrt(mod);
+
+        if (mod != 0)
+            for (int i=0; i<3; i++) v[i] /= mod;
+        else
+        {
+            v[0] = 0; v[1] = 0; v[2] = 1.0;
+        }
+    }
 };
 
 #endif // APHOTON

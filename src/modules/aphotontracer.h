@@ -2,6 +2,7 @@
 #define APHOTONTRACER_H
 
 #include "aphotonhistorylog.h"
+#include "atracerstateful.h"
 #include <QVector>
 #include "TMathBase.h"
 
@@ -37,7 +38,7 @@ public:
 
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
-private:    
+private:
     TRandom2* RandGen;
     TGeoManager* GeoManager;
     TGeoNavigator *navigator;    
@@ -48,6 +49,7 @@ private:
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;
+    ATracerStateful ResourcesForOverrides;
 
     int MaxTracks = 10;
     int PhotonTracksAdded = 0;

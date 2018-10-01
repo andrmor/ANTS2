@@ -2,6 +2,7 @@
 #include "amaterialparticlecolection.h"
 #include "aphoton.h"
 #include "asimulationstatistics.h"
+#include "atracerstateful.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -94,7 +95,7 @@ const QString ScatterOnMetal::checkOverrideData()
     return "";
 }
 
-AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   double CosTheta = Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2];
 
@@ -116,7 +117,7 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *
   double Refl = calculateReflectivity(CosTheta, RealN, ImaginaryN, Photon->waveIndex);
   //qDebug() << "Dielectric-metal override: Cos theta="<<CosTheta<<" Reflectivity:"<<Refl;
 
-  if ( RandGen->Rndm() > Refl )
+  if ( Resources.RandGen->Rndm() > Refl )
     {
       //Absorption
       //qDebug() << "Override: Loss on metal";

@@ -6,6 +6,7 @@
 class TRandom2;
 class APhoton;
 class QJsonObject;
+class ATracerStateful;
 
 enum HeightDistrEnum {empirical, gaussian, exponential};
 enum SlopeDistrEnum {trowbridgereitz, cooktorrance, bivariatecauchy};
@@ -17,7 +18,7 @@ public:
   PhScatClaudioModel(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
   // main method:
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector) = 0;
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) = 0;
     //unitary vectors! iWave - photon wave index, -1 if no wave-resolved
 
   virtual void printConfiguration(int iWave);
@@ -54,7 +55,7 @@ class PhScatClaudioModelV2 : public PhScatClaudioModel
 public:
   PhScatClaudioModelV2(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModel(MatCollection, MatFrom, MatTo) {}
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector);
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
   virtual QString getType() const {return "Claudio_Model_V2";}
   virtual QString getReportLine();
 
@@ -68,7 +69,7 @@ class PhScatClaudioModelV2d1 : public PhScatClaudioModelV2
 public:
   PhScatClaudioModelV2d1(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector);
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
   virtual QString getType() const {return "Claudio_Model_V2d1";}
   virtual QString getReportLine();
 };
@@ -78,7 +79,7 @@ class PhScatClaudioModelV2d2 : public PhScatClaudioModelV2
 public:
   PhScatClaudioModelV2d2(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector);
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
   virtual QString getType() const {return "Claudio_Model_V2d2";}
   virtual QString getReportLine();
 };

@@ -17,6 +17,7 @@
 #include "atrackrecords.h"
 #include "aenergydepositioncell.h"
 #include "amessage.h"
+#include "atracerstateful.h"
 
 #include "TVirtualGeoTrack.h"
 #include "TLegend.h"
@@ -357,13 +358,15 @@ void MainWindow::on_pbCSMtestmany_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
+  ATracerStateful Resources;
+  Resources.RandGen = Detector->RandGen;
   for (int i=0; i<ui->sbST_number->value(); i++)
     {
       ph.v[0] = PhotDir.X(); //old has output direction after full cycle!
       ph.v[1] = PhotDir.Y();
       ph.v[2] = PhotDir.Z();
       ph.waveIndex = -1;
-      ov->calculate(Detector->RandGen, &ph, N);
+      ov->calculate(Resources, &ph, N);
 
       Color_t col;
       Int_t type;
@@ -465,6 +468,8 @@ void MainWindow::on_pbST_uniform_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
+  ATracerStateful Resources;
+  Resources.RandGen = Detector->RandGen;
   for (int i=0; i<num; i++)
     {
       //diffuse illumination - lambertian is used
@@ -479,7 +484,7 @@ void MainWindow::on_pbST_uniform_clicked()
       ph.v[1] = K[1];
       ph.v[2] = K[2];
       ph.waveIndex = -1;
-      ov->calculate(Detector->RandGen, &ph, N);
+      ov->calculate(Resources, &ph, N);
 
       if (ov->Status == AOpticalOverride::Absorption)
         {
@@ -543,6 +548,8 @@ void MainWindow::on_pbST_RvsAngle_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
+  ATracerStateful Resources;
+  Resources.RandGen = Detector->RandGen;
   for (int iA=0; iA<91; iA++) //cycle by angle of incidence
     {
       double angle = iA;
@@ -563,7 +570,7 @@ void MainWindow::on_pbST_RvsAngle_clicked()
           ph.v[1] = K[1];
           ph.v[2] = K[2];
           ph.waveIndex = -1;
-          ov->calculate(Detector->RandGen, &ph, N);
+          ov->calculate(Resources, &ph, N);
 
           switch (ov->Status)
             {
@@ -615,6 +622,8 @@ static QVector<double> vParam, vTot, vSpike, vLobe, vDiff, vDir;
 static QString parName;
 void MainWindow::on_pbST_ReflectionVsParameter_clicked()
 {
+  ATracerStateful Resources;
+  Resources.RandGen = Detector->RandGen;
   //input string processing
   QString inS = ui->leST_Parameter->text().simplified();
   QStringList inL = inS.split(",", QString::SkipEmptyParts);
@@ -781,7 +790,7 @@ void MainWindow::on_pbST_ReflectionVsParameter_clicked()
           ph.v[1] = K[1];
           ph.v[2] = K[2];
           ph.waveIndex = -1;
-          ov->calculate(Detector->RandGen, &ph, N);
+          ov->calculate(Resources, &ph, N);
 
           switch (ov->Status)
             {

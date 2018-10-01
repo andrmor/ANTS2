@@ -4,6 +4,8 @@
 #include "aopticaloverride.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
+#include "atracerstateful.h"
+
 #include <QtDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -74,6 +76,39 @@ void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* Ran
 {
     for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
         MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
+}
+
+#include <QMap>
+void AMaterialParticleCollection::registerOpticalOverrideScriptInterfaces(ATracerStateful &record)
+{
+    qDebug() << "Registering ov for the thread...";
+    QMap<QString, QObject*> RegisteredTypes;
+    for (AMaterial* mat : MaterialCollectionData)
+    {
+        for (AOpticalOverride* ov : mat->OpticalOverrides)
+            if (ov)
+            {
+                if (!ov->isRequireScriptEngine()) continue;
+
+                QString type = ov->getType();
+                qDebug() << "  Found override:" << mat->name << ov->getReportLine();
+
+                if (RegisteredTypes.contains(type))
+                {
+                    qDebug() << "  Type already registered";
+                    ov->assignInterfaceScriptObject(RegisteredTypes.value(type));
+                    qDebug() << "  Assigned interface object:" << RegisteredTypes.value(type);
+                }
+                else
+                {
+                    qDebug() << "  Type not yet registered";
+                    QObject* obj = ov->generateInterfaceScriptObject();
+                    qDebug() << "  Registering interface object" << obj << obj->objectName();
+                    record.registerInterfaceObject(obj);
+                    RegisteredTypes.insert(type, obj);
+                }
+            }
+    }
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)

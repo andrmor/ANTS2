@@ -31,6 +31,10 @@ APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator,
     fGridShiftOn = false;
     fBuildTracks = false;
     p = new APhoton();
+
+    //for transfer to overrides
+    ResourcesForOverrides.RandGen = RandGen;
+    ResourcesForOverrides.registerAllInterfaceObjects(MaterialCollection);
 }
 
 APhotonTracer::~APhotonTracer()
@@ -228,7 +232,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          //qDebug() << "Overrides defined! Model = "<<ov->getType();
          N = navigator->FindNormal(kFALSE);
          fHaveNormal = true;
-         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(RandGen, p, N);
+         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(ResourcesForOverrides, p, N);
 
          switch (result)
            {

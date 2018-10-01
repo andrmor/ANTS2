@@ -350,7 +350,8 @@ SOURCES += main.cpp \
     common/atrackbuildoptions.cpp \
     gui/MainWindowTools/aopticaloverridedialog.cpp \
     OpticalOverrides/aopticaloverridescriptinterface.cpp \
-    OpticalOverrides/ascriptopticaloverride.cpp
+    OpticalOverrides/ascriptopticaloverride.cpp \
+    common/atracerstateful.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -477,7 +478,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/atrackbuildoptions.h \
     gui/MainWindowTools/aopticaloverridedialog.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
-    OpticalOverrides/ascriptopticaloverride.h
+    OpticalOverrides/ascriptopticaloverride.h \
+    common/atracerstateful.h
 
 # --- SIM ---
 ants2_SIM {

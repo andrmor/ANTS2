@@ -1,5 +1,6 @@
 #include "ascriptopticaloverride.h"
 #include "amaterialparticlecolection.h"
+#include "atracerstateful.h"
 
 #include "aopticaloverridescriptinterface.h"
 
@@ -12,39 +13,24 @@
 AScriptOpticalOverride::AScriptOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
     : AOpticalOverride(MatCollection, MatFrom, MatTo)
 {
-    //to transfer away
-    ScriptEngine = new QScriptEngine(); //mem leak
-    qDebug() << "Registering script interface";
-    interfaceObject = new AOpticalOverrideScriptInterface(); //mem leak
-    QScriptValue obj = ScriptEngine->newQObject(interfaceObject, QScriptEngine::QtOwnership);
-    ScriptEngine->globalObject().setProperty("photon", obj);
-        //coreObj = new AInterfaceToCore(this);
-        //QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
-        //QString coreName = "core";
-        //coreObj->setObjectName(coreName);
-        //engine->globalObject().setProperty(coreName, coreVal);
-        //interfaces.append(coreObj);
-        //registering math module
-        AInterfaceToMath* mathObj = new AInterfaceToMath(0);
-        QScriptValue mathVal = ScriptEngine->newQObject(mathObj, QScriptEngine::QtOwnership);
-//        mathObj->setObjectName(mathName);
-        ScriptEngine->globalObject().setProperty("math", mathVal);
-        //interfaces.append(mathObj);  //SERVICE OBJECT IS FIRST in interfaces!
+    interfaceObject = new AOpticalOverrideScriptInterface();
+    interfaceObject->setObjectName("photon");
 }
+
+AScriptOpticalOverride::~AScriptOpticalOverride() {}
 
 void AScriptOpticalOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
 {
     //external script engine will have interface already registered
 }
 
-AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     //qDebug() << "Configuring script interface";
-    interfaceObject->configure(RandGen, Photon, NormalVector);
+    interfaceObject->configure(Photon, NormalVector);
     //qDebug() << "Evaluating script";
-    //QScriptValue res =
-    ScriptEngine->evaluate(Script);
-    //qDebug() << "eval result:" << res.toString()<<"Photon status:"<<interfaceObject->getResult();
+    Resources.evaluateScript(Script);
+    qDebug() << "Photon status:"<<interfaceObject->getResult();
     return interfaceObject->getResult();
 }
 
@@ -75,6 +61,18 @@ bool AScriptOpticalOverride::readFromJson(QJsonObject &json)
 
     Script = json["Script"].toString();
     return true;
+}
+
+QObject* AScriptOpticalOverride::generateInterfaceScriptObject()
+{
+    interfaceObject = new AOpticalOverrideScriptInterface();
+    interfaceObject->setObjectName("photon");
+    return interfaceObject;
+}
+
+void AScriptOpticalOverride::assignInterfaceScriptObject(QObject *obj)
+{
+    interfaceObject = static_cast<AOpticalOverrideScriptInterface*>(obj);
 }
 
 #ifdef GUI
@@ -132,7 +130,7 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     APhoton phot(vx, r, -1, 0);
     double normal[3];
     normal[0] = 0; normal[1] = 0; normal[2] = 1.0;
-    interfaceObject->configure(RandGen, &phot, normal);
+    interfaceObject->configure(&phot, normal);
 
     //sw->SetInterfaceObject(0);
     sw->SetInterfaceObject(interfaceObject, "photon"); //steals ownership!

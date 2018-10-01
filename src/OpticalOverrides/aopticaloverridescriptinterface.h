@@ -4,9 +4,6 @@
 #include "ascriptinterface.h"
 #include "aopticaloverride.h"
 
-#include <QObject>
-
-class TRandom2;
 class APhoton;
 
 class AOpticalOverrideScriptInterface : public AScriptInterface
@@ -15,7 +12,7 @@ class AOpticalOverrideScriptInterface : public AScriptInterface
 public:
     AOpticalOverrideScriptInterface();
 
-    void configure(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector);
+    void configure(APhoton *Photon, const double *NormalVector);
     AOpticalOverride::OpticalOverrideResultEnum getResult() const;
 
 public slots:
@@ -27,7 +24,6 @@ public slots:
     void SetDirection(double vx, double vy, double vz);
 
 private:
-    TRandom2 * RandGen;
     APhoton * Photon;
     const double * NormalVector;
 

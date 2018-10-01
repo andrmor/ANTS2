@@ -2,6 +2,7 @@
 #include "amaterialparticlecolection.h"
 #include "aphoton.h"
 #include "asimulationstatistics.h"
+#include "atracerstateful.h"
 
 #include <QDebug>
 #include <QVector>
@@ -195,7 +196,7 @@ double PhScatClaudioModelV2::GnFunc(double cost)
     return 0;
 }
 
-AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRandom2 *RandGen, APhoton *Photon, const double* NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATracerStateful &Resources, APhoton *Photon, const double* NormalVector)
 {
   TVector3 K(Photon->v);                // photon direction
   //qDebug() << "Photon direction (i,j,k):"<<K.x()<<K.y()<<K.z();
@@ -227,7 +228,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
 
   // If the random number is larger than lambda the light will be scattered
   //according to the local normal. If the sigma_alpha is zero there is no specular lobe    
-  if (RandGen->Rndm() < lambda || sigma_alpha == 0)
+  if (Resources.RandGen->Rndm() < lambda || sigma_alpha == 0)
     {
       Status = SpikeReflection;
       costl = costi;
@@ -248,8 +249,8 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
             }
 
           Status = LobeReflection;
-          double alpha_WRM = SlopeAngle(RandGen->Rndm()); // Sampling of the slope angle
-          double phi_alpha_WRM = 2.0 * 3.1415926535 * RandGen->Rndm();
+          double alpha_WRM = SlopeAngle(Resources.RandGen->Rndm()); // Sampling of the slope angle
+          double phi_alpha_WRM = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
           // Set the Components of the Global Normal
           double CosAlpha_WRM = cos(alpha_WRM);
@@ -275,7 +276,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
 
           // qDebug() << "new weight microfacet:"<< weight_microfacet;
         }
-      while ( RandGen->Rndm()*1.5 > weight_microfacet );
+      while ( Resources.RandGen->Rndm()*1.5 > weight_microfacet );
     }
 
 
@@ -294,7 +295,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
   // qDebug() << "Amp_total"<<Amp_tot<<"gnr"<<gnr<<"perp"<<Amp_perp<<"par"<<Amp_parl;
 
       //TVector3 A_paral;
-  if( RandGen->Rndm() < Amp_tot)
+  if( Resources.RandGen->Rndm() < Amp_tot)
     {
       //Computation of the new momentum and the new polarization for the reflected photon (specular lobe or specular spike)
       K = 2.0 * costl * ScatNormal + K;
@@ -315,7 +316,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
       double Fres_Term = 0;
       do
         {
-          if ( RandGen->Rndm() > albedo)
+          if ( Resources.RandGen->Rndm() > albedo)
             {
               Status = Absorption;
               Photon->SimStat->OverrideClaudioAbs++;
@@ -326,10 +327,10 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
 
           Fres_Term = 0; gnd = 0;
 
-          double sintdsqquared = RandGen->Rndm();
+          double sintdsqquared = Resources.RandGen->Rndm();
           double sintd = sqrt(sintdsqquared);
           double costd = sqrt(1.0 - sintdsqquared);
-          double phid = 2.0 * 3.1415926535 * RandGen->Rndm();
+          double phid = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
           double sintinter = Rindex1*sintd/Rindex2;
           double costiter = 0;
@@ -346,7 +347,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(TRan
               gnd = GnFunc( GlobalNormal * K );
             }
         }
-      while(sigma_alpha>0 && RandGen->Rndm() > gnd*Fres_Term);
+      while(sigma_alpha>0 && Resources.RandGen->Rndm() > gnd*Fres_Term);
 
 //      //The diffuse lobe will be randomly polarized
 //      A_trans = NewMomentum.cross(theScatNormal);
@@ -369,7 +370,7 @@ QString PhScatClaudioModelV2::getReportLine()
   return PhScatClaudioModel::getReportLine()+"_v2";
 }
 
-AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   TVector3 K(Photon->v);                // photon direction
   //qDebug() << "Photon direction (i,j,k):"<<K.x()<<K.y()<<K.z();
@@ -401,7 +402,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
 
   // If the random number is larger than lambda the light will be scattered
   //according to the local normal. If the sigma_alpha is zero there is no specular lobe
-  if (RandGen->Rndm() < lambda || sigma_alpha == 0)
+  if (Resources.RandGen->Rndm() < lambda || sigma_alpha == 0)
     {
       Status = SpikeReflection;
       costl = costi;
@@ -422,8 +423,8 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
             }
 
           Status = LobeReflection;
-          double alpha_WRM = SlopeAngle(RandGen->Rndm()); // Sampling of the slope angle
-          double phi_alpha_WRM = 2.0 * 3.1415926535 * RandGen->Rndm();
+          double alpha_WRM = SlopeAngle(Resources.RandGen->Rndm()); // Sampling of the slope angle
+          double phi_alpha_WRM = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
           // Set the Components of the Global Normal
           double CosAlpha_WRM = cos(alpha_WRM);
@@ -449,7 +450,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
 
           // qDebug() << "new weight microfacet:"<< weight_microfacet;
         }
-      while ( RandGen->Rndm()*1.5 > weight_microfacet );
+      while ( Resources.RandGen->Rndm()*1.5 > weight_microfacet );
     }
 
 
@@ -468,7 +469,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
   // qDebug() << "Amp_total"<<Amp_tot<<"gnr"<<gnr<<"perp"<<Amp_perp<<"par"<<Amp_parl;
 
       //TVector3 A_paral;
-  if( RandGen->Rndm() < Amp_tot)
+  if( Resources.RandGen->Rndm() < Amp_tot)
     {
       //Computation of the new momentum and the new polarization for the reflected photon (specular lobe or specular spike)
       K = 2.0 * costl * ScatNormal + K;
@@ -489,7 +490,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
       double Fres_Term = 0;
       do
         {
-          if ( RandGen->Rndm() > albedo)
+          if ( Resources.RandGen->Rndm() > albedo)
             {
               Status = Absorption;
               Photon->SimStat->OverrideClaudioAbs++;
@@ -500,10 +501,10 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
 
           Fres_Term = 0; gnd = 0;
 
-          double sintdsqquared = RandGen->Rndm();
+          double sintdsqquared = Resources.RandGen->Rndm();
           double sintd = sqrt(sintdsqquared);
           double costd = sqrt(1.0 - sintdsqquared);
-          double phid = 2.0 * 3.1415926535 * RandGen->Rndm();
+          double phid = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
           double sintinter = Rindex2*sintd/Rindex1;  //DIF from V2
           double costiter = 0;
@@ -521,7 +522,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(TR
               gnd = GnFunc( GlobalNormal * K ); //new fix for diff phots leak
             }
         }
-      while(sigma_alpha>0 && RandGen->Rndm()<Fres_Term || RandGen->Rndm()>gnd );  //DIF from V2 +++ ExtraFix: before gnd*Fres_Term ExtraExtra - leak fix
+      while(sigma_alpha>0 && Resources.RandGen->Rndm()<Fres_Term || Resources.RandGen->Rndm()>gnd );  //DIF from V2 +++ ExtraFix: before gnd*Fres_Term ExtraExtra - leak fix
 
 //      //The diffuse lobe will be randomly polarized
 //      A_trans = NewMomentum.cross(theScatNormal);
@@ -545,7 +546,7 @@ QString PhScatClaudioModelV2d2::getReportLine()
   return PhScatClaudioModel::getReportLine()+"_v2.2";
 }
 
-AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   TVector3 K(Photon->v);                // photon direction
     //qDebug() << "Photon direction (i,j,k):"<<K.x()<<K.y()<<K.z();
@@ -577,7 +578,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
 
     // If the random number is larger than lambda the light will be scattered
     //according to the local normal. If the sigma_alpha is zero there is no specular lobe
-    if (RandGen->Rndm() < lambda || sigma_alpha == 0)
+    if (Resources.RandGen->Rndm() < lambda || sigma_alpha == 0)
       {
         Status = SpikeReflection;
         costl = costi;
@@ -598,8 +599,8 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
               }
 
             Status = LobeReflection;
-            double alpha_WRM = SlopeAngle(RandGen->Rndm()); // Sampling of the slope angle
-            double phi_alpha_WRM = 2.0 * 3.1415926535 * RandGen->Rndm();
+            double alpha_WRM = SlopeAngle(Resources.RandGen->Rndm()); // Sampling of the slope angle
+            double phi_alpha_WRM = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
             // Set the Components of the Global Normal
             double CosAlpha_WRM = cos(alpha_WRM);
@@ -625,7 +626,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
 
             // qDebug() << "new weight microfacet:"<< weight_microfacet;
           }
-        while ( RandGen->Rndm()*1.5 > weight_microfacet );
+        while ( Resources.RandGen->Rndm()*1.5 > weight_microfacet );
       }
 
 
@@ -644,7 +645,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
     // qDebug() << "Amp_total"<<Amp_tot<<"gnr"<<gnr<<"perp"<<Amp_perp<<"par"<<Amp_parl;
 
         //TVector3 A_paral;
-    if( RandGen->Rndm() < Amp_tot)
+    if( Resources.RandGen->Rndm() < Amp_tot)
       {
         //Computation of the new momentum and the new polarization for the reflected photon (specular lobe or specular spike)
         K = 2.0 * costl * ScatNormal + K;
@@ -665,7 +666,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
         double Fres_Term = 0;
         do
           {
-            if ( RandGen->Rndm() > albedo)
+            if ( Resources.RandGen->Rndm() > albedo)
               {
                 Status = Absorption;
                 Photon->SimStat->OverrideClaudioAbs++;
@@ -676,10 +677,10 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
 
             Fres_Term = 0; //gnd = 0;
 
-            double sintdsqquared = RandGen->Rndm();
+            double sintdsqquared = Resources.RandGen->Rndm();
             double sintd = sqrt(sintdsqquared);
             double costd = sqrt(1.0 - sintdsqquared);
-            double phid = 2.0 * 3.1415926535 * RandGen->Rndm();
+            double phid = 2.0 * 3.1415926535 * Resources.RandGen->Rndm();
 
             double sintinter = Rindex2*sintd/Rindex1;  //DIF from V2
             double costiter = 0;
@@ -697,7 +698,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(TR
                 //gnd = 1;
               }
           }
-        while(sigma_alpha>0 && RandGen->Rndm() < Fres_Term);  //DIF from V2 +++ ExtraFix: before gnd*Fres_Term
+        while(sigma_alpha>0 && Resources.RandGen->Rndm() < Fres_Term);  //DIF from V2 +++ ExtraFix: before gnd*Fres_Term
 
   //      //The diffuse lobe will be randomly polarized
   //      A_trans = NewMomentum.cross(theScatNormal);

@@ -5,6 +5,7 @@
 #include "ajsontools.h"
 #include "afiletools.h"
 #include "asimulationstatistics.h"
+#include "atracerstateful.h"
 
 #ifdef SIM
 #include "phscatclaudiomodel.h"
@@ -84,9 +85,9 @@ BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatColle
 BasicOpticalOverride::BasicOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
 
-AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
-    double rnd = RandGen->Rndm();
+    double rnd = Resources.RandGen->Rndm();
 
     // surface loss?
     rnd -= probLoss;
@@ -123,7 +124,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRan
         {
         case 0: //4Pi scattering
           // qDebug()<<"4Pi scatter";
-          RandomDir(RandGen, Photon);
+          RandomDir(Resources.RandGen, Photon);
           // qDebug()<<"New direction:"<<K[0]<<K[1]<<K[2];
 
           //enering new volume or backscattering?
@@ -144,7 +145,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRan
             double norm2;
             do
               {
-                RandomDir(RandGen, Photon);
+                RandomDir(Resources.RandGen, Photon);
                 Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
               }
@@ -161,7 +162,7 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(TRan
             double norm2;
             do
               {
-                RandomDir(RandGen, Photon);
+                RandomDir(Resources.RandGen, Photon);
                 Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
               }
@@ -362,7 +363,7 @@ const QStringList ListOvAllOpticalOverrideTypes()
     return l;
 }
 
-AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   // Angular reflectance: fraction of light reflected at the interface bewteen
   // medium 1 and medium 2 assuming non-polarized incident light:
@@ -401,7 +402,7 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(TRand
     }
 
 //  if random[0,1]<fresnelUnpolarR do specular reflection
-  if (RandGen->Rndm() < fresnelUnpolarR)
+  if (Resources.RandGen->Rndm() < fresnelUnpolarR)
     {
       //qDebug()<<"Override: specular reflection";
         //rotating the vector: K = K - 2*(NK)*N
@@ -412,7 +413,7 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(TRand
     }
 
 // if random[0,1]>albedo kill photon else do diffuse reflection
-  if (RandGen->Rndm() > Albedo)
+  if (Resources.RandGen->Rndm() > Albedo)
     {
       //qDebug()<<"Override: absorption";
       Status = Absorption;
@@ -424,7 +425,7 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(TRand
   double norm2;
   do
     {
-      RandomDir(RandGen, Photon);
+      RandomDir(Resources.RandGen, Photon);
       Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
       norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
     }
@@ -583,7 +584,7 @@ void AWaveshifterOverride::initializeWaveResolved(bool bWaveResolved, double wav
     }
 }
 
-AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     //currently assuming there is no scattering on original wavelength - only reemission or absorption
 
@@ -597,7 +598,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
     }
 
     double prob = ReemissionProbabilityBinned.at(Photon->waveIndex); // probability of reemission
-    if (RandGen->Rndm() < prob)
+    if (Resources.RandGen->Rndm() < prob)
     {
         //triggered!
 
@@ -624,7 +625,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
 
         if (ReemissionModel == 0)
         {
-            RandomDir(RandGen, Photon);
+            RandomDir(Resources.RandGen, Photon);
             //enering new volume or backscattering?
             //normal is in the positive direction in respect to the original direction!
             if (Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2] < 0)
@@ -644,7 +645,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
             // qDebug()<<"2Pi lambertian scattering backward";
             do
             {
-                RandomDir(RandGen, Photon);
+                RandomDir(Resources.RandGen, Photon);
                 Photon->v[0] -= NormalVector[0]; Photon->v[1] -= NormalVector[1]; Photon->v[2] -= NormalVector[2];
                 norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
             }
@@ -660,7 +661,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(TRan
         // qDebug()<<"2Pi lambertian scattering forward";
         do
           {
-            RandomDir(RandGen, Photon);
+            RandomDir(Resources.RandGen, Photon);
             Photon->v[0] += NormalVector[0]; Photon->v[1] += NormalVector[1]; Photon->v[2] += NormalVector[2];
             norm2 = Photon->v[0]*Photon->v[0] + Photon->v[1]*Photon->v[1] + Photon->v[2]*Photon->v[2];
           }
@@ -943,7 +944,7 @@ SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleColl
     ProbDiff << 0;
 }
 
-AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     int waveIndex = Photon->waveIndex;
     if (waveIndex == -1) waveIndex = effectiveWaveIndex;
@@ -952,7 +953,7 @@ AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calcul
     probDiff = ProbDiffBinned.at(waveIndex);
     probRef  = ProbRefBinned.at(waveIndex);
 
-    return BasicOpticalOverride::calculate(RandGen, Photon, NormalVector);
+    return BasicOpticalOverride::calculate(Resources, Photon, NormalVector);
 }
 
 void SpectralBasicOpticalOverride::printConfiguration(int /*iWave*/)

@@ -7,6 +7,7 @@ class APhoton;
 class TRandom2;
 class AMaterialParticleCollection;
 class QJsonObject;
+class ATracerStateful;
 
 class ScatterOnMetal : public AOpticalOverride
 {
@@ -15,7 +16,7 @@ public:
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
   virtual ~ScatterOnMetal() {}
 
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave);
   virtual QString getType() const {return "DielectricToMetal";}

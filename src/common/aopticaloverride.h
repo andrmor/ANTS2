@@ -13,7 +13,9 @@ class QJsonObject;
 class TH1D;
 class QWidget;
 class TObject;
+class QObject;
 class GraphWindowClass;
+class ATracerStateful;
 
 //modify these two functions if you want to register a new override type!
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
@@ -22,7 +24,7 @@ const QStringList ListOvAllOpticalOverrideTypes();
 class AOpticalOverride
 {
 public:
-  //the status for photon tracing:
+  //return status for photon tracing:
   enum OpticalOverrideResultEnum {NotTriggered, Absorbed, Forward, Back, _Error_};
   //detailed status for statistics only:
   enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection, Absorption, Transmission, ErrorDetected};
@@ -32,7 +34,7 @@ public:
     : MatCollection(MatCollection), MatFrom(MatFrom), MatTo(MatTo) {}
   virtual ~AOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector) = 0; //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) = 0; //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave) = 0;
   virtual QString getType() const = 0;
@@ -44,7 +46,13 @@ public:
   virtual void writeToJson(QJsonObject &json);
   virtual bool readFromJson(QJsonObject &json);
 
+  //next one is used by MatCollection when a material is removed
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
+
+  //next three methods are only for the script-based model
+  virtual bool     isRequireScriptEngine() const {return false;}
+  virtual QObject* generateInterfaceScriptObject() {return 0;}
+  virtual void     assignInterfaceScriptObject(QObject *) {}
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
@@ -68,7 +76,7 @@ public:
   BasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
   virtual ~BasicOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave);
   virtual QString getType() const {return "Simplistic_model";}
@@ -99,7 +107,7 @@ public:
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {Albedo = 0.95;}
   virtual ~FSNPOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave);
   virtual QString getType() const {return "FS_NP";}
@@ -125,7 +133,7 @@ public:
   virtual ~AWaveshifterOverride();
 
   void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave);
   virtual QString getType() const {return "SurfaceWLS";}
@@ -173,7 +181,7 @@ public:
   SpectralBasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, int ScatterModel, double EffWave);
   virtual ~SpectralBasicOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(TRandom2* RandGen, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual void printConfiguration(int iWave) override;
   virtual QString getType() const override {return "SimplisticSpectral_model";}

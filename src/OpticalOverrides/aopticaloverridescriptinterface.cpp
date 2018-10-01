@@ -1,15 +1,15 @@
 #include "aopticaloverridescriptinterface.h"
-
 #include "aphoton.h"
+
+#include <QDebug>
 
 AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface()
 {
 
 }
 
-void AOpticalOverrideScriptInterface::configure(TRandom2 *randGen, APhoton *photon, const double *normalVector)
+void AOpticalOverrideScriptInterface::configure(APhoton *photon, const double *normalVector)
 {
-    RandGen = randGen;
     Photon = photon;
     NormalVector = normalVector;
 
@@ -49,7 +49,6 @@ void AOpticalOverrideScriptInterface::TransmissionDirect()
     ReturnResult = AOpticalOverride::Forward;
 }
 
-#include <QDebug>
 void AOpticalOverrideScriptInterface::SetDirection(double vx, double vy, double vz)
 {
     Photon->v[0] = vx;

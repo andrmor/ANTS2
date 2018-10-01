@@ -83,6 +83,7 @@ public:
 #endif
   virtual const QString checkOverrideData() override;
 
+  //--parameters--
   double probLoss = 0; //probability of absorption
   double probRef = 0;  //probability of specular reflection
   double probDiff = 0; //probability of scattering

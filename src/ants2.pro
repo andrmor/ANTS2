@@ -348,7 +348,9 @@ SOURCES += main.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
     common/atrackbuildoptions.cpp \
-    gui/MainWindowTools/aopticaloverridedialog.cpp
+    gui/MainWindowTools/aopticaloverridedialog.cpp \
+    OpticalOverrides/aopticaloverridescriptinterface.cpp \
+    OpticalOverrides/ascriptopticaloverride.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -473,7 +475,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
     common/atrackbuildoptions.h \
-    gui/MainWindowTools/aopticaloverridedialog.h
+    gui/MainWindowTools/aopticaloverridedialog.h \
+    OpticalOverrides/aopticaloverridescriptinterface.h \
+    OpticalOverrides/ascriptopticaloverride.h
 
 # --- SIM ---
 ants2_SIM {
@@ -688,6 +692,7 @@ INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += gui/MainWindowTools
 
 INCLUDEPATH += SplineLibrary
+INCLUDEPATH += OpticalOverrides
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
 INCLUDEPATH += modules/lrf_v3

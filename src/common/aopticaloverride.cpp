@@ -9,6 +9,7 @@
 #ifdef SIM
 #include "phscatclaudiomodel.h"
 #include "scatteronmetal.h"
+#include "ascriptopticaloverride.h"
 #endif
 
 #include <QDebug>
@@ -340,6 +341,9 @@ AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollect
      return new FSNPOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model == "SurfaceWLS")
      return new AWaveshifterOverride(MatCollection, MatFrom, MatTo);
+   else if (model == "CustomScript")
+     return new AScriptOpticalOverride(MatCollection, MatFrom, MatTo);
+
    return NULL; //undefined override type!
 }
 
@@ -352,7 +356,8 @@ const QStringList ListOvAllOpticalOverrideTypes()
       << "Claudio_Model_V2d2"
       << "DielectricToMetal"
       << "FS_NP"
-      << "SurfaceWLS";
+      << "SurfaceWLS"
+      << "CustomScript";
 
     return l;
 }

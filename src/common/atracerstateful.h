@@ -1,12 +1,13 @@
 #ifndef ATRACERSTATEFUL_H
 #define ATRACERSTATEFUL_H
 
+#include <QString>
+
 class TRandom2;
 class QScriptEngine;
 class QObject;
 class AMaterialParticleCollection;
-
-#include <QVector>
+class AOpticalOverrideScriptInterface;
 
 //random generator is external
 //script engine is owned by this class, but created only if needed (there are script overrides)
@@ -21,13 +22,11 @@ public:
     void registerAllInterfaceObjects(AMaterialParticleCollection* MPcollection);
 
     //called by MPcollection
-    void registerInterfaceObject(QObject* interfaceObj);
+    void registerInterfaceObject(AOpticalOverrideScriptInterface *interfaceObj);
 
     TRandom2 * RandGen = 0;
     QScriptEngine * ScriptEngine = 0;
-
-private:
-    QVector<QObject*> interfaces;
+    AOpticalOverrideScriptInterface* interfaceObject = 0;
 };
 
 #endif // ATRACERSTATEFUL_H

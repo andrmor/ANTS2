@@ -78,34 +78,33 @@ void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* Ran
         MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
-#include <QMap>
+#include "ascriptopticaloverride.h"
+#include "aopticaloverridescriptinterface.h"
 void AMaterialParticleCollection::registerOpticalOverrideScriptInterfaces(ATracerStateful &record)
 {
     qDebug() << "Registering ov for the thread...";
-    QMap<QString, QObject*> RegisteredTypes;
+    AOpticalOverrideScriptInterface* interfaceObj = 0;
     for (AMaterial* mat : MaterialCollectionData)
     {
         for (AOpticalOverride* ov : mat->OpticalOverrides)
             if (ov)
             {
-                if (!ov->isRequireScriptEngine()) continue;
+                AScriptOpticalOverride* sov = dynamic_cast<AScriptOpticalOverride*>(ov);
+                if (!sov) continue;
 
-                QString type = ov->getType();
-                qDebug() << "  Found override:" << mat->name << ov->getReportLine();
+                qDebug() << "  Found script override:" << mat->name << ov->getReportLine();
 
-                if (RegisteredTypes.contains(type))
+                if (interfaceObj)
                 {
-                    qDebug() << "  Type already registered";
-                    ov->assignInterfaceScriptObject(RegisteredTypes.value(type));
-                    qDebug() << "  Assigned interface object:" << RegisteredTypes.value(type);
+                    qDebug() << "  Interface object already registered";
+                    qDebug() << "  Assigned interface object:" << interfaceObj;
                 }
                 else
                 {
-                    qDebug() << "  Type not yet registered";
-                    QObject* obj = ov->generateInterfaceScriptObject();
-                    qDebug() << "  Registering interface object" << obj << obj->objectName();
-                    record.registerInterfaceObject(obj);
-                    RegisteredTypes.insert(type, obj);
+                    qDebug() << "  Interface object not yet registered";
+                    interfaceObj = sov->generateInterfaceScriptObject();
+                    qDebug() << "  Registering interface object" << interfaceObj << interfaceObj->objectName();
+                    record.registerInterfaceObject(interfaceObj);
                 }
             }
     }

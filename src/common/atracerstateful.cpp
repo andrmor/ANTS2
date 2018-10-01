@@ -1,6 +1,6 @@
 #include "atracerstateful.h"
 #include "amaterialparticlecolection.h"
-//#include "coreinterfaces.h"
+#include "aopticaloverridescriptinterface.h"
 
 #include <QObject>
 #include <QScriptEngine>
@@ -11,9 +11,11 @@
 ATracerStateful::~ATracerStateful()
 {
     delete ScriptEngine; ScriptEngine = 0;
-    qDebug() << "Deleting" << interfaces.size() << "ov script interface(s)";
-    for (QObject* o : interfaces) delete o;
-    interfaces.clear();
+    if (interfaceObject)
+    {
+        qDebug() << "Deleting ov script interface";
+        delete interfaceObject;
+    }
 }
 
 void ATracerStateful::evaluateScript(const QString &Script)
@@ -28,7 +30,7 @@ void ATracerStateful::registerAllInterfaceObjects(AMaterialParticleCollection *M
     MPcollection->registerOpticalOverrideScriptInterfaces(*this);
 }
 
-void ATracerStateful::registerInterfaceObject(QObject *interfaceObj)
+void ATracerStateful::registerInterfaceObject(AOpticalOverrideScriptInterface *interfaceObj)
 {
     if (!ScriptEngine)
     {
@@ -38,5 +40,5 @@ void ATracerStateful::registerInterfaceObject(QObject *interfaceObj)
 
     QScriptValue val = ScriptEngine->newQObject(interfaceObj, QScriptEngine::QtOwnership);
     ScriptEngine->globalObject().setProperty(interfaceObj->objectName(), val);
-    interfaces << interfaceObj;
+    interfaceObject = interfaceObj;
 }

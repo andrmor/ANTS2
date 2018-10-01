@@ -49,11 +49,6 @@ public:
   //next one is used by MatCollection when a material is removed
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
 
-  //next three methods are only for the script-based model
-  virtual bool     isRequireScriptEngine() const {return false;}
-  virtual QObject* generateInterfaceScriptObject() {return 0;}
-  virtual void     assignInterfaceScriptObject(QObject *) {}
-
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
 #endif

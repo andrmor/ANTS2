@@ -11,27 +11,18 @@
 
 #include "coreinterfaces.h"
 AScriptOpticalOverride::AScriptOpticalOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo)
-{
-    interfaceObject = new AOpticalOverrideScriptInterface();
-    interfaceObject->setObjectName("photon");
-}
+    : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
 
 AScriptOpticalOverride::~AScriptOpticalOverride() {}
-
-void AScriptOpticalOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
-{
-    //external script engine will have interface already registered
-}
 
 AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     //qDebug() << "Configuring script interface";
-    interfaceObject->configure(Photon, NormalVector);
+    Resources.interfaceObject->configure(Photon, NormalVector);
     //qDebug() << "Evaluating script";
     Resources.evaluateScript(Script);
-    qDebug() << "Photon status:"<<interfaceObject->getResult();
-    return interfaceObject->getResult();
+    qDebug() << "Photon status:"<<Resources.interfaceObject->getResult();
+    return Resources.interfaceObject->getResult();
 }
 
 void AScriptOpticalOverride::printConfiguration(int)
@@ -63,16 +54,11 @@ bool AScriptOpticalOverride::readFromJson(QJsonObject &json)
     return true;
 }
 
-QObject* AScriptOpticalOverride::generateInterfaceScriptObject()
+AOpticalOverrideScriptInterface *AScriptOpticalOverride::generateInterfaceScriptObject()
 {
-    interfaceObject = new AOpticalOverrideScriptInterface();
+    AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
     interfaceObject->setObjectName("photon");
     return interfaceObject;
-}
-
-void AScriptOpticalOverride::assignInterfaceScriptObject(QObject *obj)
-{
-    interfaceObject = static_cast<AOpticalOverrideScriptInterface*>(obj);
 }
 
 #ifdef GUI
@@ -130,6 +116,8 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     APhoton phot(vx, r, -1, 0);
     double normal[3];
     normal[0] = 0; normal[1] = 0; normal[2] = 1.0;
+
+    AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
     interfaceObject->configure(&phot, normal);
 
     //sw->SetInterfaceObject(0);

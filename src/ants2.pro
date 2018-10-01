@@ -11,6 +11,14 @@ CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algeb
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)
 
+#Optional features enabled in Docker version   
+ants2_docker {
+    CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+    CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+    CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+    CONFIG += ants2_Python      #enable Python scripting    
+}
+
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
@@ -193,11 +201,19 @@ ants2_Python{
             LIBS += -LC:/PythonQt3.2/lib -lPythonQt
     }
     linux-g++ || unix {
-            LIBS += $$system(python3.5-config --libs)
-            QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+            ants2_docker { 
+                LIBS += $$system(python3-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-            INCLUDEPATH += /home/andr/Work/PythonQt/src
-            LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+                INCLUDEPATH += /usr/include/PythonQt5/
+                LIBS += -lPythonQt-Qt5-Python3.6
+            } else {
+                LIBS += $$system(python3.5-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+
+                INCLUDEPATH += /home/andr/Work/PythonQt/src
+                LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+            }
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h

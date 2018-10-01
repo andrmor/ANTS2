@@ -11,6 +11,7 @@ class AOpticalOverrideDialog;
 class AOpticalOverride;
 class AMaterialParticleCollection;
 class GraphWindowClass;
+class AOpticalOverrideTester;
 
 class AOpticalOverrideDialog : public QDialog
 {
@@ -35,6 +36,7 @@ private:
     int matFrom;
     int matTo;
     QStringList matNames; //need?
+    AOpticalOverrideTester* TesterWindow;
 
     int customWidgetPositionInLayout = 5;
     QWidget* customWidget = 0;

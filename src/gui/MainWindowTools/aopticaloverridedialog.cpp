@@ -3,6 +3,7 @@
 #include "aopticaloverride.h"
 #include "amaterialparticlecolection.h"
 #include "amessage.h"
+#include "aopticaloverridetester.h"
 
 #include <QJsonObject>
 #include <QVBoxLayout>
@@ -31,6 +32,8 @@ AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * Mat
     }
 
     updateGui();
+
+    TesterWindow = new AOpticalOverrideTester(GraphWindow, MatCollection, matFrom, matTo, this);
 }
 
 AOpticalOverrideDialog::~AOpticalOverrideDialog()
@@ -102,5 +105,5 @@ void AOpticalOverrideDialog::on_cobType_activated(int index)
 
 void AOpticalOverrideDialog::on_pbTestOverride_clicked()
 {
-
+    TesterWindow->show();
 }

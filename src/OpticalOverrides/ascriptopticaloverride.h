@@ -22,8 +22,6 @@ public:
   virtual void writeToJson(QJsonObject &json) override;
   virtual bool readFromJson(QJsonObject &json) override;
 
-  AOpticalOverrideScriptInterface* generateInterfaceScriptObject();
-
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
 #endif

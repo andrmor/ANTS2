@@ -34,7 +34,7 @@ APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator,
 
     //for transfer to overrides
     ResourcesForOverrides.RandGen = RandGen;
-    ResourcesForOverrides.registerAllInterfaceObjects(MaterialCollection);
+    ResourcesForOverrides.generateScriptInfrastructureIfNeeded(MaterialCollection);
 }
 
 APhotonTracer::~APhotonTracer()

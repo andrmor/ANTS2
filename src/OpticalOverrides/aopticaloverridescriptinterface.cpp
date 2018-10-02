@@ -25,6 +25,7 @@ AOpticalOverride::OpticalOverrideResultEnum AOpticalOverrideScriptInterface::get
         return ReturnResult;
     }
 
+    qDebug() << "New Dir before"<<Photon->v[0]<<Photon->v[1]<<Photon->v[2];
     Photon->EnsureUnitaryLength();
     double sum = 0;
     for (int i=0; i<3; i++)

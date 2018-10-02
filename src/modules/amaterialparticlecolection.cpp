@@ -6,7 +6,6 @@
 #include "acommonfunctions.h"
 #include "atracerstateful.h"
 #include "ascriptopticaloverride.h"
-#include "aopticaloverridescriptinterface.h"
 
 #include <QtDebug>
 #include <QJsonObject>
@@ -80,33 +79,16 @@ void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* Ran
         MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
 }
 
-void AMaterialParticleCollection::registerOpticalOverrideScriptInterfaces(ATracerStateful &record)
+bool AMaterialParticleCollection::isScriptOpticalOverrideDefined() const
 {
-    AOpticalOverrideScriptInterface* interfaceObj = 0;
     for (AMaterial* mat : MaterialCollectionData)
-    {
         for (AOpticalOverride* ov : mat->OpticalOverrides)
             if (ov)
             {
                 AScriptOpticalOverride* sov = dynamic_cast<AScriptOpticalOverride*>(ov);
-                if (!sov) continue;
-
-                qDebug() << "  Found script override:" << mat->name << ov->getReportLine();
-
-                if (interfaceObj)
-                {
-                    qDebug() << "  Interface object already registered";
-                    qDebug() << "  Assigned interface object:" << interfaceObj;
-                }
-                else
-                {
-                    qDebug() << "  Interface object not yet registered";
-                    interfaceObj = sov->generateInterfaceScriptObject();
-                    qDebug() << "  Registering interface object" << interfaceObj << interfaceObj->objectName();
-                    record.registerInterfaceObject(interfaceObj);
-                }
+                if (sov) return true;
             }
-    }
+    return false;
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)

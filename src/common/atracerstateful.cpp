@@ -25,20 +25,24 @@ void ATracerStateful::evaluateScript(const QString &Script)
     qDebug() << "eval result:" << res.toString();
 }
 
-void ATracerStateful::registerAllInterfaceObjects(AMaterialParticleCollection *MPcollection)
+void ATracerStateful::generateScriptInfrastructureIfNeeded(AMaterialParticleCollection *MPcollection)
 {
-    MPcollection->registerOpticalOverrideScriptInterfaces(*this);
+    bool bInUse = MPcollection->isScriptOpticalOverrideDefined();
+
+    if (bInUse)
+    {
+        qDebug() << "Creating script engine";
+        ScriptEngine = new QScriptEngine();
+
+        interfaceObject = new AOpticalOverrideScriptInterface();
+        qDebug() << "Created interface object:"<<interfaceObject;
+        interfaceObject->setObjectName("photon");
+        QScriptValue val = ScriptEngine->newQObject(interfaceObject, QScriptEngine::QtOwnership);
+        ScriptEngine->globalObject().setProperty(interfaceObject->objectName(), val);
+    }
 }
 
 void ATracerStateful::registerInterfaceObject(AOpticalOverrideScriptInterface *interfaceObj)
 {
-    if (!ScriptEngine)
-    {
-        qDebug() << "Creating script engine";
-        ScriptEngine = new QScriptEngine();
-    }
 
-    QScriptValue val = ScriptEngine->newQObject(interfaceObj, QScriptEngine::QtOwnership);
-    ScriptEngine->globalObject().setProperty(interfaceObj->objectName(), val);
-    interfaceObject = interfaceObj;
 }

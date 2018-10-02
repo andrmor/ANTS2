@@ -19,7 +19,7 @@ public:
 
     void evaluateScript(const QString& Script);
 
-    void registerAllInterfaceObjects(AMaterialParticleCollection* MPcollection);
+    void generateScriptInfrastructureIfNeeded(AMaterialParticleCollection* MPcollection);
 
     //called by MPcollection
     void registerInterfaceObject(AOpticalOverrideScriptInterface *interfaceObj);

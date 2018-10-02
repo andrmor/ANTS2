@@ -38,8 +38,8 @@ public:
   void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2 *RandGen, int numThreads = 1);
   void updateRandomGenForThread(int ID, TRandom2 *RandGen);
 
-  //for script-based optical overrides initialize script units in ScriptEngine
-  void registerOpticalOverrideScriptInterfaces(ATracerStateful& record);
+  //for script-based optical override initialization
+  bool isScriptOpticalOverrideDefined() const;
 
   //info requests
     //materials

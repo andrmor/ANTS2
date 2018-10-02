@@ -64,13 +64,6 @@ bool AScriptOpticalOverride::readFromJson(QJsonObject &json)
     return true;
 }
 
-AOpticalOverrideScriptInterface *AScriptOpticalOverride::generateInterfaceScriptObject()
-{
-    AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
-    interfaceObject->setObjectName("photon");
-    return interfaceObject;
-}
-
 #ifdef GUI
 QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *)
 {

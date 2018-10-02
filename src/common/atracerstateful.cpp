@@ -1,6 +1,7 @@
 #include "atracerstateful.h"
 #include "amaterialparticlecolection.h"
 #include "aopticaloverridescriptinterface.h"
+#include "amathscriptinterface.h"
 
 #include <QObject>
 #include <QScriptEngine>
@@ -11,38 +12,41 @@
 ATracerStateful::~ATracerStateful()
 {
     delete ScriptEngine; ScriptEngine = 0;
-    if (interfaceObject)
+    if (overrideInterface)
     {
         qDebug() << "Deleting ov script interface";
-        delete interfaceObject;
+        delete overrideInterface;
     }
 }
 
 void ATracerStateful::evaluateScript(const QString &Script)
 {
-    qDebug() << "Script:"<<Script;
-    QScriptValue res = ScriptEngine->evaluate(Script);
-    qDebug() << "eval result:" << res.toString();
+        //qDebug() << "Script:"<<Script;
+        //QScriptValue res =
+    ScriptEngine->evaluate(Script);
+        //qDebug() << "eval result:" << res.toString();
 }
 
 void ATracerStateful::generateScriptInfrastructureIfNeeded(AMaterialParticleCollection *MPcollection)
 {
     bool bInUse = MPcollection->isScriptOpticalOverrideDefined();
 
-    if (bInUse)
-    {
-        qDebug() << "Creating script engine";
-        ScriptEngine = new QScriptEngine();
-
-        interfaceObject = new AOpticalOverrideScriptInterface();
-        qDebug() << "Created interface object:"<<interfaceObject;
-        interfaceObject->setObjectName("photon");
-        QScriptValue val = ScriptEngine->newQObject(interfaceObject, QScriptEngine::QtOwnership);
-        ScriptEngine->globalObject().setProperty(interfaceObject->objectName(), val);
-    }
+    if (bInUse) generateScriptInfrastructure();
 }
 
-void ATracerStateful::registerInterfaceObject(AOpticalOverrideScriptInterface *interfaceObj)
+void ATracerStateful::generateScriptInfrastructure()
 {
+    qDebug() << "Creating script engine";
+    ScriptEngine = new QScriptEngine();
 
+    overrideInterface = new AOpticalOverrideScriptInterface();
+    qDebug() << "Created interface object:"<<overrideInterface;
+    overrideInterface->setObjectName("photon");
+    QScriptValue val = ScriptEngine->newQObject(overrideInterface, QScriptEngine::QtOwnership);
+    ScriptEngine->globalObject().setProperty(overrideInterface->objectName(), val);
+
+    mathInterface = new AMathScriptInterface(RandGen);
+    mathInterface->setObjectName("math");
+    val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
+    ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);
 }

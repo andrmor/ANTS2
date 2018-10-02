@@ -21,7 +21,7 @@ public slots:
     //void TransmissionSnell();  //ToDo: meddling test!
     void TransmissionDirect();  //ToDo: meddling test!
     void SpecularReflection();  //ToDo: meddling test!
-    void Uniform();  //ToDo: meddling test!
+    void Isotropic();  //ToDo: meddling test!
     //void LambertBack();  //ToDo: meddling test!
     //void LambertForward();  //ToDo: meddling test!
 

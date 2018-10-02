@@ -4,6 +4,7 @@
 #include "atextedit.h"
 #include "localscriptinterfaces.h"
 #include "coreinterfaces.h"
+#include "amathscriptinterface.h"
 #include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
@@ -300,7 +301,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         newFunctions << getListOfMethods(&core, "core", false);
         appendDeprecatedOrRemovedMethods(&core, "core");
 
-        AInterfaceToMath math(0); //dummy to extract methods
+        AMathScriptInterface math(0); //dummy to extract methods
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         fillHelper(&math, mathName);
         newFunctions << getListOfMethods(&math, mathName, false);

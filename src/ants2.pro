@@ -353,7 +353,8 @@ SOURCES += main.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
     gui/MainWindowTools/aopticaloverridetester.cpp \
-    common/aphoton.cpp
+    common/aphoton.cpp \
+    scriptmode/amathscriptinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -482,7 +483,8 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
     OpticalOverrides/ascriptopticaloverride.h \
     common/atracerstateful.h \
-    gui/MainWindowTools/aopticaloverridetester.h
+    gui/MainWindowTools/aopticaloverridetester.h \
+    scriptmode/amathscriptinterface.h
 
 # --- SIM ---
 ants2_SIM {

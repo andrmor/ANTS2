@@ -25,14 +25,13 @@ AOpticalOverride::OpticalOverrideResultEnum AOpticalOverrideScriptInterface::get
         return ReturnResult;
     }
 
-    qDebug() << "New Dir before"<<Photon->v[0]<<Photon->v[1]<<Photon->v[2];
     Photon->EnsureUnitaryLength();
     double sum = 0;
     for (int i=0; i<3; i++)
         sum += Photon->v[i] * NormalVector[i];
 
-    qDebug() << "New Dir"<<Photon->v[0]<<Photon->v[1]<<Photon->v[2];
-    qDebug() << "sum"<<sum;
+        //qDebug() << "New Dir"<<Photon->v[0]<<Photon->v[1]<<Photon->v[2];
+        //qDebug() << "sum"<<sum;
 
     if (sum < 0)
     {
@@ -79,7 +78,7 @@ void AOpticalOverrideScriptInterface::SpecularReflection()
     bResultAlreadySet = true;
 }
 
-void AOpticalOverrideScriptInterface::Uniform()
+void AOpticalOverrideScriptInterface::Isotropic()
 {
     Photon->RandomDir(RandGen);
     bResultAlreadySet = false;

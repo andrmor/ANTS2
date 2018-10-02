@@ -2,6 +2,7 @@
 #include "amaterialparticlecolection.h"
 #include "atracerstateful.h"
 #include "aopticaloverridescriptinterface.h"
+#include "amathscriptinterface.h"
 
 #ifdef GUI
 #include "ascriptwindow.h"
@@ -27,12 +28,13 @@ AScriptOpticalOverride::~AScriptOpticalOverride() {}
 
 AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
-    //qDebug() << "Configuring script interface";
-    Resources.interfaceObject->configure(Resources.RandGen, Photon, NormalVector);
-    //qDebug() << "Evaluating script";
+        //qDebug() << "Configuring script interfaces";
+    Resources.overrideInterface->configure(Resources.RandGen, Photon, NormalVector);
+    Resources.mathInterface->setRandomGen(Resources.RandGen);
+        //qDebug() << "Evaluating script";
     Resources.evaluateScript(Script);
-    qDebug() << "Photon result:"<<Resources.interfaceObject->getResult(Status)<<"Status"<<Status;;
-    return Resources.interfaceObject->getResult(Status);
+        //qDebug() << "Photon result:"<<Resources.overrideInterface->getResult(Status)<<"Status"<<Status;;
+    return Resources.overrideInterface->getResult(Status);
 }
 
 void AScriptOpticalOverride::printConfiguration(int)
@@ -113,9 +115,10 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
     interfaceObject->configure(RandGen, &phot, normal);
     interfaceObject->setObjectName("photon");
-
-    //sw->SetInterfaceObject(0);
     sw->SetInterfaceObject(interfaceObject, "photon"); //steals ownership!
+    AMathScriptInterface* math = new AMathScriptInterface(RandGen);
+    math->setObjectName("math");
+    sw->SetInterfaceObject(math, "math"); //steals ownership!
     sw->setWindowModality(Qt::ApplicationModal);
     sw->show();
 

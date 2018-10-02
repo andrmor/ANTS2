@@ -3,6 +3,7 @@
 
 #include "ascriptinterface.h"
 #include "coreinterfaces.h"
+#include "amathscriptinterface.h"
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
@@ -21,8 +22,8 @@ public:
         const AInterfaceToCore* core = dynamic_cast<const AInterfaceToCore*>(other);
         if (core) return new AInterfaceToCore(*core);
 
-        const AInterfaceToMath* math = dynamic_cast<const AInterfaceToMath*>(other);
-        if (math) return new AInterfaceToMath(*math);
+        const AMathScriptInterface* math = dynamic_cast<const AMathScriptInterface*>(other);
+        if (math) return new AMathScriptInterface(*math);
 
         const AInterfaceToConfig* config = dynamic_cast<const AInterfaceToConfig*>(other);
         if (config) return new AInterfaceToConfig(*config);

@@ -3,6 +3,7 @@
 #include "ainterfacetomessagewindow.h"
 #endif
 #include "coreinterfaces.h"
+#include "amathscriptinterface.h"
 #include "ascriptinterfacefactory.h"
 #include "ainterfacetomultithread.h"
 
@@ -182,7 +183,7 @@ void AJavaScriptManager::SetInterfaceObject(QObject *interfaceObject, QString na
         engine->globalObject().setProperty(coreName, coreVal);
         interfaces.append(coreObj);
         //registering math module
-        QObject* mathObj = new AInterfaceToMath(RandGen);
+        QObject* mathObj = new AMathScriptInterface(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         QString mathName = "math";
         mathObj->setObjectName(mathName);

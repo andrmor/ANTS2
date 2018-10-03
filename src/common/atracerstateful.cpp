@@ -9,6 +9,8 @@
 
 #include "TRandom2.h"
 
+ATracerStateful::ATracerStateful(TRandom2 *RandGen) : RandGen(RandGen) {}
+
 ATracerStateful::~ATracerStateful()
 {
     delete ScriptEngine; ScriptEngine = 0;
@@ -39,7 +41,7 @@ void ATracerStateful::generateScriptInfrastructure(const AMaterialParticleCollec
     qDebug() << "Creating script engine";
     ScriptEngine = new QScriptEngine();
 
-    overrideInterface = new AOpticalOverrideScriptInterface(MPcollection);
+    overrideInterface = new AOpticalOverrideScriptInterface(MPcollection, RandGen);
     qDebug() << "Created interface object:"<<overrideInterface;
     overrideInterface->setObjectName("photon");
     QScriptValue val = ScriptEngine->newQObject(overrideInterface, QScriptEngine::QtOwnership);

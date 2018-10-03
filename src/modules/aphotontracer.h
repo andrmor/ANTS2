@@ -2,8 +2,9 @@
 #define APHOTONTRACER_H
 
 #include "aphotonhistorylog.h"
-#include "atracerstateful.h"
+
 #include <QVector>
+
 #include "TMathBase.h"
 
 class APhoton;
@@ -18,6 +19,7 @@ class TrackHolderClass;
 class TRandom2;
 class TGeoVolume;
 class AGridElementRecord;
+class ATracerStateful;
 
 class APhotonTracer
 {
@@ -49,7 +51,7 @@ private:
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;
-    ATracerStateful ResourcesForOverrides;
+    ATracerStateful* ResourcesForOverrides;
 
     int MaxTracks = 10;
     int PhotonTracksAdded = 0;

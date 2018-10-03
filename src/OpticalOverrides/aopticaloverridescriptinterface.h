@@ -13,9 +13,9 @@ class AOpticalOverrideScriptInterface : public AScriptInterface
 {
     Q_OBJECT
 public:
-    AOpticalOverrideScriptInterface(const AMaterialParticleCollection* MpCollection);
+    AOpticalOverrideScriptInterface(const AMaterialParticleCollection* MpCollection, TRandom2* RandGen);
 
-    void configure(TRandom2 * RandGen, APhoton *Photon, const double *NormalVector, int MatFrom, int MatTo);
+    void configure(APhoton *Photon, const double *NormalVector, int MatFrom, int MatTo);
     AOpticalOverride::OpticalOverrideResultEnum getResult(AOpticalOverride::ScatterStatusEnum& status);
 
 public slots:
@@ -45,6 +45,8 @@ public slots:
 
     double getRefractiveIndexFrom();
     double GetRefractiveIndexTo();
+
+    QVariant GetPosition();
 
     void Console(const QString text);
 

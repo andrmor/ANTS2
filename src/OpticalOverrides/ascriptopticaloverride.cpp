@@ -29,12 +29,8 @@ AScriptOpticalOverride::~AScriptOpticalOverride() {}
 
 AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
-        //qDebug() << "Configuring script interfaces";
-    Resources.overrideInterface->configure(Resources.RandGen, Photon, NormalVector, MatFrom, MatTo);
-    Resources.mathInterface->setRandomGen(Resources.RandGen);
-        //qDebug() << "Evaluating script";
+    Resources.overrideInterface->configure(Photon, NormalVector, MatFrom, MatTo);
     Resources.evaluateScript(Script);
-        //qDebug() << "Photon result:"<<Resources.overrideInterface->getResult(Status)<<"Status"<<Status;;
     return Resources.overrideInterface->getResult(Status);
 }
 
@@ -124,8 +120,8 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *caller)
     normal[1] = 0;
     normal[2] = 1.0;
 
-    AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface(MatCollection);
-    interfaceObject->configure(RandGen, &phot, normal, MatFrom, MatTo);
+    AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface(MatCollection, RandGen);
+    interfaceObject->configure(&phot, normal, MatFrom, MatTo);
     interfaceObject->setObjectName("photon");
     sw->SetInterfaceObject(interfaceObject, "photon"); //takes ownership
     AMathScriptInterface* math = new AMathScriptInterface(RandGen);

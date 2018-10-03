@@ -35,15 +35,15 @@ AOpticalOverrideTester::AOpticalOverrideTester(GraphWindowClass* GraphWindow, AM
     foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     RandGen = new TRandom2();
-    Resources.RandGen = RandGen;
-    Resources.generateScriptInfrastructure(MPcollection);
+    Resources = new ATracerStateful(RandGen);
+    Resources->generateScriptInfrastructure(MPcollection);
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
 {
-    delete ui;
-
+    delete Resources;
     delete RandGen;
+    delete ui;
 }
 
 void AOpticalOverrideTester::on_pbDirectionHelp_clicked()
@@ -85,7 +85,7 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
             ph.v[1] = K[1];
             ph.v[2] = K[2];
             ph.waveIndex = -1;  //TODO wave res?
-            ov->calculate(Resources, &ph, N);
+            ov->calculate(*Resources, &ph, N);
 
             switch (ov->Status)
             {

@@ -35,7 +35,7 @@ private:
     AOpticalOverride* ov;
     GraphWindowClass* GraphWindow;
     TRandom2* RandGen;
-    ATracerStateful Resources;
+    ATracerStateful* Resources;
 };
 
 #endif // AOPTICALOVERRIDETESTER_H

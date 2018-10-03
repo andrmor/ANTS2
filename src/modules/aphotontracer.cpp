@@ -9,6 +9,7 @@
 #include "aphoton.h"
 #include "atrackrecords.h"
 #include "amonitor.h"
+#include "atracerstateful.h"
 
 //Qt
 #include <QDebug>
@@ -31,14 +32,15 @@ APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator,
     fGridShiftOn = false;
     fBuildTracks = false;
     p = new APhoton();
+    ResourcesForOverrides = new ATracerStateful(RandGen);
 
     //for transfer to overrides
-    ResourcesForOverrides.RandGen = RandGen;
-    ResourcesForOverrides.generateScriptInfrastructureIfNeeded(MaterialCollection);
+    ResourcesForOverrides->generateScriptInfrastructureIfNeeded(MaterialCollection);
 }
 
 APhotonTracer::~APhotonTracer()
 {
+    delete ResourcesForOverrides;
     delete p;
 }
 
@@ -232,7 +234,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          //qDebug() << "Overrides defined! Model = "<<ov->getType();
          N = navigator->FindNormal(kFALSE);
          fHaveNormal = true;
-         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(ResourcesForOverrides, p, N);
+         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(*ResourcesForOverrides, p, N);
 
          switch (result)
            {

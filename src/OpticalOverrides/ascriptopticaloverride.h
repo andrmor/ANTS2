@@ -5,8 +5,6 @@
 
 #include <QString>
 
-class AOpticalOverrideScriptInterface;
-
 class AScriptOpticalOverride : public AOpticalOverride
 {
 public:
@@ -28,7 +26,8 @@ public:
   virtual const QString checkOverrideData() override;
 
 private:
-  QString Script = "photon.Absorb()";
+  QString Script = "if (math.random() < 0.25) photon.LambertForward()\n"
+                   "else photon.SpecularReflection()";
 
 #ifdef GUI
   void openScriptWindow(QWidget* caller);

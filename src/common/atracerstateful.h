@@ -16,6 +16,7 @@ class AMathScriptInterface;
 class ATracerStateful
 {
 public:
+    ATracerStateful(TRandom2* RandGen);
     ~ATracerStateful();
 
     void evaluateScript(const QString& Script);

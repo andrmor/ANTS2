@@ -355,8 +355,7 @@ void MainWindow::on_pbCSMtestmany_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
-  ATracerStateful Resources;
-  Resources.RandGen = Detector->RandGen;
+  ATracerStateful Resources(Detector->RandGen);
   for (int i=0; i<ui->sbST_number->value(); i++)
     {
       ph.v[0] = PhotDir.X(); //old has output direction after full cycle!
@@ -463,8 +462,7 @@ void MainWindow::on_pbST_uniform_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
-  ATracerStateful Resources;
-  Resources.RandGen = Detector->RandGen;
+  ATracerStateful Resources(Detector->RandGen);
   for (int i=0; i<num; i++)
     {
       //diffuse illumination - lambertian is used
@@ -543,8 +541,7 @@ void MainWindow::on_pbST_RvsAngle_clicked()
   APhoton ph;
   ph.SimStat = new ASimulationStatistics();
 
-  ATracerStateful Resources;
-  Resources.RandGen = Detector->RandGen;
+  ATracerStateful Resources(Detector->RandGen);
   for (int iA=0; iA<91; iA++) //cycle by angle of incidence
     {
       double angle = iA;
@@ -617,8 +614,7 @@ static QVector<double> vParam, vTot, vSpike, vLobe, vDiff, vDir;
 static QString parName;
 void MainWindow::on_pbST_ReflectionVsParameter_clicked()
 {
-  ATracerStateful Resources;
-  Resources.RandGen = Detector->RandGen;
+  ATracerStateful Resources(Detector->RandGen);
   //input string processing
   QString inS = ui->leST_Parameter->text().simplified();
   QStringList inL = inS.split(",", QString::SkipEmptyParts);

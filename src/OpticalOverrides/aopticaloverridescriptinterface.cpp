@@ -7,12 +7,11 @@
 
 #include "TMath.h"
 
-AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface(const AMaterialParticleCollection *MpCollection) :
-    AScriptInterface(), MPcollection(MpCollection) {}
+AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface(const AMaterialParticleCollection *MpCollection, TRandom2 *RandGen) :
+    AScriptInterface(), MPcollection(MpCollection), RandGen(RandGen) {}
 
-void AOpticalOverrideScriptInterface::configure(TRandom2 * randGen, APhoton *photon, const double *normalVector, int MatFrom, int MatTo)
+void AOpticalOverrideScriptInterface::configure(APhoton *photon, const double *normalVector, int MatFrom, int MatTo)
 {
-    RandGen = randGen;
     Photon = photon;
     NormalVector = normalVector;
     iMatFrom = MatFrom;
@@ -202,6 +201,13 @@ double AOpticalOverrideScriptInterface::getRefractiveIndexFrom()
 double AOpticalOverrideScriptInterface::GetRefractiveIndexTo()
 {
     return (*MPcollection)[iMatTo]->getRefractiveIndex(Photon->waveIndex);
+}
+
+QVariant AOpticalOverrideScriptInterface::GetPosition()
+{
+    QVariantList vl;
+    vl << Photon->r[0] << Photon->r[1] << Photon->r[2];
+    return vl;
 }
 
 void AOpticalOverrideScriptInterface::Console(const QString text)

@@ -4916,9 +4916,6 @@ void MainWindow::on_lwOverrides_itemSelectionChanged()
     }
 }
 
-static bool orDialogPositioned = false;
-static QSize orDialogSize;
-static QPoint orDialogPosition;
 void MainWindow::on_pbShowOverrideMap_clicked()
 {
     int numMat = MpCollection->countMaterials();
@@ -4951,10 +4948,10 @@ void MainWindow::on_pbShowOverrideMap_clicked()
         }
     QObject::connect(tw, &QTableWidget::itemDoubleClicked, d, &QDialog::accept);
 
-    if (orDialogPositioned)
+    if (bOptOvDialogPositioned)
     {
-        d->resize(orDialogSize);
-        d->move(orDialogPosition);
+        d->resize(OptOvDialogSize);
+        d->move(OptOvDialogPosition);
     }
 
     int res = d->exec();
@@ -4972,8 +4969,8 @@ void MainWindow::on_pbShowOverrideMap_clicked()
         }
     }
 
-    orDialogPositioned = true;
-    orDialogSize = d->size();
-    orDialogPosition = d->pos();
+    bOptOvDialogPositioned = true;
+    OptOvDialogSize = d->size();
+    OptOvDialogPosition = d->pos();
     delete d;
 }

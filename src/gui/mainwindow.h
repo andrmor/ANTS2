@@ -450,6 +450,10 @@ private:
 
     bool fStopLoadRequested;
 
+    bool bOptOvDialogPositioned = false;
+    QSize OptOvDialogSize;
+    QPoint OptOvDialogPosition;
+
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
     void ViewChangeRelFactors(QString options);    

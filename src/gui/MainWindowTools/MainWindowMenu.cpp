@@ -129,6 +129,8 @@ void MainWindow::on_actionReset_position_of_windows_triggered()
        GraphWindow->showNormal();
        GraphWindow->raise();
    }
+
+   bOptOvDialogPositioned = false;
 }
 
 void addWindow(QString name, QMainWindow* w, QJsonObject &json)
@@ -184,6 +186,13 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   js["w"] = ScriptWinW;
   js["h"] = ScriptWinH;
   json["Script"] = js;
+
+  QJsonObject jsOD;
+  jsOD["x"] = OptOvDialogPosition.x();
+  jsOD["y"] = OptOvDialogPosition.y();
+  jsOD["w"] = OptOvDialogSize.width();
+  jsOD["h"] = OptOvDialogSize.height();
+  json["OptOvDialog"] = jsOD;
 
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   //if (!QDir(configDir).exists()) QDir().mkdir(configDir);
@@ -254,6 +263,19 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           parseJson(js, "h", ScriptWinH);
           if (GenScriptWindow) recallGeometryOfLocalScriptWindow();
         }
+
+      if (json.contains("OptOvDialog"))
+      {
+          QJsonObject jsOD = json["OptOvDialog"].toObject();
+          int x, y, w, h;
+          parseJson(jsOD, "x", x);
+          parseJson(jsOD, "y", y);
+          OptOvDialogPosition = QPoint(x, y);
+          parseJson(jsOD, "w", w);
+          parseJson(jsOD, "h", h);
+          OptOvDialogSize = QSize(w, h);
+          bOptOvDialogPositioned = true;
+      }
     }
 }
 

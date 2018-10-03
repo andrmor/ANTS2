@@ -208,7 +208,7 @@ void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
   if (js.contains("maximized")) fMaxi = js["maximized"].toBool();
   bool fVis = js["vis"].toBool();
 
-  AssureWidgetIsWithingVisibleArea(w);
+  GuiUtils::AssureWidgetIsWithinVisibleArea(w);
 
   if (fVis || fMaxi) w->showNormal();
   if (fMaxi)

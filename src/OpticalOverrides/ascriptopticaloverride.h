@@ -15,9 +15,9 @@ public:
 
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave) override;
-  virtual QString getType() const override {return "CustomScript";}
-  virtual QString getReportLine() override;
+  virtual const QString getType() const override {return "CustomScript";}
+  virtual const QString getAbbreviation() const override {return "JS";}
+  virtual const QString getReportLine() const override;
 
   virtual void writeToJson(QJsonObject &json) override;
   virtual bool readFromJson(QJsonObject &json) override;

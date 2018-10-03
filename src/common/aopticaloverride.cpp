@@ -166,61 +166,32 @@ AOpticalOverride::OpticalOverrideResultEnum BasicOpticalOverride::calculate(ATra
   return NotTriggered;
 }
 
-void BasicOpticalOverride::printConfiguration(int /*iWave*/)
+const QString BasicOpticalOverride::getReportLine() const
 {
-  qDebug() << "-------Configuration:-------";
-  qDebug() << "Absorption fraction:"<<probLoss;
-  qDebug() << "Specular fraction:"<<probRef;
-  qDebug() << "Scatter fraction:"<<probDiff;
-  qDebug() << "Scatter model (4Pi/LambBack/LambForward):"<<scatterModel;
-  qDebug() << "----------------------------";
-}
-
-QString BasicOpticalOverride::getReportLine()
-{
-  QString s = "to " + (*MatCollection)[MatTo]->name;
-  QString s1;
-  s += "->";
-
-  double prob = probRef+probDiff+probLoss;
-  if (prob == 0) return s + " To be defined"; //not defined - shown during configuration phase only
-  double probFresnel = 1.0 - prob;  
-
-  if (probLoss>0)
-  {
-      s1.setNum(probLoss);
-      s += " Loss: "+s1+";";
-  }
-  if (probRef>0)
-  {
-      s1.setNum(probRef);
-      s += " Spec: "+s1+";";
-  }
-  if (probDiff>0)
-  {
-      s1.setNum(probDiff);
-      switch( scatterModel )
+    double probFresnel = 1.0 - (probRef + probDiff + probLoss);
+    QString s;
+    if (probLoss > 0) s += QString("Abs %1 +").arg(probLoss);
+    if (probRef > 0)  s += QString("Spec %1 +").arg(probRef);
+    if (probDiff > 0)
+    {
+        switch( scatterModel )
         {
         case 0:
-          s += " Scat(4Pi): ";
-          break;
+            s += "Iso ";
+            break;
         case 1:
-          s += " Scat(Lamb_B): ";
-          break;
+            s += "Lamb_B ";
+            break;
         case 2:
-          s += " Scat(Lamb_F): ";
-          break;
+            s += "Lamb_F ";
+            break;
         }
-      s += s1;
-  }
-
-  if (probFresnel>1e-10)
-  {
-      s1.setNum(probFresnel);
-      s += " Fresnel: "+s1;
-  }
-
-  return s;
+        s += QString::number(probDiff);
+        s += " +";
+    }
+    if (probFresnel > 1e-10) s += QString("Fres %1 +").arg(probFresnel);
+    s.chop(2);
+    return s;
 }
 
 void BasicOpticalOverride::writeToJson(QJsonObject &json)
@@ -464,15 +435,7 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
 //  return Back;
 }
 
-void FSNPOpticalOverride::printConfiguration(int /*iWave*/)
-{
-  qDebug() << "-------Configuration:-------";
-  qDebug() << "FS_NP model";
-  qDebug() << "Albedo:"<<Albedo;
-  qDebug() << "----------------------------";
-}
-
-QString FSNPOpticalOverride::getReportLine()
+const QString FSNPOpticalOverride::getReportLine() const
 {
   QString s = "to " + (*MatCollection)[MatTo]->name;
   s += "->FS_NP model, albedo="+QString::number(Albedo);
@@ -663,20 +626,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
     return Absorbed;
 }
 
-void AWaveshifterOverride::printConfiguration(int /*iWave*/)
-{
-    qDebug() << "-------Configuration:-------";
-    qDebug() << "Surface wavelengthshifter override";
-    QString str = "Reemission probabililty: ";
-    str += (ReemissionProbability_lambda.isEmpty() ? "not defined" : "defined");
-    qDebug() << str;
-    str = "Emission spectrum: ";
-    str += (EmissionSpectrum_lambda.isEmpty() ? "not defined" : "defined");
-    qDebug() << str;
-    qDebug() << "----------------------------";
-}
-
-QString AWaveshifterOverride::getReportLine()
+const QString AWaveshifterOverride::getReportLine() const
 {
     QString s = "to " + (*MatCollection)[MatTo]->name;
     s += "->SurfaceWLS";
@@ -940,18 +890,7 @@ AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calcul
     return BasicOpticalOverride::calculate(Resources, Photon, NormalVector);
 }
 
-void SpectralBasicOpticalOverride::printConfiguration(int /*iWave*/)
-{
-    qDebug() << "-------Configuration:-------";
-    qDebug() << "Wavelength:"<<Wave;
-    qDebug() << "Absorption fraction:"<<ProbLoss;
-    qDebug() << "Specular fraction:"<<ProbRef;
-    qDebug() << "Scatter fraction:"<<ProbDiff;
-    qDebug() << "Scatter model (4Pi/LambBack/LambForward):"<<scatterModel;
-    qDebug() << "----------------------------";
-}
-
-QString SpectralBasicOpticalOverride::getReportLine()
+const QString SpectralBasicOpticalOverride::getReportLine() const
 {
     QString s = "to " + (*MatCollection)[MatTo]->name;
     s += "->";

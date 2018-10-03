@@ -234,7 +234,6 @@ private slots:
     void on_cbXbyYarray_stateChanged(int arg1);
     void on_cbRingsArray_stateChanged(int arg1);
     void on_pbRefreshOverrides_clicked();
-    void on_pbOverride_clicked();
     void on_pbStartMaterialInspector_clicked();
     void on_pbAddparticleToActive_clicked();
     void on_cobParticleToInspect_currentIndexChanged(int index);
@@ -502,10 +501,6 @@ private slots:
     void on_cobXYtype_activated(int index);
     void on_cobTOP_activated(int index);
     void on_actionNew_detector_triggered();
-    void on_pbSurfaceWLS_Show_clicked();
-    void on_pbSurfaceWLS_Load_clicked();
-    void on_pbSurfaceWLS_ShowSpec_clicked();
-    void on_pbSurfaceWLS_LoadSpec_clicked();
     void on_pbReloadTreeData_clicked();
     void on_pbRenameSource_clicked();
     void on_pbStopLoad_clicked();
@@ -539,9 +534,6 @@ private slots:
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
     void on_pbShowEnergyDeposition_clicked();
     void on_pbUpdateElectronics_clicked();
-    void on_ledSimplisticAbs_editingFinished();
-    void on_ledSimplisticSpecular_editingFinished();
-    void on_ledSimplisticScatter_editingFinished();
     void on_pbOverlay_clicked();
     void on_pbScalePDE_clicked();
     void on_pbLoadManifestFile_clicked();
@@ -555,8 +547,7 @@ private slots:
     void on_pbShowDetailedLog_clicked();
     void on_pbCSMtestmany_clicked();
     void on_pbST_showTracks_clicked();
-    void on_pbST_AngleCos_clicked();
-    void on_lwOverrides_itemClicked(QListWidgetItem *item);
+    void on_pbST_AngleCos_clicked();    
     void on_pbST_uniform_clicked();
     void on_pbST_RvsAngle_clicked();
     void on_pbST_ReflectionVsParameter_clicked();
@@ -597,54 +588,26 @@ private slots:
     void on_actionQuick_load_3_hovered();
     void on_actionLoad_last_config_hovered();
     void on_cobPartPerEvent_currentIndexChanged(int index);
-
     void on_actionOpen_Python_window_triggered();
-
     void on_ledElNoiseSigma_Norm_editingFinished();
-
     void on_cbDarkCounts_Enable_toggled(bool checked);
-
     void on_pbDarkCounts_Show_clicked();
-
     void on_pbDarkCounts_Load_clicked();
-
     void on_pbDarkCounts_Delete_clicked();
-
     void on_pushButton_clicked();
-
     void on_cobDarkCounts_Model_currentIndexChanged(int index);
-
     void on_cobDarkCounts_LoadOptions_currentIndexChanged(int index);
-
     void on_actionServer_window_triggered();
-
     void on_actionServer_settings_triggered();
-
-    void on_pbSSO_Load_clicked();
-
-    void on_pbSSO_Show_clicked();
-
-    void on_pbSSO_Binned_clicked();
-
-    void on_cobSSO_ScatterModel_activated(int index);
-
-    void on_ledSSO_EffWave_editingFinished();
-
     void on_actionGrid_triggered();
-
     void on_pbOpenTrackProperties_Phot_clicked();
-
     void on_pbTrackOptionsGun_clicked();
-
     void on_pbTrackOptionsStack_clicked();
-
     void on_pbQEacceleratorWarning_clicked();
-
     void on_ledSphericalPMAngle_editingFinished();
-
-    void on_cobSurfaceWLS_Model_activated(int index);
-
     void on_pbEditOverride_clicked();
+    void on_lwOverrides_itemDoubleClicked(QListWidgetItem *item);
+    void on_lwOverrides_itemSelectionChanged();
 
 public slots:
     void on_pbRebuildDetector_clicked();

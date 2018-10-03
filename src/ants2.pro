@@ -348,11 +348,9 @@ SOURCES += main.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
     common/atrackbuildoptions.cpp \
-    gui/MainWindowTools/aopticaloverridedialog.cpp \
     OpticalOverrides/aopticaloverridescriptinterface.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
-    gui/MainWindowTools/aopticaloverridetester.cpp \
     common/aphoton.cpp \
     scriptmode/amathscriptinterface.cpp
 
@@ -479,11 +477,9 @@ HEADERS  += common/CorrelationFilters.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
     common/atrackbuildoptions.h \
-    gui/MainWindowTools/aopticaloverridedialog.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
     OpticalOverrides/ascriptopticaloverride.h \
     common/atracerstateful.h \
-    gui/MainWindowTools/aopticaloverridetester.h \
     scriptmode/amathscriptinterface.h
 
 # --- SIM ---
@@ -599,8 +595,9 @@ ants2_GUI {
     gui/MainWindowTools/slabdelegate.cpp \
     gui/aremotewindow.cpp \
     gui/MainWindowTools/atrackdrawdialog.cpp \
-    gui/aserverdelegate.cpp
-
+    gui/aserverdelegate.cpp \
+    gui/MainWindowTools/aopticaloverridedialog.cpp \
+    gui/MainWindowTools/aopticaloverridetester.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -657,7 +654,9 @@ HEADERS  += gui/mainwindow.h \
     gui/awebsocketserverdialog.h \
     gui/aremotewindow.h \
     gui/MainWindowTools/atrackdrawdialog.h \
-    gui/aserverdelegate.h
+    gui/aserverdelegate.h \
+    gui/MainWindowTools/aopticaloverridedialog.h \
+    gui/MainWindowTools/aopticaloverridetester.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -687,7 +686,9 @@ FORMS += gui/mainwindow.ui \
     gui/aneutroninfodialog.ui \
     gui/awebsocketserverdialog.ui \
     gui/aremotewindow.ui \
-    gui/MainWindowTools/atrackdrawdialog.ui
+    gui/MainWindowTools/atrackdrawdialog.ui \
+    gui/MainWindowTools/aopticaloverridedialog.ui \
+    gui/MainWindowTools/aopticaloverridetester.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -805,6 +806,3 @@ unix {
 }
 #------------
 
-FORMS += \
-    gui/MainWindowTools/aopticaloverridedialog.ui \
-    gui/MainWindowTools/aopticaloverridetester.ui

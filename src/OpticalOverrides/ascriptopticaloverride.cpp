@@ -37,17 +37,9 @@ AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(AT
     return Resources.overrideInterface->getResult(Status);
 }
 
-void AScriptOpticalOverride::printConfiguration(int)
+const QString AScriptOpticalOverride::getReportLine() const
 {
-    qDebug() << "-------Configuration:-------";
-    qDebug() << "Script:";
-    qDebug() << Script;
-    qDebug() << "----------------------------";
-}
-
-QString AScriptOpticalOverride::getReportLine()
-{
-    return QString("to %1 -> Custom script").arg( (*MatCollection)[MatTo]->name );
+    return QString();
 }
 
 void AScriptOpticalOverride::writeToJson(QJsonObject &json)

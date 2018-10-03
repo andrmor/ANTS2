@@ -5310,7 +5310,7 @@ of the refracted beam:</string>
       </widget>
       <widget class="QWidget" name="tabMaterials">
        <attribute name="title">
-        <string>Materials</string>
+        <string>Materials and optical overrides</string>
        </attribute>
        <widget class="QPushButton" name="pbStartMaterialInspector">
         <property name="geometry">
@@ -5357,25 +5357,12 @@ of the refracted beam:</string>
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
-       <widget class="QLabel" name="label_37">
-        <property name="geometry">
-         <rect>
-          <x>403</x>
-          <y>6</y>
-          <width>130</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>has defined overrides:</string>
-        </property>
-       </widget>
        <widget class="QComboBox" name="cobMaterialForOverrides">
         <property name="geometry">
          <rect>
-          <x>257</x>
-          <y>3</y>
-          <width>141</width>
+          <x>265</x>
+          <y>20</y>
+          <width>181</width>
           <height>22</height>
          </rect>
         </property>
@@ -5384,19 +5371,6 @@ of the refracted beam:</string>
           <weight>50</weight>
           <bold>false</bold>
          </font>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pbOverride">
-        <property name="geometry">
-         <rect>
-          <x>200</x>
-          <y>40</y>
-          <width>150</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>...register new overrides</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pbRefreshMaterials">
@@ -5416,9 +5390,9 @@ materials</string>
        <widget class="QLabel" name="label_82">
         <property name="geometry">
          <rect>
-          <x>174</x>
+          <x>180</x>
           <y>-2</y>
-          <width>79</width>
+          <width>351</width>
           <height>20</height>
          </rect>
         </property>
@@ -5429,7 +5403,7 @@ materials</string>
          </font>
         </property>
         <property name="text">
-         <string>Overrides</string>
+         <string>Optical overrides (from -&gt; to)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -5446,6 +5420,9 @@ materials</string>
         </property>
         <property name="contextMenuPolicy">
          <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="toolTip">
+         <string>Double-click to edit</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pbRemoveMaterial">
@@ -5464,878 +5441,109 @@ materials</string>
        <widget class="QComboBox" name="cobMaterialTo">
         <property name="geometry">
          <rect>
-          <x>389</x>
-          <y>87</y>
-          <width>141</width>
+          <x>363</x>
+          <y>160</y>
+          <width>160</width>
           <height>22</height>
          </rect>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_29">
-        <property name="geometry">
-         <rect>
-          <x>173</x>
-          <y>89</y>
-          <width>213</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Override for interface with:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QStackedWidget" name="swScatterModel">
-        <property name="geometry">
-         <rect>
-          <x>265</x>
-          <y>113</y>
-          <width>269</width>
-          <height>73</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string/>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="page_12">
-         <widget class="QLabel" name="label_45">
-          <property name="geometry">
-           <rect>
-            <x>6</x>
-            <y>10</y>
-            <width>256</width>
-            <height>51</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Override not defined</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_11">
-         <widget class="QLabel" name="label_60">
-          <property name="geometry">
-           <rect>
-            <x>-2</x>
-            <y>24</y>
-            <width>111</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Specular reflection:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_59">
-          <property name="geometry">
-           <rect>
-            <x>18</x>
-            <y>3</y>
-            <width>91</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Absorption:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_46">
-          <property name="geometry">
-           <rect>
-            <x>18</x>
-            <y>45</y>
-            <width>91</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Scattering:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="cobScatteringModel">
-          <property name="geometry">
-           <rect>
-            <x>175</x>
-            <y>47</y>
-            <width>86</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Isotropic</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, back</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, forw</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QLineEdit" name="ledSimplisticAbs">
-          <property name="geometry">
-           <rect>
-            <x>112</x>
-            <y>3</y>
-            <width>57</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledSimplisticSpecular">
-          <property name="geometry">
-           <rect>
-            <x>112</x>
-            <y>25</y>
-            <width>57</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledSimplisticScatter">
-          <property name="geometry">
-           <rect>
-            <x>112</x>
-            <y>47</y>
-            <width>57</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_13">
-         <widget class="QLineEdit" name="ledSigmaAlpha">
-          <property name="geometry">
-           <rect>
-            <x>75</x>
-            <y>5</y>
-            <width>53</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0.18</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_316">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>6</y>
-            <width>71</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Sigma alpha:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_313">
-          <property name="geometry">
-           <rect>
-            <x>1</x>
-            <y>26</y>
-            <width>70</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Sigma spike:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_314">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>46</y>
-            <width>61</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Albedo:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledSigmaSpike">
-          <property name="geometry">
-           <rect>
-            <x>75</x>
-            <y>25</y>
-            <width>53</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledAlbedo">
-          <property name="geometry">
-           <rect>
-            <x>75</x>
-            <y>45</y>
-            <width>53</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0.97</string>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="conHeightModel">
-          <property name="geometry">
-           <rect>
-            <x>160</x>
-            <y>17</y>
-            <width>101</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Height distribution model</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Empirical</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Gauss</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Exponential</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QComboBox" name="cobSlopeModel">
-          <property name="geometry">
-           <rect>
-            <x>160</x>
-            <y>38</y>
-            <width>101</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Slope distribution model</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Trowbridgereitz</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Cooktorrance</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Bivariatecauchy</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QLabel" name="label_197">
-          <property name="geometry">
-           <rect>
-            <x>132</x>
-            <y>21</y>
-            <width>23</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>HD:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_239">
-          <property name="geometry">
-           <rect>
-            <x>132</x>
-            <y>43</y>
-            <width>23</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>SD:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_14">
-         <widget class="QComboBox" name="cobMetalSurfaceModel">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>170</x>
-            <y>30</y>
-            <width>81</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <item>
-           <property name="text">
-            <string>Polished</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QLabel" name="label_279">
-          <property name="geometry">
-           <rect>
-            <x>170</x>
-            <y>10</y>
-            <width>81</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Surface model:</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_280">
-          <property name="geometry">
-           <rect>
-            <x>12</x>
-            <y>15</y>
-            <width>61</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Real N:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledRealN">
-          <property name="geometry">
-           <rect>
-            <x>77</x>
-            <y>13</y>
-            <width>51</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Real part of the refractive index</string>
-          </property>
-          <property name="text">
-           <string>1.07</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledImaginaryN">
-          <property name="geometry">
-           <rect>
-            <x>77</x>
-            <y>40</y>
-            <width>51</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Imaginary part of the refractive index</string>
-          </property>
-          <property name="text">
-           <string>0.6</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_281">
-          <property name="geometry">
-           <rect>
-            <x>5</x>
-            <y>43</y>
-            <width>69</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Imaginary N:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_15">
-         <widget class="QLabel" name="label_317">
-          <property name="geometry">
-           <rect>
-            <x>56</x>
-            <y>28</y>
-            <width>71</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Albedo:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledNevesAlbedo">
-          <property name="geometry">
-           <rect>
-            <x>137</x>
-            <y>27</y>
-            <width>53</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0.95</string>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_19">
-         <widget class="QPushButton" name="pbSurfaceWLS_Show">
-          <property name="geometry">
-           <rect>
-            <x>137</x>
-            <y>19</y>
-            <width>60</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSurfaceWLS_Load">
-          <property name="geometry">
-           <rect>
-            <x>202</x>
-            <y>19</y>
-            <width>60</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_8">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>20</y>
-            <width>123</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>reemission probability:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_15">
-          <property name="geometry">
-           <rect>
-            <x>3</x>
-            <y>45</y>
-            <width>121</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Emission spectrum:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSurfaceWLS_LoadSpec">
-          <property name="geometry">
-           <rect>
-            <x>202</x>
-            <y>45</y>
-            <width>60</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSurfaceWLS_ShowSpec">
-          <property name="geometry">
-           <rect>
-            <x>137</x>
-            <y>45</y>
-            <width>60</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="cobSurfaceWLS_Model">
-          <property name="geometry">
-           <rect>
-            <x>9</x>
-            <y>4</y>
-            <width>121</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Isotropic</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, back (2Pi)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, forw (2Pi)</string>
-           </property>
-          </item>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_26">
-         <widget class="QLabel" name="label_208">
-          <property name="geometry">
-           <rect>
-            <x>90</x>
-            <y>29</y>
-            <width>171</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>When wave not defined, assume</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSSO_Show">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>100</x>
-            <y>4</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Show</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSSO_Load">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>4</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Format: Lines of Wavelength, ProbLoss, ProbReflection,ProbDiffuse</string>
-          </property>
-          <property name="text">
-           <string>Load</string>
-          </property>
-         </widget>
-         <widget class="QComboBox" name="cobSSO_ScatterModel">
-          <property name="geometry">
-           <rect>
-            <x>7</x>
-            <y>46</y>
-            <width>82</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="toolTip">
-           <string>Scattering options: 1) in 4Pi; 2) Lambertian backward; 3) Lambertian forward</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>Isotropic</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, back</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lamb, forw</string>
-           </property>
-          </item>
-         </widget>
-         <widget class="QLabel" name="label_238">
-          <property name="geometry">
-           <rect>
-            <x>5</x>
-            <y>29</y>
-            <width>81</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Diffuse type:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="ledSSO_EffWave">
-          <property name="geometry">
-           <rect>
-            <x>149</x>
-            <y>46</y>
-            <width>50</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>500</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_241">
-          <property name="geometry">
-           <rect>
-            <x>204</x>
-            <y>49</y>
-            <width>29</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>nm</string>
-          </property>
-         </widget>
-         <widget class="QPushButton" name="pbSSO_Binned">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="geometry">
-           <rect>
-            <x>180</x>
-            <y>4</y>
-            <width>75</width>
-            <height>23</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Binned</string>
-          </property>
-         </widget>
-         <zorder>label_208</zorder>
-         <zorder>pbSSO_Show</zorder>
-         <zorder>pbSSO_Load</zorder>
-         <zorder>label_238</zorder>
-         <zorder>ledSSO_EffWave</zorder>
-         <zorder>label_241</zorder>
-         <zorder>pbSSO_Binned</zorder>
-         <zorder>cobSSO_ScatterModel</zorder>
-        </widget>
-       </widget>
-       <widget class="Line" name="line_63">
-        <property name="geometry">
-         <rect>
-          <x>213</x>
-          <y>145</y>
-          <width>52</width>
-          <height>10</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="cobOpticalOverrideModel">
-        <property name="geometry">
-         <rect>
-          <x>179</x>
-          <y>138</y>
-          <width>77</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>If override is  notdefined, the optical photon behavior on the interface is defined by Fresnel equations</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Fresnel</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Simplistic</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Claudio's</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>OnMetal</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FS_NP</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>WLS</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>SimpSpectral</string>
-         </property>
-        </item>
-       </widget>
-       <widget class="QLabel" name="label_149">
-        <property name="geometry">
-         <rect>
-          <x>185</x>
-          <y>119</y>
-          <width>47</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Model:</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pbRefreshOverrides">
         <property name="geometry">
          <rect>
-          <x>360</x>
-          <y>40</y>
-          <width>140</width>
+          <x>240</x>
+          <y>80</y>
+          <width>241</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
-         <string>...refresh overrides</string>
+         <string>...refresh override indication</string>
         </property>
        </widget>
        <widget class="QListWidget" name="lwOverrides">
         <property name="geometry">
          <rect>
           <x>175</x>
-          <y>26</y>
+          <y>66</y>
           <width>359</width>
-          <height>60</height>
+          <height>89</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>Double-click to edit</string>
         </property>
        </widget>
        <widget class="QPushButton" name="pbEditOverride">
         <property name="geometry">
          <rect>
-          <x>179</x>
-          <y>164</y>
-          <width>75</width>
+          <x>185</x>
+          <y>160</y>
+          <width>171</width>
           <height>23</height>
          </rect>
         </property>
         <property name="text">
-         <string>PushButton</string>
+         <string>Define / edit override to:</string>
         </property>
        </widget>
+       <widget class="QLabel" name="label_8">
+        <property name="geometry">
+         <rect>
+          <x>176</x>
+          <y>22</y>
+          <width>87</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>From material:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_15">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>48</y>
+          <width>171</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>List of defined overrides:</string>
+        </property>
+       </widget>
+       <widget class="Line" name="line_6">
+        <property name="geometry">
+         <rect>
+          <x>300</x>
+          <y>170</y>
+          <width>118</width>
+          <height>3</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <zorder>line_6</zorder>
        <zorder>lwOverrides</zorder>
        <zorder>lwMaterials</zorder>
        <zorder>pbStartMaterialInspector</zorder>
        <zorder>label_28</zorder>
        <zorder>line_12</zorder>
-       <zorder>label_37</zorder>
-       <zorder>pbOverride</zorder>
        <zorder>pbRefreshMaterials</zorder>
        <zorder>label_82</zorder>
        <zorder>cobMaterialForOverrides</zorder>
        <zorder>pbRemoveMaterial</zorder>
        <zorder>cobMaterialTo</zorder>
-       <zorder>label_29</zorder>
-       <zorder>swScatterModel</zorder>
-       <zorder>line_63</zorder>
-       <zorder>cobOpticalOverrideModel</zorder>
-       <zorder>label_149</zorder>
        <zorder>pbRefreshOverrides</zorder>
        <zorder>pbEditOverride</zorder>
+       <zorder>label_8</zorder>
+       <zorder>label_15</zorder>
       </widget>
      </widget>
      <widget class="QLabel" name="laBackground">
@@ -17283,22 +16491,6 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobScatteringModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>497</x>
-     <y>257</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>294</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>ledTimeOfOneMeasurement</sender>
    <signal>editingFinished()</signal>
    <receiver>pbUpdateElectronics</receiver>
@@ -17363,118 +16555,6 @@ on stack</string>
    </hints>
   </connection>
   <connection>
-   <sender>cobOpticalOverrideModel</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>swScatterModel</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>254</x>
-     <y>218</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>225</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobOpticalOverrideModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>243</x>
-     <y>218</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>287</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSigmaAlpha</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>390</x>
-     <y>215</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>289</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledSigmaSpike</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>396</x>
-     <y>235</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>306</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledAlbedo</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>386</x>
-     <y>255</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>297</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>conHeightModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>480</x>
-     <y>229</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobSlopeModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>510</x>
-     <y>250</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>321</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cobMaterialForOverrides</sender>
    <signal>activated(int)</signal>
    <receiver>pbRefreshOverrides</receiver>
@@ -17519,54 +16599,6 @@ on stack</string>
     <hint type="destinationlabel">
      <x>286</x>
      <y>490</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledRealN</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>396</x>
-     <y>223</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>326</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledImaginaryN</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>373</x>
-     <y>250</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>310</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cobMetalSurfaceModel</sender>
-   <signal>activated(int)</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>472</x>
-     <y>242</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>262</x>
-     <y>118</y>
     </hint>
    </hints>
   </connection>
@@ -19583,22 +18615,6 @@ on stack</string>
     <hint type="destinationlabel">
      <x>333</x>
      <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledNevesAlbedo</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbOverride</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>424</x>
-     <y>234</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>127</y>
     </hint>
    </hints>
   </connection>

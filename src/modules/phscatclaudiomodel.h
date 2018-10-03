@@ -21,17 +21,18 @@ public:
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) = 0;
     //unitary vectors! iWave - photon wave index, -1 if no wave-resolved
 
-  virtual void printConfiguration(int iWave);
-  virtual QString getType() const = 0;
-  virtual QString getReportLine();
+  //virtual const QString getType() const override = 0;
+  virtual const QString getAbbreviation() const override {return "Clau";}
+  virtual const QString getReportLine() const override;
 
   // save/load config
-  virtual void writeToJson(QJsonObject &json);
-  virtual bool readFromJson(QJsonObject &json);
+  virtual void writeToJson(QJsonObject &json) override;
+  virtual bool readFromJson(QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
 #endif
+
   virtual const QString checkOverrideData() override;
 
   // interface properties
@@ -56,8 +57,8 @@ public:
   PhScatClaudioModelV2(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModel(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
-  virtual QString getType() const {return "Claudio_Model_V2";}
-  virtual QString getReportLine();
+  virtual const QString getType() const override {return "Claudio_Model_V2";}
+  virtual const QString getReportLine() const override;
 
 protected:
   virtual double GnFunc(double cost);
@@ -70,8 +71,8 @@ public:
   PhScatClaudioModelV2d1(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
-  virtual QString getType() const {return "Claudio_Model_V2d1";}
-  virtual QString getReportLine();
+  virtual const QString getType() const override {return "Claudio_Model_V2d1";}
+  virtual const QString getReportLine() const;
 };
 
 class PhScatClaudioModelV2d2 : public PhScatClaudioModelV2
@@ -80,8 +81,8 @@ public:
   PhScatClaudioModelV2d2(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector);
-  virtual QString getType() const {return "Claudio_Model_V2d2";}
-  virtual QString getReportLine();
+  virtual const QString getType() const {return "Claudio_Model_V2d2";}
+  virtual const QString getReportLine() const;
 };
 
 #endif // PHSCATCLAUDIOMODEL_H

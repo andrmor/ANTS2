@@ -2477,7 +2477,7 @@ void MaterialInspectorWindow::FillNeutronTable()
                   QPushButton* pbReaction = new QPushButton("Reactions");
                   l->addWidget(pbReaction);
                   QLabel* lab = new QLabel("  ");
-                  QIcon YellowIcon = createColorCircleIcon( QSize(12,12), ( absEl->DecayScenarios.isEmpty() ? Qt::white : Qt::green ) );
+                  QIcon YellowIcon = GuiUtils::createColorCircleIcon( QSize(12,12), ( absEl->DecayScenarios.isEmpty() ? Qt::white : Qt::green ) );
                   lab->setPixmap(YellowIcon.pixmap(16,16));
                   l->addWidget( lab );
                 w->setLayout(l);

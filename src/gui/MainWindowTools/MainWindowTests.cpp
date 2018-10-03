@@ -337,9 +337,6 @@ void MainWindow::on_pbCSMtestmany_clicked()
   PhotDir = PhotDir.Unit();
   //double K[3];
 
-  //report configuration
-  ov->printConfiguration(-1);
-
   //other inits
   tracks.clear();
   double d = 0.5; //offset - for drawing only
@@ -453,8 +450,6 @@ void MainWindow::on_pbST_uniform_clicked()
   //                 ui->ledST_k->text().toDouble());
   //PhotDir = PhotDir.Unit();
   double K[3];
-
-  ov->printConfiguration(-1);
 
   int abs, spike, lobe, lamb;
   abs = spike = lobe = lamb = 0;

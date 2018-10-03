@@ -23,29 +23,9 @@
 
 #define MODEL_VERSION 3
 
-void PhScatClaudioModel::printConfiguration(int iWave)
+const QString PhScatClaudioModel::getReportLine() const
 {
-  double Rindex1 = (*MatCollection)[MatFrom]->getRefractiveIndex(iWave);
-  double Rindex2 = (*MatCollection)[MatTo]->getRefractiveIndex(iWave);
-
-  qDebug() << "-------Configuration:-------";  
-  qDebug() << "Model:"<<getType();
-  qDebug() << "Sigma_alpha:"<<sigma_alpha<<"  Sigma_h:"<<sigma_h;
-  qDebug() << "HeightDistrModel(empirical, gaussian, exponential):"<<HeightDistribution;
-  qDebug() << "SlopeDistrModel(trowbridgereitz, cooktorrance, bivariatecauchy):"<<SlopeDistribution;
-  qDebug() << "Albedo:"<<albedo;
-  qDebug() << "Refractive indexes:"<<Rindex1 <<" to "<<Rindex2;
-  qDebug() << "Wavelength:" << 1.0e-9 * MatCollection->convertWaveIndexToWavelength(iWave)<< "m";
-  qDebug() << "----------------------------";
-}
-
-QString PhScatClaudioModel::getReportLine()
-{
-  QString s = "to " + (*MatCollection)[MatTo]->name;
-  QString s1;
-  s1.setNum(MatTo);
-  s += " ("+s1+") --> Claudio's model";
-  return s;
+    return " v2";
 }
 
 void PhScatClaudioModel::writeToJson(QJsonObject &json)
@@ -365,9 +345,9 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
   return Back;
 }
 
-QString PhScatClaudioModelV2::getReportLine()
+const QString PhScatClaudioModelV2::getReportLine() const
 {
-  return PhScatClaudioModel::getReportLine()+"_v2";
+  return " v2";
 }
 
 AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
@@ -541,9 +521,9 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
   return Back;
 }
 
-QString PhScatClaudioModelV2d2::getReportLine()
+const QString PhScatClaudioModelV2d2::getReportLine() const
 {
-  return PhScatClaudioModel::getReportLine()+"_v2.2";
+  return " v2.2";
 }
 
 AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
@@ -717,7 +697,7 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
     return Back;
 }
 
-QString PhScatClaudioModelV2d1::getReportLine()
+const QString PhScatClaudioModelV2d1::getReportLine() const
 {
-  return PhScatClaudioModel::getReportLine()+"_v2.1";
+  return " v2.1";
 }

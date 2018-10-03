@@ -19,23 +19,11 @@
 #include <QDoubleValidator>
 #endif
 
-void ScatterOnMetal::printConfiguration(int /*iWave*/)
+const QString ScatterOnMetal::getReportLine() const
 {
-  qDebug() << "-------Configuration:-------";
-  qDebug() << "Model:"<<getType();
-  qDebug() << "Real N:"<<RealN;
-  qDebug() << "Imaginary N:"<<ImaginaryN;
-  qDebug() << "----------------------------";
-}
-
-QString ScatterOnMetal::getReportLine()
-{
-  QString s = "to " + (*MatCollection)[MatTo]->name;
-  QString s1;
-  s1.setNum(MatTo);
-  s += " ("+s1+") --> Scatter on metal: ";
-  s += " n="+QString::number(RealN);
-  s += " k="+QString::number(ImaginaryN);
+  QString s;
+  s += "n = " + QString::number(RealN) + "  ";
+  s += "k = " + QString::number(ImaginaryN);
   return s;
 }
 

@@ -83,10 +83,10 @@ ReconstructionWindow::ReconstructionWindow(QWidget *parent, MainWindow *mw, Even
   funcParams[2] = 1.0;
   funcParams[3] = 1.0;
 
-  RedIcon = createColorCircleIcon(ui->twOptions->iconSize(), Qt::red);
+  RedIcon = GuiUtils::createColorCircleIcon(ui->twOptions->iconSize(), Qt::red);
   ui->labDataIsMissing->setPixmap(RedIcon.pixmap(16,16));
   ui->fNoData->setVisible(true);
-  YellowIcon = createColorCircleIcon(ui->twData->iconSize(), Qt::yellow);
+  YellowIcon = GuiUtils::createColorCircleIcon(ui->twData->iconSize(), Qt::yellow);
   ui->labUnassignedIcon->setPixmap(YellowIcon.pixmap(16,16));
   ui->fNotAssignedPMs->setVisible(false);
 

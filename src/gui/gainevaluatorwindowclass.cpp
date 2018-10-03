@@ -100,8 +100,8 @@ GainEvaluatorWindowClass::GainEvaluatorWindowClass(QWidget *parent, MainWindow *
   ui->tabwid4sets->resizeColumnsToContents();
 
   //icons
-  RedIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
-  GreenIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
+  RedIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
+  GreenIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
   ui->labIconWarningCutOffs->setPixmap(RedIcon.pixmap(16,16));
 
   //Graphics view

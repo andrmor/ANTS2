@@ -832,7 +832,7 @@ void MainWindow::updateActivityIndication()
 {
   double activity = ui->ledSourceActivity->text().toDouble();
   QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
-  QIcon wIcon = createColorCircleIcon(size, Qt::yellow);
+  QIcon wIcon = GuiUtils::createColorCircleIcon(size, Qt::yellow);
   if (activity == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
   else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
 

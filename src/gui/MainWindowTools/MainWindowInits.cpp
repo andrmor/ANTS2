@@ -239,7 +239,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->twSourcePhotonsParticles->setCurrentIndex(0);
     MainWindow::PointSource_InitTabWidget();
     QList<QWidget*> invis;
-    invis << ui->pbRefreshParticles << ui->pbOverride << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
+    invis << ui->pbRefreshParticles << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
      << ui->pbRefreshStack << ui->pbShowPMsArrayRegularData << ui->pbRefreshPMArrayData << ui->pbUpdateElectronics
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbGunRefreshparticles << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
@@ -284,7 +284,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     {
         WindowNavigator->show();
         fShowGeom = true;
-        AssureWidgetIsWithingVisibleArea(this);
+        GuiUtils::AssureWidgetIsWithinVisibleArea(this);
     }
     ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
 
@@ -306,9 +306,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
-    ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back
-    ui->cobSSO_ScatterModel->setCurrentIndex(1); //default to Lambertian back
-    //MainWindow::on_pbRefreshOverrides_clicked();  //already in load detector
     MainWindow::updateCOBsWithPMtypeNames();
 
     if (!fLoadedDefaultDetector)

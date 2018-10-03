@@ -29,16 +29,16 @@ public:
   //detailed status for statistics only - used by override tester only
   enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection, Absorption, Transmission, Error, UnclassifiedReflection, Empty, Fresnel};
 
-
   AOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : MatCollection(MatCollection), MatFrom(MatFrom), MatTo(MatTo) {}
   virtual ~AOpticalOverride() {}
 
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) = 0; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave) = 0;
-  virtual QString getType() const = 0;
-  virtual QString getReportLine() = 0; // for GUI: reports override status "to material blabla (#id): properies"
+  virtual const QString getType() const = 0;
+  virtual const QString getAbbreviation() const = 0; //for GUI: used to identify - must be short (<= 4 chars) - try to make unique
+  virtual const QString getReportLine() const = 0; // for GUI: used to reports override status (try to make as short as possible)
+
   //TODO: initializeWaveResolved() -> no need to transfer data, MatCollection knows the settings
   virtual void initializeWaveResolved(bool /*bWaveResolved*/, double /*waveFrom*/, double /*waveStep*/, int /*waveNodes*/) {}  //override if override has wavelength-resolved data
 
@@ -52,7 +52,9 @@ public:
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
 #endif
-  virtual const QString checkOverrideData() {return "";} //TODO after all are done, make = 0
+
+  //TODO after all are done, make = 0
+  virtual const QString checkOverrideData() {return "";} //cannot be const - w.resolved needs rebin
 
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!
@@ -69,15 +71,15 @@ public:
   BasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
   virtual ~BasicOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave);
-  virtual QString getType() const {return "Simplistic_model";}
-  virtual QString getReportLine();
+  virtual const QString getType() const override {return "Simplistic_model";}
+  virtual const QString getAbbreviation() const override {return "Simp";}
+  virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json);
-  virtual bool readFromJson(QJsonObject &json);
+  virtual void writeToJson(QJsonObject &json) override;
+  virtual bool readFromJson(QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
@@ -100,15 +102,15 @@ public:
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {Albedo = 0.95;}
   virtual ~FSNPOpticalOverride() {}
 
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave);
-  virtual QString getType() const {return "FS_NP";}
-  virtual QString getReportLine();
+  virtual const QString getType() const override {return "FS_NP";}
+  virtual const QString getAbbreviation() const override {return "FSNP";}
+  virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json);
-  virtual bool readFromJson(QJsonObject &json);
+  virtual void writeToJson(QJsonObject &json) override;
+  virtual bool readFromJson(QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
@@ -128,9 +130,9 @@ public:
   void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave);
-  virtual QString getType() const {return "SurfaceWLS";}
-  virtual QString getReportLine();
+  virtual const QString getType() const override {return "SurfaceWLS";}
+  virtual const QString getAbbreviation() const override {return "WLS";}
+  virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
   virtual void writeToJson(QJsonObject &json);
@@ -176,9 +178,9 @@ public:
 
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual void printConfiguration(int iWave) override;
-  virtual QString getType() const override {return "SimplisticSpectral_model";}
-  virtual QString getReportLine() override;
+  virtual const QString getType() const override {return "SimplisticSpectral_model";}
+  virtual const QString getAbbreviation() const override {return "SiSp";}
+  virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
   virtual void writeToJson(QJsonObject &json) override;

@@ -44,6 +44,7 @@ public:
   //info requests
     //materials
   AMaterial* operator[](int i) {return MaterialCollectionData[i]; } //get pointer to material with index i
+  const AMaterial* operator[](int i) const {return MaterialCollectionData[i]; } //get pointer to material with index i
   int countMaterials() const {return MaterialCollectionData.size();}
   void getFirstOverridenMaterial(int &ifrom, int &ito);
   double convertWaveIndexToWavelength(int index) {return WaveFrom + WaveStep * index;}

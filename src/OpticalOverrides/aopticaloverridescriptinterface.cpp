@@ -1,18 +1,22 @@
 #include "aopticaloverridescriptinterface.h"
 #include "aphoton.h"
+#include "amaterialparticlecolection.h"
 
 #include <QDebug>
 #include <QVariantList>
 
 #include "TMath.h"
 
-AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface() {}
+AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface(const AMaterialParticleCollection *MpCollection) :
+    AScriptInterface(), MPcollection(MpCollection) {}
 
-void AOpticalOverrideScriptInterface::configure(TRandom2 * randGen, APhoton *photon, const double *normalVector)
+void AOpticalOverrideScriptInterface::configure(TRandom2 * randGen, APhoton *photon, const double *normalVector, int MatFrom, int MatTo)
 {
     RandGen = randGen;
     Photon = photon;
     NormalVector = normalVector;
+    iMatFrom = MatFrom;
+    iMatTo = MatTo;
 
     //if script did not modify any photon properties, assuming override is skipped (doing Fresnel):
     bResultAlreadySet = true;
@@ -60,6 +64,29 @@ void AOpticalOverrideScriptInterface::Fresnel()
     ReturnResult = AOpticalOverride::NotTriggered;
     Status = AOpticalOverride::Fresnel;
     bResultAlreadySet = true;
+}
+
+bool AOpticalOverrideScriptInterface::TryTransmissionSnell()
+{
+    double NK = 0;
+    for (int i=0; i<3; i++) NK += NormalVector[i] * Photon->v[i];
+    double nFrom = (*MPcollection)[iMatFrom]->getRefractiveIndex(Photon->waveIndex);
+    double nTo   = (*MPcollection)[iMatTo]  ->getRefractiveIndex(Photon->waveIndex);
+    double nn = nFrom / nTo;
+    double UnderRoot = 1.0 - nn*nn*(1.0 - NK*NK);
+    if (UnderRoot < 0)
+    {
+        //conditions for total internal reflection
+        return false;
+    }
+    const double tmp = nn * NK - TMath::Sqrt(UnderRoot);
+    for (int i=0; i<3; i++) Photon->v[i] = -tmp * NormalVector[i] + nn * Photon->v[i];
+
+    ReturnResult = AOpticalOverride::Forward;
+    Status = AOpticalOverride::Transmission;
+    bResultAlreadySet = true;
+
+    return true;
 }
 
 void AOpticalOverrideScriptInterface::TransmissionDirect()
@@ -157,7 +184,27 @@ void AOpticalOverrideScriptInterface::AddTime(double dt)
     Photon->time += dt;
 }
 
-void AOpticalOverrideScriptInterface::Report(const QString text)
+double AOpticalOverrideScriptInterface::getWaveIndex()
+{
+    return Photon->waveIndex;
+}
+
+void AOpticalOverrideScriptInterface::setWaveIndex(int waveIndex)
+{
+    Photon->waveIndex = waveIndex;
+}
+
+double AOpticalOverrideScriptInterface::getRefractiveIndexFrom()
+{
+    return (*MPcollection)[iMatFrom]->getRefractiveIndex(Photon->waveIndex);
+}
+
+double AOpticalOverrideScriptInterface::GetRefractiveIndexTo()
+{
+    return (*MPcollection)[iMatTo]->getRefractiveIndex(Photon->waveIndex);
+}
+
+void AOpticalOverrideScriptInterface::Console(const QString text)
 {
     qDebug() << text;
 }

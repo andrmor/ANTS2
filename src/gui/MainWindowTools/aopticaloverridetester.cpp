@@ -36,7 +36,7 @@ AOpticalOverrideTester::AOpticalOverrideTester(GraphWindowClass* GraphWindow, AM
 
     RandGen = new TRandom2();
     Resources.RandGen = RandGen;
-    Resources.generateScriptInfrastructure();
+    Resources.generateScriptInfrastructure(MPcollection);
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()

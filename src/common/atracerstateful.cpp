@@ -27,19 +27,19 @@ void ATracerStateful::evaluateScript(const QString &Script)
         //qDebug() << "eval result:" << res.toString();
 }
 
-void ATracerStateful::generateScriptInfrastructureIfNeeded(AMaterialParticleCollection *MPcollection)
+void ATracerStateful::generateScriptInfrastructureIfNeeded(const AMaterialParticleCollection *MPcollection)
 {
     bool bInUse = MPcollection->isScriptOpticalOverrideDefined();
 
-    if (bInUse) generateScriptInfrastructure();
+    if (bInUse) generateScriptInfrastructure(MPcollection);
 }
 
-void ATracerStateful::generateScriptInfrastructure()
+void ATracerStateful::generateScriptInfrastructure(const AMaterialParticleCollection *MPcollection)
 {
     qDebug() << "Creating script engine";
     ScriptEngine = new QScriptEngine();
 
-    overrideInterface = new AOpticalOverrideScriptInterface();
+    overrideInterface = new AOpticalOverrideScriptInterface(MPcollection);
     qDebug() << "Created interface object:"<<overrideInterface;
     overrideInterface->setObjectName("photon");
     QScriptValue val = ScriptEngine->newQObject(overrideInterface, QScriptEngine::QtOwnership);

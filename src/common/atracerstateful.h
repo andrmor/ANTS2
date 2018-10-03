@@ -20,9 +20,9 @@ public:
 
     void evaluateScript(const QString& Script);
 
-    void generateScriptInfrastructureIfNeeded(AMaterialParticleCollection* MPcollection); //called by PhotonTracer (one per each thread!)
+    void generateScriptInfrastructureIfNeeded(const AMaterialParticleCollection* MPcollection); //called by PhotonTracer (one per each thread!)
 
-    void generateScriptInfrastructure(); //can be use from outside to force generation (e.g. interface tester); RandGen should already be set!
+    void generateScriptInfrastructure(const AMaterialParticleCollection *MPcollection); //can be use from outside to force generation (e.g. interface tester); RandGen should already be set!
 
     TRandom2 * RandGen = 0;
     QScriptEngine * ScriptEngine = 0;

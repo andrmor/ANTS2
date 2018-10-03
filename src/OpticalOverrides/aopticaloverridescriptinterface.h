@@ -7,14 +7,15 @@
 #include <QVariant>
 
 class APhoton;
+class AMaterialParticleCollection;
 
 class AOpticalOverrideScriptInterface : public AScriptInterface
 {
     Q_OBJECT
 public:
-    AOpticalOverrideScriptInterface();
+    AOpticalOverrideScriptInterface(const AMaterialParticleCollection* MpCollection);
 
-    void configure(TRandom2 * RandGen, APhoton *Photon, const double *NormalVector);
+    void configure(TRandom2 * RandGen, APhoton *Photon, const double *NormalVector, int MatFrom, int MatTo);
     AOpticalOverride::OpticalOverrideResultEnum getResult(AOpticalOverride::ScatterStatusEnum& status);
 
 public slots:
@@ -27,7 +28,7 @@ public slots:
     void LambertBack();
     void LambertForward();
     void Fresnel();
-    //void TransmissionSnell();
+    bool TryTransmissionSnell();
     void TransmissionDirect();
 
     QVariant GetNormal();
@@ -39,12 +40,21 @@ public slots:
     void SetTime(double time);
     void AddTime(double dt);
 
-    void Report(const QString text);
+    double getWaveIndex();
+    void setWaveIndex(int waveIndex);
+
+    double getRefractiveIndexFrom();
+    double GetRefractiveIndexTo();
+
+    void Console(const QString text);
 
 private:
+    const AMaterialParticleCollection * MPcollection;
     TRandom2 * RandGen;
     APhoton * Photon;
     const double * NormalVector;
+    int iMatFrom;
+    int iMatTo;
 
     bool bResultAlreadySet;
     AOpticalOverride::OpticalOverrideResultEnum ReturnResult; //{NotTriggered, Absorbed, Forward, Back, _Error_};

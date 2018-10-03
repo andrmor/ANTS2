@@ -322,7 +322,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     //completitionModel->setStringList(functions);
 
     //if standalone script, update the highlighter and tooltip
-    if (name.isEmpty()) UpdateAllTabs();
+    if (bLightMode) UpdateAllTabs();
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"

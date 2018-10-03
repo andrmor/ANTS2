@@ -549,14 +549,6 @@ private slots:
     void on_cobLoadDataType_customContextMenuRequested(const QPoint &pos);
     void on_pbManuscriptExtractNames_clicked();
     void on_pbShowDetailedLog_clicked();
-    void on_pbCSMtestmany_clicked();
-    void on_pbST_showTracks_clicked();
-    void on_pbST_AngleCos_clicked();    
-    void on_pbST_uniform_clicked();
-    void on_pbST_RvsAngle_clicked();
-    void on_pbST_ReflectionVsParameter_clicked();
-    void on_pbST_VsParameterHelp_clicked();
-    void on_cobST_ShowWhatRef_activated(int index);
     void on_actionGlobal_script_triggered();
     void on_pbLockGui_clicked();
     void on_pbUnlockGui_clicked();

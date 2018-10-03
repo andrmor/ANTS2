@@ -67,29 +67,36 @@ QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass
     f->setFrameStyle(QFrame::Box);
 
     QVBoxLayout* l = new QVBoxLayout(f);
-//        QLabel* lab = new QLabel("");
-//    l->addWidget(lab);
         QPlainTextEdit* pte = new QPlainTextEdit();
         pte->appendPlainText(Script);
+        pte->moveCursor(QTextCursor::Start);
+        pte->ensureCursorVisible();
         pte->setReadOnly(true);
         pte->setContextMenuPolicy(Qt::CustomContextMenu);
-        QObject::connect(pte, &QPlainTextEdit::customContextMenuRequested, [caller, pte, this] {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);});
+        QObject::connect(pte, &QPlainTextEdit::customContextMenuRequested, [caller, pte, this]
+        {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);
+            pte->moveCursor(QTextCursor::Start); pte->ensureCursorVisible();});
     l->addWidget(pte);
         QPushButton* pb = new QPushButton("Load / Edit script");
-        QObject::connect(pb, &QPushButton::clicked, [caller, pte, this] {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);});
+        QObject::connect(pb, &QPushButton::clicked, [caller, pte, this] {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);
+            pte->moveCursor(QTextCursor::Start); pte->ensureCursorVisible();});
     l->addWidget(pb);
-//        lab = new QLabel("");
-//    l->addWidget(lab);
 
     return f;
 }
 #endif
 
+#include <QScriptEngine>
 const QString AScriptOpticalOverride::checkOverrideData()
 {
     if (Script.isEmpty()) return "Script not defined!";
 
-    //TODO check syntax!
+    QScriptSyntaxCheckResult check = QScriptEngine::checkSyntax(Script);
+    if (check.state() != QScriptSyntaxCheckResult::Valid)
+    {
+        int lineNumber = check.errorLineNumber();
+        return QString("Syntax error at line %1").arg(lineNumber);
+    }
 
     return "";
 }

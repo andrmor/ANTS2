@@ -6,6 +6,7 @@
 #include <QVariantList>
 
 #include "TMath.h"
+#include "TVector3.h"
 
 AOpticalOverrideScriptInterface::AOpticalOverrideScriptInterface(const AMaterialParticleCollection *MpCollection, TRandom2 *RandGen) :
     AScriptInterface(), MPcollection(MpCollection), RandGen(RandGen) {}
@@ -100,6 +101,15 @@ QVariant AOpticalOverrideScriptInterface::GetNormal()
     QVariantList vl;
     vl << NormalVector[0] << NormalVector[1] << NormalVector[2];
     return vl;
+}
+
+double AOpticalOverrideScriptInterface::GetAngleWithNormal(bool inRadians)
+{
+    TVector3 N(NormalVector);
+    TVector3 P(Photon->v);
+    double angle = N.Angle(P);
+    if (inRadians) return angle;
+    else return 180.0/TMath::Pi()*angle;
 }
 
 void AOpticalOverrideScriptInterface::SpecularReflection()

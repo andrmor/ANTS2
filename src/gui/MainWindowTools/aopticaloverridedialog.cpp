@@ -4,13 +4,15 @@
 #include "amaterialparticlecolection.h"
 #include "amessage.h"
 #include "aopticaloverridetester.h"
+#include "graphwindowclass.h"
+#include "geometrywindowclass.h"
 
 #include <QJsonObject>
 #include <QVBoxLayout>
 
-AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * MatCollection,
-                                               int matFrom, int matTo, GraphWindowClass * GraphWindow, QWidget * parent) :
-    QDialog(parent), ui(new Ui::AOpticalOverrideDialog), GraphWindow(GraphWindow),
+AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * MatCollection, int matFrom, int matTo,
+                                               GraphWindowClass * GraphWindow, GeometryWindowClass *GeometryWindow, QWidget * parent) :
+    QDialog(parent), ui(new Ui::AOpticalOverrideDialog), GraphWindow(GraphWindow), GeometryWindow(GeometryWindow),
     MatCollection(MatCollection), matFrom(matFrom), matTo(matTo), matNames(MatCollection->getListOfMaterialNames())
 {
     ui->setupUi(this);
@@ -33,7 +35,7 @@ AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * Mat
 
     updateGui();
 
-    TesterWindow = new AOpticalOverrideTester(GraphWindow, MatCollection, matFrom, matTo, this);
+    TesterWindow = new AOpticalOverrideTester(&ovLocal, GraphWindow, GeometryWindow, MatCollection, matFrom, matTo, this);
 }
 
 AOpticalOverrideDialog::~AOpticalOverrideDialog()

@@ -32,6 +32,7 @@ public slots:
     void TransmissionDirect();
 
     QVariant GetNormal();
+    double GetAngleWithNormal(bool inRadians);
 
     QVariant GetDirection();
     void SetDirection(double vx, double vy, double vz);

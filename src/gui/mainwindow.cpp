@@ -53,6 +53,7 @@
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
 #include "aremotewindow.h"
+#include "aopticaloverridedialog.h"
 
 //Qt
 #include <QDebug>
@@ -720,13 +721,12 @@ void MainWindow::on_cbRingsArray_stateChanged(int arg1)
      ui->sbPMrings->setEnabled(arg1);
 }
 
-#include "aopticaloverridedialog.h"
 void MainWindow::on_pbEditOverride_clicked()
 {
     int From = ui->cobMaterialForOverrides->currentIndex();
     int To =   ui->cobMaterialTo->currentIndex();
 
-    AOpticalOverrideDialog d(MpCollection, From, To, GraphWindow, this);
+    AOpticalOverrideDialog d(MpCollection, From, To, GraphWindow, GeometryWindow, this);
     int res = d.exec();
     if (res == 1)
     {

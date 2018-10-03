@@ -609,6 +609,8 @@ private slots:
     void on_lwOverrides_itemDoubleClicked(QListWidgetItem *item);
     void on_lwOverrides_itemSelectionChanged();
 
+    void on_pbShowOverrideMap_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

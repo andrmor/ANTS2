@@ -4915,3 +4915,65 @@ void MainWindow::on_lwOverrides_itemSelectionChanged()
       counter++;
     }
 }
+
+static bool orDialogPositioned = false;
+static QSize orDialogSize;
+static QPoint orDialogPosition;
+void MainWindow::on_pbShowOverrideMap_clicked()
+{
+    int numMat = MpCollection->countMaterials();
+
+    QDialog* d = new QDialog(this);
+    d->setWindowTitle("Optical override Vertical->Horizontal. Double click to define / edit override");
+    QVBoxLayout* l = new QVBoxLayout(d);
+    QTableWidget* tw = new QTableWidget(numMat, numMat);
+    l->addWidget(tw);
+
+    tw->setVerticalHeaderLabels(MpCollection->getListOfMaterialNames());
+    tw->setHorizontalHeaderLabels(MpCollection->getListOfMaterialNames());
+
+    for (int ifrom = 0; ifrom < numMat; ifrom++)
+        for (int ito = 0; ito < numMat; ito++)
+        {
+            AOpticalOverride* ov = (*MpCollection)[ifrom]->OpticalOverrides.at(ito);
+            QString text;
+            if (ov) text = ov->getAbbreviation();
+            QTableWidgetItem *it = new QTableWidgetItem(text);
+            it->setTextAlignment(Qt::AlignCenter);
+            if (ov)
+            {
+                it->setBackground(QBrush(Qt::lightGray));
+                it->setToolTip(ov->getReportLine());
+            }
+            it->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+            tw->setItem(ifrom, ito, it);
+        }
+    QObject::connect(tw, &QTableWidget::itemDoubleClicked, d, &QDialog::accept);
+
+    if (orDialogPositioned)
+    {
+        d->resize(orDialogSize);
+        d->move(orDialogPosition);
+    }
+
+    int res = d->exec();
+
+    if (res == QDialog::Accepted)
+    {
+        int from = tw->currentRow();
+        int to = tw->currentColumn();
+
+        if (from > -1 && to > -1)
+        {
+            ui->cobMaterialForOverrides->setCurrentIndex(from);
+            ui->cobMaterialTo->setCurrentIndex(to);
+            on_pbEditOverride_clicked();
+        }
+    }
+
+    orDialogPositioned = true;
+    orDialogSize = d->size();
+    orDialogPosition = d->pos();
+    delete d;
+}

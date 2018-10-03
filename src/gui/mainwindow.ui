@@ -5491,7 +5491,7 @@ materials</string>
         <property name="geometry">
          <rect>
           <x>176</x>
-          <y>22</y>
+          <y>23</y>
           <width>87</width>
           <height>17</height>
          </rect>
@@ -5529,6 +5529,19 @@ materials</string>
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
+       <widget class="QPushButton" name="pbShowOverrideMap">
+        <property name="geometry">
+         <rect>
+          <x>495</x>
+          <y>0</y>
+          <width>40</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Map</string>
+        </property>
+       </widget>
        <zorder>line_6</zorder>
        <zorder>lwOverrides</zorder>
        <zorder>lwMaterials</zorder>
@@ -5544,6 +5557,7 @@ materials</string>
        <zorder>pbEditOverride</zorder>
        <zorder>label_8</zorder>
        <zorder>label_15</zorder>
+       <zorder>pbShowOverrideMap</zorder>
       </widget>
      </widget>
      <widget class="QLabel" name="laBackground">

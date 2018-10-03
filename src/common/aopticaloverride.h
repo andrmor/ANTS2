@@ -17,17 +17,18 @@ class QObject;
 class GraphWindowClass;
 class ATracerStateful;
 
-//modify these two functions if you want to register a new override type!
+// !!!
+// modify these two functions if you want to register a new override type
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
 const QStringList ListOvAllOpticalOverrideTypes();
 
+//base optical override class - all new overrides must inherit from it
 class AOpticalOverride
 {
 public:
-  //return status for photon tracing:
-  enum OpticalOverrideResultEnum {NotTriggered, Absorbed, Forward, Back, _Error_};
-  //detailed status for statistics only - used by override tester only
-  enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection, Absorption, Transmission, Error, UnclassifiedReflection, Empty, Fresnel};
+  enum OpticalOverrideResultEnum {NotTriggered, Absorbed, Forward, Back, _Error_}; //return status for photon tracing:
+  enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection,
+                          Absorption, Transmission, Error, UnclassifiedReflection, Empty, Fresnel}; //detailed status for statistics only - used by override tester only
 
   AOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : MatCollection(MatCollection), MatFrom(MatFrom), MatTo(MatTo) {}
@@ -43,8 +44,8 @@ public:
   virtual void initializeWaveResolved(bool /*bWaveResolved*/, double /*waveFrom*/, double /*waveStep*/, int /*waveNodes*/) {}  //override if override has wavelength-resolved data
 
   // save/load config
-  virtual void writeToJson(QJsonObject &json);
-  virtual bool readFromJson(QJsonObject &json);
+  virtual void writeToJson(QJsonObject &json) const;
+  virtual bool readFromJson(const QJsonObject &json);
 
   //next one is used by MatCollection when a material is removed
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
@@ -78,8 +79,8 @@ public:
   virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) override;
-  virtual bool readFromJson(QJsonObject &json) override;
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
@@ -109,8 +110,8 @@ public:
   virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) override;
-  virtual bool readFromJson(QJsonObject &json) override;
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
@@ -135,12 +136,13 @@ public:
   virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json);
-  virtual bool readFromJson(QJsonObject &json);
+  virtual void writeToJson(QJsonObject &json) const;
+  virtual bool readFromJson(const QJsonObject &json);
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
 #endif
+
   virtual const QString checkOverrideData() override;
 
   //-- parameters --
@@ -183,8 +185,8 @@ public:
   virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) override;
-  virtual bool readFromJson(QJsonObject &json) override;
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
 
   virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
   const QString loadData(const QString& fileName);

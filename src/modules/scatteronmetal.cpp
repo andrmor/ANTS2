@@ -27,7 +27,7 @@ const QString ScatterOnMetal::getReportLine() const
   return s;
 }
 
-void ScatterOnMetal::writeToJson(QJsonObject &json)
+void ScatterOnMetal::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
 
@@ -35,7 +35,7 @@ void ScatterOnMetal::writeToJson(QJsonObject &json)
   json["ImaginaryN"]  = ImaginaryN;
 }
 
-bool ScatterOnMetal::readFromJson(QJsonObject &json)
+bool ScatterOnMetal::readFromJson(const QJsonObject &json)
 {
   QString type = json["Model"].toString();
   if (type != getType()) return false; //file for wrong model!

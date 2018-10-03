@@ -36,14 +36,14 @@
 #include "graphwindowclass.h"
 #endif
 
-void AOpticalOverride::writeToJson(QJsonObject &json)
+void AOpticalOverride::writeToJson(QJsonObject &json) const
 {
     json["Model"] = getType();
     json["MatFrom"] = MatFrom;
     json["MatTo"] = MatTo;
 }
 
-bool AOpticalOverride::readFromJson(QJsonObject &json)
+bool AOpticalOverride::readFromJson(const QJsonObject &json)
 {
     QString type = json["Model"].toString();
     if (type != getType()) return false; //file for wrong model!
@@ -194,7 +194,7 @@ const QString BasicOpticalOverride::getReportLine() const
     return s;
 }
 
-void BasicOpticalOverride::writeToJson(QJsonObject &json)
+void BasicOpticalOverride::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
 
@@ -204,7 +204,7 @@ void BasicOpticalOverride::writeToJson(QJsonObject &json)
   json["ScatMode"] = scatterModel;  
 }
 
-bool BasicOpticalOverride::readFromJson(QJsonObject &json)
+bool BasicOpticalOverride::readFromJson(const QJsonObject &json)
 {
   QString type = json["Model"].toString();
   if (type != getType()) return false; //file for wrong model!
@@ -437,19 +437,17 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
 
 const QString FSNPOpticalOverride::getReportLine() const
 {
-  QString s = "to " + (*MatCollection)[MatTo]->name;
-  s += "->FS_NP model, albedo="+QString::number(Albedo);
-  return s;
+    return QString("Albedo %1").arg(Albedo);
 }
 
-void FSNPOpticalOverride::writeToJson(QJsonObject &json)
+void FSNPOpticalOverride::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
 
   json["Albedo"] = Albedo;
 }
 
-bool FSNPOpticalOverride::readFromJson(QJsonObject &json)
+bool FSNPOpticalOverride::readFromJson(const QJsonObject &json)
 {
   QString type = json["Model"].toString();
   if (type != getType()) return false; //file for wrong model!
@@ -628,14 +626,10 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
 
 const QString AWaveshifterOverride::getReportLine() const
 {
-    QString s = "to " + (*MatCollection)[MatTo]->name;
-    s += "->SurfaceWLS";
-    if (ReemissionProbability_lambda.isEmpty() ) s += "; Prob: not set!";
-    if (EmissionSpectrum_lambda.isEmpty() ) s += "; Spectrum not set!";
-    return s;
+    return QString();
 }
 
-void AWaveshifterOverride::writeToJson(QJsonObject &json)
+void AWaveshifterOverride::writeToJson(QJsonObject &json) const
 {
     AOpticalOverride::writeToJson(json);
 
@@ -648,7 +642,7 @@ void AWaveshifterOverride::writeToJson(QJsonObject &json)
     json["ReemissionModel"] = ReemissionModel;
 }
 
-bool AWaveshifterOverride::readFromJson(QJsonObject &json)
+bool AWaveshifterOverride::readFromJson(const QJsonObject &json)
 {
     //QString type = json["Model"].toString();
     //if (type != getType()) return false; //file for wrong model!
@@ -892,16 +886,10 @@ AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calcul
 
 const QString SpectralBasicOpticalOverride::getReportLine() const
 {
-    QString s = "to " + (*MatCollection)[MatTo]->name;
-    s += "->";
-
-    if (Wave.isEmpty()) return s + " To be defined"; //not defined - shown during configuration phase only
-
-    s += " Spectral data with " + QString::number(Wave.size()) + " points";
-    return s;
+    return QString("Spectral data with %1 points").arg(Wave.size());
 }
 
-void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json)
+void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json) const
 {
     AOpticalOverride::writeToJson(json);
 
@@ -923,7 +911,7 @@ void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json)
     json["Data"] = sp;
 }
 
-bool SpectralBasicOpticalOverride::readFromJson(QJsonObject &json)
+bool SpectralBasicOpticalOverride::readFromJson(const QJsonObject &json)
 {
     if (!AOpticalOverride::readFromJson(json)) return false;
 

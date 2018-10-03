@@ -28,7 +28,7 @@ const QString PhScatClaudioModel::getReportLine() const
     return " v2";
 }
 
-void PhScatClaudioModel::writeToJson(QJsonObject &json)
+void PhScatClaudioModel::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
 
@@ -39,7 +39,7 @@ void PhScatClaudioModel::writeToJson(QJsonObject &json)
   json["SDmodel"] = SlopeDistribution;  
 }
 
-bool PhScatClaudioModel::readFromJson(QJsonObject &json)
+bool PhScatClaudioModel::readFromJson(const QJsonObject &json)
 {
   QString type = json["Model"].toString();
   if (!type.startsWith("Claudio_Model"))

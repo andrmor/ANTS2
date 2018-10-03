@@ -16,15 +16,15 @@ public:
     : AOpticalOverride(MatCollection, MatFrom, MatTo) {}
   virtual ~ScatterOnMetal() {}
 
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
+  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual const QString getType() const override {return "DielectricToMetal";}
   virtual const QString getAbbreviation() const override {return "Met";}
   virtual const QString getReportLine() const override;
 
   // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) override;
-  virtual bool readFromJson(QJsonObject &json) override;
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;

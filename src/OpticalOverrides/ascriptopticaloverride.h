@@ -19,8 +19,8 @@ public:
   virtual const QString getAbbreviation() const override {return "JS";}
   virtual const QString getReportLine() const override;
 
-  virtual void writeToJson(QJsonObject &json) override;
-  virtual bool readFromJson(QJsonObject &json) override;
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;

@@ -42,14 +42,14 @@ const QString AScriptOpticalOverride::getReportLine() const
     return QString();
 }
 
-void AScriptOpticalOverride::writeToJson(QJsonObject &json)
+void AScriptOpticalOverride::writeToJson(QJsonObject &json) const
 {
     AOpticalOverride::writeToJson(json);
 
     json["Script"] = Script;
 }
 
-bool AScriptOpticalOverride::readFromJson(QJsonObject &json)
+bool AScriptOpticalOverride::readFromJson(const QJsonObject &json)
 {
     QString type = json["Model"].toString();
     if (type != getType()) return false; //file for wrong model!

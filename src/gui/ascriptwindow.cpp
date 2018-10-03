@@ -1080,14 +1080,13 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 //  ScriptTabs[CurrentTab]->TextEdit->insertPlainText(text);
 //}
 
-void AScriptWindow::closeEvent(QCloseEvent* /*e*/)
+void AScriptWindow::closeEvent(QCloseEvent* e)
 {
-//  qDebug() << "Script window: Close event";
-//  if (ScriptManager->fEngineIsRunning)
-//    {
-//      e->ignore();
-//      return;
-//    }
+    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+    //in light mode save the script directly
+    if (bLightMode && LightModeScript) *LightModeScript = Script;
+
+    QMainWindow::closeEvent(e);
 }
 
 bool AScriptWindow::event(QEvent *e)

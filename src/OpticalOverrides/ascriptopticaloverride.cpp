@@ -8,6 +8,7 @@
 #include "ascriptwindow.h"
 #include "ajavascriptmanager.h"
 #include "globalsettingsclass.h"
+#include <guiutils.h>
 #include "TRandom2.h"
 #include "aphoton.h"
 #include <QFrame>
@@ -59,19 +60,26 @@ bool AScriptOpticalOverride::readFromJson(const QJsonObject &json)
 }
 
 #ifdef GUI
+#include <QPlainTextEdit>
 QWidget *AScriptOpticalOverride::getEditWidget(QWidget *caller, GraphWindowClass *)
 {
     QFrame* f = new QFrame();
     f->setFrameStyle(QFrame::Box);
 
     QVBoxLayout* l = new QVBoxLayout(f);
-        QLabel* lab = new QLabel("");
-    l->addWidget(lab);
+//        QLabel* lab = new QLabel("");
+//    l->addWidget(lab);
+        QPlainTextEdit* pte = new QPlainTextEdit();
+        pte->appendPlainText(Script);
+        pte->setReadOnly(true);
+        pte->setContextMenuPolicy(Qt::CustomContextMenu);
+        QObject::connect(pte, &QPlainTextEdit::customContextMenuRequested, [caller, pte, this] {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);});
+    l->addWidget(pte);
         QPushButton* pb = new QPushButton("Load / Edit script");
-        QObject::connect(pb, &QPushButton::clicked, [caller, this] {openScriptWindow(caller);});
+        QObject::connect(pb, &QPushButton::clicked, [caller, pte, this] {openScriptWindow(caller); pte->clear(); pte->appendPlainText(Script);});
     l->addWidget(pb);
-        lab = new QLabel("");
-    l->addWidget(lab);
+//        lab = new QLabel("");
+//    l->addWidget(lab);
 
     return f;
 }
@@ -87,22 +95,29 @@ const QString AScriptOpticalOverride::checkOverrideData()
 }
 
 #ifdef GUI
-void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
+void AScriptOpticalOverride::openScriptWindow(QWidget *caller)
 {
     QString example = "photon.Absorbed()";
 
-    TRandom2* RandGen = new TRandom2(); //leak!
-    AJavaScriptManager* sm = new AJavaScriptManager(RandGen); //leak!
-    AScriptWindow* sw = new AScriptWindow(sm, new GlobalSettingsClass(0), true, parent); //leak!
+    TRandom2* RandGen = new TRandom2();
+    AJavaScriptManager* sm = new AJavaScriptManager(RandGen);
+    AScriptWindow* sw = new AScriptWindow(sm, new GlobalSettingsClass(0), true, caller);
+
     sw->ConfigureForLightMode(&Script, "Optical override: custom script", example);
 
-    double vx[3];
-    vx[0] = 0; vx[1] = 0; vx[3] = 1;
+    double v[3];
+    v[0] = 0;
+    v[1] = 0;
+    v[2] = 1.0;
     double r[3];
-    r[0] = 0; r[1] = 0; r[2] = 0;
-    APhoton phot(vx, r, -1, 0);
+    r[0] = 0;
+    r[1] = 0;
+    r[2] = 0;
+    APhoton phot(r, v, -1, 0);
     double normal[3];
-    normal[0] = 0; normal[1] = 0; normal[2] = 1.0;
+    normal[0] = 0;
+    normal[1] = 0;
+    normal[2] = 1.0;
 
     AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface();
     interfaceObject->configure(RandGen, &phot, normal);
@@ -113,12 +128,15 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *parent)
     sw->SetInterfaceObject(math, "math"); //steals ownership!
     sw->setWindowModality(Qt::ApplicationModal);
     sw->show();
+    GuiUtils::AssureWidgetIsWithinVisibleArea(sw);
 
     while (sw->isVisible())
     {
         QCoreApplication::processEvents();
         QThread::usleep(200);
     }
-    //qDebug() << "Script reports:"<<Script;
+
+    delete sw; //also deletes script manager
+    delete RandGen;
 }
 #endif

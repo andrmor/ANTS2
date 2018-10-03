@@ -31,7 +31,7 @@ private:
   QString Script = "photon.Absorb()";
 
 #ifdef GUI
-  void openScriptWindow(QWidget* parent);
+  void openScriptWindow(QWidget* caller);
 #endif
 };
 

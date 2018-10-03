@@ -69,6 +69,13 @@ void AOpticalOverrideScriptInterface::TransmissionDirect()
     bResultAlreadySet = true;
 }
 
+QVariant AOpticalOverrideScriptInterface::GetNormal()
+{
+    QVariantList vl;
+    vl << NormalVector[0] << NormalVector[1] << NormalVector[2];
+    return vl;
+}
+
 void AOpticalOverrideScriptInterface::SpecularReflection()
 {
     double NK = 0;

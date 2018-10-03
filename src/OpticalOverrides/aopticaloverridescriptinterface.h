@@ -18,14 +18,19 @@ public:
     AOpticalOverride::OpticalOverrideResultEnum getResult(AOpticalOverride::ScatterStatusEnum& status);
 
 public slots:
+
+    //ToDo: meddling test! -> e.g. dir was changed and then Lambert called
+
     void Absorb();
-    void Fresnel();  //ToDo: meddling test!
-    //void TransmissionSnell();  //ToDo: meddling test!
-    void TransmissionDirect();  //ToDo: meddling test!
-    void SpecularReflection();  //ToDo: meddling test!
-    void Isotropic();  //ToDo: meddling test!
-    void LambertBack();  //ToDo: meddling test!
-    void LambertForward();  //ToDo: meddling test!
+    void SpecularReflection();
+    void Isotropic();
+    void LambertBack();
+    void LambertForward();
+    void Fresnel();
+    //void TransmissionSnell();
+    void TransmissionDirect();
+
+    QVariant GetNormal();
 
     QVariant GetDirection();
     void SetDirection(double vx, double vy, double vz);

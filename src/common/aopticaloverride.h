@@ -16,7 +16,7 @@ class QWidget;
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
 const QStringList ListOvAllOpticalOverrideTypes();
 
-//base optical override class - all new overrides must inherit from it
+
 class AOpticalOverride
 {
 public:
@@ -33,6 +33,7 @@ public:
   virtual const QString getType() const = 0;
   virtual const QString getAbbreviation() const = 0; //for GUI: used to identify - must be short (<= 4 chars) - try to make unique
   virtual const QString getReportLine() const = 0; // for GUI: used to reports override status (try to make as short as possible)
+  virtual const QString getLongReportLine() const {return getReportLine();} //for GUI: used in overlap map
 
   //TODO: initializeWaveResolved() -> no need to transfer data, MatCollection knows the settings
   virtual void initializeWaveResolved(bool /*bWaveResolved*/, double /*waveFrom*/, double /*waveStep*/, int /*waveNodes*/) {}  //override if override has wavelength-resolved data
@@ -41,15 +42,14 @@ public:
   virtual void writeToJson(QJsonObject &json) const;
   virtual bool readFromJson(const QJsonObject &json);
 
-  //next one is used by MatCollection when a material is removed
+  //used by MatCollection when a material is removed:
   void updateMatIndices(int iMatFrom, int iMatTo) {MatFrom = iMatFrom; MatTo = iMatTo;}
 
 #ifdef GUI
   virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow);
 #endif
 
-  //TODO after all are done, make = 0
-  virtual const QString checkOverrideData() {return "";} //cannot be const - w.resolved needs rebin
+  virtual const QString checkOverrideData() = 0; //cannot be const - w.resolved needs rebin
 
   // read-out variables for standalone checker only (not multithreaded)
   ScatterStatusEnum Status;               // type of interaction which happened - use in 1 thread only!

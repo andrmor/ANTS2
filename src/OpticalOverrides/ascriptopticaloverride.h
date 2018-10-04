@@ -16,6 +16,7 @@ public:
   virtual const QString getType() const override {return "CustomScript";}
   virtual const QString getAbbreviation() const override {return "JS";}
   virtual const QString getReportLine() const override;
+  virtual const QString getLongReportLine() const;
 
   virtual void writeToJson(QJsonObject &json) const override;
   virtual bool readFromJson(const QJsonObject &json) override;

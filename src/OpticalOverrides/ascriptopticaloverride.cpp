@@ -39,6 +39,11 @@ const QString AScriptOpticalOverride::getReportLine() const
     return QString();
 }
 
+const QString AScriptOpticalOverride::getLongReportLine() const
+{
+    return Script;
+}
+
 void AScriptOpticalOverride::writeToJson(QJsonObject &json) const
 {
     AOpticalOverride::writeToJson(json);

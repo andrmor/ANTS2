@@ -4921,8 +4921,10 @@ void MainWindow::on_pbShowOverrideMap_clicked()
     int numMat = MpCollection->countMaterials();
 
     QDialog* d = new QDialog(this);
-    d->setWindowTitle("Optical override Vertical->Horizontal. Double click to define / edit override");
+    d->setWindowTitle("Map of optical overrides");
     QVBoxLayout* l = new QVBoxLayout(d);
+    QLabel* lab = new QLabel("Override from (vertical) -> to (horizontal). Double click to define / edit override");
+    l->addWidget(lab);
     QTableWidget* tw = new QTableWidget(numMat, numMat);
     l->addWidget(tw);
 
@@ -4940,7 +4942,7 @@ void MainWindow::on_pbShowOverrideMap_clicked()
             if (ov)
             {
                 it->setBackground(QBrush(Qt::lightGray));
-                it->setToolTip(ov->getReportLine());
+                it->setToolTip(ov->getLongReportLine());
             }
             it->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 

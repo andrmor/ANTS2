@@ -5,6 +5,7 @@
 #include "aopticaloverride.h"
 
 #include <QVariant>
+#include <QScriptValue>
 
 class APhoton;
 class AMaterialParticleCollection;
@@ -21,6 +22,7 @@ public:
 public slots:
 
     //ToDo: meddling test! -> e.g. dir was changed and then Lambert called
+    //maybe implement abort and add it after directives -> tested: x2 slow down
 
     void Absorb();
     void SpecularReflection();
@@ -62,6 +64,9 @@ private:
     bool bResultAlreadySet;
     AOpticalOverride::OpticalOverrideResultEnum ReturnResult; //{NotTriggered, Absorbed, Forward, Back, _Error_};
     AOpticalOverride::ScatterStatusEnum Status;
+
+signals:
+    void requestAbort(const QScriptValue &result = QScriptValue());
 };
 
 #endif // AOPTICALOVERRIDESCRIPTINTERFACE_H

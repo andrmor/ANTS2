@@ -147,6 +147,7 @@ void AOpticalOverrideScriptInterface::LambertBack()
     Status = AOpticalOverride::LambertianReflection;
     ReturnResult = AOpticalOverride::Back;
     bResultAlreadySet = true;
+    //emit requestAbort();
 }
 
 void AOpticalOverrideScriptInterface::LambertForward()

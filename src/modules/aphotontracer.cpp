@@ -234,6 +234,8 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          //qDebug() << "Overrides defined! Model = "<<ov->getType();
          N = navigator->FindNormal(kFALSE);
          fHaveNormal = true;
+         const double* PhPos = navigator->GetCurrentPoint();
+         for (int i=0; i<3; i++) p->r[i] = PhPos[i];
          AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(*ResourcesForOverrides, p, N);
 
          switch (result)

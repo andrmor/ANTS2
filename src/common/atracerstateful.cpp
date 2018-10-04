@@ -47,6 +47,8 @@ void ATracerStateful::generateScriptInfrastructure(const AMaterialParticleCollec
     QScriptValue val = ScriptEngine->newQObject(overrideInterface, QScriptEngine::QtOwnership);
     ScriptEngine->globalObject().setProperty(overrideInterface->objectName(), val);
 
+    QObject::connect(overrideInterface, &AOpticalOverrideScriptInterface::requestAbort, ScriptEngine, &QScriptEngine::abortEvaluation, Qt::DirectConnection);
+
     mathInterface = new AMathScriptInterface(RandGen);
     mathInterface->setObjectName("math");
     val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);

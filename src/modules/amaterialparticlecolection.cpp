@@ -682,6 +682,7 @@ void AMaterialParticleCollection::writeMaterialToJson(int imat, QJsonObject &jso
   MaterialCollectionData[imat]->writeToJson(json, this);
 }
 
+#include "abasicopticaloverride.h"
 bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
 {
   readParticleCollectionFromJson(json);
@@ -743,15 +744,23 @@ bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
               continue;
             }
           double Abs, Scat, Spec;
-          int ScatMode;
+          Abs = Scat = Spec = 0;
+          int ScatMode = 1;
           parseJson(jj, "Loss", Abs);
           parseJson(jj, "Ref", Spec);
           parseJson(jj, "Scat", Scat);
           parseJson(jj, "ScatModel", ScatMode);
-          BasicOpticalOverride* ov = new BasicOpticalOverride(this, MatFrom, MatTo, Abs, Spec, Scat, ScatMode );
+          ABasicOpticalOverride* ov = new ABasicOpticalOverride(this, MatFrom, MatTo);
           if (!ov)
             qWarning() << MaterialCollectionData[MatFrom]->name << ": optical override load failed!";
-          else MaterialCollectionData[MatFrom]->OpticalOverrides[MatTo] = ov;
+          else
+          {
+              MaterialCollectionData[MatFrom]->OpticalOverrides[MatTo] = ov;
+              ov->probLoss = Abs;
+              ov->probRef = Spec;
+              ov->probDiff = Scat;
+              ov->scatterModel = ScatMode;
+          }
         }
     }
   fLogLogInterpolation = false;

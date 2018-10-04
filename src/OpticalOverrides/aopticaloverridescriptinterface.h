@@ -9,6 +9,7 @@
 
 class APhoton;
 class AMaterialParticleCollection;
+class TRandom2;
 
 class AOpticalOverrideScriptInterface : public AScriptInterface
 {

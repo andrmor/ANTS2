@@ -352,7 +352,11 @@ SOURCES += main.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
     common/aphoton.cpp \
-    scriptmode/amathscriptinterface.cpp
+    scriptmode/amathscriptinterface.cpp \
+    OpticalOverrides/fsnpopticaloverride.cpp \
+    OpticalOverrides/awaveshifteroverride.cpp \
+    OpticalOverrides/spectralbasicopticaloverride.cpp \
+    OpticalOverrides/abasicopticaloverride.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -480,7 +484,11 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
     OpticalOverrides/ascriptopticaloverride.h \
     common/atracerstateful.h \
-    scriptmode/amathscriptinterface.h
+    scriptmode/amathscriptinterface.h \
+    OpticalOverrides/fsnpopticaloverride.h \
+    OpticalOverrides/awaveshifteroverride.h \
+    OpticalOverrides/spectralbasicopticaloverride.h \
+    OpticalOverrides/abasicopticaloverride.h
 
 # --- SIM ---
 ants2_SIM {
@@ -492,8 +500,8 @@ ants2_SIM {
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
     modules/simulationmanager.cpp \
-    modules/phscatclaudiomodel.cpp \
-    modules/scatteronmetal.cpp \
+    OpticalOverrides/phscatclaudiomodel.cpp \
+    OpticalOverrides/scatteronmetal.cpp \
     modules/aphotontracer.cpp \
     modules/acompton.cpp \
     modules/ageometrytester.cpp
@@ -513,8 +521,8 @@ ants2_SIM {
     modules/photon_generator.h \
     modules/s2_generator.h \
     modules/simulationmanager.h \
-    modules/phscatclaudiomodel.h \
-    modules/scatteronmetal.h \
+    OpticalOverrides/phscatclaudiomodel.h \
+    OpticalOverrides/scatteronmetal.h \
     modules/aphotontracer.h \
     modules/acompton.h \
     modules/ageometrytester.h

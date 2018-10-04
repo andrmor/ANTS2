@@ -1,23 +1,17 @@
 #ifndef OPTICALOVERRIDECLASS_H
 #define OPTICALOVERRIDECLASS_H
 
-#include <QVector>
 #include <QString>
 
 class AOpticalOverride;
 class APhoton;
 class AMaterialParticleCollection;
-class TRandom2;
-class TH1I;
 class QJsonObject;
-class TH1D;
-class QWidget;
-class TObject;
-class QObject;
 class GraphWindowClass;
 class ATracerStateful;
+class QWidget;
 
-// !!!
+//  ----   !!!  ----
 // modify these two functions if you want to register a new override type
 AOpticalOverride* OpticalOverrideFactory(QString model, AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
 const QStringList ListOvAllOpticalOverrideTypes();
@@ -63,157 +57,6 @@ public:
 protected:  
   AMaterialParticleCollection* MatCollection;
   int MatFrom, MatTo;   // material index of material before(from) and after(to) the optical interface
-};
-
-class BasicOpticalOverride : public AOpticalOverride
-{
-public:
-  BasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, double probLoss, double probRef, double probDiff, int scatterModel);
-  BasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
-  virtual ~BasicOpticalOverride() {}
-
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
-
-  virtual const QString getType() const override {return "Simplistic_model";}
-  virtual const QString getAbbreviation() const override {return "Simp";}
-  virtual const QString getReportLine() const override;
-
-  // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) const override;
-  virtual bool readFromJson(const QJsonObject &json) override;
-
-#ifdef GUI
-  virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
-#endif
-  virtual const QString checkOverrideData() override;
-
-  //--parameters--
-  double probLoss = 0; //probability of absorption
-  double probRef = 0;  //probability of specular reflection
-  double probDiff = 0; //probability of scattering
-  int    scatterModel = 1; //0 - 4Pi, 1 - 2Pi back, 2 - 2Pi forward
-};
-
-class FSNPOpticalOverride : public AOpticalOverride
-{
-public:
-  FSNPOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, double albedo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo), Albedo(albedo) {}
-  FSNPOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
-    : AOpticalOverride(MatCollection, MatFrom, MatTo) {Albedo = 0.95;}
-  virtual ~FSNPOpticalOverride() {}
-
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
-
-  virtual const QString getType() const override {return "FS_NP";}
-  virtual const QString getAbbreviation() const override {return "FSNP";}
-  virtual const QString getReportLine() const override;
-
-  // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) const override;
-  virtual bool readFromJson(const QJsonObject &json) override;
-
-#ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
-#endif
-  virtual const QString checkOverrideData() override;
-
-  //-- parameters --
-  double Albedo;
-};
-
-class AWaveshifterOverride : public AOpticalOverride
-{
-public:
-  AWaveshifterOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, int ReemissionModel = 1);
-  virtual ~AWaveshifterOverride();
-
-  void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
-
-  virtual const QString getType() const override {return "SurfaceWLS";}
-  virtual const QString getAbbreviation() const override {return "WLS";}
-  virtual const QString getReportLine() const override;
-
-  // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) const;
-  virtual bool readFromJson(const QJsonObject &json);
-
-#ifdef GUI
-  virtual QWidget* getEditWidget(QWidget *caller, GraphWindowClass* GraphWindow) override;
-#endif
-
-  virtual const QString checkOverrideData() override;
-
-  //-- parameters --
-  int ReemissionModel = 1; //0-isotropic (4Pi), 1-Lamb back (2Pi), 2-Lamb forward (2Pi)
-  QVector<double> ReemissionProbability_lambda;
-  QVector<double> ReemissionProbability;
-  QVector<double> ReemissionProbabilityBinned;  
-
-  QVector<double> EmissionSpectrum_lambda;
-  QVector<double> EmissionSpectrum;
-  TH1D* Spectrum;
-
-  //tmp parameters
-  double WaveFrom;
-  double WaveStep;
-  int WaveNodes;
-
-private:
-#ifdef GUI
-  void loadReemissionProbability(QWidget *caller);
-  void loadEmissionSpectrum(QWidget *caller);
-  void showReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
-  void showEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
-  void showBinnedReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
-  void showBinnedEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
-#endif
-};
-
-class SpectralBasicOpticalOverride : public BasicOpticalOverride
-{
-public:
-  SpectralBasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
-  SpectralBasicOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo, int ScatterModel, double EffWave);
-  virtual ~SpectralBasicOpticalOverride() {}
-
-  virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
-
-  virtual const QString getType() const override {return "SimplisticSpectral_model";}
-  virtual const QString getAbbreviation() const override {return "SiSp";}
-  virtual const QString getReportLine() const override;
-
-  // save/load config is not used for this type!
-  virtual void writeToJson(QJsonObject &json) const override;
-  virtual bool readFromJson(const QJsonObject &json) override;
-
-  virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
-  const QString loadData(const QString& fileName);
-
-#ifdef GUI
-  virtual QWidget* getEditWidget(QWidget* caller, GraphWindowClass* GraphWindow) override;
-#endif
-
-  virtual const QString checkOverrideData() override;
-
-  //parameters
-  QVector<double> Wave;
-  QVector<double> ProbLoss; //probability of absorption
-  QVector<double> ProbLossBinned; //probability of absorption
-  QVector<double> ProbRef;  //probability of specular reflection
-  QVector<double> ProbRefBinned;  //probability of specular reflection
-  QVector<double> ProbDiff; //probability of scattering
-  QVector<double> ProbDiffBinned; //probability of scattering
-  double effectiveWavelength = 500; //if waveIndex of photon is -1, index correspinding to this wavelength will be used
-  double effectiveWaveIndex;
-
-private:
-#ifdef GUI
-  void loadSpectralData(QWidget *caller);
-  void showLoaded(GraphWindowClass *GraphWindow);
-  void showBinned(QWidget *widget, GraphWindowClass *GraphWindow);
-#endif
 };
 
 #endif // OPTICALOVERRIDECLASS_H

@@ -81,7 +81,7 @@ public:
   PhScatClaudioModelV2d2(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override;
-  virtual const QString getType() const override {return "Claudio_Model_V2d2";}
+  virtual const QString getType() const override {return "ClaudioModel";}
   virtual const QString getReportLine() const override;
 };
 

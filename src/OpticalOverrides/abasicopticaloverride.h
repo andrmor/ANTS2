@@ -19,7 +19,7 @@ public:
 
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override; //unitary vectors! iWave = -1 if not wavelength-resolved
 
-  virtual const QString getType() const override {return "Simplistic_model";}
+  virtual const QString getType() const override {return "Simplistic";}
   virtual const QString getAbbreviation() const override {return "Simp";}
   virtual const QString getReportLine() const override;
 

@@ -63,21 +63,15 @@ QWidget *AOpticalOverride::getEditWidget(QWidget *, GraphWindowClass *)
 
 AOpticalOverride *OpticalOverrideFactory(QString model, AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
 {
-   if (model == "Simplistic_model")
+   if (model == "Simplistic" || model == "Simplistic_model")
      return new ABasicOpticalOverride(MatCollection, MatFrom, MatTo);
-   if (model == "SimplisticSpectral_model")
+   if (model == "SimplisticSpectral" || model == "SimplisticSpectral_model")
      return new SpectralBasicOpticalOverride(MatCollection, MatFrom, MatTo);
-   else if (model == "Claudio_Model_V2")
-     return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
-   else if (model == "Claudio_Model_V2d1")
-     return new PhScatClaudioModelV2d1(MatCollection, MatFrom, MatTo);
-   else if (model == "Claudio_Model_V2d2")
+   else if (model == "ClaudioModel" || model == "Claudio_Model_V2d2")
      return new PhScatClaudioModelV2d2(MatCollection, MatFrom, MatTo);
-   else if (model == "Claudio_Model") //compatibility
-     return new PhScatClaudioModelV2(MatCollection, MatFrom, MatTo);
    else if (model == "DielectricToMetal")
      return new ScatterOnMetal(MatCollection, MatFrom, MatTo);
-   else if (model == "FS_NP" || model=="Neves_model")
+   else if (model == "FSNP" || model == "FS_NP" || model=="Neves_model")
      return new FSNPOpticalOverride(MatCollection, MatFrom, MatTo);
    else if (model == "SurfaceWLS")
      return new AWaveshifterOverride(MatCollection, MatFrom, MatTo);
@@ -91,11 +85,11 @@ const QStringList ListOvAllOpticalOverrideTypes()
 {
     QStringList l;
 
-    l << "Simplistic_model"
-      << "SimplisticSpectral_model"
-      << "Claudio_Model_V2d2"
+    l << "Simplistic"
+      << "SimplisticSpectral"
+      << "FSNP"
       << "DielectricToMetal"
-      << "FS_NP"
+      << "ClaudioModel"
       << "SurfaceWLS"
       << "CustomScript";
 

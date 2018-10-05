@@ -17,7 +17,8 @@
 #include "afiletools.h"
 #include "graphwindowclass.h"
 #include "amessage.h"
-#include "TGraph.h"
+#include "aglobalsettings.h"
+#include <QFileInfo>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -26,6 +27,7 @@
 #include <QFileDialog>
 #include <QComboBox>
 #include <QPushButton>
+#include "TGraph.h"
 #endif
 
 AWaveshifterOverride::AWaveshifterOverride(AMaterialParticleCollection *MatCollection, int MatFrom, int MatTo)
@@ -255,9 +257,10 @@ QWidget *AWaveshifterOverride::getEditWidget(QWidget *caller, GraphWindowClass *
 #ifdef GUI
 void AWaveshifterOverride::loadReemissionProbability(QWidget* caller)
 {
-    QString fileName = QFileDialog::getOpenFileName(caller, "Load reemission probability", "", "Data files (*.dat *.txt);;All files (*)");
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load reemission probability", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    //GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QVector<double> X, Y;
     int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
     if (ret == 0)
@@ -269,9 +272,10 @@ void AWaveshifterOverride::loadReemissionProbability(QWidget* caller)
 
 void AWaveshifterOverride::loadEmissionSpectrum(QWidget *caller)
 {
-    QString fileName = QFileDialog::getOpenFileName(caller, "Load emission spectrum", "", "Data files (*.dat *.txt);;All files (*)");
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load emission spectrum", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    //GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QVector<double> X, Y;
     int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
     if (ret == 0)

@@ -148,7 +148,7 @@
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>using Fresnel and Snell laws</string>
+         <string>using Fresnel equations and Snell's laws</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

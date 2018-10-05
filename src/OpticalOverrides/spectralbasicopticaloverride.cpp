@@ -21,6 +21,8 @@
 #include "amessage.h"
 #include "TGraph.h"
 #include "TMultiGraph.h"
+#include "aglobalsettings.h"
+#include <QFileInfo>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -167,8 +169,10 @@ const QString SpectralBasicOpticalOverride::loadData(const QString &fileName)
 #ifdef GUI
 void SpectralBasicOpticalOverride::loadSpectralData(QWidget* caller)
 {
-    QString fileName = QFileDialog::getOpenFileName(caller, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", "", "Data files (*.dat *.txt);;All files (*)");
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    QString fileName = QFileDialog::getOpenFileName(caller, "Load spectral data (Wavelength, Absorption, Reflection, Scattering)", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QVector< QVector<double>* > vec;
     vec << &Wave << &ProbLoss << &ProbRef << &ProbDiff;

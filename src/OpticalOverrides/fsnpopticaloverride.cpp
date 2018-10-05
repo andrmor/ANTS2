@@ -4,6 +4,7 @@
 #include "amaterialparticlecolection.h"
 #include "atracerstateful.h"
 #include "asimulationstatistics.h"
+#include "ajsontools.h"
 
 #include <QJsonObject>
 
@@ -97,6 +98,13 @@ const QString FSNPOpticalOverride::getReportLine() const
     return QString("Albedo %1").arg(Albedo);
 }
 
+const QString FSNPOpticalOverride::getLongReportLine() const
+{
+    QString s = "--> FSNP <--\n";
+    s += QString("Albedo: %1").arg(Albedo);
+    return s;
+}
+
 void FSNPOpticalOverride::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
@@ -106,16 +114,7 @@ void FSNPOpticalOverride::writeToJson(QJsonObject &json) const
 
 bool FSNPOpticalOverride::readFromJson(const QJsonObject &json)
 {
-  QString type = json["Model"].toString();
-  if (type != getType()) return false; //file for wrong model!
-
-  if (json.contains("Albedo"))
-    {
-      Albedo = json["Albedo"].toDouble();
-      return true;
-    }
-  else
-      return false;
+    return parseJson(json, "Albedo", Albedo);
 }
 
 #ifdef GUI

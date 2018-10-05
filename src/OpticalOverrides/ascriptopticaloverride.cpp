@@ -3,6 +3,7 @@
 #include "atracerstateful.h"
 #include "aopticaloverridescriptinterface.h"
 #include "amathscriptinterface.h"
+#include "ajsontools.h"
 
 #ifdef GUI
 #include "ascriptwindow.h"
@@ -52,11 +53,7 @@ void AScriptOpticalOverride::writeToJson(QJsonObject &json) const
 
 bool AScriptOpticalOverride::readFromJson(const QJsonObject &json)
 {
-    QString type = json["Model"].toString();
-    if (type != getType()) return false; //file for wrong model!
-
-    Script = json["Script"].toString();
-    return true;
+    return parseJson(json, "Script", Script);
 }
 
 #ifdef GUI

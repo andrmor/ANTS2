@@ -36,10 +36,8 @@ void AOpticalOverride::writeToJson(QJsonObject &json) const
     json["MatTo"] = MatTo;
 }
 
-bool AOpticalOverride::readFromJson(const QJsonObject &json)
+bool AOpticalOverride::readFromJson(const QJsonObject &)
 {
-    QString type = json["Model"].toString();
-    if (type != getType()) return false; //file for wrong model!
     return true;
 }
 

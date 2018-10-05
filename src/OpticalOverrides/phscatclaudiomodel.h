@@ -24,6 +24,7 @@ public:
   //virtual const QString getType() const override = 0;
   virtual const QString getAbbreviation() const override {return "Clau";}
   virtual const QString getReportLine() const override;
+  virtual const QString getLongReportLine() const override;
 
   // save/load config
   virtual void writeToJson(QJsonObject &json) const override;

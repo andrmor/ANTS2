@@ -3,6 +3,7 @@
 #include "aphoton.h"
 #include "asimulationstatistics.h"
 #include "atracerstateful.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -27,6 +28,15 @@ const QString ScatterOnMetal::getReportLine() const
   return s;
 }
 
+const QString ScatterOnMetal::getLongReportLine() const
+{
+    QString s = "--> Dielectric to metal <--\n";
+    s += "Refractive index of metal:\n";
+    s += QString("  real: %1\n").arg(RealN);
+    s += QString("  imaginary: %1").arg(ImaginaryN);
+    return s;
+}
+
 void ScatterOnMetal::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
@@ -37,13 +47,9 @@ void ScatterOnMetal::writeToJson(QJsonObject &json) const
 
 bool ScatterOnMetal::readFromJson(const QJsonObject &json)
 {
-  QString type = json["Model"].toString();
-  if (type != getType()) return false; //file for wrong model!
-
-  RealN = json["RealN"].toDouble();
-  ImaginaryN = json["ImaginaryN"].toDouble();
-
-  return true;
+    if ( !parseJson(json, "RealN", RealN) ) return false;
+    if ( !parseJson(json, "ImaginaryN", ImaginaryN) ) return false;
+    return true;
 }
 
 #ifdef GUI

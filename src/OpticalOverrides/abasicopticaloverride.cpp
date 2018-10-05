@@ -1,10 +1,10 @@
 #include "abasicopticaloverride.h"
-
 #include "aphoton.h"
 #include "amaterial.h"
 #include "amaterialparticlecolection.h"
 #include "atracerstateful.h"
 #include "asimulationstatistics.h"
+#include "ajsontools.h"
 
 #include <QJsonObject>
 
@@ -148,6 +148,26 @@ const QString ABasicOpticalOverride::getReportLine() const
     return s;
 }
 
+const QString ABasicOpticalOverride::getLongReportLine() const
+{
+    QString s = "--> Simplistic <--\n";
+    if (probLoss > 0) s += QString("Absorption: %1%\n").arg(100.0 * probLoss);
+    if (probRef > 0)  s += QString("Specular reflection: %1%\n").arg(100.0 * probRef);
+    if (probDiff)
+    {
+        s += QString("Scattering: %1%").arg(100.0 * probDiff);
+        switch (scatterModel)
+        {
+        case 0: s += " (isotropic)\n"; break;
+        case 1: s += " (Lambertian, back)\n"; break;
+        case 2: s += " (Lambertian, forward)\n"; break;
+        }
+    }
+    double fres = 1.0 - probLoss - probRef - probDiff;
+    if (fres > 0) s += QString("Fresnel: %1%").arg(100.0 * fres);
+    return s;
+}
+
 void ABasicOpticalOverride::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
@@ -160,14 +180,11 @@ void ABasicOpticalOverride::writeToJson(QJsonObject &json) const
 
 bool ABasicOpticalOverride::readFromJson(const QJsonObject &json)
 {
-  QString type = json["Model"].toString();
-  if (type != getType()) return false; //file for wrong model!
-
-  probLoss = json["Abs"].toDouble();
-  probRef =  json["Spec"].toDouble();
-  probDiff = json["Scat"].toDouble();
-  scatterModel = json["ScatMode"].toInt();
-  return true;
+    if ( !parseJson(json, "Abs", probLoss) ) return false;
+    if ( !parseJson(json, "Spec", probRef) ) return false;
+    if ( !parseJson(json, "Scat", probDiff) ) return false;
+    if ( !parseJson(json, "ScatMode", scatterModel) ) return false;
+    return true;
 }
 
 #ifdef GUI

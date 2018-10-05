@@ -83,10 +83,8 @@ void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json) const
 
 bool SpectralBasicOpticalOverride::readFromJson(const QJsonObject &json)
 {
-    if (!AOpticalOverride::readFromJson(json)) return false;
-
-    parseJson(json, "ScatMode", scatterModel);
-    parseJson(json, "EffWavelength", effectiveWavelength);
+    if ( !parseJson(json, "ScatMode", scatterModel) ) return false;
+    if ( !parseJson(json, "EffWavelength", effectiveWavelength) ) return false;
 
     //after constructor vectors are not empty!
     Wave.clear();
@@ -95,10 +93,12 @@ bool SpectralBasicOpticalOverride::readFromJson(const QJsonObject &json)
     ProbDiff.clear();
 
     QJsonArray sp;
-    parseJson(json, "Data", sp);
+    if ( !parseJson(json, "Data", sp) ) return false;
+    if (sp.isEmpty()) return false;
     for (int i=0; i<sp.size(); i++)
     {
         QJsonArray ar = sp.at(i).toArray();
+        if (ar.size() != 4) return false;
         Wave     << ar.at(0).toDouble();
         ProbLoss << ar.at(1).toDouble();
         ProbRef  << ar.at(2).toDouble();

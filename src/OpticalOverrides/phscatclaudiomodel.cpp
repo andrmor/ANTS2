@@ -3,6 +3,7 @@
 #include "aphoton.h"
 #include "asimulationstatistics.h"
 #include "atracerstateful.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QVector>
@@ -25,7 +26,34 @@
 
 const QString PhScatClaudioModel::getReportLine() const
 {
-    return " v2";
+    QString s;
+    s += QString("sA %1 / ").arg(sigma_alpha);
+    s += QString("sH %1 / ").arg(sigma_h);
+    s += QString("Alb %1 / ").arg(albedo);
+    s += "HD ";
+    switch (HeightDistribution)
+    {
+    case empirical : s += "em"; break;
+    case gaussian : s += "gau"; break;
+    case exponential : s += "exp"; break;
+    }
+    s += " / SD ";
+    switch (SlopeDistribution)
+    {
+    case trowbridgereitz : s += "tr"; break;
+    case cooktorrance : s += "cook"; break;
+    case bivariatecauchy : s += "biv"; break;
+    }
+    return s;
+}
+
+const QString PhScatClaudioModel::getLongReportLine() const
+{
+        QString s = "--> Caludio's model v2.2 <--\n";
+//        s += "Refractive index of metal:\n";
+//        s += QString("  real: %1\n").arg(RealN);
+//        s += QString("  imaginary: %1").arg(ImaginaryN);
+        return s;
 }
 
 void PhScatClaudioModel::writeToJson(QJsonObject &json) const
@@ -41,19 +69,20 @@ void PhScatClaudioModel::writeToJson(QJsonObject &json) const
 
 bool PhScatClaudioModel::readFromJson(const QJsonObject &json)
 {
-  QString type = json["Model"].toString();
-  if (!type.startsWith("Claudio_Model"))
-    {
-      qCritical() << "Attempt to load json file for wrong override model!";
-      return false; //file for wrong model!
-    }
+    if ( !parseJson(json, "SigmaAlpha", sigma_alpha)) return false;
+    if ( !parseJson(json, "SigmaH", sigma_h)) return false;
+    if ( !parseJson(json, "Albedo", albedo)) return false;
 
-  sigma_alpha = json["SigmaAlpha"].toDouble();
-  sigma_h = json["SigmaH"].toDouble();
-  albedo = json["Albedo"].toDouble();
-  HeightDistribution = static_cast<HeightDistrEnum>(json["HDmodel"].toInt());
-  SlopeDistribution  = static_cast<SlopeDistrEnum>(json["SDmodel"].toInt());
-  return true;
+    int ival;
+    if ( !parseJson(json, "HDmodel", ival)) return false;
+    if (ival<0 || ival>2) return false;
+    HeightDistribution = static_cast<HeightDistrEnum>(ival);
+
+    if ( !parseJson(json, "SDmodel", ival)) return false;
+    if (ival<0 || ival>2) return false;
+    SlopeDistribution = static_cast<SlopeDistrEnum>(ival);
+
+    return true;
 }
 
 #ifdef GUI

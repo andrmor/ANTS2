@@ -216,15 +216,24 @@ bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y
   return true;
 }
 
-void readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y)
+bool readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y)
 {
-  for (int i=0; i<ar.size(); i++)
+    x.clear();
+    y.clear();
+
+    for (int i=0; i<ar.size(); i++)
     {
-      double X = ar[i].toArray()[0].toDouble();
-      x.append(X);
-      double Y = ar[i].toArray()[1].toDouble();
-      y.append(Y);
+        if ( !ar.at(i).isArray() ) return false;
+
+        QJsonArray jar = ar.at(i).toArray();
+        if (jar.size() < 2) return false;
+
+        double X = jar.at(0).toDouble();
+        x.append(X);
+        double Y = jar.at(1).toDouble();
+        y.append(Y);
     }
+    return true;
 }
 
 bool write2DQVectorToJArray(const QVector<QVector<double> > &xy, QJsonArray &ar)

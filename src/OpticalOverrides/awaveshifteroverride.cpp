@@ -181,17 +181,17 @@ void AWaveshifterOverride::writeToJson(QJsonObject &json) const
 
 bool AWaveshifterOverride::readFromJson(const QJsonObject &json)
 {
-    //QString type = json["Model"].toString();
-    //if (type != getType()) return false; //file for wrong model!
-    if (!AOpticalOverride::readFromJson(json)) return false;
+    if ( !parseJson(json, "ReemissionModel", ReemissionModel) ) return false;
 
-    QJsonArray arRP = json["ReemissionProbability"].toArray();
-    readTwoQVectorsFromJArray(arRP, ReemissionProbability_lambda, ReemissionProbability);
-    QJsonArray arEm = json["EmissionSpectrum"].toArray();
-    readTwoQVectorsFromJArray(arEm, EmissionSpectrum_lambda, EmissionSpectrum);
+    QJsonArray arRP;
+    if ( !parseJson(json, "ReemissionProbability", arRP) ) return false;
+    if (arRP.isEmpty()) return false;
+    if ( !readTwoQVectorsFromJArray(arRP, ReemissionProbability_lambda, ReemissionProbability) ) return false;
 
-    ReemissionModel = 1;
-    parseJson(json, "ReemissionModel", ReemissionModel);
+    QJsonArray arES;
+    if ( !parseJson(json, "EmissionSpectrum", arES) ) return false;
+    if (arES.isEmpty()) return false;
+    if ( !readTwoQVectorsFromJArray(arES, EmissionSpectrum_lambda, EmissionSpectrum) ) return false;
 
     return true;
 }

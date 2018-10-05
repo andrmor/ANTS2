@@ -131,6 +131,9 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   //qDebug() << "Updating MaterialColecftion module according to sim settings";
   detector->MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector->RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
 
+  ErrorString = detector->MpCollection->CheckOverrides();
+  if (!ErrorString.isEmpty()) return false;
+
   clearWorkers(); //just rebuild them all everytime, it's easier
 
   for(int i = 0; i < threadCount; i++)

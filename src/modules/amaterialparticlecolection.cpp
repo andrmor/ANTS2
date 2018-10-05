@@ -68,6 +68,19 @@ void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(Ge
   }
 }
 
+const QString AMaterialParticleCollection::CheckOverrides()
+{
+    for (AMaterial* mat : MaterialCollectionData)
+        for (AOpticalOverride* ov : mat->OpticalOverrides)
+        if (ov)
+        {
+             QString err = ov->checkOverrideData();
+             if ( !err.isEmpty())
+                 return QString("Error in optical override from %1 to %2:\n").arg(mat->name).arg(getMaterialName(ov->getMaterialTo())) + err;
+        }
+    return QString();
+}
+
 void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* RandGen)
 {
     for (int imat = 0; imat < MaterialCollectionData.size(); imat++)

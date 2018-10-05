@@ -36,6 +36,7 @@ public:
 
   //hopefully we will get rid of the RandGen after update in NCrystal
   void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2 *RandGen, int numThreads = 1);
+  const QString CheckOverrides();
   void updateRandomGenForThread(int ID, TRandom2 *RandGen);
 
   //for script-based optical override initialization

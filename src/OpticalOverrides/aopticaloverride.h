@@ -36,7 +36,7 @@ public:
   virtual const QString getLongReportLine() const {return getReportLine();} //for GUI: used in overlap map
 
   //TODO: initializeWaveResolved() -> no need to transfer data, MatCollection knows the settings
-  virtual void initializeWaveResolved(bool /*bWaveResolved*/, double /*waveFrom*/, double /*waveStep*/, int /*waveNodes*/) {}  //override if override has wavelength-resolved data
+  virtual void initializeWaveResolved() {}  //override if override has wavelength-resolved data
 
   // save/load config
   virtual void writeToJson(QJsonObject &json) const;

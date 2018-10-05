@@ -58,11 +58,6 @@ void AMaterialParticleCollection::GetWave(bool &wavelengthResolved, double &wave
     waveNodes = WaveNodes;
 }
 
-bool AMaterialParticleCollection::IsWaveResolved() const
-{
-    return WavelengthResolved;
-}
-
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
@@ -405,7 +400,7 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
 
       for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
-            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved();
   }
   else
   {
@@ -427,7 +422,7 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
 
       for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
-            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(false, 0, 1, 1);
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved();
   }
 }
 

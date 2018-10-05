@@ -88,8 +88,8 @@ public:
   void AddNewMaterial(QJsonObject &json);
 
   //general purpose requests
-  void GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
-  bool IsWaveResolved() const;
+  void   GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
+  bool   IsWaveResolved() const {return WavelengthResolved;}
 
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);

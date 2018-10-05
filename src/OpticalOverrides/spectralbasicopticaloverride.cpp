@@ -43,7 +43,7 @@ SpectralBasicOpticalOverride::SpectralBasicOpticalOverride(AMaterialParticleColl
 AOpticalOverride::OpticalOverrideResultEnum SpectralBasicOpticalOverride::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
     int waveIndex = Photon->waveIndex;
-    if (waveIndex == -1) waveIndex = effectiveWaveIndex;
+    if (!bWaveResolved || waveIndex == -1) waveIndex = effectiveWaveIndex; //guard: if not resolved, script ovberride can in principle assign index != -1
 
     probLoss = ProbLossBinned.at(waveIndex);
     probDiff = ProbDiffBinned.at(waveIndex);
@@ -105,8 +105,12 @@ bool SpectralBasicOpticalOverride::readFromJson(const QJsonObject &json)
     return true;
 }
 
-void SpectralBasicOpticalOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
+void SpectralBasicOpticalOverride::initializeWaveResolved()
 {
+    double waveFrom, waveTo, waveStep;
+    int waveNodes;
+    MatCollection->GetWave(bWaveResolved, waveFrom, waveTo, waveStep, waveNodes);
+
     if (bWaveResolved)
     {
         ConvertToStandardWavelengthes(&Wave, &ProbLoss, waveFrom, waveStep, waveNodes, &ProbLossBinned);
@@ -201,7 +205,8 @@ void SpectralBasicOpticalOverride::showBinned(QWidget *widget, GraphWindowClass 
     double WaveFrom, WaveTo, WaveStep;
     int WaveNodes;
     MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+
+    initializeWaveResolved();
 
     //TODO run checker
 

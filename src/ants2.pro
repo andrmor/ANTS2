@@ -256,7 +256,7 @@ SOURCES += main.cpp \
     common/apmarraydata.cpp \
     common/aqtmessageredirector.cpp \
     common/ageoobject.cpp \
-    common/aopticaloverride.cpp \
+    OpticalOverrides/aopticaloverride.cpp \
     modules/detectorclass.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
@@ -376,7 +376,7 @@ HEADERS  += common/CorrelationFilters.h \
     common/apmposangtyperecord.h \
     common/apmarraydata.h \
     common/ageoobject.h \
-    common/aopticaloverride.h \
+    OpticalOverrides/aopticaloverride.h \
     modules/detectorclass.h \
     modules/particlesourcesclass.h \
     modules/flatfield.h \

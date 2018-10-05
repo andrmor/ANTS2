@@ -19,7 +19,7 @@ public:
   AWaveshifterOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo);
   virtual ~AWaveshifterOverride();
 
-  void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
+  void initializeWaveResolved() override;
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector); //unitary vectors! iWave = -1 if not wavelength-resolved
 
   virtual const QString getType() const override {return "SurfaceWLS";}
@@ -46,7 +46,6 @@ public:
   QVector<double> EmissionSpectrum;
   TH1D* Spectrum = 0;
 
-  //tmp parameters
   double WaveFrom;
   double WaveStep;
   int WaveNodes;

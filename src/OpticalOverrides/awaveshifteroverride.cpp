@@ -36,14 +36,14 @@ AWaveshifterOverride::~AWaveshifterOverride()
     if (Spectrum) delete Spectrum;
 }
 
-void AWaveshifterOverride::initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes)
+void AWaveshifterOverride::initializeWaveResolved()
 {
-    if (bWaveResolved)
-    {
-        WaveFrom = waveFrom;
-        WaveStep = waveStep;
-        WaveNodes = waveNodes;
+    bool bWavelengthResolved;
+    double waveTo;
+    MatCollection->GetWave(bWavelengthResolved, WaveFrom, waveTo, WaveStep, WaveNodes);
 
+    if (bWavelengthResolved)
+    {
         ConvertToStandardWavelengthes(&ReemissionProbability_lambda, &ReemissionProbability, WaveFrom, WaveStep, WaveNodes, &ReemissionProbabilityBinned);
 
         QVector<double> y;
@@ -310,15 +310,11 @@ void AWaveshifterOverride::showEmissionSpectrum(GraphWindowClass *GraphWindow, Q
 
 void AWaveshifterOverride::showBinnedReemissionProbability(GraphWindowClass *GraphWindow, QWidget *caller)
 {
-    bool bWR;
-    double WaveFrom, WaveTo, WaveStep;
-    int WaveNodes;
-    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+    initializeWaveResolved();
 
     //TODO run checker
 
-    if (!bWR)
+    if ( !MatCollection->IsWaveResolved() )
     {
         message("Simulation is NOT wavelength resolved, override is inactive!", caller);
         return;
@@ -336,15 +332,11 @@ void AWaveshifterOverride::showBinnedReemissionProbability(GraphWindowClass *Gra
 
 void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWindow, QWidget *caller)
 {
-    bool bWR;
-    double WaveFrom, WaveTo, WaveStep;
-    int WaveNodes;
-    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+    initializeWaveResolved();
 
     //TODO run checker
 
-    if (!bWR)
+    if ( !MatCollection->IsWaveResolved() )
     {
         message("Simulation is NOT wavelength resolved, override is inactive!", caller);
         return;
@@ -377,13 +369,9 @@ const QString AWaveshifterOverride::checkOverrideData()
     if (EmissionSpectrum_lambda.size() != EmissionSpectrum.size())
         return "Mismatch in emission spectrum data";
 
-    bool bWR;
-    double WaveFrom, WaveTo, WaveStep;
-    int WaveNodes;
-    MatCollection->GetWave(bWR, WaveFrom, WaveTo, WaveStep, WaveNodes);
-    initializeWaveResolved(bWR, WaveFrom, WaveStep, WaveNodes);
+    initializeWaveResolved();
 
-    if (bWR && Spectrum->ComputeIntegral() <= 0)
+    if (MatCollection->IsWaveResolved() && Spectrum->ComputeIntegral() <= 0)
             return "Binned emission spectrum: integral should be > 0";
     return "";
 }

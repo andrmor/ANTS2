@@ -29,7 +29,7 @@ public:
   virtual void writeToJson(QJsonObject &json) const override;
   virtual bool readFromJson(const QJsonObject &json) override;
 
-  virtual void initializeWaveResolved(bool bWaveResolved, double waveFrom, double waveStep, int waveNodes) override;
+  virtual void initializeWaveResolved() override;
   const QString loadData(const QString& fileName);
 
 #ifdef GUI
@@ -48,6 +48,7 @@ public:
   QVector<double> ProbDiffBinned; //probability of scattering
   double effectiveWavelength = 500; //if waveIndex of photon is -1, index correspinding to this wavelength will be used
   double effectiveWaveIndex;
+  bool bWaveResolved;
 
 private:
 #ifdef GUI

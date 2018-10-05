@@ -21,7 +21,7 @@
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
 #include "particlesourcesclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "globalsettingswindowclass.h"
 #include "aconfiguration.h"
 #include "amessage.h"
@@ -50,11 +50,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        ASimulationManager *SimulationManager,
                        AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
-                       TmpObjHubClass *TmpHub,
-                       GlobalSettingsClass *GlobSet) :
+                       TmpObjHubClass *TmpHub) :
     QMainWindow(), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
     SimulationManager(SimulationManager), ReconstructionManager(ReconstructionManager),
-    NetModule(Net), TmpHub(TmpHub), GlobSet(GlobSet),
+    NetModule(Net), TmpHub(TmpHub), GlobSet(AGlobalSettings::getInstance()),
     ui(new Ui::MainWindow)
 {
     qDebug() << ">Main window constructor started";
@@ -264,7 +263,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">GUI initialized";
 
     //change font size for all windows
-    if (this->font().pointSize() != GlobSet->FontSize) setFontSizeAllWindows(GlobSet->FontSize);
+    if (this->font().pointSize() != GlobSet.FontSize) setFontSizeAllWindows(GlobSet.FontSize);
     qDebug() << ">Font size adjusted";
 
     //menu properties
@@ -275,7 +274,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->menuFile->setToolTipDuration(1000);
 
     bool fShowGeom;
-    if (GlobSet->SaveLoadWindows)
+    if (GlobSet.SaveLoadWindows)
     {
       MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered();
       fShowGeom = GeometryWindow->isVisible();
@@ -286,7 +285,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
         fShowGeom = true;
         GuiUtils::AssureWidgetIsWithinVisibleArea(this);
     }
-    ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
+    ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet.SaveLoadWindows);
 
     qDebug() << ">Init for Output window";
     Owindow->InitWindow();

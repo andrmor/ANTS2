@@ -1,8 +1,8 @@
 #include "ajavascriptmanager.h"
 #include "ui_mainwindow.h"
+#include "aglobalsettings.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "globalsettingsclass.h"
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
@@ -43,7 +43,7 @@ void MainWindow::createScriptWindow()
 {
     QWidget* w = new QWidget();
     AJavaScriptManager* SM = new AJavaScriptManager(Detector->RandGen);
-    ScriptWindow = new AScriptWindow(SM, GlobSet, false, w); //transfer ownership of SM
+    ScriptWindow = new AScriptWindow(SM, false, w); //transfer ownership of SM
     ScriptWindow->move(25,25);
     connect(ScriptWindow, &AScriptWindow::WindowShown, WindowNavigator, &WindowNavigatorClass::ShowWindowTriggered);
     connect(ScriptWindow, &AScriptWindow::WindowHidden, WindowNavigator, &WindowNavigatorClass::HideWindowTriggered);
@@ -73,11 +73,11 @@ void MainWindow::createScriptWindow()
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(dat, "events");
 
-    InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet->RecNumTreads);
+    InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
     QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
     ScriptWindow->SetInterfaceObject(sim, "sim");
 
-    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet->RecNumTreads);
+    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet.RecNumTreads);
     QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->SetInterfaceObject(rec, "rec");
@@ -114,7 +114,7 @@ void MainWindow::createScriptWindow()
     AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
     ScriptWindow->SetInterfaceObject(photon, "photon");
 
-    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
+    AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo");
 
 #ifdef ANTS_FLANN

@@ -8,7 +8,7 @@
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -562,9 +562,9 @@ TriState AreaResponseCheckUpItem::doCheckUp()
 
 void CheckUpWindowClass::on_pbSaveOverlaps_clicked()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save overlaps as text", MW->GlobSet->LastOpenDir+"/Overlaps.txt", "Text files (*.txt)");
+    QString fileName = QFileDialog::getSaveFileName(this, "Save overlaps as text", MW->GlobSet.LastOpenDir+"/Overlaps.txt", "Text files (*.txt)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QFile outputFile(fileName);
     outputFile.open(QIODevice::WriteOnly);

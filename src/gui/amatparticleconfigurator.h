@@ -5,7 +5,6 @@
 #include <QString>
 
 class QJsonObject;
-class GlobalSettingsClass;
 
 namespace Ui {
 class AMatParticleConfigurator;
@@ -16,7 +15,7 @@ class AMatParticleConfigurator : public QDialog
     Q_OBJECT
 
 public:
-    explicit AMatParticleConfigurator(GlobalSettingsClass *GlobSet, QWidget *parent = 0);
+    explicit AMatParticleConfigurator(QWidget *parent = 0);
     ~AMatParticleConfigurator();
 
     const QString getElasticScatteringFileName(QString Element, QString Mass) const;
@@ -53,7 +52,6 @@ private slots:
 
 private:
     Ui::AMatParticleConfigurator *ui;
-    GlobalSettingsClass* GlobSet;
     QString StarterDir;
 
     QString CrossSectionSystemDir;

@@ -11,7 +11,7 @@
 #include "histgraphinterfaces.h"
 #include "ainterfacetottree.h"
 #include "scriptminimizer.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "afiletools.h"
 #include "aqtmessageredirector.h"
 #include "particlesourcesclass.h"
@@ -139,7 +139,8 @@ int main(int argc, char *argv[])
     QObject::connect(&ReconstructionManager, &AReconstructionManager::UpdateReady, &Network, &ANetworkModule::ProgressReport );
     qDebug() << "Network module created";
 
-    GlobalSettingsClass GlobSet(&Network);
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    GlobSet.setNetworkModule(&Network);
     if (GlobSet.NumThreads == -1) GlobSet.NumThreads = GlobSet.RecNumTreads;
     qDebug() << "Global settings object created";
 
@@ -153,7 +154,7 @@ int main(int argc, char *argv[])
     {
         //GUI application
         qDebug() << "Creating MainWindow";
-        MainWindow w(&Detector, &EventsDataHub, &RootApp, &SimulationManager, &ReconstructionManager, &Network, &TmpHub, &GlobSet);  //Network - still need to set script manager!
+        MainWindow w(&Detector, &EventsDataHub, &RootApp, &SimulationManager, &ReconstructionManager, &Network, &TmpHub);  //Network - still need to set script manager!
         qDebug() << "Showing MainWindow";
         w.show();
 
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
         SM.SetInterfaceObject(tree, "tree");
         AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
         SM.SetInterfaceObject(photon, "photon");
-        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &GlobSet, &EventsDataHub);
+        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &EventsDataHub);
         SM.SetInterfaceObject(depo, "depo");
         AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
         SM.SetInterfaceObject(threads, "threads");

@@ -4,7 +4,6 @@
 #include "aparticleonstack.h"
 #include "simulationmanager.h"
 #include "asandwich.h"
-#include "globalsettingsclass.h"
 #include "atrackrecords.h"
 
 #include <QDebug>
@@ -13,8 +12,8 @@
 #include "TGeoTrack.h"
 #include "TGeoManager.h"
 
-AInterfaceToDepoScript::AInterfaceToDepoScript(DetectorClass *Detector, GlobalSettingsClass *GlobSet, EventsDataClass* EventsDataHub)
-  : Detector(Detector), GlobSet(GlobSet), EventsDataHub(EventsDataHub)
+AInterfaceToDepoScript::AInterfaceToDepoScript(DetectorClass *Detector, EventsDataClass* EventsDataHub)
+  : Detector(Detector), EventsDataHub(EventsDataHub)
 {
   H["ClearStack"] = "Clear particle stack";
   H["AddParticleToStack"] = "Add a particle (or several identical particles) to the stack";

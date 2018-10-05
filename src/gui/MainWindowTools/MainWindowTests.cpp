@@ -8,7 +8,7 @@
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "graphwindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "geometrywindowclass.h"
 #include "acompton.h"
 #include "aenergydepositioncell.h"
@@ -261,7 +261,7 @@ void MainWindow::on_pbShowComptonEnergies_clicked()
 
 void MainWindow::on_pbCheckRandomGen_clicked()
 {
-    auto hist1 = new TH1D("Testrndm","uniform", GlobSet->BinsX, 0,1.);
+    auto hist1 = new TH1D("Testrndm","uniform", GlobSet.BinsX, 0,1.);
     for (int i=0; i<100000; i++) hist1->Fill(Detector->RandGen->Rndm());
     GraphWindow->Draw(hist1);
 }

@@ -7,7 +7,7 @@ ANTS2_MINOR = 13
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
@@ -244,7 +244,6 @@ SOURCES += main.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
     common/generalsimsettings.cpp \
-    common/globalsettingsclass.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
     common/afiletools.cpp \
@@ -356,13 +355,13 @@ SOURCES += main.cpp \
     OpticalOverrides/fsnpopticaloverride.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
-    OpticalOverrides/abasicopticaloverride.cpp
+    OpticalOverrides/abasicopticaloverride.cpp \
+    common/aglobalsettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
     common/generalsimsettings.h \
-    common/globalsettingsclass.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
     common/apositionenergyrecords.h \
@@ -488,7 +487,8 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/fsnpopticaloverride.h \
     OpticalOverrides/awaveshifteroverride.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
-    OpticalOverrides/abasicopticaloverride.h
+    OpticalOverrides/abasicopticaloverride.h \
+    common/aglobalsettings.h
 
 # --- SIM ---
 ants2_SIM {
@@ -743,7 +743,7 @@ RC_FILE = myapp.rc
 
 #---Optimization of compilation---
 win32 {
-  #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
+  #when the next two lines are NOT commented, optimization during compilation is disabled. It will drastically shorten compilation time on MSVC2013, but there are performance loss, especially strong for LRF computation
   QMAKE_CXXFLAGS_RELEASE -= -O2
   QMAKE_CXXFLAGS_RELEASE *= -Od
 }

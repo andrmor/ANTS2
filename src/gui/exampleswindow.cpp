@@ -4,7 +4,7 @@
 #include "windownavigatorclass.h"
 #include "geometrywindowclass.h"
 #include "reconstructionwindow.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amessage.h"
 #include "aconfiguration.h"
@@ -36,9 +36,9 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
   Examples.resize(0);
   ListedExamples.resize(0);
 
-  ui->cbDoNotShowExamplesOnStart->setChecked(!MW->GlobSet->ShowExamplesOnStart);
+  ui->cbDoNotShowExamplesOnStart->setChecked(!MW->GlobSet.ShowExamplesOnStart);
 
-  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave0.json";
+  QString fileName = MW->GlobSet.QuicksaveDir + "/QuickSave0.json";
   QString s = "Not available";
   QFileInfo fi(fileName);
   if (fi.exists())
@@ -75,7 +75,7 @@ void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimS
 
 void ExamplesWindow::on_cbDoNotShowExamplesOnStart_toggled(bool checked)
 {
-  MW->GlobSet->ShowExamplesOnStart = !checked;
+  MW->GlobSet.ShowExamplesOnStart = !checked;
 }
 
 bool ExamplesWindow::event(QEvent *event)
@@ -96,7 +96,7 @@ bool ExamplesWindow::event(QEvent *event)
 
 void ExamplesWindow::BuildExampleRecord()
 {
-  QString fileName = MW->GlobSet->ExamplesDir + "/ExamplesTree.txt";
+  QString fileName = MW->GlobSet.ExamplesDir + "/ExamplesTree.txt";
   QFile file(fileName);
   if(!file.open(QIODevice::ReadOnly | QFile::Text))
       {
@@ -274,7 +274,7 @@ void ExamplesWindow::on_pbLoadExample_clicked()
   this->close();
   MW->GeometryDrawDisabled = true;
 
-  QString filename = MW->GlobSet->ExamplesDir + "/" + Examples[ListedExamples[ExamplePointer]].filename;
+  QString filename = MW->GlobSet.ExamplesDir + "/" + Examples[ListedExamples[ExamplePointer]].filename;
 
   bool bOK = MW->Config->LoadConfig(filename);
   if (!bOK) message(MW->Config->ErrorString, MW);
@@ -296,9 +296,9 @@ void ExamplesWindow::on_lwExample_doubleClicked(const QModelIndex &index)
 
 void ExamplesWindow::on_pbSaveSessings_clicked()
 {
-  QString fileName = QFileDialog::getSaveFileName(this,"Save configuration", MW->GlobSet->LastOpenDir, "Json files (*.json)");
+  QString fileName = QFileDialog::getSaveFileName(this,"Save configuration", MW->GlobSet.LastOpenDir, "Json files (*.json)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   QFileInfo file(fileName);
   if(file.suffix().isEmpty()) fileName += ".json";
   MW->ELwindow->SaveConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
@@ -306,9 +306,9 @@ void ExamplesWindow::on_pbSaveSessings_clicked()
 
 void ExamplesWindow::on_pbLoadSettings_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load configuration", MW->GlobSet->LastOpenDir, "All files (*.*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load configuration", MW->GlobSet.LastOpenDir, "All files (*.*)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MW->GeometryDrawDisabled = true; //->
   bool bOK = MW->Config->LoadConfig(fileName, !ui->cbSkipDetectorConstructor->isChecked(), !ui->cbSkipSimConfig->isChecked(), !ui->cbSkipRecConfig->isChecked());
@@ -328,7 +328,7 @@ void ExamplesWindow::on_pbLoadLast_clicked()
 
 void ExamplesWindow::QuickLoad(int i, QWidget *parent)
 {
-  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+  QString fileName = MW->GlobSet.QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
   if (!QFileInfo(fileName).exists())
   {
       QString s;
@@ -350,7 +350,7 @@ void ExamplesWindow::QuickLoad(int i, QWidget *parent)
 
 QString ExamplesWindow::getQuickSlotMessage(int i)
 {
-    QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+    QString fileName = MW->GlobSet.QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
     QString s;
     if (i==0) s = "Save on exit configuration file not found";
     else      s = "Quick save slot # " + QString::number(i) + " is empty";
@@ -377,7 +377,7 @@ void ExamplesWindow::on_pbQuickSave3_clicked()
 
 void ExamplesWindow::QuickSave(int i)
 {
-  QString fileName = MW->GlobSet->QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
+  QString fileName = MW->GlobSet.QuicksaveDir + "/QuickSave" + QString::number(i) + ".json";
   MW->ELwindow->SaveConfig(fileName);
 }
 
@@ -443,7 +443,7 @@ void ExamplesWindow::on_actionQuick_load_3_hovered()
 
 void ExamplesWindow::on_actionCreate_new_detector_triggered()
 {
-    MW->Config->LoadConfig(MW->GlobSet->ExamplesDir + "/Simplest.json");
+    MW->Config->LoadConfig(MW->GlobSet.ExamplesDir + "/Simplest.json");
     hide();
     if (MW->GeometryWindow->isVisible()) MW->GeometryWindow->ShowGeometry(false);
 }

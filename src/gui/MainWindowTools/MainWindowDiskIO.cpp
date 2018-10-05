@@ -11,7 +11,7 @@
 #include "detectorclass.h"
 #include "apmtype.h"
 #include "geometrywindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "asandwich.h"
 #include "ajsontools.h"
 #include "aenergydepositioncell.h"
@@ -342,9 +342,10 @@ void MainWindow::on_pbLoadPMcenters_clicked()
   if (reg == 1) str = "Load PM center positions (X,Y) for "+str;
   else str = "Load PM center positions (X,Y,Z) for "+str;
 
-  QString fileName = QFileDialog::getOpenFileName(this, str, GlobSet->LastOpenDir, "ASCII files (*.dat *.txt);;All files (*.*)");
+  AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+  QString fileName = QFileDialog::getOpenFileName(this, str, GlobSet.LastOpenDir, "ASCII files (*.dat *.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   APmArrayData *PMar = &Detector->PMarrays[ul];
   PMar->PositionsAnglesTypes.clear();
@@ -380,10 +381,10 @@ void MainWindow::on_pbSavePMcenters_clicked()
     if (A_Reg == 1) str = "Save PM center positions (X,Y) for "+str;
     else str = "Save PM center positions (X,Y,Z) for "+str;
 
-    QString fileName = QFileDialog::getSaveFileName(this, str, GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    QString fileName = QFileDialog::getSaveFileName(this, str, GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
     if (fileName.isEmpty()) return;
-
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QFileInfo file(fileName);
     if(file.suffix().isEmpty()) fileName += ".dat";
 

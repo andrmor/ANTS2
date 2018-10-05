@@ -10,7 +10,7 @@
 #include "graphwindowclass.h"
 #include "detectorclass.h"
 #include "checkupwindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "amaterialparticlecolection.h"
 #include "ageomarkerclass.h"
 #include "ajsontools.h"
@@ -623,10 +623,10 @@ void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
 void MainWindow::on_pbGunLoadSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   qDebug()<<fileName;
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   int isource = ui->cobParticleSource->currentIndex();
   ParticleSourceStructure* ps = ParticleSources->getSource(isource);
@@ -911,7 +911,7 @@ void MainWindow::on_lwGunParticles_currentRowChanged(int /*currentRow*/)
 
 void MainWindow::on_pbSaveParticleSource_clicked()
 {
-  QString starter = (GlobSet->LibParticleSources.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibParticleSources;
+  QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
   QString fileName = QFileDialog::getSaveFileName(this, "Export particle source", starter, "Json files (*.json)");
   if (fileName.isEmpty()) return;
   QFileInfo file(fileName);
@@ -933,7 +933,7 @@ void MainWindow::on_pbLoadParticleSource_clicked()
   int ret = msgBox.exec();
   if (ret == QMessageBox::Cancel) return;
 
-  QString starter = (GlobSet->LibParticleSources.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibParticleSources;
+  QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
   QString fileName = QFileDialog::getOpenFileName(this, "Import particle source", starter, "json files (*.json)");
   if (fileName.isEmpty()) return;
   int iSource = ui->cobParticleSource->currentIndex();

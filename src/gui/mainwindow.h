@@ -10,6 +10,7 @@
 
 // forward declarations
 class AConfiguration;
+class AGlobalSettings;
 struct AEnergyDepositionCell;
 class GeoMarkerClass;
 class AParticleOnStack;
@@ -35,7 +36,6 @@ class TH1I;
 class ParticleSourcesClass;
 class WindowNavigatorClass;
 class GeometryWindowAddOn;
-class GlobalSettingsClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
@@ -78,8 +78,7 @@ public:
                ASimulationManager *SimulationManager,
                AReconstructionManager *ReconstructionManager,
                ANetworkModule *Net,
-               TmpObjHubClass *TmpHub,
-               GlobalSettingsClass *GlobSet);
+               TmpObjHubClass *TmpHub);
     ~MainWindow();
 
     // Pointers to external resources
@@ -94,7 +93,7 @@ public:
     AReconstructionManager *ReconstructionManager = 0;
     ANetworkModule* NetModule = 0;
     TmpObjHubClass *TmpHub = 0;
-    GlobalSettingsClass* GlobSet = 0;
+    AGlobalSettings& GlobSet;
 
     // ANTS2 windows
     GraphWindowClass *GraphWindow = 0;

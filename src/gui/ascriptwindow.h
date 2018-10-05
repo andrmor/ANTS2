@@ -21,8 +21,8 @@ class TObject;
 class QThread;
 class AScriptManager;
 class AScriptWindowTabItem;
-class GlobalSettingsClass;
 class QTextCursor;
+class AGlobalSettings;
 
 namespace Ui {
 class AScriptWindow;
@@ -33,7 +33,7 @@ class AScriptWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, bool LightMode, QWidget *parent);
+    explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
     void SetInterfaceObject(QObject *interfaceObject, QString name = "");
@@ -126,9 +126,7 @@ public:
 
 private:
     Ui::AScriptWindow *ui;
-    //QStringListModel* completitionModel;
-    GlobalSettingsClass* GlobSet;
-
+    AGlobalSettings& GlobSet;
     ScriptLanguageEnum ScriptLanguage = _JavaScript_;
 
     int CurrentTab;

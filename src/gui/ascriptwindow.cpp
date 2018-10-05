@@ -19,7 +19,7 @@
 #include "apythonscriptmanager.h"
 #endif
 
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "afiletools.h"
 
 #include <QScriptEngine>
@@ -49,9 +49,9 @@
 //#include <QTextDocumentFragment>
 #include <QHeaderView>
 
-AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
+AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
-    ui(new Ui::AScriptWindow)
+    ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
     {
@@ -80,10 +80,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &AScriptWindow::receivedOnAbort);
     QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
-    this->GlobSet = GlobSet;
-    ScriptManager->LibScripts  = &GlobSet->LibScripts;
-    ScriptManager->LastOpenDir = &GlobSet->LastOpenDir;
-    ScriptManager->ExamplesDir = &GlobSet->ExamplesDir;
+    ScriptManager->LibScripts  = &GlobSet.LibScripts;
+    ScriptManager->LastOpenDir = &GlobSet.LastOpenDir;
+    ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
     ShowEvalResult = true;
     ui->setupUi(this);
@@ -377,8 +376,8 @@ void AScriptWindow::WriteToJson()
     if (bLightMode) return;
 
     QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
@@ -409,8 +408,8 @@ void AScriptWindow::ReadFromJson()
     if (bLightMode) return;
 
     QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
@@ -515,7 +514,7 @@ void AScriptWindow::on_pbRunScript_clicked()
    if (!bLightMode)
    {
        WriteToJson();
-       GlobSet->SaveANTSconfiguration();
+       GlobSet.saveANTSconfiguration();
    }
 
    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
@@ -625,7 +624,7 @@ void AScriptWindow::on_pbStop_clicked()
 
 void AScriptWindow::on_pbLoad_clicked()
 {
-  QString starter = (GlobSet->LibScripts.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibScripts;
+  QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
   QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Script files (*.txt *.js);;All files (*.*)"); //""
   if (fileName.isEmpty()) return;
 
@@ -702,7 +701,7 @@ void AScriptWindow::on_pbSave_clicked()
 void AScriptWindow::on_pbSaveAs_clicked()
 {
     if (ScriptTabs.isEmpty()) return;
-    QString starter = (GlobSet->LibScripts.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibScripts;
+    QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
     if (!ScriptTabs[CurrentTab]->FileName.isEmpty()) starter = ScriptTabs[CurrentTab]->FileName;
     QString fileName = QFileDialog::getSaveFileName(this,"Save script", starter, "Script files (*.txt *.js);;All files (*.*)");
     if (fileName.isEmpty()) return;
@@ -751,7 +750,7 @@ void AScriptWindow::on_pbExample_clicked()
 
     //reading example database
     QString target = (ScriptLanguage == _JavaScript_ ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
-    QString RecordsFilename = GlobSet->ExamplesDir + "/" + target;
+    QString RecordsFilename = GlobSet.ExamplesDir + "/" + target;
     //check it is found
     QFile file(RecordsFilename);
     if (!file.open(QIODevice::ReadOnly))
@@ -1133,7 +1132,7 @@ void AScriptWindow::receivedOnSuccess(QString eval)
 
 void AScriptWindow::onDefaulFontSizeChanged(int size)
 {
-    GlobSet->DefaultFontSize_ScriptWindow = size;
+    GlobSet.DefaultFontSize_ScriptWindow = size;
     for (AScriptWindowTabItem* tab : ScriptTabs)
         tab->TextEdit->SetFontSize(size);
 }
@@ -1407,13 +1406,13 @@ void AScriptWindow::AddNewTab()
     //tab->TextEdit->functionList = functionList;
     UpdateTab(tab);
 
-    if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
+    if (GlobSet.DefaultFontFamily_ScriptWindow.isEmpty())
       {
-         tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+         tab->TextEdit->SetFontSize(GlobSet.DefaultFontSize_ScriptWindow);
       }
     else
       {
-        QFont font(GlobSet->DefaultFontFamily_ScriptWindow, GlobSet->DefaultFontSize_ScriptWindow, GlobSet->DefaultFontWeight_ScriptWindow, GlobSet->DefaultFontItalic_ScriptWindow);
+        QFont font(GlobSet.DefaultFontFamily_ScriptWindow, GlobSet.DefaultFontSize_ScriptWindow, GlobSet.DefaultFontWeight_ScriptWindow, GlobSet.DefaultFontItalic_ScriptWindow);
         tab->TextEdit->setFont(font);
       }
 
@@ -1488,15 +1487,15 @@ void AScriptWindow::on_pbHelp_toggled(bool checked)
 
 void AScriptWindow::on_actionIncrease_font_size_triggered()
 {
-    onDefaulFontSizeChanged(++GlobSet->DefaultFontSize_ScriptWindow);
+    onDefaulFontSizeChanged(++GlobSet.DefaultFontSize_ScriptWindow);
 }
 
 void AScriptWindow::on_actionDecrease_font_size_triggered()
 {
-    if (GlobSet->DefaultFontSize_ScriptWindow<1) return;
+    if (GlobSet.DefaultFontSize_ScriptWindow<1) return;
 
-    onDefaulFontSizeChanged(--GlobSet->DefaultFontSize_ScriptWindow);
-    //qDebug() << "New font size:"<<GlobSet->DefaultFontSize_ScriptWindow;
+    onDefaulFontSizeChanged(--GlobSet.DefaultFontSize_ScriptWindow);
+    //qDebug() << "New font size:"<<GlobSet.DefaultFontSize_ScriptWindow;
 }
 
 #include <QFontDialog>
@@ -1505,17 +1504,17 @@ void AScriptWindow::on_actionSelect_font_triggered()
   bool ok;
   QFont font = QFontDialog::getFont(
                   &ok,
-                  QFont(GlobSet->DefaultFontFamily_ScriptWindow,
-                        GlobSet->DefaultFontSize_ScriptWindow,
-                        GlobSet->DefaultFontWeight_ScriptWindow,
-                        GlobSet->DefaultFontItalic_ScriptWindow),
+                  QFont(GlobSet.DefaultFontFamily_ScriptWindow,
+                        GlobSet.DefaultFontSize_ScriptWindow,
+                        GlobSet.DefaultFontWeight_ScriptWindow,
+                        GlobSet.DefaultFontItalic_ScriptWindow),
                   this);
   if (!ok) return;
 
-  GlobSet->DefaultFontFamily_ScriptWindow = font.family();
-  GlobSet->DefaultFontSize_ScriptWindow = font.pointSize();
-  GlobSet->DefaultFontWeight_ScriptWindow = font.weight();
-  GlobSet->DefaultFontItalic_ScriptWindow = font.italic();
+  GlobSet.DefaultFontFamily_ScriptWindow = font.family();
+  GlobSet.DefaultFontSize_ScriptWindow = font.pointSize();
+  GlobSet.DefaultFontWeight_ScriptWindow = font.weight();
+  GlobSet.DefaultFontItalic_ScriptWindow = font.italic();
 
   for (AScriptWindowTabItem* tab : ScriptTabs)
       tab->TextEdit->setFont(font);
@@ -1603,7 +1602,7 @@ void AScriptWindow::on_actionRemove_all_tabs_triggered()
 void AScriptWindow::on_actionStore_all_tabs_triggered()
 {
     if (ScriptTabs.isEmpty()) return;
-    QString starter = GlobSet->LastOpenDir;
+    QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getSaveFileName(this,"Save session", starter, "Json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;
 
@@ -1634,7 +1633,7 @@ void AScriptWindow::on_actionRestore_session_triggered()
         if (ret != QMessageBox::Yes) return;
     }
 
-    QString starter = GlobSet->LastOpenDir;
+    QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;
 

@@ -257,7 +257,7 @@ void AWaveshifterOverride::loadReemissionProbability(QWidget* caller)
 {
     QString fileName = QFileDialog::getOpenFileName(caller, "Load reemission probability", "", "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    //GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    //GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QVector<double> X, Y;
     int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
     if (ret == 0)
@@ -271,7 +271,7 @@ void AWaveshifterOverride::loadEmissionSpectrum(QWidget *caller)
 {
     QString fileName = QFileDialog::getOpenFileName(caller, "Load emission spectrum", "", "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    //GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    //GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QVector<double> X, Y;
     int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
     if (ret == 0)

@@ -7,7 +7,6 @@
 #ifdef GUI
 #include "ascriptwindow.h"
 #include "ajavascriptmanager.h"
-#include "globalsettingsclass.h"
 #include <guiutils.h>
 #include "TRandom2.h"
 #include "aphoton.h"
@@ -109,7 +108,7 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *caller)
 
     TRandom2* RandGen = new TRandom2();
     AJavaScriptManager* sm = new AJavaScriptManager(RandGen);
-    AScriptWindow* sw = new AScriptWindow(sm, new GlobalSettingsClass(0), true, caller);
+    AScriptWindow* sw = new AScriptWindow(sm, true, caller);
 
     double v[3];
     v[0] = 0;

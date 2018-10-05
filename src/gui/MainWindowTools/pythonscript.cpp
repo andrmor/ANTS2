@@ -3,7 +3,7 @@
 #include "apythonscriptmanager.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "interfacetoglobscript.h"
 #include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
@@ -61,11 +61,11 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
   PythonScriptWindow->SetInterfaceObject(dat, "events");
 
-  InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet->RecNumTreads);
+  InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
   QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
   PythonScriptWindow->SetInterfaceObject(sim, "sim");
 
-  InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet->RecNumTreads);
+  InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet.RecNumTreads);
   QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
   QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
   PythonScriptWindow->SetInterfaceObject(rec, "rec");

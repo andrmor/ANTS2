@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "aglobalsettings.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"
 #include "materialinspectorwindow.h"
@@ -10,7 +11,6 @@
 #include "ajsontools.h"
 #include "particlesourcesclass.h"
 #include "aparticleonstack.h"
-#include "globalsettingsclass.h"
 #include "apmhub.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
@@ -51,7 +51,7 @@ bool MainWindow::readDetectorFromJson(QJsonObject &json)
 void MainWindow::onRequestDetectorGuiUpdate()
 {
     //qDebug() << "DetJson->DetGUI";
-  Detector->GeoManager->SetNsegments(GlobSet->NumSegments); //lost because GeoManager is new
+  Detector->GeoManager->SetNsegments(GlobSet.NumSegments); //lost because GeoManager is new
 
   DoNotUpdateGeometry = true;
   //Particles

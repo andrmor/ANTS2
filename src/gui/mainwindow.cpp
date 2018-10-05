@@ -28,7 +28,7 @@
 #include "areconstructionmanager.h"
 #include "apmtype.h"
 #include "globalsettingswindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "aopticaloverride.h"
 #include "phscatclaudiomodel.h"
 #include "scatteronmetal.h"
@@ -238,7 +238,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
    qDebug() << "<Saving remote servers";
    RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
-   GlobSet->SaveANTSconfiguration();
+   GlobSet.saveANTSconfiguration();
 
    EventsDataHub->clear();
 
@@ -1405,13 +1405,13 @@ void MainWindow::on_pbLoadPDE_clicked()
 {
   QString fileName;
   if (ui->cobPMdeviceType->currentIndex() == 0)
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   else
-    fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   //qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -1483,9 +1483,9 @@ void MainWindow::on_pbShowPDEbinned_clicked()
 void MainWindow::on_pbPMtypeLoadAngular_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -1581,9 +1581,9 @@ void MainWindow::on_ledMediumRefrIndex_editingFinished()
 void MainWindow::on_pbPMtypeLoadArea_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector< QVector <double> > tmp;
   double xStep, yStep;
@@ -2043,12 +2043,12 @@ void MainWindow::on_pbIndLoadDE_clicked()
 
   QString fileName;
   if (PMs->isSiPM(ipm))
-     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   else
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2102,9 +2102,9 @@ void MainWindow::on_pbAddPM_clicked()
 void MainWindow::on_pbIndLoadAngular_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2202,9 +2202,9 @@ void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
 void MainWindow::on_pbIndLoadArea_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     int ipm = ui->sbIndPMnumber->value();
     QVector< QVector <double> > tmp;
@@ -2322,11 +2322,11 @@ void MainWindow::UpdatePreprocessingSettingsIndication()
 
 void MainWindow::LoadPMsignalsRequested()
 {
-  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load events from ascii file(s)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load events from ascii file(s)", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   if (fileNames.isEmpty()) return;
   this->activateWindow();
   this->raise();
-  GlobSet->LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
 
   if (LoadedEventFiles.isEmpty()) MainWindow::ClearData(); // first load - make sure there is no data (e.g. sim events)
   else
@@ -2510,10 +2510,10 @@ void MainWindow::DeleteLoadedEvents(bool KeepFileList)
 void MainWindow::on_pbPreprocessingLoad_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this,
-                                                  "Load preprocessing data (ignores first column with PM number)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
+                                                  "Load preprocessing data (ignores first column with PM number)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadPreprocessingAddMulti(fileName);
   if (!EventsDataHub->Events.isEmpty()) ui->fReloadRequired->setVisible(true);
@@ -2522,10 +2522,10 @@ void MainWindow::on_pbPreprocessingLoad_clicked()
 void MainWindow::on_pbPreprocessingSave_clicked()
 {
   QString fileName = QFileDialog::getSaveFileName(this,
-                                                  "Save preprocessing data", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
+                                                  "Save preprocessing data", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::SavePreprocessingAddMulti(fileName);
 }
@@ -2569,9 +2569,9 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
 {
   int ipm = ui->sbElPMnumber->value();
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load Single Photoelectron Pulse Height Spectrum", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load Single Photoelectron Pulse Height Spectrum", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x, y;
   bool error = MainWindow::LoadSPePHSfile(fileName, &x, &y);
@@ -2801,9 +2801,9 @@ void MainWindow::on_cbEnableADC_toggled(bool checked)
 
 void MainWindow::on_pbScanDistrLoad_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadScanPhotonDistribution(fileName);
   MainWindow::on_pbUpdateSimConfig_clicked();
@@ -2856,9 +2856,9 @@ void MainWindow::on_pbSecScintShowProfile_clicked()
 
 void MainWindow::on_pbSecScintLoadProfile_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadSecScintTheta(fileName);
 }
@@ -2924,9 +2924,9 @@ void MainWindow::on_pbConfigureAddOns_clicked()
 
 void MainWindow::LoadSimTreeRequested()
 {  
-  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load/Append simulation data from Root tree", GlobSet->LastOpenDir, "Root files (*.root)");
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load/Append simulation data from Root tree", GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileNames.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
 
   if (LoadedTreeFiles.isEmpty()) MainWindow::ClearData(); //clear ascii loaded data  or sim if present
   else
@@ -3280,11 +3280,11 @@ void MainWindow::CalculateIndividualQEPDE()
 
 void MainWindow::on_pbLoadRelQEfactors_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   Detector->PMs->setDoPHS( true );
 
@@ -3305,11 +3305,11 @@ void MainWindow::on_pbLoadRelQEfactors_clicked()
 
 void MainWindow::on_pbLoadRelELfactors_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   Detector->PMs->setDoPHS( true );
 
@@ -3427,9 +3427,9 @@ void MainWindow::SaveSimulationDataTree()
       message("No data to save!", this);
       return;
     }
-  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as Root Tree", GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as Root Tree", GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
 
   bool ok = EventsDataHub->saveSimulationAsTree(fileName);
@@ -3443,12 +3443,12 @@ void MainWindow::SaveSimulationDataAsText()
       message("No data to save!", this);
       return;
     }
-  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as text file", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as text file", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".dat";
 
-  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet->SimTextSave_IncludeNumPhotons, GlobSet->SimTextSave_IncludePositions);
+  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet.SimTextSave_IncludeNumPhotons, GlobSet.SimTextSave_IncludePositions);
   if (!ok) message("Error writing to file!", this);
 }
 
@@ -3775,7 +3775,7 @@ void MainWindow::startSimulation(QJsonObject &json)
 {
     WindowNavigator->BusyOn(); //go busy mode, most of gui controls disabled
     ui->pbStopScan->setEnabled(true);
-    SimulationManager->StartSimulation(json, GlobSet->NumThreads, true);
+    SimulationManager->StartSimulation(json, GlobSet.NumThreads, true);
 }
 
 void MainWindow::simulationFinished()
@@ -3834,7 +3834,7 @@ void MainWindow::simulationFinished()
         SimulationManager->Tracks.clear(); //to avoid delete content
 
         int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet->MaxNumberOfTracks */; iTr++)
+        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet.MaxNumberOfTracks */; iTr++)
           {
             const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
@@ -3931,7 +3931,7 @@ void MainWindow::on_pbTrackStack_clicked()
             {
                 const TrackHolderClass* th = pss->tracks[iTr];
 
-                //if (numTracks<GlobSet->MaxNumberOfTracks)
+                //if (numTracks<GlobSet.MaxNumberOfTracks)
                 //{
                     TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                     track->SetLineColor(th->Color);
@@ -4026,7 +4026,7 @@ void MainWindow::on_pbGDML_clicked()
 
 void MainWindow::on_pbSavePMtype_clicked()
 {
-  QString starter = (GlobSet->LibPMtypes.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibPMtypes;
+  QString starter = (GlobSet.LibPMtypes.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibPMtypes;
   starter += "/PMtype_"+ui->lePMtypeName->text();
 
   QFileDialog fileDialog;
@@ -4049,7 +4049,7 @@ void MainWindow::on_pbSavePMtype_clicked()
 
 void MainWindow::on_pbLoadPMtype_clicked()
 {
-  QString starter = (GlobSet->LibPMtypes.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibPMtypes;
+  QString starter = (GlobSet.LibPMtypes.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibPMtypes;
   QFileDialog fileDialog;
   QString fileName = fileDialog.getOpenFileName(this, "Load PM type properties", starter, "Json files (*.json);; All files (*.*)");
   if (fileName.isEmpty()) return;
@@ -4094,9 +4094,9 @@ void MainWindow::on_pbLoadPMtype_clicked()
 void MainWindow::on_pbLoadNodes_clicked()
 {
   QFileDialog fileDialog;
-  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet->LastOpenDir, "Text files (*.txt);; All files (*.*)");
+  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet.LastOpenDir, "Text files (*.txt);; All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x, y, z;
   int err = LoadDoubleVectorsFromFile(fileName, &x, &y, &z);
@@ -4127,7 +4127,7 @@ void MainWindow::on_pbRunNodeScript_clicked()
   delete GenScriptWindow; GenScriptWindow = 0;
 
   AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-  GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
+  GenScriptWindow = new AScriptWindow(jsm, true, this);
   GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
   NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
@@ -4158,7 +4158,7 @@ void MainWindow::on_actionOpen_settings_triggered()
 
 void MainWindow::on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1)
 {
-   GlobSet->SaveLoadWindows = arg1;
+   GlobSet.SaveLoadWindows = arg1;
 }
 
 void MainWindow::on_pbUpdateElectronics_clicked()
@@ -4199,9 +4199,9 @@ void MainWindow::on_pbOverlay_clicked()
       return;
     }
 
-  QString fileName = QFileDialog::getOpenFileName(this, "Overlay simulation data with data from an ASCII file", GlobSet->LastOpenDir, "All file (*.*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Overlay simulation data with data from an ASCII file", GlobSet.LastOpenDir, "All file (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   WindowNavigator->BusyOn();
   bool ok = EventsDataHub->overlayAsciiFile(fileName, ui->cbApplyAddMultiplyPreprocess->isChecked(), Detector->PMs);
@@ -4215,11 +4215,11 @@ void MainWindow::on_pbOverlay_clicked()
 
 void MainWindow::on_pbLoadManifestFile_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load manifest file", GlobSet->LastOpenDir, "Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load manifest file", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
   //this->activateWindow();
   //this->raise();
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   ui->leManifestFile->setText(fileName);
   ui->cbLoadedDataHasPosition->setChecked(false);
@@ -4550,7 +4550,7 @@ void MainWindow::on_pbShowMCcrosstalk_clicked()
   PMs->prepareMCcrosstalk();
 
   int ipm = ui->sbElPMnumber->value();
-  TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet->BinsX, 0, 0);
+  TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet.BinsX, 0, 0);
   for (int i=0; i<1000000; i++)
       hist->Fill(PMs->at(ipm).MCsampl->sample(Detector->RandGen)+1);
 
@@ -4561,9 +4561,9 @@ void MainWindow::on_pbLoadMCcrosstalk_clicked()
 {
     int ipm = ui->sbElPMnumber->value();
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load MC cross-talk distribution\nFile should contain a single column of values, starting with the probability for single event.\nData may be not normalized.", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load MC cross-talk distribution\nFile should contain a single column of values, starting with the probability for single event.\nData may be not normalized.", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QVector<double> v;
     bool error = LoadDoubleVectorsFromFile(fileName, &v);
@@ -4725,9 +4725,9 @@ void MainWindow::on_pbDarkCounts_Load_clicked()
         return;
     }
 
-    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QVector<double> x;
     int res = LoadDoubleVectorsFromFile(fileName, &x);

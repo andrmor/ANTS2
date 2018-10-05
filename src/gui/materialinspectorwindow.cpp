@@ -7,7 +7,7 @@
 #include "windownavigatorclass.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "afiletools.h"
 #include "amessage.h"
@@ -95,7 +95,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
                   "Import the file by clicking \"Import from XCOM\" button.";
     ui->pbImportXCOM->setToolTip(str);
 
-    OptionsConfigurator = new AMatParticleConfigurator(MW->GlobSet, this);
+    OptionsConfigurator = new AMatParticleConfigurator(this);
 
 
     QPixmap pm(QSize(16,16));
@@ -534,10 +534,10 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load dE/dr data", MW->GlobSet->LastOpenDir, "Data files (*.dat)");
+  fileName = QFileDialog::getOpenFileName(this, "Load dE/dr data", MW->GlobSet.LastOpenDir, "Data files (*.dat)");
 
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
@@ -607,10 +607,10 @@ void MaterialInspectorWindow::on_pbLoadThisScenarioCrossSection_clicked()
 {
     QString fileName;
     fileName = QFileDialog::getOpenFileName(this, "Load mass interaction coefficient data.\n"
-                                            "The file should contain 4 colums: energy[keV], photoelectric_data[cm2/g], compton_data[cm2/g], pair_production_data[cm2/g]", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files(*)");
+                                            "The file should contain 4 colums: energy[keV], photoelectric_data[cm2/g], compton_data[cm2/g], pair_production_data[cm2/g]", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files(*)");
 
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
     int particleId = ui->cobParticle->currentIndex();
@@ -665,10 +665,10 @@ void MaterialInspectorWindow::on_ledIntEnergyRes_editingFinished()
 void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Import stopping power data from a Trim file", MW->GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Import stopping power data from a Trim file", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
     //qDebug()<<fileName;
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     int particleId = ui->cobParticle->currentIndex();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
@@ -846,9 +846,9 @@ void MaterialInspectorWindow::on_pbImportStoppingPowerFromTrim_clicked()
 void MaterialInspectorWindow::on_pbImportXCOM_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Import partial interaction coefficients from an XCOM file", MW->GlobSet->LastOpenDir, "Text and data files (*.dat *.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Import partial interaction coefficients from an XCOM file", MW->GlobSet.LastOpenDir, "Text and data files (*.dat *.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFile file(fileName);
   if(!file.open(QIODevice::ReadOnly | QFile::Text))
@@ -1054,10 +1054,10 @@ void MaterialInspectorWindow::AddMatToCobs(QString str)
 void MaterialInspectorWindow::on_pbLoadPrimSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load primary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.PrimarySpectrum_lambda, &tmpMaterial.PrimarySpectrum);  //cleans previous data
@@ -1132,10 +1132,10 @@ void MaterialInspectorWindow::ConvertToStandardWavelengthes(QVector<double>* sp_
 void MaterialInspectorWindow::on_pbLoadSecSpectrum_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet->LastOpenDir, "Data files (*.dat);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load secondary scintillation spectrum", MW->GlobSet.LastOpenDir, "Data files (*.dat);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.SecondarySpectrum_lambda, &tmpMaterial.SecondarySpectrum);  //cleans previous data
@@ -1179,10 +1179,10 @@ void MaterialInspectorWindow::on_pbDeleteSecSpectrum_clicked()
 void MaterialInspectorWindow::on_pbLoadNlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load refractive index data", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.nWave_lambda, &tmpMaterial.nWave);  //cleans previous data too
@@ -1226,10 +1226,10 @@ void MaterialInspectorWindow::on_pbDeleteNlambda_clicked()
 void MaterialInspectorWindow::on_pbLoadABSlambda_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load exponential bulk absorption data", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
   LoadDoubleVectorsFromFile(fileName, &tmpMaterial.absWave_lambda, &tmpMaterial.absWave);  //cleans previous data too
@@ -1278,10 +1278,10 @@ void MaterialInspectorWindow::on_pbShowReemProbLambda_clicked()
 void MaterialInspectorWindow::on_pbLoadReemisProbLambda_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load reemission probability vs wavelength", MW->GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load reemission probability vs wavelength", MW->GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*.*)");
 
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
 
     LoadDoubleVectorsFromFile(fileName, &tmpMaterial.reemisProbWave_lambda, &tmpMaterial.reemisProbWave);  //cleans previous data too
@@ -1705,7 +1705,7 @@ void MaterialInspectorWindow::on_actionSave_material_triggered()
       return;
     }
 
-  QString starter = (MW->GlobSet->LibMaterials.isEmpty()) ? MW->GlobSet->LastOpenDir : MW->GlobSet->LibMaterials;
+  QString starter = (MW->GlobSet.LibMaterials.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibMaterials;
   int imat = ui->cobActiveMaterials->currentIndex();
   if (imat == -1) starter += "/Material_";
   else starter += "/Material_"+(*Detector->MpCollection)[imat]->name;
@@ -1723,7 +1723,7 @@ void MaterialInspectorWindow::on_actionSave_material_triggered()
 
 void MaterialInspectorWindow::on_actionLoad_material_triggered()
 {
-  QString starter = (MW->GlobSet->LibMaterials.isEmpty()) ? MW->GlobSet->LastOpenDir : MW->GlobSet->LibMaterials;
+  QString starter = (MW->GlobSet.LibMaterials.isEmpty()) ? MW->GlobSet.LastOpenDir : MW->GlobSet.LibMaterials;
   QString fileName = QFileDialog::getOpenFileName(this, "Load material", starter, "Material files (*mat *.json);;All files (*.*)");
   if (fileName.isEmpty()) return;
 
@@ -2163,7 +2163,7 @@ bool MaterialInspectorWindow::autoLoadCrossSection(ANeutronInteractionElement *e
 
 int MaterialInspectorWindow::autoLoadReaction(ANeutronInteractionElement& element)
 {
-    QString fileName = QString("%1/Neutrons/Reactions/%2-%3.json").arg(MW->GlobSet->ResourcesDir).arg(element.Name).arg(element.Mass);
+    QString fileName = QString("%1/Neutrons/Reactions/%2-%3.json").arg(MW->GlobSet.ResourcesDir).arg(element.Name).arg(element.Mass);
     //  qDebug() << "Is there file for reaction? "<<fileName;
 
     int delta = 0;
@@ -2616,7 +2616,7 @@ void MaterialInspectorWindow::on_cbEnableScatter_clicked()
 
 void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, const QString Action)
 {
-    if (MW->GlobSet->MaterialsAndParticlesSettings.isEmpty())
+    if (MW->GlobSet.MaterialsAndParticlesSettings.isEmpty())
         on_actionNeutrons_triggered();
 
     //      qDebug() << "Element#"<<iEl << "Isotope#:"<<iIso <<Action;
@@ -2697,9 +2697,9 @@ void MaterialInspectorWindow::onTabwNeutronsActionRequest(int iEl, int iIso, con
             }
         }
 
-        QString fileName = QFileDialog::getOpenFileName(this, "Load " + target + " cross-section data for " + isotope, MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+        QString fileName = QFileDialog::getOpenFileName(this, "Load " + target + " cross-section data for " + isotope, MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
         if (fileName.isEmpty()) return;
-        MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+        MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
         doLoadCrossSection(element, fileName);
         FillNeutronTable();
@@ -2937,7 +2937,7 @@ void MaterialInspectorWindow::on_pbPriT_test_clicked()
 
 void MaterialInspectorWindow::on_actionNeutrons_triggered()
 {
-    OptionsConfigurator->setStarterDir(MW->GlobSet->LastOpenDir);
+    OptionsConfigurator->setStarterDir(MW->GlobSet.LastOpenDir);
     OptionsConfigurator->showNormal();
 }
 
@@ -2958,7 +2958,7 @@ void MaterialInspectorWindow::on_pbShowNcmat_clicked()
 void MaterialInspectorWindow::on_pbLoadNcmat_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load NCrystal ncmat file", MW->GlobSet->LastOpenDir, "Ncmat files (*.ncmat)");
+    fileName = QFileDialog::getOpenFileName(this, "Load NCrystal ncmat file", MW->GlobSet.LastOpenDir, "Ncmat files (*.ncmat)");
     if (fileName.isEmpty()) return;
 
 #ifdef __USE_ANTS_NCRYSTAL__

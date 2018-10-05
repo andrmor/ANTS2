@@ -10,7 +10,7 @@
 #include "geometrywindowclass.h"
 #include "exampleswindow.h"
 #include "gainevaluatorwindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ascriptwindow.h"
 #include "detectoraddonswindow.h"
 
@@ -76,10 +76,10 @@ void WindowNavigatorClass::SetupWindowsTaskbar()
 
     QWinJumpList* jumplist = new QWinJumpList(this);
     //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
-    jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet->AntsBaseDir));
-    jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet->LastOpenDir));
-    if (!MW->GlobSet->LibScripts.isEmpty())
-        jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet->LibScripts));
+    jumplist->tasks()->addLink(QString("Base dir"), QDir::toNativeSeparators(MW->GlobSet.AntsBaseDir));
+    jumplist->tasks()->addLink(QString("Last working dir"), QDir::toNativeSeparators(MW->GlobSet.LastOpenDir));
+    if (!MW->GlobSet.LibScripts.isEmpty())
+        jumplist->tasks()->addLink(QString("Script dir"), QDir::toNativeSeparators(MW->GlobSet.LibScripts));
     //jumplist->tasks()->addSeparator();
     jumplist->tasks()->setVisible(true);
 

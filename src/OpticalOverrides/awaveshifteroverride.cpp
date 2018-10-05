@@ -163,7 +163,43 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
 
 const QString AWaveshifterOverride::getReportLine() const
 {
-    return QString();
+    QString s = QString("CProb %1 pts; Spectr %2 pts; Mod: ").arg(ReemissionProbability_lambda.size()).arg(EmissionSpectrum_lambda.size());
+    switch( ReemissionModel )
+    {
+    case 0:
+        s += "Iso";
+        break;
+    case 1:
+        s += "Lamb_B";
+        break;
+    case 2:
+        s += "Lamb_F";
+        break;
+    }
+    return s;
+}
+
+const QString AWaveshifterOverride::getLongReportLine() const
+{
+    QString s = "--> Wavelength shifter <--\n";
+    s += QString("Reemission probaility from %1 to %2 nm\n").arg(ReemissionProbability_lambda.first()).arg(ReemissionProbability_lambda.last());
+    s += QString("Number of points: %1\n").arg(ReemissionProbability_lambda.size());
+    s += QString("Emission spectrum from %1 to %2 nm\n").arg(EmissionSpectrum_lambda.first()).arg(EmissionSpectrum_lambda.last());
+    s += QString("Number of points: %1\n").arg(EmissionSpectrum_lambda.size());
+    s += "Reemission model: ";
+    switch( ReemissionModel )
+    {
+    case 0:
+        s += "isotropic";
+        break;
+    case 1:
+        s += "Lambertian, back";
+        break;
+    case 2:
+        s += "Lambertian, forward";
+        break;
+    }
+    return s;
 }
 
 void AWaveshifterOverride::writeToJson(QJsonObject &json) const

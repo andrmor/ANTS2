@@ -59,7 +59,6 @@ public:
     : PhScatClaudioModel(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override;
   virtual const QString getType() const override {return "Claudio_Model_V2";}
-  virtual const QString getReportLine() const override;
 
 protected:
   virtual double GnFunc(double cost) override;
@@ -73,7 +72,6 @@ public:
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override;
   virtual const QString getType() const override {return "Claudio_Model_V2d1";}
-  virtual const QString getReportLine() const override;
 };
 
 class PhScatClaudioModelV2d2 : public PhScatClaudioModelV2
@@ -83,7 +81,6 @@ public:
     : PhScatClaudioModelV2(MatCollection, MatFrom, MatTo) {}
   virtual OpticalOverrideResultEnum calculate(ATracerStateful& Resources, APhoton* Photon, const double* NormalVector) override;
   virtual const QString getType() const override {return "ClaudioModel";}
-  virtual const QString getReportLine() const override;
 };
 
 #endif // PHSCATCLAUDIOMODEL_H

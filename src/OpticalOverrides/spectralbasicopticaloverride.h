@@ -24,6 +24,7 @@ public:
   virtual const QString getType() const override {return "SimplisticSpectral";}
   virtual const QString getAbbreviation() const override {return "SiSp";}
   virtual const QString getReportLine() const override;
+  virtual const QString getLongReportLine() const override;
 
   // save/load config is not used for this type!
   virtual void writeToJson(QJsonObject &json) const override;

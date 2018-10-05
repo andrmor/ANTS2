@@ -36,12 +36,16 @@ AOpticalOverride::OpticalOverrideResultEnum AScriptOpticalOverride::calculate(AT
 
 const QString AScriptOpticalOverride::getReportLine() const
 {
-    return QString();
+    QString s = Script.simplified().left(40);
+    s += "...";
+    return s;
 }
 
 const QString AScriptOpticalOverride::getLongReportLine() const
 {
-    return Script;
+    QString s = "--> Custom script <--\n";
+    s += Script;
+    return s;
 }
 
 void AScriptOpticalOverride::writeToJson(QJsonObject &json) const

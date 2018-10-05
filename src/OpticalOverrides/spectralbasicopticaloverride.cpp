@@ -59,6 +59,15 @@ const QString SpectralBasicOpticalOverride::getReportLine() const
     return QString("Spectral data with %1 points").arg(Wave.size());
 }
 
+const QString SpectralBasicOpticalOverride::getLongReportLine() const
+{
+    QString s = "--> Simplistic spectral <--\n";
+    s += QString("Spectral data from %1 to %2 nm\n").arg(Wave.first()).arg(Wave.last());
+    s += QString("Number of points: %1\n").arg(Wave.size());
+    s += QString("Effective wavelength: %1").arg(effectiveWavelength);
+    return s;
+}
+
 void SpectralBasicOpticalOverride::writeToJson(QJsonObject &json) const
 {
     AOpticalOverride::writeToJson(json);

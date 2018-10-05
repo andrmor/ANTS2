@@ -25,6 +25,7 @@ public:
   virtual const QString getType() const override {return "SurfaceWLS";}
   virtual const QString getAbbreviation() const override {return "WLS";}
   virtual const QString getReportLine() const override;
+  virtual const QString getLongReportLine() const override;
 
   // save/load config is not used for this type!
   virtual void writeToJson(QJsonObject &json) const;

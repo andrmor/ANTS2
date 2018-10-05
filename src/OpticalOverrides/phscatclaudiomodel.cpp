@@ -50,9 +50,23 @@ const QString PhScatClaudioModel::getReportLine() const
 const QString PhScatClaudioModel::getLongReportLine() const
 {
         QString s = "--> Caludio's model v2.2 <--\n";
-//        s += "Refractive index of metal:\n";
-//        s += QString("  real: %1\n").arg(RealN);
-//        s += QString("  imaginary: %1").arg(ImaginaryN);
+        s += QString("Sigma alpha: %1\n").arg(sigma_alpha);
+        s += QString("Sigma height: %1\n").arg(sigma_h);
+        s += QString("Albedo: %1\n").arg(albedo);
+        s += "Height distribution: ";
+        switch (HeightDistribution)
+        {
+        case empirical : s += "emprirical"; break;
+        case gaussian : s += "gaussian"; break;
+        case exponential : s += "exponential"; break;
+        }
+        s += "\nSlope distribution: ";
+        switch (SlopeDistribution)
+        {
+        case trowbridgereitz : s += "trowbridgereitz"; break;
+        case cooktorrance : s += "cooktorrance"; break;
+        case bivariatecauchy : s += "bivariatecauchy"; break;
+        }
         return s;
 }
 
@@ -374,11 +388,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
   return Back;
 }
 
-const QString PhScatClaudioModelV2::getReportLine() const
-{
-  return " v2";
-}
-
 AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   TVector3 K(Photon->v);                // photon direction
@@ -550,11 +559,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
   return Back;
 }
 
-const QString PhScatClaudioModelV2d2::getReportLine() const
-{
-  return " v2.2";
-}
-
 AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   TVector3 K(Photon->v);                // photon direction
@@ -724,9 +728,4 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
     Photon->v[2] = K.Z();
     //qDebug() << "---"<<(int)Status<<PhotonDir[0]<<PhotonDir[1]<<PhotonDir[2];
     return Back;
-}
-
-const QString PhScatClaudioModelV2d1::getReportLine() const
-{
-  return " v2.1";
 }

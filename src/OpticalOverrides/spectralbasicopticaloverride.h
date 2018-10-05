@@ -12,6 +12,7 @@ class ATracerStateful;
 class APhoton;
 class QJsonObject;
 class GraphWindowClass;
+class QPushButton;
 
 class SpectralBasicOpticalOverride : public ABasicOpticalOverride
 {
@@ -53,9 +54,11 @@ public:
 
 private:
 #ifdef GUI
+  QPushButton *pbShow, *pbShowBinned;
   void loadSpectralData(QWidget *caller);
   void showLoaded(GraphWindowClass *GraphWindow);
   void showBinned(QWidget *widget, GraphWindowClass *GraphWindow);
+  void updateButtons();
 #endif
 };
 

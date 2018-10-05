@@ -9,6 +9,7 @@
 
 #include <QJsonObject>
 #include <QVBoxLayout>
+#include <QDebug>
 
 AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * MatCollection, int matFrom, int matTo,
                                                GraphWindowClass * GraphWindow, GeometryWindowClass *GeometryWindow, QWidget * parent) :
@@ -72,6 +73,20 @@ void AOpticalOverrideDialog::updateGui()
     }
 }
 
+AOpticalOverride *AOpticalOverrideDialog::findInOpended(const QString &ovType)
+{
+    for (AOpticalOverride* ov : openedOVs)
+        if (ov->getType() == ovType) return ov;
+    return 0;
+}
+
+void AOpticalOverrideDialog::clearOpenedExcept(AOpticalOverride *keepOV)
+{
+    for (AOpticalOverride* ov : openedOVs)
+        if (ov != keepOV) delete ov;
+    openedOVs.clear();
+}
+
 void AOpticalOverrideDialog::on_pbAccept_clicked()
 {
     if (ovLocal)
@@ -84,6 +99,8 @@ void AOpticalOverrideDialog::on_pbAccept_clicked()
         }
     }
 
+    clearOpenedExcept(ovLocal);
+
     delete (*MatCollection)[matFrom]->OpticalOverrides[matTo];
     (*MatCollection)[matFrom]->OpticalOverrides[matTo] = ovLocal;
     accept();
@@ -91,17 +108,23 @@ void AOpticalOverrideDialog::on_pbAccept_clicked()
 
 void AOpticalOverrideDialog::on_pbCancel_clicked()
 {
+    clearOpenedExcept(ovLocal);
     delete ovLocal; ovLocal = 0;
     reject();
 }
 
 void AOpticalOverrideDialog::on_cobType_activated(int index)
 {
-    delete ovLocal; ovLocal = 0;
+    if (ovLocal) openedOVs << ovLocal;
+    ovLocal = 0;
 
     if (index != 0)
-         ovLocal = OpticalOverrideFactory(ui->cobType->currentText(), MatCollection, matFrom, matTo);
-
+    {
+         QString selectedType = ui->cobType->currentText();
+         ovLocal = findInOpended(selectedType);
+         if (!ovLocal)
+            ovLocal = OpticalOverrideFactory(ui->cobType->currentText(), MatCollection, matFrom, matTo);
+    }
     updateGui();
 }
 

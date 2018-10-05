@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QStringList>
+#include <QSet>
 
 namespace Ui {
 class AOpticalOverrideDialog;
@@ -44,7 +45,11 @@ private:
     int customWidgetPositionInLayout = 5;
     QWidget* customWidget = 0;
 
+    QSet<AOpticalOverride*> openedOVs;
+
     void updateGui();
+    AOpticalOverride* findInOpended(const QString& ovType);
+    void clearOpenedExcept(AOpticalOverride* keepOV);
 };
 
 #endif // AOPTICALOVERRIDEDIALOG_H

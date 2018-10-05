@@ -266,25 +266,26 @@ QWidget *AWaveshifterOverride::getEditWidget(QWidget *caller, GraphWindowClass *
             vv->addWidget(pb);
         l->addLayout(vv);
             vv = new QVBoxLayout();
-                pb = new QPushButton("Show");
-                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showReemissionProbability(GraphWindow, caller);});
-            vv->addWidget(pb);
-                pb = new QPushButton("Show");
-                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showEmissionSpectrum(GraphWindow, caller);});
-            vv->addWidget(pb);
+                pbShowRP = new QPushButton("Show");
+                QObject::connect(pbShowRP, &QPushButton::clicked, [GraphWindow, caller, this] {showReemissionProbability(GraphWindow, caller);});
+            vv->addWidget(pbShowRP);
+                pbShowES = new QPushButton("Show");
+                QObject::connect(pbShowES, &QPushButton::clicked, [GraphWindow, caller, this] {showEmissionSpectrum(GraphWindow, caller);});
+            vv->addWidget(pbShowES);
         l->addLayout(vv);
             vv = new QVBoxLayout();
-                pb = new QPushButton("Binned");
-                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedReemissionProbability(GraphWindow, caller);});
-            vv->addWidget(pb);
-                pb = new QPushButton("Binned");
-                QObject::connect(pb, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedEmissionSpectrum(GraphWindow, caller);});
-            vv->addWidget(pb);
+                pbShowRPbinned = new QPushButton("Binned");
+                QObject::connect(pbShowRPbinned, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedReemissionProbability(GraphWindow, caller);});
+            vv->addWidget(pbShowRPbinned);
+                pbShowESbinned = new QPushButton("Binned");
+                QObject::connect(pbShowESbinned, &QPushButton::clicked, [GraphWindow, caller, this] {showBinnedEmissionSpectrum(GraphWindow, caller);});
+            vv->addWidget(pbShowESbinned);
         l->addLayout(vv);
     vl->addLayout(l);
         lab = new QLabel("If simulation is NOT wavelength-resolved, this override does nothing!");
         lab->setAlignment(Qt::AlignCenter);
     vl->addWidget(lab);
+    updateButtons();
 
     return f;
 }
@@ -303,6 +304,7 @@ void AWaveshifterOverride::loadReemissionProbability(QWidget* caller)
     {
         ReemissionProbability_lambda = X;
         ReemissionProbability = Y;
+        updateButtons();
     }
 }
 
@@ -318,6 +320,7 @@ void AWaveshifterOverride::loadEmissionSpectrum(QWidget *caller)
     {
         EmissionSpectrum_lambda = X;
         EmissionSpectrum = Y;
+        updateButtons();
     }
 }
 
@@ -394,6 +397,15 @@ void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWin
     SpectrumCopy->GetXaxis()->SetTitle("Wavelength, nm");
     SpectrumCopy->GetYaxis()->SetTitle("Relative intensity, a.u.");
     GraphWindow->Draw(SpectrumCopy, "hist"); //gets ownership of the copy
+}
+
+void AWaveshifterOverride::updateButtons()
+{
+    pbShowRP->setDisabled(ReemissionProbability_lambda.isEmpty());
+    pbShowES->setDisabled(EmissionSpectrum_lambda.isEmpty());
+    bool bWR = MatCollection->IsWaveResolved();
+    pbShowRPbinned->setDisabled(!bWR || ReemissionProbability_lambda.isEmpty());
+    pbShowESbinned->setDisabled(!bWR || EmissionSpectrum_lambda.isEmpty());
 }
 #endif
 

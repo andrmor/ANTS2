@@ -257,6 +257,13 @@ void SpectralBasicOpticalOverride::showBinned(QWidget *widget, GraphWindowClass 
     mg->GetYaxis()->SetTitle("Probability");
     GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
 }
+
+void SpectralBasicOpticalOverride::updateButtons()
+{
+    pbShow->setDisabled(Wave.isEmpty());
+    bool bWR = MatCollection->IsWaveResolved();
+    pbShowBinned->setDisabled(!bWR || Wave.isEmpty());
+}
 #endif
 
 #ifdef GUI
@@ -273,12 +280,12 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller, GraphWindo
             pb->setToolTip("Every line of the file should contain 4 numbers:\nwavelength[nm] absorption_prob[0..1] reflection_prob[0..1] scattering_prob[0..1]");
             QObject::connect(pb, &QPushButton::clicked, [caller, this] {loadSpectralData(caller);});
         l->addWidget(pb);
-            pb = new QPushButton("Show");
-            QObject::connect(pb, &QPushButton::clicked, [GraphWindow, this] {showLoaded(GraphWindow);});
-        l->addWidget(pb);
-            pb = new QPushButton("Binned");
-            QObject::connect(pb, &QPushButton::clicked, [caller, GraphWindow, this] {showBinned(caller, GraphWindow);});
-        l->addWidget(pb);
+            pbShow = new QPushButton("Show");
+            QObject::connect(pbShow, &QPushButton::clicked, [GraphWindow, this] {showLoaded(GraphWindow);});
+        l->addWidget(pbShow);
+            pbShowBinned = new QPushButton("Binned");
+            QObject::connect(pbShowBinned, &QPushButton::clicked, [caller, GraphWindow, this] {showBinned(caller, GraphWindow);});
+        l->addWidget(pbShowBinned);
     vl->addLayout(l);
         l = new QHBoxLayout();
             lab = new QLabel("Scattering model:");
@@ -303,6 +310,7 @@ QWidget *SpectralBasicOpticalOverride::getEditWidget(QWidget *caller, GraphWindo
             lab = new QLabel("nm");
         l->addWidget(lab);
     vl->addLayout(l);
+    updateButtons();
 
     return f;
 }

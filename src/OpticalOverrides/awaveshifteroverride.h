@@ -12,6 +12,7 @@ class APhoton;
 class QJsonObject;
 class GraphWindowClass;
 class TH1D;
+class QPushButton;
 
 class AWaveshifterOverride : public AOpticalOverride
 {
@@ -53,12 +54,14 @@ public:
 
 private:
 #ifdef GUI
+  QPushButton *pbShowRP, *pbShowRPbinned, *pbShowES, *pbShowESbinned;
   void loadReemissionProbability(QWidget *caller);
   void loadEmissionSpectrum(QWidget *caller);
   void showReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
   void showEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
   void showBinnedReemissionProbability(GraphWindowClass* GraphWindow, QWidget *caller);
   void showBinnedEmissionSpectrum(GraphWindowClass* GraphWindow, QWidget *caller);
+  void updateButtons();
 #endif
 };
 

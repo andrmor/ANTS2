@@ -239,6 +239,8 @@ QWidget *ABasicOpticalOverride::getEditWidget(QWidget*, GraphWindowClass *)
 
 const QString ABasicOpticalOverride::checkOverrideData()
 {
+    if (scatterModel<0 || scatterModel>2) return "Invalid scatter model";
+
     if (probLoss<0 || probLoss>1.0) return "Absorption probability should be within [0, 1.0]";
     if (probRef <0 || probRef >1.0) return "Reflection probability should be within [0, 1.0]";
     if (probDiff<0 || probDiff>1.0) return "Scattering probability should be within [0, 1.0]";

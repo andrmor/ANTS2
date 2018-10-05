@@ -411,6 +411,8 @@ void AWaveshifterOverride::updateButtons()
 
 const QString AWaveshifterOverride::checkOverrideData()
 {
+    if (ReemissionModel<0 || ReemissionModel>2) return "Invalid reemission model";
+
     if (ReemissionProbability_lambda.isEmpty())
         return "Reemission probability not loaded";
     if (ReemissionProbability_lambda.size() != ReemissionProbability.size())

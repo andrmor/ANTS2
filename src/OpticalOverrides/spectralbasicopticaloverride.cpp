@@ -332,8 +332,5 @@ const QString SpectralBasicOpticalOverride::checkOverrideData()
     }
     if (scatterModel < 0 || scatterModel > 2) return "unknown scattering model";
 
-    //TODO check effective wavelength
-    //TODO check binned
-
     return "";
 }

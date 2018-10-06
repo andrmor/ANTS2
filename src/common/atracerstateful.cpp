@@ -54,3 +54,9 @@ void ATracerStateful::generateScriptInfrastructure(const AMaterialParticleCollec
     val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
     ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);
 }
+
+void ATracerStateful::abort()
+{
+    if (ScriptEngine)
+        ScriptEngine->abortEvaluation();
+}

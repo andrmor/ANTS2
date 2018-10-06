@@ -3782,6 +3782,7 @@ void MainWindow::simulationFinished()
 {
       //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size();
     ui->pbStopScan->setEnabled(false);
+    ui->pbStopScan->setText("stop");
 
     if (!SimulationManager->fSuccess)
     {        
@@ -3789,37 +3790,20 @@ void MainWindow::simulationFinished()
         ui->leEventsPerSec->setText("n.a.");
         QString report = SimulationManager->Runner->getErrorMessages();
         if (report != "Simulation stopped by user") message(report, this);
-        //ClearData();
-        if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
     }
 
     bool showTracks = false;
     if (SimulationManager->LastSimType == 0) //PointSources sim
     {        
-        //showTracks = ui->cbPointSourceBuildTracks->isChecked();
         showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearGeoMarkers();
-        GeoMarkers = SimulationManager->GeoMarkers;
-        SimulationManager->GeoMarkers.clear(); //to avoid delete content
+        Rwindow->ShowPositions(1, true);
 
-        if (ui->twSingleScan->currentIndex() == 0)
-        {
-            //info on last photon
-            APhoton& ph = SimulationManager->LastPhoton;
-            QString str;
-            QTextStream strBuilder(&str);
-            strBuilder<<"  Position xyz[mm]: "<<ph.r[0]<<"  "<<ph.r[1]<<"  "<<ph.r[2]<<endl;
-            strBuilder<<"  Vector ikj: "<<ph.v[0]<<"  "<<ph.v[1]<<"  "<<ph.v[2]<<endl;
-            if (ui->cbWaveResolved->isChecked()) strBuilder<<"  Wavelength index = "<<ph.waveIndex<<endl;
-            if (ui->cbTimeResolved->isChecked()) strBuilder<<"  Emission time: "<<ph.time<<endl;
-            Owindow->OutText("Last Photon info:\n"+str);
-
+        if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
             if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
-        }
     }
     if (SimulationManager->LastSimType == 1) //ParticleSources sim
     {
-        //showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
         showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearEnergyVector();
         EnergyVector = SimulationManager->EnergyVector;
@@ -3856,7 +3840,7 @@ void MainWindow::simulationFinished()
     if (GeometryWindow->isVisible())
       {
         GeometryWindow->ShowGeometry(false);
-        if (showTracks) MainWindow::ShowTracks();
+        if (showTracks) GeometryWindow->DrawTracks();
       }
       //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
     Rwindow->OnEventsDataAdded();
@@ -4010,12 +3994,14 @@ void MainWindow::RefreshPhotSimOnTimer(int Progress, double msPerEv)
   ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
 
   qApp->processEvents();
+  /*
   if (ui->pbStopScan->isChecked())
     {
       //emit StopRequested();
       SimulationManager->StopSimulation();
       return;
     }
+  */
 }
 
 void MainWindow::on_pbGDML_clicked()
@@ -4975,4 +4961,13 @@ void MainWindow::on_pbShowOverrideMap_clicked()
     OptOvDialogSize = d->size();
     OptOvDialogPosition = d->pos();
     delete d;
+}
+
+void MainWindow::on_pbStopScan_clicked()
+{
+    //qDebug() << "Requesting sim stop...";
+    ui->pbStopScan->setText("stopping...");
+    qApp->processEvents();
+    SimulationManager->StopSimulation();
+    qApp->processEvents();
 }

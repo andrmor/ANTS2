@@ -59,6 +59,7 @@ public:
 
     bool fFinished;
     bool fSuccess;
+    bool fHardAborted;
 
     bool fStartedFromGui;
     int LastSimType; // -1 - undefined, 0 - PointSources, 1 - ParticleSources
@@ -66,9 +67,7 @@ public:
     int MaxThreads = -1;
 
     //info to report back
-    APhoton LastPhoton;
     QVector< QBitArray > SiPMpixels;
-    QVector<GeoMarkerClass*> GeoMarkers;
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<TrackHolderClass*> Tracks;
 
@@ -82,7 +81,6 @@ private:
     EventsDataClass* EventsDataHub; //alias
     DetectorClass* Detector; //alias
 
-    void clearGeoMarkers();
     void clearEnergyVector();
     void clearTracks();
 
@@ -118,6 +116,7 @@ public:
     double getProgress() const { return progress; }
     //double getmsPerEvent() const { return usPerEvent; }
     bool wasSuccessful() const;
+    bool wasHardAborted() const;
     bool isFinished() const {return simState == SFinished;}
     void setFinished() {simState = SFinished;}
     QString getErrorMessages() const;
@@ -194,7 +193,8 @@ public:
     virtual int getTotalEventCount() const = 0;
     const AOneEvent *getLastEvent() const { return OneEvent; }
 
-    bool wasSuccessful() const { return fSuccess; }
+    bool wasSuccessful() const { return (fSuccess && !fHardAbortWasTriggered); }
+    bool wasHardAborted() const { return fHardAbortWasTriggered; }
     virtual void updateGeoManager();
     void setSimSettings(const GeneralSimSettings *settings);
     void initSimStat();
@@ -206,20 +206,23 @@ public:
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
+    virtual void hardAbort();
+
 protected:
     virtual void ReserveSpace(int expectedNumEvents);
     int evenDivisionOfLabor(int totalEventCount);
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
-    const DetectorClass *detector;
-    TRandom2 *RandGen;
-    AOneEvent* OneEvent; //PM hit data for one event is stored here
-    EventsDataClass *dataHub;
-    Photon_Generator *photonGenerator;
+    const DetectorClass *detector;          // external
+    const GeneralSimSettings *simSettings;  // external
+    TRandom2 *RandGen;                      // local
+    AOneEvent* OneEvent;                    // local         //PM hit data for one event is stored here
+    EventsDataClass *dataHub;               // local
+    Photon_Generator *photonGenerator;      // local
+    APhotonTracer* photonTracker;           // local
+
     QString ErrorString; //last error
     int ID;
-
-    APhotonTracer* photonTracker;
 
     //state control
     int eventBegin;
@@ -231,9 +234,7 @@ protected:
     bool fBuildPhotonTracks;
     bool fStopRequested; //Implementors must check whenever possible (without impacting performance) to stop simulation()
     bool fSuccess;  //Implementors should set this flag at end of simulation()
-
-    //general simulation options
-    const GeneralSimSettings *simSettings;
+    bool fHardAbortWasTriggered;
 
 private:
 };
@@ -251,8 +252,6 @@ public:
     virtual void simulate();
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
-    const QVector<DotsTGeoStruct> *getDotsTGeo() const { return DotsTGeo; }
-    const APhoton *getLastPhotonOnStart() const { return &PhotonOnStart; }
     int getNumRuns() const {return NumRuns;}
 
 private:
@@ -271,11 +270,9 @@ private:
     void GenerateFromSecond(AScanRecord *scs);
     bool isInsideLimitingObject(double *r);
     virtual void ReserveSpace(int expectedNumEvents);
-    void addLastScanPointToMarkers(bool fLimitNumber = true);
 
     QJsonObject simOptions;
     TH1I *CustomHist; //custom photon generation distribution
-    QVector<DotsTGeoStruct> *DotsTGeo;
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
 

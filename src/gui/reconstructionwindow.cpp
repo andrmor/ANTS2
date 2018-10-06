@@ -329,21 +329,25 @@ void ReconstructionWindow::on_pbClearPositions_clicked()
 
 void ReconstructionWindow::on_pbShowReconstructionPositions_clicked()
 {    
-    ShowPositions(0);
+    QString err = ShowPositions(0);
+    if (!err.isEmpty())
+        message(err, this);
 }
 
 void ReconstructionWindow::on_pbShowTruePositions_clicked()
 {
-    ShowPositions(1);
+    QString err = ShowPositions(1);
+    if (!err.isEmpty())
+        message(err, this);
 }
 
-void ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible)
+const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible)
 {
-    if (fOnlyIfWindowVisible && !MW->GeometryWindow->isVisible()) return;
+    if (fOnlyIfWindowVisible && !MW->GeometryWindow->isVisible()) return "";
     if (Rec_True<0 || Rec_True>1)
     {
         qWarning() << "Wrong index in ShowPositions";
-        return;
+        return "";
     }
 
     int CurrentGroup = PMgroups->getCurrentGroup();
@@ -354,21 +358,13 @@ void ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible
     if (Rec_True == 0)
     {
         int CurrentGroup = PMgroups->getCurrentGroup();
-        if (!fRecReady)
-        {
-            message("Reconstruction not ready!", this);
-            return;
-        }
+        if (!fRecReady) return "Reconstruction not ready!";
         numEvents = EventsDataHub->ReconstructionData[CurrentGroup].size();
         marks = new GeoMarkerClass("Recon", 6, 2, kRed);
     }
     else if (Rec_True == 1)
     {
-        if (EventsDataHub->isScanEmpty())
-        {
-            message("There are no true positions available!", this);
-            return;
-        }
+        if (EventsDataHub->isScanEmpty()) return "There are no data to show!";
         numEvents = EventsDataHub->Scan.size();
         marks = new GeoMarkerClass("Scan", 6, 2, kBlue);
     }
@@ -435,6 +431,7 @@ void ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWindowVisible
     MW->GeometryWindow->activateWindow();
     MW->GeometryWindow->ShowGeometry(false);
     MW->ShowTracks();
+    return "";
 }
 
 /*

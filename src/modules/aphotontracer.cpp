@@ -55,7 +55,8 @@ void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEv
 }
 
 void APhotonTracer::TracePhoton(const APhoton* Photon)
-{ 
+{
+  if (bAbort) return;
   //qDebug() << "----accel is on?"<<SimSet->fQEaccelerator<< "Build tracks?"<<fBuildTracks;
   //accelerators
   if (SimSet->fQEaccelerator)
@@ -237,6 +238,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          const double* PhPos = navigator->GetCurrentPoint();
          for (int i=0; i<3; i++) p->r[i] = PhPos[i];
          AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(*ResourcesForOverrides, p, N);
+         if (bAbort) return;
 
          switch (result)
            {
@@ -418,6 +420,12 @@ force_stop_tracing:
 
    //qDebug()<<"Finished with the photon";
    //qDebug() << "Track size:" <<Tracks->size();
+}
+
+void APhotonTracer::hardAbort()
+{
+    bAbort = true;
+    ResourcesForOverrides->abort(); //if script engine is there will abort evaluation
 }
 
 void APhotonTracer::AppendHistoryRecord()

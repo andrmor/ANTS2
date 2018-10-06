@@ -6771,7 +6771,7 @@ thermal neutrons:</string>
         <rect>
          <x>4</x>
          <y>13</y>
-         <width>341</width>
+         <width>307</width>
          <height>16</height>
         </rect>
        </property>
@@ -6788,11 +6788,15 @@ thermal neutrons:</string>
       <widget class="QPushButton" name="pbStopScan">
        <property name="geometry">
         <rect>
-         <x>350</x>
-         <y>11</y>
-         <width>51</width>
+         <x>316</x>
+         <y>10</y>
+         <width>81</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="toolTip">
+        <string>First click attempts to stop simulation in soft mode: the already simulated events will be available for analysis.
+Second click will trigger strong abort mode, which will result in loss of all simulated data.</string>
        </property>
        <property name="layoutDirection">
         <enum>Qt::LeftToRight</enum>

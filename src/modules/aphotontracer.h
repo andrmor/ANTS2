@@ -40,6 +40,8 @@ public:
 
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
+    void hardAbort(); //before using it, give a chance to finish normally using abort at higher levels
+
 private:
     TRandom2* RandGen;
     TGeoManager* GeoManager;
@@ -78,6 +80,8 @@ private:
 
     QString nameFrom;
     QString nameTo;
+
+    bool bAbort = false;
 
     enum AbsRayEnum {AbsRayNotTriggered=0, AbsTriggered, RayTriggered, WaveShifted};
     inline AbsRayEnum AbsorptionAndRayleigh();

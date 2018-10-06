@@ -627,7 +627,7 @@ public slots:
   void onKNNreadyXchanged(bool ready, int events);
   void onKNNreadyYchanged(bool ready, int events);
 
-  void ShowPositions(int Rec_True, bool fOnlyIfWindowVisible = false);
+  const QString ShowPositions(int Rec_True, bool fOnlyIfWindowVisible = false);
 signals:
 
   void cbReconstructEnergyChanged(bool changed);

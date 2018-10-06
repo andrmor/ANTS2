@@ -241,6 +241,13 @@ bool ASimulatorRunner::wasSuccessful() const
     return fOK;
 }
 
+bool ASimulatorRunner::wasHardAborted() const
+{
+    for(const Simulator * sim : workers)
+        if (sim->wasHardAborted()) return true;
+    return false;
+}
+
 QString ASimulatorRunner::getErrorMessages() const
 {
     QString msg;
@@ -402,12 +409,13 @@ Simulator::~Simulator()
 {
     delete photonTracker;
     delete photonGenerator;
-    delete OneEvent;
-    dataHub->Events.resize(0);
-    dataHub->TimedEvents.resize(0);
-    dataHub->Scan.resize(0);
     delete dataHub;
+    delete OneEvent;    
     delete RandGen;
+
+    //if transferred, the container will be cleared, need cleaning only in case of abort
+    for (TrackHolderClass* t : tracks) delete t;
+    tracks.clear();
 }
 
 void Simulator::updateGeoManager()
@@ -432,7 +440,17 @@ void Simulator::setRngSeed(int seed)
 
 void Simulator::requestStop()
 {
-    fStopRequested = true;
+    if (fStopRequested)
+    {
+        //qDebug() << "Simulator recived repeated stop request, aborting in hard mode";
+        hardAbort();
+        fHardAbortWasTriggered = true;
+    }
+    else
+    {
+        //qDebug() << "First stop request was received by simulator";
+        fStopRequested = true;
+    }
 }
 
 void Simulator::divideThreadWork(int threadId, int threadCount)
@@ -462,7 +480,6 @@ void Simulator::divideThreadWork(int threadId, int threadCount)
 bool Simulator::setup(QJsonObject &json)
 {
     fUpdateGUI = json["DoGuiUpdate"].toBool();
-    //fBuildPhotonTracks = fUpdateGUI && simSettings->fBuildPhotonTracks;
     fBuildPhotonTracks = fUpdateGUI && simSettings->TrackBuildOptions.bBuildPhotonTracks;
 
     //inits
@@ -478,11 +495,17 @@ bool Simulator::setup(QJsonObject &json)
 
 void Simulator::appendToDataHub(EventsDataClass *dataHub)
 {
-    dataHub->Events << this->dataHub->Events;
-    dataHub->TimedEvents << this->dataHub->TimedEvents;
-    dataHub->Scan << this->dataHub->Scan;
+    dataHub->Events << this->dataHub->Events; //static
+    dataHub->TimedEvents << this->dataHub->TimedEvents; //static
+    dataHub->Scan << this->dataHub->Scan; //dynamic!
+    this->dataHub->Scan.clear();
 
-    dataHub->SimStat->AppendSimulationStatistics(this->dataHub->SimStat);
+    dataHub->SimStat->AppendSimulationStatistics(this->dataHub->SimStat); //deep copy
+}
+
+void Simulator::hardAbort()
+{
+    photonTracker->hardAbort();
 }
 
 void Simulator::ReserveSpace(int expectedNumEvents)
@@ -505,13 +528,11 @@ PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, int ID
 {  
     CustomHist = 0;
     totalEventCount = 0;
-    DotsTGeo = new QVector<DotsTGeoStruct>();
 }
 
 PointSourceSimulator::~PointSourceSimulator()
 {
   if (CustomHist) delete CustomHist;
-  delete DotsTGeo;
 }
 
 int PointSourceSimulator::getEventCount() const
@@ -528,7 +549,6 @@ bool PointSourceSimulator::setup(QJsonObject &json)
         return false;
       }
     if(!Simulator::setup(json)) return false;
-    if (fUpdateGUI) DotsTGeo->clear();
 
     QJsonObject js = json["PointSourcesConfig"].toObject();
     //reading main control options
@@ -705,6 +725,7 @@ void PointSourceSimulator::simulate()
 {
     ReserveSpace(getEventCount());
     fStopRequested = false;
+    fHardAbortWasTriggered = false;
     switch (PointSimMode)
     {
         case 0: fSuccess = SimulateSingle(); break;
@@ -713,6 +734,7 @@ void PointSourceSimulator::simulate()
         case 3: fSuccess = SimulateCustomNodes(); break;
         default: fSuccess = false; break;
     }
+    if (fHardAbortWasTriggered) fSuccess = false;
 }
 
 void PointSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
@@ -746,7 +768,6 @@ bool PointSourceSimulator::SimulateSingle()
         progress = irun * updateFactor;
         if(fStopRequested) return false;
       }
-    if (fUpdateGUI) addLastScanPointToMarkers();
     return true;
 }
 
@@ -833,7 +854,6 @@ bool PointSourceSimulator::SimulateRegularGrid()
                     progress = eventCurrent * updateFactor;
                     if(fStopRequested) return false;
                   }
-                if (fUpdateGUI) addLastScanPointToMarkers(false);
                 currentNode++;
                 if(currentNode >= eventEnd) return true;
             }
@@ -924,7 +944,6 @@ bool PointSourceSimulator::SimulateFlood()
             progress = eventCurrent * updateFactor;
             if(fStopRequested) return false;
           }
-        if (fUpdateGUI) addLastScanPointToMarkers();
     }
     return true;
 }
@@ -974,7 +993,6 @@ bool PointSourceSimulator::SimulateCustomNodes()
           progress = eventCurrent * updateFactor;
           if(fStopRequested) return false;
         }
-      if (fUpdateGUI) addLastScanPointToMarkers();
       currentNode++;
     }
    return true;
@@ -1320,8 +1338,6 @@ void PointSourceSimulator::doLRFsimulatedEvent(double *r)
   ss->Points[0].r[2] = r[2];
   ss->Points[0].energy = numPhots;
   dataHub->Scan.append(ss);
-
-  if (fUpdateGUI) DotsTGeo->append(DotsTGeoStruct(r));
 }
 
 void PointSourceSimulator::GenerateFromSecond(AScanRecord *scs)
@@ -1361,16 +1377,6 @@ void PointSourceSimulator::ReserveSpace(int expectedNumEvents)
     //if (fUpdateGUI) DotsTGeo->reserve(expectedNumEvents); //no need anymore, they are limited in size now to 1000 entries
 }
 
-void PointSourceSimulator::addLastScanPointToMarkers(bool fLimitNumber) //we do not want to limit for scan, can confuse the user
-{
-  if (dataHub->Scan.isEmpty()) return;
-  if (fLimitNumber && DotsTGeo->size()>1000) return; /// *** absolute number!
-
-  AScanRecord* sc = dataHub->Scan.last();
-  for (int i=0; i<sc->Points.size(); i++)
-    DotsTGeo->append(DotsTGeoStruct(sc->Points[i].r));
-}
-
 /******************************************************************************\
 *                         Particle Source Simulator                            |
 \******************************************************************************/
@@ -1404,11 +1410,9 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
     delete ParticleTracker;
     delete ParticleSources;
     clearParticleStack();
-    if (EnergyVector.size() > 0)
-    {
-        for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
-        EnergyVector.resize(0);
-    }
+
+    for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
+    EnergyVector.clear();
 }
 
 bool ParticleSourceSimulator::setup(QJsonObject &json)
@@ -1497,6 +1501,7 @@ void ParticleSourceSimulator::simulate()
 
     ReserveSpace(getEventCount());
     fStopRequested = false;
+    fHardAbortWasTriggered = false;
 
     //Simulation
     double updateFactor = 100.0 / ( eventEnd - eventBegin );
@@ -1591,7 +1596,7 @@ void ParticleSourceSimulator::simulate()
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     } //all events finished
 
-    fSuccess = true;
+    fSuccess = !fHardAbortWasTriggered;
 }
 
 void ParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
@@ -1815,16 +1820,9 @@ void ASimulationManager::onSimFailedToStart()
 
 void ASimulationManager::Clear()
 {
-    clearGeoMarkers();
     clearEnergyVector();
     clearTracks();
     SiPMpixels.clear();
-}
-
-void ASimulationManager::clearGeoMarkers()
-{
-    for (int i=0; i<GeoMarkers.size(); i++) delete GeoMarkers[i];
-    GeoMarkers.clear();
 }
 
 void ASimulationManager::clearEnergyVector()
@@ -1848,63 +1846,52 @@ void ASimulationManager::onSimulationFinished()
 
     fFinished = true;
     fSuccess = Runner->wasSuccessful();
+    fHardAborted = Runner->wasHardAborted();
 
-    //in Raimundo's code on simulation fail workers were not cleared!
-    ASimulationManager::Clear();
+    ASimulationManager::Clear(); //data clear containers
 
     if (Runner->modeSetup == "PointSim") LastSimType = 0; //was Point sources sim
     else if (Runner->modeSetup == "SourceSim") LastSimType = 1; //was Particle sources sim
     else LastSimType = -1;
 
     QVector<Simulator *> simulators = Runner->getWorkers();
-    if (!simulators.isEmpty())
-      {
+    if (!simulators.isEmpty() && !fHardAborted)
+    {
         if (LastSimType == 0)
-          {
+        {
             PointSourceSimulator *lastPointSrcSimulator = static_cast< PointSourceSimulator *>(simulators.last());
             EventsDataHub->ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
-            LastPhoton = *lastPointSrcSimulator->getLastPhotonOnStart();
 
-            if (fStartedFromGui)
-              {
-                for (int i = 0; i < simulators.count(); i++)
-                  {
-                    const PointSourceSimulator *simulator = static_cast<const PointSourceSimulator *>(simulators[i]);
-                    const QVector<DotsTGeoStruct>* dots = simulator->getDotsTGeo();
-                    GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-                    for (int i=0; i<dots->size(); i++)
-                      marks->SetNextPoint(dots->at(i).r[0], dots->at(i).r[1], dots->at(i).r[2]);
-                    GeoMarkers.append(marks);
-                  }
-                SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
-              }
-          }
-        if (LastSimType == 1)
-          {
-             ParticleSourceSimulator *lastPartSrcSimulator = static_cast< ParticleSourceSimulator *>(simulators.last());
-             EnergyVector = lastPartSrcSimulator->getEnergyVector();
-             lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
-          }
+            if (fStartedFromGui) SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
+        }
+        else if (LastSimType == 1)
+        {
+            ParticleSourceSimulator *lastPartSrcSimulator = static_cast< ParticleSourceSimulator *>(simulators.last());
+            EnergyVector = lastPartSrcSimulator->getEnergyVector();
+            lastPartSrcSimulator->ClearEnergyVectorButKeepObjects(); // to avoid clearing the energy vector cells
+        }
 
-        for(int iSim = 0; iSim<simulators.count(); iSim++)
-          {
-             Tracks += simulators[iSim]->tracks;
-             simulators[iSim]->tracks.clear();
-          }
-      }
+        for (Simulator * sim : simulators)
+        {
+            Tracks += sim->tracks;
+            sim->tracks.clear();  //to avoid delete objects on simulator delete
+        }
+    }
 
     //Raimundo's comment: This is part of a hack. Check this function declaration in .h for more details.
     Runner->clearWorkers();
 
-    //before was limited to the mode whenlocations are limited to a certain object in the detector geometry
-    //scan and custom nodes might have nodes outside of the limiting object - they are still present but marked with 1e10 X and Y true coordinates
-    EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
+    if (fHardAborted)
+        EventsDataHub->clear(); //data are not valid!
+    else
+    {
+        //before was limited to the mode whenlocations are limited to a certain object in the detector geometry
+        //scan and custom nodes might have nodes outside of the limiting object - they are still present but marked with 1e10 X and Y true coordinates
+        EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
+    }
 
     Detector->BuildDetector();
-    //Detector->Config->UpdateSimSettingsOfDetector(); //inside the rebuild now
-
     emit SimulationFinished();
-
     ASimulationManager::Clear();   //clear tmp data - if needed, main window has copied all needed in the slot on SimulationFinished()
     //qDebug() << "SimManager: Sim finished";
 }

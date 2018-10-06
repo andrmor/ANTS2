@@ -25,6 +25,8 @@ public:
 
     void generateScriptInfrastructure(const AMaterialParticleCollection *MPcollection); //can be use from outside to force generation (e.g. interface tester); RandGen should already be set!
 
+    void abort();
+
     TRandom2 * RandGen = 0;
     QScriptEngine * ScriptEngine = 0;
     AOpticalOverrideScriptInterface* overrideInterface = 0;

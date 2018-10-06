@@ -202,6 +202,7 @@ void ARemoteWindow::on_pbSimulate_clicked()
 
     MW->Owindow->RefreshData();
     MW->Rwindow->OnEventsDataAdded();
+    MW->Rwindow->ShowPositions(1, true);
 }
 
 void ARemoteWindow::on_pbReconstruct_clicked()

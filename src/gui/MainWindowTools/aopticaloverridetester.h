@@ -49,6 +49,9 @@ private:
     ATracerStateful* Resources;                 //loacl
 
     bool testOverride();
+
+private slots:
+    void updateWavelengthIndication();
 };
 
 #endif // AOPTICALOVERRIDETESTER_H

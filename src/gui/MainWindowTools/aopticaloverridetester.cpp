@@ -46,6 +46,8 @@ AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, Main
     RandGen = new TRandom2();
     Resources = new ATracerStateful(RandGen);
     Resources->generateScriptInfrastructure(MW->MpCollection);
+
+    updateWavelengthIndication();
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
@@ -261,7 +263,7 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
               QString::number(1.0*lobe/sum, 'g', 3) + "/" +
               QString::number(1.0*lamb/sum, 'g', 3) + ")";
       }
-    ui->leST_out->setText(str);
+    //ui->leST_out->setText(str);
     delete ph.SimStat;
 }
 
@@ -341,6 +343,17 @@ bool AOpticalOverrideTester::testOverride()
         return false;
     }
     return true;
+}
+
+void AOpticalOverrideTester::updateWavelengthIndication()
+{
+    if ( !MPcollection->IsWaveResolved() )
+    {
+        ui->cbWavelength->setEnabled(false);
+        ui->cbWavelength->setChecked(false);
+    }
+    else
+        ui->cbWavelength->setEnabled(true);
 }
 
 void AOpticalOverrideTester::on_pbST_uniform_clicked()
@@ -425,7 +438,7 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
               QString::number(1.0*lobe/sum, 'g', 3) + "/" +
               QString::number(1.0*lamb/sum, 'g', 3) + ")";
       }
-    ui->leST_out->setText(str);
+    //ui->leST_out->setText(str);
     delete ph.SimStat;
 }
 

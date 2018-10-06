@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>401</width>
-    <height>369</height>
+    <width>424</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -280,17 +280,30 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_307">
-        <property name="text">
-         <string>   Photon wavelength:</string>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cbWavelength">
+        <property name="text">
+         <string>Photon wavelength:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLineEdit" name="ledST_wave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="maximumSize">
          <size>
           <width>75</width>
@@ -309,19 +322,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </item>
     <item>
@@ -329,7 +329,7 @@
       <item>
        <widget class="QLabel" name="label_303">
         <property name="text">
-         <string>Refractive index</string>
+         <string>Refractive index:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -337,7 +337,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labFrom">
         <property name="text">
          <string>   from:</string>
         </property>
@@ -347,7 +347,7 @@
        <widget class="QLineEdit" name="ledST_Ref1">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>50</width>
           <height>16777215</height>
          </size>
         </property>
@@ -357,7 +357,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_304">
+       <widget class="QLabel" name="labTo">
         <property name="text">
          <string>to:</string>
         </property>
@@ -370,12 +370,19 @@
        <widget class="QLineEdit" name="ledST_Ref2">
         <property name="maximumSize">
          <size>
-          <width>75</width>
+          <width>50</width>
           <height>16777215</height>
          </size>
         </property>
         <property name="text">
          <string>1.66</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labMaterials">
+        <property name="text">
+         <string>(a -&gt; b)</string>
         </property>
        </widget>
       </item>
@@ -410,9 +417,28 @@
        </font>
       </property>
       <property name="text">
-       <string>Reflection vs angle of incidence</string>
+       <string>Processes vs angle of incidence</string>
       </property>
      </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pbST_uniform">
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Lambertian distribution for incoming photons!</string>
+      </property>
+      <property name="text">
+       <string>Diffuse irradiation test</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="pte"/>
     </item>
     <item>
      <widget class="QPushButton" name="pbCSMtestmany">
@@ -426,29 +452,6 @@
        <string>Trace photons</string>
       </property>
      </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pbST_uniform">
-      <property name="toolTip">
-       <string>Lambertian distribution for incoming photons!</string>
-      </property>
-      <property name="text">
-       <string>Diffuse irradiation test</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="label_50">
-      <property name="text">
-       <string>Absorption/Spike/Lobe/Lambert: counts and fractions</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="leST_out"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -507,12 +510,29 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>401</width>
+     <width>424</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cbWavelength</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ledST_wave</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>268</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>369</x>
+     <y>129</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

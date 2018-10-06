@@ -107,12 +107,12 @@ void AOpticalOverrideDialog::on_pbAccept_clicked()
     delete (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo];
     (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo] = ovLocal;
     ovLocal = 0;
-    close();
+    accept();
 }
 
 void AOpticalOverrideDialog::on_pbCancel_clicked()
 {
-    close();
+    reject();
 }
 
 void AOpticalOverrideDialog::closeEvent(QCloseEvent *e)

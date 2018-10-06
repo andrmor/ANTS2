@@ -41,6 +41,7 @@ AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * Mat
 
 AOpticalOverrideDialog::~AOpticalOverrideDialog()
 {
+    delete TesterWindow;
     delete ui;
 }
 

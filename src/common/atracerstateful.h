@@ -27,10 +27,10 @@ public:
 
     void abort();
 
-    TRandom2 * RandGen = 0;
-    QScriptEngine * ScriptEngine = 0;
-    AOpticalOverrideScriptInterface* overrideInterface = 0;
-    AMathScriptInterface* mathInterface = 0;
+    TRandom2 * RandGen = 0;                                 //external
+    QScriptEngine * ScriptEngine = 0;                       //local
+    AOpticalOverrideScriptInterface* overrideInterface = 0; //local
+    AMathScriptInterface* mathInterface = 0;                //local
 };
 
 #endif // ATRACERSTATEFUL_H

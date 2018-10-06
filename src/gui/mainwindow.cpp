@@ -726,17 +726,20 @@ void MainWindow::on_pbEditOverride_clicked()
     int From = ui->cobMaterialForOverrides->currentIndex();
     int To =   ui->cobMaterialTo->currentIndex();
 
-    AOpticalOverrideDialog d(MpCollection, From, To, GraphWindow, GeometryWindow, this);
-    int res = d.exec();
-    if (res == 1)
-    {
-        ReconstructDetector(true);
+    AOpticalOverrideDialog* d = new AOpticalOverrideDialog(MpCollection, From, To, GraphWindow, GeometryWindow, this);
+    d->setAttribute(Qt::WA_DeleteOnClose);
+    d->setWindowModality(Qt::WindowModal);
+    QObject::connect(d, &AOpticalOverrideDialog::accepted, this, &MainWindow::onOpticalOverrideDialogAccepted);
+    d->show();
+}
 
-        on_pbRefreshOverrides_clicked();
-        int i = ui->lwMaterials->currentRow();
-        UpdateMaterialListEdit(); //to update (*) status
-        ui->lwMaterials->setCurrentRow(i);
-    }
+void MainWindow::onOpticalOverrideDialogAccepted()
+{
+    ReconstructDetector(true);
+    on_pbRefreshOverrides_clicked();
+    int i = ui->lwMaterials->currentRow();
+    UpdateMaterialListEdit(); //to update (*) status
+    ui->lwMaterials->setCurrentRow(i);
 }
 
 void MainWindow::on_pbRefreshOverrides_clicked()

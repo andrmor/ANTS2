@@ -14,11 +14,8 @@ ATracerStateful::ATracerStateful(TRandom2 *RandGen) : RandGen(RandGen) {}
 ATracerStateful::~ATracerStateful()
 {
     delete ScriptEngine; ScriptEngine = 0;
-    if (overrideInterface)
-    {
-        qDebug() << "Deleting ov script interface";
-        delete overrideInterface;
-    }
+    delete overrideInterface; overrideInterface = 0;
+    delete mathInterface; mathInterface = 0;
 }
 
 void ATracerStateful::evaluateScript(const QString &Script)

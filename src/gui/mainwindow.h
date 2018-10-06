@@ -639,8 +639,8 @@ public slots:
     void OnWarningMessage(QString text);
     void OnDetectorColorSchemeChanged(int scheme, int matId);    
     void OnSlabDoubleClicked(QString SlabName);
-    void onNewConfigLoaded();
-
+    void onNewConfigLoaded();    
+    void onOpticalOverrideDialogAccepted();
 signals:
     void RequestStopLoad();
 };

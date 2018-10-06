@@ -1,6 +1,7 @@
 #include "aopticaloverridedialog.h"
 #include "ui_aopticaloverridedialog.h"
 #include "aopticaloverride.h"
+#include "mainwindow.h"
 #include "amaterialparticlecolection.h"
 #include "amessage.h"
 #include "aopticaloverridetester.h"
@@ -11,37 +12,38 @@
 #include <QVBoxLayout>
 #include <QDebug>
 
-AOpticalOverrideDialog::AOpticalOverrideDialog(AMaterialParticleCollection * MatCollection, int matFrom, int matTo,
-                                               GraphWindowClass * GraphWindow, GeometryWindowClass *GeometryWindow, QWidget * parent) :
-    QDialog(parent), ui(new Ui::AOpticalOverrideDialog), GraphWindow(GraphWindow), GeometryWindow(GeometryWindow),
-    MatCollection(MatCollection), matFrom(matFrom), matTo(matTo), matNames(MatCollection->getListOfMaterialNames())
+AOpticalOverrideDialog::AOpticalOverrideDialog(MainWindow *MW, int matFrom, int matTo) :
+    QDialog(MW), ui(new Ui::AOpticalOverrideDialog), MW(MW),
+    matFrom(matFrom), matTo(matTo)
 {
     ui->setupUi(this);
     ui->pbInterceptorForEnter->setVisible(false);
     ui->pbInterceptorForEnter->setDefault(true);
     setWindowTitle("Photon tracing rules for material interface");
 
+    QStringList matNames = MW->MpCollection->getListOfMaterialNames();
     ui->leMatFrom->setText(matNames.at(matFrom));
     ui->leMatTo->setText(matNames.at(matTo));
     ui->cobType->addItem("No special rule");
     QStringList avOv = ListOvAllOpticalOverrideTypes();
     ui->cobType->addItems(avOv);
 
-    AOpticalOverride* ov = (*MatCollection)[matFrom]->OpticalOverrides[matTo];
+    AOpticalOverride* ov = (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo];
     if (ov)
     {
-        ovLocal = OpticalOverrideFactory( ov->getType(), MatCollection, matFrom, matTo);
+        ovLocal = OpticalOverrideFactory( ov->getType(), MW->MpCollection, matFrom, matTo );
         QJsonObject json; ov->writeToJson(json); ovLocal->readFromJson(json);
     }
 
     updateGui();
 
-    TesterWindow = new AOpticalOverrideTester(&ovLocal, GraphWindow, GeometryWindow, MatCollection, matFrom, matTo, this);
+    TesterWindow = new AOpticalOverrideTester(&ovLocal, MW, matFrom, matTo, this);
+    TesterWindow->readFromJson(MW->OvTesterSettings);
 }
 
 AOpticalOverrideDialog::~AOpticalOverrideDialog()
 {
-    delete TesterWindow;
+    //TesterWindow is saved and deleted on CloseEvent
     delete ui;
 }
 
@@ -64,7 +66,7 @@ void AOpticalOverrideDialog::updateGui()
         ui->cobType->setCurrentIndex(index+1);
 
         QVBoxLayout* l = static_cast<QVBoxLayout*>(layout());
-        customWidget = ovLocal->getEditWidget(this, GraphWindow);
+        customWidget = ovLocal->getEditWidget(this, MW->GraphWindow);
         l->insertWidget(customWidgetPositionInLayout, customWidget);
     }
     else
@@ -102,16 +104,27 @@ void AOpticalOverrideDialog::on_pbAccept_clicked()
 
     clearOpenedExcept(ovLocal);
 
-    delete (*MatCollection)[matFrom]->OpticalOverrides[matTo];
-    (*MatCollection)[matFrom]->OpticalOverrides[matTo] = ovLocal;
-    accept();
+    delete (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo];
+    (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo] = ovLocal;
+    ovLocal = 0;
+    close();
 }
 
 void AOpticalOverrideDialog::on_pbCancel_clicked()
 {
-    clearOpenedExcept(ovLocal);
+    close();
+}
+
+void AOpticalOverrideDialog::closeEvent(QCloseEvent *e)
+{
+    clearOpenedExcept(ovLocal); //to avoid double-delete
     delete ovLocal; ovLocal = 0;
-    reject();
+
+    TesterWindow->writeToJson(MW->OvTesterSettings);
+    TesterWindow->hide();
+    delete TesterWindow; TesterWindow = 0;
+
+    QDialog::closeEvent(e);
 }
 
 void AOpticalOverrideDialog::on_cobType_activated(int index)
@@ -124,7 +137,7 @@ void AOpticalOverrideDialog::on_cobType_activated(int index)
          QString selectedType = ui->cobType->currentText();
          ovLocal = findInOpended(selectedType);
          if (!ovLocal)
-            ovLocal = OpticalOverrideFactory(ui->cobType->currentText(), MatCollection, matFrom, matTo);
+            ovLocal = OpticalOverrideFactory(ui->cobType->currentText(), MW->MpCollection, matFrom, matTo);
     }
     updateGui();
 }

@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QThread>
 #include <QTimer>
+#include <QJsonObject>
 
 // forward declarations
 class AConfiguration;
@@ -391,6 +392,8 @@ public:
     bool ShutDown = false; //when exiting ANTS2 by closing the main window
 
     bool fSimDataNotSaved = false;
+
+    QJsonObject OvTesterSettings;
 
     void createScriptWindow();
 

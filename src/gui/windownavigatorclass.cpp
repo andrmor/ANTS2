@@ -277,6 +277,8 @@ void WindowNavigatorClass::BusyOn()
   emit BusyStatusChanged(true);
 
   time->restart();
+
+  qApp->processEvents();
 }
 
 void WindowNavigatorClass::BusyOff(bool fShowTime)

@@ -131,6 +131,9 @@ void MainWindow::on_actionReset_position_of_windows_triggered()
    }
 
    bOptOvDialogPositioned = false;
+
+   OvTesterSettings["PositionX"] = -1;
+   OvTesterSettings["PositionY"] = -1;
 }
 
 void addWindow(QString name, QMainWindow* w, QJsonObject &json)
@@ -193,6 +196,8 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   jsOD["w"] = OptOvDialogSize.width();
   jsOD["h"] = OptOvDialogSize.height();
   json["OptOvDialog"] = jsOD;
+
+  json["OptOvTester"] = OvTesterSettings;
 
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   //if (!QDir(configDir).exists()) QDir().mkdir(configDir);
@@ -276,6 +281,8 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           OptOvDialogSize = QSize(w, h);
           bOptOvDialogPositioned = true;
       }
+
+      parseJson(json, "OptOvTester", OvTesterSettings);
     }
 }
 

@@ -10,9 +10,7 @@ class AOpticalOverrideDialog;
 }
 
 class AOpticalOverride;
-class AMaterialParticleCollection;
-class GraphWindowClass;
-class GeometryWindowClass;
+class MainWindow;
 class AOpticalOverrideTester;
 
 class AOpticalOverrideDialog : public QDialog
@@ -20,8 +18,7 @@ class AOpticalOverrideDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AOpticalOverrideDialog(AMaterialParticleCollection* MatCollection, int matFrom, int matTo,
-                                    GraphWindowClass* GraphWindow, GeometryWindowClass* GeometryWindow, QWidget* parent);
+    explicit AOpticalOverrideDialog(MainWindow* MW, int matFrom, int matTo);
     ~AOpticalOverrideDialog();
 
 private slots:
@@ -30,16 +27,15 @@ private slots:
     void on_cobType_activated(int index);
     void on_pbTestOverride_clicked();
 
+protected:
+    void closeEvent(QCloseEvent* e);
+
 private:
     Ui::AOpticalOverrideDialog * ui;
-    GraphWindowClass * GraphWindow;
-    GeometryWindowClass* GeometryWindow;
-    AOpticalOverride ** pOV;
+    MainWindow* MW;
     AOpticalOverride * ovLocal = 0;
-    AMaterialParticleCollection* MatCollection;
     int matFrom;
     int matTo;
-    QStringList matNames; //need?
     AOpticalOverrideTester* TesterWindow;
 
     int customWidgetPositionInLayout = 5;

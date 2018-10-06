@@ -1,5 +1,6 @@
 #include "aopticaloverridetester.h"
 #include "ui_aopticaloverridetester.h"
+#include "mainwindow.h"
 #include "amessage.h"
 #include "amaterialparticlecolection.h"
 #include "aopticaloverride.h"
@@ -10,6 +11,7 @@
 #include "geometrywindowclass.h"
 #include "asimulationstatistics.h"
 #include "atrackrecords.h"
+#include "ajsontools.h"
 
 #include <QDoubleValidator>
 #include <QLineEdit>
@@ -28,15 +30,13 @@
 static QVector<TrackHolderClass> tracks;
 static TVector3 NormViz;
 
-AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal,
-                                               GraphWindowClass* GraphWindow, GeometryWindowClass* GeometryWindow,
-                                               AMaterialParticleCollection* MPcollection, int matFrom, int matTo, QWidget *parent) :
+AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, MainWindow *MW, int matFrom, int matTo, QWidget *parent) :
     QMainWindow(parent), ui(new Ui::AOpticalOverrideTester),
-    MPcollection(MPcollection), MatFrom(matFrom), MatTo(matTo),
-    pOV(ovLocal),
-    GraphWindow(GraphWindow), GeometryWindow(GeometryWindow)
+    pOV(ovLocal), MatFrom(matFrom), MatTo(matTo), MW(MW),
+    MPcollection(MW->MpCollection), GraphWindow(MW->GraphWindow), GeometryWindow(MW->GeometryWindow)
 {
     ui->setupUi(this);
+    setWindowTitle("Override tester");
 
     QDoubleValidator* dv = new QDoubleValidator(this);
     dv->setNotation(QDoubleValidator::ScientificNotation);
@@ -45,7 +45,7 @@ AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal,
 
     RandGen = new TRandom2();
     Resources = new ATracerStateful(RandGen);
-    Resources->generateScriptInfrastructure(MPcollection);
+    Resources->generateScriptInfrastructure(MW->MpCollection);
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
@@ -53,6 +53,22 @@ AOpticalOverrideTester::~AOpticalOverrideTester()
     delete Resources;
     delete RandGen;
     delete ui;
+}
+
+void AOpticalOverrideTester::writeToJson(QJsonObject &json) const
+{
+    json["PositionX"] = x();
+    json["PositionY"] = y();
+}
+
+void AOpticalOverrideTester::readFromJson(const QJsonObject &json)
+{
+    if (json.isEmpty()) return;
+
+    int x, y;
+    parseJson(json, "PositionX", x);
+    parseJson(json, "PositionY", y);
+    if (x>0 && y>0) move(x, y);
 }
 
 void AOpticalOverrideTester::on_pbDirectionHelp_clicked()

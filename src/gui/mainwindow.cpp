@@ -201,12 +201,12 @@ void MainWindow::clearEnergyVector()
     EnergyVector.clear();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
    qDebug() << "\n<MainWindow shutdown initiated";
-
    ShutDown = true;
 
+   /*
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
@@ -220,6 +220,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
            event->ignore();
            return;
        }
+   */
 
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
@@ -726,7 +727,7 @@ void MainWindow::on_pbEditOverride_clicked()
     int From = ui->cobMaterialForOverrides->currentIndex();
     int To =   ui->cobMaterialTo->currentIndex();
 
-    AOpticalOverrideDialog* d = new AOpticalOverrideDialog(MpCollection, From, To, GraphWindow, GeometryWindow, this);
+    AOpticalOverrideDialog* d = new AOpticalOverrideDialog(this, From, To);
     d->setAttribute(Qt::WA_DeleteOnClose);
     d->setWindowModality(Qt::WindowModal);
     QObject::connect(d, &AOpticalOverrideDialog::accepted, this, &MainWindow::onOpticalOverrideDialogAccepted);

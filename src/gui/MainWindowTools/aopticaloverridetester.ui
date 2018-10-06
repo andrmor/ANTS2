@@ -75,6 +75,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QLineEdit" name="ledST_si">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -120,6 +123,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QLineEdit" name="ledST_sj">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -165,6 +171,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QLineEdit" name="ledST_sk">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>1</string>
           </property>
@@ -311,7 +320,7 @@
          </size>
         </property>
         <property name="text">
-         <string>176</string>
+         <string>450</string>
         </property>
        </widget>
       </item>
@@ -354,6 +363,9 @@
         <property name="text">
          <string>1.69</string>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -376,6 +388,9 @@
         </property>
         <property name="text">
          <string>1.66</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

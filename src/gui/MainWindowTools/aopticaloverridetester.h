@@ -28,6 +28,9 @@ public:
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
 
+public slots:
+    void updateIndication();
+
 private slots:
     void on_pbDirectionHelp_clicked();
     void on_pbST_RvsAngle_clicked();
@@ -35,6 +38,10 @@ private slots:
     void on_pbST_showTracks_clicked();
     void on_pbST_uniform_clicked();
     void on_pbST_AngleCos_clicked();
+
+    void on_cbWavelength_toggled(bool checked);
+
+    void on_ledST_wave_editingFinished();
 
 private:
     Ui::AOpticalOverrideTester *ui;
@@ -50,8 +57,6 @@ private:
 
     bool testOverride();
 
-private slots:
-    void updateWavelengthIndication();
 };
 
 #endif // AOPTICALOVERRIDETESTER_H

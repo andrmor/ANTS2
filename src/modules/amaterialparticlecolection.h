@@ -107,8 +107,9 @@ public:
   //if not in range, the first material index with such a problem is returned.
   // -1 is returned if there are no errors
 
-  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames);
+  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames) const;
   void RemoveParticle(int particleId);  // should NOT be used directly - use RemoveParticle method of AConfiguration
+  int WaveToIndex(double wavelength) const;
 
 private:
   int ConflictingMaterialIndex; //used by CheckMaterial function

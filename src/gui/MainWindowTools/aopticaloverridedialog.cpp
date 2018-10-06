@@ -28,6 +28,9 @@ AOpticalOverrideDialog::AOpticalOverrideDialog(MainWindow *MW, int matFrom, int 
     QStringList avOv = ListOvAllOpticalOverrideTypes();
     ui->cobType->addItems(avOv);
 
+    MW->MpCollection->UpdateWaveResolvedProperties(matFrom);
+    MW->MpCollection->UpdateWaveResolvedProperties(matTo);
+
     AOpticalOverride* ov = (*MW->MpCollection)[matFrom]->OpticalOverrides[matTo];
     if (ov)
     {
@@ -145,4 +148,5 @@ void AOpticalOverrideDialog::on_cobType_activated(int index)
 void AOpticalOverrideDialog::on_pbTestOverride_clicked()
 {
     TesterWindow->show();
+    TesterWindow->updateIndication();
 }

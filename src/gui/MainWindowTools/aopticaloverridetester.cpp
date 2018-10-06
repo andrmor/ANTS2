@@ -47,7 +47,29 @@ AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, Main
     Resources = new ATracerStateful(RandGen);
     Resources->generateScriptInfrastructure(MW->MpCollection);
 
-    updateWavelengthIndication();
+    QStringList matNames = MW->MpCollection->getListOfMaterialNames();
+    ui->labMaterials->setText( QString("(%1 -> %2)").arg(matNames.at(matFrom)).arg(matNames.at(matTo)) );
+
+    updateIndication();
+}
+
+void AOpticalOverrideTester::updateIndication()
+{
+    bool bWR = MPcollection->IsWaveResolved();
+    if (!bWR)
+    {
+        ui->cbWavelength->setEnabled(false);
+        ui->cbWavelength->setChecked(false);
+    }
+    else
+        ui->cbWavelength->setEnabled(true);
+
+    int waveIndex = -1;
+    if (ui->cbWavelength->isChecked())
+        waveIndex = MPcollection->WaveToIndex( ui->ledST_wave->text().toDouble() ); // always in [0, WaveNodes-1]
+
+    ui->ledST_Ref1->setText( QString::number( (*MPcollection)[MatFrom]->getRefractiveIndex(waveIndex) ) );
+    ui->ledST_Ref2->setText( QString::number( (*MPcollection)[MatTo]  ->getRefractiveIndex(waveIndex) ) );
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
@@ -345,17 +367,6 @@ bool AOpticalOverrideTester::testOverride()
     return true;
 }
 
-void AOpticalOverrideTester::updateWavelengthIndication()
-{
-    if ( !MPcollection->IsWaveResolved() )
-    {
-        ui->cbWavelength->setEnabled(false);
-        ui->cbWavelength->setChecked(false);
-    }
-    else
-        ui->cbWavelength->setEnabled(true);
-}
-
 void AOpticalOverrideTester::on_pbST_uniform_clicked()
 {
     if ( !testOverride() ) return;
@@ -456,4 +467,14 @@ void AOpticalOverrideTester::on_pbST_AngleCos_clicked()
     double ang = 180.0/3.1415926*acos(cos);
 
     ui->pbST_AngleCos->setText("Theta="+QString::number(ang, 'g', 3)+"  cos="+QString::number(cos, 'g', 3));
+}
+
+void AOpticalOverrideTester::on_cbWavelength_toggled(bool)
+{
+    updateIndication();
+}
+
+void AOpticalOverrideTester::on_ledST_wave_editingFinished()
+{
+    updateIndication();
 }

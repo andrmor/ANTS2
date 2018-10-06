@@ -896,7 +896,7 @@ void AMaterialParticleCollection::OnRequestListOfParticles(QStringList &definedP
       definedParticles << ParticleCollection.at(i)->ParticleName;
 }
 
-void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames)
+void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames) const
 {
   bInUse = false;
   MaterialNames.clear();
@@ -945,4 +945,14 @@ void AMaterialParticleCollection::RemoveParticle(int particleId)
     //removing
     delete ParticleCollection[particleId];
     ParticleCollection.remove(particleId);
+}
+
+int AMaterialParticleCollection::WaveToIndex(double wavelength) const
+{
+    if (!WavelengthResolved) return -1;
+
+    int iwave = round( (wavelength - WaveFrom) / WaveStep );
+    if (iwave >= WaveNodes) iwave = WaveNodes-1;
+    if (iwave < 0) iwave = 0;
+    return iwave;
 }

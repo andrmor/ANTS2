@@ -215,7 +215,7 @@
         <item>
          <widget class="QLabel" name="label_309">
           <property name="toolTip">
-           <string>Can be any values: Unitary vector is calculated automatically</string>
+           <string>The dot product of the normal and the incoming photon direction is positive defined!</string>
           </property>
           <property name="text">
            <string>Surface normal:</string>
@@ -271,6 +271,9 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string>The dot product of the normal and the incoming photon direction is positive defined!</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -319,6 +322,9 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string>The dot product of the normal and the incoming photon direction is positive defined!</string>
+          </property>
           <property name="text">
            <string>0</string>
           </property>
@@ -366,6 +372,9 @@
          <widget class="QLineEdit" name="ledST_sk">
           <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>The dot product of the normal and the incoming photon direction is positive defined!</string>
           </property>
           <property name="text">
            <string>-1</string>

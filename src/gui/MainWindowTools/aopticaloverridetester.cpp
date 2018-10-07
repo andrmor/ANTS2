@@ -107,10 +107,10 @@ void AOpticalOverrideTester::readFromJson(const QJsonObject &json)
 
 void AOpticalOverrideTester::on_pbDirectionHelp_clicked()
 {
-    QString s = "Vectors are not necessary normalized to unity (automatic when used)\n\n"
-            "Note that in override caluclations\n"
-            "normal of the surface is always oriented\n"
-            "in the same direction as the one of the incoming photon!\n";
+    QString s = "Vectors are not necessary normalized to unity (automatically scaled)\n\n"
+            "Note that in override caluclations the normal vector of the surface\n"
+            "is provided in such a way that the dot product of the normal and\n"
+            "the incoming photon direction is positive.";
     message(s, this);
 }
 
@@ -474,24 +474,6 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
     //ui->leST_out->setText(str);
     delete ph.SimStat;
 }
-
-/*
-void AOpticalOverrideTester::on_pbST_AngleCos_clicked()
-{
-    //vector photon dir
-    TVector3 ph(ui->ledST_i->text().toDouble(), ui->ledST_j->text().toDouble(), ui->ledST_k->text().toDouble());
-    ph = ph.Unit();
-
-    //vector surface normal
-    TVector3 surf(-ui->ledST_si->text().toDouble(), -ui->ledST_sj->text().toDouble(), -ui->ledST_sk->text().toDouble());
-    surf = surf.Unit();
-
-    double cos = ph*surf;
-    double ang = 180.0/3.1415926*acos(cos);
-
-    ui->pbST_AngleCos->setText("Theta="+QString::number(ang, 'g', 3)+"  cos="+QString::number(cos, 'g', 3));
-}
-*/
 
 void AOpticalOverrideTester::on_cbWavelength_toggled(bool)
 {

@@ -39,7 +39,6 @@ private slots:
     void on_pbCSMtestmany_clicked();
     void on_pbST_showTracks_clicked();
     void on_pbST_uniform_clicked();
-    //void on_pbST_AngleCos_clicked();
 
     void on_cbWavelength_toggled(bool checked);
 

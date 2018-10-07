@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>424</width>
+    <width>443</width>
     <height>466</height>
    </rect>
   </property>
@@ -173,17 +173,63 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pbST_RvsAngle">
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="topMargin">
+       <number>10</number>
       </property>
-      <property name="text">
-       <string>Processes vs angle of incidence</string>
-      </property>
-     </widget>
+      <item>
+       <widget class="QPushButton" name="pbST_RvsAngle">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>250</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Processes vs angle of incidence</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Collect:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cobPrVsAngle_WhatToCollect">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>Basic info</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Backscattering</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QPushButton" name="pbST_uniform">
@@ -519,16 +565,6 @@
         </item>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="cbST_cosToDegrees">
-        <property name="text">
-         <string>Histogram: cos to degrees</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item>
@@ -548,7 +584,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>424</width>
+     <width>443</width>
      <height>21</height>
     </rect>
    </property>

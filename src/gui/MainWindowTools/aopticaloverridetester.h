@@ -30,10 +30,9 @@ public:
 
 public slots:
     void updateGUI();
-
-private slots:
     void showGeometry();
 
+private slots:
     void on_pbDirectionHelp_clicked();
     void on_pbST_RvsAngle_clicked();
     void on_pbCSMtestmany_clicked();
@@ -65,6 +64,7 @@ private:
     ATracerStateful* Resources;                 //loacl
 
     bool testOverride();
+    int getWaveIndex();
 
 };
 

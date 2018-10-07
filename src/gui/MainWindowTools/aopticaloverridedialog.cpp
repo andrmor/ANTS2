@@ -149,4 +149,5 @@ void AOpticalOverrideDialog::on_pbTestOverride_clicked()
 {
     TesterWindow->show();
     TesterWindow->updateGUI();
+    TesterWindow->showGeometry();
 }

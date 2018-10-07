@@ -50,8 +50,6 @@ AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, Main
     ui->labMaterials->setText( QString("(%1 -> %2)").arg(matNames.at(matFrom)).arg(matNames.at(matTo)) );
 
     updateGUI();
-
-    showGeometry();
 }
 
 void AOpticalOverrideTester::updateGUI()
@@ -65,10 +63,7 @@ void AOpticalOverrideTester::updateGUI()
     else
         ui->cbWavelength->setEnabled(true);
 
-    int waveIndex = -1;
-    if (ui->cbWavelength->isChecked())
-        waveIndex = MPcollection->WaveToIndex( ui->ledST_wave->text().toDouble() ); // always in [0, WaveNodes-1]
-
+    int waveIndex = getWaveIndex();
     ui->ledST_Ref1->setText( QString::number( (*MPcollection)[MatFrom]->getRefractiveIndex(waveIndex) ) );
     ui->ledST_Ref2->setText( QString::number( (*MPcollection)[MatTo]  ->getRefractiveIndex(waveIndex) ) );
 
@@ -118,8 +113,12 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
 {
     if ( !testOverride() ) return;
 
+    //TODO wavelength shifted
+
     int numPhotons = ui->sbST_number->value();
-    QVector<double> Spike(91, 0), Lobe(91, 0), Diffuse(91, 0), Total(91, 0), Angle;
+    QVector<double> Back(91, 0), Forward(91, 0), Absorb(91, 0), NotTrigger(91, 0);
+    QVector<double> Spike(91, 0), BackLobe(91, 0), BackLambert(91, 0), WaveShifted(91, 0);
+    QVector<double> Angle;
     double N[3], K[3];
     N[0] = 0;
     N[1] = 0;
@@ -128,15 +127,16 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
     APhoton ph;
     ph.SimStat = new ASimulationStatistics();
 
-    for (int iA=0; iA<91; iA++) //cycle by angle of incidence
-      {
-        double angle = iA;
-        if (angle == 90) angle = 89.9;
+    for (int iAngle = 0; iAngle < 91; iAngle++) //cycle by angle of incidence
+    {
+        double angle = iAngle;
+        if (angle == 90) angle = 89.99;
         Angle.append(angle);
+
         //angle->photon direction
         double cosA = cos(TMath::Pi() * angle / 180.0);
         double sinA = sin(TMath::Pi() * angle / 180.0);
-        for (int i=0; i<numPhotons; i++) //cycle by photons
+        for (int iPhot=0; iPhot<numPhotons; iPhot++) //cycle by photons
         {
             //have to reset since K is modified by the override object
             K[0] = sinA;
@@ -146,47 +146,76 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
             ph.v[0] = K[0];
             ph.v[1] = K[1];
             ph.v[2] = K[2];
-            ph.waveIndex = -1;  //TODO wave res?
-            (*pOV)->calculate(*Resources, &ph, N);
+            ph.waveIndex = getWaveIndex();
+            AOpticalOverride::OpticalOverrideResultEnum result = (*pOV)->calculate(*Resources, &ph, N);
+
+            switch (result)
+            {
+            case AOpticalOverride::NotTriggered: NotTrigger[iAngle]++; break;
+            case AOpticalOverride::Absorbed: Absorb[iAngle]++; break;
+            case AOpticalOverride::Forward: Forward[iAngle]++; break;
+            case AOpticalOverride::Back: Back[iAngle]++; break;
+            default:;
+            }
 
             switch ((*pOV)->Status)
             {
-              case AOpticalOverride::Absorption: continue; break;
-              case AOpticalOverride::SpikeReflection: Spike[iA]++; break;
-              case AOpticalOverride::LobeReflection: Lobe[iA]++; break;
-              case AOpticalOverride::LambertianReflection: Diffuse[iA]++; break; //TODO what about scrip override?
+              case AOpticalOverride::SpikeReflection: Spike[iAngle]++; break;
+              case AOpticalOverride::LobeReflection: BackLobe[iAngle]++; break;
+              case AOpticalOverride::LambertianReflection: BackLambert[iAngle]++; break;
               default: ;
             }
         }
-        Spike[iA] /= numPhotons;
-        Lobe[iA] /= numPhotons;
-        Diffuse[iA] /= numPhotons;
-        Total[iA] = Spike[iA]+Lobe[iA]+Diffuse[iA];
-      }
+        NotTrigger[iAngle] /= numPhotons;
+        Absorb[iAngle] /= numPhotons;
+        Forward[iAngle] /= numPhotons;
+        Back[iAngle] /= numPhotons;
 
-    TGraph *gS, *gL, *gD, *gT;
-    gT = GraphWindow->MakeGraph(&Angle, &Total,   2, "Angle", "", 0, 1, 1, 2, "", true);
-    gT->SetMinimum(0);
-    gT->SetTitle("Total");
-    gS = GraphWindow->MakeGraph(&Angle, &Spike,   1, "Angle", "", 0, 1, 1, 1, "", true);
-    gS->SetTitle("Spike");
-    gL = GraphWindow->MakeGraph(&Angle, &Lobe,    3, "Angle", "", 0, 1, 1, 1, "", true);
-    gL->SetTitle("Lobe");
-    gD = GraphWindow->MakeGraph(&Angle, &Diffuse, 4, "Angle", "", 0, 1, 1, 1, "", true);
-    gD->SetTitle("Diffuse");
+        Spike[iAngle] /= numPhotons;
+        BackLobe[iAngle] /= numPhotons;
+        BackLambert[iAngle] /= numPhotons;
+    }
 
-    GraphWindow->Draw(gT, "AL");
-    GraphWindow->Draw(gS, "Lsame");
-    GraphWindow->Draw(gL, "Lsame");
-    GraphWindow->Draw(gD, "Lsame");
+    if ( ui->cobPrVsAngle_WhatToCollect->currentIndex() == 1 )
+    {
+        TGraph *gS, *gL, *gD, *gT;
+        gT = GraphWindow->MakeGraph(&Angle, &Back,   2, "Angle", "", 0, 1, 1, 2, "", true);
+        gT->SetMinimum(0);
+        gT->SetTitle("All reflections");
+        gS = GraphWindow->MakeGraph(&Angle, &Spike,   1, "Angle", "", 0, 1, 1, 2, "", true);
+        gS->SetTitle("Spike");
+        gL = GraphWindow->MakeGraph(&Angle, &BackLobe,    3, "Angle", "", 0, 1, 1, 2, "", true);
+        gL->SetTitle("Lobe");
+        gD = GraphWindow->MakeGraph(&Angle, &BackLambert, 4, "Angle", "", 0, 1, 1, 2, "", true);
+        gD->SetTitle("Diffuse");
 
-    TLegend *leg = new TLegend(0.1, 0.7, 0.3, 0.9);
-    leg->SetFillColor(0);
-    leg->AddEntry(gT, "Total", "lp");
-    leg->AddEntry(gS, "Spike", "lp");
-    leg->AddEntry(gL, "Lobe", "lp");
-    leg->AddEntry(gD, "Diffuse", "lp");
-    GraphWindow->Draw(leg, "same");
+        GraphWindow->Draw(gT, "AL");
+        GraphWindow->Draw(gS, "Lsame");
+        GraphWindow->Draw(gL, "Lsame");
+        GraphWindow->Draw(gD, "Lsame");
+
+        GraphWindow->on_pbAddLegend_clicked();
+    }
+    else
+    {
+        TGraph *gN, *gA, *gB, *gF;
+        gN = GraphWindow->MakeGraph(&Angle, &NotTrigger,   2, "Angle", "", 0, 1, 1, 2, "", true);
+        gN->SetMinimum(0);
+        gN->SetTitle("Not triggered");
+        gA = GraphWindow->MakeGraph(&Angle, &Absorb,   1, "Angle", "", 0, 1, 1, 2, "", true);
+        gA->SetTitle("Absorption");
+        gB = GraphWindow->MakeGraph(&Angle, &Back,    3, "Angle", "", 0, 1, 1, 2, "", true);
+        gB->SetTitle("Back");
+        gF = GraphWindow->MakeGraph(&Angle, &Forward, 4, "Angle", "", 0, 1, 1, 2, "", true);
+        gF->SetTitle("Forward");
+
+        GraphWindow->Draw(gN, "AL");
+        GraphWindow->Draw(gA, "Lsame");
+        GraphWindow->Draw(gB, "Lsame");
+        GraphWindow->Draw(gF, "Lsame");
+
+        GraphWindow->on_pbAddLegend_clicked();
+    }
 
     delete ph.SimStat;
 }
@@ -200,10 +229,12 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
                       ui->ledST_sj->text().toDouble(),
                       ui->ledST_sk->text().toDouble());
     SurfNorm = SurfNorm.Unit();
-    double N[3];
+
+    double N[3]; //needs to calculate override
     N[0] = SurfNorm.X();
     N[1] = SurfNorm.Y();
     N[2] = SurfNorm.Z();
+
     TVector3 PhotDir(ui->ledST_i->text().toDouble(),
                      ui->ledST_j->text().toDouble(),
                      ui->ledST_k->text().toDouble());
@@ -212,86 +243,91 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     tracks.clear();
     double d = 0.5; //offset - for drawing only
 
-
-
     //preparing and running cycle with photons
-    int abs, spike, lobe, lamb;
-    abs = spike = lobe = lamb = 0;
-    TH1D* hist1;
-    bool fDegrees = ui->cbST_cosToDegrees->isChecked();
-    if (fDegrees) hist1 = new TH1D("statScatter", "Angle_scattered", 100, 0, 0);
-    else          hist1 = new TH1D("statScatter", "Cos_scattered", 100, 0, 0);
+    double abs, back, forw, notTrigger, spike, lobe, lamb;
+    abs = back = forw = notTrigger = spike = lobe = lamb = 0;
+    TH1D* hist1 = new TH1D("", "", 100, 0, 0);
+    hist1->GetXaxis()->SetTitle("Backscattering angle, degrees");
 
     APhoton ph;
     ph.SimStat = new ASimulationStatistics();
 
-    for (int i=0; i<ui->sbST_number->value(); i++)
-      {
+    const int numPhot = ui->sbST_number->value();
+    for (int i = 0; i < numPhot; i++)
+    {
         ph.v[0] = PhotDir.X(); //old has output direction after full cycle!
         ph.v[1] = PhotDir.Y();
         ph.v[2] = PhotDir.Z();
-        ph.waveIndex = -1;
-        (*pOV)->calculate(*Resources, &ph, N);
+        ph.waveIndex = getWaveIndex();
+        AOpticalOverride::OpticalOverrideResultEnum result = (*pOV)->calculate(*Resources, &ph, N);
+
+        switch (result)
+        {
+        case AOpticalOverride::NotTriggered: notTrigger++; break;
+        case AOpticalOverride::Absorbed: abs++; break;
+        case AOpticalOverride::Forward: forw++; break;
+        case AOpticalOverride::Back: back++; break;
+        default:;
+        }
 
         Color_t col;
         Int_t type;
-        if ((*pOV)->Status == AOpticalOverride::Absorption)
-          {
-            abs++;
-            continue;
-          }
-        else if ((*pOV)->Status == AOpticalOverride::SpikeReflection)
-          {
+        if ((*pOV)->Status == AOpticalOverride::SpikeReflection)
+        {
             spike++;
             type = 0;
             col = 6; //0,magenta for Spike
-          }
+        }
         else if ((*pOV)->Status == AOpticalOverride::LobeReflection)
-          {
+        {
             lobe++;
             type = 1;
             col = 7; //1,teal for Lobe
-          }
+        }
         else if ((*pOV)->Status == AOpticalOverride::LambertianReflection)
-          {
+        {
             lamb++;
             type = 2;
             col = 3; //2,grean for lambert
-          }
+        }
         else
-          {
+        {
             type = 666;
             col = kBlue; //blue for error
-          }
+        }
+
+        //TODO if Fresnel, change direction!
 
         tracks.append(TrackHolderClass(type, col));
-        tracks.last().Nodes.append(TrackNodeStruct(d,d,d, 0));
-        tracks.last().Nodes.append(TrackNodeStruct(d+ph.v[0], d+ph.v[1], d+ph.v[2], 0));
+        tracks.last().Nodes.append(TrackNodeStruct(d, d, d, 0));
+        tracks.last().Nodes.append(TrackNodeStruct(d + ph.v[0], d + ph.v[1], d + ph.v[2], 0));
 
-        double costr = -SurfNorm[0]*ph.v[0] -SurfNorm[1]*ph.v[1] -SurfNorm[2]*ph.v[2];
+        double costr = - SurfNorm[0] * ph.v[0] - SurfNorm[1] * ph.v[1] - SurfNorm[2] * ph.v[2];
 
-        if (fDegrees) hist1->Fill(180.0 / TMath::Pi() * acos(costr));
-        else          hist1->Fill(costr);
-      }
+        hist1->Fill(180.0 / TMath::Pi() * acos(costr));
+    }
 
-    //show cos angle hist
     GraphWindow->Draw(hist1);
-    //show tracks
     on_pbST_showTracks_clicked();
+
+    ui->pte->clear();
+    QString t = "Process fractions:\n";
+    t += QString("  Absorption: %1\n").arg(abs/numPhot);
+    t += QString("  Back: %1\n").arg(back/numPhot);
+    t += QString("  Forward: %1\n").arg(forw/numPhot);
+    t += QString("  Not triggered: %1\n").arg(notTrigger/numPhot);
+    t += "\n";
+
     //show stat of processes
-    int sum = abs + spike + lobe + lamb;
-    QString str = QString::number(abs) + "/" +
-        QString::number(spike) + "/" +
-        QString::number(lobe) + "/" +
-        QString::number(lamb);
-    if (sum>0)
-      {
-        str += "   (" + QString::number(1.0*abs/sum, 'g', 3) + "/" +
-              QString::number(1.0*spike/sum, 'g', 3) + "/" +
-              QString::number(1.0*lobe/sum, 'g', 3) + "/" +
-              QString::number(1.0*lamb/sum, 'g', 3) + ")";
-      }
-    //ui->leST_out->setText(str);
+    t += "Backscattering info:\n";
+    t += QString("  Specular spike: %1\n").arg(spike/numPhot);
+    t += QString("  Diffuse lobe: %1\n").arg(lobe/numPhot);
+    t += QString("  Lambertian: %1\n").arg(lamb/numPhot);
+
+    ui->pte->appendPlainText(t);
+    ui->pte->moveCursor(QTextCursor::Start);
+    ui->pte->ensureCursorVisible();
+
     delete ph.SimStat;
 }
 
@@ -390,6 +426,13 @@ bool AOpticalOverrideTester::testOverride()
     return true;
 }
 
+int AOpticalOverrideTester::getWaveIndex()
+{
+    if (ui->cbWavelength->isChecked())
+        return MPcollection->WaveToIndex( ui->ledST_wave->text().toDouble() ); // always in [0, WaveNodes-1]
+    else return -1;
+}
+
 void AOpticalOverrideTester::on_pbST_uniform_clicked()
 {
     if ( !testOverride() ) return;
@@ -408,9 +451,8 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
     int abs, spike, lobe, lamb;
     abs = spike = lobe = lamb = 0;
     TH1D* hist1;
-    bool fDegrees = ui->cbST_cosToDegrees->isChecked();
-    if (fDegrees) hist1 = new TH1D("statScatter", "Angle_scattered", 100, 0, 0);
-    else          hist1 = new TH1D("statScatter", "Cos_scattered", 100, 0, 0);
+    hist1 = new TH1D("", "", 100, 0, 0);
+    hist1->GetXaxis()->SetTitle("Backscattering angle, degrees");
 
     int num = ui->sbST_number->value();
 
@@ -450,8 +492,7 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
           }
 
         double costr = -N[0]*K[0] -N[1]*K[1] -N[2]*K[2];  // after scatter, K will be in positive Z direction
-        if (fDegrees) hist1->Fill(180.0/3.1415926535*acos(costr));
-        else          hist1->Fill(costr);
+        hist1->Fill(180.0 / TMath::Pi() * acos(costr));
       }
 
     //show cos angle hist

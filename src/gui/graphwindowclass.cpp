@@ -684,28 +684,6 @@ void GraphWindowClass::switchOffBasket()
   ui->cbShowBasket->setChecked(false);
 }
 
-void GraphWindowClass::resizeEvent(QResizeEvent *)
-{
-  //tool bar box height and basket fit the window
-  //ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
-  //ui->fBasket->resize(ui->fBasket->width(), this->height());
-  //ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
-
-  //int deltaBasket = 0;
-  //if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
-
-  //int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
-  //int height = this->height() - (3 + 3);
-//  qDebug()<<width<<height;
-
-  //int mh = 0;
-  //if (ui->menuBar) mh =  ui->menuBar->height();
-  //if (RasterWindow) RasterWindow->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
-  //if (RasterWindow) RasterWindow->ForceResize();
-
-  //if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
-}
-
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 {
     if(RasterWindow->isVisible())
@@ -3495,19 +3473,9 @@ void GraphWindowClass::on_pbAttributes_clicked()
   RasterWindow->fCanvas->SetLineAttributes();
 }
 
-void GraphWindowClass::on_actionToggle_toolbar_toggled(bool arg1)
+void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 {
-   if (arg1)
-     {
-       BarShown = false;
-       ui->fUIbox->resize(150,500);
-     }
-   else
-     {
-       BarShown = true;
-       ui->fUIbox->resize(0,500);
-     }
-   GraphWindowClass::resizeEvent(0);
+    ui->fUIbox->setVisible(checked);
 }
 
 void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
@@ -3809,3 +3777,4 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
         selBoxControlsUpdated();
       }
 }
+

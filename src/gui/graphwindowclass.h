@@ -158,7 +158,6 @@ public:
     void SetStatPanelVisible(bool flag);
 
 protected:
-    void resizeEvent(QResizeEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     bool event(QEvent *event);
     void closeEvent(QCloseEvent *event);
@@ -243,7 +242,6 @@ private slots:
     void on_actionSide_triggered();
     void on_actionFront_triggered();
     void on_pbAttributes_clicked();
-    void on_actionToggle_toolbar_toggled(bool arg1);
     void on_pbDensityDistribution_clicked();
     void on_actionEqualize_scale_XY_triggered();
     void on_ledRulerDX_editingFinished();
@@ -257,6 +255,8 @@ private slots:
     void on_pbFWHM_clicked();
 
     void on_ledAngle_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionToggle_toolbar_triggered(bool checked);
 
 private:
     Ui::GraphWindowClass *ui;
@@ -284,7 +284,6 @@ private:
 
     //flags
     bool TMPignore = false; //temporarily forbid updates - need for bulk update to avoid cross-modification
-    bool BarShown;
     bool ColdStart = true;
     bool fFirstTime = false; //signals that "UnZoom" range values (xmin0, etc...) have to be stored
 

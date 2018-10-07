@@ -29,19 +29,29 @@ public:
     void readFromJson(const QJsonObject& json);
 
 public slots:
-    void updateIndication();
+    void updateGUI();
 
 private slots:
+    void showGeometry();
+
     void on_pbDirectionHelp_clicked();
     void on_pbST_RvsAngle_clicked();
     void on_pbCSMtestmany_clicked();
     void on_pbST_showTracks_clicked();
     void on_pbST_uniform_clicked();
-    void on_pbST_AngleCos_clicked();
+    //void on_pbST_AngleCos_clicked();
 
     void on_cbWavelength_toggled(bool checked);
 
     void on_ledST_wave_editingFinished();
+
+    void on_ledST_i_editingFinished();
+
+    void on_ledST_j_editingFinished();
+
+    void on_ledST_k_editingFinished();
+
+    void on_ledAngle_editingFinished();
 
 private:
     Ui::AOpticalOverrideTester *ui;

@@ -28,7 +28,6 @@
 #include "TVirtualGeoTrack.h"
 
 static QVector<TrackHolderClass> tracks;
-static TVector3 NormViz;
 
 AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, MainWindow *MW, int matFrom, int matTo, QWidget *parent) :
     QMainWindow(parent), ui(new Ui::AOpticalOverrideTester),
@@ -50,10 +49,12 @@ AOpticalOverrideTester::AOpticalOverrideTester(AOpticalOverride ** ovLocal, Main
     QStringList matNames = MW->MpCollection->getListOfMaterialNames();
     ui->labMaterials->setText( QString("(%1 -> %2)").arg(matNames.at(matFrom)).arg(matNames.at(matTo)) );
 
-    updateIndication();
+    updateGUI();
+
+    showGeometry();
 }
 
-void AOpticalOverrideTester::updateIndication()
+void AOpticalOverrideTester::updateGUI()
 {
     bool bWR = MPcollection->IsWaveResolved();
     if (!bWR)
@@ -70,6 +71,15 @@ void AOpticalOverrideTester::updateIndication()
 
     ui->ledST_Ref1->setText( QString::number( (*MPcollection)[MatFrom]->getRefractiveIndex(waveIndex) ) );
     ui->ledST_Ref2->setText( QString::number( (*MPcollection)[MatTo]  ->getRefractiveIndex(waveIndex) ) );
+
+    TVector3 photon(ui->ledST_i->text().toDouble(), ui->ledST_j->text().toDouble(), ui->ledST_k->text().toDouble());
+    photon = photon.Unit();
+    //vector surface normal
+    TVector3 normal(ui->ledST_si->text().toDouble(), ui->ledST_sj->text().toDouble(), ui->ledST_sk->text().toDouble());
+    normal = normal.Unit();
+    double cos = photon * normal;
+    double ang = 180.0 / TMath::Pi() * acos(cos);
+    ui->ledAngle->setText( QString::number(ang, 'g', 4) );
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
@@ -98,9 +108,10 @@ void AOpticalOverrideTester::readFromJson(const QJsonObject &json)
 void AOpticalOverrideTester::on_pbDirectionHelp_clicked()
 {
     QString s = "Vectors are not necessary normalized to unity (automatic when used)\n\n"
-            "Note that in overrides caluclations"
-            "normal of the surface is always oriented"
-            "in the direction away from the incoming photon";
+            "Note that in override caluclations\n"
+            "normal of the surface is always oriented\n"
+            "in the same direction as the one of the incoming photon!\n";
+    message(s, this);
 }
 
 void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
@@ -189,8 +200,6 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
                       ui->ledST_sj->text().toDouble(),
                       ui->ledST_sk->text().toDouble());
     SurfNorm = SurfNorm.Unit();
-    NormViz = SurfNorm; //visualization of tracks
-    SurfNorm = - SurfNorm; //In ANTS2 navigator provides normal in the opposite direction
     double N[3];
     N[0] = SurfNorm.X();
     N[1] = SurfNorm.Y();
@@ -202,9 +211,8 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
 
     tracks.clear();
     double d = 0.5; //offset - for drawing only
-    tracks.append(TrackHolderClass(10, kRed)); //incoming photon track
-    tracks.last().Nodes.append(TrackNodeStruct(d, d ,d, 0));
-    tracks.last().Nodes.append(TrackNodeStruct(d-PhotDir.X(), d-PhotDir.Y(), d-PhotDir.Z(), 0));
+
+
 
     //preparing and running cycle with photons
     int abs, spike, lobe, lamb;
@@ -262,11 +270,9 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
 
         double costr = -SurfNorm[0]*ph.v[0] -SurfNorm[1]*ph.v[1] -SurfNorm[2]*ph.v[2];
 
-        if (fDegrees) hist1->Fill(180.0/3.1415926535*acos(costr));
+        if (fDegrees) hist1->Fill(180.0 / TMath::Pi() * acos(costr));
         else          hist1->Fill(costr);
       }
-
-    qDebug() << "Here!";
 
     //show cos angle hist
     GraphWindow->Draw(hist1);
@@ -289,39 +295,64 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     delete ph.SimStat;
 }
 
-void AOpticalOverrideTester::on_pbST_showTracks_clicked()
+void AOpticalOverrideTester::showGeometry()
 {
-    if (tracks.isEmpty()) return;
-    int selector = ui->cobST_trackType->currentIndex() - 1;
-    if (selector == 3) return; //do not show any tracks
-
     gGeoManager->ClearTracks();
     GeometryWindow->ClearRootCanvas();
-    //showing surface
-    Int_t track_index = gGeoManager->AddTrack(1,22);
-    TVirtualGeoTrack* track = gGeoManager->GetTrack(track_index);
+
     double d = 0.5;
     double f = 0.5;
 
     //surface normal
+    TVector3 SurfNorm(ui->ledST_si->text().toDouble(),
+                      ui->ledST_sj->text().toDouble(),
+                      ui->ledST_sk->text().toDouble());
+    SurfNorm = SurfNorm.Unit();
+    int track_index = gGeoManager->AddTrack(1,22);
+    TVirtualGeoTrack* track = gGeoManager->GetTrack(track_index);
     track->AddPoint(d, d, d, 0);
-    track->AddPoint(d+NormViz.X(), d+NormViz.Y(), d+NormViz.Z(), 0);
+    track->AddPoint(d + SurfNorm.X(), d + SurfNorm.Y(), d + SurfNorm.Z(), 0);
     track->SetLineWidth(3);
-    track->SetLineColor(1);
-    //surf
-    track_index = gGeoManager->AddTrack(1,22);
-    track = gGeoManager->GetTrack(track_index);
-    TVector3 perp = NormViz.Orthogonal();
-    perp.Rotate(0.25*3.1415926535, NormViz);
-    for (int i=0; i<5; i++)
-      {
-        track->AddPoint(d+f*perp.X(), d+f*perp.Y(), d+f*perp.Z(), 0);
-        perp.Rotate(0.5*3.1415926535, NormViz);
-      }
-    track->SetLineWidth(2);
+    track->SetLineStyle(2);
     track->SetLineColor(1);
 
-    //photon tracks
+    //surface
+    track_index = gGeoManager->AddTrack(1, 22);
+    track = gGeoManager->GetTrack(track_index);
+    TVector3 perp = SurfNorm.Orthogonal();
+    perp.Rotate(0.25 * TMath::Pi(), SurfNorm);
+    for (int i=0; i<5; i++)
+      {
+        track->AddPoint(d + f * perp.X(), d + f * perp.Y(), d + f * perp.Z(), 0);
+        perp.Rotate(0.5 * TMath::Pi(), SurfNorm);
+      }
+    track->SetLineWidth(3);
+    track->SetLineColor(1);
+
+    //intitial photon track
+    track_index = gGeoManager->AddTrack(1, 10);
+    track = gGeoManager->GetTrack(track_index);
+    track->AddPoint(d, d, d, 0);
+    TVector3 PhotDir(ui->ledST_i->text().toDouble(),
+                     ui->ledST_j->text().toDouble(),
+                     ui->ledST_k->text().toDouble());
+    PhotDir = PhotDir.Unit();
+    track->AddPoint(d-PhotDir.X(), d-PhotDir.Y(), d-PhotDir.Z(), 0);
+    track->SetLineColor(kRed);
+    track->SetLineWidth(3);
+
+    GeometryWindow->show();
+    GeometryWindow->DrawTracks();
+}
+
+void AOpticalOverrideTester::on_pbST_showTracks_clicked()
+{
+    showGeometry();
+
+    if (tracks.isEmpty()) return;
+    int selector = ui->cobST_trackType->currentIndex() - 1;
+    if (selector == 3) return; //do not show any tracks
+
     int numTracks = 0;
     for(int i = 1; i<tracks.count() && numTracks<10000; i++)
       {
@@ -330,21 +361,13 @@ void AOpticalOverrideTester::on_pbST_showTracks_clicked()
         if (selector>-1)  //-1 - show all
           if (selector != th->UserIndex) continue;
 
-        track_index = gGeoManager->AddTrack(1,22);
-        track = gGeoManager->GetTrack(track_index);
+        int track_index = gGeoManager->AddTrack(1,22);
+        TVirtualGeoTrack* track = gGeoManager->GetTrack(track_index);
         track->SetLineColor(th->Color);
         track->SetLineWidth(1);
         for (int iNode=0; iNode<th->Nodes.size(); iNode++)
           track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
       }
-    //intitial photon track
-    track_index = gGeoManager->AddTrack(1,22);
-    track = gGeoManager->GetTrack(track_index);
-    TrackHolderClass* th = &tracks.first();
-    track->SetLineColor(kRed);
-    track->SetLineWidth(2);
-    for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-      track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
 
     GeometryWindow->show();
     GeometryWindow->DrawTracks();
@@ -375,7 +398,6 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
                       ui->ledST_sj->text().toDouble(),
                       ui->ledST_sk->text().toDouble());
     SurfNorm = SurfNorm.Unit();
-    SurfNorm = - SurfNorm; //In ANTS2 navigator provides normal in the opposite direction
     double N[3];
     N[0] = SurfNorm.X();
     N[1] = SurfNorm.Y();
@@ -453,6 +475,7 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
     delete ph.SimStat;
 }
 
+/*
 void AOpticalOverrideTester::on_pbST_AngleCos_clicked()
 {
     //vector photon dir
@@ -468,13 +491,58 @@ void AOpticalOverrideTester::on_pbST_AngleCos_clicked()
 
     ui->pbST_AngleCos->setText("Theta="+QString::number(ang, 'g', 3)+"  cos="+QString::number(cos, 'g', 3));
 }
+*/
 
 void AOpticalOverrideTester::on_cbWavelength_toggled(bool)
 {
-    updateIndication();
+    updateGUI();
 }
 
 void AOpticalOverrideTester::on_ledST_wave_editingFinished()
 {
-    updateIndication();
+    updateGUI();
+}
+
+void AOpticalOverrideTester::on_ledST_i_editingFinished()
+{
+    updateGUI();
+    showGeometry();
+}
+
+void AOpticalOverrideTester::on_ledST_j_editingFinished()
+{
+    updateGUI();
+    showGeometry();
+}
+
+void AOpticalOverrideTester::on_ledST_k_editingFinished()
+{
+    if (ui->ledST_k->text().toDouble() >= 0)
+    {
+        ui->ledST_k->setText("-1");
+        message("The photon direction vector along Z axis should be neagtive!", this);
+    }
+    updateGUI();
+    showGeometry();
+}
+
+void AOpticalOverrideTester::on_ledAngle_editingFinished()
+{
+    double angle = ui->ledAngle->text().toDouble();
+    if (angle <= -90.0 || angle >= 90.0 )
+    {
+        ui->ledAngle->setText("45");
+        message("Angle should be within (-90, 90) degrees!", this);
+        angle = 45.0;
+    }
+
+    TVector3 photon(0, 0, -1.0);
+    TVector3 perp(0, 1.0, 0);
+    angle *= -TMath::Pi() / 180.0;
+    photon.Rotate(angle, perp);
+    ui->ledST_i->setText( QString::number( photon.x(), 'g', 6) );
+    ui->ledST_j->setText( QString::number( photon.y(), 'g', 6) );
+    ui->ledST_k->setText( QString::number( photon.z(), 'g', 6) );
+
+    showGeometry();
 }

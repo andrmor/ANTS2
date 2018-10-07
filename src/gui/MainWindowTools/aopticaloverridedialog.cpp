@@ -148,5 +148,5 @@ void AOpticalOverrideDialog::on_cobType_activated(int index)
 void AOpticalOverrideDialog::on_pbTestOverride_clicked()
 {
     TesterWindow->show();
-    TesterWindow->updateIndication();
+    TesterWindow->updateGUI();
 }

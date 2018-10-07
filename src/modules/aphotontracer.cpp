@@ -246,7 +246,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                //qDebug() << "-Override: absorption triggered";
                navigator->PopDummy(); //clean up the stack
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Loss, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Loss, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideLoss++;
                goto force_stop_tracing; //finished with this photon
            case AOpticalOverride::Back:
@@ -254,14 +254,14 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                navigator->PopPoint();  //remaining in the original volume
                navigator->SetCurrentDirection(p->v); //updating direction
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Back, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Back, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideBack++;
                continue; //send to the next iteration
            case AOpticalOverride::Forward:
                navigator->SetCurrentDirection(p->v); //updating direction
                fDoFresnel = false; //stack cleaned afterwards
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Override_Forward, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameTo, p->time, p->waveIndex, APhotonHistoryLog::Override_Forward, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideForward++;
                break; //switch break
            case AOpticalOverride::NotTriggered:

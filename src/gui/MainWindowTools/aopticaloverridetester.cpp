@@ -12,6 +12,7 @@
 #include "asimulationstatistics.h"
 #include "atrackrecords.h"
 #include "ajsontools.h"
+#include "aglobalsettings.h"
 
 #include <QDoubleValidator>
 #include <QLineEdit>
@@ -251,20 +252,23 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
 
     APhoton ph;
     ph.SimStat = new ASimulationStatistics();
-
-    const int numPhot = ui->sbST_number->value();
+    const int waveIndex = getWaveIndex();
+    const int numPhot = ui->sbST_number->value();    
     for (int i = 0; i < numPhot; i++)
     {
         ph.v[0] = PhotDir.X(); //old has output direction after full cycle!
         ph.v[1] = PhotDir.Y();
         ph.v[2] = PhotDir.Z();
-        ph.waveIndex = getWaveIndex();
+        ph.time = 0;
+        ph.waveIndex = waveIndex;
         AOpticalOverride::OpticalOverrideResultEnum result = (*pOV)->calculate(*Resources, &ph, N);
 
+        //in case of absorption or not triggered override, do not build tracks!
         switch (result)
         {
-        case AOpticalOverride::NotTriggered: notTrigger++; break;
-        case AOpticalOverride::Absorbed: abs++; break;
+        case AOpticalOverride::Absorbed: abs++; continue;               // ! ->
+        case AOpticalOverride::NotTriggered: notTrigger++; continue;    // ! ->
+
         case AOpticalOverride::Forward: forw++; break;
         case AOpticalOverride::Back: back++; break;
         default:;
@@ -296,8 +300,6 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
             col = kBlue; //blue for error
         }
 
-        //TODO if Fresnel, change direction!
-
         tracks.append(TrackHolderClass(type, col));
         tracks.last().Nodes.append(TrackNodeStruct(d, d, d, 0));
         tracks.last().Nodes.append(TrackNodeStruct(d + ph.v[0], d + ph.v[1], d + ph.v[2], 0));
@@ -311,18 +313,22 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     on_pbST_showTracks_clicked();
 
     ui->pte->clear();
-    QString t = "Process fractions:\n";
-    t += QString("  Absorption: %1\n").arg(abs/numPhot);
-    t += QString("  Back: %1\n").arg(back/numPhot);
-    t += QString("  Forward: %1\n").arg(forw/numPhot);
-    t += QString("  Not triggered: %1\n").arg(notTrigger/numPhot);
+    QString t = "Processes:\n";
+    if (abs > 0)    t += QString("  Absorption: %1%  (%2)\n").arg(abs/numPhot*100.0).arg(abs);
+    if (back > 0)   t += QString("  Back: %1%  (%2)\n").arg(back/numPhot*100.0).arg(back);
+    if (forw)       t += QString("  Forward: %1%  (%2)\n").arg(forw/numPhot*100.0).arg(forw);
+    if (notTrigger) t += QString("  Not triggered: %1%  (%2)\n").arg(notTrigger/numPhot*100.0).arg(notTrigger);
     t += "\n";
 
-    //show stat of processes
-    t += "Backscattering info:\n";
-    t += QString("  Specular spike: %1\n").arg(spike/numPhot);
-    t += QString("  Diffuse lobe: %1\n").arg(lobe/numPhot);
-    t += QString("  Lambertian: %1\n").arg(lamb/numPhot);
+    if (back > 0)
+    {
+        //show stat of processes
+        t += "Backscattering composition:\n";
+        if (spike > 0) t += QString("  Specular spike: %1%  (%2)\n").arg(spike/back*100.0).arg(spike);
+        if (lobe > 0)  t += QString("  Diffuse lobe: %1%  (%2)\n").arg(lobe/back*100.0).arg(lobe);
+        if (lamb > 0)  t += QString("  Lambertian: %1%  (%2)\n").arg(lamb/back*100.0).arg(lamb);
+    }
+
 
     ui->pte->appendPlainText(t);
     ui->pte->moveCursor(QTextCursor::Start);
@@ -390,8 +396,8 @@ void AOpticalOverrideTester::on_pbST_showTracks_clicked()
     if (selector == 3) return; //do not show any tracks
 
     int numTracks = 0;
-    for(int i = 1; i<tracks.count() && numTracks<10000; i++)
-      {
+    for(int i = 1; i<tracks.count() && numTracks < maxNumTracks; i++)
+    {
         const TrackHolderClass* th = &tracks.at(i);
         //filter
         if (selector>-1)  //-1 - show all
@@ -403,7 +409,7 @@ void AOpticalOverrideTester::on_pbST_showTracks_clicked()
         track->SetLineWidth(1);
         for (int iNode=0; iNode<th->Nodes.size(); iNode++)
           track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-      }
+    }
 
     GeometryWindow->show();
     GeometryWindow->DrawTracks();

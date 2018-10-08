@@ -61,7 +61,9 @@ private:
     GraphWindowClass* GraphWindow;              //external
     GeometryWindowClass* GeometryWindow;        //external
     TRandom2* RandGen;                          //local
-    ATracerStateful* Resources;                 //loacl
+    ATracerStateful* Resources;                 //local
+
+    const int maxNumTracks = 1000;
 
     bool testOverride();
     int getWaveIndex();

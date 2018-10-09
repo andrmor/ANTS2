@@ -18,6 +18,7 @@
 #include "ainterfacetomultithread.h"
 #include "ainterfacetoguiscript.h"
 #include "ainterfacetottree.h"
+#include "aparticletrackinghistoryinterface.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -116,6 +117,9 @@ void MainWindow::createScriptWindow()
 
     AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
     ScriptWindow->SetInterfaceObject(depo, "depo");
+
+    AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(EventsDataHub->EventHistory);
+    ScriptWindow->SetInterfaceObject(pth, "pth");
 
 #ifdef ANTS_FLANN
     AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);

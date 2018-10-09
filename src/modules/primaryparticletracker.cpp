@@ -65,7 +65,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       if (SimSet->fLogsStat)
         {
           //initializing history record - at the end it will be appended to EventHistory QVector
-          History = new EventHistoryStructure(ParticleId, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v) ;
+          History = new EventHistoryStructure(ParticleId, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v, ParticleStack->at(0)->energy);
         }
       //setting current position, direction vector, energy and time
       double r[3];          //position

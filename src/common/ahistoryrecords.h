@@ -32,10 +32,11 @@ struct EventHistoryStructure
     int index; // this is particle index! - "serial number" of the particle
     int SecondaryOf;
     float dx, dy, dz; //direction
+    float initialEnergy;
     TerminationTypes Termination;
 
-    EventHistoryStructure(int ParticleId, int index, int SecondaryOf, double* v)
-      : ParticleId(ParticleId), index(index), SecondaryOf(SecondaryOf), dx(v[0]), dy(v[1]), dz(v[2]) { }
+    EventHistoryStructure(int ParticleId, int index, int SecondaryOf, double* v, double energy)
+      : ParticleId(ParticleId), index(index), SecondaryOf(SecondaryOf), dx(v[0]), dy(v[1]), dz(v[2]), initialEnergy(energy) { }
     EventHistoryStructure(){}
     bool isSecondary() const {return SecondaryOf > -1;}
 

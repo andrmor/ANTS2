@@ -367,7 +367,8 @@ SOURCES += main.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
-    common/atrackbuildoptions.cpp
+    common/atrackbuildoptions.cpp \
+    scriptmode/aparticletrackinghistoryinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -491,7 +492,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
-    common/atrackbuildoptions.h
+    common/atrackbuildoptions.h \
+    scriptmode/aparticletrackinghistoryinterface.h
 
 # --- SIM ---
 ants2_SIM {

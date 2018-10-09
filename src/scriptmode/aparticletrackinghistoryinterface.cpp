@@ -105,3 +105,37 @@ bool AParticleTrackingHistoryInterface::checkParticleAndMaterial(int i, int m)
     }
     return true;
 }
+
+/*
+#include "TTree.h"
+#include "TFile.h"
+bool AParticleTrackingHistoryInterface::saveHistoryToTTree(QString fileName)
+{
+    TFile* f = new TFile(fileName,"RECREATE");
+
+    TTree *t = new TTree("","Particle tracking history");
+
+    std::vector <double> x; //Can be multiple point reconstruction!
+    double chi2;
+    double ssum;
+    int ievent; //event number
+    int good, recOK;
+
+    t->Branch("i",&ievent, "i/I");
+    t->Branch("ssum",&ssum, "ssum/D");
+    t->Branch("x", &x);
+
+    int ParticleId;
+    int index;
+    int SecondaryOf;
+    float dx, dy, dz;
+    float initialEnergy;
+    int Termination;
+
+    <
+    int MaterialId;
+    double DepositedEnergy;
+    double Distance;
+    >
+}
+*/

@@ -37,6 +37,8 @@ public slots:
   double getRecordDepositedEnergy(int iParticle, int iRecord);
   double getRecordDistance(int iParticle, int iRecord);
 
+  //bool   saveHistoryToTTree(QString fileName);
+
 private:
   bool checkParticle(int i);
   bool checkParticleAndMaterial(int i, int m);

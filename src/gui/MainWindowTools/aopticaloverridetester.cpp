@@ -67,15 +67,6 @@ void AOpticalOverrideTester::updateGUI()
     int waveIndex = getWaveIndex();
     ui->ledST_Ref1->setText( QString::number( (*MPcollection)[MatFrom]->getRefractiveIndex(waveIndex) ) );
     ui->ledST_Ref2->setText( QString::number( (*MPcollection)[MatTo]  ->getRefractiveIndex(waveIndex) ) );
-
-    TVector3 photon(ui->ledST_i->text().toDouble(), ui->ledST_j->text().toDouble(), ui->ledST_k->text().toDouble());
-    photon = photon.Unit();
-    //vector surface normal
-    TVector3 normal(ui->ledST_si->text().toDouble(), ui->ledST_sj->text().toDouble(), ui->ledST_sk->text().toDouble());
-    normal = normal.Unit();
-    double cos = photon * normal;
-    double ang = 180.0 / TMath::Pi() * acos(cos);
-    ui->ledAngle->setText( QString::number(ang, 'g', 4) );
 }
 
 AOpticalOverrideTester::~AOpticalOverrideTester()
@@ -99,15 +90,6 @@ void AOpticalOverrideTester::readFromJson(const QJsonObject &json)
     parseJson(json, "PositionX", x);
     parseJson(json, "PositionY", y);
     if (x>0 && y>0) move(x, y);
-}
-
-void AOpticalOverrideTester::on_pbDirectionHelp_clicked()
-{
-    QString s = "Vectors are not necessary normalized to unity (automatically scaled)\n\n"
-            "Note that in override caluclations the normal vector of the surface\n"
-            "is provided in such a way that the dot product of the normal and\n"
-            "the incoming photon direction is positive.";
-    message(s, this);
 }
 
 void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
@@ -226,20 +208,12 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     if ( !testOverride() ) return;
 
     //surface normal and photon direction
-    TVector3 SurfNorm(ui->ledST_si->text().toDouble(),
-                      ui->ledST_sj->text().toDouble(),
-                      ui->ledST_sk->text().toDouble());
-    SurfNorm = SurfNorm.Unit();
-
+    TVector3 SurfNorm(0, 0, -1.0);
     double N[3]; //needs to calculate override
     N[0] = SurfNorm.X();
     N[1] = SurfNorm.Y();
     N[2] = SurfNorm.Z();
-
-    TVector3 PhotDir(ui->ledST_i->text().toDouble(),
-                     ui->ledST_j->text().toDouble(),
-                     ui->ledST_k->text().toDouble());
-    PhotDir = PhotDir.Unit();
+    TVector3 PhotDir = getPhotonVector();
 
     tracks.clear();
     double d = 0.5; //offset - for drawing only
@@ -346,10 +320,7 @@ void AOpticalOverrideTester::showGeometry()
     double f = 0.5;
 
     //surface normal
-    TVector3 SurfNorm(ui->ledST_si->text().toDouble(),
-                      ui->ledST_sj->text().toDouble(),
-                      ui->ledST_sk->text().toDouble());
-    SurfNorm = SurfNorm.Unit();
+    TVector3 SurfNorm(0, 0, -1.0);
     int track_index = gGeoManager->AddTrack(1,22);
     TVirtualGeoTrack* track = gGeoManager->GetTrack(track_index);
     track->AddPoint(d, d, d, 0);
@@ -375,11 +346,9 @@ void AOpticalOverrideTester::showGeometry()
     track_index = gGeoManager->AddTrack(1, 10);
     track = gGeoManager->GetTrack(track_index);
     track->AddPoint(d, d, d, 0);
-    TVector3 PhotDir(ui->ledST_i->text().toDouble(),
-                     ui->ledST_j->text().toDouble(),
-                     ui->ledST_k->text().toDouble());
-    PhotDir = PhotDir.Unit();
-    track->AddPoint(d-PhotDir.X(), d-PhotDir.Y(), d-PhotDir.Z(), 0);
+
+    TVector3 PhotDir = getPhotonVector();
+    track->AddPoint(d - PhotDir.X(), d - PhotDir.Y(), d - PhotDir.Z(), 0);
     track->SetLineColor(kRed);
     track->SetLineWidth(3);
 
@@ -439,14 +408,21 @@ int AOpticalOverrideTester::getWaveIndex()
     else return -1;
 }
 
+const TVector3 AOpticalOverrideTester::getPhotonVector()
+{
+    TVector3 PhotDir(0, 0, -1.0);
+    TVector3 perp(0, 1.0, 0);
+    double angle = ui->ledAngle->text().toDouble();
+    angle *= -TMath::Pi() / 180.0;
+    PhotDir.Rotate(angle, perp);
+    return PhotDir;
+}
+
 void AOpticalOverrideTester::on_pbST_uniform_clicked()
 {
     if ( !testOverride() ) return;
 
-    TVector3 SurfNorm(ui->ledST_si->text().toDouble(),
-                      ui->ledST_sj->text().toDouble(),
-                      ui->ledST_sk->text().toDouble());
-    SurfNorm = SurfNorm.Unit();
+    TVector3 SurfNorm(0, 0, -1.0);
     double N[3];
     N[0] = SurfNorm.X();
     N[1] = SurfNorm.Y();
@@ -497,7 +473,7 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
             exit(666);
           }
 
-        double costr = -N[0]*K[0] -N[1]*K[1] -N[2]*K[2];  // after scatter, K will be in positive Z direction
+        double costr = N[0]*K[0] + N[1]*K[1] + N[2]*K[2];
         hist1->Fill(180.0 / TMath::Pi() * acos(costr));
       }
 
@@ -532,46 +508,15 @@ void AOpticalOverrideTester::on_ledST_wave_editingFinished()
     updateGUI();
 }
 
-void AOpticalOverrideTester::on_ledST_i_editingFinished()
-{
-    updateGUI();
-    showGeometry();
-}
-
-void AOpticalOverrideTester::on_ledST_j_editingFinished()
-{
-    updateGUI();
-    showGeometry();
-}
-
-void AOpticalOverrideTester::on_ledST_k_editingFinished()
-{
-    if (ui->ledST_k->text().toDouble() >= 0)
-    {
-        ui->ledST_k->setText("-1");
-        message("The photon direction vector along Z axis should be neagtive!", this);
-    }
-    updateGUI();
-    showGeometry();
-}
-
 void AOpticalOverrideTester::on_ledAngle_editingFinished()
 {
     double angle = ui->ledAngle->text().toDouble();
-    if (angle <= -90.0 || angle >= 90.0 )
+    if (angle < 0 || angle >= 90.0 )
     {
         ui->ledAngle->setText("45");
-        message("Angle should be within (-90, 90) degrees!", this);
+        message("Angle should be within [0, 90) degrees!", this);
         angle = 45.0;
     }
-
-    TVector3 photon(0, 0, -1.0);
-    TVector3 perp(0, 1.0, 0);
-    angle *= -TMath::Pi() / 180.0;
-    photon.Rotate(angle, perp);
-    ui->ledST_i->setText( QString::number( photon.x(), 'g', 6) );
-    ui->ledST_j->setText( QString::number( photon.y(), 'g', 6) );
-    ui->ledST_k->setText( QString::number( photon.z(), 'g', 6) );
 
     showGeometry();
 }

@@ -5,6 +5,8 @@
 
 #include <QMainWindow>
 
+#include "TVector3.h"
+
 namespace Ui {
 class AOpticalOverrideTester;
 }
@@ -33,7 +35,6 @@ public slots:
     void showGeometry();
 
 private slots:
-    void on_pbDirectionHelp_clicked();
     void on_pbST_RvsAngle_clicked();
     void on_pbCSMtestmany_clicked();
     void on_pbST_showTracks_clicked();
@@ -42,12 +43,6 @@ private slots:
     void on_cbWavelength_toggled(bool checked);
 
     void on_ledST_wave_editingFinished();
-
-    void on_ledST_i_editingFinished();
-
-    void on_ledST_j_editingFinished();
-
-    void on_ledST_k_editingFinished();
 
     void on_ledAngle_editingFinished();
 
@@ -67,6 +62,7 @@ private:
 
     bool testOverride();
     int getWaveIndex();
+    const TVector3 getPhotonVector();
 
 };
 

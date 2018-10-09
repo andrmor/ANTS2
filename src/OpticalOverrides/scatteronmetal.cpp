@@ -116,7 +116,6 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(ATracerSta
       //Absorption
       //qDebug() << "Override: Loss on metal";
       Status = Absorption;
-      Photon->SimStat->OverrideMetalAbs++;
       return Absorbed;
     }
 
@@ -126,7 +125,6 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(ATracerSta
   double NK = NormalVector[0]*Photon->v[0]; NK += NormalVector[1]*Photon->v[1];  NK += NormalVector[2]*Photon->v[2];
   Photon->v[0] -= 2.0*NK*NormalVector[0]; Photon->v[1] -= 2.0*NK*NormalVector[1]; Photon->v[2] -= 2.0*NK*NormalVector[2];
   Status = SpikeReflection;
-  Photon->SimStat->OverrideMetalReflection++;
   return Back;
 }
 

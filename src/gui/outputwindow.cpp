@@ -1187,39 +1187,6 @@ void OutputWindow::ShowPhotonProcessesLog()
   s += "Overrides, loss: " + QString::number(d->OverrideLoss) + "\n";
   s += "Overrides, back: " + QString::number(d->OverrideBack) + "\n";
   s += "Overrides, forward: " + QString::number(d->OverrideForward) + "\n";
-  if (d->OverrideSimplisticAbsorption>0 || d->OverrideSimplisticReflection>0 || d->OverrideSimplisticScatter>0)
-  {
-       s += "----\n";
-       s += "Override simplistic, absorption: " + QString::number(d->OverrideSimplisticAbsorption) + "\n";
-       s += "Override simplistic, specular: " + QString::number(d->OverrideSimplisticReflection) + "\n";
-       s += "Override simplistic, lambertian: " + QString::number(d->OverrideSimplisticScatter) + "\n";
-  }
-  if (d->OverrideFSNPabs>0 || d->OverrideFSNlambert>0 || d->OverrideFSNPspecular>0)
-  {
-       s += "----\n";
-       s += "Override FSNP, absorption: " + QString::number(d->OverrideFSNPabs) + "\n";
-       s += "Override FSNP, specular: " + QString::number(d->OverrideFSNPspecular) + "\n";
-       s += "Override FSNP, lambertian: " + QString::number(d->OverrideFSNlambert) + "\n";
-  }
-  if (d->OverrideMetalAbs>0 || d->OverrideMetalReflection>0)
-  {
-       s += "----\n";
-       s += "Override OnMetal, absorption: " + QString::number(d->OverrideMetalAbs) + "\n";
-       s += "Override OnMetal, specular: " + QString::number(d->OverrideMetalReflection) + "\n";
-  }
-  if (d->OverrideClaudioAbs>0 || d->OverrideClaudioLamb>0 || d->OverrideClaudioSpec>0)
-  {
-       s += "----\n";
-       s += "Override Clauido's model', absorption: " + QString::number(d->OverrideClaudioAbs) + "\n";
-       s += "Override Claudio's model', specular: " + QString::number(d->OverrideClaudioSpec) + "\n";
-       s += "Override Claudio's model', lambertian: " + QString::number(d->OverrideClaudioLamb) + "\n";
-  }
-  if (d->OverrideWLSabs>0 || d->OverrideWLSshift>0)
-  {
-       s += "----\n";
-       s += "Override WLS, absorption: " + QString::number(d->OverrideWLSabs) + "\n";
-       s += "Override WLS, reemission: " + QString::number(d->OverrideWLSshift) + "\n";
-  }
   s += "=====================";
   //OutText(s);
   //SetTab(0);

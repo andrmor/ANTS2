@@ -331,7 +331,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
         //G4double C_perp = std::sqrt(Amp_perp/Amp_tot);
         //G4double C_parl = std::sqrt(Amp_parl/Amp_tot);
         //NewPolarization = C_parl*A_paral + C_perp*A_trans;
-      Photon->SimStat->OverrideClaudioSpec++;
     }
   else
     {
@@ -342,7 +341,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
           if ( Resources.RandGen->Rndm() > albedo)
             {
               Status = Absorption;
-              Photon->SimStat->OverrideClaudioAbs++;
               return Absorbed;
             }
 
@@ -379,7 +377,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2::calculate(ATra
 //      A_paral = A_paral.unit();
 //      G4double ThetaPolar = twopi*G4UniformRand();
 //      NewPolarization = cos(ThetaPolar)*A_paral + sin(ThetaPolar)*A_trans;
-      Photon->SimStat->OverrideClaudioLamb++;
     }
 
   Photon->v[0] = K.X();
@@ -500,7 +497,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
         //G4double C_perp = std::sqrt(Amp_perp/Amp_tot);
         //G4double C_parl = std::sqrt(Amp_parl/Amp_tot);
         //NewPolarization = C_parl*A_paral + C_perp*A_trans;
-      Photon->SimStat->OverrideClaudioSpec++;
     }
   else
     {
@@ -511,7 +507,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
           if ( Resources.RandGen->Rndm() > albedo)
             {
               Status = Absorption;
-              Photon->SimStat->OverrideClaudioAbs++;
               return Absorbed;
             }
 
@@ -549,7 +544,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d2::calculate(AT
 //      A_paral = A_paral.unit();
 //      G4double ThetaPolar = twopi*G4UniformRand();
 //      NewPolarization = cos(ThetaPolar)*A_paral + sin(ThetaPolar)*A_trans;
-      Photon->SimStat->OverrideClaudioLamb++;
     }
 
   Photon->v[0] = K.X();
@@ -671,7 +665,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
           //G4double C_perp = std::sqrt(Amp_perp/Amp_tot);
           //G4double C_parl = std::sqrt(Amp_parl/Amp_tot);
           //NewPolarization = C_parl*A_paral + C_perp*A_trans;
-        Photon->SimStat->OverrideClaudioSpec++;
       }
     else
       {
@@ -682,7 +675,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
             if ( Resources.RandGen->Rndm() > albedo)
               {
                 Status = Absorption;
-                Photon->SimStat->OverrideClaudioAbs++;
                 return Absorbed;
               }
 
@@ -720,7 +712,6 @@ AOpticalOverride::OpticalOverrideResultEnum PhScatClaudioModelV2d1::calculate(AT
   //      A_paral = A_paral.unit();
   //      G4double ThetaPolar = twopi*G4UniformRand();
   //      NewPolarization = cos(ThetaPolar)*A_paral + sin(ThetaPolar)*A_trans;
-        Photon->SimStat->OverrideClaudioLamb++;
       }
 
     Photon->v[0] = K.X();

@@ -32,7 +32,6 @@ AOpticalOverride::OpticalOverrideResultEnum ABasicOpticalOverride::calculate(ATr
     if (rnd<0)
     {
         // qDebug()<<"Override: surface loss!";
-        Photon->SimStat->OverrideSimplisticAbsorption++;
         Status = Absorption;
         return Absorbed;
     }
@@ -46,7 +45,6 @@ AOpticalOverride::OpticalOverrideResultEnum ABasicOpticalOverride::calculate(ATr
       double NK = NormalVector[0]*Photon->v[0]; NK += NormalVector[1]*Photon->v[1];  NK += NormalVector[2]*Photon->v[2];
       Photon->v[0] -= 2.0*NK*NormalVector[0]; Photon->v[1] -= 2.0*NK*NormalVector[1]; Photon->v[2] -= 2.0*NK*NormalVector[2];
 
-      Photon->SimStat->OverrideSimplisticReflection++;
       Status = SpikeReflection;
       return Back;
     }
@@ -56,7 +54,6 @@ AOpticalOverride::OpticalOverrideResultEnum ABasicOpticalOverride::calculate(ATr
   if (rnd<0)
     {
       // qDebug()<<"scattering triggered";
-      Photon->SimStat->OverrideSimplisticScatter++;
 
       switch (scatterModel)
         {

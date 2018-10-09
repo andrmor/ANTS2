@@ -44,13 +44,7 @@ public:
 
     //statistics for optical processes
     long FresnelTransmitted, FresnelReflected, BulkAbsorption, Rayleigh, Reemission; //general bulk
-    long OverrideBack, OverrideForward; //general override
-      //specific overrides
-    long OverrideSimplisticAbsorption, OverrideSimplisticReflection, OverrideSimplisticScatter; //simplistic
-    long OverrideFSNPabs, OverrideFSNlambert, OverrideFSNPspecular; //FSNP
-    long OverrideMetalAbs, OverrideMetalReflection; //on metal
-    long OverrideClaudioAbs, OverrideClaudioSpec, OverrideClaudioLamb; //Claudio's
-    long OverrideWLSabs, OverrideWLSshift;
+    long OverrideBack, OverrideForward; //general override. Note that OverrideLoss is already defined
 
     //only affects script unit "photon" tracing!
     QVector< QVector <APhotonHistoryLog> > PhotonHistoryLog;    

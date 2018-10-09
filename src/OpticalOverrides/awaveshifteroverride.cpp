@@ -75,7 +75,6 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
          ReemissionProbabilityBinned.isEmpty() )    //or probability not defined
     {
         Status = Absorption;
-        Photon->SimStat->OverrideWLSabs++;
         return Absorbed;
     }
 
@@ -94,7 +93,6 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
             if (attempts > 9)
               {
                 Status = Absorption;
-                Photon->SimStat->OverrideWLSabs++;
                 return Absorbed;
               }
             wavelength = Spectrum->GetRandom();
@@ -103,7 +101,6 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
         while (waveIndex < Photon->waveIndex); //conserving energy
 
         Photon->waveIndex = waveIndex;
-        Photon->SimStat->OverrideWLSshift++;
 
         if (ReemissionModel == 0)
         {
@@ -157,7 +154,6 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
 
     // else absorption
     Status = Absorption;
-    Photon->SimStat->OverrideWLSabs++;
     return Absorbed;
 }
 

@@ -59,11 +59,6 @@ void ASimulationStatistics::initialize(QVector<const AGeoObject*> monitorRecords
 
     FresnelTransmitted = FresnelReflected = BulkAbsorption = Rayleigh = Reemission = 0;
     OverrideForward = OverrideBack = 0;
-    OverrideSimplisticAbsorption = OverrideSimplisticReflection = OverrideSimplisticScatter = 0;
-    OverrideFSNPabs = OverrideFSNlambert = OverrideFSNPspecular = 0;
-    OverrideMetalAbs = OverrideMetalReflection = 0;
-    OverrideClaudioAbs = OverrideClaudioSpec = OverrideClaudioLamb = 0;
-    OverrideWLSabs = OverrideWLSshift = 0;
 
     PhotonHistoryLog.clear();
     PhotonHistoryLog.squeeze();
@@ -135,24 +130,6 @@ void ASimulationStatistics::AppendSimulationStatistics(ASimulationStatistics* fr
 
     OverrideBack += from->OverrideBack;
     OverrideForward += from->OverrideForward;
-
-    OverrideSimplisticAbsorption += from->OverrideSimplisticAbsorption;
-    OverrideSimplisticReflection += from->OverrideSimplisticReflection;
-    OverrideSimplisticScatter += from->OverrideSimplisticScatter;
-
-    OverrideFSNPabs += from->OverrideFSNPabs;
-    OverrideFSNlambert += from->OverrideFSNlambert;
-    OverrideFSNPspecular += from->OverrideFSNPspecular;
-
-    OverrideMetalAbs += from->OverrideMetalAbs;
-    OverrideMetalReflection += from->OverrideMetalReflection;
-
-    OverrideClaudioAbs += from->OverrideClaudioAbs;
-    OverrideClaudioSpec += from->OverrideClaudioSpec;
-    OverrideClaudioLamb += from->OverrideClaudioLamb;
-
-    OverrideWLSabs += from->OverrideWLSabs;
-    OverrideWLSshift += from->OverrideWLSshift;
 
     if (Monitors.size() != from->Monitors.size())
     {

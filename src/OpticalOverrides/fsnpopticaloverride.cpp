@@ -64,7 +64,6 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
         //rotating the vector: K = K - 2*(NK)*N
       Photon->v[0] -= 2.0*cos1*NormalVector[0]; Photon->v[1] -= 2.0*cos1*NormalVector[1]; Photon->v[2] -= 2.0*cos1*NormalVector[2];
       Status = SpikeReflection;
-      Photon->SimStat->OverrideFSNPspecular++;
       return Back;
     }
 
@@ -73,7 +72,6 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
     {
       //qDebug()<<"Override: absorption";
       Status = Absorption;
-      Photon->SimStat->OverrideFSNPabs++;
       return Absorbed;
     }
 
@@ -89,7 +87,6 @@ AOpticalOverride::OpticalOverrideResultEnum FSNPOpticalOverride::calculate(ATrac
   double normInverted = 1.0/TMath::Sqrt(norm2);
   Photon->v[0] *= normInverted; Photon->v[1] *= normInverted; Photon->v[2] *= normInverted;
   Status = LambertianReflection;
-  Photon->SimStat->OverrideFSNlambert++;
   return Back;
 }
 

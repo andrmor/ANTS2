@@ -106,36 +106,55 @@ bool AParticleTrackingHistoryInterface::checkParticleAndMaterial(int i, int m)
     return true;
 }
 
-/*
+
 #include "TTree.h"
 #include "TFile.h"
-bool AParticleTrackingHistoryInterface::saveHistoryToTTree(QString fileName)
+#include <vector>
+bool AParticleTrackingHistoryInterface::saveHistoryToTree(QString fileName)
 {
-    TFile* f = new TFile(fileName,"RECREATE");
+    TFile f(fileName.toLatin1().data(),"RECREATE");
 
     TTree *t = new TTree("","Particle tracking history");
 
-    std::vector <double> x; //Can be multiple point reconstruction!
-    double chi2;
-    double ssum;
-    int ievent; //event number
-    int good, recOK;
+    int     index;
+    int     particleId;
+    int     secondaryOf;
+    std::vector<double> dirVector; dirVector.resize(3);
+    float   initialEnergy;
+    int     termination;
 
-    t->Branch("i",&ievent, "i/I");
-    t->Branch("ssum",&ssum, "ssum/D");
-    t->Branch("x", &x);
+    std::vector<int>    Vol_MaterialId;
+    std::vector<double> Vol_DepositedEnergy;
+    std::vector<double> Vol_TravelledDistance;
 
-    int ParticleId;
-    int index;
-    int SecondaryOf;
-    float dx, dy, dz;
-    float initialEnergy;
-    int Termination;
+    t->Branch("index", &index, "index/I");
+    t->Branch("partId", &particleId, "partId/I");
+    t->Branch("secondaryOf", &secondaryOf, "secondaryOf/I");
+    t->Branch("dirVector", &dirVector);
+    t->Branch("energyOnEntrance", &initialEnergy, "energyOnEntrance/F");
+    t->Branch("termination", &termination, "termination/I");
+    t->Branch("vol_materialId", &Vol_MaterialId);
+    t->Branch("vol_depositedEnergy", &Vol_DepositedEnergy);
+    t->Branch("vol_distance", &Vol_TravelledDistance);
 
-    <
-    int MaterialId;
-    double DepositedEnergy;
-    double Distance;
-    >
+    for (const EventHistoryStructure* h : EventHistory)
+    {
+        index = h->index;
+        particleId = h->ParticleId;
+        secondaryOf = h->SecondaryOf;
+        dirVector[0] = h->dx; dirVector[1] = h->dy; dirVector[2] = h->dz;
+        initialEnergy = h->initialEnergy;
+        termination = h->Termination;
+
+        Vol_MaterialId.clear(); Vol_DepositedEnergy.clear(); Vol_TravelledDistance.clear();
+        for (const MaterialHistoryStructure& d : h->Deposition)
+        {
+            Vol_MaterialId.push_back(d.MaterialId);
+            Vol_DepositedEnergy.push_back(d.DepositedEnergy);
+            Vol_TravelledDistance.push_back(d.Distance);
+        }
+        t->Fill();
+    }
+    f.Close();
 }
-*/
+

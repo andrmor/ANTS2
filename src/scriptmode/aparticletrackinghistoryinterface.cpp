@@ -1,8 +1,9 @@
 #include "aparticletrackinghistoryinterface.h"
+#include "eventsdataclass.h"
 #include "ahistoryrecords.h"
 
-AParticleTrackingHistoryInterface::AParticleTrackingHistoryInterface(QVector<EventHistoryStructure *> &EventHistory) :
-    EventHistory(EventHistory) {}
+AParticleTrackingHistoryInterface::AParticleTrackingHistoryInterface(EventsDataClass &EventsDataHub) :
+    EventsDataHub(EventsDataHub), EventHistory(EventsDataHub.EventHistory) {}
 
 QVariantList AParticleTrackingHistoryInterface::getAllDefinedTerminatorTypes()
 {
@@ -19,13 +20,21 @@ int AParticleTrackingHistoryInterface::getTermination(int iParticle)
     return EventHistory.at(iParticle)->Termination;
 }
 
-//QVariantList AParticleTrackingHistoryInterface::getDirection(int i)
-//{
-//    QVariantList vl;
-//    if (checkParticle(i))
-//       vl << EventHistory.at(i)->dx << EventHistory.at(i)->dy << EventHistory.at(i)->dz;
-//    return vl;
-//}
+QVariantList AParticleTrackingHistoryInterface::getDirection(int iParticle)
+{
+    QVariantList vl;
+    if (checkParticle(iParticle))
+       vl << EventHistory.at(iParticle)->dx << EventHistory.at(iParticle)->dy << EventHistory.at(iParticle)->dz;
+    return vl;
+}
+
+QVariantList AParticleTrackingHistoryInterface::getInitialPosition(int iParticle)
+{
+    QVariantList vl;
+    if (checkParticle(iParticle))
+       vl << EventHistory.at(iParticle)->x << EventHistory.at(iParticle)->y << EventHistory.at(iParticle)->z;
+    return vl;
+}
 
 int AParticleTrackingHistoryInterface::getParticleId(int iParticle)
 {
@@ -35,8 +44,8 @@ int AParticleTrackingHistoryInterface::getParticleId(int iParticle)
 
 //int AParticleTrackingHistoryInterface::sernum(int i)
 //{
-//  if (!checkParticle(i)) return -1;
-//  return EventHistory.at(i)->index;
+//    if (!checkParticle(i)) return -1;
+//    return EventHistory.at(i)->index;
 //}
 
 bool AParticleTrackingHistoryInterface::isSecondary(int iParticle)
@@ -45,7 +54,7 @@ bool AParticleTrackingHistoryInterface::isSecondary(int iParticle)
     return EventHistory.at(iParticle)->isSecondary();
 }
 
-int AParticleTrackingHistoryInterface::getParent(int iParticle)
+int AParticleTrackingHistoryInterface::getParentIndex(int iParticle)
 {
     if (!checkParticle(iParticle)) return -1;
     return EventHistory.at(iParticle)->SecondaryOf;
@@ -106,55 +115,8 @@ bool AParticleTrackingHistoryInterface::checkParticleAndMaterial(int i, int m)
     return true;
 }
 
-
-#include "TTree.h"
-#include "TFile.h"
-#include <vector>
-bool AParticleTrackingHistoryInterface::saveHistoryToTree(QString fileName)
+void AParticleTrackingHistoryInterface::saveHistoryToTree(QString fileName)
 {
-    TFile f(fileName.toLatin1().data(),"RECREATE");
-
-    TTree *t = new TTree("","Particle tracking history");
-
-    int     index;
-    int     particleId;
-    int     secondaryOf;
-    std::vector<double> dirVector; dirVector.resize(3);
-    float   initialEnergy;
-    int     termination;
-
-    std::vector<int>    Vol_MaterialId;
-    std::vector<double> Vol_DepositedEnergy;
-    std::vector<double> Vol_TravelledDistance;
-
-    t->Branch("index", &index, "index/I");
-    t->Branch("partId", &particleId, "partId/I");
-    t->Branch("secondaryOf", &secondaryOf, "secondaryOf/I");
-    t->Branch("dirVector", &dirVector);
-    t->Branch("energyOnEntrance", &initialEnergy, "energyOnEntrance/F");
-    t->Branch("termination", &termination, "termination/I");
-    t->Branch("vol_materialId", &Vol_MaterialId);
-    t->Branch("vol_depositedEnergy", &Vol_DepositedEnergy);
-    t->Branch("vol_distance", &Vol_TravelledDistance);
-
-    for (const EventHistoryStructure* h : EventHistory)
-    {
-        index = h->index;
-        particleId = h->ParticleId;
-        secondaryOf = h->SecondaryOf;
-        dirVector[0] = h->dx; dirVector[1] = h->dy; dirVector[2] = h->dz;
-        initialEnergy = h->initialEnergy;
-        termination = h->Termination;
-
-        Vol_MaterialId.clear(); Vol_DepositedEnergy.clear(); Vol_TravelledDistance.clear();
-        for (const MaterialHistoryStructure& d : h->Deposition)
-        {
-            Vol_MaterialId.push_back(d.MaterialId);
-            Vol_DepositedEnergy.push_back(d.DepositedEnergy);
-            Vol_TravelledDistance.push_back(d.Distance);
-        }
-        t->Fill();
-    }
-    f.Close();
+    EventsDataHub.saveEventHistoryToTree(fileName.toLatin1().data());
 }
 

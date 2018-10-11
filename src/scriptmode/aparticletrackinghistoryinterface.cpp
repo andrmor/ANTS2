@@ -3,7 +3,28 @@
 #include "ahistoryrecords.h"
 
 AParticleTrackingHistoryInterface::AParticleTrackingHistoryInterface(EventsDataClass &EventsDataHub) :
-    EventsDataHub(EventsDataHub), EventHistory(EventsDataHub.EventHistory) {}
+    EventsDataHub(EventsDataHub), EventHistory(EventsDataHub.EventHistory)
+{
+    H["countParticles"] = "Number of entries in the log";
+
+    H["getParticleId"] = "Particle id of this particle";
+    H["isSecondary"] = "Returns true if this is the primary particle.";
+    H["getParentIndex"] = "If it is primary particle, returns -1. Otherwise returns index (entry number) of the parent";
+    H["getInitialEnergy"] = "Returns energy which the particle had when created.";
+    H["getInitialPosition"] = "Returns array of XYZ of the position where the particle was created";
+    H["getDirection"] = "Return unit vector (XYZ components) of the particle's direction";
+    H["getTermination"] = "Returns int number corresponding to how the tracking of the particle has ended.\n"
+                          "Use getAllDefinedTerminatorTypes() method to get the list of all possible terminator values";
+
+    H["getAllDefinedTerminatorTypes"] = "Get the list of all possible values of the termination";
+
+    H["countRecords"] = "Returns the number of volumes the particle passed during tracking";
+    H["getRecordMaterial"] = "Returns the list of material indexes of the crossed volumes";
+    H["getRecordDepositedEnergy"] = "Returns energies depositied in all crossed volumes";
+    H["getRecordDistance"] = "Returns distances travelled by the particle in each volume";
+
+    H["saveHistoryToTree"] = "Save particle tracking log to a CERN root tree";
+}
 
 QVariantList AParticleTrackingHistoryInterface::getAllDefinedTerminatorTypes()
 {

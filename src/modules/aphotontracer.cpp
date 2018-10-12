@@ -268,7 +268,8 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                fDoFresnel = true;
                break; //switch break
            default:
-               qCritical() << "override reported an error!";
+               qCritical() << "override error - doing fresnel instead!";
+               fDoFresnel = true;
            }
        }
      else fDoFresnel = true;

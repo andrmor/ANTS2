@@ -36,7 +36,7 @@ public:
     explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
-    void SetInterfaceObject(QObject *interfaceObject, QString name = "");
+    void SetInterfaceObject(QObject *interfaceObject, QString name = ""); // if not lightMode, do not forget to call UpdateAllTabs() after all units were registered!
     void UpdateAllTabs(); //highlighter, helper etc
 
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown

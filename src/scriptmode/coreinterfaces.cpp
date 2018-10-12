@@ -52,6 +52,7 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["getFittedArr"] = "Used with setCurveFitter. Extracts the fitted values of y for an array of x";
 
   //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
+  DepRem["str"] = "Deprecated. Use .toFixed(n) javaScript method. E.g.: 'var i=123.456; i.toFixed(2)'";
 }
 
 AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :

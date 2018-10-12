@@ -920,7 +920,7 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
          <widget class="QSpinBox" name="sbPMtype">
           <property name="geometry">
            <rect>
-            <x>420</x>
+            <x>460</x>
             <y>30</y>
             <width>51</width>
             <height>22</height>
@@ -1184,6 +1184,19 @@ Data: matrix NumPixelsInX by NumPixelsInY of values 0..1</string>
             <set>Qt::AlignCenter</set>
            </property>
           </widget>
+         </widget>
+         <widget class="QPushButton" name="pbPMtypeHelp">
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>34</y>
+            <width>29</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>?</string>
+          </property>
          </widget>
         </widget>
         <widget class="QComboBox" name="cobPMdeviceType">

@@ -4975,3 +4975,19 @@ void MainWindow::on_pbStopScan_clicked()
     SimulationManager->StopSimulation();
     qApp->processEvents();
 }
+
+void MainWindow::on_pbPMtypeHelp_clicked()
+{
+    QString s = "Note that photon detection test is triggered\n"
+                "   as soon as a photon eneters the PM volume!\n\n"
+                "That means that the material of the PM is important\n"
+                "   only for the material interface\n"
+                "   (Fresnel/Snell's + optical overrides)\n\n"
+                "The PM thickness matters only for positioning\n"
+                "   of the volume in the detector geometry.\n\n"
+                "For simulation of, e.g., PMT structure (window +\n"
+                "   photocathode) one has to add the window\n"
+                "   volume to the geometry and the PM object should\n"
+                "   represent the photocathode.";
+    message(s, this);
+}

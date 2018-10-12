@@ -1614,7 +1614,7 @@ void MaterialInspectorWindow::on_pbRename_clicked()
 {
   if (!ui->labMatWasModified->text().simplified().isEmpty())
     {
-      message("Material properties were modified!\nUpdate, add as new or cancel changes before renaming");
+      message("Material properties were modified!\nUpdate, add as new or cancel changes before renaming", this);
       return;
     }
 

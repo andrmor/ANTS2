@@ -11,6 +11,21 @@ namespace Ui {
 class AOpticalOverrideTester;
 }
 
+struct AReportForOverride
+{
+    double abs = 0;
+    double back = 0;
+    double forw = 0;
+    double notTrigger = 0;
+    double error = 0;
+
+    double Bspike = 0;
+    double Blobe = 0;
+    double Blamb = 0;
+
+    double waveChanged = 0;
+    double timeChanged = 0;
+};
 class AMaterialParticleCollection;
 class AOpticalOverride;
 class MainWindow;
@@ -63,6 +78,7 @@ private:
     bool testOverride();
     int getWaveIndex();
     const TVector3 getPhotonVector();
+    void reportStatistics(const AReportForOverride& rep, int numPhot);
 
 };
 

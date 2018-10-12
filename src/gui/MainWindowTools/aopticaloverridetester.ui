@@ -352,6 +352,11 @@ the incoming photon direction is positive.</string>
           <string>Backscattering</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Wavelength shift</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

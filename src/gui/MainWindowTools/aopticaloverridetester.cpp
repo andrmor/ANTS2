@@ -96,8 +96,6 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
 {
     if ( !testOverride() ) return;
 
-    //TODO wavelength shifted
-
     int numPhotons = ui->sbST_number->value();
     QVector<double> Back(91, 0), Forward(91, 0), Absorb(91, 0), NotTrigger(91, 0);
     QVector<double> Spike(91, 0), BackLobe(91, 0), BackLambert(91, 0), WaveShifted(91, 0);
@@ -157,33 +155,20 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
         Spike[iAngle] /= numPhotons;
         BackLobe[iAngle] /= numPhotons;
         BackLambert[iAngle] /= numPhotons;
+
+        WaveShifted[iAngle] = ph.SimStat->wavelengthChanged / numPhotons;
+        ph.SimStat->wavelengthChanged = 0;
     }
 
-    if ( ui->cobPrVsAngle_WhatToCollect->currentIndex() == 1 )
+    int what = ui->cobPrVsAngle_WhatToCollect->currentIndex();
+    switch (what)
     {
-        TGraph *gS, *gL, *gD, *gT;
-        gT = GraphWindow->MakeGraph(&Angle, &Back,   2, "Angle", "", 0, 1, 1, 2, "", true);
-        gT->SetMinimum(0);
-        gT->SetTitle("All reflections");
-        gS = GraphWindow->MakeGraph(&Angle, &Spike,   1, "Angle", "", 0, 1, 1, 2, "", true);
-        gS->SetTitle("Spike");
-        gL = GraphWindow->MakeGraph(&Angle, &BackLobe,    3, "Angle", "", 0, 1, 1, 2, "", true);
-        gL->SetTitle("Lobe");
-        gD = GraphWindow->MakeGraph(&Angle, &BackLambert, 4, "Angle", "", 0, 1, 1, 2, "", true);
-        gD->SetTitle("Diffuse");
-
-        GraphWindow->Draw(gT, "AL");
-        GraphWindow->Draw(gS, "Lsame");
-        GraphWindow->Draw(gL, "Lsame");
-        GraphWindow->Draw(gD, "Lsame");
-
-        GraphWindow->on_pbAddLegend_clicked();
-    }
-    else
-    {
-        TGraph *gN, *gA, *gB, *gF;
-        gN = GraphWindow->MakeGraph(&Angle, &NotTrigger,   2, "Angle", "", 0, 1, 1, 2, "", true);
+      case 0:
+      {
+        TGraph *gN, *gA, *gB, *gF = 0;
+        gN = GraphWindow->MakeGraph(&Angle, &NotTrigger,   2, "Angle, deg", "Fraction", 0, 1, 1, 2, "", true);
         gN->SetMinimum(0);
+        gN->SetMaximum(1.05);
         gN->SetTitle("Not triggered");
         gA = GraphWindow->MakeGraph(&Angle, &Absorb,   1, "Angle", "", 0, 1, 1, 2, "", true);
         gA->SetTitle("Absorption");
@@ -198,6 +183,39 @@ void AOpticalOverrideTester::on_pbST_RvsAngle_clicked()
         GraphWindow->Draw(gF, "Lsame");
 
         GraphWindow->on_pbAddLegend_clicked();
+        break;
+      }
+      case 1:
+      {
+        TGraph *gS, *gL, *gD, *gT;
+        gT = GraphWindow->MakeGraph(&Angle, &Back,   2, "Angle, deg", "Fraction", 0, 1, 1, 2, "", true);
+        gT->SetMinimum(0);
+        gT->SetMaximum(1.05);
+        gT->SetTitle("All reflections");
+        gS = GraphWindow->MakeGraph(&Angle, &Spike,   1, "Angle", "", 0, 1, 1, 2, "", true);
+        gS->SetTitle("Spike");
+        gL = GraphWindow->MakeGraph(&Angle, &BackLobe,    3, "Angle", "", 0, 1, 1, 2, "", true);
+        gL->SetTitle("Lobe");
+        gD = GraphWindow->MakeGraph(&Angle, &BackLambert, 4, "Angle", "", 0, 1, 1, 2, "", true);
+        gD->SetTitle("Diffuse");
+
+        GraphWindow->Draw(gT, "AL");
+        GraphWindow->Draw(gS, "Lsame");
+        GraphWindow->Draw(gL, "Lsame");
+        GraphWindow->Draw(gD, "Lsame");
+
+        GraphWindow->on_pbAddLegend_clicked();
+        break;
+      }
+      case 2:
+      {
+        TGraph *gW = GraphWindow->ConstructTGraph(Angle, WaveShifted, "Wavelength shifted", "Angle, deg", "Fraction", 4, 0, 1, 4, 1, 2);
+        gW->SetMaximum(1.05);
+        gW->SetMinimum(0);
+        GraphWindow->Draw(gW, "AL");
+        GraphWindow->on_pbAddLegend_clicked();
+        break;
+      }
     }
 
     delete ph.SimStat;
@@ -219,13 +237,14 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     double d = 0.5; //offset - for drawing only
 
     //preparing and running cycle with photons
-    double abs, back, forw, notTrigger, spike, lobe, lamb;
-    abs = back = forw = notTrigger = spike = lobe = lamb = 0;
+
     TH1D* hist1 = new TH1D("", "", 100, 0, 0);
     hist1->GetXaxis()->SetTitle("Backscattering angle, degrees");
 
     APhoton ph;
     ph.SimStat = new ASimulationStatistics();
+    AReportForOverride rep;
+
     const int waveIndex = getWaveIndex();
     const int numPhot = ui->sbST_number->value();    
     for (int i = 0; i < numPhot; i++)
@@ -240,31 +259,30 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
         //in case of absorption or not triggered override, do not build tracks!
         switch (result)
         {
-        case AOpticalOverride::Absorbed: abs++; continue;               // ! ->
-        case AOpticalOverride::NotTriggered: notTrigger++; continue;    // ! ->
-
-        case AOpticalOverride::Forward: forw++; break;
-        case AOpticalOverride::Back: back++; break;
-        default:;
+        case AOpticalOverride::Absorbed:     rep.abs++; continue;           // ! ->
+        case AOpticalOverride::NotTriggered: rep.notTrigger++; continue;    // ! ->
+        case AOpticalOverride::Forward:      rep.forw++; break;
+        case AOpticalOverride::Back:         rep.back++; break;
+        default:                             rep.error++; continue;         // ! ->
         }
 
         Color_t col;
         Int_t type;
         if ((*pOV)->Status == AOpticalOverride::SpikeReflection)
         {
-            spike++;
+            rep.Bspike++;
             type = 0;
             col = 6; //0,magenta for Spike
         }
         else if ((*pOV)->Status == AOpticalOverride::LobeReflection)
         {
-            lobe++;
+            rep.Blobe++;
             type = 1;
             col = 7; //1,teal for Lobe
         }
         else if ((*pOV)->Status == AOpticalOverride::LambertianReflection)
         {
-            lamb++;
+            rep.Blamb++;
             type = 2;
             col = 3; //2,grean for lambert
         }
@@ -286,27 +304,9 @@ void AOpticalOverrideTester::on_pbCSMtestmany_clicked()
     GraphWindow->Draw(hist1);
     on_pbST_showTracks_clicked();
 
-    ui->pte->clear();
-    QString t = "Processes:\n";
-    if (abs > 0)    t += QString("  Absorption: %1%  (%2)\n").arg(abs/numPhot*100.0).arg(abs);
-    if (back > 0)   t += QString("  Back: %1%  (%2)\n").arg(back/numPhot*100.0).arg(back);
-    if (forw)       t += QString("  Forward: %1%  (%2)\n").arg(forw/numPhot*100.0).arg(forw);
-    if (notTrigger) t += QString("  Not triggered: %1%  (%2)\n").arg(notTrigger/numPhot*100.0).arg(notTrigger);
-    t += "\n";
-
-    if (back > 0)
-    {
-        //show stat of processes
-        t += "Backscattering composition:\n";
-        if (spike > 0) t += QString("  Specular spike: %1%  (%2)\n").arg(spike/back*100.0).arg(spike);
-        if (lobe > 0)  t += QString("  Diffuse lobe: %1%  (%2)\n").arg(lobe/back*100.0).arg(lobe);
-        if (lamb > 0)  t += QString("  Lambertian: %1%  (%2)\n").arg(lamb/back*100.0).arg(lamb);
-    }
-
-
-    ui->pte->appendPlainText(t);
-    ui->pte->moveCursor(QTextCursor::Start);
-    ui->pte->ensureCursorVisible();
+    rep.waveChanged = ph.SimStat->wavelengthChanged;
+    rep.timeChanged = ph.SimStat->timeChanged;
+    reportStatistics(rep, numPhot);
 
     delete ph.SimStat;
 }
@@ -358,6 +358,7 @@ void AOpticalOverrideTester::showGeometry()
 
 void AOpticalOverrideTester::on_pbST_showTracks_clicked()
 {
+    GeometryWindow->ShowAndFocus();
     showGeometry();
 
     if (tracks.isEmpty()) return;
@@ -422,79 +423,64 @@ void AOpticalOverrideTester::on_pbST_uniform_clicked()
 {
     if ( !testOverride() ) return;
 
-    TVector3 SurfNorm(0, 0, -1.0);
-    double N[3];
-    N[0] = SurfNorm.X();
-    N[1] = SurfNorm.Y();
-    N[2] = SurfNorm.Z();
+    double N[3]; //normal
+    N[0] = 0;
+    N[1] = 0;
+    N[2] = -1.0;
 
-    double K[3];
+    double K[3]; //photon direction - new for every photon!
 
-    int abs, spike, lobe, lamb;
-    abs = spike = lobe = lamb = 0;
-    TH1D* hist1;
-    hist1 = new TH1D("", "", 100, 0, 0);
+    TH1D* hist1 = new TH1D("", "", 100, 0, 0);
     hist1->GetXaxis()->SetTitle("Backscattering angle, degrees");
 
-    int num = ui->sbST_number->value();
+    const int waveIndex = getWaveIndex();
+    const int numPhot = ui->sbST_number->value();
 
     APhoton ph;
     ph.SimStat = new ASimulationStatistics();
+    AReportForOverride rep;
 
-    for (int i=0; i<num; i++)
-      {
+    for (int i = 0; i < numPhot; i++)
+    {
         //diffuse illumination - lambertian is used
         double sin2angle = RandGen->Rndm();
         double angle = asin(sqrt(sin2angle));
         double yOff = cos(angle), zOff = -sin(angle);
-        N[0] = 0; N[1] = 0; N[2] = -1;   // convention of photon tracer - normal is med1->med2
         K[0] = 0; K[1] = yOff; K[2] = zOff;  // -z direction on xy plane (incidence angle from 90 to 0)
 
         ph.v[0] = K[0];
         ph.v[1] = K[1];
         ph.v[2] = K[2];
-        ph.waveIndex = -1;
-        (*pOV)->calculate(*Resources, &ph, N);
+        ph.time = 0;
+        ph.waveIndex = waveIndex;
 
-        if ((*pOV)->Status == AOpticalOverride::Absorption)
-          {
-            abs++;
-            continue;
-          }
-        else if ((*pOV)->Status == AOpticalOverride::SpikeReflection)
-            spike++;
-        else if ((*pOV)->Status == AOpticalOverride::LobeReflection)
-            lobe++;
-        else if ((*pOV)->Status == AOpticalOverride::LambertianReflection)
-            lamb++;
-        else
-          {
-            qCritical()<<"Unknown process!";
-            exit(666);
-          }
+        AOpticalOverride::OpticalOverrideResultEnum result = (*pOV)->calculate(*Resources, &ph, N);
+
+        switch (result)
+        {
+        case AOpticalOverride::Absorbed: rep.abs++; break;
+        case AOpticalOverride::NotTriggered: rep.notTrigger++; break;
+        case AOpticalOverride::Forward: rep.forw++; break;
+        case AOpticalOverride::Back: rep.back++; break;
+        default: rep.error++;
+        }
+
+        if ((*pOV)->Status == AOpticalOverride::SpikeReflection) rep.Bspike++;
+        else if ((*pOV)->Status == AOpticalOverride::LobeReflection) rep.Blobe++;
+        else if ((*pOV)->Status == AOpticalOverride::LambertianReflection) rep.Blamb++;
 
         double costr = N[0]*K[0] + N[1]*K[1] + N[2]*K[2];
         hist1->Fill(180.0 / TMath::Pi() * acos(costr));
-      }
+    }
 
-    //show cos angle hist
     GraphWindow->Draw(hist1);
 
-    //show stat of processes
-    int sum = abs + spike + lobe + lamb;
-    QString str = "Scat probability: "+QString::number(1.0*(sum-abs)/num, 'g', 4) + "  Processes:"+
-        QString::number(abs) + "/" +
-        QString::number(spike) + "/" +
-        QString::number(lobe) + "/" +
-        QString::number(lamb);
-    if (sum>0)
-      {
-        str += "   (" + QString::number(1.0*abs/sum, 'g', 3) + "/" +
-              QString::number(1.0*spike/sum, 'g', 3) + "/" +
-              QString::number(1.0*lobe/sum, 'g', 3) + "/" +
-              QString::number(1.0*lamb/sum, 'g', 3) + ")";
-      }
-    //ui->leST_out->setText(str);
+    rep.waveChanged = ph.SimStat->wavelengthChanged;
+    rep.timeChanged = ph.SimStat->timeChanged;
+    reportStatistics(rep, numPhot);
+
+    showGeometry(); //to clear track vis
+
     delete ph.SimStat;
 }
 
@@ -519,4 +505,39 @@ void AOpticalOverrideTester::on_ledAngle_editingFinished()
     }
 
     showGeometry();
+}
+
+void AOpticalOverrideTester::reportStatistics(const AReportForOverride &rep, int numPhot)
+{
+    ui->pte->clear();
+
+    QString t;
+    if (rep.error > 0)  t += QString("Error detected: %1\n\n").arg(rep.error);
+
+    t += "Processes:\n";
+    if (rep.abs > 0)    t += QString("  Absorption: %1%  (%2)\n").arg(rep.abs/numPhot*100.0).arg(rep.abs);
+    if (rep.back > 0)   t += QString("  Back: %1%  (%2)\n").arg(rep.back/numPhot*100.0).arg(rep.back);
+    if (rep.forw)       t += QString("  Forward: %1%  (%2)\n").arg(rep.forw/numPhot*100.0).arg(rep.forw);
+    if (rep.notTrigger) t += QString("  Not triggered: %1%  (%2)\n").arg(rep.notTrigger/numPhot*100.0).arg(rep.notTrigger);
+    t += "\n";
+
+    if (rep.back > 0)
+    {
+        //show stat of processes
+        t += "Backscattering composition:\n";
+        if (rep.Bspike > 0) t += QString("  Specular spike: %1%  (%2)\n").arg(rep.Bspike/rep.back*100.0).arg(rep.Bspike);
+        if (rep.Blobe > 0)  t += QString("  Diffuse lobe: %1%  (%2)\n").arg(rep.Blobe/rep.back*100.0).arg(rep.Blobe);
+        if (rep.Blamb > 0)  t += QString("  Lambertian: %1%  (%2)\n").arg(rep.Blamb/rep.back*100.0).arg(rep.Blamb);
+    }
+
+    if (rep.waveChanged > 0)
+        t += QString("\nWavelength changed: %1  (%2)\n").arg(rep.waveChanged/numPhot*100.0).arg(rep.waveChanged);
+
+    if (rep.timeChanged > 0)
+        t += QString("\nTime changed: %1  (%2)\n").arg(rep.timeChanged/numPhot*100.0).arg(rep.timeChanged);
+
+
+    ui->pte->appendPlainText(t);
+    ui->pte->moveCursor(QTextCursor::Start);
+    ui->pte->ensureCursorVisible();
 }

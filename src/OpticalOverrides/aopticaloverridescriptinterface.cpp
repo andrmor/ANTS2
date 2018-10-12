@@ -1,6 +1,7 @@
 #include "aopticaloverridescriptinterface.h"
 #include "aphoton.h"
 #include "amaterialparticlecolection.h"
+#include "asimulationstatistics.h"
 
 #include <QDebug>
 #include <QVariantList>
@@ -187,11 +188,13 @@ void AOpticalOverrideScriptInterface::SetDirection(double vx, double vy, double 
 void AOpticalOverrideScriptInterface::SetTime(double time)
 {
     Photon->time = time;
+    Photon->SimStat->timeChanged++;
 }
 
 void AOpticalOverrideScriptInterface::AddTime(double dt)
 {
     Photon->time += dt;
+    Photon->SimStat->timeChanged++;
 }
 
 double AOpticalOverrideScriptInterface::getWaveIndex()
@@ -202,6 +205,7 @@ double AOpticalOverrideScriptInterface::getWaveIndex()
 void AOpticalOverrideScriptInterface::setWaveIndex(int waveIndex)
 {
     Photon->waveIndex = waveIndex;
+    Photon->SimStat->wavelengthChanged++;
 }
 
 double AOpticalOverrideScriptInterface::getRefractiveIndexFrom()

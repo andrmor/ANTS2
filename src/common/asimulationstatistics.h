@@ -53,6 +53,10 @@ public:
     QSet<QString> MustNotInclude_Volumes; //fast
     QVector<QString> MustInclude_Volumes; //v.slow
 
+    //only for optical override tester!
+    long wavelengthChanged = 0;
+    long timeChanged = 0;
+
     QVector<AMonitor*> Monitors;
 
 private:

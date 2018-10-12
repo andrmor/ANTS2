@@ -21,8 +21,13 @@ class AOpticalOverride
 {
 public:
   enum OpticalOverrideResultEnum {NotTriggered, Absorbed, Forward, Back, _Error_}; //return status for photon tracing:
-  enum ScatterStatusEnum {SpikeReflection, LobeReflection, LambertianReflection,
-                          Absorption, Transmission, Error, UnclassifiedReflection, Empty, Fresnel}; //detailed status for statistics only - used by override tester only
+  enum ScatterStatusEnum {
+                          Absorption,
+                          SpikeReflection, LobeReflection, LambertianReflection,
+                          UnclassifiedReflection,
+                          Transmission,
+                          Empty, Fresnel, Error
+                         }; //detailed status for statistics only - used by override tester only
 
   AOpticalOverride(AMaterialParticleCollection* MatCollection, int MatFrom, int MatTo)
     : MatCollection(MatCollection), MatFrom(MatFrom), MatTo(MatTo) {}

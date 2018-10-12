@@ -101,6 +101,7 @@ AOpticalOverride::OpticalOverrideResultEnum AWaveshifterOverride::calculate(ATra
         }
         while (waveIndex < Photon->waveIndex); //conserving energy
 
+        Photon->SimStat->wavelengthChanged++;
         Photon->waveIndex = waveIndex;
 
         if (ReemissionModel == 0)

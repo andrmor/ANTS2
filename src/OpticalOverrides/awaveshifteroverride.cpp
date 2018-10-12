@@ -8,6 +8,7 @@
 #include "ajsontools.h"
 
 #include <QJsonObject>
+#include <QDebug>
 
 #include "TMath.h"
 #include "TRandom2.h"
@@ -213,7 +214,11 @@ void AWaveshifterOverride::writeToJson(QJsonObject &json) const
 
 bool AWaveshifterOverride::readFromJson(const QJsonObject &json)
 {
-    if ( !parseJson(json, "ReemissionModel", ReemissionModel) ) return false;
+    if ( !parseJson(json, "ReemissionModel", ReemissionModel) )
+    {
+        ReemissionModel = 1;
+        qWarning() << "Load WLS optical override: ReemissionModel not given, assuming Lambert back";
+    }
 
     QJsonArray arRP;
     if ( !parseJson(json, "ReemissionProbability", arRP) ) return false;

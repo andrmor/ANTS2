@@ -236,52 +236,52 @@ int main(int argc, char *argv[])
 
         AJavaScriptManager SM(Detector.RandGen);
         Network.SetScriptManager(&SM);
-        SM.SetInterfaceObject(0); //no replacement for the global object in "gloal script" mode
+        SM.RegisterCoreInterfaces();
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
-        SM.SetInterfaceObject(conf, "config");
+        SM.RegisterInterface(conf, "config");
         AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
-        SM.SetInterfaceObject(geo, "geo");
+        SM.RegisterInterface(geo, "geo");
         AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
-        SM.SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
+        SM.RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
-        SM.SetInterfaceObject(dat, "events");
+        SM.RegisterInterface(dat, "events");
 #ifdef SIM
         InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
         QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
-        SM.SetInterfaceObject(sim, "sim");
+        SM.RegisterInterface(sim, "sim");
 #endif
         InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
-        SM.SetInterfaceObject(rec, "rec");
+        SM.RegisterInterface(rec, "rec");
         AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
-        SM.SetInterfaceObject(lrf, "lrf");
+        SM.RegisterInterface(lrf, "lrf");
         ALrfScriptInterface* newLrf = new ALrfScriptInterface(&Detector, &EventsDataHub);
-        SM.SetInterfaceObject(newLrf, "newLrf");
+        SM.RegisterInterface(newLrf, "newLrf");
         AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
-        SM.SetInterfaceObject(pmS, "pms");
+        SM.RegisterInterface(pmS, "pms");
         AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
-        SM.SetInterfaceObject(graph, "graph");
+        SM.RegisterInterface(graph, "graph");
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
-        SM.SetInterfaceObject(hist, "hist");
+        SM.RegisterInterface(hist, "hist");
         AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
-        SM.SetInterfaceObject(tree, "tree");
+        SM.RegisterInterface(tree, "tree");
         AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
-        SM.SetInterfaceObject(photon, "photon");
+        SM.RegisterInterface(photon, "photon");
         AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &EventsDataHub);
-        SM.SetInterfaceObject(depo, "depo");
+        SM.RegisterInterface(depo, "depo");
         AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
-        SM.SetInterfaceObject(threads, "threads");
+        SM.RegisterInterface(threads, "threads");
         AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
-        SM.SetInterfaceObject(web, "web");
+        SM.RegisterInterface(web, "web");
         AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);
-        SM.SetInterfaceObject(server, "server");
+        SM.RegisterInterface(server, "server");
 #ifdef ANTS_FLANN
         AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);
-        SM.SetInterfaceObject(knn, "knn");
+        SM.RegisterInterface(knn, "knn");
 #endif
 #ifdef ANTS_FANN
         //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-        //SM.SetInterfaceObject(ann, "ann");
+        //SM.RegisterInterface(ann, "ann");
 #endif
 
         if ( parser.isSet(scriptOption) )

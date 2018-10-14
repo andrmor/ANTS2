@@ -128,10 +128,10 @@ void AScriptOpticalOverride::openScriptWindow(QWidget *caller)
     AOpticalOverrideScriptInterface* interfaceObject = new AOpticalOverrideScriptInterface(MatCollection, RandGen);
     interfaceObject->configure(&phot, normal, MatFrom, MatTo);
     interfaceObject->setObjectName("photon");
-    sw->SetInterfaceObject(interfaceObject, "photon"); //takes ownership
+    sw->RegisterInterface(interfaceObject, "photon"); //takes ownership
     AMathScriptInterface* math = new AMathScriptInterface(RandGen);
     math->setObjectName("math");
-    sw->SetInterfaceObject(math, "math"); //takes ownership
+    sw->RegisterInterface(math, "math"); //takes ownership
 
     sw->ConfigureForLightMode(&Script, "Optical override: custom script", example);
     sw->setWindowModality(Qt::ApplicationModal);

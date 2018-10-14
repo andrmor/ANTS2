@@ -2,6 +2,7 @@
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
 #include "atextedit.h"
+#include "ascriptinterface.h"
 #include "localscriptinterfaces.h"
 #include "coreinterfaces.h"
 #include "amathscriptinterface.h"
@@ -277,11 +278,9 @@ AScriptWindow::~AScriptWindow()
   delete ui;
   delete RedIcon;
   delete ScriptManager;
-  //qDebug() << "Script manager deleted";
-  //delete completitionModel;
-  //qDebug() << "Completition model deleted";
 }
 
+/*
 void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     ScriptManager->SetInterfaceObject(interfaceObject, name);
@@ -292,7 +291,6 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     if(name.isEmpty())
     { // empty name means the main module
         // populating help for main, math and core units
-        trwHelp->clear();
         if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
 
         AInterfaceToCore core(0); //dummy to extract methods
@@ -305,7 +303,6 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         fillHelper(&math, mathName);
         newFunctions << getListOfMethods(&math, mathName, false);
         appendDeprecatedOrRemovedMethods(&math, mathName);
-        trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
@@ -321,7 +318,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     //completitionModel->setStringList(functions);
 
     //if standalone script, update the highlighter and tooltip
-    if (bLightMode) UpdateAllTabs();
+    if (bLightMode) UpdateGui();
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
@@ -330,11 +327,64 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
 }
+*/
 
-void AScriptWindow::UpdateAllTabs()
+void AScriptWindow::RegisterInterfaceAsGlobal(AScriptInterface *interface)
+{
+    ScriptManager->RegisterInterfaceAsGlobal(interface);
+
+    doRegister(interface, "");
+}
+
+void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
+{
+    ScriptManager->RegisterCoreInterfaces(bCore, bMath);
+
+    if (bCore)
+    {
+        AInterfaceToCore core(0); //dummy to extract method names
+        doRegister(&core, "core");
+    }
+    if (bMath)
+    {
+        AMathScriptInterface math(0); //dummy to extract method names
+        QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
+        doRegister(&math, mathName);
+    }
+}
+
+void AScriptWindow::RegisterInterface(AScriptInterface *interface, const QString &name)
+{
+    ScriptManager->RegisterInterface(interface, name);
+
+    doRegister(interface, name);
+
+    //special "needs" of particular interface objects
+    if ( dynamic_cast<AInterfaceToHist*>(interface) || dynamic_cast<AInterfaceToGraph*>(interface)) //"graph" or "hist"
+       QObject::connect(interface, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
+}
+
+void AScriptWindow::doRegister(AScriptInterface *interface, const QString &name)
+{
+    // populating help
+    fillHelper(interface, name);
+    QStringList newFunctions;
+    newFunctions << getListOfMethods(interface, name, false);
+    appendDeprecatedOrRemovedMethods(interface, name);
+
+    //filling autocompleter
+    for (int i=0; i<newFunctions.size(); i++) newFunctions[i] += "()";
+    functions << newFunctions;
+}
+
+void AScriptWindow::UpdateGui()
 {
     for (int i=0; i<ScriptTabs.size(); i++)
         UpdateTab(ScriptTabs[i]);
+
+    if (bLightMode && trwHelp->topLevelItemCount() > 0)
+        trwHelp->expandItem(trwHelp->itemAt(0,0));
+    else trwHelp->collapseAll();
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -460,12 +510,6 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
             splMain->setSizes(sizes);
         }
     }
-}
-
-void AScriptWindow::UpdateHighlight()
-{
-   for (int i=0; i<ScriptTabs.size(); i++)
-       ScriptTabs[i]->UpdateHighlight();
 }
 
 void AScriptWindow::SetMainSplitterSizes(QList<int> values)
@@ -1192,23 +1236,20 @@ QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool 
   return commands;
 }
 
-void AScriptWindow::appendDeprecatedOrRemovedMethods(const QObject *obj, const QString &name)
+void AScriptWindow::appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString &name)
 {
-    const AScriptInterface* unit = dynamic_cast<const AScriptInterface*>(obj);
+    if (!obj) return;
 
-    if (unit)
+    QHashIterator<QString, QString> iter(obj->getDeprecatedOrRemovedMethods());
+    while (iter.hasNext())
     {
-        QHashIterator<QString, QString> iter(unit->getDeprecatedOrRemovedMethods());
-        while (iter.hasNext())
-        {
-            iter.next();
+        iter.next();
 
-            QString key = iter.key();
-            if (!name.isEmpty()) key = name + "." + key;
+        QString key = iter.key();
+        if (!name.isEmpty()) key = name + "." + key;
 
-            DeprecatedOrRemovedMethods[key] = iter.value();
-            ListOfDeprecatedOrRemovedMethods << key;
-        }
+        DeprecatedOrRemovedMethods[key] = iter.value();
+        ListOfDeprecatedOrRemovedMethods << key;
     }
 }
 
@@ -1394,6 +1435,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
 {
     tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
+    tab->UpdateHighlight();
     tab->TextEdit->functionList = functionList;
     tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
 }

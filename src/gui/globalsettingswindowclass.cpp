@@ -137,13 +137,17 @@ void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
     AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
     MW->GenScriptWindow = new AScriptWindow(jsm, true, this);
 
-    QString example = QString("");
+    QString example = QString("//see https://root.cern.ch/doc/master/classTStyle.html\n"
+                              "\n"
+                              "//try, e.g.:\n"
+                              "//SetOptStat(\"ei\") //\"nemr\" is redault");
     MW->GenScriptWindow->ConfigureForLightMode(&MW->GlobSet.RootStyleScript,
                               "Script to set ROOT's gStyle",
                               example);
 
     GStyleInterface = new AInterfaceToGStyleScript();
-    MW->GenScriptWindow->SetInterfaceObject(GStyleInterface);
+    MW->GenScriptWindow->RegisterInterfaceAsGlobal(GStyleInterface);
+    MW->GenScriptWindow->UpdateGui();
 
     MW->recallGeometryOfLocalScriptWindow();
     MW->GenScriptWindow->show();

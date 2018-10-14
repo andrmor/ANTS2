@@ -1,8 +1,11 @@
 #include "ascriptmanager.h"
 #include "ascriptinterface.h"
+#include "ascriptinterface.h"
+
 #ifdef GUI
 #include "ainterfacetomessagewindow.h"
 #endif
+
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QMetaMethod>

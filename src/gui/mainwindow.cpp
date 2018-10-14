@@ -4121,10 +4121,12 @@ void MainWindow::on_pbRunNodeScript_clicked()
   GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
   NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
-  GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
+  GenScriptWindow->RegisterInterfaceAsGlobal(NodesScriptInterface);
+  GenScriptWindow->RegisterCoreInterfaces();
   connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
   recallGeometryOfLocalScriptWindow();
+  GenScriptWindow->UpdateGui();
   GenScriptWindow->show();
 }
 

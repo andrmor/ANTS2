@@ -17,7 +17,7 @@
 class AScriptInterfaceFactory
 {
 public:    
-    static QObject* makeCopy(const QObject* other)
+    static AScriptInterface* makeCopy(const AScriptInterface* other)
     {
         const AInterfaceToCore* core = dynamic_cast<const AInterfaceToCore*>(other);
         if (core) return new AInterfaceToCore(*core);

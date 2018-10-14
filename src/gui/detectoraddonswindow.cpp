@@ -538,13 +538,15 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
     AddObjScriptInterface = new AInterfaceToAddObjScript(Detector);
-    MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
+    MW->GenScriptWindow->RegisterInterfaceAsGlobal(AddObjScriptInterface);
+    MW->GenScriptWindow->RegisterCoreInterfaces();
 
     connect(AddObjScriptInterface, &AInterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
     connect(AddObjScriptInterface, &AInterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
     connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
 
     MW->recallGeometryOfLocalScriptWindow();
+    MW->GenScriptWindow->UpdateGui();
     MW->GenScriptWindow->show();
 
 //  MW->extractGeometryOfLocalScriptWindow();

@@ -26,7 +26,10 @@ public:
     ~AJavaScriptManager();
 
     //configuration
-    virtual void    SetInterfaceObject(QObject* interfaceObject, QString name = "") override;
+    //virtual void    SetInterfaceObject(QObject* interfaceObject, QString name = "") override;
+    virtual void    RegisterInterfaceAsGlobal(AScriptInterface* interface) override;
+    virtual void    RegisterCoreInterfaces(bool bCore = true, bool bMath = true) override;
+    virtual void    RegisterInterface(AScriptInterface* interface, const QString& name) override;
 
     //run
     virtual int     FindSyntaxError(const QString &script) override; //returns line number of the first syntax error; -1 if no errors found
@@ -65,6 +68,8 @@ private:
     QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
 #endif
 
+private:
+    void doRegister(AScriptInterface *interface, const QString &name);
 };
 
 #endif // AJAVASCRIPTMANAGER_H

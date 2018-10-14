@@ -263,10 +263,12 @@ void MainWindow::on_pbPositionScript_clicked()
     GenScriptWindow->ConfigureForLightMode(&Detector->PMarrays[ul].PositioningScript, title, example);
 
     PMscriptInterface = new InterfaceToPMscript();
-    GenScriptWindow->SetInterfaceObject(PMscriptInterface);
+    GenScriptWindow->RegisterInterfaceAsGlobal(PMscriptInterface);
+    GenScriptWindow->RegisterCoreInterfaces();
     connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::PMscriptSuccess); // ***!!! uses ScriptWindow directly!
 
     recallGeometryOfLocalScriptWindow();
+    GenScriptWindow->UpdateGui();
     GenScriptWindow->show();
 }
 

@@ -811,6 +811,15 @@ void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)
   CalculateTotalActivity();
 }
 
+bool ParticleSourcesClass::replace(int iSource, AParticleSourceRecord *gunParticle)
+{
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return false;
+
+    delete ParticleSourcesData[iSource];
+    ParticleSourcesData[iSource] = gunParticle;
+    return true;
+}
+
 void ParticleSourcesClass::remove(int iSource)
 {
   if (ParticleSourcesData.isEmpty()) return;

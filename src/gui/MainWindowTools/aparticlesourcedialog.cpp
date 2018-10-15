@@ -58,6 +58,7 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
 
     ui->frSecondary->setVisible(false);
     UpdateListWidget();
+    updateColorLimitingMat();
     if ( !Rec->GunParticles.isEmpty() )
     {
         ui->lwGunParticles->setCurrentRow(0);
@@ -357,6 +358,7 @@ void AParticleSourceDialog::on_pbUpdateRecord_clicked()
         curRow = 0;
     ui->lwGunParticles->setCurrentRow(curRow);
     UpdateParticleInfo();
+    updateColorLimitingMat();
     if (ui->pbShowSource->isChecked()) MW.ShowSource(Rec, true);
 }
 
@@ -426,4 +428,22 @@ void AParticleSourceDialog::on_pbDeleteSpectrum_clicked()
     delete Rec->GunParticles[iPart]->spectrum; Rec->GunParticles[iPart]->spectrum = 0;
 
     UpdateParticleInfo();
+}
+
+void AParticleSourceDialog::updateColorLimitingMat()
+{
+    if (!ui->cbSourceLimitmat->isChecked()) return;
+
+    const QString name = ui->leSourceLimitMaterial->text();
+    bool fFound = false;
+    for (int iMat=0; iMat < MW.MpCollection->countMaterials(); iMat++)
+        if (name == (*MW.MpCollection)[iMat]->name)
+        {
+            fFound = true;
+            break;
+        }
+
+    QPalette palette = ui->leSourceLimitMaterial->palette();
+    palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );
+    ui->leSourceLimitMaterial->setPalette(palette);
 }

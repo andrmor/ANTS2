@@ -43,6 +43,8 @@ private slots:
 
     void on_pbDeleteSpectrum_clicked();
 
+
+
 private:
     MainWindow& MW;
 
@@ -55,6 +57,7 @@ private:
 private:
     void UpdateListWidget();
     void UpdateParticleInfo();
+    void updateColorLimitingMat();
 };
 
 #endif // APARTICLESOURCEDIALOG_H

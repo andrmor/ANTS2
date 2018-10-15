@@ -117,6 +117,7 @@ public:
 
   //Source handling - after handling is finished, requires Init() !!!
   void append(AParticleSourceRecord* gunParticle);
+  bool replace(int iSource, AParticleSourceRecord* gunParticle);
   void remove(int iSource);
   void clear();
 

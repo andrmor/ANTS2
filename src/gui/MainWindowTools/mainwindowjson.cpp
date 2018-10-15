@@ -581,15 +581,9 @@ if (scj.contains("CustomDistrib"))
   JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
 
   //particle sources
-  int SelectedSource = ui->cobParticleSource->currentIndex();
   ParticleSources->clear();
   ParticleSources->readFromJson(psjs);
   on_pbUpdateSourcesIndication_clicked();
-  if (SelectedSource>-1 && SelectedSource<ParticleSources->size())
-  {
-      ui->cobParticleSource->setCurrentIndex(SelectedSource);
-      updateOneParticleSourcesIndication(ParticleSources->getSource(SelectedSource));
-  }
 
   //Window CONTROL
   if (js.contains("Mode"))

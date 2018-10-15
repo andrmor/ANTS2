@@ -4605,24 +4605,6 @@ void MainWindow::on_tabMCcrosstalk_cellChanged(int row, int column)
     on_pbUpdateElectronics_clicked();
 }
 
-void MainWindow::on_leSourceLimitMaterial_textChanged(const QString &/*arg1*/)
-{
-    if (!ui->cbSourceLimitmat->isChecked()) return;
-
-    const QString name = ui->leSourceLimitMaterial->text();
-    bool fFound = false;
-    for (int iMat=0; iMat<MpCollection->countMaterials(); iMat++)
-        if (name == (*MpCollection)[iMat]->name)
-        {
-            fFound = true;
-            break;
-        }
-
-    QPalette palette = ui->leSourceLimitMaterial->palette();
-    palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );
-    ui->leSourceLimitMaterial->setPalette(palette);
-}
-
 void MainWindow::on_leLimitNodesObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbLimitNodesOutsideObject->isChecked()) ?
@@ -4992,12 +4974,4 @@ void MainWindow::on_pbPMtypeHelp_clicked()
                 "   volume to the geometry and the PM object should\n"
                 "   represent the photocathode.";
     message(s, this);
-}
-
-#include "aparticlesourcedialog.h"
-void MainWindow::on_pushButton_2_clicked()
-{
-    int isource = ui->cobParticleSource->currentIndex();
-    AParticleSourceDialog d(*this, ParticleSources->getSource(isource));
-    d.exec();
 }

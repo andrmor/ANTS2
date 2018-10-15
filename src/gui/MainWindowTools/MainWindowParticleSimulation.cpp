@@ -18,6 +18,7 @@
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "guiutils.h"
+#include "aparticlesourcedialog.h"
 
 //Qt
 #include <QDebug>
@@ -251,9 +252,10 @@ void MainWindow::on_pbGunTest_clicked()
       {
           if (iRun>2)
           {
-             if (ui->cbSourceLimitmat->isChecked()) message("Did several attempts but no particles were generated!\n"
-                                                            "Possible reason: generation is limited to a wrong material", this);
-             else message("Did several attempts but no particles were generated!", this);
+//             if (ui->cbSourceLimitmat->isChecked()) message("Did several attempts but no particles were generated!\n"
+//                                                            "Possible reason: generation is limited to a wrong material", this);
+//             else
+             message("Did several attempts but no particles were generated!", this);
              return;
           }
       }
@@ -285,388 +287,6 @@ void MainWindow::on_pbGunTest_clicked()
       ParticleSources->getSource(i)->Activity = activities.at(i);
 }
 
-void MainWindow::on_pbGunRefreshparticles_clicked()
-{
-    ui->lwGunParticles->clear(); //Cleaning ListView
-
-    if (ParticleSources->size() == 0) return;
-    int isource = ui->cobParticleSource->currentIndex();
-    if (isource > ParticleSources->size()-1) return; //protection
-
-    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-
-    //Populating ListView
-    int DefinedSourceParticles = ps->GunParticles.size();
-    //qDebug() << "Defined particles for this source:"<< DefinedSourceParticles;
-
-    for (int i=0; i<DefinedSourceParticles; i++)
-      {
-        GunParticleStruct* gps = ps->GunParticles[i];
-
-        bool Individual = gps->Individual;
-
-        QString str, str1;
-        if (Individual) str = "";
-        else str = ">";
-        str1.setNum(i);
-        str += str1 + "> ";
-        //str += Detector->ParticleCollection[gps->ParticleId]->ParticleName;
-        str += Detector->MpCollection->getParticleName(gps->ParticleId);
-        if (gps->spectrum) str += " E=spec";
-        else
-          {
-            str1.setNum(gps->energy);
-            str += " E=" + str1;
-          }
-
-        if (Individual)
-          {
-            str += " W=";
-            str1.setNum(gps->StatWeight);
-            str += str1;
-          }
-        else
-          {
-            str += " Link:";
-            str += QString::number(gps->LinkedTo);
-            str += " P=";
-            str += QString::number(gps->LinkingProbability);
-            if (gps->LinkingOppositeDir)
-                str += " Opposite";
-          }
-        ui->lwGunParticles->addItem(str);
-        //qDebug() << str;
-      }
-  MainWindow::SourceUpdateThisParticleIndication();
-}
-
-void MainWindow::SourceUpdateThisParticleIndication()
-{
-  //showing selected row and updating data indication
-  int isource = ui->cobParticleSource->currentIndex();
-  if (isource<0 || isource>=ParticleSources->size()) return;
-  int row = ui->lwGunParticles->currentRow();
-
-  const AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-
-  int DefinedSourceParticles = ps->GunParticles.size();
-  if (DefinedSourceParticles > 0 && row>-1)
-    {
-      ui->fGunParticle->setEnabled(true);
-      int part = ps->GunParticles[row]->ParticleId;
-      ui->cobGunParticle->setCurrentIndex(part);
-
-      GunParticleStruct* gps = ps->GunParticles[row];
-
-      QString str;
-      str.setNum(gps->StatWeight);
-      ui->ledGunParticleWeight->setText(str);
-      str.setNum(gps->energy);
-      ui->ledGunEnergy->setText(str);
-      ui->cbIndividualParticle->setChecked(gps->Individual);
-      ui->leiParticleLinkedTo->setText( QString::number(gps->LinkedTo) );
-      str.setNum(gps->LinkingProbability);
-      ui->ledLinkingProbability->setText(str);
-      ui->cbLinkingOpposite->setChecked(gps->LinkingOppositeDir);
-      //Depending on the presence of spectrum data, modifing visiblility and enable/disable
-      if (gps->spectrum == 0)
-        {
-          ui->pbGunShowSpectrum->setEnabled(false);
-          ui->pbGunDeleteSpectrum->setEnabled(false);
-          ui->ledGunEnergy->setEnabled(true);
-          ui->fPartEnergy->setVisible(true);
-        }
-      else
-        {
-          ui->pbGunShowSpectrum->setEnabled(true);
-          ui->pbGunDeleteSpectrum->setEnabled(true);
-          ui->ledGunEnergy->setEnabled(false);
-          ui->fPartEnergy->setVisible(false);
-        }
-    }
-  else ui->fGunParticle->setEnabled(false);
-}
-
-void MainWindow::on_pbGunAddNew_clicked()
-{
-    int isource = ui->cobParticleSource->currentIndex();
-
-    GunParticleStruct* tmp = new GunParticleStruct();
-    tmp->ParticleId = ui->cobGunParticle->currentIndex();
-    tmp->StatWeight = ui->ledGunParticleWeight->text().toDouble();
-    tmp->energy = ui->ledGunEnergy->text().toDouble();
-    tmp->spectrum = 0;
-    ParticleSources->getSource(isource)->GunParticles.append(tmp);
-
-    MainWindow::on_pbGunRefreshparticles_clicked();
-    ui->lwGunParticles->setCurrentRow( ParticleSources->getSource(isource)->GunParticles.size()-1 );
-
-    MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_pbGunRemove_clicked()
-{
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  if (ps->GunParticles.size() < 2)
-  {
-      message("Source should contain at least one particle!");
-      return;
-  }
-
-  int iparticle = ui->lwGunParticles->currentRow();
-  if (iparticle == -1)
-    {
-      message("Select a particle to remove!", this);
-      return;
-    }
-  delete ps->GunParticles[iparticle];
-  ps->GunParticles.remove(iparticle);
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  int errCode = ParticleSources->CheckSource(isource);
-  if (errCode>0)
-    {
-      QString err = ParticleSources->getErrorString(errCode);
-      message("Source checker reports an error: "+err, this);
-    }
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_cobGunSourceType_currentIndexChanged(int index)
-{
-  QList <QString> s;
-  switch (index)
-    {
-    default:
-    case 0: s <<""<<""<<"";
-      break;
-    case 1: s <<"Length:"<<""<<"";
-      break;
-    case 2: s <<"Size X:"<<"Size Y:"<<"";
-      break;
-    case 3: s <<"Diameter:"<<""<<"";
-      break;
-    case 4: s <<"Size X:"<<"Size Y:"<<"Size Z:";
-      break;
-    case 5: s <<"Diameter:"<<""<<"Height:";
-    }
-  ui->lGun1DSize->setText(s[0]);
-  ui->lGun2DSize->setText(s[1]);
-  ui->lGun3DSize->setText(s[2]);
-  ui->fGun1D->setDisabled(s[0].isEmpty());
-  ui->fGun2D->setDisabled(s[1].isEmpty());
-  ui->fGun3D->setDisabled(s[2].isEmpty());
-
-  ui->fGunPhi->setEnabled(index != 0);
-  ui->fGunTheta->setEnabled(index != 0);
-  ui->fGunPsi->setEnabled(index > 1);
-
-  if (index == 1)
-  {
-      ui->labGunPhi->setText("Phi");
-      ui->labGunTheta->setText("Theta");
-  }
-  else
-  {
-      ui->labGunPhi->setText("around X");
-      ui->labGunTheta->setText("around Y");
-  }
-}
-
-void MainWindow::on_cobGunParticle_activated(int index)
-{
-     //next 4 obsolete?
-   if (ParticleSources->size() == 0) return;
-   int isource = ui->cobParticleSource->currentIndex();
-   if (isource > ParticleSources->size() - 1) return;
-
-   AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-   if (ps->GunParticles.isEmpty()) return;
-
-   int particle = ui->lwGunParticles->currentRow();
-   if (particle<0 || particle > ps->GunParticles.size()-1) return;
-   ps->GunParticles[particle]->ParticleId = index;
-   MainWindow::on_pbGunRefreshparticles_clicked();
-   ui->lwGunParticles->setCurrentRow(particle);
-
-   MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_ledGunEnergy_editingFinished()
-{
-  //if (BulkUpdate) return;
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-
-  ps->GunParticles[particle]->energy = ui->ledGunEnergy->text().toDouble();
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_ledGunParticleWeight_editingFinished()
-{
-  //if (BulkUpdate) return;
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-  ps->GunParticles[particle]->StatWeight = ui->ledGunParticleWeight->text().toDouble();
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_cbIndividualParticle_clicked(bool checked)
-{
-  //if (BulkUpdate) return;
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-
-  if (particle == 0 && !checked)
-    {
-      ui->cbIndividualParticle->setChecked(true);
-      message("First particle should be 'Individual'", this);
-      return;//update on_toggle
-    }
-  ps->GunParticles[particle]->Individual = checked;
-  if (!checked) ps->GunParticles[particle]->LinkedTo = ui->leiParticleLinkedTo->text().toInt();
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_leiParticleLinkedTo_editingFinished()
-{
-  //if (BulkUpdate) return;
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-  int iLinkedTo = ui->leiParticleLinkedTo->text().toInt();
-  if (iLinkedTo == particle)
-    {
-      ui->leiParticleLinkedTo->setText("0");
-      message("Particle cannot be linked to itself!", this);
-      MainWindow::on_leiParticleLinkedTo_editingFinished();
-      return;
-    }
-
-  int TotParticles = ps->GunParticles.size();
-  if (iLinkedTo>TotParticles-1 || iLinkedTo<0)
-    {
-      if (iLinkedTo == 0) return; //protection - no particles are defined
-      ui->leiParticleLinkedTo->setText("0");
-      message("Particle index is out of range: "+QString::number(TotParticles)+" particle are defined", this);
-      MainWindow::on_leiParticleLinkedTo_editingFinished();
-      return;
-    }
-
-  ps->GunParticles[particle]->LinkedTo = iLinkedTo;
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_ledLinkingProbability_editingFinished()
-{
-  double val = ui->ledLinkingProbability->text().toDouble();
-  if (val<0 || val>1)
-    {
-      ui->ledLinkingProbability->setText("0");
-      message("Error in probability value: should be between 0 and 1",this);
-      val = 0;
-    }
-
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-  ps->GunParticles[particle]->LinkingProbability = val;
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
-{
-    int isource = ui->cobParticleSource->currentIndex();
-    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-    int particle = ui->lwGunParticles->currentRow();
-    if (particle<0 || particle > ps->GunParticles.size()-1) return;
-    int linkedTo = ui->leiParticleLinkedTo->text().toInt();
-    if (linkedTo<0 || linkedTo > ps->GunParticles.size()-1) return;
-    if (linkedTo == particle)
-    {
-        ps->GunParticles[particle]->LinkingOppositeDir = false;
-        message("Cannot link particle to itself", this);
-    }
-
-    ps->GunParticles[particle]->LinkingOppositeDir = checked;
-    MainWindow::on_pbGunRefreshparticles_clicked();
-    ui->lwGunParticles->setCurrentRow(particle);
-
-    MainWindow::on_pbUpdateSources_clicked();
-}
-
-void MainWindow::on_pbGunLoadSpectrum_clicked()
-{
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
-  qDebug()<<fileName;
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-  ParticleSources->LoadGunEnergySpectrum(isource, particle, fileName);
-  MainWindow::on_pbGunRefreshparticles_clicked();
-  ui->lwGunParticles->setCurrentRow(particle);
-
-  MainWindow::on_pbUpdateSources_clicked();
-}
-
-#include "TH1.h"
-void MainWindow::on_pbGunShowSpectrum_clicked()
-{
-  int isource = ui->cobParticleSource->currentIndex();
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-  int particle = ui->lwGunParticles->currentRow();
-  if (particle<0 || particle > ps->GunParticles.size()-1) return;
-  ps->GunParticles[particle]->spectrum->GetXaxis()->SetTitle("Energy, keV");
-  GraphWindow->Draw(ps->GunParticles[particle]->spectrum, "", true, false);
-}
-
-void MainWindow::on_pbGunDeleteSpectrum_clicked()
-{
-   int isource = ui->cobParticleSource->currentIndex();
-   AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-   int particle = ui->lwGunParticles->currentRow();
-   if (particle<0 || particle > ps->GunParticles.size()-1) return;
-   if (ps->GunParticles[particle]->spectrum)
-     {
-       delete ps->GunParticles[particle]->spectrum;
-       ps->GunParticles[particle]->spectrum = 0;
-     }
-   ui->pbGunShowSpectrum->setEnabled(false);
-   ui->pbGunDeleteSpectrum->setEnabled(false);
-   MainWindow::on_pbGunRefreshparticles_clicked();
-   ui->lwGunParticles->setCurrentRow(particle);
-
-   MainWindow::on_pbUpdateSources_clicked();
-}
-
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
 {
    double val = ui->ledGunAverageNumPartperEvent->text().toDouble();
@@ -691,7 +311,6 @@ void MainWindow::on_pbRemoveSource_clicked()
   ParticleSources->remove(isource);
   ui->cobParticleSource->removeItem(isource);
   ui->cobParticleSource->setCurrentIndex(isource-1);
-  if (ParticleSources->size() == 0) clearParticleSourcesIndication();
 
   on_pbUpdateSimConfig_clicked();
 
@@ -711,95 +330,12 @@ void MainWindow::on_pbRemoveSource_clicked()
 void MainWindow::on_pbAddSource_clicked()
 {
   AParticleSourceRecord* s = new AParticleSourceRecord();
+  s->GunParticles << new GunParticleStruct();
   ParticleSources->append(s);
   ui->cobParticleSource->addItem(ParticleSources->getLastSource()->name);
   ui->cobParticleSource->setCurrentIndex(ParticleSources->size()-1);
 
-  ui->ledGunParticleWeight->setText("1");
-  ui->cbIndividualParticle->setChecked(true);
-  on_pbGunAddNew_clicked(); //to add new particle and register the changes in config
-  on_pbUpdateSourcesIndication_clicked();
-  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
-}
-
-void MainWindow::on_pbUpdateSources_clicked()
-{
-  int isource = ui->cobParticleSource->currentIndex();
-  if (isource<0)
-    {
-      //qWarning() << "Attempt to update source with number <0";
-      return;
-    }
-
-  if (BulkUpdate) return;
-  if (DoNotUpdateGeometry) return;
-  if (ShutDown) return;
-  if (ParticleSources->size() == 0)
-    {
-      qWarning()<<"Attempt to update particle source while there are no defined ones!";
-      return;
-    }
-
-  //qDebug()<<"Update source#"<<isource<<"   defined in total:"<<ParticleSources->size();
-
-  if (isource >= ParticleSources->size())
-    {
-      message("Error: Attempting to update particle source parameters, but source number is out of bounds!",this);
-      return;
-    }
-
-  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-
-  ps->Activity = ui->ledSourceActivity->text().toDouble();
-  ps->index = ui->cobGunSourceType->currentIndex();
-  ps->X0 = ui->ledGunOriginX->text().toDouble();
-  ps->Y0 = ui->ledGunOriginY->text().toDouble();
-  ps->Z0 = ui->ledGunOriginZ->text().toDouble();
-  ps->Phi = ui->ledGunPhi->text().toDouble();
-  ps->Theta = ui->ledGunTheta->text().toDouble();
-  ps->Psi = ui->ledGunPsi->text().toDouble();
-  ps->size1 = 0.5 * ui->ledGun1DSize->text().toDouble();
-  ps->size2 = 0.5 * ui->ledGun2DSize->text().toDouble();
-  ps->size3 = 0.5 * ui->ledGun3DSize->text().toDouble();
-  ps->CollPhi = ui->ledGunCollPhi->text().toDouble();
-  ps->CollTheta = ui->ledGunCollTheta->text().toDouble();
-  ps->Spread = ui->ledGunSpread->text().toDouble();
-  ps->DoMaterialLimited = ui->cbSourceLimitmat->isChecked();
-  ps->LimtedToMatName = ui->leSourceLimitMaterial->text();
-  ParticleSources->checkLimitedToMaterial(ps);
-
-  if (Detector->isGDMLempty())
-    { //check world size
-      double XYm = 0;
-      double  Zm = 0;
-      for (int isource = 0; isource < ParticleSources->size(); isource++)
-        {
-          double msize =   ps->size1;
-          UpdateMax(msize, ps->size2);
-          UpdateMax(msize, ps->size3);
-
-          UpdateMax(XYm, fabs(ps->X0)+msize);
-          UpdateMax(XYm, fabs(ps->Y0)+msize);
-          UpdateMax(Zm,  fabs(ps->Z0)+msize);
-        }
-
-      double currXYm = Detector->WorldSizeXY;
-      double  currZm = Detector->WorldSizeZ;
-      if (XYm>currXYm || Zm>currZm)
-        {
-          //need to override          
-          Detector->fWorldSizeFixed = true;
-          Detector->WorldSizeXY = std::max(XYm,currXYm);
-          Detector->WorldSizeZ =  std::max(Zm,currZm);
-          MainWindow::ReconstructDetector();
-        }
-    }
-
-  on_pbUpdateSimConfig_clicked();
-
-  updateActivityIndication();    //update marker!
-  if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
-  //qDebug() << "...update sources done";
+  on_pbEditParticleSource_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
@@ -809,7 +345,6 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
-  clearParticleSourcesIndication();
   if (numSources == 0) return;
   ui->fParticleSources->setEnabled(true);
   ui->frSelectSource->setEnabled(true);
@@ -820,9 +355,6 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
   if (isource == -1) isource = 0;
 
   ui->cobParticleSource->setCurrentIndex(isource);
-  updateOneParticleSourcesIndication(ParticleSources->getSource(isource));
-  on_pbGunRefreshparticles_clicked();
-  on_leSourceLimitMaterial_textChanged("");  //update color only!
   updateActivityIndication();
 }
 
@@ -838,42 +370,6 @@ void MainWindow::updateActivityIndication()
   double TotalActivity = ParticleSources->getTotalActivity();
   if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
   ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
-}
-
-void MainWindow::updateOneParticleSourcesIndication(AParticleSourceRecord* ps)
-{
-    bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
-    BulkUpdate = true;
-
-    ui->ledSourceActivity->setText(QString::number(ps->Activity));
-    ui->cobGunSourceType->setCurrentIndex(ps->index);
-    ui->ledGunOriginX->setText(QString::number(ps->X0));
-    ui->ledGunOriginY->setText(QString::number(ps->Y0));
-    ui->ledGunOriginZ->setText(QString::number(ps->Z0));
-    ui->ledGunPhi->setText(QString::number(ps->Phi));
-    ui->ledGunTheta->setText(QString::number(ps->Theta));
-    ui->ledGunPsi->setText(QString::number(ps->Psi));
-    ui->ledGun1DSize->setText(QString::number(2.0 * ps->size1));
-    ui->ledGun2DSize->setText(QString::number(2.0 * ps->size2));
-    ui->ledGun3DSize->setText(QString::number(2.0 * ps->size3));
-    ui->ledGunCollPhi->setText(QString::number(ps->CollPhi));
-    ui->ledGunCollTheta->setText(QString::number(ps->CollTheta));
-    ui->ledGunSpread->setText(QString::number(ps->Spread));
-
-    ui->cbSourceLimitmat->setChecked(ps->DoMaterialLimited);
-    ui->leSourceLimitMaterial->setText(ps->LimtedToMatName);
-
-    BulkUpdate = BulkUpdateCopy;
-}
-
-void MainWindow::clearParticleSourcesIndication()
-{
-    AParticleSourceRecord ps;
-    updateOneParticleSourcesIndication(&ps);
-    ui->cobParticleSource->clear();
-    ui->cobParticleSource->setCurrentIndex(-1);
-    ui->fParticleSources->setEnabled(false);
-    ui->frSelectSource->setEnabled(false);
 }
 
 void MainWindow::on_pbGunShowSource_toggled(bool checked)
@@ -900,11 +396,6 @@ void MainWindow::ShowParticleSource_noFocus()
       return;
     }
   ShowSource(ParticleSources->getSource(isource), true);
-}
-
-void MainWindow::on_lwGunParticles_currentRowChanged(int /*currentRow*/)
-{
-  MainWindow::SourceUpdateThisParticleIndication();
 }
 
 void MainWindow::on_pbSaveParticleSource_clicked()
@@ -987,25 +478,6 @@ void MainWindow::on_pbSingleSourceShow_clicked()
     GeoMarkers.append(marks1);
 
     GeometryWindow->ShowGeometry(false);
-}
-
-void MainWindow::on_pbRenameSource_clicked()
-{
-    int isource = ui->cobParticleSource->currentIndex();
-    //qDebug() << "current source:"<<isource;
-    if (isource<0 || isource>ParticleSources->size()-1) return;
-
-    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-    bool ok;
-    QString text = QInputDialog::getText(this, "Rename particle source",
-                                            "New name:", QLineEdit::Normal,
-                                            ps->name, &ok);
-    if (ok && !text.isEmpty())
-    {
-        ps->name = text;
-        ui->cobParticleSource->setItemText(isource, text);
-        MainWindow::on_pbUpdateSources_clicked();
-    }
 }
 
 void MainWindow::on_pbAddParticleToStack_clicked()
@@ -1155,4 +627,52 @@ void MainWindow::on_pbClearAllStack_clicked()
         delete ParticleStack[i];
     ParticleStack.clear();
     MainWindow::on_pbRefreshStack_clicked();
+}
+
+void MainWindow::on_pbEditParticleSource_clicked()
+{
+    int isource = ui->cobParticleSource->currentIndex();
+    AParticleSourceDialog d(*this, ParticleSources->getSource(isource));
+    int res = d.exec();
+
+    if (res == QDialog::Rejected) return;
+    ParticleSources->replace(isource, d.getResult());
+
+    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
+
+    ps->Activity = ui->ledSourceActivity->text().toDouble();
+    ParticleSources->checkLimitedToMaterial(ps);
+
+    if (Detector->isGDMLempty())
+      { //check world size
+        double XYm = 0;
+        double  Zm = 0;
+        for (int isource = 0; isource < ParticleSources->size(); isource++)
+          {
+            double msize =   ps->size1;
+            UpdateMax(msize, ps->size2);
+            UpdateMax(msize, ps->size3);
+
+            UpdateMax(XYm, fabs(ps->X0)+msize);
+            UpdateMax(XYm, fabs(ps->Y0)+msize);
+            UpdateMax(Zm,  fabs(ps->Z0)+msize);
+          }
+
+        double currXYm = Detector->WorldSizeXY;
+        double  currZm = Detector->WorldSizeZ;
+        if (XYm>currXYm || Zm>currZm)
+          {
+            //need to override
+            Detector->fWorldSizeFixed = true;
+            Detector->WorldSizeXY = std::max(XYm,currXYm);
+            Detector->WorldSizeZ =  std::max(Zm,currZm);
+            MainWindow::ReconstructDetector();
+          }
+      }
+
+    on_pbUpdateSimConfig_clicked();
+
+    updateActivityIndication();    //update marker!
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
+    //qDebug() << "...update sources done";
 }

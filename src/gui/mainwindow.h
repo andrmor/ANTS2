@@ -282,17 +282,7 @@ private slots:
     void on_pbPMtypeShowAngular_clicked();
     void on_pbPMtypeDeleteAngular_clicked();
     void on_pbPMtypeShowEffectiveAngular_clicked();
-    void on_cobGunSourceType_currentIndexChanged(int index);    
     void on_pbGunTest_clicked();
-    void on_pbGunRefreshparticles_clicked();
-    void on_pbGunAddNew_clicked();
-    void on_pbGunRemove_clicked();
-    void on_cobGunParticle_activated(int index);
-    void on_ledGunEnergy_editingFinished();
-    void on_ledGunParticleWeight_editingFinished();
-    void on_pbGunLoadSpectrum_clicked();
-    void on_pbGunShowSpectrum_clicked();
-    void on_pbGunDeleteSpectrum_clicked();
     void on_ledGunAverageNumPartperEvent_editingFinished();
     void on_ledMediumRefrIndex_editingFinished();
     void on_pbPMtypeLoadArea_clicked();
@@ -369,7 +359,6 @@ private slots:
     void LoadSimTreeRequested();
     void on_pbRemoveSource_clicked();
     void on_pbAddSource_clicked();
-    void on_pbUpdateSources_clicked();
     void on_pbUpdateSourcesIndication_clicked();
     void on_pbGunShowSource_toggled(bool checked);
 
@@ -462,8 +451,6 @@ private:
 private slots:
     void timerTimeout(); //timer-based update of Root events
 
-    void on_cbIndividualParticle_clicked(bool checked);
-    void on_ledLinkingProbability_editingFinished();
     void on_pbShowCheckUpWindow_clicked();
     void on_lePreprocessingMultiply_editingFinished();
     void on_extractPedestals_clicked();   
@@ -485,7 +472,6 @@ private slots:
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
     void on_pbRemoveParticle_clicked();
-    void on_lwGunParticles_currentRowChanged(int currentRow);
     void on_pbSaveParticleSource_clicked();
     void on_pbLoadParticleSource_clicked();
     void on_pbSaveResults_clicked();
@@ -493,7 +479,6 @@ private slots:
     void on_lwLoadedEventsFiles_itemChanged(QListWidgetItem *item);
     void on_pobTest_clicked();
     void on_actionGain_evaluation_triggered();
-    void on_leiParticleLinkedTo_editingFinished();
     void on_cbLRFs_toggled(bool checked);  
     void on_pbClearAdd_clicked();
     void on_pbClearMulti_clicked();
@@ -507,11 +492,9 @@ private slots:
     void on_cobTOP_activated(int index);
     void on_actionNew_detector_triggered();
     void on_pbReloadTreeData_clicked();
-    void on_pbRenameSource_clicked();
     void on_pbStopLoad_clicked();
     void on_pbConfigureNumberOfThreads_clicked();
     void on_cobFixedDirOrCone_currentIndexChanged(int index);
-    void on_cbLinkingOpposite_clicked(bool checked);
     void on_pbShowComptonAngles_clicked();
     void on_pbShowComptonEnergies_clicked();
     void on_pbCheckRandomGen_clicked();
@@ -562,7 +545,6 @@ private slots:
     void on_cbEnableMCcrosstalk_toggled(bool checked);
     void on_pbRemoveCellMCcrosstalk_clicked();
     void on_pbMCnormalize_clicked();
-    void on_leSourceLimitMaterial_textChanged(const QString &arg1);
     void on_leLimitNodesObject_textChanged(const QString &arg1);
     void on_cbLimitNodesOutsideObject_toggled(bool checked);
     void on_bpResults_clicked();
@@ -612,7 +594,7 @@ private slots:
 
     void on_pbPMtypeHelp_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_pbEditParticleSource_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -628,10 +610,7 @@ public slots:
 
 private:
     void initDetectorSandwich();
-    void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
-    void clearParticleSourcesIndication();   
-    void updateOneParticleSourcesIndication(AParticleSourceRecord *ps);
     void ShowParticleSource_noFocus();
     void updateActivityIndication();
 

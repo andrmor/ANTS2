@@ -340,8 +340,10 @@ void MainWindow::on_pbAddSource_clicked()
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-  //qDebug() << "Update sources inidcation. Defined sources:"<<ParticleSources->size();
+  qDebug() << "Update sources indication. Defined sources:"<<ParticleSources->size();
   int isource = ui->cobParticleSource->currentIndex();
+
+  ui->cobParticleSource->clear();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));

@@ -420,7 +420,7 @@ void ParticleSourcesClass::IsParticleInUse(int particleId, bool &bInUse, QString
 
   for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
     {
-      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      AParticleSourceRecord* ps = ParticleSourcesData[isource];
       for (int ip = 0; ip<ps->GunParticles.size(); ip++)
         {
           if ( particleId == ps->GunParticles[ip]->ParticleId )
@@ -437,7 +437,7 @@ void ParticleSourcesClass::RemoveParticle(int particleId)
 {
   for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
     {
-      ParticleSourceStructure* ps = ParticleSourcesData[isource];
+      AParticleSourceRecord* ps = ParticleSourcesData[isource];
       for (int ip = 0; ip<ps->GunParticles.size(); ip++)
           if ( ps->GunParticles[ip]->ParticleId > particleId)
               ps->GunParticles[ip]->ParticleId--;
@@ -461,7 +461,7 @@ bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
 {
    if (iSource<0 || iSource>ParticleSourcesData.size()-1) return false;
 
-   ParticleSourceStructure* s = ParticleSourcesData[iSource];
+   AParticleSourceRecord* s = ParticleSourcesData[iSource];
 
    //general
    json["Name"] = s->name;
@@ -552,13 +552,13 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
   if (iSource == -1)
     {
       //append new!
-      ParticleSourceStructure* ns = new ParticleSourceStructure();
+      AParticleSourceRecord* ns = new AParticleSourceRecord();
       ParticleSourcesData.append(ns);
       iSource = ParticleSourcesData.size()-1;
     }
 
   delete ParticleSourcesData[iSource]; //have to delete here, or histograms might have not unique names
-  ParticleSourceStructure* s = new ParticleSourceStructure();
+  AParticleSourceRecord* s = new AParticleSourceRecord();
   ParticleSourcesData[iSource] = s;
   //reading general info
   parseJson(json, "Name", s->name);
@@ -614,7 +614,7 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
       AParticle::ParticleType Type = static_cast<AParticle::ParticleType>(type);
       int ParticleId = MpCollection->FindCreateParticle(name, Type, charge, mass);
 
-      s->GunParticles.append(new GunParticleStruct());
+      s->GunParticles << new GunParticleStruct();
       s->GunParticles[ip]->ParticleId = ParticleId;
       //qDebug()<<"Added gun particle with particle Id"<<ParticleId<<ParticleCollection->at(ParticleId)->ParticleName;
 
@@ -652,7 +652,7 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
   return true;
 }
 
-void ParticleSourcesClass::checkLimitedToMaterial(ParticleSourceStructure* s)
+void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
 {
     bool fFound = false;
     int iMat;
@@ -744,7 +744,7 @@ int ParticleSourcesClass::CheckSource(int isource)
   if (MpCollection == 0) return 3; // 3 - material collection not connected
   if (getTotalActivity() == 0) return 4; // 4 - total activity = 0
 
-  ParticleSourceStructure* ps = ParticleSourcesData[isource];
+  AParticleSourceRecord* ps = ParticleSourcesData[isource];
   if (ps->index <0 || ps->index>5) return 10; //10 - unknown source shape
 
   int numParts = ps->GunParticles.size();     //11 - no particles defined
@@ -801,7 +801,7 @@ QString ParticleSourcesClass::getErrorString(int error)
   return "undefined error";
 }
 
-void ParticleSourcesClass::append(ParticleSourceStructure *gunParticle)
+void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)
 {
   ParticleSourcesData.append(gunParticle);
   CalculateTotalActivity();
@@ -817,28 +817,43 @@ void ParticleSourcesClass::remove(int iSource)
   CalculateTotalActivity();
 }
 
+GunParticleStruct * GunParticleStruct::clone() const
+{
+    //shallow copy
+    GunParticleStruct* gp = new GunParticleStruct(*this);
+
+    //clear dynamic
+    gp->spectrum = 0;
+
+    //deep copy for dynamic properties
+    if (spectrum)
+        gp->spectrum = new TH1D(*spectrum);
+
+    return gp;
+}
+
 GunParticleStruct::~GunParticleStruct()
 {
   if (spectrum) delete spectrum;
 }
 
-
-ParticleSourceStructure::ParticleSourceStructure()
+AParticleSourceRecord::~AParticleSourceRecord()
 {
-  name = "Underfined_name";
-  Activity = 1;
-  index = 0;
-  X0 = 0; Y0 = 0; Z0 = 0;
-  size1 = 10; size2 = 10; size3 = 10;
-  Phi = 0; Theta = 0; Psi = 0;
-  CollPhi = 0; CollTheta = 0;
-  Spread = 45;
-  DoMaterialLimited = fLimit = false;
-
-  GunParticles.resize(0);
+  for (GunParticleStruct* g : GunParticles) delete g;
+  GunParticles.clear();
 }
 
-ParticleSourceStructure::~ParticleSourceStructure()
+AParticleSourceRecord * AParticleSourceRecord::clone() const
 {
-  for (int i=0; i<GunParticles.size(); i++) delete GunParticles[i];
+    //shallow copy
+    AParticleSourceRecord * newRec = new AParticleSourceRecord(*this);
+
+    //clear dynamic
+    newRec->GunParticles.clear();
+
+    //deep copy of dynamic resources
+    for (GunParticleStruct* g : GunParticles)
+        newRec->GunParticles << g->clone();
+
+    return newRec;
 }

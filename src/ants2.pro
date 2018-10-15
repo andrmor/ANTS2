@@ -356,7 +356,8 @@ SOURCES += main.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
     OpticalOverrides/abasicopticaloverride.cpp \
-    common/aglobalsettings.cpp
+    common/aglobalsettings.cpp \
+    aparticlesourcedialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -488,7 +489,8 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/awaveshifteroverride.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
     OpticalOverrides/abasicopticaloverride.h \
-    common/aglobalsettings.h
+    common/aglobalsettings.h \
+    aparticlesourcedialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -813,4 +815,7 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    aparticlesourcedialog.ui
 

@@ -242,7 +242,7 @@ TriState CheckUpWindowClass::CheckInteractions()
     //Check all particle sources: if links are valid, if interaction data for a given energy is available
     for(int i = 0; i < MW->ParticleSources->size(); i++)
     {
-        ParticleSourceStructure* source = MW->ParticleSources->getSource(i);
+        AParticleSourceRecord* source = MW->ParticleSources->getSource(i);
         int sourceParticleCount = source->GunParticles.size();
 
         //Loop over all GunParticles

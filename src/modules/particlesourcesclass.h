@@ -15,70 +15,61 @@ class DetectorClass;
 
 struct GunParticleStruct
 {
-  int ParticleId;
-  double StatWeight;
-  double energy;
-  TH1D* spectrum; //energy spectrum
-  bool Individual; // true = individual particle; false = linked
-  int LinkedTo; // index of the "parent" particle this one is following
-  double LinkingProbability;  //probability to be emitted after the parent particle
-  bool LinkingOppositeDir; // false = random direction; otherwise particle is emitted in the opposite direction in respect to the LinkedTo particle
+  int    ParticleId = 0;
+  double StatWeight = 1.0;
+  double energy = 100.0; //in keV
+  bool   Individual = true; // true = individual particle; false = linked
+  int    LinkedTo = 0; // index of the "parent" particle this one is following
+  double LinkingProbability = 0;  //probability to be emitted after the parent particle
+  bool   LinkingOppositeDir = false; // false = random direction; otherwise particle is emitted in the opposite direction in respect to the LinkedTo particle
 
-  GunParticleStruct()
-    {
-      spectrum = 0;
-      Individual = true;
-      LinkedTo = 0;//-1;
-      LinkingProbability = 0;
-      LinkingOppositeDir = false;
-    }
+  TH1D* spectrum = 0; //energy spectrum
+
+  GunParticleStruct * clone() const;
 
   ~GunParticleStruct();
 };
 
-struct ParticleSourceStructure
+struct AParticleSourceRecord
 {
   //name
-  QString name;
+  QString name = "Underfined";
   //source type (geometry)
-  int index; //shape
+  int index = 0; //shape
   //position
-  double X0;
-  double Y0;
-  double Z0;
+  double X0 = 0;
+  double Y0 = 0;
+  double Z0 = 0;
   //orientation
-  double Phi;
-  double Theta;
-  double Psi;
+  double Phi = 0;
+  double Theta = 0;
+  double Psi = 0;
   //size
-  double size1;
-  double size2;
-  double size3;
+  double size1 = 10.0;
+  double size2 = 10.0;
+  double size3 = 10.0;
   //collimation
-  double CollPhi;
-  double CollTheta;
-  double Spread;
+  double CollPhi = 0;
+  double CollTheta = 0;
+  double Spread = 45.0;
 
   //limit to material
-  bool DoMaterialLimited;
+  bool DoMaterialLimited = false;
   QString LimtedToMatName;
 
-  //Activity
-  double Activity;
+  //Relative activity
+  double Activity = 1.0;
 
   //particles
   QVector<GunParticleStruct*> GunParticles;
 
-  //constructor - creates a default source with _no_ particles!
-  ParticleSourceStructure();
+  ~AParticleSourceRecord(); //deletes records in dynamic GunParticles
 
-  //destructor - takes care of dynamic GunParticles
-  ~ParticleSourceStructure();
-
+  AParticleSourceRecord * clone() const;
 
   //local variables, used in tracking, calculated autonatically, not to be loaded/saved!
   int LimitedToMat; //automatically calculated if LimtedToMatName matches a material
-  bool fLimit;
+  bool fLimit = false;
 };
 
 class GeneratedParticleStructure
@@ -114,13 +105,13 @@ public:
   //requests
   int size() {return ParticleSourcesData.size();}
   double getTotalActivity();
-  ParticleSourceStructure* getSource(int iSource) {return ParticleSourcesData[iSource];}
+  AParticleSourceRecord* getSource(int iSource) {return ParticleSourcesData[iSource];}
   //ParticleSourceStructure &operator[] (int iSource) {return *ParticleSourcesData[iSource];}
-  ParticleSourceStructure* getLastSource() {return ParticleSourcesData.last();}
+  AParticleSourceRecord* getLastSource() {return ParticleSourcesData.last();}
   //ParticleSourceStructure &last() {return *ParticleSourcesData.last();}
 
   //Source handling - after handling is finished, requires Init() !!!
-  void append(ParticleSourceStructure* gunParticle);
+  void append(AParticleSourceRecord* gunParticle);
   void remove(int iSource);
   void clear();
 
@@ -137,7 +128,7 @@ public:
   bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 
   TVector3 GenerateRandomDirection();  
-  void checkLimitedToMaterial(ParticleSourceStructure *s);
+  void checkLimitedToMaterial(AParticleSourceRecord *s);
 
   //for remove particle from configuration
   void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIspareticleInUse first
@@ -151,7 +142,7 @@ private:
 
   TString NameID; //use to make unique hist name in multithread environment /// - actually not needed anymore!
 
-  QVector<ParticleSourceStructure*> ParticleSourcesData;
+  QVector<AParticleSourceRecord*> ParticleSourcesData;
   QVector<double> TotalParticleWeight;  
   double TotalActivity;
   QVector< QVector< QVector<LinkedParticleStructure> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)

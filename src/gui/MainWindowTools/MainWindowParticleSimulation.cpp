@@ -53,7 +53,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
 void MainWindow::ShowSource(int isource, bool clear)
 {
-  ParticleSourceStructure* p = ParticleSources->getSource(isource);
+  const AParticleSourceRecord* p = ParticleSources->getSource(isource);
 
   int index = p->index;
   double X0 = p->X0;
@@ -295,7 +295,7 @@ void MainWindow::on_pbGunRefreshparticles_clicked()
     int isource = ui->cobParticleSource->currentIndex();
     if (isource > ParticleSources->size()-1) return; //protection
 
-    ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
 
     //Populating ListView
     int DefinedSourceParticles = ps->GunParticles.size();
@@ -349,7 +349,7 @@ void MainWindow::SourceUpdateThisParticleIndication()
   if (isource<0 || isource>=ParticleSources->size()) return;
   int row = ui->lwGunParticles->currentRow();
 
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  const AParticleSourceRecord* ps = ParticleSources->getSource(isource);
 
   int DefinedSourceParticles = ps->GunParticles.size();
   if (DefinedSourceParticles > 0 && row>-1)
@@ -409,7 +409,7 @@ void MainWindow::on_pbGunAddNew_clicked()
 void MainWindow::on_pbGunRemove_clicked()
 {
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   if (ps->GunParticles.size() < 2)
   {
       message("Source should contain at least one particle!");
@@ -482,7 +482,7 @@ void MainWindow::on_cobGunParticle_activated(int index)
    int isource = ui->cobParticleSource->currentIndex();
    if (isource > ParticleSources->size() - 1) return;
 
-   ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+   AParticleSourceRecord* ps = ParticleSources->getSource(isource);
    if (ps->GunParticles.isEmpty()) return;
 
    int particle = ui->lwGunParticles->currentRow();
@@ -498,7 +498,7 @@ void MainWindow::on_ledGunEnergy_editingFinished()
 {
   //if (BulkUpdate) return;
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
 
@@ -513,7 +513,7 @@ void MainWindow::on_ledGunParticleWeight_editingFinished()
 {
   //if (BulkUpdate) return;
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
   ps->GunParticles[particle]->StatWeight = ui->ledGunParticleWeight->text().toDouble();
@@ -527,7 +527,7 @@ void MainWindow::on_cbIndividualParticle_clicked(bool checked)
 {
   //if (BulkUpdate) return;
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
 
@@ -549,7 +549,7 @@ void MainWindow::on_leiParticleLinkedTo_editingFinished()
 {
   //if (BulkUpdate) return;
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
   int iLinkedTo = ui->leiParticleLinkedTo->text().toInt();
@@ -589,7 +589,7 @@ void MainWindow::on_ledLinkingProbability_editingFinished()
     }
 
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
   ps->GunParticles[particle]->LinkingProbability = val;
@@ -602,7 +602,7 @@ void MainWindow::on_ledLinkingProbability_editingFinished()
 void MainWindow::on_cbLinkingOpposite_clicked(bool checked)
 {
     int isource = ui->cobParticleSource->currentIndex();
-    ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
     int particle = ui->lwGunParticles->currentRow();
     if (particle<0 || particle > ps->GunParticles.size()-1) return;
     int linkedTo = ui->leiParticleLinkedTo->text().toInt();
@@ -629,7 +629,7 @@ void MainWindow::on_pbGunLoadSpectrum_clicked()
   GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
   ParticleSources->LoadGunEnergySpectrum(isource, particle, fileName);
@@ -643,7 +643,7 @@ void MainWindow::on_pbGunLoadSpectrum_clicked()
 void MainWindow::on_pbGunShowSpectrum_clicked()
 {
   int isource = ui->cobParticleSource->currentIndex();
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
   int particle = ui->lwGunParticles->currentRow();
   if (particle<0 || particle > ps->GunParticles.size()-1) return;
   ps->GunParticles[particle]->spectrum->GetXaxis()->SetTitle("Energy, keV");
@@ -653,7 +653,7 @@ void MainWindow::on_pbGunShowSpectrum_clicked()
 void MainWindow::on_pbGunDeleteSpectrum_clicked()
 {
    int isource = ui->cobParticleSource->currentIndex();
-   ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+   AParticleSourceRecord* ps = ParticleSources->getSource(isource);
    int particle = ui->lwGunParticles->currentRow();
    if (particle<0 || particle > ps->GunParticles.size()-1) return;
    if (ps->GunParticles[particle]->spectrum)
@@ -712,7 +712,7 @@ void MainWindow::on_pbRemoveSource_clicked()
 
 void MainWindow::on_pbAddSource_clicked()
 {
-  ParticleSourceStructure* s = new ParticleSourceStructure();
+  AParticleSourceRecord* s = new AParticleSourceRecord();
   ParticleSources->append(s);
   ui->cobParticleSource->addItem(ParticleSources->getLastSource()->name);
   ui->cobParticleSource->setCurrentIndex(ParticleSources->size()-1);
@@ -750,7 +750,7 @@ void MainWindow::on_pbUpdateSources_clicked()
       return;
     }
 
-  ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+  AParticleSourceRecord* ps = ParticleSources->getSource(isource);
 
   ps->Activity = ui->ledSourceActivity->text().toDouble();
   ps->index = ui->cobGunSourceType->currentIndex();
@@ -842,7 +842,7 @@ void MainWindow::updateActivityIndication()
   ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
 }
 
-void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
+void MainWindow::updateOneParticleSourcesIndication(AParticleSourceRecord* ps)
 {
     bool BulkUpdateCopy = BulkUpdate; //it could be set outside to true already, do not want to reselt to false on exit
     BulkUpdate = true;
@@ -870,7 +870,7 @@ void MainWindow::updateOneParticleSourcesIndication(ParticleSourceStructure* ps)
 
 void MainWindow::clearParticleSourcesIndication()
 {
-    ParticleSourceStructure ps;
+    AParticleSourceRecord ps;
     updateOneParticleSourcesIndication(&ps);
     ui->cobParticleSource->clear();
     ui->cobParticleSource->setCurrentIndex(-1);
@@ -997,7 +997,7 @@ void MainWindow::on_pbRenameSource_clicked()
     //qDebug() << "current source:"<<isource;
     if (isource<0 || isource>ParticleSources->size()-1) return;
 
-    ParticleSourceStructure* ps = ParticleSources->getSource(isource);
+    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
     bool ok;
     QString text = QInputDialog::getText(this, "Rename particle source",
                                             "New name:", QLineEdit::Normal,

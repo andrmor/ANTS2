@@ -55,7 +55,7 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
-struct ParticleSourceStructure;
+struct AParticleSourceRecord;
 class ARemoteWindow;
 class AWebSocketServerDialog;
 
@@ -630,7 +630,7 @@ private:
     void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
     void clearParticleSourcesIndication();   
-    void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
+    void updateOneParticleSourcesIndication(AParticleSourceRecord *ps);
     void ShowParticleSource_noFocus();
     void updateActivityIndication();
 

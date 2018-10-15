@@ -2592,13 +2592,6 @@ void GainEvaluatorWindowClass::UpdateTriads()
   Triads.SetEvents(list, &EventsDataHub->Events);
 }
 
-void GainEvaluatorWindowClass::SetWindowFont(int ptsize)
-{
-    QFont font = this->font();
-    font.setPointSize(ptsize);
-    this->setFont(font);
-}
-
 void GainEvaluatorWindowClass::on_pbShowNonLinkedSet_clicked()
 {
    flagShowNonLinkedSet = true;

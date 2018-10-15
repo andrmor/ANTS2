@@ -3606,13 +3606,11 @@ void ReconstructionWindow::ShowGainWindow()
       //qDebug()<<"-->Creating GainWindow";
       QWidget* w = new QWidget();
       MW->GainWindow = new GainEvaluatorWindowClass(w, MW, EventsDataHub);
-      //MW->GainWindow = new GainEvaluatorWindowClass(this, MW, EventsDataHub);
 
       // fix font size on Linux
       #ifdef Q_OS_WIN//Q_OS_LINUX
       #else
-        SetWindowFont(MW->GainWindow, 8);
-  //      GainWindow->SetWindowFont(8);
+        GuiUtils::SetWindowFont(MW->GainWindow, 8);
       #endif
       MW->GainWindow->show();
       MW->GainWindow->resize(MW->GainWindow->width()+1, MW->GainWindow->height());

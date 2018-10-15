@@ -60,6 +60,7 @@ public:
   int getParticleCharge(int particleIndex) const;
   double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
+  const QStringList getListOfParticleNames() const;
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal = false);

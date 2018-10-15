@@ -75,7 +75,6 @@ public:
 
   double CalculateAreaFraction(int ipm1, int ipm2); //return area(pm1)/area(pm2)
   double getPolygonArea(QPolygonF &qpolygonf); //for non-self intersecting polygons!
-  void SetWindowFont(int ptsize);
 
 public slots:
   void UpdateGraphics();

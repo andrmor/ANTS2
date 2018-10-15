@@ -4993,3 +4993,11 @@ void MainWindow::on_pbPMtypeHelp_clicked()
                 "   represent the photocathode.";
     message(s, this);
 }
+
+#include "aparticlesourcedialog.h"
+void MainWindow::on_pushButton_2_clicked()
+{
+    int isource = ui->cobParticleSource->currentIndex();
+    AParticleSourceDialog d(*this, ParticleSources->getSource(isource));
+    d.exec();
+}

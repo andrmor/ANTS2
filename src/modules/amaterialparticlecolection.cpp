@@ -151,7 +151,15 @@ double AMaterialParticleCollection::getParticleMass(int particleIndex) const
 
 const AParticle *AMaterialParticleCollection::getParticle(int particleIndex) const
 {
-  return ParticleCollection.at(particleIndex);
+    return ParticleCollection.at(particleIndex);
+}
+
+const QStringList AMaterialParticleCollection::getListOfParticleNames() const
+{
+    QStringList l;
+    for (AParticle* p : ParticleCollection)
+        l << p->ParticleName;
+    return l;
 }
 
 void AMaterialParticleCollection::clearMaterialCollection()

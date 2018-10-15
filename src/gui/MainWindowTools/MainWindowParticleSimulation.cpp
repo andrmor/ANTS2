@@ -51,10 +51,8 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   json["ParticleSourcesConfig"] = masterjs;
 }
 
-void MainWindow::ShowSource(int isource, bool clear)
+void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 {
-  const AParticleSourceRecord* p = ParticleSources->getSource(isource);
-
   int index = p->index;
   double X0 = p->X0;
   double Y0 = p->Y0;
@@ -901,7 +899,7 @@ void MainWindow::ShowParticleSource_noFocus()
       message("Source number is out of bounds!",this);
       return;
     }
-  ShowSource(isource, true);
+  ShowSource(ParticleSources->getSource(isource), true);
 }
 
 void MainWindow::on_lwGunParticles_currentRowChanged(int /*currentRow*/)

@@ -356,8 +356,7 @@ SOURCES += main.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
     OpticalOverrides/abasicopticaloverride.cpp \
-    common/aglobalsettings.cpp \
-    aparticlesourcedialog.cpp
+    common/aglobalsettings.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -489,8 +488,7 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/awaveshifteroverride.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
     OpticalOverrides/abasicopticaloverride.h \
-    common/aglobalsettings.h \
-    aparticlesourcedialog.h
+    common/aglobalsettings.h
 
 # --- SIM ---
 ants2_SIM {
@@ -607,7 +605,8 @@ ants2_GUI {
     gui/MainWindowTools/atrackdrawdialog.cpp \
     gui/aserverdelegate.cpp \
     gui/MainWindowTools/aopticaloverridedialog.cpp \
-    gui/MainWindowTools/aopticaloverridetester.cpp
+    gui/MainWindowTools/aopticaloverridetester.cpp \
+    gui/MainWindowTools/aparticlesourcedialog.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -666,7 +665,8 @@ HEADERS  += gui/mainwindow.h \
     gui/MainWindowTools/atrackdrawdialog.h \
     gui/aserverdelegate.h \
     gui/MainWindowTools/aopticaloverridedialog.h \
-    gui/MainWindowTools/aopticaloverridetester.h
+    gui/MainWindowTools/aopticaloverridetester.h \
+    gui/MainWindowTools/aparticlesourcedialog.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -698,7 +698,8 @@ FORMS += gui/mainwindow.ui \
     gui/aremotewindow.ui \
     gui/MainWindowTools/atrackdrawdialog.ui \
     gui/MainWindowTools/aopticaloverridedialog.ui \
-    gui/MainWindowTools/aopticaloverridetester.ui
+    gui/MainWindowTools/aopticaloverridetester.ui \
+    gui/MainWindowTools/aparticlesourcedialog.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -815,7 +816,4 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
-
-FORMS += \
-    aparticlesourcedialog.ui
 

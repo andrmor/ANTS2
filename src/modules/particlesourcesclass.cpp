@@ -520,6 +520,7 @@ bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
                 writeTH1DtoJsonArr(s->GunParticles[ip]->spectrum, ja);
                 jGunParticle["EnergySpectrum"] = ja;
               }
+            jGunParticle["PreferredUnits"] = s->GunParticles[ip]->PreferredUnits;
             jParticleEntries.append(jGunParticle);
          }
    json["GunParticles"] = jParticleEntries;
@@ -626,6 +627,8 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
       parseJson(jThisGunPart, "LinkingOppositeDir",  s->GunParticles[ip]->LinkingOppositeDir );
 
       parseJson(jThisGunPart, "Energy",  s->GunParticles[ip]->energy );
+      parseJson(jThisGunPart, "PreferredUnits",  s->GunParticles[ip]->PreferredUnits );
+
       QJsonArray ar = jThisGunPart["EnergySpectrum"].toArray();
       if (!ar.isEmpty())
         {

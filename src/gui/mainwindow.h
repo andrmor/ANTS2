@@ -414,6 +414,7 @@ public:
     void UpdateCustomScanNodesIndication();
     void CalculateIndividualQEPDE(); //Public for use in scripting
     void clearEnergyVector();
+    void ShowSource(const AParticleSourceRecord *p, bool clear = true);
 private:
     bool startupDetector();  //on ANTS start load/create detector
     void PointSource_UpdateTabWidget();
@@ -433,8 +434,6 @@ private:
     int LoadAreaResponse(QString fileName, QVector<QVector<double> >* tmp, double* xStep, double* yStep);       ///see MainWindowDiskIO.cpp
     int LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVector<double>* SPePHS);                   ///see MainWindowDiskIO.cpp    
     QStringList LoadedEventFiles, LoadedTreeFiles;
-
-    void ShowSource(int isource, bool clear = true);
 
     QString CheckerScript;
 
@@ -612,6 +611,8 @@ private slots:
     void on_pbStopScan_clicked();
 
     void on_pbPMtypeHelp_clicked();
+
+    void on_pushButton_2_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

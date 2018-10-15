@@ -3,8 +3,16 @@
 #include "mainwindow.h"
 #include "amaterialparticlecolection.h"
 #include "amessage.h"
+#include "geometrywindowclass.h"
+#include "graphwindowclass.h"
+#include "aglobalsettings.h"
 
 #include <QDebug>
+#include <QDoubleValidator>
+#include <QFileDialog>
+
+#include "TGeoManager.h"
+#include "TH1D.h"
 
 AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSourceRecord * Rec) :
     QDialog(&MW),
@@ -12,6 +20,14 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
     ui(new Ui::AParticleSourceDialog)
 {
     ui->setupUi(this);
+
+    setWindowModality(Qt::WindowModal);
+    setWindowTitle("Particle source configurator");
+
+    QDoubleValidator* dv = new QDoubleValidator(this);
+    dv->setNotation(QDoubleValidator::ScientificNotation);
+    QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
+    foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
     ui->pbUpdateRecord->setDefault(true);
     ui->pbUpdateRecord->setVisible(false);
@@ -86,11 +102,11 @@ void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)
         break;
       case 1: s <<"Length:"<<""<<"";
         break;
-      case 2: s <<"Size X:"<<"Size Y:"<<"";
+      case 2: s <<"X:"<<"Y:"<<"";
         break;
       case 3: s <<"Diameter:"<<""<<"";
         break;
-      case 4: s <<"Size X:"<<"Size Y:"<<"Size Z:";
+      case 4: s <<"X:"<<"Y:"<<"Z:";
         break;
       case 5: s <<"Diameter:"<<""<<"Height:";
         break;
@@ -105,17 +121,14 @@ void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)
     bool b1 = !s[0].isEmpty();
     ui->lGun1DSize->setVisible(b1);
     ui->ledGun1DSize->setVisible(b1);
-    ui->lGun1DSize_mm->setVisible(b1);
 
     bool b2 = !s[1].isEmpty();
     ui->lGun2DSize->setVisible(b2);
     ui->ledGun2DSize->setVisible(b2);
-    ui->lGun2DSize_mm->setVisible(b2);
 
     bool b3 = !s[2].isEmpty();
     ui->lGun3DSize->setVisible(b3);
     ui->ledGun3DSize->setVisible(b3);
-    ui->lGun3DSize_mm->setVisible(b3);
 
     ui->ledGunPhi->setEnabled(index != 0);
     ui->ledGunTheta->setEnabled(index != 0);
@@ -123,13 +136,13 @@ void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)
 
     if (index == 1)
     {
-        ui->labGunPhi->setText("Phi");
-        ui->labGunTheta->setText("Theta");
+        ui->labGunPhi->setText("Phi:");
+        ui->labGunTheta->setText("Theta:");
     }
     else
     {
-        ui->labGunPhi->setText("around X");
-        ui->labGunTheta->setText("around Y");
+        ui->labGunPhi->setText("Around X:");
+        ui->labGunTheta->setText("Around Y:");
     }
 }
 
@@ -139,7 +152,6 @@ void AParticleSourceDialog::on_pbGunAddNew_clicked()
     tmp->ParticleId = ui->cobGunParticle->currentIndex();
     tmp->StatWeight = ui->ledGunParticleWeight->text().toDouble();
     tmp->energy = ui->ledGunEnergy->text().toDouble();
-    tmp->spectrum = 0;
     Rec->GunParticles << tmp;
 
     UpdateListWidget();
@@ -172,6 +184,8 @@ void AParticleSourceDialog::on_pbGunRemove_clicked()
 
 void AParticleSourceDialog::UpdateListWidget()
 {
+    bUpdateInProgress = true; // >>>---
+
     ui->lwGunParticles->clear();
     int counter = 0;
     for (const GunParticleStruct* gps : Rec->GunParticles)
@@ -184,12 +198,9 @@ void AParticleSourceDialog::UpdateListWidget()
         str1.setNum(counter++);
         str += str1 + "> ";
         str += MW.MpCollection->getParticleName(gps->ParticleId);
-        if (gps->spectrum) str += " E=spec";
-        else
-        {
-            str1.setNum(gps->energy);
-            str += " E=" + str1;
-        }
+        if (gps->bUseFixedEnergy)
+             str += QString(" E=%1").arg(gps->energy);
+        else str += " E=spec";
 
         if (Individual)
         {
@@ -208,6 +219,8 @@ void AParticleSourceDialog::UpdateListWidget()
         }
         ui->lwGunParticles->addItem(str);
     }
+
+    bUpdateInProgress = false; // <<<---
 }
 
 void AParticleSourceDialog::UpdateParticleInfo()
@@ -242,28 +255,27 @@ void AParticleSourceDialog::UpdateParticleInfo()
 
         ui->cbLinkedParticle->setChecked(!gRec->Individual);
         ui->frSecondary->setVisible(!gRec->Individual);
-        ui->leiParticleLinkedTo->setText( QString::number(gRec->LinkedTo) );
+        ui->sbLinkedTo->setValue(gRec->LinkedTo);
         str.setNum(gRec->LinkingProbability);
         ui->ledLinkingProbability->setText(str);
         ui->cbLinkingOpposite->setChecked(gRec->LinkingOppositeDir);
-        if (gRec->spectrum == 0)
-        {
-            ui->pbGunShowSpectrum->setEnabled(false);
-            ui->ledGunEnergy->setEnabled(true);
-            ui->rbFixed->setChecked(true);
-        }
-        else
-        {
-            ui->pbGunShowSpectrum->setEnabled(true);
-            ui->ledGunEnergy->setEnabled(false);
-            ui->rbSpectrum->setChecked(false);
-        }
+
+        ui->pbGunShowSpectrum->setEnabled(gRec->spectrum);
+        bool bFix = gRec->bUseFixedEnergy;
+        ui->cobEnergy->setCurrentIndex( bFix ? 0 : 1 );
+        ui->pbGunShowSpectrum->setVisible(!bFix);
+        ui->pbGunLoadSpectrum->setVisible(!bFix);
+        ui->pbDeleteSpectrum->setVisible(!bFix);
+        ui->ledGunEnergy->setVisible(bFix);
+        ui->cobUnits->setVisible(bFix);
     }
     else ui->fGunParticle->setEnabled(false);
 }
 
 void AParticleSourceDialog::on_lwGunParticles_currentRowChanged(int)
 {
+    if (bUpdateInProgress) return;
+
     UpdateParticleInfo();
 }
 
@@ -275,20 +287,18 @@ void AParticleSourceDialog::on_cobUnits_activated(int)
     UpdateParticleInfo();
 }
 
-#include "geometrywindowclass.h"
-#include "TGeoManager.h"
 void AParticleSourceDialog::on_pbShowSource_toggled(bool checked)
 {
     if (checked)
-      {
+    {
         MW.GeometryWindow->ShowAndFocus();
         MW.ShowSource(Rec, true);
-      }
+    }
     else
-      {
+    {
         gGeoManager->ClearTracks();
         MW.GeometryWindow->ShowGeometry();
-      }
+    }
 }
 
 void AParticleSourceDialog::on_cbLinkedParticle_toggled(bool checked)
@@ -327,11 +337,93 @@ void AParticleSourceDialog::on_pbUpdateRecord_clicked()
 
         p->ParticleId = ui->cobGunParticle->currentIndex();
         p->StatWeight = ui->ledGunParticleWeight->text().toDouble();
-        p->energy = ui->ledGunEnergy->text().toDouble();
+        p->bUseFixedEnergy = ( ui->cobEnergy->currentIndex() == 0);
+        p->PreferredUnits = ui->cobUnits->currentText();
+        double energy = ui->ledGunEnergy->text().toDouble();
+        if      (p->PreferredUnits == "MeV") energy *= 1.0e3;
+        else if (p->PreferredUnits == "keV") ;
+        else if (p->PreferredUnits == "eV") energy *= 1.0e-3;
+        else if (p->PreferredUnits == "meV") energy *= 1.0e-6;
+        p->energy = energy;
         p->Individual = !ui->cbLinkedParticle->isChecked();
+        p->LinkedTo = ui->sbLinkedTo->value();
         p->LinkingProbability = ui->ledLinkingProbability->text().toDouble();
         p->LinkingOppositeDir = ui->cbLinkingOpposite->isChecked();
     }
+
+    int curRow = ui->lwGunParticles->currentRow();
+    UpdateListWidget();
+    if ( curRow < 0 && curRow >= ui->lwGunParticles->count() )
+        curRow = 0;
+    ui->lwGunParticles->setCurrentRow(curRow);
+    UpdateParticleInfo();
+    if (ui->pbShowSource->isChecked()) MW.ShowSource(Rec, true);
+}
+
+void AParticleSourceDialog::on_cbLinkedParticle_clicked(bool checked)
+{
+    if (checked)
+    {
+        if (ui->lwGunParticles->currentRow() == 0)
+        {
+            ui->cbLinkedParticle->setChecked(false);
+            message("First particle cannot be linked", this);
+            return;
+        }
+    }
+    on_pbUpdateRecord_clicked();
+}
+
+void AParticleSourceDialog::on_sbLinkedTo_editingFinished()
+{
+    int index = ui->sbLinkedTo->value();
+    if (index >= ui->lwGunParticles->currentRow())
+    {
+        ui->sbLinkedTo->setValue(0);
+        message("Bad index of the particle linked to! Setting to 0", this);
+    }
+    on_pbUpdateRecord_clicked();
+}
+
+void AParticleSourceDialog::on_ledLinkingProbability_editingFinished()
+{
+    double val = ui->ledLinkingProbability->text().toDouble();
+    if (val < 0 || val > 1.0)
+    {
+        ui->ledLinkingProbability->setText(0);
+        message("Linking probability has to be within [0, 1] range. Setting to 0", this);
+    }
+    on_pbUpdateRecord_clicked();
+}
+
+void AParticleSourceDialog::on_pbGunShowSpectrum_clicked()
+{
+    int particle = ui->lwGunParticles->currentRow();
+    TH1D* h = new TH1D(*Rec->GunParticles[particle]->spectrum);
+
+    h->GetXaxis()->SetTitle("Energy, keV");
+    MW.GraphWindow->Draw(h); //registering!
+    MW.GraphWindow->ShowAndFocus();
+}
+
+void AParticleSourceDialog::on_pbGunLoadSpectrum_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load energy spectrum", MW.GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    MW.GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+
+    int iPart = ui->lwGunParticles->currentRow();
+    bool bOK = Rec->GunParticles[iPart]->loadSpectrum(fileName);
+
+    //if (!bOK) message("Load file failed!", this);
+
+    UpdateParticleInfo();
+}
+
+void AParticleSourceDialog::on_pbDeleteSpectrum_clicked()
+{
+    int iPart = ui->lwGunParticles->currentRow();
+    delete Rec->GunParticles[iPart]->spectrum; Rec->GunParticles[iPart]->spectrum = 0;
 
     UpdateParticleInfo();
 }

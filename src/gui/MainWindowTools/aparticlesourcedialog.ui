@@ -7,8 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>502</width>
-    <height>538</height>
+    <height>599</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -35,134 +41,144 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="text">
-        <string>Source name:</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Source name:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_160">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Geometry:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLineEdit" name="leSourceName"/>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="spacing">
+        <number>5</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLineEdit" name="leSourceName"/>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cobGunSourceType">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <item>
+          <property name="text">
+           <string>Point</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Linear</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Surface - square</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Surface - round</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Volume - box</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Volume - cylinder</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <spacer name="horizontalSpacer_16">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+       <item>
+        <widget class="QPushButton" name="pbShowSource">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Show source</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>     </string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_22">
-     <item>
-      <widget class="QLabel" name="label_160">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Geometry:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_14">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_24">
-     <property name="topMargin">
-      <number>0</number>
+    <widget class="QLabel" name="label_9">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
-     <item>
-      <widget class="QComboBox" name="cobGunSourceType">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <item>
-        <property name="text">
-         <string>Point</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Linear</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Surface - square</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Surface - round</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Volume - box</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Volume - cylinder</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_17">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
+     <property name="text">
+      <string>Dimensions, mm:</string>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -172,7 +188,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>     </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -200,19 +216,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lGun1DSize_mm">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>mm</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="lGun2DSize">
        <property name="text">
         <string>Size2:</string>
@@ -232,19 +235,6 @@
        </property>
        <property name="text">
         <string>10</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lGun2DSize_mm">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>mm</string>
        </property>
       </widget>
      </item>
@@ -272,19 +262,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="lGun3DSize_mm">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>mm</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -304,7 +281,7 @@
      <item>
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>     </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -327,7 +304,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_6">
+      <spacer name="horizontalSpacer_10">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -357,7 +334,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </font>
      </property>
      <property name="text">
-      <string>Position of the source center:</string>
+      <string>Position of the source center, mm:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -369,7 +346,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>     </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -396,7 +373,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <item>
       <widget class="QLabel" name="label_158">
        <property name="text">
-        <string>mm  Y:</string>
+        <string>Y:</string>
        </property>
       </widget>
      </item>
@@ -416,7 +393,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <item>
       <widget class="QLabel" name="label_159">
        <property name="text">
-        <string>mm  Z:</string>
+        <string>Z:</string>
        </property>
       </widget>
      </item>
@@ -430,13 +407,6 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <property name="text">
         <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_164">
-       <property name="text">
-        <string>mm</string>
        </property>
       </widget>
      </item>
@@ -464,7 +434,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </font>
      </property>
      <property name="text">
-      <string>Source orientation:</string>
+      <string>Source orientation, degrees:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -476,7 +446,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>     </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -504,13 +474,6 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_163">
-       <property name="text">
-        <string>deg</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="labGunTheta">
        <property name="text">
         <string>Theta:</string>
@@ -534,16 +497,9 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_162">
-       <property name="text">
-        <string>deg</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_168">
        <property name="text">
-        <string>around Z:</string>
+        <string>Around Z:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -560,13 +516,6 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <property name="text">
         <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_171">
-       <property name="text">
-        <string>deg</string>
        </property>
       </widget>
      </item>
@@ -594,7 +543,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </font>
      </property>
      <property name="text">
-      <string>Collimation direction:</string>
+      <string>Collimation direction and cone, degrees:</string>
      </property>
     </widget>
    </item>
@@ -603,7 +552,7 @@ If material with this name does not exist, this limitation is not applied.</stri
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>     </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -631,13 +580,6 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_176">
-       <property name="text">
-        <string>deg</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_174">
        <property name="text">
         <string>Theta:</string>
@@ -661,16 +603,9 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_178">
-       <property name="text">
-        <string>deg</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>Collimation cone:</string>
+        <string>Cone:</string>
        </property>
       </widget>
      </item>
@@ -687,13 +622,6 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <property name="text">
         <string>45</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_181">
-       <property name="text">
-        <string>deg</string>
        </property>
       </widget>
      </item>
@@ -721,7 +649,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </font>
      </property>
      <property name="text">
-      <string>Particle composition:</string>
+      <string> Particle composition:</string>
      </property>
     </widget>
    </item>
@@ -781,7 +709,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <property name="maximumSize">
         <size>
-         <width>250</width>
+         <width>200</width>
          <height>16777215</height>
         </size>
        </property>
@@ -793,7 +721,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <property name="spacing">
-         <number>1</number>
+         <number>3</number>
         </property>
         <property name="leftMargin">
          <number>3</number>
@@ -813,9 +741,16 @@ If material with this name does not exist, this limitation is not applied.</stri
            <number>0</number>
           </property>
           <item>
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Particle:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QComboBox" name="cobGunParticle">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -828,12 +763,19 @@ If material with this name does not exist, this limitation is not applied.</stri
             </property>
             <property name="maximumSize">
              <size>
-              <width>120</width>
+              <width>16777215</width>
               <height>16777215</height>
              </size>
             </property>
            </widget>
           </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QLabel" name="label_165">
             <property name="sizePolicy">
@@ -843,7 +785,7 @@ If material with this name does not exist, this limitation is not applied.</stri
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Stat weight:</string>
+             <string>Statistical weight:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -854,7 +796,7 @@ If material with this name does not exist, this limitation is not applied.</stri
            <widget class="QLineEdit" name="ledGunParticleWeight">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>16777215</width>
               <height>16777215</height>
              </size>
             </property>
@@ -866,109 +808,145 @@ If material with this name does not exist, this limitation is not applied.</stri
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
-          <item>
-           <widget class="QRadioButton" name="rbFixed">
-            <property name="text">
-             <string>Fixed energy</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="ledGunEnergy">
-            <property name="maximumSize">
-             <size>
-              <width>75</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>100</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cobUnits">
-            <item>
-             <property name="text">
-              <string>MeV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>keV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>eV</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>meV</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_15">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Energy:</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
           <item>
-           <widget class="QRadioButton" name="rbSpectrum">
-            <property name="text">
-             <string>Energy spectrum</string>
+           <widget class="QComboBox" name="cobEnergy">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
+            <item>
+             <property name="text">
+              <string>Fixed</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Distribution</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pbGunShowSpectrum">
-            <property name="enabled">
-             <bool>false</bool>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>45</width>
-              <height>0</height>
-             </size>
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string>Show</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbGunLoadSpectrum">
-            <property name="minimumSize">
-             <size>
-              <width>45</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Format: two columns, first is the energy in keV, second is the probability</string>
-            </property>
-            <property name="text">
-             <string>Load</string>
-            </property>
-           </widget>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="ledGunEnergy">
+                <property name="maximumSize">
+                 <size>
+                  <width>75</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>100</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cobUnits">
+                <item>
+                 <property name="text">
+                  <string>MeV</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>keV</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>eV</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>meV</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <property name="spacing">
+               <number>1</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="pbGunShowSpectrum">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>35</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbGunLoadSpectrum">
+                <property name="minimumSize">
+                 <size>
+                  <width>35</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Format: two columns, first is the energy in keV, second is the probability</string>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDeleteSpectrum">
+                <property name="maximumSize">
+                 <size>
+                  <width>18</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -1017,7 +995,7 @@ If material with this name does not exist, this limitation is not applied.</stri
              <item>
               <widget class="QLabel" name="label_153">
                <property name="text">
-                <string>Linked to particle #:</string>
+                <string>Linked to particle #</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1025,30 +1003,7 @@ If material with this name does not exist, this limitation is not applied.</stri
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="leiParticleLinkedTo">
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_12">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
+              <widget class="QSpinBox" name="sbLinkedTo"/>
              </item>
             </layout>
            </item>
@@ -1057,7 +1012,7 @@ If material with this name does not exist, this limitation is not applied.</stri
              <item>
               <widget class="QLabel" name="label_152">
                <property name="text">
-                <string>with probability:</string>
+                <string>With probability:</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1068,7 +1023,7 @@ If material with this name does not exist, this limitation is not applied.</stri
               <widget class="QLineEdit" name="ledLinkingProbability">
                <property name="maximumSize">
                 <size>
-                 <width>50</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1077,27 +1032,14 @@ If material with this name does not exist, this limitation is not applied.</stri
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QCheckBox" name="cbLinkingOpposite">
-               <property name="text">
-                <string>Opposite</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_13">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cbLinkingOpposite">
+             <property name="text">
+              <string>Generated in opposite direction</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -1147,6 +1089,9 @@ If material with this name does not exist, this limitation is not applied.</stri
        <zorder>fLinkedParticle</zorder>
        <zorder>verticalSpacer</zorder>
        <zorder>frSecondary</zorder>
+       <zorder>horizontalLayoutWidget</zorder>
+       <zorder>label_11</zorder>
+       <zorder>horizontalLayoutWidget_2</zorder>
       </widget>
      </item>
     </layout>
@@ -1161,22 +1106,6 @@ If material with this name does not exist, this limitation is not applied.</stri
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_14">
      <item>
-      <widget class="QPushButton" name="pbShowSource">
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Show source</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="Line" name="line_3">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -1184,10 +1113,23 @@ If material with this name does not exist, this limitation is not applied.</stri
       </widget>
      </item>
      <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QPushButton" name="pbGunTest">
        <property name="minimumSize">
         <size>
-         <width>200</width>
+         <width>150</width>
          <height>0</height>
         </size>
        </property>
@@ -1208,6 +1150,19 @@ If material with this name does not exist, this limitation is not applied.</stri
         <number>100</number>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -1326,8 +1281,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>228</x>
-     <y>72</y>
+     <x>285</x>
+     <y>52</y>
     </hint>
     <hint type="destinationlabel">
      <x>455</x>
@@ -1358,12 +1313,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>262</x>
-     <y>97</y>
+     <x>243</x>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
-     <x>417</x>
-     <y>130</y>
+     <x>494</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -1374,8 +1329,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>93</y>
+     <x>359</x>
+     <y>98</y>
     </hint>
     <hint type="destinationlabel">
      <x>426</x>
@@ -1390,8 +1345,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
-     <y>126</y>
+     <x>117</x>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>440</x>
@@ -1406,8 +1361,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>355</x>
-     <y>127</y>
+     <x>361</x>
+     <y>126</y>
     </hint>
     <hint type="destinationlabel">
      <x>440</x>
@@ -1438,8 +1393,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>212</x>
-     <y>176</y>
+     <x>205</x>
+     <y>173</y>
     </hint>
     <hint type="destinationlabel">
      <x>439</x>
@@ -1454,12 +1409,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>171</y>
+     <x>302</x>
+     <y>173</y>
     </hint>
     <hint type="destinationlabel">
-     <x>491</x>
-     <y>131</y>
+     <x>494</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -1486,8 +1441,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>242</x>
-     <y>215</y>
+     <x>235</x>
+     <y>218</y>
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
@@ -1502,8 +1457,8 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
-     <y>211</y>
+     <x>370</x>
+     <y>218</y>
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
@@ -1534,12 +1489,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>190</x>
-     <y>265</y>
+     <x>235</x>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
-     <x>429</x>
-     <y>131</y>
+     <x>494</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -1550,28 +1505,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>402</x>
-     <y>258</y>
+     <x>351</x>
+     <y>263</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
      <y>128</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledGunParticleWeight</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateRecord</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>470</x>
-     <y>304</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>465</x>
-     <y>124</y>
     </hint>
    </hints>
   </connection>
@@ -1582,12 +1521,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>342</x>
-     <y>305</y>
+     <x>490</x>
+     <y>312</y>
     </hint>
     <hint type="destinationlabel">
-     <x>443</x>
-     <y>129</y>
+     <x>494</x>
+     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -1598,44 +1537,12 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
-     <y>328</y>
+     <x>438</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>454</x>
      <y>123</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>cbLinkedParticle</sender>
-   <signal>clicked()</signal>
-   <receiver>pbUpdateRecord</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>310</x>
-     <y>381</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>445</x>
-     <y>122</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ledLinkingProbability</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateRecord</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>373</x>
-     <y>427</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>441</x>
-     <y>128</y>
     </hint>
    </hints>
   </connection>
@@ -1646,12 +1553,44 @@ If material with this name does not exist, this limitation is not applied.</stri
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>441</x>
-     <y>426</y>
+     <x>491</x>
+     <y>504</y>
     </hint>
     <hint type="destinationlabel">
      <x>466</x>
      <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cobEnergy</sender>
+   <signal>activated(int)</signal>
+   <receiver>pbUpdateRecord</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>326</x>
+     <y>379</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>426</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ledGunParticleWeight</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateRecord</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>490</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>124</y>
     </hint>
    </hints>
   </connection>

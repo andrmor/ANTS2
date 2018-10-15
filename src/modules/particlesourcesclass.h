@@ -17,6 +17,7 @@ struct GunParticleStruct
 {
   int     ParticleId = 0;
   double  StatWeight = 1.0;
+  bool    bUseFixedEnergy = true;
   double  energy = 100.0; //in keV
   QString PreferredUnits = "keV";
   bool    Individual = true; // true = individual particle; false = linked
@@ -24,9 +25,12 @@ struct GunParticleStruct
   double  LinkingProbability = 0;  //probability to be emitted after the parent particle
   bool    LinkingOppositeDir = false; // false = random direction; otherwise particle is emitted in the opposite direction in respect to the LinkedTo particle
 
-  TH1D* spectrum = 0; //energy spectrum
+  TH1D*   spectrum = 0; //energy spectrum
 
   GunParticleStruct * clone() const;
+
+  double  generateEnergy() const;
+  bool    loadSpectrum(const QString& fileName);
 
   ~GunParticleStruct();
 };

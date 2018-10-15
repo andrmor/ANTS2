@@ -9669,7 +9669,7 @@ double events:</string>
           </font>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_6">
           <attribute name="title">

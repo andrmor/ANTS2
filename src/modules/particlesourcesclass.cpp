@@ -228,9 +228,10 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
 
                   GeneratedParticleStructure ps;
                   ps.ParticleId = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
-                  if (ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum == 0)
-                    ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->energy;
-                  else ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum->GetRandom();
+                  //if (ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum == 0)
+                  //  ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->energy;
+                  //else ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum->GetRandom();
+                  ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
                   ps.Direction[0] = -GeneratedParticles->at(index).Direction[0];
                   ps.Direction[1] = -GeneratedParticles->at(index).Direction[1];
                   ps.Direction[2] = -GeneratedParticles->at(index).Direction[2];
@@ -379,9 +380,10 @@ void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector
   ps.ParticleId = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
 
     //energy
-  if (ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum == 0)
-    ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->energy;
-  else ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum->GetRandom();
+  //if (ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum == 0)
+  //  ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->energy;
+  //else ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum->GetRandom();
+  ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
     //generating random direction inside the collimation cone
   double spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0; //max angle away from generation diretion
   double cosTheta = cos(spread);
@@ -505,21 +507,18 @@ bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
             jGunParticle["StatWeight"] = s->GunParticles[ip]->StatWeight;
             bool individual = s->GunParticles[ip]->Individual;
             jGunParticle["Individual"] = individual;
-            //if (!individual)
-            //  {
                 jGunParticle["LinkedTo"] = s->GunParticles[ip]->LinkedTo;
                 jGunParticle["LinkingProbability"] = s->GunParticles[ip]->LinkingProbability;
                 jGunParticle["LinkingOppositeDir"] = s->GunParticles[ip]->LinkingOppositeDir;
-            //  }
-            if ( s->GunParticles[ip]->spectrum == 0 )
-              jGunParticle["Energy"] = s->GunParticles[ip]->energy;
-            else
-              {
+            jGunParticle["Energy"] = s->GunParticles[ip]->energy;
+            jGunParticle["UseFixedEnergy"] = s->GunParticles[ip]->bUseFixedEnergy;
+            if ( s->GunParticles[ip]->spectrum )
+            {
                 //saving spectrum               
                 QJsonArray ja;
                 writeTH1DtoJsonArr(s->GunParticles[ip]->spectrum, ja);
                 jGunParticle["EnergySpectrum"] = ja;
-              }
+            }
             jGunParticle["PreferredUnits"] = s->GunParticles[ip]->PreferredUnits;
             jParticleEntries.append(jGunParticle);
          }
@@ -628,6 +627,7 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
 
       parseJson(jThisGunPart, "Energy",  s->GunParticles[ip]->energy );
       parseJson(jThisGunPart, "PreferredUnits",  s->GunParticles[ip]->PreferredUnits );
+      parseJson(jThisGunPart, "UseFixedEnergy",  s->GunParticles[ip]->bUseFixedEnergy );
 
       QJsonArray ar = jThisGunPart["EnergySpectrum"].toArray();
       if (!ar.isEmpty())
@@ -724,7 +724,8 @@ bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QSt
   int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
   if (error>0) return false;
 
-  if (ParticleSourcesData[iSource]->GunParticles[iParticle]->spectrum) delete ParticleSourcesData[iSource]->GunParticles[iParticle]->spectrum;
+  if (ParticleSourcesData[iSource]->GunParticles[iParticle]->spectrum)
+      delete ParticleSourcesData[iSource]->GunParticles[iParticle]->spectrum;
   int size = x.size();
   double* xx = new double [size];
   for (int i = 0; i<size; i++) xx[i]=x[i];
@@ -833,6 +834,29 @@ GunParticleStruct * GunParticleStruct::clone() const
         gp->spectrum = new TH1D(*spectrum);
 
     return gp;
+}
+
+double GunParticleStruct::generateEnergy() const
+{
+    if (bUseFixedEnergy || !spectrum)
+        return energy;
+    return spectrum->GetRandom();
+}
+
+bool GunParticleStruct::loadSpectrum(const QString &fileName)
+{
+    QVector<double> x, y;
+    int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
+    if (error > 0) return false;
+
+    delete spectrum; spectrum = 0;
+    int size = x.size();
+    //double* xx = new double[size];
+    //for (int i = 0; i<size; i++) xx[i]=x[i];
+    spectrum = new TH1D("","Energy spectrum", size-1, x.data());
+    for (int j = 1; j < size+1; j++)
+        spectrum->SetBinContent(j, y[j-1]);
+    return true;
 }
 
 GunParticleStruct::~GunParticleStruct()

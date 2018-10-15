@@ -16,7 +16,8 @@ ants2_docker {
     CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
     CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
     CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
-    CONFIG += ants2_Python      #enable Python scripting    
+    CONFIG += ants2_Python      #enable Python scripting  
+    CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)  
 }
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
@@ -233,10 +234,16 @@ ants2_NCrystal{
             LIBS += -LC:/NCrystal/lib -lNCrystal
     }
     linux-g++ || unix {
-            INCLUDEPATH += /home/andr/Work/NCrystal/include
+            ants2_docker {
+                INCLUDEPATH += /usr/local/include/NCrystal/
+                LIBS += -L/usr/local/lib/
+                LIBS += -lNCrystal
 
-            LIBS += -L/home/andr/Work/NCrystal/lib/
-            LIBS += -lNCrystal
+            } else {
+                INCLUDEPATH += /home/andr/Work/NCrystal/include
+                LIBS += -L/home/andr/Work/NCrystal/lib/
+                LIBS += -lNCrystal
+            }
     }
 
     SOURCES += common/arandomgenncrystal.cpp

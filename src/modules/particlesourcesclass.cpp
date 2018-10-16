@@ -19,12 +19,12 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen, TString nameID)
-    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen), NameID(nameID), TotalActivity(0) {}
+ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen)
+    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen), TotalActivity(0) {}
 
 ParticleSourcesClass::~ParticleSourcesClass()
 {
-    ParticleSourcesClass::clear();
+    clear();
 }
 
 void ParticleSourcesClass::clear()
@@ -249,18 +249,18 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
   return GeneratedParticles;
 }
 
-void ParticleSourcesClass::GeneratePosition(int isource, double *R)
+void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
 {
-  int index = ParticleSourcesData[isource]->index;
-  double X0 = ParticleSourcesData[isource]->X0;
-  double Y0 = ParticleSourcesData[isource]->Y0;
-  double Z0 = ParticleSourcesData[isource]->Z0;
-  double Phi = ParticleSourcesData[isource]->Phi*3.1415926535/180.0;
-  double Theta = ParticleSourcesData[isource]->Theta*3.1415926535/180.0;
-  double Psi = ParticleSourcesData[isource]->Psi*3.1415926535/180.0;
-  double size1 = ParticleSourcesData[isource]->size1;
-  double size2 = ParticleSourcesData[isource]->size2;
-  double size3 = ParticleSourcesData[isource]->size3;
+  const int& index = ParticleSourcesData[isource]->index;
+  const double& X0 = ParticleSourcesData[isource]->X0;
+  const double& Y0 = ParticleSourcesData[isource]->Y0;
+  const double& Z0 = ParticleSourcesData[isource]->Z0;
+  const double& Phi = ParticleSourcesData[isource]->Phi*3.1415926535/180.0;
+  const double& Theta = ParticleSourcesData[isource]->Theta*3.1415926535/180.0;
+  const double& Psi = ParticleSourcesData[isource]->Psi*3.1415926535/180.0;
+  const double& size1 = ParticleSourcesData[isource]->size1;
+  const double& size2 = ParticleSourcesData[isource]->size2;
+  const double& size3 = ParticleSourcesData[isource]->size3;
 
   switch (index) //source geometry type
     {
@@ -372,7 +372,7 @@ void ParticleSourcesClass::GeneratePosition(int isource, double *R)
   return;
 }
 
-void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles)
+void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles) const
 {
   GeneratedParticleStructure ps;
 
@@ -659,6 +659,12 @@ void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)
 {
   ParticleSourcesData.append(gunParticle);
   CalculateTotalActivity();
+}
+
+void ParticleSourcesClass::forget(AParticleSourceRecord *gunParticle)
+{
+    ParticleSourcesData.removeAll(gunParticle);
+    CalculateTotalActivity();
 }
 
 bool ParticleSourcesClass::replace(int iSource, AParticleSourceRecord *gunParticle)

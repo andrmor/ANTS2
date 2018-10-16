@@ -8,6 +8,8 @@
 #include "graphwindowclass.h"
 #include "aglobalsettings.h"
 #include "ajsontools.h"
+#include "particlesourcesclass.h"
+#include "detectorclass.h"
 
 #include <QDebug>
 #include <QDoubleValidator>
@@ -102,7 +104,14 @@ void AParticleSourceDialog::on_pbReject_clicked()
 
 void AParticleSourceDialog::on_pbGunTest_clicked()
 {
+    ParticleSourcesClass ps(MW.Detector, MW.Detector->RandGen);
+    ps.append(Rec);
 
+    MW.GeometryWindow->ShowAndFocus();
+    MW.ShowSource(Rec, true);
+    MW.TestParticleGun(&ps, ui->sbGunTestEvents->value());
+
+    ps.forget(Rec); //so Rec is not deleted
 }
 
 void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)

@@ -226,7 +226,6 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 
 void MainWindow::on_pbGunTest_clicked()
 {
-  //MainWindow::on_pbGunShowSource_clicked();
   MainWindow::on_pbGunShowSource_toggled(true);
 
   QVector<double> activities;
@@ -238,54 +237,49 @@ void MainWindow::on_pbGunTest_clicked()
       if (i==isource) ParticleSources->getSource(i)->Activity = 1.0;
       else ParticleSources->getSource(i)->Activity = 0;
   }
-  ParticleSources->Init();
 
-  double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
-  double R[3], K[3];
-  int numParticles = ui->sbGunTestEvents->value();
-  bool bHaveSome = false;
-  for (int iRun=0; iRun<numParticles; iRun++)
-    {      
-      QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
-      if (GP->size()>0)
-          bHaveSome = true;
-      else
-      {
-          if (iRun>2)
-          {
-//             if (ui->cbSourceLimitmat->isChecked()) message("Did several attempts but no particles were generated!\n"
-//                                                            "Possible reason: generation is limited to a wrong material", this);
-//             else
-             message("Did several attempts but no particles were generated!", this);
-             return;
-          }
-      }
-      for (int iP = 0; iP<GP->size(); iP++)
-        {
-          R[0] = (*GP)[iP].Position[0];
-          R[1] = (*GP)[iP].Position[1];
-          R[2] = (*GP)[iP].Position[2];
-          K[0] = (*GP)[iP].Direction[0];
-          K[1] = (*GP)[iP].Direction[1];
-          K[2] = (*GP)[iP].Direction[2];
-
-          Int_t track_index = Detector->GeoManager->AddTrack(1,22);
-          TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
-          track->AddPoint(R[0], R[1], R[2], 0);
-          track->AddPoint(R[0]+K[0]*Length, R[1]+K[1]*Length, R[2]+K[2]*Length, 0);
-          track->SetLineWidth(1);
-          track->SetLineColor(1+(*GP)[iP].ParticleId);
-        }
-      //clear and delete QVector with generated event
-      GP->clear();
-      delete GP;
-    }
-
-  MainWindow::ShowTracks();
+  TestParticleGun(ParticleSources, ui->sbGunTestEvents->value());
 
   //restore activities of the sources
   for (int i=0; i<ParticleSources->size(); i++)
       ParticleSources->getSource(i)->Activity = activities.at(i);
+}
+
+void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numParticles)
+{
+    ParticleSources->Init();
+
+    double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
+    double R[3], K[3];
+    for (int iRun=0; iRun<numParticles; iRun++)
+      {
+        QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
+        if (GP->isEmpty() && iRun > 2)
+        {
+               message("Did several attempts but no particles were generated!", this);
+               return;
+        }
+        for (GeneratedParticleStructure& p : *GP)
+        {
+            R[0] = p.Position[0];
+            R[1] = p.Position[1];
+            R[2] = p.Position[2];
+
+            K[0] = p.Direction[0];
+            K[1] = p.Direction[1];
+            K[2] = p.Direction[2];
+
+            Int_t track_index = Detector->GeoManager->AddTrack(1,22);
+            TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
+            track->AddPoint(R[0], R[1], R[2], 0);
+            track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
+            track->SetLineWidth(1); //TODO respect all attributes!
+            track->SetLineColor(1 + p.ParticleId); //TODO respect particle track colors!
+        }
+        GP->clear();
+        delete GP;
+      }
+    ShowTracks();
 }
 
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()

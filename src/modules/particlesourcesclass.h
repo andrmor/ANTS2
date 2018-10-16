@@ -3,7 +3,6 @@
 
 #include <QString>
 #include <QVector>
-#include <QObject>
 #include "TVector3.h"
 
 class AMaterialParticleCollection;
@@ -31,27 +30,35 @@ public:
   LinkedParticleStructure(int iparticle, int linkedto = -1) {iParticle = iparticle; LinkedTo = linkedto;}
 };
 
-class ParticleSourcesClass : public QObject
+/*
+class AParticleGun
 {
-    Q_OBJECT
+    virtual ~AParticleGenerator(){}
+
+    virtual void Init() = 0;
+    virtual QVector<GeneratedParticleStructure>* GenerateEvent() const = 0;
+};
+*/
+
+class ParticleSourcesClass
+{
 public:
-   ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen, TString nameID = "");
+   ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen);
   ~ParticleSourcesClass();
 
   //MAIN usage
-  void Init(); // !!! has to be called before the first use of "GenerateEvent"  NOT thread safe!
+  void Init(); // !!! has to be called before the first use of "GenerateEvent"!
   QVector<GeneratedParticleStructure>* GenerateEvent(); //see Init!!!
 
   //requests
   int size() {return ParticleSourcesData.size();}
   double getTotalActivity();
   AParticleSourceRecord* getSource(int iSource) {return ParticleSourcesData[iSource];}
-  //ParticleSourceStructure &operator[] (int iSource) {return *ParticleSourcesData[iSource];}
   AParticleSourceRecord* getLastSource() {return ParticleSourcesData.last();}
-  //ParticleSourceStructure &last() {return *ParticleSourcesData.last();}
 
   //Source handling - after handling is finished, requires Init() !!!
   void append(AParticleSourceRecord* gunParticle);
+  void forget(AParticleSourceRecord* gunParticle);
   bool replace(int iSource, AParticleSourceRecord* gunParticle);
   void remove(int iSource);
   void clear();
@@ -72,7 +79,7 @@ public:
   void checkLimitedToMaterial(AParticleSourceRecord *s);
 
   //for remove particle from configuration
-  void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIspareticleInUse first
+  void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
   void IsParticleInUse(int particleId, bool& bInUse, QString& SourceNames);
 
 private:  
@@ -80,8 +87,6 @@ private:
   const DetectorClass* Detector;
   AMaterialParticleCollection* MpCollection;
   TRandom2 *RandGen;
-
-  TString NameID; //use to make unique hist name in multithread environment /// - actually not needed anymore!
 
   QVector<AParticleSourceRecord*> ParticleSourcesData;
   QVector<double> TotalParticleWeight;  
@@ -95,8 +100,8 @@ private:
 
   //utilities
   void CalculateTotalActivity();
-  void GeneratePosition(int isource, double *R);
-  void AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles); //QVector - only pointer is transferred!
+  void GeneratePosition(int isource, double *R) const;
+  void AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
 #endif // PARTICLESOURCESCLASS_H

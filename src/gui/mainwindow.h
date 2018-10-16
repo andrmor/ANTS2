@@ -404,6 +404,8 @@ public:
     void CalculateIndividualQEPDE(); //Public for use in scripting
     void clearEnergyVector();
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
+    void TestParticleGun(ParticleSourcesClass *ParticleSources, int numParticles);
+
 private:
     bool startupDetector();  //on ANTS start load/create detector
     void PointSource_UpdateTabWidget();

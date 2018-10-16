@@ -227,22 +227,7 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 void MainWindow::on_pbGunTest_clicked()
 {
   MainWindow::on_pbGunShowSource_toggled(true);
-
-  QVector<double> activities;
-  //forcing to 100% activity the currently selected source
-  int isource = ui->cobParticleSource->currentIndex();
-  for (int i=0; i<ParticleSources->size(); i++)
-  {
-      activities << ParticleSources->getSource(i)->Activity; //remember old
-      if (i==isource) ParticleSources->getSource(i)->Activity = 1.0;
-      else ParticleSources->getSource(i)->Activity = 0;
-  }
-
   TestParticleGun(ParticleSources, ui->sbGunTestEvents->value());
-
-  //restore activities of the sources
-  for (int i=0; i<ParticleSources->size(); i++)
-      ParticleSources->getSource(i)->Activity = activities.at(i);
 }
 
 void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numParticles)
@@ -295,7 +280,7 @@ void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
 void MainWindow::on_pbRemoveSource_clicked()
 {
   if (ParticleSources->size() == 0) return;
-  int isource = ui->cobParticleSource->currentIndex();
+  int isource = ui->lwDefinedParticleSources->currentRow();
 
   int ret = QMessageBox::question(this, "Remove particle source",
                                   "Are you sure - this will remove source " + ParticleSources->getSource(isource)->name,
@@ -304,11 +289,8 @@ void MainWindow::on_pbRemoveSource_clicked()
   if (ret != QMessageBox::Yes) return;
 
   ParticleSources->remove(isource);
-  ui->cobParticleSource->removeItem(isource);
-  ui->cobParticleSource->setCurrentIndex(isource-1);
 
   on_pbUpdateSimConfig_clicked();
-
   on_pbUpdateSourcesIndication_clicked();
   if (ui->pbGunShowSource->isChecked())
     {
@@ -327,46 +309,72 @@ void MainWindow::on_pbAddSource_clicked()
   AParticleSourceRecord* s = new AParticleSourceRecord();
   s->GunParticles << new GunParticleStruct();
   ParticleSources->append(s);
-  ui->cobParticleSource->addItem(ParticleSources->getLastSource()->name);
-  ui->cobParticleSource->setCurrentIndex(ParticleSources->size()-1);
 
+  on_pbUpdateSourcesIndication_clicked();
+  ui->lwDefinedParticleSources->setCurrentRow( ParticleSources->size()-1 );
   on_pbEditParticleSource_clicked();
 }
 
+#include <QHBoxLayout>
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
   qDebug() << "Update sources indication. Defined sources:"<<ParticleSources->size();
-  int isource = ui->cobParticleSource->currentIndex();
-
-  ui->cobParticleSource->clear();
 
   int numSources = ParticleSources->size();
   ui->labPartSourcesDefined->setText(QString::number(numSources));
-  if (numSources == 0) return;
-  ui->fParticleSources->setEnabled(true);
-  ui->frSelectSource->setEnabled(true);
+
+  int curRow = ui->lwDefinedParticleSources->currentRow();
+  ui->lwDefinedParticleSources->clear();
 
   for (int i=0; i<numSources; i++)
-      ui->cobParticleSource->addItem(ParticleSources->getSource(i)->name);
-  if (isource >= numSources) isource = 0;  
-  if (isource == -1) isource = 0;
+  {
+      AParticleSourceRecord* pr = ParticleSources->getSource(i);
+      QListWidgetItem* item = new QListWidgetItem();
+      ui->lwDefinedParticleSources->addItem(item);
 
-  ui->cobParticleSource->setCurrentIndex(isource);
-  updateActivityIndication();
+      QFrame* fr = new QFrame();
+      fr->setFrameShape(QFrame::Box);
+      QHBoxLayout* l = new QHBoxLayout();
+      l->setContentsMargins(3, 2, 3, 2);
+      l->addWidget(new QLabel(pr->name + ','));
+      l->addWidget(new QLabel(pr->getShapeString() + ','));
+      l->addWidget(new QLabel( QString("%1 particle(s)").arg(pr->GunParticles.size())));
+      l->addStretch();
+      l->addWidget(new QLabel("Activity:"));
+      QLineEdit* e = new QLineEdit(QString::number(pr->Activity));
+        e->setMaximumWidth(75);
+        QDoubleValidator* val = new QDoubleValidator(this);
+        val->setBottom(0);
+        e->setValidator(val);
+        QObject::connect(e, &QLineEdit::editingFinished, [pr, e, this]
+        {
+            double newVal = e->text().toDouble();
+            if (pr->Activity == newVal) return;
+            pr->Activity = newVal;
+            this->onTotalActivityChanged();
+        });
+      l->addWidget(e);
+      double totAct = ParticleSources->getTotalActivity();
+      double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
+      QString t = QString("(%1%)").arg(per, 3, 'g', 3);
+      l->addWidget(new QLabel(t));
+
+      fr->setLayout(l);
+      item->setSizeHint(fr->sizeHint());
+
+      ui->lwDefinedParticleSources->setItemWidget(item, fr);
+
+  }
+
+  if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())
+      curRow = 0;
+  ui->lwDefinedParticleSources->setCurrentRow(curRow);
 }
 
-void MainWindow::updateActivityIndication()
+void MainWindow::onTotalActivityChanged()
 {
-  double activity = ui->ledSourceActivity->text().toDouble();
-  QSize size(ui->lSourceActive->height(), ui->lSourceActive->height());
-  QIcon wIcon = GuiUtils::createColorCircleIcon(size, Qt::yellow);
-  if (activity == 0) ui->lSourceActive->setPixmap(wIcon.pixmap(16,16));
-  else          ui->lSourceActive->setPixmap(QIcon().pixmap(16,16));
-
-  double fraction = 0;
-  double TotalActivity = ParticleSources->getTotalActivity();
-  if (TotalActivity != 0) fraction = activity / TotalActivity * 100.0;
-  ui->labOfTotal->setText(QString::number(fraction, 'g', 3)+"%");
+    //on_pbUpdateSourcesIndication_clicked();
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbGunShowSource_toggled(bool checked)
@@ -385,7 +393,7 @@ void MainWindow::on_pbGunShowSource_toggled(bool checked)
 
 void MainWindow::ShowParticleSource_noFocus()
 {
-  int isource = ui->cobParticleSource->currentIndex();
+  int isource = ui->lwDefinedParticleSources->currentRow();
   if (isource < 0) return;
   if (isource >= ParticleSources->size())
     {
@@ -403,7 +411,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
   QFileInfo file(fileName);
   if (file.suffix().isEmpty()) fileName += ".json";
   QJsonObject json, js;
-  ParticleSources->writeSourceToJson(ui->cobParticleSource->currentIndex(), json);
+  ParticleSources->writeSourceToJson(ui->lwDefinedParticleSources->currentRow(), json);
   js["ParticleSource"] = json;
   bool bOK = SaveJsonToFile(js, fileName);
   if (!bOK) message("Failed to save json to file: "+fileName, this);
@@ -422,7 +430,7 @@ void MainWindow::on_pbLoadParticleSource_clicked()
   QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
   QString fileName = QFileDialog::getOpenFileName(this, "Import particle source", starter, "json files (*.json)");
   if (fileName.isEmpty()) return;
-  int iSource = ui->cobParticleSource->currentIndex();
+  int iSource = ui->lwDefinedParticleSources->currentRow();
   QJsonObject json, js;
   bool ok = LoadJsonFromFile(json, fileName);
   if (!ok)
@@ -438,7 +446,6 @@ void MainWindow::on_pbLoadParticleSource_clicked()
   int oldPartCollSize = Detector->MpCollection->countParticles();
   js = json["ParticleSource"].toObject();
   ParticleSources->readSourceFromJson(iSource, js);
-  ui->cobParticleSource->setItemText(iSource, ParticleSources->getSource(iSource)->name);
 
   onRequestDetectorGuiUpdate();
 
@@ -626,16 +633,25 @@ void MainWindow::on_pbClearAllStack_clicked()
 
 void MainWindow::on_pbEditParticleSource_clicked()
 {
-    int isource = ui->cobParticleSource->currentIndex();
+    int isource = ui->lwDefinedParticleSources->currentRow();
+    if (isource == -1)
+    {
+        message("Select a source to edit", this);
+        return;
+    }
+    if (isource >= ParticleSources->size())
+    {
+        message("Error - bad source index!", this);
+        return;
+    }
+
     AParticleSourceDialog d(*this, ParticleSources->getSource(isource));
     int res = d.exec();
-
     if (res == QDialog::Rejected) return;
+
     ParticleSources->replace(isource, d.getResult());
 
     AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-
-    ps->Activity = ui->ledSourceActivity->text().toDouble();
     ParticleSources->checkLimitedToMaterial(ps);
 
     if (Detector->isGDMLempty())
@@ -667,7 +683,6 @@ void MainWindow::on_pbEditParticleSource_clicked()
 
     on_pbUpdateSimConfig_clicked();
 
-    updateActivityIndication();    //update marker!
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
     //qDebug() << "...update sources done";
 }

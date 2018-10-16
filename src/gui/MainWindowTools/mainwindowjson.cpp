@@ -633,13 +633,14 @@ if (scj.contains("CustomDistrib"))
 void MainWindow::selectFirstActiveParticleSource()
 {
     if (ParticleSources->getTotalActivity() > 0)
-      {  //show the first source with non-zero activity
-        int i=0;
+    {
+        //show the first source with non-zero activity
+        int i = 0;
         for (; i<ParticleSources->size(); i++)
           if (ParticleSources->getSource(i)->Activity > 0) break;
-        ui->cobParticleSource->setCurrentIndex(i);        
-      }
-    else if (ParticleSources->size()>0) ui->cobParticleSource->setCurrentIndex(0);
-    else ui->cobParticleSource->setCurrentIndex(-1);
+
+        if (i < ui->lwDefinedParticleSources->count())
+            ui->lwDefinedParticleSources->setCurrentRow(i);
+    }
     on_pbUpdateSourcesIndication_clicked();
 }

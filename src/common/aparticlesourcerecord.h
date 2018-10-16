@@ -73,6 +73,8 @@ struct AParticleSourceRecord
     void writeToJson(QJsonObject & json, const AMaterialParticleCollection & MpCollection) const;
     bool readFromJson(const QJsonObject & json, AMaterialParticleCollection & MpCollection);
 
+    const QString getShapeString() const;
+
     //local variables, used in tracking, calculated autonatically, not to be loaded/saved!
     int LimitedToMat; //automatically calculated if LimtedToMatName matches a material
     bool fLimit = false;

@@ -4642,11 +4642,6 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->SetTab(3);
 }
 
-void MainWindow::on_cobParticleSource_activated(int /*index*/)
-{
-    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
-}
-
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
 {
     QString s;

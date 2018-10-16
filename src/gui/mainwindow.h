@@ -553,7 +553,6 @@ private slots:
     void on_pobTest_2_clicked();
     void on_bpResults_2_clicked();
     void on_actionScript_window_triggered();
-    void on_cobParticleSource_activated(int index);
     void on_actionQuick_save_1_triggered();
     void on_actionQuick_save_2_triggered();
     void on_actionQuick_save_3_triggered();
@@ -614,7 +613,6 @@ private:
     void initDetectorSandwich();
     void onGuiEnableStatus(bool fLocked);
     void ShowParticleSource_noFocus();
-    void updateActivityIndication();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();
@@ -628,6 +626,7 @@ public slots:
     void OnSlabDoubleClicked(QString SlabName);
     void onNewConfigLoaded();    
     void onOpticalOverrideDialogAccepted();
+    void onTotalActivityChanged();
 signals:
     void RequestStopLoad();
 };

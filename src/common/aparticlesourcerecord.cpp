@@ -247,3 +247,18 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
     }
     return true;
 }
+
+const QString AParticleSourceRecord::getShapeString() const
+{
+    switch (index)
+    {
+    case 0: return "Point";
+    case 1: return "Linear";
+    case 2: return "Square";
+    case 3: return "Round";
+    case 4: return "Box";
+    case 5: return "Cylinder";
+    default: ;
+    }
+    return "-error-";
+}

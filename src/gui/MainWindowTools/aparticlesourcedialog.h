@@ -36,14 +36,9 @@ private slots:
     void on_cbLinkedParticle_clicked(bool checked);
     void on_sbLinkedTo_editingFinished();
     void on_ledLinkingProbability_editingFinished();
-
     void on_pbGunShowSpectrum_clicked();
-
     void on_pbGunLoadSpectrum_clicked();
-
     void on_pbDeleteSpectrum_clicked();
-
-
 
 private:
     MainWindow& MW;

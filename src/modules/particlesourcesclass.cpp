@@ -1,4 +1,5 @@
 #include "particlesourcesclass.h"
+#include "aparticlesourcerecord.h"
 #include "detectorclass.h"
 #include "jsonparser.h"
 #include "amaterialparticlecolection.h"
@@ -17,8 +18,6 @@
 #include "TMath.h"
 #include "TRandom2.h"
 #include "TGeoManager.h"
-
-
 
 ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen, TString nameID)
     : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen), NameID(nameID), TotalActivity(0) {}
@@ -464,65 +463,7 @@ bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
    if (iSource<0 || iSource>ParticleSourcesData.size()-1) return false;
 
    AParticleSourceRecord* s = ParticleSourcesData[iSource];
-
-   //general
-   json["Name"] = s->name;
-   json["Type"] = s->index;
-   json["Activity"] = s->Activity;
-   json["X"] = s->X0;
-   json["Y"] = s->Y0;
-   json["Z"] = s->Z0;
-   json["Size1"] = s->size1;
-   json["Size2"] = s->size2;
-   json["Size3"] = s->size3;
-   json["Phi"] = s->Phi;
-   json["Theta"] = s->Theta;
-   json["Psi"] = s->Psi;
-   json["CollPhi"] = s->CollPhi;
-   json["CollTheta"] = s->CollTheta;
-   json["Spread"] = s->Spread;
-
-   json["DoMaterialLimited"] = s->DoMaterialLimited;
-   json["LimitedToMaterial"] = s->LimtedToMatName;
-
-   //particles
-   int GunParticleSize = s->GunParticles.size();
-   json["Particles"] = GunParticleSize;
-
-   QJsonArray jParticleEntries;
-   for (int ip=0; ip<GunParticleSize; ip++)
-         {
-            QJsonObject jGunParticle;
-
-            QJsonObject jparticle;
-            int ParticleId = s->GunParticles[ip]->ParticleId;
-            const AParticle* p = MpCollection->getParticle(ParticleId);
-            jparticle["name"] = p->ParticleName;
-            jparticle["type"] = p->type;
-            jparticle["charge"] = p->charge;
-            jparticle["mass"] = p->mass;
-              //adding to top level
-            jGunParticle["Particle"] = jparticle;
-
-            jGunParticle["StatWeight"] = s->GunParticles[ip]->StatWeight;
-            bool individual = s->GunParticles[ip]->Individual;
-            jGunParticle["Individual"] = individual;
-                jGunParticle["LinkedTo"] = s->GunParticles[ip]->LinkedTo;
-                jGunParticle["LinkingProbability"] = s->GunParticles[ip]->LinkingProbability;
-                jGunParticle["LinkingOppositeDir"] = s->GunParticles[ip]->LinkingOppositeDir;
-            jGunParticle["Energy"] = s->GunParticles[ip]->energy;
-            jGunParticle["UseFixedEnergy"] = s->GunParticles[ip]->bUseFixedEnergy;
-            if ( s->GunParticles[ip]->spectrum )
-            {
-                //saving spectrum               
-                QJsonArray ja;
-                writeTH1DtoJsonArr(s->GunParticles[ip]->spectrum, ja);
-                jGunParticle["EnergySpectrum"] = ja;
-            }
-            jGunParticle["PreferredUnits"] = s->GunParticles[ip]->PreferredUnits;
-            jParticleEntries.append(jGunParticle);
-         }
-   json["GunParticles"] = jParticleEntries;
+   s->writeToJson(json, *MpCollection);
    return true;
 }
 
@@ -557,102 +498,11 @@ bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
       iSource = ParticleSourcesData.size()-1;
     }
 
-  delete ParticleSourcesData[iSource]; //have to delete here, or histograms might have not unique names
+  delete ParticleSourcesData[iSource];
   AParticleSourceRecord* s = new AParticleSourceRecord();
   ParticleSourcesData[iSource] = s;
-  //reading general info
-  parseJson(json, "Name", s->name);
-  //qDebug() << s->name;
-  parseJson(json, "Type", s->index);
-  parseJson(json, "Activity", s->Activity);
-  parseJson(json, "X", s->X0);
-  parseJson(json, "Y", s->Y0);
-  parseJson(json, "Z", s->Z0);
-  parseJson(json, "Size1", s->size1);
-  parseJson(json, "Size2", s->size2);
-  parseJson(json, "Size3", s->size3);
-  parseJson(json, "Phi", s->Phi);
-  parseJson(json, "Theta", s->Theta);
-  parseJson(json, "Psi", s->Psi);
-  parseJson(json, "CollPhi", s->CollPhi);
-  parseJson(json, "CollTheta", s->CollTheta);
-  parseJson(json, "Spread", s->Spread);
 
-  s->DoMaterialLimited = s->fLimit = false;
-  s->LimtedToMatName = "";
-  if (json.contains("DoMaterialLimited"))
-  {
-      parseJson(json, "DoMaterialLimited", s->DoMaterialLimited);
-      parseJson(json, "LimitedToMaterial", s->LimtedToMatName);
-
-      if (s->DoMaterialLimited) checkLimitedToMaterial(s);
-  }
-
-  //GunParticles
-  //int declPart; //declared number of particles
-  //parseJson(json, "Particles", declPart);  //obsolete
-  QJsonArray jGunPartArr = json["GunParticles"].toArray();
-  int numGP = jGunPartArr.size();
-  //qDebug()<<"Entries in gunparticles:"<<numGP;
-  for (int ip = 0; ip<numGP; ip++)
-    {
-      QJsonObject jThisGunPart = jGunPartArr[ip].toObject();
-
-      //extracting the particle
-      QJsonObject jparticle = jThisGunPart["Particle"].toObject();
-      //JsonParser GunParticleParser(jThisGunPart);
-      if (jparticle.isEmpty())
-        {
-          qWarning()<<"Cannot extract particle in the material file";
-          return false;
-        }
-      QString name = jparticle["name"].toString();
-      int type = jparticle["type"].toInt();
-      int charge = jparticle["charge"].toInt();
-      double mass = jparticle["mass"].toDouble();
-      //looking for this particle in the collection and create if necessary
-      AParticle::ParticleType Type = static_cast<AParticle::ParticleType>(type);
-      int ParticleId = MpCollection->FindCreateParticle(name, Type, charge, mass);
-
-      s->GunParticles << new GunParticleStruct();
-      s->GunParticles[ip]->ParticleId = ParticleId;
-      //qDebug()<<"Added gun particle with particle Id"<<ParticleId<<ParticleCollection->at(ParticleId)->ParticleName;
-
-      //going through gunparticle general properties
-      parseJson(jThisGunPart, "StatWeight",  s->GunParticles[ip]->StatWeight );
-      parseJson(jThisGunPart, "Individual",  s->GunParticles[ip]->Individual );
-      parseJson(jThisGunPart, "LinkedTo",  s->GunParticles[ip]->LinkedTo ); //linked always to previously already defined particles!
-      parseJson(jThisGunPart, "LinkingProbability",  s->GunParticles[ip]->LinkingProbability );
-      parseJson(jThisGunPart, "LinkingOppositeDir",  s->GunParticles[ip]->LinkingOppositeDir );
-
-      parseJson(jThisGunPart, "Energy",  s->GunParticles[ip]->energy );
-      parseJson(jThisGunPart, "PreferredUnits",  s->GunParticles[ip]->PreferredUnits );
-      parseJson(jThisGunPart, "UseFixedEnergy",  s->GunParticles[ip]->bUseFixedEnergy );
-
-      QJsonArray ar = jThisGunPart["EnergySpectrum"].toArray();
-      if (!ar.isEmpty())
-        {
-          int size = ar.size();
-          double* xx = new double [size];
-          double* yy = new double [size];
-          for (int i=0; i<size; i++)
-            {
-              xx[i] = ar[i].toArray()[0].toDouble();
-              yy[i] = ar[i].toArray()[1].toDouble();
-            }
-          //generating unique name for the histogram
-          QString str = "EnSp" + QString::number(iSource) + "s" + QString::number(ip) + "p"+NameID;
-          //qDebug() << "name:" <<str;
-          QByteArray ba = str.toLocal8Bit();
-          const char *c_str = ba.data();
-          s->GunParticles[ip]->spectrum = new TH1D(c_str,"Energy spectrum", size-1, xx);
-          for (int j = 1; j<size+1; j++) s->GunParticles[ip]->spectrum->SetBinContent(j, yy[j-1]);
-          delete[] xx;
-          delete[] yy;
-        }
-      // TO DO !!! *** add error if no energy or spectrum
-    }
-  return true;
+  return s->readFromJson(json, *MpCollection);
 }
 
 void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
@@ -828,68 +678,4 @@ void ParticleSourcesClass::remove(int iSource)
   delete ParticleSourcesData[iSource];
   ParticleSourcesData.remove(iSource);
   CalculateTotalActivity();
-}
-
-GunParticleStruct * GunParticleStruct::clone() const
-{
-    //shallow copy
-    GunParticleStruct* gp = new GunParticleStruct(*this);
-
-    //clear dynamic
-    gp->spectrum = 0;
-
-    //deep copy for dynamic properties
-    if (spectrum)
-        gp->spectrum = new TH1D(*spectrum);
-
-    return gp;
-}
-
-double GunParticleStruct::generateEnergy() const
-{
-    if (bUseFixedEnergy || !spectrum)
-        return energy;
-    return spectrum->GetRandom();
-}
-
-bool GunParticleStruct::loadSpectrum(const QString &fileName)
-{
-    QVector<double> x, y;
-    int error = LoadDoubleVectorsFromFile(fileName, &x, &y);
-    if (error > 0) return false;
-
-    delete spectrum; spectrum = 0;
-    int size = x.size();
-    //double* xx = new double[size];
-    //for (int i = 0; i<size; i++) xx[i]=x[i];
-    spectrum = new TH1D("","Energy spectrum", size-1, x.data());
-    for (int j = 1; j < size+1; j++)
-        spectrum->SetBinContent(j, y[j-1]);
-    return true;
-}
-
-GunParticleStruct::~GunParticleStruct()
-{
-  if (spectrum) delete spectrum;
-}
-
-AParticleSourceRecord::~AParticleSourceRecord()
-{
-  for (GunParticleStruct* g : GunParticles) delete g;
-  GunParticles.clear();
-}
-
-AParticleSourceRecord * AParticleSourceRecord::clone() const
-{
-    //shallow copy
-    AParticleSourceRecord * newRec = new AParticleSourceRecord(*this);
-
-    //clear dynamic
-    newRec->GunParticles.clear();
-
-    //deep copy of dynamic resources
-    for (GunParticleStruct* g : GunParticles)
-        newRec->GunParticles << g->clone();
-
-    return newRec;
 }

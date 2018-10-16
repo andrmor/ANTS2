@@ -9,6 +9,7 @@
 #include "generalsimsettings.h"
 #include "particlesourcesclass.h"
 #include "aglobalsettings.h"
+#include "aparticlesourcerecord.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>

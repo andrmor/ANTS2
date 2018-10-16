@@ -54,6 +54,7 @@
 #include "ascriptwindow.h"
 #include "aremotewindow.h"
 #include "aopticaloverridedialog.h"
+#include "aparticlesourcerecord.h" //---
 
 //Qt
 #include <QDebug>

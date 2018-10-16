@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "aparticlesourcerecord.h"
 #include "aglobalsettings.h"
 #include "ui_mainwindow.h"
 #include "detectorclass.h"

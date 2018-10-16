@@ -1,15 +1,20 @@
 #include "aparticlesourcedialog.h"
 #include "ui_aparticlesourcedialog.h"
 #include "mainwindow.h"
+#include "aparticlesourcerecord.h"
 #include "amaterialparticlecolection.h"
 #include "amessage.h"
 #include "geometrywindowclass.h"
 #include "graphwindowclass.h"
 #include "aglobalsettings.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QDoubleValidator>
 #include <QFileDialog>
+//#include <QMenuBar>
+//#include <QMenu>
+//#include <QMessageBox>
 
 #include "TGeoManager.h"
 #include "TH1D.h"
@@ -64,6 +69,12 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
         ui->lwGunParticles->setCurrentRow(0);
         UpdateParticleInfo();
     }
+
+//    QMenuBar* mb = new QMenuBar(this);
+//    QMenu* fileMenu = mb->addMenu("&File");
+//    fileMenu->addAction("Load source", this, &AParticleSourceDialog::loadSource);
+//    fileMenu->addAction("Save source", this, &AParticleSourceDialog::saveSource);
+//    layout()->setMenuBar(mb);
 }
 
 AParticleSourceDialog::~AParticleSourceDialog()

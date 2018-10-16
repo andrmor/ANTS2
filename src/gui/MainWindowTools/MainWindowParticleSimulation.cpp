@@ -1,6 +1,7 @@
 //ANTS2
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "aparticlesourcerecord.h"
 #include "outputwindow.h"
 #include "apmhub.h"
 #include "eventsdataclass.h"
@@ -440,7 +441,6 @@ void MainWindow::on_pbLoadParticleSource_clicked()
       message("Json file format error", this);
       return;
     }
-  //int oldPartCollSize = Detector->ParticleCollection.size();
   int oldPartCollSize = Detector->MpCollection->countParticles();
   js = json["ParticleSource"].toObject();
   ParticleSources->readSourceFromJson(iSource, js);
@@ -457,7 +457,6 @@ void MainWindow::on_pbLoadParticleSource_clicked()
       else str += " was";
       str += " added:\n";
       for (int i=oldPartCollSize; i<newPartCollSize; i++)
-          //str += Detector->ParticleCollection[i]->ParticleName + "\n";
           str += Detector->MpCollection->getParticleName(i) + "\n";
       str += "\nSet the interaction data for the detector materials!";
       message(str,this);

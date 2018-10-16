@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -5049,7 +5049,7 @@ of the refracted beam:</string>
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabParticles">
        <attribute name="title">
@@ -9705,8 +9705,8 @@ double events:</string>
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>53</y>
-            <width>60</width>
+            <y>50</y>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
@@ -9760,8 +9760,8 @@ double events:</string>
           <widget class="QLabel" name="labPartPerEvent">
            <property name="geometry">
             <rect>
-             <x>114</x>
-             <y>0</y>
+             <x>130</x>
+             <y>-1</y>
              <width>141</width>
              <height>20</height>
             </rect>
@@ -9782,9 +9782,9 @@ double events:</string>
           <widget class="QLineEdit" name="ledGunAverageNumPartperEvent">
            <property name="geometry">
             <rect>
-             <x>260</x>
+             <x>276</x>
              <y>0</y>
-             <width>54</width>
+             <width>41</width>
              <height>20</height>
             </rect>
            </property>
@@ -9801,7 +9801,7 @@ double events:</string>
           <widget class="QComboBox" name="cobPartPerEvent">
            <property name="geometry">
             <rect>
-             <x>30</x>
+             <x>24</x>
              <y>0</y>
              <width>80</width>
              <height>19</height>
@@ -9828,8 +9828,8 @@ double events:</string>
          <widget class="QCheckBox" name="cbGunAllowMultipleEvents">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>193</y>
+            <x>7</x>
+            <y>194</y>
             <width>198</width>
             <height>18</height>
            </rect>
@@ -9849,7 +9849,7 @@ double events:</string>
            <rect>
             <x>7</x>
             <y>22</y>
-            <width>411</width>
+            <width>417</width>
             <height>161</height>
            </rect>
           </property>
@@ -9861,8 +9861,8 @@ double events:</string>
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>83</y>
-            <width>60</width>
+            <y>77</y>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
@@ -9880,8 +9880,8 @@ double events:</string>
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>110</y>
-            <width>60</width>
+            <y>108</y>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
@@ -9892,7 +9892,7 @@ double events:</string>
            </font>
           </property>
           <property name="text">
-           <string>Export</string>
+           <string>Save</string>
           </property>
          </widget>
          <widget class="QPushButton" name="pbLoadParticleSource">
@@ -9900,7 +9900,7 @@ double events:</string>
            <rect>
             <x>430</x>
             <y>130</y>
-            <width>60</width>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
@@ -9919,12 +9919,34 @@ double events:</string>
            <rect>
             <x>430</x>
             <y>23</y>
-            <width>60</width>
+            <width>70</width>
             <height>23</height>
            </rect>
           </property>
           <property name="text">
            <string>Edit</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pbGunShowSource">
+          <property name="geometry">
+           <rect>
+            <x>430</x>
+            <y>160</y>
+            <width>70</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Show</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
          <zorder>cbGunAllowMultipleEvents</zorder>
@@ -9937,6 +9959,7 @@ double events:</string>
          <zorder>pbSaveParticleSource</zorder>
          <zorder>pbLoadParticleSource</zorder>
          <zorder>pbEditParticleSource</zorder>
+         <zorder>pbGunShowSource</zorder>
         </widget>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
@@ -9993,28 +10016,6 @@ double events:</string>
          <string>Test generator</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="pbGunShowSource">
-        <property name="geometry">
-         <rect>
-          <x>32</x>
-          <y>268</y>
-          <width>120</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Show geometry</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
        <widget class="QLabel" name="lSourceActive">
         <property name="geometry">
          <rect>
@@ -10040,7 +10041,6 @@ double events:</string>
        <zorder>tabWidget_3</zorder>
        <zorder>sbGunTestEvents</zorder>
        <zorder>pbGunTest</zorder>
-       <zorder>pbGunShowSource</zorder>
        <zorder>lSourceActive</zorder>
       </widget>
      </widget>

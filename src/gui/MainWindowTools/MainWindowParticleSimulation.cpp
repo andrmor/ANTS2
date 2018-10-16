@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QHBoxLayout>
 
 //Root
 #include "TVirtualGeoTrack.h"
@@ -269,57 +270,63 @@ void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numP
 
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()
 {
-   double val = ui->ledGunAverageNumPartperEvent->text().toDouble();
-   if (val<0)
-     {
-       message("Average number of particles per event should be more than 0", this);
-       ui->ledGunAverageNumPartperEvent->setText("1");
-     }
+    double val = ui->ledGunAverageNumPartperEvent->text().toDouble();
+    if (val<0)
+    {
+        message("Average number of particles per event should be more than 0", this);
+        ui->ledGunAverageNumPartperEvent->setText("1");
+    }
 }
 
 void MainWindow::on_pbRemoveSource_clicked()
 {
-  if (ParticleSources->size() == 0) return;
-  int isource = ui->lwDefinedParticleSources->currentRow();
-
-  int ret = QMessageBox::question(this, "Remove particle source",
-                                  "Are you sure - this will remove source " + ParticleSources->getSource(isource)->name,
-                                  QMessageBox::Yes | QMessageBox::Cancel,
-                                  QMessageBox::Cancel);
-  if (ret != QMessageBox::Yes) return;
-
-  ParticleSources->remove(isource);
-
-  on_pbUpdateSimConfig_clicked();
-  on_pbUpdateSourcesIndication_clicked();
-  if (ui->pbGunShowSource->isChecked())
+    int isource = ui->lwDefinedParticleSources->currentRow();
+    if (isource == -1)
     {
-      if (ParticleSources->size() == 0)
+        message("Select a source to remove", this);
+        return;
+    }
+    if (isource >= ParticleSources->size())
+    {
+        message("Error - bad source index!", this);
+        return;
+    }
+
+    int ret = QMessageBox::question(this, "Remove particle source",
+                                    "Are you sure you want to remove source " + ParticleSources->getSource(isource)->name,
+                                    QMessageBox::Yes | QMessageBox::Cancel,
+                                    QMessageBox::Cancel);
+    if (ret != QMessageBox::Yes) return;
+
+    ParticleSources->remove(isource);
+
+    on_pbUpdateSimConfig_clicked();
+    on_pbUpdateSourcesIndication_clicked();
+    if (ui->pbGunShowSource->isChecked())
+    {
+        if (ParticleSources->size() == 0)
         {
-           Detector->GeoManager->ClearTracks();
-           GeometryWindow->ShowGeometry(false);
+            Detector->GeoManager->ClearTracks();
+            GeometryWindow->ShowGeometry(false);
         }
         else
-        ShowParticleSource_noFocus();
+            ShowParticleSource_noFocus();
     }
 }
 
 void MainWindow::on_pbAddSource_clicked()
 {
-  AParticleSourceRecord* s = new AParticleSourceRecord();
-  s->GunParticles << new GunParticleStruct();
-  ParticleSources->append(s);
+    AParticleSourceRecord* s = new AParticleSourceRecord();
+    s->GunParticles << new GunParticleStruct();
+    ParticleSources->append(s);
 
-  on_pbUpdateSourcesIndication_clicked();
-  ui->lwDefinedParticleSources->setCurrentRow( ParticleSources->size()-1 );
-  on_pbEditParticleSource_clicked();
+    on_pbUpdateSourcesIndication_clicked();
+    ui->lwDefinedParticleSources->setCurrentRow( ParticleSources->size()-1 );
+    on_pbEditParticleSource_clicked();
 }
 
-#include <QHBoxLayout>
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    qDebug() << "Update sources indication. Defined sources:"<<ParticleSources->size();
-
     int numSources = ParticleSources->size();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
@@ -385,15 +392,25 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
 void MainWindow::on_pbGunShowSource_toggled(bool checked)
 {
     if (checked)
-      {
+    {
         GeometryWindow->ShowAndFocus();
         ShowParticleSource_noFocus();
-      }
+    }
     else
-      {
+    {
         Detector->GeoManager->ClearTracks();
         GeometryWindow->ShowGeometry();
-      }
+    }
+}
+
+void MainWindow::on_lwDefinedParticleSources_itemDoubleClicked(QListWidgetItem *)
+{
+    on_pbEditParticleSource_clicked();
+}
+
+void MainWindow::on_lwDefinedParticleSources_itemClicked(QListWidgetItem *)
+{
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 void MainWindow::ShowParticleSource_noFocus()
@@ -410,63 +427,75 @@ void MainWindow::ShowParticleSource_noFocus()
 
 void MainWindow::on_pbSaveParticleSource_clicked()
 {
-  QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
-  QString fileName = QFileDialog::getSaveFileName(this, "Export particle source", starter, "Json files (*.json)");
-  if (fileName.isEmpty()) return;
-  QFileInfo file(fileName);
-  if (file.suffix().isEmpty()) fileName += ".json";
-  QJsonObject json, js;
-  ParticleSources->writeSourceToJson(ui->lwDefinedParticleSources->currentRow(), json);
-  js["ParticleSource"] = json;
-  bool bOK = SaveJsonToFile(js, fileName);
-  if (!bOK) message("Failed to save json to file: "+fileName, this);
+    int isource = ui->lwDefinedParticleSources->currentRow();
+    if (isource == -1)
+    {
+        message("Select a source to remove", this);
+        return;
+    }
+    if (isource >= ParticleSources->size())
+    {
+        message("Error - bad source index!", this);
+        return;
+    }
+
+    QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
+    QString fileName = QFileDialog::getSaveFileName(this, "Save particle source", starter, "Json files (*.json)");
+    if (fileName.isEmpty()) return;
+    QFileInfo file(fileName);
+    if (file.suffix().isEmpty()) fileName += ".json";
+
+    QJsonObject json, js;
+    ParticleSources->writeSourceToJson(isource, json);
+    js["ParticleSource"] = json;
+    bool bOK = SaveJsonToFile(js, fileName);
+    if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
 
 void MainWindow::on_pbLoadParticleSource_clicked()
 {
-  QMessageBox msgBox(this);
-  msgBox.setText("You are about to replace this source with a source from a file.");
-  msgBox.setInformativeText("Proceed?");
-  msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-  msgBox.setDefaultButton(QMessageBox::Cancel);
-  int ret = msgBox.exec();
-  if (ret == QMessageBox::Cancel) return;
+    QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
+    QString fileName = QFileDialog::getOpenFileName(this, "Import particle source", starter, "json files (*.json)");
+    if (fileName.isEmpty()) return;
 
-  QString starter = (GlobSet.LibParticleSources.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibParticleSources;
-  QString fileName = QFileDialog::getOpenFileName(this, "Import particle source", starter, "json files (*.json)");
-  if (fileName.isEmpty()) return;
-  int iSource = ui->lwDefinedParticleSources->currentRow();
-  QJsonObject json, js;
-  bool ok = LoadJsonFromFile(json, fileName);
-  if (!ok)
-  {
-      message("Cannot open file: "+fileName, this);
-      return;
-  }
-  if (!json.contains("ParticleSource"))
+    QJsonObject json, js;
+    bool ok = LoadJsonFromFile(json, fileName);
+    if (!ok)
     {
-      message("Json file format error", this);
-      return;
+        message("Cannot open file: "+fileName, this);
+        return;
     }
-  int oldPartCollSize = Detector->MpCollection->countParticles();
-  js = json["ParticleSource"].toObject();
-  ParticleSources->readSourceFromJson(iSource, js);
-
-  onRequestDetectorGuiUpdate();
-
-  int newPartCollSize = Detector->MpCollection->countParticles();
-  if (oldPartCollSize != newPartCollSize)
+    if (!json.contains("ParticleSource"))
     {
-      //qDebug() << oldPartCollSize <<"->"<<newPartCollSize;
-      QString str = "Warning!\nThe following particle";
-      if (newPartCollSize-oldPartCollSize>1) str += "s were";
-      else str += " was";
-      str += " added:\n";
-      for (int i=oldPartCollSize; i<newPartCollSize; i++)
-          str += Detector->MpCollection->getParticleName(i) + "\n";
-      str += "\nSet the interaction data for the detector materials!";
-      message(str,this);
+        message("Json file format error", this);
+        return;
     }
+
+    int oldPartCollSize = Detector->MpCollection->countParticles();
+    js = json["ParticleSource"].toObject();
+
+    ParticleSources->append(new AParticleSourceRecord());
+    ParticleSources->readSourceFromJson(ParticleSources->size()-1, js);
+
+    onRequestDetectorGuiUpdate();
+    on_pbUpdateSimConfig_clicked();
+
+    int newPartCollSize = Detector->MpCollection->countParticles();
+    if (oldPartCollSize != newPartCollSize)
+    {
+        //qDebug() << oldPartCollSize <<"->"<<newPartCollSize;
+        QString str = "Warning!\nThe following particle";
+        if (newPartCollSize-oldPartCollSize>1) str += "s were";
+        else str += " was";
+        str += " added:\n";
+        for (int i=oldPartCollSize; i<newPartCollSize; i++)
+            str += Detector->MpCollection->getParticleName(i) + "\n";
+        str += "\nSet the interaction data for the detector materials!";
+        message(str,this);
+    }
+
+    ui->lwDefinedParticleSources->setCurrentRow(ui->lwDefinedParticleSources->count()-1);
+    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 void MainWindow::on_pbSingleSourceShow_clicked()
@@ -687,7 +716,5 @@ void MainWindow::on_pbEditParticleSource_clicked()
       }
 
     on_pbUpdateSimConfig_clicked();
-
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
-    //qDebug() << "...update sources done";
 }

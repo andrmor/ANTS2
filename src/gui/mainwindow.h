@@ -597,6 +597,10 @@ private slots:
 
     void on_pbEditParticleSource_clicked();
 
+    void on_lwDefinedParticleSources_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_lwDefinedParticleSources_itemClicked(QListWidgetItem *item);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

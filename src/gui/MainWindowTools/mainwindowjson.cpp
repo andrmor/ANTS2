@@ -578,7 +578,7 @@ if (scj.contains("CustomDistrib"))
   //JsonToCheckbox(csjs, "PhotonTracks", ui->cbBuilPhotonTrackstester);
   ui->cbIgnoreEventsWithNoHits->setChecked(false);//compatibility
   JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
-  ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(true);//compatibility
+  ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
   JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
 
   //particle sources

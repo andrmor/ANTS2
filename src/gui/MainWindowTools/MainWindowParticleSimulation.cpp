@@ -227,13 +227,23 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 
 void MainWindow::on_pbGunTest_clicked()
 {
-  MainWindow::on_pbGunShowSource_toggled(true);
-  TestParticleGun(ParticleSources, ui->sbGunTestEvents->value());
+    GeometryWindow->ShowAndFocus();
+    gGeoManager->ClearTracks();
+
+    if (ui->pbGunShowSource->isChecked())
+    {
+        for (int i=0; i<ParticleSources->size(); i++)
+            ShowSource(ParticleSources->getSource(i), false);
+    }
+
+    TestParticleGun(ParticleSources, ui->sbGunTestEvents->value());
 }
 
 void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numParticles)
 {
     ParticleSources->Init();
+
+
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];
@@ -242,8 +252,8 @@ void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numP
         QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
         if (GP->isEmpty() && iRun > 2)
         {
-               message("Did several attempts but no particles were generated!", this);
-               return;
+            message("Did several attempts but no particles were generated!", this);
+            return;
         }
         for (GeneratedParticleStructure& p : *GP)
         {

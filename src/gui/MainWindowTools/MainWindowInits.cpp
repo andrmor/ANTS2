@@ -232,6 +232,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labReloadRequired->setPixmap(Rwindow->RedIcon.pixmap(16,16));
     ui->labAdvancedOn->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->labAdvancedOn->setVisible(false);
+    ui->labIgnoreNoHitEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoHitEvents->setVisible(false);
+    ui->labIgnoreNoDepoEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoDepoEvents->setVisible(false);
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties

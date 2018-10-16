@@ -42,7 +42,7 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
     ui->cobGunParticle->addItems(MW.MpCollection->getListOfParticleNames());
 
     ui->leSourceName->setText(Rec->name);
-    ui->cobGunSourceType->setCurrentIndex(Rec->index);
+    ui->cobGunSourceType->setCurrentIndex(Rec->shape);
 
     ui->ledGun1DSize->setText(QString::number(2.0 * Rec->size1));
     ui->ledGun2DSize->setText(QString::number(2.0 * Rec->size2));
@@ -329,7 +329,8 @@ void AParticleSourceDialog::on_cbLinkedParticle_toggled(bool checked)
 
 void AParticleSourceDialog::on_pbUpdateRecord_clicked()
 {
-    Rec->index = ui->cobGunSourceType->currentIndex();
+    Rec->name = ui->leSourceName->text();
+    Rec->shape = ui->cobGunSourceType->currentIndex();
 
     Rec->size1 = 0.5 * ui->ledGun1DSize->text().toDouble();
     Rec->size2 = 0.5 * ui->ledGun2DSize->text().toDouble();

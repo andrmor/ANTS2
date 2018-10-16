@@ -156,7 +156,7 @@ AParticleSourceRecord * AParticleSourceRecord::clone() const
 void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParticleCollection & MpCollection) const
 {
     json["Name"] = name;
-    json["Type"] = index;
+    json["Type"] = shape;
     json["Activity"] = Activity;
     json["X"] = X0;
     json["Y"] = Y0;
@@ -190,7 +190,7 @@ void AParticleSourceRecord::writeToJson(QJsonObject & json, const AMaterialParti
 bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParticleCollection &MpCollection)
 {
     parseJson(json, "Name", name);
-    parseJson(json, "Type", index);
+    parseJson(json, "Type", shape);
     parseJson(json, "Activity", Activity);
     parseJson(json, "X", X0);
     parseJson(json, "Y", Y0);
@@ -250,7 +250,7 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
 
 const QString AParticleSourceRecord::getShapeString() const
 {
-    switch (index)
+    switch (shape)
     {
     case 0: return "Point";
     case 1: return "Linear";

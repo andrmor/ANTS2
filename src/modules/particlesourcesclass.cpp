@@ -251,7 +251,7 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
 
 void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
 {
-  const int& index = ParticleSourcesData[isource]->index;
+  const int& index = ParticleSourcesData[isource]->shape;
   const double& X0 = ParticleSourcesData[isource]->X0;
   const double& Y0 = ParticleSourcesData[isource]->Y0;
   const double& Z0 = ParticleSourcesData[isource]->Z0;
@@ -599,7 +599,7 @@ int ParticleSourcesClass::CheckSource(int isource)
   if (getTotalActivity() == 0) return 4; // 4 - total activity = 0
 
   AParticleSourceRecord* ps = ParticleSourcesData[isource];
-  if (ps->index <0 || ps->index>5) return 10; //10 - unknown source shape
+  if (ps->shape <0 || ps->shape>5) return 10; //10 - unknown source shape
 
   int numParts = ps->GunParticles.size();     //11 - no particles defined
   if (numParts == 0) return 11;

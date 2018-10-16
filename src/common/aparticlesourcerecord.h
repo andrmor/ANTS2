@@ -38,9 +38,8 @@ struct AParticleSourceRecord
 {
     ~AParticleSourceRecord(); //deletes records in dynamic GunParticles
 
-    QString name = "Underfined";
-    //source type (geometry)
-    int index = 0; //shape
+    QString name = "No_name";
+    int shape = 0;
     //position
     double X0 = 0;
     double Y0 = 0;

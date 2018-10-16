@@ -55,7 +55,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 
 void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
 {
-  int index = p->index;
+  int index = p->shape;
   double X0 = p->X0;
   double Y0 = p->Y0;
   double Z0 = p->Z0;

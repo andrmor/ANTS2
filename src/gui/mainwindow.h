@@ -626,9 +626,9 @@ public slots:
     void OnSlabDoubleClicked(QString SlabName);
     void onNewConfigLoaded();    
     void onOpticalOverrideDialogAccepted();
-    void onTotalActivityChanged();
 signals:
     void RequestStopLoad();
+    void RequestUpdateSimConfig(); //used to delay execution (quesued connection have to be used). Used in Lambda expression!
 };
 
 #endif // MAINWINDOW_H

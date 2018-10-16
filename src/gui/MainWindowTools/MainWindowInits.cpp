@@ -187,6 +187,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(SimulationManager->Runner, SIGNAL(updateReady(int, double)), this, SLOT(RefreshPhotSimOnTimer(int, double))); //Simulation interface refresh/update stuff
     QObject::connect(SimulationManager, SIGNAL(SimulationFinished()), this, SLOT(simulationFinished())); //Simulation finished
 
+    QObject::connect(this, &MainWindow::RequestUpdateSimConfig, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+
     DoNotUpdateGeometry = false; //control
 
     qDebug()<<">Loading default detector...";

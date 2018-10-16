@@ -318,63 +318,68 @@ void MainWindow::on_pbAddSource_clicked()
 #include <QHBoxLayout>
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-  qDebug() << "Update sources indication. Defined sources:"<<ParticleSources->size();
+    qDebug() << "Update sources indication. Defined sources:"<<ParticleSources->size();
 
-  int numSources = ParticleSources->size();
-  ui->labPartSourcesDefined->setText(QString::number(numSources));
+    int numSources = ParticleSources->size();
 
-  int curRow = ui->lwDefinedParticleSources->currentRow();
-  ui->lwDefinedParticleSources->clear();
+    int curRow = ui->lwDefinedParticleSources->currentRow();
+    ui->lwDefinedParticleSources->clear();
 
-  for (int i=0; i<numSources; i++)
-  {
-      AParticleSourceRecord* pr = ParticleSources->getSource(i);
-      QListWidgetItem* item = new QListWidgetItem();
-      ui->lwDefinedParticleSources->addItem(item);
+    for (int i=0; i<numSources; i++)
+    {
+        AParticleSourceRecord* pr = ParticleSources->getSource(i);
+        QListWidgetItem* item = new QListWidgetItem();
+        ui->lwDefinedParticleSources->addItem(item);
 
-      QFrame* fr = new QFrame();
-      fr->setFrameShape(QFrame::Box);
-      QHBoxLayout* l = new QHBoxLayout();
-      l->setContentsMargins(3, 2, 3, 2);
-      l->addWidget(new QLabel(pr->name + ','));
-      l->addWidget(new QLabel(pr->getShapeString() + ','));
-      l->addWidget(new QLabel( QString("%1 particle(s)").arg(pr->GunParticles.size())));
-      l->addStretch();
-      l->addWidget(new QLabel("Activity:"));
-      QLineEdit* e = new QLineEdit(QString::number(pr->Activity));
-        e->setMaximumWidth(75);
-        QDoubleValidator* val = new QDoubleValidator(this);
-        val->setBottom(0);
-        e->setValidator(val);
-        QObject::connect(e, &QLineEdit::editingFinished, [pr, e, this]
-        {
-            double newVal = e->text().toDouble();
-            if (pr->Activity == newVal) return;
-            pr->Activity = newVal;
-            this->onTotalActivityChanged();
-        });
-      l->addWidget(e);
-      double totAct = ParticleSources->getTotalActivity();
-      double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
-      QString t = QString("(%1%)").arg(per, 3, 'g', 3);
-      l->addWidget(new QLabel(t));
+        QFrame* fr = new QFrame();
+        fr->setFrameShape(QFrame::Box);
+        QHBoxLayout* l = new QHBoxLayout();
+        l->setContentsMargins(3, 2, 3, 2);
+            QLabel* lab = new QLabel(pr->name);
+            lab->setMinimumWidth(110);
+            QFont f = lab->font();
+            f.setBold(true);
+            lab->setFont(f);
+        l->addWidget(lab);
+        l->addWidget(new QLabel(pr->getShapeString() + ','));
+        l->addWidget(new QLabel( QString("%1 particle%2").arg(pr->GunParticles.size()).arg( pr->GunParticles.size()>1 ? "s" : "" ) ) );
+        l->addStretch();
 
-      fr->setLayout(l);
-      item->setSizeHint(fr->sizeHint());
+        l->addWidget(new QLabel("Fraction:"));
+            QLineEdit* e = new QLineEdit(QString::number(pr->Activity));
+            e->setMaximumWidth(50);
+            e->setMinimumWidth(50);
+            QDoubleValidator* val = new QDoubleValidator(this);
+            val->setBottom(0);
+            e->setValidator(val);
+            QObject::connect(e, &QLineEdit::editingFinished, [pr, e, this]()
+            {
+                double newVal = e->text().toDouble();
+                if (pr->Activity == newVal) return;
+                pr->Activity = newVal;
+                e->clearFocus();
+                emit this->RequestUpdateSimConfig();
+            });
+            e->setVisible(numSources > 1);
+        l->addWidget(e);
 
-      ui->lwDefinedParticleSources->setItemWidget(item, fr);
+            double totAct = ParticleSources->getTotalActivity();
+            double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
+            QString t = QString("%1%").arg(per, 3, 'g', 3);
+            lab = new QLabel(t);
+            lab->setMinimumWidth(45);
+        l->addWidget(lab);
 
-  }
 
-  if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())
-      curRow = 0;
-  ui->lwDefinedParticleSources->setCurrentRow(curRow);
-}
+        fr->setLayout(l);
+        item->setSizeHint(fr->sizeHint());
+        ui->lwDefinedParticleSources->setItemWidget(item, fr);
+        item->setSizeHint(fr->sizeHint());
+    }
 
-void MainWindow::onTotalActivityChanged()
-{
-    //on_pbUpdateSourcesIndication_clicked();
-    on_pbUpdateSimConfig_clicked();
+    if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())
+        curRow = 0;
+    ui->lwDefinedParticleSources->setCurrentRow(curRow);
 }
 
 void MainWindow::on_pbGunShowSource_toggled(bool checked)

@@ -10045,12 +10045,12 @@ double events:</string>
            <rect>
             <x>60</x>
             <y>120</y>
-            <width>47</width>
-            <height>13</height>
+            <width>421</width>
+            <height>91</height>
            </rect>
           </property>
           <property name="text">
-           <string>...</string>
+           <string/>
           </property>
          </widget>
         </widget>

@@ -746,7 +746,27 @@ void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 
 }
 
+#include "afileparticlegenerator.h"
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
+    ui->labGenerateFromFile_info->setText("");
+    int numParticles = MpCollection->countParticles();
+    AParticleFileStat stat = AFileParticleGenerator::InspectFile(ui->leGenerateFromFile_FileName->text(), numParticles);
 
+    if (!stat.ErrorString.isEmpty())
+    {
+        message(stat.ErrorString, this);
+        return;
+    }
+
+    QString s;
+    s += QString("Events: %1\n").arg(stat.numEvents);
+    if (stat.numMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(stat.numMultipleEvents);
+    s += "Particle distribution:\n";
+    for (int ip = 0; ip < numParticles; ip++)
+    {
+        if (stat.ParticleStat.at(ip) > 0)
+            s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(stat.ParticleStat.at(ip));
+    }
+    ui->labGenerateFromFile_info->setText(s);
 }

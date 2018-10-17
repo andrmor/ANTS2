@@ -6,8 +6,18 @@
 #include <QString>
 #include <QFile>
 #include <QRegularExpression>
+#include <QVector>
 
 class QTextStream;
+
+class AParticleFileStat
+{
+public:
+    int numEvents = 0;
+    int numMultipleEvents = 0;
+    QVector<int> ParticleStat;
+    QString ErrorString;
+};
 
 class AFileParticleGenerator : public AParticleGun
 {
@@ -27,12 +37,15 @@ public:
 private:
     const QString FileName;
     QFile File;
-    QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
     QTextStream* Stream = 0;
 
 private:
     //bool readLine();
+
+public:
+    static const AParticleFileStat InspectFile(const QString& fname, int ParticleCount); //TODO remove static
 };
 
 #endif // AFILEPARTICLEGENERATOR_H

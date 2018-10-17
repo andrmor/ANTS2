@@ -249,13 +249,13 @@ void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numP
     double R[3], K[3];
     for (int iRun=0; iRun<numParticles; iRun++)
       {
-        QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
+        QVector<AGeneratedParticle>* GP = ParticleSources->GenerateEvent();
         if (GP->isEmpty() && iRun > 2)
         {
             message("Did several attempts but no particles were generated!", this);
             return;
         }
-        for (GeneratedParticleStructure& p : *GP)
+        for (AGeneratedParticle& p : *GP)
         {
             R[0] = p.Position[0];
             R[1] = p.Position[1];

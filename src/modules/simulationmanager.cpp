@@ -1532,14 +1532,14 @@ void ParticleSourceSimulator::simulate()
         for(int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
             //generating one event
-            QVector<GeneratedParticleStructure>* GP = ParticleSources->GenerateEvent();
+            QVector<AGeneratedParticle>* GP = ParticleSources->GenerateEvent();
             //adding particles to the stack
             for (int iPart = 0; iPart < GP->size(); iPart++ )
             {
                 if(iRun > 0 && timeRange != 0)
                     time = timeFrom + timeRange*RandGen->Rndm(); //added TimeFrom 05/02/2015
 
-                const GeneratedParticleStructure &part = GP->at(iPart);
+                const AGeneratedParticle &part = GP->at(iPart);
                 ParticleStack.append(new AParticleOnStack(part.ParticleId,
                                                          part.Position[0], part.Position[1], part.Position[2],
                                                          part.Direction[0], part.Direction[1], part.Direction[2],

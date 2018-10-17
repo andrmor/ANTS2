@@ -490,7 +490,8 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
     OpticalOverrides/abasicopticaloverride.h \
     common/aglobalsettings.h \
-    common/aparticlesourcerecord.h
+    common/aparticlesourcerecord.h \
+    common/aparticlegun.h
 
 # --- SIM ---
 ants2_SIM {

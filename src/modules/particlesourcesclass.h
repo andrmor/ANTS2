@@ -1,6 +1,8 @@
 #ifndef PARTICLESOURCESCLASS_H
 #define PARTICLESOURCESCLASS_H
 
+#include "aparticlegun.h"
+
 #include <QString>
 #include <QVector>
 #include "TVector3.h"
@@ -10,15 +12,6 @@ class QJsonObject;
 class TRandom2;
 class DetectorClass;
 struct AParticleSourceRecord;
-
-class GeneratedParticleStructure
-{
-public:
-    int ParticleId;
-    double Energy;
-    double Position[3];
-    double Direction[3];
-};
 
 class LinkedParticleStructure
 {
@@ -30,25 +23,18 @@ public:
   LinkedParticleStructure(int iparticle, int linkedto = -1) {iParticle = iparticle; LinkedTo = linkedto;}
 };
 
-/*
-class AParticleGun
-{
-    virtual ~AParticleGenerator(){}
-
-    virtual void Init() = 0;
-    virtual QVector<GeneratedParticleStructure>* GenerateEvent() const = 0;
-};
-*/
-
-class ParticleSourcesClass
+class ParticleSourcesClass : public AParticleGun
 {
 public:
    ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen);
-  ~ParticleSourcesClass();
+   ~ParticleSourcesClass();
 
-  //MAIN usage
-  void Init(); // !!! has to be called before the first use of "GenerateEvent"!
-  QVector<GeneratedParticleStructure>* GenerateEvent(); //see Init!!!
+   virtual void Init() override; // !!! has to be called before the first use of "GenerateEvent"!
+   virtual QVector<AGeneratedParticle>* GenerateEvent() override; //see Init!!!
+
+   //for remove particle from configuration
+   virtual void RemoveParticle(int particleId) override; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
+   virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 
   //requests
   int size() {return ParticleSourcesData.size();}
@@ -78,10 +64,6 @@ public:
   TVector3 GenerateRandomDirection();  
   void checkLimitedToMaterial(AParticleSourceRecord *s);
 
-  //for remove particle from configuration
-  void RemoveParticle(int particleId); //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
-  void IsParticleInUse(int particleId, bool& bInUse, QString& SourceNames);
-
 private:  
   //external resources - pointers
   const DetectorClass* Detector;
@@ -101,7 +83,7 @@ private:
   //utilities
   void CalculateTotalActivity();
   void GeneratePosition(int isource, double *R) const;
-  void AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles) const; //QVector - only pointer is transferred!
+  void AddParticleInCone(int isource, int iparticle, QVector<AGeneratedParticle> *GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
 #endif // PARTICLESOURCESCLASS_H

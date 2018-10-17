@@ -109,11 +109,11 @@ void ParticleSourcesClass::Init()
     }
 }
 
-QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
+QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
 {
   //after any operation with sources (add, remove), init should be called before first use!
 
-  QVector<GeneratedParticleStructure>* GeneratedParticles = new QVector<GeneratedParticleStructure>;
+  QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
 
   //selecting the source
   int isource = 0;
@@ -225,7 +225,7 @@ QVector<GeneratedParticleStructure>* ParticleSourcesClass::GenerateEvent()
                   for (int i=0; i<linkedTo+1; i++) if (WasGenerated.at(i)) index++;
                   //qDebug() << "making this particle opposite to:"<<linkedTo<<"index in GeneratedParticles:"<<index;
 
-                  GeneratedParticleStructure ps;
+                  AGeneratedParticle ps;
                   ps.ParticleId = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
                   //if (ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum == 0)
                   //  ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->energy;
@@ -372,9 +372,9 @@ void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
   return;
 }
 
-void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<GeneratedParticleStructure> *GeneratedParticles) const
+void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AGeneratedParticle> *GeneratedParticles) const
 {
-  GeneratedParticleStructure ps;
+  AGeneratedParticle ps;
 
   ps.ParticleId = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
 
@@ -414,23 +414,30 @@ TVector3 ParticleSourcesClass::GenerateRandomDirection()
   return TVector3(a*scale, b*scale, -1.0 + 8.0 * r2 );
 }
 
-void ParticleSourcesClass::IsParticleInUse(int particleId, bool &bInUse, QString &SourceNames)
+#include <QSet>
+bool ParticleSourcesClass::IsParticleInUse(int particleId, QString &SourceNames) const
 {
-  bInUse = false;
-  SourceNames.clear();
+    SourceNames.clear();
+    QSet<QString> sources;
 
-  for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
+    for (const AParticleSourceRecord* ps : ParticleSourcesData)
     {
-      AParticleSourceRecord* ps = ParticleSourcesData[isource];
-      for (int ip = 0; ip<ps->GunParticles.size(); ip++)
+        for (int ip = 0; ip < ps->GunParticles.size(); ip++)
         {
-          if ( particleId == ps->GunParticles[ip]->ParticleId )
-            {
-              bInUse = true;
-              if (!SourceNames.isEmpty()) SourceNames += ", ";
-              SourceNames += ps->name;
-            }
+            if ( particleId == ps->GunParticles[ip]->ParticleId )
+                sources << ps->name;
         }
+    }
+
+    if (sources.isEmpty()) return false;
+    else
+    {
+        for (const QString& s : sources)
+        {
+            if (!SourceNames.isEmpty()) SourceNames += ", ";
+            SourceNames += s;
+        }
+        return true;
     }
 }
 

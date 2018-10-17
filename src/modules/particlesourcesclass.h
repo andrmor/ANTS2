@@ -29,7 +29,7 @@ public:
    ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen);
    ~ParticleSourcesClass();
 
-   virtual void Init() override; // !!! has to be called before the first use of "GenerateEvent"!
+   virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
    virtual QVector<AGeneratedParticle>* GenerateEvent() override; //see Init!!!
 
    //for remove particle from configuration

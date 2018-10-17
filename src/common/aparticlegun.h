@@ -17,7 +17,7 @@ class AParticleGun
 public:
     virtual ~AParticleGun(){}
 
-    virtual void Init() {}               //called before first use
+    virtual bool Init() = 0;             //called before first use
     virtual void ReleaseResources() {}   //called after end of operation
     virtual QVector<AGeneratedParticle>* GenerateEvent() = 0;
 

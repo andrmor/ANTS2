@@ -357,7 +357,9 @@ SOURCES += main.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
     OpticalOverrides/abasicopticaloverride.cpp \
     common/aglobalsettings.cpp \
-    common/aparticlesourcerecord.cpp
+    common/aparticlesourcerecord.cpp \
+    modules/ascriptparticlegenerator.cpp \
+    modules/afileparticlegenerator.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -491,7 +493,9 @@ HEADERS  += common/CorrelationFilters.h \
     OpticalOverrides/abasicopticaloverride.h \
     common/aglobalsettings.h \
     common/aparticlesourcerecord.h \
-    common/aparticlegun.h
+    common/aparticlegun.h \
+    modules/ascriptparticlegenerator.h \
+    modules/afileparticlegenerator.h
 
 # --- SIM ---
 ants2_SIM {

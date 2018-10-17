@@ -34,7 +34,7 @@ void ParticleSourcesClass::clear()
     TotalActivity = 0;
 }
 
-void ParticleSourcesClass::Init()
+bool ParticleSourcesClass::Init()
 {  
     int NumSources = ParticleSourcesData.size();
     CalculateTotalActivity();
@@ -107,6 +107,7 @@ void ParticleSourcesClass::Init()
       CollimationProbability[isource] = 0.5 * (1.0 - cos(Spread));
       //CollimationSpreadProduct[isource] = cos(Spread); //scalar product of coll direction and max spread unit vectors
     }
+  return true; //TODO  check for fails
 }
 
 QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()

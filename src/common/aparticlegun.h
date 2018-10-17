@@ -6,6 +6,18 @@
 class AGeneratedParticle
 {
 public:
+    AGeneratedParticle(int pId, double energy, double x, double y, double z, double vx, double vy, double vz) :
+        ParticleId(pId), Energy(energy)
+    {
+        Position[0] = x;
+        Position[1] = y;
+        Position[2] = z;
+        Direction[0] = vx;
+        Direction[1] = vy;
+        Direction[2] = vz;
+    }
+    AGeneratedParticle(){}
+
     int    ParticleId;
     double Energy;
     double Position[3];

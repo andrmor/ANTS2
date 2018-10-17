@@ -601,6 +601,14 @@ private slots:
 
     void on_lwDefinedParticleSources_itemClicked(QListWidgetItem *item);
 
+    void on_pbGenerateFromFile_Help_clicked();
+
+    void on_pbGenerateFromFile_Change_clicked();
+
+    void on_leGenerateFromFile_FileName_editingFinished();
+
+    void on_pbGenerateFromFile_Check_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

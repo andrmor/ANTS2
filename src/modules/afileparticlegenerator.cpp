@@ -3,11 +3,12 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <QStringList>
 
 AFileParticleGenerator::AFileParticleGenerator(const QString &FileName) :
     FileName(FileName) {}
 
-void AFileParticleGenerator::Init()
+bool AFileParticleGenerator::Init()
 {
     File.setFileName(FileName);
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
@@ -16,7 +17,7 @@ void AFileParticleGenerator::Init()
         return false;
     }
 
-    Stream = new QTextStream(&file);
+    Stream = new QTextStream(&File);
     return true;
 }
 
@@ -30,26 +31,29 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
 {
     QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
 
-    QRegExp rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+    while(!Stream->atEnd())
+    {
+        const QString line = Stream->readLine();
+        QStringList f = line.split(rx, QString::SkipEmptyParts);
+        //format: ParticleId Energy X Y Z VX VY VZ *  //'*' is optional - indicates event not finished yet
 
-    /*
-    x->resize(0);
+        if (f.size() < 8) continue;
 
-    while(!in.atEnd())
-         {
-            QString line = in.readLine();
-            QStringList fields = line.split(rx, QString::SkipEmptyParts);
+        int    pId    = f.at(0).toInt(); //TODO index check
+        double energy = f.at(1).toDouble();
+        double x =      f.at(2).toDouble();
+        double y =      f.at(3).toDouble();
+        double z =      f.at(4).toDouble();
+        double vx =     f.at(5).toDouble();
+        double vy =     f.at(6).toDouble();
+        double vz =     f.at(7).toDouble();
 
-            bool ok1= false;
-            double xx;
-            if (fields.size()>0) xx = fields[0].toDouble(&ok1);  //*** potential problem with decimal separator!
+        (*GeneratedParticles) << AGeneratedParticle(pId, energy, x, y, z, vx, vy, vz);
 
-            if (ok1)
-              {
-                x->append(xx);
-              }
-          }
-   */
+        if (f.size() > 8 && f.at(8) == '*') continue;
+        break;
+    }
+
     return GeneratedParticles;
 }
 

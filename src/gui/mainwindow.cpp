@@ -4971,3 +4971,4 @@ void MainWindow::on_pbPMtypeHelp_clicked()
                 "   represent the photocathode.";
     message(s, this);
 }
+

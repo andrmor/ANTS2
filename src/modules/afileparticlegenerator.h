@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QFile>
+#include <QRegularExpression>
 
 class QTextStream;
 
@@ -14,7 +15,7 @@ public:
     AFileParticleGenerator(const QString& FileName);
     virtual ~AFileParticleGenerator(){}
 
-    virtual void Init() override;               //called before first use
+    virtual bool Init() override;               //called before first use
     virtual void ReleaseResources() override;   //called after end of operation
     virtual QVector<AGeneratedParticle>* GenerateEvent();
 
@@ -26,6 +27,7 @@ public:
 private:
     const QString FileName;
     QFile File;
+    QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 
     QTextStream* Stream = 0;
 

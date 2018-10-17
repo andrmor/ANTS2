@@ -728,3 +728,25 @@ void MainWindow::on_pbEditParticleSource_clicked()
     on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
+
+// ---- from file ----
+
+void MainWindow::on_pbGenerateFromFile_Help_clicked()
+{
+
+}
+
+void MainWindow::on_pbGenerateFromFile_Change_clicked()
+{
+
+}
+
+void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
+{
+
+}
+
+void MainWindow::on_pbGenerateFromFile_Check_clicked()
+{
+
+}

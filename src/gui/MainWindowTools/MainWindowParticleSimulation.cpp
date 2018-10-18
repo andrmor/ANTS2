@@ -290,7 +290,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 //            message("Did several attempts but no particles were generated!", this);
 //            break;
 //        }
-        for (AGeneratedParticle& p : *GP)
+        for (const AGeneratedParticle& p : *GP)
         {
             R[0] = p.Position[0];
             R[1] = p.Position[1];
@@ -304,10 +304,11 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
             TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
             track->AddPoint(R[0], R[1], R[2], 0);
             track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
-            track->SetLineWidth(1); //TODO respect all attributes!
-            track->SetLineColor(1 + p.ParticleId); //TODO respect particle track colors!
+            SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p.ParticleId);
+            //track->SetLineWidth(1); //TODO respect all attributes!
+            //track->SetLineColor(1 + p.ParticleId); //TODO respect particle track colors!
 
-            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, kBlack);
+            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p.ParticleId));
             marks->SetNextPoint(R[0], R[1], R[2]);
             GeoMarkers.append(marks);
         }

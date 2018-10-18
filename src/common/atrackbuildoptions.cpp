@@ -2,6 +2,8 @@
 #include "ajsontools.h"
 #include "atrackrecords.h"
 
+#include "TVirtualGeoTrack.h"
+
 void ATrackAttributes::writeToJson(QJsonObject &json) const
 {
     json["color"] = color;
@@ -28,6 +30,13 @@ void ATrackAttributes::setTrackAttributes(TrackHolderClass *track) const
     track->Color = color;
     track->Width = width;
     track->Style = style;
+}
+
+void ATrackAttributes::setTrackAttributes(TVirtualGeoTrack *track) const
+{
+    track->SetLineColor(color);
+    track->SetLineWidth(width);
+    track->SetLineStyle(style);
 }
 
 void ATrackAttributes::reset()
@@ -152,6 +161,30 @@ void ATrackBuildOptions::applyToParticleTrack(TrackHolderClass *track, int Parti
 
     if ( ParticleId < DefaultParticle_Colors.size())
         track->Color = DefaultParticle_Colors.at(ParticleId);
+}
+
+void ATrackBuildOptions::applyToParticleTrack(TVirtualGeoTrack *track, int ParticleId) const
+{
+    if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
+    {
+        //custom properties defined for this particle
+        CustomParticle_Attributes.at(ParticleId)->setTrackAttributes(track);
+        return;
+    }
+
+    TA_DefaultParticle.setTrackAttributes(track);
+
+    if ( ParticleId < DefaultParticle_Colors.size())
+        track->SetLineColor( DefaultParticle_Colors.at(ParticleId) );
+}
+
+int ATrackBuildOptions::getParticleColor(int ParticleId) const
+{
+    if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
+        return CustomParticle_Attributes.at(ParticleId)->color; //custom properties defined for this particle
+
+    if ( ParticleId < DefaultParticle_Colors.size()) return DefaultParticle_Colors.at(ParticleId);
+    else return TA_DefaultParticle.color;
 }
 
 void ATrackBuildOptions::clear()

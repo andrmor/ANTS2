@@ -5,6 +5,7 @@
 
 class QJsonObject;
 class TrackHolderClass;
+class TVirtualGeoTrack;
 
 class ATrackAttributes
 {
@@ -18,6 +19,7 @@ public:
     void readFromJson(const QJsonObject& json);
 
     void setTrackAttributes(TrackHolderClass* track) const;
+    void setTrackAttributes(TVirtualGeoTrack* track) const;
 
     void reset();
 };
@@ -58,6 +60,8 @@ public:
     void readFromJson(const QJsonObject& json);
 
     void applyToParticleTrack(TrackHolderClass* track, int ParticleId) const;
+    void applyToParticleTrack(TVirtualGeoTrack *track, int ParticleId) const;
+    int  getParticleColor(int ParticleId) const;
 
 private:
     void clear(); //clear and reset to default values

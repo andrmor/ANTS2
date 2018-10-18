@@ -1430,34 +1430,34 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
     }
 
     QJsonObject js = json["ParticleSourcesConfig"].toObject();
+        //control options
+        QJsonObject cjs = js["SourceControlOptions"].toObject();
+        if (cjs.isEmpty())
+        {
+            ErrorString = "Json sent to simulator does not contain proper sim config data!";
+            return false;
+        }
 
-    //control options
-    //QJsonObject cjs = js[controlOptions].toObject();
-    QJsonObject cjs = js["SourceControlOptions"].toObject();
-    if (cjs.isEmpty())
-    {
-        ErrorString = "Json sent to simulator does not contain proper sim config data!";
-        return false;
-    }
-    totalEventCount = cjs["EventsToDo"].toInt();
-    fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
-    AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
-    TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
-    fDoS1 = cjs["DoS1"].toBool();
-    fDoS2 = cjs["DoS2"].toBool();
-    //fBuildParticleTracks = cjs["ParticleTracks"].toBool();
-    fBuildParticleTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
-    fIgnoreNoHitsEvents = false; //compatibility
-    parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
-    fIgnoreNoDepoEvents = true; //compatibility
-    parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+        // select ParticleGun type and load the appropriate options
 
-    //particle sources
-    if (js.contains("ParticleSources"))
-    {
-        ParticleSources->readFromJson(js);
-        ParticleSources->Init();
-    }
+        totalEventCount = cjs["EventsToDo"].toInt();
+        fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
+        AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
+        TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
+        fDoS1 = cjs["DoS1"].toBool();
+        fDoS2 = cjs["DoS2"].toBool();
+        fBuildParticleTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
+        fIgnoreNoHitsEvents = false; //compatibility
+        parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
+        fIgnoreNoDepoEvents = true; //compatibility
+        parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+
+        //particle sources
+        if (js.contains("ParticleSources"))
+        {
+            ParticleSources->readFromJson(js);
+            ParticleSources->Init();
+        }
 
     //inits
     ParticleTracker->configure(simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
@@ -1478,7 +1478,7 @@ void ParticleSourceSimulator::updateGeoManager()
 void ParticleSourceSimulator::simulate()
 {
     //watchdogs
-    int NumSources = ParticleSources->size();
+    int NumSources = ParticleSources->countSources();
     if (NumSources == 0)
     {
         ErrorString = "Particle sources are not defined!";

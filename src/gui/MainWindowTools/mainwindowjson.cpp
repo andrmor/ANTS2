@@ -552,50 +552,45 @@ if (scj.contains("CustomDistrib"))
     }
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
 
-  //Particle generation mode
-  QString PartGenMode = "Sources"; //compatibility
-  parseJson(js, "ParticleGenerationMode", PartGenMode);
-  int PGMindex = 0;
-  if      (PartGenMode == "Sources") PGMindex = 0;
-  else if (PartGenMode == "File")    PGMindex = 1;
-  else if (PartGenMode == "Script")  PGMindex = 2;
-  else qWarning() << "Load sim settings: Unknown particle generation mode!";
-  ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+    //PARTICLE SOURCES
+    QJsonObject psjs = js["ParticleSourcesConfig"].toObject();
+        QJsonObject csjs = psjs["SourceControlOptions"].toObject();
+            //Particle generation mode
+            QString PartGenMode = "Sources"; //compatibility
+            parseJson(csjs, "ParticleGenerationMode", PartGenMode);
+            int PGMindex = 0;
+            if      (PartGenMode == "Sources") PGMindex = 0;
+            else if (PartGenMode == "File")    PGMindex = 1;
+            else if (PartGenMode == "Script")  PGMindex = 2;
+            else qWarning() << "Load sim settings: Unknown particle generation mode!";
+            ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+            JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
+            JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
+            JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
+            ui->cobPartPerEvent->setCurrentIndex(0);
+            JsonToComboBox(csjs, "TypeParticlesPerEvent", ui->cobPartPerEvent);
+            JsonToCheckbox(csjs, "DoS1", ui->cbGunDoS1);
+            JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
+            JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);
+            JsonToCheckbox(csjs, "DoS2", ui->cbDoS2tester);
+            ui->cbIgnoreEventsWithNoHits->setChecked(false);//compatibility
+            JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
+            ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
+            JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
 
-  //From file
-  QJsonObject fjs;
-  parseJson(js, "GenerationFromFile", fjs);
-  if (!fjs.isEmpty())
-  {
-      SimulationManager->FileParticleGenerator->readFromJson(fjs);
-      ui->leGenerateFromFile_FileName->setText(SimulationManager->FileParticleGenerator->GetFileName());
-  }
+        //particle sources
+        SimulationManager->ParticleSources->readFromJson(psjs);
 
-  //PARTICLE SOURCES
-  QJsonObject psjs = js["ParticleSourcesConfig"].toObject();
-  //full sources mode
-  QJsonObject csjs = psjs["SourceControlOptions"].toObject();
-  JsonToSpinBox (csjs, "EventsToDo", ui->sbGunEvents);
-  JsonToCheckbox(csjs, "AllowMultipleParticles", ui->cbGunAllowMultipleEvents);
-  JsonToLineEditDouble(csjs, "AverageParticlesPerEvent", ui->ledGunAverageNumPartperEvent);
-  ui->cobPartPerEvent->setCurrentIndex(0);
-  JsonToComboBox(csjs, "TypeParticlesPerEvent", ui->cobPartPerEvent);
-  JsonToCheckbox(csjs, "DoS1", ui->cbGunDoS1);
-  JsonToCheckbox(csjs, "DoS1", ui->cbDoS1tester);
-  JsonToCheckbox(csjs, "DoS2", ui->cbGunDoS2);
-  JsonToCheckbox(csjs, "DoS2", ui->cbDoS2tester);
-  //JsonToCheckbox(csjs, "ParticleTracks", ui->cbGunParticleTracks);
-  //JsonToCheckbox(csjs, "ParticleTracks", ui->cbBuildParticleTrackstester);
-  //JsonToCheckbox(csjs, "PhotonTracks", ui->cbGunPhotonTracks);
-  //JsonToCheckbox(csjs, "PhotonTracks", ui->cbBuilPhotonTrackstester);
-  ui->cbIgnoreEventsWithNoHits->setChecked(false);//compatibility
-  JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
-  ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
-  JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
+        //generation from file
+        QJsonObject fjs;
+        parseJson(js, "GenerationFromFile", fjs);
+            if (!fjs.isEmpty())
+            {
+                SimulationManager->FileParticleGenerator->readFromJson(fjs);
+                ui->leGenerateFromFile_FileName->setText(SimulationManager->FileParticleGenerator->GetFileName());
+            }
 
-  //particle sources
-  SimulationManager->ParticleSources->readFromJson(psjs);
-  on_pbUpdateSourcesIndication_clicked();
+    on_pbUpdateSourcesIndication_clicked();
 
   //Window CONTROL
   if (js.contains("Mode"))
@@ -647,7 +642,7 @@ void MainWindow::selectFirstActiveParticleSource()
     {
         //show the first source with non-zero activity
         int i = 0;
-        for (; i<SimulationManager->ParticleSources->size(); i++)
+        for (; i<SimulationManager->ParticleSources->countSources(); i++)
           if (SimulationManager->ParticleSources->getSource(i)->Activity > 0) break;
 
         if (i < ui->lwDefinedParticleSources->count())

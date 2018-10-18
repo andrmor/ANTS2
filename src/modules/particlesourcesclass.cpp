@@ -598,7 +598,7 @@ bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QSt
 
 int ParticleSourcesClass::CheckSource(int isource)
 {
-  if (isource<0 || isource>size()-1) return 1; // 1 - wrong isource
+  if (isource<0 || isource>countSources()-1) return 1; // 1 - wrong isource
 
   // obsolete: 2 - particle collection not connected
   if (MpCollection == 0) return 3; // 3 - material collection not connected

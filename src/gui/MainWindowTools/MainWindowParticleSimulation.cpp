@@ -38,35 +38,36 @@
 
 void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
 {
-    QString str;
-    switch (ui->twParticleGenerationMode->currentIndex())
-    {
-    case 0 : str = "Sources"; break;
-    case 1 : str = "File"; break;
-    case 2 : str = "Script"; break;
-    default: qWarning() << "Save sim config: unknown particle generation mode";
-    }
-    json["ParticleGenerationMode"] = str;
-
-    //from file
-    QJsonObject fjs;
-    SimulationManager->FileParticleGenerator->writeToJson(fjs);
-    json["GenerationFromFile"] = fjs;
-
-    //Particle sources
     QJsonObject psjs;
-        QJsonObject cjs; // control options
-        cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
-        cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
-        cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
-        cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
-        cjs["DoS1"] = ui->cbGunDoS1->isChecked();
-        cjs["DoS2"] = ui->cbGunDoS2->isChecked();
-        cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
-        cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
-    psjs["SourceControlOptions"] = cjs;
-    //particle sources
-    SimulationManager->ParticleSources->writeToJson(psjs);
+        //control options
+        QJsonObject cjs;
+            QString str;
+                switch (ui->twParticleGenerationMode->currentIndex())
+                {
+                default: qWarning() << "Save sim config: unknown particle generation mode";
+                case 0 : str = "Sources"; break;
+                case 1 : str = "File"; break;
+                case 2 : str = "Script"; break;
+                }
+            cjs["ParticleGenerationMode"] = str;
+            cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
+            cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked(); //--->ps
+            cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble(); //--->ps
+            cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex(); //--->ps
+            cjs["DoS1"] = ui->cbGunDoS1->isChecked();
+            cjs["DoS2"] = ui->cbGunDoS2->isChecked();
+            cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
+            cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
+        psjs["SourceControlOptions"] = cjs;
+
+        //particle sources
+        SimulationManager->ParticleSources->writeToJson(psjs);
+
+        //from file
+        QJsonObject fjs;
+            SimulationManager->FileParticleGenerator->writeToJson(fjs);
+        psjs["GenerationFromFile"] = fjs;
+
     json["ParticleSourcesConfig"] = psjs;
 }
 
@@ -250,7 +251,7 @@ void MainWindow::on_pbGunTest_clicked()
     {
         if (ui->pbGunShowSource->isChecked())
         {
-            for (int i=0; i<SimulationManager->ParticleSources->size(); i++)
+            for (int i=0; i<SimulationManager->ParticleSources->countSources(); i++)
                 ShowSource(SimulationManager->ParticleSources->getSource(i), false);
         }
     }
@@ -337,7 +338,7 @@ void MainWindow::on_pbRemoveSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->countSources())
     {
         message("Error - bad source index!", this);
         return;
@@ -355,7 +356,7 @@ void MainWindow::on_pbRemoveSource_clicked()
     on_pbUpdateSourcesIndication_clicked();
     if (ui->pbGunShowSource->isChecked())
     {
-        if (SimulationManager->ParticleSources->size() == 0)
+        if (SimulationManager->ParticleSources->countSources() == 0)
         {
             Detector->GeoManager->ClearTracks();
             GeometryWindow->ShowGeometry(false);
@@ -372,13 +373,13 @@ void MainWindow::on_pbAddSource_clicked()
     SimulationManager->ParticleSources->append(s);
 
     on_pbUpdateSourcesIndication_clicked();
-    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->size()-1 );
+    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->countSources()-1 );
     on_pbEditParticleSource_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    int numSources = SimulationManager->ParticleSources->size();
+    int numSources = SimulationManager->ParticleSources->countSources();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
     ui->lwDefinedParticleSources->clear();
@@ -468,7 +469,7 @@ void MainWindow::ShowParticleSource_noFocus()
 {
   int isource = ui->lwDefinedParticleSources->currentRow();
   if (isource < 0) return;
-  if (isource >= SimulationManager->ParticleSources->size())
+  if (isource >= SimulationManager->ParticleSources->countSources())
     {
       message("Source number is out of bounds!",this);
       return;
@@ -484,7 +485,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->countSources())
     {
         message("Error - bad source index!", this);
         return;
@@ -526,7 +527,7 @@ void MainWindow::on_pbLoadParticleSource_clicked()
     js = json["ParticleSource"].toObject();
 
     SimulationManager->ParticleSources->append(new AParticleSourceRecord());
-    SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->size()-1, js );
+    SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->countSources()-1, js );
 
     onRequestDetectorGuiUpdate();
     on_pbUpdateSimConfig_clicked();
@@ -724,7 +725,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
         message("Select a source to edit", this);
         return;
     }
-    if (isource >= SimulationManager->ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->countSources())
     {
         message("Error - bad source index!", this);
         return;
@@ -743,7 +744,7 @@ void MainWindow::on_pbEditParticleSource_clicked()
       { //check world size
         double XYm = 0;
         double  Zm = 0;
-        for (int isource = 0; isource < SimulationManager->ParticleSources->size(); isource++)
+        for (int isource = 0; isource < SimulationManager->ParticleSources->countSources(); isource++)
           {
             double msize =   ps->size1;
             UpdateMax(msize, ps->size2);
@@ -776,13 +777,13 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
   fStartedFromGUI = true;
   fSimDataNotSaved = false; // to disable the warning
   //watchdog on particle sources, can be transferred later to check-upwindow
-  if (SimulationManager->ParticleSources->size() == 0)
+  if (SimulationManager->ParticleSources->countSources() == 0)
     {
       message("No particle sources defined!", this);
       return;
     }
 
-  for (int i = 0; i<SimulationManager->ParticleSources->size(); i++)
+  for (int i = 0; i<SimulationManager->ParticleSources->countSources(); i++)
     {
       int error = SimulationManager->ParticleSources->CheckSource(i);
       if (error == 0) continue;

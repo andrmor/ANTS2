@@ -36,6 +36,8 @@ public:
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
     virtual void RemoveParticle(int particleId) override; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
 
+    virtual const QString CheckConfiguration() const;
+
     virtual void writeToJson(QJsonObject &json) const override;
     virtual bool readFromJson(const QJsonObject &json) override;
 
@@ -51,12 +53,6 @@ public:
     bool replace(int iSource, AParticleSourceRecord* gunParticle);
     void remove(int iSource);
     void clear();
-
-  //check consistency of data
-  int CheckSource(int isource); // 0 - no errors
-  QString getErrorString(int error);
-
-
 
   bool writeSourceToJson(int iSource, QJsonObject &json) const; //only one source
   bool readSourceFromJson(int iSource, QJsonObject &json);

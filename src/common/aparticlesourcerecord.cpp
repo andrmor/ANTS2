@@ -262,3 +262,45 @@ const QString AParticleSourceRecord::getShapeString() const
     }
     return "-error-";
 }
+
+const QString AParticleSourceRecord::CheckSource(const AMaterialParticleCollection & MpCollection) const
+{
+    if (shape < 0 || shape > 5) return "unknown source shape";
+
+    int numParts = GunParticles.size();     //11 - no particles defined
+    if (numParts == 0) return "no particles defined";
+
+    if (Spread < 0) return "negative spread angle";
+    if (Activity < 0) return "negative activity";
+
+    //checking all particles
+    int numIndParts = 0;
+    double TotPartWeight = 0;
+    for (int ip = 0; ip<numParts; ip++)
+    {
+        GunParticleStruct* gp = GunParticles.at(ip);
+        int pid = gp->ParticleId;
+        if (pid < 0 || pid >= MpCollection.countParticles()) return QString("uses not valid particle index %1").arg(pid);
+
+        if (gp->Individual)
+        {
+            //individual
+            numIndParts++;
+            if (GunParticles.at(ip)->StatWeight < 0) return QString("negative statistical weight for particle #%1").arg(ip);
+            TotPartWeight += GunParticles.at(ip)->StatWeight;
+        }
+        else
+        {
+            //linked
+            if (ip == gp->LinkedTo) return QString("particle #%1 is linked to itself").arg(ip);
+            if (ip < gp->LinkedTo) return QString("invalid linking for particle #%1").arg(ip);
+        }
+
+        if (gp->energy <= 0) return QString("invalid energy of %1 for particle #%2").arg(gp->energy).arg(ip);
+    }
+
+    if (numIndParts == 0) return "no individual particles defined";
+    if (TotPartWeight == 0) return "total statistical weight of individual particles is zero";
+
+    return "";
+}

@@ -62,9 +62,9 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
     return GeneratedParticles;
 }
 
-bool AFileParticleGenerator::CheckConfiguration()
+const QString AFileParticleGenerator::CheckConfiguration() const
 {
-    return true; //TODO
+    return ""; //TODO
 }
 
 bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const

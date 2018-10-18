@@ -773,27 +773,20 @@ void MainWindow::on_pbEditParticleSource_clicked()
 
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
-  ELwindow->QuickSave(0);
-  fStartedFromGUI = true;
-  fSimDataNotSaved = false; // to disable the warning
-  //watchdog on particle sources, can be transferred later to check-upwindow
-  if (SimulationManager->ParticleSources->countSources() == 0)
+    ELwindow->QuickSave(0);
+    fStartedFromGUI = true;
+    fSimDataNotSaved = false; // to disable the warning
+    //watchdog on particle sources, can be transferred later to check-upwindow
+
+    QString err = SimulationManager->ParticleSources->CheckConfiguration();
+    if (!err.isEmpty())
     {
-      message("No particle sources defined!", this);
-      return;
+        message(err);
+        return;
     }
 
-  for (int i = 0; i<SimulationManager->ParticleSources->countSources(); i++)
-    {
-      int error = SimulationManager->ParticleSources->CheckSource(i);
-      if (error == 0) continue;
-
-      message("Error in source " + SimulationManager->ParticleSources->getSource(i)->name +":\n\n" + SimulationManager->ParticleSources->getErrorString(error), this);
-      return;
-    }
-
-  MainWindow::writeSimSettingsToJson(Config->JSON);
-  startSimulation(Config->JSON);
+    MainWindow::writeSimSettingsToJson(Config->JSON);
+    startSimulation(Config->JSON);
 }
 
 void MainWindow::on_twParticleGenerationMode_currentChanged(int index)

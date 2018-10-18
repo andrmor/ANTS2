@@ -74,6 +74,8 @@ struct AParticleSourceRecord
 
     const QString getShapeString() const;
 
+    const QString CheckSource(const AMaterialParticleCollection & MpCollection) const; //return error description if error found
+
     //local variables, used in tracking, calculated autonatically, not to be loaded/saved!
     int LimitedToMat; //automatically calculated if LimtedToMatName matches a material
     bool fLimit = false;

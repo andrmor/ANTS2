@@ -450,7 +450,20 @@ void ParticleSourcesClass::RemoveParticle(int particleId)
       for (int ip = 0; ip<ps->GunParticles.size(); ip++)
           if ( ps->GunParticles[ip]->ParticleId > particleId)
               ps->GunParticles[ip]->ParticleId--;
+  }
+}
+
+const QString ParticleSourcesClass::CheckConfiguration() const
+{
+    if (ParticleSourcesData.isEmpty()) return  "No sources are defined";
+    for (AParticleSourceRecord* ps : ParticleSourcesData)
+    {
+        QString err = ps->CheckSource(*MpCollection);
+        if (!err.isEmpty()) return QString("Error in source %1:\n%2").arg(ps->name).arg(err);
     }
+    if (TotalActivity == 0) return "Total activity is zero";
+
+    return "";
 }
 
 double ParticleSourcesClass::getTotalActivity()
@@ -594,71 +607,6 @@ bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QSt
   for (int j = 1; j<size+1; j++)  ParticleSourcesData[iSource]->GunParticles[iParticle]->spectrum->SetBinContent(j, y[j-1]);
 
   return true;
-}
-
-int ParticleSourcesClass::CheckSource(int isource)
-{
-  if (isource<0 || isource>countSources()-1) return 1; // 1 - wrong isource
-
-  // obsolete: 2 - particle collection not connected
-  if (MpCollection == 0) return 3; // 3 - material collection not connected
-  if (getTotalActivity() == 0) return 4; // 4 - total activity = 0
-
-  AParticleSourceRecord* ps = ParticleSourcesData[isource];
-  if (ps->shape <0 || ps->shape>5) return 10; //10 - unknown source shape
-
-  int numParts = ps->GunParticles.size();     //11 - no particles defined
-  if (numParts == 0) return 11;
-
-  //checking all particles
-  int numIndParts = 0;
-  double TotPartWeight = 0;
-  for (int ip = 0; ip<numParts; ip++)
-    {
-      GunParticleStruct* gp = ps->GunParticles[ip];
-
-      int id = gp->ParticleId;
-      //if (id<0 || id>ParticleCollection->size()-1) return 12; // 12 - use of non-defined particle
-      if (id<0 || id>MpCollection->countParticles()-1) return 12; // 12 - use of non-defined particle
-
-      if (gp->Individual)
-        {
-          //individual
-          numIndParts++;
-
-          TotPartWeight += ParticleSourcesData[isource]->GunParticles[ip]->StatWeight;
-        }
-      else
-        {
-          //linked
-          if (ip == gp->LinkedTo) return 13; // 13 - particle is linked to itself
-        }
-    }
-
-  if (numIndParts == 0) return 21; //21 - no individual particles defined
-  if (TotPartWeight == 0) return 22;  //total weight of individual particles = 0
-
-  return 0; //all is OK
-}
-
-QString ParticleSourcesClass::getErrorString(int error)
-{
-  switch (error)
-    {
-    case 0: return "No errors";
-    case 1: return "Wrong source number";
-    case 2: return "Particle collection not connected";
-    case 3: return "Materia collection not connected";
-    case 4: return "Total activity of all sources = 0";
-    case 10: return "Unknown source shape";
-    case 11: return "No particles defined";
-    case 12: return "Use of non-defined particle";
-    case 13: return "Particle is linked to itself";
-    case 21: return "No individual particles defined";
-    case 22: return "Notal probability to emit a particle = 0";
-    }
-
-  return "undefined error";
 }
 
 void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)

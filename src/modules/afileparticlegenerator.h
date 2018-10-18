@@ -32,7 +32,7 @@ public:
     virtual void ReleaseResources() override;   //called after end of operation
     virtual QVector<AGeneratedParticle>* GenerateEvent();
 
-    virtual bool CheckConfiguration() override; //check consistency of the configuration
+    virtual const QString CheckConfiguration() const override; //check consistency of the configuration
 
     virtual void RemoveParticle(int particleId) override {} //cannot be used for this class
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;

@@ -37,8 +37,8 @@ public:
     virtual void RemoveParticle(int particleId) override {} //cannot be used for this class
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 
-    void writeToJson(QJsonObject& json) const;
-    void readFromJson(const QJsonObject& json);
+    virtual void writeToJson(QJsonObject& json) const override;
+    virtual bool readFromJson(const QJsonObject& json) override;
 
 private:
     QString FileName;

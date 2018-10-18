@@ -795,6 +795,13 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
   startSimulation(Config->JSON);
 }
 
+void MainWindow::on_twParticleGenerationMode_currentChanged(int index)
+{
+    ui->sbGunEvents->setVisible(index != 1);
+    ui->labEventsPS->setVisible(index != 1);
+    ui->linePS->setVisible(index != 1);
+}
+
 // ---- from file ----
 
 void MainWindow::on_pbGenerateFromFile_Help_clicked()
@@ -804,12 +811,16 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
 
 void MainWindow::on_pbGenerateFromFile_Change_clicked()
 {
-
+    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    on_leGenerateFromFile_FileName_editingFinished();
 }
 
 void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 {
-
+    SimulationManager->FileParticleGenerator->SetFileName(ui->leGenerateFromFile_FileName->text());
+    on_pbUpdateSimConfig_clicked();
 }
 
 #include "afileparticlegenerator.h"

@@ -77,9 +77,9 @@ void AFileParticleGenerator::writeToJson(QJsonObject &json) const
     json["FileName"] = FileName;
 }
 
-void AFileParticleGenerator::readFromJson(const QJsonObject &json)
+bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
 {
-    parseJson(json, "FileName", FileName);
+    return parseJson(json, "FileName", FileName);
 }
 
 const AParticleFileStat AFileParticleGenerator::InspectFile(const QString &fname, int ParticleCount)

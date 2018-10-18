@@ -466,7 +466,7 @@ void ParticleSourcesClass::CalculateTotalActivity()
     TotalActivity += ParticleSourcesData[i]->Activity;
 }
 
-bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
+bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json) const
 {
    if (iSource<0 || iSource>ParticleSourcesData.size()-1) return false;
 
@@ -475,18 +475,16 @@ bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json)
    return true;
 }
 
-bool ParticleSourcesClass::writeToJson(QJsonObject &json)
+void ParticleSourcesClass::writeToJson(QJsonObject &json) const
 {
   QJsonArray ja;
   for (int iSource=0; iSource<ParticleSourcesData.size(); iSource++)
     {
       QJsonObject js1;
       bool fOK = writeSourceToJson(iSource, js1);
-      if (!fOK) return false;
-      ja.append(js1);
+      if (fOK) ja.append(js1);
     }
   json["ParticleSources"] = ja;
-  return true;
 }
 
 bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
@@ -532,7 +530,7 @@ void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
     else s->fLimit = false;
 }
 
-bool ParticleSourcesClass::readFromJson(QJsonObject &json)
+bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
 {
   if (!json.contains("ParticleSources"))
     {

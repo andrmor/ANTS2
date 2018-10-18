@@ -53,12 +53,11 @@ public:
   int CheckSource(int isource); // 0 - no errors
   QString getErrorString(int error);
 
-  // save
-  bool writeSourceToJson(int iSource, QJsonObject &json); //only one source
-  bool writeToJson(QJsonObject &json); //all config
-  // load
+  virtual void writeToJson(QJsonObject &json) const override;
+  virtual bool readFromJson(const QJsonObject &json) override;
+
+  bool writeSourceToJson(int iSource, QJsonObject &json) const; //only one source
   bool readSourceFromJson(int iSource, QJsonObject &json);
-  bool readFromJson(QJsonObject &json); // all config
   bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 
   TVector3 GenerateRandomDirection();  

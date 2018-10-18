@@ -9660,7 +9660,7 @@ double events:</string>
          <string>tracks options</string>
         </property>
        </widget>
-       <widget class="QTabWidget" name="tabWidget_3">
+       <widget class="QTabWidget" name="twParticleGenerationMode">
         <property name="geometry">
          <rect>
           <x>8</x>
@@ -10087,6 +10087,9 @@ double events:</string>
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Particle are generated and their directions are shown. No interaction is simulated!</string>
+        </property>
         <property name="text">
          <string>Test generator</string>
         </property>
@@ -10124,7 +10127,7 @@ double events:</string>
        <zorder>pbParticleSourcesSimulate</zorder>
        <zorder>sbGunEvents</zorder>
        <zorder>pbTrackOptionsGun</zorder>
-       <zorder>tabWidget_3</zorder>
+       <zorder>twParticleGenerationMode</zorder>
        <zorder>sbGunTestEvents</zorder>
        <zorder>pbGunTest</zorder>
        <zorder>labIgnoreNoHitEvents</zorder>

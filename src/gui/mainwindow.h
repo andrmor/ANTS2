@@ -34,7 +34,6 @@ class OutputWindow;
 class QComboBox;
 class TH1D;
 class TH1I;
-class ParticleSourcesClass;
 class WindowNavigatorClass;
 class GeometryWindowAddOn;
 class GlobalSettingsWindowClass;
@@ -58,6 +57,7 @@ class ANetworkModule;
 struct AParticleSourceRecord;
 class ARemoteWindow;
 class AWebSocketServerDialog;
+class AParticleGun;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -160,7 +160,7 @@ public:
 
     void writeDetectorToJson(QJsonObject &json); //GDML is NOT here
     bool readDetectorFromJson(QJsonObject &json);
-    void writeSimSettingsToJson(QJsonObject &json, bool fVerbose = false);  //true - save point and source settings
+    void writeSimSettingsToJson(QJsonObject &json);
     bool readSimSettingsFromJson(QJsonObject &json);
 
     //save data to file - public due to batch mode usage
@@ -386,7 +386,7 @@ public:
     void createScriptWindow();
 
     void SimGeneralConfigToJson(QJsonObject &jsonMaster);                              //Save to JSON general options of simulation
-    void SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerbose = false);  //Save to JSON config for PointSources simulation
+    void SimPointSourcesConfigToJson(QJsonObject &jsonMaster);  //Save to JSON config for PointSources simulation
     void SimParticleSourcesConfigToJson(QJsonObject &json);     //Save to JSON config for ParticleSources simulation
     void updatePMArrayDataIndication();
     void writeLoadExpDataConfigToJson(QJsonObject &json);
@@ -403,7 +403,7 @@ public:
     void CalculateIndividualQEPDE(); //Public for use in scripting
     void clearEnergyVector();
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
-    void TestParticleGun(ParticleSourcesClass *ParticleSources, int numParticles);
+    void TestParticleGun(AParticleGun *ParticleSources, int numParticles);
 
 private:
     bool startupDetector();  //on ANTS start load/create detector

@@ -1756,6 +1756,8 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     //qDebug() << "->Container for particle sources created and configured";
 
+    FileParticleGenerator = new AFileParticleGenerator();
+
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 
     QObject::connect(Runner, SIGNAL(simulationFinished()), this, SLOT(onSimulationFinished()));
@@ -1775,6 +1777,7 @@ ASimulationManager::~ASimulationManager()
     delete Runner;
     ASimulationManager::Clear();
 
+    delete FileParticleGenerator;
     delete ParticleSources;
 }
 

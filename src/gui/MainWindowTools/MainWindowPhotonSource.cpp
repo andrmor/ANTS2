@@ -108,8 +108,9 @@ struct SAxis
   SAxis(double DX, double DY, double DZ, int Nodes, int Option){dX=DX; dY=DY; dZ=DZ; nodes=Nodes; option=Option;}
 };
 
-void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerbose)
+void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
 {
+  bool fVerbose = true;
   QJsonObject json;
 
   //main control options

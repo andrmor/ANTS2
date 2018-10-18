@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QVector>
+#include <QJsonObject>
 
 class QTextStream;
 
@@ -22,8 +23,10 @@ public:
 class AFileParticleGenerator : public AParticleGun
 {
 public:
-    AFileParticleGenerator(const QString& FileName);
     virtual ~AFileParticleGenerator(){}
+
+    void          SetFileName(const QString &fileName) {FileName = fileName;}
+    const QString GetFileName() const {return FileName;}
 
     virtual bool Init() override;               //called before first use
     virtual void ReleaseResources() override;   //called after end of operation
@@ -34,8 +37,11 @@ public:
     virtual void RemoveParticle(int particleId) override {} //cannot be used for this class
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 
+    void writeToJson(QJsonObject& json) const;
+    void readFromJson(const QJsonObject& json);
+
 private:
-    const QString FileName;
+    QString FileName;
     QFile File;
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
 

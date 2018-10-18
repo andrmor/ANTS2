@@ -37,6 +37,11 @@ public:
 
     virtual void RemoveParticle(int particleId) = 0; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const = 0;
+
+    const QString& GetErrorString() const {return ErrorString;}
+
+protected:
+    QString ErrorString;
 };
 
 #endif // APARTICLEGUN_H

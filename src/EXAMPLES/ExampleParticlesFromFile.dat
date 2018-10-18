@@ -1,9 +1,9 @@
 format: particleId energy x y z vx vy vz      if line ends with *, the next particle is added to the same event
 separators can be any number of spaces or tabs
 comments are ignored
-
-0  120  0  0 -10  0  0  1
-2  250  0  0 -10  1  0  1
-1  115  0  0 -10  0  1  1
-0  511  0  0 0    0  0  1 *
-0  511  0  0 0    0  0 -1
+  
+0  120  0  0 -10   0  0     1
+2  250  0  0 -10   1  0     1
+1  115  0  0 -10   0  1     1
+0  511  10 10 0    1  0.25  1 *
+0  511  10 10 0   -1 -0.25 -1

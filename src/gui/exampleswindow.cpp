@@ -65,7 +65,7 @@ void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimS
 {
     MW->writeDetectorToJson(MW->Config->JSON);
       MW->writeExtraGuiToJson(MW->Config->JSON);
-    MW->writeSimSettingsToJson(MW->Config->JSON, true);
+    MW->writeSimSettingsToJson(MW->Config->JSON);
     MW->Rwindow->writeToJson(MW->Config->JSON);
     MW->Config->UpdateLRFmakeJson();
     MW->Config->UpdateLRFv3makeJson();

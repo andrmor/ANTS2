@@ -1,22 +1,24 @@
 #include "afileparticlegenerator.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
 
-AFileParticleGenerator::AFileParticleGenerator(const QString &FileName) :
-    FileName(FileName) {}
-
 bool AFileParticleGenerator::Init()
 {
+    if (File.isOpen()) File.close();
     File.setFileName(FileName);
+
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
     {
-        qWarning() << "Could not open: " << FileName;
+        ErrorString = QString("Failed to open file: %1").arg(FileName);
+        qWarning() << ErrorString;
         return false;
     }
 
+    if (Stream) delete Stream; Stream = 0;
     Stream = new QTextStream(&File);
     return true;
 }
@@ -39,7 +41,7 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
 
         if (f.size() < 8) continue;
 
-        int    pId    = f.at(0).toInt(); //TODO index check
+        int    pId    = f.at(0).toInt();   //TODO index check
         double energy = f.at(1).toDouble();
         double x =      f.at(2).toDouble();
         double y =      f.at(3).toDouble();
@@ -53,7 +55,6 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
         if (f.size() > 8 && f.at(8) == '*') continue;
         break;
     }
-
     return GeneratedParticles;
 }
 
@@ -65,6 +66,16 @@ bool AFileParticleGenerator::CheckConfiguration()
 bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
 {
     return false; //TODO
+}
+
+void AFileParticleGenerator::writeToJson(QJsonObject &json) const
+{
+    json["FileName"] = FileName;
+}
+
+void AFileParticleGenerator::readFromJson(const QJsonObject &json)
+{
+    parseJson(json, "FileName", FileName);
 }
 
 const AParticleFileStat AFileParticleGenerator::InspectFile(const QString &fname, int ParticleCount)

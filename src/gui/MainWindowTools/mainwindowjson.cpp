@@ -244,32 +244,25 @@ void MainWindow::writeLoadExpDataConfigToJson(QJsonObject &json)
 }
 
 // SIMULATION GUI
-void MainWindow::writeSimSettingsToJson(QJsonObject &json, bool fVerbose)
+void MainWindow::writeSimSettingsToJson(QJsonObject &json)
 {
     //qDebug() << "GUI->Sim Json";
-  fVerbose = true;  //Now always!!!
+    QJsonObject js;
+    SimGeneralConfigToJson(js);         //general sim settings
+    if (ui->twSourcePhotonsParticles->currentIndex() == 0)
+        js["Mode"] = "PointSim"; //point source sim
+    else
+        js["Mode"] = "SourceSim"; //particle source sim
+    SimPointSourcesConfigToJson(js);
+    SimParticleSourcesConfigToJson(js);
 
-  QJsonObject js;
-  SimGeneralConfigToJson(js);         //general sim settings
-  if (ui->twSourcePhotonsParticles->currentIndex() == 0)
-    { //point source sim
-      js["Mode"] = "PointSim";
-      SimPointSourcesConfigToJson(js, fVerbose);
-      if (fVerbose) SimParticleSourcesConfigToJson(js);
-    }
-  else
-    { //particle source sim
-      js["Mode"] = "SourceSim";
-      SimParticleSourcesConfigToJson(js);
-      if (fVerbose) SimPointSourcesConfigToJson(js, fVerbose);
-    }
-  js["DoGuiUpdate"] = true;           //batcher have to set it to false!
+    js["DoGuiUpdate"] = true;           //batcher have to set it to false!
 
-  json["SimulationConfig"] = js;
+    json["SimulationConfig"] = js;
 
-  //QJsonObject js1;
-  //js1["SimulationConfig"] = js;
-  //SaveJsonToFile(js1, "SimConfig.json");
+    //QJsonObject js1;
+    //js1["SimulationConfig"] = js;
+    //SaveJsonToFile(js1, "SimConfig.json");
 }
 
 void MainWindow::onRequestSimulationGuiUpdate()
@@ -558,6 +551,25 @@ if (scj.contains("CustomDistrib"))
       CustomScanNodes.append( new QVector3D(el[0].toDouble(), el[1].toDouble(), el[2].toDouble()));
     }
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
+
+  //Particle generation mode
+  QString PartGenMode = "Sources"; //compatibility
+  parseJson(js, "ParticleGenerationMode", PartGenMode);
+  int PGMindex = 0;
+  if      (PartGenMode == "Sources") PGMindex = 0;
+  else if (PartGenMode == "File")    PGMindex = 1;
+  else if (PartGenMode == "Script")  PGMindex = 2;
+  else qWarning() << "Load sim settings: Unknown particle generation mode!";
+  ui->twParticleGenerationMode->setCurrentIndex(PGMindex);
+
+  //From file
+  QJsonObject fjs;
+  parseJson(js, "GenerationFromFile", fjs);
+  if (!fjs.isEmpty())
+  {
+      SimulationManager->FileParticleGenerator->readFromJson(fjs);
+      ui->leGenerateFromFile_FileName->setText(SimulationManager->FileParticleGenerator->GetFileName());
+  }
 
   //PARTICLE SOURCES
   QJsonObject psjs = js["ParticleSourcesConfig"].toObject();

@@ -37,24 +37,37 @@
 #include "TH1D.h"
 
 void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
-{  
-  QJsonObject masterjs;
-    // control options
-  QJsonObject cjs;
-  cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
-  cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
-  cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
-  cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
-  cjs["DoS1"] = ui->cbGunDoS1->isChecked();
-  cjs["DoS2"] = ui->cbGunDoS2->isChecked();
-  //cjs["ParticleTracks"] = ui->cbGunParticleTracks->isChecked();
-  cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
-  cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
-  masterjs["SourceControlOptions"] = cjs;
-    //particle sources
-  SimulationManager->ParticleSources->writeToJson(masterjs);
+{
+    QString str;
+    switch (ui->twParticleGenerationMode->currentIndex())
+    {
+    case 0 : str = "Sources"; break;
+    case 1 : str = "File"; break;
+    case 2 : str = "Script"; break;
+    default: qWarning() << "Save sim config: unknown particle generation mode";
+    }
+    json["ParticleGenerationMode"] = str;
 
-  json["ParticleSourcesConfig"] = masterjs;
+    //from file
+    QJsonObject fjs;
+    SimulationManager->FileParticleGenerator->writeToJson(fjs);
+    json["GenerationFromFile"] = fjs;
+
+    //Particle sources
+    QJsonObject psjs;
+        QJsonObject cjs; // control options
+        cjs["EventsToDo"] = ui->sbGunEvents->text().toDouble();
+        cjs["AllowMultipleParticles"] = ui->cbGunAllowMultipleEvents->isChecked();
+        cjs["AverageParticlesPerEvent"] = ui->ledGunAverageNumPartperEvent->text().toDouble();
+        cjs["TypeParticlesPerEvent"] = ui->cobPartPerEvent->currentIndex();
+        cjs["DoS1"] = ui->cbGunDoS1->isChecked();
+        cjs["DoS2"] = ui->cbGunDoS2->isChecked();
+        cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
+        cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
+    psjs["SourceControlOptions"] = cjs;
+    //particle sources
+    SimulationManager->ParticleSources->writeToJson(psjs);
+    json["ParticleSourcesConfig"] = psjs;
 }
 
 void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
@@ -233,31 +246,48 @@ void MainWindow::on_pbGunTest_clicked()
     GeometryWindow->ShowAndFocus();
     gGeoManager->ClearTracks();
 
-    if (ui->pbGunShowSource->isChecked())
+    if (ui->twParticleGenerationMode->currentIndex() == 0)
     {
-        for (int i=0; i<SimulationManager->ParticleSources->size(); i++)
-            ShowSource(SimulationManager->ParticleSources->getSource(i), false);
+        if (ui->pbGunShowSource->isChecked())
+        {
+            for (int i=0; i<SimulationManager->ParticleSources->size(); i++)
+                ShowSource(SimulationManager->ParticleSources->getSource(i), false);
+        }
     }
+    else GeometryWindow->ShowGeometry();
 
-    TestParticleGun(SimulationManager->ParticleSources, ui->sbGunTestEvents->value());
+    AParticleGun* pg;
+    switch (ui->twParticleGenerationMode->currentIndex())
+    {
+    case 0: pg = SimulationManager->ParticleSources; break;
+    case 1: pg = SimulationManager->FileParticleGenerator; break;
+    case 2:
+    default:
+        message("This generation mode is not implemented!", this);
+        return;
+    }
+    TestParticleGun(pg, ui->sbGunTestEvents->value());
 }
 
-void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numParticles)
+void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
-    ParticleSources->Init();
-
-
+    bool bOK = Gun->Init();
+    if (!bOK)
+    {
+        message("failed to initialize particle gun", this); //TODO ErrorStrig
+        return;
+    }
 
     double Length = std::max(Detector->WorldSizeXY, Detector->WorldSizeZ)*0.4;
     double R[3], K[3];
     for (int iRun=0; iRun<numParticles; iRun++)
-      {
-        QVector<AGeneratedParticle>* GP = ParticleSources->GenerateEvent();
-        if (GP->isEmpty() && iRun > 2)
-        {
-            message("Did several attempts but no particles were generated!", this);
-            return;
-        }
+    {
+        QVector<AGeneratedParticle>* GP = Gun->GenerateEvent();
+//        if (GP->isEmpty() && iRun > 2)
+//        {
+//            message("Did several attempts but no particles were generated!", this);
+//            break;
+//        }
         for (AGeneratedParticle& p : *GP)
         {
             R[0] = p.Position[0];
@@ -277,7 +307,7 @@ void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numP
         }
         GP->clear();
         delete GP;
-      }
+    }
     ShowTracks();
 }
 

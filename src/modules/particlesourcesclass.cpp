@@ -479,25 +479,16 @@ void ParticleSourcesClass::CalculateTotalActivity()
     TotalActivity += ParticleSourcesData[i]->Activity;
 }
 
-bool ParticleSourcesClass::writeSourceToJson(int iSource, QJsonObject &json) const
-{
-   if (iSource<0 || iSource>ParticleSourcesData.size()-1) return false;
-
-   AParticleSourceRecord* s = ParticleSourcesData[iSource];
-   s->writeToJson(json, *MpCollection);
-   return true;
-}
-
 void ParticleSourcesClass::writeToJson(QJsonObject &json) const
 {
-  QJsonArray ja;
-  for (int iSource=0; iSource<ParticleSourcesData.size(); iSource++)
+    QJsonArray ja;
+    for (const AParticleSourceRecord* ps : ParticleSourcesData)
     {
-      QJsonObject js1;
-      bool fOK = writeSourceToJson(iSource, js1);
-      if (fOK) ja.append(js1);
+        QJsonObject js;
+        ps->writeToJson(js, *MpCollection);
+        ja.append(js);
     }
-  json["ParticleSources"] = ja;
+    json["ParticleSources"] = ja;
 }
 
 bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)

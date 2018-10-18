@@ -54,7 +54,6 @@ public:
     void remove(int iSource);
     void clear();
 
-  bool writeSourceToJson(int iSource, QJsonObject &json) const; //only one source
   bool readSourceFromJson(int iSource, QJsonObject &json);
   bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 

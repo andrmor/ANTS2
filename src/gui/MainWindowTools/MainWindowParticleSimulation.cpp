@@ -498,7 +498,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
     if (file.suffix().isEmpty()) fileName += ".json";
 
     QJsonObject json, js;
-    SimulationManager->ParticleSources->writeSourceToJson(isource, json);
+    SimulationManager->ParticleSources->getSource(isource)->writeToJson(json, *MpCollection);
     js["ParticleSource"] = json;
     bool bOK = SaveJsonToFile(js, fileName);
     if (!bOK) message("Failed to save json to file: "+fileName, this);

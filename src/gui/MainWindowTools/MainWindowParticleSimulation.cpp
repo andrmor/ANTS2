@@ -526,8 +526,10 @@ void MainWindow::on_pbLoadParticleSource_clicked()
     int oldPartCollSize = Detector->MpCollection->countParticles();
     js = json["ParticleSource"].toObject();
 
-    SimulationManager->ParticleSources->append(new AParticleSourceRecord());
-    SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->countSources()-1, js );
+    AParticleSourceRecord* ps = new AParticleSourceRecord();
+    ps->readFromJson(js, *MpCollection);
+    SimulationManager->ParticleSources->append(ps);
+    //SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->countSources()-1, js );
 
     onRequestDetectorGuiUpdate();
     on_pbUpdateSimConfig_clicked();

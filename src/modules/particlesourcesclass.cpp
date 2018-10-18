@@ -468,15 +468,15 @@ const QString ParticleSourcesClass::CheckConfiguration() const
 
 double ParticleSourcesClass::getTotalActivity()
 {
-  CalculateTotalActivity();
-  return TotalActivity;
+    CalculateTotalActivity();
+    return TotalActivity;
 }
 
 void ParticleSourcesClass::CalculateTotalActivity()
 {
-  TotalActivity = 0;
-  for (int i=0; i<ParticleSourcesData.size(); i++)
-    TotalActivity += ParticleSourcesData[i]->Activity;
+    TotalActivity = 0;
+    for (int i=0; i<ParticleSourcesData.size(); i++)
+        TotalActivity += ParticleSourcesData[i]->Activity;
 }
 
 void ParticleSourcesClass::writeToJson(QJsonObject &json) const
@@ -489,30 +489,6 @@ void ParticleSourcesClass::writeToJson(QJsonObject &json) const
         ja.append(js);
     }
     json["ParticleSources"] = ja;
-}
-
-bool ParticleSourcesClass::readSourceFromJson(int iSource, QJsonObject &json)
-{
-    //qDebug() << "Read!";
-  if (iSource<-1 || iSource>ParticleSourcesData.size()-1)
-    {
-      qWarning("Particle source was NOT loaded - wrong source index");
-      return false;
-    }
-
-  if (iSource == -1)
-    {
-      //append new!
-      AParticleSourceRecord* ns = new AParticleSourceRecord();
-      ParticleSourcesData.append(ns);
-      iSource = ParticleSourcesData.size()-1;
-    }
-
-  delete ParticleSourcesData[iSource];
-  AParticleSourceRecord* s = new AParticleSourceRecord();
-  ParticleSourcesData[iSource] = s;
-
-  return s->readFromJson(json, *MpCollection);
 }
 
 void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
@@ -536,35 +512,31 @@ void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
 
 bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
 {
-  if (!json.contains("ParticleSources"))
+    clear();
+
+    if (!json.contains("ParticleSources"))
     {
-      qWarning() << "--- Json does not contain config for particle sources!";
-      return false;
+        qWarning() << "--- Json does not contain config for particle sources!";
+        return false;
     }
 
-  QJsonArray ar = json["ParticleSources"].toArray();
-  if (ar.isEmpty())
-    {
-      //qDebug() << "No sources defined in the json object!";
-      return false;
-    }
+    QJsonArray ar = json["ParticleSources"].toArray();
+    if (ar.isEmpty()) return true;
 
-  //        qDebug() << "    Sources in json:"<< ar.size();
-  ParticleSourcesClass::clear();
-
-  for (int iSource =0; iSource<ar.size(); iSource++)
+    for (int iSource = 0; iSource < ar.size(); iSource++)
     {
-      QJsonObject json = ar[iSource].toObject();
-      bool fOK = readSourceFromJson(-1, json);
-      if (!fOK)
+        QJsonObject json = ar.at(iSource).toObject();
+        AParticleSourceRecord* ps = new AParticleSourceRecord();
+        bool bOK = ps->readFromJson(json, *MpCollection);
+        if (!bOK)
         {
-          qWarning() << "||| Load particles from json failed!";
-          ParticleSourcesClass::clear();
-          return false;
+            qWarning() << "||| Load particle source #" << iSource << "from json failed!";
+            delete ps;
         }
+        else ParticleSourcesData << ps;
     }
 
-  return true;
+    return true;
 }
 
 bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)

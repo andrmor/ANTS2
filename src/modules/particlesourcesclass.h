@@ -54,32 +54,29 @@ public:
     void remove(int iSource);
     void clear();
 
-  bool readSourceFromJson(int iSource, QJsonObject &json);
-  bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
+    bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
 
-  TVector3 GenerateRandomDirection();  
-  void checkLimitedToMaterial(AParticleSourceRecord *s);
+    TVector3 GenerateRandomDirection();
+    void checkLimitedToMaterial(AParticleSourceRecord *s);
 
 private:  
-  //external resources - pointers
-  const DetectorClass* Detector;
-  AMaterialParticleCollection* MpCollection;
-  TRandom2 *RandGen;
+    const DetectorClass* Detector;             //external
+    AMaterialParticleCollection* MpCollection; //external
+    TRandom2 *RandGen;                         //external
 
-  QVector<AParticleSourceRecord*> ParticleSourcesData;
-  QVector<double> TotalParticleWeight;  
-  double TotalActivity;
-  QVector< QVector< QVector<LinkedParticleStructure> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
+    QVector<AParticleSourceRecord*> ParticleSourcesData;
+    QVector<double> TotalParticleWeight;
+    double TotalActivity;
+    QVector< QVector< QVector<LinkedParticleStructure> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
                               //full recipe of emission builder (containes particles linked to particles etc up to the top level individual particle)
 
-  QVector<TVector3> CollimationDirection; //[isource] collimation direction 
-  QVector<double> CollimationProbability; //[isource] collimation probability: solid angle inside cone / 4Pi
-  //QVector<int> CollimationSpreadProduct; //[isource] vector product of collimation and normal (used to check is the new vector inisde collimation cone)
+    QVector<TVector3> CollimationDirection; //[isource] collimation direction
+    QVector<double> CollimationProbability; //[isource] collimation probability: solid angle inside cone / 4Pi
 
-  //utilities
-  void CalculateTotalActivity();
-  void GeneratePosition(int isource, double *R) const;
-  void AddParticleInCone(int isource, int iparticle, QVector<AGeneratedParticle> *GeneratedParticles) const; //QVector - only pointer is transferred!
+    //utilities
+    void CalculateTotalActivity();
+    void GeneratePosition(int isource, double *R) const;
+    void AddParticleInCone(int isource, int iparticle, QVector<AGeneratedParticle> *GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
 #endif // PARTICLESOURCESCLASS_H

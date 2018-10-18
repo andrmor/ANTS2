@@ -4807,6 +4807,22 @@ void MainWindow::on_pbTrackOptionsGun_clicked()
     on_pbOpenTrackProperties_Phot_clicked();
 }
 
+void MainWindow::on_pbTrackOptionsGun_customContextMenuRequested(const QPoint &)
+{   // in particle source
+    SimulationManager->TrackBuildOptions.bBuildPhotonTracks = false;
+
+    SimulationManager->TrackBuildOptions.bBuildParticleTracks = !SimulationManager->TrackBuildOptions.bBuildParticleTracks;
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbOpenTrackProperties_Phot_customContextMenuRequested(const QPoint &)
+{   //in photon sources
+    SimulationManager->TrackBuildOptions.bBuildParticleTracks = false;
+
+    SimulationManager->TrackBuildOptions.bBuildPhotonTracks = !SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+    on_pbUpdateSimConfig_clicked();
+}
+
 void MainWindow::on_pbTrackOptionsStack_clicked()
 {
     on_pbOpenTrackProperties_Phot_clicked();

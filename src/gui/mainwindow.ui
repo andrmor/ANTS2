@@ -8676,8 +8676,12 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <bold>false</bold>
            </font>
           </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
           <property name="toolTip">
-           <string>Track build options</string>
+           <string>Click: Show / edit all track options
+Right click: toggle build photon tracks. Also switches of building particle tracks</string>
           </property>
           <property name="text">
            <string>tracks options</string>
@@ -9655,6 +9659,13 @@ double events:</string>
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="toolTip">
+         <string>Click: Show / edit all track options
+Right click: toggle build particle tracks. Also switch off building photon tracks</string>
         </property>
         <property name="text">
          <string>tracks options</string>
@@ -13118,8 +13129,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>226</x>
-     <y>540</y>
+     <x>224</x>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>280</x>
@@ -13278,8 +13289,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>433</y>
+     <x>368</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>519</x>
@@ -13310,8 +13321,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>406</y>
+     <x>317</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>257</x>
@@ -13774,8 +13785,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>467</x>
@@ -13790,8 +13801,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>460</x>
@@ -13806,8 +13817,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>443</y>
+     <x>441</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -13822,8 +13833,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>500</x>
@@ -13838,8 +13849,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>443</x>
-     <y>472</y>
+     <x>441</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>502</x>
@@ -13854,8 +13865,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>382</y>
+     <x>293</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13870,8 +13881,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>165</x>
-     <y>382</y>
+     <x>163</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>464</x>
@@ -13886,8 +13897,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>442</y>
+     <x>317</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>510</x>
@@ -14686,8 +14697,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>419</y>
+     <x>225</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>46</x>
@@ -14702,8 +14713,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>317</x>
-     <y>419</y>
+     <x>315</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>92</x>
@@ -14718,8 +14729,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>407</x>
-     <y>419</y>
+     <x>405</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
      <x>112</x>
@@ -14734,8 +14745,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>188</x>
-     <y>398</y>
+     <x>190</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>40</x>
@@ -14750,8 +14761,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>260</x>
-     <y>398</y>
+     <x>262</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>61</x>
@@ -14766,8 +14777,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>331</x>
-     <y>398</y>
+     <x>333</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
      <x>88</x>
@@ -14782,8 +14793,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>440</y>
+     <x>186</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>31</x>
@@ -14798,8 +14809,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>440</y>
+     <x>228</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>48</x>
@@ -14814,8 +14825,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>440</y>
+     <x>270</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>47</x>
@@ -14830,8 +14841,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>333</x>
-     <y>441</y>
+     <x>337</x>
+     <y>419</y>
     </hint>
     <hint type="destinationlabel">
      <x>83</x>
@@ -14846,8 +14857,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>432</x>
-     <y>440</y>
+     <x>436</x>
+     <y>418</y>
     </hint>
     <hint type="destinationlabel">
      <x>101</x>
@@ -14862,8 +14873,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>116</x>
-     <y>459</y>
+     <x>120</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>43</x>
@@ -14878,8 +14889,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>461</y>
+     <x>186</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>14</x>
@@ -14894,8 +14905,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>461</y>
+     <x>228</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>28</x>
@@ -14910,8 +14921,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>461</y>
+     <x>270</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>50</x>
@@ -14926,8 +14937,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>335</x>
-     <y>462</y>
+     <x>339</x>
+     <y>440</y>
     </hint>
     <hint type="destinationlabel">
      <x>77</x>
@@ -14942,8 +14953,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>461</y>
+     <x>403</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>122</x>
@@ -14958,8 +14969,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>135</x>
-     <y>480</y>
+     <x>134</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
      <x>44</x>
@@ -14974,8 +14985,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>482</y>
+     <x>186</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>52</x>
@@ -14990,8 +15001,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>482</y>
+     <x>228</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>36</x>
@@ -15006,8 +15017,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>482</y>
+     <x>270</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>50</x>
@@ -15022,8 +15033,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>483</y>
+     <x>336</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>75</x>
@@ -15038,8 +15049,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>438</x>
-     <y>482</y>
+     <x>442</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
@@ -15054,8 +15065,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>406</y>
+     <x>166</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>36</x>
@@ -15070,8 +15081,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>319</x>
-     <y>406</y>
+     <x>317</x>
+     <y>384</y>
     </hint>
     <hint type="destinationlabel">
      <x>51</x>
@@ -15086,8 +15097,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>436</y>
+     <x>127</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>40</x>
@@ -15102,8 +15113,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>458</y>
+     <x>127</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>57</x>
@@ -15118,8 +15129,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>436</y>
+     <x>223</x>
+     <y>414</y>
     </hint>
     <hint type="destinationlabel">
      <x>58</x>
@@ -15134,8 +15145,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>458</y>
+     <x>223</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>37</x>
@@ -15150,8 +15161,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>433</y>
+     <x>368</x>
+     <y>411</y>
     </hint>
     <hint type="destinationlabel">
      <x>97</x>
@@ -15166,8 +15177,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>369</x>
-     <y>456</y>
+     <x>367</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>110</x>
@@ -15182,8 +15193,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>438</y>
+     <x>157</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>31</x>
@@ -15198,8 +15209,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>159</x>
-     <y>459</y>
+     <x>157</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>33</x>
@@ -15214,8 +15225,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>438</y>
+     <x>237</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
      <x>68</x>
@@ -15230,8 +15241,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>459</y>
+     <x>237</x>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>58</x>
@@ -15246,8 +15257,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>456</y>
+     <x>368</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>119</x>
@@ -15262,8 +15273,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>466</x>
-     <y>456</y>
+     <x>464</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>122</x>
@@ -15518,8 +15529,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>474</y>
+     <x>179</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>310</x>
@@ -15550,8 +15561,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>472</y>
+     <x>249</x>
+     <y>450</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -15566,8 +15577,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>458</y>
+     <x>233</x>
+     <y>436</y>
     </hint>
     <hint type="destinationlabel">
      <x>485</x>
@@ -15582,8 +15593,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>235</x>
-     <y>496</y>
+     <x>233</x>
+     <y>474</y>
     </hint>
     <hint type="destinationlabel">
      <x>499</x>
@@ -15598,8 +15609,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>180</x>
-     <y>382</y>
+     <x>184</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>424</x>
@@ -15614,8 +15625,8 @@ on stack</string>
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>442</y>
+     <x>239</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>427</x>
@@ -15630,8 +15641,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>392</x>
-     <y>479</y>
+     <x>390</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel">
      <x>486</x>
@@ -15646,8 +15657,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>442</y>
+     <x>239</x>
+     <y>420</y>
     </hint>
     <hint type="destinationlabel">
      <x>443</x>
@@ -15838,8 +15849,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>495</y>
+     <x>249</x>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -15854,8 +15865,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>136</x>
-     <y>382</y>
+     <x>140</x>
+     <y>360</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -15870,8 +15881,8 @@ on stack</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>298</x>
-     <y>474</y>
+     <x>302</x>
+     <y>452</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>

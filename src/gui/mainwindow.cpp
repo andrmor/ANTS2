@@ -444,9 +444,10 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
         case 0:
         default:
           delete GeoMarkers[i];
-          GeoMarkers.remove(i);
       }
   }
+
+  if (All_Rec_True == 0) GeoMarkers.clear();
 }
 
 void MainWindow::clearCustomScanNodes()

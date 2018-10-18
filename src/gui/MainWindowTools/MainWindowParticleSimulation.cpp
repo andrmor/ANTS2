@@ -271,10 +271,12 @@ void MainWindow::on_pbGunTest_clicked()
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 {
+    clearGeoMarkers();
+
     bool bOK = Gun->Init();
     if (!bOK)
     {
-        message("failed to initialize particle gun", this); //TODO ErrorStrig
+        message("Failed to initialize particle gun!\n" + Gun->GetErrorString(), this); //TODO ErrorStrig
         return;
     }
 
@@ -296,7 +298,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
 
             K[0] = p.Direction[0];
             K[1] = p.Direction[1];
-            K[2] = p.Direction[2];
+            K[2] = p.Direction[2];            
 
             Int_t track_index = Detector->GeoManager->AddTrack(1,22);
             TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
@@ -304,11 +306,16 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
             track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
             track->SetLineWidth(1); //TODO respect all attributes!
             track->SetLineColor(1 + p.ParticleId); //TODO respect particle track colors!
+
+            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, kBlack);
+            marks->SetNextPoint(R[0], R[1], R[2]);
+            GeoMarkers.append(marks);
         }
         GP->clear();
         delete GP;
     }
     ShowTracks();
+    ShowGeoMarkers();
 }
 
 void MainWindow::on_ledGunAverageNumPartperEvent_editingFinished()

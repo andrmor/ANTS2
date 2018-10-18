@@ -41,7 +41,11 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
 
         if (f.size() < 8) continue;
 
-        int    pId    = f.at(0).toInt();   //TODO index check
+        bool bOK;
+        int    pId    = f.at(0).toInt(&bOK);
+        if (!bOK) continue;
+        //TODO protection of wrong index, either test on start
+
         double energy = f.at(1).toDouble();
         double x =      f.at(2).toDouble();
         double y =      f.at(3).toDouble();

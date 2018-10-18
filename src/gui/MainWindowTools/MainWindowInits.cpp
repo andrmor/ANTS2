@@ -76,6 +76,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
     ui->leGenerateFromFile_FileName->setText(epff);
+    SimulationManager->FileParticleGenerator->SetFileName(epff);
 
     //adding Context menus
     ui->lwLoadedEventsFiles->setContextMenuPolicy(Qt::CustomContextMenu);

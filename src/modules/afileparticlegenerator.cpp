@@ -89,7 +89,9 @@ const AParticleFileStat AFileParticleGenerator::InspectFile(const QString &fname
 
         if (f.size() < 8) continue;
 
-        int    pId    = f.at(0).toInt();
+        bool bOK;
+        int    pId = f.at(0).toInt(&bOK);
+        if (!bOK) continue; //assuming this is a comment line
         if (pId < 0 || pId >= ParticleCount)
         {
             stat.ErrorString = QString("Invalid particle index %1 in file %2").arg(pId).arg(fname);

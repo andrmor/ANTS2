@@ -10,6 +10,7 @@
 #include "particlesourcesclass.h"
 #include "aglobalsettings.h"
 #include "aparticlesourcerecord.h"
+#include "simulationmanager.h"
 
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -241,9 +242,9 @@ TriState CheckUpWindowClass::CheckInteractions()
     int listIndex = ui->listInteraction->count();
 
     //Check all particle sources: if links are valid, if interaction data for a given energy is available
-    for(int i = 0; i < MW->ParticleSources->size(); i++)
+    for(int i = 0; i < MW->SimulationManager->ParticleSources->size(); i++)
     {
-        AParticleSourceRecord* source = MW->ParticleSources->getSource(i);
+        AParticleSourceRecord* source = MW->SimulationManager->ParticleSources->getSource(i);
         int sourceParticleCount = source->GunParticles.size();
 
         //Loop over all GunParticles

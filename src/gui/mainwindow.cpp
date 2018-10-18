@@ -3751,31 +3751,6 @@ void MainWindow::on_pbSimulate_clicked()
   startSimulation(Config->JSON);  
 }
 
-void MainWindow::on_pbParticleSourcesSimulate_clicked()
-{  
-  ELwindow->QuickSave(0);
-  fStartedFromGUI = true;
-  fSimDataNotSaved = false; // to disable the warning
-  //watchdog on particle sources, can be transferred later to check-upwindow
-  if (ParticleSources->size() == 0)
-    {
-      message("No particle sources defined!", this);
-      return;
-    }
-
-  for (int i = 0; i<ParticleSources->size(); i++)
-    {
-      int error = ParticleSources->CheckSource(i);
-      if (error == 0) continue;
-
-      message("Error in source "+ParticleSources->getSource(i)->name +":\n\n"+ParticleSources->getErrorString(error), this);
-      return;
-    }
-
-  MainWindow::writeSimSettingsToJson(Config->JSON);
-  startSimulation(Config->JSON);
-}
-
 void MainWindow::startSimulation(QJsonObject &json)
 {
     WindowNavigator->BusyOn(); //go busy mode, most of gui controls disabled

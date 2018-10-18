@@ -20,7 +20,7 @@
 #include "detectorclass.h"
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
-#include "particlesourcesclass.h"
+//#include "particlesourcesclass.h"
 #include "aglobalsettings.h"
 #include "globalsettingswindowclass.h"
 #include "aconfiguration.h"
@@ -74,13 +74,13 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QString mav = QString::number(majVer);
     setWindowTitle("ANTS2_v"+mav+"."+miv);
 
+    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    ui->leGenerateFromFile_FileName->setText(epff);
+
     //adding Context menus
     ui->lwLoadedEventsFiles->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->lwLoadedEventsFiles, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(LoadEventsListContextMenu(const QPoint&)));
-
-    //setting up alias for particle sources container class - just for GUI
-    ParticleSources = SimulationManager->ParticleSources;
 
     //interface windows
     qDebug()<<">Creating Examples Window";

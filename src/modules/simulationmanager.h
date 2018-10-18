@@ -74,7 +74,7 @@ public:
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
     void Clear();
 
-    ParticleSourcesClass* ParticleSources;  //used to update JSON on config chamges and in GUI to configure; Simulateors use their local copies build from JSON
+    ParticleSourcesClass* ParticleSources;  //used to update JSON on config changes and in GUI to configure; Simulateors use their local copies build from JSON
     ATrackBuildOptions TrackBuildOptions;
 
 private:

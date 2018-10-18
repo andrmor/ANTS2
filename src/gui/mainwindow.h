@@ -90,7 +90,6 @@ public:
     EventsDataClass *EventsDataHub = 0;
     TApplication *RootApp = 0;
     ASimulationManager* SimulationManager = 0;
-    ParticleSourcesClass* ParticleSources = 0;
     AReconstructionManager *ReconstructionManager = 0;
     ANetworkModule* NetModule = 0;
     TmpObjHubClass *TmpHub = 0;

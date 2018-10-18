@@ -582,8 +582,7 @@ if (scj.contains("CustomDistrib"))
   JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
 
   //particle sources
-  ParticleSources->clear();
-  ParticleSources->readFromJson(psjs);
+  SimulationManager->ParticleSources->readFromJson(psjs);
   on_pbUpdateSourcesIndication_clicked();
 
   //Window CONTROL
@@ -632,12 +631,12 @@ if (scj.contains("CustomDistrib"))
 
 void MainWindow::selectFirstActiveParticleSource()
 {
-    if (ParticleSources->getTotalActivity() > 0)
+    if (SimulationManager->ParticleSources->getTotalActivity() > 0)
     {
         //show the first source with non-zero activity
         int i = 0;
-        for (; i<ParticleSources->size(); i++)
-          if (ParticleSources->getSource(i)->Activity > 0) break;
+        for (; i<SimulationManager->ParticleSources->size(); i++)
+          if (SimulationManager->ParticleSources->getSource(i)->Activity > 0) break;
 
         if (i < ui->lwDefinedParticleSources->count())
             ui->lwDefinedParticleSources->setCurrentRow(i);

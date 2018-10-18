@@ -10027,26 +10027,13 @@ double events:</string>
            <string>Check file</string>
           </property>
          </widget>
-         <widget class="QLabel" name="label_37">
-          <property name="geometry">
-           <rect>
-            <x>60</x>
-            <y>100</y>
-            <width>47</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>File info:</string>
-          </property>
-         </widget>
          <widget class="QLabel" name="labGenerateFromFile_info">
           <property name="geometry">
            <rect>
-            <x>60</x>
-            <y>120</y>
-            <width>421</width>
-            <height>91</height>
+            <x>10</x>
+            <y>100</y>
+            <width>491</width>
+            <height>111</height>
            </rect>
           </property>
           <property name="text">

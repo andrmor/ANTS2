@@ -20,6 +20,9 @@
 #include "acommonfunctions.h"
 #include "guiutils.h"
 #include "aparticlesourcedialog.h"
+#include "simulationmanager.h"
+#include "exampleswindow.h"
+#include "aconfiguration.h"
 
 //Qt
 #include <QDebug>
@@ -49,7 +52,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
   cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
   masterjs["SourceControlOptions"] = cjs;
     //particle sources
-  ParticleSources->writeToJson(masterjs);
+  SimulationManager->ParticleSources->writeToJson(masterjs);
 
   json["ParticleSourcesConfig"] = masterjs;
 }
@@ -232,11 +235,11 @@ void MainWindow::on_pbGunTest_clicked()
 
     if (ui->pbGunShowSource->isChecked())
     {
-        for (int i=0; i<ParticleSources->size(); i++)
-            ShowSource(ParticleSources->getSource(i), false);
+        for (int i=0; i<SimulationManager->ParticleSources->size(); i++)
+            ShowSource(SimulationManager->ParticleSources->getSource(i), false);
     }
 
-    TestParticleGun(ParticleSources, ui->sbGunTestEvents->value());
+    TestParticleGun(SimulationManager->ParticleSources, ui->sbGunTestEvents->value());
 }
 
 void MainWindow::TestParticleGun(ParticleSourcesClass* ParticleSources, int numParticles)
@@ -296,25 +299,25 @@ void MainWindow::on_pbRemoveSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->size())
     {
         message("Error - bad source index!", this);
         return;
     }
 
     int ret = QMessageBox::question(this, "Remove particle source",
-                                    "Are you sure you want to remove source " + ParticleSources->getSource(isource)->name,
+                                    "Are you sure you want to remove source " + SimulationManager->ParticleSources->getSource(isource)->name,
                                     QMessageBox::Yes | QMessageBox::Cancel,
                                     QMessageBox::Cancel);
     if (ret != QMessageBox::Yes) return;
 
-    ParticleSources->remove(isource);
+    SimulationManager->ParticleSources->remove(isource);
 
     on_pbUpdateSimConfig_clicked();
     on_pbUpdateSourcesIndication_clicked();
     if (ui->pbGunShowSource->isChecked())
     {
-        if (ParticleSources->size() == 0)
+        if (SimulationManager->ParticleSources->size() == 0)
         {
             Detector->GeoManager->ClearTracks();
             GeometryWindow->ShowGeometry(false);
@@ -328,23 +331,23 @@ void MainWindow::on_pbAddSource_clicked()
 {
     AParticleSourceRecord* s = new AParticleSourceRecord();
     s->GunParticles << new GunParticleStruct();
-    ParticleSources->append(s);
+    SimulationManager->ParticleSources->append(s);
 
     on_pbUpdateSourcesIndication_clicked();
-    ui->lwDefinedParticleSources->setCurrentRow( ParticleSources->size()-1 );
+    ui->lwDefinedParticleSources->setCurrentRow( SimulationManager->ParticleSources->size()-1 );
     on_pbEditParticleSource_clicked();
 }
 
 void MainWindow::on_pbUpdateSourcesIndication_clicked()
 {
-    int numSources = ParticleSources->size();
+    int numSources = SimulationManager->ParticleSources->size();
 
     int curRow = ui->lwDefinedParticleSources->currentRow();
     ui->lwDefinedParticleSources->clear();
 
     for (int i=0; i<numSources; i++)
     {
-        AParticleSourceRecord* pr = ParticleSources->getSource(i);
+        AParticleSourceRecord* pr = SimulationManager->ParticleSources->getSource(i);
         QListWidgetItem* item = new QListWidgetItem();
         ui->lwDefinedParticleSources->addItem(item);
 
@@ -380,7 +383,7 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
             e->setVisible(numSources > 1);
         l->addWidget(e);
 
-            double totAct = ParticleSources->getTotalActivity();
+            double totAct = SimulationManager->ParticleSources->getTotalActivity();
             double per = ( totAct == 0 ? 0 : 100.0 * pr->Activity / totAct );
             QString t = QString("%1%").arg(per, 3, 'g', 3);
             lab = new QLabel(t);
@@ -427,12 +430,12 @@ void MainWindow::ShowParticleSource_noFocus()
 {
   int isource = ui->lwDefinedParticleSources->currentRow();
   if (isource < 0) return;
-  if (isource >= ParticleSources->size())
+  if (isource >= SimulationManager->ParticleSources->size())
     {
       message("Source number is out of bounds!",this);
       return;
     }
-  ShowSource(ParticleSources->getSource(isource), true);
+  ShowSource(SimulationManager->ParticleSources->getSource(isource), true);
 }
 
 void MainWindow::on_pbSaveParticleSource_clicked()
@@ -443,7 +446,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
         message("Select a source to remove", this);
         return;
     }
-    if (isource >= ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->size())
     {
         message("Error - bad source index!", this);
         return;
@@ -456,7 +459,7 @@ void MainWindow::on_pbSaveParticleSource_clicked()
     if (file.suffix().isEmpty()) fileName += ".json";
 
     QJsonObject json, js;
-    ParticleSources->writeSourceToJson(isource, json);
+    SimulationManager->ParticleSources->writeSourceToJson(isource, json);
     js["ParticleSource"] = json;
     bool bOK = SaveJsonToFile(js, fileName);
     if (!bOK) message("Failed to save json to file: "+fileName, this);
@@ -484,8 +487,8 @@ void MainWindow::on_pbLoadParticleSource_clicked()
     int oldPartCollSize = Detector->MpCollection->countParticles();
     js = json["ParticleSource"].toObject();
 
-    ParticleSources->append(new AParticleSourceRecord());
-    ParticleSources->readSourceFromJson(ParticleSources->size()-1, js);
+    SimulationManager->ParticleSources->append(new AParticleSourceRecord());
+    SimulationManager->ParticleSources->readSourceFromJson( SimulationManager->ParticleSources->size()-1, js );
 
     onRequestDetectorGuiUpdate();
     on_pbUpdateSimConfig_clicked();
@@ -683,26 +686,26 @@ void MainWindow::on_pbEditParticleSource_clicked()
         message("Select a source to edit", this);
         return;
     }
-    if (isource >= ParticleSources->size())
+    if (isource >= SimulationManager->ParticleSources->size())
     {
         message("Error - bad source index!", this);
         return;
     }
 
-    AParticleSourceDialog d(*this, ParticleSources->getSource(isource));
+    AParticleSourceDialog d(*this, SimulationManager->ParticleSources->getSource(isource));
     int res = d.exec();
     if (res == QDialog::Rejected) return;
 
-    ParticleSources->replace(isource, d.getResult());
+    SimulationManager->ParticleSources->replace(isource, d.getResult());
 
-    AParticleSourceRecord* ps = ParticleSources->getSource(isource);
-    ParticleSources->checkLimitedToMaterial(ps);
+    AParticleSourceRecord* ps = SimulationManager->ParticleSources->getSource(isource);
+    SimulationManager->ParticleSources->checkLimitedToMaterial(ps);
 
     if (Detector->isGDMLempty())
       { //check world size
         double XYm = 0;
         double  Zm = 0;
-        for (int isource = 0; isource < ParticleSources->size(); isource++)
+        for (int isource = 0; isource < SimulationManager->ParticleSources->size(); isource++)
           {
             double msize =   ps->size1;
             UpdateMax(msize, ps->size2);
@@ -727,6 +730,31 @@ void MainWindow::on_pbEditParticleSource_clicked()
 
     on_pbUpdateSimConfig_clicked();
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
+}
+
+void MainWindow::on_pbParticleSourcesSimulate_clicked()
+{
+  ELwindow->QuickSave(0);
+  fStartedFromGUI = true;
+  fSimDataNotSaved = false; // to disable the warning
+  //watchdog on particle sources, can be transferred later to check-upwindow
+  if (SimulationManager->ParticleSources->size() == 0)
+    {
+      message("No particle sources defined!", this);
+      return;
+    }
+
+  for (int i = 0; i<SimulationManager->ParticleSources->size(); i++)
+    {
+      int error = SimulationManager->ParticleSources->CheckSource(i);
+      if (error == 0) continue;
+
+      message("Error in source " + SimulationManager->ParticleSources->getSource(i)->name +":\n\n" + SimulationManager->ParticleSources->getErrorString(error), this);
+      return;
+    }
+
+  MainWindow::writeSimSettingsToJson(Config->JSON);
+  startSimulation(Config->JSON);
 }
 
 // ---- from file ----

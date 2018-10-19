@@ -134,20 +134,27 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   ErrorString = detector->MpCollection->CheckOverrides();
   if (!ErrorString.isEmpty()) return false;
 
-  clearWorkers(); //just rebuild them all everytime, it's easier
+  clearWorkers();
 
-  for(int i = 0; i < threadCount; i++)
+  for (int i = 0; i < threadCount; i++)
   {
       Simulator *worker;
       if (modeSetup == "PointSim") //Photon simulator
-        worker = new PointSourceSimulator(detector, i);
+          worker = new PointSourceSimulator(detector, i);
       else //Particle simulator
-        worker = new ParticleSourceSimulator(detector, i);
+          worker = new ParticleSourceSimulator(detector, i);
 
       worker->setSimSettings(&simSettings);
-      int seed = detector->RandGen->Rndm()*100000;
+      int seed = detector->RandGen->Rndm() * 100000;
       worker->setRngSeed(seed);
-      worker->setup(jsSimSet);
+      bool bOK = worker->setup(jsSimSet);
+      if (!bOK)
+      {
+          ErrorString = worker->getErrorString();
+          delete worker;
+          clearWorkers();
+          return false;
+      }
       worker->initSimStat();
 
       worker->divideThreadWork(i, threadCount);
@@ -1415,8 +1422,7 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
 
 bool ParticleSourceSimulator::setup(QJsonObject &json)
 {
-    if(!Simulator::setup(json))
-        return false;
+    if(!Simulator::setup(json)) return false;
 
     //prepare this module
     timeFrom = simSettings->TimeFrom;
@@ -1437,9 +1443,6 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             ErrorString = "Json sent to simulator does not contain proper sim config data!";
             return false;
         }
-
-        // select ParticleGun type and load the appropriate options
-
         totalEventCount = cjs["EventsToDo"].toInt();
         fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
         AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
@@ -1452,11 +1455,51 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
         fIgnoreNoDepoEvents = true; //compatibility
         parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
 
-        //particle sources
-        if (js.contains("ParticleSources"))
+        // particle generation mode
+        QString PartGenMode = "Sources"; //compatibility
+        parseJson(cjs, "ParticleGenerationMode", PartGenMode);
+
+        if (PartGenMode == "Sources")
         {
-            ParticleSources->readFromJson(js);
-            ParticleSources->Init();
+            // particle sources
+            if (js.contains("ParticleSources"))
+            {
+                ParticleSources->readFromJson(js);
+                ParticleSources->Init();
+            }
+            else
+            {
+                ErrorString = "Simulation settings do not contain particle source configuration";
+                return false;
+            }
+        }
+        else if (PartGenMode == "File")
+        {
+            //  generation from file
+            QJsonObject fjs;
+            parseJson(js, "GenerationFromFile", fjs);
+            if (fjs.isEmpty())
+            {
+                ErrorString = "Simulation settings do not contain 'from file' generator configuration";
+                return false;
+            }
+            else
+            {
+                ErrorString = "'From file' mode is not yet implemented";
+                return false;
+                //FileParticleGenerator->readFromJson(fjs);
+            }
+        }
+        else if (PartGenMode == "Script")
+        {
+            // script based generator
+            ErrorString = "Script particle generator is not yet implemented";
+            return false;
+        }
+        else
+        {
+            ErrorString = "Load sim settings: Unknown particle generation mode!";
+            return false;
         }
 
     //inits

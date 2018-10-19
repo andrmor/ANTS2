@@ -20,7 +20,7 @@
 #include "TGeoManager.h"
 
 ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen)
-    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen), TotalActivity(0) {}
+    : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen) {}
 
 ParticleSourcesClass::~ParticleSourcesClass()
 {
@@ -112,38 +112,39 @@ bool ParticleSourcesClass::Init()
 
 QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
 {
-  //after any operation with sources (add, remove), init should be called before first use!
+    //after any operation with sources (add, remove), init should be called before first use!
 
-  QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
+    QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
 
-  //selecting the source
-  int isource = 0;
-  int NumSources = ParticleSourcesData.size();
-  if (NumSources>1)
+    //selecting the source
+    int isource = 0;
+    int NumSources = ParticleSourcesData.size();
+    if (NumSources>1)
     {
-      double rnd = RandGen->Rndm()*TotalActivity;
-      for (; isource<NumSources-1; isource++)
+        double rnd = RandGen->Rndm()*TotalActivity;
+        for (; isource<NumSources-1; isource++)
         {
-          if (ParticleSourcesData[isource]->Activity >= rnd) break; //this source selected
-          rnd -= ParticleSourcesData[isource]->Activity;
+            if (ParticleSourcesData[isource]->Activity >= rnd) break; //this source selected
+            rnd -= ParticleSourcesData[isource]->Activity;
         }
     }
 
-  //position
-  double R[3];
-  if (ParticleSourcesData[isource]->fLimit)
-  {
-      QElapsedTimer timer;
-      timer.start();
-      do
-      {
-          if (timer.elapsed()>500) return GeneratedParticles;
+    //position
+    double R[3];
+    if (ParticleSourcesData[isource]->fLimit)
+    {
+        QElapsedTimer timer; //TODO make dynamic member
+        timer.start();
+        do
+        {
+            if (timer.elapsed()>500) return GeneratedParticles;
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
-          GeneratePosition(isource, R);
-      }
-      while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != ParticleSourcesData[isource]->LimitedToMat );
-  }
-  else GeneratePosition(isource, R);
+            GeneratePosition(isource, R);
+        }
+        //TODO - not safe in multithread!!!
+        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != ParticleSourcesData[isource]->LimitedToMat );
+    }
+    else GeneratePosition(isource, R);
 
   //selecting the particle
   double rnd = RandGen->Rndm()*TotalParticleWeight[isource];
@@ -491,25 +492,6 @@ void ParticleSourcesClass::writeToJson(QJsonObject &json) const
     json["ParticleSources"] = ja;
 }
 
-void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
-{
-    bool fFound = false;
-    int iMat;
-    for (iMat=0; iMat<MpCollection->countMaterials(); iMat++)
-        if (s->LimtedToMatName == (*MpCollection)[iMat]->name)
-        {
-            fFound = true;
-            break;
-        }
-
-    if (fFound)
-    { //only in this case limit to material will be used!
-        s->fLimit = true;
-        s->LimitedToMat = iMat;
-    }
-    else s->fLimit = false;
-}
-
 bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
 {
     clear();
@@ -539,14 +521,33 @@ bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
     return true;
 }
 
+void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
+{
+    bool fFound = false;
+    int iMat;
+    for (iMat=0; iMat<MpCollection->countMaterials(); iMat++)
+        if (s->LimtedToMatName == (*MpCollection)[iMat]->name)
+        {
+            fFound = true;
+            break;
+        }
+
+    if (fFound)
+    { //only in this case limit to material will be used!
+        s->fLimit = true;
+        s->LimitedToMat = iMat;
+    }
+    else s->fLimit = false;
+}
+
 bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)
 {
-  if (iSource<0 || iSource>ParticleSourcesData.size()-1)
+  if (iSource < 0 || iSource >= ParticleSourcesData.size())
     {
       qWarning("Energy spectrum was NOT loaded - wrong source index");
       return false;
     }
-  if (iParticle<0 || iParticle>ParticleSourcesData[iSource]->GunParticles.size()-1)
+  if (iParticle < 0 || iParticle >= ParticleSourcesData[iSource]->GunParticles.size())
     {
       qWarning("Energy spectrum was NOT loaded - wrong particle index");
       return false;
@@ -574,8 +575,8 @@ bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QSt
 
 void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)
 {
-  ParticleSourcesData.append(gunParticle);
-  CalculateTotalActivity();
+    ParticleSourcesData.append(gunParticle);
+    CalculateTotalActivity();
 }
 
 void ParticleSourcesClass::forget(AParticleSourceRecord *gunParticle)
@@ -595,10 +596,10 @@ bool ParticleSourcesClass::replace(int iSource, AParticleSourceRecord *gunPartic
 
 void ParticleSourcesClass::remove(int iSource)
 {
-  if (ParticleSourcesData.isEmpty()) return;
-  if (iSource >= ParticleSourcesData.size()) return;
+    if (ParticleSourcesData.isEmpty()) return;
+    if (iSource < 0 || iSource >= ParticleSourcesData.size()) return;
 
-  delete ParticleSourcesData[iSource];
-  ParticleSourcesData.remove(iSource);
-  CalculateTotalActivity();
+    delete ParticleSourcesData[iSource];
+    ParticleSourcesData.remove(iSource);
+    CalculateTotalActivity();
 }

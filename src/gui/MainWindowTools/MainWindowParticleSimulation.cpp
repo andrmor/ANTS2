@@ -419,7 +419,6 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
                 e->clearFocus();
                 emit this->RequestUpdateSimConfig();
             });
-            e->setVisible(numSources > 1);
         l->addWidget(e);
 
             double totAct = SimulationManager->ParticleSources->getTotalActivity();
@@ -429,11 +428,12 @@ void MainWindow::on_pbUpdateSourcesIndication_clicked()
             lab->setMinimumWidth(45);
         l->addWidget(lab);
 
-
         fr->setLayout(l);
         item->setSizeHint(fr->sizeHint());
         ui->lwDefinedParticleSources->setItemWidget(item, fr);
         item->setSizeHint(fr->sizeHint());
+
+        e->setVisible(numSources > 1);
     }
 
     if (curRow < 0 || curRow >= ui->lwDefinedParticleSources->count())

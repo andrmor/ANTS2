@@ -42,19 +42,16 @@ public:
     virtual bool readFromJson(const QJsonObject &json) override;
 
     //requests
-    int countSources() const {return ParticleSourcesData.size();}
+    int    countSources() const {return ParticleSourcesData.size();}
     double getTotalActivity();
     AParticleSourceRecord* getSource(int iSource) {return ParticleSourcesData[iSource];}
-    AParticleSourceRecord* getLastSource() {return ParticleSourcesData.last();}
+    void   append(AParticleSourceRecord* gunParticle);
+    void   forget(AParticleSourceRecord* gunParticle);
+    bool   replace(int iSource, AParticleSourceRecord* gunParticle);
+    void   remove(int iSource);
+    void   clear();
 
-    //Source handling - after handling is finished, requires Init() !!!
-    void append(AParticleSourceRecord* gunParticle);
-    void forget(AParticleSourceRecord* gunParticle);
-    bool replace(int iSource, AParticleSourceRecord* gunParticle);
-    void remove(int iSource);
-    void clear();
-
-    bool LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName);
+    bool   LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName); //TODO uses load function with message
 
     TVector3 GenerateRandomDirection();
     void checkLimitedToMaterial(AParticleSourceRecord *s);
@@ -66,7 +63,7 @@ private:
 
     QVector<AParticleSourceRecord*> ParticleSourcesData;
     QVector<double> TotalParticleWeight;
-    double TotalActivity;
+    double TotalActivity = 0;
     QVector< QVector< QVector<LinkedParticleStructure> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
                               //full recipe of emission builder (containes particles linked to particles etc up to the top level individual particle)
 

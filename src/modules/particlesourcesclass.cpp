@@ -141,24 +141,23 @@ QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
             GeneratePosition(isource, R);
         }
-        //TODO - not safe in multithread!!!
-        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != ParticleSourcesData[isource]->LimitedToMat );
+        while ( Detector->GeoManager->FindNode(R[0], R[1], R[2])->GetVolume()->GetMaterial()->GetIndex() != ParticleSourcesData[isource]->LimitedToMat ); //gGeoManager is Thread-aware
     }
     else GeneratePosition(isource, R);
 
-  //selecting the particle
-  double rnd = RandGen->Rndm()*TotalParticleWeight[isource];
-  int iparticle;
-  for (iparticle = 0; iparticle<ParticleSourcesData[isource]->GunParticles.size()-1; iparticle++)
+    //selecting the particle
+    double rnd = RandGen->Rndm() * TotalParticleWeight.at(isource);
+    int iparticle;
+    for (iparticle = 0; iparticle<ParticleSourcesData[isource]->GunParticles.size()-1; iparticle++)
     {
-      if (ParticleSourcesData[isource]->GunParticles[iparticle]->Individual)
+        if (ParticleSourcesData[isource]->GunParticles[iparticle]->Individual)
         {
-          if (ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight >= rnd) break; //this one
-          rnd -= ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight;
+            if (ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight >= rnd) break; //this one
+            rnd -= ParticleSourcesData[isource]->GunParticles[iparticle]->StatWeight;
         }
     }
-  //iparticle is the particle number in the list
-  //qDebug()<<"----Particle"<<iparticle<<"selected";
+    //iparticle is the particle number in the list
+    //qDebug()<<"----Particle"<<iparticle<<"selected";
 
   //algorithm of generation depends on whether there are particles linked to this one
   if (LinkedPartiles[isource][iparticle].size() == 1) //1 - only the particle itself

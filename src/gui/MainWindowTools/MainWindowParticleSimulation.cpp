@@ -828,25 +828,39 @@ void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
-    ui->labGenerateFromFile_info->setText("");
-    int numParticles = MpCollection->countParticles();
-
     pg->InvalidateFile();
-
     if (!pg->Init())
-    {
         message(pg->GetErrorString(), this);
+
+    updateFileParticleGeneratorGui();
+}
+
+void MainWindow::updateFileParticleGeneratorGui()
+{
+    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
+
+    QFileInfo fi(pg->GetFileName());
+    if (!fi.exists())
+    {
+        ui->labGenerateFromFile_info->setText("File not found");
         return;
     }
 
     QString s;
-    s += QString("Events: %1\n").arg(pg->statNumEvents);
-    if (pg->statNumMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(pg->statNumMultipleEvents);
-    s += "Particle distribution:\n";
-    for (int ip = 0; ip < numParticles; ip++)
+    if (pg->IsValidated())
     {
-        if (pg->statParticleQuantity.at(ip) > 0)
-            s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
+        s += QString("Events: %1\n").arg(pg->statNumEvents);
+        if (pg->statNumMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(pg->statNumMultipleEvents);
+
+        int numParticles = MpCollection->countParticles();
+        s += "Particle distribution:\n";
+        for (int ip = 0; ip < numParticles; ip++)
+        {
+            if (pg->statParticleQuantity.at(ip) > 0)
+                s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
+        }
     }
+    else s = "Click 'Analyse file' to see statistics";
+
     ui->labGenerateFromFile_info->setText(s);
 }

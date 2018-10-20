@@ -227,6 +227,8 @@ public slots:
     void ShowGeometrySlot();
 
 private slots:
+    void updateFileParticleGeneratorGui();
+
     void on_pbAddParticleToStack_clicked();
     void on_pbRemoveFromStack_clicked();
     void on_pbRefreshMaterials_clicked();

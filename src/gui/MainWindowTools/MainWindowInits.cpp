@@ -162,6 +162,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(Config, SIGNAL(requestLRFGuiUpdate()), lrfwindow, SLOT(onRequestGuiUpdate()));
     QObject::connect(Config, SIGNAL(NewConfigLoaded()), this, SLOT(onNewConfigLoaded()));
     QObject::connect(Config, &AConfiguration::requestGuiBusyStatusChange, WindowNavigator, &WindowNavigatorClass::ChangeGuiBusyStatus);
+    QObject::connect(MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, this, &MainWindow::updateFileParticleGeneratorGui);
 
     QObject::connect(EventsDataHub, SIGNAL(loaded(int, int)), this, SLOT(updateLoaded(int, int)));
     QObject::connect(this, SIGNAL(RequestStopLoad()), EventsDataHub, SLOT(onRequestStopLoad()));

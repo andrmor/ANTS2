@@ -10035,15 +10035,15 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </rect>
           </property>
           <property name="text">
-           <string>Check file</string>
+           <string>Analyse file</string>
           </property>
          </widget>
          <widget class="QLabel" name="labGenerateFromFile_info">
           <property name="geometry">
            <rect>
-            <x>10</x>
+            <x>50</x>
             <y>100</y>
-            <width>491</width>
+            <width>451</width>
             <height>111</height>
            </rect>
           </property>

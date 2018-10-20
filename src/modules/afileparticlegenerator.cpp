@@ -184,6 +184,12 @@ void AFileParticleGenerator::InvalidateFile()
     clearFileStat();
 }
 
+bool AFileParticleGenerator::IsValidated() const
+{
+    QFileInfo fi(File);
+    return (fi.exists() && FileLastModified == fi.lastModified() && RegisteredParticleCount == MpCollection.countParticles());
+}
+
 void AFileParticleGenerator::clearFileStat()
 {
     FileLastModified = QDateTime(); //will force to inspect file on next use

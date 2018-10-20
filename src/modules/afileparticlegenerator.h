@@ -37,6 +37,7 @@ public:
     virtual void SetStartEvent(int startEvent) override;
 
     void InvalidateFile(); //signals that the file has to be inspected again
+    bool IsValidated() const;
 
     //public file inspect results
     int statNumEvents = 0;

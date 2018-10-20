@@ -1485,7 +1485,7 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                ParticleGun = new AFileParticleGenerator();
+                ParticleGun = new AFileParticleGenerator(*detector->MpCollection);
                 ParticleGun->readFromJson(fjs);
 
             }
@@ -1812,7 +1812,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     //qDebug() << "->Container for particle sources created and configured";
 
-    FileParticleGenerator = new AFileParticleGenerator();
+    FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 

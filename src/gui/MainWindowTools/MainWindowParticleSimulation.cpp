@@ -23,6 +23,7 @@
 #include "simulationmanager.h"
 #include "exampleswindow.h"
 #include "aconfiguration.h"
+#include "afileparticlegenerator.h"
 
 //Qt
 #include <QDebug>
@@ -817,31 +818,35 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
 
 void MainWindow::on_leGenerateFromFile_FileName_editingFinished()
 {
-    SimulationManager->FileParticleGenerator->SetFileName(ui->leGenerateFromFile_FileName->text());
+    QString newName = ui->leGenerateFromFile_FileName->text();
+    if (newName == SimulationManager->FileParticleGenerator->GetFileName()) return;
+
+    SimulationManager->FileParticleGenerator->SetFileName(newName);
     on_pbUpdateSimConfig_clicked();
 }
 
-#include "afileparticlegenerator.h"
 void MainWindow::on_pbGenerateFromFile_Check_clicked()
 {
+    AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
     ui->labGenerateFromFile_info->setText("");
     int numParticles = MpCollection->countParticles();
-    AParticleFileStat stat = AFileParticleGenerator::InspectFile(ui->leGenerateFromFile_FileName->text(), numParticles);
 
-    if (!stat.ErrorString.isEmpty())
+    pg->InvalidateFile();
+
+    if (!pg->Init())
     {
-        message(stat.ErrorString, this);
+        message(pg->GetErrorString(), this);
         return;
     }
 
     QString s;
-    s += QString("Events: %1\n").arg(stat.numEvents);
-    if (stat.numMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(stat.numMultipleEvents);
+    s += QString("Events: %1\n").arg(pg->statNumEvents);
+    if (pg->statNumMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(pg->statNumMultipleEvents);
     s += "Particle distribution:\n";
     for (int ip = 0; ip < numParticles; ip++)
     {
-        if (stat.ParticleStat.at(ip) > 0)
-            s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(stat.ParticleStat.at(ip));
+        if (pg->statParticleQuantity.at(ip) > 0)
+            s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
     }
     ui->labGenerateFromFile_info->setText(s);
 }

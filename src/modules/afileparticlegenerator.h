@@ -8,24 +8,18 @@
 #include <QRegularExpression>
 #include <QVector>
 #include <QJsonObject>
+#include <QDateTime>
 
+class AMaterialParticleCollection;
 class QTextStream;
-
-class AParticleFileStat
-{
-public:
-    int numEvents = 0;
-    int numMultipleEvents = 0;
-    QVector<int> ParticleStat;
-    QString ErrorString;
-};
 
 class AFileParticleGenerator : public AParticleGun
 {
 public:
+    AFileParticleGenerator(const AMaterialParticleCollection& MpCollection);
     virtual ~AFileParticleGenerator(){}
 
-    void          SetFileName(const QString &fileName) {FileName = fileName;}
+    void          SetFileName(const QString &fileName);
     const QString GetFileName() const {return FileName;}
 
     virtual bool Init() override;               //called before first use
@@ -34,7 +28,7 @@ public:
 
     virtual const QString CheckConfiguration() const override; //check consistency of the configuration
 
-    virtual void RemoveParticle(int particleId) override {} //cannot be used for this class
+    virtual void RemoveParticle(int particleId) override; //cannot be used for this class
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 
     virtual void writeToJson(QJsonObject& json) const override;
@@ -42,18 +36,26 @@ public:
 
     virtual void SetStartEvent(int startEvent) override;
 
+    void InvalidateFile(); //signals that the file has to be inspected again
+
+    //public file inspect results
+    int statNumEvents = 0;
+    int statNumMultipleEvents = 0;
+    QVector<int> statParticleQuantity;
+
 private:
+    const AMaterialParticleCollection & MpCollection;
     QString FileName;
     QFile File;
     const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+    int RegisteredParticleCount = -1;
 
     QTextStream* Stream = 0;
+    QDateTime FileLastModified;
 
 private:
-    //bool readLine();
+    void clearFileStat();
 
-public:
-    static const AParticleFileStat InspectFile(const QString& fname, int ParticleCount); //TODO remove static
 };
 
 #endif // AFILEPARTICLEGENERATOR_H

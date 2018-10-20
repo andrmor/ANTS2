@@ -583,12 +583,13 @@ if (scj.contains("CustomDistrib"))
 
         //generation from file
         QJsonObject fjs;
-        parseJson(js, "GenerationFromFile", fjs);
+        parseJson(psjs, "GenerationFromFile", fjs);
             if (!fjs.isEmpty())
             {
                 SimulationManager->FileParticleGenerator->readFromJson(fjs);
                 ui->leGenerateFromFile_FileName->setText(SimulationManager->FileParticleGenerator->GetFileName());
             }
+        updateFileParticleGeneratorGui();
 
     on_pbUpdateSourcesIndication_clicked();
 

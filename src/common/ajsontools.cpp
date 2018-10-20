@@ -34,6 +34,18 @@ bool parseJson(const QJsonObject &json, const QString &key, int &var)
     }
   else return false;
 }
+
+bool parseJson(const QJsonObject &json, const QString &key, qint64 &var)
+{
+    if (json.contains(key))
+      {
+        double val = json[key].toDouble();
+        var = val;
+        return true;
+      }
+    else return false;
+}
+
 bool parseJson(const QJsonObject &json, const QString &key, double &var)
 {
   if (json.contains(key))
@@ -277,4 +289,3 @@ const QString jsonToString(const QJsonObject &json)
     QString s( doc.toJson(QJsonDocument::Compact) );
     return s;
 }
-

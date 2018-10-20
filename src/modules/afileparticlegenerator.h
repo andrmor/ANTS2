@@ -36,11 +36,11 @@ public:
 
     virtual void SetStartEvent(int startEvent) override;
 
-    void InvalidateFile(); //signals that the file has to be inspected again
+    void InvalidateFile(); //signals that the file has to be inspected again by running Init()
     bool IsValidated() const;
 
     //public file inspect results
-    int statNumEvents = 0;
+    int NumEventsInFile = 0;          //saved
     int statNumMultipleEvents = 0;
     QVector<int> statParticleQuantity;
 
@@ -48,11 +48,13 @@ private:
     const AMaterialParticleCollection & MpCollection;
     QString FileName;
     QFile File;
-    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
-    int RegisteredParticleCount = -1;
-
     QTextStream* Stream = 0;
-    QDateTime FileLastModified;
+
+    const QRegularExpression rx = QRegularExpression("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+
+    int RegisteredParticleCount = -1; //saved - used in validity check
+    QDateTime FileLastModified;       //saved - used in validity check
+
 
 private:
     void clearFileStat();

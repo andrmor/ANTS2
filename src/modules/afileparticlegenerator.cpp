@@ -71,7 +71,7 @@ bool AFileParticleGenerator::Init()
             double vz =     f.at(7).toDouble();
             */
 
-            if (!bContinueEvent) statNumEvents++;
+            if (!bContinueEvent) NumEventsInFile++;
 
             if (f.size() > 8 && f.at(8) == '*')
             {
@@ -141,10 +141,20 @@ bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceName
 void AFileParticleGenerator::writeToJson(QJsonObject &json) const
 {
     json["FileName"] = FileName;
+
+    json["NumEventsInFile"] = NumEventsInFile;
+    json["RegisteredParticleCount"] = RegisteredParticleCount;
+    json["FileLastModified"] = FileLastModified.toMSecsSinceEpoch();
 }
 
 bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
 {
+    parseJson(json, "NumEventsInFile", NumEventsInFile);
+    parseJson(json, "RegisteredParticleCount", RegisteredParticleCount);
+    qint64 lastMod;
+    parseJson(json, "FileLastModified", lastMod);
+    FileLastModified = QDateTime::fromMSecsSinceEpoch(lastMod);
+
     return parseJson(json, "FileName", FileName);
 }
 
@@ -186,7 +196,7 @@ void AFileParticleGenerator::InvalidateFile()
 
 bool AFileParticleGenerator::IsValidated() const
 {
-    QFileInfo fi(File);
+    QFileInfo fi(FileName);
     return (fi.exists() && FileLastModified == fi.lastModified() && RegisteredParticleCount == MpCollection.countParticles());
 }
 
@@ -194,7 +204,7 @@ void AFileParticleGenerator::clearFileStat()
 {
     FileLastModified = QDateTime(); //will force to inspect file on next use
 
-    statNumEvents = 0;
+    NumEventsInFile = 0;
     statNumMultipleEvents = 0;
     statParticleQuantity = QVector<int>(RegisteredParticleCount, 0);
 }

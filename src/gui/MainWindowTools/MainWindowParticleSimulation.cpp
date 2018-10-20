@@ -849,16 +849,23 @@ void MainWindow::updateFileParticleGeneratorGui()
     QString s;
     if (pg->IsValidated())
     {
-        s += QString("Events: %1\n").arg(pg->statNumEvents);
-        if (pg->statNumMultipleEvents > 0) s += QString("Multiple events: %1\n").arg(pg->statNumMultipleEvents);
+        s += QString("%1 events in the file").arg(pg->NumEventsInFile);
+        if (pg->statNumMultipleEvents > 0) s += QString(", including %1 multiple events").arg(pg->statNumMultipleEvents);
 
+        s += "\n\n";
+
+        QString pd;
+        bool bFound = false;
         int numParticles = MpCollection->countParticles();
-        s += "Particle distribution:\n";
         for (int ip = 0; ip < numParticles; ip++)
         {
             if (pg->statParticleQuantity.at(ip) > 0)
-                s += QString("  %1 - %2\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
+            {
+                pd += QString("  %2 %1\n").arg(MpCollection->getParticleName(ip)).arg(pg->statParticleQuantity.at(ip));
+                bFound = true;
+            }
         }
+        if (bFound) s += "Particle distribution:\n" + pd;
     }
     else s = "Click 'Analyse file' to see statistics";
 

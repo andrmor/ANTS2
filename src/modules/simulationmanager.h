@@ -39,6 +39,7 @@ class AParticleOnStack;
 struct AEnergyDepositionCell;
 class ASimulatorRunner;
 class GeoMarkerClass;
+class AParticleGun;
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
 class TThread;
@@ -332,7 +333,7 @@ public:
     virtual int getTotalEventCount() const { return totalEventCount; }
     virtual bool setup(QJsonObject &json);
     virtual void updateGeoManager();
-    virtual void simulate();
+    virtual void simulate(); // TODO watchdogs?
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition 
@@ -348,10 +349,10 @@ private:
     void clearParticleStack();
 
     //local objects
-    PrimaryParticleTracker* ParticleTracker;
-    S1_Generator* S1generator;
-    S2_Generator* S2generator;
-    ParticleSourcesClass *ParticleSources;
+    PrimaryParticleTracker* ParticleTracker = 0;
+    S1_Generator* S1generator = 0;
+    S2_Generator* S2generator = 0;
+    AParticleGun* ParticleGun = 0;
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<AParticleOnStack*> ParticleStack;
 

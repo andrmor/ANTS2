@@ -33,7 +33,7 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
 {
     QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
 
-    while(!Stream->atEnd())
+    while (!Stream->atEnd())
     {
         const QString line = Stream->readLine();
         QStringList f = line.split(rx, QString::SkipEmptyParts);
@@ -80,6 +80,37 @@ void AFileParticleGenerator::writeToJson(QJsonObject &json) const
 bool AFileParticleGenerator::readFromJson(const QJsonObject &json)
 {
     return parseJson(json, "FileName", FileName);
+}
+
+void AFileParticleGenerator::SetStartEvent(int startEvent)
+{
+    if (Stream)
+    {
+        Stream->seek(0);
+        if (startEvent == 0) return;
+
+        int event = -1;
+        bool bContinueEvent = false;
+        while (!Stream->atEnd())
+        {
+            const QString line = Stream->readLine();
+            QStringList f = line.split(rx, QString::SkipEmptyParts);
+            if (f.size() < 8) continue;
+            bool bOK;
+            int  pId = f.at(0).toInt(&bOK);
+            if (!bOK) continue; //assuming this is a comment line
+
+            if (!bContinueEvent) event++;
+
+            if (f.size() > 8 && f.at(8) == '*')
+                bContinueEvent = true;
+            else
+            {
+                bContinueEvent = false;
+                if (event == startEvent-1) return;
+            }
+        }
+    }
 }
 
 const AParticleFileStat AFileParticleGenerator::InspectFile(const QString &fname, int ParticleCount)

@@ -793,9 +793,11 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
 void MainWindow::on_twParticleGenerationMode_currentChanged(int index)
 {
+    /*
     ui->sbGunEvents->setVisible(index != 1);
     ui->labEventsPS->setVisible(index != 1);
     ui->linePS->setVisible(index != 1);
+    */
 }
 
 // ---- from file ----

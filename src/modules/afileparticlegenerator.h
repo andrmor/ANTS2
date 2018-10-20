@@ -40,6 +40,8 @@ public:
     virtual void writeToJson(QJsonObject& json) const override;
     virtual bool readFromJson(const QJsonObject& json) override;
 
+    virtual void SetStartEvent(int startEvent) override;
+
 private:
     QString FileName;
     QFile File;

@@ -44,6 +44,8 @@ public:
     virtual void writeToJson(QJsonObject &json) const = 0;
     virtual bool readFromJson(const QJsonObject &json) = 0;
 
+    virtual void SetStartEvent(int) {} // for 'from file' generator
+
     const QString& GetErrorString() const {return ErrorString;}
 
 protected:

@@ -160,12 +160,12 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       worker->divideThreadWork(i, threadCount);
       int workerEventCount = worker->getEventCount();
       //Let's not create more than the necessary number of workers, but require at least 1
-      if(workerEventCount == 0 && i != 0)
-        {
+      if (workerEventCount == 0 && i != 0)
+      {
           //qDebug()<<"Worker ("<<(i+1)<<") discarded, no job assigned";
           delete worker;
           break;
-        }
+      }
       totalEventCount += worker->getEventCount();
       workers.append(worker);
   }
@@ -1405,7 +1405,7 @@ ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, 
     S1generator = new S1_Generator(photonGenerator, photonTracker, detector->MpCollection, &EnergyVector, &dataHub->GeneratedPhotonsHistory, RandGen);
     S2generator = new S2_Generator(photonGenerator, photonTracker, &EnergyVector, RandGen, detector->GeoManager, detector->MpCollection, &dataHub->GeneratedPhotonsHistory);
 
-    ParticleSources = new ParticleSourcesClass(detector, RandGen);
+    //ParticleSources = new ParticleSourcesClass(detector, RandGen); /too early - do not know yet the particle generator mode
 }
 
 ParticleSourceSimulator::~ParticleSourceSimulator()
@@ -1413,7 +1413,7 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
     delete S2generator;
     delete S1generator;
     delete ParticleTracker;
-    delete ParticleSources;
+    delete ParticleGun;
     clearParticleStack();
 
     for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
@@ -1422,7 +1422,7 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
 
 bool ParticleSourceSimulator::setup(QJsonObject &json)
 {
-    if(!Simulator::setup(json)) return false;
+    if ( !Simulator::setup(json) ) return false;
 
     //prepare this module
     timeFrom = simSettings->TimeFrom;
@@ -1464,8 +1464,8 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             // particle sources
             if (js.contains("ParticleSources"))
             {
-                ParticleSources->readFromJson(js);
-                ParticleSources->Init();
+                ParticleGun = new ParticleSourcesClass(detector, RandGen);
+                ParticleGun->readFromJson(js);
             }
             else
             {
@@ -1485,9 +1485,9 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             }
             else
             {
-                ErrorString = "'From file' mode is not yet implemented";
-                return false;
-                //FileParticleGenerator->readFromJson(fjs);
+                ParticleGun = new AFileParticleGenerator();
+                ParticleGun->readFromJson(fjs);
+
             }
         }
         else if (PartGenMode == "Script")
@@ -1499,6 +1499,13 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
         else
         {
             ErrorString = "Load sim settings: Unknown particle generation mode!";
+            return false;
+        }
+
+        // trying initialize the gun
+        if ( !ParticleGun->Init() )
+        {
+            ErrorString = ParticleGun->GetErrorString();
             return false;
         }
 
@@ -1520,27 +1527,32 @@ void ParticleSourceSimulator::updateGeoManager()
 
 void ParticleSourceSimulator::simulate()
 {
-    //watchdogs
-    int NumSources = ParticleSources->countSources();
+    //watchdogs TODO
+    /*
+    int NumSources = ParticleGun->countSources();
     if (NumSources == 0)
     {
         ErrorString = "Particle sources are not defined!";
         fSuccess = false;
         return;
     }
-    if (ParticleSources->getTotalActivity() == 0)
+    if (ParticleGun->getTotalActivity() == 0)
     {
         ErrorString = "Total activity of sources is zero!";
         fSuccess = false;
         return;
     }
-    if (ParticleStack.size()>0) // *** to be moved to "ClearData"?
+    */
+
+    if ( !ParticleStack.isEmpty() ) // *** to be moved to "ClearData"?
     {
         for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
-        ParticleStack.resize(0);
+        ParticleStack.clear();
     }
 
     ReserveSpace(getEventCount());
+    if (ParticleGun) ParticleGun->SetStartEvent(eventBegin);
+    //qDebug() << "---Thread"<<ID << "setting start event:"<<eventBegin;
     fStopRequested = false;
     fHardAbortWasTriggered = false;
 
@@ -1572,10 +1584,11 @@ void ParticleSourceSimulator::simulate()
         //qDebug()<<"----particle runs this event: "<<ParticleRunsThisEvent;
 
         //cycle by the particles this event
-        for(int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
+        for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
             //generating one event
-            QVector<AGeneratedParticle>* GP = ParticleSources->GenerateEvent();
+            QVector<AGeneratedParticle>* GP = ParticleGun->GenerateEvent();
+                //qDebug() << "Thread"<<ID << "Event:"<<eventCurrent << "particles generated:" << GP->size();
             //adding particles to the stack
             for (int iPart = 0; iPart < GP->size(); iPart++ )
             {

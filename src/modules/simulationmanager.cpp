@@ -1444,9 +1444,7 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             return false;
         }
         totalEventCount = cjs["EventsToDo"].toInt();
-        fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
-        AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
-        TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
+        fAllowMultiple = false; //only applies to 'Sources' mode
         fDoS1 = cjs["DoS1"].toBool();
         fDoS2 = cjs["DoS2"].toBool();
         fBuildParticleTracks = simSettings->TrackBuildOptions.bBuildParticleTracks;
@@ -1466,6 +1464,10 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             {
                 ParticleGun = new ParticleSourcesClass(detector, RandGen);
                 ParticleGun->readFromJson(js);
+
+                fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
+                AverageNumParticlesPerEvent = cjs["AverageParticlesPerEvent"].toDouble();
+                TypeParticlesPerEvent = cjs["TypeParticlesPerEvent"].toInt();
             }
             else
             {
@@ -1509,6 +1511,8 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             return false;
         }
 
+    //update config according to the selected generation mode
+    if (PartGenMode == "File") totalEventCount = static_cast<AFileParticleGenerator*>(ParticleGun)->NumEventsInFile;
     //inits
     ParticleTracker->configure(simSettings, fBuildParticleTracks, &tracks, fIgnoreNoDepoEvents);
     ParticleTracker->resetCounter();

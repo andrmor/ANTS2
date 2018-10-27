@@ -6,12 +6,16 @@
 #include <QString>
 
 class AMaterialParticleCollection;
+class TRandom2;
+class QScriptEngine;
+class AParticleGeneratorInterface;
+class AMathScriptInterface;
 
 class AScriptParticleGenerator : public AParticleGun
 {
 public:
-    AScriptParticleGenerator(const AMaterialParticleCollection& MpCollection);
-    virtual ~AScriptParticleGenerator(){}
+    AScriptParticleGenerator(const AMaterialParticleCollection& MpCollection, TRandom2 *RandGen);
+    virtual ~AScriptParticleGenerator();
 
     void SetScript(const QString& script) {Script = script;}
     const QString& GetScript() const {return Script;}
@@ -29,9 +33,14 @@ public:
     virtual bool readFromJson(const QJsonObject& json) override;
 
 private:
-    const AMaterialParticleCollection& MpCollection;
+    const AMaterialParticleCollection & MpCollection;
+    TRandom2 * RandGen;
 
     QString Script;
+    QScriptEngine * ScriptEngine = 0;  // creates only on Init - only if from script mode was selected!
+                                       //TODO make external (e.g. Simulator class can host it for sim)
+    AParticleGeneratorInterface * ScriptInterface = 0; // creates only on Init - only if from script mode was selected!
+    AMathScriptInterface * mathInterface = 0; // creates only on Init - only if from script mode was selected!
 };
 
 #endif // ASCRIPTPARTICLEGENERATOR_H

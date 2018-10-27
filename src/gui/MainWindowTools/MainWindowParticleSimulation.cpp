@@ -268,7 +268,7 @@ void MainWindow::on_pbGunTest_clicked()
     {
     case 0: pg = SimulationManager->ParticleSources; break;
     case 1: pg = SimulationManager->FileParticleGenerator; break;
-    case 2:
+    case 2: pg = SimulationManager->ScriptParticleGenerator; break;
     default:
         message("This generation mode is not implemented!", this);
         return;

@@ -5,7 +5,7 @@
 #include "TMath.h"
 #include "TRandom2.h"
 
-AParticleGeneratorInterface::AParticleGeneratorInterface(const AMaterialParticleCollection *MpCollection, TRandom2 *RandGen) :
+AParticleGeneratorInterface::AParticleGeneratorInterface(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen) :
     MpCollection(MpCollection), RandGen(RandGen) {}
 
 void AParticleGeneratorInterface::configure(QVector<AParticleRecord*> * GeneratedParticles)
@@ -15,7 +15,7 @@ void AParticleGeneratorInterface::configure(QVector<AParticleRecord*> * Generate
 
 void AParticleGeneratorInterface::AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time)
 {
-    if (type < 0 || type >= MpCollection->countParticles())
+    if (type < 0 || type >= MpCollection.countParticles())
         abort("Invalid particle Id");
     else
     {
@@ -30,7 +30,7 @@ void AParticleGeneratorInterface::AddParticle(int type, double energy, double x,
 
 void AParticleGeneratorInterface::AddParticleIsotropic(int type, double energy, double x, double y, double z, double time)
 {
-    if (type < 0 || type >= MpCollection->countParticles())
+    if (type < 0 || type >= MpCollection.countParticles())
         abort("Invalid particle Id");
     else
     {

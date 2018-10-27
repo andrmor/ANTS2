@@ -14,7 +14,7 @@ class AParticleGeneratorInterface : public AScriptInterface
     Q_OBJECT
 
 public:
-    AParticleGeneratorInterface(const AMaterialParticleCollection * MpCollection, TRandom2 * RandGen);
+    AParticleGeneratorInterface(const AMaterialParticleCollection & MpCollection, TRandom2 * RandGen);
 
     void configure(QVector<AParticleRecord*> * GeneratedParticles);
 
@@ -23,7 +23,7 @@ public slots:
     void AddParticleIsotropic(int type, double energy, double x, double y, double z, double time = 0);
 
 private:
-    const AMaterialParticleCollection * MpCollection = 0;   //external
+    const AMaterialParticleCollection & MpCollection;
     TRandom2 * RandGen = 0;                                 //external
     QVector<AParticleRecord*> * GP = 0;                     //external
 

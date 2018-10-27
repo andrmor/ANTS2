@@ -1,18 +1,53 @@
 #include "ascriptparticlegenerator.h"
 #include "aparticlerecord.h"
 #include "ajsontools.h"
+#include "aparticlegeneratorinterface.h"
+#include "amathscriptinterface.h"
 
-AScriptParticleGenerator::AScriptParticleGenerator(const AMaterialParticleCollection &MpCollection) :
-    MpCollection(MpCollection) {}
+#include <QScriptEngine>
+#include <QDebug>
+
+AScriptParticleGenerator::AScriptParticleGenerator(const AMaterialParticleCollection &MpCollection, TRandom2 * RandGen) :
+    MpCollection(MpCollection), RandGen(RandGen) {}
+
+AScriptParticleGenerator::~AScriptParticleGenerator()
+{
+    delete ScriptInterface;
+    delete ScriptEngine;
+}
 
 bool AScriptParticleGenerator::Init()
 {
+    qDebug() << "Init script particle ghenerator";
+
+    if (!ScriptEngine)
+    {
+        qDebug() << "Creating script infrastructure";
+        ScriptEngine = new QScriptEngine();
+        ScriptInterface = new AParticleGeneratorInterface(MpCollection, RandGen);
+
+        ScriptInterface->setObjectName("gen");
+        QScriptValue val = ScriptEngine->newQObject(ScriptInterface, QScriptEngine::QtOwnership);
+        ScriptEngine->globalObject().setProperty(ScriptInterface->objectName(), val);
+
+        //QObject::connect(ScriptInterface, &AParticleGeneratorInterface::requestAbort, ScriptEngine, &QScriptEngine::abortEvaluation, Qt::DirectConnection);
+
+        mathInterface = new AMathScriptInterface(RandGen);
+        mathInterface->setObjectName("math");
+        val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
+        ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);
+    }
+
     return true;
 }
 
 void AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-
+    qDebug() << "Generating event!";
+    ScriptInterface->configure(&GeneratedParticles);
+    qDebug() << ScriptEngine->evaluate(Script).toString();
+    qDebug() << "Script>:"<<Script;
+    qDebug() << "Generated particles:"<<GeneratedParticles.size();
 }
 
 bool AScriptParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const

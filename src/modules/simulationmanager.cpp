@@ -1492,14 +1492,25 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             {
                 ParticleGun = new AFileParticleGenerator(*detector->MpCollection);
                 ParticleGun->readFromJson(fjs);
-
             }
         }
         else if (PartGenMode == "Script")
         {
             // script based generator
-            ErrorString = "Script particle generator is not yet implemented";
-            return false;
+            //ErrorString = "Script particle generator is not yet implemented";
+            //return false;
+            QJsonObject sjs;
+            parseJson(js, "GenerationFromScript", sjs);
+            if (sjs.isEmpty())
+            {
+                ErrorString = "Simulation settings do not contain 'from script' generator configuration";
+                return false;
+            }
+            else
+            {
+                ParticleGun = new AScriptParticleGenerator(*detector->MpCollection, RandGen);
+                ParticleGun->readFromJson(sjs);
+            }
         }
         else
         {
@@ -1819,7 +1830,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 
     ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
-    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection);
+    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection, Detector->RandGen);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 

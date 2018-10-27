@@ -90,9 +90,9 @@ void AFileParticleGenerator::ReleaseResources()
     File.close();
 }
 
-QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
+QVector<AParticleRecord> *AFileParticleGenerator::GenerateEvent()
 {
-    QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
+    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
 
     while (!Stream->atEnd())
     {
@@ -115,7 +115,12 @@ QVector<AGeneratedParticle> * AFileParticleGenerator::GenerateEvent()
         double vy =     f.at(6).toDouble();
         double vz =     f.at(7).toDouble();
 
-        (*GeneratedParticles) << AGeneratedParticle(pId, energy, x, y, z, vx, vy, vz);
+        //(*GeneratedParticles) << AGeneratedParticle(pId, energy, x, y, z, vx, vy, vz);
+        (*GeneratedParticles) << AParticleRecord(pId,
+                                                 x, y, z,
+                                                 vx, vy, vz,
+                                                 0, energy);
+        //TODO ensure unitary?
 
         if (f.size() > 8 && f.at(8) == '*') continue;
         break;

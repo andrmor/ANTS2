@@ -1591,7 +1591,7 @@ void ParticleSourceSimulator::simulate()
         for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
             //generating one event
-            QVector<AGeneratedParticle>* GP = ParticleGun->GenerateEvent();
+            QVector<AParticleRecord>* GP = ParticleGun->GenerateEvent();
                 //qDebug() << "Thread"<<ID << "Event:"<<eventCurrent << "particles generated:" << GP->size();
             //adding particles to the stack
             for (int iPart = 0; iPart < GP->size(); iPart++ )
@@ -1599,11 +1599,11 @@ void ParticleSourceSimulator::simulate()
                 if(iRun > 0 && timeRange != 0)
                     time = timeFrom + timeRange*RandGen->Rndm(); //added TimeFrom 05/02/2015
 
-                const AGeneratedParticle &part = GP->at(iPart);
-                ParticleStack.append(new AParticleRecord(part.ParticleId,
-                                                         part.Position[0], part.Position[1], part.Position[2],
-                                                         part.Direction[0], part.Direction[1], part.Direction[2],
-                                                         time, part.Energy));
+                const AParticleRecord &part = GP->at(iPart);
+                ParticleStack.append(new AParticleRecord(part.Id,
+                                                         part.r[0], part.r[1], part.r[2],
+                                                         part.v[0], part.v[1], part.v[2],
+                                                         time, part.energy));
             }
             //clear and delete QVector with generated event
             GP->clear();

@@ -110,11 +110,11 @@ bool ParticleSourcesClass::Init()
   return true; //TODO  check for fails
 }
 
-QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
+QVector<AParticleRecord> *ParticleSourcesClass::GenerateEvent()
 {
     //after any operation with sources (add, remove), init should be called before first use!
 
-    QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
+    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
 
     //selecting the source
     int isource = 0;
@@ -165,9 +165,9 @@ QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
       //there are no linked particles     
       //qDebug()<<"Generating individual particle"<<iparticle;
       ParticleSourcesClass::AddParticleInCone(isource, iparticle, GeneratedParticles);
-      GeneratedParticles->last().Position[0] = R[0];
-      GeneratedParticles->last().Position[1] = R[1];
-      GeneratedParticles->last().Position[2] = R[2];
+      GeneratedParticles->last().r[0] = R[0];
+      GeneratedParticles->last().r[1] = R[1];
+      GeneratedParticles->last().r[2] = R[2];
     }
   else
     {
@@ -226,21 +226,18 @@ QVector<AGeneratedParticle>* ParticleSourcesClass::GenerateEvent()
                   for (int i=0; i<linkedTo+1; i++) if (WasGenerated.at(i)) index++;
                   //qDebug() << "making this particle opposite to:"<<linkedTo<<"index in GeneratedParticles:"<<index;
 
-                  AGeneratedParticle ps;
-                  ps.ParticleId = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
-                  //if (ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum == 0)
-                  //  ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->energy;
-                  //else ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->spectrum->GetRandom();
-                  ps.Energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
-                  ps.Direction[0] = -GeneratedParticles->at(index).Direction[0];
-                  ps.Direction[1] = -GeneratedParticles->at(index).Direction[1];
-                  ps.Direction[2] = -GeneratedParticles->at(index).Direction[2];
+                  AParticleRecord ps;
+                  ps.Id = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
+                  ps.energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
+                  ps.v[0] = -GeneratedParticles->at(index).v[0];
+                  ps.v[1] = -GeneratedParticles->at(index).v[1];
+                  ps.v[2] = -GeneratedParticles->at(index).v[2];
                   GeneratedParticles->append(ps);
                 }
 
-              GeneratedParticles->last().Position[0] = R[0];
-              GeneratedParticles->last().Position[1] = R[1];
-              GeneratedParticles->last().Position[2] = R[2];
+              GeneratedParticles->last().r[0] = R[0];
+              GeneratedParticles->last().r[1] = R[1];
+              GeneratedParticles->last().r[2] = R[2];
             }
           //qDebug()<<"---No Event:"<<NoEvent;
         }
@@ -373,17 +370,17 @@ void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
   return;
 }
 
-void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AGeneratedParticle> *GeneratedParticles) const
+void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord> *GeneratedParticles) const
 {
-  AGeneratedParticle ps;
+  AParticleRecord ps;
 
-  ps.ParticleId = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
+  ps.Id = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
 
     //energy
   //if (ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum == 0)
   //  ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->energy;
   //else ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum->GetRandom();
-  ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
+  ps.energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
     //generating random direction inside the collimation cone
   double spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0; //max angle away from generation diretion
   double cosTheta = cos(spread);
@@ -393,9 +390,9 @@ void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector
   TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
   TVector3 Coll(CollimationDirection[isource]);
   K1.RotateUz(Coll);
-  ps.Direction[0] = K1[0];
-  ps.Direction[1] = K1[1];
-  ps.Direction[2] = K1[2];
+  ps.v[0] = K1[0];
+  ps.v[1] = K1[1];
+  ps.v[2] = K1[2];
 
   GeneratedParticles->append(ps);
 }

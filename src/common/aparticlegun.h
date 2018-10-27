@@ -5,27 +5,8 @@
 #include <QString>
 
 class QJsonObject;
-
-class AGeneratedParticle
-{
-public:
-    AGeneratedParticle(int pId, double energy, double x, double y, double z, double vx, double vy, double vz) :
-        ParticleId(pId), Energy(energy)
-    {
-        Position[0] = x;
-        Position[1] = y;
-        Position[2] = z;
-        Direction[0] = vx;
-        Direction[1] = vy;
-        Direction[2] = vz;
-    }
-    AGeneratedParticle(){}
-
-    int    ParticleId;
-    double Energy;
-    double Position[3];
-    double Direction[3];
-};
+//class AParticleRecord;
+#include "aparticlerecord.h"
 
 class AParticleGun
 {
@@ -34,7 +15,7 @@ public:
 
     virtual bool Init() = 0;             //called before first use
     virtual void ReleaseResources() {}   //called after end of operation
-    virtual QVector<AGeneratedParticle>* GenerateEvent() = 0;
+    virtual QVector<AParticleRecord> * GenerateEvent() = 0;
 
     virtual const QString CheckConfiguration() const = 0; //check consistency of the configuration
 

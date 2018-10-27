@@ -286,31 +286,29 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     double R[3], K[3];
     for (int iRun=0; iRun<numParticles; iRun++)
     {
-        QVector<AGeneratedParticle>* GP = Gun->GenerateEvent();
+        QVector<AParticleRecord>* GP = Gun->GenerateEvent();
 //        if (GP->isEmpty() && iRun > 2)
 //        {
 //            message("Did several attempts but no particles were generated!", this);
 //            break;
 //        }
-        for (const AGeneratedParticle& p : *GP)
+        for (const AParticleRecord& p : *GP)
         {
-            R[0] = p.Position[0];
-            R[1] = p.Position[1];
-            R[2] = p.Position[2];
+            R[0] = p.r[0];
+            R[1] = p.r[1];
+            R[2] = p.r[2];
 
-            K[0] = p.Direction[0];
-            K[1] = p.Direction[1];
-            K[2] = p.Direction[2];            
+            K[0] = p.v[0];
+            K[1] = p.v[1];
+            K[2] = p.v[2];
 
             Int_t track_index = Detector->GeoManager->AddTrack(1,22);
             TVirtualGeoTrack *track = Detector->GeoManager->GetTrack(track_index);
             track->AddPoint(R[0], R[1], R[2], 0);
             track->AddPoint(R[0] + K[0]*Length, R[1] + K[1]*Length, R[2] + K[2]*Length, 0);
-            SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p.ParticleId);
-            //track->SetLineWidth(1); //TODO respect all attributes!
-            //track->SetLineColor(1 + p.ParticleId); //TODO respect particle track colors!
+            SimulationManager->TrackBuildOptions.applyToParticleTrack(track, p.Id);
 
-            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p.ParticleId));
+            GeoMarkerClass* marks = new GeoMarkerClass("t", 7, 1, SimulationManager->TrackBuildOptions.getParticleColor(p.Id));
             marks->SetNextPoint(R[0], R[1], R[2]);
             GeoMarkers.append(marks);
         }

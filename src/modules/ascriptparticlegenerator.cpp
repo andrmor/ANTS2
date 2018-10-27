@@ -10,9 +10,9 @@ bool AScriptParticleGenerator::Init()
     return true;
 }
 
-QVector<AGeneratedParticle> *AScriptParticleGenerator::GenerateEvent()
+QVector<AParticleRecord> *AScriptParticleGenerator::GenerateEvent()
 {
-    QVector<AGeneratedParticle>* GeneratedParticles = new QVector<AGeneratedParticle>;
+    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
 
     return GeneratedParticles;
 }

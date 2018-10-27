@@ -24,7 +24,7 @@ public:
 
     virtual bool Init() override;               //called before first use
     virtual void ReleaseResources() override;   //called after end of operation
-    virtual QVector<AGeneratedParticle>* GenerateEvent();
+    virtual QVector<AParticleRecord>* GenerateEvent();
 
     virtual const QString CheckConfiguration() const override; //check consistency of the configuration
 

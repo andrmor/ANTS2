@@ -1415,6 +1415,7 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
     delete ParticleTracker;
     delete ParticleGun;
     clearParticleStack();
+    clearGeneratedParticles(); //if something was not transferred
 
     for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
     EnergyVector.clear();
@@ -1591,23 +1592,18 @@ void ParticleSourceSimulator::simulate()
         for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
             //generating one event
-            QVector<AParticleRecord>* GP = ParticleGun->GenerateEvent();
-                //qDebug() << "Thread"<<ID << "Event:"<<eventCurrent << "particles generated:" << GP->size();
-            //adding particles to the stack
-            for (int iPart = 0; iPart < GP->size(); iPart++ )
-            {
-                if(iRun > 0 && timeRange != 0)
-                    time = timeFrom + timeRange*RandGen->Rndm(); //added TimeFrom 05/02/2015
+            ParticleGun->GenerateEvent(GeneratedParticles);
 
-                const AParticleRecord &part = GP->at(iPart);
-                ParticleStack.append(new AParticleRecord(part.Id,
-                                                         part.r[0], part.r[1], part.r[2],
-                                                         part.v[0], part.v[1], part.v[2],
-                                                         time, part.energy));
+            //adding particles to the stack
+            for (AParticleRecord * p : GeneratedParticles)
+            {
+                if (iRun > 0 && timeRange != 0)
+                    p->time = timeFrom + timeRange*RandGen->Rndm();
+
+                ParticleStack << p;
             }
             //clear and delete QVector with generated event
-            GP->clear();
-            delete GP;
+            GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
         } //event prepared
         //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
 
@@ -1806,6 +1802,12 @@ void ParticleSourceSimulator::clearParticleStack()
 {
   for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
   ParticleStack.clear();
+}
+
+void ParticleSourceSimulator::clearGeneratedParticles()
+{
+    for (AParticleRecord * p : GeneratedParticles) delete p;
+    GeneratedParticles.clear();
 }
 
 ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorClass* Detector)

@@ -1,4 +1,5 @@
 #include "ascriptparticlegenerator.h"
+#include "aparticlerecord.h"
 
 AScriptParticleGenerator::AScriptParticleGenerator()
 {
@@ -10,11 +11,9 @@ bool AScriptParticleGenerator::Init()
     return true;
 }
 
-QVector<AParticleRecord> *AScriptParticleGenerator::GenerateEvent()
+void AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
 
-    return GeneratedParticles;
 }
 
 void AScriptParticleGenerator::RemoveParticle(int particleId)

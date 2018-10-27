@@ -1,4 +1,5 @@
 #include "particlesourcesclass.h"
+#include "aparticlerecord.h"
 #include "aparticlesourcerecord.h"
 #include "detectorclass.h"
 #include "jsonparser.h"
@@ -110,11 +111,9 @@ bool ParticleSourcesClass::Init()
   return true; //TODO  check for fails
 }
 
-QVector<AParticleRecord> *ParticleSourcesClass::GenerateEvent()
+void ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
     //after any operation with sources (add, remove), init should be called before first use!
-
-    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
 
     //selecting the source
     int isource = 0;
@@ -137,7 +136,7 @@ QVector<AParticleRecord> *ParticleSourcesClass::GenerateEvent()
         timer.start();
         do
         {
-            if (timer.elapsed()>500) return GeneratedParticles;
+            if (timer.elapsed() > 500) return;
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
             GeneratePosition(isource, R);
         }
@@ -165,9 +164,9 @@ QVector<AParticleRecord> *ParticleSourcesClass::GenerateEvent()
       //there are no linked particles     
       //qDebug()<<"Generating individual particle"<<iparticle;
       ParticleSourcesClass::AddParticleInCone(isource, iparticle, GeneratedParticles);
-      GeneratedParticles->last().r[0] = R[0];
-      GeneratedParticles->last().r[1] = R[1];
-      GeneratedParticles->last().r[2] = R[2];
+      GeneratedParticles.last()->r[0] = R[0];
+      GeneratedParticles.last()->r[1] = R[1];
+      GeneratedParticles.last()->r[2] = R[2];
     }
   else
     {
@@ -226,25 +225,23 @@ QVector<AParticleRecord> *ParticleSourcesClass::GenerateEvent()
                   for (int i=0; i<linkedTo+1; i++) if (WasGenerated.at(i)) index++;
                   //qDebug() << "making this particle opposite to:"<<linkedTo<<"index in GeneratedParticles:"<<index;
 
-                  AParticleRecord ps;
-                  ps.Id = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
-                  ps.energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
-                  ps.v[0] = -GeneratedParticles->at(index).v[0];
-                  ps.v[1] = -GeneratedParticles->at(index).v[1];
-                  ps.v[2] = -GeneratedParticles->at(index).v[2];
-                  GeneratedParticles->append(ps);
+                  AParticleRecord* ps = new AParticleRecord();
+                  ps->Id = ParticleSourcesData[isource]->GunParticles[thisParticle]->ParticleId;
+                  ps->energy = ParticleSourcesData[isource]->GunParticles[thisParticle]->generateEnergy();
+                  ps->v[0] = -GeneratedParticles.at(index)->v[0];
+                  ps->v[1] = -GeneratedParticles.at(index)->v[1];
+                  ps->v[2] = -GeneratedParticles.at(index)->v[2];
+                  GeneratedParticles << ps;
                 }
 
-              GeneratedParticles->last().r[0] = R[0];
-              GeneratedParticles->last().r[1] = R[1];
-              GeneratedParticles->last().r[2] = R[2];
+              GeneratedParticles.last()->r[0] = R[0];
+              GeneratedParticles.last()->r[1] = R[1];
+              GeneratedParticles.last()->r[2] = R[2];
             }
           //qDebug()<<"---No Event:"<<NoEvent;
         }
       while (NoEvent);
     }
-
-  return GeneratedParticles;
 }
 
 void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
@@ -370,31 +367,26 @@ void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
   return;
 }
 
-void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord> *GeneratedParticles) const
+void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const
 {
-  AParticleRecord ps;
+  AParticleRecord* ps = new AParticleRecord();
 
-  ps.Id = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
-
-    //energy
-  //if (ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum == 0)
-  //  ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->energy;
-  //else ps.Energy = ParticleSourcesData[isource]->GunParticles[iparticle]->spectrum->GetRandom();
-  ps.energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
+  ps->Id = ParticleSourcesData[isource]->GunParticles[iparticle]->ParticleId;
+  ps->energy = ParticleSourcesData[isource]->GunParticles[iparticle]->generateEnergy();
     //generating random direction inside the collimation cone
-  double spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0; //max angle away from generation diretion
-  double cosTheta = cos(spread);
-  double z = cosTheta + RandGen->Rndm() * (1.0 - cosTheta);
-  double tmp = TMath::Sqrt(1.0 - z*z);
-  double phi = RandGen->Rndm()*3.1415926535*2.0;
-  TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
-  TVector3 Coll(CollimationDirection[isource]);
-  K1.RotateUz(Coll);
-  ps.v[0] = K1[0];
-  ps.v[1] = K1[1];
-  ps.v[2] = K1[2];
+    double spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0; //max angle away from generation diretion
+    double cosTheta = cos(spread);
+    double z = cosTheta + RandGen->Rndm() * (1.0 - cosTheta);
+    double tmp = TMath::Sqrt(1.0 - z*z);
+    double phi = RandGen->Rndm()*3.1415926535*2.0;
+    TVector3 K1(tmp*cos(phi), tmp*sin(phi), z);
+    TVector3 Coll(CollimationDirection[isource]);
+    K1.RotateUz(Coll);
+  ps->v[0] = K1[0];
+  ps->v[1] = K1[1];
+  ps->v[2] = K1[2];
 
-  GeneratedParticles->append(ps);
+  GeneratedParticles << ps;
 }
 
 TVector3 ParticleSourcesClass::GenerateRandomDirection()

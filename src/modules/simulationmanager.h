@@ -356,6 +356,9 @@ private:
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<AParticleRecord*> ParticleStack;
 
+    //local use - container which particle generator fills for each event; the particles are deleted by the tracker
+    QVector<AParticleRecord*> GeneratedParticles;
+
     int totalEventCount;
     double timeFrom, timeRange;
 
@@ -368,6 +371,8 @@ private:
     int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
+
+    void clearGeneratedParticles();
 };
 
 #endif // SIMULATION_MANAGER_H

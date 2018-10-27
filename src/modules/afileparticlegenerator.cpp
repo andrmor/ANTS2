@@ -1,5 +1,6 @@
 #include "afileparticlegenerator.h"
 #include "amaterialparticlecolection.h"
+#include "aparticlerecord.h"
 #include "ajsontools.h"
 
 #include <QDebug>
@@ -90,10 +91,8 @@ void AFileParticleGenerator::ReleaseResources()
     File.close();
 }
 
-QVector<AParticleRecord> *AFileParticleGenerator::GenerateEvent()
+void AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-    QVector<AParticleRecord>* GeneratedParticles = new QVector<AParticleRecord>;
-
     while (!Stream->atEnd())
     {
         const QString line = Stream->readLine();
@@ -115,17 +114,16 @@ QVector<AParticleRecord> *AFileParticleGenerator::GenerateEvent()
         double vy =     f.at(6).toDouble();
         double vz =     f.at(7).toDouble();
 
-        //(*GeneratedParticles) << AGeneratedParticle(pId, energy, x, y, z, vx, vy, vz);
-        (*GeneratedParticles) << AParticleRecord(pId,
+        AParticleRecord* p = new AParticleRecord(pId,
                                                  x, y, z,
                                                  vx, vy, vz,
                                                  0, energy);
-        //TODO ensure unitary?
+        p->ensureUnitaryLength();
+        GeneratedParticles << p;
 
         if (f.size() > 8 && f.at(8) == '*') continue;
         break;
     }
-    return GeneratedParticles;
 }
 
 const QString AFileParticleGenerator::CheckConfiguration() const

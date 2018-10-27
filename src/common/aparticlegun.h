@@ -5,8 +5,7 @@
 #include <QString>
 
 class QJsonObject;
-//class AParticleRecord;
-#include "aparticlerecord.h"
+class AParticleRecord;
 
 class AParticleGun
 {
@@ -15,7 +14,7 @@ public:
 
     virtual bool Init() = 0;             //called before first use
     virtual void ReleaseResources() {}   //called after end of operation
-    virtual QVector<AParticleRecord> * GenerateEvent() = 0;
+    virtual void GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
 
     virtual const QString CheckConfiguration() const = 0; //check consistency of the configuration
 

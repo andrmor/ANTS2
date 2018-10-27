@@ -30,7 +30,7 @@ public:
     ~ParticleSourcesClass();
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
-    virtual QVector<AParticleRecord>* GenerateEvent() override; //see Init!!!
+    virtual void GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override; //see Init!!!
 
     //triggered when remove particle from configuration is attempted
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
@@ -73,7 +73,7 @@ private:
     //utilities
     void CalculateTotalActivity();
     void GeneratePosition(int isource, double *R) const;
-    void AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord> *GeneratedParticles) const; //QVector - only pointer is transferred!
+    void AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
 #endif // PARTICLESOURCESCLASS_H

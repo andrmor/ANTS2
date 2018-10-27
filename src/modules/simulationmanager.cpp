@@ -15,7 +15,7 @@
 #include "aphotontracer.h"
 #include "apositionenergyrecords.h"
 #include "aenergydepositioncell.h"
-#include "aparticleonstack.h"
+#include "aparticlerecord.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "ageomarkerclass.h"
@@ -1600,7 +1600,7 @@ void ParticleSourceSimulator::simulate()
                     time = timeFrom + timeRange*RandGen->Rndm(); //added TimeFrom 05/02/2015
 
                 const AGeneratedParticle &part = GP->at(iPart);
-                ParticleStack.append(new AParticleOnStack(part.ParticleId,
+                ParticleStack.append(new AParticleRecord(part.ParticleId,
                                                          part.Position[0], part.Position[1], part.Position[2],
                                                          part.Direction[0], part.Direction[1], part.Direction[2],
                                                          time, part.Energy));
@@ -1674,7 +1674,7 @@ void ParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
     dataHub->ScanNumberOfRuns = 1;
 }
 
-bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleOnStack *> *particleStack)
+bool ParticleSourceSimulator::standaloneTrackStack(QVector<AParticleRecord *> *particleStack)
 {
     if (particleStack->isEmpty())
     {

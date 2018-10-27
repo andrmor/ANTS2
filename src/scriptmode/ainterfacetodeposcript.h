@@ -9,7 +9,7 @@
 
 class EventsDataClass;
 struct AEnergyDepositionCell;
-class AParticleOnStack;
+class AParticleRecord;
 
 struct DepoNode
 {
@@ -44,7 +44,7 @@ private:
   DetectorClass* Detector;
   EventsDataClass* EventsDataHub;
 
-  QVector<AParticleOnStack*> ParticleStack;
+  QVector<AParticleRecord*> ParticleStack;
   QVector<AEnergyDepositionCell*> EnergyVector;
   QVector<ParticleRecord> PR;
 

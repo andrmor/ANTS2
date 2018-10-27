@@ -35,7 +35,7 @@ class TGeoManager;
 class APhotonTracer;
 class TrackHolderClass;
 struct AScanRecord;
-class AParticleOnStack;
+class AParticleRecord;
 struct AEnergyDepositionCell;
 class ASimulatorRunner;
 class GeoMarkerClass;
@@ -337,7 +337,7 @@ public:
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition 
-    bool standaloneTrackStack(QVector<AParticleOnStack*>* particleStack);
+    bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
 protected:
@@ -354,7 +354,7 @@ private:
     S2_Generator* S2generator = 0;
     AParticleGun* ParticleGun = 0;
     QVector<AEnergyDepositionCell*> EnergyVector;
-    QVector<AParticleOnStack*> ParticleStack;
+    QVector<AParticleRecord*> ParticleStack;
 
     int totalEventCount;
     double timeFrom, timeRange;

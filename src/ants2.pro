@@ -359,7 +359,9 @@ SOURCES += main.cpp \
     common/aglobalsettings.cpp \
     common/aparticlesourcerecord.cpp \
     modules/ascriptparticlegenerator.cpp \
-    modules/afileparticlegenerator.cpp
+    modules/afileparticlegenerator.cpp \
+    scriptmode/aparticlegeneratorinterface.cpp \
+    common/aparticlerecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -495,7 +497,9 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticlesourcerecord.h \
     common/aparticlegun.h \
     modules/ascriptparticlegenerator.h \
-    modules/afileparticlegenerator.h
+    modules/afileparticlegenerator.h \
+    scriptmode/aparticlegeneratorinterface.h \
+    common/aparticlerecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -520,7 +524,6 @@ ants2_SIM {
     common/atrackrecords.h \
     common/dotstgeostruct.h \
     common/aenergydepositioncell.h \
-    common/aparticleonstack.h \
     common/ahistoryrecords.h \
     common/asimulationstatistics.h \
     modules/primaryparticletracker.h \

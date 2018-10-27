@@ -1,7 +1,7 @@
 #include "ainterfacetodeposcript.h"
 #include "eventsdataclass.h"
 #include "aenergydepositioncell.h"
-#include "aparticleonstack.h"
+#include "aparticlerecord.h"
 #include "simulationmanager.h"
 #include "asandwich.h"
 #include "atrackrecords.h"
@@ -81,18 +81,10 @@ void AInterfaceToDepoScript::AddParticleToStack(int particleID, double X, double
                                                       double Time, double Energy,
                                                       int numCopies)
 {
-//  MW->ParticleStack.reserve(MW->ParticleStack.size() + numCopies);
-//  for (int i=0; i<numCopies; i++)
-//  {
-//     AParticleOnStack *tmp = new AParticleOnStack(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
-//     MW->ParticleStack.append(tmp);
-//  }
-//  MW->on_pbRefreshStack_clicked();
-
     ParticleStack.reserve( ParticleStack.size() + numCopies );
     for (int i=0; i<numCopies; i++)
     {
-        AParticleOnStack* tmp = new AParticleOnStack(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
+        AParticleRecord* tmp = new AParticleRecord(particleID,   X, Y, Z,   dX, dY, dZ,  Time, Energy);
         ParticleStack.append(tmp);
     }
 }

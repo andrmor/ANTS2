@@ -17,7 +17,6 @@
 #include "aenergydepositioncell.h"
 #include "afiletools.h"
 #include "amessage.h"
-#include "aparticleonstack.h"
 #include "aconfiguration.h"
 #include "tmpobjhubclass.h"
 #include "apmgroupsmanager.h"

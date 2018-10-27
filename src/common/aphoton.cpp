@@ -8,8 +8,8 @@ APhoton::APhoton() {}
 APhoton::APhoton(double *xyz, double *Vxyz, int waveIndex, double time) :
     time(time), waveIndex(waveIndex), scint_type(0)
 {
-    r[0]=xyz[0];  r[1]=xyz[1];  r[2]=xyz[2];
-    v[0]=Vxyz[0]; v[1]=Vxyz[1]; v[2]=Vxyz[2];
+    r[0] =  xyz[0]; r[1] =  xyz[1]; r[2] =  xyz[2];
+    v[0] = Vxyz[0]; v[1] = Vxyz[1]; v[2] = Vxyz[2];
 }
 
 void APhoton::CopyFrom(const APhoton *CopyFrom)
@@ -32,9 +32,11 @@ void APhoton::CopyFrom(const APhoton *CopyFrom)
 
 void APhoton::EnsureUnitaryLength()
 {
-    double mod;
+    double mod = 0;
     for (int i=0; i<3; i++)
         mod += ( v[i] * v[i] );
+
+    if (mod == 1.0) return;
     mod = TMath::Sqrt(mod);
 
     if (mod != 0)

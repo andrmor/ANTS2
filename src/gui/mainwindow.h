@@ -14,7 +14,7 @@ class AConfiguration;
 class AGlobalSettings;
 struct AEnergyDepositionCell;
 class GeoMarkerClass;
-class AParticleOnStack;
+class AParticleRecord;
 class AMaterialParticleCollection;
 class EventsDataClass;
 class GeneralSimSettings;
@@ -125,7 +125,7 @@ public:
     //local data, just for GUI
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<GeoMarkerClass*> GeoMarkers;
-    QVector<AParticleOnStack*> ParticleStack;
+    QVector<AParticleRecord*> ParticleStack;
 
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 

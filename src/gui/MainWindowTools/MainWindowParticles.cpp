@@ -5,7 +5,6 @@
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
-#include "aparticleonstack.h"
 #include "particlesourcesclass.h"
 #include "amessage.h"
 #include "aconfiguration.h"

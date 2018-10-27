@@ -15,7 +15,7 @@
 #include "amaterialparticlecolection.h"
 #include "ageomarkerclass.h"
 #include "ajsontools.h"
-#include "aparticleonstack.h"
+#include "aparticlerecord.h"
 #include "amessage.h"
 #include "acommonfunctions.h"
 #include "guiutils.h"
@@ -630,7 +630,7 @@ void MainWindow::on_pbAddParticleToStack_clicked()
     ParticleStack.reserve(ParticleStack.size() + numCopies);
     for (int i=0; i<numCopies; i++)
     {
-       AParticleOnStack *tmp = new AParticleOnStack(ui->cobParticleToStack->currentIndex(),
+       AParticleRecord *tmp = new AParticleRecord(ui->cobParticleToStack->currentIndex(),
                                                   ui->ledParticleStackX->text().toDouble(), ui->ledParticleStackY->text().toDouble(), ui->ledParticleStackZ->text().toDouble(),
                                                   ui->ledParticleStackVx->text().toDouble(), ui->ledParticleStackVy->text().toDouble(), ui->ledParticleStackVz->text().toDouble(),
                                                   ui->ledParticleStackTime->text().toDouble(), ui->ledParticleStackEnergy->text().toDouble());

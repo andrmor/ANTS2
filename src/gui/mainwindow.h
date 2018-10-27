@@ -616,6 +616,10 @@ private slots:
 
     void on_twParticleGenerationMode_currentChanged(int index);
 
+    void on_pbParticleGenerationScript_clicked();
+
+    void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

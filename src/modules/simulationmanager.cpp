@@ -9,6 +9,8 @@
 #include "s1_generator.h"
 #include "s2_generator.h"
 #include "particlesourcesclass.h"
+#include "afileparticlegenerator.h"
+#include "ascriptparticlegenerator.h"
 #include "amaterialparticlecolection.h"
 #include "asandwich.h"
 #include "ageoobject.h"
@@ -1816,9 +1818,8 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     this->Detector = Detector;
 
     ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
-    //qDebug() << "->Container for particle sources created and configured";
-
     FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
+    ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 
@@ -1839,6 +1840,7 @@ ASimulationManager::~ASimulationManager()
     delete Runner;
     ASimulationManager::Clear();
 
+    delete ScriptParticleGenerator;
     delete FileParticleGenerator;
     delete ParticleSources;
 }

@@ -21,6 +21,8 @@
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
 //#include "particlesourcesclass.h"
+#include "afileparticlegenerator.h"
+#include "ascriptparticlegenerator.h"
 #include "aglobalsettings.h"
 #include "globalsettingswindowclass.h"
 #include "aconfiguration.h"
@@ -77,6 +79,12 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
     ui->leGenerateFromFile_FileName->setText(epff);
     SimulationManager->FileParticleGenerator->SetFileName(epff);
+
+    QString SPGtext = "AddParticle(0,  100+math.Random(),  10*math.Random(), 10*math.Random(), 0,   0, 0, 1)\n"
+                      "AddParticleIsotropic(0,  111,  0, 0, -5)";
+    ui->pteParticleGenerationScript->clear();
+    ui->pteParticleGenerationScript->appendPlainText(SPGtext);
+    SimulationManager->ScriptParticleGenerator->SetScript(SPGtext);
 
     //adding Context menus
     ui->lwLoadedEventsFiles->setContextMenuPolicy(Qt::CustomContextMenu);

@@ -11,6 +11,8 @@
 #include "aconfiguration.h"
 #include "ajsontools.h"
 #include "particlesourcesclass.h"
+#include "afileparticlegenerator.h"
+#include "ascriptparticlegenerator.h"
 #include "apmhub.h"
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
@@ -579,6 +581,7 @@ if (scj.contains("CustomDistrib"))
 
         //particle sources
         SimulationManager->ParticleSources->readFromJson(psjs);
+        on_pbUpdateSourcesIndication_clicked();
 
         //generation from file
         QJsonObject fjs;
@@ -590,7 +593,15 @@ if (scj.contains("CustomDistrib"))
             }
         updateFileParticleGeneratorGui();
 
-    on_pbUpdateSourcesIndication_clicked();
+        QJsonObject sjs;
+        parseJson(psjs, "GenerationFromScript", sjs);
+            if (!sjs.isEmpty())
+            {
+                SimulationManager->FileParticleGenerator->readFromJson(sjs);
+                ui->pteParticleGenerationScript->clear();
+                ui->pteParticleGenerationScript->appendPlainText(SimulationManager->ScriptParticleGenerator->GetScript());
+            }
+
 
   //Window CONTROL
   if (js.contains("Mode"))

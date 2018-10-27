@@ -6,7 +6,6 @@
 #include "aphoton.h"
 #include "dotstgeostruct.h"
 #include "atrackbuildoptions.h"
-#include "afileparticlegenerator.h"
 
 #include <QVector>
 #include <QObject>
@@ -27,6 +26,8 @@ class PrimaryParticleTracker;
 class S1_Generator;
 class S2_Generator;
 class ParticleSourcesClass;
+class AFileParticleGenerator;
+class AScriptParticleGenerator;
 class Simulator;
 class TRandom2;
 class TString;
@@ -76,9 +77,10 @@ public:
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
     void Clear();
 
-    // Next two: Simulators use their own local copies constructed using configuration in JSON
-    ParticleSourcesClass* ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
-    AFileParticleGenerator* FileParticleGenerator = 0; //only for gui, simulation threads use their own
+    // Next three: Simulators use their own local copies constructed using configuration in JSON
+    ParticleSourcesClass*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
+    AFileParticleGenerator*   FileParticleGenerator = 0;   //only for gui, simulation threads use their own
+    AScriptParticleGenerator* ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
 
     ATrackBuildOptions TrackBuildOptions;
 

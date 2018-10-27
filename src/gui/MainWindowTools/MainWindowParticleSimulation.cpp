@@ -8,6 +8,8 @@
 #include "windownavigatorclass.h"
 #include "geometrywindowclass.h"
 #include "particlesourcesclass.h"
+#include "afileparticlegenerator.h"
+#include "ascriptparticlegenerator.h"
 #include "graphwindowclass.h"
 #include "detectorclass.h"
 #include "checkupwindowclass.h"
@@ -23,7 +25,6 @@
 #include "simulationmanager.h"
 #include "exampleswindow.h"
 #include "aconfiguration.h"
-#include "afileparticlegenerator.h"
 
 //Qt
 #include <QDebug>
@@ -61,13 +62,17 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
             cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
         psjs["SourceControlOptions"] = cjs;
 
-        //particle sources
+        //Particle generation
+        //--particle sources
         SimulationManager->ParticleSources->writeToJson(psjs);
-
-        //from file
+        //--from file
         QJsonObject fjs;
             SimulationManager->FileParticleGenerator->writeToJson(fjs);
         psjs["GenerationFromFile"] = fjs;
+        //--from script
+        QJsonObject sjs;
+            SimulationManager->ScriptParticleGenerator->writeToJson(sjs);
+        psjs["GenerationFromScript"] = sjs;
 
     json["ParticleSourcesConfig"] = psjs;
 }
@@ -870,4 +875,16 @@ void MainWindow::updateFileParticleGeneratorGui()
     else s = "Click 'Analyse file' to see statistics";
 
     ui->labGenerateFromFile_info->setText(s);
+}
+
+// --- by script
+
+void MainWindow::on_pbParticleGenerationScript_clicked()
+{
+
+}
+
+void MainWindow::on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &)
+{
+    on_pbParticleGenerationScript_clicked();
 }

@@ -288,11 +288,11 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     for (int iRun=0; iRun<numParticles; iRun++)
     {
         Gun->GenerateEvent(GP);
-        if (GP.isEmpty() && iRun > 2)
-        {
-            message("Did several attempts but no particles were generated!", this);
-            break;
-        }
+//        if (GP.isEmpty() && iRun > 2)
+//        {
+//            message("Did several attempts but no particles were generated!", this);
+//            break;
+//        }
         for (const AParticleRecord * p : GP)
         {
             R[0] = p->r[0];

@@ -228,6 +228,7 @@ public slots:
 
 private slots:
     void updateFileParticleGeneratorGui();
+    void updateScriptParticleGeneratorGui();
 
     void on_pbAddParticleToStack_clicked();
     void on_pbRemoveFromStack_clicked();

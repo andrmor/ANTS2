@@ -18,6 +18,7 @@
 #include "tmpobjhubclass.h"
 #include "reconstructionwindow.h"
 #include "simulationmanager.h"
+#include "aparticlerecord.h"
 
 #include <QJsonObject>
 #include <QDebug>
@@ -290,10 +291,11 @@ bool MainWindow::readSimSettingsFromJson(QJsonObject &json)
   ui->pbScanDistrDelete->setEnabled(false);
   populateTable = true;
   if (ParticleStack.size()>0)
-    {
-      for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
+  {
+      for (int i=0; i<ParticleStack.size(); i++)
+          delete ParticleStack[i];
       ParticleStack.resize(0);
-    }
+  }
 
   DoNotUpdateGeometry = true;
   BulkUpdate = true;
@@ -587,20 +589,14 @@ if (scj.contains("CustomDistrib"))
         QJsonObject fjs;
         parseJson(psjs, "GenerationFromFile", fjs);
             if (!fjs.isEmpty())
-            {
                 SimulationManager->FileParticleGenerator->readFromJson(fjs);
-                ui->leGenerateFromFile_FileName->setText(SimulationManager->FileParticleGenerator->GetFileName());
-            }
         updateFileParticleGeneratorGui();
 
         QJsonObject sjs;
         parseJson(psjs, "GenerationFromScript", sjs);
             if (!sjs.isEmpty())
-            {
-                SimulationManager->FileParticleGenerator->readFromJson(sjs);
-                ui->pteParticleGenerationScript->clear();
-                ui->pteParticleGenerationScript->appendPlainText(SimulationManager->ScriptParticleGenerator->GetScript());
-            }
+                SimulationManager->ScriptParticleGenerator->readFromJson(sjs);
+        updateScriptParticleGeneratorGui();
 
 
   //Window CONTROL

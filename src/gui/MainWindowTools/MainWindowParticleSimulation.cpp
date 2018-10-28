@@ -844,6 +844,8 @@ void MainWindow::updateFileParticleGeneratorGui()
 {
     AFileParticleGenerator* pg = SimulationManager->FileParticleGenerator;
 
+    ui->leGenerateFromFile_FileName->setText(pg->GetFileName());
+
     QFileInfo fi(pg->GetFileName());
     if (!fi.exists())
     {
@@ -879,9 +881,56 @@ void MainWindow::updateFileParticleGeneratorGui()
 
 // --- by script
 
+#include "ajavascriptmanager.h"
+#include "ascriptwindow.h"
+#include "aparticlegeneratorinterface.h"
+#include "amathscriptinterface.h"
+
+void MainWindow::updateScriptParticleGeneratorGui()
+{
+    ui->pteParticleGenerationScript->clear();
+    ui->pteParticleGenerationScript->appendPlainText(SimulationManager->ScriptParticleGenerator->GetScript());
+}
+
 void MainWindow::on_pbParticleGenerationScript_clicked()
 {
+    AJavaScriptManager* sm = new AJavaScriptManager(Detector->RandGen);
+    AScriptWindow* sw = new AScriptWindow(sm, true, this);
 
+    AParticleGeneratorInterface* gen = new AParticleGeneratorInterface(*Detector->MpCollection, Detector->RandGen);
+    QVector<AParticleRecord*> GeneratedParticles;
+    gen->configure(&GeneratedParticles);
+    gen->setObjectName("gen");
+    sw->RegisterInterface(gen, "gen"); //takes ownership
+    AMathScriptInterface* math = new AMathScriptInterface(Detector->RandGen);
+    math->setObjectName("math");
+    sw->RegisterInterface(math, "math"); //takes ownership
+
+    sw->UpdateGui();
+
+    QObject::connect(sw, &AScriptWindow::onStart, [&GeneratedParticles](){for (AParticleRecord* p : GeneratedParticles) delete p; GeneratedParticles.clear();});
+
+
+    QString Script = SimulationManager->ScriptParticleGenerator->GetScript();
+    QString Example = "gen.AddParticle(0,  100+math.random(),  10*math.random(), 10*math.random(), 0,   0, 0, 1)\n"
+                      "gen.AddParticleIsotropic(0,  111,  0, 0, -5)";
+    sw->ConfigureForLightMode(&Script, "Optical override: custom script", Example);
+    sw->setWindowModality(Qt::ApplicationModal);
+    sw->show();
+    GuiUtils::AssureWidgetIsWithinVisibleArea(sw);
+
+    while (sw->isVisible())
+    {
+        QCoreApplication::processEvents();
+        QThread::usleep(200);
+    }
+
+    for (AParticleRecord* p : GeneratedParticles) delete p;
+    GeneratedParticles.clear();
+    delete sw; //also deletes script manager
+
+    SimulationManager->ScriptParticleGenerator->SetScript(Script);
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &)

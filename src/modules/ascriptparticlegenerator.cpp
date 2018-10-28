@@ -43,11 +43,8 @@ bool AScriptParticleGenerator::Init()
 
 void AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
-    qDebug() << "Generating event!";
     ScriptInterface->configure(&GeneratedParticles);
-    qDebug() << ScriptEngine->evaluate(Script).toString();
-    qDebug() << "Script>:"<<Script;
-    qDebug() << "Generated particles:"<<GeneratedParticles.size();
+    ScriptEngine->evaluate(Script).toString();
 }
 
 bool AScriptParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const

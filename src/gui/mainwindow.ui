@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -6906,7 +6906,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
       </property>
       <widget class="QWidget" name="tabPhSources">
        <attribute name="title">
-        <string>                         Photon sources                         </string>
+        <string>                         Only photons                         </string>
        </attribute>
        <widget class="QLabel" name="labPerNode">
         <property name="geometry">
@@ -9491,7 +9491,7 @@ double events:</string>
       </widget>
       <widget class="QWidget" name="tabParticleSources">
        <attribute name="title">
-        <string>                         Particle sources                         </string>
+        <string>                         Particles + photons                         </string>
        </attribute>
        <widget class="QCheckBox" name="cbGunDoS1">
         <property name="geometry">
@@ -9675,9 +9675,9 @@ Right click: toggle build particle tracks. Also switch off building photon track
         <property name="geometry">
          <rect>
           <x>8</x>
-          <y>11</y>
+          <y>21</y>
           <width>514</width>
-          <height>251</height>
+          <height>241</height>
          </rect>
         </property>
         <property name="font">
@@ -9687,7 +9687,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
          </font>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
@@ -9716,7 +9716,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>50</y>
+            <y>49</y>
             <width>70</width>
             <height>23</height>
            </rect>
@@ -9757,7 +9757,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>180</x>
-            <y>194</y>
+            <y>187</y>
             <width>320</width>
             <height>21</height>
            </rect>
@@ -9840,7 +9840,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>7</x>
-            <y>194</y>
+            <y>187</y>
             <width>198</width>
             <height>18</height>
            </rect>
@@ -9861,7 +9861,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             <x>7</x>
             <y>22</y>
             <width>417</width>
-            <height>161</height>
+            <height>155</height>
            </rect>
           </property>
           <property name="spacing">
@@ -9872,7 +9872,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>77</y>
+            <y>75</y>
             <width>70</width>
             <height>23</height>
            </rect>
@@ -9891,7 +9891,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>108</y>
+            <y>104</y>
             <width>70</width>
             <height>23</height>
            </rect>
@@ -9910,7 +9910,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>130</y>
+            <y>126</y>
             <width>70</width>
             <height>23</height>
            </rect>
@@ -9942,7 +9942,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>430</x>
-            <y>160</y>
+            <y>154</y>
             <width>70</width>
             <height>23</height>
            </rect>
@@ -10044,7 +10044,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             <x>50</x>
             <y>100</y>
             <width>451</width>
-            <height>111</height>
+            <height>108</height>
            </rect>
           </property>
           <property name="text">
@@ -10060,7 +10060,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
           <property name="geometry">
            <rect>
             <x>178</x>
-            <y>197</y>
+            <y>186</y>
             <width>160</width>
             <height>23</height>
            </rect>
@@ -10075,7 +10075,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
             <x>10</x>
             <y>30</y>
             <width>491</width>
-            <height>161</height>
+            <height>150</height>
            </rect>
           </property>
           <property name="contextMenuPolicy">
@@ -10173,6 +10173,25 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <string>--</string>
         </property>
        </widget>
+       <widget class="QLabel" name="label_45">
+        <property name="geometry">
+         <rect>
+          <x>22</x>
+          <y>2</y>
+          <width>501</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Particle generation mode:</string>
+        </property>
+       </widget>
        <zorder>linePS</zorder>
        <zorder>cbGunDoS1</zorder>
        <zorder>cbGunDoS2</zorder>
@@ -10187,6 +10206,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
        <zorder>labIgnoreNoDepoEvents</zorder>
        <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
        <zorder>cbIgnoreEventsWithNoHits</zorder>
+       <zorder>label_45</zorder>
       </widget>
      </widget>
      <widget class="QFrame" name="fSaveExport">

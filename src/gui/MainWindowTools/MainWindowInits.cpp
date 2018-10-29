@@ -79,8 +79,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     SimulationManager->FileParticleGenerator->SetFileName(epff);
     updateFileParticleGeneratorGui();
 
-    QString SPGtext = "gen.AddParticle(0,  100+math.random(),  10*math.random(), 10*math.random(), 0,   0, 0, 1)\n"
-                      "gen.AddParticleIsotropic(0,  111,  0, 0, -5)";
+    QString SPGtext = "gen.AddParticleIsotropic(0,  math.gauss(150, 25),  10, 12, -5)";
     SimulationManager->ScriptParticleGenerator->SetScript(SPGtext);
     updateScriptParticleGeneratorGui();
 

@@ -9986,7 +9986,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </rect>
           </property>
           <property name="text">
-           <string>Generate event from file:</string>
+           <string>Generate events from file:</string>
           </property>
          </widget>
          <widget class="QLineEdit" name="leGenerateFromFile_FileName">
@@ -10095,7 +10095,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </rect>
           </property>
           <property name="text">
-           <string>Particle generation script:</string>
+           <string>Particle generation script (called for each event):</string>
           </property>
          </widget>
         </widget>

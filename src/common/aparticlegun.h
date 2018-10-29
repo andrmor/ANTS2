@@ -16,7 +16,7 @@ public:
     virtual void ReleaseResources() {}   //called after end of operation
     virtual void GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
 
-    virtual const QString CheckConfiguration() const = 0; //check consistency of the configuration
+    virtual const QString CheckConfiguration() const = 0; //check consistency of the configuration - TODO: merge with Init()
 
     virtual void RemoveParticle(int particleId) = 0; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const = 0;

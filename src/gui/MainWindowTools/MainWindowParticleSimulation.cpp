@@ -283,7 +283,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     bool bOK = Gun->Init();
     if (!bOK)
     {
-        message("Failed to initialize particle gun!\n" + Gun->GetErrorString(), this); //TODO ErrorStrig
+        message("Failed to initialize particle gun!\n" + Gun->GetErrorString(), this);
         return;
     }
 

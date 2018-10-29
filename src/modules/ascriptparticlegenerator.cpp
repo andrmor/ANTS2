@@ -18,11 +18,11 @@ AScriptParticleGenerator::~AScriptParticleGenerator()
 
 bool AScriptParticleGenerator::Init()
 {
-    qDebug() << "Init script particle ghenerator";
+    //qDebug() << "Init script particle ghenerator";
 
     if (!ScriptEngine)
     {
-        qDebug() << "Creating script infrastructure";
+            //qDebug() << "Creating script infrastructure";
         ScriptEngine = new QScriptEngine();
         ScriptInterface = new AParticleGeneratorInterface(MpCollection, RandGen);
 
@@ -37,6 +37,9 @@ bool AScriptParticleGenerator::Init()
         val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
         ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);
     }
+
+    //TODO: check script syntax
+    //TODO: check particles
 
     return true;
 }

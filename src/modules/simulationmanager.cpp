@@ -1545,23 +1545,6 @@ void ParticleSourceSimulator::updateGeoManager()
 
 void ParticleSourceSimulator::simulate()
 {
-    //watchdogs TODO
-    /*
-    int NumSources = ParticleGun->countSources();
-    if (NumSources == 0)
-    {
-        ErrorString = "Particle sources are not defined!";
-        fSuccess = false;
-        return;
-    }
-    if (ParticleGun->getTotalActivity() == 0)
-    {
-        ErrorString = "Total activity of sources is zero!";
-        fSuccess = false;
-        return;
-    }
-    */
-
     if ( !ParticleStack.isEmpty() ) // *** to be moved to "ClearData"?
     {
         for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
@@ -1661,6 +1644,7 @@ void ParticleSourceSimulator::simulate()
     } //all events finished
 
     fSuccess = !fHardAbortWasTriggered;
+    if (ParticleGun) ParticleGun->ReleaseResources();
 }
 
 void ParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)

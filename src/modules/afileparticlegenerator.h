@@ -17,7 +17,7 @@ class AFileParticleGenerator : public AParticleGun
 {
 public:
     AFileParticleGenerator(const AMaterialParticleCollection& MpCollection);
-    virtual ~AFileParticleGenerator(){}
+    virtual ~AFileParticleGenerator();
 
     void          SetFileName(const QString &fileName);
     const QString GetFileName() const {return FileName;}

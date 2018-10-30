@@ -12,6 +12,11 @@
 AFileParticleGenerator::AFileParticleGenerator(const AMaterialParticleCollection & MpCollection) :
     MpCollection(MpCollection) {}
 
+AFileParticleGenerator::~AFileParticleGenerator()
+{
+    ReleaseResources();
+}
+
 void AFileParticleGenerator::SetFileName(const QString &fileName)
 {
     if (FileName == fileName) return;
@@ -22,9 +27,14 @@ void AFileParticleGenerator::SetFileName(const QString &fileName)
 
 bool AFileParticleGenerator::Init()
 {
-    if (File.isOpen()) File.close();
-    File.setFileName(FileName);
+    ReleaseResources();
 
+    if (FileName.isEmpty())
+    {
+        ErrorString = "File name is not defined";
+        return false;
+    }
+    File.setFileName(FileName);
     if(!File.open(QIODevice::ReadOnly | QFile::Text))
     {
         ErrorString = QString("Failed to open file: %1").arg(FileName);
@@ -32,7 +42,6 @@ bool AFileParticleGenerator::Init()
         return false;
     }
 
-    if (Stream) delete Stream; Stream = 0;
     Stream = new QTextStream(&File);
 
     QFileInfo fi(File);
@@ -88,7 +97,7 @@ bool AFileParticleGenerator::Init()
 void AFileParticleGenerator::ReleaseResources()
 {
     delete Stream; Stream = 0;
-    File.close();
+    if (File.isOpen()) File.close();
 }
 
 bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)

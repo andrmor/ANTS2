@@ -16,7 +16,7 @@ public:
     virtual ~AParticleGun(){}
 
     virtual bool Init() = 0;             //called before first use
-    virtual void ReleaseResources() {}   //called after end of operation TODO use
+    virtual void ReleaseResources() {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
 
     virtual void RemoveParticle(int particleId) = 0; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first

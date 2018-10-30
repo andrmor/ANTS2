@@ -811,7 +811,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     startSimulation(Config->JSON);
 }
 
-void MainWindow::on_twParticleGenerationMode_currentChanged(int index)
+void MainWindow::on_twParticleGenerationMode_currentChanged(int)
 {
     /*
     ui->sbGunEvents->setVisible(index != 1);

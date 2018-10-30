@@ -180,6 +180,7 @@ void AFileParticleGenerator::SetStartEvent(int startEvent)
             bool bOK;
             int  pId = f.at(0).toInt(&bOK);
             if (!bOK) continue; //assuming this is a comment line
+            //TODO protection of wrong index, either test on start // synchronize!
 
             if (!bContinueEvent) event++;
 

@@ -202,7 +202,7 @@ void AMatParticleConfigurator::on_pbShowSystemDir_clicked()
     QDesktopServices::openUrl(QUrl("file:///"+CrossSectionSystemDir, QUrl::TolerantMode));
 }
 
-void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &pos)
+void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &)
 {
     QString st = ui->leCustomDataDir->text();
     if (!st.isEmpty())

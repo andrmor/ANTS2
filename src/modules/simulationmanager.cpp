@@ -1518,7 +1518,7 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             return false;
         }
 
-        // trying initialize the gun
+        // trying to initialize the gun
         if ( !ParticleGun->Init() )
         {
             ErrorString = ParticleGun->GetErrorString();

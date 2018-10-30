@@ -128,11 +128,6 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
     return false; //could not read particle record in file!
 }
 
-const QString AFileParticleGenerator::CheckConfiguration() const
-{
-    return ""; //TODO
-}
-
 void AFileParticleGenerator::RemoveParticle(int)
 {
     qWarning() << "Remove particle has no effect for AFileParticleGenerator";

@@ -38,50 +38,71 @@ void ParticleSourcesClass::clear()
 bool ParticleSourcesClass::Init()
 {  
     int NumSources = ParticleSourcesData.size();
-    CalculateTotalActivity();
-    //qDebug()<<"Tot activity:"<<TotalActivity;
-
-  TotalParticleWeight.fill(0, NumSources);
-  for (int isource = 0; isource<NumSources; isource++)
-    {      
-      for (int i=0; i<ParticleSourcesData[isource]->GunParticles.size(); i++)
-        if (ParticleSourcesData[isource]->GunParticles[i]->Individual)
-           TotalParticleWeight[isource] += ParticleSourcesData[isource]->GunParticles[i]->StatWeight;
+    if (NumSources == 0)
+    {
+        ErrorString = "No sources are defined";
+        return false;
     }
 
-   //creating lists of linked particles
-  LinkedPartiles.resize(NumSources);
-  for (int isource=0; isource<NumSources; isource++)
+    CalculateTotalActivity();
+    //qDebug()<<"Tot activity:"<<TotalActivity;
+    if (TotalActivity == 0)
     {
-      int numParts = ParticleSourcesData[isource]->GunParticles.size();
-      LinkedPartiles[isource].resize(numParts);
-      for (int iparticle=0; iparticle<numParts; iparticle++)
-        {          
-          LinkedPartiles[isource][iparticle].resize(0);
-          if (!ParticleSourcesData[isource]->GunParticles[iparticle]->Individual) continue; //nothing to do for non-individual particles
+        ErrorString = "Total activity is zero";
+        return false;
+    }
 
-          //every individual particles defines an "event generation chain" containing the particle iteslf and all linked (and linked to linked to linked etc) particles
-          LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(iparticle)); //list always contains the particle itself - simplifies the generation algorithm
-          //only particles with larger indexes can be linked to this particle
-          for (int ip=iparticle+1; ip<numParts; ip++)
-            if (!ParticleSourcesData[isource]->GunParticles[ip]->Individual) //only looking for non-individuals
-              {
-                //for iparticle, checking if it is linked to any particle in the list of the LinkedParticles
-                for (int idef=0; idef<LinkedPartiles[isource][iparticle].size(); idef++)
-                  {
-                    int compareWith = LinkedPartiles[isource][iparticle][idef].iParticle;
-                    int linkedTo = ParticleSourcesData[isource]->GunParticles[ip]->LinkedTo;
-                    if ( linkedTo == compareWith)
-                      {
-                        LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(ip, linkedTo));
-                        break;
-                      }
-                  }
-              }
+    for (AParticleSourceRecord* ps : ParticleSourcesData)
+    {
+        QString err = ps->CheckSource(*MpCollection);
+        if (!err.isEmpty())
+        {
+            ErrorString = QString("Error in source %1:\n%2").arg(ps->name).arg(err);
+            return false;
         }
     }
 
-  /*
+    TotalParticleWeight.fill(0, NumSources);
+    for (int isource = 0; isource<NumSources; isource++)
+    {
+        for (int i=0; i<ParticleSourcesData[isource]->GunParticles.size(); i++)
+            if (ParticleSourcesData[isource]->GunParticles[i]->Individual)
+                TotalParticleWeight[isource] += ParticleSourcesData[isource]->GunParticles[i]->StatWeight;
+    }
+
+    //creating lists of linked particles
+    LinkedPartiles.resize(NumSources);
+    for (int isource=0; isource<NumSources; isource++)
+    {
+        int numParts = ParticleSourcesData[isource]->GunParticles.size();
+        LinkedPartiles[isource].resize(numParts);
+        for (int iparticle=0; iparticle<numParts; iparticle++)
+        {
+            LinkedPartiles[isource][iparticle].resize(0);
+            if (!ParticleSourcesData[isource]->GunParticles[iparticle]->Individual) continue; //nothing to do for non-individual particles
+
+            //every individual particles defines an "event generation chain" containing the particle iteslf and all linked (and linked to linked to linked etc) particles
+            LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(iparticle)); //list always contains the particle itself - simplifies the generation algorithm
+            //only particles with larger indexes can be linked to this particle
+            for (int ip=iparticle+1; ip<numParts; ip++)
+                if (!ParticleSourcesData[isource]->GunParticles[ip]->Individual) //only looking for non-individuals
+                {
+                    //for iparticle, checking if it is linked to any particle in the list of the LinkedParticles
+                    for (int idef=0; idef<LinkedPartiles[isource][iparticle].size(); idef++)
+                    {
+                        int compareWith = LinkedPartiles[isource][iparticle][idef].iParticle;
+                        int linkedTo = ParticleSourcesData[isource]->GunParticles[ip]->LinkedTo;
+                        if ( linkedTo == compareWith)
+                        {
+                            LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(ip, linkedTo));
+                            break;
+                        }
+                    }
+                }
+        }
+    }
+
+    /*
   //debug
   for (int isource=0; isource<NumSources; isource++)
     for (int iparticle=0; iparticle<ParticleSourcesData[isource]->GunParticles.size(); iparticle++)
@@ -95,20 +116,20 @@ bool ParticleSourcesClass::Init()
 
 
     //vectors related to collmation direction
-  CollimationDirection.resize(NumSources);
-  CollimationProbability.resize(NumSources);
-  //CollimationSpreadProduct.resize(NumSources);
-  for (int isource=0; isource<NumSources; isource++)
+    CollimationDirection.resize(NumSources);
+    CollimationProbability.resize(NumSources);
+    //CollimationSpreadProduct.resize(NumSources);
+    for (int isource=0; isource<NumSources; isource++)
     {
-      double CollPhi = ParticleSourcesData[isource]->CollPhi*3.1415926535/180.0;
-      double CollTheta = ParticleSourcesData[isource]->CollTheta*3.1415926535/180.0;
-      double Spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0;
+        double CollPhi = ParticleSourcesData[isource]->CollPhi*3.1415926535/180.0;
+        double CollTheta = ParticleSourcesData[isource]->CollTheta*3.1415926535/180.0;
+        double Spread = ParticleSourcesData[isource]->Spread*3.1415926535/180.0;
 
-      CollimationDirection[isource] = TVector3(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta));
-      CollimationProbability[isource] = 0.5 * (1.0 - cos(Spread));
-      //CollimationSpreadProduct[isource] = cos(Spread); //scalar product of coll direction and max spread unit vectors
+        CollimationDirection[isource] = TVector3(sin(CollTheta)*sin(CollPhi), sin(CollTheta)*cos(CollPhi), cos(CollTheta));
+        CollimationProbability[isource] = 0.5 * (1.0 - cos(Spread));
+        //CollimationSpreadProduct[isource] = cos(Spread); //scalar product of coll direction and max spread unit vectors
     }
-  return true; //TODO  check for fails
+    return true; //TODO  check for fails
 }
 
 bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
@@ -444,19 +465,6 @@ void ParticleSourcesClass::RemoveParticle(int particleId)
           if ( ps->GunParticles[ip]->ParticleId > particleId)
               ps->GunParticles[ip]->ParticleId--;
   }
-}
-
-const QString ParticleSourcesClass::CheckConfiguration() const
-{
-    if (ParticleSourcesData.isEmpty()) return  "No sources are defined";
-    for (AParticleSourceRecord* ps : ParticleSourcesData)
-    {
-        QString err = ps->CheckSource(*MpCollection);
-        if (!err.isEmpty()) return QString("Error in source %1:\n%2").arg(ps->name).arg(err);
-    }
-    if (TotalActivity == 0) return "Total activity is zero";
-
-    return "";
 }
 
 double ParticleSourcesClass::getTotalActivity()

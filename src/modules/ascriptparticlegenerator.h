@@ -24,8 +24,6 @@ public:
     //virtual void ReleaseResources() override {}   //called after end of operation
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
 
-    virtual const QString CheckConfiguration() const override {return "";} //check consistency of the configuration
-
     virtual void RemoveParticle(int) override {} //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 

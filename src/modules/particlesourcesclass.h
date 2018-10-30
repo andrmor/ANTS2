@@ -36,8 +36,6 @@ public:
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
     virtual void RemoveParticle(int particleId) override; //should NOT be used to remove one of particles in use! use onIsPareticleInUse first
 
-    virtual const QString CheckConfiguration() const;
-
     virtual void writeToJson(QJsonObject &json) const override;
     virtual bool readFromJson(const QJsonObject &json) override;
 

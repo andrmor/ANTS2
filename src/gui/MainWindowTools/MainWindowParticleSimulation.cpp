@@ -798,14 +798,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
     fSimDataNotSaved = false; // to disable the warning
-    //watchdog on particle sources, can be transferred later to check-upwindow
-
-    QString err = SimulationManager->ParticleSources->CheckConfiguration();
-    if (!err.isEmpty())
-    {
-        message(err);
-        return;
-    }
 
     MainWindow::writeSimSettingsToJson(Config->JSON);
     startSimulation(Config->JSON);

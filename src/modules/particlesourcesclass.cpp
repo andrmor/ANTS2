@@ -111,8 +111,9 @@ bool ParticleSourcesClass::Init()
   return true; //TODO  check for fails
 }
 
-void ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
+    bAbortRequested = false;
     //after any operation with sources (add, remove), init should be called before first use!
 
     //selecting the source
@@ -136,7 +137,8 @@ void ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedPa
         timer.start();
         do
         {
-            if (timer.elapsed() > 500) return;
+            if (bAbortRequested) return false;
+            if (timer.elapsed() > 500) return false;
             //qDebug() << "Time passed" << timer.elapsed() << "milliseconds";
             GeneratePosition(isource, R);
         }
@@ -242,6 +244,8 @@ void ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedPa
         }
       while (NoEvent);
     }
+
+  return true;
 }
 
 void ParticleSourcesClass::GeneratePosition(int isource, double *R) const

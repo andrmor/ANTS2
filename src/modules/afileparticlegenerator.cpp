@@ -91,7 +91,7 @@ void AFileParticleGenerator::ReleaseResources()
     File.close();
 }
 
-void AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
     while (!Stream->atEnd())
     {
@@ -121,9 +121,11 @@ void AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
         p->ensureUnitaryLength();
         GeneratedParticles << p;
 
-        if (f.size() > 8 && f.at(8) == '*') continue;
-        break;
+        if (f.size() > 8 && f.at(8) == '*') continue; //this is multiple event!
+        return true; //normal termination
     }
+
+    return false; //could not read particle record in file!
 }
 
 const QString AFileParticleGenerator::CheckConfiguration() const

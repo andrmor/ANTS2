@@ -6893,7 +6893,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -9691,7 +9691,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
         </property>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
-          <string>Direct</string>
+          <string>Sources</string>
          </attribute>
          <widget class="QPushButton" name="pbUpdateSourcesIndication">
           <property name="geometry">

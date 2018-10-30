@@ -81,6 +81,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QString SPGtext = "gen.AddParticleIsotropic(0,  math.gauss(150, 25),  10, 12, -5)";
     SimulationManager->ScriptParticleGenerator->SetScript(SPGtext);
+    QObject::connect(ui->pbStopScan, &QPushButton::clicked, SimulationManager->ScriptParticleGenerator, &AScriptParticleGenerator::abort);//[pg](){pg->abort();});
     updateScriptParticleGeneratorGui();
 
     //adding Context menus

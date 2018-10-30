@@ -22,7 +22,7 @@ public:
 
     virtual bool Init() override;               //called before first use
     //virtual void ReleaseResources() override {}   //called after end of operation
-    virtual void GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
+    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
 
     virtual const QString CheckConfiguration() const override {return "";} //check consistency of the configuration
 
@@ -31,6 +31,11 @@ public:
 
     virtual void writeToJson(QJsonObject& json) const override;
     virtual bool readFromJson(const QJsonObject& json) override;
+
+    void SetProcessInterval(int msOrMinus1) {processInterval = msOrMinus1;}
+
+public slots:
+    virtual void abort() override;
 
 private:
     const AMaterialParticleCollection & MpCollection;
@@ -41,6 +46,8 @@ private:
                                        //TODO make external (e.g. Simulator class can host it for sim)
     AParticleGeneratorInterface * ScriptInterface = 0; // creates only on Init - only if from script mode was selected!
     AMathScriptInterface * mathInterface = 0; // creates only on Init - only if from script mode was selected!
+
+    int processInterval = -1; //ms; if -1 processing of events during evaluation is disabled
 };
 
 #endif // ASCRIPTPARTICLEGENERATOR_H

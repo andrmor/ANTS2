@@ -1587,9 +1587,6 @@ void ParticleSourceSimulator::simulate()
             EnergyVector.resize(0);
         }
 
-        //adding particles to stack
-        double time = 0;
-
         //how many particles to run this event?
         int ParticleRunsThisEvent = 1;
         if (fAllowMultiple)
@@ -1735,6 +1732,12 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
     return true;
 }
 
+void ParticleSourceSimulator::hardAbort()
+{
+    Simulator::hardAbort();
+    ParticleGun->abort();
+}
+
 void ParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParticleTracks)
 {
     ParticleTracker->setMaxTracks(maxParticleTracks);
@@ -1831,6 +1834,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
     ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection, Detector->RandGen);
+    ScriptParticleGenerator->SetProcessInterval(200);
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 

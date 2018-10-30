@@ -342,6 +342,8 @@ public:
     bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
+    virtual void hardAbort() override;
+
 protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 

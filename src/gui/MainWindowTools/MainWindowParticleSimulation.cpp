@@ -273,7 +273,20 @@ void MainWindow::on_pbGunTest_clicked()
         message("This generation mode is not implemented!", this);
         return;
     }
-    TestParticleGun(pg, ui->sbGunTestEvents->value());
+
+    ui->pbStopScan->setEnabled(true);
+    QFont font = ui->pbStopScan->font();
+    font.setBold(true);
+    ui->pbStopScan->setFont(font);
+    WindowNavigator->BusyOn();
+
+    TestParticleGun(pg, ui->sbGunTestEvents->value()); //script generator is aborted on click of the stop button!
+
+    ui->pbStopScan->setEnabled(false);
+    ui->pbStopScan->setText("stop");
+    font.setBold(false);
+    ui->pbStopScan->setFont(font);
+    WindowNavigator->BusyOff();
 }
 
 void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
@@ -292,7 +305,8 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     QVector<AParticleRecord*> GP;
     for (int iRun=0; iRun<numParticles; iRun++)
     {
-        Gun->GenerateEvent(GP);
+        bool bOK = Gun->GenerateEvent(GP);
+        if (!bOK) return;
 //        if (GP.isEmpty() && iRun > 2)
 //        {
 //            message("Did several attempts but no particles were generated!", this);

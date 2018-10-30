@@ -24,6 +24,7 @@ bool AScriptParticleGenerator::Init()
     {
             //qDebug() << "Creating script infrastructure";
         ScriptEngine = new QScriptEngine();
+        ScriptEngine->setProcessEventsInterval(processInterval);
         ScriptInterface = new AParticleGeneratorInterface(MpCollection, RandGen);
 
         ScriptInterface->setObjectName("gen");
@@ -44,10 +45,12 @@ bool AScriptParticleGenerator::Init()
     return true;
 }
 
-void AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool AScriptParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
+    bAbortRequested = false;
     ScriptInterface->configure(&GeneratedParticles);
     ScriptEngine->evaluate(Script).toString();
+    return !bAbortRequested;
 }
 
 bool AScriptParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
@@ -63,4 +66,10 @@ void AScriptParticleGenerator::writeToJson(QJsonObject &json) const
 bool AScriptParticleGenerator::readFromJson(const QJsonObject &json)
 {
     return parseJson(json, "Script", Script);
+}
+
+void AScriptParticleGenerator::abort()
+{
+    bAbortRequested = true;
+    ScriptEngine->abortEvaluation();
 }

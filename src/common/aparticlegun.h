@@ -1,20 +1,23 @@
 #ifndef APARTICLEGUN_H
 #define APARTICLEGUN_H
 
+#include <QObject>
 #include <QVector>
 #include <QString>
 
 class QJsonObject;
 class AParticleRecord;
 
-class AParticleGun
+class AParticleGun : public QObject
 {
+    Q_OBJECT
+
 public:
     virtual ~AParticleGun(){}
 
     virtual bool Init() = 0;             //called before first use
     virtual void ReleaseResources() {}   //called after end of operation
-    virtual void GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
+    virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) = 0;
 
     virtual const QString CheckConfiguration() const = 0; //check consistency of the configuration - TODO: merge with Init()
 
@@ -28,8 +31,12 @@ public:
 
     const QString& GetErrorString() const {return ErrorString;}
 
+public slots:
+    virtual void abort() {bAbortRequested = true;}
+
 protected:
     QString ErrorString;
+    bool bAbortRequested = false;
 };
 
 #endif // APARTICLEGUN_H

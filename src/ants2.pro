@@ -319,7 +319,6 @@ SOURCES += main.cpp \
     common/amaterialcomposition.cpp \
     common/aneutroninteractionelement.cpp \
     scriptmode/ainterfacetodeposcript.cpp \
-    scriptmode/coreinterfaces.cpp \
     scriptmode/localscriptinterfaces.cpp \
     scriptmode/histgraphinterfaces.cpp \
     scriptmode/ainterfacetomultithread.cpp \
@@ -361,7 +360,8 @@ SOURCES += main.cpp \
     modules/ascriptparticlegenerator.cpp \
     modules/afileparticlegenerator.cpp \
     scriptmode/aparticlegeneratorinterface.cpp \
-    common/aparticlerecord.cpp
+    common/aparticlerecord.cpp \
+    scriptmode/acorescriptinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -456,7 +456,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/amaterialcomposition.h \
     common/aneutroninteractionelement.h \
     scriptmode/ainterfacetodeposcript.h \
-    scriptmode/coreinterfaces.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
     common/amessageoutput.h \
@@ -499,7 +498,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/ascriptparticlegenerator.h \
     modules/afileparticlegenerator.h \
     scriptmode/aparticlegeneratorinterface.h \
-    common/aparticlerecord.h
+    common/aparticlerecord.h \
+    scriptmode/acorescriptinterface.h
 
 # --- SIM ---
 ants2_SIM {

@@ -53,7 +53,7 @@ public:
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
     QScriptValue    EvaluationResult;
-    AInterfaceToCore* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+    ACoreScriptInterface* coreObj = 0;  //core interface - to forward evaluate-script-in-script
 
 public slots:
 #ifdef GUI

@@ -5,7 +5,7 @@
 #endif
 
 #include "ascriptinterface.h"
-#include "coreinterfaces.h"
+#include "acorescriptinterface.h"
 #include "amathscriptinterface.h"
 #include "ascriptinterfacefactory.h"
 #include "ainterfacetomultithread.h"
@@ -222,7 +222,7 @@ void AJavaScriptManager::RegisterCoreInterfaces(bool bCore, bool bMath)
 {
     if (bCore)
     {
-        coreObj = new AInterfaceToCore(this);
+        coreObj = new ACoreScriptInterface(this);
         QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
         engine->globalObject().setProperty("core", coreVal);
         doRegister(coreObj, "core");
@@ -471,7 +471,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
             //  qDebug() << "Making available for multi-thread use: "<<io->objectName();
 
             //special for core unit
-            AInterfaceToCore* core = dynamic_cast<AInterfaceToCore*>(copy);
+            ACoreScriptInterface* core = dynamic_cast<ACoreScriptInterface*>(copy);
             if (core)
             {
                 //qDebug() << "--this is core";
@@ -514,7 +514,7 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
             if (bAbortIsGlobal)
             {
                 AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
+                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &ACoreScriptInterface::abort);
             }
 
             sm->RegisterInterface(copy, si->objectName());

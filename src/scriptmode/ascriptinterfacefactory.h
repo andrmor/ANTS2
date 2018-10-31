@@ -2,7 +2,7 @@
 #define ASCRIPTINTERFACEFACTORY_H
 
 #include "ascriptinterface.h"
-#include "coreinterfaces.h"
+#include "acorescriptinterface.h"
 #include "amathscriptinterface.h"
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
@@ -19,8 +19,8 @@ class AScriptInterfaceFactory
 public:    
     static AScriptInterface* makeCopy(const AScriptInterface* other)
     {
-        const AInterfaceToCore* core = dynamic_cast<const AInterfaceToCore*>(other);
-        if (core) return new AInterfaceToCore(*core);
+        const ACoreScriptInterface* core = dynamic_cast<const ACoreScriptInterface*>(other);
+        if (core) return new ACoreScriptInterface(*core);
 
         const AMathScriptInterface* math = dynamic_cast<const AMathScriptInterface*>(other);
         if (math) return new AMathScriptInterface(*math);

@@ -4,7 +4,7 @@
 #include "atextedit.h"
 #include "ascriptinterface.h"
 #include "localscriptinterfaces.h"
-#include "coreinterfaces.h"
+#include "acorescriptinterface.h"
 #include "amathscriptinterface.h"
 #include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
@@ -342,7 +342,7 @@ void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
 
     if (bCore)
     {
-        AInterfaceToCore core(0); //dummy to extract method names
+        ACoreScriptInterface core(0); //dummy to extract method names
         doRegister(&core, "core");
     }
     if (bMath)

@@ -1,5 +1,5 @@
-#ifndef COREINTERFACES_H
-#define COREINTERFACES_H
+#ifndef ACORESCRIPTINTERFACE_H
+#define ACORESCRIPTINTERFACE_H
 
 #include "ascriptinterface.h"
 
@@ -10,13 +10,13 @@
 class AScriptManager;
 class CurveFit;
 
-class AInterfaceToCore : public AScriptInterface
+class ACoreScriptInterface : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  explicit AInterfaceToCore(AScriptManager *ScriptManager);
-  explicit AInterfaceToCore(const AInterfaceToCore& other);
+  explicit ACoreScriptInterface(AScriptManager *ScriptManager);
+  explicit ACoreScriptInterface(const ACoreScriptInterface& other);
 
   virtual bool IsMultithreadCapable() const override {return true;}
 
@@ -88,4 +88,4 @@ private:
 
 };
 
-#endif // COREINTERFACES_H
+#endif // ACORESCRIPTINTERFACE_H

@@ -306,7 +306,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
     for (int iRun=0; iRun<numParticles; iRun++)
     {
         bool bOK = Gun->GenerateEvent(GP);
-        if (!bOK) return;
+        if (!bOK) break;
 //        if (GP.isEmpty() && iRun > 2)
 //        {
 //            message("Did several attempts but no particles were generated!", this);

@@ -323,18 +323,18 @@ void ASimulatorRunner::simulate()
 #else
         //std::thread -> start on construction
         for (int i=0; i < workers.count(); i++)
-          {
-            //  qDebug() << "Asking thread"<<(i+1)<<" to join...";
+        {
+            //qDebug() << "Asking thread"<<(i+1)<<" to join...";
             threads[i]->join();
-            //  qDebug() <<"Thread"<<(i+1)<<"joined";
-          }
+            //qDebug() <<"   Thread"<<(i+1)<<"joined";
+        }
 #endif
+        //qDebug() << "SimRunner: all threads joined";
 
        for (int i=0; i<threads.size(); i++) delete threads[i];
        threads.clear();
     }
     simState = SFinished;
-
     progress = 100;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
     emit updateReady(100.0, usPerEvent);
@@ -342,8 +342,8 @@ void ASimulatorRunner::simulate()
     //Dump data in dataHub
     dataHub->fSimulatedData = true;
     dataHub->LastSimSet = simSettings;
-
     ErrorString.clear();
+    //qDebug() << "SimRunner: Collecting data from workers";
     for(int i = 0; i < workers.count(); i++)
     {
         workers[i]->appendToDataHub(dataHub);
@@ -352,7 +352,7 @@ void ASimulatorRunner::simulate()
             ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
     }
 
-    //qDebug()<<"Simulation finished!";
+    //qDebug()<<"Sim runner reports simulation finished!";
 
 //    qDebug() << "\n Pointer of the List of navigators: "<< detector->GeoManager->GetListOfNavigators();
 //    if (detector->GeoManager->IsMultiThread())
@@ -451,13 +451,13 @@ void Simulator::requestStop()
 {
     if (fStopRequested)
     {
-        //qDebug() << "Simulator recived repeated stop request, aborting in hard mode";
+        //  qDebug() << "Simulator #" << ID << "recived repeated stop request, aborting in hard mode";
         hardAbort();
         fHardAbortWasTriggered = true;
     }
     else
     {
-        //qDebug() << "First stop request was received by simulator";
+        //  qDebug() << "First stop request was received by simulator #"<<ID;
         fStopRequested = true;
     }
 }
@@ -732,9 +732,10 @@ bool PointSourceSimulator::setup(QJsonObject &json)
 
 void PointSourceSimulator::simulate()
 {
-    ReserveSpace(getEventCount());
     fStopRequested = false;
     fHardAbortWasTriggered = false;
+
+    ReserveSpace(getEventCount());
     switch (PointSimMode)
     {
         case 0: fSuccess = SimulateSingle(); break;
@@ -748,6 +749,7 @@ void PointSourceSimulator::simulate()
 
 void PointSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
 {
+    //qDebug() << "Thread #"<<ID << " PhotSim ---> appending data";
     Simulator::appendToDataHub(dataHub);
     dataHub->ScanNumberOfRuns = this->NumRuns;
 }
@@ -1545,7 +1547,7 @@ void ParticleSourceSimulator::updateGeoManager()
 
 void ParticleSourceSimulator::simulate()
 {
-    if ( !ParticleStack.isEmpty() ) // *** to be moved to "ClearData"?
+    if ( !ParticleStack.isEmpty() ) // TODO --> to be moved to "ClearData"?
     {
         for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
         ParticleStack.clear();
@@ -1587,7 +1589,7 @@ void ParticleSourceSimulator::simulate()
         {
             //generating one event
             bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
-                //qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
+            //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
             if (!bGenerationSuccessful) break;
 
             //adding particles to the stack
@@ -1648,13 +1650,14 @@ void ParticleSourceSimulator::simulate()
     } //all events finished
 
     fSuccess = !fHardAbortWasTriggered;
-        //qDebug() << "----Releasing resources";
+    //  qDebug() << "----Releasing resources";
     if (ParticleGun) ParticleGun->ReleaseResources();
-        //qDebug() << "done!"<<ID;
+    //  qDebug() << "done!"<<ID << "events collected:"<<dataHub->countEvents();
 }
 
 void ParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
 {
+    //qDebug() << "Thread #"<<ID << " PartSim ---> appending data";
     Simulator::appendToDataHub(dataHub);
     int oldSize = dataHub->EventHistory.count();
     dataHub->EventHistory.reserve(oldSize + this->dataHub->EventHistory.count());
@@ -1828,15 +1831,19 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 
-    QObject::connect(Runner, SIGNAL(simulationFinished()), this, SLOT(onSimulationFinished()));
-    QObject::connect(this, SIGNAL(RequestStopSimulation()), Runner, SLOT(requestStop()), Qt::DirectConnection);
+    //QObject::connect(Runner, SIGNAL(simulationFinished()), this, SLOT(onSimulationFinished()));
+    QObject::connect(Runner, &ASimulatorRunner::simulationFinished, this, &ASimulationManager::onSimulationFinished);
+    //QObject::connect(this, SIGNAL(RequestStopSimulation()), Runner, SLOT(requestStop()), Qt::DirectConnection);
+    QObject::connect(this, &ASimulationManager::RequestStopSimulation, Runner, &ASimulatorRunner::requestStop, Qt::DirectConnection);
 
-    Runner->moveToThread(&simThread); //Move to background thread, as it always runs synchronously even in MT
-    QObject::connect(&simThread, SIGNAL(started()), Runner, SLOT(simulate())); //Connect thread to simulation start
+    Runner->moveToThread(&simRunnerThread); //Move to background thread, as it always runs synchronously even in MT
+    //QObject::connect(&simRunnerThread, SIGNAL(started()), Runner, SLOT(simulate())); //Connect thread to simulation start
+    QObject::connect(&simRunnerThread, &QThread::started, Runner, &ASimulatorRunner::simulate); //Connect thread to simulation start
 
+    //GUI update
     simTimerGuiUpdate.setInterval(1000);
-    QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), Runner, SLOT(updateGui()), Qt::DirectConnection);
-
+    //QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), Runner, SLOT(updateGui()), Qt::DirectConnection);
+    QObject::connect(&simTimerGuiUpdate, &QTimer::timeout, Runner, &ASimulatorRunner::updateGui, Qt::DirectConnection);
     QObject::connect(Runner, &ASimulatorRunner::updateReady, this, &ASimulationManager::ProgressReport);
 }
 
@@ -1869,7 +1876,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     }
     else
     {
-        simThread.start();
+        simRunnerThread.start();
         simTimerGuiUpdate.start();
     }
 }
@@ -1909,10 +1916,12 @@ void ASimulationManager::clearTracks()
 
 void ASimulationManager::onSimulationFinished()
 {
+    //  qDebug() << "Simulation manager: Simulation finished";
+
     //qDebug() << "after finish, manager has monitors:"<< EventsDataHub->SimStat->Monitors.size();
     simTimerGuiUpdate.stop();
     QThread::usleep(5000); // to make sure update cycle is finished
-    simThread.quit();
+    simRunnerThread.quit();
 
     fFinished = true;
     fSuccess = Runner->wasSuccessful();

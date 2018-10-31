@@ -71,5 +71,5 @@ bool AScriptParticleGenerator::readFromJson(const QJsonObject &json)
 void AScriptParticleGenerator::abort()
 {
     bAbortRequested = true;
-    ScriptEngine->abortEvaluation();
+    if (ScriptEngine) ScriptEngine->abortEvaluation();
 }

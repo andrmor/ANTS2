@@ -57,7 +57,7 @@ public:
     ~ASimulationManager();
 
     ASimulatorRunner* Runner;
-    QThread simThread;
+    QThread simRunnerThread;
     QTimer simTimerGuiUpdate;
 
     bool fFinished;
@@ -189,7 +189,7 @@ public:
     virtual ~Simulator();
 
     const DetectorClass *getDetector() { return detector; }
-    QString getErrorString() const { return ErrorString; }
+    const QString getErrorString() const { return ErrorString; }
     virtual int getEventsDone() const = 0;
 
     char progress;
@@ -335,7 +335,7 @@ public:
     virtual int getTotalEventCount() const { return totalEventCount; }
     virtual bool setup(QJsonObject &json);
     virtual void updateGeoManager();
-    virtual void simulate(); // TODO watchdogs?
+    virtual void simulate();
     virtual void appendToDataHub(EventsDataClass *dataHub);
 
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition 

@@ -1582,10 +1582,13 @@ void ParticleSourceSimulator::simulate()
         //qDebug()<<"----particle runs this event: "<<ParticleRunsThisEvent;
 
         //cycle by the particles this event
+        bool bGenerationSuccessful = true;
         for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
             //generating one event
-            ParticleGun->GenerateEvent(GeneratedParticles);
+            bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
+                //qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
+            if (!bGenerationSuccessful) break;
 
             //adding particles to the stack
             for (AParticleRecord * p : GeneratedParticles)
@@ -1599,6 +1602,7 @@ void ParticleSourceSimulator::simulate()
             GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
         } //event prepared
         //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
+        if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
         ParticleTracker->TrackParticlesOnStack(eventCurrent);
         //energy vector is ready
@@ -1644,7 +1648,9 @@ void ParticleSourceSimulator::simulate()
     } //all events finished
 
     fSuccess = !fHardAbortWasTriggered;
+        //qDebug() << "----Releasing resources";
     if (ParticleGun) ParticleGun->ReleaseResources();
+        //qDebug() << "done!"<<ID;
 }
 
 void ParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)

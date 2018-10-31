@@ -104,6 +104,7 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
 {
     while (!Stream->atEnd())
     {
+        if (bAbortRequested) return false;
         const QString line = Stream->readLine();
         QStringList f = line.split(rx, QString::SkipEmptyParts);
         //format: ParticleId Energy X Y Z VX VY VZ *  //'*' is optional - indicates event not finished yet

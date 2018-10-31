@@ -1,5 +1,5 @@
-#ifndef PARTICLESOURCESCLASS_H
-#define PARTICLESOURCESCLASS_H
+#ifndef ASOURCEPARTICLEGENERATOR_H
+#define ASOURCEPARTICLEGENERATOR_H
 
 #include "aparticlegun.h"
 
@@ -13,21 +13,21 @@ class TRandom2;
 class DetectorClass;
 struct AParticleSourceRecord;
 
-class LinkedParticleStructure
+class ALinkedParticle
 {
 public:
-  int iParticle; //indexed according to GunParticles index
-  int LinkedTo;  //index of particle it is linked to
+    int iParticle; //indexed according to GunParticles index
+    int LinkedTo;  //index of particle it is linked to
 
-  LinkedParticleStructure() {}
-  LinkedParticleStructure(int iparticle, int linkedto = -1) {iParticle = iparticle; LinkedTo = linkedto;}
+    ALinkedParticle() {}
+    ALinkedParticle(int iparticle, int linkedto = -1) {iParticle = iparticle; LinkedTo = linkedto;}
 };
 
-class ParticleSourcesClass : public AParticleGun
+class ASourceParticleGenerator : public AParticleGun
 {
 public:
-    ParticleSourcesClass(const DetectorClass* Detector, TRandom2* RandGen);
-    ~ParticleSourcesClass();
+    ASourceParticleGenerator(const DetectorClass* Detector, TRandom2* RandGen);
+    ~ASourceParticleGenerator();
 
     virtual bool Init() override; // !!! has to be called before the first use of "GenerateEvent"!
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override; //see Init!!!
@@ -62,7 +62,7 @@ private:
     QVector<AParticleSourceRecord*> ParticleSourcesData;
     QVector<double> TotalParticleWeight;
     double TotalActivity = 0;
-    QVector< QVector< QVector<LinkedParticleStructure> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
+    QVector< QVector< QVector<ALinkedParticle> > > LinkedPartiles; //[isource] [iparticle] []  (includes the record of the particle iteslf!!!)
                               //full recipe of emission builder (containes particles linked to particles etc up to the top level individual particle)
 
     QVector<TVector3> CollimationDirection; //[isource] collimation direction
@@ -74,4 +74,4 @@ private:
     void AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const; //QVector - only pointer is transferred!
 };
 
-#endif // PARTICLESOURCESCLASS_H
+#endif // ASOURCEPARTICLEGENERATOR_H

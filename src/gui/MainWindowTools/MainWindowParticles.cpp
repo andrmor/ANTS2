@@ -5,7 +5,7 @@
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "amessage.h"
 #include "aconfiguration.h"
 #include "atrackrecords.h"

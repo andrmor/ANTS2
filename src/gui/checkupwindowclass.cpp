@@ -7,7 +7,7 @@
 #include "apmtype.h"
 #include "materialinspectorwindow.h"
 #include "generalsimsettings.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "aglobalsettings.h"
 #include "aparticlesourcerecord.h"
 #include "simulationmanager.h"

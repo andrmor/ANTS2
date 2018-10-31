@@ -49,7 +49,7 @@
 #include "ascriptwindow.h"
 #include "gui/alrfwindow.h"
 #include "acustomrandomsampling.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
 #include "aremotewindow.h"

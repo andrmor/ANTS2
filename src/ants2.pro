@@ -261,7 +261,6 @@ SOURCES += main.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/processorclass.cpp \
-    modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
     modules/manifesthandling.cpp \
@@ -361,7 +360,8 @@ SOURCES += main.cpp \
     modules/afileparticlegenerator.cpp \
     scriptmode/aparticlegeneratorinterface.cpp \
     common/aparticlerecord.cpp \
-    scriptmode/acorescriptinterface.cpp
+    scriptmode/acorescriptinterface.cpp \
+    modules/asourceparticlegenerator.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -383,7 +383,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/ageoobject.h \
     OpticalOverrides/aopticaloverride.h \
     modules/detectorclass.h \
-    modules/particlesourcesclass.h \
     modules/flatfield.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
@@ -499,7 +498,8 @@ HEADERS  += common/CorrelationFilters.h \
     modules/afileparticlegenerator.h \
     scriptmode/aparticlegeneratorinterface.h \
     common/aparticlerecord.h \
-    scriptmode/acorescriptinterface.h
+    scriptmode/acorescriptinterface.h \
+    modules/asourceparticlegenerator.h
 
 # --- SIM ---
 ants2_SIM {

@@ -25,7 +25,7 @@ class Photon_Generator;
 class PrimaryParticleTracker;
 class S1_Generator;
 class S2_Generator;
-class ParticleSourcesClass;
+class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 class Simulator;
@@ -78,7 +78,7 @@ public:
     void Clear();
 
     // Next three: Simulators use their own local copies constructed using configuration in JSON
-    ParticleSourcesClass*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
+    ASourceParticleGenerator*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
     AFileParticleGenerator*   FileParticleGenerator = 0;   //only for gui, simulation threads use their own
     AScriptParticleGenerator* ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
 

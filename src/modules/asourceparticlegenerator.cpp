@@ -1,4 +1,4 @@
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "aparticlerecord.h"
 #include "aparticlesourcerecord.h"
 #include "detectorclass.h"
@@ -20,22 +20,22 @@
 #include "TRandom2.h"
 #include "TGeoManager.h"
 
-ParticleSourcesClass::ParticleSourcesClass(const DetectorClass *Detector, TRandom2 *RandGen)
+ASourceParticleGenerator::ASourceParticleGenerator(const DetectorClass *Detector, TRandom2 *RandGen)
     : Detector(Detector), MpCollection(Detector->MpCollection), RandGen(RandGen) {}
 
-ParticleSourcesClass::~ParticleSourcesClass()
+ASourceParticleGenerator::~ASourceParticleGenerator()
 {
     clear();
 }
 
-void ParticleSourcesClass::clear()
+void ASourceParticleGenerator::clear()
 {
     for (int i=0; i<ParticleSourcesData.size(); i++) delete ParticleSourcesData[i];
     ParticleSourcesData.clear();
     TotalActivity = 0;
 }
 
-bool ParticleSourcesClass::Init()
+bool ASourceParticleGenerator::Init()
 {  
     int NumSources = ParticleSourcesData.size();
     if (NumSources == 0)
@@ -82,7 +82,7 @@ bool ParticleSourcesClass::Init()
             if (!ParticleSourcesData[isource]->GunParticles[iparticle]->Individual) continue; //nothing to do for non-individual particles
 
             //every individual particles defines an "event generation chain" containing the particle iteslf and all linked (and linked to linked to linked etc) particles
-            LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(iparticle)); //list always contains the particle itself - simplifies the generation algorithm
+            LinkedPartiles[isource][iparticle].append(ALinkedParticle(iparticle)); //list always contains the particle itself - simplifies the generation algorithm
             //only particles with larger indexes can be linked to this particle
             for (int ip=iparticle+1; ip<numParts; ip++)
                 if (!ParticleSourcesData[isource]->GunParticles[ip]->Individual) //only looking for non-individuals
@@ -94,7 +94,7 @@ bool ParticleSourcesClass::Init()
                         int linkedTo = ParticleSourcesData[isource]->GunParticles[ip]->LinkedTo;
                         if ( linkedTo == compareWith)
                         {
-                            LinkedPartiles[isource][iparticle].append(LinkedParticleStructure(ip, linkedTo));
+                            LinkedPartiles[isource][iparticle].append(ALinkedParticle(ip, linkedTo));
                             break;
                         }
                     }
@@ -132,7 +132,7 @@ bool ParticleSourcesClass::Init()
     return true; //TODO  check for fails
 }
 
-bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
+bool ASourceParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles)
 {
     bAbortRequested = false;
     //after any operation with sources (add, remove), init should be called before first use!
@@ -186,7 +186,7 @@ bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedPa
     {
       //there are no linked particles     
       //qDebug()<<"Generating individual particle"<<iparticle;
-      ParticleSourcesClass::AddParticleInCone(isource, iparticle, GeneratedParticles);
+      ASourceParticleGenerator::AddParticleInCone(isource, iparticle, GeneratedParticles);
       GeneratedParticles.last()->r[0] = R[0];
       GeneratedParticles.last()->r[1] = R[1];
       GeneratedParticles.last()->r[2] = R[2];
@@ -240,7 +240,7 @@ bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedPa
               WasGenerated[ip] = true;
 
               if (!fOpposite)
-                ParticleSourcesClass::AddParticleInCone(isource, thisParticle, GeneratedParticles);
+                ASourceParticleGenerator::AddParticleInCone(isource, thisParticle, GeneratedParticles);
               else
                 {
                   //find index in the GeneratedParticles
@@ -269,7 +269,7 @@ bool ParticleSourcesClass::GenerateEvent(QVector<AParticleRecord*> & GeneratedPa
   return true;
 }
 
-void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
+void ASourceParticleGenerator::GeneratePosition(int isource, double *R) const
 {
   const int& index = ParticleSourcesData[isource]->shape;
   const double& X0 = ParticleSourcesData[isource]->X0;
@@ -392,7 +392,7 @@ void ParticleSourcesClass::GeneratePosition(int isource, double *R) const
   return;
 }
 
-void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const
+void ASourceParticleGenerator::AddParticleInCone(int isource, int iparticle, QVector<AParticleRecord*> & GeneratedParticles) const
 {
   AParticleRecord* ps = new AParticleRecord();
 
@@ -414,7 +414,7 @@ void ParticleSourcesClass::AddParticleInCone(int isource, int iparticle, QVector
   GeneratedParticles << ps;
 }
 
-TVector3 ParticleSourcesClass::GenerateRandomDirection()
+TVector3 ASourceParticleGenerator::GenerateRandomDirection()
 {
   //Sphere function of Root:
   double a=0,b=0,r2=1;
@@ -430,7 +430,7 @@ TVector3 ParticleSourcesClass::GenerateRandomDirection()
 }
 
 #include <QSet>
-bool ParticleSourcesClass::IsParticleInUse(int particleId, QString &SourceNames) const
+bool ASourceParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
 {
     SourceNames.clear();
     QSet<QString> sources;
@@ -456,7 +456,7 @@ bool ParticleSourcesClass::IsParticleInUse(int particleId, QString &SourceNames)
     }
 }
 
-void ParticleSourcesClass::RemoveParticle(int particleId)
+void ASourceParticleGenerator::RemoveParticle(int particleId)
 {
   for (int isource=0; isource<ParticleSourcesData.size(); isource++ )
     {
@@ -467,20 +467,20 @@ void ParticleSourcesClass::RemoveParticle(int particleId)
   }
 }
 
-double ParticleSourcesClass::getTotalActivity()
+double ASourceParticleGenerator::getTotalActivity()
 {
     CalculateTotalActivity();
     return TotalActivity;
 }
 
-void ParticleSourcesClass::CalculateTotalActivity()
+void ASourceParticleGenerator::CalculateTotalActivity()
 {
     TotalActivity = 0;
     for (int i=0; i<ParticleSourcesData.size(); i++)
         TotalActivity += ParticleSourcesData[i]->Activity;
 }
 
-void ParticleSourcesClass::writeToJson(QJsonObject &json) const
+void ASourceParticleGenerator::writeToJson(QJsonObject &json) const
 {
     QJsonArray ja;
     for (const AParticleSourceRecord* ps : ParticleSourcesData)
@@ -492,7 +492,7 @@ void ParticleSourcesClass::writeToJson(QJsonObject &json) const
     json["ParticleSources"] = ja;
 }
 
-bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
+bool ASourceParticleGenerator::readFromJson(const QJsonObject &json)
 {
     clear();
 
@@ -521,7 +521,7 @@ bool ParticleSourcesClass::readFromJson(const QJsonObject &json)
     return true;
 }
 
-void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
+void ASourceParticleGenerator::checkLimitedToMaterial(AParticleSourceRecord* s)
 {
     bool fFound = false;
     int iMat;
@@ -540,7 +540,7 @@ void ParticleSourcesClass::checkLimitedToMaterial(AParticleSourceRecord* s)
     else s->fLimit = false;
 }
 
-bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)
+bool ASourceParticleGenerator::LoadGunEnergySpectrum(int iSource, int iParticle, QString fileName)
 {
   if (iSource < 0 || iSource >= ParticleSourcesData.size())
     {
@@ -573,19 +573,19 @@ bool ParticleSourcesClass::LoadGunEnergySpectrum(int iSource, int iParticle, QSt
   return true;
 }
 
-void ParticleSourcesClass::append(AParticleSourceRecord *gunParticle)
+void ASourceParticleGenerator::append(AParticleSourceRecord *gunParticle)
 {
     ParticleSourcesData.append(gunParticle);
     CalculateTotalActivity();
 }
 
-void ParticleSourcesClass::forget(AParticleSourceRecord *gunParticle)
+void ASourceParticleGenerator::forget(AParticleSourceRecord *gunParticle)
 {
     ParticleSourcesData.removeAll(gunParticle);
     CalculateTotalActivity();
 }
 
-bool ParticleSourcesClass::replace(int iSource, AParticleSourceRecord *gunParticle)
+bool ASourceParticleGenerator::replace(int iSource, AParticleSourceRecord *gunParticle)
 {
     if (iSource < 0 || iSource >= ParticleSourcesData.size()) return false;
 
@@ -594,7 +594,7 @@ bool ParticleSourcesClass::replace(int iSource, AParticleSourceRecord *gunPartic
     return true;
 }
 
-void ParticleSourcesClass::remove(int iSource)
+void ASourceParticleGenerator::remove(int iSource)
 {
     if (ParticleSourcesData.isEmpty()) return;
     if (iSource < 0 || iSource >= ParticleSourcesData.size()) return;

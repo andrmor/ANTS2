@@ -1,7 +1,7 @@
 #ifndef APARTICLESOURCEDIALOG_H
 #define APARTICLESOURCEDIALOG_H
 
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 
 #include <QDialog>
 

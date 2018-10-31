@@ -14,7 +14,7 @@
 #include "aglobalsettings.h"
 #include "afiletools.h"
 #include "aqtmessageredirector.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "anetworkmodule.h"
 #include "asandwich.h"
 #include "amessageoutput.h"

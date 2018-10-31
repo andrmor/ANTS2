@@ -7,7 +7,7 @@
 #include "eventsdataclass.h"
 #include "windownavigatorclass.h"
 #include "geometrywindowclass.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "afileparticlegenerator.h"
 #include "ascriptparticlegenerator.h"
 #include "graphwindowclass.h"

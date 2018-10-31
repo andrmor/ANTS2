@@ -6,7 +6,7 @@
 #include <QJsonArray>
 
 class DetectorClass;
-class ParticleSourcesClass;
+class ASourceParticleGenerator;
 
 class AConfiguration : public QObject
 {
@@ -19,7 +19,7 @@ public:
   QString ErrorString;      // Last detected error (load config)
 
   void SetDetector(DetectorClass* detector) {Detector = detector;}
-  void SetParticleSources(ParticleSourcesClass* particleSources) {ParticleSources = particleSources;}
+  void SetParticleSources(ASourceParticleGenerator* particleSources) {ParticleSources = particleSources;}
   DetectorClass* GetDetector() {return Detector;}
 
   // save/load to json
@@ -78,7 +78,7 @@ public slots:
 
 private:
   DetectorClass* Detector;                  // Link to the Detector object
-  ParticleSourcesClass* ParticleSources;    // Link to the ParticleSources object of SimulationManager
+  ASourceParticleGenerator* ParticleSources;    // Link to the ParticleSources object of SimulationManager
 
 };
 

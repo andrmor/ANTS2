@@ -8,7 +8,7 @@
 #include "graphwindowclass.h"
 #include "aglobalsettings.h"
 #include "ajsontools.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "detectorclass.h"
 
 #include <QDebug>
@@ -104,7 +104,7 @@ void AParticleSourceDialog::on_pbReject_clicked()
 
 void AParticleSourceDialog::on_pbGunTest_clicked()
 {
-    ParticleSourcesClass ps(MW.Detector, MW.Detector->RandGen);
+    ASourceParticleGenerator ps(MW.Detector, MW.Detector->RandGen);
     ps.append(Rec);
 
     MW.GeometryWindow->ShowAndFocus();

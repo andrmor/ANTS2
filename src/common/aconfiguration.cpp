@@ -4,7 +4,7 @@
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "asandwich.h"
 #include "generalsimsettings.h"
 #include "apmhub.h"

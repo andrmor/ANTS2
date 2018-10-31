@@ -8,7 +8,7 @@
 #include "primaryparticletracker.h"
 #include "s1_generator.h"
 #include "s2_generator.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "afileparticlegenerator.h"
 #include "ascriptparticlegenerator.h"
 #include "amaterialparticlecolection.h"
@@ -1465,7 +1465,7 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
             // particle sources
             if (js.contains("ParticleSources"))
             {
-                ParticleGun = new ParticleSourcesClass(detector, RandGen);
+                ParticleGun = new ASourceParticleGenerator(detector, RandGen);
                 ParticleGun->readFromJson(js);
 
                 fAllowMultiple = cjs["AllowMultipleParticles"].toBool();
@@ -1815,7 +1815,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     this->EventsDataHub = EventsDataHub;
     this->Detector = Detector;
 
-    ParticleSources = new ParticleSourcesClass(Detector, Detector->RandGen);
+    ParticleSources = new ASourceParticleGenerator(Detector, Detector->RandGen);
     FileParticleGenerator = new AFileParticleGenerator(*Detector->MpCollection);
     ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection, Detector->RandGen);
     ScriptParticleGenerator->SetProcessInterval(200);

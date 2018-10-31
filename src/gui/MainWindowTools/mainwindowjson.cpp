@@ -10,7 +10,7 @@
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
 #include "ajsontools.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "afileparticlegenerator.h"
 #include "ascriptparticlegenerator.h"
 #include "apmhub.h"

@@ -22,11 +22,11 @@ public:
     void          SetFileName(const QString &fileName);
     const QString GetFileName() const {return FileName;}
 
-    virtual bool Init() override;               //called before first use
-    virtual void ReleaseResources() override;   //called after end of operation
+    virtual bool Init() override;               //has to be called before first use of GenerateEvent()
+    virtual void ReleaseResources() override;
     virtual bool GenerateEvent(QVector<AParticleRecord*> & GeneratedParticles) override;
 
-    virtual void RemoveParticle(int particleId) override; //cannot be used for this class
+    virtual void RemoveParticle(int) override {} //cannot be used for this class
     virtual bool IsParticleInUse(int particleId, QString& SourceNames) const override;
 
     virtual void writeToJson(QJsonObject& json) const override;
@@ -34,8 +34,10 @@ public:
 
     virtual void SetStartEvent(int startEvent) override;
 
-    void InvalidateFile(); //signals that the file has to be inspected again by running Init()
+    void InvalidateFile();    //forces the file to be inspected again during next call of Init()
     bool IsValidated() const;
+
+    const QString GetEventRecords(int fromEvent, int toEvent) const;
 
     //public file inspect results
     int NumEventsInFile = 0;          //saved

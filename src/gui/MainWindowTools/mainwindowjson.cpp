@@ -554,6 +554,7 @@ if (scj.contains("CustomDistrib"))
       CustomScanNodes.append( new QVector3D(el[0].toDouble(), el[1].toDouble(), el[2].toDouble()));
     }
   ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
+  ui->labPhTracksOn->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
 
     //PARTICLE SOURCES
     QJsonObject psjs = js["ParticleSourcesConfig"].toObject();
@@ -597,6 +598,9 @@ if (scj.contains("CustomDistrib"))
             if (!sjs.isEmpty())
                 SimulationManager->ScriptParticleGenerator->readFromJson(sjs);
         updateScriptParticleGeneratorGui();
+
+        ui->labPhTracksOn_1->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
+        ui->labPartTracksOn->setVisible(SimulationManager->TrackBuildOptions.bBuildParticleTracks);
 
 
   //Window CONTROL

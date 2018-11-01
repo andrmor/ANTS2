@@ -8664,7 +8664,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
          <widget class="QPushButton" name="pbOpenTrackProperties_Phot">
           <property name="geometry">
            <rect>
-            <x>350</x>
+            <x>370</x>
             <y>208</y>
             <width>111</width>
             <height>21</height>
@@ -8687,23 +8687,23 @@ Right click: toggle build photon tracks. Also switches of building particle trac
            <string>tracks options</string>
           </property>
          </widget>
-         <widget class="Line" name="line_11">
+         <widget class="QLabel" name="labPhTracksOn">
           <property name="geometry">
            <rect>
-            <x>270</x>
-            <y>218</y>
-            <width>118</width>
-            <height>3</height>
+            <x>359</x>
+            <y>210</y>
+            <width>21</width>
+            <height>16</height>
            </rect>
           </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+          <property name="text">
+           <string>--</string>
           </property>
          </widget>
-         <zorder>line_11</zorder>
          <zorder>twSingleScan</zorder>
          <zorder>pbSimulate</zorder>
          <zorder>frLimitNodesTo</zorder>
+         <zorder>labPhTracksOn</zorder>
          <zorder>pbOpenTrackProperties_Phot</zorder>
         </widget>
         <widget class="QWidget" name="page_7">
@@ -10192,6 +10192,32 @@ Right click: toggle build particle tracks. Also switch off building photon track
          <string>Particle generation mode:</string>
         </property>
        </widget>
+       <widget class="QLabel" name="labPhTracksOn_1">
+        <property name="geometry">
+         <rect>
+          <x>413</x>
+          <y>338</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>--</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="labPartTracksOn">
+        <property name="geometry">
+         <rect>
+          <x>413</x>
+          <y>347</y>
+          <width>21</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>--</string>
+        </property>
+       </widget>
        <zorder>linePS</zorder>
        <zorder>cbGunDoS1</zorder>
        <zorder>cbGunDoS2</zorder>
@@ -10207,6 +10233,8 @@ Right click: toggle build particle tracks. Also switch off building photon track
        <zorder>cbIgnoreEventsWithNoEnergyDepo</zorder>
        <zorder>cbIgnoreEventsWithNoHits</zorder>
        <zorder>label_45</zorder>
+       <zorder>labPhTracksOn_1</zorder>
+       <zorder>labPartTracksOn</zorder>
       </widget>
      </widget>
      <widget class="QFrame" name="fSaveExport">

@@ -138,11 +138,6 @@ bool AFileParticleGenerator::GenerateEvent(QVector<AParticleRecord*> & Generated
     return false; //could not read particle record in file!
 }
 
-void AFileParticleGenerator::RemoveParticle(int)
-{
-    qWarning() << "Remove particle has no effect for AFileParticleGenerator";
-}
-
 bool AFileParticleGenerator::IsParticleInUse(int particleId, QString &SourceNames) const
 {
     return false; //TODO
@@ -183,9 +178,8 @@ void AFileParticleGenerator::SetStartEvent(int startEvent)
             QStringList f = line.split(rx, QString::SkipEmptyParts);
             if (f.size() < 8) continue;
             bool bOK;
-            int  pId = f.at(0).toInt(&bOK);
+            f.at(0).toInt(&bOK);
             if (!bOK) continue; //assuming this is a comment line
-            //TODO protection of wrong index, either test on start // synchronize!
 
             if (!bContinueEvent) event++;
 
@@ -209,6 +203,38 @@ bool AFileParticleGenerator::IsValidated() const
 {
     QFileInfo fi(FileName);
     return (fi.exists() && FileLastModified == fi.lastModified() && RegisteredParticleCount == MpCollection.countParticles());
+}
+
+const QString AFileParticleGenerator::GetEventRecords(int fromEvent, int toEvent) const
+{
+    QString s;
+    if (Stream)
+    {
+        Stream->seek(0);
+
+        int event = -1;
+        bool bContinueEvent = false;
+        while (!Stream->atEnd())
+        {
+            const QString line = Stream->readLine();
+            QStringList f = line.split(rx, QString::SkipEmptyParts);
+            if (f.size() < 8) continue;
+            bool bOK;
+            f.at(0).toInt(&bOK);
+            if (!bOK) continue; //assuming this is a comment line
+
+            if (!bContinueEvent) event++;
+
+            if (event >= fromEvent && event < toEvent) s += line;
+
+            if (f.size() > 8 && f.at(8) == '*')
+                bContinueEvent = true;
+            else
+                bContinueEvent = false;
+        }
+
+    }
+    return s;
 }
 
 void AFileParticleGenerator::clearFileStat()

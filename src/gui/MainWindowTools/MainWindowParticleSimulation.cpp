@@ -902,10 +902,11 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
 {
     AJavaScriptManager* sm = new AJavaScriptManager(Detector->RandGen);
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
+    sw->EnableAcceptReject();
 
     AParticleGeneratorInterface* gen = new AParticleGeneratorInterface(*Detector->MpCollection, Detector->RandGen);
-    QVector<AParticleRecord*> GeneratedParticles;
-    gen->configure(&GeneratedParticles);
+    QVector<AParticleRecord*> GP;
+    gen->configure(&GP);
     gen->setObjectName("gen");
     sw->RegisterInterface(gen, "gen"); //takes ownership
     AMathScriptInterface* math = new AMathScriptInterface(Detector->RandGen);
@@ -914,7 +915,14 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
 
     sw->UpdateGui();
 
-    QObject::connect(sw, &AScriptWindow::onStart, [&GeneratedParticles](){for (AParticleRecord* p : GeneratedParticles) delete p; GeneratedParticles.clear();});
+    QObject::connect(sw, &AScriptWindow::onFinish,
+                     [&GP, this](bool bError)
+                     {
+                        if (!bError) message(QString("Script generated %1 particle%2").arg(GP.size()).arg(GP.size()==1?"":"s"), this);
+                        for (AParticleRecord* p : GP) delete p;
+                        GP.clear();
+                     }
+    );
 
 
     QString Script = SimulationManager->ScriptParticleGenerator->GetScript();
@@ -931,11 +939,12 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
         QThread::usleep(200);
     }
 
-    for (AParticleRecord* p : GeneratedParticles) delete p;
-    GeneratedParticles.clear();
+    bool bWasAccepted = sw->isAccepted();
+    for (AParticleRecord* p : GP) delete p;
+    GP.clear();
     delete sw; //also deletes script manager
 
-    SimulationManager->ScriptParticleGenerator->SetScript(Script);
+    if (bWasAccepted) SimulationManager->ScriptParticleGenerator->SetScript(Script);
     on_pbUpdateSimConfig_clicked();
 }
 

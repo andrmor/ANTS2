@@ -55,6 +55,8 @@ public:
     void onBusyOff();
 
     void ConfigureForLightMode(QString* ScriptPtr, const QString &WindowTitle, const QString& Example);
+    void EnableAcceptReject();
+    bool isAccepted() const {return bAccepted;}
 
     AScriptManager* ScriptManager;
     QStringList functions;
@@ -135,7 +137,8 @@ private:
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
-    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for small local scripts
+    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
+    bool bAccepted = false;
     QString* LightModeScript = 0;
     QString  LightModeExample;
 
@@ -192,6 +195,7 @@ signals:
     //just retranslators:
     void onStart();
     void onAbort();
+    void onFinish(bool bError);
     void success(QString eval);
 
 public slots:
@@ -209,6 +213,8 @@ private slots:
     virtual void onFindVariable();
     void onBack();
     void onForward();
+    void on_pbAccept_clicked();
+    void on_pbCancel_clicked();
 };
 
 class AScriptWindowTabItem : public QObject

@@ -231,6 +231,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     ui->centralwidget->layout()->addWidget(splMain);
     ui->centralwidget->layout()->addItem(ui->horizontalLayout);
 
+    ui->centralwidget->layout()->removeWidget(ui->frAccept);
+    ui->centralwidget->layout()->addWidget(ui->frAccept);
+
     trwJson->header()->resizeSection(0, 200);
 
     sizes.clear();
@@ -259,9 +262,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
     //connect(DoPaste, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->paste();});
 
-    if (!bLightMode)
-        ReadFromJson();
-    else
+    if (bLightMode)
     {
         ui->pbConfig->setEnabled(false);
         twScriptTabs->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
@@ -269,7 +270,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         ui->menuTabs->setEnabled(false);
         ui->menuView->setEnabled(false);
     }
+    else ReadFromJson();
 
+    ui->frAccept->setVisible(false);
 }
 
 AScriptWindow::~AScriptWindow()
@@ -538,6 +541,16 @@ void AScriptWindow::ConfigureForLightMode(QString *ScriptPtr, const QString& Win
         ScriptTabs[CurrentTab]->TextEdit->clear();
         ScriptTabs[CurrentTab]->TextEdit->appendPlainText(*LightModeScript);
     }
+}
+
+void AScriptWindow::EnableAcceptReject()
+{
+    ui->frAccept->setVisible(true);
+
+    ui->pbRunScript->setText("Test script");
+    QFont f = ui->pbRunScript->font();
+    f.setBold(false);
+    ui->pbRunScript->setFont(f);
 }
 
 void AScriptWindow::ShowText(QString text)
@@ -1172,6 +1185,7 @@ void AScriptWindow::receivedOnSuccess(QString eval)
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     emit success(eval);
+    emit onFinish(ScriptManager->isUncaughtException());
 }
 
 void AScriptWindow::onDefaulFontSizeChanged(int size)
@@ -2118,4 +2132,16 @@ void AScriptWindowTabItem::onTextChanged()
 
     Variables.append(functions);
     completitionModel->setStringList(Variables);
+}
+
+void AScriptWindow::on_pbAccept_clicked()
+{
+    bAccepted = true;
+    close();
+}
+
+void AScriptWindow::on_pbCancel_clicked()
+{
+    bAccepted = false;
+    close();
 }

@@ -916,9 +916,9 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     sw->UpdateGui();
 
     QObject::connect(sw, &AScriptWindow::onFinish,
-                     [&GP, this](bool bError)
+                     [&GP, sw](bool bError)
                      {
-                        if (!bError) message(QString("Script generated %1 particle%2").arg(GP.size()).arg(GP.size()==1?"":"s"), this);
+                        if (!bError) message(QString("Script generated %1 particle%2").arg(GP.size()).arg(GP.size()==1?"":"s"), sw);
                         for (AParticleRecord* p : GP) delete p;
                         GP.clear();
                      }

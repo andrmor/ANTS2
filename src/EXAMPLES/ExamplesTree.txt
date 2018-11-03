@@ -1,6 +1,7 @@
 define:Gamma cameras
 define:Neutrons
 define:Dark matter
+define:Neutrinos
 define:ANTS2 tests
 define: Startup
 
@@ -12,8 +13,9 @@ define:Gamma  cameras:PMT-based
 define:Neutrons:Gas
 define:Neutrons:Converter
 
-define:Dark matter:RED
 define:Dark matter:LUX
+
+define:Neutrinos:RED
 
 define:ANTS2 tests:Fresnel test
 define:ANTS2 tests:Scatter model
@@ -42,6 +44,9 @@ add:Gamma cameras:PMT-based:Med37.json:Medical gamma camera GE MaxiCamera 400T; 
 
 add:Neutrons:Gas:AngerGSPC19.json:GSPC19 detector
 add:Neutrons:Converter:B4C_multigap.json:Multigap RPC neutron detector
+
+add:Dark matter:LUX:LUX.json:A model of LUX - a dual-phase detector for dark matter search 
+add:Neutrinos:RED:RED100.json:A model of RED100 - a dual-phase neutrino detector
 
 add:Startup:Startup:StartupDetector.json:Detector loaded on start of ANTS2
 add:Startup:Startup:Simplest.json:Nearly empty detector

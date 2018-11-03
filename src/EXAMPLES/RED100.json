@@ -1,0 +1,3880 @@
+{
+    "DetectorConfig": {
+        "DummyPMs": [
+        ],
+        "Electronics": {
+            "ADC": {
+                "ADCbits": [
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16,
+                    16
+                ],
+                "ADCmax": [
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535,
+                    65535
+                ],
+                "Active": false
+            },
+            "DarkCounts": {
+                "Active": false,
+                "Data": [
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    },
+                    {
+                        "DarkCounts_distribution": [
+                        ],
+                        "DarkCounts_model": 0,
+                        "DarkCounts_time": 150
+                    }
+                ]
+            },
+            "MCcrosstalk": {
+                "Active": false,
+                "Model": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "ProbDistr": [
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ]
+                ],
+                "TrigProb": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "Noise": {
+                "Active": false,
+                "NoiseSigma": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "NoiseSigmaStat": [
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ],
+                    [
+                        0,
+                        1
+                    ]
+                ]
+            },
+            "PHS": {
+                "Active": false,
+                "Data": [
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    },
+                    {
+                        "Average": 1,
+                        "Mode": 0
+                    }
+                ]
+            }
+        },
+        "FixedWorldSizes": {
+            "WorldSizeFixed": false,
+            "XY": 932.41333698683025,
+            "Z": 932.41333698683025
+        },
+        "IndividualPMoverrides": {
+            "Angular": {
+                "AngularResponse": [
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ]
+                ],
+                "RefrIndex": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "Area": {
+                "AreaResponse": [
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ],
+                    [
+                    ]
+                ],
+                "Step": [
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ],
+                    [
+                        777,
+                        777
+                    ]
+                ]
+            },
+            "PDEeffective": [
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1
+            ],
+            "PDEwave": [
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ],
+                [
+                ]
+            ],
+            "RelQEandElStr": [
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ],
+                [
+                    1,
+                    1
+                ]
+            ]
+        },
+        "LoadExpDataConfig": {
+            "AddMulti": [
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ],
+                [
+                    0,
+                    1
+                ]
+            ],
+            "IgnoreThresholds": {
+                "Activated": false,
+                "Max": 10000000000,
+                "Min": 1
+            },
+            "LoadFirst": -1,
+            "LoadedEnergy": {
+                "Activated": false,
+                "Add": 0,
+                "Channel": 38,
+                "Multi": 1
+            },
+            "LoadedPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "LoadedZPosition": {
+                "Activated": false,
+                "Channel": 0
+            },
+            "ManifestFile": "",
+            "Preprocessing": false
+        },
+        "MaterialCollection": {
+            "LogLog": false,
+            "Materials": [
+                {
+                    "*MaterialName": "Air",
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "LXenon",
+                    "BulkAbsorption": 0.00054000000000000001,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
+                                    "ReactionType": 4
+                                }
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 300,
+                    "RayleighWave": 175,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1.6899999999999999,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "GXenon",
+                    "BulkAbsorption": 0,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
+                                    "ReactionType": 4
+                                }
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 100,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 0.029999999999999999
+                },
+                {
+                    "*MaterialName": "Cu",
+                    "BulkAbsorption": 10000,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
+                                    "ReactionType": 4
+                                }
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "Teflon",
+                    "BulkAbsorption": 10000,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 0,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1.3500000000000001,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 0,
+                    "SecScint_Tau": 0,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "Glass",
+                    "BulkAbsorption": 0.0030000000000000001,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
+                                    "ReactionType": 4
+                                }
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1.55,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 100
+                },
+                {
+                    "*MaterialName": "DarkTeflon",
+                    "BulkAbsorption": 100000,
+                    "BulkAbsorptionWave": [
+                    ],
+                    "ChemicalComposition": {
+                        "ElementComposition": [
+                        ],
+                        "ElementCompositionString": "",
+                        "MeanAtomMass": 0
+                    },
+                    "Comments": "",
+                    "Density": 0.0012041,
+                    "ElDriftVelo": 1,
+                    "MatParticles": [
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 0,
+                                "Name": "gamma",
+                                "Type": 0
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 2,
+                                "Mass": 4,
+                                "Name": "alpha",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": 0,
+                                "Mass": 1,
+                                "Name": "neutron",
+                                "Type": 2
+                            },
+                            "AllowAbsentCsData": false,
+                            "CaptureEnabled": true,
+                            "DataSource": "",
+                            "DataString": "",
+                            "ElasticEnabled": false,
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "Terminators": [
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "ReactionType": 2
+                                },
+                                {
+                                    "InteractionData": [
+                                    ],
+                                    "IsotopeRecords": [
+                                    ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
+                                    "ReactionType": 4
+                                }
+                            ],
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
+                        }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "PrimScintSpectrum": [
+                    ],
+                    "PrimScint_Model": 0,
+                    "RayleighMFP": 0,
+                    "RayleighWave": 500,
+                    "ReemissionProb": 0,
+                    "ReemissionProbabilityWave": [
+                    ],
+                    "RefractiveIndex": 1.3500000000000001,
+                    "RefractiveIndexWave": [
+                    ],
+                    "SecScintSpectrum": [
+                    ],
+                    "SecScint_PhYield": 2,
+                    "SecScint_Tau": 5,
+                    "Temperature": 298,
+                    "W": 100
+                }
+            ],
+            "Overrides": [
+                {
+                    "Abs": 0.050000000000000003,
+                    "MatFrom": 1,
+                    "MatTo": 4,
+                    "Model": "Simplistic_model",
+                    "Scat": 0.94999999999999996,
+                    "ScatMode": 1,
+                    "Spec": 0
+                },
+                {
+                    "Abs": 1,
+                    "MatFrom": 1,
+                    "MatTo": 6,
+                    "Model": "Simplistic_model",
+                    "Scat": 0,
+                    "ScatMode": 1,
+                    "Spec": 0
+                },
+                {
+                    "Abs": 1,
+                    "MatFrom": 2,
+                    "MatTo": 3,
+                    "Model": "Simplistic_model",
+                    "Scat": 0,
+                    "ScatMode": 1,
+                    "Spec": 0
+                },
+                {
+                    "Abs": 0.10000000000000001,
+                    "MatFrom": 2,
+                    "MatTo": 4,
+                    "Model": "Simplistic_model",
+                    "Scat": 0.90000000000000002,
+                    "ScatMode": 1,
+                    "Spec": 0
+                },
+                {
+                    "Abs": 1,
+                    "MatFrom": 2,
+                    "MatTo": 6,
+                    "Model": "Simplistic_model",
+                    "Scat": 0,
+                    "ScatMode": 1,
+                    "Spec": 0
+                }
+            ]
+        },
+        "PMarrays": [
+            {
+                "PMarrayData": {
+                    "Activated": true,
+                    "CenterToCenter": 79,
+                    "NumRings": 2,
+                    "PMtype": 0,
+                    "Packing": 1,
+                    "PositioningScript": "PM( 0,  0,  0, Type1 )",
+                    "Regularity": 0,
+                    "UseRings": true
+                }
+            },
+            {
+                "PMarrayData": {
+                    "Activated": true,
+                    "CenterToCenter": 79,
+                    "NumRings": 2,
+                    "PMtype": 0,
+                    "Packing": 1,
+                    "Regularity": 0,
+                    "UseRings": true
+                }
+            }
+        ],
+        "PMtypes": [
+            {
+                "AngularResponse": {
+                    "RefrIndexMeasure": 1,
+                    "ResponseVsAngle": [
+                    ]
+                },
+                "AreaResponse": {
+                    "AreaStepX": 1,
+                    "AreaStepY": 1,
+                    "ResponseVsXY": [
+                    ]
+                },
+                "General": {
+                    "AngleSphere": 35,
+                    "MaterialIndex": 5,
+                    "Name": "Type1",
+                    "Shape": 1,
+                    "SiPM": false,
+                    "SizeX": 76,
+                    "SizeY": 100,
+                    "SizeZ": 0.01
+                },
+                "PDEproperties": {
+                    "PDE": 0.29999999999999999,
+                    "PDEwave": [
+                    ]
+                },
+                "SiPMproperties": {
+                    "DarkCountRate": 10000000,
+                    "PixelsX": 50,
+                    "PixelsY": 50,
+                    "RecoveryTime": 50
+                }
+            }
+        ],
+        "ParticleCollection": [
+            {
+                "Charge": 0,
+                "Mass": 0,
+                "Name": "gamma",
+                "Type": 0
+            },
+            {
+                "Charge": 2,
+                "Mass": 4,
+                "Name": "alpha",
+                "Type": 1
+            },
+            {
+                "Charge": 0,
+                "Mass": 1,
+                "Name": "neutron",
+                "Type": 2
+            }
+        ],
+        "Sandwich": {
+            "DefaultXY": {
+                "angle": 0,
+                "shape": 1,
+                "sides": 6,
+                "size1": 400,
+                "size2": 100
+            },
+            "Slabs": [
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 1,
+                        "sides": 12,
+                        "size1": 450,
+                        "size2": 100
+                    },
+                    "color": 7,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 50,
+                    "material": 2,
+                    "name": "New_B7",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 2,
+                        "sides": 12,
+                        "size1": 400,
+                        "size2": 100
+                    },
+                    "color": 2,
+                    "fActive": true,
+                    "fCenter": true,
+                    "height": 26,
+                    "material": 2,
+                    "name": "SecScint",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 2,
+                        "sides": 12,
+                        "size1": 400,
+                        "size2": 100
+                    },
+                    "color": 4,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 430,
+                    "material": 1,
+                    "name": "Scint",
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "XY": {
+                        "angle": 0,
+                        "shape": 1,
+                        "sides": 12,
+                        "size1": 450,
+                        "size2": 100
+                    },
+                    "color": 28,
+                    "fActive": true,
+                    "fCenter": false,
+                    "height": 50,
+                    "material": 1,
+                    "name": "New_B9",
+                    "style": 1,
+                    "width": 1
+                }
+            ],
+            "State": "Individual",
+            "WorldMaterial": 4,
+            "WorldTree": [
+                {
+                    "Container": "",
+                    "Locked": false,
+                    "Name": "World",
+                    "ObjectType": {
+                        "Type": "World"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 6,
+                    "Name": "DarkCorp1",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTube",
+                    "ShapeSpecific": {
+                        "dz": 25,
+                        "rmax": 250,
+                        "rmin": 225
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 51,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Material": 6,
+                    "Name": "DarkCorp2",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTube",
+                    "ShapeSpecific": {
+                        "dz": 25,
+                        "rmax": 250,
+                        "rmin": 225
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": -455,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "New_B7",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "SecScint",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "SecScint",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "Grid_O7",
+                    "ObjectType": {
+                        "Type": "Grid"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTube",
+                    "ShapeSpecific": {
+                        "dz": 0.251,
+                        "rmax": 200,
+                        "rmin": 0
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": false,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "Grid_O7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "GridElement_Grid_O7",
+                    "ObjectType": {
+                        "Type": "GridElement",
+                        "dz": 0.251,
+                        "shape": 2,
+                        "size1": 3.5,
+                        "size2": 3
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoPolygon",
+                    "ShapeSpecific": {
+                        "dphi": 360,
+                        "dz": 0.251,
+                        "nedges": 6,
+                        "rmaxL": 3.5,
+                        "rmaxU": 3.5,
+                        "rminL": 0,
+                        "rminU": 0
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "GridElement_Grid_O7",
+                    "Locked": false,
+                    "Material": 3,
+                    "Name": "Composite_XJ7",
+                    "ObjectType": {
+                        "Type": "Composite"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoCompositeShape",
+                    "ShapeSpecific": {
+                        "GenerationString": "TGeoCompositeShape( New_NG6 + New_IP2 + New_OY3 + New_AA7 + New_VK9 + New_UX7 )"
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": false,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "Composite_XJ7",
+                    "Locked": false,
+                    "Name": "CompositeSet_Composite_XJ7",
+                    "ObjectType": {
+                        "Type": "CompositeContainer"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_UX7",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": -120,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": 2.8145812500000003,
+                    "Y": -1.625,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_VK9",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 120,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": -2.8145812500000003,
+                    "Y": -1.625,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_AA7",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": -60,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": 2.8145812500000003,
+                    "Y": 1.625,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_OY3",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 60,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": -2.8145812500000003,
+                    "Y": 1.625,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_IP2",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 180,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": 0,
+                    "Y": -3.25,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "CompositeSet_Composite_XJ7",
+                    "Locked": false,
+                    "Material": 2,
+                    "Name": "New_NG6",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoTrd1",
+                    "ShapeSpecific": {
+                        "dx1": 2.0207152177176311,
+                        "dx2": 2.3093902177176311,
+                        "dy": 0.25,
+                        "dz": 0.25
+                    },
+                    "Theta": 90,
+                    "X": 0,
+                    "Y": 3.25,
+                    "Z": 0,
+                    "color": -1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "Scint",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                },
+                {
+                    "Container": "World",
+                    "Locked": false,
+                    "Name": "New_B9",
+                    "ObjectType": {
+                        "Type": "Slab"
+                    },
+                    "fActive": true,
+                    "fExpanded": true
+                }
+            ],
+            "ZeroZ": "Bottom"
+        }
+    },
+    "GUI": {
+        "GeometryWindow": {
+            "ZoomLevel": 2
+        },
+        "MW": {
+            "ConfigGuiLocked": false
+        },
+        "PartcleStackChecker": {
+            "Copies": 1,
+            "Energy": 200,
+            "Particle": 0,
+            "ScriptEV": "",
+            "Time": 0,
+            "X": 0,
+            "Y": 0,
+            "Z": 0,
+            "dX": 1,
+            "dY": 0,
+            "dZ": 0
+        },
+        "ReconstructionWindow": {
+            "Blur": {
+                "BlurSigma": 10,
+                "BlurSigmaZ": 1,
+                "BlurType": 1,
+                "BlurWidth": 10,
+                "BlurWidthZ": 1
+            },
+            "ChPerPhePeaks": {
+                "Bins": 300,
+                "From": -50,
+                "MaxPeaks": 30,
+                "Sigma": 8,
+                "Threshold": 0.02,
+                "To": 250
+            },
+            "ChPerPheStat": {
+                "Bins": 100,
+                "ENF": 1,
+                "Lower": 3,
+                "MaxRange": 1000,
+                "MinRange": 0,
+                "Upper": 500
+            },
+            "PlotXYsettings": {
+                "PlotXYbinsX": 50,
+                "PlotXYbinsY": 50,
+                "PlotXYfromX": -180,
+                "PlotXYfromY": -180,
+                "PlotXYfromZ": -5,
+                "PlotXYoptionZ": 0,
+                "PlotXYtoX": 180,
+                "PlotXYtoY": 180,
+                "PlotXYtoZ": 5
+            }
+        }
+    },
+    "ReconstructionConfig": {
+        "ANTS2build": 2197,
+        "FilterOptions": [
+            {
+                "Chi2": {
+                    "Active": false,
+                    "Max": 2,
+                    "Min": 0
+                },
+                "Correlation": {
+                    "Active": false,
+                    "Set": [
+                        {
+                            "Active": true,
+                            "AutoSize": true,
+                            "BinX": 100,
+                            "BinY": 100,
+                            "Cut": {
+                                "CutOption": 0,
+                                "Data": [
+                                    0,
+                                    1,
+                                    300
+                                ],
+                                "Type": "line"
+                            },
+                            "XY": [
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                },
+                                {
+                                    "Array": [
+                                        0
+                                    ],
+                                    "Type": "SingleChannel"
+                                }
+                            ],
+                            "maxX": 20,
+                            "maxY": 20,
+                            "minX": -20,
+                            "minY": -20
+                        }
+                    ]
+                },
+                "EventNumber": {
+                    "Active": false,
+                    "Max": 0,
+                    "Min": 0
+                },
+                "IndividualPMSignal": {
+                    "Active": false,
+                    "UsePassives": true
+                },
+                "LoadedEnergy": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0
+                },
+                "MultipleScanEvents": false,
+                "ReconstructedEnergy": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0
+                },
+                "SpatialCustom": {
+                    "Active": false,
+                    "AllZ": true,
+                    "Angle": 0,
+                    "CutOutsideInside": 0,
+                    "Diameter": 400,
+                    "Polygon": [
+                    ],
+                    "RecOrScan": 0,
+                    "Shape": 1,
+                    "Side": 15,
+                    "SizeX": 30,
+                    "SizeY": 30,
+                    "X0": 0,
+                    "Y0": 0,
+                    "Zfrom": -5,
+                    "Zto": 5
+                },
+                "SpatialToObject": {
+                    "Active": false,
+                    "LimitObject": "PrScint",
+                    "RecOrScan": 0
+                },
+                "SumSignal": {
+                    "Active": false,
+                    "Max": 10000000000,
+                    "Min": 0,
+                    "UseGains": false,
+                    "UsePassives": true
+                },
+                "kNN": {
+                    "Active": false,
+                    "AverageOver": 10,
+                    "Max": 10000000000,
+                    "Min": 0
+                }
+            }
+        ],
+        "LRFmakeJson": {
+            "AdjustGains": true,
+            "Compression_k": 5,
+            "Compression_lam": 50,
+            "Compression_r0": 150,
+            "DataSelector": 0,
+            "EnergyNormalization": 1,
+            "FitOnlyLast": false,
+            "ForceInZ": 0,
+            "ForceNonIncreasingInR": false,
+            "ForceNonNegative": false,
+            "ForceZeroDeriv": true,
+            "GroupToMake": 0,
+            "GroupingOption": "Individual",
+            "GrouppingType": 0,
+            "LRF_3D": false,
+            "LRF_compress": true,
+            "LRF_type": 0,
+            "LimitGroup": false,
+            "Nodes_x": 10,
+            "Nodes_y": 10,
+            "StoreError": false,
+            "UseEnergy": true,
+            "UseGrid": true,
+            "UseGroupping": false
+        },
+        "LRFmoduleSelected": 0,
+        "LRFv3makeJson": {
+            "fit error": true,
+            "instruction list vpos": 0,
+            "instructions": [
+                {
+                    "current instruction": 0,
+                    "expanded": true,
+                    "instructions": [
+                        {
+                            "EffectOnPrevious": 0,
+                            "Groupping": {
+                                "AdjustGains": true,
+                                "Enabled": true,
+                                "Type": 0
+                            },
+                            "Lrf": {
+                                "Category": "Script",
+                                "Settings": {
+                                    "script": "//Variables to be fitted and their initial values:\nvar A = 150; var m = 0\nvar  b = 2; var g = 1\n\nfunction eval(r)\n{\n   // var dr = r[0]-mu\n    return m*r[0]+b+A/Math.pow(1+g*g*r[0]*r[0], 1.5)\n}\n",
+                                    "text height": 130
+                                },
+                                "Type": "Script Polar"
+                            },
+                            "SensorComposition": 0,
+                            "SensorGroup": 0,
+                            "SensorList": "0, 2-5"
+                        },
+                        {
+                            "recipe": 9,
+                            "sensors": "",
+                            "version": -1
+                        }
+                    ],
+                    "name": "Name"
+                },
+                {
+                    "current instruction": 0,
+                    "expanded": true,
+                    "instructions": [
+                        {
+                            "EffectOnPrevious": 0,
+                            "Groupping": {
+                                "AdjustGains": true,
+                                "Enabled": true,
+                                "Type": 1
+                            },
+                            "Lrf": {
+                                "Category": "Bspline",
+                                "Settings": {
+                                    "nintx": 2,
+                                    "ninty": 2
+                                },
+                                "Type": "XY"
+                            },
+                            "SensorComposition": 0,
+                            "SensorGroup": 0,
+                            "SensorList": "7-18"
+                        },
+                        {
+                            "recipe": 9,
+                            "sensors": "",
+                            "version": -1
+                        }
+                    ],
+                    "name": "Name"
+                }
+            ],
+            "name": "Recipe's name",
+            "scale by energy": true,
+            "use true data": true
+        },
+        "ReconstructionOptions": [
+            {
+                "AlgorithmOptions": {
+                    "Algorithm": 1,
+                    "CGonCUDAsettings": {
+                        "Buffer": 500,
+                        "Iterations": 3,
+                        "OptimizeMLChi2": 0,
+                        "ScaleReduction": 8,
+                        "StartOption": 0,
+                        "StartStep": 10,
+                        "StartX": 0,
+                        "StartY": 0,
+                        "StarterZ": 0,
+                        "ThreadBlockXY": 8
+                    },
+                    "CPUgridsOptions": {
+                        "InitialStep": 10,
+                        "Iterations": 3,
+                        "NodesXY": 15,
+                        "OptimizeWhat": 0,
+                        "Reduction": 8,
+                        "StartOption": 1,
+                        "StartX": 0,
+                        "StartY": 0
+                    },
+                    "CoGoptions": {
+                        "DoStretch": true,
+                        "ForceFixedZ": true,
+                        "IgnoreBySignal": false,
+                        "IgnoreDistance": 100,
+                        "IgnoreFar": false,
+                        "IgnoreThresholdHigh": 10000000000,
+                        "IgnoreThresholdLow": 200,
+                        "StretchX": 2.2000000000000002,
+                        "StretchY": 2.2000000000000002,
+                        "StretchZ": 1
+                    },
+                    "RootMinimizerOptions": {
+                        "LSorLikelihood": 1,
+                        "LSsuppressConsole": true,
+                        "MaxCalls": 500,
+                        "Minuit2Option": 1,
+                        "StartOption": 1,
+                        "StartStepEnergy": 0.10000000000000001,
+                        "StartStepX": 1,
+                        "StartStepY": 1,
+                        "StartStepZ": 1
+                    }
+                },
+                "DynamicPassives": {
+                    "DistanceLimit": 200,
+                    "IgnoreByDistance": false,
+                    "IgnoreBySignal": true,
+                    "SignalLimitHigh": 10000000000,
+                    "SignalLimitLow": 0
+                },
+                "General": {
+                    "IncludePassives": false,
+                    "InitialEnergy": 1,
+                    "InitialZ": 0,
+                    "LimitSearchGauss": false,
+                    "LimitSearchIfTrueIsSet": false,
+                    "RangeForLimitSearchIfTrueSet": 1,
+                    "ReconstructEnergy": true,
+                    "ReconstructZ": false,
+                    "WeightedChi2": true,
+                    "Zstrategy": 0
+                },
+                "MultipleEvents": {
+                    "Option": 0
+                }
+            }
+        ],
+        "SensorGroups": [
+            {
+                "CutOffs": [
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ],
+                    [
+                        -10000000000,
+                        10000000000
+                    ]
+                ],
+                "Gains": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "Name": "Default group",
+                "PmIndexes": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21,
+                    22,
+                    23,
+                    24,
+                    25,
+                    26,
+                    27,
+                    28,
+                    29,
+                    30,
+                    31,
+                    32,
+                    33,
+                    34,
+                    35,
+                    36,
+                    37
+                ]
+            }
+        ],
+        "StaticPassives": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+        ]
+    },
+    "SimulationConfig": {
+        "DoGuiUpdate": true,
+        "GeneralSimConfig": {
+            "AcceleratorConfig": {
+                "CheckBeforeTrack": false,
+                "LogsStatistics": true,
+                "MaxNumTransitions": 10
+            },
+            "AngleConfig": {
+                "AngResolved": false,
+                "NumBins": 1000
+            },
+            "AreaConfig": {
+                "AreaResolved": false
+            },
+            "DetStatNumBins": 100,
+            "LrfBasedSim": {
+                "NumPhotElLRFunity": 1,
+                "NumPhotsLRFunity": 20000,
+                "UseLRFs": false
+            },
+            "SecScintConfig": {
+                "Type": 0
+            },
+            "TimeConfig": {
+                "TimeBins": 5,
+                "TimeFrom": 0,
+                "TimeResolved": false,
+                "TimeTo": 1000
+            },
+            "TrackBuildingOptions": {
+                "BuildParticleTracks": false,
+                "BuildPhotonTracks": false,
+                "GeneralPhoton_Attributes": {
+                    "color": 7,
+                    "style": 1,
+                    "width": 1
+                },
+                "MaxParticleTracks": 1000,
+                "MaxPhotonTracks": 1000,
+                "Particle_CustomAttribtes": [
+                ],
+                "Particle_DefaultAttributes": {
+                    "color": 15,
+                    "style": 1,
+                    "width": 2
+                },
+                "Particle_DefaultColors": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    7,
+                    8,
+                    9,
+                    28,
+                    30,
+                    36,
+                    38,
+                    39,
+                    40,
+                    46,
+                    49
+                ],
+                "PhotonHittingPM_Attributes": {
+                    "color": 2,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSecScint_Attributes": {
+                    "color": 6,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSpecialRule_HittingPMs": true,
+                "PhotonSpecialRule_SecScint": true,
+                "SkipParticles_Primary": false,
+                "SkipParticles_PrimaryNoInteraction": false,
+                "SkipParticles_Secondary": false,
+                "SkipPhotonsMissingPMs": false
+            },
+            "TrackingConfig": {
+                "MaxStep": 0.10000000000000001,
+                "MinEnergy": 0.01,
+                "MinEnergyNeutrons": 0.01,
+                "MinStep": 5.0000000000000002e-05,
+                "Safety": 1e-10,
+                "dE": 0.050000000000000003
+            },
+            "WaveConfig": {
+                "WaveFrom": 200,
+                "WaveNodes": 121,
+                "WaveResolved": false,
+                "WaveStep": 5,
+                "WaveTo": 800
+            }
+        },
+        "Mode": "PointSim",
+        "ParticleSourcesConfig": {
+            "ParticleSources": [
+            ],
+            "SourceControlOptions": {
+                "AllowMultipleParticles": false,
+                "AverageParticlesPerEvent": 0.10000000000000001,
+                "DoS1": true,
+                "DoS2": false,
+                "EventsToDo": 10,
+                "IgnoreNoDepoEvents": true,
+                "IgnoreNoHitsEvents": false,
+                "TypeParticlesPerEvent": 0
+            }
+        },
+        "PointSourcesConfig": {
+            "BadEventOptions": {
+                "BadEvents": false,
+                "NoiseArray": [
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in one PM",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in one PM\n(over a normal event)",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in all PMs",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 100,
+                        "Description": "Noise signal in all PMs\n(over a normal event)",
+                        "Probability": 0.01,
+                        "Spread": 40
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 0,
+                        "Description": "Double event\n(two independent)",
+                        "Probability": 0.01,
+                        "Spread": 0
+                    },
+                    {
+                        "Active": false,
+                        "AverageValue": 0.5,
+                        "Description": "Double event\n(# of photons is shared)",
+                        "Probability": 0.01,
+                        "Spread": 0.25
+                    }
+                ],
+                "Probability": 0,
+                "SigmaDouble": 10
+            },
+            "ControlOptions": {
+                "LimitNodes": false,
+                "LimitNodesTo": "PrScint",
+                "MultipleRuns": false,
+                "MultipleRunsNumber": 100,
+                "Primary_Secondary": 1,
+                "Single_Scan_Flood": 2
+            },
+            "CustomNodesOptions": {
+                "Nodes": [
+                ],
+                "Script": ""
+            },
+            "FloodOptions": {
+                "CenterX": 0,
+                "CenterY": 0,
+                "DiameterIn": 0,
+                "DiameterOut": 400,
+                "Nodes": 10000,
+                "Shape": 1,
+                "Xfrom": -50,
+                "Xto": 50,
+                "Yfrom": -50,
+                "Yto": 50,
+                "Zfixed": -50,
+                "Zfrom": -2.4900000000000002,
+                "Zoption": 0,
+                "Zto": 2.4900000000000002
+            },
+            "PhotPerNodeOptions": {
+                "PhotPerNodeConstant": 1000,
+                "PhotPerNodeCustom": [
+                ],
+                "PhotPerNodeGaussMean": 10000,
+                "PhotPerNodeGaussSigma": 250,
+                "PhotPerNodeMode": 0,
+                "PhotPerNodeUniMax": 12,
+                "PhotPerNodeUniMin": 10
+            },
+            "PhotonDirectionOptions": {
+                "Cone": 45,
+                "FixedX": 0,
+                "FixedY": 0,
+                "FixedZ": 1,
+                "Fixed_or_Cone": 0,
+                "Random": true
+            },
+            "RegularScanOptions": {
+                "AxesData": [
+                    {
+                        "Nodes": 5,
+                        "Option": 0,
+                        "dX": 10,
+                        "dY": 0,
+                        "dZ": 0
+                    },
+                    {
+                        "Nodes": 5,
+                        "Option": 0,
+                        "dX": 0,
+                        "dY": 10,
+                        "dZ": 0
+                    }
+                ],
+                "ScanX0": 0,
+                "ScanY0": 0,
+                "ScanZ0": 0
+            },
+            "SinglePositionOptions": {
+                "SingleX": 50,
+                "SingleY": 0,
+                "SingleZ": 0
+            },
+            "WaveTimeOptions": {
+                "UseFixedWavelength": false,
+                "WaveIndex": 0
+            }
+        }
+    }
+}

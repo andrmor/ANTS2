@@ -6893,7 +6893,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -8684,7 +8684,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
 Right click: toggle build photon tracks. Also switches of building particle tracks</string>
           </property>
           <property name="text">
-           <string>tracks options</string>
+           <string>track options</string>
           </property>
          </widget>
          <widget class="QLabel" name="labPhTracksOn">
@@ -9668,7 +9668,7 @@ double events:</string>
 Right click: toggle build particle tracks. Also switch off building photon tracks</string>
         </property>
         <property name="text">
-         <string>tracks options</string>
+         <string>track options</string>
         </property>
        </widget>
        <widget class="QTabWidget" name="twParticleGenerationMode">
@@ -9687,7 +9687,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
          </font>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">

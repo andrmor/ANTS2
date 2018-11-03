@@ -816,7 +816,13 @@ void MainWindow::on_twParticleGenerationMode_currentChanged(int)
 
 void MainWindow::on_pbGenerateFromFile_Help_clicked()
 {
-
+    QString s = "File should contain particle records, one line per particle.\n\n"
+                "Record format:\n"
+                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ  *\n\n"
+                "where optional '*' indicates that the event is not finished:\n"
+                "the next particle will be generated within the same event.\n\n"
+                "If a line does not start with an integer, it is ignored.";
+    message(s, this);
 }
 
 void MainWindow::on_pbGenerateFromFile_Change_clicked()

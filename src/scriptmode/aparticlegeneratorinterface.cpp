@@ -6,7 +6,11 @@
 #include "TRandom2.h"
 
 AParticleGeneratorInterface::AParticleGeneratorInterface(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen) :
-    MpCollection(MpCollection), RandGen(RandGen) {}
+    MpCollection(MpCollection), RandGen(RandGen)
+{
+    H["AddParticle"] = "Adds particle to track to this event";
+    H["AddParticleIsotropic"] = "Adds particle to track to this event. The particle's direction is randomly generated (isotropic)";
+}
 
 void AParticleGeneratorInterface::configure(QVector<AParticleRecord*> * GeneratedParticles)
 {

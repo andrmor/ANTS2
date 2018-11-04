@@ -13,6 +13,15 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 
 # You may need to modify paths CERN ROOT and the enabled libraries! See the corresponding sections below
 
+#Optional features enabled in Docker version   
+ants2_docker {
+    CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+    CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+    CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+    CONFIG += ants2_Python      #enable Python scripting  
+    CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)  
+}
+
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
 
@@ -195,11 +204,19 @@ ants2_Python{
             LIBS += -LC:/PythonQt3.2/lib -lPythonQt
     }
     linux-g++ || unix {
-            LIBS += $$system(python3.5-config --libs)
-            QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+            ants2_docker { 
+                LIBS += $$system(python3-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-            INCLUDEPATH += /home/andr/Work/PythonQt/src
-            LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+                INCLUDEPATH += /usr/include/PythonQt5/
+                LIBS += -lPythonQt-Qt5-Python3.6
+            } else {
+                LIBS += $$system(python3.5-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+
+                INCLUDEPATH += /home/andr/Work/PythonQt/src
+                LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+            }
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h
@@ -219,10 +236,16 @@ ants2_NCrystal{
             LIBS += -LC:/NCrystal/lib -lNCrystal
     }
     linux-g++ || unix {
-            INCLUDEPATH += /home/andr/Work/NCrystal/include
+            ants2_docker {
+                INCLUDEPATH += /usr/local/include/NCrystal/
+                LIBS += -L/usr/local/lib/
+                LIBS += -lNCrystal
 
-            LIBS += -L/home/andr/Work/NCrystal/lib/
-            LIBS += -lNCrystal
+            } else {
+                INCLUDEPATH += /home/andr/Work/NCrystal/include
+                LIBS += -L/home/andr/Work/NCrystal/lib/
+                LIBS += -lNCrystal
+            }
     }
 
     SOURCES += common/arandomgenncrystal.cpp
@@ -361,7 +384,8 @@ SOURCES += main.cpp \
     scriptmode/aparticlegeneratorinterface.cpp \
     common/aparticlerecord.cpp \
     scriptmode/acorescriptinterface.cpp \
-    modules/asourceparticlegenerator.cpp
+    modules/asourceparticlegenerator.cpp \
+    scriptmode/aparticletrackinghistoryinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -499,7 +523,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aparticlegeneratorinterface.h \
     common/aparticlerecord.h \
     scriptmode/acorescriptinterface.h \
-    modules/asourceparticlegenerator.h
+    modules/asourceparticlegenerator.h \
+    scriptmode/aparticletrackinghistoryinterface.h
 
 # --- SIM ---
 ants2_SIM {

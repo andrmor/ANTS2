@@ -1,6 +1,9 @@
 #ifndef AHISTORYRECORDS
 #define AHISTORYRECORDS
 
+#include "aparticleonstack.h"
+
+#include <QVector>
 #include <QList>
 
 struct MaterialHistoryStructure
@@ -8,8 +11,8 @@ struct MaterialHistoryStructure
     MaterialHistoryStructure(int mat, double en, double dis) {MaterialId = mat; DepositedEnergy = en; Distance = dis;}
     MaterialHistoryStructure(){}
     int MaterialId;
-    double DepositedEnergy;
-    double Distance;
+    float DepositedEnergy;
+    float Distance;
 };
 
 struct EventHistoryStructure
@@ -31,18 +34,29 @@ struct EventHistoryStructure
     int ParticleId;
     int index; // this is particle index! - "serial number" of the particle
     int SecondaryOf;
+    float x, y, z;  //creation position
     float dx, dy, dz; //direction
+    float initialEnergy; //energy when created
     TerminationTypes Termination;
+    QVector<MaterialHistoryStructure> Deposition;
 
-    EventHistoryStructure(int ParticleId, int index, int SecondaryOf, double* v)
-      : ParticleId(ParticleId), index(index), SecondaryOf(SecondaryOf), dx(v[0]), dy(v[1]), dz(v[2]) { }
+    EventHistoryStructure(int ParticleId, int index, int SecondaryOf, double* r, double* v, double energy) :
+        ParticleId(ParticleId), index(index), SecondaryOf(SecondaryOf),
+         x(r[0]),  y(r[1]),  z(r[2]),
+        dx(v[0]), dy(v[1]), dz(v[2]), initialEnergy(energy) {}
+
+    EventHistoryStructure(const AParticleOnStack* p, int index) :
+        ParticleId(p->Id), index(index), SecondaryOf(p->secondaryOf),
+         x(p->r[0]),  y(p->r[1]),  z(p->r[2]),
+        dx(p->v[0]), dy(p->v[1]), dz(p->v[2]),
+        initialEnergy(p->energy) {}
+
     EventHistoryStructure(){}
+
     bool isSecondary() const {return SecondaryOf > -1;}
 
-    QList<MaterialHistoryStructure> Deposition;
-
     //utilities
-    static QStringList getAllDefinedTerminationTypes() {return QStringList({"NotFinished", "Escaped", "AllEnergyDisspated", "Photoelectric",
+    static QStringList getAllDefinedTerminationTypes() {return QStringList({"NotFinished", "Escaped", "AllEnergyDissipated", "Photoelectric",
                                                                             "ComptonScattering", "NeutronAbsorption", "ErrorDuringTracking",
                                                                             "CreatedOutside", "FoundUntrackableMaterial", "PairProduction",
                                                                             "ElasticScattering", "StoppedOnMonitor"});}
@@ -51,7 +65,7 @@ struct EventHistoryStructure
 struct GeneratedPhotonsHistoryStructure
 {
     int event;
-    int index; //# t distinguish between particles with the same ParticleId (e.g. during the same event)
+    int index; // to distinguish between particles with the same ParticleId (e.g. during the same event)
     int ParticleId;
     int MaterialId;
     double Energy;

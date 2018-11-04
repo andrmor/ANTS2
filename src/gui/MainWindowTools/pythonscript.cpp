@@ -25,6 +25,7 @@
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 #include "ainterfacetottree.h"
+#include "aparticletrackinghistoryinterface.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -100,6 +101,9 @@ void MainWindow::createPythonScriptWindow()
 
   AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
   PythonScriptWindow->RegisterInterface(depo, "depo");
+
+  AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);
+  ScriptWindow->SetInterfaceObject(pth, "tracklog");
 
 #ifdef ANTS_FLANN
   AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);

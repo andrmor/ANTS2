@@ -1,7 +1,7 @@
 #ifndef AINTERFACETODEPOSCRIPT_H
 #define AINTERFACETODEPOSCRIPT_H
 
-#include "localscriptinterfaces.h"
+#include "ascriptinterface.h"
 #include "ahistoryrecords.h"
 #include "detectorclass.h"
 

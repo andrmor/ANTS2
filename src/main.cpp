@@ -24,6 +24,7 @@
 #include "ainterfacetomultithread.h"
 #include "ainterfacetowebsocket.h"
 #include "awebserverinterface.h"
+#include "aparticletrackinghistoryinterface.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -271,6 +272,8 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(depo, "depo");
         AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
         SM.RegisterInterface(threads, "threads");
+        AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(EventsDataHub);
+        SM.RegisterInterface(pth, "tracklog");
         AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
         SM.RegisterInterface(web, "web");
         AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);

@@ -1,7 +1,7 @@
 #ifndef AHISTORYRECORDS
 #define AHISTORYRECORDS
 
-#include "aparticleonstack.h"
+#include "aparticlerecord.h"
 
 #include <QVector>
 #include <QList>
@@ -45,7 +45,7 @@ struct EventHistoryStructure
          x(r[0]),  y(r[1]),  z(r[2]),
         dx(v[0]), dy(v[1]), dz(v[2]), initialEnergy(energy) {}
 
-    EventHistoryStructure(const AParticleOnStack* p, int index) :
+    EventHistoryStructure(const AParticleRecord* p, int index) :
         ParticleId(p->Id), index(index), SecondaryOf(p->secondaryOf),
          x(p->r[0]),  y(p->r[1]),  z(p->r[2]),
         dx(p->v[0]), dy(p->v[1]), dz(p->v[2]),

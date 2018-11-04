@@ -1617,9 +1617,9 @@ void OutputWindow::on_pbSaveLog_clicked()
         return;
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this, "Save particle tracking log to ROOT tree", MW->GlobSet->LastOpenDir, "TTree files (*.root)");
+    QString fileName = QFileDialog::getSaveFileName(this, "Save particle tracking log to ROOT tree", MW->GlobSet.LastOpenDir, "TTree files (*.root)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QFileInfo file(fileName);
     if (file.suffix().isEmpty()) fileName += ".root";
     EventsDataHub->saveEventHistoryToTree(fileName);

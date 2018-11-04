@@ -119,7 +119,7 @@ void MainWindow::createScriptWindow()
     ScriptWindow->RegisterInterface(depo, "depo");
 
     AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);
-    ScriptWindow->SetInterfaceObject(pth, "tracklog");
+    ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
     AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);

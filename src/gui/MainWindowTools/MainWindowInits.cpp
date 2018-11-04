@@ -20,8 +20,9 @@
 #include "detectorclass.h"
 #include "simulationmanager.h"
 #include "areconstructionmanager.h"
-#include "particlesourcesclass.h"
-#include "globalsettingsclass.h"
+#include "afileparticlegenerator.h"
+#include "ascriptparticlegenerator.h"
+#include "aglobalsettings.h"
 #include "globalsettingswindowclass.h"
 #include "aconfiguration.h"
 #include "amessage.h"
@@ -50,11 +51,10 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        ASimulationManager *SimulationManager,
                        AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
-                       TmpObjHubClass *TmpHub,
-                       GlobalSettingsClass *GlobSet) :
+                       TmpObjHubClass *TmpHub) :
     QMainWindow(), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
     SimulationManager(SimulationManager), ReconstructionManager(ReconstructionManager),
-    NetModule(Net), TmpHub(TmpHub), GlobSet(GlobSet),
+    NetModule(Net), TmpHub(TmpHub), GlobSet(AGlobalSettings::getInstance()),
     ui(new Ui::MainWindow)
 {
     qDebug() << ">Main window constructor started";
@@ -75,13 +75,21 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QString mav = QString::number(majVer);
     setWindowTitle("ANTS2_v"+mav+"."+miv);
 
+    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    updateFileParticleGeneratorGui();
+
+    QString SPGtext = "gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)\n"
+                      "if (math.random() < 0.1)\n"
+                      "      gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)";
+    SimulationManager->ScriptParticleGenerator->SetScript(SPGtext);
+    QObject::connect(ui->pbStopScan, &QPushButton::clicked, SimulationManager->ScriptParticleGenerator, &AScriptParticleGenerator::abort);//[pg](){pg->abort();});
+    updateScriptParticleGeneratorGui();
+
     //adding Context menus
     ui->lwLoadedEventsFiles->setContextMenuPolicy(Qt::CustomContextMenu);
     QObject::connect(ui->lwLoadedEventsFiles, SIGNAL(customContextMenuRequested(const QPoint&)),
         this, SLOT(LoadEventsListContextMenu(const QPoint&)));
-
-    //setting up alias for particle sources container class - just for GUI
-    ParticleSources = SimulationManager->ParticleSources;
 
     //interface windows
     qDebug()<<">Creating Examples Window";
@@ -162,6 +170,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     QObject::connect(Config, SIGNAL(requestLRFGuiUpdate()), lrfwindow, SLOT(onRequestGuiUpdate()));
     QObject::connect(Config, SIGNAL(NewConfigLoaded()), this, SLOT(onNewConfigLoaded()));
     QObject::connect(Config, &AConfiguration::requestGuiBusyStatusChange, WindowNavigator, &WindowNavigatorClass::ChangeGuiBusyStatus);
+    QObject::connect(MpCollection, &AMaterialParticleCollection::ParticleCollectionChanged, this, &MainWindow::updateFileParticleGeneratorGui);
 
     QObject::connect(EventsDataHub, SIGNAL(loaded(int, int)), this, SLOT(updateLoaded(int, int)));
     QObject::connect(this, SIGNAL(RequestStopLoad()), EventsDataHub, SLOT(onRequestStopLoad()));
@@ -187,6 +196,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QObject::connect(SimulationManager->Runner, SIGNAL(updateReady(int, double)), this, SLOT(RefreshPhotSimOnTimer(int, double))); //Simulation interface refresh/update stuff
     QObject::connect(SimulationManager, SIGNAL(SimulationFinished()), this, SLOT(simulationFinished())); //Simulation finished
+
+    QObject::connect(this, &MainWindow::RequestUpdateSimConfig, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
 
     DoNotUpdateGeometry = false; //control
 
@@ -231,6 +242,16 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->labReloadRequired->setPixmap(Rwindow->RedIcon.pixmap(16,16));
     ui->labAdvancedOn->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
     ui->labAdvancedOn->setVisible(false);
+    ui->labIgnoreNoHitEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoHitEvents->setVisible(false);
+    ui->labIgnoreNoDepoEvents->setPixmap(Rwindow->YellowIcon.pixmap(16,16));
+    ui->labIgnoreNoDepoEvents->setVisible(false);
+    ui->labPhTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPhTracksOn->setVisible(false);
+    ui->labPhTracksOn_1->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPhTracksOn_1->setVisible(false);
+    ui->labPartTracksOn->setPixmap(Rwindow->YellowIcon.pixmap(8,8));
+    ui->labPartTracksOn->setVisible(false);
       //misc gui inits
     ui->swPMTvsSiPM->setCurrentIndex(ui->cobPMdeviceType->currentIndex());
     MainWindow::on_pbRefreshPMproperties_clicked(); //indication of PM properties
@@ -239,19 +260,19 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->twSourcePhotonsParticles->setCurrentIndex(0);
     MainWindow::PointSource_InitTabWidget();
     QList<QWidget*> invis;
-    invis << ui->pbRefreshParticles << ui->pbOverride << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
+    invis << ui->pbRefreshParticles << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
      << ui->pbRefreshStack << ui->pbShowPMsArrayRegularData << ui->pbRefreshPMArrayData << ui->pbUpdateElectronics
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
-     << ui->pbGunRefreshparticles << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
+     << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui
      << ui->pbInitializeScanFloodNoise << ui->pbUpdateScanFloodTabWidget << ui->fScanFloodTotProb
-     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSources << ui->pbUpdateSourcesIndication
-     << ui->fLinkedParticle << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
+     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication
+     << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
     ui->frLimitNodesTo->setVisible( ui->twSingleScan->currentIndex()!=0 );
     QList<QWidget*> disables;
-    disables << ui->fGunParticle << ui->fFixedDir << ui->fFixedWorldSize;
+    disables << ui->fFixedDir << ui->fFixedWorldSize;
     for (int i=0;i<disables.length();i++) disables[i]->setEnabled(false);
     ui->fWaveOptions->setEnabled(ui->cbWaveResolved->isChecked());
     ui->fWaveTests->setEnabled(ui->cbWaveResolved->isChecked());
@@ -264,7 +285,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug() << ">GUI initialized";
 
     //change font size for all windows
-    if (this->font().pointSize() != GlobSet->FontSize) setFontSizeAllWindows(GlobSet->FontSize);
+    if (this->font().pointSize() != GlobSet.FontSize) setFontSizeAllWindows(GlobSet.FontSize);
     qDebug() << ">Font size adjusted";
 
     //menu properties
@@ -275,7 +296,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->menuFile->setToolTipDuration(1000);
 
     bool fShowGeom;
-    if (GlobSet->SaveLoadWindows)
+    if (GlobSet.SaveLoadWindows)
     {
       MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered();
       fShowGeom = GeometryWindow->isVisible();
@@ -284,9 +305,9 @@ MainWindow::MainWindow(DetectorClass *Detector,
     {
         WindowNavigator->show();
         fShowGeom = true;
-        AssureWidgetIsWithingVisibleArea(this);
+        GuiUtils::AssureWidgetIsWithinVisibleArea(this);
     }
-    ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet->SaveLoadWindows);
+    ui->actionSave_Load_windows_status_on_Exit_Init->setChecked(GlobSet.SaveLoadWindows);
 
     qDebug() << ">Init for Output window";
     Owindow->InitWindow();
@@ -306,9 +327,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
     GeometryWindow->ShowGeometry(false);
     if (!fShowGeom) GeometryWindow->hide();
 
-    ui->cobScatteringModel->setCurrentIndex(1); //default to Lambertian back
-    ui->cobSSO_ScatterModel->setCurrentIndex(1); //default to Lambertian back
-    //MainWindow::on_pbRefreshOverrides_clicked();  //already in load detector
     MainWindow::updateCOBsWithPMtypeNames();
 
     if (!fLoadedDefaultDetector)

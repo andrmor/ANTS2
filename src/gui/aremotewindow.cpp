@@ -5,7 +5,7 @@
 #include "aserverdelegate.h"
 #include "mainwindow.h"
 #include "aconfiguration.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "amessage.h"
 
 #include "ajsontools.h"
@@ -56,12 +56,12 @@ void ARemoteWindow::WriteConfig()
         for (ARemoteServerRecord* r : Records) ar << r->WriteToJson();
     json["Servers"] = ar;
 
-    MW->GlobSet->RemoteServers = json;
+    MW->GlobSet.RemoteServers = json;
 }
 
 void ARemoteWindow::ReadConfig()
 {
-    QJsonObject& json = MW->GlobSet->RemoteServers;
+    QJsonObject& json = MW->GlobSet.RemoteServers;
     if (json.isEmpty()) return;
 
     Clear();
@@ -202,6 +202,7 @@ void ARemoteWindow::on_pbSimulate_clicked()
 
     MW->Owindow->RefreshData();
     MW->Rwindow->OnEventsDataAdded();
+    MW->Rwindow->ShowPositions(1, true);
 }
 
 void ARemoteWindow::on_pbReconstruct_clicked()
@@ -217,7 +218,7 @@ void ARemoteWindow::on_pbRateServers_clicked()
 {
     WriteConfig();
 
-    const QString DefDet = MW->GlobSet->ExamplesDir + "/StartupDetector.json";
+    const QString DefDet = MW->GlobSet.ExamplesDir + "/StartupDetector.json";
     QJsonObject js;
     bool bOK = LoadJsonFromFile(js, DefDet);
     if (!bOK)

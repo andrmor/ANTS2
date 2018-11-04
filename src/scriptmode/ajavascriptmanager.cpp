@@ -1,15 +1,18 @@
 #include "ajavascriptmanager.h"
+
 #ifdef GUI
 #include "ainterfacetomessagewindow.h"
 #endif
-#include "coreinterfaces.h"
+
+#include "ascriptinterface.h"
+#include "acorescriptinterface.h"
+#include "amathscriptinterface.h"
 #include "ascriptinterfacefactory.h"
 #include "ainterfacetomultithread.h"
 
 #include <QScriptEngine>
 #include <QDebug>
 #include <QScriptValueIterator>
-//#include <QDialog>
 #include <QElapsedTimer>
 
 AJavaScriptManager::AJavaScriptManager(TRandom2* RandGen) :
@@ -165,6 +168,7 @@ void AJavaScriptManager::restoreMsgDialogs()
 }
 #endif
 
+/*
 void AJavaScriptManager::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     //qDebug() << "Registering:" << interfaceObject << name;
@@ -182,12 +186,12 @@ void AJavaScriptManager::SetInterfaceObject(QObject *interfaceObject, QString na
         engine->globalObject().setProperty(coreName, coreVal);
         interfaces.append(coreObj);
         //registering math module
-        QObject* mathObj = new AInterfaceToMath(RandGen);
+        QObject* mathObj = new AMathScriptInterface(RandGen);
         QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
         QString mathName = "math";
         mathObj->setObjectName(mathName);
         engine->globalObject().setProperty(mathName, mathVal);
-        interfaces.append(mathObj);  //SERVICE OBJECT IS FIRST in interfaces!
+        interfaces.append(mathObj);
       }
     else
       { // name is not empty - this is one of the secondary modules
@@ -203,7 +207,48 @@ void AJavaScriptManager::SetInterfaceObject(QObject *interfaceObject, QString na
         int index = interfaceObject->metaObject()->indexOfSignal("AbortScriptEvaluation(QString)");
         if (index != -1)
             QObject::connect(interfaceObject, "2AbortScriptEvaluation(QString)", this, SLOT(AbortEvaluation(QString)));  //1-slot, 2-signal
-      }
+    }
+}
+*/
+
+void AJavaScriptManager::RegisterInterfaceAsGlobal(AScriptInterface *interface)
+{
+    QScriptValue obj = engine->newQObject(interface, QScriptEngine::QtOwnership);
+    engine->setGlobalObject(obj);
+    doRegister(interface, "");
+}
+
+void AJavaScriptManager::RegisterCoreInterfaces(bool bCore, bool bMath)
+{
+    if (bCore)
+    {
+        coreObj = new ACoreScriptInterface(this);
+        QScriptValue coreVal = engine->newQObject(coreObj, QScriptEngine::QtOwnership);
+        engine->globalObject().setProperty("core", coreVal);
+        doRegister(coreObj, "core");
+    }
+
+    if (bMath)
+    {
+        AMathScriptInterface* mathObj = new AMathScriptInterface(RandGen);
+        QScriptValue mathVal = engine->newQObject(mathObj, QScriptEngine::QtOwnership);
+        engine->globalObject().setProperty("math", mathVal);
+        doRegister(mathObj, "math");
+    }
+}
+
+void AJavaScriptManager::RegisterInterface(AScriptInterface *interface, const QString &name)
+{
+    QScriptValue obj = engine->newQObject(interface, QScriptEngine::QtOwnership);
+    engine->globalObject().setProperty(name, obj);
+    doRegister(interface, name);
+}
+
+void AJavaScriptManager::doRegister(AScriptInterface *interface, const QString &name)
+{
+    interface->setObjectName(name);
+    interfaces.append(interface);
+    QObject::connect(interface, &AScriptInterface::AbortScriptEvaluation, this, &AJavaScriptManager::AbortEvaluation);
 }
 
 int AJavaScriptManager::FindSyntaxError(const QString& script)
@@ -416,20 +461,17 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
     sm->bOwnRandomGen = true;
     sm->bShowAbortMessageInOutput = bAbortIsGlobal;
 
-    for (QObject* io : interfaces)
+    for (AScriptInterface* si : interfaces)
     {
-        AScriptInterface* si = dynamic_cast<AScriptInterface*>(io);
-        if (!si) continue;
-
         if (!si->IsMultithreadCapable()) continue;
 
-        QObject* copy = AScriptInterfaceFactory::makeCopy(io); //cloning script interfaces
+        AScriptInterface* copy = AScriptInterfaceFactory::makeCopy(si); //cloning script interfaces
         if (copy)
         {
             //  qDebug() << "Making available for multi-thread use: "<<io->objectName();
 
             //special for core unit
-            AInterfaceToCore* core = dynamic_cast<AInterfaceToCore*>(copy);
+            ACoreScriptInterface* core = dynamic_cast<ACoreScriptInterface*>(copy);
             if (core)
             {
                 //qDebug() << "--this is core";
@@ -472,14 +514,14 @@ AJavaScriptManager *AJavaScriptManager::createNewScriptManager(int threadNumber,
             if (bAbortIsGlobal)
             {
                 AScriptInterface* base = dynamic_cast<AScriptInterface*>(copy);
-                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &AInterfaceToCore::abort);
+                if (base) connect(base, &AScriptInterface::AbortScriptEvaluation, coreObj, &ACoreScriptInterface::abort);
             }
 
-            sm->SetInterfaceObject(copy, io->objectName());
+            sm->RegisterInterface(copy, si->objectName());
         }
         else
         {
-            qDebug() << "Unknown interface object type for unit" << io->objectName();
+            qDebug() << "Unknown interface object type for unit" << si->objectName();
         }
     }
 

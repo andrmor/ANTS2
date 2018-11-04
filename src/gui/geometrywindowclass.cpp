@@ -7,7 +7,7 @@
 #include "windownavigatorclass.h"
 #include "detectorclass.h"
 #include "rasterwindowbaseclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amessage.h"
 
@@ -425,7 +425,7 @@ void GeometryWindowClass::ShowGeometry(bool ActivateWindow, bool SAME, bool Colo
     //with or without activation (focussing) of this window
     if (ActivateWindow) ShowAndFocus(); //window is activated (focused)
     else SetAsActiveRootWindow(); //no activation in this mode
-    MW->Detector->GeoManager->SetNsegments(MW->GlobSet->NumSegments);
+    MW->Detector->GeoManager->SetNsegments(MW->GlobSet.NumSegments);
     int level = ui->sbLimitVisibility->value();
     if (!ui->cbLimitVisibility->isChecked()) level = -1;
     MW->Detector->GeoManager->SetVisLevel(level);
@@ -530,16 +530,16 @@ void GeometryWindowClass::on_pbSaveAs_clicked()
 {
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet->LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFileInfo file(fileName);
   if(file.suffix().isEmpty()) fileName += ".png";
 
   GeometryWindowClass::SaveAs(fileName);
 
-  if (MW->GlobSet->fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
 void GeometryWindowClass::on_pbShowGLview_clicked()

@@ -8,14 +8,30 @@
 #include <QApplication>
 #include <QScreen>
 
-void SetWindowFont(QMainWindow *w, int ptsize)
+void GuiUtils::SetWindowFont(QMainWindow *w, int ptsize)
 {
     QFont font = w->font();
     font.setPointSize(ptsize);
     w->setFont(font);
 }
 
-QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color)
+void GuiUtils::AssureWidgetIsWithinVisibleArea(QWidget *w)
+{
+    QList<QScreen *> listScr = qApp->screens();
+    bool bVis = false;
+    for (QScreen* scr : listScr)
+    {
+        QRect ts = scr->geometry();
+        if (ts.contains(w->x(), w->y()))
+        {
+            bVis = true;
+            break;
+        }
+    }
+    if (!bVis) w->move(50,50);
+}
+
+QIcon GuiUtils::createColorCircleIcon(QSize size, Qt::GlobalColor color)
 {
   QPixmap pm(size.width()-2, size.height()-2);
   pm.fill(Qt::transparent);
@@ -26,9 +42,7 @@ QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color)
   return QIcon(pm);
 }
 
-TableDoubleDelegateClass::TableDoubleDelegateClass(QObject *parent)  : QItemDelegate(parent)
-{
-}
+TableDoubleDelegateClass::TableDoubleDelegateClass(QObject *parent)  : QItemDelegate(parent) {}
 
 QWidget *TableDoubleDelegateClass::createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const
 {
@@ -89,20 +103,4 @@ void myQGraphicsView::mouseReleaseEvent(QMouseEvent *event)
   QGraphicsView::mouseReleaseEvent(event);
   if (CursorMode == 1)
     viewport()->setCursor(Qt::CrossCursor);
-}
-
-void AssureWidgetIsWithingVisibleArea(QWidget *w)
-{
-    QList<QScreen *> listScr = qApp->screens();
-    bool bVis = false;
-    for (QScreen* scr : listScr)
-    {
-        QRect ts = scr->geometry();
-        if (ts.contains(w->x(), w->y()))
-        {
-            bVis = true;
-            break;
-        }
-    }
-    if (!bVis) w->move(50,50);
 }

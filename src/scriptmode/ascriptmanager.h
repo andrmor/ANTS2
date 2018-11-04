@@ -6,8 +6,9 @@
 #include <QString>
 #include <QVariant>
 
+class AScriptInterface;
 class TRandom2;
-class AInterfaceToCore;
+class ACoreScriptInterface;
 class QElapsedTimer;
 
 class AScriptManager : public QObject
@@ -19,7 +20,9 @@ public:
   virtual ~AScriptManager();
 
   //configuration
-  virtual void      SetInterfaceObject(QObject* interfaceObject, QString name = "") = 0;
+  virtual void      RegisterInterfaceAsGlobal(AScriptInterface* interface) = 0;
+  virtual void      RegisterCoreInterfaces(bool bCore = true, bool bMath = true) = 0;
+  virtual void      RegisterInterface(AScriptInterface* interface, const QString& name) = 0;
 
   //run
   virtual int       FindSyntaxError(const QString & /*script*/ ) {return -1;} //returns line number of the first syntax error; -1 if no errors found
@@ -53,7 +56,7 @@ public slots:
   virtual void      AbortEvaluation(QString message = "Aborted!");
 
 public:
-  QVector<QObject*> interfaces;  //registered interfaces (units)
+  QVector<AScriptInterface*> interfaces;  //registered interfaces (units)
   TRandom2*         RandGen;     //math module uses it
 
   //pointers to starter dirs

@@ -100,8 +100,8 @@ GainEvaluatorWindowClass::GainEvaluatorWindowClass(QWidget *parent, MainWindow *
   ui->tabwid4sets->resizeColumnsToContents();
 
   //icons
-  RedIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
-  GreenIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
+  RedIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
+  GreenIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
   ui->labIconWarningCutOffs->setPixmap(RedIcon.pixmap(16,16));
 
   //Graphics view
@@ -2590,13 +2590,6 @@ void GainEvaluatorWindowClass::UpdateTriads()
   Triads.Init(xx, yy, Rmax, 0);
 
   Triads.SetEvents(list, &EventsDataHub->Events);
-}
-
-void GainEvaluatorWindowClass::SetWindowFont(int ptsize)
-{
-    QFont font = this->font();
-    font.setPointSize(ptsize);
-    this->setFont(font);
 }
 
 void GainEvaluatorWindowClass::on_pbShowNonLinkedSet_clicked()

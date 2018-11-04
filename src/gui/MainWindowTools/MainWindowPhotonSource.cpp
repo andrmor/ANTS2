@@ -1,7 +1,7 @@
 //ANTS2 modules and windows
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amessage.h"
 #include "simulationmanager.h"
@@ -72,7 +72,7 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
   json["AcceleratorConfig"] = acjson;
 
   //DetStat binning
-  json["DetStatNumBins"] = GlobSet->BinsX;
+  json["DetStatNumBins"] = GlobSet.BinsX;
 
   //Sec scint options
   QJsonObject scjson;
@@ -108,8 +108,9 @@ struct SAxis
   SAxis(double DX, double DY, double DZ, int Nodes, int Option){dX=DX; dY=DY; dZ=DZ; nodes=Nodes; option=Option;}
 };
 
-void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerbose)
+void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
 {
+  bool fVerbose = true;
   QJsonObject json;
 
   //main control options

@@ -28,7 +28,7 @@
 #include "areconstructionmanager.h"
 #include "apmtype.h"
 #include "globalsettingswindowclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "aopticaloverride.h"
 #include "phscatclaudiomodel.h"
 #include "scatteronmetal.h"
@@ -49,10 +49,12 @@
 #include "ascriptwindow.h"
 #include "gui/alrfwindow.h"
 #include "acustomrandomsampling.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
 #include "aremotewindow.h"
+#include "aopticaloverridedialog.h"
+#include "aparticlesourcerecord.h" //---
 
 //Qt
 #include <QDebug>
@@ -200,12 +202,12 @@ void MainWindow::clearEnergyVector()
     EnergyVector.clear();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
    qDebug() << "\n<MainWindow shutdown initiated";
-
    ShutDown = true;
 
+   /*
    if (ReconstructionManager->isBusy() || !SimulationManager->fFinished)
        if (timesTriedToExit < 6)
        {
@@ -219,6 +221,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
            event->ignore();
            return;
        }
+   */
 
    ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
@@ -237,7 +240,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
    qDebug() << "<Saving remote servers";
    RemoteWindow->WriteConfig();
    qDebug()<<"<Saving global settings";
-   GlobSet->SaveANTSconfiguration();
+   GlobSet.saveANTSconfiguration();
 
    EventsDataHub->clear();
 
@@ -441,9 +444,10 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
         case 0:
         default:
           delete GeoMarkers[i];
-          GeoMarkers.remove(i);
       }
   }
+
+  if (All_Rec_True == 0) GeoMarkers.clear();
 }
 
 void MainWindow::clearCustomScanNodes()
@@ -552,14 +556,13 @@ void MainWindow::UpdateMaterialListEdit()
     //if there are overrides, add (*)
     bool fFound = false;
     for (int p=0; p<NumMaterials; p++)      
-      //  if ( (*MaterialCollection)[i]->LossOverride[p]>0 || (*MaterialCollection)[i]->ReflectionOverride[p]>0 || (*MaterialCollection)[i]->ScatterOverride[p]>0)
       if ( (*MpCollection)[i]->OpticalOverrides[p] )
         {
           fFound = true;
           break;
         }
 
-    if (fFound) tmpStr += "  (override)";
+    if (fFound) tmpStr += "  (ov)";
 
     QListWidgetItem* pItem =new QListWidgetItem(tmpStr);
     if (GeometryWindow->isColorByMaterial())
@@ -721,233 +724,51 @@ void MainWindow::on_cbRingsArray_stateChanged(int arg1)
      ui->sbPMrings->setEnabled(arg1);
 }
 
-void MainWindow::on_pbOverride_clicked()
+void MainWindow::on_pbEditOverride_clicked()
 {
-    //qDebug() << "->Registering new override parameters";
     int From = ui->cobMaterialForOverrides->currentIndex();
     int To =   ui->cobMaterialTo->currentIndex();
 
-    AOpticalOverride* ov = (*MpCollection)[From]->OpticalOverrides[To];
+    AOpticalOverrideDialog* d = new AOpticalOverrideDialog(this, From, To);
+    d->setAttribute(Qt::WA_DeleteOnClose);
+    d->setWindowModality(Qt::WindowModal);
+    QObject::connect(d, &AOpticalOverrideDialog::accepted, this, &MainWindow::onOpticalOverrideDialogAccepted);
+    d->show();
+}
 
-    if (ov)  //potential loss of data
-      {
-        AWaveshifterOverride* swo =  dynamic_cast<AWaveshifterOverride*>(ov);
-        if (swo)
-            if (!swo->ReemissionProbability_lambda.isEmpty() || !swo->EmissionSpectrum_lambda.isEmpty())
-            {
-                QMessageBox msgBox;
-                msgBox.setText("Warning: configured emission probability and spectrum will be lost!");
-                msgBox.setInformativeText("Continue?");
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-                msgBox.setDefaultButton(QMessageBox::Cancel);
-                int ret = msgBox.exec();
-                if (ret == QMessageBox::Cancel)
-                {
-                    on_pbRefreshOverrides_clicked();
-                    return;
-                }
-            }
-
-        SpectralBasicOpticalOverride* sso = dynamic_cast<SpectralBasicOpticalOverride*>(ov);
-        if (sso)
-            if (sso->Wave.size() > 1)
-            {
-                QMessageBox msgBox;
-                msgBox.setText("Warning: configured spectral data will be lost!");
-                msgBox.setInformativeText("Continue?");
-                msgBox.setIcon(QMessageBox::Warning);
-                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-                msgBox.setDefaultButton(QMessageBox::Cancel);
-                int ret = msgBox.exec();
-                if (ret == QMessageBox::Cancel)
-                {
-                    on_pbRefreshOverrides_clicked();
-                    return;
-                }
-            }
-
-        delete ov;
-        ov = 0;
-      }
-
-    int Model = ui->cobOpticalOverrideModel->currentIndex();
-    switch (Model)
-      {
-      case 0: //Override not defined
-        break;
-      case 1: //Simplistic model
-        {
-        double abs = ui->ledSimplisticAbs->text().toDouble();
-        double spec = ui->ledSimplisticSpecular->text().toDouble();
-        double scat = ui->ledSimplisticScatter->text().toDouble();
-        int scatModel = ui->cobScatteringModel->currentIndex();
-        ov = new BasicOpticalOverride(Detector->MpCollection, From, To, abs, spec, scat, scatModel);
-        break;
-        }
-      case 2: //Claudio's model - using version 2.2
-        {
-        PhScatClaudioModelV2d2* cs = new PhScatClaudioModelV2d2(Detector->MpCollection, From, To);
-        cs->sigma_alpha = ui->ledSigmaAlpha->text().toDouble();
-        cs->sigma_h = ui->ledSigmaSpike->text().toDouble();
-        cs->albedo = ui->ledAlbedo->text().toDouble();
-        switch(ui->conHeightModel->currentIndex())
-          {
-            case 0: cs->HeightDistribution = empirical; break;
-            case 1: cs->HeightDistribution = gaussian; break;
-            case 2: cs->HeightDistribution = exponential; break;
-            default:;
-          }
-        switch(ui->cobSlopeModel->currentIndex())
-          {
-            case 0: cs->SlopeDistribution = trowbridgereitz; break;
-            case 1: cs->SlopeDistribution = cooktorrance; break;
-            case 2: cs->SlopeDistribution = bivariatecauchy; break;
-            default:;
-          }
-        ov = cs;
-        break;
-        }
-      case 3: //Dielectric/Metal model
-        {
-          ScatterOnMetal* sm = new ScatterOnMetal(Detector->MpCollection, From, To);
-          sm->RealN = ui->ledRealN->text().toDouble();
-          sm->ImaginaryN = ui->ledImaginaryN->text().toDouble();
-          ov = sm;
-          break;
-        }
-      case 4:  // FS_NP model
-        {
-          double albedo = ui->ledNevesAlbedo->text().toDouble();
-          ov = new FSNPOpticalOverride(Detector->MpCollection, From, To, albedo);
-          break;
-        }
-      case 5:  // Surface WLS
-        {
-          ui->cobSurfaceWLS_Model->setCurrentIndex(1);
-          ov = new AWaveshifterOverride(Detector->MpCollection, From, To, 1);
-          ui->pbSurfaceWLS_Show->setEnabled(false);
-          ui->pbSurfaceWLS_ShowSpec->setEnabled(false);
-          break;
-        }
-      case 6:  // Simplistic spectral
-        {
-          ov = new SpectralBasicOpticalOverride(Detector->MpCollection, From, To, ui->cobSSO_ScatterModel->currentIndex(), ui->ledSSO_EffWave->text().toDouble());
-          ui->pbSSO_Show->setEnabled(false);
-          ui->pbSSO_Binned->setEnabled(false);
-          break;
-        }
-      default:
-        {
-            qDebug() << "Not existent override model!";
-            break;
-        }
-      }
-
-//    if (ov)
-//      {
-//        qDebug() << "Override type selected:" <<ov->getType();
-//        ov->printConfiguration(-1);
-//      }
-//    else qDebug() << "No override selected";
-
-    (*MpCollection)[From]->OpticalOverrides[To] = ov;
-
+void MainWindow::onOpticalOverrideDialogAccepted()
+{
     ReconstructDetector(true);
-
-    MainWindow::on_pbRefreshOverrides_clicked();
+    on_pbRefreshOverrides_clicked();
     int i = ui->lwMaterials->currentRow();
-    MainWindow::UpdateMaterialListEdit(); //to update (*) status
+    UpdateMaterialListEdit(); //to update (*) status
     ui->lwMaterials->setCurrentRow(i);
 }
 
 void MainWindow::on_pbRefreshOverrides_clicked()
 {
-    //qDebug() << "->Updating overrides indication";
     ui->lwOverrides->clear();
-    int size = MpCollection->countMaterials();
+    int numMat = MpCollection->countMaterials();
+    int iMatFrom = ui->cobMaterialForOverrides->currentIndex();
 
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo   = ui->cobMaterialTo->currentIndex();
+    for (int iMatTo = 0; iMatTo < numMat; iMatTo++)
+    {
+        const AOpticalOverride* ov = (*MpCollection)[iMatFrom]->OpticalOverrides.at(iMatTo);
+        if (!ov) continue;
 
-    //updating text field
-    QString s;
-    bool flagEmpty = true;
-    for (int i=0; i<size; i++)
-      {
-        flagEmpty = false;
-        if ( !(*MpCollection)[MatFrom]->OpticalOverrides.at(i) ) continue;
-        s = (*MpCollection)[MatFrom]->OpticalOverrides.at(i)->getReportLine();
-        //qDebug() << s;
+        QString s = QString("->%1 = ").arg( (*MpCollection)[iMatTo]->name );
+        s += ov->getAbbreviation();
+        s += ": ";
+        s += ov->getReportLine();
         ui->lwOverrides->addItem(s);
-      }
-    if (flagEmpty) ui->lwOverrides->addItem("Not defined");
-
-    //updating parameters area
-    if ( !(*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) )
-      ui->cobOpticalOverrideModel->setCurrentIndex(0);
-    else
-      {
-        QString model = (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo)->getType();
-        if (model == "Simplistic_model")
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(1);
-            BasicOpticalOverride* ov = dynamic_cast<BasicOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->ledSimplisticAbs->setText(QString::number(ov->probLoss));
-            ui->ledSimplisticSpecular->setText(QString::number(ov->probRef));
-            ui->ledSimplisticScatter->setText(QString::number(ov->probDiff));
-            ui->cobScatteringModel->setCurrentIndex(ov->scatterModel);
-          }
-        else if (model.startsWith("Claudio_Model"))
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(2);
-            PhScatClaudioModel* ov = dynamic_cast<PhScatClaudioModel*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->ledSigmaAlpha->setText(QString::number(ov->sigma_alpha));
-            ui->ledSigmaSpike->setText(QString::number(ov->sigma_h));
-            ui->ledAlbedo->setText(QString::number(ov->albedo));
-            ui->conHeightModel->setCurrentIndex( (int)ov->HeightDistribution );
-            ui->cobSlopeModel->setCurrentIndex( (int)ov->SlopeDistribution );
-          }
-        else if (model == "DielectricToMetal")
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(3);
-            ScatterOnMetal* ov = dynamic_cast<ScatterOnMetal*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->ledRealN->setText(QString::number(ov->RealN));
-            ui->ledImaginaryN->setText(QString::number(ov->ImaginaryN));
-          }
-        else if (model=="FS_NP" || model=="Neves_model")
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(4);
-            FSNPOpticalOverride* ov = dynamic_cast<FSNPOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->ledNevesAlbedo->setText(QString::number(ov->Albedo));
-          }
-        else if (model == "SurfaceWLS")
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(5);
-            AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->pbSurfaceWLS_Show->setEnabled(!ov->ReemissionProbability_lambda.isEmpty());
-            ui->pbSurfaceWLS_ShowSpec->setEnabled(!ov->EmissionSpectrum_lambda.isEmpty());
-            ui->cobSurfaceWLS_Model->setCurrentIndex(ov->ReemissionModel);
-          }
-        else if (model == "SimplisticSpectral_model")
-          {
-            ui->cobOpticalOverrideModel->setCurrentIndex(6);
-            SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*MpCollection)[MatFrom]->OpticalOverrides.at(MatTo) );
-            ui->pbSSO_Show->setEnabled(!ov->Wave.isEmpty());
-            ui->pbSSO_Binned->setEnabled(!ov->Wave.isEmpty());
-            ui->cobSSO_ScatterModel->setCurrentIndex(ov->scatterModel);
-            ui->ledSSO_EffWave->setText( QString::number(ov->effectiveWavelength) );
-          }
-        else
-          {
-             message("Unknown override model: "+model, this);
-             ui->cobOpticalOverrideModel->setCurrentIndex(0);
-          }
-      }
+    }
 }
 
 void MainWindow::on_pbStartMaterialInspector_clicked()
 {
+    int imat = ui->lwMaterials->currentRow();
+    if (imat != -1) MIwindow->SetMaterial(imat);
+
     MIwindow->showNormal();
     MIwindow->raise();
     MIwindow->activateWindow();   
@@ -1590,13 +1411,13 @@ void MainWindow::on_pbLoadPDE_clicked()
 {
   QString fileName;
   if (ui->cobPMdeviceType->currentIndex() == 0)
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   else
-    fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   //qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -1668,9 +1489,9 @@ void MainWindow::on_pbShowPDEbinned_clicked()
 void MainWindow::on_pbPMtypeLoadAngular_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -1766,9 +1587,9 @@ void MainWindow::on_ledMediumRefrIndex_editingFinished()
 void MainWindow::on_pbPMtypeLoadArea_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector< QVector <double> > tmp;
   double xStep, yStep;
@@ -2228,12 +2049,12 @@ void MainWindow::on_pbIndLoadDE_clicked()
 
   QString fileName;
   if (PMs->isSiPM(ipm))
-     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load photon detection efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   else
-     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+     fileName = QFileDialog::getOpenFileName(this, "Load quantum efficiency vs wavelength", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2287,9 +2108,9 @@ void MainWindow::on_pbAddPM_clicked()
 void MainWindow::on_pbIndLoadAngular_clicked()
 {
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load angular response (0 - 90 degrees)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x,y;
   LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2387,9 +2208,9 @@ void MainWindow::on_ledIndMediumRefrIndex_editingFinished()
 void MainWindow::on_pbIndLoadArea_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load area response", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     int ipm = ui->sbIndPMnumber->value();
     QVector< QVector <double> > tmp;
@@ -2507,11 +2328,11 @@ void MainWindow::UpdatePreprocessingSettingsIndication()
 
 void MainWindow::LoadPMsignalsRequested()
 {
-  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load events from ascii file(s)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load events from ascii file(s)", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
   if (fileNames.isEmpty()) return;
   this->activateWindow();
   this->raise();
-  GlobSet->LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
 
   if (LoadedEventFiles.isEmpty()) MainWindow::ClearData(); // first load - make sure there is no data (e.g. sim events)
   else
@@ -2695,10 +2516,10 @@ void MainWindow::DeleteLoadedEvents(bool KeepFileList)
 void MainWindow::on_pbPreprocessingLoad_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this,
-                                                  "Load preprocessing data (ignores first column with PM number)", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
+                                                  "Load preprocessing data (ignores first column with PM number)", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadPreprocessingAddMulti(fileName);
   if (!EventsDataHub->Events.isEmpty()) ui->fReloadRequired->setVisible(true);
@@ -2707,10 +2528,10 @@ void MainWindow::on_pbPreprocessingLoad_clicked()
 void MainWindow::on_pbPreprocessingSave_clicked()
 {
   QString fileName = QFileDialog::getSaveFileName(this,
-                                                  "Save preprocessing data", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
+                                                  "Save preprocessing data", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt)");
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::SavePreprocessingAddMulti(fileName);
 }
@@ -2754,9 +2575,9 @@ void MainWindow::on_pbElGainLoadDistr_clicked()
 {
   int ipm = ui->sbElPMnumber->value();
   QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load Single Photoelectron Pulse Height Spectrum", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  fileName = QFileDialog::getOpenFileName(this, "Load Single Photoelectron Pulse Height Spectrum", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x, y;
   bool error = MainWindow::LoadSPePHSfile(fileName, &x, &y);
@@ -2986,9 +2807,9 @@ void MainWindow::on_cbEnableADC_toggled(bool checked)
 
 void MainWindow::on_pbScanDistrLoad_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadScanPhotonDistribution(fileName);
   MainWindow::on_pbUpdateSimConfig_clicked();
@@ -3041,9 +2862,9 @@ void MainWindow::on_pbSecScintShowProfile_clicked()
 
 void MainWindow::on_pbSecScintLoadProfile_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load custom distribution", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   MainWindow::LoadSecScintTheta(fileName);
 }
@@ -3109,9 +2930,9 @@ void MainWindow::on_pbConfigureAddOns_clicked()
 
 void MainWindow::LoadSimTreeRequested()
 {  
-  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load/Append simulation data from Root tree", GlobSet->LastOpenDir, "Root files (*.root)");
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load/Append simulation data from Root tree", GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileNames.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
 
   if (LoadedTreeFiles.isEmpty()) MainWindow::ClearData(); //clear ascii loaded data  or sim if present
   else
@@ -3465,11 +3286,11 @@ void MainWindow::CalculateIndividualQEPDE()
 
 void MainWindow::on_pbLoadRelQEfactors_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load relative QE / PDE factors", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   Detector->PMs->setDoPHS( true );
 
@@ -3490,11 +3311,11 @@ void MainWindow::on_pbLoadRelQEfactors_clicked()
 
 void MainWindow::on_pbLoadRelELfactors_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
   qDebug()<<fileName;
 
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   Detector->PMs->setDoPHS( true );
 
@@ -3612,9 +3433,9 @@ void MainWindow::SaveSimulationDataTree()
       message("No data to save!", this);
       return;
     }
-  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as Root Tree", GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as Root Tree", GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
 
   bool ok = EventsDataHub->saveSimulationAsTree(fileName);
@@ -3628,12 +3449,12 @@ void MainWindow::SaveSimulationDataAsText()
       message("No data to save!", this);
       return;
     }
-  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as text file", GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save simulation data as text file", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".dat";
 
-  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet->SimTextSave_IncludeNumPhotons, GlobSet->SimTextSave_IncludePositions);
+  bool ok = EventsDataHub->saveSimulationAsText(fileName, GlobSet.SimTextSave_IncludeNumPhotons, GlobSet.SimTextSave_IncludePositions);
   if (!ok) message("Error writing to file!", this);
 }
 
@@ -3931,42 +3752,18 @@ void MainWindow::on_pbSimulate_clicked()
   startSimulation(Config->JSON);  
 }
 
-void MainWindow::on_pbParticleSourcesSimulate_clicked()
-{  
-  ELwindow->QuickSave(0);
-  fStartedFromGUI = true;
-  fSimDataNotSaved = false; // to disable the warning
-  //watchdog on particle sources, can be transferred later to check-upwindow
-  if (ParticleSources->size() == 0)
-    {
-      message("No particle sources defined!", this);
-      return;
-    }
-
-  for (int i = 0; i<ParticleSources->size(); i++)
-    {
-      int error = ParticleSources->CheckSource(i);
-      if (error == 0) continue;
-
-      message("Error in source "+ParticleSources->getSource(i)->name +":\n\n"+ParticleSources->getErrorString(error), this);
-      return;
-    }
-
-  MainWindow::writeSimSettingsToJson(Config->JSON);
-  startSimulation(Config->JSON);
-}
-
 void MainWindow::startSimulation(QJsonObject &json)
 {
     WindowNavigator->BusyOn(); //go busy mode, most of gui controls disabled
     ui->pbStopScan->setEnabled(true);
-    SimulationManager->StartSimulation(json, GlobSet->NumThreads, true);
+    SimulationManager->StartSimulation(json, GlobSet.NumThreads, true);
 }
 
 void MainWindow::simulationFinished()
 {
       //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size();
     ui->pbStopScan->setEnabled(false);
+    ui->pbStopScan->setText("stop");
 
     if (!SimulationManager->fSuccess)
     {        
@@ -3974,37 +3771,20 @@ void MainWindow::simulationFinished()
         ui->leEventsPerSec->setText("n.a.");
         QString report = SimulationManager->Runner->getErrorMessages();
         if (report != "Simulation stopped by user") message(report, this);
-        //ClearData();
-        if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
     }
 
     bool showTracks = false;
     if (SimulationManager->LastSimType == 0) //PointSources sim
     {        
-        //showTracks = ui->cbPointSourceBuildTracks->isChecked();
         showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearGeoMarkers();
-        GeoMarkers = SimulationManager->GeoMarkers;
-        SimulationManager->GeoMarkers.clear(); //to avoid delete content
+        Rwindow->ShowPositions(1, true);
 
-        if (ui->twSingleScan->currentIndex() == 0)
-        {
-            //info on last photon
-            APhoton& ph = SimulationManager->LastPhoton;
-            QString str;
-            QTextStream strBuilder(&str);
-            strBuilder<<"  Position xyz[mm]: "<<ph.r[0]<<"  "<<ph.r[1]<<"  "<<ph.r[2]<<endl;
-            strBuilder<<"  Vector ikj: "<<ph.v[0]<<"  "<<ph.v[1]<<"  "<<ph.v[2]<<endl;
-            if (ui->cbWaveResolved->isChecked()) strBuilder<<"  Wavelength index = "<<ph.waveIndex<<endl;
-            if (ui->cbTimeResolved->isChecked()) strBuilder<<"  Emission time: "<<ph.time<<endl;
-            Owindow->OutText("Last Photon info:\n"+str);
-
+        if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
             if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
-        }
     }
     if (SimulationManager->LastSimType == 1) //ParticleSources sim
     {
-        //showTracks = ui->cbGunParticleTracks->isChecked() || ui->cbGunPhotonTracks->isChecked();
         showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
         clearEnergyVector();
         EnergyVector = SimulationManager->EnergyVector;
@@ -4019,7 +3799,7 @@ void MainWindow::simulationFinished()
         SimulationManager->Tracks.clear(); //to avoid delete content
 
         int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet->MaxNumberOfTracks */; iTr++)
+        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet.MaxNumberOfTracks */; iTr++)
           {
             const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
             TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
@@ -4041,7 +3821,7 @@ void MainWindow::simulationFinished()
     if (GeometryWindow->isVisible())
       {
         GeometryWindow->ShowGeometry(false);
-        if (showTracks) MainWindow::ShowTracks();
+        if (showTracks) GeometryWindow->DrawTracks();
       }
       //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
     Rwindow->OnEventsDataAdded();
@@ -4116,7 +3896,7 @@ void MainWindow::on_pbTrackStack_clicked()
             {
                 const TrackHolderClass* th = pss->tracks[iTr];
 
-                //if (numTracks<GlobSet->MaxNumberOfTracks)
+                //if (numTracks<GlobSet.MaxNumberOfTracks)
                 //{
                     TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
                     track->SetLineColor(th->Color);
@@ -4195,12 +3975,14 @@ void MainWindow::RefreshPhotSimOnTimer(int Progress, double msPerEv)
   ui->leEventsPerSec->setText( (msPerEv==0) ? "n.a." : QString::number(msPerEv, 'g', 4));
 
   qApp->processEvents();
+  /*
   if (ui->pbStopScan->isChecked())
     {
       //emit StopRequested();
       SimulationManager->StopSimulation();
       return;
     }
+  */
 }
 
 void MainWindow::on_pbGDML_clicked()
@@ -4211,7 +3993,7 @@ void MainWindow::on_pbGDML_clicked()
 
 void MainWindow::on_pbSavePMtype_clicked()
 {
-  QString starter = (GlobSet->LibPMtypes.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibPMtypes;
+  QString starter = (GlobSet.LibPMtypes.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibPMtypes;
   starter += "/PMtype_"+ui->lePMtypeName->text();
 
   QFileDialog fileDialog;
@@ -4234,7 +4016,7 @@ void MainWindow::on_pbSavePMtype_clicked()
 
 void MainWindow::on_pbLoadPMtype_clicked()
 {
-  QString starter = (GlobSet->LibPMtypes.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibPMtypes;
+  QString starter = (GlobSet.LibPMtypes.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibPMtypes;
   QFileDialog fileDialog;
   QString fileName = fileDialog.getOpenFileName(this, "Load PM type properties", starter, "Json files (*.json);; All files (*.*)");
   if (fileName.isEmpty()) return;
@@ -4279,9 +4061,9 @@ void MainWindow::on_pbLoadPMtype_clicked()
 void MainWindow::on_pbLoadNodes_clicked()
 {
   QFileDialog fileDialog;
-  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet->LastOpenDir, "Text files (*.txt);; All files (*.*)");
+  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet.LastOpenDir, "Text files (*.txt);; All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QVector<double> x, y, z;
   int err = LoadDoubleVectorsFromFile(fileName, &x, &y, &z);
@@ -4312,14 +4094,16 @@ void MainWindow::on_pbRunNodeScript_clicked()
   delete GenScriptWindow; GenScriptWindow = 0;
 
   AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-  GenScriptWindow = new AScriptWindow(jsm, GlobSet, true, this);
+  GenScriptWindow = new AScriptWindow(jsm, true, this);
   GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
 
   NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
-  GenScriptWindow->SetInterfaceObject(NodesScriptInterface);
+  GenScriptWindow->RegisterInterfaceAsGlobal(NodesScriptInterface);
+  GenScriptWindow->RegisterCoreInterfaces();
   connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
 
   recallGeometryOfLocalScriptWindow();
+  GenScriptWindow->UpdateGui();
   GenScriptWindow->show();
 }
 
@@ -4343,7 +4127,7 @@ void MainWindow::on_actionOpen_settings_triggered()
 
 void MainWindow::on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1)
 {
-   GlobSet->SaveLoadWindows = arg1;
+   GlobSet.SaveLoadWindows = arg1;
 }
 
 void MainWindow::on_pbUpdateElectronics_clicked()
@@ -4376,48 +4160,6 @@ void MainWindow::on_pbUpdateElectronics_clicked()
    ReconstructDetector(true); //GUI update is triggered automatically
 }
 
-void MainWindow::on_ledSimplisticAbs_editingFinished()
-{
-  double pLoss = ui->ledSimplisticAbs->text().toDouble();
-  double pRef = ui->ledSimplisticSpecular->text().toDouble();
-  double pDiff = ui->ledSimplisticScatter->text().toDouble();
-
-  if (pLoss+pRef+pDiff > 1.0)
-    {
-      ui->ledSimplisticAbs->setText(QString::number(1.0 - pRef - pDiff));
-      message("Sum cannot exceed 1.0", this);
-    }  
-  MainWindow::on_pbOverride_clicked();
-}
-
-void MainWindow::on_ledSimplisticSpecular_editingFinished()
-{
-  double pLoss = ui->ledSimplisticAbs->text().toDouble();
-  double pRef = ui->ledSimplisticSpecular->text().toDouble();
-  double pDiff = ui->ledSimplisticScatter->text().toDouble();
-
-  if (pLoss+pRef+pDiff > 1.0)
-    {
-      ui->ledSimplisticSpecular->setText(QString::number(1.0 - pLoss - pDiff));
-      message("Sum cannot exceed 1.0", this);
-    }  
-  MainWindow::on_pbOverride_clicked();
-}
-
-void MainWindow::on_ledSimplisticScatter_editingFinished()
-{
-  double pLoss = ui->ledSimplisticAbs->text().toDouble();
-  double pRef = ui->ledSimplisticSpecular->text().toDouble();
-  double pDiff = ui->ledSimplisticScatter->text().toDouble();
-
-  if (pLoss+pRef+pDiff > 1.0)
-  {
-      ui->ledSimplisticScatter->setText(QString::number(1.0 - pLoss - pRef));
-      message("Sum cannot exceed 1.0", this);
-  } 
-  MainWindow::on_pbOverride_clicked();
-}
-
 void MainWindow::on_pbOverlay_clicked()
 {
   if (EventsDataHub->isEmpty())
@@ -4426,9 +4168,9 @@ void MainWindow::on_pbOverlay_clicked()
       return;
     }
 
-  QString fileName = QFileDialog::getOpenFileName(this, "Overlay simulation data with data from an ASCII file", GlobSet->LastOpenDir, "All file (*.*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Overlay simulation data with data from an ASCII file", GlobSet.LastOpenDir, "All file (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   WindowNavigator->BusyOn();
   bool ok = EventsDataHub->overlayAsciiFile(fileName, ui->cbApplyAddMultiplyPreprocess->isChecked(), Detector->PMs);
@@ -4442,11 +4184,11 @@ void MainWindow::on_pbOverlay_clicked()
 
 void MainWindow::on_pbLoadManifestFile_clicked()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Load manifest file", GlobSet->LastOpenDir, "Text files (*.txt);;All files (*)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Load manifest file", GlobSet.LastOpenDir, "Text files (*.txt);;All files (*)");
   if (fileName.isEmpty()) return;
   //this->activateWindow();
   //this->raise();
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   ui->leManifestFile->setText(fileName);
   ui->cbLoadedDataHasPosition->setChecked(false);
@@ -4619,122 +4361,9 @@ void MainWindow::on_pbManuscriptExtractNames_clicked()
    MainWindow::on_pbReloadExpData_clicked();
 }
 
-void MainWindow::on_lwOverrides_itemClicked(QListWidgetItem* /*item*/)
-{
-  int row = ui->lwOverrides->currentRow();
-  //if (ui->lwOverrides->currentItem()->text() == "Not defined") return;
-
-  int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-  int Mats = Detector->MpCollection->countMaterials();
-  int counter = 0;
-  for (int iMat=0; iMat<Mats; iMat++)
-    {
-      AOpticalOverride* ov = (*Detector->MpCollection)[MatFrom]->OpticalOverrides[iMat];
-      if (!ov) continue;
-      if (counter == row)
-        {
-          ui->cobMaterialTo->setCurrentIndex(iMat);
-          MainWindow::on_pbRefreshOverrides_clicked();
-          return;
-        }
-      counter++;
-    }
-}
-
 void MainWindow::setFloodZposition(double Z)
 {
   ui->ledScanFloodZ->setText(QString::number(Z));
-}
-
-void MainWindow::on_pbSurfaceWLS_Show_clicked()
-{
-  int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-  int MatTo = ui->cobMaterialTo->currentIndex();
-
-  AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-  if (!ov) return;
-
-  auto gr = GraphWindow->MakeGraph(&ov->ReemissionProbability_lambda, &ov->ReemissionProbability,   4, "Wavelength, nm", "Probability [0,1]", 20, 1, 0, 0, "", true);
-  gr->SetTitle("Reemission probability in 2Pi");
-  gr->SetMinimum(0);
-
-  GraphWindow->Draw(gr, "apl");
-}
-
-void MainWindow::on_cobSurfaceWLS_Model_activated(int index)
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    ov->ReemissionModel = index;
-    ReconstructDetector();
-    //MainWindow::on_pbRefreshOverrides_clicked();
-}
-
-void MainWindow::on_pbSurfaceWLS_Load_clicked()
-{
-  int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-  int MatTo = ui->cobMaterialTo->currentIndex();
-
-  AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-  if (!ov) return;
-
-  QString fileName;
-  fileName = QFileDialog::getOpenFileName(this, "Load reemission probability", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
-  if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-  QVector<double> X, Y;
-  int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
-  if (ret == 0)
-    {
-      ov->ReemissionProbability_lambda = X;
-      ov->ReemissionProbability = Y;
-      ui->pbSurfaceWLS_Show->setEnabled(true);
-    }
-  ReconstructDetector();
-  MainWindow::on_pbRefreshOverrides_clicked();
-}
-
-void MainWindow::on_pbSurfaceWLS_ShowSpec_clicked()
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    auto gr = GraphWindow->MakeGraph(&ov->EmissionSpectrum_lambda, &ov->EmissionSpectrum,   2, "Wavelength, nm", "Relative intensity, a.u.", 20, 1, 0, 0, "", true);
-    gr->SetTitle("Emission spectrum");
-    gr->SetMinimum(0);
-
-    GraphWindow->Draw(gr, "apl");
-}
-
-void MainWindow::on_pbSurfaceWLS_LoadSpec_clicked()
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    AWaveshifterOverride* ov = dynamic_cast<AWaveshifterOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load emission spectrum", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
-    if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-    QVector<double> X, Y;
-    int ret = LoadDoubleVectorsFromFile(fileName, &X, &Y);
-    if (ret == 0)
-      {
-        ov->EmissionSpectrum_lambda = X;
-        ov->EmissionSpectrum = Y;
-        ui->pbSurfaceWLS_ShowSpec->setEnabled(true);
-      }
-    ReconstructDetector();
-    MainWindow::on_pbRefreshOverrides_clicked();
 }
 
 void MainWindow::on_pbUpdatePreprocessingSettings_clicked()
@@ -4890,7 +4519,7 @@ void MainWindow::on_pbShowMCcrosstalk_clicked()
   PMs->prepareMCcrosstalk();
 
   int ipm = ui->sbElPMnumber->value();
-  TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet->BinsX, 0, 0);
+  TH1I* hist = new TH1I("aa", "Test custom sampling", GlobSet.BinsX, 0, 0);
   for (int i=0; i<1000000; i++)
       hist->Fill(PMs->at(ipm).MCsampl->sample(Detector->RandGen)+1);
 
@@ -4901,9 +4530,9 @@ void MainWindow::on_pbLoadMCcrosstalk_clicked()
 {
     int ipm = ui->sbElPMnumber->value();
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load MC cross-talk distribution\nFile should contain a single column of values, starting with the probability for single event.\nData may be not normalized.", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load MC cross-talk distribution\nFile should contain a single column of values, starting with the probability for single event.\nData may be not normalized.", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QVector<double> v;
     bool error = LoadDoubleVectorsFromFile(fileName, &v);
@@ -4953,24 +4582,6 @@ void MainWindow::on_tabMCcrosstalk_cellChanged(int row, int column)
     on_pbUpdateElectronics_clicked();
 }
 
-void MainWindow::on_leSourceLimitMaterial_textChanged(const QString &/*arg1*/)
-{
-    if (!ui->cbSourceLimitmat->isChecked()) return;
-
-    const QString name = ui->leSourceLimitMaterial->text();
-    bool fFound = false;
-    for (int iMat=0; iMat<MpCollection->countMaterials(); iMat++)
-        if (name == (*MpCollection)[iMat]->name)
-        {
-            fFound = true;
-            break;
-        }
-
-    QPalette palette = ui->leSourceLimitMaterial->palette();
-    palette.setColor(QPalette::Text, (fFound ? Qt::black : Qt::red) );
-    ui->leSourceLimitMaterial->setPalette(palette);
-}
-
 void MainWindow::on_leLimitNodesObject_textChanged(const QString &/*arg1*/)
 {
     bool fFound = (ui->cbLimitNodesOutsideObject->isChecked()) ?
@@ -5005,11 +4616,6 @@ void MainWindow::on_bpResults_2_clicked()
   Owindow->raise();
   Owindow->activateWindow();
   Owindow->SetTab(3);
-}
-
-void MainWindow::on_cobParticleSource_activated(int /*index*/)
-{
-    if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
 void MainWindow::on_cobPartPerEvent_currentIndexChanged(int index)
@@ -5065,9 +4671,9 @@ void MainWindow::on_pbDarkCounts_Load_clicked()
         return;
     }
 
-    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
+    const QString fileName = QFileDialog::getOpenFileName(this, QString("Load generation distribution for PM #").arg(ipm), GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
     if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QVector<double> x;
     int res = LoadDoubleVectorsFromFile(fileName, &x);
@@ -5181,120 +4787,6 @@ void MainWindow::on_actionServer_settings_triggered()
     GlobSetWindow->show();
 }
 
-void MainWindow::on_pbSSO_Load_clicked()
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    QString fileName = QFileDialog::getOpenFileName(this, "Load spectral data (Wave,Loss,Ref,Scatter)", GlobSet->LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
-    if (fileName.isEmpty()) return;
-    GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
-
-    const QString err = ov->loadData(fileName);
-    if (err.isEmpty())
-    {
-        ReconstructDetector();
-        on_pbRefreshOverrides_clicked();
-    }
-    else message(err, this);
-}
-
-
-#include "TMultiGraph.h"
-void MainWindow::on_pbSSO_Show_clicked()
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    QVector<double> Fr;
-    for (int i=0; i<ov->Wave.size(); i++)
-        Fr << (1.0 - ov->ProbLoss.at(i) - ov->ProbRef.at(i) - ov->ProbDiff.at(i));
-
-    TMultiGraph* mg = new TMultiGraph();
-    TGraph* gLoss = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbLoss, "Loss", "Wavelength, nm", "", 2, 20, 1, 2);
-    mg->Add(gLoss, "LP");
-    TGraph* gRef = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbRef, "Specular reflection", "Wavelength, nm", "", 4, 21, 1, 4);
-    mg->Add(gRef, "LP");
-    TGraph* gDiff = GraphWindow->ConstructTGraph(ov->Wave, ov->ProbDiff, "Diffuse scattering", "Wavelength, nm", "", 7, 22, 1, 7);
-    mg->Add(gDiff, "LP");
-    TGraph* gFr = GraphWindow->ConstructTGraph(ov->Wave, Fr, "Fresnel", "Wavelength, nm", "", 1, 24, 1, 1, 1, 1);
-    mg->Add(gFr, "LP");
-
-    mg->SetMinimum(0);
-    GraphWindow->Draw(mg, "apl");
-    mg->GetXaxis()->SetTitle("Wavelength, nm");
-    mg->GetYaxis()->SetTitle("Probability");
-    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
-}
-
-void MainWindow::on_pbSSO_Binned_clicked()
-{
-    if (!ui->cbWaveResolved->isChecked())
-    {
-        message("Activate wavelength-resolved simulation option!", this);
-        return;
-    }
-
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    ov->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
-
-    QVector<double> waveIndex;
-    for (int i=0; i<WaveNodes; i++) waveIndex << i;
-
-    QVector<double> Fr;
-    for (int i=0; i<waveIndex.size(); i++)
-        Fr << (1.0 - ov->ProbLossBinned.at(i) - ov->ProbRefBinned.at(i) - ov->ProbDiffBinned.at(i));
-
-    TMultiGraph* mg = new TMultiGraph();
-    TGraph* gLoss = GraphWindow->ConstructTGraph(waveIndex, ov->ProbLossBinned, "Loss", "Wave index", "Loss", 2, 20, 1, 2);
-    mg->Add(gLoss, "LP");
-    TGraph* gRef = GraphWindow->ConstructTGraph(waveIndex, ov->ProbRefBinned, "Specular reflection", "Wave index", "Reflection", 4, 21, 1, 4);
-    mg->Add(gRef, "LP");
-    TGraph* gDiff = GraphWindow->ConstructTGraph(waveIndex, ov->ProbDiffBinned, "Diffuse scattering", "Wave index", "Scatter", 7, 22, 1, 7);
-    mg->Add(gDiff, "LP");
-    TGraph* gFr = GraphWindow->ConstructTGraph(waveIndex, Fr, "Fresnel", "Wave index", "", 1, 24, 1, 1, 1, 1);
-    mg->Add(gFr, "LP");
-
-    mg->SetMinimum(0);
-    GraphWindow->Draw(mg, "apl");
-    mg->GetXaxis()->SetTitle("Wave index");
-    mg->GetYaxis()->SetTitle("Probability");
-    GraphWindow->AddLegend(0.7,0.8, 0.95,0.95, "");
-}
-
-void MainWindow::on_cobSSO_ScatterModel_activated(int index)
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    ov->scatterModel = index;
-}
-
-void MainWindow::on_ledSSO_EffWave_editingFinished()
-{
-    int MatFrom = ui->cobMaterialForOverrides->currentIndex();
-    int MatTo = ui->cobMaterialTo->currentIndex();
-
-    SpectralBasicOpticalOverride* ov = dynamic_cast<SpectralBasicOpticalOverride*>( (*Detector->MpCollection)[MatFrom]->OpticalOverrides[MatTo]  );
-    if (!ov) return;
-
-    ov->effectiveWavelength = ui->ledSSO_EffWave->text().toDouble();
-}
-
 void MainWindow::on_actionGrid_triggered()
 {
     RemoteWindow->show();
@@ -5313,6 +4805,22 @@ void MainWindow::on_pbOpenTrackProperties_Phot_clicked()
 void MainWindow::on_pbTrackOptionsGun_clicked()
 {
     on_pbOpenTrackProperties_Phot_clicked();
+}
+
+void MainWindow::on_pbTrackOptionsGun_customContextMenuRequested(const QPoint &)
+{   // in particle source
+    SimulationManager->TrackBuildOptions.bBuildPhotonTracks = false;
+
+    SimulationManager->TrackBuildOptions.bBuildParticleTracks = !SimulationManager->TrackBuildOptions.bBuildParticleTracks;
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbOpenTrackProperties_Phot_customContextMenuRequested(const QPoint &)
+{   //in photon sources
+    SimulationManager->TrackBuildOptions.bBuildParticleTracks = false;
+
+    SimulationManager->TrackBuildOptions.bBuildPhotonTracks = !SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+    on_pbUpdateSimConfig_clicked();
 }
 
 void MainWindow::on_pbTrackOptionsStack_clicked()
@@ -5343,4 +4851,115 @@ void MainWindow::on_ledSphericalPMAngle_editingFinished()
     }
 
     on_pbUpdatePMproperties_clicked();
+}
+
+void MainWindow::on_lwOverrides_itemDoubleClicked(QListWidgetItem *)
+{
+    on_pbEditOverride_clicked();
+}
+
+void MainWindow::on_lwOverrides_itemSelectionChanged()
+{
+  int row = ui->lwOverrides->currentRow();
+
+  int MatFrom = ui->cobMaterialForOverrides->currentIndex();
+  int Mats = Detector->MpCollection->countMaterials();
+  int counter = 0;
+  for (int iMat=0; iMat<Mats; iMat++)
+    {
+      AOpticalOverride* ov = (*Detector->MpCollection)[MatFrom]->OpticalOverrides[iMat];
+      if (!ov) continue;
+      if (counter == row)
+        {
+          ui->cobMaterialTo->setCurrentIndex(iMat);
+          return;
+        }
+      counter++;
+    }
+}
+
+void MainWindow::on_pbShowOverrideMap_clicked()
+{
+    int numMat = MpCollection->countMaterials();
+
+    QDialog* d = new QDialog(this);
+    d->setWindowTitle("Map of optical overrides");
+    QVBoxLayout* l = new QVBoxLayout(d);
+    QLabel* lab = new QLabel("Override from (vertical) -> to (horizontal). Double click to define / edit override");
+    l->addWidget(lab);
+    QTableWidget* tw = new QTableWidget(numMat, numMat);
+    l->addWidget(tw);
+
+    tw->setVerticalHeaderLabels(MpCollection->getListOfMaterialNames());
+    tw->setHorizontalHeaderLabels(MpCollection->getListOfMaterialNames());
+
+    for (int ifrom = 0; ifrom < numMat; ifrom++)
+        for (int ito = 0; ito < numMat; ito++)
+        {
+            AOpticalOverride* ov = (*MpCollection)[ifrom]->OpticalOverrides.at(ito);
+            QString text;
+            if (ov) text = ov->getAbbreviation();
+            QTableWidgetItem *it = new QTableWidgetItem(text);
+            it->setTextAlignment(Qt::AlignCenter);
+            if (ov)
+            {
+                it->setBackground(QBrush(Qt::lightGray));
+                it->setToolTip(ov->getLongReportLine());
+            }
+            it->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+            tw->setItem(ifrom, ito, it);
+        }
+    QObject::connect(tw, &QTableWidget::itemDoubleClicked, d, &QDialog::accept);
+
+    if (bOptOvDialogPositioned)
+    {
+        d->resize(OptOvDialogSize);
+        d->move(OptOvDialogPosition);
+    }
+
+    int res = d->exec();
+
+    if (res == QDialog::Accepted)
+    {
+        int from = tw->currentRow();
+        int to = tw->currentColumn();
+
+        if (from > -1 && to > -1)
+        {
+            ui->cobMaterialForOverrides->setCurrentIndex(from);
+            ui->cobMaterialTo->setCurrentIndex(to);
+            on_pbEditOverride_clicked();
+        }
+    }
+
+    bOptOvDialogPositioned = true;
+    OptOvDialogSize = d->size();
+    OptOvDialogPosition = d->pos();
+    delete d;
+}
+
+void MainWindow::on_pbStopScan_clicked()
+{
+    //qDebug() << "Requesting sim stop...";
+    ui->pbStopScan->setText("stopping...");
+    qApp->processEvents();
+    SimulationManager->StopSimulation();
+    qApp->processEvents();
+}
+
+void MainWindow::on_pbPMtypeHelp_clicked()
+{
+    QString s = "Note that photon detection test is triggered\n"
+                "   as soon as a photon eneters the PM volume!\n\n"
+                "That means that the material of the PM is important\n"
+                "   only for the material interface\n"
+                "   (Fresnel/Snell's + optical overrides)\n\n"
+                "The PM thickness matters only for positioning\n"
+                "   of the volume in the detector geometry.\n\n"
+                "For simulation of, e.g., PMT structure (window +\n"
+                "   photocathode) one has to add the window\n"
+                "   volume to the geometry and the PM object should\n"
+                "   represent the photocathode.";
+    message(s, this);
 }

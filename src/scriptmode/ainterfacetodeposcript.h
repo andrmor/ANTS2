@@ -8,9 +8,8 @@
 #include <QVector>
 
 class EventsDataClass;
-class GlobalSettingsClass;
 struct AEnergyDepositionCell;
-class AParticleOnStack;
+class AParticleRecord;
 
 struct DepoNode
 {
@@ -38,15 +37,14 @@ class AInterfaceToDepoScript : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AInterfaceToDepoScript(DetectorClass* Detector, GlobalSettingsClass* GlobSet, EventsDataClass* EventsDataHub);
+  AInterfaceToDepoScript(DetectorClass* Detector, EventsDataClass* EventsDataHub);
   ~AInterfaceToDepoScript();
 
 private:
   DetectorClass* Detector;
-  GlobalSettingsClass* GlobSet;
   EventsDataClass* EventsDataHub;
 
-  QVector<AParticleOnStack*> ParticleStack;
+  QVector<AParticleRecord*> ParticleStack;
   QVector<AEnergyDepositionCell*> EnergyVector;
   QVector<ParticleRecord> PR;
 

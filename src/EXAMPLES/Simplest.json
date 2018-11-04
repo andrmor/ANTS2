@@ -154,11 +154,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": true,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -175,11 +172,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": true,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -198,7 +192,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -206,12 +200,25 @@
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": true
+                            "TrackingAllowed": true,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Tau": 5,
+                    "PrimScint_Model": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -224,6 +231,7 @@
                     ],
                     "SecScint_PhYield": 2,
                     "SecScint_Tau": 5,
+                    "Temperature": 298,
                     "W": 100
                 }
             ]
@@ -267,6 +275,7 @@
                     ]
                 },
                 "General": {
+                    "AngleSphere": 35,
                     "MaterialIndex": 0,
                     "Name": "Type1",
                     "Shape": 0,
@@ -654,8 +663,7 @@
             "AcceleratorConfig": {
                 "CheckBeforeTrack": false,
                 "LogsStatistics": false,
-                "MaxNumTransitions": 500,
-                "OnlyTracksOnPMs": false
+                "MaxNumTransitions": 500
             },
             "AngleConfig": {
                 "AngResolved": false,
@@ -664,14 +672,12 @@
             "AreaConfig": {
                 "AreaResolved": false
             },
-            "BuildPhotonTracks": false,
             "DetStatNumBins": 100,
             "LrfBasedSim": {
                 "NumPhotElLRFunity": 1,
                 "NumPhotsLRFunity": 20000,
                 "UseLRFs": false
             },
-            "MaxNumberOfTracks": 5000,
             "SecScintConfig": {
                 "Type": 0
             },
@@ -681,13 +687,64 @@
                 "TimeResolved": false,
                 "TimeTo": 1000
             },
+            "TrackBuildingOptions": {
+                "BuildParticleTracks": false,
+                "BuildPhotonTracks": false,
+                "GeneralPhoton_Attributes": {
+                    "color": 7,
+                    "style": 1,
+                    "width": 1
+                },
+                "MaxParticleTracks": 1000,
+                "MaxPhotonTracks": 1000,
+                "Particle_CustomAttribtes": [
+                ],
+                "Particle_DefaultAttributes": {
+                    "color": 15,
+                    "style": 1,
+                    "width": 2
+                },
+                "Particle_DefaultColors": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    7,
+                    8,
+                    9,
+                    28,
+                    30,
+                    36,
+                    38,
+                    39,
+                    40,
+                    46,
+                    49
+                ],
+                "PhotonHittingPM_Attributes": {
+                    "color": 2,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSecScint_Attributes": {
+                    "color": 6,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSpecialRule_HittingPMs": true,
+                "PhotonSpecialRule_SecScint": true,
+                "SkipParticles_Primary": false,
+                "SkipParticles_PrimaryNoInteraction": false,
+                "SkipParticles_Secondary": false,
+                "SkipPhotonsMissingPMs": false
+            },
             "TrackingConfig": {
                 "MaxStep": 0.1,
                 "MinEnergy": 0.01,
                 "MinEnergyNeutrons": 0.01,
                 "MinStep": 5e-05,
                 "Safety": 1e-10,
-                "TrackColorAdd": 0,
                 "dE": 0.05
             },
             "WaveConfig": {
@@ -700,6 +757,15 @@
         },
         "Mode": "PointSim",
         "ParticleSourcesConfig": {
+            "GenerationFromFile": {
+                "FileLastModified": 0,
+                "FileName": "",
+                "NumEventsInFile": 0,
+                "RegisteredParticleCount": -1
+            },
+            "GenerationFromScript": {
+                "Script": ""
+            },
             "ParticleSources": [
             ],
             "SourceControlOptions": {
@@ -708,9 +774,9 @@
                 "DoS1": true,
                 "DoS2": false,
                 "EventsToDo": 10,
-                "IgnoreNoDepoEvents": true,
+                "IgnoreNoDepoEvents": false,
                 "IgnoreNoHitsEvents": false,
-                "ParticleTracks": true,
+                "ParticleGenerationMode": "Sources",
                 "TypeParticlesPerEvent": 0
             }
         },
@@ -794,7 +860,7 @@
                 "Zto": 2.49
             },
             "PhotPerNodeOptions": {
-                "PhotPerNodeConstant": 4000,
+                "PhotPerNodeConstant": 100,
                 "PhotPerNodeCustom": [
                 ],
                 "PhotPerNodeGaussMean": 10,
@@ -838,9 +904,7 @@
                 "SingleZ": 0
             },
             "WaveTimeOptions": {
-                "DecayTime": 0,
-                "Direct_Material": 2,
-                "Material": 0,
+                "UseFixedWavelength": false,
                 "WaveIndex": 0
             }
         }

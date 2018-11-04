@@ -21,7 +21,7 @@
 #include "geometrywindowclass.h"
 #include "apmgroupsmanager.h"
 #include "ajsontools.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "graphwindowclass.h"
 #include "windownavigatorclass.h"
 #include "aconfiguration.h"
@@ -535,9 +535,9 @@ void ALrfWindow::onRecipeContextMenuActionCopyToEditor()
 
 void ALrfWindow::onRecipeContextMenuActionSave()
 {
-  QString file_name = QFileDialog::getSaveFileName(this, "Save recipe", mw->GlobSet->LastOpenDir, "json files(*.json);;all files(*)");
+  QString file_name = QFileDialog::getSaveFileName(this, "Save recipe", mw->GlobSet.LastOpenDir, "json files(*.json);;all files(*)");
   if (file_name.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_name).dir().absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_name).dir().absolutePath();
 
   QJsonDocument doc(repo->toJson(tw_recipes->getSelectedRecipeId()));
   QFile save_file(file_name);
@@ -588,9 +588,9 @@ void ALrfWindow::onVersionContextMenuActionSetAsSecondary()
 
 void ALrfWindow::onVersionContextMenuActionSave()
 {
-  QString file_name = QFileDialog::getSaveFileName(this, "Save version", mw->GlobSet->LastOpenDir, "json files(*.json);;all files(*)");
+  QString file_name = QFileDialog::getSaveFileName(this, "Save version", mw->GlobSet.LastOpenDir, "json files(*.json);;all files(*)");
   if (file_name.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_name).dir().absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_name).dir().absolutePath();
 
   QJsonDocument doc(repo->toJson(tw_recipes->getSelectedRecipeId(), tw_recipes->getSelectedVersionId()));
   QFile save_file(file_name);
@@ -723,9 +723,9 @@ void ALrfWindow::on_pbSTOP_clicked()
 
 void ALrfWindow::on_pb_save_repository_clicked()
 {
-  QString file_name = QFileDialog::getSaveFileName(this, "Save repository", mw->GlobSet->LastOpenDir, "json files(*.json);;all files(*)");
+  QString file_name = QFileDialog::getSaveFileName(this, "Save repository", mw->GlobSet.LastOpenDir, "json files(*.json);;all files(*)");
   if (file_name.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_name).dir().absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_name).dir().absolutePath();
 
   QJsonDocument doc(repo->toJson());
   QFile save_file(file_name);
@@ -739,9 +739,9 @@ void ALrfWindow::on_pb_save_repository_clicked()
 
 void ALrfWindow::on_pb_load_repository_clicked()
 {
-  QStringList file_names = QFileDialog::getOpenFileNames(this, "Append repository", mw->GlobSet->LastOpenDir, "json files (*.json);;all files(*)");
+  QStringList file_names = QFileDialog::getOpenFileNames(this, "Append repository", mw->GlobSet.LastOpenDir, "json files (*.json);;all files(*)");
   if(file_names.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_names.first()).absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_names.first()).absolutePath();
 
   for (int ifile = 0; ifile < file_names.size(); ifile++) {
     QString file_name = file_names[ifile];
@@ -763,9 +763,9 @@ void ALrfWindow::on_pb_load_repository_clicked()
 
 void ALrfWindow::on_pb_save_current_clicked()
 {
-  QString file_name = QFileDialog::getSaveFileName(this, "Save current lrfs", mw->GlobSet->LastOpenDir, "json files(*.json);;all files(*)");
+  QString file_name = QFileDialog::getSaveFileName(this, "Save current lrfs", mw->GlobSet.LastOpenDir, "json files(*.json);;all files(*)");
   if (file_name.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_name).dir().absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_name).dir().absolutePath();
 
   QJsonDocument doc(repo->toJson(repo->getCurrentRecipeID()));
   QFile save_file(file_name);
@@ -779,9 +779,9 @@ void ALrfWindow::on_pb_save_current_clicked()
 
 void ALrfWindow::on_pb_load_current_clicked()
 {
-  QStringList file_names = QFileDialog::getOpenFileNames(this, "Append repository and set as current", mw->GlobSet->LastOpenDir, "json files (*.json);;all files(*)");
+  QStringList file_names = QFileDialog::getOpenFileNames(this, "Append repository and set as current", mw->GlobSet.LastOpenDir, "json files (*.json);;all files(*)");
   if(file_names.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(file_names.first()).absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(file_names.first()).absolutePath();
 
   for (int ifile = 0; ifile < file_names.size(); ifile++) {
     QString file_name = file_names[ifile];
@@ -827,7 +827,7 @@ void ALrfWindow::on_pb_show_radial_clicked()
   json["Z"] = led_zcenter->text().toDouble();
   json["DZ"] = led_zrange->text().toDouble();
   json["EnergyScaling"] = cb_UseEventEnergy->isChecked();
-  json["FunctionPointsX"] = mw->GlobSet->FunctionPointsX;
+  json["FunctionPointsX"] = mw->GlobSet.FunctionPointsX;
   json["Bins"] = sbDataBins->value();
   json["ShowNodes"] = false;//ui->cbShowNodePositions->isChecked();
 
@@ -881,8 +881,8 @@ void ALrfWindow::on_pb_show_xy_clicked()
   json["Z"] = led_zcenter->text().toDouble();
   json["DZ"] = led_zrange->text().toDouble();
   json["EnergyScaling"] = cb_UseEventEnergy->isChecked();
-  json["FunctionPointsX"] = mw->GlobSet->FunctionPointsX;
-  json["FunctionPointsY"] = mw->GlobSet->FunctionPointsY;
+  json["FunctionPointsX"] = mw->GlobSet.FunctionPointsX;
+  json["FunctionPointsY"] = mw->GlobSet.FunctionPointsY;
   json["Bins"] = sbDataBins->value();
   //json["ShowNodes"] = ui->cbShowNodePositions->isChecked();
 
@@ -1074,10 +1074,10 @@ void ALrfWindow::on_pbExportLrfVsRadial_clicked()
   if(!doLrfRadialProfile(Rad, LRF)) return;
 
   QString str = sbPM->text();
-  QString fileName = QFileDialog::getSaveFileName(this, "Save LRF # " +str+ " vs radius", mw->GlobSet->LastOpenDir,
+  QString fileName = QFileDialog::getSaveFileName(this, "Save LRF # " +str+ " vs radius", mw->GlobSet.LastOpenDir,
                                                   "Text files (*.txt);;Data files (*.dat);;All files (*.*)");
   if (fileName.isEmpty()) return;
-  mw->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  mw->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   QFile outputFile(fileName);
   outputFile.open(QIODevice::WriteOnly);
   if(!outputFile.isOpen()) {

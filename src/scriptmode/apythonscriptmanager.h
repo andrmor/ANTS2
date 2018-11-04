@@ -21,7 +21,10 @@ public:
     ~APythonScriptManager() {}
 
     //configuration
-    virtual void      SetInterfaceObject(QObject* interfaceObject, QString name) override;
+    //virtual void      SetInterfaceObject(QObject* interfaceObject, QString name) override;
+    virtual void      RegisterInterfaceAsGlobal(AScriptInterface* interface) override;
+    virtual void      RegisterCoreInterfaces(bool bCore = true, bool bMath = true) override;
+    virtual void      RegisterInterface(AScriptInterface* interface, const QString& name) override;
 
     //run
     virtual QString   Evaluate(const QString &Script) override;

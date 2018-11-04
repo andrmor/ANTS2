@@ -7,7 +7,7 @@
 #include "mainwindow.h"
 #include "rasterwindowgraphclass.h"
 #include "windownavigatorclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "amessage.h"
 #include "afiletools.h"
 #include "shapeablerectitem.h"
@@ -682,28 +682,6 @@ void GraphWindowClass::OnBusyOff()
 void GraphWindowClass::switchOffBasket()
 {
   ui->cbShowBasket->setChecked(false);
-}
-
-void GraphWindowClass::resizeEvent(QResizeEvent *)
-{
-  //tool bar box height and basket fit the window
-  //ui->fUIbox->resize(ui->fUIbox->width(), this->height() - 24 - 3);
-  //ui->fBasket->resize(ui->fBasket->width(), this->height());
-  //ui->lwBasket->resize(ui->lwBasket->width(), this->height()-ui->lwBasket->y()-3);
-
-  //int deltaBasket = 0;
-  //if (ui->cbShowBasket->isChecked()) deltaBasket = ui->fBasket->width();
-
-  //int width = this->width() - (3 + ui->fUIbox->width()) - deltaBasket;
-  //int height = this->height() - (3 + 3);
-//  qDebug()<<width<<height;
-
-  //int mh = 0;
-  //if (ui->menuBar) mh =  ui->menuBar->height();
-  //if (RasterWindow) RasterWindow->setGeometry(ui->fUIbox->x() + ui->fUIbox->width()+3, mh, width, height);
-  //if (RasterWindow) RasterWindow->ForceResize();
-
-  //if (ui->cbShowBasket->isChecked()) ui->fBasket->move(this->width()-3-ui->fBasket->width(), 0);
 }
 
 void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
@@ -1419,7 +1397,7 @@ void GraphWindowClass::UpdateControls()
 
 void GraphWindowClass::DoSaveGraph(QString name)
 {  
-  GraphWindowClass::SaveGraph(MW->GlobSet->LastOpenDir + "/" + name);
+  GraphWindowClass::SaveGraph(MW->GlobSet.LastOpenDir + "/" + name);
 }
 
 void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
@@ -1431,6 +1409,14 @@ void GraphWindowClass::DrawStrOpt(TObject *obj, QString options, bool DoUpdate)
       return;
     }
   Draw(obj, options.toLatin1().data(), DoUpdate, false);
+}
+
+void GraphWindowClass::onDrawRequest(TObject *obj, const QString options, bool transferOwnership, bool focusWindow)
+{
+    if (focusWindow)
+        Draw(obj, options.toLatin1().data(), true, transferOwnership);
+    else
+        DrawWithoutFocus(obj, options.toLatin1().data(), true, transferOwnership);
 }
 
 void SetMarkerAttributes(TAttMarker* m, const QVariantList& vl)
@@ -2210,9 +2196,9 @@ void GraphWindowClass::ExportData(bool fUseBinCenters)
 
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet->LastOpenDir+"/"+obj->GetName(), "Text files(*.txt)");
+  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+obj->GetName(), "Text files(*.txt)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
   SaveDoubleVectorsToFile(fileName, &x, &y);
 }
@@ -2239,9 +2225,9 @@ void GraphWindowClass::exportTextForTH2(TH2* h)
 
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("txt");
-  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet->LastOpenDir+"/"+h->GetTitle(), "Text files(*.txt)");
+  QString fileName = fileDialog->getSaveFileName(this, "Export data to ascii file", MW->GlobSet.LastOpenDir+"/"+h->GetTitle(), "Text files(*.txt)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if (QFileInfo(fileName).suffix().isEmpty()) fileName += ".txt";
   SaveDoubleVectorsToFile(fileName, &x, &y, &f);
 }
@@ -2272,7 +2258,7 @@ void GraphWindowClass::on_actionSave_root_object_triggered()
         {
           QFileDialog *fileDialog = new QFileDialog;
           fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH1 histogram", MW->GlobSet->LastOpenDir, "Root files(*.root)");
+          QString fileName = fileDialog->getSaveFileName(this, "Save TH1 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
           if (fileName.isEmpty()) return;
           hist->SaveAs(fileName.toLatin1().data());
         }
@@ -2293,7 +2279,7 @@ void GraphWindowClass::on_actionSave_root_object_triggered()
         {
           QFileDialog *fileDialog = new QFileDialog;
           fileDialog->setDefaultSuffix("root");
-          QString fileName = fileDialog->getSaveFileName(this, "Save TH2 histogram", MW->GlobSet->LastOpenDir, "Root files(*.root)");
+          QString fileName = fileDialog->getSaveFileName(this, "Save TH2 histogram", MW->GlobSet.LastOpenDir, "Root files(*.root)");
           if (fileName.isEmpty()) return;
           hist->SaveAs(fileName.toLatin1().data());
         }
@@ -2799,9 +2785,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   else if (selectedItem == appendTxt)
     {
       qDebug() << "Appending txt file as graph to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
       if (fileName.isEmpty()) return;
-      MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
       QString name(QFileInfo(fileName).baseName());
       QVector<double> x, y;
       int res = LoadDoubleVectorsFromFile(fileName, &x, &y);
@@ -2819,9 +2805,9 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   else if (selectedItem == appendTxtEr)
     {
       qDebug() << "Appending txt file as graph+errors to basket";
-      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet->LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
+      QString fileName = QFileDialog::getOpenFileName(this, "Append graph from ascii file to Basket", MW->GlobSet.LastOpenDir, "Data files (*.txt *.dat); All files (*.*)");
       if (fileName.isEmpty()) return;
-      MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+      MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
       QString name(QFileInfo(fileName).baseName());
       QVector<double> x, y, err;
       int res = LoadDoubleVectorsFromFile(fileName, &x, &y, &err);
@@ -3138,12 +3124,12 @@ void GraphWindowClass::on_actionSave_image_triggered()
 {
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("png");
-  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet->LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
+  QString fileName = fileDialog->getSaveFileName(this, "Save image as file", MW->GlobSet.LastOpenDir, "png (*.png);;gif (*.gif);;Jpg (*.jpg)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   GraphWindowClass::SaveGraph(fileName);
-  if (MW->GlobSet->fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
+  if (MW->GlobSet.fOpenImageExternalEditor) QDesktopServices::openUrl(QUrl("file:"+fileName, QUrl::TolerantMode));
 }
 
 void GraphWindowClass::on_actionExport_data_as_text_triggered()
@@ -3202,9 +3188,9 @@ void GraphWindowClass::SaveBasket()
 {
   qDebug() << "Saving basket";
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save Basket objects to file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
 
   QString str;
@@ -3238,9 +3224,9 @@ void GraphWindowClass::SaveBasket()
 
 void GraphWindowClass::AppendBasket()
 {
-  QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Append objects from Basket file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   //if(QFileInfo(fileName).suffix().isEmpty()) fileName += ".root";
 
   QByteArray ba = fileName.toLocal8Bit();
@@ -3350,9 +3336,9 @@ void GraphWindowClass::AppendBasket()
 
 void GraphWindowClass::AppendRootHistsOrGraphs()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Append objects from ROOT file", MW->GlobSet.LastOpenDir, "Root files (*.root)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QByteArray ba = fileName.toLocal8Bit();
     const char *c_str = ba.data();
@@ -3487,19 +3473,9 @@ void GraphWindowClass::on_pbAttributes_clicked()
   RasterWindow->fCanvas->SetLineAttributes();
 }
 
-void GraphWindowClass::on_actionToggle_toolbar_toggled(bool arg1)
+void GraphWindowClass::on_actionToggle_toolbar_triggered(bool checked)
 {
-   if (arg1)
-     {
-       BarShown = false;
-       ui->fUIbox->resize(150,500);
-     }
-   else
-     {
-       BarShown = true;
-       ui->fUIbox->resize(0,500);
-     }
-   GraphWindowClass::resizeEvent(0);
+    ui->fUIbox->setVisible(checked);
 }
 
 void GraphWindowClass::on_actionEqualize_scale_XY_triggered()
@@ -3801,3 +3777,4 @@ void GraphWindowClass::on_ledAngle_customContextMenuRequested(const QPoint &pos)
         selBoxControlsUpdated();
       }
 }
+

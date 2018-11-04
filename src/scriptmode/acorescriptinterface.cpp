@@ -1,12 +1,10 @@
-#include "coreinterfaces.h"
+#include "acorescriptinterface.h"
 #include "ascriptmanager.h"
 #include "afiletools.h"
 
 #ifdef USE_EIGEN
 #include "curvefit.h"
 #endif
-
-#include "TRandom2.h"
 
 #include <QScriptEngine>
 #include <QDateTime>
@@ -21,9 +19,7 @@
 #include <QThread>
 #include <QRegularExpression>
 
-// ------------------- CORE ----------------------
-
-AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
+ACoreScriptInterface::ACoreScriptInterface(AScriptManager* ScriptManager) :
     ScriptManager(ScriptManager)
 {
   Description = "General-purpose opeartions: abort script, basic text output and file save/load";
@@ -56,26 +52,27 @@ AInterfaceToCore::AInterfaceToCore(AScriptManager* ScriptManager) :
   H["getFittedArr"] = "Used with setCurveFitter. Extracts the fitted values of y for an array of x";
 
   //DepRem["isFileExists"] = "Deprecated. Use file.isFileExists method";
+  DepRem["str"] = "Deprecated. Use .toFixed(n) javaScript method. E.g.: 'var i=123.456; i.toFixed(2)'";
 }
 
-AInterfaceToCore::AInterfaceToCore(const AInterfaceToCore &other) :
+ACoreScriptInterface::ACoreScriptInterface(const ACoreScriptInterface &other) :
   AScriptInterface(other)
 {
    ScriptManager = 0; //to be set after copy!!!
 }
 
-void AInterfaceToCore::abort(QString message)
+void ACoreScriptInterface::abort(QString message)
 {
   qDebug() << ">Core module: abort triggered!";
   ScriptManager->AbortEvaluation(message);
 }
 
-QVariant AInterfaceToCore::evaluate(QString script)
+QVariant ACoreScriptInterface::evaluate(QString script)
 {
     return ScriptManager->EvaluateScriptInScript(script);
 }
 
-void AInterfaceToCore::sleep(int ms)
+void ACoreScriptInterface::sleep(int ms)
 {
   if (ms == 0) return;
   QTime t;
@@ -89,37 +86,37 @@ void AInterfaceToCore::sleep(int ms)
   while (t.elapsed()<ms);
 }
 
-int AInterfaceToCore::elapsedTimeInMilliseconds()
+int ACoreScriptInterface::elapsedTimeInMilliseconds()
 {
     return ScriptManager->getElapsedTime();
 }
 
-void AInterfaceToCore::print(QString text)
+void ACoreScriptInterface::print(QString text)
 {
     emit ScriptManager->showMessage(text);
 }
 
-void AInterfaceToCore::clearText()
+void ACoreScriptInterface::clearText()
 {
     emit ScriptManager->clearText();
 }
 
-QString AInterfaceToCore::str(double value, int precision)
+QString ACoreScriptInterface::str(double value, int precision)
 {
     return QString::number(value, 'g', precision);
 }
 
-QString AInterfaceToCore::GetTimeStamp()
+QString ACoreScriptInterface::GetTimeStamp()
 {
     return QDateTime::currentDateTime().toString("H:m:s");
 }
 
-QString AInterfaceToCore::GetDateTimeStamp()
+QString ACoreScriptInterface::GetDateTimeStamp()
 {
     return QDateTime::currentDateTime().toString("d/M/yyyy H:m:s");
 }
 
-bool AInterfaceToCore::save(QString fileName, QString str)
+bool ACoreScriptInterface::save(QString fileName, QString str)
 {
   if (!QFileInfo(fileName).exists())
     {
@@ -143,7 +140,7 @@ bool AInterfaceToCore::save(QString fileName, QString str)
   return true;
 }
 
-bool AInterfaceToCore::saveArray(QString fileName, QVariant array)
+bool ACoreScriptInterface::saveArray(QString fileName, QVariant array)
 {
     QString type = array.typeName();
     if (type != "QVariantList")
@@ -194,7 +191,7 @@ bool AInterfaceToCore::saveArray(QString fileName, QVariant array)
     return true;
 }
 
-bool AInterfaceToCore::saveObject(QString FileName, QVariant Object, bool CanOverride)
+bool ACoreScriptInterface::saveObject(QString FileName, QVariant Object, bool CanOverride)
 {
     QString type = Object.typeName();
     if (type != "QVariantMap")
@@ -228,7 +225,7 @@ bool AInterfaceToCore::saveObject(QString FileName, QVariant Object, bool CanOve
     return true;
 }
 
-QVariant AInterfaceToCore::loadColumn(QString fileName, int column)
+QVariant ACoreScriptInterface::loadColumn(QString fileName, int column)
 {
   QVector< QVector<double>* > vec;
   for (int i=0; i<column+1; i++)
@@ -289,7 +286,7 @@ QVariant AInterfaceToCore::loadColumn(QString fileName, int column)
   */
 }
 
-QVariant AInterfaceToCore::loadArray(QString fileName, int columns)
+QVariant ACoreScriptInterface::loadArray(QString fileName, int columns)
 {
     QVariantList l;
     if (columns == 0) return l;
@@ -359,7 +356,7 @@ QVariant AInterfaceToCore::loadArray(QString fileName, int columns)
   */
 }
 
-QVariant AInterfaceToCore::loadArray(QString fileName)
+QVariant ACoreScriptInterface::loadArray(QString fileName)
 {
     if (!QFileInfo(fileName).exists())
     {
@@ -406,7 +403,7 @@ QVariant AInterfaceToCore::loadArray(QString fileName)
     return vl;
 }
 
-QString AInterfaceToCore::loadText(QString fileName)
+QString ACoreScriptInterface::loadText(QString fileName)
 {
   if (!QFileInfo(fileName).exists())
   {
@@ -425,7 +422,7 @@ QString AInterfaceToCore::loadText(QString fileName)
   return str;
 }
 
-QVariant AInterfaceToCore::loadObject(QString fileName)
+QVariant ACoreScriptInterface::loadObject(QString fileName)
 {
     QFile loadFile(fileName);
     if (!loadFile.open(QIODevice::ReadOnly))
@@ -442,25 +439,25 @@ QVariant AInterfaceToCore::loadObject(QString fileName)
     return v;
 }
 
-QString AInterfaceToCore::GetWorkDir()
+QString ACoreScriptInterface::GetWorkDir()
 {
     if (!ScriptManager->LastOpenDir) return QString();
     else return *ScriptManager->LastOpenDir;
 }
 
-QString AInterfaceToCore::GetScriptDir()
+QString ACoreScriptInterface::GetScriptDir()
 {
     if (!ScriptManager->LibScripts) return QString();
     else return *ScriptManager->LibScripts;
 }
 
-QString AInterfaceToCore::GetExamplesDir()
+QString ACoreScriptInterface::GetExamplesDir()
 {
     if (!ScriptManager->ExamplesDir) return QString();
     else return *ScriptManager->ExamplesDir;
 }
 
-QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fileNamePattern)
+QVariant ACoreScriptInterface::SetNewFileFinder(const QString dir, const QString fileNamePattern)
 {
     Finder_Dir = dir;
     Finder_NamePattern = fileNamePattern;
@@ -478,7 +475,7 @@ QVariant AInterfaceToCore::SetNewFileFinder(const QString dir, const QString fil
     return res;
 }
 
-QVariant AInterfaceToCore::GetNewFiles()
+QVariant ACoreScriptInterface::GetNewFiles()
 {
     QVariantList newFiles;
     QDir d(Finder_Dir);
@@ -492,18 +489,18 @@ QVariant AInterfaceToCore::GetNewFiles()
     return newFiles;
 }
 
-void AInterfaceToCore::processEvents()
+void ACoreScriptInterface::processEvents()
 {
     qApp->processEvents();
 }
 
-void AInterfaceToCore::reportProgress(int percents)
+void ACoreScriptInterface::reportProgress(int percents)
 {
     emit ScriptManager->reportProgress(percents);
     qApp->processEvents();
 }
 
-void AInterfaceToCore::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
+void ACoreScriptInterface::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
 {
 #ifdef USE_EIGEN
     QVariantList vlX = x.toList();
@@ -522,7 +519,7 @@ void AInterfaceToCore::setCurveFitter(double min, double max, int nInt, QVariant
 #endif
 }
 
-double AInterfaceToCore::getFitted(double x)
+double ACoreScriptInterface::getFitted(double x)
 {
 #ifdef USE_EIGEN
     if (!CurF) return 0;
@@ -534,7 +531,7 @@ double AInterfaceToCore::getFitted(double x)
 #endif
 }
 
-const QVariant AInterfaceToCore::getFittedArr(const QVariant array)
+const QVariant ACoreScriptInterface::getFittedArr(const QVariant array)
 {
 #ifdef USE_EIGEN
     if (!CurF) return 0;
@@ -551,7 +548,7 @@ const QVariant AInterfaceToCore::getFittedArr(const QVariant array)
 #endif
 }
 
-bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)
+bool ACoreScriptInterface::createFile(QString fileName, bool AbortIfExists)
 {
   if (QFileInfo(fileName).exists())
     {
@@ -574,17 +571,17 @@ bool AInterfaceToCore::createFile(QString fileName, bool AbortIfExists)
   return true;
 }
 
-bool AInterfaceToCore::isFileExists(QString fileName)
+bool ACoreScriptInterface::isFileExists(QString fileName)
 {
     return QFileInfo(fileName).exists();
 }
 
-bool AInterfaceToCore::deleteFile(QString fileName)
+bool ACoreScriptInterface::deleteFile(QString fileName)
 {
     return QFile(fileName).remove();
 }
 
-bool AInterfaceToCore::createDir(QString path)
+bool ACoreScriptInterface::createDir(QString path)
 {
     //QDir dir(path);
     //return dir.mkdir(".");
@@ -592,171 +589,12 @@ bool AInterfaceToCore::createDir(QString path)
     return dir.mkpath(path);
 }
 
-QString AInterfaceToCore::getCurrentDir()
+QString ACoreScriptInterface::getCurrentDir()
 {
     return QDir::currentPath();
 }
 
-bool AInterfaceToCore::setCirrentDir(QString path)
+bool ACoreScriptInterface::setCirrentDir(QString path)
 {
     return QDir::setCurrent(path);
 }
-// ------------- End of CORE --------------
-
-// ------------- MATH ------------
-
-AInterfaceToMath::AInterfaceToMath(TRandom2* RandGen)
-{
-  Description = "Expanded math module; implemented using std and CERN ROOT functions";
-
-  //srand (time(NULL));
-    this->RandGen = RandGen;
-
-  H["random"] = "Returns a random number between 0 and 1.\nGenerator respects the seed set by SetSeed method of the sim module!";
-  H["gauss"] = "Returns a random value sampled from Gaussian distribution with mean and sigma given by the user";
-  H["poisson"] = "Returns a random value sampled from Poisson distribution with mean given by the user";
-  H["maxwell"] = "Returns a random value sampled from maxwell distribution with Sqrt(kT/M) given by the user";
-  H["exponential"] = "Returns a random value sampled from exponential decay with decay time given by the user";
-}
-
-void AInterfaceToMath::setRandomGen(TRandom2 *RandGen)
-{
-  this->RandGen = RandGen;
-}
-
-double AInterfaceToMath::abs(double val)
-{
-  return std::abs(val);
-}
-
-double AInterfaceToMath::acos(double val)
-{
-  return std::acos(val);
-}
-
-double AInterfaceToMath::asin(double val)
-{
-  return std::asin(val);
-}
-
-double AInterfaceToMath::atan(double val)
-{
-  return std::atan(val);
-}
-
-double AInterfaceToMath::atan2(double y, double x)
-{
-  return std::atan2(y, x);
-}
-
-double AInterfaceToMath::ceil(double val)
-{
-  return std::ceil(val);
-}
-
-double AInterfaceToMath::cos(double val)
-{
-  return std::cos(val);
-}
-
-double AInterfaceToMath::exp(double val)
-{
-  return std::exp(val);
-}
-
-double AInterfaceToMath::floor(double val)
-{
-  return std::floor(val);
-}
-
-double AInterfaceToMath::log(double val)
-{
-  return std::log(val);
-}
-
-double AInterfaceToMath::max(double val1, double val2)
-{
-  return std::max(val1, val2);
-}
-
-double AInterfaceToMath::min(double val1, double val2)
-{
-  return std::min(val1, val2);
-}
-
-double AInterfaceToMath::pow(double val, double power)
-{
-  return std::pow(val, power);
-}
-
-double AInterfaceToMath::sin(double val)
-{
-  return std::sin(val);
-}
-
-double AInterfaceToMath::sqrt(double val)
-{
-  return std::sqrt(val);
-}
-
-double AInterfaceToMath::tan(double val)
-{
-    return std::tan(val);
-}
-
-double AInterfaceToMath::round(double val)
-{
-  int f = std::floor(val);
-  if (val>0)
-    {
-      if (val - f < 0.5) return f;
-      else return f+1;
-    }
-  else
-    {
-      if (val - f < 0.5 ) return f;
-      else return f+1;
-    }
-}
-
-double AInterfaceToMath::random()
-{
-  //return rand()/(double)RAND_MAX;
-
-  if (!RandGen) return 0;
-  return RandGen->Rndm();
-}
-
-double AInterfaceToMath::gauss(double mean, double sigma)
-{
-  if (!RandGen) return 0;
-  return RandGen->Gaus(mean, sigma);
-}
-
-double AInterfaceToMath::poisson(double mean)
-{
-  if (!RandGen) return 0;
-  return RandGen->Poisson(mean);
-}
-
-double AInterfaceToMath::maxwell(double a)
-{
-  if (!RandGen) return 0;
-
-  double v2 = 0;
-  for (int i=0; i<3; i++)
-    {
-      double v = RandGen->Gaus(0, a);
-      v *= v;
-      v2 += v;
-    }
-  return std::sqrt(v2);
-}
-
-double AInterfaceToMath::exponential(double tau)
-{
-    if (!RandGen) return 0;
-    return RandGen->Exp(tau);
-}
-
-// ------------- End of MATH -------------

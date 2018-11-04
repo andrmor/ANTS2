@@ -26,7 +26,10 @@ public:
     ~AJavaScriptManager();
 
     //configuration
-    virtual void    SetInterfaceObject(QObject* interfaceObject, QString name = "") override;
+    //virtual void    SetInterfaceObject(QObject* interfaceObject, QString name = "") override;
+    virtual void    RegisterInterfaceAsGlobal(AScriptInterface* interface) override;
+    virtual void    RegisterCoreInterfaces(bool bCore = true, bool bMath = true) override;
+    virtual void    RegisterInterface(AScriptInterface* interface, const QString& name) override;
 
     //run
     virtual int     FindSyntaxError(const QString &script) override; //returns line number of the first syntax error; -1 if no errors found
@@ -50,7 +53,7 @@ public:
     QScriptValue    getProperty(const QString& properyName) const;
     QScriptValue    registerNewVariant(const QVariant &Variant);
     QScriptValue    EvaluationResult;
-    AInterfaceToCore* coreObj = 0;  //core interface - to forward evaluate-script-in-script
+    ACoreScriptInterface* coreObj = 0;  //core interface - to forward evaluate-script-in-script
 
 public slots:
 #ifdef GUI
@@ -65,6 +68,8 @@ private:
     QVector<AScriptMessengerDialog*> ThreadMessangerDialogs;
 #endif
 
+private:
+    void doRegister(AScriptInterface *interface, const QString &name);
 };
 
 #endif // AJAVASCRIPTMANAGER_H

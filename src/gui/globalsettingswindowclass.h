@@ -4,7 +4,6 @@
 #include <QMainWindow>
 
 class MainWindow;
-class GlobalSettingsClass;
 class ANetworkModule;
 class AInterfaceToGStyleScript;
 
@@ -110,10 +109,7 @@ private slots:
 
 private:
   Ui::GlobalSettingsWindowClass *ui;
-
   MainWindow* MW;
-  GlobalSettingsClass* GlobSet; //just an alias, read from MW
-
 };
 
 #endif // GLOBALSETTINGSWINDOWCLASS_H

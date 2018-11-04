@@ -7,12 +7,14 @@
 #include <QVector>
 #include <QThread>
 #include <QTimer>
+#include <QJsonObject>
 
 // forward declarations
 class AConfiguration;
+class AGlobalSettings;
 struct AEnergyDepositionCell;
 class GeoMarkerClass;
-class AParticleOnStack;
+class AParticleRecord;
 class AMaterialParticleCollection;
 class EventsDataClass;
 class GeneralSimSettings;
@@ -32,10 +34,8 @@ class OutputWindow;
 class QComboBox;
 class TH1D;
 class TH1I;
-class ParticleSourcesClass;
 class WindowNavigatorClass;
 class GeometryWindowAddOn;
-class GlobalSettingsClass;
 class GlobalSettingsWindowClass;
 class GainEvaluatorWindowClass;
 class TApplication;
@@ -54,9 +54,10 @@ class ASimulationManager;
 class AScriptWindow;
 class ALrfWindow;
 class ANetworkModule;
-struct ParticleSourceStructure;
+struct AParticleSourceRecord;
 class ARemoteWindow;
 class AWebSocketServerDialog;
+class AParticleGun;
 
 #ifdef ANTS_FANN
 class NeuralNetworksWindow;
@@ -78,8 +79,7 @@ public:
                ASimulationManager *SimulationManager,
                AReconstructionManager *ReconstructionManager,
                ANetworkModule *Net,
-               TmpObjHubClass *TmpHub,
-               GlobalSettingsClass *GlobSet);
+               TmpObjHubClass *TmpHub);
     ~MainWindow();
 
     // Pointers to external resources
@@ -90,11 +90,10 @@ public:
     EventsDataClass *EventsDataHub = 0;
     TApplication *RootApp = 0;
     ASimulationManager* SimulationManager = 0;
-    ParticleSourcesClass* ParticleSources = 0;
     AReconstructionManager *ReconstructionManager = 0;
     ANetworkModule* NetModule = 0;
     TmpObjHubClass *TmpHub = 0;
-    GlobalSettingsClass* GlobSet = 0;
+    AGlobalSettings& GlobSet;
 
     // ANTS2 windows
     GraphWindowClass *GraphWindow = 0;
@@ -126,7 +125,7 @@ public:
     //local data, just for GUI
     QVector<AEnergyDepositionCell*> EnergyVector;
     QVector<GeoMarkerClass*> GeoMarkers;
-    QVector<AParticleOnStack*> ParticleStack;
+    QVector<AParticleRecord*> ParticleStack;
 
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
@@ -161,7 +160,7 @@ public:
 
     void writeDetectorToJson(QJsonObject &json); //GDML is NOT here
     bool readDetectorFromJson(QJsonObject &json);
-    void writeSimSettingsToJson(QJsonObject &json, bool fVerbose = false);  //true - save point and source settings
+    void writeSimSettingsToJson(QJsonObject &json);
     bool readSimSettingsFromJson(QJsonObject &json);
 
     //save data to file - public due to batch mode usage
@@ -228,13 +227,15 @@ public slots:
     void ShowGeometrySlot();
 
 private slots:
+    void updateFileParticleGeneratorGui();
+    void updateScriptParticleGeneratorGui();
+
     void on_pbAddParticleToStack_clicked();
     void on_pbRemoveFromStack_clicked();
     void on_pbRefreshMaterials_clicked();
     void on_cbXbyYarray_stateChanged(int arg1);
     void on_cbRingsArray_stateChanged(int arg1);
     void on_pbRefreshOverrides_clicked();
-    void on_pbOverride_clicked();
     void on_pbStartMaterialInspector_clicked();
     void on_pbAddparticleToActive_clicked();
     void on_cobParticleToInspect_currentIndexChanged(int index);
@@ -283,17 +284,7 @@ private slots:
     void on_pbPMtypeShowAngular_clicked();
     void on_pbPMtypeDeleteAngular_clicked();
     void on_pbPMtypeShowEffectiveAngular_clicked();
-    void on_cobGunSourceType_currentIndexChanged(int index);    
     void on_pbGunTest_clicked();
-    void on_pbGunRefreshparticles_clicked();
-    void on_pbGunAddNew_clicked();
-    void on_pbGunRemove_clicked();
-    void on_cobGunParticle_activated(int index);
-    void on_ledGunEnergy_editingFinished();
-    void on_ledGunParticleWeight_editingFinished();
-    void on_pbGunLoadSpectrum_clicked();
-    void on_pbGunShowSpectrum_clicked();
-    void on_pbGunDeleteSpectrum_clicked();
     void on_ledGunAverageNumPartperEvent_editingFinished();
     void on_ledMediumRefrIndex_editingFinished();
     void on_pbPMtypeLoadArea_clicked();
@@ -370,7 +361,6 @@ private slots:
     void LoadSimTreeRequested();
     void on_pbRemoveSource_clicked();
     void on_pbAddSource_clicked();
-    void on_pbUpdateSources_clicked();
     void on_pbUpdateSourcesIndication_clicked();
     void on_pbGunShowSource_toggled(bool checked);
 
@@ -394,10 +384,12 @@ public:
 
     bool fSimDataNotSaved = false;
 
+    QJsonObject OvTesterSettings;
+
     void createScriptWindow();
 
     void SimGeneralConfigToJson(QJsonObject &jsonMaster);                              //Save to JSON general options of simulation
-    void SimPointSourcesConfigToJson(QJsonObject &jsonMaster, bool fVerbose = false);  //Save to JSON config for PointSources simulation
+    void SimPointSourcesConfigToJson(QJsonObject &jsonMaster);  //Save to JSON config for PointSources simulation
     void SimParticleSourcesConfigToJson(QJsonObject &json);     //Save to JSON config for ParticleSources simulation
     void updatePMArrayDataIndication();
     void writeLoadExpDataConfigToJson(QJsonObject &json);
@@ -413,6 +405,9 @@ public:
     void UpdateCustomScanNodesIndication();
     void CalculateIndividualQEPDE(); //Public for use in scripting
     void clearEnergyVector();
+    void ShowSource(const AParticleSourceRecord *p, bool clear = true);
+    void TestParticleGun(AParticleGun *ParticleSources, int numParticles);
+
 private:
     bool startupDetector();  //on ANTS start load/create detector
     void PointSource_UpdateTabWidget();
@@ -433,8 +428,6 @@ private:
     int LoadSPePHSfile(QString fileName, QVector<double>* SPePHS_x, QVector<double>* SPePHS);                   ///see MainWindowDiskIO.cpp    
     QStringList LoadedEventFiles, LoadedTreeFiles;
 
-    void ShowSource(int isource, bool clear = true);
-
     QString CheckerScript;
 
     QVector<ScanFloodStructure> ScanFloodNoise;
@@ -451,6 +444,10 @@ private:
 
     bool fStopLoadRequested;
 
+    bool bOptOvDialogPositioned = false;
+    QSize OptOvDialogSize;
+    QPoint OptOvDialogPosition;
+
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
     void ViewChangeRelFactors(QString options);    
@@ -458,8 +455,6 @@ private:
 private slots:
     void timerTimeout(); //timer-based update of Root events
 
-    void on_cbIndividualParticle_clicked(bool checked);
-    void on_ledLinkingProbability_editingFinished();
     void on_pbShowCheckUpWindow_clicked();
     void on_lePreprocessingMultiply_editingFinished();
     void on_extractPedestals_clicked();   
@@ -481,7 +476,6 @@ private slots:
     void on_actionSave_configuration_triggered();
     void on_actionLoad_configuration_triggered();
     void on_pbRemoveParticle_clicked();
-    void on_lwGunParticles_currentRowChanged(int currentRow);
     void on_pbSaveParticleSource_clicked();
     void on_pbLoadParticleSource_clicked();
     void on_pbSaveResults_clicked();
@@ -489,7 +483,6 @@ private slots:
     void on_lwLoadedEventsFiles_itemChanged(QListWidgetItem *item);
     void on_pobTest_clicked();
     void on_actionGain_evaluation_triggered();
-    void on_leiParticleLinkedTo_editingFinished();
     void on_cbLRFs_toggled(bool checked);  
     void on_pbClearAdd_clicked();
     void on_pbClearMulti_clicked();
@@ -502,16 +495,10 @@ private slots:
     void on_cobXYtype_activated(int index);
     void on_cobTOP_activated(int index);
     void on_actionNew_detector_triggered();
-    void on_pbSurfaceWLS_Show_clicked();
-    void on_pbSurfaceWLS_Load_clicked();
-    void on_pbSurfaceWLS_ShowSpec_clicked();
-    void on_pbSurfaceWLS_LoadSpec_clicked();
     void on_pbReloadTreeData_clicked();
-    void on_pbRenameSource_clicked();
     void on_pbStopLoad_clicked();
     void on_pbConfigureNumberOfThreads_clicked();
     void on_cobFixedDirOrCone_currentIndexChanged(int index);
-    void on_cbLinkingOpposite_clicked(bool checked);
     void on_pbShowComptonAngles_clicked();
     void on_pbShowComptonEnergies_clicked();
     void on_pbCheckRandomGen_clicked();
@@ -539,9 +526,6 @@ private slots:
     void on_actionSave_Load_windows_status_on_Exit_Init_toggled(bool arg1);
     void on_pbShowEnergyDeposition_clicked();
     void on_pbUpdateElectronics_clicked();
-    void on_ledSimplisticAbs_editingFinished();
-    void on_ledSimplisticSpecular_editingFinished();
-    void on_ledSimplisticScatter_editingFinished();
     void on_pbOverlay_clicked();
     void on_pbScalePDE_clicked();
     void on_pbLoadManifestFile_clicked();
@@ -553,15 +537,6 @@ private slots:
     void on_cobLoadDataType_customContextMenuRequested(const QPoint &pos);
     void on_pbManuscriptExtractNames_clicked();
     void on_pbShowDetailedLog_clicked();
-    void on_pbCSMtestmany_clicked();
-    void on_pbST_showTracks_clicked();
-    void on_pbST_AngleCos_clicked();
-    void on_lwOverrides_itemClicked(QListWidgetItem *item);
-    void on_pbST_uniform_clicked();
-    void on_pbST_RvsAngle_clicked();
-    void on_pbST_ReflectionVsParameter_clicked();
-    void on_pbST_VsParameterHelp_clicked();
-    void on_cobST_ShowWhatRef_activated(int index);
     void on_actionGlobal_script_triggered();
     void on_pbLockGui_clicked();
     void on_pbUnlockGui_clicked();
@@ -574,14 +549,12 @@ private slots:
     void on_cbEnableMCcrosstalk_toggled(bool checked);
     void on_pbRemoveCellMCcrosstalk_clicked();
     void on_pbMCnormalize_clicked();
-    void on_leSourceLimitMaterial_textChanged(const QString &arg1);
     void on_leLimitNodesObject_textChanged(const QString &arg1);
     void on_cbLimitNodesOutsideObject_toggled(bool checked);
     void on_bpResults_clicked();
     void on_pobTest_2_clicked();
     void on_bpResults_2_clicked();
     void on_actionScript_window_triggered();
-    void on_cobParticleSource_activated(int index);
     void on_actionQuick_save_1_triggered();
     void on_actionQuick_save_2_triggered();
     void on_actionQuick_save_3_triggered();
@@ -597,52 +570,56 @@ private slots:
     void on_actionQuick_load_3_hovered();
     void on_actionLoad_last_config_hovered();
     void on_cobPartPerEvent_currentIndexChanged(int index);
-
     void on_actionOpen_Python_window_triggered();
-
     void on_ledElNoiseSigma_Norm_editingFinished();
-
     void on_cbDarkCounts_Enable_toggled(bool checked);
-
     void on_pbDarkCounts_Show_clicked();
-
     void on_pbDarkCounts_Load_clicked();
-
     void on_pbDarkCounts_Delete_clicked();
-
     void on_pushButton_clicked();
-
     void on_cobDarkCounts_Model_currentIndexChanged(int index);
-
     void on_cobDarkCounts_LoadOptions_currentIndexChanged(int index);
-
     void on_actionServer_window_triggered();
-
     void on_actionServer_settings_triggered();
-
-    void on_pbSSO_Load_clicked();
-
-    void on_pbSSO_Show_clicked();
-
-    void on_pbSSO_Binned_clicked();
-
-    void on_cobSSO_ScatterModel_activated(int index);
-
-    void on_ledSSO_EffWave_editingFinished();
-
     void on_actionGrid_triggered();
-
     void on_pbOpenTrackProperties_Phot_clicked();
-
     void on_pbTrackOptionsGun_clicked();
-
     void on_pbTrackOptionsStack_clicked();
-
     void on_pbQEacceleratorWarning_clicked();
-
     void on_ledSphericalPMAngle_editingFinished();
+    void on_pbEditOverride_clicked();
+    void on_lwOverrides_itemDoubleClicked(QListWidgetItem *item);
+    void on_lwOverrides_itemSelectionChanged();
 
-    void on_cobSurfaceWLS_Model_activated(int index);
+    void on_pbShowOverrideMap_clicked();
+
+    void on_pbStopScan_clicked();
+
+    void on_pbPMtypeHelp_clicked();
+
+    void on_pbEditParticleSource_clicked();
+
+    void on_lwDefinedParticleSources_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_lwDefinedParticleSources_itemClicked(QListWidgetItem *item);
+
+    void on_pbGenerateFromFile_Help_clicked();
+
+    void on_pbGenerateFromFile_Change_clicked();
+
+    void on_leGenerateFromFile_FileName_editingFinished();
+
+    void on_pbGenerateFromFile_Check_clicked();
+
+    void on_pbTrackOptionsGun_customContextMenuRequested(const QPoint &pos);
+
+    void on_pbOpenTrackProperties_Phot_customContextMenuRequested(const QPoint &pos);
+
+    void on_twParticleGenerationMode_currentChanged(int index);
+
+    void on_pbParticleGenerationScript_clicked();
+
+    void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
 
 public slots:
     void on_pbRebuildDetector_clicked();
@@ -658,12 +635,8 @@ public slots:
 
 private:
     void initDetectorSandwich();
-    void SourceUpdateThisParticleIndication();
     void onGuiEnableStatus(bool fLocked);
-    void clearParticleSourcesIndication();   
-    void updateOneParticleSourcesIndication(ParticleSourceStructure *ps);
     void ShowParticleSource_noFocus();
-    void updateActivityIndication();
 
 #ifdef __USE_ANTS_PYTHON__
     void createPythonScriptWindow();
@@ -675,10 +648,11 @@ public slots:
     void OnWarningMessage(QString text);
     void OnDetectorColorSchemeChanged(int scheme, int matId);    
     void OnSlabDoubleClicked(QString SlabName);
-    void onNewConfigLoaded();
-
+    void onNewConfigLoaded();    
+    void onOpticalOverrideDialogAccepted();
 signals:
     void RequestStopLoad();
+    void RequestUpdateSimConfig(); //used to delay execution (quesued connection have to be used). Used in Lambda expression!
 };
 
 #endif // MAINWINDOW_H

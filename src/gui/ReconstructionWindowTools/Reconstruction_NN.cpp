@@ -7,7 +7,7 @@
 #include "graphwindowclass.h"
 #include "windownavigatorclass.h"
 #include "areconstructionmanager.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "graphwindowclass.h"
@@ -78,8 +78,8 @@ void ReconstructionWindow::on_pbNNshowSpectrum_clicked()
       for (int i=0;i<100;i++) MyPalette[i] = FI+i;
     }
 
-  auto hist1D = new TH1D("NNtmp1","NN_distance", MW->GlobSet->BinsX, minD, maxD);
-  auto hist1D2 = new TH1D("NNtmp2","NN_distance", MW->GlobSet->BinsX, minD, maxD);
+  auto hist1D = new TH1D("NNtmp1","NN_distance", MW->GlobSet.BinsX, minD, maxD);
+  auto hist1D2 = new TH1D("NNtmp2","NN_distance", MW->GlobSet.BinsX, minD, maxD);
   for (int iev=0; iev<numEvents; iev++)
     {
        float dist = MW->ReconstructionManager->KNNmodule->Filter.getAverageDist(iev);

@@ -9,6 +9,7 @@
 #include "aphoton.h"
 #include "atrackrecords.h"
 #include "amonitor.h"
+#include "atracerstateful.h"
 
 //Qt
 #include <QDebug>
@@ -31,10 +32,15 @@ APhotonTracer::APhotonTracer(TGeoManager *geoManager, TRandom2 *RandomGenerator,
     fGridShiftOn = false;
     fBuildTracks = false;
     p = new APhoton();
+    ResourcesForOverrides = new ATracerStateful(RandGen);
+
+    //for transfer to overrides
+    ResourcesForOverrides->generateScriptInfrastructureIfNeeded(MaterialCollection);
 }
 
 APhotonTracer::~APhotonTracer()
 {
+    delete ResourcesForOverrides;
     delete p;
 }
 
@@ -49,7 +55,8 @@ void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEv
 }
 
 void APhotonTracer::TracePhoton(const APhoton* Photon)
-{ 
+{
+  if (bAbort) return;
   //qDebug() << "----accel is on?"<<SimSet->fQEaccelerator<< "Build tracks?"<<fBuildTracks;
   //accelerators
   if (SimSet->fQEaccelerator)
@@ -228,7 +235,10 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
          //qDebug() << "Overrides defined! Model = "<<ov->getType();
          N = navigator->FindNormal(kFALSE);
          fHaveNormal = true;
-         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(RandGen, p, N);
+         const double* PhPos = navigator->GetCurrentPoint();
+         for (int i=0; i<3; i++) p->r[i] = PhPos[i];
+         AOpticalOverride::OpticalOverrideResultEnum result = ov->calculate(*ResourcesForOverrides, p, N);
+         if (bAbort) return;
 
          switch (result)
            {
@@ -236,7 +246,7 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                //qDebug() << "-Override: absorption triggered";
                navigator->PopDummy(); //clean up the stack
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Loss, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Loss, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideLoss++;
                goto force_stop_tracing; //finished with this photon
            case AOpticalOverride::Back:
@@ -244,21 +254,22 @@ void APhotonTracer::TracePhoton(const APhoton* Photon)
                navigator->PopPoint();  //remaining in the original volume
                navigator->SetCurrentDirection(p->v); //updating direction
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Back, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameFrom, p->time, p->waveIndex, APhotonHistoryLog::Override_Back, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideBack++;
                continue; //send to the next iteration
            case AOpticalOverride::Forward:
                navigator->SetCurrentDirection(p->v); //updating direction
                fDoFresnel = false; //stack cleaned afterwards
                if (SimSet->bDoPhotonHistoryLog)
-                   PhLog.append( APhotonHistoryLog(navigator->GetCurrentPoint(), nameTo, p->time, p->waveIndex, APhotonHistoryLog::Override_Forward, MatIndexFrom, MatIndexTo) );
+                   PhLog.append( APhotonHistoryLog(PhPos, nameTo, p->time, p->waveIndex, APhotonHistoryLog::Override_Forward, MatIndexFrom, MatIndexTo) );
                OneEvent->SimStat->OverrideForward++;
                break; //switch break
            case AOpticalOverride::NotTriggered:
                fDoFresnel = true;
                break; //switch break
            default:
-               qCritical() << "override reported an error!";
+               qCritical() << "override error - doing fresnel instead!";
+               fDoFresnel = true;
            }
        }
      else fDoFresnel = true;
@@ -410,6 +421,12 @@ force_stop_tracing:
 
    //qDebug()<<"Finished with the photon";
    //qDebug() << "Track size:" <<Tracks->size();
+}
+
+void APhotonTracer::hardAbort()
+{
+    bAbort = true;
+    ResourcesForOverrides->abort(); //if script engine is there will abort evaluation
 }
 
 void APhotonTracer::AppendHistoryRecord()

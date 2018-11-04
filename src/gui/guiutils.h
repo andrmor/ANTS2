@@ -8,6 +8,13 @@ class QMainWindow;
 class QWheelEvent;
 class QGraphicsScene;
 
+namespace GuiUtils
+{
+    void SetWindowFont(QMainWindow *w, int ptsize);
+    QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color);
+    void AssureWidgetIsWithinVisibleArea(QWidget* w);
+}
+
 class myQGraphicsView : public QGraphicsView
 {
    Q_OBJECT
@@ -38,10 +45,5 @@ class TableDoubleDelegateClass : public QItemDelegate
                           const QStyleOptionViewItem &/* option */,
                           const QModelIndex &/* index */) const;
 };
-
-void SetWindowFont(QMainWindow *w, int ptsize);
-QIcon createColorCircleIcon(QSize size, Qt::GlobalColor color);
-
-void AssureWidgetIsWithingVisibleArea(QWidget* w);
 
 #endif // GUIUTILS_H

@@ -9,7 +9,7 @@
 #include "geometrywindowclass.h"
 #include "outputwindow.h"
 #include "eventsdataclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "apositionenergyrecords.h"
 #include "windownavigatorclass.h"
@@ -126,8 +126,8 @@ void LRFwindow::showLRF()
     json["Z"] = ui->ledZcenter->text().toDouble();
     json["DZ"] = ui->ledZrange->text().toDouble();
     json["EnergyScaling"] = ui->cbEnergyScalling->isChecked();
-    json["FunctionPointsX"] = MW->GlobSet->FunctionPointsX;
-    json["FunctionPointsY"] = MW->GlobSet->FunctionPointsY;
+    json["FunctionPointsX"] = MW->GlobSet.FunctionPointsX;
+    json["FunctionPointsY"] = MW->GlobSet.FunctionPointsY;
     //json["Bins"] = ui->sbNumBins_2->value();
     //json["ShowNodes"] = ui->cbShowNodePositions->isChecked();
 
@@ -269,9 +269,9 @@ void LRFwindow::SaveLRFDialog(QWidget* wid)
 
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("json");
-  QString fileName = fileDialog->getSaveFileName(this, "Save LRF Block", MW->GlobSet->LastOpenDir, "json files(*.json);;all files(*.*)");
+  QString fileName = fileDialog->getSaveFileName(this, "Save LRF Block", MW->GlobSet.LastOpenDir, "json files(*.json);;all files(*.*)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   int iCur = SensLRF->getCurrentIterIndex();
   if (iCur == -1)
@@ -316,9 +316,9 @@ void LRFwindow::on_pbSaveIterations_clicked()
       return;
     }
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save all Iterations: provided name will be used to create a dir", MW->GlobSet->LastOpenDir, "json files(*.json);;all files(*.*)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save all Iterations: provided name will be used to create a dir", MW->GlobSet.LastOpenDir, "json files(*.json);;all files(*.*)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFileInfo fi(fileName);
   QString dir = fi.baseName();
@@ -352,9 +352,9 @@ void LRFwindow::on_pbLoadLRFs_clicked()
 
 void LRFwindow::LoadLRFDialog(QWidget* wid)
 {
-  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load LRF Block", MW->GlobSet->LastOpenDir, "JSON files (*.json)");
+  QStringList fileNames = QFileDialog::getOpenFileNames(this, "Load LRF Block", MW->GlobSet.LastOpenDir, "JSON files (*.json)");
   if (fileNames.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileNames.first()).absolutePath();
 
   for (int ifile=0; ifile<fileNames.size(); ifile++)
     {
@@ -749,7 +749,7 @@ void LRFwindow::drawRadial()
    json["Z"] = ui->ledZcenter->text().toDouble();
    json["DZ"] = ui->ledZrange->text().toDouble();
    json["EnergyScaling"] = ui->cbEnergyScalling->isChecked();
-   json["FunctionPointsX"] = MW->GlobSet->FunctionPointsX;
+   json["FunctionPointsX"] = MW->GlobSet.FunctionPointsX;
    json["Bins"] = ui->sbNumBins_2->value();
    json["ShowNodes"] = ui->cbShowNodePositions->isChecked();
 
@@ -838,7 +838,7 @@ void LRFwindow::on_pbAxial3DvsZ_clicked()
     double rr[3];
     rr[0] = radius;
     rr[1] = 0;
-    int bins = MW->GlobSet->FunctionPointsX;
+    int bins = MW->GlobSet.FunctionPointsX;
     double stepZ = (z1-z0)/bins;
     for (int i=0; i<bins; i++)
     {
@@ -887,8 +887,8 @@ void LRFwindow::on_pbAxial3DvsRandZ_clicked()
 
     double rr[3];
     rr[1] = 0;
-    int binsR = MW->GlobSet->FunctionPointsX;
-    int binsZ = MW->GlobSet->FunctionPointsY;
+    int binsR = MW->GlobSet.FunctionPointsX;
+    int binsZ = MW->GlobSet.FunctionPointsY;
     double stepR = (r1-r0)/binsR;
     double stepZ = (z1-z0)/binsZ;
     for (int ir=0; ir<binsR; ir++)
@@ -1359,10 +1359,10 @@ void LRFwindow::on_pbRadialToText_clicked()
     }
 
     QString str = ui->sbPMnoButons->text();
-    QString fileName = QFileDialog::getSaveFileName(this, "Save LRF # " +str+ " vs radius", MW->GlobSet->LastOpenDir,
+    QString fileName = QFileDialog::getSaveFileName(this, "Save LRF # " +str+ " vs radius", MW->GlobSet.LastOpenDir,
                                                    "Text files (*.txt);;Data files (*.dat);;All files (*.*)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QFile outputFile(fileName);
     outputFile.open(QIODevice::WriteOnly);
@@ -1455,9 +1455,9 @@ void LRFwindow::on_pbTableToAxial_clicked()
     ui->cob2Dtype->setCurrentIndex(0);
     ui->cbMakePMGroup->setChecked(false);
 
-    QString fileName = QFileDialog::getOpenFileName(this, "LRF table file", MW->GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+    QString fileName = QFileDialog::getOpenFileName(this, "LRF table file", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
     if (fileName.isEmpty()) return;
-    //MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    //MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QFileInfo fi(fileName);
     QString ext = fi.suffix();

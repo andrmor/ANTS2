@@ -2,7 +2,9 @@
 #define APHOTONTRACER_H
 
 #include "aphotonhistorylog.h"
+
 #include <QVector>
+
 #include "TMathBase.h"
 
 class APhoton;
@@ -17,6 +19,7 @@ class TrackHolderClass;
 class TRandom2;
 class TGeoVolume;
 class AGridElementRecord;
+class ATracerStateful;
 
 class APhotonTracer
 {
@@ -37,7 +40,9 @@ public:
 
     void setMaxTracks(int maxTracks) {MaxTracks = maxTracks;}
 
-private:    
+    void hardAbort(); //before using it, give a chance to finish normally using abort at higher levels
+
+private:
     TRandom2* RandGen;
     TGeoManager* GeoManager;
     TGeoNavigator *navigator;    
@@ -48,6 +53,7 @@ private:
     QVector<TrackHolderClass*>* Tracks;
     TrackHolderClass* track;
     QVector<APhotonHistoryLog> PhLog;
+    ATracerStateful* ResourcesForOverrides;
 
     int MaxTracks = 10;
     int PhotonTracksAdded = 0;
@@ -74,6 +80,8 @@ private:
 
     QString nameFrom;
     QString nameTo;
+
+    bool bAbort = false;
 
     enum AbsRayEnum {AbsRayNotTriggered=0, AbsTriggered, RayTriggered, WaveShifted};
     inline AbsRayEnum AbsorptionAndRayleigh();

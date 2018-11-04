@@ -4,6 +4,9 @@
 #include "aopticaloverride.h"
 #include "ajsontools.h"
 #include "acommonfunctions.h"
+#include "atracerstateful.h"
+#include "ascriptopticaloverride.h"
+
 #include <QtDebug>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -46,6 +49,15 @@ void AMaterialParticleCollection::SetWave(bool wavelengthResolved, double waveFr
   WaveNodes = waveNodes;
 }
 
+void AMaterialParticleCollection::GetWave(bool &wavelengthResolved, double &waveFrom, double &waveTo, double &waveStep, int &waveNodes) const
+{
+    wavelengthResolved = WavelengthResolved;
+    waveFrom = WaveFrom;
+    waveTo = WaveTo;
+    waveStep = WaveStep;
+    waveNodes = WaveNodes;
+}
+
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);
@@ -56,10 +68,35 @@ void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(Ge
   }
 }
 
+const QString AMaterialParticleCollection::CheckOverrides()
+{
+    for (AMaterial* mat : MaterialCollectionData)
+        for (AOpticalOverride* ov : mat->OpticalOverrides)
+        if (ov)
+        {
+             QString err = ov->checkOverrideData();
+             if ( !err.isEmpty())
+                 return QString("Error in optical override from %1 to %2:\n").arg(mat->name).arg(getMaterialName(ov->getMaterialTo())) + err;
+        }
+    return QString();
+}
+
 void AMaterialParticleCollection::updateRandomGenForThread(int ID, TRandom2* RandGen)
 {
     for (int imat = 0; imat < MaterialCollectionData.size(); imat++)
         MaterialCollectionData[imat]->UpdateRandGen(ID, RandGen);
+}
+
+bool AMaterialParticleCollection::isScriptOpticalOverrideDefined() const
+{
+    for (AMaterial* mat : MaterialCollectionData)
+        for (AOpticalOverride* ov : mat->OpticalOverrides)
+            if (ov)
+            {
+                AScriptOpticalOverride* sov = dynamic_cast<AScriptOpticalOverride*>(ov);
+                if (sov) return true;
+            }
+    return false;
 }
 
 void AMaterialParticleCollection::getFirstOverridenMaterial(int &ifrom, int &ito)
@@ -75,6 +112,14 @@ QString AMaterialParticleCollection::getMaterialName(int matIndex)
 {
   if (matIndex<0 || matIndex>MaterialCollectionData.size()-1) return "";
   return MaterialCollectionData.at(matIndex)->name;
+}
+
+const QStringList AMaterialParticleCollection::getListOfMaterialNames() const
+{
+    QStringList l;
+    for (AMaterial* m : MaterialCollectionData)
+        l << m->name;
+    return l;
 }
 
 int AMaterialParticleCollection::getParticleId(QString name) const
@@ -106,7 +151,15 @@ double AMaterialParticleCollection::getParticleMass(int particleIndex) const
 
 const AParticle *AMaterialParticleCollection::getParticle(int particleIndex) const
 {
-  return ParticleCollection.at(particleIndex);
+    return ParticleCollection.at(particleIndex);
+}
+
+const QStringList AMaterialParticleCollection::getListOfParticleNames() const
+{
+    QStringList l;
+    for (AParticle* p : ParticleCollection)
+        l << p->ParticleName;
+    return l;
 }
 
 void AMaterialParticleCollection::clearMaterialCollection()
@@ -368,7 +421,7 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
 
       for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
-            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(true, WaveFrom, WaveStep, WaveNodes);
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved();
   }
   else
   {
@@ -390,7 +443,7 @@ void AMaterialParticleCollection::UpdateWaveResolvedProperties(int imat)
 
       for (int ior=0; ior<MaterialCollectionData[imat]->OpticalOverrides.size(); ior++)
         if (MaterialCollectionData[imat]->OpticalOverrides[ior])
-            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved(false, 0, 1, 1);
+            MaterialCollectionData[imat]->OpticalOverrides[ior]->initializeWaveResolved();
   }
 }
 
@@ -645,6 +698,7 @@ void AMaterialParticleCollection::writeMaterialToJson(int imat, QJsonObject &jso
   MaterialCollectionData[imat]->writeToJson(json, this);
 }
 
+#include "abasicopticaloverride.h"
 bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
 {
   readParticleCollectionFromJson(json);
@@ -706,15 +760,23 @@ bool AMaterialParticleCollection::readFromJson(QJsonObject &json)
               continue;
             }
           double Abs, Scat, Spec;
-          int ScatMode;
+          Abs = Scat = Spec = 0;
+          int ScatMode = 1;
           parseJson(jj, "Loss", Abs);
           parseJson(jj, "Ref", Spec);
           parseJson(jj, "Scat", Scat);
           parseJson(jj, "ScatModel", ScatMode);
-          BasicOpticalOverride* ov = new BasicOpticalOverride(this, MatFrom, MatTo, Abs, Spec, Scat, ScatMode );
+          ABasicOpticalOverride* ov = new ABasicOpticalOverride(this, MatFrom, MatTo);
           if (!ov)
             qWarning() << MaterialCollectionData[MatFrom]->name << ": optical override load failed!";
-          else MaterialCollectionData[MatFrom]->OpticalOverrides[MatTo] = ov;
+          else
+          {
+              MaterialCollectionData[MatFrom]->OpticalOverrides[MatTo] = ov;
+              ov->probLoss = Abs;
+              ov->probRef = Spec;
+              ov->probDiff = Scat;
+              ov->scatterModel = ScatMode;
+          }
         }
     }
   fLogLogInterpolation = false;
@@ -842,7 +904,7 @@ void AMaterialParticleCollection::OnRequestListOfParticles(QStringList &definedP
       definedParticles << ParticleCollection.at(i)->ParticleName;
 }
 
-void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames)
+void AMaterialParticleCollection::IsParticleInUse(int particleId, bool &bInUse, QString& MaterialNames) const
 {
   bInUse = false;
   MaterialNames.clear();
@@ -891,4 +953,14 @@ void AMaterialParticleCollection::RemoveParticle(int particleId)
     //removing
     delete ParticleCollection[particleId];
     ParticleCollection.remove(particleId);
+}
+
+int AMaterialParticleCollection::WaveToIndex(double wavelength) const
+{
+    if (!WavelengthResolved) return -1;
+
+    int iwave = round( (wavelength - WaveFrom) / WaveStep );
+    if (iwave >= WaveNodes) iwave = WaveNodes-1;
+    if (iwave < 0) iwave = 0;
+    return iwave;
 }

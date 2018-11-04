@@ -8,7 +8,7 @@ class TGeoManager;
 class TRandom2;
 class AParticle;
 class AMaterial;
-class AParticleOnStack;
+class AParticleRecord;
 struct AEnergyDepositionCell;
 struct EventHistoryStructure;
 class AMaterialParticleCollection;
@@ -24,7 +24,7 @@ public:
     explicit PrimaryParticleTracker(TGeoManager* geoManager,
                                     TRandom2* RandomGenerator,
                                     AMaterialParticleCollection* MpCollection,
-                                    QVector<AParticleOnStack*>* particleStack,
+                                    QVector<AParticleRecord*>* particleStack,
                                     QVector<AEnergyDepositionCell*>* energyVector,
                                     QVector<EventHistoryStructure*>* eventHistory,
                                     ASimulationStatistics* simStat,
@@ -55,7 +55,7 @@ private:
     TGeoManager* GeoManager;
     TRandom2* RandGen;
     AMaterialParticleCollection* MpCollection;
-    QVector<AParticleOnStack*>* ParticleStack;
+    QVector<AParticleRecord*>* ParticleStack;
     QVector<AEnergyDepositionCell*>* EnergyVector;
     QVector<EventHistoryStructure*>* EventHistory;
     ASimulationStatistics* SimStat;

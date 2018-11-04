@@ -2,6 +2,8 @@
 #include "amaterialparticlecolection.h"
 #include "aphoton.h"
 #include "asimulationstatistics.h"
+#include "atracerstateful.h"
+#include "ajsontools.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -9,27 +11,33 @@
 #include "TComplex.h"
 #include "TRandom2.h"
 
-void ScatterOnMetal::printConfiguration(int /*iWave*/)
-{
-  qDebug() << "-------Configuration:-------";
-  qDebug() << "Model:"<<getType();
-  qDebug() << "Real N:"<<RealN;
-  qDebug() << "Imaginary N:"<<ImaginaryN;
-  qDebug() << "----------------------------";
-}
+#ifdef GUI
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#endif
 
-QString ScatterOnMetal::getReportLine()
+const QString ScatterOnMetal::getReportLine() const
 {
-  QString s = "to " + (*MatCollection)[MatTo]->name;
-  QString s1;
-  s1.setNum(MatTo);
-  s += " ("+s1+") --> Scatter on metal: ";
-  s += " n="+QString::number(RealN);
-  s += " k="+QString::number(ImaginaryN);
+  QString s;
+  s += "n = " + QString::number(RealN) + "  ";
+  s += "k = " + QString::number(ImaginaryN);
   return s;
 }
 
-void ScatterOnMetal::writeToJson(QJsonObject &json)
+const QString ScatterOnMetal::getLongReportLine() const
+{
+    QString s = "--> Dielectric to metal <--\n";
+    s += "Refractive index of metal:\n";
+    s += QString("  real: %1\n").arg(RealN);
+    s += QString("  imaginary: %1").arg(ImaginaryN);
+    return s;
+}
+
+void ScatterOnMetal::writeToJson(QJsonObject &json) const
 {
   AOpticalOverride::writeToJson(json);
 
@@ -37,18 +45,51 @@ void ScatterOnMetal::writeToJson(QJsonObject &json)
   json["ImaginaryN"]  = ImaginaryN;
 }
 
-bool ScatterOnMetal::readFromJson(QJsonObject &json)
+bool ScatterOnMetal::readFromJson(const QJsonObject &json)
 {
-  QString type = json["Model"].toString();
-  if (type != getType()) return false; //file for wrong model!
-
-  RealN = json["RealN"].toDouble();
-  ImaginaryN = json["ImaginaryN"].toDouble();
-
-  return true;
+    if ( !parseJson(json, "RealN", RealN) ) return false;
+    if ( !parseJson(json, "ImaginaryN", ImaginaryN) ) return false;
+    return true;
 }
 
-AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *RandGen, APhoton *Photon, const double *NormalVector)
+#ifdef GUI
+QWidget *ScatterOnMetal::getEditWidget(QWidget *, GraphWindowClass *)
+{
+    QFrame* f = new QFrame();
+    f->setFrameStyle(QFrame::Box);
+
+    QHBoxLayout* hl = new QHBoxLayout(f);
+        QVBoxLayout* l = new QVBoxLayout();
+            QLabel* lab = new QLabel("Refractive index, real:");
+        l->addWidget(lab);
+            lab = new QLabel("Refractive index, imaginary:");
+        l->addWidget(lab);
+    hl->addLayout(l);
+        l = new QVBoxLayout();
+            QLineEdit* le = new QLineEdit(QString::number(RealN));
+            QDoubleValidator* val = new QDoubleValidator(f);
+            val->setNotation(QDoubleValidator::StandardNotation);
+            //val->setBottom(0);
+            val->setDecimals(6);
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->RealN = le->text().toDouble(); } );
+        l->addWidget(le);
+            le = new QLineEdit(QString::number(ImaginaryN));
+            le->setValidator(val);
+            QObject::connect(le, &QLineEdit::editingFinished, [le, this]() { this->ImaginaryN = le->text().toDouble(); } );
+        l->addWidget(le);
+    hl->addLayout(l);
+
+    return f;
+}
+#endif
+
+const QString ScatterOnMetal::checkOverrideData()
+{
+    return "";
+}
+
+AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(ATracerStateful &Resources, APhoton *Photon, const double *NormalVector)
 {
   double CosTheta = Photon->v[0]*NormalVector[0] + Photon->v[1]*NormalVector[1] + Photon->v[2]*NormalVector[2];
 
@@ -70,12 +111,11 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *
   double Refl = calculateReflectivity(CosTheta, RealN, ImaginaryN, Photon->waveIndex);
   //qDebug() << "Dielectric-metal override: Cos theta="<<CosTheta<<" Reflectivity:"<<Refl;
 
-  if ( RandGen->Rndm() > Refl )
+  if ( Resources.RandGen->Rndm() > Refl )
     {
       //Absorption
       //qDebug() << "Override: Loss on metal";
       Status = Absorption;
-      Photon->SimStat->OverrideMetalAbs++;
       return Absorbed;
     }
 
@@ -85,7 +125,6 @@ AOpticalOverride::OpticalOverrideResultEnum ScatterOnMetal::calculate(TRandom2 *
   double NK = NormalVector[0]*Photon->v[0]; NK += NormalVector[1]*Photon->v[1];  NK += NormalVector[2]*Photon->v[2];
   Photon->v[0] -= 2.0*NK*NormalVector[0]; Photon->v[1] -= 2.0*NK*NormalVector[1]; Photon->v[2] -= 2.0*NK*NormalVector[2];
   Status = SpikeReflection;
-  Photon->SimStat->OverrideMetalReflection++;
   return Back;
 }
 

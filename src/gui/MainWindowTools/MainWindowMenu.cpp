@@ -10,7 +10,7 @@
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "lrfwindow.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "detectoraddonswindow.h"
 #include "detectorclass.h"
 #include "ajsontools.h"
@@ -129,6 +129,11 @@ void MainWindow::on_actionReset_position_of_windows_triggered()
        GraphWindow->showNormal();
        GraphWindow->raise();
    }
+
+   bOptOvDialogPositioned = false;
+
+   OvTesterSettings["PositionX"] = -1;
+   OvTesterSettings["PositionY"] = -1;
 }
 
 void addWindow(QString name, QMainWindow* w, QJsonObject &json)
@@ -185,9 +190,18 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   js["h"] = ScriptWinH;
   json["Script"] = js;
 
+  QJsonObject jsOD;
+  jsOD["x"] = OptOvDialogPosition.x();
+  jsOD["y"] = OptOvDialogPosition.y();
+  jsOD["w"] = OptOvDialogSize.width();
+  jsOD["h"] = OptOvDialogSize.height();
+  json["OptOvDialog"] = jsOD;
+
+  json["OptOvTester"] = OvTesterSettings;
+
   //QString configDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/ants2";
   //if (!QDir(configDir).exists()) QDir().mkdir(configDir);
-  QString fileName = GlobSet->ConfigDir + "/WindowConfig.ini";
+  QString fileName = GlobSet.ConfigDir + "/WindowConfig.ini";
   bool bOK = SaveJsonToFile(json, fileName);
   if (!bOK) message("Failed to save json to file: "+fileName, this);
 }
@@ -208,7 +222,7 @@ void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
   if (js.contains("maximized")) fMaxi = js["maximized"].toBool();
   bool fVis = js["vis"].toBool();
 
-  AssureWidgetIsWithingVisibleArea(w);
+  GuiUtils::AssureWidgetIsWithinVisibleArea(w);
 
   if (fVis || fMaxi) w->showNormal();
   if (fMaxi)
@@ -220,7 +234,7 @@ void readXYwindow(QString key, QMainWindow* w, bool fWH, QJsonObject &json)
 
 void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
 {
-  QString fileName = GlobSet->ConfigDir + "/WindowConfig.ini";
+  QString fileName = GlobSet.ConfigDir + "/WindowConfig.ini";
   if (QFile(fileName).exists())
     {
       QJsonObject json;
@@ -254,6 +268,21 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           parseJson(js, "h", ScriptWinH);
           if (GenScriptWindow) recallGeometryOfLocalScriptWindow();
         }
+
+      if (json.contains("OptOvDialog"))
+      {
+          QJsonObject jsOD = json["OptOvDialog"].toObject();
+          int x, y, w, h;
+          parseJson(jsOD, "x", x);
+          parseJson(jsOD, "y", y);
+          OptOvDialogPosition = QPoint(x, y);
+          parseJson(jsOD, "w", w);
+          parseJson(jsOD, "h", h);
+          OptOvDialogSize = QSize(w, h);
+          bOptOvDialogPositioned = true;
+      }
+
+      parseJson(json, "OptOvTester", OvTesterSettings);
     }
 }
 
@@ -315,9 +344,9 @@ void MainWindow::CorrectPreprocessingAdds(QVector<double> Pedestals)
 void MainWindow::on_actionSave_configuration_triggered()
 {
   QFileDialog fileDialog;
-  QString fileName = fileDialog.getSaveFileName(this, "Save configuration", GlobSet->LastOpenDir, "Json files (*.json)");
+  QString fileName = fileDialog.getSaveFileName(this, "Save configuration", GlobSet.LastOpenDir, "Json files (*.json)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   QFileInfo file(fileName);
   if(file.suffix().isEmpty()) fileName += ".json";
   ELwindow->SaveConfig(fileName);
@@ -326,9 +355,9 @@ void MainWindow::on_actionSave_configuration_triggered()
 void MainWindow::on_actionLoad_configuration_triggered()
 {
   QFileDialog fileDialog;
-  QString fileName = fileDialog.getOpenFileName(this,"Load configuration", GlobSet->LastOpenDir, "All files (*.*)");
+  QString fileName = fileDialog.getOpenFileName(this,"Load configuration", GlobSet.LastOpenDir, "All files (*.*)");
   if (fileName.isEmpty()) return;
-  GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
   bool bOK = Config->LoadConfig(fileName);
   if (!bOK) message(Config->ErrorString, this);
   if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry();
@@ -345,7 +374,7 @@ void MainWindow::on_actionNew_detector_triggered()
   int ret = msgBox.exec();
   if (ret == QMessageBox::Cancel) return;
 
-  Config->LoadConfig(GlobSet->ExamplesDir + "/Simplest.json");
+  Config->LoadConfig(GlobSet.ExamplesDir + "/Simplest.json");
   if (ELwindow->isVisible()) ELwindow->hide();
   if (GeometryWindow->isVisible()) GeometryWindow->ShowGeometry(false);
 }

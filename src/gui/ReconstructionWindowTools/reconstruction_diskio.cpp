@@ -5,7 +5,7 @@
 #include "jsonparser.h"
 #include "eventsdataclass.h"
 #include "windownavigatorclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "detectorclass.h"
 #include "amessage.h"
 #include "globalsettingswindowclass.h"
@@ -164,9 +164,9 @@ void ReconstructionWindow::on_pbSaveScanTree_clicked()
       return;
     }
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save sigma/distortion information", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save sigma/distortion information", MW->GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QString path = QFileInfo(fileName).absoluteDir().absolutePath();
   QString suffix = QFileInfo(fileName).suffix();
@@ -207,9 +207,9 @@ void ReconstructionWindow::on_pbSaveReconstructionAsText_clicked()
       return;
     }  
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save reconstruction data", MW->GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save reconstruction data", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*.*)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QString path = QFileInfo(fileName).absoluteDir().absolutePath();
   QString suffix = QFileInfo(fileName).suffix();
@@ -256,13 +256,13 @@ void ReconstructionWindow::on_pbSaveReconstructionAsRootTree_clicked()
 
       QCheckBox* cbSig = new QCheckBox("Include PM signals", &D);
       l->addWidget(cbSig);
-      cbSig->setChecked(MW->GlobSet->RecTreeSave_IncludePMsignals);
+      cbSig->setChecked(MW->GlobSet.RecTreeSave_IncludePMsignals);
       QCheckBox* cbRho = new QCheckBox("Include rho array (distance reconstructed->PM center)", &D);
       l->addWidget(cbRho);
-      cbRho->setChecked(MW->GlobSet->RecTreeSave_IncludeRho);
+      cbRho->setChecked(MW->GlobSet.RecTreeSave_IncludeRho);
       QCheckBox* cbTrue = new QCheckBox("Include true data for simulation/calibration datasets", &D);
       l->addWidget(cbTrue);
-      cbTrue->setChecked(MW->GlobSet->RecTreeSave_IncludeTrue);
+      cbTrue->setChecked(MW->GlobSet.RecTreeSave_IncludeTrue);
 
       QPushButton* pb = new QPushButton("Confirm", &D);
       l->addWidget(pb);
@@ -275,15 +275,15 @@ void ReconstructionWindow::on_pbSaveReconstructionAsRootTree_clicked()
       if (D.result() == QDialog::Rejected) return;
 
       DontShowTodayOnSaveTree =  (cbDont->isChecked());
-      MW->GlobSet->RecTreeSave_IncludePMsignals = cbSig->isChecked();
-      MW->GlobSet->RecTreeSave_IncludeRho = cbRho->isChecked();
-      MW->GlobSet->RecTreeSave_IncludeTrue = cbTrue->isChecked();      
+      MW->GlobSet.RecTreeSave_IncludePMsignals = cbSig->isChecked();
+      MW->GlobSet.RecTreeSave_IncludeRho = cbRho->isChecked();
+      MW->GlobSet.RecTreeSave_IncludeTrue = cbTrue->isChecked();
       MW->GlobSetWindow->updateGUI();
   }
 
-  QString fileName = QFileDialog::getSaveFileName(this, "Save reconsruction data as Root Tree", MW->GlobSet->LastOpenDir, "Root files (*.root)");
+  QString fileName = QFileDialog::getSaveFileName(this, "Save reconsruction data as Root Tree", MW->GlobSet.LastOpenDir, "Root files (*.root)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QString path = QFileInfo(fileName).absoluteDir().absolutePath();
   QString suffix = QFileInfo(fileName).suffix();
@@ -302,9 +302,9 @@ void ReconstructionWindow::on_pbSaveReconstructionAsRootTree_clicked()
       Name = path + "/" + Name + "."+suffix;
 
       bool ok = EventsDataHub->saveReconstructionAsTree(Name, MW->Detector->PMs,
-                                                        MW->GlobSet->RecTreeSave_IncludePMsignals,
-                                                        MW->GlobSet->RecTreeSave_IncludeRho,
-                                                        MW->GlobSet->RecTreeSave_IncludeTrue,                                                        
+                                                        MW->GlobSet.RecTreeSave_IncludePMsignals,
+                                                        MW->GlobSet.RecTreeSave_IncludeRho,
+                                                        MW->GlobSet.RecTreeSave_IncludeTrue,
                                                         ig);
       if (!ok)
       {

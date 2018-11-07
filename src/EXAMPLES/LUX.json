@@ -5115,11 +5115,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5136,11 +5133,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5159,7 +5153,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5167,19 +5161,25 @@
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": false
+                            "TrackingAllowed": false,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Decay": [
-                        [
-                            1,
-                            5
-                        ]
-                    ],
                     "PrimScint_Model": 0,
-                    "PrimScint_Raise": 0,
                     "RayleighMFP": 300,
                     "RayleighWave": 175,
                     "ReemissionProb": 0,
@@ -5192,6 +5192,7 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "Temperature": 298,
                     "W": 0
                 },
                 {
@@ -5216,11 +5217,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5237,11 +5235,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5260,7 +5255,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5268,19 +5263,25 @@
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": false
+                            "TrackingAllowed": false,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Decay": [
-                        [
-                            1,
-                            5
-                        ]
-                    ],
                     "PrimScint_Model": 0,
-                    "PrimScint_Raise": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -5293,6 +5294,7 @@
                     ],
                     "SecScint_PhYield": 2,
                     "SecScint_Tau": 5,
+                    "Temperature": 298,
                     "W": 25
                 },
                 {
@@ -5317,11 +5319,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5338,11 +5337,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5361,7 +5357,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5369,19 +5365,25 @@
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": false
+                            "TrackingAllowed": false,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Decay": [
-                        [
-                            1,
-                            5
-                        ]
-                    ],
                     "PrimScint_Model": 0,
-                    "PrimScint_Raise": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -5394,6 +5396,7 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "Temperature": 298,
                     "W": 0
                 },
                 {
@@ -5418,11 +5421,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5439,11 +5439,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5462,7 +5459,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5470,19 +5467,25 @@
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": false
+                            "TrackingAllowed": false,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Decay": [
-                        [
-                            1,
-                            5
-                        ]
-                    ],
                     "PrimScint_Model": 0,
-                    "PrimScint_Raise": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 500,
                     "ReemissionProb": 0,
@@ -5495,6 +5498,7 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "Temperature": 298,
                     "W": 0
                 },
                 {
@@ -5519,11 +5523,8 @@
                                 "Name": "gamma",
                                 "Type": 0
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": false,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5540,11 +5541,8 @@
                                 "Name": "alpha",
                                 "Type": 1
                             },
-                            "AllowAbsentCsData": false,
-                            "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5563,7 +5561,7 @@
                             "CaptureEnabled": true,
                             "DataSource": "",
                             "DataString": "",
-                            "EllasticEnabled": false,
+                            "ElasticEnabled": false,
                             "IntrEnergyRes": 0,
                             "MatIsTransparent": true,
                             "PrimScintPhYield": 0,
@@ -5580,24 +5578,33 @@
                                     ],
                                     "IsotopeRecords": [
                                     ],
+                                    "NCrystal_Ncmat": "",
+                                    "NCystal_CutOff": 0,
+                                    "NCystal_Packing": 1,
                                     "ReactionType": 4
                                 }
                             ],
                             "TotalInteraction": [
                             ],
-                            "TrackingAllowed": false
+                            "TrackingAllowed": false,
+                            "UseNCrystal": false
                         }
+                    ],
+                    "PrimScintDecay": [
+                        [
+                            5,
+                            1
+                        ]
+                    ],
+                    "PrimScintRaise": [
+                        [
+                            0,
+                            1
+                        ]
                     ],
                     "PrimScintSpectrum": [
                     ],
-                    "PrimScint_Decay": [
-                        [
-                            1,
-                            5
-                        ]
-                    ],
                     "PrimScint_Model": 0,
-                    "PrimScint_Raise": 0,
                     "RayleighMFP": 0,
                     "RayleighWave": 175,
                     "ReemissionProb": 0,
@@ -5610,6 +5617,7 @@
                     ],
                     "SecScint_PhYield": 0,
                     "SecScint_Tau": 0,
+                    "Temperature": 298,
                     "W": 0
                 }
             ],
@@ -5618,7 +5626,7 @@
                     "Abs": 0.03,
                     "MatFrom": 0,
                     "MatTo": 2,
-                    "Model": "Simplistic_model",
+                    "Model": "Simplistic",
                     "Scat": 0.97,
                     "ScatMode": 1,
                     "Spec": 0
@@ -5627,7 +5635,7 @@
                     "Abs": 0.8,
                     "MatFrom": 0,
                     "MatTo": 4,
-                    "Model": "Simplistic_model",
+                    "Model": "Simplistic",
                     "Scat": 0,
                     "ScatMode": 1,
                     "Spec": 0.2
@@ -5636,7 +5644,7 @@
                     "Abs": 0.2,
                     "MatFrom": 1,
                     "MatTo": 2,
-                    "Model": "Simplistic_model",
+                    "Model": "Simplistic",
                     "Scat": 0.8,
                     "ScatMode": 1,
                     "Spec": 0
@@ -5645,7 +5653,7 @@
                     "Abs": 0.8,
                     "MatFrom": 1,
                     "MatTo": 4,
-                    "Model": "Simplistic_model",
+                    "Model": "Simplistic",
                     "Scat": 0,
                     "ScatMode": 1,
                     "Spec": 0.2
@@ -6420,6 +6428,7 @@
                     ]
                 },
                 "General": {
+                    "AngleSphere": 35,
                     "MaterialIndex": 3,
                     "Name": "Type0",
                     "Shape": 1,
@@ -6453,6 +6462,7 @@
                     ]
                 },
                 "General": {
+                    "AngleSphere": 35,
                     "MaterialIndex": 3,
                     "Name": "Type_1",
                     "Shape": 1,
@@ -8549,8 +8559,7 @@
             "AcceleratorConfig": {
                 "CheckBeforeTrack": true,
                 "LogsStatistics": false,
-                "MaxNumTransitions": 25,
-                "OnlyTracksOnPMs": false
+                "MaxNumTransitions": 25
             },
             "AngleConfig": {
                 "AngResolved": false,
@@ -8559,14 +8568,12 @@
             "AreaConfig": {
                 "AreaResolved": false
             },
-            "BuildPhotonTracks": false,
-            "DetStatNumBins": 300,
+            "DetStatNumBins": 100,
             "LrfBasedSim": {
                 "NumPhotElLRFunity": 1,
                 "NumPhotsLRFunity": 20000,
                 "UseLRFs": false
             },
-            "MaxNumberOfTracks": 1000,
             "SecScintConfig": {
                 "Type": 0
             },
@@ -8576,13 +8583,64 @@
                 "TimeResolved": false,
                 "TimeTo": 1000
             },
+            "TrackBuildingOptions": {
+                "BuildParticleTracks": false,
+                "BuildPhotonTracks": false,
+                "GeneralPhoton_Attributes": {
+                    "color": 7,
+                    "style": 1,
+                    "width": 1
+                },
+                "MaxParticleTracks": 1000,
+                "MaxPhotonTracks": 1000,
+                "Particle_CustomAttribtes": [
+                ],
+                "Particle_DefaultAttributes": {
+                    "color": 15,
+                    "style": 1,
+                    "width": 2
+                },
+                "Particle_DefaultColors": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    7,
+                    8,
+                    9,
+                    28,
+                    30,
+                    36,
+                    38,
+                    39,
+                    40,
+                    46,
+                    49
+                ],
+                "PhotonHittingPM_Attributes": {
+                    "color": 2,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSecScint_Attributes": {
+                    "color": 6,
+                    "style": 1,
+                    "width": 1
+                },
+                "PhotonSpecialRule_HittingPMs": true,
+                "PhotonSpecialRule_SecScint": true,
+                "SkipParticles_Primary": false,
+                "SkipParticles_PrimaryNoInteraction": false,
+                "SkipParticles_Secondary": false,
+                "SkipPhotonsMissingPMs": false
+            },
             "TrackingConfig": {
                 "MaxStep": 0.1,
                 "MinEnergy": 0.01,
                 "MinEnergyNeutrons": 0.01,
                 "MinStep": 5e-05,
                 "Safety": 1e-10,
-                "TrackColorAdd": 0,
                 "dE": 0.05
             },
             "WaveConfig": {
@@ -8595,6 +8653,15 @@
         },
         "Mode": "PointSim",
         "ParticleSourcesConfig": {
+            "GenerationFromFile": {
+                "FileLastModified": 0,
+                "FileName": "D:/QtProjects/ANTS2git/ANTS2/build-ants2-Desktop_Qt_5_8_0_MSVC2013_32bit-Release/EXAMPLES/ExampleParticlesFromFile.dat",
+                "NumEventsInFile": 0,
+                "RegisteredParticleCount": -1
+            },
+            "GenerationFromScript": {
+                "Script": "gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)\nif (math.random() < 0.1)\n      gen.AddParticle(0, 120,    math.gauss(0, 25),  math.gauss(0, 25), -20,   0,0,1)"
+            },
             "ParticleSources": [
                 {
                     "Activity": 1,
@@ -8614,7 +8681,9 @@
                                 "name": "gamma",
                                 "type": 0
                             },
-                            "StatWeight": 0.856
+                            "PreferredUnits": "keV",
+                            "StatWeight": 0.856,
+                            "UseFixedEnergy": true
                         },
                         {
                             "Energy": 136,
@@ -8628,7 +8697,9 @@
                                 "name": "gamma",
                                 "type": 0
                             },
-                            "StatWeight": 0.1068
+                            "PreferredUnits": "keV",
+                            "StatWeight": 0.1068,
+                            "UseFixedEnergy": true
                         }
                     ],
                     "LimitedToMaterial": "",
@@ -8655,7 +8726,7 @@
                 "EventsToDo": 10,
                 "IgnoreNoDepoEvents": true,
                 "IgnoreNoHitsEvents": false,
-                "ParticleTracks": true,
+                "ParticleGenerationMode": "Sources",
                 "TypeParticlesPerEvent": 0
             }
         },
@@ -8715,7 +8786,7 @@
                 "MultipleRuns": false,
                 "MultipleRunsNumber": 100,
                 "Primary_Secondary": 1,
-                "Single_Scan_Flood": 2
+                "Single_Scan_Flood": 0
             },
             "CustomNodesOptions": {
                 "Nodes": [
@@ -9674,7 +9745,7 @@
                 "Zto": 2.49
             },
             "PhotPerNodeOptions": {
-                "PhotPerNodeConstant": 100,
+                "PhotPerNodeConstant": 50000,
                 "PhotPerNodeCustom": [
                 ],
                 "PhotPerNodeGaussMean": 10,
@@ -9713,7 +9784,7 @@
                 "ScanZ0": 0
             },
             "SinglePositionOptions": {
-                "SingleX": 0,
+                "SingleX": 50,
                 "SingleY": 0,
                 "SingleZ": 0
             },

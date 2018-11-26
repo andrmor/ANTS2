@@ -439,6 +439,49 @@ QVariant ACoreScriptInterface::loadObject(QString fileName)
     return v;
 }
 
+#include "ainternetbrowser.h"
+QVariant ACoreScriptInterface::loadArrayFromWeb(QString url, int msTimeout)
+{
+    AInternetBrowser b(msTimeout);
+    QString Reply;
+    bool fOK = b.Post(url, "", Reply);
+    //  qDebug() << "Post result:"<<fOK;
+
+    if (!fOK)
+    {
+        abort("Error:\n" + b.GetLastError());
+        return 0;
+    }
+    //  qDebug() << Reply;
+
+    QRegularExpression rx("(\\ |\\,|\\:|\\t)"); //separators: ' ' or ',' or ':' or '\t'
+    QVariantList vl;
+
+    QStringList sl = Reply.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+    for (const QString& line : sl)
+    {
+        QStringList fields = line.split(rx, QString::SkipEmptyParts);
+
+        if (fields.isEmpty()) continue;
+        bool bOK;
+        double first = fields.at(0).toDouble(&bOK);
+        if (!bOK) continue;
+
+        if (fields.size() == 1)
+            vl.append(first);
+        else
+        {
+            QVariantList el;
+            el << first;
+            for (int i=1; i<fields.size(); i++)
+                el << fields.at(i).toDouble();
+            vl.push_back(el);
+        }
+    }
+
+    return vl;
+}
+
 QString ACoreScriptInterface::GetWorkDir()
 {
     if (!ScriptManager->LastOpenDir) return QString();

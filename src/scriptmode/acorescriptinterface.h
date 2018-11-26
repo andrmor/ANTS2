@@ -59,6 +59,8 @@ public slots:
   QString  loadText(QString fileName);
   QVariant loadObject(QString fileName);
 
+  QVariant loadArrayFromWeb(QString url, int msTimeout = 3000);
+
   //dirs
   QString GetWorkDir();
   QString GetScriptDir();

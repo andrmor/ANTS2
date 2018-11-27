@@ -23,11 +23,23 @@ public:
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 };
 
+class TH1D;
 class ADecayScenario
 {
 public:
     double Branching;
+
+    //full model
     QVector<AAbsorptionGeneratedParticle> GeneratedParticles;
+
+    //simplified model
+    enum DirectDepoSelected { NotActive = 0, ConstModel = 1, GaussModel = 2, CustomDistModel = 3};
+    DirectDepoSelected eDirectDepo = NotActive; //if any other than NotActive is selected, GeneratedParticles are ignored!
+    double DirectAverage = 1000.0; // keV
+    double DirectSigma = 10.0; //keV
+    QVector<double> DirectCustomEn;
+    QVector<double> DirectCustomProb;
+    TH1D* DirectCustomDist = 0;  //run-time property!
 
     ADecayScenario(double Branching) : Branching(Branching) {}
     ADecayScenario() : Branching(1.0) {}
@@ -60,6 +72,8 @@ public:
     void readFromJson(const QJsonObject& json, AMaterialParticleCollection *MpCollection);
 
     void readScenariosFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection);
+
+    void updateRuntimeProperties();
 };
 
 #endif // ANEUTRONINTERACTIONELEMENT_H

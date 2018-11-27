@@ -475,6 +475,13 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
                                         //      qDebug() << "Decay scenario #" << iScenario << "was triggered";
                                         const ADecayScenario& reaction = el.DecayScenarios.at(iScenario);
 
+                                        //simplistic model?
+                                        if (reaction.eDirectDepo != ADecayScenario::NotActive)
+                                        {
+                                            // TODO ***!!!
+                                            qDebug() << "Direct depo model!";
+                                        }
+
                                         //generating particles if defined
                                         if (reaction.GeneratedParticles.isEmpty())
                                         {

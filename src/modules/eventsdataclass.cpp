@@ -500,7 +500,7 @@ void EventsDataClass::saveEventHistoryToTree(const QString &fileName) const
     f.Close();
 }
 
-int EventsDataClass::countGoodEvents(int igroup) //counts events passing all filters
+int EventsDataClass::countGoodEvents(int igroup) const //counts events passing all filters
 {
     if (igroup > ReconstructionData.size()-1)
     {

@@ -21,14 +21,14 @@ APmGroupsManager::~APmGroupsManager()
 
 void APmGroupsManager::setCurrentGroup(int iGroup)
 {
-    if (iGroup<0 || iGroup>Groups.size()-1) return;
+    if (iGroup < 0 || iGroup >= Groups.size()) return;
     CurrentGroup = iGroup;
     emit CurrentSensorGroupChanged();  //Gain evaluator gui is listening
 }
 
 const QString APmGroupsManager::getGroupName(int iGroup) const
 {
-    if (iGroup > Groups.size()-1) return "";
+    if (iGroup < 0 || iGroup >= Groups.size()) return "";
     return Groups.at(iGroup)->Name;
 }
 
@@ -244,8 +244,8 @@ bool APmGroupsManager::removeGroup(int igroup)
 
 bool APmGroupsManager::isPmBelongsToGroup(int ipm, int igroup) const
 {
-    if (igroup>Groups.size()-1) return false;
-    if (ipm>PMs->count()-1) return false;
+    if (igroup < 0 || igroup >= Groups.size()) return false;
+    if (ipm < 0 || ipm >= PMs->count()) return false;
     if (Groups.at(igroup)->PMS.isEmpty()) return false;
 
     return Groups.at(igroup)->PMS.at(ipm).member;

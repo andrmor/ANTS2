@@ -10,7 +10,6 @@
 #include "amessage.h"
 
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfaxial3d.h"
 #include "lrfxy.h"
 #include "lrfxyz.h"

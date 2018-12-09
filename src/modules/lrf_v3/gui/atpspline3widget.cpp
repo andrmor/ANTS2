@@ -78,7 +78,7 @@ ATPspline3Widget::ATPspline3Widget(const QString &dimx_name, const QString &dimy
   }
 }
 
-TPspline3 ATPspline3Widget::getSpline() const
+Bspline2d ATPspline3Widget::getSpline() const
 {
   int column_count = coeffs->rowCount();
   int row_count = coeffs->columnCount();
@@ -96,7 +96,7 @@ TPspline3 ATPspline3Widget::getSpline() const
   }
 
   std::vector<double> c(row_count*column_count);
-  TPspline3 spline(minx, maxx, nodesx, miny, maxy, nodesy);
+  Bspline2d spline(minx, maxx, nodesx, miny, maxy, nodesy);
   for(int y = 0; y < row_count; y++) {
     for(int x = 0; x < column_count; x++) {
       if(dimx_is_row)
@@ -109,7 +109,7 @@ TPspline3 ATPspline3Widget::getSpline() const
   return spline;
 }
 
-void ATPspline3Widget::setSpline(const TPspline3 &spline)
+void ATPspline3Widget::setSpline(const Bspline2d &spline)
 {
   int column_count = spline.GetNintX()+3;
   int row_count = spline.GetNintY()+3;

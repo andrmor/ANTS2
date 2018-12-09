@@ -1,7 +1,6 @@
 #include "sensorlocalcache.h"
 #include "lrf2.h"
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfxy.h"
 #include "lrfxyz.h"
 #include "lrfcomposite.h"

@@ -35,17 +35,17 @@ ABspline3Widget::ABspline3Widget(QWidget *parent) : QWidget(parent)
   connect(nodes, &QLineEdit::editingFinished, this, &ABspline3Widget::onNodeCountChanged);
 }
 
-Bspline3 ABspline3Widget::getSpline() const
+Bspline1d ABspline3Widget::getSpline() const
 {
-  Bspline3 spline(min->text().toDouble(), max->text().toDouble(), nodes->text().toInt());
-  std::vector<Bspline3::value_type> c(coeffs->rowCount());
+  Bspline1d spline(min->text().toDouble(), max->text().toDouble(), nodes->text().toInt());
+  std::vector<double> c(coeffs->rowCount());
   for(int i = 0; i < coeffs->rowCount(); i++)
     c[i] = static_cast<QLineEdit*>(coeffs->cellWidget(i, 0))->text().toDouble();
   spline.SetCoef(c);
   return spline;
 }
 
-void ABspline3Widget::setSpline(const Bspline3 &spline)
+void ABspline3Widget::setSpline(const Bspline1d &spline)
 {
   nodes->setText(QString::number(spline.GetNint()));
   min->setText(QString::number(spline.GetXmin()));

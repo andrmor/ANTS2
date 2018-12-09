@@ -13,7 +13,7 @@
 #include "atransform.h"
 #include "avladimircompression.h"
 #include "spline.h"
-#include "bspline3.h"
+#include "bspline123d.h"
 
 namespace LRF { namespace CoreLrfs {
 
@@ -25,7 +25,7 @@ double AAxial::distance(const APoint &pos) const
   return transf.inverse(pos).normxy();
 }
 
-AAxial::AAxial(ALrfTypeID type, const Bspline3 &bsr, const Bspline3 &bse,
+AAxial::AAxial(ALrfTypeID type, const Bspline1d &bsr, const Bspline1d &bse,
                bool flattop, const ATransform &t)
   : ARelativeLrf(type, t), bsr(bsr), bse(bse),
     rmax2(bsr.GetXmax()*bsr.GetXmax()), flattop(flattop) { }
@@ -98,7 +98,7 @@ ALrf *AxialCompressed::clone() const
 /***************************************************************************\
 *                     Implementation of ASlicedAxial                        *
 \***************************************************************************/
-AAxial3D::AAxial3D(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
+AAxial3D::AAxial3D(ALrfTypeID type, const Bspline2d &bsr, const Bspline2d &bse,
                    const AVladimirCompression &compressor, const ATransform &t) :
     ARelativeLrf(type, t), bsr(bsr), bse(bse), compress(compressor),
     zmin(bsr.GetYmin()), zmax(bsr.GetYmax())
@@ -151,7 +151,7 @@ void AAxial3D::getXYRange(double &xmin, double &xmax, double &ymin, double &ymax
 /***************************************************************************\
 *                   Implementation of Axy and related                       *
 \***************************************************************************/
-Axy::Axy(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
+Axy::Axy(ALrfTypeID type, const Bspline2d &bsr, const Bspline2d &bse,
          const ATransform &t) :
     ARelativeLrf(type, t), bsr(bsr), bse(bse), xmin(bsr.GetXmin()),
     xmax(bsr.GetXmax()), ymin(bsr.GetYmin()), ymax(bsr.GetYmax()) { }
@@ -214,14 +214,14 @@ double ASlicedXY::getLayers(double z, int &lower_layer) const
   return -1;
 }
 
-ASlicedXY::ASlicedXY(ALrfTypeID type, double zmin, double zmax, const std::vector<TPspline3> &bsr,
-                     const std::vector<TPspline3> &bse, const ATransform &t) :
+ASlicedXY::ASlicedXY(ALrfTypeID type, double zmin, double zmax, const std::vector<Bspline2d> &bsr,
+                     const std::vector<Bspline2d> &bse, const ATransform &t) :
     ARelativeLrf(type, t), bsr(bsr), bse(bse), zmin(zmin), zmax(zmax)
 {
   xmin = +1e300; xmax = -1e300;
   ymin = +1e300; ymax = -1e300;
   for(size_t i = 0; i < bsr.size(); i++) {
-    const TPspline3 &spline = bsr[i];
+    const Bspline2d &spline = bsr[i];
     if(spline.GetXmin() < xmin) xmin = spline.GetXmin();
     if(spline.GetXmax() > xmax) xmax = spline.GetXmax();
     if(spline.GetYmin() < ymin) ymin = spline.GetYmin();

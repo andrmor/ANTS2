@@ -2,13 +2,13 @@
 #include "jsonparser.h"
 #include "spline.h"
 #ifdef TPS3M
-#include "tpspline3m.h"
+#include "bspline123d.h"
 #else
-#include "tpspline3.h"
+#include "bspline123d.h"
 #endif
 
 #ifdef NEWFIT
-#include "tps3fit.h"
+#include "bsfit123.h"
 #endif
 
 #include <QJsonObject>
@@ -17,14 +17,17 @@
 
 
 LRFxy::LRFxy(double x_min, double x_max, int n_intx, double y_min,
-            double y_max, int n_inty, bool log) : LRF2(), xmin(x_min), xmax(x_max),
-            ymin(y_min), ymax(y_max), nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL), logscale(log)
+            double y_max, int n_inty) : LRF2(),
+//            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max),
+            nintx(n_intx), ninty(n_inty), bsr(NULL), bse(NULL)
 {
+    xmin = x_min; xmax = x_max;
+    ymin = y_min; ymax = y_max;
     non_negative = false;
     top_down = false;
 }
 
-LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL), logscale(false)
+LRFxy::LRFxy(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL)
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -82,7 +85,7 @@ double LRFxy::eval(double x, double y, double /*z*/) const
 //        qDebug() << x << "," << y << "Not in Domain";
         return 0.;
     }
-    return logscale ? exp(bsr->Eval(x, y)) : bsr->Eval(x, y);
+    return bsr->Eval(x, y);
 }
 
 double LRFxy::evalErr(double /*x*/, double /*y*/, double /*z*/) const
@@ -95,7 +98,6 @@ double LRFxy::evalDrvX(double x, double y, double /*z*/) const
     // TODO: insert check for bsr with popup on failure
     if (!inDomain(x, y))
         return 0.;
-// TODO: handle logscale if possible
     return bsr->EvalDrvX(x, y);
 }
 
@@ -104,7 +106,6 @@ double LRFxy::evalDrvY(double x, double y, double /*z*/) const
 // TODO: insert check for bsr with popup on failure
     if (!inDomain(x, y))
         return 0.;
-// TODO: handle logscale if possible
     return bsr->EvalDrvY(x, y);
 }
 
@@ -115,7 +116,7 @@ double LRFxy::eval(double x, double y, double /*z*/, double *err) const
         return 0.;
     }
     *err = bse ? bse->Eval(x, y) : 0.;
-    return logscale ? exp(bsr->Eval(x, y)) : bsr->Eval(x, y);
+    return bsr->Eval(x, y);
 }
 
 #ifdef NEWFIT
@@ -132,10 +133,10 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
+    bsr = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
     valid = true;
 
-    TPS3fit F(bsr);
+    BSfit2D F(bsr);
     if (non_negative)
         F.SetConstraintNonNegative();
 
@@ -166,7 +167,7 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
+    bsr = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
     valid = true;
 
     if (!grid)
@@ -176,12 +177,11 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
 }
 #endif
 
-void LRFxy::setSpline(TPspline3 *bs, bool log)
+void LRFxy::setSpline(Bspline2d *bs)
 {
     bsr = bs;
     bsr->GetRangeX(&xmin, &xmax);
     bsr->GetRangeY(&ymin, &ymax);
-    logscale = log;
 }
 
 void LRFxy::writeJSON(QJsonObject &json) const
@@ -212,7 +212,6 @@ QJsonObject LRFxy::reportSettings() const
   json["type"] = QString(type());
   json["n1"] = nintx;
   json["n2"] = ninty;
-  json["logscale"] = logscale;
 
   return json;
 }

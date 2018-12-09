@@ -7,29 +7,32 @@
 #include <math.h>
 
 #ifdef TPS3M
-#include "tpspline3m.h"
+#include "bspline123d.h"
 #else
-#include "tpspline3.h"
+#include "bspline123d.h"
 #endif
 
 #ifdef NEWFIT
-#include "tps3dfit.h"
+#include "bsfit123.h"
 #endif
 
-#include "tpspline3d.h"
+#include "bspline123d.h"
 
 LRFxyz::LRFxyz(double x_min, double x_max, int n_intx, double y_min,
-            double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF3d(),
-            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
+            double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF2(),
+//            xmin(x_min), xmax(x_max), ymin(y_min), ymax(y_max), zmin(z_min), zmax(z_max),
             nintx(n_intx), ninty(n_inty), nintz(n_intz)
 {
     non_negative = false;
     nbasz = nintz+3;
-    bsr = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+    xmin = x_min; xmax = x_max;
+    ymin = y_min; ymax = y_max;
+    zmin = z_min; zmax = z_max;
+    bsr = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
     bse = 0;
 }
 
-LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
+LRFxyz::LRFxyz(QJsonObject &json) : LRF2()
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -47,7 +50,7 @@ LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
 
     non_negative = false;
     nbasz = nintz+3;
-    bsr = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+    bsr = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
     bse = 0;
 
 // read response
@@ -65,7 +68,7 @@ LRFxyz::LRFxyz(QJsonObject &json) : LRF3d()
 // try to read error
     parser.SetObject(json);
     if ( parser.ParseObject("error", errarr) ) {
-        bse = new TPspline3D(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
+        bse = new Bspline3d(xmin, xmax, nintx, ymin, ymax, ninty, zmin, zmax, nintz);
         QVector <QJsonObject> stack;
         if (parser.ParseArray(errarr, stack))
             if (stack.size() >= nbasz)
@@ -170,7 +173,7 @@ double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, 
 
     valid = true;
 
-    TPS3Dfit F(bsr);
+    BSfit3D F(bsr);
 
     if (non_negative)
         F.SetConstraintNonNegative();
@@ -204,7 +207,7 @@ double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, 
     }
 
     for (int iz=0; iz < nintz; iz++) {
-        bsr[iz] = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
+        bsr[iz] = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
 
         if (!grid)
             fit_tpspline3(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);

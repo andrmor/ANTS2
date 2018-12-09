@@ -206,15 +206,15 @@ bool ALrfModuleSelector::getNodes(bool fUseOldModule, int ipm, QVector<double> &
       int nodes = lrf->getNint();
       double rmax = lrf->getRmax();
 
-      double Rmin = lrf->compress(0);
-      double Rmax = lrf->compress(rmax);
+      double Rmin = lrf->Rho(0);
+      double Rmax = lrf->Rho(rmax);
       double DX = Rmax-Rmin;
 
       int lastnode = -1;
       for (int ix=0; ix<102; ix++)
         {
           double x = rmax*ix/100.0;
-          double X = lrf->compress(x);
+          double X = lrf->Rho(x);
           int node = X * nodes/DX;
           if (node>lastnode)
             {

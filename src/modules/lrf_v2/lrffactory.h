@@ -2,7 +2,6 @@
 #define LRFFACTORY_H
 
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfaxial3d.h"
 #include "lrfcaxial3d.h"
 #include "lrfxy.h"

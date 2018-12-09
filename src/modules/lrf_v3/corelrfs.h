@@ -6,11 +6,11 @@
 #include <QScriptString>
 
 #include "alrf.h"
-#include "bspline3.h"
+#include "bspline123d.h"
 #ifdef TPS3M
-#include "tpspline3m.h"
+#include "bspline123d.h"
 #else
-#include "tpspline3.h"
+#include "bspline123d.h"
 #endif
 #include "avladimircompression.h"
 #include "atransform.h"
@@ -46,8 +46,8 @@ public:
 
 class AAxial : public ARelativeLrf {
 protected:
-  Bspline3 bsr; // spline describing radial dependence
-  Bspline3 bse; // spline describing radial error dependence
+  Bspline1d bsr; // spline describing radial dependence
+  Bspline1d bse; // spline describing radial error dependence
   double rmax2;	// domain check (actually comes from bsr and is just cached)
   bool flattop; // creation settings for readback
 
@@ -55,7 +55,7 @@ protected:
   double distance(const APoint &pos) const;
 
 public:
-  AAxial(ALrfTypeID type, const Bspline3 &bsr, const Bspline3 &bse,
+  AAxial(ALrfTypeID type, const Bspline1d &bsr, const Bspline1d &bse,
          bool flattop, const ATransform &t = ATransform());
 
   bool inDomain(const APoint &pos) const override;
@@ -70,8 +70,8 @@ public:
   double getRmax() const { return sqrt(rmax2); }
   bool isFlattop() const { return flattop; }
 
-  const Bspline3 &getBsr() const { return bsr; }
-  const Bspline3 &getBse() const { return bse; }
+  const Bspline1d &getBsr() const { return bsr; }
+  const Bspline1d &getBse() const { return bse; }
 };
 
 
@@ -99,15 +99,15 @@ public:
 
 class AAxial3D : public ARelativeLrf {
 protected:
-  TPspline3 bsr;        // 2D spline describing r+z LRF dependence
-  TPspline3 bse;        // 2D spline describing r+z error dependence
+  Bspline2d bsr;        // 2D spline describing r+z LRF dependence
+  Bspline2d bse;        // 2D spline describing r+z error dependence
   AVladimirCompression compress;
   double rmax2;
   double zmin, zmax; 	  // zrange
   double dz;
 
 public:
-  AAxial3D(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
+  AAxial3D(ALrfTypeID type, const Bspline2d &bsr, const Bspline2d &bse,
            const AVladimirCompression &compressor, const ATransform &t = ATransform());
 
 #ifdef Q_OS_WIN32
@@ -133,21 +133,21 @@ public:
   int getNintZ() const { return bsr.GetNintY(); }
 
   //Used to write to json
-  const TPspline3 &getBsr() const { return bsr; }
-  const TPspline3 &getBse() const { return bse; }
+  const Bspline2d &getBsr() const { return bsr; }
+  const Bspline2d &getBse() const { return bse; }
   const AVladimirCompression &getCompressor() const { return compress; }
 };
 
 
 class Axy : public ARelativeLrf {
 protected:
-  TPspline3 bsr;        // 2D spline describing r+z LRF dependence
-  TPspline3 bse;        // 2D spline describing r+z error dependence
+  Bspline2d bsr;        // 2D spline describing r+z LRF dependence
+  Bspline2d bse;        // 2D spline describing r+z error dependence
   double xmin, xmax; 	// xrange
   double ymin, ymax; 	// yrange
 
 public:
-  Axy(ALrfTypeID type, const TPspline3 &bsr, const TPspline3 &bse,
+  Axy(ALrfTypeID type, const Bspline2d &bsr, const Bspline2d &bse,
       const ATransform &t = ATransform());
 
 #ifdef Q_OS_WIN32
@@ -174,16 +174,16 @@ public:
   void getMinMax(double &xMin, double &xMax, double &yMin, double &yMax) const { xMin = xmin; xMax = xmax; yMin = ymin; yMax = ymax; }
 
   //Used to write to json
-  const TPspline3 &getBsr() const { return bsr; }
-  const TPspline3 &getBse() const { return bse; }
+  const Bspline2d &getBsr() const { return bsr; }
+  const Bspline2d &getBse() const { return bse; }
 };
 
 
 //Using a set of Axy could be a bit simpler, but let's keep them independent
 class ASlicedXY : public ARelativeLrf {
 protected:
-  std::vector<TPspline3> bsr;  // 2D splines describing xy+z LRF dependence
-  std::vector<TPspline3> bse;  // 2D splines describing xy+z error dependence
+  std::vector<Bspline2d> bsr;  // 2D splines describing xy+z LRF dependence
+  std::vector<Bspline2d> bse;  // 2D splines describing xy+z error dependence
   double xmin, xmax; 	         // xrange
   double ymin, ymax; 	         // yrange
   double zmin, zmax; 	         // zrange
@@ -193,8 +193,8 @@ protected:
 
   double getLayers(double z, int &lower_layer) const;
 public:
-  ASlicedXY(ALrfTypeID type, double zmin, double zmax, const std::vector<TPspline3> &bsr,
-            const std::vector<TPspline3> &bse, const ATransform &t = ATransform());
+  ASlicedXY(ALrfTypeID type, double zmin, double zmax, const std::vector<Bspline2d> &bsr,
+            const std::vector<Bspline2d> &bse, const ATransform &t = ATransform());
 
   bool inDomain(const APoint &pos) const override;
   double eval(const APoint &pos) const override;
@@ -207,8 +207,8 @@ public:
   double getZMax() const { return zmax; }
 
   //Used to write to json
-  const std::vector<TPspline3> &getBsr() const { return bsr; }
-  const std::vector<TPspline3> &getBse() const { return bse; }
+  const std::vector<Bspline2d> &getBsr() const { return bsr; }
+  const std::vector<Bspline2d> &getBse() const { return bse; }
 };
 
 

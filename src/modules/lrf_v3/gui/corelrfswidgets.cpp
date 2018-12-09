@@ -154,14 +154,14 @@ void AxialInternalsWidget::saveState(QJsonObject &state) const
     compression->getCompression().toJson(state);
 
   QJsonObject state_response_spline;
-  Bspline3 spline_response = response->getSpline();
+  Bspline1d spline_response = response->getSpline();
   write_bspline3_json(&spline_response, state_response_spline);
   QJsonObject state_response;
   state_response["bspline3"] = state_response_spline;
   state["response"] = state_response;
 
   QJsonObject state_sigma_spline;
-  Bspline3 spline_sigma = sigma->getSpline();
+  Bspline1d spline_sigma = sigma->getSpline();
   write_bspline3_json(&spline_sigma, state_sigma_spline);
   QJsonObject state_sigma;
   state_sigma["bspline3"] = state_sigma_spline;
@@ -177,13 +177,13 @@ void AxialInternalsWidget::loadState(const QJsonObject &state)
   compression->setCompression(AVladimirCompression(state));
 
   QJsonObject state_reponse_spline = state["response"].toObject()["bspline3"].toObject();
-  Bspline3 *spline_response = read_bspline3_json(state_reponse_spline);
+  Bspline1d *spline_response = read_bspline3_json(state_reponse_spline);
   if(spline_response == nullptr) return;
   response->setSpline(*spline_response);
   delete spline_response;
 
   QJsonObject state_sigma_spline = state["error"].toObject()["bspline3"].toObject();
-  Bspline3 *spline_sigma = read_bspline3_json(state_sigma_spline);
+  Bspline1d *spline_sigma = read_bspline3_json(state_sigma_spline);
   if(spline_sigma == nullptr) return;
   sigma->setSpline(*spline_sigma);
   delete spline_sigma;
@@ -288,13 +288,13 @@ void Axial3DInternalsWidget::saveState(QJsonObject &state) const
   }
 
   QJsonObject state_response_spline;
-  TPspline3 spline_response = response->getSpline();
+  Bspline2d spline_response = response->getSpline();
   write_tpspline3_json(&spline_response, state_response_spline);
   QJsonObject state_response;
   state_response["tpspline3"] = state_response_spline;
   state["response"] = state_response;
 
-  TPspline3 spline_sigma = sigma->getSpline();
+  Bspline2d spline_sigma = sigma->getSpline();
   if(!spline_sigma.isInvalid()) {
     QJsonObject state_sigma_spline;
     write_tpspline3_json(&spline_sigma, state_sigma_spline);
@@ -312,13 +312,13 @@ void Axial3DInternalsWidget::loadState(const QJsonObject &state)
   compression->setCompression(AVladimirCompression(state["compression"].toObject()));
 
   QJsonObject state_reponse_spline = state["response"].toObject()["tpspline3"].toObject();
-  TPspline3 *spline_response = read_tpspline3_json(state_reponse_spline);
+  Bspline2d *spline_response = read_tpspline3_json(state_reponse_spline);
   if(spline_response == nullptr) return;
   response->setSpline(*spline_response);
   delete spline_response;
 
   QJsonObject state_sigma_spline = state["error"].toObject()["tpspline3"].toObject();
-  TPspline3 *spline_sigma = read_tpspline3_json(state_sigma_spline);
+  Bspline2d *spline_sigma = read_tpspline3_json(state_sigma_spline);
   if(spline_sigma == nullptr) return;
   sigma->setSpline(*spline_sigma);
   delete spline_sigma;
@@ -395,14 +395,14 @@ void AxyInternalsWidget::saveState(QJsonObject &state) const
   state["transform"] = transform->getTransform().toJson();
 
   QJsonObject state_response_spline;
-  TPspline3 spline_response = response->getSpline();
+  Bspline2d spline_response = response->getSpline();
   write_tpspline3_json(&spline_response, state_response_spline);
   QJsonObject state_response;
   state_response["tpspline3"] = state_response_spline;
   state["response"] = state_response;
 
   QJsonObject state_sigma_spline;
-  TPspline3 spline_sigma = sigma->getSpline();
+  Bspline2d spline_sigma = sigma->getSpline();
   write_tpspline3_json(&spline_sigma, state_sigma_spline);
   QJsonObject state_sigma;
   state_sigma["tpspline3"] = state_sigma_spline;
@@ -415,13 +415,13 @@ void AxyInternalsWidget::loadState(const QJsonObject &state)
   transform->setTransform(t);
 
   QJsonObject state_reponse_spline = state["response"].toObject()["tpspline3"].toObject();
-  TPspline3 *spline_response = read_tpspline3_json(state_reponse_spline);
+  Bspline2d *spline_response = read_tpspline3_json(state_reponse_spline);
   if(spline_response == nullptr) return;
   response->setSpline(*spline_response);
   delete spline_response;
 
   QJsonObject state_sigma_spline = state["error"].toObject()["tpspline3"].toObject();
-  TPspline3 *spline_sigma = read_tpspline3_json(state_sigma_spline);
+  Bspline2d *spline_sigma = read_tpspline3_json(state_sigma_spline);
   if(spline_sigma == nullptr) return;
   sigma->setSpline(*spline_sigma);
   delete spline_sigma;
@@ -537,7 +537,7 @@ void ASlicedXYInternalsWidget::saveState(QJsonObject &state) const
 
   QJsonArray state_response_spline;
   for(int i = 0; i < response.size(); i++) {
-    TPspline3 spline_response = response[i]->getSpline();
+    Bspline2d spline_response = response[i]->getSpline();
     QJsonObject json_spline;
     write_tpspline3_json(&spline_response, json_spline);
     state_response_spline.append(json_spline);
@@ -548,7 +548,7 @@ void ASlicedXYInternalsWidget::saveState(QJsonObject &state) const
 
   QJsonArray state_sigma_spline;
   for(int i = 0; i < response.size(); i++) {
-    TPspline3 spline_sigma = response[i]->getSpline();
+    Bspline2d spline_sigma = response[i]->getSpline();
     QJsonObject json_spline;
     write_tpspline3_json(&spline_sigma, json_spline);
     state_sigma_spline.append(json_spline);
@@ -578,7 +578,7 @@ void ASlicedXYInternalsWidget::loadState(const QJsonObject &state)
   response.resize(state_reponse_spline.size());
   for(int i = 0; i < state_reponse_spline.size(); i++) {
     QJsonObject json_spline = state_reponse_spline[i].toObject();
-    TPspline3 *spline_response = read_tpspline3_json(json_spline);
+    Bspline2d *spline_response = read_tpspline3_json(json_spline);
     if(spline_response == nullptr) return;
     response[i] = new ATPspline3Widget;
     response[i]->setSpline(*spline_response);
@@ -590,7 +590,7 @@ void ASlicedXYInternalsWidget::loadState(const QJsonObject &state)
   sigma.resize(state_sigma_spline.size());
   for(int i = 0; i < state_sigma_spline.size(); i++) {
     QJsonObject json_spline = state_sigma_spline[i].toObject();
-    TPspline3 *spline_sigma = read_tpspline3_json(json_spline);
+    Bspline2d *spline_sigma = read_tpspline3_json(json_spline);
     if(spline_sigma == nullptr) return;
     sigma[i] = new ATPspline3Widget;
     sigma[i]->setSpline(*spline_sigma);

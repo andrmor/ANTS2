@@ -4,9 +4,9 @@
 #include <QWidget>
 
 #ifdef TPS3M
-#include "tpspline3m.h"
+#include "bspline123d.h"
 #else
-#include "tpspline3.h"
+#include "bspline123d.h"
 #endif
 
 class QLineEdit;
@@ -25,8 +25,8 @@ public:
   explicit ATPspline3Widget(const QString &dimx_name = "X", const QString &dimy_name = "Y",
                             bool dimx_is_row = true, QWidget *parent = 0);
 
-  TPspline3 getSpline() const;
-  void setSpline(const TPspline3 &spline);
+  Bspline2d getSpline() const;
+  void setSpline(const Bspline2d &spline);
 
 signals:
 

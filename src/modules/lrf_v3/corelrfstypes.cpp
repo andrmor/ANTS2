@@ -32,7 +32,8 @@
 #include "ascriptvaluecopier.h"
 #include "ascriptvalueconverter.h"
 #include "spline.h"
-#include "bspline3.h"
+#include "bspline123d.h"
+#include "bsfit123.h"
 
 namespace LRF { namespace CoreLrfs {
 
@@ -92,13 +93,13 @@ ALrf *AxialType::lrfFromJson(const QJsonObject &json) const
 
   //Try to read response, fail if not available
   QJsonObject json_bsr = json["response"].toObject()["bspline3"].toObject();
-  Bspline3 bsr = FromJson::mkBspline3(json_bsr);
+  Bspline1d bsr = FromJson::mkBspline3(json_bsr);
   if(bsr.isInvalid())
     return nullptr;
 
   //Try to read error. Don't fail!
   QJsonObject json_bse = json["error"].toObject()["bspline3"].toObject();
-  Bspline3 bse = FromJson::mkBspline3(json_bse);
+  Bspline1d bse = FromJson::mkBspline3(json_bse);
 
   //These used to not be stored, and were default true. Only to show settings.
   bool flattop = json["flattop"].toBool(true);
@@ -141,18 +142,27 @@ ALrf *AxialType::lrfFromData(const QJsonObject &settings, bool fit_error,
     if(r > rmax) rmax = r;
   }
 
-  Bspline3 bsr(0., rmax, settings["nint"].toInt());
-  Bspline3 bse(0., rmax, settings["nint"].toInt());
+  Bspline1d bsr(0., rmax, settings["nint"].toInt());
+  Bspline1d bse(0., rmax, settings["nint"].toInt());
 
   bool flattop = settings["flat top"].toBool();
 
-  fit_bspline3_grid(&bsr, event_signal.size(), vr.data(), event_signal.data(), flattop);
+  BSfit1D F(&bsr);
+  if (flattop) F.SetConstraintEven();
+  F.AddData(event_signal.size(), vr.data(), event_signal.data());
+  F.Fit();
+
+//  fit_bspline3_grid(&bsr, event_signal.size(), vr.data(), event_signal.data(), flattop);
 
   if(fit_error) {
     for (size_t i = 0; i < vr.size(); i++)
       va[i] = event_signal[i] - bsr.Eval(vr[i]);
 
-    fit_bspline3_grid(&bse, va.size(), vr.data(), va.data(), flattop);
+    BSfit1D Fe(&bse);
+    Fe.AddData(va.size(), vr.data(), va.data());
+    Fe.Fit();
+
+//    fit_bspline3_grid(&bse, va.size(), vr.data(), va.data(), flattop);
   }
 
   if(hasCompression)
@@ -207,13 +217,13 @@ ALrf *AAxial3DType::lrfFromJson(const QJsonObject &json) const
 {
   //Try to read response, fail if not available
   QJsonObject json_bsr = json["response"].toObject()["tpspline3"].toObject();
-  TPspline3 bsr = FromJson::mkTPspline3(json_bsr);
+  Bspline2d bsr = FromJson::mkTPspline3(json_bsr);
   if(bsr.isInvalid())
     return nullptr;
 
   //Try to read error. Don't fail!
   QJsonObject json_bse = json["error"].toObject()["tpspline3"].toObject();
-  TPspline3 bse = FromJson::mkTPspline3(json_bse);
+  Bspline2d bse = FromJson::mkTPspline3(json_bse);
 
   ATransform t = ATransform::fromJson(json["transform"].toObject());
   AVladimirCompression compr(json["compression"].toObject());
@@ -261,15 +271,26 @@ ALrf *AAxial3DType::lrfFromData(const QJsonObject &settings, bool fit_error,
 
   int nintr = settings["nintr"].toInt();
   int nintz = settings["nintz"].toInt();
-  TPspline3 bsr(0, rmax, nintr, zmin, zmax, nintz);
-  TPspline3 bse(0, rmax, nintr, zmin, zmax, nintz);
+  Bspline2d bsr(0, rmax, nintr, zmin, zmax, nintz);
+  Bspline2d bse(0, rmax, nintr, zmin, zmax, nintz);
 
-  fit_tpspline3_grid(&bsr, event_signal.size(), vr.data(), vz.data(), event_signal.data(), true);
+  BSfit2D F(&bsr);
+  F.SetConstraintDdxAt0();
+  F.AddData(event_signal.size(), vr.data(), vz.data(), event_signal.data());
+  F.Fit();
+
+//  fit_tpspline3_grid(&bsr, event_signal.size(), vr.data(), vz.data(), event_signal.data(), true);
 
   if (fit_error) {
     for (size_t i = 0; i < event_pos.size(); i++)
       va[i] = event_signal[i] - bsr.Eval(vr[i], vz[i]);
-    fit_tpspline3_grid(&bse, event_signal.size(), vr.data(), vz.data(), va.data(), true);
+
+    BSfit2D Fe(&bse);
+    Fe.SetConstraintDdxAt0();
+    Fe.AddData(event_signal.size(), vr.data(), vz.data(), va.data());
+    Fe.Fit();
+
+//    fit_tpspline3_grid(&bse, event_signal.size(), vr.data(), vz.data(), va.data(), true);
   }
 
   return new AAxial3D(id(), bsr, bse, compress);
@@ -319,13 +340,13 @@ ALrf *AxyType::lrfFromJson(const QJsonObject &json) const
 {
     //Try to read response, fail if not available
     QJsonObject json_bsr = json["response"].toObject()["tpspline3"].toObject();
-    TPspline3 bsr = FromJson::mkTPspline3(json_bsr);
+    Bspline2d bsr = FromJson::mkTPspline3(json_bsr);
     if(bsr.isInvalid())
       return nullptr;
 
     //Try to read error. Don't fail!
     QJsonObject json_bse = json["error"].toObject()["tpspline3"].toObject();
-    TPspline3 bse = FromJson::mkTPspline3(json_bse);
+    Bspline2d bse = FromJson::mkTPspline3(json_bse);
 
     ATransform t = ATransform::fromJson(json["transform"].toObject());
 
@@ -364,16 +385,31 @@ ALrf *AxyType::lrfFromData(const QJsonObject &settings, bool fit_error,
 
     int nintx = settings["nintx"].toInt();
     int ninty = settings["ninty"].toInt();
-    TPspline3 bsr(xmin, xmax, nintx, ymin, ymax, ninty);
-    TPspline3 bse(xmin, xmax, nintx, ymin, ymax, ninty);
+    Bspline2d bsr(xmin, xmax, nintx, ymin, ymax, ninty);
+    Bspline2d bse(xmin, xmax, nintx, ymin, ymax, ninty);
 
-    fit_tpspline3_grid(&bsr, event_signal.size(), event_pos.data(), event_signal.data());
+    std::vector <double> vx, vy;
+    for (int i=0; i<event_pos.size(); i++) {
+        vx.push_back(event_pos[i].x());
+        vy.push_back(event_pos[i].y());
+    }
+
+    BSfit2D F(&bsr);
+    F.AddData(event_signal.size(), vx.data(), vy.data(), event_signal.data());
+    F.Fit();
+
+//    fit_tpspline3_grid(&bsr, event_signal.size(), event_pos.data(), event_signal.data());
 
     if (fit_error)
     {
       for (size_t i = 0; i < event_pos.size(); i++)
         va[i] = event_signal[i] - bsr.Eval(event_pos[i].x(), event_pos[i].y());
-      fit_tpspline3_grid(&bse, event_signal.size(), event_pos.data(), va.data());
+
+      BSfit2D Fe(&bse);
+      Fe.AddData(event_signal.size(), vx.data(), vy.data(), va.data());
+      Fe.Fit();
+
+//      fit_tpspline3_grid(&bse, event_signal.size(), event_pos.data(), va.data());
     }
 
     return new Axy(id(), bsr, bse);
@@ -406,7 +442,7 @@ QJsonObject ASlicedXYType::lrfToJson(const ALrf *lrf) const
   json["zmax"] = sliced->getZMax();
 
   QJsonArray splines;
-  for(const TPspline3 &spline : sliced->getBsr()) {
+  for(const Bspline2d &spline : sliced->getBsr()) {
     QJsonObject json_spline;
     write_tpspline3_json(&spline, json_spline);
     splines.append(json_spline);
@@ -416,7 +452,7 @@ QJsonObject ASlicedXYType::lrfToJson(const ALrf *lrf) const
   json["response"] = response;
 
   QJsonArray error_splines;
-  for(const TPspline3 &spline : sliced->getBse()) {
+  for(const Bspline2d &spline : sliced->getBse()) {
     if(spline.isInvalid()) continue;
     QJsonObject json_spline;
     write_tpspline3_json(&spline, json_spline);
@@ -431,17 +467,17 @@ QJsonObject ASlicedXYType::lrfToJson(const ALrf *lrf) const
 
 ALrf *ASlicedXYType::lrfFromJson(const QJsonObject &json) const
 {
-  std::vector<TPspline3> bsr;
+  std::vector<Bspline2d> bsr;
   //Try to read response, fail if not available
   for(const QJsonValue &json_bsr : json["response"].toObject()["tpspline3"].toArray()) {
     QJsonObject j = json_bsr.toObject();
-    TPspline3 spline = FromJson::mkTPspline3(j);
+    Bspline2d spline = FromJson::mkTPspline3(j);
     if(spline.isInvalid())
       return nullptr;
     bsr.push_back(spline);
   }
 
-  std::vector<TPspline3> bse;
+  std::vector<Bspline2d> bse;
   //Try to read error. Don't fail!
   for(const QJsonValue &json_bse : json["error"].toObject()["tpspline3"].toArray()) {
     QJsonObject j = json_bse.toObject();
@@ -504,17 +540,28 @@ ALrf *ASlicedXYType::lrfFromData(const QJsonObject &settings, bool fit_error,
 
   int nintx = settings["nintx"].toInt();
   int ninty = settings["ninty"].toInt();
-  std::vector<TPspline3> bsrs, bses;
+  std::vector<Bspline2d> bsrs, bses;
   for(int iz = 0; iz < nintz; iz++) {
-    TPspline3 bsr(xmin, xmax, nintx, ymin, ymax, ninty);
-    TPspline3 bse(xmin, xmax, nintx, ymin, ymax, ninty);
+    Bspline2d bsr(xmin, xmax, nintx, ymin, ymax, ninty);
+    Bspline2d bse(xmin, xmax, nintx, ymin, ymax, ninty);
 
-    fit_tpspline3_grid(&bsr, vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
+    if (true) {
+        BSfit2D F(&bsr);
+        F.AddData(vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
+        F.Fit();
+    }
+
+//    fit_tpspline3_grid(&bsr, vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
 
     if(fit_error) {
       for (size_t i = 0; i < vva[iz].size(); i++)
         vva[iz][i] -= bsr.Eval(vvx[iz][i], vvy[iz][i]);
-      fit_tpspline3_grid(&bse, vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
+
+      BSfit2D Fe(&bse);
+      Fe.AddData(vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
+      Fe.Fit();
+
+//      fit_tpspline3_grid(&bse, vva[iz].size(), vvx[iz].data(), vvy[iz].data(), vva[iz].data());
     }
 
     bsrs.push_back(bsr);

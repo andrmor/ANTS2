@@ -1,16 +1,16 @@
 #ifndef LRFSLICED3D_H
 #define LRFSLICED3D_H
 
-#include "lrf3d.h"
+#include "lrf2.h"
 #include <vector>
 
-class TPspline3;
+class Bspline2d;
 
-class LRFsliced3D : public LRF3d
+class LRFsliced3D : public LRF2
 {
 public:
     LRFsliced3D(double x_min, double x_max, int n_intx, double y_min, double y_max, int n_inty,
-                double z_min, double z_max, int n_intz, bool log = false);
+                double z_min, double z_max, int n_intz);
     LRFsliced3D(QJsonObject &json);
     ~LRFsliced3D();
 
@@ -34,23 +34,19 @@ public:
     virtual double evalDrvY(double x, double y, double z) const;
     virtual double eval(double x, double y, double z, double *err) const;
     virtual double fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid);
-    void setSpline(TPspline3 *bs, int iz);
-    TPspline3 *getSpline(int iz) {if (iz<nintz) return bsr[iz]; else return 0;}
-    std::vector <TPspline3*> getSpline() const {return bsr;}
+    void setSpline(Bspline2d *bs, int iz);
+    Bspline2d *getSpline(int iz) {if (iz<nintz) return bsr[iz]; else return 0;}
+    std::vector <Bspline2d*> getSpline() const {return bsr;}
     virtual const char *type() const {return "Sliced3D";}
     virtual void writeJSON(QJsonObject &json) const;
     virtual QJsonObject reportSettings() const;
 
 private:
-    double xmin, xmax; 	// xrange
-    double ymin, ymax; 	// yrange
-    double zmin, zmax; 	// zrange
     int nintx, ninty;	// intervals
     int nintz;	// slices
     float dz, zbot, ztop; // needed for interpolation
-    std::vector <TPspline3*> bsr; 	// vector of 2D splines
-    std::vector <TPspline3*> bse; 	// vector of 2D error splines
-    bool logscale;	// spline stores logarithm
+    std::vector <Bspline2d*> bsr; 	// vector of 2D splines
+    std::vector <Bspline2d*> bse; 	// vector of 2D error splines
 
     void get_layers (double z, int *l1, int *l2, double *frac) const;
 };

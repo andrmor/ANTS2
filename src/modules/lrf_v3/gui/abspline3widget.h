@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "bspline3.h"
+#include "bspline123d.h"
 
 class QLineEdit;
 class QTableWidget;
@@ -19,8 +19,8 @@ class ABspline3Widget : public QWidget
 public:
   explicit ABspline3Widget(QWidget *parent = 0);
 
-  Bspline3 getSpline() const;
-  void setSpline(const Bspline3 &spline);
+  Bspline1d getSpline() const;
+  void setSpline(const Bspline1d &spline);
 
 signals:
 

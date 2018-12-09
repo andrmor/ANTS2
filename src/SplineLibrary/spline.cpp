@@ -52,7 +52,7 @@
 // TODO:
 // - Consider encapsulating this fuctionality in classes derived from BSpline and TPSpline
 
-void write_bspline3_json(const Bspline3 *bs, QJsonObject &json)
+void write_bspline3_json(const Bspline1d *bs, QJsonObject &json)
 {
     int nint = bs->GetNint();
     QJsonArray data;
@@ -65,7 +65,7 @@ void write_bspline3_json(const Bspline3 *bs, QJsonObject &json)
     json["data"] = data;
 }
 
-void write_bspline3_json(const Bspline3 *bs, std::ofstream *out)
+void write_bspline3_json(const Bspline1d *bs, std::ofstream *out)
 {
     *out << "{" << std::endl;
     *out << "\"xmin\": " << bs->GetXmin() << "," << std::endl;
@@ -80,7 +80,7 @@ void write_bspline3_json(const Bspline3 *bs, std::ofstream *out)
     *out << "}" << std::endl;
 }
 
-void write_tpspline3_json(const TPspline3 *ts, QJsonObject &json)
+void write_tpspline3_json(const Bspline2d *ts, QJsonObject &json)
 {
     int nintx = ts->GetNintX();
     int ninty = ts->GetNintY();
@@ -103,25 +103,25 @@ void write_tpspline3_json(const TPspline3 *ts, QJsonObject &json)
     json["data"] = datay;
 }
 
-Bspline3 FromJson::mkBspline3(QJsonObject &json)
+Bspline1d FromJson::mkBspline3(QJsonObject &json)
 {
   double xmin = json["xmin"].toDouble();
   double xmax = json["xmax"].toDouble();
   int n_int = json["intervals"].toInt();
 
-  std::vector<Bspline3::value_type> coef;
+  std::vector<double> coef;
   for(auto c : json["data"].toArray())
     coef.push_back(c.toDouble());
   if((int)coef.size()<n_int+3)
-    return Bspline3(0, 0, 0);
+    return Bspline1d(0, 0, 0);
 
-  Bspline3 bs(xmin, xmax, n_int);
-  bs.SetCoef(coef.data());
+  Bspline1d bs(xmin, xmax, n_int);
+  bs.SetCoef(coef);
   return bs;
 }
 
 
-TPspline3 FromJson::mkTPspline3(QJsonObject &json)
+Bspline2d FromJson::mkTPspline3(QJsonObject &json)
 {
     JsonParser parser(json);
     double xmin, xmax, ymin, ymax;
@@ -137,34 +137,37 @@ TPspline3 FromJson::mkTPspline3(QJsonObject &json)
     parser.ParseObject("xintervals", nintx);
     parser.ParseObject("yintervals", ninty);
     if (!parser.ParseObject("data", data))
-        return TPspline3(0, 0, 0, 0, 0, 0);
+        return Bspline2d(0, 0, 0, 0, 0, 0);
     if (!parser.ParseArray(data, rows))
-        return TPspline3(0, 0, 0, 0, 0, 0);
+        return Bspline2d(0, 0, 0, 0, 0, 0);
     if (rows.size()<ninty+3)
-        return TPspline3(0, 0, 0, 0, 0, 0);
+        return Bspline2d(0, 0, 0, 0, 0, 0);
     for (int i=0; i<ninty+3; i++)
     {
         onerow.clear();
         parser.ParseArray(rows[i], onerow);
         if (onerow.size()<nintx+3)
-            return TPspline3(0, 0, 0, 0, 0, 0);
+            return Bspline2d(0, 0, 0, 0, 0, 0);
         coef += onerow;
     }
     if (parser.GetError())
-        return TPspline3(0, 0, 0, 0, 0, 0);
+        return Bspline2d(0, 0, 0, 0, 0, 0);
 
-    TPspline3 ts(xmin, xmax, nintx, ymin, ymax, ninty);
-    ts.SetCoef(coef.data());
+    Bspline2d ts(xmin, xmax, nintx, ymin, ymax, ninty);
+    std::vector <double> c(coef.size(), 0.);
+    for (int i=0; i<coef.size(); i++)
+        c[i] = coef[i];
+    ts.SetCoef(c);
     return ts;
 }
 
-Bspline3 *read_bspline3_json(QJsonObject &json)
+Bspline1d *read_bspline3_json(QJsonObject &json)
 {
     JsonParser parser(json);
     double xmin, xmax;
     int n_int;
     QJsonArray data;
-    QVector<Bspline3::value_type> coef;
+    QVector<double> coef;
 
     parser.ParseObject("xmin", xmin);
     parser.ParseObject("xmax", xmax);
@@ -174,12 +177,15 @@ Bspline3 *read_bspline3_json(QJsonObject &json)
     if (parser.GetError() || coef.size()<n_int+3)
         return NULL;
 
-    Bspline3 *bs = new Bspline3(xmin, xmax, n_int);
-    bs->SetCoef(coef.data());
+    Bspline1d *bs = new Bspline1d(xmin, xmax, n_int);
+    std::vector <double> c(coef.size(), 0.);
+    for (int i=0; i<coef.size(); i++)
+        c[i] = coef[i];
+    bs->SetCoef(c);
     return bs;
 }
 
-TPspline3 *read_tpspline3_json(QJsonObject &json)
+Bspline2d *read_tpspline3_json(QJsonObject &json)
 {
     JsonParser parser(json);
     double xmin, xmax, ymin, ymax;
@@ -212,97 +218,23 @@ TPspline3 *read_tpspline3_json(QJsonObject &json)
     if (parser.GetError())
         return NULL;
 
-    TPspline3 *ts = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
-    ts->SetCoef(coef.data());
-
-    return ts;
-}
-
-#ifdef USE_PUGIXML
-void write_bspline3_xml(Bspline3 *bs, std::ofstream *out)
-{
-    *out << "<bspline3>" << std::endl;
-    *out << "<xmin>" << bs->GetXmin() << "</xmin>" << std::endl;
-    *out << "<xmax>" << bs->GetXmax() << "</xmax>" << std::endl;
-    *out << "<intervals>" << bs->GetNint() << "</intervals>" << std::endl;
-    *out << "<data>" << std::endl;
-    int nint = bs->GetNint();
-    for (int i=0; i<nint+3; i++)
-        *out << bs->GetCoef(i) << " ";
-    *out << std::endl;
-    *out << "</data>" << std::endl;
-    *out << "</bspline3>" << std::endl;
-}
-
-Bspline3 *read_bspline3_xml(pugi::xml_node node)
-{
-    double xmin = node.child("xmin").text().as_double();
-    double xmax = node.child("xmax").text().as_double();
-    int n_int = node.child("intervals").text().as_int();
-    Bspline3 *bs = new Bspline3(xmin, xmax, n_int);
-    std::string data(node.child("data").text().get());
-    std::istringstream datastream(data);
-
-    double *c = new double[n_int+3];
-    for (int i=0; i<n_int+3; i++)
-        datastream >> c[i];
-    bs->SetCoef(c);
-    delete[] c;
-
-    return bs;
-}
-
-void write_tpspline3_xml(TPspline3 *ts, std::ofstream *out)
-{
-    *out << "<tpspline3>" << std::endl;
-    *out << "<xmin>" << ts->GetXmin() << "</xmin>" << std::endl;
-    *out << "<xmax>" << ts->GetXmax() << "</xmax>" << std::endl;
-    *out << "<ymin>" << ts->GetYmin() << "</ymin>" << std::endl;
-    *out << "<ymax>" << ts->GetYmax() << "</ymax>" << std::endl;
-    *out << "<xintervals>" << ts->GetNintX() << "</xintervals>" << std::endl;
-    *out << "<yintervals>" << ts->GetNintY() << "</yintervals>" << std::endl;
-
-    int nintx = ts->GetNintX();
-    int ninty = ts->GetNintY();
-    *out << "<data>" << std::endl;
-    for (int i=0; i<ninty+3; i++) {
-        for (int j=0; j<nintx+3; j++)
-            *out << ts->GetCoef(i*(nintx+3)+j) << " ";
-        *out << std::endl;
-    }
-    *out << "</data>" << std::endl;
-    *out << "</tpspline3>" << std::endl;
-}
-
-TPspline3 *read_tpspline3_xml(pugi::xml_node node)
-{
-    double xmin = node.child("xmin").text().as_double();
-    double xmax = node.child("xmax").text().as_double();
-    int nintx = node.child("xintervals").text().as_int();
-    double ymin = node.child("ymin").text().as_double();
-    double ymax = node.child("ymax").text().as_double();
-    int ninty = node.child("yintervals").text().as_int();
-    TPspline3 *ts = new TPspline3(xmin, xmax, nintx, ymin, ymax, ninty);
-    std::string data(node.child("data").text().get());
-    std::istringstream datastream(data);
-
-    double *c = new double[(nintx+3)*(ninty+3)];
-    for (int i=0; i<ninty+3; i++)
-        for (int j=0; j<nintx+3; j++)
-            datastream >> c[i*(nintx+3)+j];
+    Bspline2d *ts = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
+    std::vector <double> c(coef.size(), 0.);
+    for (int i=0; i<coef.size(); i++)
+        c[i] = coef[i];
     ts->SetCoef(c);
-    delete[] c;
 
     return ts;
 }
-#endif
+
+#ifdef CRAP
 
 #ifdef USE_EIGEN
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::JacobiSVD;
 #ifndef USE_QP
-double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even)
+double fit_bspline3(Bspline1d *bs, int npts, const double *datax, const double *datay, bool even)
 {
 	int nbas = bs->GetNbas(); 	// numbes of basis functions
 	Bool_t success;
@@ -353,17 +285,16 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
     std::cout << c_svd << std::endl;
 
 // fill bs from the solution vector
-	double *c = new double[nbas];
+    std::vector <double> c(nbas, 0.);
 	for (int i=0; i<nbas; i++)
 		c[i] = c_svd(i);
 	bs->SetCoef(c);
-	delete[] c;
 	
     VectorXd residual = A*c_svd - y;
     return sqrt(residual.squaredNorm());
 }
 #else
-double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even)
+double fit_bspline3(Bspline1d *bs, int npts, const double *datax, const double *datay, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions
     Bool_t success;
@@ -444,7 +375,7 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
 #endif
 #else
 
-double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, const double *weight, bool even)
+double fit_bspline3(Bspline1d *bs, int npts, const double *datax, const double *datay, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// number of basis functions
     Bool_t success;
@@ -509,7 +440,7 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
 //    qDebug() << "Singular values: " << sig(0) << " ... " << sig(nbas-1);
 
 // fill bs from the solution vector
-    Bspline3::value_type *c = new Bspline3::value_type[nbas];
+    double *c = new double[nbas];
     for (int i=0; i<nbas; i++)
         c[i] = c_svd(i);
     bs->SetCoef(c);
@@ -520,7 +451,7 @@ double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *d
 }
 
 // wrapper for compatibility
-double fit_bspline3(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even)
+double fit_bspline3(Bspline1d *bs, int npts, const double *datax, const double *datay, bool even)
 {
     return fit_bspline3(bs, npts, datax, datay, NULL, even);
 }
@@ -565,7 +496,7 @@ int get_data_from_profile2D(TProfile2D *h, std::vector <double> *x, std::vector 
     return w->size();
 }
 
-double fit_bspline3_grid(Bspline3 *bs, int npts, const double *datax, const double *datay, bool even, bool takeroot)
+double fit_bspline3_grid(Bspline1d *bs, int npts, const double *datax, const double *datay, bool even, bool takeroot)
 {
     // number of intervals can't be less then number of basis functions in the spline
     // we set it (somewhat arbitrarily) to 4 times number of intervals in the spline
@@ -591,7 +522,7 @@ double fit_bspline3_grid(Bspline3 *bs, int npts, const double *datax, const doub
 
 #ifdef USE_EIGEN
 #ifndef USE_QP
-double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
+double fit_tpspline3(Bspline2d *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions
     int nbasx = bs->GetBSX().GetNbas();
@@ -707,17 +638,16 @@ double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double 
 //    }
 
 // fill bs from the solution vector
-    double *c = new double[nbas];
+    std::vector <double> c(nbas, 0.);
     for (int i=0; i<nbas; i++)
         c[i] = c_svd(i);
     bs->SetCoef(c);
-    delete[] c;
 
     VectorXd residual = A*c_svd - z;
     return sqrt(residual.squaredNorm());
 }
 #else // use QP
-double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
+double fit_tpspline3(Bspline2d *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions
     int nbasx = bs->GetBSX().GetNbas();
@@ -832,7 +762,7 @@ double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double 
 }
 #endif // use QP
 #else // use ROOT instead of Eigen
-double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
+double fit_tpspline3(Bspline2d *bs, int npts, const double *datax, const double *datay, const double *dataz, const double *weight, bool even)
 {
     int nbas = bs->GetNbas(); 	// numbes of basis functions
     int nbasx = bs->GetBSX().GetNbas();
@@ -973,7 +903,7 @@ double fit_tpspline3(TPspline3 *bs, int npts, const double *datax, const double 
 #endif
 
 /*
-double fit_tpspline3(TPspline3 *bs, int npts, double *datax, double *datay, double *dataz, double *weight, bool even)
+double fit_tpspline3(Bspline2d *bs, int npts, double *datax, double *datay, double *dataz, double *weight, bool even)
 {
 	int nbas = bs->GetNbas(); 	// numbes of basis functions
     int nbasx = bs->GetBSX()->GetNbas();
@@ -1049,7 +979,7 @@ double fit_tpspline3(TPspline3 *bs, int npts, double *datax, double *datay, doub
 	return sqrt(residual.Norm2Sqr());
 }
 */
-double fit_tpspline3_grid(TPspline3 *bs, int npts, const double *datax, const double *datay, const double *dataz, bool even)
+double fit_tpspline3_grid(Bspline2d *bs, int npts, const double *datax, const double *datay, const double *dataz, bool even)
 {
     // number of intervals can't be less then number of basis functions in the spline
     // we set it (somewhat arbitrarily) to 4 times number of intervals in the spline
@@ -1072,7 +1002,7 @@ double fit_tpspline3_grid(TPspline3 *bs, int npts, const double *datax, const do
     return fit_tpspline3(bs, ngood, &x[0], &y[0], &z[0], &w[0], even);
 }
 
-double fit_tpspline3_grid(TPspline3 *bs, int npts, const APoint *data, const double *dataz, bool even)
+double fit_tpspline3_grid(Bspline2d *bs, int npts, const APoint *data, const double *dataz, bool even)
 {
     // number of intervals can't be less then number of basis functions in the spline
     // we set it (somewhat arbitrarily) to 4 times number of intervals in the spline
@@ -1094,3 +1024,5 @@ double fit_tpspline3_grid(TPspline3 *bs, int npts, const APoint *data, const dou
     delete h1;
     return fit_tpspline3(bs, ngood, &x[0], &y[0], &z[0], &w[0], even);
 }
+
+#endif

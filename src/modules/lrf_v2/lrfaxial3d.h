@@ -1,11 +1,11 @@
 #ifndef LRFAXIAL3D_H
 #define LRFAXIAL3D_H
 
-#include "lrf3d.h"
+#include "lrf2.h"
 
-class TPspline3;
+class Bspline2d;
 
-class LRFaxial3d : public LRF3d
+class LRFaxial3d : public LRF2
 {
 public:
     LRFaxial3d(double r, int nint_, double z_min, double z_max, int n_intz, bool log = false);
@@ -18,8 +18,6 @@ public:
     virtual double getXmax() const {return +getRmax();}
     virtual double getYmin() const {return -getRmax();}
     virtual double getYmax() const {return +getRmax();}
-    virtual double getZmin() const {return zmin;}
-    virtual double getZmax() const {return zmax;}
     int getNint() const {return nint;}
     int getNintZ() const {return nintz;}
     virtual double eval(double x, double y, double z) const;
@@ -28,7 +26,7 @@ public:
     virtual double evalDrvY(double x, double y, double z) const;
     virtual double eval(double x, double y, double z, double *err) const;
     virtual double fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid);
-    void setSpline(TPspline3 *bs, bool log);
+    void setSpline(Bspline2d *bs, bool log);
     virtual const char *type() const { return "Axial3D"; }
     virtual void writeJSON(QJsonObject &json) const;
     virtual QJsonObject reportSettings() const;
@@ -44,10 +42,9 @@ public:
 private:
     double rmax;	// domain
     int nint;		// intervals
-    double zmin, zmax; 	// zrange
     int nintz;	// intervals
-    TPspline3 *bsr; 	// spline describing radial dependence
-    TPspline3 *bse; 	// spline describing radial error dependence
+    Bspline2d *bsr; 	// spline describing radial dependence
+    Bspline2d *bse; 	// spline describing radial error dependence
     bool flat_top;
     bool non_negative;
     bool non_increasing;

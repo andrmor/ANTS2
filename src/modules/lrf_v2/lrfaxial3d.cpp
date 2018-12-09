@@ -3,7 +3,7 @@
 #include "jsonparser.h"
 
 #ifdef NEWFIT
-#include "tps3fit.h"
+#include "bsfit123.h"
 #endif
 
 #include <math.h>
@@ -11,16 +11,18 @@
 #include <QJsonObject>
 
 LRFaxial3d::LRFaxial3d(double r, int nint_, double z_min,
-            double z_max, int n_intz, bool log) : LRF3d(), rmax(r), nint(nint_),
-            zmin(z_min), zmax(z_max), nintz(n_intz), bsr(NULL), bse(NULL)
+            double z_max, int n_intz, bool log) : LRF2(), rmax(r), nint(nint_),
+//            zmin(z_min), zmax(z_max),
+            nintz(n_intz), bsr(NULL), bse(NULL)
 {
+    zmin = z_min; zmax = z_max;
     flat_top = false;
     non_increasing = false;
     non_negative = false;
     z_slope = 0;
 }
 
-LRFaxial3d::LRFaxial3d(QJsonObject &json) : LRF3d(), bsr(NULL), bse(NULL)
+LRFaxial3d::LRFaxial3d(QJsonObject &json) : LRF2(), bsr(NULL), bse(NULL)
 {
     JsonParser parser(json);
     QJsonObject jsobj, splineobj;
@@ -61,7 +63,7 @@ LRFaxial3d::~LRFaxial3d()
 
 bool LRFaxial3d::inDomain(double x, double y, double z) const
 {
-    return hypot(x,y)<rmax*rmax && z>zmin && z<zmax;
+    return hypot(x,y)<rmax && z>zmin && z<zmax;
 }
 
 double LRFaxial3d::eval(double x, double y, double z) const
@@ -85,7 +87,6 @@ double LRFaxial3d::evalDrvX(double x, double y, double z) const
     double r = hypot(x, y);
     if (r > rmax || z<zmin || z>zmax)
         return 0.;
-// TODO: handle logscale if possible
     return bsr->EvalDrvX(compress(r), z)*comprDev(r)*x/r;
 }
 
@@ -95,7 +96,6 @@ double LRFaxial3d::evalDrvY(double x, double y, double z) const
     double r = hypot(x, y);
     if (r > rmax || z<zmin || z>zmax)
         return 0.;
-// TODO: handle logscale if possible
     return bsr->EvalDrvX(compress(r), z)*comprDev(r)*y/r;
 }
 
@@ -124,10 +124,10 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(0., compress(rmax), nint, zmin, zmax, nintz);
+    bsr = new Bspline2d(0., compress(rmax), nint, zmin, zmax, nintz);
     valid = true;
 
-    TPS3fit F(bsr);
+    BSfit2D F(bsr);
     if (flat_top)
         F.SetConstraintDdxAt0();
     if (non_negative)
@@ -162,7 +162,7 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
         va.push_back(data[i]);
     }
 
-    bsr = new TPspline3(0., compress(rmax), nint, zmin, zmax, nintz);
+    bsr = new Bspline2d(0., compress(rmax), nint, zmin, zmax, nintz);
     valid = true;
 
     if (!grid)
@@ -172,7 +172,7 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
 }
 #endif
 
-void LRFaxial3d::setSpline(TPspline3 *bs, bool log)
+void LRFaxial3d::setSpline(Bspline2d *bs, bool log)
 {
     bsr = bs;
     double dummy;

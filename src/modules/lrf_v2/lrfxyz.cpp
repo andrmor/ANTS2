@@ -1,22 +1,12 @@
 #include "lrfxyz.h"
 #include "jsonparser.h"
 #include "spline.h"
+#include "bspline123d.h"
+#include "bsfit123.h"
 
 #include <QJsonObject>
 
 #include <math.h>
-
-#ifdef TPS3M
-#include "bspline123d.h"
-#else
-#include "bspline123d.h"
-#endif
-
-#ifdef NEWFIT
-#include "bsfit123.h"
-#endif
-
-#include "bspline123d.h"
 
 LRFxyz::LRFxyz(double x_min, double x_max, int n_intx, double y_min,
             double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF2(),
@@ -155,7 +145,6 @@ double LRFxyz::eval(double x, double y, double z, double *err) const
     return bsr->Eval(x, y, z);
 }
 
-#ifdef NEWFIT
 double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
 {
     std::vector <double> vx;
@@ -187,37 +176,6 @@ double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, 
         return F.GetResidual();
     }
 }
-#else
-double LRFxyz::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
-{
-    std::vector <std::vector <double> > vvx;
-    std::vector <std::vector <double> > vvy;
-    std::vector <std::vector <double> > vva;
-    vvx.resize(nintz);
-    vvy.resize(nintz);
-    vva.resize(nintz);
-
-    for (int i=0; i<npts; i++) {
-        if (!inDomain(x[i], y[i], z[i]) || z[i] >= zmax)
-            continue;
-        int iz = (int) ((z[i]-zmin)/dz);
-        vvx[iz].push_back(x[i]);
-        vvy[iz].push_back(y[i]);
-        vva[iz].push_back(data[i]);
-    }
-
-    for (int iz=0; iz < nintz; iz++) {
-        bsr[iz] = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
-
-        if (!grid)
-            fit_tpspline3(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
-        else
-            fit_tpspline3_grid(bsr[iz], vva[iz].size(), &vvx[iz][0], &vvy[iz][0], &vva[iz][0]);
-    }
-    valid = true;
-    return 0;
-}
-#endif
 
 void LRFxyz::writeJSON(QJsonObject &json) const
 {

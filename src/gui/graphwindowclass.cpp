@@ -15,10 +15,7 @@
 #include "arootlineconfigurator.h"
 #include "arootmarkerconfigurator.h"
 #include "atoolboxscene.h"
-
-#ifdef USE_EIGEN
 #include "curvefit.h"
-#endif
 
 //Qt
 #include <QtGui>
@@ -3005,7 +3002,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
   }
   else if (selectedItem == splineFit)
   {
-#ifdef USE_EIGEN
       TGraph* g =   static_cast<TGraph*>(Basket[row].DrawObjects.first().getPointer());
       if (!g)
       {
@@ -3040,10 +3036,6 @@ void GraphWindowClass::on_lwBasket_customContextMenuRequested(const QPoint &pos)
           Basket[row].DrawObjects.append(DrawObjectStructure(fg, "Csame"));
           RedrawAll();
       }
-#else
-    message("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled", this);
-    return;
-#endif
   }
   else if (selectedItem == drawIntegral)
   {

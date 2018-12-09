@@ -322,14 +322,12 @@ LRF2 *SensorLocalCache::mkLRFsliced3D(int nodesr, int nodesz) const
     return fitLRF(new LRFsliced3D(minx, maxx, nodesr, miny, maxy, nodesr, minz, maxz, nodesz));
 }
 
-#ifdef TPS3M
 LRF2 *SensorLocalCache::mkLRFxyz(int nodesr, int nodesz) const
 {
     LRFxyz* lrf = new LRFxyz(minx, maxx, nodesr, miny, maxy, nodesr, minz, maxz, nodesz);
 //    lrf->SetNonNegative(LRFsettings->fForceNonNegative);
     return fitLRF(lrf);
 }
-#endif
 
 void SensorLocalCache::expandDomain(double fraction)
 {

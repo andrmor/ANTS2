@@ -72,15 +72,6 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
   QObject::connect(SensLRF, SIGNAL(SensorLRFsReadySignal(bool)), this, SLOT(LRF_ModuleReadySlot(bool)));
   QObject::connect(SensLRF, SIGNAL(ProgressReport(int)), this, SLOT(onProgressReportReceived(int)));
 
-#ifndef NEWFIT
-  ui->frAdvancedLrfConstrains->setEnabled(false);
-
-  ui->cbForceNonNegative->setChecked(false);
-  ui->cbForceNonIncreasingInR->setChecked(false);
-  ui->cobForceInZ->setCurrentIndex(0);
-  ui->cbForceTopDown->setChecked(false);
-#endif
-
   LRFwindow::on_pbUpdateGUI_clicked(); //update GUI to set enable/visible/index status
   LRFwindow::on_pbShrink_clicked();
   ui->fSingleGroup->setEnabled(false);

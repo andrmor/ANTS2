@@ -309,9 +309,7 @@ bool PMsensorGroup::readJSON(QJsonObject &json)
   else if (type == "Radial3D")   lrf = new LRFaxial3d(lrf_json); // compatibility
   else if (type == "XY")         lrf = new LRFxy(lrf_json);
   else if (type == "Freeform")   lrf = new LRFxy(lrf_json);      // compatibility
-#ifdef TPS3M
   else if (type == "XYZ")        lrf = new LRFxyz(lrf_json);
-#endif
   else if (type == "Composite")  lrf = new LRFcomposite(lrf_json);
   else if (type == "Sliced3D")   lrf = new LRFsliced3D(lrf_json);
   else

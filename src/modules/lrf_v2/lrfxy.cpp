@@ -1,15 +1,8 @@
 #include "lrfxy.h"
 #include "jsonparser.h"
 #include "spline.h"
-#ifdef TPS3M
 #include "bspline123d.h"
-#else
-#include "bspline123d.h"
-#endif
-
-#ifdef NEWFIT
 #include "bsfit123.h"
-#endif
 
 #include <QJsonObject>
 
@@ -119,7 +112,6 @@ double LRFxy::eval(double x, double y, double /*z*/, double *err) const
     return bsr->Eval(x, y);
 }
 
-#ifdef NEWFIT
 double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
 {
     std::vector <double> vx;
@@ -152,30 +144,6 @@ double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z
         return F.GetResidual();
     }
 }
-
-#else
-double LRFxy::fit(int npts, const double *x, const double *y, const double * /*z*/, const double *data, bool grid)
-{
-    std::vector <double> vx;
-    std::vector <double> vy;
-    std::vector <double> va;
-    for (int i=0; i<npts; i++) {
-        if (!inDomain(x[i], y[i]))
-            continue;
-        vx.push_back(x[i]);
-        vy.push_back(y[i]);
-        va.push_back(data[i]);
-    }
-
-    bsr = new Bspline2d(xmin, xmax, nintx, ymin, ymax, ninty);
-    valid = true;
-
-    if (!grid)
-        return fit_tpspline3(bsr, va.size(), &vx[0], &vy[0], &va[0]);
-    else
-        return fit_tpspline3_grid(bsr, va.size(), &vx[0], &vy[0], &va[0]);
-}
-#endif
 
 void LRFxy::setSpline(Bspline2d *bs)
 {

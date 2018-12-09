@@ -3639,12 +3639,12 @@ void MainWindow::on_actionVersion_triggered()
 #endif
       " - FLANN (kNN searches)\n"
 
-#ifdef USE_EIGEN
-  "  on"
-#else
-  "  off"
-#endif
-     " - Eigen3 (fast LRF fitting)\n"
+//#ifdef USE_EIGEN
+//  "  on"
+//#else
+//  "  off"
+//#endif
+//     " - Eigen3 (fast LRF fitting)\n"
 
 #ifdef USE_ROOT_HTML
  "  on"

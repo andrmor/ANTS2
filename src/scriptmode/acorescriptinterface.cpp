@@ -1,10 +1,7 @@
 #include "acorescriptinterface.h"
 #include "ascriptmanager.h"
 #include "afiletools.h"
-
-#ifdef USE_EIGEN
 #include "curvefit.h"
-#endif
 
 #include <QScriptEngine>
 #include <QDateTime>
@@ -545,7 +542,6 @@ void ACoreScriptInterface::reportProgress(int percents)
 
 void ACoreScriptInterface::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
 {
-#ifdef USE_EIGEN
     QVariantList vlX = x.toList();
     QVariantList vlY = y.toList();
 
@@ -557,26 +553,17 @@ void ACoreScriptInterface::setCurveFitter(double min, double max, int nInt, QVar
     }
 
     CurF = new CurveFit(min, max, nInt, xx, yy);
-#else
-    abort("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled");
-#endif
 }
 
 double ACoreScriptInterface::getFitted(double x)
 {
-#ifdef USE_EIGEN
     if (!CurF) return 0;
 
     return CurF->eval(x);
-#else
-    abort("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled");
-    return 0;
-#endif
 }
 
 const QVariant ACoreScriptInterface::getFittedArr(const QVariant array)
 {
-#ifdef USE_EIGEN
     if (!CurF) return 0;
 
     QVariantList vl = array.toList();
@@ -585,10 +572,6 @@ const QVariant ACoreScriptInterface::getFittedArr(const QVariant array)
         res << CurF->eval( vl.at(i).toDouble() );
 
     return res;
-#else
-    abort("CurveFitter is supported only if ANTS2 is compliled with Eigen library enabled");
-    return 0;
-#endif
 }
 
 bool ACoreScriptInterface::createFile(QString fileName, bool AbortIfExists)

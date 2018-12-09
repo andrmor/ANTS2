@@ -1,18 +1,12 @@
 #include "lrfsliced3d.h"
 #include "jsonparser.h"
 #include "bsfit123.h"
+#include "bspline123d.h"
 #include "spline.h"
 
 #include <QJsonObject>
 
 #include <math.h>
-
-#ifdef TPS3M
-#include "bspline123d.h"
-#else
-#include "bspline123d.h"
-#endif
-
 
 LRFsliced3D::LRFsliced3D(double x_min, double x_max, int n_intx, double y_min,
             double y_max, int n_inty, double z_min, double z_max, int n_intz) : LRF2(),

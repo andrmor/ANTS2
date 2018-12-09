@@ -1,10 +1,7 @@
 #include "lrfaxial3d.h"
 #include "spline.h"
 #include "jsonparser.h"
-
-#ifdef NEWFIT
 #include "bsfit123.h"
-#endif
 
 #include <math.h>
 
@@ -110,7 +107,6 @@ double LRFaxial3d::eval(double x, double y, double z, double *err) const
     return bsr->Eval(compress(r), z);
 }
 
-#ifdef NEWFIT
 double LRFaxial3d::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
 {
     std::vector <double> vr;
@@ -146,31 +142,6 @@ double LRFaxial3d::fit(int npts, const double *x, const double *y, const double 
         return F.GetResidual();
     }
 }
-
-#else
-
-double LRFaxial3d::fit(int npts, const double *x, const double *y, const double *z, const double *data, bool grid)
-{  
-    std::vector <double> vr;
-    std::vector <double> vz;
-    std::vector <double> va;
-    for (int i=0; i<npts; i++) {
-        if (!inDomain(x[i], y[i], z[i]))
-            continue;
-        vr.push_back(compress(hypot(x[i], y[i])));
-        vz.push_back(z[i]);
-        va.push_back(data[i]);
-    }
-
-    bsr = new Bspline2d(0., compress(rmax), nint, zmin, zmax, nintz);
-    valid = true;
-
-    if (!grid)
-        return fit_tpspline3(bsr, va.size(), &vr[0], &vz[0], &va[0], NULL, true);
-    else
-        return fit_tpspline3_grid(bsr, va.size(), &vr[0], &vz[0], &va[0], true);
-}
-#endif
 
 void LRFaxial3d::setSpline(Bspline2d *bs, bool log)
 {

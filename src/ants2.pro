@@ -6,7 +6,6 @@ ANTS2_MINOR = 14
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
-CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
 CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
@@ -42,46 +41,10 @@ linux-g++ || unix {
 #-----------
 
 #---EIGEN---
-ants2_eigen3 {
-     DEFINES += USE_EIGEN
-     CONFIG += ants2_matrix #if enabled - use matrix algebra for TP splines - UNDER DEVELOPMENT
 
-     win32 { INCLUDEPATH += C:/eigen3 }
-     linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
+ win32 { INCLUDEPATH += C:/eigen3 }
+ linux-g++ || unix { INCLUDEPATH += /usr/include/eigen3 }
 
-     #advanced options:
-     DEFINES += NEWFIT #if enabled, use advanced fitting class (non-negative LS, non-decreasing LS, hole-plugging, etc.)  
-
-     SOURCES += SplineLibrary/bsfit123.cpp \
-#                SplineLibrary/bs3fit.cpp \
-#                SplineLibrary/tps3fit.cpp \
-                SplineLibrary/profileHist.cpp \
-				SplineLibrary/curvefit.cpp
-
-     HEADERS += SplineLibrary/bsfit123.h \
-#                SplineLibrary/bs3fit.h \
-#                SplineLibrary/tps3fit.h \
-                SplineLibrary/profileHist.h \
-				SplineLibrary/curvefit.h
-}
-ants2_matrix { # use matrix algebra for TP splines
-    DEFINES += TPS3M
-    SOURCES += SplineLibrary/bspline123d.cpp \
-#               SplineLibrary/tpspline3m.cpp \
-#               SplineLibrary/tpspline3d.cpp \
-#               SplineLibrary/tps3dfit.cpp \
-               modules/lrf_v2/lrfxyz.cpp
-
-    HEADERS += SplineLibrary/bspline123d.h \
-#               SplineLibrary/tpspline3m.h \
-#               SplineLibrary/tpspline3d.h \
-#               SplineLibrary/tps3dfit.h \
-               modules/lrf_v2/lrfxyz.h
-
-} else {
-#    SOURCES += SplineLibrary/tpspline3.cpp
-#    HEADERS += SplineLibrary/tpspline3.h
-} 
 #----------
 
 #---FLANN---
@@ -295,12 +258,14 @@ SOURCES += main.cpp \
     modules/manifesthandling.cpp \
     modules/apmgroupsmanager.cpp \
     modules/asandwich.cpp \
+    SplineLibrary/bspline123d.cpp \
+    SplineLibrary/bsfit123.cpp \
+    SplineLibrary/profileHist.cpp \
+    SplineLibrary/curvefit.cpp \
     SplineLibrary/spline.cpp \
-#    SplineLibrary/bspline.cpp \
-#    SplineLibrary/bspline3.cpp \
+    modules/lrf_v2/lrfxyz.cpp \
     modules/lrf_v2/pmsensor.cpp \
     modules/lrf_v2/lrf2.cpp \
-#    modules/lrf_v2/lrfcaxial.cpp \
     modules/lrf_v2/lrfaxial.cpp \
     modules/lrf_v2/pmsensorgroup.cpp \
     modules/lrf_v2/lrfxy.cpp \
@@ -308,7 +273,6 @@ SOURCES += main.cpp \
     modules/lrf_v2/lrfsliced3d.cpp \
     modules/lrf_v2/lrfaxial3d.cpp \
     modules/lrf_v2/lrfcaxial3d.cpp \
-#    modules/lrf_v2/lrf3d.cpp \
     modules/lrf_v2/sensorlocalcache.cpp \
     modules/lrf_v2/lrffactory.cpp \
     modules/lrf_v2/alrffitsettings.cpp \
@@ -420,20 +384,21 @@ HEADERS  += common/CorrelationFilters.h \
     modules/processorclass.h \
     modules/manifesthandling.h \
     modules/apmgroupsmanager.h \
+    SplineLibrary/bspline123d.h \
+    SplineLibrary/bsfit123.h \
+    SplineLibrary/profileHist.h \
+    SplineLibrary/curvefit.h \
     SplineLibrary/spline.h \
-#    SplineLibrary/bspline.h \
-#    SplineLibrary/bspline3.h \
+    modules/lrf_v2/lrfxyz.h \
     modules/lrf_v2/pmsensor.h \
     modules/lrf_v2/lrf2.h \
     modules/lrf_v2/lrfaxial.h \
-#    modules/lrf_v2/lrfcaxial.h \
     modules/lrf_v2/pmsensorgroup.h \
     modules/lrf_v2/lrfxy.h \
     modules/lrf_v2/lrfcomposite.h \
     modules/lrf_v2/lrfsliced3d.h \
     modules/lrf_v2/lrfaxial3d.h \
     modules/lrf_v2/lrfcaxial3d.h \
-#    modules/lrf_v2/lrf3d.h \
     modules/lrf_v2/sensorlocalcache.h \
     modules/lrf_v2/lrffactory.h \
     modules/lrf_v2/alrffitsettings.h \

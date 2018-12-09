@@ -6,14 +6,8 @@
 #include "sensorlrfs.h"
 #include "eventsdataclass.h"
 #include "lrfaxial.h"
-#include "lrfcaxial.h"
 #include "lrfxy.h"
-#include "bspline3.h"
-#ifdef TPS3M
-#include "tpspline3m.h"
-#else
-#include "tpspline3.h"
-#endif
+#include "bspline123d.h"
 #include "lrfsliced3d.h"
 #include "apositionenergyrecords.h"
 #include "ajsontools.h"
@@ -608,7 +602,7 @@ void CudaManagerClass::ConfigureLRFs_Axial()
     {
       LRFaxial *lrf = (LRFaxial*)(*SensLRF)[iActualPM]; //iActualPM - acual PM index, ipm - pm index for CUDA
       double gain = SensLRF->getIteration()->sensor(iActualPM)->GetGain();
-      std::vector <Bspline3::value_type> coef = lrf->getSpline()->GetCoef();
+      std::vector <double> coef = lrf->getSpline()->GetCoef();
       for (int i=0; i<lrfFloatsPerPM-1; i++)
          lrfData[lrfFloatsPerPM*ipm + i] = coef[i]*gain;
 
@@ -698,7 +692,7 @@ void CudaManagerClass::ConfigureLRFs_Composite()
 
       //axial part
       {
-        std::vector<Bspline3::value_type> coef = lrfAxial->getSpline()->GetCoef();
+        std::vector<double> coef = lrfAxial->getSpline()->GetCoef();
         for (int i=0; i<lrfFloatsAxialPerPM-1; i++)
           lrfData[lrfFloatsPerPM*ipm + i] = coef[i]*gain;
         float max = lrfAxial->getRmax();

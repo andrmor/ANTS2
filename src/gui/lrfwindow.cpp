@@ -580,7 +580,7 @@ bool LRFwindow::checkWatchdogs()
         LastError = "Data set is too small!";
         return false;
       }
-    if (EventsDataHub->countGoodEvents() < minDataSize)
+    if (dataScanRecon && EventsDataHub->countGoodEvents() < minDataSize)
       {
         LastError = "Data set is too small!";
         return false;

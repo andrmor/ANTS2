@@ -78,6 +78,7 @@ SensorLocalCache::SensorLocalCache(int numGoodEvents, bool fDataRecon, bool fSca
         i++;
     }
 
+    qDebug() << "fDataRecon = " << fDataRecon;
     //qDebug() << "official good events:"<<numGoodEvents << "size of data:" << i;
     this->goodEvents = goodEvents;
     this->r = r;
@@ -198,6 +199,8 @@ void SensorLocalCache::calcRelativeGains2D(int ngrid, unsigned int pmsCount)
         hp0.Fill(xx[i], yy[i], sigsig[i]);
     hp0.Write();
 
+    qDebug() << "numGoodEvents = " << numGoodEvents;
+
     for (unsigned int ipm = 1; ipm < pmsCount; ipm++)
     {
         const double *pmx = &xx[numGoodEvents*ipm];
@@ -209,7 +212,7 @@ void SensorLocalCache::calcRelativeGains2D(int ngrid, unsigned int pmsCount)
         TProfile2D hp1(histname, histname, ngrid, minx, maxx, ngrid, miny, maxy);
         for (int i = 0; i < numGoodEvents; i++)
             hp1.Fill(pmx[i], pmy[i], pmsig[i]);
-        hp1.Write();
+//        hp1.Write();
 
         double sumxy = 0.;
         double sumxx = 0.;

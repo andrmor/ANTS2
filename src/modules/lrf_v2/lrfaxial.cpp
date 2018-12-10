@@ -90,7 +90,7 @@ double LRFaxial::eval(double x, double y, double /*z*/) const
 
 double LRFaxial::evalErr(double x, double y, double /*z*/) const
 {
-    return bse ? bse->Eval(Rho(x, y)) : 0.;
+    return errorDefined() ? bse->Eval(Rho(x, y)) : 0.;
 }
 
 double LRFaxial::evalDrvX(double x, double y, double /*z*/) const
@@ -106,7 +106,7 @@ double LRFaxial::evalDrvY(double x, double y, double /*z*/) const
 double LRFaxial::eval(double x, double y, double /*z*/, double *err) const
 {
     double rho = Rho(x, y);
-    *err = bse ? bse->Eval(rho) : 0.;
+    *err = errorDefined() ? bse->Eval(rho) : 0.;
     return isReady() ? bsr->Eval(rho) : 0.;
 }
 
@@ -168,6 +168,7 @@ double LRFaxial::fitError(int npts, const double *x, const double *y, const doub
 {
     std::vector <double> vr;
     std::vector <double> va;
+
     for (int i=0; i<npts; i++) {
         if (!inDomain(x[i], y[i]))
             continue;
@@ -182,9 +183,6 @@ double LRFaxial::fitError(int npts, const double *x, const double *y, const doub
     bse = new Bspline1d(0., Rho(rmax), nint);
 
     BSfit1D F(bse);
-//    if (flattop) F.SetConstraintEven();
-//    if (non_negative) F.SetConstraintNonNegative();
-//    if (non_increasing) F.SetConstraintNonIncreasing();
 
     if (!grid) {
         F.Fit(va.size(), &vr[0], &va[0]);

@@ -6,17 +6,15 @@
 class LRFcAxial3d : public LRFaxial3d
 {
 public:
-    LRFcAxial3d(double r, int nint, double zmin, double zmax,
-                int nintz, double k, double r0, double lam, double x0 = 0., double y0 = 0.);
+    LRFcAxial3d(double r, int nint_, double z_min,
+              double z_max, int n_intz,  double k, double r0, double lam);
     virtual void writeJSON(QJsonObject &json) const;
     LRFcAxial3d(QJsonObject &json);
     virtual const char *type() const { return "ComprAxial3D"; }
     virtual QJsonObject reportSettings() const;
 
-    virtual double Rho(double r) const;
-    virtual double Rho(double x, double y) const;
-    virtual double RhoDrvX(double x, double y) const;
-    virtual double RhoDrvY(double x, double y) const;
+    virtual double compress(double r) const;
+    virtual double comprDev(double r) const;
 
 protected:
     double a;

@@ -3,9 +3,9 @@
 
 #include <math.h>
 
-LRFcAxial3d::LRFcAxial3d(double r, int nint, double zmin, double zmax,
-                         int nintz, double k, double r0, double lam, double x0, double y0) :
-    LRFaxial3d(r, nint, zmin, zmax, nintz, x0, y0)
+LRFcAxial3d::LRFcAxial3d(double r, int nint_, double z_min,
+                         double z_max, int n_intz,  double k, double r0, double lam) :
+    LRFaxial3d(r, nint_, z_min, z_max, n_intz, false)
 {
     this->r0 = r0;
     a = (k+1)/(k-1);
@@ -39,30 +39,16 @@ QJsonObject LRFcAxial3d::reportSettings() const
    return json;
 }
 
-double LRFcAxial3d::Rho(double r) const
+double LRFcAxial3d::compress(double r) const
 {
-    double dr = r - r0;
-    return std::max(0., b + dr*a - sqrt(dr*dr + lam2));
+    double dr=r-r0;
+    return std::max(0., b+dr*a-sqrt(dr*dr+lam2));
 }
 
-double LRFcAxial3d::Rho(double x, double y) const
+double LRFcAxial3d::comprDev(double r) const
 {
-    double dr = R(x, y) - r0;
-    return std::max(0., b + dr*a - sqrt(dr*dr + lam2));
-}
-
-double LRFcAxial3d::RhoDrvX(double x, double y) const
-{
-    double dr = R(x, y) - r0;
-    double dRhodR = dr/sqrt(dr*dr + lam2) + a;
-    return dRhodR*(x-x0)/R(x, y);
-}
-
-double LRFcAxial3d::RhoDrvY(double x, double y) const
-{
-    double dr = R(x, y) - r0;
-    double dRhodR = dr/sqrt(dr*dr + lam2) + a;
-    return dRhodR*(y-y0)/R(x, y);
+    double dr=r-r0;
+    return dr/sqrt(dr*dr+lam2)+a;
 }
 
 void LRFcAxial3d::writeJSON(QJsonObject &json) const
@@ -76,4 +62,3 @@ void LRFcAxial3d::writeJSON(QJsonObject &json) const
     json["comp_lam"] = comp_lam;
     json["comp_k"] = comp_k;
 }
-

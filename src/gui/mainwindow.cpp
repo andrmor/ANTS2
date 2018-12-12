@@ -2012,11 +2012,8 @@ void MainWindow::on_ledIndEffectiveDE_editingFinished()
 void MainWindow::on_pbIndRestoreEffectiveDE_clicked()
 {
     const int ipm = ui->sbIndPMnumber->value();
-
     PMs->at(ipm).effectivePDE = -1.0;
-
     ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowDE_clicked()
@@ -2040,7 +2037,6 @@ void MainWindow::on_pbIndRestoreDE_clicked()
     PMs->at(ipm).PDEbinned.clear();
 
     ReconstructDetector(true);
-    //MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndLoadDE_clicked()
@@ -3223,11 +3219,6 @@ void MainWindow::ViewChangeRelFactors(QString options)
 
   tw->setItemDelegate(new TableDoubleDelegateClass(tw)); //accept only doubles
 
-  //tw->resizeColumnsToContents();
-  //tw->resizeRowsToContents();
-  //tw->setColumnWidth(0, 56);
-  //tw->setColumnWidth(1, 56);
-
   QVBoxLayout *mainLayout = new QVBoxLayout;
   mainLayout->addWidget(tw);
   mainLayout->addLayout(buttonsLayout);
@@ -3238,7 +3229,7 @@ void MainWindow::ViewChangeRelFactors(QString options)
 
   if (result == 1)
     {
-      Detector->PMs->setDoPHS( true );
+      Detector->PMs->setDoPHS( true );  // *** should be in "EL" ?
       if (options == "QE")
         {
           //updating data
@@ -3309,6 +3300,19 @@ void MainWindow::on_pbLoadRelQEfactors_clicked()
   ReconstructDetector(true);
 }
 
+void MainWindow::on_pbClearRelQEfactors_clicked()
+{
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        PMs->at(ipm).effectivePDE = -1.0;
+
+        PMs->at(ipm).PDE.clear();
+        PMs->at(ipm).PDE_lambda.clear();
+        PMs->at(ipm).PDEbinned.clear();
+    }
+    ReconstructDetector(true);
+}
+
 void MainWindow::on_pbLoadRelELfactors_clicked()
 {
   QString fileName = QFileDialog::getOpenFileName(this, "Load relative strength of electronic channels", GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);;All files (*)");
@@ -3365,16 +3369,52 @@ void MainWindow::on_pbRandomScaleELaverages_clicked()
   ReconstructDetector(true);
 }
 
+void MainWindow::on_pbRelQERandomScaleELaverages_clicked()
+{
+    bool bUniform = ( ui->cobRelQEScaleGainsUniNorm->currentIndex() == 0 );
+    double min = ui->ledRelQEELavScaleMin->text().toDouble();
+    double max = ui->ledRelQEELavScaleMax->text().toDouble();
+    if (bUniform && min >= max) return;
+    double mean = ui->ledRelQEELavScaleMean->text().toDouble();
+    double sigma = ui->ledRelQEELavScaleSigma->text().toDouble();
+
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+    {
+        double factor;
+        if (bUniform)
+        {
+            factor = Detector->RandGen->Rndm();
+            factor = min + (max-min)*factor;
+        }
+        else
+            factor = Detector->RandGen->Gaus(mean, sigma);
+
+        PMs->at(ipm).relQE_PDE = factor;
+    }
+
+    CalculateIndividualQEPDE();
+    ReconstructDetector(true);
+}
+
+void MainWindow::on_pbRelQESetELaveragesToUnity_clicked()
+{
+    double val = ui->ledRelQEvalue->text().toDouble();
+    for (int ipm = 0; ipm < PMs->count(); ipm++)
+        PMs->at(ipm).relQE_PDE = val;
+
+    CalculateIndividualQEPDE();
+    ReconstructDetector(true);
+}
+
 void MainWindow::on_pbSetELaveragesToUnity_clicked()
 {
-  //ui->cbEnableSPePHS->setChecked(true);
-  Detector->PMs->setDoPHS( true );
+    Detector->PMs->setDoPHS( true );
 
-  for (int ipm = 0; ipm<PMs->count(); ipm++)
-      PMs->at(ipm).scaleSPePHS(1.0);
+    double val = ui->ledELEvalue->text().toDouble();
+    for (int ipm = 0; ipm<PMs->count(); ipm++)
+        PMs->at(ipm).scaleSPePHS(val);
 
-  ReconstructDetector(true);
-  //MainWindow::on_pbElUpdateIndication_clicked();
+    ReconstructDetector(true);
 }
 
 void MainWindow::on_pbShowRelGains_clicked()

@@ -4788,7 +4788,7 @@ of the refracted beam:</string>
           </rect>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_26">
           <widget class="QLineEdit" name="ledRelQEELavScaleMax">
@@ -5042,7 +5042,7 @@ of the refracted beam:</string>
           </rect>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_22">
           <widget class="QLineEdit" name="ledELavScaleMax">

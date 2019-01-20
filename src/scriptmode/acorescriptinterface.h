@@ -78,6 +78,8 @@ public slots:
   double getFitted(double x);
   const QVariant getFittedArr(const QVariant array);
 
+  const QString StartExternalProcess(QString command, QVariant arguments, bool waitToFinish, int milliseconds);
+
 private:
   AScriptManager* ScriptManager;
 

@@ -6,6 +6,10 @@
 #include "curvefit.h"
 #endif
 
+#ifdef _ALLOW_LAUNCH_EXTERNAL_PROCESS_
+#include <QProcess>
+#endif
+
 #include <QScriptEngine>
 #include <QDateTime>
 #include <QFileInfo>
@@ -640,4 +644,51 @@ QString ACoreScriptInterface::getCurrentDir()
 bool ACoreScriptInterface::setCirrentDir(QString path)
 {
     return QDir::setCurrent(path);
+}
+
+const QString ACoreScriptInterface::StartExternalProcess(QString command, QVariant argumentArray, bool waitToFinish, int milliseconds)
+{
+#ifndef _ALLOW_LAUNCH_EXTERNAL_PROCESS_
+    abort("Launch of external process is not allowed.\nEnable \"_ALLOW_LAUNCH_EXTERNAL_PROCESS_\" in ants2.pro");
+    return "";
+#else
+    QStringList arg;
+    QString type = argumentArray.typeName();
+    if (type == "QString") arg << argumentArray.toString();
+    else if (type == "int") arg << QString::number(argumentArray.toInt());
+    else if (type == "double") arg << QString::number(argumentArray.toDouble());
+    else if (type == "QVariantList")
+    {
+        QVariantList vl = argumentArray.toList();
+        QJsonArray ar = QJsonArray::fromVariantList(vl);
+        for (int i=0; i<ar.size(); i++) arg << ar.at(i).toString();
+    }
+    else
+    {
+        qDebug() << "Format error in argument list";
+        return "bad arguments";
+    }
+
+    QString str = command + " ";
+    for (QString &s : arg) str += s + " ";
+    qDebug() << "Executing external command:" << str;
+
+    QProcess *process = new QProcess(this);
+    QString errorString;
+
+    if (waitToFinish)
+    {
+        process->start(command, arg);
+        process->waitForFinished(milliseconds);
+        errorString = process->errorString();
+        delete process;
+    }
+    else
+    {
+        QObject::connect(process, SIGNAL(finished(int)), process, SLOT(deleteLater()));
+        process->start(command, arg);
+    }
+
+    return errorString;
+#endif // ANTS2_ALLOW_EXTERNAL_PROCESS
 }

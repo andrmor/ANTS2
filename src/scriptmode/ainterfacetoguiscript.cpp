@@ -554,6 +554,41 @@ void AInterfaceToGuiScript::checkboxOnClick(const QString name, const QVariant s
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
+void AInterfaceToGuiScript::setMinimumWidth(const QString name, int min)
+{
+    QWidget* w = Widgets.value(name, 0);
+    if (!w) abort("Widget " + name + " does not exist");
+    else w->setMinimumWidth(min);
+}
+
+void AInterfaceToGuiScript::setMinimumHeight(const QString name, int min)
+{
+    QWidget* w = Widgets.value(name, 0);
+    if (!w) abort("Widget " + name + " does not exist");
+    else w->setMinimumHeight(min);
+}
+
+void AInterfaceToGuiScript::setMaximumWidth(const QString name, int max)
+{
+    QWidget* w = Widgets.value(name, 0);
+    if (!w) abort("Widget " + name + " does not exist");
+    else w->setMaximumWidth(max);
+}
+
+void AInterfaceToGuiScript::setMaximumHeight(const QString name, int max)
+{
+    QWidget* w = Widgets.value(name, 0);
+    if (!w) abort("Widget " + name + " does not exist");
+    else w->setMaximumHeight(max);
+}
+
+void AInterfaceToGuiScript::setToolTip(const QString name, const QString text)
+{
+    QWidget* w = Widgets.value(name, 0);
+    if (!w) abort("Widget " + name + " does not exist");
+    else w->setToolTip(text);
+}
+
 void AInterfaceToGuiScript::addStretch(const QString addTo)
 {
     QLayout* lay = Layouts.value(addTo, 0);
@@ -581,6 +616,20 @@ void AInterfaceToGuiScript::addHoizontalLine(const QString addTo)
     }
     QFrame* e = new QFrame;
     e->setFrameShape(QFrame::HLine);
+    e->setFrameShadow(QFrame::Raised);
+    lay->addWidget(e);
+}
+
+void AInterfaceToGuiScript::addVerticalLine(const QString addTo)
+{
+    QLayout* lay = Layouts.value(addTo, 0);
+    if (!lay)
+    {
+        abort("Layout " + addTo + " does not exist");
+        return;
+    }
+    QFrame* e = new QFrame;
+    e->setFrameShape(QFrame::VLine);
     e->setFrameShadow(QFrame::Raised);
     lay->addWidget(e);
 }

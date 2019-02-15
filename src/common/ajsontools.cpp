@@ -34,6 +34,18 @@ bool parseJson(const QJsonObject &json, const QString &key, int &var)
     }
   else return false;
 }
+
+bool parseJson(const QJsonObject &json, const QString &key, qint64 &var)
+{
+    if (json.contains(key))
+      {
+        double val = json[key].toDouble();
+        var = val;
+        return true;
+      }
+    else return false;
+}
+
 bool parseJson(const QJsonObject &json, const QString &key, double &var)
 {
   if (json.contains(key))
@@ -128,7 +140,7 @@ void JsonToComboBox(QJsonObject &json, QString key, QComboBox *qb)
 }
 #endif
 
-bool LoadJsonFromFile(QJsonObject &json, QString fileName)
+bool LoadJsonFromFile(QJsonObject &json, const QString &fileName)
 {
     QFile loadFile(fileName);
     if (loadFile.open(QIODevice::ReadOnly))
@@ -147,7 +159,7 @@ bool LoadJsonFromFile(QJsonObject &json, QString fileName)
       }
 }
 
-bool SaveJsonToFile(QJsonObject &json, QString fileName)
+bool SaveJsonToFile(const QJsonObject &json, const QString &fileName)
 {
   QJsonDocument saveDoc(json);
 
@@ -216,15 +228,24 @@ bool writeTwoQVectorsToJArray(const QVector<double> &x, const QVector<double> &y
   return true;
 }
 
-void readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y)
+bool readTwoQVectorsFromJArray(QJsonArray &ar, QVector<double> &x, QVector<double> &y)
 {
-  for (int i=0; i<ar.size(); i++)
+    x.clear();
+    y.clear();
+
+    for (int i=0; i<ar.size(); i++)
     {
-      double X = ar[i].toArray()[0].toDouble();
-      x.append(X);
-      double Y = ar[i].toArray()[1].toDouble();
-      y.append(Y);
+        if ( !ar.at(i).isArray() ) return false;
+
+        QJsonArray jar = ar.at(i).toArray();
+        if (jar.size() < 2) return false;
+
+        double X = jar.at(0).toDouble();
+        x.append(X);
+        double Y = jar.at(1).toDouble();
+        y.append(Y);
     }
+    return true;
 }
 
 bool write2DQVectorToJArray(const QVector<QVector<double> > &xy, QJsonArray &ar)
@@ -268,4 +289,3 @@ const QString jsonToString(const QJsonObject &json)
     QString s( doc.toJson(QJsonDocument::Compact) );
     return s;
 }
-

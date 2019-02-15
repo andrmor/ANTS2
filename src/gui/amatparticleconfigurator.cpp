@@ -1,29 +1,30 @@
 #include "amatparticleconfigurator.h"
 #include "ui_amatparticleconfigurator.h"
 #include "ajsontools.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "afiletools.h"
 
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QDebug>
 
-AMatParticleConfigurator::AMatParticleConfigurator(GlobalSettingsClass *GlobSet, QWidget *parent) :
-    QDialog(parent), ui(new Ui::AMatParticleConfigurator), GlobSet(GlobSet)
+AMatParticleConfigurator::AMatParticleConfigurator(QWidget *parent) :
+    QDialog(parent), ui(new Ui::AMatParticleConfigurator)
 {
     ui->setupUi(this);
     ui->pbUpdateGlobSet->setVisible(false);
     ui->cobUnits->setCurrentIndex(1);
 
-    CrossSectionSystemDir = GlobSet->ResourcesDir + "/Neutrons/CrossSections";
+    AGlobalSettings& GlobSet = AGlobalSettings::getInstance();
+    CrossSectionSystemDir = GlobSet.ResourcesDir + "/Neutrons/CrossSections";
 
     QDoubleValidator* val = new QDoubleValidator(this);
     val->setBottom(0);
     ui->ledMinEnergy->setValidator(val);
     ui->ledMaxEnergy->setValidator(val);
 
-    if (!GlobSet->MaterialsAndParticlesSettings.isEmpty())
-        readFromJson(GlobSet->MaterialsAndParticlesSettings);
+    if (!GlobSet.MaterialsAndParticlesSettings.isEmpty())
+        readFromJson(GlobSet.MaterialsAndParticlesSettings);
 }
 
 AMatParticleConfigurator::~AMatParticleConfigurator()
@@ -117,7 +118,7 @@ double AMatParticleConfigurator::getMaxEnergy() const
 
 const QString AMatParticleConfigurator::getNatAbundFileName() const
 {
-    return GlobSet->ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt";
+    return AGlobalSettings::getInstance().ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt";
 }
 
 const QString AMatParticleConfigurator::getCrossSectionFirstDataDir() const
@@ -192,7 +193,7 @@ void AMatParticleConfigurator::on_pbChangeDir_clicked()
 
 void AMatParticleConfigurator::on_pbUpdateGlobSet_clicked()
 {
-    writeToJson(GlobSet->MaterialsAndParticlesSettings);
+    writeToJson(AGlobalSettings::getInstance().MaterialsAndParticlesSettings);
 }
 
 #include <QDesktopServices>
@@ -201,7 +202,7 @@ void AMatParticleConfigurator::on_pbShowSystemDir_clicked()
     QDesktopServices::openUrl(QUrl("file:///"+CrossSectionSystemDir, QUrl::TolerantMode));
 }
 
-void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &pos)
+void AMatParticleConfigurator::on_pbChangeDir_customContextMenuRequested(const QPoint &)
 {
     QString st = ui->leCustomDataDir->text();
     if (!st.isEmpty())

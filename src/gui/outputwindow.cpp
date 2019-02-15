@@ -11,7 +11,7 @@
 #include "eventsdataclass.h"
 #include "detectorclass.h"
 #include "dynamicpassiveshandler.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "apositionenergyrecords.h"
 #include "amessage.h"
 #include "apmgroupsmanager.h"
@@ -33,6 +33,7 @@
 #include <QString>
 #include <QBitArray>
 #include <QStandardItemModel>
+#include <QFileDialog>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
     QMainWindow(parent),
@@ -327,13 +328,13 @@ void OutputWindow::showParticleHistString(int iRec, int level)
         if (m != 0) s += " ->";
         int MatId = h->Deposition[m].MaterialId;
         s += " " + (*MW->MpCollection)[MatId]->name +"_";
-        s += QString::number(h->Deposition[m].Distance, 'g', MW->GlobSet->TextLogPrecision)+"_mm";
+        s += QString::number(h->Deposition[m].Distance, 'g', MW->GlobSet.TextLogPrecision)+"_mm";
         double depo = h->Deposition[m].DepositedEnergy;
         if (depo>0)
         {
             s += "_";
             s += "<b>";
-            s += QString::number(depo, 'g', MW->GlobSet->TextLogPrecision);
+            s += QString::number(depo, 'g', MW->GlobSet.TextLogPrecision);
             s += "</b>";
             s += "_keV";
             TotalEnergyDeposited += depo;
@@ -396,7 +397,7 @@ void OutputWindow::ShowEventHistoryLog()
       addParticleHistoryLogLine(i, 0);
     }
   s  = "---------------------\n";
-  s += "Total energy deposited: " + QString::number(TotalEnergyDeposited, 'g', MW->GlobSet->TextLogPrecision) + " keV\n";
+  s += "Total energy deposited: " + QString::number(TotalEnergyDeposited, 'g', MW->GlobSet.TextLogPrecision) + " keV\n";
   s += "=====================\n";
   //SetTab(0);
   ui->pteOut->appendPlainText(s);
@@ -913,7 +914,7 @@ void OutputWindow::ShowOneEventLog(int iev)
   if (!isVisible()) show();
   raise();
 
-  int precision = MW->GlobSet->TextLogPrecision;
+  int precision = MW->GlobSet.TextLogPrecision;
   QString str = "Event# " + QString::number(iev);
 
   if (!EventsDataHub->isScanEmpty())
@@ -1001,7 +1002,7 @@ void OutputWindow::on_pbShowSumSignals_clicked()
     }
     bool fGood = ui->cbOnlyGood->isChecked();
 
-    auto hist1D = new TH1F("SumSig","Distribution of sum signal", MW->GlobSet->BinsX, 0,0);
+    auto hist1D = new TH1F("SumSig","Distribution of sum signal", MW->GlobSet.BinsX, 0,0);
   #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
     hist1D->SetBit(TH1::kCanRebin);
   #endif
@@ -1047,7 +1048,7 @@ void OutputWindow::on_pbShowSignals_clicked()
 
     TString title = "Distribution of signal for PM# ";
     title += ipm;
-    auto hist1D = new TH1F("Sig", title, MW->GlobSet->BinsX, 0,0);
+    auto hist1D = new TH1F("Sig", title, MW->GlobSet.BinsX, 0,0);
   #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
     hist1D->SetBit(TH1::kCanRebin);
   #endif
@@ -1080,7 +1081,7 @@ void OutputWindow::on_pbAverageSignals_clicked()
   }
   bool fGood = ui->cbOnlyGood->isChecked();
 
-  auto hist1D = new TH1F("MaxSigDist","Distribution of max signal", MW->GlobSet->BinsX, 0,0);
+  auto hist1D = new TH1F("MaxSigDist","Distribution of max signal", MW->GlobSet.BinsX, 0,0);
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   hist1D->SetBit(TH1::kCanRebin);
 #endif
@@ -1187,39 +1188,6 @@ void OutputWindow::ShowPhotonProcessesLog()
   s += "Overrides, loss: " + QString::number(d->OverrideLoss) + "\n";
   s += "Overrides, back: " + QString::number(d->OverrideBack) + "\n";
   s += "Overrides, forward: " + QString::number(d->OverrideForward) + "\n";
-  if (d->OverrideSimplisticAbsorption>0 || d->OverrideSimplisticReflection>0 || d->OverrideSimplisticScatter>0)
-  {
-       s += "----\n";
-       s += "Override simplistic, absorption: " + QString::number(d->OverrideSimplisticAbsorption) + "\n";
-       s += "Override simplistic, specular: " + QString::number(d->OverrideSimplisticReflection) + "\n";
-       s += "Override simplistic, lambertian: " + QString::number(d->OverrideSimplisticScatter) + "\n";
-  }
-  if (d->OverrideFSNPabs>0 || d->OverrideFSNlambert>0 || d->OverrideFSNPspecular>0)
-  {
-       s += "----\n";
-       s += "Override FSNP, absorption: " + QString::number(d->OverrideFSNPabs) + "\n";
-       s += "Override FSNP, specular: " + QString::number(d->OverrideFSNPspecular) + "\n";
-       s += "Override FSNP, lambertian: " + QString::number(d->OverrideFSNlambert) + "\n";
-  }
-  if (d->OverrideMetalAbs>0 || d->OverrideMetalReflection>0)
-  {
-       s += "----\n";
-       s += "Override OnMetal, absorption: " + QString::number(d->OverrideMetalAbs) + "\n";
-       s += "Override OnMetal, specular: " + QString::number(d->OverrideMetalReflection) + "\n";
-  }
-  if (d->OverrideClaudioAbs>0 || d->OverrideClaudioLamb>0 || d->OverrideClaudioSpec>0)
-  {
-       s += "----\n";
-       s += "Override Clauido's model', absorption: " + QString::number(d->OverrideClaudioAbs) + "\n";
-       s += "Override Claudio's model', specular: " + QString::number(d->OverrideClaudioSpec) + "\n";
-       s += "Override Claudio's model', lambertian: " + QString::number(d->OverrideClaudioLamb) + "\n";
-  }
-  if (d->OverrideWLSabs>0 || d->OverrideWLSshift>0)
-  {
-       s += "----\n";
-       s += "Override WLS, absorption: " + QString::number(d->OverrideWLSabs) + "\n";
-       s += "Override WLS, reemission: " + QString::number(d->OverrideWLSshift) + "\n";
-  }
   s += "=====================";
   //OutText(s);
   //SetTab(0);
@@ -1639,4 +1607,45 @@ void OutputWindow::on_pbShowAverageOverAll_clicked()
     if (ui->cbShowPMsignals->isChecked())
       addTextitems(&sums, MaxSignal, 0); //add icons with signal text to the scene
     updateSignalScale();
+}
+
+void OutputWindow::on_pbSaveLog_clicked()
+{
+    if (EventsDataHub->EventHistory.isEmpty())
+    {
+        message("Log is empty! Make sure to acivate 'Do logs and statistics'\nin MainWindow->Simulation->Accelerators before running a simulation!", this);
+        return;
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this, "Save particle tracking log to ROOT tree", MW->GlobSet.LastOpenDir, "TTree files (*.root)");
+    if (fileName.isEmpty()) return;
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    QFileInfo file(fileName);
+    if (file.suffix().isEmpty()) fileName += ".root";
+    EventsDataHub->saveEventHistoryToTree(fileName);
+}
+
+void OutputWindow::on_pbHelpWithSaveToTree_clicked()
+{
+    QStringList sl = EventHistoryStructure::getAllDefinedTerminationTypes();
+
+    QString s = "";
+
+    s += "index -> particle#\n";
+    s += "partId -> index (type) of the particle\n";
+    s += "secondaryOf -> -1 if primary, otherwise particle# of the parent\n";
+    s += "initialPosition -> vector with the generation position\n";
+    s += "direction -> direction of the particle (unit vector)\n";
+    s += "initialEnergy -> energy on start\n";
+    s += "termination -> how the particle tracking has ended\n";
+    for (int i=0; i<sl.size(); i++)
+        s += QString("    %1 = %2\n").arg(i).arg(sl.at(i));
+    s += "The next tree parameters give info related to the geometry volumes the particle passed during tracking.\n";
+    s += "The information is given by vectors, first elements corresponds to the volume where the particle was created\n";
+    s += "and the last to the one where the tracking has stopped.\n";
+    s += "vol_materialId -> material index of the volume\n";
+    s += "vol_depositedEnergy -> energy depsoited in the volume\n";
+    s += "vol_distance -> distance travelled in the volume\n";
+
+    ui->pteOut->appendPlainText(s);
 }

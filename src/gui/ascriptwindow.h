@@ -6,8 +6,8 @@
 #include <QHash>
 #include <QString>
 
+class AScriptInterface;
 class AHighlighterScriptWindow;
-class QAbstractItemModel;
 class QCompleter;
 class QStringListModel;
 class ATextEdit;
@@ -18,11 +18,9 @@ class QSplitter;
 class QFrame;
 class QLineEdit;
 class TObject;
-class QThread;
 class AScriptManager;
 class AScriptWindowTabItem;
-class GlobalSettingsClass;
-class QTextCursor;
+class AGlobalSettings;
 
 namespace Ui {
 class AScriptWindow;
@@ -33,11 +31,14 @@ class AScriptWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit AScriptWindow(AScriptManager *ScriptManager, GlobalSettingsClass* GlobSet, bool LightMode, QWidget *parent);
+    explicit AScriptWindow(AScriptManager *ScriptManager, bool LightMode, QWidget *parent);
     ~AScriptWindow();
 
-    void SetInterfaceObject(QObject *interfaceObject, QString name = "");
-    void UpdateAllTabs(); //highlighter, helper etc
+    //void SetInterfaceObject(QObject *interfaceObject, QString name = ""); // if not lightMode, do not forget to call UpdateAllTabs() after all units were registered!
+    void RegisterInterfaceAsGlobal(AScriptInterface* interface);
+    void RegisterCoreInterfaces(bool bCore = true, bool bMath = true);
+    void RegisterInterface(AScriptInterface* interface, const QString& name);
+    void UpdateGui(); //highlighter, helper etc - call it to take into account all changes introduced by introduction of new interface units!
 
     void SetShowEvaluationResult(bool flag) {ShowEvalResult = flag;} //if false, window only reports "success", ptherwise eval result is shown
 
@@ -48,17 +49,20 @@ public:
     void WriteToJson();
     void ReadFromJson();
 
-    void UpdateHighlight();
-
     void SetMainSplitterSizes(QList<int> values);
 
     void onBusyOn();
     void onBusyOff();
 
     void ConfigureForLightMode(QString* ScriptPtr, const QString &WindowTitle, const QString& Example);
+    void EnableAcceptReject();
+    bool isAccepted() const {return bAccepted;}
 
     AScriptManager* ScriptManager;
     QStringList functions;
+
+private:
+    void doRegister(AScriptInterface *interface, const QString& name);
 
 public slots:
     void updateJsonTree();
@@ -126,16 +130,15 @@ public:
 
 private:
     Ui::AScriptWindow *ui;
-    //QStringListModel* completitionModel;
-    GlobalSettingsClass* GlobSet;
-
+    AGlobalSettings& GlobSet;
     ScriptLanguageEnum ScriptLanguage = _JavaScript_;
 
     int CurrentTab;
     QList<AScriptWindowTabItem*> ScriptTabs;
     QTabWidget* twScriptTabs;
 
-    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for small local scripts
+    bool bLightMode = false;  // true -> to imitate former genericscriptwindow. Used for local scripts
+    bool bAccepted = false;
     QString* LightModeScript = 0;
     QString  LightModeExample;
 
@@ -166,7 +169,7 @@ private:
     QString getKeyPath(QTreeWidgetItem *item);
     void showContextMenuForJsonTree(QTreeWidgetItem *item, QPoint pos);
     QStringList getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments = false);
-    void appendDeprecatedOrRemovedMethods(const QObject *obj, const QString& name);
+    void appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString& name);
 
     void ReadFromJson(QJsonObject &json);
     void WriteToJson(QJsonObject &json);
@@ -192,6 +195,7 @@ signals:
     //just retranslators:
     void onStart();
     void onAbort();
+    void onFinish(bool bError);
     void success(QString eval);
 
 public slots:
@@ -209,6 +213,8 @@ private slots:
     virtual void onFindVariable();
     void onBack();
     void onForward();
+    void on_pbAccept_clicked();
+    void on_pbCancel_clicked();
 };
 
 class AScriptWindowTabItem : public QObject

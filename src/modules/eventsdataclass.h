@@ -49,6 +49,7 @@ public:
 #ifdef SIM
     // Logs
     QVector<EventHistoryStructure*> EventHistory;
+    void saveEventHistoryToTree(const QString& fileName) const;
     QVector<GeneratedPhotonsHistoryStructure> GeneratedPhotonsHistory;
 
     //Detection statistics

@@ -4,7 +4,7 @@
 #include "acompton.h"
 #include "atrackrecords.h"
 #include "aenergydepositioncell.h"
-#include "aparticleonstack.h"
+#include "aparticlerecord.h"
 #include "ahistoryrecords.h"
 #include "acommonfunctions.h"
 #include "asimulationstatistics.h"
@@ -22,7 +22,7 @@
 PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
                                                TRandom2 *RandomGenerator,
                                                AMaterialParticleCollection* MpCollection,
-                                               QVector<AParticleOnStack*>* particleStack,
+                                               QVector<AParticleRecord*>* particleStack,
                                                QVector<AEnergyDepositionCell*>* energyVector,
                                                QVector<EventHistoryStructure*>* eventHistory,
                                                ASimulationStatistics *simStat, int threadIndex,
@@ -63,10 +63,11 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
 
       EventHistoryStructure* History;
       if (SimSet->fLogsStat)
-        {
+      {
           //initializing history record - at the end it will be appended to EventHistory QVector
-          History = new EventHistoryStructure(ParticleId, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v) ;
-        }
+          //History = new EventHistoryStructure(ParticleId, counter, ParticleStack->at(0)->secondaryOf, ParticleStack->at(0)->v, ParticleStack->at(0)->energy);
+          History = new EventHistoryStructure(ParticleStack->at(0), counter);
+      }
       //setting current position, direction vector, energy and time
       double r[3];          //position
       double v[3];          //direction vector
@@ -384,7 +385,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
                                 EnergyVector->append(tc);
 
                                 //creating gamma and putting it on stack
-                                AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
+                                AParticleRecord *tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], G1.direction[0], G1.direction[1], G1.direction[2], time, G1.energy, counter);
                                 ParticleStack->append(tmp);
                                   //creating electron
                                   //int IdElectron =
@@ -497,7 +498,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
                                                     GenerateRandomDirection(vv);
                                                     //      qDebug() << "   in random direction";
                                                 }
-                                                AParticleOnStack* pp = new AParticleOnStack(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
+                                                AParticleRecord* pp = new AParticleRecord(ParticleId, r[0], r[1], r[2], vv[0], vv[1], vv[2], time, energy, counter);
                                                 ParticleStack->append(pp);
                                             }
                                         }
@@ -523,9 +524,9 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
                                 //creating two gammas from positron anihilation and putting it on stack
                                 double vv[3];
                                 GenerateRandomDirection(vv);
-                                AParticleOnStack* tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
+                                AParticleRecord* tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], vv[0], vv[1], vv[2], time, 511, counter);
                                 ParticleStack->append(tmp);
-                                tmp = new AParticleOnStack(ParticleId, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
+                                tmp = new AParticleRecord(ParticleId, r[0],r[1],r[2], -vv[0], -vv[1], -vv[2], time, 511, counter);
                                 ParticleStack->append(tmp);
 
                                 terminationStatus = EventHistoryStructure::PairProduction;//9
@@ -650,7 +651,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
 
                                 if (newEnergy > SimSet->MinEnergyNeutrons * 1.0e-6) // meV -> keV to compare
                                 {
-                                    AParticleOnStack *tmp = new AParticleOnStack(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
+                                    AParticleRecord *tmp = new AParticleRecord(ParticleId, r[0],r[1], r[2], vnew[0]/vnewMod, vnew[1]/vnewMod, vnew[2]/vnewMod, time, newEnergy, counter);
                                     ParticleStack->append(tmp);
                                     energyHistory = energy - newEnergy;
                                 }

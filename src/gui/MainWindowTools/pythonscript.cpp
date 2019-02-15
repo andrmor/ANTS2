@@ -3,7 +3,7 @@
 #include "apythonscriptmanager.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "interfacetoglobscript.h"
 #include "ainterfacetomessagewindow.h"
 #include "scriptminimizer.h"
@@ -25,6 +25,7 @@
 #include "ainterfacetophotonscript.h"
 #include "ainterfacetomultithread.h"
 #include "ainterfacetottree.h"
+#include "aparticletrackinghistoryinterface.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -44,83 +45,86 @@ void MainWindow::createPythonScriptWindow()
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
 
   // interface objects are owned after this by the ScriptManager!
-  PythonScriptWindow->SetInterfaceObject(0); //initialization
+  PythonScriptWindow->RegisterCoreInterfaces();
 
   AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
   QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
-  PythonScriptWindow->SetInterfaceObject(conf, "config");
+  PythonScriptWindow->RegisterInterface(conf, "config");
 
   AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(Detector);
   connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
-  PythonScriptWindow->SetInterfaceObject(geo, "geo");
+  PythonScriptWindow->RegisterInterface(geo, "geo");
 
   AInterfaceToMinimizerPythonScript* mini = new AInterfaceToMinimizerPythonScript(PSM);
-  PythonScriptWindow->SetInterfaceObject(mini, "mini");  //mini should be before sim to handle abort correctly
+  PythonScriptWindow->RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
 
   AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
   QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
-  PythonScriptWindow->SetInterfaceObject(dat, "events");
+  PythonScriptWindow->RegisterInterface(dat, "events");
 
-  InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet->RecNumTreads);
+  InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
   QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
-  PythonScriptWindow->SetInterfaceObject(sim, "sim");
+  PythonScriptWindow->RegisterInterface(sim, "sim");
 
-  InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet->RecNumTreads);
+  InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet.RecNumTreads);
   QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
   QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
-  PythonScriptWindow->SetInterfaceObject(rec, "rec");
+  PythonScriptWindow->RegisterInterface(rec, "rec");
 
   AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
-  PythonScriptWindow->SetInterfaceObject(lrf, "lrf");
+  PythonScriptWindow->RegisterInterface(lrf, "lrf");
   ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
-  PythonScriptWindow->SetInterfaceObject(newLrf, "newLrf");
+  PythonScriptWindow->RegisterInterface(newLrf, "newLrf");
 
   AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
-  PythonScriptWindow->SetInterfaceObject(pmS, "pms");
+  PythonScriptWindow->RegisterInterface(pmS, "pms");
 
   AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
-  PythonScriptWindow->SetInterfaceObject(graph, "graph");
+  PythonScriptWindow->RegisterInterface(graph, "graph");
 
   AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
-  PythonScriptWindow->SetInterfaceObject(hist, "hist");
+  PythonScriptWindow->RegisterInterface(hist, "hist");
 
   AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
-  PythonScriptWindow->SetInterfaceObject(tree, "tree");
+  PythonScriptWindow->RegisterInterface(tree, "tree");
 
   AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(PSM, PythonScriptWindow);
-  PythonScriptWindow->SetInterfaceObject(txt, "msg");
+  PythonScriptWindow->RegisterInterface(txt, "msg");
 
   AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
   QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
   QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
-  PythonScriptWindow->SetInterfaceObject(web, "web");
+  PythonScriptWindow->RegisterInterface(web, "web");
 
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
-  PythonScriptWindow->SetInterfaceObject(photon, "photon");
+  PythonScriptWindow->RegisterInterface(photon, "photon");
 
   AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
-  PythonScriptWindow->SetInterfaceObject(depo, "depo");
+  PythonScriptWindow->RegisterInterface(depo, "depo");
+
+  AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);
+  ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
   AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
-  PythonScriptWindow->SetInterfaceObject(knn, "knn");
+  PythonScriptWindow->RegisterInterface(knn, "knn");
 #endif
 
 #ifdef ANTS_FANN
   //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
-  //PythonScriptWindow->SetInterfaceObject(ann, "ann");
+  //PythonScriptWindow->RegisterInterface(ann, "ann");
 #endif
 
   // Interfaces which rely on MainWindow
 
   InterfaceToGeoWin* geowin = new InterfaceToGeoWin(this, TmpHub);
-  PythonScriptWindow->SetInterfaceObject(geowin, "geowin");
+  PythonScriptWindow->RegisterInterface(geowin, "geowin");
 
   InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
-  PythonScriptWindow->SetInterfaceObject(grwin, "grwin");
+  PythonScriptWindow->RegisterInterface(grwin, "grwin");
 
   AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
-  PythonScriptWindow->SetInterfaceObject(out, "outwin");
+  PythonScriptWindow->RegisterInterface(out, "outwin");
 
   PythonScriptWindow->SetShowEvaluationResult(true);
 
@@ -128,5 +132,5 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(PythonScriptWindow, SIGNAL(success(QString)), this, SLOT(onGlobalScriptFinished()));
   QObject::connect(PythonScriptWindow, SIGNAL(RequestDraw(TObject*,QString,bool)), GraphWindow, SLOT(DrawStrOpt(TObject*,QString,bool)));
 
-  PythonScriptWindow->UpdateHighlight();
+  PythonScriptWindow->UpdateGui();
 }

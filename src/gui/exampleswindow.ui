@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>458</width>
-    <height>455</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>123</x>
-      <y>410</y>
+      <y>444</y>
       <width>231</width>
       <height>17</height>
      </rect>
@@ -31,7 +31,7 @@
     <property name="geometry">
      <rect>
       <x>1</x>
-      <y>271</y>
+      <y>306</y>
       <width>457</width>
       <height>20</height>
      </rect>
@@ -55,7 +55,7 @@
       <x>4</x>
       <y>30</y>
       <width>451</width>
-      <height>233</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -68,7 +68,7 @@
      <property name="geometry">
       <rect>
        <x>12</x>
-       <y>114</y>
+       <y>150</y>
        <width>151</width>
        <height>16</height>
       </rect>
@@ -87,7 +87,7 @@
      <property name="geometry">
       <rect>
        <x>129</x>
-       <y>204</y>
+       <y>241</y>
        <width>191</width>
        <height>24</height>
       </rect>
@@ -105,7 +105,7 @@
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>8</x>
+       <x>20</x>
        <y>4</y>
        <width>107</width>
        <height>13</height>
@@ -123,8 +123,8 @@
       <rect>
        <x>6</x>
        <y>20</y>
-       <width>111</width>
-       <height>91</height>
+       <width>129</width>
+       <height>127</height>
       </rect>
      </property>
      <property name="selectionRectVisible">
@@ -138,7 +138,7 @@
      <property name="geometry">
       <rect>
        <x>6</x>
-       <y>131</y>
+       <y>167</y>
        <width>441</width>
        <height>70</height>
       </rect>
@@ -147,17 +147,17 @@
     <widget class="QListWidget" name="lwSubType">
      <property name="geometry">
       <rect>
-       <x>126</x>
+       <x>140</x>
        <y>20</y>
        <width>131</width>
-       <height>91</height>
+       <height>127</height>
       </rect>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>268</x>
+       <x>270</x>
        <y>4</y>
        <width>178</width>
        <height>13</height>
@@ -173,7 +173,7 @@
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>128</x>
+       <x>142</x>
        <y>4</y>
        <width>130</width>
        <height>13</height>
@@ -189,10 +189,10 @@
     <widget class="QListWidget" name="lwExample">
      <property name="geometry">
       <rect>
-       <x>266</x>
+       <x>276</x>
        <y>20</y>
-       <width>181</width>
-       <height>91</height>
+       <width>171</width>
+       <height>127</height>
       </rect>
      </property>
     </widget>
@@ -223,7 +223,7 @@
     <property name="geometry">
      <rect>
       <x>4</x>
-      <y>292</y>
+      <y>327</y>
       <width>451</width>
       <height>111</height>
      </rect>

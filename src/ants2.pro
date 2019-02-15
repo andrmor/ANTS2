@@ -1,15 +1,26 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 12
+ANTS2_MINOR = 14
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
 #CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
 #CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
 CONFIG += ants2_eigen3      #use Eigen3 library instead of ROOT for linear algebra - highly recommended! Installation requires only to copy files!
-#CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
-#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)
+#CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
+
+# You may need to modify paths CERN ROOT and the enabled libraries! See the corresponding sections below
+
+#Optional features enabled in Docker version   
+ants2_docker {
+    CONFIG += ants2_flann       #enable FLANN (fast neighbour search) library: see https://github.com/mariusmuja/flann
+    CONFIG += ants2_fann        #enables FANN (fast neural network) library: see https://github.com/libfann/fann
+    CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
+    CONFIG += ants2_Python      #enable Python scripting  
+    CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering)  
+}
 
 DEBUG_VERBOSITY = 1          # 0 - debug messages suppressed, 1 - normal, 2 - normal + file/line information
                              # after a change, qmake and rebuild (or qmake + make any change in main.cpp to trigger recompilation)
@@ -193,11 +204,19 @@ ants2_Python{
             LIBS += -LC:/PythonQt3.2/lib -lPythonQt
     }
     linux-g++ || unix {
-            LIBS += $$system(python3.5-config --libs)
-            QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+            ants2_docker { 
+                LIBS += $$system(python3-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-            INCLUDEPATH += /home/andr/Work/PythonQt/src
-            LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+                INCLUDEPATH += /usr/include/PythonQt5/
+                LIBS += -lPythonQt-Qt5-Python3.6
+            } else {
+                LIBS += $$system(python3.5-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+
+                INCLUDEPATH += /home/andr/Work/PythonQt/src
+                LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+            }
     }
 
     HEADERS += scriptmode/apythonscriptmanager.h
@@ -217,10 +236,16 @@ ants2_NCrystal{
             LIBS += -LC:/NCrystal/lib -lNCrystal
     }
     linux-g++ || unix {
-            INCLUDEPATH += /home/andr/Work/NCrystal/include
+            ants2_docker {
+                INCLUDEPATH += /usr/local/include/NCrystal/
+                LIBS += -L/usr/local/lib/
+                LIBS += -lNCrystal
 
-            LIBS += -L/home/andr/Work/NCrystal/lib/
-            LIBS += -lNCrystal
+            } else {
+                INCLUDEPATH += /home/andr/Work/NCrystal/include
+                LIBS += -L/home/andr/Work/NCrystal/lib/
+                LIBS += -lNCrystal
+            }
     }
 
     SOURCES += common/arandomgenncrystal.cpp
@@ -236,19 +261,12 @@ message("--> Compiling without GUI")
 CONFIG -= ants2_GUI
 }
 
-#Options to be in effect only during compilation for docker
-Ants2Docker {
-message("--> Compiling for docker")
-CONFIG += ants2_docker
-}
-
 #---ANTS2 files---
 SOURCES += main.cpp \
     common/jsonparser.cpp \
     common/CorrelationFilters.cpp \
     common/reconstructionsettings.cpp \
     common/generalsimsettings.cpp \
-    common/globalsettingsclass.cpp \
     common/tmpobjhubclass.cpp \
     common/ajsontools.cpp \
     common/afiletools.cpp \
@@ -261,12 +279,11 @@ SOURCES += main.cpp \
     common/apmarraydata.cpp \
     common/aqtmessageredirector.cpp \
     common/ageoobject.cpp \
-    common/aopticaloverride.cpp \
+    OpticalOverrides/aopticaloverride.cpp \
     modules/detectorclass.cpp \
     modules/eventsdataclass.cpp \
     modules/dynamicpassiveshandler.cpp \
     modules/processorclass.cpp \
-    modules/particlesourcesclass.cpp \
     modules/flatfield.cpp \
     modules/sensorlrfs.cpp \
     modules/manifesthandling.cpp \
@@ -324,7 +341,6 @@ SOURCES += main.cpp \
     common/amaterialcomposition.cpp \
     common/aneutroninteractionelement.cpp \
     scriptmode/ainterfacetodeposcript.cpp \
-    scriptmode/coreinterfaces.cpp \
     scriptmode/localscriptinterfaces.cpp \
     scriptmode/histgraphinterfaces.cpp \
     scriptmode/ainterfacetomultithread.cpp \
@@ -351,13 +367,30 @@ SOURCES += main.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
-    common/atrackbuildoptions.cpp
+    common/atrackbuildoptions.cpp \
+    OpticalOverrides/aopticaloverridescriptinterface.cpp \
+    OpticalOverrides/ascriptopticaloverride.cpp \
+    common/atracerstateful.cpp \
+    common/aphoton.cpp \
+    scriptmode/amathscriptinterface.cpp \
+    OpticalOverrides/fsnpopticaloverride.cpp \
+    OpticalOverrides/awaveshifteroverride.cpp \
+    OpticalOverrides/spectralbasicopticaloverride.cpp \
+    OpticalOverrides/abasicopticaloverride.cpp \
+    common/aglobalsettings.cpp \
+    common/aparticlesourcerecord.cpp \
+    modules/ascriptparticlegenerator.cpp \
+    modules/afileparticlegenerator.cpp \
+    scriptmode/aparticlegeneratorinterface.cpp \
+    common/aparticlerecord.cpp \
+    scriptmode/acorescriptinterface.cpp \
+    modules/asourceparticlegenerator.cpp \
+    scriptmode/aparticletrackinghistoryinterface.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
     common/reconstructionsettings.h \
     common/generalsimsettings.h \
-    common/globalsettingsclass.h \
     common/tmpobjhubclass.h \
     common/agammarandomgenerator.h \
     common/apositionenergyrecords.h \
@@ -372,9 +405,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/apmposangtyperecord.h \
     common/apmarraydata.h \
     common/ageoobject.h \
-    common/aopticaloverride.h \
+    OpticalOverrides/aopticaloverride.h \
     modules/detectorclass.h \
-    modules/particlesourcesclass.h \
     modules/flatfield.h \
     modules/sensorlrfs.h \
     modules/eventsdataclass.h \
@@ -447,7 +479,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/amaterialcomposition.h \
     common/aneutroninteractionelement.h \
     scriptmode/ainterfacetodeposcript.h \
-    scriptmode/coreinterfaces.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
     common/amessageoutput.h \
@@ -475,7 +506,25 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
-    common/atrackbuildoptions.h
+    common/atrackbuildoptions.h \
+    OpticalOverrides/aopticaloverridescriptinterface.h \
+    OpticalOverrides/ascriptopticaloverride.h \
+    common/atracerstateful.h \
+    scriptmode/amathscriptinterface.h \
+    OpticalOverrides/fsnpopticaloverride.h \
+    OpticalOverrides/awaveshifteroverride.h \
+    OpticalOverrides/spectralbasicopticaloverride.h \
+    OpticalOverrides/abasicopticaloverride.h \
+    common/aglobalsettings.h \
+    common/aparticlesourcerecord.h \
+    common/aparticlegun.h \
+    modules/ascriptparticlegenerator.h \
+    modules/afileparticlegenerator.h \
+    scriptmode/aparticlegeneratorinterface.h \
+    common/aparticlerecord.h \
+    scriptmode/acorescriptinterface.h \
+    modules/asourceparticlegenerator.h \
+    scriptmode/aparticletrackinghistoryinterface.h
 
 # --- SIM ---
 ants2_SIM {
@@ -487,8 +536,8 @@ ants2_SIM {
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
     modules/simulationmanager.cpp \
-    modules/phscatclaudiomodel.cpp \
-    modules/scatteronmetal.cpp \
+    OpticalOverrides/phscatclaudiomodel.cpp \
+    OpticalOverrides/scatteronmetal.cpp \
     modules/aphotontracer.cpp \
     modules/acompton.cpp \
     modules/ageometrytester.cpp
@@ -500,7 +549,6 @@ ants2_SIM {
     common/atrackrecords.h \
     common/dotstgeostruct.h \
     common/aenergydepositioncell.h \
-    common/aparticleonstack.h \
     common/ahistoryrecords.h \
     common/asimulationstatistics.h \
     modules/primaryparticletracker.h \
@@ -508,8 +556,8 @@ ants2_SIM {
     modules/photon_generator.h \
     modules/s2_generator.h \
     modules/simulationmanager.h \
-    modules/phscatclaudiomodel.h \
-    modules/scatteronmetal.h \
+    OpticalOverrides/phscatclaudiomodel.h \
+    OpticalOverrides/scatteronmetal.h \
     modules/aphotontracer.h \
     modules/acompton.h \
     modules/ageometrytester.h
@@ -590,8 +638,10 @@ ants2_GUI {
     gui/MainWindowTools/slabdelegate.cpp \
     gui/aremotewindow.cpp \
     gui/MainWindowTools/atrackdrawdialog.cpp \
-    gui/aserverdelegate.cpp
-
+    gui/aserverdelegate.cpp \
+    gui/MainWindowTools/aopticaloverridedialog.cpp \
+    gui/MainWindowTools/aopticaloverridetester.cpp \
+    gui/MainWindowTools/aparticlesourcedialog.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -648,7 +698,10 @@ HEADERS  += gui/mainwindow.h \
     gui/awebsocketserverdialog.h \
     gui/aremotewindow.h \
     gui/MainWindowTools/atrackdrawdialog.h \
-    gui/aserverdelegate.h
+    gui/aserverdelegate.h \
+    gui/MainWindowTools/aopticaloverridedialog.h \
+    gui/MainWindowTools/aopticaloverridetester.h \
+    gui/MainWindowTools/aparticlesourcedialog.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \
@@ -678,7 +731,10 @@ FORMS += gui/mainwindow.ui \
     gui/aneutroninfodialog.ui \
     gui/awebsocketserverdialog.ui \
     gui/aremotewindow.ui \
-    gui/MainWindowTools/atrackdrawdialog.ui
+    gui/MainWindowTools/atrackdrawdialog.ui \
+    gui/MainWindowTools/aopticaloverridedialog.ui \
+    gui/MainWindowTools/aopticaloverridetester.ui \
+    gui/MainWindowTools/aparticlesourcedialog.ui
 
 INCLUDEPATH += gui
 INCLUDEPATH += gui/RasterWindow
@@ -690,6 +746,7 @@ INCLUDEPATH += gui/GraphWindowTools
 INCLUDEPATH += gui/MainWindowTools
 
 INCLUDEPATH += SplineLibrary
+INCLUDEPATH += OpticalOverrides
 INCLUDEPATH += modules
 INCLUDEPATH += modules/lrf_v2
 INCLUDEPATH += modules/lrf_v3
@@ -722,11 +779,14 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
+# The next define allows the core script interface to launch external processes. Enable only if you know what are you doing
+#DEFINES += _ALLOW_LAUNCH_EXTERNAL_PROCESS_
+
 #---Optimization of compilation---
 win32 {
-  #uncomment the next two lines to disable optimization during compilation. It will drastically shorten compilation time, but there are performance loss, especially strong for LRF computation
-  #QMAKE_CXXFLAGS_RELEASE -= -O2
-  #QMAKE_CXXFLAGS_RELEASE *= -Od
+  #when the next two lines are NOT commented, optimization during compilation is disabled. It will drastically shorten compilation time on MSVC2013, but there are performance loss, especially strong for LRF computation
+  QMAKE_CXXFLAGS_RELEASE -= -O2
+  QMAKE_CXXFLAGS_RELEASE *= -Od
 }
 linux-g++ || unix {
     QMAKE_CXXFLAGS += -march=native
@@ -794,3 +854,4 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+

@@ -95,6 +95,10 @@ private slots:
 
     void on_pbShowWavelength_clicked();
 
+    void on_pbSaveLog_clicked();
+
+    void on_pbHelpWithSaveToTree_clicked();
+
 protected:
     bool event(QEvent *event);   
 

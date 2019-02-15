@@ -10,6 +10,7 @@
 #include <QStringList>
 
 class GeneralSimSettings;
+class ATracerStateful;
 
 class AMaterialParticleCollection : public QObject
 {
@@ -35,15 +36,22 @@ public:
 
   //hopefully we will get rid of the RandGen after update in NCrystal
   void UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2 *RandGen, int numThreads = 1);
+  const QString CheckOverrides();
   void updateRandomGenForThread(int ID, TRandom2 *RandGen);
+
+  //for script-based optical override initialization
+  bool isScriptOpticalOverrideDefined() const;
 
   //info requests
     //materials
   AMaterial* operator[](int i) {return MaterialCollectionData[i]; } //get pointer to material with index i
+  const AMaterial* operator[](int i) const {return MaterialCollectionData[i]; } //get pointer to material with index i
   int countMaterials() const {return MaterialCollectionData.size();}
   void getFirstOverridenMaterial(int &ifrom, int &ito);
   double convertWaveIndexToWavelength(int index) {return WaveFrom + WaveStep * index;}
   QString getMaterialName(int matIndex);
+  const QStringList getListOfMaterialNames() const;
+
     //particle
   int countParticles() const {return ParticleCollection.size();}
   int getParticleId(QString name) const;
@@ -52,6 +60,7 @@ public:
   int getParticleCharge(int particleIndex) const;
   double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
+  const QStringList getListOfParticleNames() const;
 
   //Material handling
   void AddNewMaterial(bool fSuppressChangedSignal = false);
@@ -80,6 +89,10 @@ public:
   bool readFromJson(QJsonObject &json);
   void AddNewMaterial(QJsonObject &json);
 
+  //general purpose requests
+  void   GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
+  bool   IsWaveResolved() const {return WavelengthResolved;}
+
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);
   int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);
@@ -95,8 +108,9 @@ public:
   //if not in range, the first material index with such a problem is returned.
   // -1 is returned if there are no errors
 
-  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames);
+  void IsParticleInUse(int particleId, bool& bInUse, QString &MaterialNames) const;
   void RemoveParticle(int particleId);  // should NOT be used directly - use RemoveParticle method of AConfiguration
+  int WaveToIndex(double wavelength) const;
 
 private:
   int ConflictingMaterialIndex; //used by CheckMaterial function

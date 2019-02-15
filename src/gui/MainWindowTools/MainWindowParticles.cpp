@@ -5,8 +5,7 @@
 #include "materialinspectorwindow.h"
 #include "outputwindow.h"
 #include "detectorclass.h"
-#include "aparticleonstack.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "amessage.h"
 #include "aconfiguration.h"
 #include "atrackrecords.h"
@@ -79,7 +78,7 @@ void updateParticleCOB(QComboBox* cob, DetectorClass* Detector)
 void MainWindow::on_pbRefreshParticles_clicked()
 {
   QList< QComboBox* > cobs;
-  cobs << ui->cobParticleToInspect << ui->cobParticleToStack << ui->cobGunParticle;
+  cobs << ui->cobParticleToInspect << ui->cobParticleToStack;
   foreach (QComboBox* cob, cobs)
     updateParticleCOB(cob, Detector);
 

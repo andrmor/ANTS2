@@ -2,8 +2,10 @@
 #include "ui_ascriptwindow.h"
 #include "ahighlighters.h"
 #include "atextedit.h"
+#include "ascriptinterface.h"
 #include "localscriptinterfaces.h"
-#include "coreinterfaces.h"
+#include "acorescriptinterface.h"
+#include "amathscriptinterface.h"
 #include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
@@ -18,7 +20,7 @@
 #include "apythonscriptmanager.h"
 #endif
 
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "afiletools.h"
 
 #include <QScriptEngine>
@@ -48,9 +50,9 @@
 //#include <QTextDocumentFragment>
 #include <QHeaderView>
 
-AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass *GlobSet, bool LightMode, QWidget *parent) :
+AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
     QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
-    ui(new Ui::AScriptWindow)
+    ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
     {
@@ -79,10 +81,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     QObject::connect(ScriptManager, &AScriptManager::onAbort, this, &AScriptWindow::receivedOnAbort);
     QObject::connect(ScriptManager, &AScriptManager::onFinish, this, &AScriptWindow::receivedOnSuccess);
 
-    this->GlobSet = GlobSet;
-    ScriptManager->LibScripts  = &GlobSet->LibScripts;
-    ScriptManager->LastOpenDir = &GlobSet->LastOpenDir;
-    ScriptManager->ExamplesDir = &GlobSet->ExamplesDir;
+    ScriptManager->LibScripts  = &GlobSet.LibScripts;
+    ScriptManager->LastOpenDir = &GlobSet.LastOpenDir;
+    ScriptManager->ExamplesDir = &GlobSet.ExamplesDir;
 
     ShowEvalResult = true;
     ui->setupUi(this);
@@ -230,6 +231,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     ui->centralwidget->layout()->addWidget(splMain);
     ui->centralwidget->layout()->addItem(ui->horizontalLayout);
 
+    ui->centralwidget->layout()->removeWidget(ui->frAccept);
+    ui->centralwidget->layout()->addWidget(ui->frAccept);
+
     trwJson->header()->resizeSection(0, 200);
 
     sizes.clear();
@@ -258,9 +262,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
     //QShortcut* DoPaste = new QShortcut(QKeySequence("Ctrl+V"), this);
     //connect(DoPaste, &QShortcut::activated, [&](){ScriptTabs[CurrentTab]->TextEdit->paste();});
 
-    if (!bLightMode)
-        ReadFromJson();
-    else
+    if (bLightMode)
     {
         ui->pbConfig->setEnabled(false);
         twScriptTabs->setStyleSheet("QTabWidget::tab-bar { width: 0; height: 0; margin: 0; padding: 0; border: none; }");
@@ -268,7 +270,9 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, GlobalSettingsClass 
         ui->menuTabs->setEnabled(false);
         ui->menuView->setEnabled(false);
     }
+    else ReadFromJson();
 
+    ui->frAccept->setVisible(false);
 }
 
 AScriptWindow::~AScriptWindow()
@@ -277,11 +281,9 @@ AScriptWindow::~AScriptWindow()
   delete ui;
   delete RedIcon;
   delete ScriptManager;
-  //qDebug() << "Script manager deleted";
-  //delete completitionModel;
-  //qDebug() << "Completition model deleted";
 }
 
+/*
 void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
 {
     ScriptManager->SetInterfaceObject(interfaceObject, name);
@@ -292,7 +294,6 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     if(name.isEmpty())
     { // empty name means the main module
         // populating help for main, math and core units
-        trwHelp->clear();
         if (bLightMode && interfaceObject) fillHelper(interfaceObject, "");
 
         AInterfaceToCore core(0); //dummy to extract methods
@@ -300,12 +301,11 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
         newFunctions << getListOfMethods(&core, "core", false);
         appendDeprecatedOrRemovedMethods(&core, "core");
 
-        AInterfaceToMath math(0); //dummy to extract methods
+        AMathScriptInterface math(0); //dummy to extract methods
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         fillHelper(&math, mathName);
         newFunctions << getListOfMethods(&math, mathName, false);
         appendDeprecatedOrRemovedMethods(&math, mathName);
-        trwHelp->expandItem(trwHelp->itemAt(0,0));
     }
     else
     {
@@ -321,7 +321,7 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     //completitionModel->setStringList(functions);
 
     //if standalone script, update the highlighter and tooltip
-    if (name.isEmpty()) UpdateAllTabs();
+    if (bLightMode) UpdateGui();
 
     //special "needs" of particular interface objects
     if ( dynamic_cast<AInterfaceToHist*>(interfaceObject) || dynamic_cast<AInterfaceToGraph*>(interfaceObject)) //"graph" or "hist"
@@ -330,11 +330,64 @@ void AScriptWindow::SetInterfaceObject(QObject *interfaceObject, QString name)
     if (bLightMode && interfaceObject && trwHelp->topLevelItemCount() > 0) trwHelp->expandItem(trwHelp->itemAt(0,0));
     else trwHelp->collapseAll();
 }
+*/
 
-void AScriptWindow::UpdateAllTabs()
+void AScriptWindow::RegisterInterfaceAsGlobal(AScriptInterface *interface)
+{
+    ScriptManager->RegisterInterfaceAsGlobal(interface);
+
+    doRegister(interface, "");
+}
+
+void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
+{
+    ScriptManager->RegisterCoreInterfaces(bCore, bMath);
+
+    if (bCore)
+    {
+        ACoreScriptInterface core(0); //dummy to extract method names
+        doRegister(&core, "core");
+    }
+    if (bMath)
+    {
+        AMathScriptInterface math(0); //dummy to extract method names
+        QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
+        doRegister(&math, mathName);
+    }
+}
+
+void AScriptWindow::RegisterInterface(AScriptInterface *interface, const QString &name)
+{
+    ScriptManager->RegisterInterface(interface, name);
+
+    doRegister(interface, name);
+
+    //special "needs" of particular interface objects
+    if ( dynamic_cast<AInterfaceToHist*>(interface) || dynamic_cast<AInterfaceToGraph*>(interface)) //"graph" or "hist"
+       QObject::connect(interface, SIGNAL(RequestDraw(TObject*,QString,bool)), this, SLOT(onRequestDraw(TObject*,QString,bool)));
+}
+
+void AScriptWindow::doRegister(AScriptInterface *interface, const QString &name)
+{
+    // populating help
+    fillHelper(interface, name);
+    QStringList newFunctions;
+    newFunctions << getListOfMethods(interface, name, false);
+    appendDeprecatedOrRemovedMethods(interface, name);
+
+    //filling autocompleter
+    for (int i=0; i<newFunctions.size(); i++) newFunctions[i] += "()";
+    functions << newFunctions;
+}
+
+void AScriptWindow::UpdateGui()
 {
     for (int i=0; i<ScriptTabs.size(); i++)
         UpdateTab(ScriptTabs[i]);
+
+    if (bLightMode && trwHelp->topLevelItemCount() > 0)
+        trwHelp->expandItem(trwHelp->itemAt(0,0));
+    else trwHelp->collapseAll();
 }
 
 void AScriptWindow::ReportError(QString error, int line)
@@ -373,9 +426,11 @@ void AScriptWindow::HighlightErrorLine(int line)
 
 void AScriptWindow::WriteToJson()
 {
+    if (bLightMode) return;
+
     QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
@@ -403,9 +458,11 @@ void AScriptWindow::WriteToJson(QJsonObject& json)
 
 void AScriptWindow::ReadFromJson()
 {
+    if (bLightMode) return;
+
     QJsonObject* ScriptWindowJsonPtr = 0;
-    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet->ScriptWindowJson;
-    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet->PythonScriptWindowJson;
+    if ( ScriptLanguage == _JavaScript_) ScriptWindowJsonPtr = &GlobSet.ScriptWindowJson;
+    else if ( ScriptLanguage == _PythonScript_) ScriptWindowJsonPtr = &GlobSet.PythonScriptWindowJson;
     if (!ScriptWindowJsonPtr) return;
 
     QJsonObject& json = *ScriptWindowJsonPtr;
@@ -458,12 +515,6 @@ void AScriptWindow::ReadFromJson(QJsonObject& json)
     }
 }
 
-void AScriptWindow::UpdateHighlight()
-{
-   for (int i=0; i<ScriptTabs.size(); i++)
-       ScriptTabs[i]->UpdateHighlight();
-}
-
 void AScriptWindow::SetMainSplitterSizes(QList<int> values)
 {
     splMain->setSizes(values);
@@ -492,6 +543,16 @@ void AScriptWindow::ConfigureForLightMode(QString *ScriptPtr, const QString& Win
     }
 }
 
+void AScriptWindow::EnableAcceptReject()
+{
+    ui->frAccept->setVisible(true);
+
+    ui->pbRunScript->setText("Test script");
+    QFont f = ui->pbRunScript->font();
+    f.setBold(false);
+    ui->pbRunScript->setFont(f);
+}
+
 void AScriptWindow::ShowText(QString text)
 {
   pteOut->appendHtml(text);
@@ -510,7 +571,7 @@ void AScriptWindow::on_pbRunScript_clicked()
    if (!bLightMode)
    {
        WriteToJson();
-       GlobSet->SaveANTSconfiguration();
+       GlobSet.saveANTSconfiguration();
    }
 
    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
@@ -620,7 +681,7 @@ void AScriptWindow::on_pbStop_clicked()
 
 void AScriptWindow::on_pbLoad_clicked()
 {
-  QString starter = (GlobSet->LibScripts.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibScripts;
+  QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
   QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Script files (*.txt *.js);;All files (*.*)"); //""
   if (fileName.isEmpty()) return;
 
@@ -697,7 +758,7 @@ void AScriptWindow::on_pbSave_clicked()
 void AScriptWindow::on_pbSaveAs_clicked()
 {
     if (ScriptTabs.isEmpty()) return;
-    QString starter = (GlobSet->LibScripts.isEmpty()) ? GlobSet->LastOpenDir : GlobSet->LibScripts;
+    QString starter = (GlobSet.LibScripts.isEmpty()) ? GlobSet.LastOpenDir : GlobSet.LibScripts;
     if (!ScriptTabs[CurrentTab]->FileName.isEmpty()) starter = ScriptTabs[CurrentTab]->FileName;
     QString fileName = QFileDialog::getSaveFileName(this,"Save script", starter, "Script files (*.txt *.js);;All files (*.*)");
     if (fileName.isEmpty()) return;
@@ -746,7 +807,7 @@ void AScriptWindow::on_pbExample_clicked()
 
     //reading example database
     QString target = (ScriptLanguage == _JavaScript_ ? "ScriptExamples.cfg" : "PythonScriptExamples.cfg");
-    QString RecordsFilename = GlobSet->ExamplesDir + "/" + target;
+    QString RecordsFilename = GlobSet.ExamplesDir + "/" + target;
     //check it is found
     QFile file(RecordsFilename);
     if (!file.open(QIODevice::ReadOnly))
@@ -1075,14 +1136,13 @@ void AScriptWindow::onContextMenuRequestedByHelp(QPoint pos)
 //  ScriptTabs[CurrentTab]->TextEdit->insertPlainText(text);
 //}
 
-void AScriptWindow::closeEvent(QCloseEvent* /*e*/)
+void AScriptWindow::closeEvent(QCloseEvent* e)
 {
-//  qDebug() << "Script window: Close event";
-//  if (ScriptManager->fEngineIsRunning)
-//    {
-//      e->ignore();
-//      return;
-//    }
+    QString Script = ScriptTabs[CurrentTab]->TextEdit->document()->toPlainText();
+    //in light mode save the script directly
+    if (bLightMode && LightModeScript) *LightModeScript = Script;
+
+    QMainWindow::closeEvent(e);
 }
 
 bool AScriptWindow::event(QEvent *e)
@@ -1125,11 +1185,12 @@ void AScriptWindow::receivedOnSuccess(QString eval)
     ui->prbProgress->setValue(0);
     ui->prbProgress->setVisible(false);
     emit success(eval);
+    emit onFinish(ScriptManager->isUncaughtException());
 }
 
 void AScriptWindow::onDefaulFontSizeChanged(int size)
 {
-    GlobSet->DefaultFontSize_ScriptWindow = size;
+    GlobSet.DefaultFontSize_ScriptWindow = size;
     for (AScriptWindowTabItem* tab : ScriptTabs)
         tab->TextEdit->SetFontSize(size);
 }
@@ -1189,23 +1250,20 @@ QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool 
   return commands;
 }
 
-void AScriptWindow::appendDeprecatedOrRemovedMethods(const QObject *obj, const QString &name)
+void AScriptWindow::appendDeprecatedOrRemovedMethods(const AScriptInterface *obj, const QString &name)
 {
-    const AScriptInterface* unit = dynamic_cast<const AScriptInterface*>(obj);
+    if (!obj) return;
 
-    if (unit)
+    QHashIterator<QString, QString> iter(obj->getDeprecatedOrRemovedMethods());
+    while (iter.hasNext())
     {
-        QHashIterator<QString, QString> iter(unit->getDeprecatedOrRemovedMethods());
-        while (iter.hasNext())
-        {
-            iter.next();
+        iter.next();
 
-            QString key = iter.key();
-            if (!name.isEmpty()) key = name + "." + key;
+        QString key = iter.key();
+        if (!name.isEmpty()) key = name + "." + key;
 
-            DeprecatedOrRemovedMethods[key] = iter.value();
-            ListOfDeprecatedOrRemovedMethods << key;
-        }
+        DeprecatedOrRemovedMethods[key] = iter.value();
+        ListOfDeprecatedOrRemovedMethods << key;
     }
 }
 
@@ -1391,6 +1449,7 @@ void AScriptWindow::onScriptTabMoved(int from, int to)
 void AScriptWindow::UpdateTab(AScriptWindowTabItem* tab)
 {
     tab->highlighter->setHighlighterRules(functions, ListOfDeprecatedOrRemovedMethods, ListOfConstants);
+    tab->UpdateHighlight();
     tab->TextEdit->functionList = functionList;
     tab->TextEdit->DeprecatedOrRemovedMethods = &DeprecatedOrRemovedMethods;
 }
@@ -1403,13 +1462,13 @@ void AScriptWindow::AddNewTab()
     //tab->TextEdit->functionList = functionList;
     UpdateTab(tab);
 
-    if (GlobSet->DefaultFontFamily_ScriptWindow.isEmpty())
+    if (GlobSet.DefaultFontFamily_ScriptWindow.isEmpty())
       {
-         tab->TextEdit->SetFontSize(GlobSet->DefaultFontSize_ScriptWindow);
+         tab->TextEdit->SetFontSize(GlobSet.DefaultFontSize_ScriptWindow);
       }
     else
       {
-        QFont font(GlobSet->DefaultFontFamily_ScriptWindow, GlobSet->DefaultFontSize_ScriptWindow, GlobSet->DefaultFontWeight_ScriptWindow, GlobSet->DefaultFontItalic_ScriptWindow);
+        QFont font(GlobSet.DefaultFontFamily_ScriptWindow, GlobSet.DefaultFontSize_ScriptWindow, GlobSet.DefaultFontWeight_ScriptWindow, GlobSet.DefaultFontItalic_ScriptWindow);
         tab->TextEdit->setFont(font);
       }
 
@@ -1484,15 +1543,15 @@ void AScriptWindow::on_pbHelp_toggled(bool checked)
 
 void AScriptWindow::on_actionIncrease_font_size_triggered()
 {
-    onDefaulFontSizeChanged(++GlobSet->DefaultFontSize_ScriptWindow);
+    onDefaulFontSizeChanged(++GlobSet.DefaultFontSize_ScriptWindow);
 }
 
 void AScriptWindow::on_actionDecrease_font_size_triggered()
 {
-    if (GlobSet->DefaultFontSize_ScriptWindow<1) return;
+    if (GlobSet.DefaultFontSize_ScriptWindow<1) return;
 
-    onDefaulFontSizeChanged(--GlobSet->DefaultFontSize_ScriptWindow);
-    //qDebug() << "New font size:"<<GlobSet->DefaultFontSize_ScriptWindow;
+    onDefaulFontSizeChanged(--GlobSet.DefaultFontSize_ScriptWindow);
+    //qDebug() << "New font size:"<<GlobSet.DefaultFontSize_ScriptWindow;
 }
 
 #include <QFontDialog>
@@ -1501,17 +1560,17 @@ void AScriptWindow::on_actionSelect_font_triggered()
   bool ok;
   QFont font = QFontDialog::getFont(
                   &ok,
-                  QFont(GlobSet->DefaultFontFamily_ScriptWindow,
-                        GlobSet->DefaultFontSize_ScriptWindow,
-                        GlobSet->DefaultFontWeight_ScriptWindow,
-                        GlobSet->DefaultFontItalic_ScriptWindow),
+                  QFont(GlobSet.DefaultFontFamily_ScriptWindow,
+                        GlobSet.DefaultFontSize_ScriptWindow,
+                        GlobSet.DefaultFontWeight_ScriptWindow,
+                        GlobSet.DefaultFontItalic_ScriptWindow),
                   this);
   if (!ok) return;
 
-  GlobSet->DefaultFontFamily_ScriptWindow = font.family();
-  GlobSet->DefaultFontSize_ScriptWindow = font.pointSize();
-  GlobSet->DefaultFontWeight_ScriptWindow = font.weight();
-  GlobSet->DefaultFontItalic_ScriptWindow = font.italic();
+  GlobSet.DefaultFontFamily_ScriptWindow = font.family();
+  GlobSet.DefaultFontSize_ScriptWindow = font.pointSize();
+  GlobSet.DefaultFontWeight_ScriptWindow = font.weight();
+  GlobSet.DefaultFontItalic_ScriptWindow = font.italic();
 
   for (AScriptWindowTabItem* tab : ScriptTabs)
       tab->TextEdit->setFont(font);
@@ -1599,7 +1658,7 @@ void AScriptWindow::on_actionRemove_all_tabs_triggered()
 void AScriptWindow::on_actionStore_all_tabs_triggered()
 {
     if (ScriptTabs.isEmpty()) return;
-    QString starter = GlobSet->LastOpenDir;
+    QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getSaveFileName(this,"Save session", starter, "Json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;
 
@@ -1630,7 +1689,7 @@ void AScriptWindow::on_actionRestore_session_triggered()
         if (ret != QMessageBox::Yes) return;
     }
 
-    QString starter = GlobSet->LastOpenDir;
+    QString starter = GlobSet.LastOpenDir;
     QString fileName = QFileDialog::getOpenFileName(this, "Load script", starter, "Json files (*.json);;All files (*.*)");
     if (fileName.isEmpty()) return;
 
@@ -2073,4 +2132,16 @@ void AScriptWindowTabItem::onTextChanged()
 
     Variables.append(functions);
     completitionModel->setStringList(Variables);
+}
+
+void AScriptWindow::on_pbAccept_clicked()
+{
+    bAccepted = true;
+    close();
+}
+
+void AScriptWindow::on_pbCancel_clicked()
+{
+    bAccepted = false;
+    close();
 }

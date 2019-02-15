@@ -56,8 +56,16 @@ public slots:
     bool checkboxIsChecked(const QString name);
     void checkboxOnClick(const QString name, const QVariant scriptFunction);
 
+    void setMinimumWidth(const QString name, int min);
+    void setMinimumHeight(const QString name, int min);
+    void setMaximumWidth(const QString name, int max);
+    void setMaximumHeight(const QString name, int max);
+
+    void setToolTip(const QString name, const QString text);
+
     void addStretch(const QString addTo);
     void addHoizontalLine(const QString addTo);
+    void addVerticalLine(const QString addTo);
 
     void verticalLayout(const QString name, const QString addTo);
     void horizontalLayout(const QString& name, const QString& addTo);

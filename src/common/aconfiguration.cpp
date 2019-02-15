@@ -4,7 +4,7 @@
 #include "alrfmoduleselector.h"
 #include "apmgroupsmanager.h"
 #include "amaterialparticlecolection.h"
-#include "particlesourcesclass.h"
+#include "asourceparticlegenerator.h"
 #include "asandwich.h"
 #include "generalsimsettings.h"
 #include "apmhub.h"
@@ -370,8 +370,8 @@ const QString AConfiguration::RemoveParticle(int particleId)
   Detector->MpCollection->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is a secondary particle defined in neutron capture.\nIt appears in the following material(s):\n"+s;
 
-  ParticleSources->IsParticleInUse(particleId, bInUse, s);
-  if (bInUse) return "This particle is in use by the particle source(s):\n" + s;
+  if ( ParticleSources->IsParticleInUse(particleId, s) )
+      return "This particle is in use by the particle source(s):\n" + s;
 
   Detector->Sandwich->IsParticleInUse(particleId, bInUse, s);
   if (bInUse) return "This particle is currently in use by the monitor(s):\n" + s;

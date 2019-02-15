@@ -74,17 +74,8 @@ GainEvaluatorWindowClass::GainEvaluatorWindowClass(QWidget *parent, MainWindow *
 
   move(50,50);
 
-  Equations = 0;
-  Variables = 0;
-  tmpHistForLogR = 0;
-  TMPignore = false; 
-  flagShowNeighbourGroups = false;
-  flagShowNonLinkedSet = false;
-  flagAllPMsCovered = false;
-  flagShowingLinked = false;
   CenterTopFraction = 0.01 * ui->ledCenterTopFraction->text().toDouble();
   CutOffFraction = 0.01 * ui->ledCutOffFraction->text().toDouble();
-  CenterGroups.clear();
   CenterGroups << CenterGroupClass(30.0, 0.5);
 
   ui->pbUpdateLogR->setVisible(false);
@@ -96,18 +87,16 @@ GainEvaluatorWindowClass::GainEvaluatorWindowClass(QWidget *parent, MainWindow *
   QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
   foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
-  iSets4PMs.clear();
   ui->tabwid4sets->resizeColumnsToContents();
 
   //icons
-  RedIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
-  GreenIcon = createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
+  RedIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::red);
+  GreenIcon = GuiUtils::createColorCircleIcon(ui->twAlgorithms->iconSize(), Qt::green);
   ui->labIconWarningCutOffs->setPixmap(RedIcon.pixmap(16,16));
 
   //Graphics view
-  GVscale = 10.0;
   scene = new QGraphicsScene(this);
-  connect(scene, SIGNAL(selectionChanged()), this, SLOT(sceneSelectionChanged()));
+  connect(scene, &QGraphicsScene::selectionChanged, this, &GainEvaluatorWindowClass::sceneSelectionChanged);
   gvGains = new myQGraphicsView(this);
   int gvY = ui->fGV->y() + ui->fGV->height() + 3;
   gvGains->setGeometry(ui->fGV->x(), gvY, 256, 192);
@@ -198,9 +187,8 @@ void GainEvaluatorWindowClass::UpdateEvaluator()
     iPMs.clear();   
     for (int i=0; i<MW->PMs->count(); i++)
        if (!MW->Detector->PMgroups->isStaticPassive(i))
-       //if (MW->PMs->at(i).group == igroup)
-       if (MW->Detector->PMgroups->isPmBelongsToGroup(i, CurrentGroup))
-           iPMs.append(i);
+            if (MW->Detector->PMgroups->isPmBelongsToGroup(i, CurrentGroup))
+                iPMs.append(i);
     Variables = iPMs.size();
     //all methods - Equations + collecting statistics on PMs and store in dedicated sets
     Equations = 1; //the only one equation with nonzero "y" value of SVD
@@ -1041,7 +1029,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
   //============================== Log =================================
   if (ui->cbActivateLogR->isChecked())
     {
-      qDebug()<<"----------!!!--------------";
+      //qDebug()<<"----------!!!--------------";
       if (ui->cobLogMethodSelection->currentIndex() == 0)
         {          
           //Log pairs
@@ -1054,7 +1042,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
                 for (int i2=i1+1; i2<iLogPMs.size(); i2++)
                     {
                       int ipm2 = iLogPMs[i2];
-                      qDebug()<<"PMs:"<<ipm1<<ipm2;
+                      //qDebug()<<"PMs:"<<ipm1<<ipm2;
                       if (isPMDistanceCheckFailLogR(ipm1, ipm2)) continue; //check distance between PM is withing the user range
 
                       //getting relative gains
@@ -1066,7 +1054,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
                           g1 = 1.0/g2;
                           g2 = 1.0;
                         }
-                      qDebug()<<"   -> relative gains:"<<g1<<g2;
+                      //qDebug()<<"   -> relative gains:"<<g1<<g2;
 
                       //filling this equation
                       for (int i=0; i<iPMs.count(); i++)
@@ -1085,7 +1073,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
       else
         {
           // Triads
-          qDebug()<<"----------!!!--------------";
+          //qDebug()<<"----------!!!--------------";
           int numTriads = static_cast<int>( Triads.getTriads()->size() );
           for (int iTriad=0; iTriad<numTriads; iTriad++)
             {
@@ -1095,7 +1083,7 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
               int iPM0 =  iLogPMs[ (*Triads.getTriads())[iTriad][0] ];
               int iPM1 =  iLogPMs[ (*Triads.getTriads())[iTriad][1] ];
               int iPM2 =  iLogPMs[ (*Triads.getTriads())[iTriad][2] ];
-              qDebug()<<"Triad:"<<iTriad<<" ipms:"<<iPM0<<iPM1<<iPM2<<" Relative gains10 and 20:"<<gainRat10<<gainRat20;
+              //qDebug()<<"Triad:"<<iTriad<<" ipms:"<<iPM0<<iPM1<<iPM2<<" Relative gains10 and 20:"<<gainRat10<<gainRat20;
 
               int ipm1[2], ipm2[2];
               ipm1[0] = iPM0; ipm2[0] = iPM1;
@@ -1162,22 +1150,22 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
 
 
   //debug
-  qDebug()<<"-------------------";
-  qDebug()<<"Variables (PMs):"<<iPMs.count();
-  qDebug()<<"Actual equations: "<<iequation;  //its +1 but we started from 0
-  qDebug()<<"-------------------";
-  qDebug()<<"y ("<<y.GetNoElements()<<"):";
-  for (int i=0; i<Equations; i++) qDebug()<<y[i];
-  QString str;  
-  qDebug()<<"-------------------";
-  qDebug()<<"matrix ("<<A.GetNrows()<<","<<A.GetNcols()<<"):";
-  for (int ix=0; ix<Equations; ix++)
-    {
-      str="";
-      for (int iy=0; iy<Variables; iy++) str += QString::number(A(ix,iy))+" ";
-      qDebug()<<str;
-    }
-  qDebug()<<"-------------------";
+  //qDebug()<<"-------------------";
+  //qDebug()<<"Variables (PMs):"<<iPMs.count();
+  //qDebug()<<"Actual equations: "<<iequation;  //its +1 but we started from 0
+  //qDebug()<<"-------------------";
+  //qDebug()<<"y ("<<y.GetNoElements()<<"):";
+  //for (int i=0; i<Equations; i++) qDebug()<<y[i];
+  //QString str;
+  //qDebug()<<"-------------------";
+  //qDebug()<<"matrix ("<<A.GetNrows()<<","<<A.GetNcols()<<"):";
+  //for (int ix=0; ix<Equations; ix++)
+  //  {
+  //    str="";
+  //    for (int iy=0; iy<Variables; iy++) str += QString::number(A(ix,iy))+" ";
+  //    qDebug()<<str;
+  //  }
+  //qDebug()<<"-------------------";
 
 
   //solving SVD
@@ -1209,10 +1197,9 @@ void GainEvaluatorWindowClass::on_pbEvaluateGains_clicked()
       MW->Detector->PMgroups->setGain(iPMs[i], CurrentGroup, c_svd(i)/max);
 
   //reporting gains:
-  qDebug()<<"-------------------";
-  for (int i=0; i<iPMs.count(); i++)
-    //qDebug()<<"PM#:"<<iPMs[i]<<" gain="<<MW->PMs->at(iPMs[i]).relGain;
-    qDebug()<<"PM#:"<<iPMs[i]<<" gain="<<MW->Detector->PMgroups->getGain(iPMs[i], CurrentGroup);
+  //qDebug()<<"-------------------";
+  //for (int i=0; i<iPMs.count(); i++)
+  //  qDebug()<<"PM#:"<<iPMs[i]<<" gain="<<MW->Detector->PMgroups->getGain(iPMs[i], CurrentGroup);
 
   GainEvaluatorWindowClass::UpdateGraphics();
 
@@ -1556,7 +1543,7 @@ void GainEvaluatorWindowClass::on_ledCentersTolerance_returnPressed()
 
 void GainEvaluatorWindowClass::on_pbUpdateCenters_clicked()
 {
-  qDebug()<<"CentersPMs: "<<iCentersPMs;
+  //qDebug()<<"CentersPMs: "<<iCentersPMs;
   bool enabled = ui->cbCentersActivate->isChecked();
   ui->labPMsCenters->setText(QString::number(iCentersPMs.size()));
 
@@ -1629,7 +1616,7 @@ void GainEvaluatorWindowClass::on_ledCenterTopFraction_editingFinished()
 
 void GainEvaluatorWindowClass::on_sbCentersGroupNumber_valueChanged(int arg1)
 {
-  if ( arg1>CenterGroups.size() )
+  if ( arg1 >= CenterGroups.size() )
     {
       ui->sbCentersGroupNumber->setValue(0);
       return; //update on_change
@@ -1678,7 +1665,7 @@ void GainEvaluatorWindowClass::on_ledCutOffFraction_editingFinished()
 
 void GainEvaluatorWindowClass::on_pbUpdate4_clicked()
 {
-  qDebug()<<"4Sets: "<<iSets4PMs.size();
+  //qDebug()<<"4Sets: "<<iSets4PMs.size();
   bool enabled = ui->cb4Activate->isChecked();
 
   ui->f4->setEnabled( enabled );
@@ -1857,11 +1844,7 @@ void GainEvaluatorWindowClass::UpdateGraphics()
     //============================ drawing PMs ===================================
     for (int ipm=0; ipm<MW->PMs->count(); ipm++)
       {
-
-
         const APm &PM = MW->PMs->at(ipm);
-        //if (PM.isStaticPassive()) continue;
-        //if (igroup != -1) if ( PM.group != igroup ) continue; //wrong group
 
         //PM object pen
         QPen pen(Qt::black);
@@ -1872,7 +1855,6 @@ void GainEvaluatorWindowClass::UpdateGraphics()
         QBrush brush(Qt::white); //default color
 
         bool fVisible;
-        //if (PM.isStaticPassive() || (igroup != -1) && ( PM.group != igroup ) )
         if (MW->Detector->PMgroups->isStaticPassive(ipm) || !MW->Detector->PMgroups->isPmBelongsToGroup(ipm, CurrentGroup) )
           {
              fVisible = false;
@@ -1961,7 +1943,6 @@ void GainEvaluatorWindowClass::UpdateGraphics()
         tmp->setRotation(-PM.psi);
         tmp->setTransform(QTransform().translate(PM.x*GVscale, -PM.y*GVscale)); //minus!!!!
 
-        //if (PM.isStaticPassive() || (igroup != -1) && ( PM.group != igroup ) ) ;//unclickable!
         if (MW->Detector->PMgroups->isStaticPassive(ipm) || !MW->Detector->PMgroups->isPmBelongsToGroup(ipm, CurrentGroup) ) ;//unclickable!
         else tmp->setFlag(QGraphicsItem::ItemIsSelectable);
 
@@ -2033,7 +2014,6 @@ void GainEvaluatorWindowClass::UpdateGraphics()
          for (int ipm=0; ipm<MW->PMs->count(); ipm++)
            {
              if (MW->Detector->PMgroups->isStaticPassive(ipm)) continue; //no static passives!
-             //if ( MW->PMs->at(ipm).group != igroup ) continue; //wrong group
              if ( !MW->Detector->PMgroups->isPmBelongsToGroup(ipm, CurrentGroup) ) continue; //wrong group
 
              QGraphicsTextItem * io = new QGraphicsTextItem();
@@ -2137,7 +2117,7 @@ void GainEvaluatorWindowClass::sceneSelectionChanged()
   ipm = PMicons.indexOf(pointer);
   if (ipm == -1)
     {
-      qDebug()<<" --ipm not found!";
+      qWarning() << " --ipm not found!";
       return;
     }
   //qDebug()<<" -- ipm = "<<ipm;
@@ -2330,9 +2310,7 @@ void GainEvaluatorWindowClass::on_pbCalcAverage_clicked()
   if (ipm2>MW->PMs->count()-1) return;
 
   if (isPMDistanceCheckFail(ipm1, ipm2))
-    {
-      qDebug()<<"warning: distance check fail!";
-    }
+      qWarning() << "warning: distance check fail!";
 
   GainEvaluatorWindowClass::AdjustGainPair(ipm1, ipm2);
 }
@@ -2372,8 +2350,8 @@ double GainEvaluatorWindowClass::AdjustGainPair(int ipm1, int ipm2) //----automa
         }
       double ratio;
       if (larger2>0) ratio = 1.0*larger1/larger2; else ratio = 1.0;
-///      qDebug()<<"-------";
-///      qDebug()<<"larger1, larger2:"<<larger1<<larger2<<"ratio:"<<ratio;
+//      qDebug()<<"-------";
+//      qDebug()<<"larger1, larger2:"<<larger1<<larger2<<"ratio:"<<ratio;
 
 
       //choosing direction on start
@@ -2393,11 +2371,11 @@ double GainEvaluatorWindowClass::AdjustGainPair(int ipm1, int ipm2) //----automa
 
       //going next iteration
       g2 += sign*shift;
-///      qDebug()<<"new g2:"<<g2;
+//      qDebug()<<"new g2:"<<g2;
     }
   while ( !fDone );
 
-  qDebug()<<"ipms:"<<ipm1<<ipm2<<"Area fraction:"<<A1OverA2<<"Relative gains: g1=1, g2="<<g2;
+  //qDebug()<<"ipms:"<<ipm1<<ipm2<<"Area fraction:"<<A1OverA2<<"Relative gains: g1=1, g2="<<g2;
   return g2;
 }
 
@@ -2406,7 +2384,7 @@ double GainEvaluatorWindowClass::CalculateAreaFraction(int ipm1, int ipm2) //ret
   const double illuminationRadius = 0.5*ui->ledIlluminatedDiameter->text().toDouble();  
   QLineF lineBetweenPMs(MW->PMs->X(ipm1), MW->PMs->Y(ipm1), MW->PMs->X(ipm2), MW->PMs->Y(ipm2));
   QPointF middlePoint = lineBetweenPMs.pointAt(0.5);
-///qDebug()<<"-------"<<middlePoint.x()<<middlePoint.y();
+//qDebug()<<"-------"<<middlePoint.x()<<middlePoint.y();
 
   QLineF tmp(middlePoint, lineBetweenPMs.p2());
   QLineF splitLineVector1 = tmp.unitVector().normalVector();
@@ -2438,9 +2416,9 @@ double GainEvaluatorWindowClass::CalculateAreaFraction(int ipm1, int ipm2) //ret
     }
   circ1<< circ1.first(); //making closed
   circ2<< circ2.first();
-///  qDebug()<<"\n\nCircles around ipm1 and ipm2:"<<circ1<<"\n\n"<<circ2;
-///  MW->AddPolygonfToGeometry(circ1, 3, 2);
-///  MW->AddPolygonfToGeometry(circ2, 4, 2);
+//  qDebug()<<"\n\nCircles around ipm1 and ipm2:"<<circ1<<"\n\n"<<circ2;
+//  MW->AddPolygonfToGeometry(circ1, 3, 2);
+//  MW->AddPolygonfToGeometry(circ2, 4, 2);
 
   //creating polygons for illuminated area split by the middle line
   QPolygonF illum1, illum2; //on start dont know which one belongs to which pm!
@@ -2450,9 +2428,9 @@ double GainEvaluatorWindowClass::CalculateAreaFraction(int ipm1, int ipm2) //ret
   QLineF radius2(QPointF(0,0), SecondPointOnCircle);
   double endAngle = radius2.angle(); //in degrees!
   if (endAngle<startAngle) std::swap(startAngle, endAngle);
-///  qDebug()<<"\n\nStart and end angles:"<<startAngle<<endAngle;
-///  MW->AddLineToGeometry(QPointF(0,0), FirstPointOnCircle);
-///  MW->AddLineToGeometry(QPointF(0,0), SecondPointOnCircle);
+//  qDebug()<<"\n\nStart and end angles:"<<startAngle<<endAngle;
+//  MW->AddLineToGeometry(QPointF(0,0), FirstPointOnCircle);
+//  MW->AddLineToGeometry(QPointF(0,0), SecondPointOnCircle);
     //filling polygons
      //finding angular step per sector
   startAngle *= 3.1415926/180.0;
@@ -2473,33 +2451,33 @@ double GainEvaluatorWindowClass::CalculateAreaFraction(int ipm1, int ipm2) //ret
   if (illum2.containsPoint( QPointF(MW->PMs->X(ipm1), MW->PMs->Y(ipm1) ), Qt::OddEvenFill))
     {
         //have to swap!
-///      qDebug()<<"swapping illum1 and illum2!";
+//      qDebug()<<"swapping illum1 and illum2!";
       illum1.swap(illum2);
     }
-///  qDebug()<<"\n\nIllum1 and illum2:"<<illum1<<"\n\n"<<illum2;
-///  MW->AddPolygonfToGeometry(illum1, 3, 2);
-///  MW->AddPolygonfToGeometry(illum2, 4, 2);
+//  qDebug()<<"\n\nIllum1 and illum2:"<<illum1<<"\n\n"<<illum2;
+//  MW->AddPolygonfToGeometry(illum1, 3, 2);
+//  MW->AddPolygonfToGeometry(illum2, 4, 2);
 
     //overlaping polygons
   circ1 = circ1.intersected(illum1);
   circ2 = circ2.intersected(illum2);
-///  qDebug()<<"\n\nIntersected results for ipm1 and ipm2:"<<circ1<<"\n\n"<<circ2;
+//  qDebug()<<"\n\nIntersected results for ipm1 and ipm2:"<<circ1<<"\n\n"<<circ2;
     //calculating areas
   double area1 = GainEvaluatorWindowClass::getPolygonArea(circ1);
   double area2 = GainEvaluatorWindowClass::getPolygonArea(circ2);
-///  qDebug()<<"\n------\nArea1 and Area2:"<<area1<<area2;
+//  qDebug()<<"\n------\nArea1 and Area2:"<<area1<<area2;
 
   if (area1 == 0 || area2 == 0)
     {
       qCritical()<<"Error in area calculation: zero area reported!";
-///      qDebug()<<"ipms:"<<ipm1<<ipm2;
+//      qDebug()<<"ipms:"<<ipm1<<ipm2;
       return 0;
     }
 
-///  MW->ShowGeometry();
-///  MW->GeoManager->DrawTracks();
-///  MW->GeometryWindow->UpdateRootCanvas();
-///  MW->GeometryWindow->raise();
+//  MW->ShowGeometry();
+//  MW->GeoManager->DrawTracks();
+//  MW->GeometryWindow->UpdateRootCanvas();
+//  MW->GeometryWindow->raise();
 
   return area1/area2;
 }
@@ -2531,7 +2509,7 @@ double GainEvaluatorWindowClass::AdjustGainPairLogR(int ipm1, int ipm2)
     }
 
   double av = tmpHistForLogR->GetMean();
-  qDebug()<<"av:"<<av;
+  //qDebug()<<"av:"<<av;
 
   return TMath::Exp(av);
 }
@@ -2590,13 +2568,6 @@ void GainEvaluatorWindowClass::UpdateTriads()
   Triads.Init(xx, yy, Rmax, 0);
 
   Triads.SetEvents(list, &EventsDataHub->Events);
-}
-
-void GainEvaluatorWindowClass::SetWindowFont(int ptsize)
-{
-    QFont font = this->font();
-    font.setPointSize(ptsize);
-    this->setFont(font);
 }
 
 void GainEvaluatorWindowClass::on_pbShowNonLinkedSet_clicked()

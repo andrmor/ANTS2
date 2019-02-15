@@ -1,7 +1,7 @@
 #include "ascriptexampleexplorer.h"
 #include "ui_ascriptexampleexplorer.h"
 #include "ascriptexampledatabase.h"
-#include "globalsettingsclass.h"
+//#include "aglobalsettings.h"
 
 #include <QDebug>
 #include <QFileInfo>

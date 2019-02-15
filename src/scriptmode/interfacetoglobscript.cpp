@@ -7,7 +7,6 @@
 #include "atrackrecords.h"
 #include "sensorlrfs.h"
 #include "alrfmoduleselector.h"
-#include "globalsettingsclass.h"
 #include "ajsontools.h"
 #include "apmtype.h"
 #include "aconfiguration.h"

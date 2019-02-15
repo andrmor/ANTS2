@@ -8,7 +8,7 @@
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
 #include "detectorclass.h"
-#include "globalsettingsclass.h"
+#include "aglobalsettings.h"
 #include "ainterfacetoaddobjscript.h"
 #include "asandwich.h"
 #include "aslab.h"
@@ -86,7 +86,7 @@ DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *de
   QList<QLineEdit*> list = this->findChildren<QLineEdit *>();
   foreach(QLineEdit *w, list) if (w->objectName().startsWith("led")) w->setValidator(dv);
 
-  ui->cbAutoCheck->setChecked( MW->GlobSet->PerformAutomaticGeometryCheck );  
+  ui->cbAutoCheck->setChecked( MW->GlobSet.PerformAutomaticGeometryCheck );
   on_cbAutoCheck_stateChanged(111);
 }
 
@@ -360,10 +360,10 @@ void DetectorAddOnsWindow::on_sbDummyType_valueChanged(int arg1)
 void DetectorAddOnsWindow::on_pbLoadDummyPMs_clicked()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet->LastOpenDir, "Data files (*.dat);;Text files (*.txt);; All files (*.*)");
+    fileName = QFileDialog::getOpenFileName(this, "Load file with dummy PMs", MW->GlobSet.LastOpenDir, "Data files (*.dat);;Text files (*.txt);; All files (*.*)");
     //qDebug()<<fileName;
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     Detector->PMdummies.resize(0);
     MW->LoadDummyPMs(fileName);
     ui->sbDummyPMindex->setValue(0);
@@ -531,20 +531,22 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
     delete MW->GenScriptWindow; MW->GenScriptWindow = 0;
 
     AJavaScriptManager* jsm = new AJavaScriptManager(MW->Detector->RandGen);
-    MW->GenScriptWindow = new AScriptWindow(jsm, MW->GlobSet, true, this);
+    MW->GenScriptWindow = new AScriptWindow(jsm, true, this);
 
     QString example = "ClearAll()\nfor (var i=0; i<3; i++)\n Box('Test'+i, 10,5,2, 0, 'PrScint', (i-1)*20,i*2,-i*5,  0,0,0)";
     QString title = ( ObjectScriptTarget.isEmpty() ? "Add objects script" : QString("Add objects script. Script will be stored in object ") + ObjectScriptTarget );
     MW->GenScriptWindow->ConfigureForLightMode(&Detector->AddObjPositioningScript, title, example);
 
     AddObjScriptInterface = new AInterfaceToAddObjScript(Detector);
-    MW->GenScriptWindow->SetInterfaceObject(AddObjScriptInterface);
+    MW->GenScriptWindow->RegisterInterfaceAsGlobal(AddObjScriptInterface);
+    MW->GenScriptWindow->RegisterCoreInterfaces();
 
     connect(AddObjScriptInterface, &AInterfaceToAddObjScript::AbortScriptEvaluation, this, &DetectorAddOnsWindow::ReportScriptError);
     connect(AddObjScriptInterface, &AInterfaceToAddObjScript::requestShowCheckUpWindow, MW->CheckUpWindow, &CheckUpWindowClass::showNormal);
     connect(MW->GenScriptWindow, &AScriptWindow::success, this, &DetectorAddOnsWindow::AddObjScriptSuccess);
 
     MW->recallGeometryOfLocalScriptWindow();
+    MW->GenScriptWindow->UpdateGui();
     MW->GenScriptWindow->show();
 
 //  MW->extractGeometryOfLocalScriptWindow();
@@ -580,7 +582,7 @@ void DetectorAddOnsWindow::on_pbUseScriptToAddObj_clicked()
 //    MW->GenScriptWindow->SetTitle("Add objects script. Script will be stored in object "+ObjectScriptTarget);
 
 //  MW->GenScriptWindow->SetScript(&Detector->AddObjPositioningScript);
-//  MW->GenScriptWindow->SetStarterDir(MW->GlobSet->LibScripts);
+//  MW->GenScriptWindow->SetStarterDir(MW->GlobSet.LibScripts);
 //  connect(MW->GenScriptWindow, SIGNAL(success(QString)), this, SLOT(AddObjScriptSuccess()));
 //
 //  AddObjScriptInterface->GeoObjects.clear();
@@ -606,12 +608,12 @@ void DetectorAddOnsWindow::ReportScriptError(QString ErrorMessage)
 
 void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
 {
-  QString starter = MW->GlobSet->LastOpenDir;
+  QString starter = MW->GlobSet.LastOpenDir;
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("gdml");
   QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml);;Root files (*.root)");
   if (fileName.isEmpty()) return;
-  MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+  MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
   QFileInfo fi(fileName);
   if (fi.suffix().isEmpty()) fileName += ".gdml";
@@ -901,9 +903,9 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
 
 void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet->LastOpenDir, "GDML files (*.gdml)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
     QFileInfo fi(fileName);
     if (fi.suffix() != "gdml")
       {
@@ -911,7 +913,7 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
         return;
       }
 
-    MW->Config->LoadConfig(MW->GlobSet->ExamplesDir + "/Empty.json");
+    MW->Config->LoadConfig(MW->GlobSet.ExamplesDir + "/Empty.json");
 
     QString PMtemplate = ui->lePMtemplate->text();
     if (Detector->GeoManager) delete Detector->GeoManager;
@@ -1020,9 +1022,9 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
 
 void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet->LastOpenDir, "GDML files (*.gdml)");
+    QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
     if (fileName.isEmpty()) return;
-    MW->GlobSet->LastOpenDir = QFileInfo(fileName).absolutePath();
+    MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
     QFileInfo fi(fileName);
     if (fi.suffix() != "gdml")
@@ -1076,7 +1078,7 @@ void DetectorAddOnsWindow::on_pbCheckGeometry_clicked()
 
 void DetectorAddOnsWindow::on_cbAutoCheck_clicked(bool checked)
 {
-    MW->GlobSet->PerformAutomaticGeometryCheck = checked;
+    MW->GlobSet.PerformAutomaticGeometryCheck = checked;
     if (!checked) MW->CheckUpWindow->hide();
 }
 

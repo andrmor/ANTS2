@@ -39,7 +39,7 @@ void MainWindow::createPythonScriptWindow()
 {
   QWidget* w = new QWidget();
   APythonScriptManager* PSM = new APythonScriptManager(Detector->RandGen);
-  PythonScriptWindow = new AScriptWindow(PSM, GlobSet, false, w);
+  PythonScriptWindow = new AScriptWindow(PSM, false, w);
   PythonScriptWindow->move(25,25);
   connect(PythonScriptWindow, SIGNAL(WindowShown(QString)), WindowNavigator, SLOT(ShowWindowTriggered(QString)));
   connect(PythonScriptWindow, SIGNAL(WindowHidden(QString)), WindowNavigator, SLOT(HideWindowTriggered(QString)));
@@ -99,7 +99,7 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
   PythonScriptWindow->RegisterInterface(photon, "photon");
 
-  AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, GlobSet, EventsDataHub);
+  AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, EventsDataHub);
   PythonScriptWindow->RegisterInterface(depo, "depo");
 
   AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);

@@ -2050,10 +2050,9 @@ const QString AGeoPgon::getGenerationString() const
                 QString::number(dphi) + ", "+
                 QString::number(nedges);
 
-  for (APolyCGsection s : Sections)
-                str += ", " + s.toString();
+  for (APolyCGsection s : Sections)  str += ", " + s.toString();
 
-                str +=" )";
+  str +=" )";
   return str;
 }
 
@@ -2803,10 +2802,9 @@ const QString AGeoPcon::getGenerationString() const
                 QString::number(phi)+", "+
                 QString::number(dphi);
 
-  for (APolyCGsection s : Sections)
-                str += ", " + s.toString();
+  for (APolyCGsection s : Sections) str += ", " + s.toString();
 
-                str +=" )";
+  str +=" )";
   return str;
 }
 
@@ -2903,7 +2901,7 @@ bool APolyCGsection::fromString(QString s)
   return true;
 }
 
-QString APolyCGsection::toString() const
+const QString APolyCGsection::toString() const
 {
   return QString("{ ") +
          QString::number(z) + " : " +

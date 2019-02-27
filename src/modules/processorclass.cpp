@@ -1123,13 +1123,13 @@ void CGonCPUreconstructorClass::execute()
 
                     //energy assuming event is in this node
                     if (RecSet->fReconstructEnergy)
-                      {
+                    {
                         bool fBadLRFfound = false;
                         double sumLRFs = 0;
                         double SumSignal = 0;
                         for (int ipm = 0; ipm < numPMs; ipm++)
                           if (DynamicPassives->isActive(ipm))
-                            {
+                          {
                              double LRFhere = LRFs.getLRF(ipm, rec->Points[0].r);
                              if (LRFhere <= 0.0)
                                {
@@ -1139,10 +1139,10 @@ void CGonCPUreconstructorClass::execute()
                              sumLRFs += LRFhere;
                              //SumSignal += EventsDataHub->Events[iev].at(ipm) / Detector->PMs->at(ipm).relGain;
                              SumSignal += EventsDataHub->Events.at(iev).at(ipm) / PMgroups->Groups.at(ThisPmGroup)->PMS.at(ipm).gain;
-                            }
-                        if (fBadLRFfound) continue; //skip this location
-                        rec->Points[0].energy = SumSignal/sumLRFs;//energy cannot be zero here
-                      }
+                          }
+                        if (fBadLRFfound) continue; //skip this grid node
+                        rec->Points[0].energy = SumSignal/sumLRFs; //sumLRFs is always > 0
+                    }
                     else rec->Points[0].energy = RecSet->SuggestedEnergy;
 
                     double result = (RecSet->CGoptimizeWhat == 0) ? calculateChi2NoDegFree(iev, rec) : calculateMLfactor(iev, rec);

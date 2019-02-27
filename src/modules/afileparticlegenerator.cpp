@@ -243,5 +243,8 @@ void AFileParticleGenerator::clearFileStat()
 
     NumEventsInFile = 0;
     statNumMultipleEvents = 0;
-    statParticleQuantity = QVector<int>(RegisteredParticleCount, 0);
+
+    statParticleQuantity.clear();
+    if (RegisteredParticleCount >= 0)
+        statParticleQuantity =  QVector<int>(RegisteredParticleCount, 0);
 }

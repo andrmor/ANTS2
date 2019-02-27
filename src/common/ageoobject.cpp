@@ -2050,7 +2050,7 @@ const QString AGeoPgon::getGenerationString() const
                 QString::number(dphi) + ", "+
                 QString::number(nedges);
 
-  for (APolyCGsection s : Sections)  str += ", " + s.toString();
+  for (const APolyCGsection& s : Sections)  str += ", " + s.toString();
 
   str +=" )";
   return str;
@@ -2802,7 +2802,7 @@ const QString AGeoPcon::getGenerationString() const
                 QString::number(phi)+", "+
                 QString::number(dphi);
 
-  for (APolyCGsection s : Sections) str += ", " + s.toString();
+  for (const APolyCGsection& s : Sections) str += ", " + s.toString();
 
   str +=" )";
   return str;

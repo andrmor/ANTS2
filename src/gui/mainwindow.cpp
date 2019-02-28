@@ -1149,9 +1149,6 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
    if (checked) ui->twOption->setTabIcon(7, Rwindow->YellowIcon);
    else         ui->twOption->setTabIcon(7, QIcon());
 
-   int i=0;
-   if (checked) i=1;
-
    if (checked) ui->cbScanFloodAddNoise->setChecked(false);
    ui->cbScanFloodAddNoise->setEnabled(!checked);
 }

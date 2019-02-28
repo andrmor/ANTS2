@@ -108,7 +108,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
     {
        //Shao model, upgraded to have several decay components
 
-       double td;
+       double td = 0;
        //selecting decay component
        if (PriScint_Decay.size() == 1)
            td = PriScint_Decay.first().value;

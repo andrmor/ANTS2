@@ -889,7 +889,6 @@ void OutputWindow::on_sbEvent_valueChanged(int arg1)
   if (arg1 > EventsDataHub->Events.size()-1)
     {
       ui->sbEvent->setValue(0);
-      arg1 = 0;
       return; //already triggered "on change" = this procedure
     } 
 

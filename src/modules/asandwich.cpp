@@ -793,7 +793,7 @@ bool ASandwich::CalculateZofSlabs()
   LastError = "";
 
   // find the Z=0 slab
-  int iZeroSlab;
+  int iZeroSlab = 0;
   int FoundActiveLayers = 0;
   int i;
   for (i=0; i<World->HostedObjects.size(); i++)

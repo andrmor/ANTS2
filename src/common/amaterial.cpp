@@ -60,7 +60,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
         // --- "Sum" model ---
 
         //delay due to raise time
-        double tau;
+        double tau = 0;
         if (PriScint_Raise.size() == 1)
             tau = PriScint_Raise.first().value;
         else
@@ -128,7 +128,7 @@ double AMaterial::GeneratePrimScintTime(TRandom2 *RandGen) const
            }
        }
 
-       double tr;
+       double tr = 0;
        //selecting raise component
        if (PriScint_Raise.size() == 1)
            tr = PriScint_Raise.first().value;

@@ -125,9 +125,9 @@ void MainWindow::on_actionReset_position_of_windows_triggered()
 
    if (PythonScriptWindow)
    {
-       GraphWindow->setGeometry(20, 20, 700, 500);
-       GraphWindow->showNormal();
-       GraphWindow->raise();
+       PythonScriptWindow->setGeometry(20, 20, 700, 500);
+       PythonScriptWindow->showNormal();
+       PythonScriptWindow->raise();
    }
 
    bOptOvDialogPositioned = false;

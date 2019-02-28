@@ -1587,6 +1587,7 @@ void ParticleSourceSimulator::simulate()
         bool bGenerationSuccessful = true;
         for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
         {
+            if (!ParticleGun) break; //paranoic
             //generating one event
             bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
             //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();

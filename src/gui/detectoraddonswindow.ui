@@ -1086,6 +1086,9 @@
                  <bold>true</bold>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>All length sizes should be in mm!</string>
+               </property>
                <property name="text">
                 <string>Import geometry from a GDML file</string>
                </property>
@@ -1145,6 +1148,9 @@
                <weight>75</weight>
                <bold>true</bold>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>All length sizes should be in mm!</string>
              </property>
              <property name="text">
               <string>Override geometry from a GDML file</string>

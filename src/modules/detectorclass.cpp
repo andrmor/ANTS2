@@ -31,6 +31,7 @@
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
 #include "TGeoCompositeShape.h"
+#include "TNamed.h"
 
 static void autoLoadPlugins() {
   typedef void (*LrfPluginSetupFn)(LRF::ALrfTypeManagerInterface &manager);
@@ -357,8 +358,7 @@ void DetectorClass::constructDetector()
   //qDebug() << "    World size XYmax:"<<WorldSizeXY<<"Zmax:"<<WorldSizeZ;
 
   //qDebug() << "--> Creating top volume";
-  top = GeoManager->MakeBox("World", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
-  //Detector->top->SetLineColor(kGreen);
+  top = GeoManager->MakeBox("WorldBox", (*MpCollection)[Sandwich->World->Material]->GeoMed, WorldSizeXY, WorldSizeXY, WorldSizeZ);
   GeoManager->SetTopVolume(top);
   GeoManager->SetTopVisible(true);
   //qDebug() << "--> Positioning sandwich layers";
@@ -381,6 +381,7 @@ void DetectorClass::constructDetector()
       //qDebug() << "--> Positioning dummy PMs";
       positionDummies();
     }
+  top->SetName("World");
   //qDebug() << "--> Closing geometry";
   GeoManager->CloseGeometry();
   emit newGeoManager(GeoManager);

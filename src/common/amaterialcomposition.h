@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QPair>
 
+#include "TString.h"
+
 class QJsonObject;
 class TGeoMaterial;
 class TGeoElement;
@@ -20,6 +22,8 @@ public:
 
     AIsotope(const QString Symbol, int Mass, double Abundancy) : Symbol(Symbol), Mass(Mass), Abundancy(Abundancy) {}
     AIsotope() : Symbol("Undefined"), Mass(777), Abundancy(0) {}
+
+    const TString getTName() const;
 
     void writeToJson(QJsonObject &json) const;
     void readFromJson(const QJsonObject &json);
@@ -86,7 +90,7 @@ private:
 
     const QString fillIsotopesWithNaturalAbundances(AChemicalElement &element) const; //return error (empty if all fine)
 
-    TGeoElement* generateTGeoElement(const AChemicalElement *el) const; //does not own!
+    TGeoElement* generateTGeoElement(const AChemicalElement *el, const TString &matName) const; //does not own!
 };
 
 #endif // AMATERIALCOMPOSITION_H

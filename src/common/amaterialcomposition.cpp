@@ -231,18 +231,19 @@ const QString AMaterialComposition::checkForErrors() const
 #include "TGeoMaterial.h"
 #include "TGeoElement.h"
 #include "TGeoManager.h"
-TGeoElement *AMaterialComposition::generateTGeoElement(const AChemicalElement *el) const
+TGeoElement *AMaterialComposition::generateTGeoElement(const AChemicalElement *el, const TString& matName) const
 {
-    TString tName = el->Symbol.toLatin1().data();
-    TGeoElement* geoEl = new TGeoElement(tName, tName, el->countIsotopes());
+    TString tName(el->Symbol.toLatin1().data());
+    tName += '_';
+    tName += matName;
 
+    TGeoElement *geoEl = new TGeoElement(tName, tName, el->countIsotopes());
     int Z = SymbolToNumber[el->Symbol];
-
     for (const AIsotope& iso : el->Isotopes)
     {
-        TString thisIsoName = tName;
-        thisIsoName += iso.Mass;
-        TGeoIsotope *geoIsotope = new TGeoIsotope(thisIsoName, Z, iso.Mass, 0); // ***!!! 0
+        const TString thisIsoName = iso.getTName();
+        TGeoIsotope *geoIsotope = TGeoIsotope::FindIsotope(thisIsoName);
+        if (!geoIsotope) geoIsotope = new TGeoIsotope(thisIsoName, Z, iso.Mass, iso.Mass);
         geoEl->AddIsotope(geoIsotope, iso.Abundancy);
     }
     return geoEl;
@@ -258,17 +259,19 @@ TGeoMaterial *AMaterialComposition::generateTGeoMaterial(const QString &MatName,
     if (numElements == 0)
         return new TGeoMaterial(tName, 1.0, 1, 1.0e-29);
     else if (numIsotopes == 1)
-        return new TGeoMaterial(tName, generateTGeoElement(getElement(0)), density);
+        return new TGeoMaterial(tName, generateTGeoElement(getElement(0), tName), density);
     else
     {
         TGeoMixture* mix = new TGeoMixture(tName, numElements, density);
 
-        double totWeight = 0;
-        for (const AChemicalElement& el : ElementComposition)
-            totWeight += el.getFractionWeight() * el.MolarFraction;
+        // GDML doc hints it is the molar fraction! http://gdml.web.cern.ch/GDML/doc/GDMLmanual.pdf
+        //double totWeight = 0;
+        //for (const AChemicalElement& el : ElementComposition)
+        //    totWeight += el.getFractionWeight() * el.MolarFraction;
 
         for (const AChemicalElement& el : ElementComposition)
-            mix->AddElement(generateTGeoElement(&el), el.getFractionWeight() * el.MolarFraction / totWeight);
+            //mix->AddElement(generateTGeoElement(&el), el.getFractionWeight() * el.MolarFraction / totWeight);
+            mix->AddElement(generateTGeoElement(&el, tName), el.MolarFraction);
 
         return mix;
     }
@@ -409,6 +412,13 @@ const QString AMaterialComposition::fillIsotopesWithNaturalAbundances(AChemicalE
     for (auto& pair : list)
         element.Isotopes << AIsotope(name, pair.first, pair.second);
     return "";
+}
+
+const TString AIsotope::getTName() const
+{
+    TString name(Symbol.toLatin1().data());
+    name += Mass;
+    return name;
 }
 
 void AIsotope::writeToJson(QJsonObject &json) const

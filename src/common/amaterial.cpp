@@ -42,6 +42,13 @@ double AMaterial::getReemissionProbability(int iWave) const
     return reemissionProbBinned.at(iWave);
 }
 
+#include "TGeoMaterial.h"
+void AMaterial::generateTGeoMat()
+{
+    delete GeoMat; GeoMat = 0;
+    GeoMat = ChemicalComposition.generateTGeoMaterial(name.toLocal8Bit().data(), density);
+}
+
 double AMaterial::FT(double td, double tr, double t) const
 {
     return 1.0 - ((tr + td) / td) * exp(- t / td) + (tr / td) * exp(- t * (1.0 / tr + 1.0 / td));

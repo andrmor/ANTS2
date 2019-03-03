@@ -329,7 +329,8 @@ void DetectorClass::constructDetector()
       QString tmpStr = (*MpCollection)[i]->name;
       QByteArray ba = tmpStr.toLocal8Bit();
       char *cname = ba.data();
-      (*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
+      //(*MpCollection)[i]->GeoMat = new TGeoMaterial(cname, (*MpCollection)[i]->p1, (*MpCollection)[i]->p2, (*MpCollection)[i]->p3);
+      (*MpCollection)[i]->generateTGeoMat();
       (*MpCollection)[i]->GeoMed = new TGeoMedium (cname, i, (*MpCollection)[i]->GeoMat);
     }
 

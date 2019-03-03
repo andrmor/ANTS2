@@ -7,10 +7,18 @@
 #include <QJsonArray>
 #include <QList>
 #include <QDebug>
+#include <QVector>
 
 AMaterialComposition::AMaterialComposition()
 {
-    AllPossibleElements<<"H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
+    QList<QString> all;
+    all << "H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
+
+    for (const QString& s : all)
+        AllPossibleElements << s;
+
+    for (int i=0; i<all.size(); i++)
+        SymbolToNumber.insert(all.at(i), i+1);
 }
 
 void AMaterialComposition::configureNaturalAbunances(const QString FileName_NaturalAbundancies)
@@ -220,6 +228,52 @@ const QString AMaterialComposition::checkForErrors() const
     return "";
 }
 
+#include "TGeoMaterial.h"
+#include "TGeoElement.h"
+#include "TGeoManager.h"
+TGeoElement *AMaterialComposition::generateTGeoElement(const AChemicalElement *el) const
+{
+    TString tName = el->Symbol.toLatin1().data();
+    TGeoElement* geoEl = new TGeoElement(tName, tName, el->countIsotopes());
+
+    int Z = SymbolToNumber[el->Symbol];
+
+    for (const AIsotope& iso : el->Isotopes)
+    {
+        TString thisIsoName = tName;
+        thisIsoName += iso.Mass;
+        TGeoIsotope *geoIsotope = new TGeoIsotope(thisIsoName, Z, iso.Mass, 0); // ***!!! 0
+        geoEl->AddIsotope(geoIsotope, iso.Abundancy);
+    }
+    return geoEl;
+}
+
+TGeoMaterial *AMaterialComposition::generateTGeoMaterial(const QString &MatName, const double& density) const
+{
+    TString tName = MatName.toLocal8Bit().data();
+
+    int numElements = countElements();
+    int numIsotopes = countIsotopes();
+
+    if (numElements == 0)
+        return new TGeoMaterial(tName, 1.0, 1, 1.0e-29);
+    else if (numIsotopes == 1)
+        return new TGeoMaterial(tName, generateTGeoElement(getElement(0)), density);
+    else
+    {
+        TGeoMixture* mix = new TGeoMixture(tName, numElements, density);
+
+        double totWeight = 0;
+        for (const AChemicalElement& el : ElementComposition)
+            totWeight += el.getFractionWeight() * el.MolarFraction;
+
+        for (const AChemicalElement& el : ElementComposition)
+            mix->AddElement(generateTGeoElement(&el), el.getFractionWeight() * el.MolarFraction / totWeight);
+
+        return mix;
+    }
+}
+
 int AMaterialComposition::countIsotopes() const
 {
     int count = 0;
@@ -303,6 +357,14 @@ const QString AChemicalElement::print() const
     for (const AIsotope& iso : Isotopes)
         str += "  " + iso.Symbol + "-" + QString::number(iso.Mass) + "   " + QString::number(iso.Abundancy) + "\n";
     return str;
+}
+
+double AChemicalElement::getFractionWeight() const
+{
+    double w = 0;
+    for (const AIsotope& iso : Isotopes)
+        w += iso.Mass * iso.Abundancy;
+    return w;
 }
 
 void AChemicalElement::writeToJson(QJsonObject &json) const

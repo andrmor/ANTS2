@@ -8,6 +8,8 @@
 #include <QPair>
 
 class QJsonObject;
+class TGeoMaterial;
+class TGeoElement;
 
 class AIsotope
 {
@@ -35,6 +37,7 @@ public:
 
     const QString print() const;
     int countIsotopes() const {return Isotopes.size();}
+    double getFractionWeight() const;
 
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
@@ -69,16 +72,21 @@ public:
 
     const QString checkForErrors() const; //returns empty string if OK
 
+    TGeoMaterial* generateTGeoMaterial(const QString& MatName, const double& density) const; //does not own!
+
 private:
     QString ElementCompositionString;
     QVector<AChemicalElement> ElementComposition;
     double MeanAtomMass; //mean atom mass of the material (in au)
 
-    QSet<QString> AllPossibleElements; //set with all possible element symbols
+    QSet<QString> AllPossibleElements; //set with all possible element symbols until and including Einsteinium Es (99)
+    QMap<QString, int> SymbolToNumber;
     QString FileName_NaturalAbundancies;
     QMap<QString, QVector<QPair<int, double> > > NaturalAbundancies; //Key - element name, contains QVector<mass, abund>
 
     const QString fillIsotopesWithNaturalAbundances(AChemicalElement &element) const; //return error (empty if all fine)
+
+    TGeoElement* generateTGeoElement(const AChemicalElement *el) const; //does not own!
 };
 
 #endif // AMATERIALCOMPOSITION_H

@@ -230,7 +230,6 @@ const QString AMaterialComposition::checkForErrors() const
 
 #include "TGeoMaterial.h"
 #include "TGeoElement.h"
-#include "TGeoManager.h"
 TGeoElement *AMaterialComposition::generateTGeoElement(const AChemicalElement *el, const TString& matName) const
 {
     TString tName(el->Symbol.toLatin1().data());
@@ -243,7 +242,8 @@ TGeoElement *AMaterialComposition::generateTGeoElement(const AChemicalElement *e
     {
         const TString thisIsoName = iso.getTName();
         TGeoIsotope *geoIsotope = TGeoIsotope::FindIsotope(thisIsoName);
-        if (!geoIsotope) geoIsotope = new TGeoIsotope(thisIsoName, Z, iso.Mass, iso.Mass);
+        if (!geoIsotope)
+            geoIsotope = new TGeoIsotope(thisIsoName, Z, iso.Mass, iso.Mass);
         geoEl->AddIsotope(geoIsotope, iso.Abundancy);
     }
     return geoEl;
@@ -264,14 +264,12 @@ TGeoMaterial *AMaterialComposition::generateTGeoMaterial(const QString &MatName,
     {
         TGeoMixture* mix = new TGeoMixture(tName, numElements, density);
 
-        // GDML doc hints it is the molar fraction! http://gdml.web.cern.ch/GDML/doc/GDMLmanual.pdf
-        //double totWeight = 0;
-        //for (const AChemicalElement& el : ElementComposition)
-        //    totWeight += el.getFractionWeight() * el.MolarFraction;
+        double totWeight = 0;
+        for (const AChemicalElement& el : ElementComposition)
+            totWeight += el.getFractionWeight() * el.MolarFraction;
 
         for (const AChemicalElement& el : ElementComposition)
-            //mix->AddElement(generateTGeoElement(&el), el.getFractionWeight() * el.MolarFraction / totWeight);
-            mix->AddElement(generateTGeoElement(&el, tName), el.MolarFraction);
+            mix->AddElement(generateTGeoElement(&el, tName), el.getFractionWeight() * el.MolarFraction / totWeight);
 
         return mix;
     }

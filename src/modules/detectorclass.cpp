@@ -11,6 +11,7 @@
 #include "asandwich.h"
 #include "aslab.h"
 #include "ageoobject.h"
+#include "afiletools.h"
 #include "modules/lrf_v3/corelrfstypes.h"
 #include "modules/lrf_v3/alrftypemanager.h"
 #include "modules/lrf_v3/alrftypemanagerinterface.h"
@@ -215,6 +216,33 @@ void DetectorClass::writePreprocessingToJson(QJsonObject &json)
 void DetectorClass::changeLineWidthOfVolumes(int delta)
 {
     Sandwich->changeLineWidthOfVolumes(delta);
+}
+
+const QString DetectorClass::exportToGDML(const QString& fileName) const
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix().compare("gdml", Qt::CaseInsensitive))
+        return "Error: file name should have .gdml extension";
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *c_str = ba.data();
+    GeoManager->SetName("geometry");
+    GeoManager->Export(c_str);
+
+    QFile f(fileName);
+    if (f.open(QFile::ReadOnly | QFile::Text))
+    {
+        QTextStream in(&f);
+        QString txt = in.readAll();
+
+        if (f.remove())
+        {
+            txt.replace("unit=\"cm\"", "unit=\"mm\"");
+            bool bOK = SaveTextToFile(fileName, txt);
+            if (bOK) return "";
+        }
+    }
+    return "Error during cm->mm conversion stage!";
 }
 
 void DetectorClass::writePMarraysToJson(QJsonObject &json)

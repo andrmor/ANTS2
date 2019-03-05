@@ -55,6 +55,8 @@ public slots:
   const QVariant GetConfig() const;
   bool SetConfig(const QVariant& conf);
 
+  void ExportToGDML(QString FileName);
+
   bool Replace(QString Key, QVariant val);
   QVariant GetKeyValue(QString Key);
 

@@ -1053,7 +1053,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Export geometry as a GDML or ROOT file</string>
+              <string>Export geometry to a GDML file</string>
              </property>
             </widget>
            </item>

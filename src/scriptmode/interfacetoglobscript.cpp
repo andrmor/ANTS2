@@ -539,6 +539,13 @@ bool AInterfaceToConfig::SetConfig(const QVariant &conf)
     return false;
 }
 
+void AInterfaceToConfig::ExportToGDML(QString FileName)
+{
+    QString err = Config->GetDetector()->exportToGDML(FileName);
+    if (err.isEmpty()) return;
+    abort(err);
+}
+
 #ifdef SIM
 //----------------------------------
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)

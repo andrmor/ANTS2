@@ -612,37 +612,13 @@ void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
   QString starter = MW->GlobSet.LastOpenDir;
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("gdml");
-  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml);;Root files (*.root)");
+  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml)");
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  QFileInfo fi(fileName);
-  if (fi.suffix().isEmpty()) fileName += ".gdml";
-  if (fi.suffix().compare("root") && fi.suffix().compare("gdml"))
-    {
-      message("Only ROOT and GDML files can be created!", this);
-      return;
-    }
+  QString err = Detector->exportToGDML(fileName);
 
-  QByteArray ba = fileName.toLocal8Bit();
-  const char *c_str = ba.data();
-  Detector->GeoManager->SetName("geometry");
-  Detector->GeoManager->Export(c_str);
-
-  QFile f(fileName);
-  if (f.open(QFile::ReadOnly | QFile::Text))
-  {
-      QTextStream in(&f);
-      QString txt = in.readAll();
-
-      if (f.remove())
-      {
-          txt.replace("unit=\"cm\"", "unit=\"mm\"");
-          bool bOK = SaveTextToFile(fileName, txt);
-          if (bOK) return;
-      }
-  }
-  message("Error during cm->mm conversion stage!", this);
+  if (!err.isEmpty()) message(err, this);
 }
 
 void ShowNodes(const TGeoNode* node, int level)

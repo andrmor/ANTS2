@@ -385,7 +385,10 @@ SOURCES += main.cpp \
     common/aparticlerecord.cpp \
     scriptmode/acorescriptinterface.cpp \
     modules/asourceparticlegenerator.cpp \
-    scriptmode/aparticletrackinghistoryinterface.cpp
+    scriptmode/aparticletrackinghistoryinterface.cpp \
+    common/aisotopeabundancehandler.cpp \
+    common/aisotope.cpp \
+    common/achemicalelement.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -524,7 +527,10 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticlerecord.h \
     scriptmode/acorescriptinterface.h \
     modules/asourceparticlegenerator.h \
-    scriptmode/aparticletrackinghistoryinterface.h
+    scriptmode/aparticletrackinghistoryinterface.h \
+    common/aisotopeabundancehandler.h \
+    common/aisotope.h \
+    common/achemicalelement.h
 
 # --- SIM ---
 ants2_SIM {

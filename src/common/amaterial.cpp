@@ -2,6 +2,7 @@
 #include "aparticle.h"
 #include "ajsontools.h"
 #include "amaterialparticlecolection.h"
+#include "achemicalelement.h"
 #include "acommonfunctions.h"
 #include "afiletools.h"
 

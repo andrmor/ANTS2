@@ -1,4 +1,5 @@
 #include "aglobalsettings.h"
+#include "aisotopeabundancehandler.h"
 #include "ajsontools.h"
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
@@ -50,6 +51,8 @@ AGlobalSettings::AGlobalSettings()
     ExamplesDir = QDir::current().absolutePath() + "/EXAMPLES"; //dir where examples will be copied
     ResourcesDir = QDir::current().absolutePath() + "/DATA";//dir where data will be copied
 
+    IsotopeAbundanceHandler = new AIsotopeAbundanceHandler( ResourcesDir + "/Neutrons/IsotopeNaturalAbundances.txt" );
+
 #ifdef Q_OS_WIN32
     if (!QDir(ExamplesDir).exists())  //direct call of ants2.exe
     {
@@ -93,6 +96,11 @@ AGlobalSettings::AGlobalSettings()
         SM->deleteLater();
     }
 #endif
+}
+
+AGlobalSettings::~AGlobalSettings()
+{
+    delete IsotopeAbundanceHandler; IsotopeAbundanceHandler = 0;
 }
 
 void AGlobalSettings::writeToJson(QJsonObject &json) const

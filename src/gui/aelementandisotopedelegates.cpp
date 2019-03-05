@@ -1,5 +1,6 @@
 #include "aelementandisotopedelegates.h"
-#include "amaterialcomposition.h"
+//#include "amaterialcomposition.h"
+#include "achemicalelement.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

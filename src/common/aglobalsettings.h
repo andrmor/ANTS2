@@ -4,6 +4,7 @@
 #include <QString>
 #include <QJsonObject>
 
+class AIsotopeAbundanceHandler;
 class ANetworkModule;
 
 class AGlobalSettings final
@@ -13,7 +14,7 @@ public:
 
 private:
     AGlobalSettings();
-    ~AGlobalSettings() = default;
+    ~AGlobalSettings();
 
     AGlobalSettings(const AGlobalSettings&) = delete;           // Copy ctor
     AGlobalSettings(AGlobalSettings&&) = delete;                // Move ctor
@@ -26,6 +27,8 @@ public:
 
     void writeToJson(QJsonObject& json) const;
     void readFromJson(const QJsonObject& json);
+
+    AIsotopeAbundanceHandler & getIsotopeAbundanceHandler() const {return *IsotopeAbundanceHandler;}
 
     void setNetworkModule(ANetworkModule* NetworkModule) {NetModule = NetworkModule;}
     ANetworkModule* getNetworkModule() const {return NetModule;}
@@ -93,7 +96,8 @@ public:
     QJsonObject RemoteServers;
 
 private:
-    ANetworkModule* NetModule;
+    AIsotopeAbundanceHandler* IsotopeAbundanceHandler = 0; //owns
+    ANetworkModule* NetModule = 0; //external
 };
 
 #endif // AGLOBALSETTINGS_H

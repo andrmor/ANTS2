@@ -3,7 +3,7 @@
 
 #include "TString.h"
 
-const TString & AIsotope::getTName() const
+const TString AIsotope::getTName() const
 {
     TString name(Symbol.toLatin1().data());
     name += Mass;

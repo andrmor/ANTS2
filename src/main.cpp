@@ -1,4 +1,3 @@
-//ANTS2
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "areconstructionmanager.h"

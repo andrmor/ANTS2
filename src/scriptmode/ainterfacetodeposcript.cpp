@@ -234,6 +234,7 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     if (!fOK)
     {
         abort("Error in tracker: " + pss->getErrorString());
+        delete pss;
         return false;
     }
     //--- Retrieve results ---

@@ -682,14 +682,19 @@ int InterfaceToSim::countMonitors()
 
 int InterfaceToSim::getMonitorHits(QString monitor)
 {
-    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    if (!EventsDataHub->SimStat)
+    {
+        abort("Collect simulation statistics is OFF");
+        return 0;
+    }
     for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
     {
         const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
         if (mon->getName() == monitor)
             return mon->getHits();
     }
-    return std::numeric_limits<int>::quiet_NaN();
+    abort(QString("Monitor %1 not found").arg(monitor));
+    return 0;
 }
 
 QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
@@ -2409,19 +2414,19 @@ int AInterfaceToPMs::CountPM() const
 
 double AInterfaceToPMs::GetPMx(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->X(ipm);
 }
 
 double AInterfaceToPMs::GetPMy(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->Y(ipm);
 }
 
 double AInterfaceToPMs::GetPMz(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->Z(ipm);
 }
 

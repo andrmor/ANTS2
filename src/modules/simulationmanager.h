@@ -137,6 +137,8 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
+    void setNextSimGeneratePrimToFile(const QString& fileNamePattern) {bNextStartPrimariesToFile = true; FileNamePattern = fileNamePattern;}
+
 private:
     //void initQEAccelerator(); //configures MaxQE and MaxQEvsWave
 
@@ -171,6 +173,9 @@ private:
     double usPerEvent;
 
     QString ErrorString;
+
+    bool bNextStartPrimariesToFile = false;
+    QString FileNamePattern = "PrimPartGen";
 
 public slots:
     void simulate();
@@ -342,6 +347,10 @@ public:
     bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
+    void setExternalTracking() {bExternalTracking = true;}
+    void setOnlySavePrimaries() {bExternalTracking = true; bOnlySaveToFile = true;}
+    void setFileNamePattern(const QString& fileNamePattern) {FileNamePattern = fileNamePattern;}
+
     virtual void hardAbort() override;
 
 protected:
@@ -375,6 +384,10 @@ private:
     int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
+
+    bool bExternalTracking = false;
+    bool bOnlySaveToFile = false;
+    QString FileNamePattern = "PrimPartToGen";
 
     void clearGeneratedParticles();
 };

@@ -601,30 +601,13 @@ bool InterfaceToSim::RunParticleSources(int NumThreads)
     SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
 
     do
-      {
+    {
         QThread::usleep(100);
         qApp->processEvents();
-      }
+    }
     while (!SimulationManager->fFinished);
+
     return SimulationManager->fSuccess;
-
-
-  /* 
-  //watchdog on particle sources, can be transferred later to check-upwindow
-  if (MW->ParticleSources.size() == 0)
-    {
-      qDebug() << "No particle sources defined!";
-      return false;
-    }
-  for (int i = 0; i<MW->ParticleSources.size(); i++)
-    {
-      int error = MW->ParticleSources.CheckSource(i);
-      if (error == 0) continue;
-
-      qDebug() << "Error in source " << MW->ParticleSources[i].name << MW->ParticleSources.getErrorString(error);
-      return false;
-    }
-  */
 }
 
 void InterfaceToSim::SetSeed(long seed)
@@ -773,6 +756,12 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
       }
   }
   return vl;
+}
+
+void InterfaceToSim::GenerateFilesWithPrimaries(QString FileNamePattern, int NumThreads)
+{
+    SimulationManager->Runner->setNextSimGeneratePrimToFile(FileNamePattern);
+    RunParticleSources(NumThreads);
 }
 #endif
 

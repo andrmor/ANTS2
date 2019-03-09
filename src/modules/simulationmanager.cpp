@@ -25,6 +25,8 @@
 #include "ajsontools.h"
 #include "aconfiguration.h"
 
+#include <memory>
+
 #include <QVector>
 #include <QTime>
 #include <QDebug>
@@ -144,7 +146,15 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       if (modeSetup == "PointSim") //Photon simulator
           worker = new PointSourceSimulator(detector, i);
       else //Particle simulator
-          worker = new ParticleSourceSimulator(detector, i);
+      {
+          ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, i);
+          if (bNextStartPrimariesToFile)
+          {
+              pss->setOnlySavePrimaries();
+              pss->setFileNamePattern(FileNamePattern);
+          }
+          worker = pss;
+      }
 
       worker->setSimSettings(&simSettings);
       int seed = detector->RandGen->Rndm() * 100000;
@@ -155,6 +165,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
           ErrorString = worker->getErrorString();
           delete worker;
           clearWorkers();
+          bNextStartPrimariesToFile = false;
           return false;
       }
       worker->initSimStat();
@@ -171,6 +182,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       totalEventCount += worker->getEventCount();
       workers.append(worker);
   }
+  bNextStartPrimariesToFile = false;
 
   if(fRunThreads)
     {
@@ -1559,6 +1571,21 @@ void ParticleSourceSimulator::simulate()
     fStopRequested = false;
     fHardAbortWasTriggered = false;
 
+    std::unique_ptr<QFile> pFile;
+    std::unique_ptr<QTextStream> pStream;
+    if (bExternalTracking)
+    {
+        const QString name = QString("%1-%2.txt").arg(FileNamePattern).arg(ID) ;
+        pFile.reset(new QFile(name));
+        if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
+        {
+            ErrorString = QString("Cannot open file: %1").arg(name);
+            fSuccess = false;
+            return;
+        }
+        pStream.reset(new QTextStream(&(*pFile))); //have to close file at the end or automatic is fine?
+    }
+
     //Simulation
     double updateFactor = 100.0 / ( eventEnd - eventBegin );
     for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
@@ -1607,7 +1634,32 @@ void ParticleSourceSimulator::simulate()
         //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
         if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
-        ParticleTracker->TrackParticlesOnStack(eventCurrent);
+        if (!bExternalTracking)
+            ParticleTracker->TrackParticlesOnStack(eventCurrent);
+        else
+        {
+            *pStream << QString("#%1\n").arg(eventCurrent);
+            for (const AParticleRecord* p : ParticleStack)
+            {
+                QString t = detector->MpCollection->getParticleName(p->Id);
+                t += QString(" %1").arg(p->energy);
+                t += QString(" %1 %2 %3").arg(p->r[0]).arg(p->r[1]).arg(p->r[2]);
+                t += QString(" %1 %2 %3").arg(p->v[0]).arg(p->v[1]).arg(p->v[2]);
+                t += QString(" %1").arg(p->time);
+                t += "\n";
+                *pStream << t;
+
+                delete p;
+            }
+            ParticleStack.clear();
+
+            if (bOnlySaveToFile)
+            {
+                progress = (eventCurrent - eventBegin + 1) * updateFactor;
+                continue;
+            }
+        }
+
         //energy vector is ready
 
         //if it is an empty event, ignore it!

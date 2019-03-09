@@ -343,6 +343,8 @@ public slots:
   QVariant getMonitorEnergy(QString monitor);
   QVariant getMonitorXY(QString monitor);
 
+  void GenerateFilesWithPrimaries(QString FileNamePattern, int NumThreads);
+
 signals:
   void requestStopSimulation();
 

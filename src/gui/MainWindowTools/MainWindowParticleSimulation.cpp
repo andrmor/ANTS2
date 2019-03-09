@@ -803,15 +803,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     startSimulation(Config->JSON);
 }
 
-void MainWindow::on_twParticleGenerationMode_currentChanged(int)
-{
-    /*
-    ui->sbGunEvents->setVisible(index != 1);
-    ui->labEventsPS->setVisible(index != 1);
-    ui->linePS->setVisible(index != 1);
-    */
-}
-
 // ---- from file ----
 
 void MainWindow::on_pbGenerateFromFile_Help_clicked()

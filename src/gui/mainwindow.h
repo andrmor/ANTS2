@@ -615,8 +615,6 @@ private slots:
 
     void on_pbOpenTrackProperties_Phot_customContextMenuRequested(const QPoint &pos);
 
-    void on_twParticleGenerationMode_currentChanged(int index);
-
     void on_pbParticleGenerationScript_clicked();
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);

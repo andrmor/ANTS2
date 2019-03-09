@@ -362,7 +362,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
         numEvents = EventsDataHub->ReconstructionData[CurrentGroup].size();
         marks = new GeoMarkerClass("Recon", 6, 2, kRed);
     }
-    else if (Rec_True == 1)
+    else
     {
         if (EventsDataHub->isScanEmpty()) return "There are no data to show!";
         numEvents = EventsDataHub->Scan.size();

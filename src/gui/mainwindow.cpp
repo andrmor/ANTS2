@@ -1061,27 +1061,9 @@ void MainWindow::on_cobUpperLowerPMs_currentIndexChanged(int index)
 void MainWindow::on_pbRemoveThisPMtype_clicked()
 {
     int itype = ui->sbPMtype->value();
-    int numTypes = PMs->countPMtypes();
-    //qDebug() << numTypes;
-    if (numTypes < 2)
-      {        
-        message("Cannot delete the last type", this);
-        return;
-      }
-
     const QString err = Detector->removePMtype(itype);
-    if (!err.isEmpty())
-        message(err, this);
-    else
-        ReconstructDetector();
-
-    /*
-    //tmpPMtype = PMs->getType(itype-1);
-    MainWindow::on_pbShowPMsArrayRegularData_clicked(); //refresh indication
-    ui->sbPMtype->setValue(itype-1);
-    //updating all comboboxes with PM type names
-    MainWindow::updateCOBsWithPMtypeNames();
-    */
+    if (!err.isEmpty()) message(err, this);
+    else ReconstructDetector();
 }
 
 void MainWindow::on_pbAddNewPMtype_clicked()

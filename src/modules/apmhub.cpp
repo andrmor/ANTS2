@@ -425,10 +425,10 @@ bool APmHub::removePMtype(int itype)
   if (numTypes <= 1) return false;
 
   for (int ipm = 0; ipm < numPMs; ipm++)
-    {
+  {
       if (PMs[ipm].type == itype)
       return false;
-    }
+  }
 
   PMtypes.remove(itype);
   //shifting existing ones

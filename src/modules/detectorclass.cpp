@@ -783,7 +783,7 @@ void DetectorClass::findPM(int ipm, int &ul, int &index)
 
 const QString DetectorClass::removePMtype(int itype)
 {
-    if (PMs->countPMtypes() <= 1) return "Cannot remove the last type";
+    if (PMs->countPMtypes() < 2) return "Cannot remove the last type";
 
     //no need to check PMarrays -> if type is in use, PMs module will report it
     for (const PMdummyStructure& ad : PMdummies)
@@ -795,12 +795,12 @@ const QString DetectorClass::removePMtype(int itype)
     //shifting data in the arrays
     for (APmArrayData& ad : PMarrays)
     {
-        if (ad.PMtype > itype) ad.PMtype--;
+        if (ad.PMtype >= itype) ad.PMtype--;  // >= i used to shift non-existent type to previous in inactive arrays
         for (APmPosAngTypeRecord& r : ad.PositionsAnglesTypes)
-            if (r.type > itype) r.type--;
+            if (r.type >= itype) r.type--;
     }
     for (PMdummyStructure& ad : PMdummies)
-        if (ad.PMtype > itype) ad.PMtype--;
+        if (ad.PMtype >= itype) ad.PMtype--;
 
     return "";
 }
@@ -854,27 +854,36 @@ TGeoVolume *DetectorClass::generatePmVolume(TString Name, TGeoMedium *Medium, co
 
 void DetectorClass::populatePMs()
 {
-  PMs->clear();
-  for (int ul=0; ul<2; ul++)
+    PMs->clear();
+    for (int ul=0; ul<2; ul++)
     {
-      if (PMarrays[ul].fActive)
+        if (PMarrays[ul].fActive)
         {
-          // calculate XY positions for regular array and create the record with positions (otherwise already there)
-          if (PMarrays[ul].Regularity == 0) calculatePmsXY(ul);
-          // calculate Z position for regular and auto-z array
-          if (PMarrays[ul].Regularity < 2)
+            // calculate XY positions for regular array and create the record with positions (otherwise already there)
+            if (PMarrays[ul].Regularity == 0) calculatePmsXY(ul);
+            // calculate Z position for regular and auto-z array
+            if (PMarrays[ul].Regularity < 2)
             {
-              for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
-              {
-                int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
-                double halfWidth = ( PMs->getType(itype)->Shape == 3 ? PMs->getType(itype)->getHalfHeightSpherical() : 0.5*PMs->getType(itype)->SizeZ);
-                double Z = (ul == 0) ? UpperEdge+halfWidth : LowerEdge-halfWidth;
-                PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
-              }
+                const int numTypes = PMs->countPMtypes();
+                for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
+                {
+                    int itype = PMarrays[ul].PositionsAnglesTypes.at(ipm).type;
+                    if (itype >= numTypes)
+                    {
+                        qWarning() << "Unknown type detected, changed to type 0";
+                        PMarrays[ul].PositionsAnglesTypes[ipm].type = 0;
+                        itype = 0;
+                    }
+
+                    const APmType* pType = PMs->getType(itype);
+                    double halfWidth = ( pType->Shape == 3 ? pType->getHalfHeightSpherical() : 0.5*pType->SizeZ );
+                    double Z = ( ul == 0 ? UpperEdge + halfWidth : LowerEdge - halfWidth );
+                    PMarrays[ul].PositionsAnglesTypes[ipm].z = Z;
+                }
             }
-          //registering PMTs in PMs module
-          for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
-              PMs->add(ul, &PMarrays[ul].PositionsAnglesTypes[ipm]);
+            //registering PMTs in PMs module
+            for (int ipm=0; ipm<PMarrays[ul].PositionsAnglesTypes.size(); ipm++)
+                PMs->add(ul, &PMarrays[ul].PositionsAnglesTypes[ipm]);
         }
     }
 }

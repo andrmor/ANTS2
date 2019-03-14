@@ -758,10 +758,17 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
   return vl;
 }
 
-void InterfaceToSim::GenerateFilesWithPrimaries(QString FileNamePattern, int NumThreads)
+void InterfaceToSim::GenerateG4InterfaceFiles(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads)
 {
-    SimulationManager->Runner->setNextSimGeneratePrimToFile(FileNamePattern);
-    RunParticleSources(NumThreads);
+    QStringList SV;
+    for (auto & v : SensitiveVolumes )
+        SV << v.toString();
+
+    bool bOK = SimulationManager->Runner->generateG4interfaceFiles(Path, SV, Seed, numThreads);
+    if (!bOK) abort("Failed to create output files");
+
+    SimulationManager->Runner->setNextSimGeneratePrimToFile(Path);
+    RunParticleSources(numThreads);
 }
 #endif
 

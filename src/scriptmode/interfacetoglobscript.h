@@ -174,7 +174,7 @@ public slots:
     //assuming there is only one group, and single point reconstruction
   double GetReconstructedX(int ievent);  
   double GetReconstructedY(int ievent); 
-  double GetReconstructedZ(int ievent);  
+  double GetReconstructedZ(int ievent);
   double GetRho(int ievent, int iPM);  
   double GetRho2(int ievent, int iPM); 
   double GetReconstructedEnergy(int ievent);  
@@ -343,7 +343,7 @@ public slots:
   QVariant getMonitorEnergy(QString monitor);
   QVariant getMonitorXY(QString monitor);
 
-  void GenerateFilesWithPrimaries(QString FileNamePattern, int NumThreads);
+  void GenerateG4InterfaceFiles(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads);
 
 signals:
   void requestStopSimulation();

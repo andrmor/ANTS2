@@ -151,7 +151,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
           if (bNextStartPrimariesToFile)
           {
               pss->setOnlySavePrimaries();
-              pss->setFileNamePattern(FileNamePattern);
+              pss->setFilePath(GenerationPath);
           }
           worker = pss;
       }
@@ -284,6 +284,51 @@ void ASimulatorRunner::clearWorkers()
     for(int i = 0; i < workers.count(); i++)
         delete workers[i];
     workers.clear();
+}
+
+bool ASimulatorRunner::generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads)
+{
+    if (!Path.endsWith('/')) Path += '/';
+    QString gdmlName = Path + "Detector.gdml";
+    QString err = detector->exportToGDML(gdmlName);
+    if ( !err.isEmpty() ) return false;
+
+    QJsonObject json;
+
+    const QStringList Particles = detector->MpCollection->getListOfParticleNames();
+    QJsonArray Parr;
+    for (auto & pname : Particles )
+        Parr << pname;
+    json["Particles"] = Parr;
+
+    QJsonArray SVarr;
+    for (auto & v : SensitiveVolumes )
+        SVarr << v;
+    json["SensitiveVolumes"] = SVarr;
+
+    json["GDML"] = gdmlName;
+
+    QJsonArray Carr;
+    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.01 mm";
+    json["Commands"] = Carr;
+
+    json["GuiMode"] = false;
+
+    TRandom2* RandGen = detector->RandGen;
+    RandGen->SetSeed(Seed);
+
+    for (int i=0; i<numThreads; i++)
+    {
+        json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
+
+        json["File_Primaries"] = Path + QString("primaries-%1.txt").arg(i);
+        json["File_Deposition"] = Path + QString("deposition-%1.txt").arg(i);
+        json["File_Receipt"] = Path + QString("receipt-%1.txt").arg(i);
+
+        SaveJsonToFile(json, Path + QString("aga-%1.json").arg(i));
+    }
+
+    return true;
 }
 
 void ASimulatorRunner::simulate()
@@ -1575,7 +1620,7 @@ void ParticleSourceSimulator::simulate()
     std::unique_ptr<QTextStream> pStream;
     if (bExternalTracking)
     {
-        const QString name = QString("%1-%2.txt").arg(FileNamePattern).arg(ID) ;
+        const QString name = FilePath + QString("deposition-%1.txt").arg(ID) ;
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
         {
@@ -1641,7 +1686,8 @@ void ParticleSourceSimulator::simulate()
             *pStream << QString("#%1\n").arg(eventCurrent);
             for (const AParticleRecord* p : ParticleStack)
             {
-                QString t = detector->MpCollection->getParticleName(p->Id);
+                //QString t = detector->MpCollection->getParticleName(p->Id);
+                QString t = QString::number(p->Id);
                 t += QString(" %1").arg(p->energy);
                 t += QString(" %1 %2 %3").arg(p->r[0]).arg(p->r[1]).arg(p->r[2]);
                 t += QString(" %1 %2 %3").arg(p->v[0]).arg(p->v[1]).arg(p->v[2]);

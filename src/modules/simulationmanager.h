@@ -137,7 +137,8 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
-    void setNextSimGeneratePrimToFile(const QString& fileNamePattern) {bNextStartPrimariesToFile = true; FileNamePattern = fileNamePattern;}
+    void setNextSimGeneratePrimToFile(const QString& path) {bNextStartPrimariesToFile = true; GenerationPath = path;}
+    bool generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads);
 
 private:
     //void initQEAccelerator(); //configures MaxQE and MaxQEvsWave
@@ -175,7 +176,7 @@ private:
     QString ErrorString;
 
     bool bNextStartPrimariesToFile = false;
-    QString FileNamePattern = "PrimPartGen";
+    QString GenerationPath;
 
 public slots:
     void simulate();
@@ -349,7 +350,7 @@ public:
 
     void setExternalTracking() {bExternalTracking = true;}
     void setOnlySavePrimaries() {bExternalTracking = true; bOnlySaveToFile = true;}
-    void setFileNamePattern(const QString& fileNamePattern) {FileNamePattern = fileNamePattern;}
+    void setFilePath(const QString& filePath) {FilePath = filePath;}
 
     virtual void hardAbort() override;
 
@@ -387,7 +388,7 @@ private:
 
     bool bExternalTracking = false;
     bool bOnlySaveToFile = false;
-    QString FileNamePattern = "PrimPartToGen";
+    QString FilePath = "PrimPartToGen";
 
     void clearGeneratedParticles();
 };

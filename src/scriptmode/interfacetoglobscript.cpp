@@ -767,7 +767,20 @@ void InterfaceToSim::GenerateG4InterfaceFiles(QString Path, QVariantList Sensiti
     bool bOK = SimulationManager->Runner->generateG4interfaceFiles(Path, SV, Seed, numThreads);
     if (!bOK) abort("Failed to create output files");
 
-    SimulationManager->Runner->setNextSimGeneratePrimToFile(Path);
+    SimulationManager->Runner->setNextSimExternal_OnlyExport(Path);
+    RunParticleSources(numThreads);
+}
+
+void InterfaceToSim::SimWithGeant4Export(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads)
+{
+    QStringList SV;
+    for (auto & v : SensitiveVolumes )
+        SV << v.toString();
+
+    bool bOK = SimulationManager->Runner->generateG4interfaceFiles(Path, SV, Seed, numThreads);
+    if (!bOK) abort("Failed to create output files");
+
+    SimulationManager->Runner->setNextSimExternal(Path);
     RunParticleSources(numThreads);
 }
 #endif

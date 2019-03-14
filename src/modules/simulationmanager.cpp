@@ -148,9 +148,10 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       else //Particle simulator
       {
           ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, i);
-          if (bNextStartPrimariesToFile)
+          if (bNextSimExternal)
           {
-              pss->setOnlySavePrimaries();
+              pss->setExternalTracking();
+              if (bOnlyFileExport) pss->setOnlySavePrimaries();
               pss->setFilePath(GenerationPath);
           }
           worker = pss;
@@ -165,7 +166,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
           ErrorString = worker->getErrorString();
           delete worker;
           clearWorkers();
-          bNextStartPrimariesToFile = false;
+          bNextSimExternal = false;
           return false;
       }
       worker->initSimStat();
@@ -182,7 +183,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       totalEventCount += worker->getEventCount();
       workers.append(worker);
   }
-  bNextStartPrimariesToFile = false;
+  bNextSimExternal = false;
 
   if(fRunThreads)
     {
@@ -1477,9 +1478,7 @@ ParticleSourceSimulator::~ParticleSourceSimulator()
     delete ParticleGun;
     clearParticleStack();
     clearGeneratedParticles(); //if something was not transferred
-
-    for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
-    EnergyVector.clear();
+    clearEnergyVector();
 }
 
 bool ParticleSourceSimulator::setup(QJsonObject &json)
@@ -1602,13 +1601,10 @@ void ParticleSourceSimulator::updateGeoManager()
     S2generator->UpdateGeoManager(detector->GeoManager);
 }
 
+#include <QProcess>
 void ParticleSourceSimulator::simulate()
 {
-    if ( !ParticleStack.isEmpty() ) // TODO --> to be moved to "ClearData"?
-    {
-        for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
-        ParticleStack.clear();
-    }
+    if ( !ParticleStack.isEmpty() ) clearParticleStack();
 
     ReserveSpace(getEventCount());
     if (ParticleGun) ParticleGun->SetStartEvent(eventBegin);
@@ -1620,7 +1616,7 @@ void ParticleSourceSimulator::simulate()
     std::unique_ptr<QTextStream> pStream;
     if (bExternalTracking)
     {
-        const QString name = FilePath + QString("deposition-%1.txt").arg(ID) ;
+        const QString name = FilePath + QString("primaries-%1.txt").arg(ID);
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
         {
@@ -1628,7 +1624,7 @@ void ParticleSourceSimulator::simulate()
             fSuccess = false;
             return;
         }
-        pStream.reset(new QTextStream(&(*pFile))); //have to close file at the end or automatic is fine?
+        pStream.reset(new QTextStream(&(*pFile)));
     }
 
     //Simulation
@@ -1636,53 +1632,20 @@ void ParticleSourceSimulator::simulate()
     for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
     {
         if (fStopRequested) break;
+        if (EnergyVector.size() > 0) clearEnergyVector();
 
-        //clear EnergyVector to receive new data
-        if (EnergyVector.size() > 0)
-        {
-            for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
-            EnergyVector.resize(0);
-        }
-
-        //how many particles to run this event?
-        int ParticleRunsThisEvent = 1;
-        if (fAllowMultiple)
-        {
-            if (TypeParticlesPerEvent == 0) ParticleRunsThisEvent = std::round(AverageNumParticlesPerEvent);
-            else                            ParticleRunsThisEvent = RandGen->Poisson(AverageNumParticlesPerEvent);
-
-            if(ParticleRunsThisEvent < 1) ParticleRunsThisEvent = 1;
-        }
-        //qDebug()<<"----particle runs this event: "<<ParticleRunsThisEvent;
-
-        //cycle by the particles this event
-        bool bGenerationSuccessful = true;
-        for (int iRun = 0; iRun < ParticleRunsThisEvent; iRun++)
-        {
-            if (!ParticleGun) break; //paranoic
-            //generating one event
-            bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
-            //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
-            if (!bGenerationSuccessful) break;
-
-            //adding particles to the stack
-            for (AParticleRecord * p : GeneratedParticles)
-            {
-                if (iRun > 0 && timeRange != 0)
-                    p->time = timeFrom + timeRange*RandGen->Rndm();
-
-                ParticleStack << p;
-            }
-            //clear and delete QVector with generated event
-            GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
-        } //event prepared
-        //   qDebug()<<"event!  Particle stack length:"<<ParticleStack.size();
+        int numPrimaries = chooseNumberOfParticlesThisEvent();
+            //qDebug() << "---- primary particles in this event: " << numPrimaries;
+        bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries);
+        //event prepared
+            //qDebug() << "Event composition ready!  Particle stack length:" << ParticleStack.size();
         if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
         if (!bExternalTracking)
             ParticleTracker->TrackParticlesOnStack(eventCurrent);
         else
         {
+            //prepare file for export to external tracker
             *pStream << QString("#%1\n").arg(eventCurrent);
             for (const AParticleRecord* p : ParticleStack)
             {
@@ -1700,10 +1663,9 @@ void ParticleSourceSimulator::simulate()
             ParticleStack.clear();
 
             if (bOnlySaveToFile)
-            {
                 progress = (eventCurrent - eventBegin + 1) * updateFactor;
-                continue;
-            }
+
+            continue;
         }
 
         //energy vector is ready
@@ -1746,7 +1708,29 @@ void ParticleSourceSimulator::simulate()
         EnergyVectorToScan(); //save actual positions
 
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
-    } //all events finished
+    }
+
+    if (bExternalTracking)
+    {
+        pStream->flush();
+        pFile->close();
+    }
+
+    //external tracking: Geant4
+    if (bExternalTracking && !bOnlySaveToFile)
+    {
+        QString exe = "/home/andr/G4antsKraken/build-G4ants-Desktop-Release/G4ants";
+        QString confFile = FilePath + QString("aga-%1.json").arg(ID);
+        qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
+        QStringList ar;
+        ar << confFile;
+        QProcess *process = new QProcess();
+        process->start(exe, ar);
+        process->waitForFinished(-1);
+        QString errorString = process->errorString();
+        qDebug() << "=====err string:====>"<<errorString<<"<====";
+        delete process;
+    }
 
     fSuccess = !fHardAbortWasTriggered;
     //  qDebug() << "----Releasing resources";
@@ -1908,14 +1892,57 @@ void ParticleSourceSimulator::EnergyVectorToScan()
 
 void ParticleSourceSimulator::clearParticleStack()
 {
-  for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
-  ParticleStack.clear();
+    for (int i=0; i<ParticleStack.size(); i++) delete ParticleStack[i];
+    ParticleStack.clear();
+}
+
+void ParticleSourceSimulator::clearEnergyVector()
+{
+    for (int i = 0; i < EnergyVector.size(); i++) delete EnergyVector[i];
+    EnergyVector.clear();
 }
 
 void ParticleSourceSimulator::clearGeneratedParticles()
 {
     for (AParticleRecord * p : GeneratedParticles) delete p;
     GeneratedParticles.clear();
+}
+
+int ParticleSourceSimulator::chooseNumberOfParticlesThisEvent() const
+{
+    if (!fAllowMultiple) return 1;
+
+    if (TypeParticlesPerEvent == 0)
+        return std::round(AverageNumParticlesPerEvent);
+    else
+    {
+        int num = RandGen->Poisson(AverageNumParticlesPerEvent);
+        return std::max(1, num);
+    }
+}
+
+bool ParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries)
+{
+    for (int iPart = 0; iPart < numPrimaries; iPart++)
+    {
+        if (!ParticleGun) break; //paranoic
+        //generating one event
+        bool bGenerationSuccessful = ParticleGun->GenerateEvent(GeneratedParticles);
+        //  qDebug() << "thr--->"<<ID << "ev:" << eventBegin <<"P:"<<iRun << "  =====> " << bGenerationSuccessful << GeneratedParticles.size();
+        if (!bGenerationSuccessful) return false;
+
+        //adding particles to the stack
+        for (AParticleRecord * p : GeneratedParticles)
+        {
+            if (iPart > 0 && timeRange != 0)
+                p->time = timeFrom + timeRange*RandGen->Rndm();  // what about file or script generation? *** !!!
+
+            ParticleStack << p;
+        }
+        //clear and delete QVector with generated event
+        GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
+    }
+    return true;
 }
 
 ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorClass* Detector)

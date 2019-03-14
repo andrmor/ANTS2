@@ -344,6 +344,7 @@ public slots:
   QVariant getMonitorXY(QString monitor);
 
   void GenerateG4InterfaceFiles(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads);
+  void SimWithGeant4Export(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads);
 
 signals:
   void requestStopSimulation();

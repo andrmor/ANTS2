@@ -137,7 +137,8 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
-    void setNextSimGeneratePrimToFile(const QString& path) {bNextStartPrimariesToFile = true; GenerationPath = path;}
+    void setNextSimExternal(const QString& path) {bNextSimExternal = true; bOnlyFileExport = false; GenerationPath = path;}
+    void setNextSimExternal_OnlyExport(const QString& path) {bNextSimExternal = true; bOnlyFileExport = true; GenerationPath = path;}
     bool generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads);
 
 private:
@@ -175,7 +176,8 @@ private:
 
     QString ErrorString;
 
-    bool bNextStartPrimariesToFile = false;
+    bool bNextSimExternal = false;
+    bool bOnlyFileExport = true;
     QString GenerationPath;
 
 public slots:
@@ -358,9 +360,13 @@ protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
 private:
-    //utilities
     void EnergyVectorToScan();
     void clearParticleStack();
+    void clearEnergyVector();
+    void clearGeneratedParticles();
+
+    int  chooseNumberOfParticlesThisEvent() const;
+    bool choosePrimariesForThisEvent(int numPrimaries);
 
     //local objects
     PrimaryParticleTracker* ParticleTracker = 0;
@@ -386,11 +392,11 @@ private:
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
 
+    //Geant4 interface
     bool bExternalTracking = false;
     bool bOnlySaveToFile = false;
     QString FilePath = "PrimPartToGen";
 
-    void clearGeneratedParticles();
 };
 
 #endif // SIMULATION_MANAGER_H

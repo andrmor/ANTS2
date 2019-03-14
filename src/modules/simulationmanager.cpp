@@ -1602,6 +1602,7 @@ void ParticleSourceSimulator::updateGeoManager()
 }
 
 #include <QProcess>
+#include "afiletools.h"
 void ParticleSourceSimulator::simulate()
 {
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
@@ -1710,6 +1711,7 @@ void ParticleSourceSimulator::simulate()
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     }
 
+    if (ParticleGun) ParticleGun->ReleaseResources();
     if (bExternalTracking)
     {
         pStream->flush();
@@ -1719,22 +1721,92 @@ void ParticleSourceSimulator::simulate()
     //external tracking: Geant4
     if (bExternalTracking && !bOnlySaveToFile)
     {
+        // simulate in Genat4
         QString exe = "/home/andr/G4antsKraken/build-G4ants-Desktop-Release/G4ants";
         QString confFile = FilePath + QString("aga-%1.json").arg(ID);
-        qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
+            //qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
         QStringList ar;
         ar << confFile;
         QProcess *process = new QProcess();
         process->start(exe, ar);
         process->waitForFinished(-1);
-        QString errorString = process->errorString();
-        qDebug() << "=====err string:====>"<<errorString<<"<====";
+        QString err = process->errorString();
+            //qDebug() << "=====err string:====>"<<err<<"<====";
         delete process;
+        if (err.contains("No such file or directory"))
+        {
+            ErrorString = "Cannot find G4ants executable";
+            fSuccess = false;
+            return;
+        }
+        // read receipt file, stop if not "OK"
+        QString receipe = FilePath + QString("receipt-%1.txt").arg(ID);
+        QString res;
+        bool bOK = LoadTextFromFile(receipe, res);
+        if (!bOK)
+        {
+            ErrorString = "Could not read the receipt file";
+            fSuccess = false;
+            return;
+        }
+        qDebug() << "Res:>>>"<<res<<"<<<";
+        if (!res.startsWith("OK"))
+        {
+            ErrorString = res;
+            fSuccess = false;
+            return;
+        }
+
+        //read and process depo data
+        QString DepoFileName = FilePath + QString("deposition-%1.txt").arg(ID);
+        QFile inFile(DepoFileName);
+        if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
+        {
+            ErrorString = "Cannot open file with energy deposition data:\n" + DepoFileName;
+            fSuccess = false;
+            return;
+        }
+
+        QTextStream in(&inFile);
+
+        QString line = in.readLine();
+        for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
+        {
+            if (fStopRequested) break;
+            if (EnergyVector.size() > 0) clearEnergyVector();
+
+            qDebug() << ID << " CurEv:"<<eventCurrent <<" -> " << line;
+            if (!line.startsWith('#') || line.size() < 2)
+            {
+                ErrorString = "Format error in file:\n" + DepoFileName;
+                fSuccess = false;
+                return;
+            }
+            line.remove(0, 1);
+            if (line.toInt() != eventCurrent)
+            {
+                ErrorString = "Missmatch of event number in file:\n" + DepoFileName;
+                fSuccess = false;
+                return;
+            }
+
+            do
+            {
+                line = in.readLine();
+                if (line.startsWith('#'))
+                    break; //next event
+                qDebug() << ID << "->"<<line;
+            }
+            while (!in.atEnd());
+
+        }
+
+
+        inFile.close();
+
     }
 
     fSuccess = !fHardAbortWasTriggered;
-    //  qDebug() << "----Releasing resources";
-    if (ParticleGun) ParticleGun->ReleaseResources();
     //  qDebug() << "done!"<<ID << "events collected:"<<dataHub->countEvents();
 }
 

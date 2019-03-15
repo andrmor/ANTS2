@@ -151,6 +151,8 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
 
     js["RemoteServers"] = RemoteServers;
 
+    js["G4ants"] = G4antsExec;
+
     json["ANTS2config"] = js;
 }
 
@@ -206,6 +208,8 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
     parseJson(js, "RunRootServerOnStart", fRunRootServerOnStart);
 
     parseJson(js, "RemoteServers", RemoteServers);
+
+    parseJson(js, "G4ants", G4antsExec);
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

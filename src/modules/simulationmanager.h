@@ -137,8 +137,10 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
-    void setNextSimExternal(const QString& path) {bNextSimExternal = true; bOnlyFileExport = false; GenerationPath = path;}
-    void setNextSimExternal_OnlyExport(const QString& path) {bNextSimExternal = true; bOnlyFileExport = true; GenerationPath = path;}
+    void setG4Sim_Path(const QString& path) {GenerationPath = path;}
+    void setG4Sim() {bNextSimExternal = true;}
+    void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
+
     bool generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads);
 
 private:

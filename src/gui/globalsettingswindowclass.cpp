@@ -80,6 +80,8 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->cbSaveSimAsText_IncludeNumPhotons->setChecked(MW->GlobSet.SimTextSave_IncludeNumPhotons);
   ui->cbSaveSimAsText_IncludePositions->setChecked(MW->GlobSet.SimTextSave_IncludePositions);
 
+  ui->leGeant4exec->setText(MW->GlobSet.G4antsExec);
+
   updateNetGui();
 }
 
@@ -127,6 +129,13 @@ void GlobalSettingsWindowClass::SetTab(int iTab)
 {
     if (iTab<0 || iTab>ui->twMain->count()-1) return;
     ui->twMain->setCurrentIndex(iTab);
+}
+
+bool GlobalSettingsWindowClass::event(QEvent *event)
+{
+    if (event->type() == QEvent::WindowActivate) updateGUI();
+
+    return QMainWindow::event(event);
 }
 
 void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
@@ -467,4 +476,17 @@ void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludeNumPhotons_clicked(boo
 void GlobalSettingsWindowClass::on_cbSaveSimAsText_IncludePositions_clicked(bool checked)
 {
     MW->GlobSet.SimTextSave_IncludePositions = checked;
+}
+
+void GlobalSettingsWindowClass::on_pbGeant4exec_clicked()
+{
+    QString fn = QFileDialog::getOpenFileName(this, "G4ants executable", MW->GlobSet.G4antsExec);
+    if (fn.isEmpty()) return;
+    ui->leGeant4exec->setText(fn);
+    MW->GlobSet.G4antsExec = fn;
+}
+
+void GlobalSettingsWindowClass::on_leGeant4exec_editingFinished()
+{
+    MW->GlobSet.G4antsExec = ui->leGeant4exec->text();
 }

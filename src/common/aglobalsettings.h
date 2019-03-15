@@ -95,6 +95,9 @@ public:
     //RemoteServers
     QJsonObject RemoteServers;
 
+    //Geant4 interface
+    QString G4antsExec;
+
 private:
     AIsotopeAbundanceHandler* IsotopeAbundanceHandler = 0; //owns
     ANetworkModule* NetModule = 0; //external

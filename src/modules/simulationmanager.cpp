@@ -1609,6 +1609,7 @@ void ParticleSourceSimulator::updateGeoManager()
 
 #include <QProcess>
 #include "afiletools.h"
+#include "aglobalsettings.h"
 void ParticleSourceSimulator::simulate()
 {
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
@@ -1727,8 +1728,8 @@ void ParticleSourceSimulator::simulate()
     if (bExternalTracking && !bOnlySaveToFile)
     {
         // simulate in Genat4
-        QString exe = "/home/andr/G4antsKraken/build-G4ants-Desktop-Release/G4ants"; // ***!!! TODO
-        QString confFile = FilePath + QString("aga-%1.json").arg(ID);
+        const QString exe = AGlobalSettings::getInstance().G4antsExec;
+        const QString confFile = FilePath + QString("aga-%1.json").arg(ID);
             //qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
         QStringList ar;
         ar << confFile;

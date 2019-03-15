@@ -302,6 +302,12 @@ bool ASimulatorRunner::generateG4interfaceFiles(QString Path, const QStringList 
         Parr << pname;
     json["Particles"] = Parr;
 
+    const QStringList Materials = detector->MpCollection->getListOfMaterialNames();
+    QJsonArray Marr;
+    for (auto & mname : Materials )
+        Marr << mname;
+    json["Materials"] = Marr;
+
     QJsonArray SVarr;
     for (auto & v : SensitiveVolumes )
         SVarr << v;
@@ -310,7 +316,7 @@ bool ASimulatorRunner::generateG4interfaceFiles(QString Path, const QStringList 
     json["GDML"] = gdmlName;
 
     QJsonArray Carr;
-    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.01 mm";
+    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.01 mm"; // ***!!! TODO
     json["Commands"] = Carr;
 
     json["GuiMode"] = false;
@@ -1721,7 +1727,7 @@ void ParticleSourceSimulator::simulate()
     if (bExternalTracking && !bOnlySaveToFile)
     {
         // simulate in Genat4
-        QString exe = "/home/andr/G4antsKraken/build-G4ants-Desktop-Release/G4ants";
+        QString exe = "/home/andr/G4antsKraken/build-G4ants-Desktop-Release/G4ants"; // ***!!! TODO
         QString confFile = FilePath + QString("aga-%1.json").arg(ID);
             //qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
         QStringList ar;
@@ -1796,21 +1802,20 @@ void ParticleSourceSimulator::simulate()
                     break; //next event
 
                 qDebug() << ID << "->"<<line;
-                //pName dE x y z t
+                //pId mId dE x y z t
+                // 0   1   2 3 4 5 6
                 //populating energy vector data
                 QStringList fields = line.split(' ', QString::SkipEmptyParts);
                 if (fields.isEmpty()) break; //last event had no depo - end of file reached
-                if (fields.size() < 6)
+                if (fields.size() < 7)
                 {
                     ErrorString = "Format error in file:\n" + DepoFileName;
                     fSuccess = false;
                     return;
                 }
-                int pId = 0; // ***!!! TODO
-                int matId = 2; // ***!!! TODO
-                AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[2].toDouble(), fields[3].toDouble(), fields[4].toDouble(), //x y z
-                                                                        0, fields[5].toDouble(), fields[1].toDouble(),  // length time dE
-                                                                        pId, matId, 0, eventCurrent); //part mat sernum event
+                AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
+                                                                        0, fields[6].toDouble(), fields[2].toDouble(),  // length time dE
+                                                                        fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
                 EnergyVector << cell;
             }
             while (!in.atEnd());

@@ -23,21 +23,24 @@
 #include "ageomarkerclass.h"
 #include "atrackrecords.h"
 #include "ajsontools.h"
+#include "afiletools.h"
 #include "aconfiguration.h"
+#include "aglobalsettings.h"
 
 #include <memory>
 
 #include <QVector>
 #include <QTime>
 #include <QDebug>
+#include <QProcess>
 
 #include "TGeoManager.h"
 #include "TRandom2.h"
 #include "TH1D.h"
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
-#include "TThread.h"
+    #include "TThread.h"
 #else
-#include <thread>
+    #include <thread>
 #endif
 
 //static method to give to TThread or std::thread which will run simulation
@@ -1607,16 +1610,12 @@ void ParticleSourceSimulator::updateGeoManager()
     S2generator->UpdateGeoManager(detector->GeoManager);
 }
 
-#include <QProcess>
-#include "afiletools.h"
-#include "aglobalsettings.h"
 void ParticleSourceSimulator::simulate()
 {
     if ( !ParticleStack.isEmpty() ) clearParticleStack();
 
     ReserveSpace(getEventCount());
     if (ParticleGun) ParticleGun->SetStartEvent(eventBegin);
-    //qDebug() << "---Thread"<<ID << "setting start event:"<<eventBegin;
     fStopRequested = false;
     fHardAbortWasTriggered = false;
 
@@ -1635,29 +1634,29 @@ void ParticleSourceSimulator::simulate()
         pStream.reset(new QTextStream(&(*pFile)));
     }
 
-    //Simulation
-    double updateFactor = 100.0 / ( eventEnd - eventBegin );
+    // -- Main simulation cycle --
+    updateFactor = 100.0 / ( eventEnd - eventBegin );
     for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
     {
         if (fStopRequested) break;
-        if (EnergyVector.size() > 0) clearEnergyVector();
+        if (!EnergyVector.isEmpty()) clearEnergyVector();
 
         int numPrimaries = chooseNumberOfParticlesThisEvent();
             //qDebug() << "---- primary particles in this event: " << numPrimaries;
         bool bGenerationSuccessful = choosePrimariesForThisEvent(numPrimaries);
+        if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
+
         //event prepared
             //qDebug() << "Event composition ready!  Particle stack length:" << ParticleStack.size();
-        if (!bGenerationSuccessful) break; //e.g. in file gen -> end of file reached
 
         if (!bExternalTracking)
             ParticleTracker->TrackParticlesOnStack(eventCurrent);
         else
         {
-            //prepare file for export to external tracker
+            //prepare file with primaries for export to Geant4 particle tracker
             *pStream << QString("#%1\n").arg(eventCurrent);
             for (const AParticleRecord* p : ParticleStack)
             {
-                //QString t = detector->MpCollection->getParticleName(p->Id);
                 QString t = QString::number(p->Id);
                 t += QString(" %1").arg(p->energy);
                 t += QString(" %1 %2 %3").arg(p->r[0]).arg(p->r[1]).arg(p->r[2]);
@@ -1665,54 +1664,44 @@ void ParticleSourceSimulator::simulate()
                 t += QString(" %1").arg(p->time);
                 t += "\n";
                 *pStream << t;
-
                 delete p;
             }
             ParticleStack.clear();
 
-            if (bOnlySaveToFile)
+            if (bOnlySavePrimariesToFile)
                 progress = (eventCurrent - eventBegin + 1) * updateFactor;
 
-            continue;
+            continue; //skip tracking and go to the next event
         }
 
-        //--only local tracking ends here--
+        //-- only local tracking ends here --
         //energy vector is ready
-        //if it is empty, can ignore this event
-        if (EnergyVector.isEmpty() && fIgnoreNoDepoEvents)
+
+        if ( fIgnoreNoDepoEvents && EnergyVector.isEmpty() ) //if there is no deposition can ignore this event
         {
             eventCurrent--;
             continue;
         }
 
-        OneEvent->clearHits();
-        if (fDoS1 && !S1generator->Generate())
+        bool bOK = generateAndTrackPhotons();
+        if (!bOK)
         {
-            ErrorString = "Error executing S1 generation!";
             fSuccess = false;
             return;
         }
 
-        if (fDoS2 && !S2generator->Generate())
+        if ( fIgnoreNoHitsEvents && OneEvent->isHitsEmpty() ) // if there were no PM hits can ignore this event
         {
-            ErrorString = "Error executing S2 generation!";
-            fSuccess = false;
-            return;
+            eventCurrent--;
+            continue;
         }
-
-        if (fIgnoreNoHitsEvents)
-          if (OneEvent->isHitsEmpty())
-          {
-              eventCurrent--;
-              continue;
-          }
 
         if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
 
         dataHub->Events.append(OneEvent->PMsignals);
         if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
 
-        EnergyVectorToScan(); //save actual positions
+        EnergyVectorToScan(); //prepare true position data using deposition data
 
         progress = (eventCurrent - eventBegin + 1) * updateFactor;
     }
@@ -1724,126 +1713,15 @@ void ParticleSourceSimulator::simulate()
         pFile->close();
     }
 
-    //external tracking: Geant4
-    if (bExternalTracking && !bOnlySaveToFile)
+    if (bExternalTracking && !bOnlySavePrimariesToFile)
     {
-        // simulate in Genat4
-        const QString exe = AGlobalSettings::getInstance().G4antsExec;
-        const QString confFile = FilePath + QString("aga-%1.json").arg(ID);
-            //qDebug() << "Starting executable:\n"<<exe<<"\nwith argument:\n"<<confFile;
-        QStringList ar;
-        ar << confFile;
-        QProcess *process = new QProcess();
-        process->start(exe, ar);
-        process->waitForFinished(-1);
-        QString err = process->errorString();
-            //qDebug() << "=====err string:====>"<<err<<"<====";
-        delete process;
-        if (err.contains("No such file or directory"))
-        {
-            ErrorString = "Cannot find G4ants executable";
-            fSuccess = false;
-            return;
-        }
-        // read receipt file, stop if not "OK"
-        QString receipe = FilePath + QString("receipt-%1.txt").arg(ID);
-        QString res;
-        bool bOK = LoadTextFromFile(receipe, res);
+        // track primaries in Geant4, read deposition, generate photons, trace photons, process hits
+        bool bOK = geant4TrackAndProcess();
         if (!bOK)
         {
-            ErrorString = "Could not read the receipt file";
             fSuccess = false;
             return;
         }
-        qDebug() << "Res:>>>"<<res<<"<<<";
-        if (!res.startsWith("OK"))
-        {
-            ErrorString = res;
-            fSuccess = false;
-            return;
-        }
-
-        //read and process depo data
-        QString DepoFileName = FilePath + QString("deposition-%1.txt").arg(ID);
-        QFile inFile(DepoFileName);
-        if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
-        {
-            ErrorString = "Cannot open file with energy deposition data:\n" + DepoFileName;
-            fSuccess = false;
-            return;
-        }
-
-        QTextStream in(&inFile);
-
-        QString line = in.readLine();
-        for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
-        {
-            if (fStopRequested) break;
-            if (EnergyVector.size() > 0) clearEnergyVector();
-
-            qDebug() << ID << " CurEv:"<<eventCurrent <<" -> " << line;
-            if (!line.startsWith('#') || line.size() < 2)
-            {
-                ErrorString = "Format error for #event field in file:\n" + DepoFileName;
-                fSuccess = false;
-                return;
-            }
-            line.remove(0, 1);
-            if (line.toInt() != eventCurrent)
-            {
-                ErrorString = "Missmatch of event number in file:\n" + DepoFileName;
-                fSuccess = false;
-                return;
-            }
-
-            do
-            {
-                line = in.readLine();
-                if (line.startsWith('#'))
-                    break; //next event
-
-                qDebug() << ID << "->"<<line;
-                //pId mId dE x y z t
-                // 0   1   2 3 4 5 6
-                //populating energy vector data
-                QStringList fields = line.split(' ', QString::SkipEmptyParts);
-                if (fields.isEmpty()) break; //last event had no depo - end of file reached
-                if (fields.size() < 7)
-                {
-                    ErrorString = "Format error in file:\n" + DepoFileName;
-                    fSuccess = false;
-                    return;
-                }
-                AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
-                                                                        0, fields[6].toDouble(), fields[2].toDouble(),  // length time dE
-                                                                        fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
-                EnergyVector << cell;
-            }
-            while (!in.atEnd());
-            //Energy vector filled for this event
-            qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
-            OneEvent->clearHits();
-            if (fDoS1 && !S1generator->Generate())
-            {
-                ErrorString = "Error executing S1 generation!";
-                fSuccess = false;
-                return;
-            }
-            if (fDoS2 && !S2generator->Generate())
-            {
-                ErrorString = "Error executing S2 generation!";
-                fSuccess = false;
-                return;
-            }
-            if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
-            dataHub->Events.append(OneEvent->PMsignals);
-            if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
-            EnergyVectorToScan(); //save actual positions
-            progress = (eventCurrent - eventBegin + 1) * updateFactor;
-        }
-
-
-        inFile.close();
     }
 
     fSuccess = !fHardAbortWasTriggered;
@@ -1922,6 +1800,7 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
 
 void ParticleSourceSimulator::hardAbort()
 {
+    qDebug() << "HARD abort"<<ID;
     Simulator::hardAbort();
     ParticleGun->abort();
 }
@@ -2054,6 +1933,147 @@ bool ParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries)
         //clear and delete QVector with generated event
         GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
     }
+    return true;
+}
+
+bool ParticleSourceSimulator::generateAndTrackPhotons()
+{
+    OneEvent->clearHits();
+
+    if (fDoS1 && !S1generator->Generate())
+    {
+        ErrorString = "Error executing S1 generation!";
+        return false;
+    }
+
+    if (fDoS2 && !S2generator->Generate())
+    {
+        ErrorString = "Error executing S2 generation!";
+        return false;
+    }
+
+    return true;
+}
+
+#include <QCoreApplication>
+bool ParticleSourceSimulator::geant4TrackAndProcess()
+{
+    const QString exe = AGlobalSettings::getInstance().G4antsExec;
+    const QString confFile = FilePath + QString("aga-%1.json").arg(ID);
+
+    QStringList ar;
+    ar << confFile;
+    QProcess * G4antsProcess = new QProcess(); // TODO connect abort ***!!!
+    //bool isRunning = true;
+    //QObject::connect(G4antsProcess, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [&isRunning](){isRunning = false; qDebug() << "----FINISHED!-----";});//this, &MainWindow::on_cameraControlExit);
+    G4antsProcess->start(exe, ar);
+    //G4antsProcess->waitForStarted(-1);
+    //qDebug() << "============="<<ID;
+    G4antsProcess->waitForFinished(-1);
+    //do
+    //{
+    //    QCoreApplication::processEvents();
+    //    QThread::usleep(100);
+    //    qDebug() << (int)G4antsProcess->state();
+    //}
+    //while (G4antsProcess->state() ==  QProcess::Running);
+    //while (isRunning);
+    QString err = G4antsProcess->errorString();
+        //qDebug() << "=====err string:====>"<<err<<"<====";
+    delete G4antsProcess;
+
+    if (err.contains("No such file or directory"))
+    {
+        ErrorString = "Cannot find G4ants executable";
+        return false;
+    }
+
+    // read receipt file, stop if not "OK"
+    QString receipe = FilePath + QString("receipt-%1.txt").arg(ID);
+    QString res;
+    bool bOK = LoadTextFromFile(receipe, res);
+    if (!bOK)
+    {
+        ErrorString = "Could not read the receipt file";
+        return false;
+    }
+    if (!res.startsWith("OK"))
+    {
+        ErrorString = res;
+        return false;
+    }
+
+    //read and process depo data
+    QString DepoFileName = FilePath + QString("deposition-%1.txt").arg(ID);
+    QFile inFile(DepoFileName);
+    if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        ErrorString = "Cannot open file with energy deposition data:\n" + DepoFileName;
+        return false;
+    }
+
+    QTextStream in(&inFile);
+
+    QString line = in.readLine();
+    for (eventCurrent = eventBegin; eventCurrent < eventEnd; eventCurrent++)
+    {
+        if (fStopRequested) break;
+        if (EnergyVector.size() > 0) clearEnergyVector();
+
+            //qDebug() << ID << " CurEv:"<<eventCurrent <<" -> " << line;
+        if (!line.startsWith('#') || line.size() < 2)
+        {
+            ErrorString = "Format error for #event field in file:\n" + DepoFileName;
+            return false;
+        }
+        line.remove(0, 1);
+        if (line.toInt() != eventCurrent)
+        {
+            ErrorString = "Missmatch of event number in file:\n" + DepoFileName;
+            return false;
+        }
+
+        do
+        {
+            line = in.readLine();
+            if (line.startsWith('#'))
+                break; //next event
+
+            //qDebug() << ID << "->"<<line;
+            //pId mId dE x y z t
+            // 0   1   2 3 4 5 6
+            //populating energy vector data
+            QStringList fields = line.split(' ', QString::SkipEmptyParts);
+            if (fields.isEmpty()) break; //last event had no depo - end of file reached
+            if (fields.size() < 7)
+            {
+                ErrorString = "Format error in file:\n" + DepoFileName;
+                return false;
+            }
+            AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[3].toDouble(), fields[4].toDouble(), fields[5].toDouble(), //x y z
+                                                                    0, fields[6].toDouble(), fields[2].toDouble(),  // length time dE
+                                                                    fields[0].toInt(), fields[1].toInt(), 0, eventCurrent); //part mat sernum event
+            EnergyVector << cell;
+        }
+        while (!in.atEnd());
+
+        //Energy vector is filled for this event
+            //qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
+
+        bool bOK = generateAndTrackPhotons();
+        if (!bOK) return false;
+
+        if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
+
+        dataHub->Events.append(OneEvent->PMsignals);
+        if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+
+        EnergyVectorToScan(); // TODO another version of conversion have to be written ***!!!
+
+        progress = (eventCurrent - eventBegin + 1) * updateFactor;
+    }
+
+    inFile.close();
     return true;
 }
 

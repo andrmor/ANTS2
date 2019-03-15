@@ -353,7 +353,7 @@ public:
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
     void setExternalTracking() {bExternalTracking = true;}
-    void setOnlySavePrimaries() {bExternalTracking = true; bOnlySaveToFile = true;}
+    void setOnlySavePrimaries() {bExternalTracking = true; bOnlySavePrimariesToFile = true;}
     void setFilePath(const QString& filePath) {FilePath = filePath;}
 
     virtual void hardAbort() override;
@@ -369,6 +369,8 @@ private:
 
     int  chooseNumberOfParticlesThisEvent() const;
     bool choosePrimariesForThisEvent(int numPrimaries);
+    bool generateAndTrackPhotons();
+    bool geant4TrackAndProcess();
 
     //local objects
     PrimaryParticleTracker* ParticleTracker = 0;
@@ -383,6 +385,7 @@ private:
 
     int totalEventCount;
     double timeFrom, timeRange;
+    double updateFactor;
 
     //Control
     bool fBuildParticleTracks;   //can be dropped and use directly TrackBuildOptions od simSettings
@@ -396,7 +399,7 @@ private:
 
     //Geant4 interface
     bool bExternalTracking = false;
-    bool bOnlySaveToFile = false;
+    bool bOnlySavePrimariesToFile = false;
     QString FilePath = "PrimPartToGen";
 
 };

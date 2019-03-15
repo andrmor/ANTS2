@@ -1669,14 +1669,14 @@ void ParticleSourceSimulator::simulate()
             continue;
         }
 
+        //--only local tracking ends here--
         //energy vector is ready
-
-        //if it is an empty event, ignore it!
+        //if it is empty, can ignore this event
         if (EnergyVector.isEmpty() && fIgnoreNoDepoEvents)
-          {
+        {
             eventCurrent--;
             continue;
-          }
+        }
 
         OneEvent->clearHits();
         if (fDoS1 && !S1generator->Generate())
@@ -1695,13 +1695,12 @@ void ParticleSourceSimulator::simulate()
 
         if (fIgnoreNoHitsEvents)
           if (OneEvent->isHitsEmpty())
-            {
+          {
               eventCurrent--;
               continue;
-            }
+          }
 
-        if (simSettings->fLRFsim) ;
-        else OneEvent->HitsToSignal();
+        if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
 
         dataHub->Events.append(OneEvent->PMsignals);
         if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
@@ -1778,7 +1777,7 @@ void ParticleSourceSimulator::simulate()
             qDebug() << ID << " CurEv:"<<eventCurrent <<" -> " << line;
             if (!line.startsWith('#') || line.size() < 2)
             {
-                ErrorString = "Format error in file:\n" + DepoFileName;
+                ErrorString = "Format error for #event field in file:\n" + DepoFileName;
                 fSuccess = false;
                 return;
             }
@@ -1795,15 +1794,50 @@ void ParticleSourceSimulator::simulate()
                 line = in.readLine();
                 if (line.startsWith('#'))
                     break; //next event
+
                 qDebug() << ID << "->"<<line;
+                //pName dE x y z t
+                //populating energy vector data
+                QStringList fields = line.split(' ', QString::SkipEmptyParts);
+                if (fields.isEmpty()) break; //last event had no depo - end of file reached
+                if (fields.size() < 6)
+                {
+                    ErrorString = "Format error in file:\n" + DepoFileName;
+                    fSuccess = false;
+                    return;
+                }
+                int pId = 0; // ***!!! TODO
+                int matId = 2; // ***!!! TODO
+                AEnergyDepositionCell* cell = new AEnergyDepositionCell(fields[2].toDouble(), fields[3].toDouble(), fields[4].toDouble(), //x y z
+                                                                        0, fields[5].toDouble(), fields[1].toDouble(),  // length time dE
+                                                                        pId, matId, 0, eventCurrent); //part mat sernum event
+                EnergyVector << cell;
             }
             while (!in.atEnd());
-
+            //Energy vector filled for this event
+            qDebug() << "Energy vector contains" << EnergyVector.size() << "cells";
+            OneEvent->clearHits();
+            if (fDoS1 && !S1generator->Generate())
+            {
+                ErrorString = "Error executing S1 generation!";
+                fSuccess = false;
+                return;
+            }
+            if (fDoS2 && !S2generator->Generate())
+            {
+                ErrorString = "Error executing S2 generation!";
+                fSuccess = false;
+                return;
+            }
+            if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
+            dataHub->Events.append(OneEvent->PMsignals);
+            if (timeRange != 0) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+            EnergyVectorToScan(); //save actual positions
+            progress = (eventCurrent - eventBegin + 1) * updateFactor;
         }
 
 
         inFile.close();
-
     }
 
     fSuccess = !fHardAbortWasTriggered;

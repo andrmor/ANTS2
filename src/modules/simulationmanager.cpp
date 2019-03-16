@@ -1522,6 +1522,9 @@ bool ParticleSourceSimulator::setup(QJsonObject &json)
         parseJson(cjs, "IgnoreNoHitsEvents", fIgnoreNoHitsEvents);
         fIgnoreNoDepoEvents = true; //compatibility
         parseJson(cjs, "IgnoreNoDepoEvents", fIgnoreNoDepoEvents);
+        ClusterMergeRadius2 = 1.0;
+        parseJson(cjs, "ClusterMergeRadius", ClusterMergeRadius2);
+        ClusterMergeRadius2 *= ClusterMergeRadius2;
 
         // particle generation mode
         QString PartGenMode = "Sources"; //compatibility
@@ -1811,6 +1814,7 @@ void ParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxPartic
     photonTracker->setMaxTracks(maxPhotonTracks);
 }
 
+#include <algorithm>
 void ParticleSourceSimulator::EnergyVectorToScan()
 {
     if (EnergyVector.isEmpty())
@@ -1822,7 +1826,83 @@ void ParticleSourceSimulator::EnergyVectorToScan()
         return;
     }
 
-    //scanning the energy deposition vector and put info in ScanData
+    //== new system ==
+    AScanRecord* scs = new AScanRecord();
+    scs->ScintType = 0;
+
+    if (EnergyVector.size() == 1) //want to have the case of 1 fast - in many modes this will be the only outcome
+    {
+        for (int i=0; i<3; i++) scs->Points[0].r[i] = EnergyVector[0]->r[i];
+        scs->Points[0].energy = EnergyVector[0]->dE;
+    }
+    else
+    {
+        QVector<APositionEnergyRecord> Depo(EnergyVector.size()); // TODO : make property of PSS
+        for (int i=0; i<3; i++) Depo[0].r[i] = EnergyVector[0]->r[i];
+        Depo[0].energy = EnergyVector[0]->dE;
+
+        //first pass is copy from EnergyVector (since cannot modify EnergyVector itself),
+        //if next point is within cluster range, merge with previous point
+        //if outside, start with a new cluster
+        int iPoint = 0;  //merging to this point
+        int numMerges = 0;
+        for (int iCell = 1; iCell < EnergyVector.size(); iCell++)
+        {
+            const AEnergyDepositionCell * EVcell = EnergyVector.at(iCell);
+            APositionEnergyRecord & Point = Depo[iPoint];
+            if (EVcell->isCloser(ClusterMergeRadius2, Point.r))
+            {
+                Point.MergeWith(EVcell->r, EVcell->dE);
+                numMerges++;
+            }
+            else
+            {
+                //start the next cluster
+                iPoint++;
+                for (int i=0; i<3; i++) Depo[iPoint].r[i] = EVcell->r[i];
+                Depo[iPoint].energy = EVcell->dE;
+            }
+        }
+
+        //direct pass finished, if there were no merges, work is done
+        qDebug() << "-----Merges in the first pass:"<<numMerges;
+        if (numMerges > 0)
+        {
+            Depo.resize(EnergyVector.size() - numMerges); //only shrinking
+            // pass for all clusters -> not needed for charged, but it is likely needed for Geant4 import depo data
+            int iThisCluster = 0;
+            while (iThisCluster < Depo.size()-1)
+            {
+                int iOtherCluster = iThisCluster + 1;
+                while (iOtherCluster < Depo.size())
+                {
+                    if (Depo[iThisCluster].isCloser(ClusterMergeRadius2, Depo[iOtherCluster]))
+                    {
+                        Depo[iThisCluster].MergeWith(Depo[iOtherCluster]);
+                        Depo.removeAt(iOtherCluster);
+                    }
+                    else iOtherCluster++;
+                }
+                iThisCluster++;
+            }
+
+            // in principle, after merging some clusters can become within merging range
+            // to make the procedure complete, the top while cycle have to be restarted until number of merges is 0
+            // but it will slow down without much effect - skip for now
+        }
+
+        //sort (make it optional?)
+        std::stable_sort(Depo.rbegin(), Depo.rend()); //reverse order
+
+        scs->Points.Reinitialize(Depo.size());
+        for (int iDe=0; iDe<Depo.size(); iDe++)
+            scs->Points[iDe] = Depo[iDe];
+    }
+
+    dataHub->Scan.append(scs);
+
+    /*
+    //-- old system --
     int PreviousIndex = EnergyVector.first()->index; //particle number - not to be confused with ParticleId!!!
     bool fTrackStarted = false;
     double EnergyAccumulator = 0;
@@ -1879,6 +1959,7 @@ void ParticleSourceSimulator::EnergyVectorToScan()
     }
 
     dataHub->Scan.append(scs);
+    */
 }
 
 void ParticleSourceSimulator::clearParticleStack()

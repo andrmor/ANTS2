@@ -396,6 +396,7 @@ private:
     int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
+    double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
 
     //Geant4 interface
     bool bExternalTracking = false;

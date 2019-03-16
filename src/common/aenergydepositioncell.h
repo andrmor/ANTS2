@@ -21,6 +21,17 @@ struct AEnergyDepositionCell  //element of the EnergyVector QVector
             ParticleId(ParticleId), MaterialId(MaterialId),
             index(index), eventId(eventId) {this->r[0] = x; this->r[1] = y; this->r[2] = z;}
         AEnergyDepositionCell(){}
+
+        bool isCloser(double length2, const double* R) const
+        {
+            double d2 = 0;
+            for (int i=0; i<3; i++)
+            {
+                double delta = r[i] - R[i];
+                d2 += delta * delta;
+            }
+            return d2 < length2;
+        }
     };
 
 #endif // AENERGYDEPOSITIONCELL

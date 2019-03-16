@@ -4982,3 +4982,15 @@ void MainWindow::on_pbPMtypeHelp_clicked()
                 "   represent the photocathode.";
     message(s, this);
 }
+
+void MainWindow::on_pnShowHideAdvanced_Particle_toggled(bool checked)
+{
+    if (checked) ui->swAdvancedSim_Particle->setCurrentIndex(1);
+            else ui->swAdvancedSim_Particle->setCurrentIndex(0);
+}
+
+void MainWindow::on_pbGoToConfigueG4ants_clicked()
+{
+    GlobSetWindow->showNormal();
+    GlobSetWindow->SetTab(6);
+}

@@ -615,8 +615,6 @@ private slots:
 
     void on_pbOpenTrackProperties_Phot_customContextMenuRequested(const QPoint &pos);
 
-    void on_twParticleGenerationMode_currentChanged(int index);
-
     void on_pbParticleGenerationScript_clicked();
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
@@ -626,6 +624,10 @@ private slots:
     void on_pbRelQERandomScaleELaverages_clicked();
 
     void on_pbRelQESetELaveragesToUnity_clicked();
+
+    void on_pnShowHideAdvanced_Particle_toggled(bool checked);
+
+    void on_pbGoToConfigueG4ants_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

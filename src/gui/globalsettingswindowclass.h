@@ -24,6 +24,9 @@ public:
 
   AInterfaceToGStyleScript* GStyleInterface = 0;  // if created -> owned by the script manager
 
+protected:
+    bool event(QEvent *event);
+
 public slots:
   void updateNetGui();
 
@@ -106,6 +109,10 @@ private slots:
   void on_cbSaveSimAsText_IncludeNumPhotons_clicked(bool checked);
 
   void on_cbSaveSimAsText_IncludePositions_clicked(bool checked);
+
+  void on_pbGeant4exec_clicked();
+
+  void on_leGeant4exec_editingFinished();
 
 private:
   Ui::GlobalSettingsWindowClass *ui;

@@ -1053,7 +1053,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Export geometry as a GDML or ROOT file</string>
+              <string>Export geometry to a GDML file</string>
              </property>
             </widget>
            </item>
@@ -1085,6 +1085,9 @@
                  <weight>75</weight>
                  <bold>true</bold>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>All length sizes should be in mm!</string>
                </property>
                <property name="text">
                 <string>Import geometry from a GDML file</string>
@@ -1145,6 +1148,9 @@
                <weight>75</weight>
                <bold>true</bold>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>All length sizes should be in mm!</string>
              </property>
              <property name="text">
               <string>Override geometry from a GDML file</string>

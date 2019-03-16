@@ -60,6 +60,7 @@ void MainWindow::SimParticleSourcesConfigToJson(QJsonObject &json)
             cjs["DoS2"] = ui->cbGunDoS2->isChecked();
             cjs["IgnoreNoHitsEvents"] = ui->cbIgnoreEventsWithNoHits->isChecked();
             cjs["IgnoreNoDepoEvents"] = ui->cbIgnoreEventsWithNoEnergyDepo->isChecked();
+            cjs["ClusterMergeRadius"] = ui->ledClusterRadius->text().toDouble();
         psjs["SourceControlOptions"] = cjs;
 
         //Particle generation
@@ -801,15 +802,6 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
 
     MainWindow::writeSimSettingsToJson(Config->JSON);
     startSimulation(Config->JSON);
-}
-
-void MainWindow::on_twParticleGenerationMode_currentChanged(int)
-{
-    /*
-    ui->sbGunEvents->setVisible(index != 1);
-    ui->labEventsPS->setVisible(index != 1);
-    ui->linePS->setVisible(index != 1);
-    */
 }
 
 // ---- from file ----

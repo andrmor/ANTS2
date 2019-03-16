@@ -387,6 +387,12 @@ void AWaveshifterOverride::showBinnedEmissionSpectrum(GraphWindowClass *GraphWin
         return;
     }
 
+    if ( !Spectrum ) //paranoic
+    {
+        message("Spectrum is not defined!", caller);
+        return;
+    }
+
     double integral = Spectrum->ComputeIntegral();
     if (integral <= 0)
     {

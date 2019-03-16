@@ -304,7 +304,7 @@ void AGeoTreeWidget::dropEvent(QDropEvent* event)
       if (obj)
         obj->repositionInHosted(objTo, fAfter);
 
-      if (obj->Container && obj->Container->ObjectType->isStack())
+      if (obj && obj->Container && obj->Container->ObjectType->isStack())
         obj->updateStack();
 
       //qDebug() << "Affected items:"<< DraggedName<<DraggedTo;

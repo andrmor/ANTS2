@@ -437,8 +437,7 @@ void AParticleSourceDialog::on_pbGunLoadSpectrum_clicked()
 
     int iPart = ui->lwGunParticles->currentRow();
     bool bOK = Rec->GunParticles[iPart]->loadSpectrum(fileName);
-
-    //if (!bOK) message("Load file failed!", this);
+    if (!bOK) message("Load file failed!", this);
 
     UpdateParticleInfo();
 }

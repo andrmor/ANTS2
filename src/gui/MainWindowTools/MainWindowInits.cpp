@@ -199,6 +199,11 @@ MainWindow::MainWindow(DetectorClass *Detector,
 
     QObject::connect(this, &MainWindow::RequestUpdateSimConfig, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
 
+    //have to be queued - otherwise report current index before click
+    QObject::connect(ui->twSourcePhotonsParticles, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+    QObject::connect(ui->twParticleGenerationMode, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+    QObject::connect(ui->twSingleScan, &QTabWidget::tabBarClicked, this, &MainWindow::on_pbUpdateSimConfig_clicked, Qt::QueuedConnection);
+
     DoNotUpdateGeometry = false; //control
 
     qDebug()<<">Loading default detector...";

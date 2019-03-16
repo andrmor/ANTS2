@@ -21,6 +21,7 @@
 #include "amaterialparticlecolection.h"
 #include "aconfiguration.h"
 #include "ajsontools.h"
+#include "afiletools.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -611,22 +612,13 @@ void DetectorAddOnsWindow::on_pbSaveTGeo_clicked()
   QString starter = MW->GlobSet.LastOpenDir;
   QFileDialog *fileDialog = new QFileDialog;
   fileDialog->setDefaultSuffix("gdml");
-  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml);;Root files (*.root)");
+  QString fileName = fileDialog->getSaveFileName(this, "Export detector geometry", starter, "GDML files (*.gdml)");
   if (fileName.isEmpty()) return;
   MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-  QFileInfo fi(fileName);
-  if (fi.suffix().isEmpty()) fileName += ".gdml";
-  if (fi.suffix().compare("root") && fi.suffix().compare("gdml"))
-    {
-      message("Only ROOT and GDML files can be created!", this);
-      return;
-    }
+  QString err = Detector->exportToGDML(fileName);
 
-  QByteArray ba = fileName.toLocal8Bit();
-  const char *c_str = ba.data();
-  Detector->GeoManager->SetName("geometry");
-  Detector->GeoManager->Export(c_str);
+  if (!err.isEmpty()) message(err, this);
 }
 
 void ShowNodes(const TGeoNode* node, int level)
@@ -901,6 +893,36 @@ void readGeoObjectTree(AGeoObject* obj, const TGeoNode* node,
     }    
 }
 
+bool DetectorAddOnsWindow::GDMLtoTGeo(const QString& fileName)
+{
+    QString txt;
+    bool bOK = LoadTextFromFile(fileName, txt);
+    if (!bOK)
+    {
+        message("Cannot read the file", this);
+        return false;
+    }
+
+    if (txt.contains("unit=\"cm\"") || txt.contains("unit=\"m\""))
+    {
+        message("Cannot load GDML files with length units other than \"mm\"", this);
+        return false;
+    }
+
+    txt.replace("unit=\"mm\"", "unit=\"cm\"");
+    QString tmpFileName = MW->GlobSet.TmpDir + "/gdmlTMP.gdml";
+    bOK = SaveTextToFile(tmpFileName, txt);
+    if (!bOK)
+    {
+        message("Conversion failed - tmp file cannot be allocated", this);
+        return false;
+    }
+
+    Detector->GeoManager = TGeoManager::Import(tmpFileName.toLatin1());
+    QFile(tmpFileName).remove();
+    return true;
+}
+
 void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
@@ -918,7 +940,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     QString PMtemplate = ui->lePMtemplate->text();
     if (Detector->GeoManager) delete Detector->GeoManager;
     Detector->GeoManager = 0;
-    Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
+    //Detector->GeoManager = TGeoManager::Import(fileName.toLatin1());
+    GDMLtoTGeo(fileName.toLatin1());
     if (!Detector->GeoManager || !Detector->GeoManager->IsClosed())
     {
         message("Load failed!", this);
@@ -1020,37 +1043,49 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     Detector->BuildDetector(); 
 }
 
+const QString DetectorAddOnsWindow::loadGDML(const QString& fileName, QString& gdml)
+{
+    QFileInfo fi(fileName);
+    if (fi.suffix() != "gdml")
+        return "Only GDML files are accepted!";
+
+    QFile f(fileName);
+    if (!f.open(QFile::ReadOnly | QFile::Text))
+        return QString("Cannot open file %1").arg(fileName);
+
+    QTextStream in(&f);
+    gdml = in.readAll();
+
+    if (gdml.contains("unit=\"cm\"") || gdml.contains("unit=\"m\""))
+        return "Cannot load GDML files with length units other than \"mm\"";
+
+    gdml.replace("unit=\"mm\"", "unit=\"cm\"");
+    return "";
+}
+
 void DetectorAddOnsWindow::on_pbLoadTGeo_clicked()
 {
+    QString gdml;
+
     QString fileName = QFileDialog::getOpenFileName(this, "Load GDML file", MW->GlobSet.LastOpenDir, "GDML files (*.gdml)");
     if (fileName.isEmpty()) return;
     MW->GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
 
-    QFileInfo fi(fileName);
-    if (fi.suffix() != "gdml")
-      {
-        message("Only GDML files are accepted!", this);
+    const QString err = loadGDML(fileName, gdml);
+    if (!err.isEmpty())
+    {
+        message(err, this);
         return;
-      }
-
-    QFile f(fileName);
-    if (!f.open(QFile::ReadOnly | QFile::Text))
-      {
-        message("Cannot open file!", this);
-        return;
-      }
-    QTextStream in(&f);
-    QString gdml = in.readAll();
+    }
 
     //attempting to load and validity check
     bool fOK = Detector->importGDML(gdml);
-
     if (fOK)
-      {
+    {
         //qDebug() << "--> GDML successfully registered";
         MW->NumberOfPMsHaveChanged();
         MW->GeometryWindow->ShowGeometry();
-      }
+    }
     else message(Detector->ErrorString, this);
 
     MW->onGDMLstatusChage(fOK); //update MW GUI

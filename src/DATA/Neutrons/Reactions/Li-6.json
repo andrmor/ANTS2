@@ -7,9 +7,9 @@
 				"Energy": 2730,
 				"OpositeDirectionWithPrevious": false,
 				"Particle": {
-					"Charge": 2,
+					"Charge": 1,
 					"Mass": 3,
-					"Name": "He-3",
+					"Name": "triton",
 					"Type": 1
 				}
 			},

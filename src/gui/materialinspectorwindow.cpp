@@ -15,7 +15,8 @@
 #include "guiutils.h"
 #include "ainternetbrowser.h"
 #include "amatparticleconfigurator.h"
-#include "amaterialcomposition.h"
+//#include "amaterialcomposition.h"
+#include "achemicalelement.h"
 #include "aelementandisotopedelegates.h"
 #include "aneutronreactionsconfigurator.h"
 #include "aneutroninfodialog.h"
@@ -2283,7 +2284,9 @@ void MaterialInspectorWindow::on_pbModifyChemicalComposition_clicked()
         //      qDebug() << newComp;
 
         AMaterialComposition& mc = tmpMaterial.ChemicalComposition;
-        mc.configureNaturalAbunances(OptionsConfigurator->getNatAbundFileName());
+
+        //future: if want to update isotope abundance, re-read file here
+
         QString error = mc.setCompositionString(le->text(), true);
         if (!error.isEmpty())
         {

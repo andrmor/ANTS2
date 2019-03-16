@@ -242,7 +242,11 @@ bool AParticleSourceRecord::readFromJson(const QJsonObject &json, AMaterialParti
 
         GunParticleStruct* gp = new GunParticleStruct();
         bool bOK = gp->readFromJson(jThisGunPart, MpCollection);
-        if (!bOK) return false;
+        if (!bOK)
+        {
+            delete gp;
+            return false;
+        }
         GunParticles << gp;
     }
     return true;

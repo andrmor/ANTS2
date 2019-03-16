@@ -137,6 +137,12 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
+    void setG4Sim_Path(const QString& path) {GenerationPath = path;}
+    void setG4Sim() {bNextSimExternal = true;}
+    void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
+
+    bool generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads);
+
 private:
     //void initQEAccelerator(); //configures MaxQE and MaxQEvsWave
 
@@ -171,6 +177,10 @@ private:
     double usPerEvent;
 
     QString ErrorString;
+
+    bool bNextSimExternal = false;
+    bool bOnlyFileExport = true;
+    QString GenerationPath;
 
 public slots:
     void simulate();
@@ -342,15 +352,25 @@ public:
     bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
+    void setExternalTracking() {bExternalTracking = true;}
+    void setOnlySavePrimaries() {bExternalTracking = true; bOnlySavePrimariesToFile = true;}
+    void setFilePath(const QString& filePath) {FilePath = filePath;}
+
     virtual void hardAbort() override;
 
 protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
 private:
-    //utilities
     void EnergyVectorToScan();
     void clearParticleStack();
+    void clearEnergyVector();
+    void clearGeneratedParticles();
+
+    int  chooseNumberOfParticlesThisEvent() const;
+    bool choosePrimariesForThisEvent(int numPrimaries);
+    bool generateAndTrackPhotons();
+    bool geant4TrackAndProcess();
 
     //local objects
     PrimaryParticleTracker* ParticleTracker = 0;
@@ -365,6 +385,7 @@ private:
 
     int totalEventCount;
     double timeFrom, timeRange;
+    double updateFactor;
 
     //Control
     bool fBuildParticleTracks;   //can be dropped and use directly TrackBuildOptions od simSettings
@@ -375,8 +396,13 @@ private:
     int TypeParticlesPerEvent;  //0 - constant, 1 - Poisson
     bool fIgnoreNoHitsEvents;
     bool fIgnoreNoDepoEvents;
+    double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
 
-    void clearGeneratedParticles();
+    //Geant4 interface
+    bool bExternalTracking = false;
+    bool bOnlySavePrimariesToFile = false;
+    QString FilePath = "PrimPartToGen";
+
 };
 
 #endif // SIMULATION_MANAGER_H

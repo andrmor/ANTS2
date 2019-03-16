@@ -74,8 +74,9 @@ public:
   QVector<double> SecondarySpectrum;
   TH1D* SecondarySpectrumHist = 0;
 
-  TGeoMaterial* GeoMat = 0; // handled by TGEoManager
-  TGeoMedium* GeoMed = 0;   // handled by TGEoManager
+  TGeoMaterial* GeoMat = 0; // handled by TGeoManager
+  TGeoMedium* GeoMed = 0;   // handled by TGeoManager
+  void generateTGeoMat();
 
   double GeneratePrimScintTime(TRandom2* RandGen) const;
 
@@ -90,7 +91,7 @@ public:
 
   const QString CheckMaterial(int iPart, const AMaterialParticleCollection *MpCollection) const;
 
-  bool isNCrystalInUse() const;
+  bool isNCrystalInUse() const;  
 
 private:
   //run-time properties

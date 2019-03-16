@@ -203,7 +203,7 @@ void ATextEdit::keyPressEvent(QKeyEvent *e)
         tc.select(QTextCursor::LineUnderCursor);
         QString line = tc.selectedText();
         int startingSpaces = 0;
-        for (int i=0; line.size(); i++)
+        for (int i=0; i<line.size(); i++)
           {
             if (line.at(i) != QChar::Space) break;
             else startingSpaces++;

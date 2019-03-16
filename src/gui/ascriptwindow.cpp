@@ -860,7 +860,7 @@ void AScriptWindow::fillHelper(QObject* obj, QString module)
       QString retVal = "Help not provided";
       QString funcNoArgs = Fshort.remove(QRegExp("\\((.*)\\)"));
       if (!module.isEmpty()) funcNoArgs.remove(0, module.length()+1); //remove name.
-      if (obj->metaObject()->indexOfMethod("help(QString)") != -1)
+      if (obj && obj->metaObject()->indexOfMethod("help(QString)") != -1)
         {
           QMetaObject::invokeMethod(obj, "help", Qt::DirectConnection,
                               Q_RETURN_ARG(QString, retVal),
@@ -1205,6 +1205,7 @@ void AScriptWindow::onProgressChanged(int percent)
 QStringList AScriptWindow::getListOfMethods(QObject *obj, QString ObjName, bool fWithArguments)
 {
   QStringList commands;
+  if (!obj) return commands;
   int methods = obj->metaObject()->methodCount();
   for (int i=0; i<methods; i++)
     {

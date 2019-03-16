@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>445</width>
+    <width>511</width>
     <height>341</height>
    </rect>
   </property>
@@ -19,12 +19,12 @@
      <rect>
       <x>5</x>
       <y>4</y>
-      <width>436</width>
+      <width>501</width>
       <height>331</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabDirs">
      <attribute name="title">
@@ -34,9 +34,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>67</y>
-        <width>340</width>
-        <height>20</height>
+        <y>68</y>
+        <width>402</width>
+        <height>24</height>
        </rect>
       </property>
      </widget>
@@ -45,18 +45,18 @@
        <rect>
         <x>10</x>
         <y>204</y>
-        <width>411</width>
-        <height>20</height>
+        <width>480</width>
+        <height>25</height>
        </rect>
       </property>
      </widget>
      <widget class="QPushButton" name="pbChooseMaterialLib">
       <property name="geometry">
        <rect>
-        <x>364</x>
+        <x>420</x>
         <y>66</y>
-        <width>54</width>
-        <height>22</height>
+        <width>71</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="contextMenuPolicy">
@@ -70,9 +70,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>188</y>
-        <width>171</width>
-        <height>16</height>
+        <y>184</y>
+        <width>300</width>
+        <height>19</height>
        </rect>
       </property>
       <property name="text">
@@ -83,8 +83,8 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>9</y>
-        <width>231</width>
+        <y>8</y>
+        <width>371</width>
         <height>16</height>
        </rect>
       </property>
@@ -96,9 +96,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>124</y>
-        <width>231</width>
-        <height>16</height>
+        <y>134</y>
+        <width>341</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -109,9 +109,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>85</y>
-        <width>231</width>
-        <height>16</height>
+        <y>90</y>
+        <width>361</width>
+        <height>18</height>
        </rect>
       </property>
       <property name="text">
@@ -122,9 +122,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>29</y>
-        <width>340</width>
-        <height>20</height>
+        <y>25</y>
+        <width>402</width>
+        <height>24</height>
        </rect>
       </property>
      </widget>
@@ -132,9 +132,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>49</y>
-        <width>231</width>
-        <height>16</height>
+        <y>50</y>
+        <width>361</width>
+        <height>17</height>
        </rect>
       </property>
       <property name="text">
@@ -145,9 +145,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>142</y>
-        <width>340</width>
-        <height>20</height>
+        <y>151</y>
+        <width>402</width>
+        <height>24</height>
        </rect>
       </property>
      </widget>
@@ -155,19 +155,19 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>103</y>
-        <width>340</width>
-        <height>20</height>
+        <y>109</y>
+        <width>402</width>
+        <height>24</height>
        </rect>
       </property>
      </widget>
      <widget class="QPushButton" name="pbChoosePMtypeLib">
       <property name="geometry">
        <rect>
-        <x>364</x>
-        <y>28</y>
-        <width>54</width>
-        <height>22</height>
+        <x>420</x>
+        <y>24</y>
+        <width>71</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="contextMenuPolicy">
@@ -180,10 +180,10 @@
      <widget class="QPushButton" name="pbChooseParticleSourcesLib">
       <property name="geometry">
        <rect>
-        <x>364</x>
-        <y>102</y>
-        <width>54</width>
-        <height>22</height>
+        <x>420</x>
+        <y>108</y>
+        <width>71</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="contextMenuPolicy">
@@ -196,10 +196,10 @@
      <widget class="QPushButton" name="pbChooseScriptsLib">
       <property name="geometry">
        <rect>
-        <x>364</x>
-        <y>141</y>
-        <width>54</width>
-        <height>22</height>
+        <x>420</x>
+        <y>150</y>
+        <width>71</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="contextMenuPolicy">
@@ -212,10 +212,10 @@
      <widget class="QPushButton" name="pbChangeWorkingDir">
       <property name="geometry">
        <rect>
-        <x>130</x>
-        <y>227</y>
-        <width>181</width>
-        <height>23</height>
+        <x>110</x>
+        <y>231</y>
+        <width>280</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="text">
@@ -225,10 +225,10 @@
      <widget class="QPushButton" name="pbOpen">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>273</y>
-        <width>91</width>
-        <height>23</height>
+        <x>58</x>
+        <y>266</y>
+        <width>96</width>
+        <height>25</height>
        </rect>
       </property>
       <property name="text">
@@ -238,10 +238,10 @@
      <widget class="QComboBox" name="comboBox">
       <property name="geometry">
        <rect>
-        <x>140</x>
-        <y>273</y>
-        <width>241</width>
-        <height>22</height>
+        <x>168</x>
+        <y>267</y>
+        <width>246</width>
+        <height>25</height>
        </rect>
       </property>
       <item>
@@ -273,9 +273,9 @@
      <widget class="Line" name="line_3">
       <property name="geometry">
        <rect>
-        <x>80</x>
-        <y>283</y>
-        <width>118</width>
+        <x>108</x>
+        <y>277</y>
+        <width>123</width>
         <height>3</height>
        </rect>
       </property>
@@ -314,12 +314,12 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>360</width>
+        <width>420</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
-       <string>Number of threads to be used in simulation and reconstruction:</string>
+       <string>Threads to be used in simulation and reconstruction:</string>
       </property>
      </widget>
      <widget class="QSpinBox" name="sbNumTreads">
@@ -337,7 +337,7 @@
        <rect>
         <x>10</x>
         <y>96</y>
-        <width>360</width>
+        <width>420</width>
         <height>16</height>
        </rect>
       </property>
@@ -369,7 +369,7 @@
        <rect>
         <x>124</x>
         <y>52</y>
-        <width>190</width>
+        <width>250</width>
         <height>16</height>
        </rect>
       </property>
@@ -382,7 +382,7 @@
        <rect>
         <x>119</x>
         <y>122</y>
-        <width>331</width>
+        <width>310</width>
         <height>16</height>
        </rect>
       </property>
@@ -395,7 +395,7 @@
        <rect>
         <x>119</x>
         <y>138</y>
-        <width>181</width>
+        <width>301</width>
         <height>31</height>
        </rect>
       </property>
@@ -413,20 +413,23 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>18</y>
-        <width>131</width>
-        <height>16</height>
+        <y>23</y>
+        <width>220</width>
+        <height>21</height>
        </rect>
       </property>
       <property name="text">
        <string>Font size for all windows:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
      </widget>
      <widget class="QSpinBox" name="sbFontSize">
       <property name="geometry">
        <rect>
-        <x>148</x>
-        <y>16</y>
+        <x>240</x>
+        <y>24</y>
         <width>51</width>
         <height>22</height>
        </rect>
@@ -442,20 +445,23 @@
       <property name="geometry">
        <rect>
         <x>11</x>
-        <y>82</y>
-        <width>141</width>
-        <height>16</height>
+        <y>56</y>
+        <width>222</width>
+        <height>21</height>
        </rect>
       </property>
       <property name="text">
        <string>Data precision in text log:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
      </widget>
      <widget class="QSpinBox" name="sbLogPrecision">
       <property name="geometry">
        <rect>
-        <x>150</x>
-        <y>80</y>
+        <x>240</x>
+        <y>56</y>
         <width>50</width>
         <height>22</height>
        </rect>
@@ -471,13 +477,13 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>140</y>
-        <width>341</width>
+        <y>98</y>
+        <width>460</width>
         <height>17</height>
        </rect>
       </property>
       <property name="text">
-       <string>Open image file in external editor after save on Graph window</string>
+       <string>Open image in external editor after save on GraphWindow</string>
       </property>
      </widget>
      <zorder>label_2</zorder>
@@ -495,7 +501,7 @@
        <rect>
         <x>94</x>
         <y>20</y>
-        <width>241</width>
+        <width>320</width>
         <height>31</height>
        </rect>
       </property>
@@ -506,7 +512,7 @@
      <widget class="QSpinBox" name="sbNumBinsHistogramsX">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>88</y>
         <width>79</width>
         <height>22</height>
@@ -527,7 +533,7 @@
        <rect>
         <x>22</x>
         <y>111</y>
-        <width>170</width>
+        <width>221</width>
         <height>16</height>
        </rect>
       </property>
@@ -540,7 +546,7 @@
        <rect>
         <x>10</x>
         <y>61</y>
-        <width>411</width>
+        <width>480</width>
         <height>16</height>
        </rect>
       </property>
@@ -551,7 +557,7 @@
      <widget class="QSpinBox" name="sbNumBinsHistogramsY">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>110</y>
         <width>79</width>
         <height>22</height>
@@ -570,7 +576,7 @@
      <widget class="QSpinBox" name="sbNumBinsHistogramsZ">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>132</y>
         <width>79</width>
         <height>22</height>
@@ -589,7 +595,7 @@
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>186</x>
+        <x>244</x>
         <y>91</y>
         <width>21</width>
         <height>16</height>
@@ -605,7 +611,7 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>186</x>
+        <x>244</x>
         <y>112</y>
         <width>21</width>
         <height>16</height>
@@ -621,7 +627,7 @@
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>186</x>
+        <x>244</x>
         <y>133</y>
         <width>21</width>
         <height>16</height>
@@ -637,7 +643,7 @@
      <widget class="QSpinBox" name="sbNumSegments">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>230</y>
         <width>79</width>
         <height>22</height>
@@ -656,9 +662,9 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>22</x>
+        <x>21</x>
         <y>229</y>
-        <width>182</width>
+        <width>241</width>
         <height>20</height>
        </rect>
       </property>
@@ -672,7 +678,7 @@
      <widget class="QLabel" name="label_8">
       <property name="geometry">
        <rect>
-        <x>186</x>
+        <x>244</x>
         <y>192</y>
         <width>21</width>
         <height>16</height>
@@ -688,7 +694,7 @@
      <widget class="QLabel" name="label_9">
       <property name="geometry">
        <rect>
-        <x>186</x>
+        <x>244</x>
         <y>171</y>
         <width>21</width>
         <height>16</height>
@@ -704,7 +710,7 @@
      <widget class="QSpinBox" name="sbNumPointsFunctionX">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>168</y>
         <width>79</width>
         <height>22</height>
@@ -723,7 +729,7 @@
      <widget class="QSpinBox" name="sbNumPointsFunctionY">
       <property name="geometry">
        <rect>
-        <x>210</x>
+        <x>270</x>
         <y>190</y>
         <width>79</width>
         <height>22</height>
@@ -744,7 +750,7 @@
        <rect>
         <x>22</x>
         <y>170</y>
-        <width>170</width>
+        <width>201</width>
         <height>41</height>
        </rect>
       </property>
@@ -779,7 +785,7 @@ used to draw a function</string>
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>321</width>
+        <width>411</width>
         <height>16</height>
        </rect>
       </property>
@@ -808,7 +814,7 @@ used to draw a function</string>
        <rect>
         <x>30</x>
         <y>70</y>
-        <width>241</width>
+        <width>381</width>
         <height>17</height>
        </rect>
       </property>
@@ -824,7 +830,7 @@ used to draw a function</string>
        <rect>
         <x>30</x>
         <y>50</y>
-        <width>371</width>
+        <width>450</width>
         <height>17</height>
        </rect>
       </property>
@@ -840,7 +846,7 @@ used to draw a function</string>
        <rect>
         <x>10</x>
         <y>96</y>
-        <width>411</width>
+        <width>480</width>
         <height>16</height>
        </rect>
       </property>
@@ -885,7 +891,7 @@ used to draw a function</string>
        <rect>
         <x>11</x>
         <y>120</y>
-        <width>321</width>
+        <width>480</width>
         <height>16</height>
        </rect>
       </property>
@@ -953,22 +959,25 @@ used to draw a function</string>
      <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
-        <x>28</x>
+        <x>6</x>
         <y>91</y>
-        <width>211</width>
+        <width>141</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
        <string>To connect, use url:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
      </widget>
      <widget class="QLineEdit" name="leWebSocketURL">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>154</x>
         <y>90</y>
-        <width>270</width>
+        <width>340</width>
         <height>20</height>
        </rect>
       </property>
@@ -981,7 +990,7 @@ used to draw a function</string>
        <rect>
         <x>10</x>
         <y>120</y>
-        <width>410</width>
+        <width>481</width>
         <height>16</height>
        </rect>
       </property>
@@ -1018,9 +1027,9 @@ used to draw a function</string>
      <widget class="QCheckBox" name="cbAutoRunRootServer">
       <property name="geometry">
        <rect>
-        <x>60</x>
+        <x>46</x>
         <y>170</y>
-        <width>311</width>
+        <width>440</width>
         <height>17</height>
        </rect>
       </property>
@@ -1033,7 +1042,7 @@ used to draw a function</string>
        <rect>
         <x>150</x>
         <y>260</y>
-        <width>270</width>
+        <width>340</width>
         <height>20</height>
        </rect>
       </property>
@@ -1044,35 +1053,41 @@ used to draw a function</string>
      <widget class="QLabel" name="label_17">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>10</x>
         <y>233</y>
-        <width>60</width>
+        <width>78</width>
         <height>13</height>
        </rect>
       </property>
       <property name="text">
        <string>JSROOT:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
      </widget>
      <widget class="QLabel" name="label_21">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>262</y>
-        <width>211</width>
+        <x>8</x>
+        <y>261</y>
+        <width>140</width>
         <height>16</height>
        </rect>
       </property>
       <property name="text">
        <string>To connect, use url:</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
      </widget>
      <widget class="QLineEdit" name="leJSROOT">
       <property name="geometry">
        <rect>
-        <x>90</x>
+        <x>94</x>
         <y>230</y>
-        <width>330</width>
+        <width>400</width>
         <height>20</height>
        </rect>
       </property>
@@ -1123,11 +1138,52 @@ used to draw a function</string>
      <zorder>label_23</zorder>
      <zorder>leWebSocketIP</zorder>
     </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Geant4</string>
+     </attribute>
+     <widget class="QLineEdit" name="leGeant4exec">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>51</y>
+        <width>400</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>13</x>
+        <y>31</y>
+        <width>311</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Geant4 executable (G4ants):</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pbGeant4exec">
+      <property name="geometry">
+       <rect>
+        <x>416</x>
+        <y>51</y>
+        <width>75</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Change</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="gbSaveOnExit">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>570</x>
       <y>70</y>
       <width>411</width>
       <height>91</height>

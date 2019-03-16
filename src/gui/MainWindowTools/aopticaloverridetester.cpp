@@ -501,7 +501,6 @@ void AOpticalOverrideTester::on_ledAngle_editingFinished()
     {
         ui->ledAngle->setText("45");
         message("Angle should be within [0, 90) degrees!", this);
-        angle = 45.0;
     }
 
     showGeometry();

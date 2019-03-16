@@ -480,7 +480,7 @@ struct APolyCGsection
   APolyCGsection(double z, double rmin, double rmax) : z(z), rmin(rmin), rmax(rmax) {}
 
   bool fromString(QString string);
-  QString toString() const;
+  const QString toString() const;
   void writeToJson(QJsonObject& json) const;
   void readFromJson(QJsonObject& json);
 };

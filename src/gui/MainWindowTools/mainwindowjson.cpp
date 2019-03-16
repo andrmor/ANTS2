@@ -581,6 +581,7 @@ if (scj.contains("CustomDistrib"))
             JsonToCheckbox(csjs, "IgnoreNoHitsEvents", ui->cbIgnoreEventsWithNoHits);
             ui->cbIgnoreEventsWithNoEnergyDepo->setChecked(false);
             JsonToCheckbox(csjs, "IgnoreNoDepoEvents", ui->cbIgnoreEventsWithNoEnergyDepo);
+            JsonToLineEditDouble(csjs, "ClusterMergeRadius", ui->ledClusterRadius);
 
         //particle sources
         SimulationManager->ParticleSources->readFromJson(psjs);

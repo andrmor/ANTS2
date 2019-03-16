@@ -539,6 +539,13 @@ bool AInterfaceToConfig::SetConfig(const QVariant &conf)
     return false;
 }
 
+void AInterfaceToConfig::ExportToGDML(QString FileName)
+{
+    QString err = Config->GetDetector()->exportToGDML(FileName);
+    if (err.isEmpty()) return;
+    abort(err);
+}
+
 #ifdef SIM
 //----------------------------------
 InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
@@ -594,30 +601,13 @@ bool InterfaceToSim::RunParticleSources(int NumThreads)
     SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
 
     do
-      {
+    {
         QThread::usleep(100);
         qApp->processEvents();
-      }
+    }
     while (!SimulationManager->fFinished);
+
     return SimulationManager->fSuccess;
-
-
-  /* 
-  //watchdog on particle sources, can be transferred later to check-upwindow
-  if (MW->ParticleSources.size() == 0)
-    {
-      qDebug() << "No particle sources defined!";
-      return false;
-    }
-  for (int i = 0; i<MW->ParticleSources.size(); i++)
-    {
-      int error = MW->ParticleSources.CheckSource(i);
-      if (error == 0) continue;
-
-      qDebug() << "Error in source " << MW->ParticleSources[i].name << MW->ParticleSources.getErrorString(error);
-      return false;
-    }
-  */
 }
 
 void InterfaceToSim::SetSeed(long seed)
@@ -675,14 +665,19 @@ int InterfaceToSim::countMonitors()
 
 int InterfaceToSim::getMonitorHits(QString monitor)
 {
-    if (!EventsDataHub->SimStat) return std::numeric_limits<int>::quiet_NaN();
+    if (!EventsDataHub->SimStat)
+    {
+        abort("Collect simulation statistics is OFF");
+        return 0;
+    }
     for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
     {
         const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
         if (mon->getName() == monitor)
             return mon->getHits();
     }
-    return std::numeric_limits<int>::quiet_NaN();
+    abort(QString("Monitor %1 not found").arg(monitor));
+    return 0;
 }
 
 QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
@@ -761,6 +756,27 @@ QVariant InterfaceToSim::getMonitorXY(QString monitor)
       }
   }
   return vl;
+}
+
+#include "aglobalsettings.h"
+void InterfaceToSim::SetGeant4Executable(QString FileName)
+{
+    AGlobalSettings::getInstance().G4antsExec = FileName;
+}
+
+void InterfaceToSim::RunSim_Geant4(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads, bool OnlyGenerateFiles)
+{
+    QStringList SV;
+    for (auto & v : SensitiveVolumes )
+        SV << v.toString();
+
+    bool bOK = SimulationManager->Runner->generateG4interfaceFiles(Path, SV, Seed, numThreads);
+    if (!bOK) abort("Failed to create output files");
+
+    SimulationManager->Runner->setG4Sim();
+    SimulationManager->Runner->setG4Sim_OnlyGenerateFiles(OnlyGenerateFiles);
+    SimulationManager->Runner->setG4Sim_Path(Path);
+    RunParticleSources(numThreads);
 }
 #endif
 
@@ -2402,19 +2418,19 @@ int AInterfaceToPMs::CountPM() const
 
 double AInterfaceToPMs::GetPMx(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->X(ipm);
 }
 
 double AInterfaceToPMs::GetPMy(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->Y(ipm);
 }
 
 double AInterfaceToPMs::GetPMz(int ipm)
 {
-  if (!checkValidPM(ipm)) return false;
+  if (!checkValidPM(ipm)) return std::numeric_limits<double>::quiet_NaN();
   return PMs->Z(ipm);
 }
 

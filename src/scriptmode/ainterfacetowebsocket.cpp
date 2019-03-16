@@ -518,7 +518,7 @@ bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
     if (!socket)
     {
         abort("Web socket was not connected");
-        return "";
+        return false;
     }
     const QByteArray& ba = socket->GetBinaryReply();
     qDebug() << "ByteArray to save size:"<<ba.size();

@@ -55,6 +55,8 @@ public slots:
   const QVariant GetConfig() const;
   bool SetConfig(const QVariant& conf);
 
+  void ExportToGDML(QString FileName);
+
   bool Replace(QString Key, QVariant val);
   QVariant GetKeyValue(QString Key);
 
@@ -172,7 +174,7 @@ public slots:
     //assuming there is only one group, and single point reconstruction
   double GetReconstructedX(int ievent);  
   double GetReconstructedY(int ievent); 
-  double GetReconstructedZ(int ievent);  
+  double GetReconstructedZ(int ievent);
   double GetRho(int ievent, int iPM);  
   double GetRho2(int ievent, int iPM); 
   double GetReconstructedEnergy(int ievent);  
@@ -340,6 +342,9 @@ public slots:
   QVariant getMonitorWave(QString monitor);
   QVariant getMonitorEnergy(QString monitor);
   QVariant getMonitorXY(QString monitor);
+
+  void SetGeant4Executable(QString FileName);
+  void RunSim_Geant4(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads, bool OnlyGenerateFiles = false);
 
 signals:
   void requestStopSimulation();

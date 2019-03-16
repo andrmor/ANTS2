@@ -1865,7 +1865,7 @@ void ParticleSourceSimulator::EnergyVectorToScan()
         }
 
         //direct pass finished, if there were no merges, work is done
-        qDebug() << "-----Merges in the first pass:"<<numMerges;
+            //qDebug() << "-----Merges in the first pass:"<<numMerges;
         if (numMerges > 0)
         {
             Depo.resize(EnergyVector.size() - numMerges); //only shrinking

@@ -776,7 +776,7 @@ void GeometryWindowClass::on_pbWebViewer_clicked()
       {
         //QString t = "http://localhost:8080/?nobrowser&item=Objects/GeoWorld/World_1&opt=dray;all;tracks";
         //[Objects/GeoWorld/World_1,Objects/GeoTracks]
-        QString t = "http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/World_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks";
+        QString t = "http://localhost:8080/?nobrowser&item=[Objects/GeoWorld/WorldBox_1,Objects/GeoTracks/TObjArray]&opt=dray;all;tracks";
         t += ";transp"+QString::number(ui->sbTransparency->value());
         if (ui->cbShowAxes->isChecked()) t += ";axis";
 

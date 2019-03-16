@@ -3207,7 +3207,8 @@ void GraphWindowClass::SaveBasket()
           TString name = "";
           name += index;
           index++;
-          ((TNamed*)Basket[ib].DrawObjects[i].getPointer())->SetName(name);
+          TNamed* no = dynamic_cast<TNamed*>(Basket[ib].DrawObjects[i].getPointer());
+          if (no) no->SetName(name);
           Basket[ib].DrawObjects[i].getPointer()->Write();
           str += "|"+Basket[ib].DrawObjects[i].getOptions();
         }
@@ -3741,10 +3742,13 @@ void GraphWindowClass::on_pbFWHM_clicked()
         Draw(f, "same");
 
         //draw base line
-        TF1 *fl = new TF1("line", "pol2", startX, stopX);
-        fl->SetLineStyle(2);
-        fl->SetParameters(c/b, -a/b);
-        Draw(fl, "same");
+        if (ui->cbShowBaseLine->isChecked())
+        {
+            TF1 *fl = new TF1("line", "pol2", startX, stopX);
+            fl->SetLineStyle(2);
+            fl->SetParameters(c/b, -a/b);
+            Draw(fl, "same");
+        }
 
         //draw panel with results
         ShowTextPanel("fwhm = " + QString::number(FWHM) + "\nmean = " + QString::number(mid) + "\nfwhm/mean = "+QString::number(rel));

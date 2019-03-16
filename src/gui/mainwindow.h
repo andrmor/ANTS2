@@ -621,6 +621,12 @@ private slots:
 
     void on_pteParticleGenerationScript_customContextMenuRequested(const QPoint &pos);
 
+    void on_pbClearRelQEfactors_clicked();
+
+    void on_pbRelQERandomScaleELaverages_clicked();
+
+    void on_pbRelQESetELaveragesToUnity_clicked();
+
 public slots:
     void on_pbRebuildDetector_clicked();
     void onRequestDetectorGuiUpdate();     // called to update GUI related to Detector

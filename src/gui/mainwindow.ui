@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -4680,27 +4680,236 @@ of the refracted beam:</string>
         <widget class="QPushButton" name="pbLoadRelQEfactors">
          <property name="geometry">
           <rect>
-           <x>61</x>
+           <x>120</x>
            <y>64</y>
-           <width>121</width>
+           <width>120</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Load relative factors</string>
+          <string>Load factors</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbViewChangeRelQEfactors">
          <property name="geometry">
           <rect>
-           <x>41</x>
+           <x>10</x>
            <y>33</y>
-           <width>171</width>
+           <width>230</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
           <string>View / change relative factors</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbClearRelQEfactors">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>64</y>
+           <width>100</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="toolTip">
+          <string>Use base properties of the type for all PMs</string>
+         </property>
+         <property name="text">
+          <string>Use PM type</string>
+         </property>
+        </widget>
+        <widget class="Line" name="line_63">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>87</y>
+           <width>211</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbRelQESetELaveragesToUnity">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>179</y>
+           <width>170</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Set all gains to:</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pbRelQERandomScaleELaverages">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Randomize</string>
+         </property>
+        </widget>
+        <widget class="QComboBox" name="cobRelQEScaleGainsUniNorm">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>103</y>
+           <width>130</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <item>
+          <property name="text">
+           <string>Uniform</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Normal</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QStackedWidget" name="swRelQEGainUniNorm">
+         <property name="geometry">
+          <rect>
+           <x>103</x>
+           <y>130</y>
+           <width>130</width>
+           <height>48</height>
+          </rect>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="page_26">
+          <widget class="QLineEdit" name="ledRelQEELavScaleMax">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>24</y>
+             <width>50</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledRelQEELavScaleMin">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>2</y>
+             <width>50</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0.5</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_50">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>6</y>
+             <width>35</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>min:</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_136">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>25</y>
+             <width>35</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>max:</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="page_27">
+          <widget class="QLineEdit" name="ledRelQEELavScaleMean">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>2</y>
+             <width>50</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="ledRelQEELavScaleSigma">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>24</y>
+             <width>50</width>
+             <height>20</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>0.2</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_197">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>6</y>
+             <width>48</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>mean:</string>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_205">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>25</y>
+             <width>48</width>
+             <height>13</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>sigma:</string>
+           </property>
+          </widget>
+         </widget>
+        </widget>
+        <widget class="QLineEdit" name="ledRelQEvalue">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>180</y>
+           <width>50</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>1.0</string>
          </property>
         </widget>
        </widget>
@@ -4741,9 +4950,9 @@ of the refracted beam:</string>
         <widget class="QPushButton" name="pbViewChangeRelELfactors">
          <property name="geometry">
           <rect>
-           <x>40</x>
+           <x>9</x>
            <y>33</y>
-           <width>171</width>
+           <width>230</width>
            <height>23</height>
           </rect>
          </property>
@@ -4754,14 +4963,14 @@ of the refracted beam:</string>
         <widget class="QPushButton" name="pbLoadRelELfactors">
          <property name="geometry">
           <rect>
-           <x>65</x>
+           <x>70</x>
            <y>64</y>
-           <width>121</width>
+           <width>120</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Load relative factors</string>
+          <string>Load factors</string>
          </property>
         </widget>
         <widget class="QPushButton" name="pbRandomScaleELaverages">
@@ -4795,19 +5004,19 @@ of the refracted beam:</string>
           <rect>
            <x>10</x>
            <y>179</y>
-           <width>232</width>
+           <width>170</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Set all gains to 1</string>
+          <string>Set all gains to:</string>
          </property>
         </widget>
         <widget class="QComboBox" name="cobScaleGainsUniNorm">
          <property name="geometry">
           <rect>
            <x>100</x>
-           <y>101</y>
+           <y>103</y>
            <width>130</width>
            <height>22</height>
           </rect>
@@ -4827,7 +5036,7 @@ of the refracted beam:</string>
          <property name="geometry">
           <rect>
            <x>103</x>
-           <y>126</y>
+           <y>130</y>
            <width>130</width>
            <height>48</height>
           </rect>
@@ -4944,6 +5153,19 @@ of the refracted beam:</string>
           </widget>
          </widget>
         </widget>
+        <widget class="QLineEdit" name="ledELEvalue">
+         <property name="geometry">
+          <rect>
+           <x>190</x>
+           <y>180</y>
+           <width>50</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>1.0</string>
+         </property>
+        </widget>
         <zorder>label_35</zorder>
         <zorder>pbViewChangeRelELfactors</zorder>
         <zorder>pbLoadRelELfactors</zorder>
@@ -4952,6 +5174,7 @@ of the refracted beam:</string>
         <zorder>pbRandomScaleELaverages</zorder>
         <zorder>cobScaleGainsUniNorm</zorder>
         <zorder>swGainUniNorm</zorder>
+        <zorder>ledELEvalue</zorder>
        </widget>
        <widget class="QPushButton" name="pbShowRelGains">
         <property name="geometry">

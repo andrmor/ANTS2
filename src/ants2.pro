@@ -779,6 +779,9 @@ TEMPLATE = app
 RC_FILE = myapp.rc
 #------------
 
+# The next define allows the core script interface to launch external processes. Enable only if you know what are you doing
+#DEFINES += _ALLOW_LAUNCH_EXTERNAL_PROCESS_
+
 #---Optimization of compilation---
 win32 {
   #when the next two lines are NOT commented, optimization during compilation is disabled. It will drastically shorten compilation time on MSVC2013, but there are performance loss, especially strong for LRF computation

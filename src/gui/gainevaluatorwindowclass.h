@@ -181,12 +181,12 @@ private:
 
   MainWindow* MW;
   EventsDataClass* EventsDataHub;
-  bool TMPignore; //temporaly ignore update
+  bool TMPignore = false; //temporaly ignore update
 
-  int CurrentGroup;
+  int CurrentGroup = 0;
 
-  int Equations;
-  int Variables;
+  int Equations = 0;
+  int Variables = 0;
   QList<int> iPMs; //indeces of all PMs to be used in gain reconstruction
   QList<int> iCutOffPMs; //indeces of PMs to be used in CutOffs gain eval procedure
   QList<int> iCentersPMs; //indeces of PMs to be used in CutOffs gain eval procedure
@@ -201,24 +201,24 @@ private:
   QString Overlap4PMs;
   double Tolerance4PMs;
 
-  QGraphicsScene *scene;
-  myQGraphicsView *gvGains;
-  double GVscale;
+  QGraphicsScene *scene = 0;
+  myQGraphicsView *gvGains = 0;
+  double GVscale = 10.0;
   QVector<QGraphicsItem*> PMicons;
 
   QList<int> SelectedPMsFor4Set;  //tmp set used to draw new 4pm set
   QVector< QSet<int> > SetNeighbour; //all neigbours by group
   QVector< QSet<int> > AllLinks; //link between all PMs - used in check of all PM coverage;
 
-  bool flagShowNeighbourGroups;
-  bool flagAllPMsCovered;
+  bool flagShowNeighbourGroups = false;
+  bool flagAllPMsCovered = false;
   QSet<int> firstUncoveredSet;
-  bool flagShowingLinked;
-  bool flagShowNonLinkedSet;
+  bool flagShowingLinked = false;
+  bool flagShowNonLinkedSet = false;
 
   QIcon RedIcon, GreenIcon;
 
-  TH1D *tmpHistForLogR;
+  TH1D *tmpHistForLogR = 0;
 
   FlatField Triads;
 

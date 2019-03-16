@@ -726,7 +726,7 @@ void ReconstructionWindow::on_pbShowSumSignal_clicked()
   hist1D->SetXTitle("Sum signal");
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  hist1D->SetBit(TH1::kCanRebin);
+  if (!ui->cbFilterSumSignal->isChecked()) hist1D->SetBit(TH1::kCanRebin);
 #endif
 
   int counter = 0;  
@@ -813,7 +813,7 @@ void ReconstructionWindow::ShowIndividualSpectrum(bool focus)
   hist1D->SetXTitle("Signal");
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  hist1D->SetBit(TH1::kCanRebin);
+  if (!ui->cbFilterIndividualSignals->isChecked()) hist1D->SetBit(TH1::kCanRebin);
 #endif
 
   int counter = 0;
@@ -1198,7 +1198,7 @@ void ReconstructionWindow::ShowEnergySpectrum()
     auto hist1D = new TH1D("hist1ShEnSp","Energy spectrum", MW->GlobSet.BinsX, 0, 0);
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-    hist1D->SetBit(TH1::kCanRebin);
+  if (!ui->cbActivateEnergyFilter->isChecked()) hist1D->SetBit(TH1::kCanRebin);
 #endif
 
     for (int i=0; i<EventsDataHub->ReconstructionData[CurrentGroup].size(); i++)
@@ -1251,10 +1251,11 @@ void ReconstructionWindow::ShowChi2Spectrum()
       return;
     }
 
-  auto hist1D = new TH1D("hist1Chi2Dis","Chi2 distribution", MW->GlobSet.BinsX, 0, 0);
+  auto hist1D = new TH1D("hist1Chi2Dis","Chi2 distribution", MW->GlobSet.BinsX, 0, 0);  
   hist1D->SetXTitle("Chi2");
+
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  hist1D->SetBit(TH1::kCanRebin);
+  if (!ui->cbActivateChi2Filter->isChecked()) hist1D->SetBit(TH1::kCanRebin);
 #endif
 
   for (int i=0; i<EventsDataHub->ReconstructionData[CurrentGroup].size(); i++)
@@ -3376,9 +3377,11 @@ void ReconstructionWindow::on_pbLoadEnergySpectrum_clicked()
 
   auto hist1D = new TH1D("hist1ShLoEnSp","True/loaded energy", MW->GlobSet.BinsX, 0, 0);
   hist1D->SetXTitle("True or loaded energy");
+
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  hist1D->SetBit(TH1::kCanRebin);
+  if (!ui->cbActivateLoadedEnergyFilter->isChecked()) hist1D->SetBit(TH1::kCanRebin);
 #endif
+
   //check filter status only of reconstruction has been done
   bool DoFiltering = false;
   if (!EventsDataHub->isReconstructionDataEmpty()) DoFiltering = true;

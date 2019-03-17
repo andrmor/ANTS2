@@ -1107,48 +1107,45 @@ void OutputWindow::on_pbAverageSignals_clicked()
 
 void OutputWindow::ShowGeneratedPhotonsLog()
 {
-  if (EventsDataHub->GeneratedPhotonsHistory.isEmpty())
-  {
-      message("Photon history log is empty!\n"
-              "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n"
-              "Also, photon sources simulations do not generate this log!", this);
-      return;
-  }
+    if (EventsDataHub->GeneratedPhotonsHistory.isEmpty())
+    {
+        message("Photon history log is empty!\n"
+                "Simulation_options/Accelerators/Do_logs_and_statistics has to be activated before simulation!\n"
+                "Also, photon sources simulations do not generate this log!", this);
+        return;
+    }
 
-  QString s = "\n=====================\n"
-              "Log of genereated photons\n"
-              "---------------------\n";
-  for (int i=0; i<EventsDataHub->GeneratedPhotonsHistory.size(); i++)
-        {
-          QString out, str;
+    QString s = "\n=====================\n"
+                "Log of genereated photons\n"
+                "---------------------\n";
+    for (int i=0; i<EventsDataHub->GeneratedPhotonsHistory.size(); i++)
+    {
+        QString out, str;
 
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].event);
-          out = str + "/";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].index);
-          out += str + "> ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].event);
+        out = str + "/";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].index);
+        out += str + "> ";
 
-          //out += MW->Detector->ParticleCollection[EventsDataHub->GeneratedPhotonsHistory[i].ParticleId]->ParticleName;
-          out += MW->Detector->MpCollection->getParticleName(EventsDataHub->GeneratedPhotonsHistory[i].ParticleId);
-          out += " in " + (*MW->MpCollection)[EventsDataHub->GeneratedPhotonsHistory[i].MaterialId]->name;
+        out += MW->Detector->MpCollection->getParticleName(EventsDataHub->GeneratedPhotonsHistory[i].ParticleId);
+        out += " in " + (*MW->MpCollection)[EventsDataHub->GeneratedPhotonsHistory[i].MaterialId]->name;
 
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].Energy);
-          out += "  deposited: " + str + " keV";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].Energy);
+        out += "  deposited: " + str + " keV";
 
-          out += "  Primary photons: ";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].PrimaryPhotons);
-          out += str;
+        out += "  Primary photons: ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].PrimaryPhotons);
+        out += str;
 
-          out += "  Secondary photons: ";
-          str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].SecondaryPhotons);
-          out += str;
+        out += "  Secondary photons: ";
+        str.setNum(EventsDataHub->GeneratedPhotonsHistory[i].SecondaryPhotons);
+        out += str;
 
-          s += out + "\n";
-        }
-  s += "=====================\n";
+        s += out + "\n";
+    }
+    s += "=====================\n";
 
-  //SetTab(0);
-  //OutText(s);
-  ui->pteOut->appendPlainText(s);
+    ui->pteOut->appendPlainText(s);
 }
 
 void OutputWindow::on_pbShowParticldeLog_clicked()

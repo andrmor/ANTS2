@@ -28,8 +28,21 @@
 //#include "tmpobjhubclass.h"
 //#include "TAttMarker.h"
 
+#include "acommonfunctions.h"
+#include "TH1D.h"
+#include "TH1.h"
 void MainWindow::on_pobTest_clicked()
 {
+    TH1D * hist = new TH1D("", "", 5, 0, 5);
+    for (int i=0; i<5; i++)
+        hist->Fill(i, 1.0+i);
+    GraphWindow->Draw(hist, "hist");
+
+    TH1D * h = new TH1D("", "", 100, -2, 8);
+    //for (int i=0; i<100000; i++) h->Fill( GetRandomFromHist(hist, Detector->RandGen) );
+    for (int i=0; i<100000; i++) h->Fill( GetRandomBinFromHist(hist, Detector->RandGen) );
+    GraphWindow->Draw(h, "hist");
+
 //    double tau1 = 100.0;
 //    double tau2 = 100.0;
 //    int num = 10000000;

@@ -121,3 +121,24 @@ void ANeutronInteractionElement::readScenariosFromJson(const QJsonObject &json, 
         DecayScenarios << r;
     }
 }
+
+#include "TH1.h"
+void ANeutronInteractionElement::updateRuntimeProperties()
+{
+    for (ADecayScenario & ds : DecayScenarios)
+    {
+        delete ds.DirectCustomDist; ds.DirectCustomDist = 0;
+
+        int size = ds.DirectCustomEn.size();
+        if (size > 0)
+        {
+            double first = ds.DirectCustomEn.first();
+            double last  = ds.DirectCustomEn.last();
+            double delta = ( size > 1 ? (last - first) / size : 1.0);
+            ds.DirectCustomDist = new TH1D("", "Custom deposition", size, first, last + delta);
+            for (int j = 1; j<size+1; j++)
+                ds.DirectCustomDist->SetBinContent(j, ds.DirectCustomProb.at(j-1));
+            ds.DirectCustomDist->ComputeIntegral(true); //to make thread safe
+        }
+    }
+}

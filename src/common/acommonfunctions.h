@@ -6,6 +6,12 @@
 
 #include <map>
 
+class TH1;
+class TRandom2;
+
+double GetRandomFromHist(TH1* hist, TRandom2* RandGen);    //integral must be already calculated to be thread-safe
+int    GetRandomBinFromHist(TH1* hist, TRandom2* RandGen); //integral must be already calculated to be thread-safe
+
 bool NormalizeVector(double *arr);
 
 void UpdateMax(double &max, double value); //assume positive max and value!

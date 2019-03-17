@@ -748,6 +748,10 @@ void NeutralTerminatorStructure::UpdateRunTimeProperties(bool bUseLogLog, TRando
             {
                 ANeutronInteractionElement& nie = IsotopeRecords[iElement];
                 //  qDebug() << nie.Name << "-" << nie.Mass << "  with molar fraction:"<<nie.MolarFraction;
+
+                //updating neutron absorption runtime properties (can be custom distr of deposited energy)
+                nie.updateRuntimeProperties();
+
                 //  qDebug() << "size of cross-section dataset"<<nie.Energy.size() << nie.CrossSection.size();
                 if (nie.Energy.isEmpty()) continue;
                 if (PartialCrossSectionEnergy.isEmpty())

@@ -4,6 +4,50 @@
 #include <QDebug>
 
 #include "TMath.h"
+#include "TH1.h"
+#include "TRandom2.h"
+
+double GetRandomFromHist(TH1 *hist, TRandom2 *RandGen)
+{
+    int nbinsx = hist->GetNbinsX();
+
+    /*
+       double integral = 0;
+       // compute integral checking that all bins have positive content (see ROOT-5894)
+       if (fIntegral)
+       {
+          if (fIntegral[nbinsx+1] != fEntries) integral = ((TH1*)this)->ComputeIntegral(true);
+          else  integral = fIntegral[nbinsx];
+       }
+       else integral = ((TH1*)this)->ComputeIntegral(true);
+    */
+
+    double * fIntegral = hist->GetIntegral();
+    double integral = fIntegral[nbinsx];
+    if (integral == 0) return 0;
+    // return a NaN in case some bins have negative content
+    if (integral == TMath::QuietNaN() ) return TMath::QuietNaN();
+
+    double r1 = RandGen->Rndm();
+    int ibin = TMath::BinarySearch(nbinsx, fIntegral, r1);
+    double x = hist->GetBinLowEdge(ibin + 1);
+    if (r1 > fIntegral[ibin])
+        x += hist->GetBinWidth(ibin+1) * (r1 - fIntegral[ibin]) / (fIntegral[ibin+1] - fIntegral[ibin]);
+    return x;
+}
+
+int GetRandomBinFromHist(TH1 *hist, TRandom2 *RandGen)
+{
+    int nbinsx = hist->GetNbinsX();
+    double * fIntegral = hist->GetIntegral();
+    double integral = fIntegral[nbinsx];
+    if (integral == 0) return -1;
+    // return a NaN in case some bins have negative content
+    if (integral == TMath::QuietNaN() ) return -1;
+
+    double r1 = RandGen->Rndm();
+    return TMath::BinarySearch(nbinsx, fIntegral, r1);
+}
 
 bool NormalizeVector(double *arr)
 {

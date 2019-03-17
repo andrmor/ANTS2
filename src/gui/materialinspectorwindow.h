@@ -88,7 +88,6 @@ private slots:
     void on_pbShowUsage_clicked();
     void on_pbNistPage_clicked();
     void on_pbRename_clicked();
-    void on_ledMFPenergy_2_editingFinished();  //fix me!!! no button
     void on_pbAddNewMaterial_clicked();
     void on_ledIntEnergyRes_editingFinished();
     void on_cbTransparentMaterial_clicked();
@@ -166,6 +165,8 @@ private slots:
     void on_lePriT_raise_editingFinished();
 
     void on_pbNew_clicked();
+
+    void on_pbComputeRangeCharged_clicked();
 
 private:
     Ui::MaterialInspectorWindow *ui;

@@ -1880,8 +1880,8 @@ resolution:</string>
               <widget class="QLineEdit" name="leMFP_2">
                <property name="geometry">
                 <rect>
-                 <x>267</x>
-                 <y>237</y>
+                 <x>52</x>
+                 <y>258</y>
                  <width>81</width>
                  <height>20</height>
                 </rect>
@@ -1893,24 +1893,24 @@ resolution:</string>
               <widget class="QLabel" name="label_50">
                <property name="geometry">
                 <rect>
-                 <x>206</x>
-                 <y>240</y>
+                 <x>244</x>
+                 <y>231</y>
                  <width>54</width>
-                 <height>13</height>
+                 <height>16</height>
                 </rect>
                </property>
                <property name="text">
-                <string>keV is:</string>
+                <string>keV</string>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                </property>
               </widget>
               <widget class="QLabel" name="label_51">
                <property name="geometry">
                 <rect>
-                 <x>352</x>
-                 <y>239</y>
+                 <x>137</x>
+                 <y>260</y>
                  <width>46</width>
                  <height>13</height>
                 </rect>
@@ -1919,30 +1919,30 @@ resolution:</string>
                 <string>mm</string>
                </property>
               </widget>
-              <widget class="QLabel" name="label_52">
-               <property name="geometry">
-                <rect>
-                 <x>27</x>
-                 <y>239</y>
-                 <width>101</width>
-                 <height>16</height>
-                </rect>
-               </property>
-               <property name="text">
-                <string>Projected range for</string>
-               </property>
-              </widget>
               <widget class="QLineEdit" name="ledMFPenergy_2">
                <property name="geometry">
                 <rect>
-                 <x>127</x>
-                 <y>237</y>
-                 <width>70</width>
+                 <x>188</x>
+                 <y>230</y>
+                 <width>51</width>
                  <height>20</height>
                 </rect>
                </property>
                <property name="text">
                 <string>100</string>
+               </property>
+              </widget>
+              <widget class="QPushButton" name="pbComputeRangeCharged">
+               <property name="geometry">
+                <rect>
+                 <x>50</x>
+                 <y>229</y>
+                 <width>131</width>
+                 <height>23</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Compute range for</string>
                </property>
               </widget>
               <zorder>line_7</zorder>
@@ -1957,9 +1957,9 @@ resolution:</string>
               <zorder>label_33</zorder>
               <zorder>label_50</zorder>
               <zorder>label_51</zorder>
-              <zorder>label_52</zorder>
               <zorder>ledMFPenergy_2</zorder>
               <zorder>leMFP_2</zorder>
+              <zorder>pbComputeRangeCharged</zorder>
              </widget>
              <widget class="QWidget" name="pageNeutral">
               <layout class="QVBoxLayout" name="verticalLayout_7">

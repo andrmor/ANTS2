@@ -454,7 +454,6 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
      ui->swMainMatParticle->setCurrentIndex(0);
      if (mp.InteractionDataX.size()>0) ui->pbShowStoppingPower->setEnabled(true);
      else ui->pbShowStoppingPower->setEnabled(false);
-     on_ledMFPenergy_2_editingFinished();
   }
   else //neutral particles
   {      
@@ -529,7 +528,6 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.e_driftVelocity = ui->ledEDriftVelocity->text().toDouble();
 
     on_ledGammaDiagnosticsEnergy_editingFinished(); //gamma - update MFP
-    on_ledMFPenergy_2_editingFinished();            //charged - update projected range
 }
 
 void MaterialInspectorWindow::on_pbLoadDeDr_clicked()
@@ -1638,33 +1636,30 @@ void MaterialInspectorWindow::on_pbRename_clicked()
   MaterialInspectorWindow::on_leName_textChanged(ui->leName->text());
 }
 
-void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
+void MaterialInspectorWindow::on_pbComputeRangeCharged_clicked()
 {
-  /*
   int particleId = ui->cobParticle->currentIndex();
   if (MW->MpCollection->getParticleType(particleId) != AParticle::_charged_) return;
 
   if (ui->ledMFPenergy_2->text().isEmpty())
-    {
+  {
       ui->leMFP_2->setText("");
       return;
-    }
+  }
 
   AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-  double energy;
-  energy = ui->ledMFPenergy_2->text().toDouble();
+  double energy = ui->ledMFPenergy_2->text().toDouble();
 
   if ( tmpMaterial.MatParticle[particleId].InteractionDataX.size() < 2)
-    {
-      ui->leMFP->setText("no data");
+  {
+      ui->leMFP_2->setText("n.a.");
       return;
-    }
-  if (energy<tmpMaterial.MatParticle[particleId].InteractionDataX.first() || energy > tmpMaterial.MatParticle[particleId].InteractionDataX.last())
-    {
-      ui->leMFP->setText("out range");
+  }
+  if (energy < tmpMaterial.MatParticle[particleId].InteractionDataX.first() || energy > tmpMaterial.MatParticle[particleId].InteractionDataX.last())
+  {
+      ui->leMFP_2->setText("n.a.");
       return;
-    }
+  }
 
   int LogLogInterpolation = Detector->MpCollection->fLogLogInterpolation;
   //double InteractionCoefficient = InteractionValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
@@ -1675,7 +1670,7 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
   double Step;
   int counter = 1000; //1000 steps!
   do
-    {
+  {
       if (energy < tmpMaterial.MatParticle[particleId].InteractionDataX.first()) break;
       double InteractionCoefficient = GetInterpolatedValue(energy, &tmpMaterial.MatParticle[particleId].InteractionDataX, &tmpMaterial.MatParticle[particleId].InteractionDataF, LogLogInterpolation);
       //qDebug()<<InteractionCoefficient<<tmpMaterial.density;
@@ -1687,13 +1682,12 @@ void MaterialInspectorWindow::on_ledMFPenergy_2_editingFinished()
 
       energy -= dE;
       counter--;
-    }
+  }
   while (counter>0);
 
   QString str;
   str.setNum(range, 'g', 4);
   ui->leMFP_2->setText(str);
-  */
 }
 
 void MaterialInspectorWindow::on_actionSave_material_triggered()

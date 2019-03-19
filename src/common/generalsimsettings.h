@@ -2,6 +2,7 @@
 #define GENERALSIMSETTINGS_H
 
 #include "atrackbuildoptions.h"
+#include "ag4simulationsettings.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -50,6 +51,8 @@ public:
   //TH1D *SecScintThetaHist;
 
   ATrackBuildOptions TrackBuildOptions;
+
+  AG4SimulationSettings G4SimSet;
 
   //utility
   QString ErrorString;

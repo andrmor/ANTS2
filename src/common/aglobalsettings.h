@@ -97,6 +97,7 @@ public:
 
     //Geant4 interface
     QString G4antsExec;
+    QString G4ExchangeFolder;
 
 private:
     AIsotopeAbundanceHandler* IsotopeAbundanceHandler = 0; //owns

@@ -388,7 +388,9 @@ SOURCES += main.cpp \
     scriptmode/aparticletrackinghistoryinterface.cpp \
     common/aisotopeabundancehandler.cpp \
     common/aisotope.cpp \
-    common/achemicalelement.cpp
+    common/achemicalelement.cpp \
+    Simulation/ag4simulationsettings.cpp \
+    gui/ageant4configdialog.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -530,7 +532,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aparticletrackinghistoryinterface.h \
     common/aisotopeabundancehandler.h \
     common/aisotope.h \
-    common/achemicalelement.h
+    common/achemicalelement.h \
+    Simulation/ag4simulationsettings.h \
+    gui/ageant4configdialog.h
 
 # --- SIM ---
 ants2_SIM {
@@ -759,6 +763,7 @@ INCLUDEPATH += modules/lrf_v3
 INCLUDEPATH += common
 INCLUDEPATH += scriptmode
 INCLUDEPATH += Net
+INCLUDEPATH += Simulation
 
 RESOURCES += \
     Resources.qrc
@@ -860,4 +865,7 @@ unix {
    QMAKE_PRE_LINK = $$quote(cp -rf \"$${fromdir}\" \"$${todir}\"$$escape_expand(\n\t))
 }
 #------------
+
+FORMS += \
+    gui/ageant4configdialog.ui
 

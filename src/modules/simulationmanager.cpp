@@ -319,7 +319,7 @@ bool ASimulatorRunner::generateG4interfaceFiles(QString Path, const QStringList 
     json["GDML"] = gdmlName;
 
     QJsonArray Carr;
-    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.01 mm"; // ***!!! TODO
+    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.0001 mm"; // ***!!! TODO
     json["Commands"] = Carr;
 
     json["GuiMode"] = false;
@@ -2059,13 +2059,20 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     //}
     //while (G4antsProcess->state() ==  QProcess::Running);
     //while (isRunning);
+
     QString err = G4antsProcess->errorString();
-        //qDebug() << "=====err string:====>"<<err<<"<====";
+
     delete G4antsProcess;
 
     if (err.contains("No such file or directory"))
     {
         ErrorString = "Cannot find G4ants executable";
+        return false;
+    }
+    if (G4antsProcess->exitStatus() == QProcess::CrashExit)
+    {
+        qWarning() << "QProcess returned error string:"<<err;
+        ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";
         return false;
     }
 

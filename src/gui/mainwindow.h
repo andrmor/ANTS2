@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "scanfloodstructure.h"
+#include "ag4simulationsettings.h"
 
 #include <QMainWindow>
 #include <QVector>
@@ -448,6 +449,8 @@ private:
     QSize OptOvDialogSize;
     QPoint OptOvDialogPosition;
 
+    AG4SimulationSettings G4SimSet;
+
     void clearPreprocessingData();
     void updateCOBsWithPMtypeNames();
     void ViewChangeRelFactors(QString options);    
@@ -628,6 +631,10 @@ private slots:
     void on_pnShowHideAdvanced_Particle_toggled(bool checked);
 
     void on_pbGoToConfigueG4ants_clicked();
+
+    void on_cbGeant4ParticleTracking_toggled(bool checked);
+
+    void on_pbG4Settings_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

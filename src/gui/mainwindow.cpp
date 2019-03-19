@@ -4994,3 +4994,15 @@ void MainWindow::on_pbGoToConfigueG4ants_clicked()
     GlobSetWindow->showNormal();
     GlobSetWindow->SetTab(6);
 }
+
+void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
+{
+    ui->swNormalOrGeant4->setCurrentIndex((int)checked);
+}
+
+#include "ageant4configdialog.h"
+void MainWindow::on_pbG4Settings_clicked()
+{
+    AGeant4ConfigDialog D(G4SimSet, this);
+    D.exec();
+}

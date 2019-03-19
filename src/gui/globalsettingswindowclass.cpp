@@ -490,3 +490,17 @@ void GlobalSettingsWindowClass::on_leGeant4exec_editingFinished()
 {
     MW->GlobSet.G4antsExec = ui->leGeant4exec->text();
 }
+
+void GlobalSettingsWindowClass::on_pbGeant4ExchangeFolder_clicked()
+{
+    MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
+}
+
+void GlobalSettingsWindowClass::on_leGeant4ExchangeFolder_editingFinished()
+{
+    QString starter = MW->GlobSet.G4ExchangeFolder;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select folder for Ants2<->Geant4 file exchange",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    ui->leGeant4exec->setText(dir);
+    MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
+}

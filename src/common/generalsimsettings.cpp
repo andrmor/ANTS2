@@ -74,6 +74,11 @@ bool GeneralSimSettings::readFromJson(const QJsonObject &Json)
     parseJson(json, "TrackBuildingOptions", tbojs);
   TrackBuildOptions.readFromJson(tbojs);
 
+  //Geant4 simulation options
+  QJsonObject g4js;
+    parseJson(json, "Geant4SimulationSettings", g4js);
+  G4SimSet.readFromJson(g4js);
+
   //Secondary scint options
   QJsonObject scjson = json["SecScintConfig"].toObject();
   SecScintGenMode = scjson["Type"].toInt();  //0-4Pi, 1-2PiUp, 2-2Pidown, // obsolete: 3-custom

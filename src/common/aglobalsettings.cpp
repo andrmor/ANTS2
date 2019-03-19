@@ -152,6 +152,7 @@ void AGlobalSettings::writeToJson(QJsonObject &json) const
     js["RemoteServers"] = RemoteServers;
 
     js["G4ants"] = G4antsExec;
+    js["G4ExchangeFolder"] = G4ExchangeFolder;
 
     json["ANTS2config"] = js;
 }
@@ -210,6 +211,9 @@ void AGlobalSettings::readFromJson(const QJsonObject &json)
     parseJson(js, "RemoteServers", RemoteServers);
 
     parseJson(js, "G4ants", G4antsExec);
+    parseJson(js, "G4ExchangeFolder", G4ExchangeFolder);
+    if (G4ExchangeFolder.isEmpty())
+        G4ExchangeFolder = TmpDir;
 
     QString tmp;
     parseJson(js, "ExternalJSROOT", tmp);

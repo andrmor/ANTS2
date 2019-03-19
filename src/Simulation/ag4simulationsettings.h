@@ -15,16 +15,15 @@ public:
 
     QStringList SensitiveVolumes; //later will be filled automatically
     QStringList Commands = {"/process/em/fluo true", "/process/em/auger true", "/process/em/pixe true", "/run/setCut 0.0001 mm"};
-    int Seed;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);
 
-    const QString getPrimariesFileName(int iThreadNum);
-    const QString getDepositionFileName(int iThreadNum);
-    const QString getReceitFileName(int iThreadNum);
-    const QString getConfigFileName(int iThreadNum);
-    const QString getGdmlFileName();
+    const QString getPrimariesFileName(int iThreadNum) const;
+    const QString getDepositionFileName(int iThreadNum) const;
+    const QString getReceitFileName(int iThreadNum) const;
+    const QString getConfigFileName(int iThreadNum) const;
+    const QString getGdmlFileName() const;
 
 };
 

@@ -81,6 +81,7 @@ void GlobalSettingsWindowClass::updateGUI()
   ui->cbSaveSimAsText_IncludePositions->setChecked(MW->GlobSet.SimTextSave_IncludePositions);
 
   ui->leGeant4exec->setText(MW->GlobSet.G4antsExec);
+  ui->leGeant4ExchangeFolder->setText(MW->GlobSet.G4ExchangeFolder);
 
   updateNetGui();
 }
@@ -493,14 +494,14 @@ void GlobalSettingsWindowClass::on_leGeant4exec_editingFinished()
 
 void GlobalSettingsWindowClass::on_pbGeant4ExchangeFolder_clicked()
 {
+    QString starter = MW->GlobSet.G4ExchangeFolder;
+    QString dir = QFileDialog::getExistingDirectory(this, "Select folder for Ants2<->Geant4 file exchange",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (dir.isEmpty()) return;
+    ui->leGeant4ExchangeFolder->setText(dir);
     MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
 }
 
 void GlobalSettingsWindowClass::on_leGeant4ExchangeFolder_editingFinished()
 {
-    QString starter = MW->GlobSet.G4ExchangeFolder;
-    QString dir = QFileDialog::getExistingDirectory(this, "Select folder for Ants2<->Geant4 file exchange",starter,QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if (dir.isEmpty()) return;
-    ui->leGeant4exec->setText(dir);
     MW->GlobSet.G4ExchangeFolder = ui->leGeant4ExchangeFolder->text();
 }

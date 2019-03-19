@@ -137,11 +137,8 @@ public:
     //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
 
-    void setG4Sim_Path(const QString& path) {GenerationPath = path;}
     void setG4Sim() {bNextSimExternal = true;}
     void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
-
-    bool generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads);
 
 private:
     //void initQEAccelerator(); //configures MaxQE and MaxQEvsWave
@@ -180,7 +177,6 @@ private:
 
     bool bNextSimExternal = false;
     bool bOnlyFileExport = true;
-    QString GenerationPath;
 
 public slots:
     void simulate();
@@ -352,9 +348,7 @@ public:
     bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
-    void setExternalTracking() {bExternalTracking = true;}
-    void setOnlySavePrimaries() {bExternalTracking = true; bOnlySavePrimariesToFile = true;}
-    void setFilePath(const QString& filePath) {FilePath = filePath;}
+    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;}
 
     virtual void hardAbort() override;
 
@@ -399,9 +393,7 @@ private:
     double ClusterMergeRadius2 = 1.0; //scan cluster merge radius [mm] in square - used by EnergyVectorToScan()
 
     //Geant4 interface
-    bool bExternalTracking = false;
     bool bOnlySavePrimariesToFile = false;
-    QString FilePath = "PrimPartToGen";
 
 };
 

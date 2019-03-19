@@ -22,6 +22,7 @@ class APreprocessingSettings;
 class ASandwich;
 class APmGroupsManager;
 class APmType;
+class AG4SimulationSettings;
 
 struct PMdummyStructure
 {
@@ -95,7 +96,8 @@ public:
 
   void changeLineWidthOfVolumes(int delta);
 
-  const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine
+  const QString exportToGDML(const QString &fileName) const; //returns error string, empty if all is fine  
+  bool generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads);
 
 public slots:
   void onRequestRegisterGeoManager();

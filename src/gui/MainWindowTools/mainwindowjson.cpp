@@ -258,13 +258,9 @@ void MainWindow::writeSimSettingsToJson(QJsonObject &json)
     SimPointSourcesConfigToJson(js);
     SimParticleSourcesConfigToJson(js);
 
-    js["DoGuiUpdate"] = true;           //batcher have to set it to false!
+    js["DoGuiUpdate"] = true;
 
     json["SimulationConfig"] = js;
-
-    //QJsonObject js1;
-    //js1["SimulationConfig"] = js;
-    //SaveJsonToFile(js1, "SimConfig.json");
 }
 
 void MainWindow::onRequestSimulationGuiUpdate()
@@ -375,6 +371,11 @@ if (scj.contains("CustomDistrib"))
   QJsonObject tbojs;
     parseJson(gjs, "TrackBuildingOptions", tbojs);
   SimulationManager->TrackBuildOptions.readFromJson(tbojs);
+
+  QJsonObject g4js;
+    parseJson(gjs, "Geant4SimulationSettings", g4js);
+    G4SimSet.readFromJson(g4js);
+    ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
 
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();

@@ -1185,3 +1185,48 @@ void DetectorClass::updatePreprocessingAddMultySize()
         Config->JSON["DetectorConfig"] = js1;
     }
 }
+
+#include "ag4simulationsettings.h"
+bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads)
+{
+    QString gdmlName = G4SimSet.getGdmlFileName();
+    QString err = exportToGDML(gdmlName);
+    if ( !err.isEmpty() ) return false;
+
+    QJsonObject json;
+
+    const QStringList Particles = MpCollection->getListOfParticleNames();
+    QJsonArray Parr;
+    for (auto & pname : Particles ) Parr << pname;
+    json["Particles"] = Parr;
+
+    const QStringList Materials = MpCollection->getListOfMaterialNames();
+    QJsonArray Marr;
+    for (auto & mname : Materials ) Marr << mname;
+    json["Materials"] = Marr;
+
+    QJsonArray SVarr;
+    for (auto & v : G4SimSet.SensitiveVolumes ) SVarr << v;
+    json["SensitiveVolumes"] = SVarr;
+
+    json["GDML"] = gdmlName;
+
+    QJsonArray Carr;
+    for (auto & c : G4SimSet.Commands ) Carr << c;
+    json["Commands"] = Carr;
+
+    json["GuiMode"] = false;
+
+    for (int i=0; i<numThreads; i++)
+    {
+        json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
+
+        json["File_Primaries"] = G4SimSet.getPrimariesFileName(i);
+        json["File_Deposition"] = G4SimSet.getDepositionFileName(i);
+        json["File_Receipt"] = G4SimSet.getReceitFileName(i);
+
+        SaveJsonToFile(json, G4SimSet.getConfigFileName(i));
+    }
+
+    return true;
+}

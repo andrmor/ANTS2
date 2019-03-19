@@ -796,11 +796,12 @@ void MainWindow::on_pbEditParticleSource_clicked()
 
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
+    MainWindow::writeSimSettingsToJson(Config->JSON);
+
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
     fSimDataNotSaved = false; // to disable the warning
 
-    MainWindow::writeSimSettingsToJson(Config->JSON);
     startSimulation(Config->JSON);
 }
 

@@ -90,6 +90,7 @@ ASimulatorRunner::~ASimulatorRunner()
 
 bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 {
+  threadCount = std::max(threadCount, 1);
   //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
   if (!json.contains("SimulationConfig"))
@@ -113,8 +114,26 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       return false;
   }
 
+  bool bGeant4ParticleSim = simSettings.G4SimSet.bTrackParticles;
+  if (bNextSimExternal)
+  {
+      bGeant4ParticleSim = true; // override for script use
+      bNextSimExternal= false; //single session trigger
+  }
+
   modeSetup = jsSimSet["Mode"].toString();
 
+if (bGeant4ParticleSim)
+{
+    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount);
+    if (!bOK)
+    {
+        ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
+        return false;
+    }
+}
+else
+{
 #ifndef __USE_ANTS_NCRYSTAL__
   if ( modeSetup != "PointSim" && detector->MpCollection->isNCrystalInUse())
   {
@@ -122,6 +141,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       return false;
   }
 #endif
+}
 
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
@@ -130,8 +150,6 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
   //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
   //qDebug() << "Simulation mode:" << modeSetup;
   //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
-
-  threadCount = std::max(threadCount, 1);
 
   //qDebug() << "Updating PMs module according to sim settings";
   detector->PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
@@ -151,14 +169,10 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       else //Particle simulator
       {
           ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, i);
-          if (bNextSimExternal)
-          {
-              pss->setExternalTracking();
-              if (bOnlyFileExport) pss->setOnlySavePrimaries();
-              pss->setFilePath(GenerationPath);
-          }
+          if (bGeant4ParticleSim && bOnlyFileExport) pss->setOnlySavePrimaries();
           worker = pss;
       }
+      bOnlyFileExport = false; //single session trigger from script
 
       worker->setSimSettings(&simSettings);
       int seed = detector->RandGen->Rndm() * 100000;
@@ -169,7 +183,6 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
           ErrorString = worker->getErrorString();
           delete worker;
           clearWorkers();
-          bNextSimExternal = false;
           return false;
       }
       worker->initSimStat();
@@ -186,7 +199,6 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
       totalEventCount += worker->getEventCount();
       workers.append(worker);
   }
-  bNextSimExternal = false;
 
   if(fRunThreads)
     {
@@ -288,57 +300,6 @@ void ASimulatorRunner::clearWorkers()
     for(int i = 0; i < workers.count(); i++)
         delete workers[i];
     workers.clear();
-}
-
-bool ASimulatorRunner::generateG4interfaceFiles(QString Path, const QStringList & SensitiveVolumes, int Seed, int numThreads)
-{
-    if (!Path.endsWith('/')) Path += '/';
-    QString gdmlName = Path + "Detector.gdml";
-    QString err = detector->exportToGDML(gdmlName);
-    if ( !err.isEmpty() ) return false;
-
-    QJsonObject json;
-
-    const QStringList Particles = detector->MpCollection->getListOfParticleNames();
-    QJsonArray Parr;
-    for (auto & pname : Particles )
-        Parr << pname;
-    json["Particles"] = Parr;
-
-    const QStringList Materials = detector->MpCollection->getListOfMaterialNames();
-    QJsonArray Marr;
-    for (auto & mname : Materials )
-        Marr << mname;
-    json["Materials"] = Marr;
-
-    QJsonArray SVarr;
-    for (auto & v : SensitiveVolumes )
-        SVarr << v;
-    json["SensitiveVolumes"] = SVarr;
-
-    json["GDML"] = gdmlName;
-
-    QJsonArray Carr;
-    Carr <<  "/process/em/fluo true" << "/process/em/auger true" << "/process/em/pixe true" << "/run/setCut 0.0001 mm"; // ***!!! TODO
-    json["Commands"] = Carr;
-
-    json["GuiMode"] = false;
-
-    TRandom2* RandGen = detector->RandGen;
-    RandGen->SetSeed(Seed);
-
-    for (int i=0; i<numThreads; i++)
-    {
-        json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
-
-        json["File_Primaries"] = Path + QString("primaries-%1.txt").arg(i);
-        json["File_Deposition"] = Path + QString("deposition-%1.txt").arg(i);
-        json["File_Receipt"] = Path + QString("receipt-%1.txt").arg(i);
-
-        SaveJsonToFile(json, Path + QString("aga-%1.json").arg(i));
-    }
-
-    return true;
 }
 
 void ASimulatorRunner::simulate()
@@ -1624,9 +1585,9 @@ void ParticleSourceSimulator::simulate()
 
     std::unique_ptr<QFile> pFile;
     std::unique_ptr<QTextStream> pStream;
-    if (bExternalTracking)
+    if (simSettings->G4SimSet.bTrackParticles)
     {
-        const QString name = FilePath + QString("primaries-%1.txt").arg(ID);
+        const QString name = simSettings->G4SimSet.getPrimariesFileName(ID);//   FilePath + QString("primaries-%1.txt").arg(ID);
         pFile.reset(new QFile(name));
         if(!pFile->open(QIODevice::WriteOnly | QFile::Text))
         {
@@ -1652,7 +1613,7 @@ void ParticleSourceSimulator::simulate()
         //event prepared
             //qDebug() << "Event composition ready!  Particle stack length:" << ParticleStack.size();
 
-        if (!bExternalTracking)
+        if (!simSettings->G4SimSet.bTrackParticles)
             ParticleTracker->TrackParticlesOnStack(eventCurrent);
         else
         {
@@ -1710,13 +1671,13 @@ void ParticleSourceSimulator::simulate()
     }
 
     if (ParticleGun) ParticleGun->ReleaseResources();
-    if (bExternalTracking)
+    if (simSettings->G4SimSet.bTrackParticles)
     {
         pStream->flush();
         pFile->close();
     }
 
-    if (bExternalTracking && !bOnlySavePrimariesToFile)
+    if (simSettings->G4SimSet.bTrackParticles && !bOnlySavePrimariesToFile)
     {
         // track primaries in Geant4, read deposition, generate photons, trace photons, process hits
         bool bOK = geant4TrackAndProcess();
@@ -2040,7 +2001,7 @@ bool ParticleSourceSimulator::generateAndTrackPhotons()
 bool ParticleSourceSimulator::geant4TrackAndProcess()
 {
     const QString exe = AGlobalSettings::getInstance().G4antsExec;
-    const QString confFile = FilePath + QString("aga-%1.json").arg(ID);
+    const QString confFile = simSettings->G4SimSet.getConfigFileName(ID); // FilePath + QString("aga-%1.json").arg(ID);
 
     QStringList ar;
     ar << confFile;
@@ -2077,7 +2038,7 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     }
 
     // read receipt file, stop if not "OK"
-    QString receipe = FilePath + QString("receipt-%1.txt").arg(ID);
+    QString receipe = simSettings->G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
     QString res;
     bool bOK = LoadTextFromFile(receipe, res);
     if (!bOK)
@@ -2092,7 +2053,7 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     }
 
     //read and process depo data
-    QString DepoFileName = FilePath + QString("deposition-%1.txt").arg(ID);
+    QString DepoFileName = simSettings->G4SimSet.getDepositionFileName(ID); // FilePath + QString("deposition-%1.txt").arg(ID);
     QFile inFile(DepoFileName);
     if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
     {

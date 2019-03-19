@@ -344,7 +344,7 @@ public slots:
   QVariant getMonitorXY(QString monitor);
 
   void SetGeant4Executable(QString FileName);
-  void RunSim_Geant4(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads, bool OnlyGenerateFiles = false);
+  void RunSim_Geant4(int numThreads, bool OnlyGenerateFiles = false);
 
 signals:
   void requestStopSimulation();

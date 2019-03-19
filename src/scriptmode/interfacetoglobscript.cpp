@@ -764,18 +764,10 @@ void InterfaceToSim::SetGeant4Executable(QString FileName)
     AGlobalSettings::getInstance().G4antsExec = FileName;
 }
 
-void InterfaceToSim::RunSim_Geant4(QString Path, QVariantList SensitiveVolumes, int Seed, int numThreads, bool OnlyGenerateFiles)
+void InterfaceToSim::RunSim_Geant4(int numThreads, bool OnlyGenerateFiles)
 {
-    QStringList SV;
-    for (auto & v : SensitiveVolumes )
-        SV << v.toString();
-
-    bool bOK = SimulationManager->Runner->generateG4interfaceFiles(Path, SV, Seed, numThreads);
-    if (!bOK) abort("Failed to create output files");
-
     SimulationManager->Runner->setG4Sim();
     SimulationManager->Runner->setG4Sim_OnlyGenerateFiles(OnlyGenerateFiles);
-    SimulationManager->Runner->setG4Sim_Path(Path);
     RunParticleSources(numThreads);
 }
 #endif

@@ -5004,5 +5004,12 @@ void MainWindow::on_cbGeant4ParticleTracking_toggled(bool checked)
 void MainWindow::on_pbG4Settings_clicked()
 {
     AGeant4ConfigDialog D(G4SimSet, this);
-    D.exec();
+    int res = D.exec();
+    if (res == 1)
+    {
+        //some watchdogs here?
+
+        //update sim setgtings
+        on_pbUpdateSimConfig_clicked();
+    }
 }

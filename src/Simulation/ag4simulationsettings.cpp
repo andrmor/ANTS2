@@ -12,9 +12,7 @@ AG4SimulationSettings::AG4SimulationSettings()
 
 void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 {
-    json[""] = bTrackParticles;
-
-    json[""] = Seed;
+    json["TrackParticles"] = bTrackParticles;
 
     QJsonArray arSV;
     for (auto & v : SensitiveVolumes)
@@ -31,7 +29,6 @@ void AG4SimulationSettings::writeToJson(QJsonObject &json) const
 void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 {
     parseJson(json, "TrackParticles", bTrackParticles);
-    parseJson(json, "Seed", Seed);
 
     QJsonArray arSV;
     SensitiveVolumes.clear();
@@ -47,35 +44,35 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 
 }
 
-const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum)
+const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const
 {
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';
     return Path + QString("primaries-%1.txt").arg(iThreadNum);
 }
 
-const QString AG4SimulationSettings::getDepositionFileName(int iThreadNum)
+const QString AG4SimulationSettings::getDepositionFileName(int iThreadNum) const
 {
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';
     return Path + QString("deposition-%1.txt").arg(iThreadNum);
 }
 
-const QString AG4SimulationSettings::getReceitFileName(int iThreadNum)
+const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
 {
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';
     return Path + QString("receipt-%1.txt").arg(iThreadNum);
 }
 
-const QString AG4SimulationSettings::getConfigFileName(int iThreadNum)
+const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const
 {
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';
-    return Path + QString("aga-%1.txt").arg(iThreadNum);
+    return Path + QString("aga-%1.json").arg(iThreadNum);
 }
 
-const QString AG4SimulationSettings::getGdmlFileName()
+const QString AG4SimulationSettings::getGdmlFileName() const
 {
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';

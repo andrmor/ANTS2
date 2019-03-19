@@ -94,6 +94,11 @@ void MainWindow::SimGeneralConfigToJson(QJsonObject &jsonMaster)
     SimulationManager->TrackBuildOptions.writeToJson(tbojs);
   json["TrackBuildingOptions"] = tbojs;
 
+  QJsonObject g4js;
+    G4SimSet.bTrackParticles = ui->cbGeant4ParticleTracking->isChecked();
+    G4SimSet.writeToJson(g4js);
+  json["Geant4SimulationSettings"] = g4js;
+
   //adding to master json
   jsonMaster["GeneralSimConfig"] = json;
 }

@@ -1764,9 +1764,11 @@ bool ParticleSourceSimulator::standaloneGenerateLight(QVector<AEnergyDepositionC
 
 void ParticleSourceSimulator::hardAbort()
 {
-    qDebug() << "HARD abort"<<ID;
+    //qDebug() << "HARD abort"<<ID;
     Simulator::hardAbort();
+
     ParticleGun->abort();
+    if (bG4isRunning && G4antsProcess) G4antsProcess->kill();
 }
 
 void ParticleSourceSimulator::updateMaxTracks(int maxPhotonTracks, int maxParticleTracks)
@@ -1997,7 +1999,6 @@ bool ParticleSourceSimulator::generateAndTrackPhotons()
     return true;
 }
 
-#include <QCoreApplication>
 bool ParticleSourceSimulator::geant4TrackAndProcess()
 {
     const QString exe = AGlobalSettings::getInstance().G4antsExec;
@@ -2005,32 +2006,26 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
 
     QStringList ar;
     ar << confFile;
-    QProcess * G4antsProcess = new QProcess(); // TODO connect abort ***!!!
-    //bool isRunning = true;
+
+    G4antsProcess = new QProcess();
     //QObject::connect(G4antsProcess, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [&isRunning](){isRunning = false; qDebug() << "----FINISHED!-----";});//this, &MainWindow::on_cameraControlExit);
-    G4antsProcess->start(exe, ar);
-    //G4antsProcess->waitForStarted(-1);
-    //qDebug() << "============="<<ID;
-    G4antsProcess->waitForFinished(-1);
-    //do
-    //{
-    //    QCoreApplication::processEvents();
-    //    QThread::usleep(100);
-    //    qDebug() << (int)G4antsProcess->state();
-    //}
-    //while (G4antsProcess->state() ==  QProcess::Running);
-    //while (isRunning);
+    bG4isRunning = true;
+        G4antsProcess->start(exe, ar);
+        G4antsProcess->waitForFinished(-1);
+    bG4isRunning = false;
 
     QString err = G4antsProcess->errorString();
+    QProcess::ExitStatus exitStat = G4antsProcess->exitStatus();
 
-    delete G4antsProcess;
+    delete G4antsProcess; G4antsProcess = 0;
+    if (fHardAbortWasTriggered) return false;
 
     if (err.contains("No such file or directory"))
     {
         ErrorString = "Cannot find G4ants executable";
         return false;
     }
-    if (G4antsProcess->exitStatus() == QProcess::CrashExit)
+    if (exitStat == QProcess::CrashExit)
     {
         qWarning() << "QProcess returned error string:"<<err;
         ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";

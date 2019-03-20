@@ -41,6 +41,7 @@ struct AEnergyDepositionCell;
 class ASimulatorRunner;
 class GeoMarkerClass;
 class AParticleGun;
+class QProcess;
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
 class TThread;
@@ -394,7 +395,8 @@ private:
 
     //Geant4 interface
     bool bOnlySavePrimariesToFile = false;
-
+    QProcess * G4antsProcess = 0;
+    bool bG4isRunning = false;
 };
 
 #endif // SIMULATION_MANAGER_H

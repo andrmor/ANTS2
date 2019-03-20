@@ -372,10 +372,11 @@ if (scj.contains("CustomDistrib"))
     parseJson(gjs, "TrackBuildingOptions", tbojs);
   SimulationManager->TrackBuildOptions.readFromJson(tbojs);
 
+  G4SimSet = AG4SimulationSettings();
   QJsonObject g4js;
-    parseJson(gjs, "Geant4SimulationSettings", g4js);
-    G4SimSet.readFromJson(g4js);
-    ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
+  if (parseJson(gjs, "Geant4SimulationSettings", g4js))
+      G4SimSet.readFromJson(g4js);
+  ui->cbGeant4ParticleTracking->setChecked(G4SimSet.bTrackParticles);
 
   //POINT SOURCES
   QJsonObject pojs = js["PointSourcesConfig"].toObject();

@@ -823,6 +823,7 @@ void MainWindow::on_pbGenerateFromFile_Change_clicked()
     QString fileName = QFileDialog::getOpenFileName(this, "Select a file with particle generation data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
     if (fileName.isEmpty()) return;
     GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    ui->leGenerateFromFile_FileName->setText(fileName);
     on_leGenerateFromFile_FileName_editingFinished();
 }
 

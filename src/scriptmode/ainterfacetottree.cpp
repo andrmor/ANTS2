@@ -15,6 +15,17 @@ AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
     Description = "Interface to CERN ROOT Trees";
 
     H["LoadTree"] = "If the third argument is not provided, the first tree found in the file is loaded";
+    H["NewTree"] = "Branch types:\n"
+            "C - string\n"
+            "I - int\n"
+            "F - float\n"
+            "D - double\n"
+            "O - bool\n"
+            "AC - vector of strings\n"
+            "AI - vector of ints\n"
+            "AF - vector of floats\n"
+            "AD - vector of doubles\n"
+            "AO - vector of bools";
 }
 
 void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileName, const QString TreeNameInFile)

@@ -130,12 +130,15 @@ function update()
 
 function treeChanged()
 {
+       gui.comboboxClear("cBranches")
+
        var treeName = gui.comboboxGetSelected("cTree")
        var brNames = tree.GetBranchNames(treeName)  //empty if tree not found
        
-       gui.comboboxClear("cBranches")
-       gui.comboboxAppend("cBranches", brNames)
+       if (brNames.length == 0) return
        //       core.print(brNames)
+       
+       gui.comboboxAppend("cBranches", brNames)
        gui.editSetCompleter("eWhat", brNames)
        gui.editSetCompleter("eCuts", brNames)        
 }

@@ -112,6 +112,7 @@ void AInterfaceToDepoScript::ClearExtractedData()
 void AInterfaceToDepoScript::populateParticleRecords()
 {
   ClearExtractedData();
+  /*
   if (EventsDataHub->EventHistory.isEmpty())
     {
       abort("EventHistory is empty!");
@@ -122,6 +123,7 @@ void AInterfaceToDepoScript::populateParticleRecords()
       abort("EnergyVector is empty!");
       return;
     }
+  */
 
   int indexEV = 0;
   for (int i=0; i<EventsDataHub->EventHistory.size(); i++)
@@ -547,6 +549,29 @@ QString AInterfaceToDepoScript::Deposition_volumeName(int i, int m)
   else return "";
 }
 
+QString AInterfaceToDepoScript::Deposition_parentVolumeName(int i, int m)
+{
+    if (i<0 || i>PR.size()-1)
+      {
+        abort("Attempt to address non-existent particle");
+        return "";
+      }
+    if (m<0 || m>PR.at(i).Deposition.size()-1)
+      {
+        abort("Attempt to address non-existent material in deposition");
+        return "";
+      }
+
+    if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return "";
+    TGeoManager* GeoManager = Detector->GeoManager;
+    double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+    TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
+    if (!node) return "";
+    TGeoVolume* mother = node->GetMotherVolume();
+    if (!mother) return "";
+    return QString(mother->GetName());
+}
+
 int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
@@ -566,6 +591,34 @@ int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
   TGeoNode* node = GeoManager->FindNode(R[0], R[1], R[2]);
   if (node) return node->GetNumber();
   else return -1;
+}
+
+int AInterfaceToDepoScript::Deposition_parentVolumeIndex(int i, int m)
+{
+    if (i<0 || i>PR.size()-1)
+      {
+        abort("Attempt to address non-existent particle");
+        return -1;
+      }
+    if (m<0 || m>PR.at(i).Deposition.size()-1)
+      {
+        abort("Attempt to address non-existent material in deposition");
+        return -1;
+      }
+
+    if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return -1;
+    //TGeoManager* GeoManager = Detector->GeoManager;
+    double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+
+    TGeoNavigator *navigator = Detector->GeoManager->GetCurrentNavigator();
+    TGeoNode* node = navigator->FindNode(R[0], R[1], R[2]);
+    if (!node) return -1;
+    if (!node->GetMotherVolume()) return -1;
+
+    navigator->CdUp();
+    node = navigator->GetCurrentNode();
+    if (!node) return -1;
+    return node->GetNumber();
 }
 
 double AInterfaceToDepoScript::Deposition_energy(int i, int m)

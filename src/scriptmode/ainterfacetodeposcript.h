@@ -90,7 +90,9 @@ public slots:
   double Deposition_startY(int i, int m);
   double Deposition_startZ(int i, int m);
   QString Deposition_volumeName(int i, int m);
+  QString Deposition_parentVolumeName(int i, int m);
   int Deposition_volumeIndex(int i, int m);
+  int Deposition_parentVolumeIndex(int i, int m);
   double Deposition_energy(int i, int m);
     // +subindex - node index
   int Deposition_countNodes(int i, int m);

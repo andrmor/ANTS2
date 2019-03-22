@@ -110,6 +110,11 @@ QString ACoreScriptInterface::str(double value, int precision)
     return QString::number(value, 'g', precision);
 }
 
+bool ACoreScriptInterface::strIncludes(QString str, QString pattern)
+{
+    return (str.indexOf(pattern) >= 0);
+}
+
 QString ACoreScriptInterface::GetTimeStamp()
 {
     return QDateTime::currentDateTime().toString("H:m:s");

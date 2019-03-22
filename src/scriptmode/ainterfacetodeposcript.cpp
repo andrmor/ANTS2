@@ -621,6 +621,28 @@ int AInterfaceToDepoScript::Deposition_parentVolumeIndex(int i, int m)
     return node->GetNumber();
 }
 
+QString AInterfaceToDepoScript::Deposition_geoPath(int i, int m)
+{
+    if (i<0 || i>PR.size()-1)
+    {
+        abort("Attempt to address non-existent particle");
+        return "";
+    }
+    if (m<0 || m>PR.at(i).Deposition.size()-1)
+    {
+        abort("Attempt to address non-existent material in deposition");
+        return "";
+    }
+
+    if (PR.at(i).Deposition.at(m).ByMaterial.isEmpty()) return "";
+    double* R = (double*)PR.at(i).Deposition.at(m).ByMaterial.first().R;
+
+    TGeoNavigator *navigator = Detector->GeoManager->GetCurrentNavigator();
+    TGeoNode* node = navigator->FindNode(R[0], R[1], R[2]);
+    if (!node) return "";
+    return navigator->GetPath();
+}
+
 double AInterfaceToDepoScript::Deposition_energy(int i, int m)
 {
   if (i<0 || i>PR.size()-1)

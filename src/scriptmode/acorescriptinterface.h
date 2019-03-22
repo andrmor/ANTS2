@@ -36,6 +36,7 @@ public slots:
   void print(QString text);
   void clearText();
   QString str(double value, int precision);
+  bool strIncludes(QString str, QString pattern);
 
   //time stamps
   QString GetTimeStamp();

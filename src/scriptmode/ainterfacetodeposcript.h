@@ -93,6 +93,7 @@ public slots:
   QString Deposition_parentVolumeName(int i, int m);
   int Deposition_volumeIndex(int i, int m);
   int Deposition_parentVolumeIndex(int i, int m);
+  QString Deposition_geoPath(int i, int m);
   double Deposition_energy(int i, int m);
     // +subindex - node index
   int Deposition_countNodes(int i, int m);

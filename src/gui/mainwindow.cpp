@@ -3836,14 +3836,12 @@ void MainWindow::simulationFinished()
             if (showTracks) GeometryWindow->DrawTracks();
         }
 
+        //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
+        Rwindow->OnEventsDataAdded();
+          //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
+        //Owindow->SetCurrentEvent(0);
         WindowNavigator->BusyOff(false);
     }
-
-    //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
-    Rwindow->OnEventsDataAdded();
-      //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
-    Owindow->SetCurrentEvent(0);
-
 
     fStartedFromGUI = false;
     fSimDataNotSaved = true;

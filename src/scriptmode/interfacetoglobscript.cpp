@@ -1575,7 +1575,7 @@ QVariant AGeoWin_SI::GetWindowGeometry()
 
 void AGeoWin_SI::SetWindowGeometry(QVariant xywh)
 {
-    if (xywh.type() != QMetaType::QVariantList)
+    if (xywh.type() != QVariant::List)
     {
         abort("Array [X Y Width Height] is expected");
         return;
@@ -2374,7 +2374,7 @@ void AInterfaceToOutputWin::Hide()
 
 void AInterfaceToOutputWin::SetWindowGeometry(QVariant xywh)
 {
-    if (xywh.type() != QMetaType::QVariantList)
+    if (xywh.type() != QVariant::List)
     {
         abort("Array [X Y Width Height] is expected");
         return;

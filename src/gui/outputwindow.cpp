@@ -482,7 +482,6 @@ void OutputWindow::on_pbRefreshViz_clicked()
 void OutputWindow::RefreshData()
 {
   bool fHaveData = !EventsDataHub->isEmpty();
-
   if (!fHaveData) ui->labTotal->setText("-");
   else ui->labTotal->setText(QString::number(EventsDataHub->Events.size()));
 
@@ -522,18 +521,19 @@ void OutputWindow::RefreshData()
 
   //updating viz
   scene->clear();
-  double MaxSignal = 0.0;
+  float MaxSignal = 0.0;
   if (!fHaveData) MaxSignal = 1.0;
   else
     {
       for (int i=0; i<MW->PMs->count(); i++)
         if (Passives->isActive(i))
-          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal) MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+        {
+          if ( EventsDataHub->Events[CurrentEvent][i] > MaxSignal)
+              MaxSignal = EventsDataHub->Events[CurrentEvent][i];
+        }
     }
   if (MaxSignal<=1.0e-25) MaxSignal = 1.0;
   //qDebug()<<"MaxSignal="<<MaxSignal<<"  selector="<<selector;
-
-
 
   updateSignalLabels(MaxSignal);
   addPMitems( (fHaveData ? &EventsDataHub->Events.at(CurrentEvent) : 0), MaxSignal, Passives); //add icons with PMs to the scene
@@ -588,7 +588,7 @@ void OutputWindow::updateMonitors()
     }
 }
 
-void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -600,7 +600,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
       //brush
       QBrush brush(Qt::white);
 
-      double sig = ( vector ? vector->at(ipm) : 0 );
+      float sig = ( vector ? vector->at(ipm) : 0 );
 
       if (sig > 0)
         {
@@ -662,7 +662,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, double MaxSignal, Dy
     }
 }
 
-void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, DynamicPassivesHandler *Passives)
+void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
@@ -670,7 +670,7 @@ void OutputWindow::addTextitems(const QVector<float> *vector, double MaxSignal, 
       double size = 0.5*MW->PMs->getType( PM.type )->SizeX;
       //io->setTextWidth(40);
 
-      double sig = ( vector ? vector->at(ipm) : 0 );
+      float sig = ( vector ? vector->at(ipm) : 0 );
       //qDebug()<<"sig="<<sig;
       QString text = QString::number(sig, 'g', 6);
       //text = "<CENTER>" + text + "</CENTER>";

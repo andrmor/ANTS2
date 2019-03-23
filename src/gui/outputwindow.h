@@ -121,8 +121,8 @@ private:
 
     void clearGrItems();
     void updateSignalLabels(double MaxSignal);
-    void addPMitems  (const QVector<float>* vector, double MaxSignal, DynamicPassivesHandler *Passives);
-    void addTextitems(const QVector<float>* vector, double MaxSignal, DynamicPassivesHandler *Passives);
+    void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
+    void addTextitems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    
     void updateSignalTableWidth();
     void showParticleHistString(int iRec, int level);

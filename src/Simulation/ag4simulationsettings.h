@@ -14,7 +14,7 @@ public:
     bool bTrackParticles = false;
 
     QStringList SensitiveVolumes; //later will be filled automatically
-    QStringList Commands = {"/process/em/fluo true", "/process/em/auger true", "/process/em/pixe true", "/run/setCut 0.0001 mm"};
+    QStringList Commands;
 
     void writeToJson(QJsonObject & json) const;
     void readFromJson(const QJsonObject & json);

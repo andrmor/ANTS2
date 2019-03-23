@@ -7,7 +7,11 @@
 
 AG4SimulationSettings::AG4SimulationSettings()
 {
-    Commands = QStringList({"/process/em/fluo true", "/process/em/auger true", "/process/em/pixe true", "/run/setCut 0.01 mm"});
+    Commands = QStringList({"/process/em/fluo true",
+                            "/process/em/auger true",
+                            "/process/em/augerCascade true",
+                            "/process/em/pixe true",
+                            "/run/setCut 0.01 mm"});
 }
 
 void AG4SimulationSettings::writeToJson(QJsonObject &json) const

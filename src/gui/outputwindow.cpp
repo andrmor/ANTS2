@@ -459,7 +459,7 @@ void OutputWindow::ResetViewport()
   double Xdelta = Xmax-Xmin;
   double Ydelta = Ymax-Ymin;
 
-  scene->setSceneRect((Xmin - 0.5*Xdelta)*GVscale, (Ymin - 0.5*Ydelta)*GVscale, (Xmax-Xmin + 1.0*Xdelta)*GVscale, (Ymax-Ymin + 1.0*Ydelta)*GVscale);
+  scene->setSceneRect((Xmin - 0.95*Xdelta)*GVscale, (Ymin - 0.95*Ydelta)*GVscale, (Xmax-Xmin + 1.9*Xdelta)*GVscale, (Ymax-Ymin + 1.9*Ydelta)*GVscale);
   gvOut->fitInView( (Xmin - 0.01*Xdelta)*GVscale, (Ymin - 0.01*Ydelta)*GVscale, (Xmax-Xmin + 0.02*Xdelta)*GVscale, (Ymax-Ymin + 0.02*Ydelta)*GVscale, Qt::KeepAspectRatio);
 }
 

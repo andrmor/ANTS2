@@ -78,25 +78,15 @@ private slots:
     void RefreshPMhitsTable();
 
     void on_pbMonitorShowXY_clicked();
-
     void on_pbMonitorShowTime_clicked();
-
     void on_pbShowProperties_clicked();
-
     void on_pbMonitorShowAngle_clicked();
-
     void on_pbMonitorShowWave_clicked();
-
     void on_pbMonitorShowEnergy_clicked();
-
     void on_cobMonitor_activated(int index);
-
     void on_pbShowAverageOverAll_clicked();
-
     void on_pbShowWavelength_clicked();
-
     void on_pbSaveLog_clicked();
-
     void on_pbHelpWithSaveToTree_clicked();
 
 protected:

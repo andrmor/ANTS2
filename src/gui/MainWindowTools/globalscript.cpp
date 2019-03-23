@@ -19,6 +19,7 @@
 #include "ainterfacetoguiscript.h"
 #include "ainterfacetottree.h"
 #include "aparticletrackinghistoryinterface.h"
+#include "asim_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -74,7 +75,7 @@ void MainWindow::createScriptWindow()
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->RegisterInterface(dat, "events");
 
-    InterfaceToSim* sim = new InterfaceToSim(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
+    ASim_SI* sim = new ASim_SI(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
     QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
     ScriptWindow->RegisterInterface(sim, "sim");
 
@@ -133,7 +134,7 @@ void MainWindow::createScriptWindow()
 
     // Interfaces which rely on MainWindow
 
-    InterfaceToGeoWin* geowin = new InterfaceToGeoWin(this, TmpHub);
+    AGeoWin_SI* geowin = new AGeoWin_SI(this, SimulationManager);
     ScriptWindow->RegisterInterface(geowin, "geowin");
 
     InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);

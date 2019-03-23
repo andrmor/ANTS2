@@ -105,10 +105,10 @@ void MainWindow::onRequestDetectorGuiUpdate()
   DoNotUpdateGeometry = false;
 
   if (GeometryWindow->isVisible())
-    {
+  {
       GeometryWindow->ShowGeometry(false);
-      ShowTracks();
-    }
+      GeometryWindow->DrawTracks();
+  }
 }
 
 void MainWindow::onNewConfigLoaded()

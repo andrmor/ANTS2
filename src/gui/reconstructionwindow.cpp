@@ -273,7 +273,7 @@ void ReconstructionWindow::on_sbEventNumberInspect_valueChanged(int arg1)
           MW->GeoMarkers.append(marks);
         }
       MW->GeometryWindow->ShowGeometry(false);  //to clear view
-      MW->ShowTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
+      MW->GeometryWindow->DrawTracks(); //has to use ShowTracks since if there is continuos energy deposition - tracks are used for inidication
     }
 }
 
@@ -430,7 +430,7 @@ const QString ReconstructionWindow::ShowPositions(int Rec_True, bool fOnlyIfWind
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
     MW->GeometryWindow->ShowGeometry(false);
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
     return "";
 }
 
@@ -1665,7 +1665,7 @@ void ReconstructionWindow::on_pbShowSpatialFilter_clicked()
         ReconstructionWindow::DrawPolygon(ui->ledSpFfromZ->text().toDouble());
         ReconstructionWindow::DrawPolygon(ui->ledSpFtoZ->text().toDouble());
       }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void ReconstructionWindow::DrawPolygon(double z)
@@ -1969,7 +1969,7 @@ void ReconstructionWindow::on_pbShowPassivePMs_clicked()
             track->SetLineColor(30);
         }
     }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void ReconstructionWindow::on_pbAllPMsActive_clicked()

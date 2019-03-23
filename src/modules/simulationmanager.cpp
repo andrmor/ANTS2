@@ -2152,7 +2152,9 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 ASimulationManager::~ASimulationManager()
 {
     delete Runner;
-    ASimulationManager::Clear();
+
+    clearEnergyVector();
+    clearTracks();
 
     delete ScriptParticleGenerator;
     delete FileParticleGenerator;
@@ -2197,13 +2199,6 @@ void ASimulationManager::onSimFailedToStart()
     emit SimulationFinished();
 }
 
-void ASimulationManager::Clear()
-{
-    clearEnergyVector();
-    clearTracks();
-    SiPMpixels.clear();
-}
-
 void ASimulationManager::clearEnergyVector()
 {
     for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
@@ -2229,7 +2224,10 @@ void ASimulationManager::onSimulationFinished()
     fSuccess = Runner->wasSuccessful();
     fHardAborted = Runner->wasHardAborted();
 
-    ASimulationManager::Clear(); //data clear containers
+    //clear data containers
+    clearEnergyVector();
+    SiPMpixels.clear();
+    clearTracks();
 
     if (Runner->modeSetup == "PointSim") LastSimType = 0; //was Point sources sim
     else if (Runner->modeSetup == "SourceSim") LastSimType = 1; //was Particle sources sim
@@ -2273,7 +2271,9 @@ void ASimulationManager::onSimulationFinished()
 
     Detector->BuildDetector();
     emit SimulationFinished();
-    ASimulationManager::Clear();   //clear tmp data - if needed, main window has copied all needed in the slot on SimulationFinished()
+
+    clearEnergyVector(); // main window copied if needed
+    SiPMpixels.clear();  // main window copied if needed
     //qDebug() << "SimManager: Sim finished";
 }
 

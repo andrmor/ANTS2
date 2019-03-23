@@ -390,7 +390,8 @@ SOURCES += main.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
     Simulation/ag4simulationsettings.cpp \
-    gui/ageant4configdialog.cpp
+    gui/ageant4configdialog.cpp \
+    scriptmode/asim_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -534,7 +535,8 @@ HEADERS  += common/CorrelationFilters.h \
     common/aisotope.h \
     common/achemicalelement.h \
     Simulation/ag4simulationsettings.h \
-    gui/ageant4configdialog.h
+    gui/ageant4configdialog.h \
+    scriptmode/asim_si.h
 
 # --- SIM ---
 ants2_SIM {

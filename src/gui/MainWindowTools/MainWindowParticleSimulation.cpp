@@ -243,7 +243,7 @@ void MainWindow::ShowSource(const AParticleSourceRecord* p, bool clear)
       track->SetLineColor(9);
   }
 
-  MainWindow::ShowTracks();
+  GeometryWindow->DrawTracks();
   Detector->GeoManager->SetCurrentPoint(X0,Y0,Z0);
   //Detector->GeoManager->DrawCurrentPoint(9);
   GeometryWindow->UpdateRootCanvas();
@@ -337,7 +337,7 @@ void MainWindow::TestParticleGun(AParticleGun* Gun, int numParticles)
         }
         GP.clear();
     }
-    ShowTracks();
+    GeometryWindow->DrawTracks();
     ShowGeoMarkers();
 }
 

@@ -31,7 +31,6 @@ public slots:
   void Show();
   void Hide();
   void Show(const QString& text, int ms = -1);
-  void SetTransparent(bool flag);
   void SetDialogTitle(const QString& title);
 
   void Move(double x, double y);
@@ -48,7 +47,6 @@ signals:
   void requestShow();
   void requestHide();
   void requestTemporaryShow(int ms);
-  void requestSetTransparency(bool bTransparent);
   void requestSetTitle(const QString& title);
   void requestMove(double x, double y);
   void requestResize(double w, double h);

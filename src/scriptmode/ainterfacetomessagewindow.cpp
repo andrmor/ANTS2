@@ -31,7 +31,6 @@ void AInterfaceToMessageWindow::connectSignalSlots()
     connect(this, &AInterfaceToMessageWindow::requestShow, DialogWidget, &AScriptMessengerDialog::Show, ct);
     connect(this, &AInterfaceToMessageWindow::requestHide, DialogWidget, &AScriptMessengerDialog::Hide, ct);
     connect(this, &AInterfaceToMessageWindow::requestTemporaryShow, DialogWidget, &AScriptMessengerDialog::ShowTemporary, ct);
-    connect(this, &AInterfaceToMessageWindow::requestSetTransparency, DialogWidget, &AScriptMessengerDialog::SetTransparent, ct);
     connect(this, &AInterfaceToMessageWindow::requestSetTitle, DialogWidget, &AScriptMessengerDialog::SetDialogTitle, ct);
     connect(this, &AInterfaceToMessageWindow::requestMove, DialogWidget, &AScriptMessengerDialog::Move, ct);
     connect(this, &AInterfaceToMessageWindow::requestResize, DialogWidget, &AScriptMessengerDialog::Resize, ct);
@@ -84,13 +83,9 @@ void AInterfaceToMessageWindow::Hide()
 
 void AInterfaceToMessageWindow::Show(const QString &text, int ms)
 {
+    emit requestClear();
     emit requestAppend(text);
     emit requestTemporaryShow(ms);
-}
-
-void AInterfaceToMessageWindow::SetTransparent(bool flag)
-{
-    emit requestSetTransparency(flag);
 }
 
 void AInterfaceToMessageWindow::SetDialogTitle(const QString &title)

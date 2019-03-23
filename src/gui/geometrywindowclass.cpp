@@ -507,11 +507,10 @@ void GeometryWindowClass::on_pbShowTracks_clicked()
 
 void GeometryWindowClass::DrawTracks()
 {
-  if (MW->GeometryDrawDisabled) return;
-
-  SetAsActiveRootWindow();
-  MW->Detector->GeoManager->DrawTracks();
-  UpdateRootCanvas();
+    if (MW->GeometryDrawDisabled) return;
+    SetAsActiveRootWindow();
+    MW->Detector->GeoManager->DrawTracks();
+    UpdateRootCanvas();
 }
 
 void GeometryWindowClass::on_pbClearTracks_clicked()

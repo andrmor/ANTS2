@@ -70,13 +70,13 @@ public:
 
     int MaxThreads = -1;
 
-    //info to report back
+    //last event info
     QVector< QBitArray > SiPMpixels;
     QVector<AEnergyDepositionCell*> EnergyVector;
+
     QVector<TrackHolderClass*> Tracks;
 
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
-    void Clear();
 
     // Next three: Simulators use their own local copies constructed using configuration in JSON
     ASourceParticleGenerator*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure

@@ -305,62 +305,6 @@ private:
   bool checkAddPmCommon(int UpperLower, int type);
 };
 
-#ifdef SIM
-// ---- S I M U L A T I O N S ----
-class InterfaceToSim : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass* EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent = true);
-  ~InterfaceToSim(){}
-
-  virtual void ForceStop();
-
-public slots:
-  bool RunPhotonSources(int NumThreads = -1);
-  bool RunParticleSources(int NumThreads = -1);
-
-  void SetSeed(long seed);
-  long GetSeed();
-
-  void ClearCustomNodes();
-  void AddCustomNode(double x, double y, double z);
-  QVariant GetCustomNodes();
-  bool SetCustomNodes(QVariant ArrayOfArray3);
-
-  bool SaveAsTree(QString fileName);
-  bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);
-
-  //monitors
-  int countMonitors();
-  //int getMonitorHits(int imonitor);
-  int getMonitorHits(QString monitor);
-
-  QVariant getMonitorTime(QString monitor);
-  QVariant getMonitorAngular(QString monitor);
-  QVariant getMonitorWave(QString monitor);
-  QVariant getMonitorEnergy(QString monitor);
-  QVariant getMonitorXY(QString monitor);
-
-  void SetGeant4Executable(QString FileName);
-  void RunSim_Geant4(int numThreads, bool OnlyGenerateFiles = false);
-
-signals:
-  void requestStopSimulation();
-
-private:  
-  ASimulationManager* SimulationManager;
-  EventsDataClass* EventsDataHub;
-  AConfiguration* Config;
-
-  int RecNumThreads;
-  bool fGuiPresent;
-
-  QVariant getMonitorData1D(QString monitor, QString whichOne);
-};
-#endif
-
 // ---- L R F ----
 class AInterfaceToLRF : public AScriptInterface
 {
@@ -489,18 +433,19 @@ public slots:
   void Show();
   void Hide();
 
+  void SetWindowGeometry(QVariant xywh);
+
 private:
   MainWindow* MW;
 };
 
 // -- GEOMETRY WINDOW --
-class InterfaceToGeoWin : public AScriptInterface
+class AGeoWin_SI : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  InterfaceToGeoWin(MainWindow* MW, TmpObjHubClass* TmpHub);
-  ~InterfaceToGeoWin();
+  AGeoWin_SI(MainWindow* MW, ASimulationManager* SimManager);
 
 public slots:  
   void Show();
@@ -525,6 +470,8 @@ public slots:
   int  GetY();
   int  GetW();
   int  GetH();
+  QVariant GetWindowGeometry();
+  void SetWindowGeometry(QVariant xywh);
 
   //show things
   void ShowGeometry();
@@ -546,7 +493,7 @@ public slots:
 
 private:
   MainWindow* MW;
-  TmpObjHubClass* TmpHub;
+  ASimulationManager* SimManager;
   DetectorClass* Detector;
 };
 #endif // GUI

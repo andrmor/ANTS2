@@ -546,232 +546,6 @@ void AInterfaceToConfig::ExportToGDML(QString FileName)
     abort(err);
 }
 
-#ifdef SIM
-//----------------------------------
-InterfaceToSim::InterfaceToSim(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
-  : SimulationManager(SimulationManager), EventsDataHub(EventsDataHub), Config(Config), RecNumThreads(RecNumThreads), fGuiPresent(fGuiPresent)
-{
-  Description = "Access to simulator";
-
-  H["RunPhotonSources"] = "Perform simulation with photon sorces.\nPhoton tracks are not shown!";
-  H["RunParticleSources"] = "Perform simulation with particle sorces.\nPhoton tracks are not shown!";
-  H["SetSeed"] = "Set random generator seed";
-  H["GetSeed"] = "Get random generator seed";
-  H["SaveAsTree"] = "Save simulation results as a ROOT tree file";
-  H["SaveAsText"] = "Save simulation results as an ASCII file";
-
-  H["getMonitorTime"] = "returns array of arrays: [time, value]";
-  H["getMonitorWave"] = "returns array of arrays: [wave index, value]";
-  H["getMonitorEnergy"] = "returns array of arrays: [energy, value]";
-  H["getMonitorAngular"] = "returns array of arrays: [angle, value]";
-  H["getMonitorXY"] = "returns array of arrays: [x, y, value]";
-  H["getMonitorHits"] = "returns the number of detected hits by the monitor with the given name";
-}
-
-void InterfaceToSim::ForceStop()
-{
-  emit requestStopSimulation();
-}
-
-bool InterfaceToSim::RunPhotonSources(int NumThreads)
-{
-    if (NumThreads == -1) NumThreads = RecNumThreads;
-    QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
-    sim["Mode"] = "PointSim";
-    Config->JSON["SimulationConfig"] = sim;
-    Config->AskForSimulationGuiUpdate();
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
-
-    do
-      {
-        QThread::usleep(100);
-        qApp->processEvents();
-      }
-    while (!SimulationManager->fFinished);
-    return SimulationManager->fSuccess;
-}
-
-bool InterfaceToSim::RunParticleSources(int NumThreads)
-{
-    if (NumThreads == -1) NumThreads = RecNumThreads;
-    QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
-    sim["Mode"] = "SourceSim";
-    Config->JSON["SimulationConfig"] = sim;
-    Config->AskForSimulationGuiUpdate();
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
-
-    do
-    {
-        QThread::usleep(100);
-        qApp->processEvents();
-    }
-    while (!SimulationManager->fFinished);
-
-    return SimulationManager->fSuccess;
-}
-
-void InterfaceToSim::SetSeed(long seed)
-{
-  Config->GetDetector()->RandGen->SetSeed(seed);
-}
-
-long InterfaceToSim::GetSeed()
-{
-    return Config->GetDetector()->RandGen->GetSeed();
-}
-
-void InterfaceToSim::ClearCustomNodes()
-{
-    Config->ClearCustomNodes();
-}
-
-void InterfaceToSim::AddCustomNode(double x, double y, double z)
-{
-    Config->AddCustomNode(x, y, z);
-}
-
-QVariant InterfaceToSim::GetCustomNodes()
-{
-    QJsonArray arr = Config->GetCustomNodes();
-    QVariant vr = arr.toVariantList();
-    return vr;
-}
-
-bool InterfaceToSim::SetCustomNodes(QVariant ArrayOfArray3)
-{
-    QString type = ArrayOfArray3.typeName();
-    if (type != "QVariantList") return false;
-
-    QVariantList vl = ArrayOfArray3.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    return Config->SetCustomNodes(ar);
-}
-
-bool InterfaceToSim::SaveAsTree(QString fileName)
-{
-  return EventsDataHub->saveSimulationAsTree(fileName);
-}
-
-bool InterfaceToSim::SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons)
-{
-  return EventsDataHub->saveSimulationAsText(fileName, IncludeTruePositionAndNumPhotons, IncludeTruePositionAndNumPhotons);
-}
-
-int InterfaceToSim::countMonitors()
-{
-    if (!EventsDataHub->SimStat) return 0;
-    return EventsDataHub->SimStat->Monitors.size();
-}
-
-int InterfaceToSim::getMonitorHits(QString monitor)
-{
-    if (!EventsDataHub->SimStat)
-    {
-        abort("Collect simulation statistics is OFF");
-        return 0;
-    }
-    for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-    {
-        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-        if (mon->getName() == monitor)
-            return mon->getHits();
-    }
-    abort(QString("Monitor %1 not found").arg(monitor));
-    return 0;
-}
-
-QVariant InterfaceToSim::getMonitorData1D(QString monitor, QString whichOne)
-{
-  QVariantList vl;
-  if (!EventsDataHub->SimStat) return vl;
-  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-  {
-      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-      if (mon->getName() == monitor)
-      {
-          TH1D* h;
-          if      (whichOne == "time")   h = mon->getTime();
-          else if (whichOne == "angle")  h = mon->getAngle();
-          else if (whichOne == "wave")   h = mon->getWave();
-          else if (whichOne == "energy") h = mon->getEnergy();
-          else return vl;
-
-          if (!h) return vl;
-
-          TAxis* axis = h->GetXaxis();
-          for (int i=1; i<axis->GetNbins()+1; i++)
-          {
-              QVariantList el;
-              el << axis->GetBinCenter(i);
-              el << h->GetBinContent(i);
-              vl.push_back(el);
-          }
-      }
-  }
-  return vl;
-}
-
-QVariant InterfaceToSim::getMonitorTime(QString monitor)
-{
-    return getMonitorData1D(monitor, "time");
-}
-
-QVariant InterfaceToSim::getMonitorAngular(QString monitor)
-{
-  return getMonitorData1D(monitor, "angle");
-}
-
-QVariant InterfaceToSim::getMonitorWave(QString monitor)
-{
-  return getMonitorData1D(monitor, "wave");
-}
-
-QVariant InterfaceToSim::getMonitorEnergy(QString monitor)
-{
-  return getMonitorData1D(monitor, "energy");
-}
-
-QVariant InterfaceToSim::getMonitorXY(QString monitor)
-{
-  QVariantList vl;
-  if (!EventsDataHub->SimStat) return vl;
-  for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
-  {
-      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
-      if (mon->getName() == monitor)
-      {
-          TH2D* h = mon->getXY();
-
-          TAxis* axisX = h->GetXaxis();
-          TAxis* axisY = h->GetYaxis();
-          for (int ix=1; ix<axisX->GetNbins()+1; ix++)
-            for (int iy=1; iy<axisY->GetNbins()+1; iy++)
-          {
-              QVariantList el;
-              el << axisX->GetBinCenter(ix);
-              el << axisY->GetBinCenter(iy);
-              el << h->GetBinContent( h->GetBin(ix,iy) );
-              vl.push_back(el);
-          }
-      }
-  }
-  return vl;
-}
-
-#include "aglobalsettings.h"
-void InterfaceToSim::SetGeant4Executable(QString FileName)
-{
-    AGlobalSettings::getInstance().G4antsExec = FileName;
-}
-
-void InterfaceToSim::RunSim_Geant4(int numThreads, bool OnlyGenerateFiles)
-{
-    SimulationManager->Runner->setG4Sim();
-    SimulationManager->Runner->setG4Sim_OnlyGenerateFiles(OnlyGenerateFiles);
-    RunParticleSources(numThreads);
-}
-#endif
-
 //----------------------------------
 AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* EventsDataHub)
   : Config(Config), EventsDataHub(EventsDataHub)
@@ -1682,8 +1456,8 @@ bool AInterfaceToLRF::getValidIteration(int &iterIndex)
 
 #ifdef GUI
 //----------------------------------
-InterfaceToGeoWin::InterfaceToGeoWin(MainWindow *MW, TmpObjHubClass* TmpHub)
- : MW(MW), TmpHub(TmpHub)
+AGeoWin_SI::AGeoWin_SI(MainWindow *MW, ASimulationManager *SimManager)
+ : MW(MW), SimManager(SimManager)
 {
   Description = "Access to the Geometry window of GUI";
 
@@ -1691,32 +1465,27 @@ InterfaceToGeoWin::InterfaceToGeoWin(MainWindow *MW, TmpObjHubClass* TmpHub)
   H["SaveImage"] = "Save image currently shown on the geometry window to an image file.\nTip: use .png extension";
 }
 
-InterfaceToGeoWin::~InterfaceToGeoWin()
-{
-   TmpHub->ClearTracks();
-}
-
-double InterfaceToGeoWin::GetPhi()
+double AGeoWin_SI::GetPhi()
 {
     return MW->GeometryWindow->Phi;
 }
 
-double InterfaceToGeoWin::GetTheta()
+double AGeoWin_SI::GetTheta()
 {
   return MW->GeometryWindow->Theta;
 }
 
-void InterfaceToGeoWin::SetPhi(double phi)
+void AGeoWin_SI::SetPhi(double phi)
 {
   MW->GeometryWindow->Phi = phi;
 }
 
-void InterfaceToGeoWin::SetTheta(double theta)
+void AGeoWin_SI::SetTheta(double theta)
 {
   MW->GeometryWindow->Theta = theta;
 }
 
-void InterfaceToGeoWin::Rotate(double Theta, double Phi, int Steps, int msPause)
+void AGeoWin_SI::Rotate(double Theta, double Phi, int Steps, int msPause)
 {
   if (Steps <= 0) return;
   double stepT = Theta/Steps;
@@ -1740,7 +1509,7 @@ void InterfaceToGeoWin::Rotate(double Theta, double Phi, int Steps, int msPause)
     }
 }
 
-void InterfaceToGeoWin::SetZoom(int level)
+void AGeoWin_SI::SetZoom(int level)
 {
   MW->GeometryWindow->ZoomLevel = level;
   MW->GeometryWindow->Zoom(true);
@@ -1748,130 +1517,161 @@ void InterfaceToGeoWin::SetZoom(int level)
   MW->GeometryWindow->readRasterWindowProperties();
 }
 
-void InterfaceToGeoWin::UpdateView()
+void AGeoWin_SI::UpdateView()
 {
   MW->GeometryWindow->fRecallWindow = true;
   MW->GeometryWindow->PostDraw();
   MW->GeometryWindow->UpdateRootCanvas();
 }
 
-void InterfaceToGeoWin::SetParallel(bool on)
+void AGeoWin_SI::SetParallel(bool on)
 {
   MW->GeometryWindow->ModePerspective = !on;
 }
 
-void InterfaceToGeoWin::Show()
+void AGeoWin_SI::Show()
 {
   MW->GeometryWindow->showNormal();
   MW->GeometryWindow->raise();
 }
 
-void InterfaceToGeoWin::Hide()
+void AGeoWin_SI::Hide()
 {
   MW->GeometryWindow->hide();
 }
 
-void InterfaceToGeoWin::BlockUpdates(bool on)
+void AGeoWin_SI::BlockUpdates(bool on)
 {
   MW->DoNotUpdateGeometry = on;
   MW->GeometryDrawDisabled = on;
 }
 
-int InterfaceToGeoWin::GetX()
+int AGeoWin_SI::GetX()
 {
   return MW->GeometryWindow->x();
 }
 
-int InterfaceToGeoWin::GetY()
+int AGeoWin_SI::GetY()
 {
   return MW->GeometryWindow->y();
 }
 
-int InterfaceToGeoWin::GetW()
+int AGeoWin_SI::GetW()
 {
   return MW->GeometryWindow->width();
 }
 
-int InterfaceToGeoWin::GetH()
+int AGeoWin_SI::GetH()
 {
-  return MW->GeometryWindow->height();
+    return MW->GeometryWindow->height();
 }
 
-void InterfaceToGeoWin::ShowGeometry()
+QVariant AGeoWin_SI::GetWindowGeometry()
+{
+    QVariantList vl;
+    vl << MW->GeometryWindow->x() << MW->GeometryWindow->y() << MW->GeometryWindow->width() << MW->GeometryWindow->height();
+    return vl;
+}
+
+void AGeoWin_SI::SetWindowGeometry(QVariant xywh)
+{
+    if (xywh.type() != QMetaType::QVariantList)
+    {
+        abort("Array [X Y Width Height] is expected");
+        return;
+    }
+    QVariantList vl = xywh.toList();
+    if (vl.size() != 4)
+    {
+        abort("Array [X Y Width Height] is expected");
+        return;
+    }
+
+    int x = vl[0].toInt();
+    int y = vl[1].toInt();
+    int w = vl[2].toInt();
+    int h = vl[3].toInt();
+    //MW->GeometryWindow->setGeometry(x, y, w, h);
+    MW->GeometryWindow->move(x, y);
+    MW->GeometryWindow->resize(w, h);
+}
+
+void AGeoWin_SI::ShowGeometry()
 {
   MW->GeometryWindow->readRasterWindowProperties();
   MW->GeometryWindow->ShowGeometry(false);
 }
 
-void InterfaceToGeoWin::ShowPMnumbers()
+void AGeoWin_SI::ShowPMnumbers()
 {
   MW->GeometryWindow->on_pbShowPMnumbers_clicked();
 }
 
-void InterfaceToGeoWin::ShowReconstructedPositions()
+void AGeoWin_SI::ShowReconstructedPositions()
 {
   //MW->Rwindow->ShowReconstructionPositionsIfWindowVisible();
   MW->Rwindow->ShowPositions(0, true);
 }
 
-void InterfaceToGeoWin::SetShowOnlyFirstEvents(bool fOn, int number)
+void AGeoWin_SI::SetShowOnlyFirstEvents(bool fOn, int number)
 {
   MW->Rwindow->SetShowFirst(fOn, number);
 }
 
-void InterfaceToGeoWin::ShowTruePositions()
+void AGeoWin_SI::ShowTruePositions()
 {
   MW->Rwindow->DotActualPositions();
   MW->GeometryWindow->ShowGeometry(false, false);
 }
 
-void InterfaceToGeoWin::ShowTracks(int num, int OnlyColor)
+void AGeoWin_SI::ShowTracks(int num, int OnlyColor)
 {
   Detector->GeoManager->ClearTracks();
-  if (TmpHub->TrackInfo.isEmpty()) return;
+  if (SimManager->Tracks.isEmpty()) return;
 
-  for (int iTr=0; iTr<TmpHub->TrackInfo.size() && iTr<num; iTr++)
-    {
-      TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
+  for (int iTr=0; iTr<SimManager->Tracks.size() && iTr<num; iTr++)
+  {
+      TrackHolderClass* th = SimManager->Tracks.at(iTr);
       TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
       track->SetLineColor(th->Color);
       track->SetLineWidth(th->Width);
+      track->SetLineStyle(th->Style);
       for (int iNode=0; iNode<th->Nodes.size(); iNode++)
         track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
 
       if (track->GetNpoints()>1)
-        {
+      {
           if (OnlyColor == -1  || OnlyColor == th->Color)
             Detector->GeoManager->AddTrack(track);
-        }
+      }
       else delete track;
-    }
-  MW->ShowTracks();
+  }
+  MW->GeometryWindow->DrawTracks();
 }
 
-void InterfaceToGeoWin::ShowSPS_position()
+void AGeoWin_SI::ShowSPS_position()
 {
   MW->on_pbSingleSourceShow_clicked();
 }
 
-void InterfaceToGeoWin::ClearTracks()
+void AGeoWin_SI::ClearTracks()
 {
   MW->GeometryWindow->on_pbClearTracks_clicked();
 }
 
-void InterfaceToGeoWin::ClearMarkers()
+void AGeoWin_SI::ClearMarkers()
 {
   MW->GeometryWindow->on_pbClearDots_clicked();
 }
 
-void InterfaceToGeoWin::SaveImage(QString fileName)
+void AGeoWin_SI::SaveImage(QString fileName)
 {
   MW->GeometryWindow->SaveAs(fileName);
 }
 
-void InterfaceToGeoWin::ShowTracksMovie(int num, int steps, int msDelay, double dTheta, double dPhi, double rotSteps, int color)
+void AGeoWin_SI::ShowTracksMovie(int num, int steps, int msDelay, double dTheta, double dPhi, double rotSteps, int color)
 {
-  int tracks = TmpHub->TrackInfo.size();
+  int tracks = SimManager->Tracks.size();
   if (tracks == 0) return;
   if (num > tracks) num = tracks;
 
@@ -1890,7 +1690,7 @@ void InterfaceToGeoWin::ShowTracksMovie(int num, int steps, int msDelay, double 
           //cycle by tracks
           for (int iTr=0; iTr<num; iTr++)
             {
-              TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
+              TrackHolderClass* th = SimManager->Tracks.at(iTr);
               int ThisTrackNodes = th->Nodes.size();
               if (ThisTrackNodes <= thisNodes && iStep == steps-1) toDo--; //last node of this track
 
@@ -1927,7 +1727,7 @@ void InterfaceToGeoWin::ShowTracksMovie(int num, int steps, int msDelay, double 
                 Detector->GeoManager->AddTrack(track);
               else delete track;
             }
-          MW->ShowTracks();
+          MW->GeometryWindow->DrawTracks();
           Rotate(dTheta, dPhi, rotSteps);
           QThread::msleep(msDelay);
         }
@@ -1936,7 +1736,7 @@ void InterfaceToGeoWin::ShowTracksMovie(int num, int steps, int msDelay, double 
   while (toDo>0);
 }
 
-void InterfaceToGeoWin::ShowEnergyVector()
+void AGeoWin_SI::ShowEnergyVector()
 {
   MW->Rwindow->UpdateSimVizData(0);
 }
@@ -2570,6 +2370,28 @@ void AInterfaceToOutputWin::Show()
 void AInterfaceToOutputWin::Hide()
 {
     MW->Owindow->hide();
+}
+
+void AInterfaceToOutputWin::SetWindowGeometry(QVariant xywh)
+{
+    if (xywh.type() != QMetaType::QVariantList)
+    {
+        abort("Array [X Y Width Height] is expected");
+        return;
+    }
+    QVariantList vl = xywh.toList();
+    if (vl.size() != 4)
+    {
+        abort("Array [X Y Width Height] is expected");
+        return;
+    }
+
+    int x = vl[0].toInt();
+    int y = vl[1].toInt();
+    int w = vl[2].toInt();
+    int h = vl[3].toInt();
+    MW->Owindow->move(x, y);
+    MW->Owindow->resize(w, h);
 }
 #endif
 

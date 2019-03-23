@@ -491,7 +491,7 @@ void DetectorAddOnsWindow::OnrequestShowMonitor(const AGeoObject *mon)
         track->SetLineWidth(4);
         track->SetLineColor(kRed);
     }
-    MW->ShowTracks();
+    MW->GeometryWindow->DrawTracks();
 }
 
 void DetectorAddOnsWindow::HighlightVolume(QString VolName)
@@ -1200,7 +1200,7 @@ void DetectorAddOnsWindow::on_pbRunTestParticle_clicked()
        }
 
        MW->GeometryWindow->ShowGeometry(false);
-       MW->ShowTracks();
+       MW->GeometryWindow->DrawTracks();
    }
 }
 

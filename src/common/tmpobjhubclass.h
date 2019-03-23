@@ -6,7 +6,6 @@
 #include <QObject>
 #include <QVector>
 
-class TrackHolderClass;
 class TH1D;
 
 class TmpObjHubClass : public QObject
@@ -24,9 +23,6 @@ public:
   //preprocessing: energy channel
   double PreEnAdd = 0;
   double PreEnMulti = 1.0;
-
-  QVector<TrackHolderClass*> TrackInfo;
-  void ClearTracks();
 
   //signal->photoelectrons: from peaks
   QVector<TH1D*> PeakHists;

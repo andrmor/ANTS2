@@ -28,7 +28,6 @@ public slots:
     void Append(const QString& text);
     void ShowTemporary(int ms);
 
-    void SetTransparent(bool flag);
     void SetDialogTitle(const QString& title);
     void Move(double x, double y);
     void Resize(double w, double h);
@@ -47,8 +46,6 @@ private:
     double X = 50, Y = 50;
     double WW = 300, HH = 500;
     QString Title = "Script messenger";
-
-    void init(bool bTransparent);
 };
 
 #endif // ASCRIPTMESSENGERDIALOG_H

@@ -24,6 +24,7 @@
 #include "ainterfacetowebsocket.h"
 #include "awebserverinterface.h"
 #include "aparticletrackinghistoryinterface.h"
+#include "asim_si.h"
 
 #ifdef ANTS_FLANN
   #include "ainterfacetoknnscript.h"
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         SM.RegisterInterface(dat, "events");
 #ifdef SIM
-        InterfaceToSim* sim = new InterfaceToSim(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
+        ASim_SI* sim = new ASim_SI(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
         QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
         SM.RegisterInterface(sim, "sim");
 #endif

@@ -481,11 +481,6 @@ void MainWindow::ShowGraphWindow()
   GraphWindow->ShowAndFocus();  
 }
 
-void MainWindow::ShowTracks()
-{   
-  GeometryWindow->DrawTracks();
-}
-
 void MainWindow::on_pbRebuildDetector_clicked()
 {   
   if (DoNotUpdateGeometry) return; //if bulk update in progress
@@ -1820,7 +1815,7 @@ void MainWindow::on_pbIndPMshowInfo_clicked()
         track->SetLineWidth(4);
         track->SetLineColor(kRed);
 
-        MainWindow::ShowTracks();
+        GeometryWindow->DrawTracks();
       }
 }
 
@@ -3780,78 +3775,79 @@ void MainWindow::startSimulation(QJsonObject &json)
 
 void MainWindow::simulationFinished()
 {
-      //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size();
-    ui->pbStopScan->setEnabled(false);
-    ui->pbStopScan->setText("stop");
-
-    if (!SimulationManager->fSuccess)
-    {        
-        //qDebug() << "Sim manager reported fail!";
-        ui->leEventsPerSec->setText("n.a.");
-        QString report = SimulationManager->Runner->getErrorMessages();
-        if (report != "Simulation stopped by user") message(report, this);
-    }
-
-    bool showTracks = false;
-    if (SimulationManager->LastSimType == 0) //PointSources sim
-    {        
-        showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-        clearGeoMarkers();
-        Rwindow->ShowPositions(1, true);
-
-        if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
-            if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
-    }
-    if (SimulationManager->LastSimType == 1) //ParticleSources sim
+    qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size()<<"Was started from GUI:"<<fStartedFromGUI;
+    if (fStartedFromGUI)
     {
-        showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
-        clearEnergyVector();
-        EnergyVector = SimulationManager->EnergyVector;
-        SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells        
+        ui->pbStopScan->setEnabled(false);
+        ui->pbStopScan->setText("stop");
+
+        if (!SimulationManager->fSuccess)
+        {
+            //qDebug() << "Sim manager reported fail!";
+            ui->leEventsPerSec->setText("n.a.");
+            QString report = SimulationManager->Runner->getErrorMessages();
+            if (report != "Simulation stopped by user") message(report, this);
+        }
+
+        bool showTracks = false;
+        if (SimulationManager->LastSimType == 0) //PointSources sim
+        {
+            showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+            clearGeoMarkers();
+            Rwindow->ShowPositions(1, true);
+
+            if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->fSuccess)
+                if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
+        }
+        if (SimulationManager->LastSimType == 1) //ParticleSources sim
+        {
+            showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
+            clearEnergyVector();
+            EnergyVector = SimulationManager->EnergyVector; // TODO skip local EnergyVector?
+            SimulationManager->EnergyVector.clear(); // to avoid clearing the energy vector cells
+        }
+
+        //prepare TGeoTracks
+        if (showTracks)
+        {
+            int numTracks = 0;
+            for (int iTr=0; iTr<SimulationManager->Tracks.size(); iTr++)
+            {
+                const TrackHolderClass* th = SimulationManager->Tracks.at(iTr);
+                TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
+                track->SetLineColor(th->Color);
+                track->SetLineWidth(th->Width);
+                track->SetLineStyle(th->Style);
+                for (int iNode=0; iNode<th->Nodes.size(); iNode++)
+                    track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
+                if (track->GetNpoints()>1)
+                {
+                    numTracks++;
+                    Detector->GeoManager->AddTrack(track);
+                }
+                else delete track;
+            }
+        }
+
+        //Additional GUI updates
+        if (GeometryWindow->isVisible())
+        {
+            GeometryWindow->ShowGeometry(false);
+            if (showTracks) GeometryWindow->DrawTracks();
+        }
+
+        WindowNavigator->BusyOff(false);
     }
 
-    //tracks
-    if (showTracks)
-      {
-        TmpHub->ClearTracks();
-        TmpHub->TrackInfo = SimulationManager->Tracks; //transferred track info to the tmp object,can be accessed by script
-        SimulationManager->Tracks.clear(); //to avoid delete content
-
-        int numTracks = 0;
-        for (int iTr=0; iTr<TmpHub->TrackInfo.size() /* && numTracks<GlobSet.MaxNumberOfTracks */; iTr++)
-          {
-            const TrackHolderClass* th = TmpHub->TrackInfo.at(iTr);
-            TGeoTrack* track = new TGeoTrack(1, th->UserIndex);
-            track->SetLineColor(th->Color);
-            track->SetLineWidth(th->Width);
-            track->SetLineStyle(th->Style);
-            for (int iNode=0; iNode<th->Nodes.size(); iNode++)
-                track->AddPoint(th->Nodes[iNode].R[0], th->Nodes[iNode].R[1], th->Nodes[iNode].R[2], th->Nodes[iNode].Time);
-            if (track->GetNpoints()>1)
-            {
-                numTracks++;
-                Detector->GeoManager->AddTrack(track);
-            }
-            else delete track;
-          }
-      }
-
-    //Additional GUI updates
-    if (GeometryWindow->isVisible())
-      {
-        GeometryWindow->ShowGeometry(false);
-        if (showTracks) GeometryWindow->DrawTracks();
-      }
-      //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
+    //qDebug() << "==>After sim: OnEventsDataLoadOrClear";
     Rwindow->OnEventsDataAdded();
       //qDebug()  << "==>Checked the available data, default Recon data created, basic filters applied";
     Owindow->SetCurrentEvent(0);
 
-    if (fStartedFromGUI) WindowNavigator->BusyOff(false);
+
     fStartedFromGUI = false;
     fSimDataNotSaved = true;
-
-    //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
+    qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
 ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
@@ -3939,8 +3935,7 @@ void MainWindow::on_pbTrackStack_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) GeometryWindow->DrawTracks();
         }
         //report data saved in history
         pss->appendToDataHub(EventsDataHub);
@@ -3976,8 +3971,7 @@ void MainWindow::on_pbGenerateLight_clicked()
         if (GeometryWindow->isVisible())
         {
             GeometryWindow->ShowGeometry();
-            //if (ui->cbBuildParticleTrackstester->isChecked()) MainWindow::ShowTracks();
-            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) MainWindow::ShowTracks();
+            if (SimulationManager->TrackBuildOptions.bBuildParticleTracks) GeometryWindow->DrawTracks();
         }
         pss->appendToDataHub(EventsDataHub);
         //Owindow->SetCurrentEvent(0);

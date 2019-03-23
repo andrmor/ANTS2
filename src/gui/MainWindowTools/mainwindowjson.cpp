@@ -78,7 +78,7 @@ void MainWindow::onRequestDetectorGuiUpdate()
   if (Detector->PMdummies.size()>0) DAwindow->UpdateDummyPMindication();
   //Output window
   Owindow->RefreshData();
-  Owindow->ResetViewport();  // *** !!! extend to other windows too!
+//  Owindow->ResetViewport();  // *** !!! extend to other windows too!
   //world
   ui->ledTopSizeXY->setText( QString::number(2.0*Detector->WorldSizeXY, 'g', 4) );
   ui->ledTopSizeZ->setText( QString::number(2.0*Detector->WorldSizeZ, 'g', 4) );
@@ -117,6 +117,8 @@ void MainWindow::onNewConfigLoaded()
     initOverridesAfterLoad();
 
     readExtraGuiFromJson(Config->JSON);
+
+    Owindow->ResetViewport();
 }
 
 void MainWindow::initOverridesAfterLoad()

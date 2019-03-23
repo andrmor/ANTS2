@@ -3775,7 +3775,7 @@ void MainWindow::startSimulation(QJsonObject &json)
 
 void MainWindow::simulationFinished()
 {
-    qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size()<<"Was started from GUI:"<<fStartedFromGUI;
+    //qDebug() << "---------Simulation finished. Events:"<<EventsDataHub->Events.size()<<"Was started from GUI:"<<fStartedFromGUI;
     if (fStartedFromGUI)
     {
         ui->pbStopScan->setEnabled(false);
@@ -3845,7 +3845,7 @@ void MainWindow::simulationFinished()
 
     fStartedFromGUI = false;
     fSimDataNotSaved = true;
-    qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
+    //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
 ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!

@@ -536,8 +536,8 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>65</y>
-           <width>101</width>
+           <y>81</y>
+           <width>110</width>
            <height>17</height>
           </rect>
          </property>
@@ -549,21 +549,27 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>4</y>
+           <y>20</y>
            <width>101</width>
-           <height>31</height>
+           <height>37</height>
           </rect>
          </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Redraw</string>
+          <string>Reset view</string>
          </property>
         </widget>
         <widget class="QCheckBox" name="cbShowPMsignals">
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>44</y>
-           <width>111</width>
+           <y>60</y>
+           <width>120</width>
            <height>17</height>
           </rect>
          </property>
@@ -578,9 +584,9 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>100</y>
+           <y>116</y>
            <width>101</width>
-           <height>61</height>
+           <height>49</height>
           </rect>
          </property>
          <property name="text">

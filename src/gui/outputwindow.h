@@ -120,7 +120,7 @@ private:
     bool bForbidUpdate;
 
     void clearGrItems();
-    void updateSignalLabels(double MaxSignal);
+    void updateSignalLabels(float MaxSignal);
     void addPMitems  (const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void addTextitems(const QVector<float>* vector, float MaxSignal, DynamicPassivesHandler *Passives);
     void updateSignalScale();    

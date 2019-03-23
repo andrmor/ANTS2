@@ -717,13 +717,13 @@ void OutputWindow::updateSignalScale()
     }
 }
 
-void OutputWindow::updateSignalLabels(double MaxSignal)
+void OutputWindow::updateSignalLabels(float MaxSignal)
 {
   QString str;
   str.setNum(MaxSignal, 'g', 4);
   ui->labHitsMax->setText(str);
 
-  double lowmid = 0.25*MaxSignal;
+  float lowmid = 0.25f * MaxSignal;
   if (lowmid>0)
     {
       str.setNum(lowmid, 'g', 4);
@@ -731,7 +731,7 @@ void OutputWindow::updateSignalLabels(double MaxSignal)
     }
   else ui->labLowMid->setText("");
 
-  double mid = 0.5*MaxSignal;
+  float mid = 0.5f * MaxSignal;
   if (mid > 0 && mid !=lowmid)
     {
       str.setNum(mid, 'g', 4);
@@ -739,7 +739,7 @@ void OutputWindow::updateSignalLabels(double MaxSignal)
     }
   else ui->labMid->setText("");
 
-  double highmid = 0.75*MaxSignal;
+  float highmid = 0.75f * MaxSignal;
   if (highmid > 0 && highmid !=mid)
     {
       str.setNum(highmid, 'g', 4);

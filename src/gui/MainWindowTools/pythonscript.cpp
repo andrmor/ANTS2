@@ -5,11 +5,11 @@
 #include "eventsdataclass.h"
 #include "aglobalsettings.h"
 #include "interfacetoglobscript.h"
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
-#include "ainterfacetoaddobjscript.h"
-#include "ainterfacetodeposcript.h"
+#include "ageo_si.h"
+#include "adepo_si.h"
 #include "graphwindowclass.h"
 #include "geometrywindowclass.h"
 #include "aconfiguration.h"
@@ -20,12 +20,12 @@
 #include "lrfwindow.h"
 #include "ascriptwindow.h"
 #include "checkupwindowclass.h"
-#include "ainterfacetowebsocket.h"
+#include "aweb_si.h"
 #include "anetworkmodule.h"
-#include "ainterfacetophotonscript.h"
-#include "ainterfacetomultithread.h"
-#include "ainterfacetottree.h"
-#include "aparticletrackinghistoryinterface.h"
+#include "aphoton_si.h"
+#include "athreads_si.h"
+#include "atree_si.h"
+#include "atracklog_si.h"
 #include "asim_si.h"
 
 #ifdef ANTS_FLANN
@@ -52,11 +52,11 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
   PythonScriptWindow->RegisterInterface(conf, "config");
 
-  AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(Detector);
+  AGeo_SI* geo = new AGeo_SI(Detector);
   connect(geo, SIGNAL(requestShowCheckUpWindow()), CheckUpWindow, SLOT(showNormal()));
   PythonScriptWindow->RegisterInterface(geo, "geo");
 
-  AInterfaceToMinimizerPythonScript* mini = new AInterfaceToMinimizerPythonScript(PSM);
+  AMini_Python_SI* mini = new AMini_Python_SI(PSM);
   PythonScriptWindow->RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
 
   AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
@@ -86,24 +86,24 @@ void MainWindow::createPythonScriptWindow()
   AInterfaceToHist* hist = new AInterfaceToHist(TmpHub);
   PythonScriptWindow->RegisterInterface(hist, "hist");
 
-  AInterfaceToTTree* tree = new AInterfaceToTTree(TmpHub);
+  ATree_SI* tree = new ATree_SI(TmpHub);
   PythonScriptWindow->RegisterInterface(tree, "tree");
 
-  AInterfaceToMessageWindow* txt = new AInterfaceToMessageWindow(PSM, PythonScriptWindow);
+  AMsg_SI* txt = new AMsg_SI(PSM, PythonScriptWindow);
   PythonScriptWindow->RegisterInterface(txt, "msg");
 
-  AInterfaceToWebSocket* web = new AInterfaceToWebSocket(EventsDataHub);
-  QObject::connect(web, &AInterfaceToWebSocket::showTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Append); // make sure this line is after AInterfaceToMessageWindow init
-  QObject::connect(web, &AInterfaceToWebSocket::clearTextOnMessageWindow, txt, &AInterfaceToMessageWindow::Clear); // make sure this line is after AInterfaceToMessageWindow init
+  AWeb_SI* web = new AWeb_SI(EventsDataHub);
+  QObject::connect(web, &AWeb_SI::showTextOnMessageWindow, txt, &AMsg_SI::Append); // make sure this line is after AInterfaceToMessageWindow init
+  QObject::connect(web, &AWeb_SI::clearTextOnMessageWindow, txt, &AMsg_SI::Clear); // make sure this line is after AInterfaceToMessageWindow init
   PythonScriptWindow->RegisterInterface(web, "web");
 
-  AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(Config, EventsDataHub);
+  APhoton_SI* photon = new APhoton_SI(Config, EventsDataHub);
   PythonScriptWindow->RegisterInterface(photon, "photon");
 
-  AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(Detector, EventsDataHub);
+  ADepo_SI* depo = new ADepo_SI(Detector, EventsDataHub);
   PythonScriptWindow->RegisterInterface(depo, "depo");
 
-  AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(*EventsDataHub);
+  ATrackLog_SI* pth = new ATrackLog_SI(*EventsDataHub);
   ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN

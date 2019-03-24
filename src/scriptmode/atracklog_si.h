@@ -3,6 +3,7 @@
 
 #include "ascriptinterface.h"
 
+#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QVariantList>
@@ -10,11 +11,11 @@
 class EventsDataClass;
 struct EventHistoryStructure;
 
-class AParticleTrackingHistoryInterface : public AScriptInterface
+class ATrackLog_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AParticleTrackingHistoryInterface(EventsDataClass& EventsDataHub);
+  ATrackLog_SI(EventsDataClass& EventsDataHub);
 
 private:
   EventsDataClass& EventsDataHub;

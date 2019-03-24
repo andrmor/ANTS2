@@ -1,4 +1,4 @@
-#include "acorescriptinterface.h"
+#include "acore_si.h"
 #include "ascriptmanager.h"
 #include "afiletools.h"
 
@@ -23,7 +23,7 @@
 #include <QThread>
 #include <QRegularExpression>
 
-ACoreScriptInterface::ACoreScriptInterface(AScriptManager* ScriptManager) :
+ACore_SI::ACore_SI(AScriptManager* ScriptManager) :
     ScriptManager(ScriptManager)
 {
   Description = "General-purpose opeartions: abort script, basic text output and file save/load";
@@ -59,24 +59,24 @@ ACoreScriptInterface::ACoreScriptInterface(AScriptManager* ScriptManager) :
   DepRem["str"] = "Deprecated. Use .toFixed(n) javaScript method. E.g.: 'var i=123.456; i.toFixed(2)'";
 }
 
-ACoreScriptInterface::ACoreScriptInterface(const ACoreScriptInterface &other) :
+ACore_SI::ACore_SI(const ACore_SI &other) :
   AScriptInterface(other)
 {
    ScriptManager = 0; //to be set after copy!!!
 }
 
-void ACoreScriptInterface::abort(QString message)
+void ACore_SI::abort(QString message)
 {
   qDebug() << ">Core module: abort triggered!";
   ScriptManager->AbortEvaluation(message);
 }
 
-QVariant ACoreScriptInterface::evaluate(QString script)
+QVariant ACore_SI::evaluate(QString script)
 {
     return ScriptManager->EvaluateScriptInScript(script);
 }
 
-void ACoreScriptInterface::sleep(int ms)
+void ACore_SI::sleep(int ms)
 {
   if (ms == 0) return;
   QTime t;
@@ -90,42 +90,42 @@ void ACoreScriptInterface::sleep(int ms)
   while (t.elapsed()<ms);
 }
 
-int ACoreScriptInterface::elapsedTimeInMilliseconds()
+int ACore_SI::elapsedTimeInMilliseconds()
 {
     return ScriptManager->getElapsedTime();
 }
 
-void ACoreScriptInterface::print(QString text)
+void ACore_SI::print(QString text)
 {
     emit ScriptManager->showMessage(text);
 }
 
-void ACoreScriptInterface::clearText()
+void ACore_SI::clearText()
 {
     emit ScriptManager->clearText();
 }
 
-QString ACoreScriptInterface::str(double value, int precision)
+QString ACore_SI::str(double value, int precision)
 {
     return QString::number(value, 'g', precision);
 }
 
-bool ACoreScriptInterface::strIncludes(QString str, QString pattern)
+bool ACore_SI::strIncludes(QString str, QString pattern)
 {
     return (str.indexOf(pattern) >= 0);
 }
 
-QString ACoreScriptInterface::GetTimeStamp()
+QString ACore_SI::GetTimeStamp()
 {
     return QDateTime::currentDateTime().toString("H:m:s");
 }
 
-QString ACoreScriptInterface::GetDateTimeStamp()
+QString ACore_SI::GetDateTimeStamp()
 {
     return QDateTime::currentDateTime().toString("d/M/yyyy H:m:s");
 }
 
-bool ACoreScriptInterface::save(QString fileName, QString str)
+bool ACore_SI::save(QString fileName, QString str)
 {
   if (!QFileInfo(fileName).exists())
     {
@@ -149,7 +149,7 @@ bool ACoreScriptInterface::save(QString fileName, QString str)
   return true;
 }
 
-bool ACoreScriptInterface::saveArray(QString fileName, QVariant array)
+bool ACore_SI::saveArray(QString fileName, QVariant array)
 {
     QString type = array.typeName();
     if (type != "QVariantList")
@@ -200,7 +200,7 @@ bool ACoreScriptInterface::saveArray(QString fileName, QVariant array)
     return true;
 }
 
-bool ACoreScriptInterface::saveObject(QString FileName, QVariant Object, bool CanOverride)
+bool ACore_SI::saveObject(QString FileName, QVariant Object, bool CanOverride)
 {
     QString type = Object.typeName();
     if (type != "QVariantMap")
@@ -234,7 +234,7 @@ bool ACoreScriptInterface::saveObject(QString FileName, QVariant Object, bool Ca
     return true;
 }
 
-QVariant ACoreScriptInterface::loadColumn(QString fileName, int column)
+QVariant ACore_SI::loadColumn(QString fileName, int column)
 {
   QVector< QVector<double>* > vec;
   for (int i=0; i<column+1; i++)
@@ -295,7 +295,7 @@ QVariant ACoreScriptInterface::loadColumn(QString fileName, int column)
   */
 }
 
-QVariant ACoreScriptInterface::loadArray(QString fileName, int columns)
+QVariant ACore_SI::loadArray(QString fileName, int columns)
 {
     QVariantList l;
     if (columns == 0) return l;
@@ -365,7 +365,7 @@ QVariant ACoreScriptInterface::loadArray(QString fileName, int columns)
   */
 }
 
-QVariant ACoreScriptInterface::loadArray(QString fileName)
+QVariant ACore_SI::loadArray(QString fileName)
 {
     if (!QFileInfo(fileName).exists())
     {
@@ -412,7 +412,7 @@ QVariant ACoreScriptInterface::loadArray(QString fileName)
     return vl;
 }
 
-QString ACoreScriptInterface::loadText(QString fileName)
+QString ACore_SI::loadText(QString fileName)
 {
   if (!QFileInfo(fileName).exists())
   {
@@ -431,7 +431,7 @@ QString ACoreScriptInterface::loadText(QString fileName)
   return str;
 }
 
-QVariant ACoreScriptInterface::loadObject(QString fileName)
+QVariant ACore_SI::loadObject(QString fileName)
 {
     QFile loadFile(fileName);
     if (!loadFile.open(QIODevice::ReadOnly))
@@ -449,7 +449,7 @@ QVariant ACoreScriptInterface::loadObject(QString fileName)
 }
 
 #include "ainternetbrowser.h"
-QVariant ACoreScriptInterface::loadArrayFromWeb(QString url, int msTimeout)
+QVariant ACore_SI::loadArrayFromWeb(QString url, int msTimeout)
 {
     AInternetBrowser b(msTimeout);
     QString Reply;
@@ -491,25 +491,25 @@ QVariant ACoreScriptInterface::loadArrayFromWeb(QString url, int msTimeout)
     return vl;
 }
 
-QString ACoreScriptInterface::GetWorkDir()
+QString ACore_SI::GetWorkDir()
 {
     if (!ScriptManager->LastOpenDir) return QString();
     else return *ScriptManager->LastOpenDir;
 }
 
-QString ACoreScriptInterface::GetScriptDir()
+QString ACore_SI::GetScriptDir()
 {
     if (!ScriptManager->LibScripts) return QString();
     else return *ScriptManager->LibScripts;
 }
 
-QString ACoreScriptInterface::GetExamplesDir()
+QString ACore_SI::GetExamplesDir()
 {
     if (!ScriptManager->ExamplesDir) return QString();
     else return *ScriptManager->ExamplesDir;
 }
 
-QVariant ACoreScriptInterface::SetNewFileFinder(const QString dir, const QString fileNamePattern)
+QVariant ACore_SI::SetNewFileFinder(const QString dir, const QString fileNamePattern)
 {
     Finder_Dir = dir;
     Finder_NamePattern = fileNamePattern;
@@ -527,7 +527,7 @@ QVariant ACoreScriptInterface::SetNewFileFinder(const QString dir, const QString
     return res;
 }
 
-QVariant ACoreScriptInterface::GetNewFiles()
+QVariant ACore_SI::GetNewFiles()
 {
     QVariantList newFiles;
     QDir d(Finder_Dir);
@@ -541,18 +541,18 @@ QVariant ACoreScriptInterface::GetNewFiles()
     return newFiles;
 }
 
-void ACoreScriptInterface::processEvents()
+void ACore_SI::processEvents()
 {
     qApp->processEvents();
 }
 
-void ACoreScriptInterface::reportProgress(int percents)
+void ACore_SI::reportProgress(int percents)
 {
     emit ScriptManager->reportProgress(percents);
     qApp->processEvents();
 }
 
-void ACoreScriptInterface::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
+void ACore_SI::setCurveFitter(double min, double max, int nInt, QVariant x, QVariant y)
 {
 #ifdef USE_EIGEN
     QVariantList vlX = x.toList();
@@ -571,7 +571,7 @@ void ACoreScriptInterface::setCurveFitter(double min, double max, int nInt, QVar
 #endif
 }
 
-double ACoreScriptInterface::getFitted(double x)
+double ACore_SI::getFitted(double x)
 {
 #ifdef USE_EIGEN
     if (!CurF) return 0;
@@ -583,7 +583,7 @@ double ACoreScriptInterface::getFitted(double x)
 #endif
 }
 
-const QVariant ACoreScriptInterface::getFittedArr(const QVariant array)
+const QVariant ACore_SI::getFittedArr(const QVariant array)
 {
 #ifdef USE_EIGEN
     if (!CurF) return 0;
@@ -600,7 +600,7 @@ const QVariant ACoreScriptInterface::getFittedArr(const QVariant array)
 #endif
 }
 
-bool ACoreScriptInterface::createFile(QString fileName, bool AbortIfExists)
+bool ACore_SI::createFile(QString fileName, bool AbortIfExists)
 {
   if (QFileInfo(fileName).exists())
     {
@@ -623,17 +623,17 @@ bool ACoreScriptInterface::createFile(QString fileName, bool AbortIfExists)
   return true;
 }
 
-bool ACoreScriptInterface::isFileExists(QString fileName)
+bool ACore_SI::isFileExists(QString fileName)
 {
     return QFileInfo(fileName).exists();
 }
 
-bool ACoreScriptInterface::deleteFile(QString fileName)
+bool ACore_SI::deleteFile(QString fileName)
 {
     return QFile(fileName).remove();
 }
 
-bool ACoreScriptInterface::createDir(QString path)
+bool ACore_SI::createDir(QString path)
 {
     //QDir dir(path);
     //return dir.mkdir(".");
@@ -641,17 +641,17 @@ bool ACoreScriptInterface::createDir(QString path)
     return dir.mkpath(path);
 }
 
-QString ACoreScriptInterface::getCurrentDir()
+QString ACore_SI::getCurrentDir()
 {
     return QDir::currentPath();
 }
 
-bool ACoreScriptInterface::setCirrentDir(QString path)
+bool ACore_SI::setCirrentDir(QString path)
 {
     return QDir::setCurrent(path);
 }
 
-const QString ACoreScriptInterface::StartExternalProcess(QString command, QVariant argumentArray, bool waitToFinish, int milliseconds)
+const QString ACore_SI::StartExternalProcess(QString command, QVariant argumentArray, bool waitToFinish, int milliseconds)
 {
 #ifndef _ALLOW_LAUNCH_EXTERNAL_PROCESS_
     abort("Launch of external process is not allowed.\nEnable \"_ALLOW_LAUNCH_EXTERNAL_PROCESS_\" in ants2.pro");

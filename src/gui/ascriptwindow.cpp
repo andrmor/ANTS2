@@ -4,8 +4,8 @@
 #include "atextedit.h"
 #include "ascriptinterface.h"
 #include "localscriptinterfaces.h"
-#include "acorescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "acore_si.h"
+#include "amath_si.h"
 #include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
@@ -345,12 +345,12 @@ void AScriptWindow::RegisterCoreInterfaces(bool bCore, bool bMath)
 
     if (bCore)
     {
-        ACoreScriptInterface core(0); //dummy to extract method names
+        ACore_SI core(0); //dummy to extract method names
         doRegister(&core, "core");
     }
     if (bMath)
     {
-        AMathScriptInterface math(0); //dummy to extract method names
+        AMath_SI math(0); //dummy to extract method names
         QString mathName = (ScriptLanguage == _JavaScript_ ? "math" : "MATH");
         doRegister(&math, mathName);
     }

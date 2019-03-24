@@ -2,7 +2,7 @@
 #include "aparticlerecord.h"
 #include "ajsontools.h"
 #include "aparticlegeneratorinterface.h"
-#include "amathscriptinterface.h"
+#include "amath_si.h"
 
 #include <QScriptEngine>
 #include <QDebug>
@@ -33,7 +33,7 @@ bool AScriptParticleGenerator::Init()
 
         //QObject::connect(ScriptInterface, &AParticleGeneratorInterface::requestAbort, ScriptEngine, &QScriptEngine::abortEvaluation, Qt::DirectConnection);
 
-        mathInterface = new AMathScriptInterface(RandGen);
+        mathInterface = new AMath_SI(RandGen);
         mathInterface->setObjectName("math");
         val = ScriptEngine->newQObject(mathInterface, QScriptEngine::QtOwnership);
         ScriptEngine->globalObject().setProperty(mathInterface->objectName(), val);

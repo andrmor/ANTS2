@@ -1,4 +1,4 @@
-#include "ainterfacetoguiscript.h"
+#include "agui_si.h"
 #include "ajavascriptmanager.h"
 #include "amessage.h"
 #include "alineedit.h"
@@ -19,13 +19,13 @@
 #include <QDoubleValidator>
 #include <QCompleter>
 
-AInterfaceToGuiScript::AInterfaceToGuiScript(AJavaScriptManager* ScriptManager) :
+AGui_SI::AGui_SI(AJavaScriptManager* ScriptManager) :
     AScriptInterface(), ScriptManager(ScriptManager)
 {
     init();
 }
 
-void AInterfaceToGuiScript::init()
+void AGui_SI::init()
 {
     delete Wid;
     Wid = new QWidget();
@@ -39,23 +39,23 @@ void AInterfaceToGuiScript::init()
     Layouts.insert("", lay);
 }
 
-AInterfaceToGuiScript::~AInterfaceToGuiScript()
+AGui_SI::~AGui_SI()
 {
     delete Wid; Wid = 0;
 }
 
-bool AInterfaceToGuiScript::InitOnRun()
+bool AGui_SI::InitOnRun()
 {
     init();
     return true;
 }
 
-void AInterfaceToGuiScript::ForceStop()
+void AGui_SI::ForceStop()
 {
     delete Wid; Wid = 0;
 }
 
-void AInterfaceToGuiScript::buttonNew(const QString name, const QString addTo, const QString text)
+void AGui_SI::buttonNew(const QString name, const QString addTo, const QString text)
 {
     if (Widgets.contains(name))
     {
@@ -74,7 +74,7 @@ void AInterfaceToGuiScript::buttonNew(const QString name, const QString addTo, c
     lay->addWidget(b);
 }
 
-void AInterfaceToGuiScript::buttonSetText(const QString name, const QString text, bool bold)
+void AGui_SI::buttonSetText(const QString name, const QString text, bool bold)
 {
     QWidget* w = Widgets.value(name, 0);
     QPushButton* b = dynamic_cast<QPushButton*>(w);
@@ -88,7 +88,7 @@ void AInterfaceToGuiScript::buttonSetText(const QString name, const QString text
     }
 }
 
-void AInterfaceToGuiScript::buttonOnClick(const QString name, const QVariant scriptFunction)
+void AGui_SI::buttonOnClick(const QString name, const QVariant scriptFunction)
 {
     QWidget* w = Widgets.value(name, 0);
     QPushButton* b = dynamic_cast<QPushButton*>(w);
@@ -123,7 +123,7 @@ void AInterfaceToGuiScript::buttonOnClick(const QString name, const QVariant scr
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
-void AInterfaceToGuiScript::buttonOnRightClick(const QString name, const QVariant scriptFunction)
+void AGui_SI::buttonOnRightClick(const QString name, const QVariant scriptFunction)
 {
     QWidget* w = Widgets.value(name, 0);
     QPushButton* b = dynamic_cast<QPushButton*>(w);
@@ -158,7 +158,7 @@ void AInterfaceToGuiScript::buttonOnRightClick(const QString name, const QVarian
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
-void AInterfaceToGuiScript::labelNew(const QString name, const QString addTo, const QString text)
+void AGui_SI::labelNew(const QString name, const QString addTo, const QString text)
 {
     if (Widgets.contains(name))
     {
@@ -176,7 +176,7 @@ void AInterfaceToGuiScript::labelNew(const QString name, const QString addTo, co
     lay->addWidget(l);
 }
 
-void AInterfaceToGuiScript::labelSetText(const QString name, const QString labelText)
+void AGui_SI::labelSetText(const QString name, const QString labelText)
 {
     QWidget* w = Widgets.value(name, 0);
     QLabel* l = dynamic_cast<QLabel*>(w);
@@ -188,7 +188,7 @@ void AInterfaceToGuiScript::labelSetText(const QString name, const QString label
     l->setText(labelText);
 }
 
-void AInterfaceToGuiScript::editNew(const QString name, const QString addTo, const QString text)
+void AGui_SI::editNew(const QString name, const QString addTo, const QString text)
 {
     if (Widgets.contains(name))
     {
@@ -206,7 +206,7 @@ void AInterfaceToGuiScript::editNew(const QString name, const QString addTo, con
     lay->addWidget(e);
 }
 
-void AInterfaceToGuiScript::editSetText(const QString name, const QString text)
+void AGui_SI::editSetText(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -214,7 +214,7 @@ void AInterfaceToGuiScript::editSetText(const QString name, const QString text)
     else e->setText(text);
 }
 
-const QString AInterfaceToGuiScript::editGetText(const QString name)
+const QString AGui_SI::editGetText(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -226,7 +226,7 @@ const QString AInterfaceToGuiScript::editGetText(const QString name)
     return e->text();
 }
 
-void AInterfaceToGuiScript::editSetIntValidator(const QString name, int min, int max)
+void AGui_SI::editSetIntValidator(const QString name, int min, int max)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -241,7 +241,7 @@ void AInterfaceToGuiScript::editSetIntValidator(const QString name, int min, int
     }
 }
 
-void AInterfaceToGuiScript::editSetDoubleValidator(const QString name, double min, double max, int decimals)
+void AGui_SI::editSetDoubleValidator(const QString name, double min, double max, int decimals)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -256,7 +256,7 @@ void AInterfaceToGuiScript::editSetDoubleValidator(const QString name, double mi
     }
 }
 
-void AInterfaceToGuiScript::editSetCompleter(const QString name, const QVariant arrayOfStrings)
+void AGui_SI::editSetCompleter(const QString name, const QVariant arrayOfStrings)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -283,7 +283,7 @@ void AInterfaceToGuiScript::editSetCompleter(const QString name, const QVariant 
     }
 }
 
-void AInterfaceToGuiScript::editOnTextChanged(const QString name, const QVariant scriptFunction)
+void AGui_SI::editOnTextChanged(const QString name, const QVariant scriptFunction)
 {
     QWidget* w = Widgets.value(name, 0);
     ALineEdit* e = dynamic_cast<ALineEdit*>(w);
@@ -318,7 +318,7 @@ void AInterfaceToGuiScript::editOnTextChanged(const QString name, const QVariant
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
-void AInterfaceToGuiScript::comboboxNew(const QString name, const QString addTo, bool Editable)
+void AGui_SI::comboboxNew(const QString name, const QString addTo, bool Editable)
 {
     if (Widgets.contains(name))
     {
@@ -337,7 +337,7 @@ void AInterfaceToGuiScript::comboboxNew(const QString name, const QString addTo,
     lay->addWidget(e);
 }
 
-void AInterfaceToGuiScript::comboboxAppend(const QString name, const QVariant entries)
+void AGui_SI::comboboxAppend(const QString name, const QVariant entries)
 {
     QWidget* w = Widgets.value(name, 0);
     QComboBox* e = dynamic_cast<QComboBox*>(w);
@@ -351,7 +351,7 @@ void AInterfaceToGuiScript::comboboxAppend(const QString name, const QVariant en
     }
 }
 
-void AInterfaceToGuiScript::comboboxClear(const QString name)
+void AGui_SI::comboboxClear(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     QComboBox* e = dynamic_cast<QComboBox*>(w);
@@ -359,7 +359,7 @@ void AInterfaceToGuiScript::comboboxClear(const QString name)
     else e->clear();
 }
 
-const QString AInterfaceToGuiScript::comboboxGetSelected(const QString name)
+const QString AGui_SI::comboboxGetSelected(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     QComboBox* e = dynamic_cast<QComboBox*>(w);
@@ -371,7 +371,7 @@ const QString AInterfaceToGuiScript::comboboxGetSelected(const QString name)
     return e->currentText();
 }
 
-void AInterfaceToGuiScript::comboboxOnTextChanged(const QString name, const QVariant scriptFunction)
+void AGui_SI::comboboxOnTextChanged(const QString name, const QVariant scriptFunction)
 {
     QWidget* w = Widgets.value(name, 0);
     QComboBox* b = dynamic_cast<QComboBox*>(w);
@@ -406,7 +406,7 @@ void AInterfaceToGuiScript::comboboxOnTextChanged(const QString name, const QVar
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
-void AInterfaceToGuiScript::textNew(const QString name, const QString addTo, const QString text)
+void AGui_SI::textNew(const QString name, const QString addTo, const QString text)
 {
     if (Widgets.contains(name))
     {
@@ -424,7 +424,7 @@ void AInterfaceToGuiScript::textNew(const QString name, const QString addTo, con
     lay->addWidget(t);
 }
 
-void AInterfaceToGuiScript::textClear(const QString name)
+void AGui_SI::textClear(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     QPlainTextEdit* t = dynamic_cast<QPlainTextEdit*>(w);
@@ -436,7 +436,7 @@ void AInterfaceToGuiScript::textClear(const QString name)
     t->clear();
 }
 
-void AInterfaceToGuiScript::textAppendPlainText(const QString name, const QString text)
+void AGui_SI::textAppendPlainText(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
     QPlainTextEdit* t = dynamic_cast<QPlainTextEdit*>(w);
@@ -448,7 +448,7 @@ void AInterfaceToGuiScript::textAppendPlainText(const QString name, const QStrin
     t->appendPlainText(text);
 }
 
-void AInterfaceToGuiScript::textAppendHtml(const QString name, const QString text)
+void AGui_SI::textAppendHtml(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
     QPlainTextEdit* t = dynamic_cast<QPlainTextEdit*>(w);
@@ -460,7 +460,7 @@ void AInterfaceToGuiScript::textAppendHtml(const QString name, const QString tex
     t->appendHtml(text);
 }
 
-const QString AInterfaceToGuiScript::textGet(const QString name)
+const QString AGui_SI::textGet(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     QPlainTextEdit* t = dynamic_cast<QPlainTextEdit*>(w);
@@ -472,7 +472,7 @@ const QString AInterfaceToGuiScript::textGet(const QString name)
     return t->document()->toPlainText();
 }
 
-void AInterfaceToGuiScript::checkboxNew(const QString name, const QString addTo, const QString text, bool checked)
+void AGui_SI::checkboxNew(const QString name, const QString addTo, const QString text, bool checked)
 {
     if (Widgets.contains(name))
     {
@@ -491,7 +491,7 @@ void AInterfaceToGuiScript::checkboxNew(const QString name, const QString addTo,
     lay->addWidget(cb);
 }
 
-void AInterfaceToGuiScript::checkboxSetText(const QString name, const QString text)
+void AGui_SI::checkboxSetText(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
     QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
@@ -499,7 +499,7 @@ void AInterfaceToGuiScript::checkboxSetText(const QString name, const QString te
     else cb->setText(text);
 }
 
-void AInterfaceToGuiScript::checkboxSetChecked(const QString name, bool checked)
+void AGui_SI::checkboxSetChecked(const QString name, bool checked)
 {
     QWidget* w = Widgets.value(name, 0);
     QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
@@ -507,7 +507,7 @@ void AInterfaceToGuiScript::checkboxSetChecked(const QString name, bool checked)
     else cb->setChecked(checked);
 }
 
-bool AInterfaceToGuiScript::checkboxIsChecked(const QString name)
+bool AGui_SI::checkboxIsChecked(const QString name)
 {
     QWidget* w = Widgets.value(name, 0);
     QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
@@ -519,7 +519,7 @@ bool AInterfaceToGuiScript::checkboxIsChecked(const QString name)
     return cb->isChecked();
 }
 
-void AInterfaceToGuiScript::checkboxOnClick(const QString name, const QVariant scriptFunction)
+void AGui_SI::checkboxOnClick(const QString name, const QVariant scriptFunction)
 {
     QWidget* w = Widgets.value(name, 0);
     QCheckBox* cb = dynamic_cast<QCheckBox*>(w);
@@ -554,42 +554,42 @@ void AInterfaceToGuiScript::checkboxOnClick(const QString name, const QVariant s
             [=]() { ScriptManager->getProperty(functionName).call(); ScriptManager->ifError_AbortAndReport(); } );
 }
 
-void AInterfaceToGuiScript::setMinimumWidth(const QString name, int min)
+void AGui_SI::setMinimumWidth(const QString name, int min)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setMinimumWidth(min);
 }
 
-void AInterfaceToGuiScript::setMinimumHeight(const QString name, int min)
+void AGui_SI::setMinimumHeight(const QString name, int min)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setMinimumHeight(min);
 }
 
-void AInterfaceToGuiScript::setMaximumWidth(const QString name, int max)
+void AGui_SI::setMaximumWidth(const QString name, int max)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setMaximumWidth(max);
 }
 
-void AInterfaceToGuiScript::setMaximumHeight(const QString name, int max)
+void AGui_SI::setMaximumHeight(const QString name, int max)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setMaximumHeight(max);
 }
 
-void AInterfaceToGuiScript::setToolTip(const QString name, const QString text)
+void AGui_SI::setToolTip(const QString name, const QString text)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setToolTip(text);
 }
 
-void AInterfaceToGuiScript::addStretch(const QString addTo)
+void AGui_SI::addStretch(const QString addTo)
 {
     QLayout* lay = Layouts.value(addTo, 0);
     if (!lay)
@@ -606,7 +606,7 @@ void AInterfaceToGuiScript::addStretch(const QString addTo)
     }
 }
 
-void AInterfaceToGuiScript::addHoizontalLine(const QString addTo)
+void AGui_SI::addHoizontalLine(const QString addTo)
 {
     QLayout* lay = Layouts.value(addTo, 0);
     if (!lay)
@@ -620,7 +620,7 @@ void AInterfaceToGuiScript::addHoizontalLine(const QString addTo)
     lay->addWidget(e);
 }
 
-void AInterfaceToGuiScript::addVerticalLine(const QString addTo)
+void AGui_SI::addVerticalLine(const QString addTo)
 {
     QLayout* lay = Layouts.value(addTo, 0);
     if (!lay)
@@ -634,7 +634,7 @@ void AInterfaceToGuiScript::addVerticalLine(const QString addTo)
     lay->addWidget(e);
 }
 
-void AInterfaceToGuiScript::verticalLayout(const QString name, const QString addTo)
+void AGui_SI::verticalLayout(const QString name, const QString addTo)
 {
     if (Layouts.contains(name))
     {
@@ -659,7 +659,7 @@ void AInterfaceToGuiScript::verticalLayout(const QString name, const QString add
     }
 }
 
-void AInterfaceToGuiScript::horizontalLayout(const QString &name, const QString &addTo)
+void AGui_SI::horizontalLayout(const QString &name, const QString &addTo)
 {
     if (Layouts.contains(name))
     {
@@ -684,39 +684,39 @@ void AInterfaceToGuiScript::horizontalLayout(const QString &name, const QString 
     }
 }
 
-void AInterfaceToGuiScript::messageBox(const QString text)
+void AGui_SI::messageBox(const QString text)
 {
     message(text, Wid);
 }
 
-void AInterfaceToGuiScript::show()
+void AGui_SI::show()
 {
     Wid->show();
 }
 
-void AInterfaceToGuiScript::hide()
+void AGui_SI::hide()
 {
     Wid->hide();
 }
 
-void AInterfaceToGuiScript::setWidgetTitle(const QString title)
+void AGui_SI::setWidgetTitle(const QString title)
 {
     Wid->setWindowTitle(title);
 }
 
-void AInterfaceToGuiScript::resize(int width, int height)
+void AGui_SI::resize(int width, int height)
 {
     Wid->resize(width, height);
 }
 
-void AInterfaceToGuiScript::setEnabled(const QString name, bool flag)
+void AGui_SI::setEnabled(const QString name, bool flag)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");
     else w->setEnabled(flag);
 }
 
-void AInterfaceToGuiScript::setVisible(const QString name, bool flag)
+void AGui_SI::setVisible(const QString name, bool flag)
 {
     QWidget* w = Widgets.value(name, 0);
     if (!w) abort("Widget " + name + " does not exist");

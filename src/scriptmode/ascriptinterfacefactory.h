@@ -2,14 +2,14 @@
 #define ASCRIPTINTERFACEFACTORY_H
 
 #include "ascriptinterface.h"
-#include "acorescriptinterface.h"
-#include "amathscriptinterface.h"
+#include "acore_si.h"
+#include "amath_si.h"
 #include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
-#include "ainterfacetowebsocket.h"
+#include "aweb_si.h"
 #ifdef GUI
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #endif
 
 #include <QObject>
@@ -19,17 +19,17 @@ class AScriptInterfaceFactory
 public:    
     static AScriptInterface* makeCopy(const AScriptInterface* other)
     {
-        const ACoreScriptInterface* core = dynamic_cast<const ACoreScriptInterface*>(other);
-        if (core) return new ACoreScriptInterface(*core);
+        const ACore_SI* core = dynamic_cast<const ACore_SI*>(other);
+        if (core) return new ACore_SI(*core);
 
-        const AMathScriptInterface* math = dynamic_cast<const AMathScriptInterface*>(other);
-        if (math) return new AMathScriptInterface(*math);
+        const AMath_SI* math = dynamic_cast<const AMath_SI*>(other);
+        if (math) return new AMath_SI(*math);
 
         const AInterfaceToConfig* config = dynamic_cast<const AInterfaceToConfig*>(other);
         if (config) return new AInterfaceToConfig(*config);
 
-        const AInterfaceToMinimizerJavaScript* mini = dynamic_cast<const AInterfaceToMinimizerJavaScript*>(other);
-        if (mini) return new AInterfaceToMinimizerJavaScript(*mini);
+        const AMini_JavaScript_SI* mini = dynamic_cast<const AMini_JavaScript_SI*>(other);
+        if (mini) return new AMini_JavaScript_SI(*mini);
 
         const AInterfaceToData* events = dynamic_cast<const AInterfaceToData*>(other);
         if (events) return new AInterfaceToData(*events);
@@ -46,11 +46,11 @@ public:
         const AInterfaceToGraph* graph = dynamic_cast<const AInterfaceToGraph*>(other);
         if (graph) return new AInterfaceToGraph(*graph);
 #ifdef GUI
-        const AInterfaceToMessageWindow* msg = dynamic_cast<const AInterfaceToMessageWindow*>(other);
-        if (msg) return new AInterfaceToMessageWindow(*msg);
+        const AMsg_SI* msg = dynamic_cast<const AMsg_SI*>(other);
+        if (msg) return new AMsg_SI(*msg);
 #endif
-        const AInterfaceToWebSocket* web = dynamic_cast<const AInterfaceToWebSocket*>(other);
-        if (web) return new AInterfaceToWebSocket(*web);
+        const AWeb_SI* web = dynamic_cast<const AWeb_SI*>(other);
+        if (web) return new AWeb_SI(*web);
 
         return 0;
     }

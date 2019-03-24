@@ -15,14 +15,14 @@ class QThread;
 
 class AScriptThreadBase;
 
-class AInterfaceToMultiThread : public AScriptInterface
+class AThreads_SI : public AScriptInterface
 {
     Q_OBJECT
 
 friend class AScriptThreadBase;
 
 public:
-    AInterfaceToMultiThread(AJavaScriptManager *MasterScriptManager);
+    AThreads_SI(AJavaScriptManager *MasterScriptManager);
 
     virtual void  ForceStop() override;
 

@@ -1,4 +1,4 @@
-#include "ainterfacetottree.h"
+#include "atree_si.h"
 #include "aroottreerecord.h"
 #include "tmpobjhubclass.h"
 
@@ -9,7 +9,7 @@
 #include "TBranch.h"
 #include "TLeaf.h"
 
-AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
+ATree_SI::ATree_SI(TmpObjHubClass *TmpHub) :
     TmpHub(TmpHub)
 {
     Description = "Interface to CERN ROOT Trees";
@@ -28,7 +28,7 @@ AInterfaceToTTree::AInterfaceToTTree(TmpObjHubClass *TmpHub) :
             "AO - vector of bools";
 }
 
-void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileName, const QString TreeNameInFile)
+void ATree_SI::LoadTree(const QString& TreeName, const QString& FileName, const QString TreeNameInFile)
 {
     if (!bGuiThread)
     {
@@ -50,7 +50,7 @@ void AInterfaceToTTree::LoadTree(const QString& TreeName, const QString& FileNam
     else abort("Failed to create tree "+ TreeName + ": " + ErrorString);
 }
 
-void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersOfBranches,
+void ATree_SI::NewTree(const QString &TreeName, const QVariant HeadersOfBranches,
                                 const QString StoreInFileName, int AutosaveAfterEntriesAdded)
 {
     if (!bGuiThread)
@@ -111,7 +111,7 @@ void AInterfaceToTTree::NewTree(const QString &TreeName, const QVariant HeadersO
     else abort("Failed to create tree: " + TreeName);
 }
 
-void AInterfaceToTTree::Fill(const QString &TreeName, const QVariant Array)
+void ATree_SI::Fill(const QString &TreeName, const QVariant Array)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -125,7 +125,7 @@ void AInterfaceToTTree::Fill(const QString &TreeName, const QVariant Array)
     }
 }
 
-int AInterfaceToTTree::GetNumEntries(const QString &TreeName) const
+int ATree_SI::GetNumEntries(const QString &TreeName) const
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -134,7 +134,7 @@ int AInterfaceToTTree::GetNumEntries(const QString &TreeName) const
         return r->countEntries();
 }
 
-const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName) const
+const QVariant ATree_SI::GetBranchNames(const QString &TreeName) const
 {
     QVariantList vl;
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
@@ -146,7 +146,7 @@ const QVariant AInterfaceToTTree::GetBranchNames(const QString &TreeName) const
     return vl;
 }
 
-const QVariant AInterfaceToTTree::GetBranchTypes(const QString &TreeName) const
+const QVariant ATree_SI::GetBranchTypes(const QString &TreeName) const
 {
     QVariantList vl;
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
@@ -158,7 +158,7 @@ const QVariant AInterfaceToTTree::GetBranchTypes(const QString &TreeName) const
     return vl;
 }
 
-const QVariant AInterfaceToTTree::GetAllTreeNames() const
+const QVariant ATree_SI::GetAllTreeNames() const
 {
     QStringList sl = TmpHub->Trees.getAllRecordNames();
 
@@ -167,13 +167,13 @@ const QVariant AInterfaceToTTree::GetAllTreeNames() const
     return vl;
 }
 
-bool AInterfaceToTTree::IsTreeExists(const QString &TreeName) const
+bool ATree_SI::IsTreeExists(const QString &TreeName) const
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     return r;
 }
 
-void AInterfaceToTTree::ResetTreeAddresses(const QString &TreeName)
+void ATree_SI::ResetTreeAddresses(const QString &TreeName)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -234,7 +234,7 @@ const QString AInterfaceToTTree::GetTreeStructure(const QString& TreeName)
 }
 */
 
-const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QString& BranchName)
+const QVariant ATree_SI::GetBranch(const QString& TreeName, const QString& BranchName)
 {
     QVariantList res;
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
@@ -457,7 +457,7 @@ const QVariant AInterfaceToTTree::GetBranch(const QString& TreeName, const QStri
     */
 }
 
-const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QString &BranchName, int EntryIndex)
+const QVariant ATree_SI::GetBranch(const QString &TreeName, const QString &BranchName, int EntryIndex)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -472,7 +472,7 @@ const QVariant AInterfaceToTTree::GetBranch(const QString &TreeName, const QStri
     return QVariant();
 }
 
-const QVariant AInterfaceToTTree::GetEntry(const QString &TreeName, int EntryIndex)
+const QVariant ATree_SI::GetEntry(const QString &TreeName, int EntryIndex)
 {
     ARootTreeRecord* r = dynamic_cast<ARootTreeRecord*>(TmpHub->Trees.getRecord(TreeName));
     if (!r)
@@ -520,7 +520,7 @@ const QVariantList assertMarkerLine(const QVariant& in)
     return out;
 }
 
-const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options,
+const QString ATree_SI::Draw(const QString &TreeName, const QString &what, const QString &cuts, const QString &options,
                                       const QVariant binsAndRanges, const QVariant markerAndLineAttributes, bool AbortIfFailedToDraw)
 {
     if (!bGuiThread)
@@ -567,7 +567,7 @@ const QString AInterfaceToTTree::Draw(const QString &TreeName, const QString &wh
     }
 }
 
-void AInterfaceToTTree::Save(const QString &TreeName, const QString &FileName)
+void ATree_SI::Save(const QString &TreeName, const QString &FileName)
 {
     if (!bGuiThread)
     {
@@ -587,7 +587,7 @@ void AInterfaceToTTree::Save(const QString &TreeName, const QString &FileName)
     }
 }
 
-void AInterfaceToTTree::FlushToFile(const QString &TreeName)
+void ATree_SI::FlushToFile(const QString &TreeName)
 {
     if (!bGuiThread)
     {
@@ -617,12 +617,12 @@ void AInterfaceToTTree::SetAutoSave(const QString &TreeName, int AutoSaveAfterEn
 }
 */
 
-bool AInterfaceToTTree::DeleteTree(const QString& TreeName)
+bool ATree_SI::DeleteTree(const QString& TreeName)
 {
     return TmpHub->Trees.remove(TreeName);
 }
 
-void AInterfaceToTTree::DeleteAllTrees()
+void ATree_SI::DeleteAllTrees()
 {
     TmpHub->Trees.clear();
 }

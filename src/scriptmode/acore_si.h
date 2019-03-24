@@ -10,13 +10,13 @@
 class AScriptManager;
 class CurveFit;
 
-class ACoreScriptInterface : public AScriptInterface
+class ACore_SI : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  explicit ACoreScriptInterface(AScriptManager *ScriptManager);
-  explicit ACoreScriptInterface(const ACoreScriptInterface& other);
+  explicit ACore_SI(AScriptManager *ScriptManager);
+  explicit ACore_SI(const ACore_SI& other);
 
   virtual bool IsMultithreadCapable() const override {return true;}
 

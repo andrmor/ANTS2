@@ -16,13 +16,13 @@
 
 class TmpObjHubClass;
 
-class AInterfaceToTTree : public AScriptInterface
+class ATree_SI : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-   AInterfaceToTTree(TmpObjHubClass *TmpHub);
-   ~AInterfaceToTTree() {}
+   ATree_SI(TmpObjHubClass *TmpHub);
+   ~ATree_SI() {}
 
 public slots:
    void     SetAbortIfAlreadyExists(bool flag) {bAbortIfExists = flag;}

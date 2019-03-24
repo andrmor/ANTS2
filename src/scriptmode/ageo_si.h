@@ -11,12 +11,12 @@
 class AGeoObject;
 class DetectorClass;
 
-class AInterfaceToAddObjScript : public AScriptInterface
+class AGeo_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AInterfaceToAddObjScript(DetectorClass* Detector);
-  ~AInterfaceToAddObjScript();
+  AGeo_SI(DetectorClass* Detector);
+  ~AGeo_SI();
 
   virtual bool InitOnRun();
 

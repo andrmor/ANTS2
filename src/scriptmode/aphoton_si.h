@@ -14,12 +14,12 @@ class TrackHolderClass;
 class AOneEvent;
 class TH1;
 
-class AInterfaceToPhotonScript : public AScriptInterface
+class APhoton_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-    AInterfaceToPhotonScript (AConfiguration* Config, EventsDataClass *EventsDataHub);
-    ~AInterfaceToPhotonScript();
+    APhoton_SI (AConfiguration* Config, EventsDataClass *EventsDataHub);
+    ~APhoton_SI();
 
 public slots:
     void ClearData();

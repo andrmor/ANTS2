@@ -1,4 +1,4 @@
-#include "ainterfacetomultithread.h"
+#include "athreads_si.h"
 #include "ajavascriptmanager.h"
 
 #include <QThread>
@@ -6,7 +6,7 @@
 #include <QtWidgets/QApplication>
 #include <QScriptEngine>
 
-AInterfaceToMultiThread::AInterfaceToMultiThread(AJavaScriptManager *ScriptManager) :
+AThreads_SI::AThreads_SI(AJavaScriptManager *ScriptManager) :
   MasterScriptManager(ScriptManager)
 {
   Description = "Allows to evaluate script or function in a new thread.\n"
@@ -15,13 +15,13 @@ AInterfaceToMultiThread::AInterfaceToMultiThread(AJavaScriptManager *ScriptManag
                 "Script or function can return any type of data, inclusing multi-level arrays and objects.";
 }
 
-void AInterfaceToMultiThread::ForceStop()
+void AThreads_SI::ForceStop()
 {
     qDebug() << ">Multithread module:  External abort received, aborting all threads";
     abortAll();
 }
 
-void AInterfaceToMultiThread::evaluateScript(const QString script)
+void AThreads_SI::evaluateScript(const QString script)
 {
     AJavaScriptManager* sm = MasterScriptManager->createNewScriptManager(workers.size(), bAbortIsGlobal);
     //  qDebug() << "Cloned SM. master:"<<MasterScriptManager<<"clone:"<<sm;
@@ -30,7 +30,7 @@ void AInterfaceToMultiThread::evaluateScript(const QString script)
     startEvaluation(sm, worker);
 }
 
-void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QVariant arguments)
+void AThreads_SI::evaluateFunction(const QVariant function, const QVariant arguments)
 {
     QString functionName;
 
@@ -56,14 +56,14 @@ void AInterfaceToMultiThread::evaluateFunction(const QVariant function, const QV
     startEvaluation(sm, worker);
 }
 
-void AInterfaceToMultiThread::startEvaluation(AJavaScriptManager* sm, AScriptThreadBase *worker)
+void AThreads_SI::startEvaluation(AJavaScriptManager* sm, AScriptThreadBase *worker)
 {
     workers << worker;
 
     QThread* t = new QThread();
     QObject::connect(t,  &QThread::started, worker, &AScriptThreadBase::Run);
     QObject::connect(sm, &AJavaScriptManager::onFinish, t, &QThread::quit);
-    QObject::connect(worker, &AScriptThreadBase::errorFound, this, &AInterfaceToMultiThread::onErrorInTread);
+    QObject::connect(worker, &AScriptThreadBase::errorFound, this, &AThreads_SI::onErrorInTread);
     QObject::connect(t, &QThread::finished, t, &QThread::deleteLater);
     worker->moveToThread(t);
     t->start();
@@ -71,7 +71,7 @@ void AInterfaceToMultiThread::startEvaluation(AJavaScriptManager* sm, AScriptThr
     //  qDebug() << "Started new thread!";
 }
 
-void AInterfaceToMultiThread::onErrorInTread(AScriptThreadBase *workerWithError)
+void AThreads_SI::onErrorInTread(AScriptThreadBase *workerWithError)
 {
     qDebug() << "Error in thread:"<<workerWithError;
 
@@ -82,7 +82,7 @@ void AInterfaceToMultiThread::onErrorInTread(AScriptThreadBase *workerWithError)
     if (bAbortIsGlobal) abort(msg);
 }
 
-void AInterfaceToMultiThread::waitForAll()
+void AThreads_SI::waitForAll()
 {
     while (countNotFinished() > 0)
       {
@@ -91,7 +91,7 @@ void AInterfaceToMultiThread::waitForAll()
       }
 }
 
-void AInterfaceToMultiThread::waitForOne(int IndexOfWorker)
+void AThreads_SI::waitForOne(int IndexOfWorker)
 {
   if (IndexOfWorker < 0 || IndexOfWorker >= workers.size()) return;
   if (!workers.at(IndexOfWorker)->isRunning()) return;
@@ -103,13 +103,13 @@ void AInterfaceToMultiThread::waitForOne(int IndexOfWorker)
     }
 }
 
-void AInterfaceToMultiThread::abortAll()
+void AThreads_SI::abortAll()
 {
   for (AScriptThreadBase* w : workers)
      if (w->isRunning()) w->abort();
 }
 
-void AInterfaceToMultiThread::abortOne(int IndexOfWorker)
+void AThreads_SI::abortOne(int IndexOfWorker)
 {
   if (IndexOfWorker < 0 || IndexOfWorker >= workers.size()) return;
   if (!workers.at(IndexOfWorker)->isRunning()) return;
@@ -117,12 +117,12 @@ void AInterfaceToMultiThread::abortOne(int IndexOfWorker)
   workers.at(IndexOfWorker)->abort();
 }
 
-int AInterfaceToMultiThread::countAll()
+int AThreads_SI::countAll()
 {
   return workers.size();
 }
 
-int AInterfaceToMultiThread::countNotFinished()
+int AThreads_SI::countNotFinished()
 {
   //  qDebug() << "Total number of workers:"<< workers.count();
   int counter = 0;
@@ -134,7 +134,7 @@ int AInterfaceToMultiThread::countNotFinished()
   return counter;
 }
 
-QVariant AInterfaceToMultiThread::getResult(int IndexOfWorker)
+QVariant AThreads_SI::getResult(int IndexOfWorker)
 {
   if (IndexOfWorker < 0 || IndexOfWorker >= workers.size()) return QString("Wrong worker index");
   if (workers.at(IndexOfWorker)->isRunning()) return QString("Still running");
@@ -142,7 +142,7 @@ QVariant AInterfaceToMultiThread::getResult(int IndexOfWorker)
   return workers.at(IndexOfWorker)->getResult();
 }
 
-bool AInterfaceToMultiThread::isAborted(int IndexOfWorker)
+bool AThreads_SI::isAborted(int IndexOfWorker)
 {
     if (IndexOfWorker < 0 || IndexOfWorker >= workers.size()) return false;
     if (workers.at(IndexOfWorker)->isRunning()) return false;
@@ -150,7 +150,7 @@ bool AInterfaceToMultiThread::isAborted(int IndexOfWorker)
     return workers.at(IndexOfWorker)->isAborted();
 }
 
-void AInterfaceToMultiThread::deleteAll()
+void AThreads_SI::deleteAll()
 {
     for (AScriptThreadBase* w : workers)
       if (w->isRunning())
@@ -163,7 +163,7 @@ void AInterfaceToMultiThread::deleteAll()
     workers.clear();
 }
 
-bool AInterfaceToMultiThread::deleteOne(int IndexOfWorker)
+bool AThreads_SI::deleteOne(int IndexOfWorker)
 {
    if (IndexOfWorker < 0 || IndexOfWorker >= workers.size())
    {

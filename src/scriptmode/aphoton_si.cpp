@@ -1,4 +1,4 @@
-#include "ainterfacetophotonscript.h"
+#include "aphoton_si.h"
 #include "aconfiguration.h"
 #include "aphotontracer.h"
 #include "detectorclass.h"
@@ -19,7 +19,7 @@
 #include <QDebug>
 #include <QFileInfo>
 
-AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, EventsDataClass* EventsDataHub) :
+APhoton_SI::APhoton_SI(AConfiguration* Config, EventsDataClass* EventsDataHub) :
     Config(Config), EventsDataHub(EventsDataHub), Detector(Config->GetDetector())
 {
     Event = new AOneEvent(Detector->PMs, Detector->RandGen, EventsDataHub->SimStat);
@@ -32,24 +32,24 @@ AInterfaceToPhotonScript::AInterfaceToPhotonScript(AConfiguration* Config, Event
     MaxNumberTracks = 1000;
 }
 
-AInterfaceToPhotonScript::~AInterfaceToPhotonScript()
+APhoton_SI::~APhoton_SI()
 {
     delete Tracer;
     delete Event;
 }
 
-void AInterfaceToPhotonScript::ClearData()
+void APhoton_SI::ClearData()
 {
     EventsDataHub->clear();
     clearTrackHolder();
 }
 
-void AInterfaceToPhotonScript::ClearTracks()
+void APhoton_SI::ClearTracks()
 {
     Detector->GeoManager->ClearTracks();
 }
 
-bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent)
+bool APhoton_SI::TracePhotons(int copies, double x, double y, double z, double vx, double vy, double vz, int iWave, double time, bool AddToPreviousEvent)
 {
     if (!initTracer()) return false;
 
@@ -75,7 +75,7 @@ bool AInterfaceToPhotonScript::TracePhotons(int copies, double x, double y, doub
     return true;
 }
 
-bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time, bool AddToPreviousEvent)
+bool APhoton_SI::TracePhotonsIsotropic(int copies, double x, double y, double z, int iWave, double time, bool AddToPreviousEvent)
 {
    if (!initTracer()) return false;
 
@@ -111,7 +111,7 @@ bool AInterfaceToPhotonScript::TracePhotonsIsotropic(int copies, double x, doubl
    return true;
 }
 
-bool AInterfaceToPhotonScript::TracePhotonsS2Isotropic(int copies, double x, double y, double zStart, double zStop, int iWave, double time, double dZmm_dTns, bool AddToPreviousEvent)
+bool APhoton_SI::TracePhotonsS2Isotropic(int copies, double x, double y, double zStart, double zStop, int iWave, double time, double dZmm_dTns, bool AddToPreviousEvent)
 {
     if (!initTracer()) return false;
 
@@ -156,7 +156,7 @@ bool AInterfaceToPhotonScript::TracePhotonsS2Isotropic(int copies, double x, dou
     return true;
 }
 
-void AInterfaceToPhotonScript::handleEventData(bool AddToPreviousEvent)
+void APhoton_SI::handleEventData(bool AddToPreviousEvent)
 {
     Event->HitsToSignal();
 
@@ -199,7 +199,7 @@ void AInterfaceToPhotonScript::handleEventData(bool AddToPreviousEvent)
     EventsDataHub->LastSimSet = simSet;
 }
 
-void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
+void APhoton_SI::SetHistoryFilters_Processes(QVariant MustInclude, QVariant MustNotInclude)
 {
   QVariantList vMI = MustInclude.toList();
   QJsonArray arMI = QJsonArray::fromVariantList(vMI);
@@ -220,7 +220,7 @@ void AInterfaceToPhotonScript::SetHistoryFilters_Processes(QVariant MustInclude,
     }
 }
 
-void AInterfaceToPhotonScript::SetHistoryFilters_Volumes(QVariant MustInclude, QVariant MustNotInclude)
+void APhoton_SI::SetHistoryFilters_Volumes(QVariant MustInclude, QVariant MustNotInclude)
 {
   QVariantList vMI = MustInclude.toList();
   QJsonArray arMI = QJsonArray::fromVariantList(vMI);
@@ -241,7 +241,7 @@ void AInterfaceToPhotonScript::SetHistoryFilters_Volumes(QVariant MustInclude, Q
     }
 }
 
-void AInterfaceToPhotonScript::ClearHistoryFilters()
+void APhoton_SI::ClearHistoryFilters()
 {
     EventsDataHub->SimStat->MustInclude_Processes.clear();
     EventsDataHub->SimStat->MustInclude_Volumes.clear();
@@ -249,87 +249,87 @@ void AInterfaceToPhotonScript::ClearHistoryFilters()
     EventsDataHub->SimStat->MustNotInclude_Volumes.clear();
 }
 
-void AInterfaceToPhotonScript::SetRandomGeneratorSeed(int seed)
+void APhoton_SI::SetRandomGeneratorSeed(int seed)
 {
     Detector->RandGen->SetSeed(seed);
 }
 
-long AInterfaceToPhotonScript::GetBulkAbsorbed() const
+long APhoton_SI::GetBulkAbsorbed() const
 {
     return EventsDataHub->SimStat->Absorbed;
 }
 
-long AInterfaceToPhotonScript::GetOverrideLoss() const
+long APhoton_SI::GetOverrideLoss() const
 {
     return EventsDataHub->SimStat->OverrideLoss;
 }
 
-long AInterfaceToPhotonScript::GetHitPM() const
+long APhoton_SI::GetHitPM() const
 {
     return EventsDataHub->SimStat->HitPM;
 }
 
-long AInterfaceToPhotonScript::GetHitDummy() const
+long APhoton_SI::GetHitDummy() const
 {
     return EventsDataHub->SimStat->HitDummy;
 }
 
-long AInterfaceToPhotonScript::GetEscaped() const
+long APhoton_SI::GetEscaped() const
 {
     return EventsDataHub->SimStat->Escaped;
 }
 
-long AInterfaceToPhotonScript::GetLossOnGrid() const
+long APhoton_SI::GetLossOnGrid() const
 {
     return EventsDataHub->SimStat->LossOnGrid;
 }
 
-long AInterfaceToPhotonScript::GetTracingSkipped() const
+long APhoton_SI::GetTracingSkipped() const
 {
     return EventsDataHub->SimStat->TracingSkipped;
 }
 
-long AInterfaceToPhotonScript::GetMaxCyclesReached() const
+long APhoton_SI::GetMaxCyclesReached() const
 {
     return EventsDataHub->SimStat->MaxCyclesReached;
 }
 
-long AInterfaceToPhotonScript::GetGeneratedOutsideGeometry() const
+long APhoton_SI::GetGeneratedOutsideGeometry() const
 {
     return EventsDataHub->SimStat->GeneratedOutsideGeometry;
 }
 
-long AInterfaceToPhotonScript::GetStoppedByMonitor() const
+long APhoton_SI::GetStoppedByMonitor() const
 {
     return EventsDataHub->SimStat->KilledByMonitor;
 }
 
-long AInterfaceToPhotonScript::GetFresnelTransmitted() const
+long APhoton_SI::GetFresnelTransmitted() const
 {
     return EventsDataHub->SimStat->FresnelTransmitted;
 }
 
-long AInterfaceToPhotonScript::GetFresnelReflected() const
+long APhoton_SI::GetFresnelReflected() const
 {
     return EventsDataHub->SimStat->FresnelReflected;
 }
 
-long AInterfaceToPhotonScript::GetRayleigh() const
+long APhoton_SI::GetRayleigh() const
 {
     return EventsDataHub->SimStat->Rayleigh;
 }
 
-long AInterfaceToPhotonScript::GetReemitted() const
+long APhoton_SI::GetReemitted() const
 {
     return EventsDataHub->SimStat->Reemission;
 }
 
-int AInterfaceToPhotonScript::GetHistoryLength() const
+int APhoton_SI::GetHistoryLength() const
 {
     return EventsDataHub->SimStat->PhotonHistoryLog.size();
 }
 
-QVariant AInterfaceToPhotonScript::GetHistory() const
+QVariant APhoton_SI::GetHistory() const
 {
   //qDebug() << "   get history triggered"<< EventsDataHub->SimStat->PhotonHistoryLog.capacity();
   QJsonArray arr;
@@ -365,13 +365,13 @@ QVariant AInterfaceToPhotonScript::GetHistory() const
   return arr.toVariantList();
 }
 
-void AInterfaceToPhotonScript::DeleteHistoryRecord(int iPhoton)
+void APhoton_SI::DeleteHistoryRecord(int iPhoton)
 {
     if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return;
     EventsDataHub->SimStat->PhotonHistoryLog.remove(iPhoton);
 }
 
-bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom)
+bool APhoton_SI::SaveHistoryToFile(QString FileName, bool AllowAppend, int StartFrom)
 {
     if (!AllowAppend && QFileInfo(FileName).exists())
       {
@@ -411,7 +411,7 @@ bool AInterfaceToPhotonScript::SaveHistoryToFile(QString FileName, bool AllowApp
     return true;
 }
 
-void AInterfaceToPhotonScript::AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth)
+void APhoton_SI::AddTrackFromHistory(int iPhoton, int TrackColor, int TrackWidth)
 {
     if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return;
 
@@ -429,12 +429,12 @@ void AInterfaceToPhotonScript::AddTrackFromHistory(int iPhoton, int TrackColor, 
     Detector->GeoManager->AddTrack(track);
 }
 
-int AInterfaceToPhotonScript::GetNumberOfTracks() const
+int APhoton_SI::GetNumberOfTracks() const
 {
     return Detector->GeoManager->GetNtracks();
 }
 
-QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
+QString APhoton_SI::PrintAllDefinedRecordMemebers()
 {
   QString s = "<br>Defined record fields:<br>";
   s += "process -> process type<br>";
@@ -448,12 +448,12 @@ QString AInterfaceToPhotonScript::PrintAllDefinedRecordMemebers()
   return s;
 }
 
-QString AInterfaceToPhotonScript::GetProcessName(int NodeType)
+QString APhoton_SI::GetProcessName(int NodeType)
 {
   return APhotonHistoryLog::GetProcessName(NodeType);
 }
 
-QString AInterfaceToPhotonScript::PrintRecord(int iPhoton, int iRecord)
+QString APhoton_SI::PrintRecord(int iPhoton, int iRecord)
 {
   if (iPhoton<0 || iPhoton>=EventsDataHub->SimStat->PhotonHistoryLog.size()) return "Invalid photon index";
   if (iRecord<0 || iRecord>=EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).size()) return "Invalid record index";
@@ -461,19 +461,19 @@ QString AInterfaceToPhotonScript::PrintRecord(int iPhoton, int iRecord)
   return EventsDataHub->SimStat->PhotonHistoryLog.at(iPhoton).at(iRecord).Print(Detector->MpCollection);
 }
 
-QString AInterfaceToPhotonScript::PrintAllDefinedProcessTypes()
+QString APhoton_SI::PrintAllDefinedProcessTypes()
 {
   return APhotonHistoryLog::PrintAllProcessTypes();
 }
 
-void AInterfaceToPhotonScript::clearTrackHolder()
+void APhoton_SI::clearTrackHolder()
 {
     for(int i=0; i<Tracks.size(); i++) delete Tracks[i];
     Tracks.clear();
     Tracks.squeeze();
 }
 
-bool AInterfaceToPhotonScript::initTracer()
+bool APhoton_SI::initTracer()
 {
     Tracer->UpdateGeoManager(Detector->GeoManager);
 
@@ -500,7 +500,7 @@ bool AInterfaceToPhotonScript::initTracer()
     return true;
 }
 
-void AInterfaceToPhotonScript::processTracks()
+void APhoton_SI::processTracks()
 {
     for (int iTr=0; iTr<Tracks.size(); iTr++)
     {
@@ -520,7 +520,7 @@ void AInterfaceToPhotonScript::processTracks()
     clearTrackHolder();
 }
 
-void AInterfaceToPhotonScript::normalizeVector(double *arr)
+void APhoton_SI::normalizeVector(double *arr)
 {
     double Norm = 0;
     for (int i=0;i<3;i++) Norm += arr[i]*arr[i];

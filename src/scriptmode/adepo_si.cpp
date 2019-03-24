@@ -1,4 +1,4 @@
-#include "ainterfacetodeposcript.h"
+#include "adepo_si.h"
 #include "eventsdataclass.h"
 #include "aenergydepositioncell.h"
 #include "aparticlerecord.h"
@@ -12,7 +12,7 @@
 #include "TGeoTrack.h"
 #include "TGeoManager.h"
 
-AInterfaceToDepoScript::AInterfaceToDepoScript(DetectorClass *Detector, EventsDataClass* EventsDataHub)
+ADepo_SI::ADepo_SI(DetectorClass *Detector, EventsDataClass* EventsDataHub)
   : Detector(Detector), EventsDataHub(EventsDataHub)
 {
   H["ClearStack"] = "Clear particle stack";
@@ -56,14 +56,14 @@ AInterfaceToDepoScript::AInterfaceToDepoScript(DetectorClass *Detector, EventsDa
   H["getAllDefinedTerminatorTypes"] = "Return array with all defined terminator types. Format of array element is 'index=type'";
 }
 
-AInterfaceToDepoScript::~AInterfaceToDepoScript()
+ADepo_SI::~ADepo_SI()
 {
     ClearExtractedData();
     ClearStack();
     clearEnergyVector();
 }
 
-void AInterfaceToDepoScript::ClearStack()
+void ADepo_SI::ClearStack()
 {
   //qDebug() << "Clear stack triggered";
 
@@ -76,7 +76,7 @@ void AInterfaceToDepoScript::ClearStack()
   //qDebug() << "Done";
 }
 
-void AInterfaceToDepoScript::AddParticleToStack(int particleID, double X, double Y, double Z,
+void ADepo_SI::AddParticleToStack(int particleID, double X, double Y, double Z,
                                                       double dX, double dY, double dZ,
                                                       double Time, double Energy,
                                                       int numCopies)
@@ -89,7 +89,7 @@ void AInterfaceToDepoScript::AddParticleToStack(int particleID, double X, double
     }
 }
 
-void AInterfaceToDepoScript::TrackStack(bool bDoTracks)
+void ADepo_SI::TrackStack(bool bDoTracks)
 {
   //qDebug() << "->Track stack triggered";
   ClearExtractedData();
@@ -104,12 +104,12 @@ void AInterfaceToDepoScript::TrackStack(bool bDoTracks)
   //qDebug() << "--->Particle records populated";
 }
 
-void AInterfaceToDepoScript::ClearExtractedData()
+void ADepo_SI::ClearExtractedData()
 {
     PR.clear();
 }
 
-void AInterfaceToDepoScript::populateParticleRecords()
+void ADepo_SI::populateParticleRecords()
 {
   ClearExtractedData();
   /*
@@ -175,7 +175,7 @@ void AInterfaceToDepoScript::populateParticleRecords()
 #include "aconfiguration.h"
 #include "apmhub.h"
 #include "amaterialparticlecolection.h"
-bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
+bool ADepo_SI::doTracking(bool bDoTracks)
 {
     clearEnergyVector();
     EventsDataHub->clear();
@@ -284,13 +284,13 @@ bool AInterfaceToDepoScript::doTracking(bool bDoTracks)
     return true;
 }
 
-void AInterfaceToDepoScript::clearEnergyVector()
+void ADepo_SI::clearEnergyVector()
 {
     for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
     EnergyVector.clear();
 }
 
-int AInterfaceToDepoScript::termination(int i)
+int ADepo_SI::termination(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -300,7 +300,7 @@ int AInterfaceToDepoScript::termination(int i)
   return PR.at(i).History->Termination;
 }
 
-QString AInterfaceToDepoScript::terminationStr(int i)
+QString ADepo_SI::terminationStr(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -325,7 +325,7 @@ QString AInterfaceToDepoScript::terminationStr(int i)
     }
 }
 
-double AInterfaceToDepoScript::dX(int i)
+double ADepo_SI::dX(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -335,7 +335,7 @@ double AInterfaceToDepoScript::dX(int i)
   return PR.at(i).History->dx;
 }
 
-double AInterfaceToDepoScript::dY(int i)
+double ADepo_SI::dY(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -345,7 +345,7 @@ double AInterfaceToDepoScript::dY(int i)
   return PR.at(i).History->dy;
 }
 
-double AInterfaceToDepoScript::dZ(int i)
+double ADepo_SI::dZ(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -355,7 +355,7 @@ double AInterfaceToDepoScript::dZ(int i)
   return PR.at(i).History->dz;
 }
 
-int AInterfaceToDepoScript::particleId(int i)
+int ADepo_SI::particleId(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -365,7 +365,7 @@ int AInterfaceToDepoScript::particleId(int i)
   return PR.at(i).History->ParticleId;
 }
 
-int AInterfaceToDepoScript::sernum(int i)
+int ADepo_SI::sernum(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -375,7 +375,7 @@ int AInterfaceToDepoScript::sernum(int i)
   return PR.at(i).History->index;
 }
 
-int AInterfaceToDepoScript::isSecondary(int i)
+int ADepo_SI::isSecondary(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -385,7 +385,7 @@ int AInterfaceToDepoScript::isSecondary(int i)
   return PR.at(i).History->isSecondary();
 }
 
-int AInterfaceToDepoScript::getParent(int i)
+int ADepo_SI::getParent(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -395,7 +395,7 @@ int AInterfaceToDepoScript::getParent(int i)
   return PR.at(i).History->SecondaryOf;
 }
 
-int AInterfaceToDepoScript::MaterialsCrossed_count(int i)
+int ADepo_SI::MaterialsCrossed_count(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -405,7 +405,7 @@ int AInterfaceToDepoScript::MaterialsCrossed_count(int i)
   return PR.at(i).History->Deposition.size();
 }
 
-int AInterfaceToDepoScript::MaterialsCrossed_matId(int i, int m)
+int ADepo_SI::MaterialsCrossed_matId(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -420,7 +420,7 @@ int AInterfaceToDepoScript::MaterialsCrossed_matId(int i, int m)
   return PR.at(i).History->Deposition.at(m).MaterialId;
 }
 
-int AInterfaceToDepoScript::MaterialsCrossed_energy(int i, int m)
+int ADepo_SI::MaterialsCrossed_energy(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -435,7 +435,7 @@ int AInterfaceToDepoScript::MaterialsCrossed_energy(int i, int m)
   return PR.at(i).History->Deposition.at(m).DepositedEnergy;
 }
 
-int AInterfaceToDepoScript::MaterialsCrossed_distance(int i, int m)
+int ADepo_SI::MaterialsCrossed_distance(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -450,7 +450,7 @@ int AInterfaceToDepoScript::MaterialsCrossed_distance(int i, int m)
   return PR.at(i).History->Deposition.at(m).Distance;
 }
 
-int AInterfaceToDepoScript::Deposition_countMaterials(int i)
+int ADepo_SI::Deposition_countMaterials(int i)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -460,7 +460,7 @@ int AInterfaceToDepoScript::Deposition_countMaterials(int i)
   return PR.at(i).Deposition.size();
 }
 
-int AInterfaceToDepoScript::Deposition_matId(int i, int m)
+int ADepo_SI::Deposition_matId(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -476,7 +476,7 @@ int AInterfaceToDepoScript::Deposition_matId(int i, int m)
   return PR.at(i).Deposition.at(m).MatId;
 }
 
-double AInterfaceToDepoScript::Deposition_startX(int i, int m)
+double ADepo_SI::Deposition_startX(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -492,7 +492,7 @@ double AInterfaceToDepoScript::Deposition_startX(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[0];
 }
 
-double AInterfaceToDepoScript::Deposition_startY(int i, int m)
+double ADepo_SI::Deposition_startY(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -508,7 +508,7 @@ double AInterfaceToDepoScript::Deposition_startY(int i, int m)
   return PR.at(i).Deposition.at(m).StartPosition[1];
 }
 
-double AInterfaceToDepoScript::Deposition_startZ(int i, int m)
+double ADepo_SI::Deposition_startZ(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -528,7 +528,7 @@ double AInterfaceToDepoScript::Deposition_startZ(int i, int m)
 #include "TGeoVolume.h"
 #include "TGeoNode.h"
 #include "detectorclass.h"
-QString AInterfaceToDepoScript::Deposition_volumeName(int i, int m)
+QString ADepo_SI::Deposition_volumeName(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -549,7 +549,7 @@ QString AInterfaceToDepoScript::Deposition_volumeName(int i, int m)
   else return "";
 }
 
-QString AInterfaceToDepoScript::Deposition_parentVolumeName(int i, int m)
+QString ADepo_SI::Deposition_parentVolumeName(int i, int m)
 {
     if (i<0 || i>PR.size()-1)
       {
@@ -572,7 +572,7 @@ QString AInterfaceToDepoScript::Deposition_parentVolumeName(int i, int m)
     return QString(mother->GetName());
 }
 
-int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
+int ADepo_SI::Deposition_volumeIndex(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -593,7 +593,7 @@ int AInterfaceToDepoScript::Deposition_volumeIndex(int i, int m)
   else return -1;
 }
 
-int AInterfaceToDepoScript::Deposition_parentVolumeIndex(int i, int m)
+int ADepo_SI::Deposition_parentVolumeIndex(int i, int m)
 {
     if (i<0 || i>PR.size()-1)
       {
@@ -621,7 +621,7 @@ int AInterfaceToDepoScript::Deposition_parentVolumeIndex(int i, int m)
     return node->GetNumber();
 }
 
-QString AInterfaceToDepoScript::Deposition_geoPath(int i, int m)
+QString ADepo_SI::Deposition_geoPath(int i, int m)
 {
     if (i<0 || i>PR.size()-1)
     {
@@ -643,7 +643,7 @@ QString AInterfaceToDepoScript::Deposition_geoPath(int i, int m)
     return navigator->GetPath();
 }
 
-double AInterfaceToDepoScript::Deposition_energy(int i, int m)
+double ADepo_SI::Deposition_energy(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -662,7 +662,7 @@ double AInterfaceToDepoScript::Deposition_energy(int i, int m)
   return energy;
 }
 
-int AInterfaceToDepoScript::Deposition_countNodes(int i, int m)
+int ADepo_SI::Deposition_countNodes(int i, int m)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -678,7 +678,7 @@ int AInterfaceToDepoScript::Deposition_countNodes(int i, int m)
   return PR.at(i).Deposition.at(m).ByMaterial.size();
 }
 
-double AInterfaceToDepoScript::Deposition_X(int i, int m, int n)
+double ADepo_SI::Deposition_X(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -698,7 +698,7 @@ double AInterfaceToDepoScript::Deposition_X(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[0];
 }
 
-double AInterfaceToDepoScript::Deposition_Y(int i, int m, int n)
+double ADepo_SI::Deposition_Y(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -718,7 +718,7 @@ double AInterfaceToDepoScript::Deposition_Y(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[1];
 }
 
-double AInterfaceToDepoScript::Deposition_Z(int i, int m, int n)
+double ADepo_SI::Deposition_Z(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -738,7 +738,7 @@ double AInterfaceToDepoScript::Deposition_Z(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).R[2];
 }
 
-double AInterfaceToDepoScript::Deposition_dE(int i, int m, int n)
+double ADepo_SI::Deposition_dE(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -758,7 +758,7 @@ double AInterfaceToDepoScript::Deposition_dE(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).Energy;
 }
 
-double AInterfaceToDepoScript::Deposition_dL(int i, int m, int n)
+double ADepo_SI::Deposition_dL(int i, int m, int n)
 {
   if (i<0 || i>PR.size()-1)
     {
@@ -778,7 +778,7 @@ double AInterfaceToDepoScript::Deposition_dL(int i, int m, int n)
   return PR.at(i).Deposition.at(m).ByMaterial.at(n).CellLength;
 }
 
-QVariantList AInterfaceToDepoScript::getAllDefinedTerminatorTypes()
+QVariantList ADepo_SI::getAllDefinedTerminatorTypes()
 {
     const QStringList defined = EventHistoryStructure::getAllDefinedTerminationTypes();
     QVariantList l;

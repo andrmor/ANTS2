@@ -890,7 +890,7 @@ void MainWindow::updateFileParticleGeneratorGui()
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
 #include "aparticlegeneratorinterface.h"
-#include "amathscriptinterface.h"
+#include "amath_si.h"
 
 void MainWindow::updateScriptParticleGeneratorGui()
 {
@@ -909,7 +909,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     gen->configure(&GP);
     gen->setObjectName("gen");
     sw->RegisterInterface(gen, "gen"); //takes ownership
-    AMathScriptInterface* math = new AMathScriptInterface(Detector->RandGen);
+    AMath_SI* math = new AMath_SI(Detector->RandGen);
     math->setObjectName("math");
     sw->RegisterInterface(math, "math"); //takes ownership
 

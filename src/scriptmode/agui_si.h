@@ -11,12 +11,12 @@ class AJavaScriptManager;
 class QWidget;
 class QLayout;
 
-class AInterfaceToGuiScript : public AScriptInterface
+class AGui_SI : public AScriptInterface
 {
     Q_OBJECT
 public:
-    AInterfaceToGuiScript(AJavaScriptManager* ScriptManager);
-    ~AInterfaceToGuiScript();
+    AGui_SI(AJavaScriptManager* ScriptManager);
+    ~AGui_SI();
 
     bool         InitOnRun() override;
     virtual void ForceStop() override;

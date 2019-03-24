@@ -1,4 +1,4 @@
-#include "ainterfacetoaddobjscript.h"
+#include "ageo_si.h"
 #include "amaterialparticlecolection.h"
 #include "ageoobject.h"
 #include "aslab.h"
@@ -9,7 +9,7 @@
 
 #include <QDebug>
 
-AInterfaceToAddObjScript::AInterfaceToAddObjScript(DetectorClass* Detector)
+AGeo_SI::AGeo_SI(DetectorClass* Detector)
   : Detector(Detector)
 {
   Description = "Allows to configure detector geometry. Based on CERN ROOT TGeoManager";
@@ -54,19 +54,19 @@ AInterfaceToAddObjScript::AInterfaceToAddObjScript(DetectorClass* Detector)
   H["RecalculateStack"] = "Recalculates xyz positions of the stack elements. Has to be called if config.Replace() was used to change thickness of the elements.";
 }
 
-AInterfaceToAddObjScript::~AInterfaceToAddObjScript()
+AGeo_SI::~AGeo_SI()
 {
   clearGeoObjects();
 }
 
-bool AInterfaceToAddObjScript::InitOnRun()
+bool AGeo_SI::InitOnRun()
 {
   //qDebug() << "Init on start for Geo script unit";
   clearGeoObjects();
   return true;
 }
 
-void AInterfaceToAddObjScript::Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container,
+void AGeo_SI::Box(QString name, double Lx, double Ly, double Lz, int iMat, QString container,
                                   double x, double y, double z, double phi, double theta, double psi)
 {
   AGeoObject* o = new AGeoObject(name, container, iMat,
@@ -75,7 +75,7 @@ void AInterfaceToAddObjScript::Box(QString name, double Lx, double Ly, double Lz
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Cylinder(QString name, double D, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::Cylinder(QString name, double D, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   AGeoObject* o = new AGeoObject(name, container, iMat,
                                  new AGeoTube(0.5*D, 0.5*h),
@@ -83,7 +83,7 @@ void AInterfaceToAddObjScript::Cylinder(QString name, double D, double h, int iM
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Polygone(QString name, int edges, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::Polygone(QString name, int edges, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   AGeoObject* o = new AGeoObject(name, container, iMat,
                                  new AGeoPolygon(edges, 0.5*h, 0.5*Dbot, 0.5*Dtop),
@@ -91,7 +91,7 @@ void AInterfaceToAddObjScript::Polygone(QString name, int edges, double Dtop, do
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Cone(QString name, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::Cone(QString name, double Dtop, double Dbot, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   AGeoObject* o = new AGeoObject(name, container, iMat,
                                  new AGeoCone(0.5*h, 0.5*Dbot, 0.5*Dtop),
@@ -99,7 +99,7 @@ void AInterfaceToAddObjScript::Cone(QString name, double Dtop, double Dbot, doub
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Sphere(QString name, double D, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::Sphere(QString name, double D, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   AGeoObject* o = new AGeoObject(name, container, iMat,
                                  new AGeoSphere(0.5*D),
@@ -107,7 +107,7 @@ void AInterfaceToAddObjScript::Sphere(QString name, double D, int iMat, QString 
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::Arb8(QString name, QVariant NodesX, QVariant NodesY, double h, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
   //qDebug() << NodesX << NodesY;
   QStringList lx = NodesX.toStringList();
@@ -149,7 +149,7 @@ void AInterfaceToAddObjScript::Arb8(QString name, QVariant NodesX, QVariant Node
   GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Monitor(QString name, int shape, double size1, double size2, QString container, double x, double y, double z, double phi, double theta, double psi, bool SensitiveTop, bool SensitiveBottom, bool StopsTraking)
+void AGeo_SI::Monitor(QString name, int shape, double size1, double size2, QString container, double x, double y, double z, double phi, double theta, double psi, bool SensitiveTop, bool SensitiveBottom, bool StopsTraking)
 {
     AGeoObject* o = new AGeoObject(name, container, 0,    // no material -> it will be updated on build
                                    0,                     // no shape yet
@@ -172,7 +172,7 @@ void AInterfaceToAddObjScript::Monitor(QString name, int shape, double size1, do
     GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave)
+void AGeo_SI::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave)
 {
     AGeoObject* o = 0;
     for (AGeoObject* obj : GeoObjects)
@@ -263,7 +263,7 @@ void AInterfaceToAddObjScript::Monitor_ConfigureForPhotons(QString MonitorName, 
     }
 }
 
-void AInterfaceToAddObjScript::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitivePrimary, bool SensitiveSecondary,
+void AGeo_SI::Monitor_ConfigureForParticles(QString MonitorName, int ParticleIndex, bool SensitivePrimary, bool SensitiveSecondary,
                                                             QVariant Position, QVariant Time, QVariant Angle, QVariant Energy)
 {
     AGeoObject* o = 0;
@@ -360,7 +360,7 @@ void AInterfaceToAddObjScript::Monitor_ConfigureForParticles(QString MonitorName
     }
 }
 
-void AInterfaceToAddObjScript::TGeo(QString name, QString GenerationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
+void AGeo_SI::TGeo(QString name, QString GenerationString, int iMat, QString container, double x, double y, double z, double phi, double theta, double psi)
 {
     AGeoObject* o = new AGeoObject(name, container, iMat,
                                    0,
@@ -420,7 +420,7 @@ void AInterfaceToAddObjScript::TGeo(QString name, QString GenerationString, int 
     GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::MakeStack(QString name, QString container)
+void AGeo_SI::MakeStack(QString name, QString container)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
     delete o->ObjectType;
@@ -428,7 +428,7 @@ void AInterfaceToAddObjScript::MakeStack(QString name, QString container)
     GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::InitializeStack(QString StackName, QString Origin_MemberName)
+void AGeo_SI::InitializeStack(QString StackName, QString Origin_MemberName)
 {
     AGeoObject* StackObj = 0;
     for (AGeoObject* obj : GeoObjects)
@@ -471,7 +471,7 @@ void AInterfaceToAddObjScript::InitializeStack(QString StackName, QString Origin
    StackObj->HostedObjects.clear();
 }
 
-void AInterfaceToAddObjScript::MakeGroup(QString name, QString container)
+void AGeo_SI::MakeGroup(QString name, QString container)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, 0,0,0, 0,0,0);
     delete o->ObjectType;
@@ -479,7 +479,7 @@ void AInterfaceToAddObjScript::MakeGroup(QString name, QString container)
     GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::RecalculateStack(QString name)
+void AGeo_SI::RecalculateStack(QString name)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
   if (!obj)
@@ -503,7 +503,7 @@ void AInterfaceToAddObjScript::RecalculateStack(QString name)
   Detector->BuildDetector_CallFromScript();
 }
 
-void AInterfaceToAddObjScript::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
+void AGeo_SI::Array(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ, QString container, double x, double y, double z, double psi)
 {
     AGeoObject* o = new AGeoObject(name, container, 0, 0, x,y,z, 0,0,psi);
     delete o->ObjectType;
@@ -511,7 +511,7 @@ void AInterfaceToAddObjScript::Array(QString name, int numX, int numY, int numZ,
     GeoObjects.append(o);
 }
 
-void AInterfaceToAddObjScript::ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
+void AGeo_SI::ReconfigureArray(QString name, int numX, int numY, int numZ, double stepX, double stepY, double stepZ)
 {
     AGeoObject* obj = Detector->Sandwich->World->findObjectByName(name);
     if (!obj)
@@ -530,7 +530,7 @@ void AInterfaceToAddObjScript::ReconfigureArray(QString name, int numX, int numY
     a->Reconfigure(numX, numY, numZ, stepX, stepY, stepZ);
 }
 
-void AInterfaceToAddObjScript::SetLine(QString name, int color, int width, int style)
+void AGeo_SI::SetLine(QString name, int color, int width, int style)
 {
   AGeoObject* obj = 0;
 
@@ -570,7 +570,7 @@ void AInterfaceToAddObjScript::SetLine(QString name, int color, int width, int s
     }
 }
 
-void AInterfaceToAddObjScript::ClearAll()
+void AGeo_SI::ClearAll()
 {
   clearGeoObjects();
 
@@ -578,7 +578,7 @@ void AInterfaceToAddObjScript::ClearAll()
   Detector->BuildDetector_CallFromScript();
 }
 
-void AInterfaceToAddObjScript::Remove(QString Object)
+void AGeo_SI::Remove(QString Object)
 {
     AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
     if (!obj)
@@ -594,7 +594,7 @@ void AInterfaceToAddObjScript::Remove(QString Object)
     }
 }
 
-void AInterfaceToAddObjScript::RemoveRecursive(QString Object)
+void AGeo_SI::RemoveRecursive(QString Object)
 {
     AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
     if (!obj)
@@ -605,12 +605,12 @@ void AInterfaceToAddObjScript::RemoveRecursive(QString Object)
     obj->recursiveSuicide();
 }
 
-void AInterfaceToAddObjScript::RemoveAllExceptWorld()
+void AGeo_SI::RemoveAllExceptWorld()
 {
   Detector->Sandwich->clearWorld();
 }
 
-void AInterfaceToAddObjScript::EnableObject(QString Object)
+void AGeo_SI::EnableObject(QString Object)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
   if (!obj)
@@ -622,7 +622,7 @@ void AInterfaceToAddObjScript::EnableObject(QString Object)
   obj->enableUp();
 }
 
-void AInterfaceToAddObjScript::DisableObject(QString Object)
+void AGeo_SI::DisableObject(QString Object)
 {
   AGeoObject* obj = Detector->Sandwich->World->findObjectByName(Object);
   if (!obj)
@@ -634,7 +634,7 @@ void AInterfaceToAddObjScript::DisableObject(QString Object)
   obj->fActive = false;
 }
 
-void AInterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
+void AGeo_SI::UpdateGeometry(bool CheckOverlaps)
 {
   //checkup
   for (int i=0; i<GeoObjects.size(); i++)
@@ -717,7 +717,7 @@ void AInterfaceToAddObjScript::UpdateGeometry(bool CheckOverlaps)
     }
 }
 
-void AInterfaceToAddObjScript::clearGeoObjects()
+void AGeo_SI::clearGeoObjects()
 {
     for (int i=0; i<GeoObjects.size(); i++)
         delete GeoObjects[i];

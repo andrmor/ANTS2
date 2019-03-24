@@ -10,14 +10,14 @@
 class AScriptManager;
 class AScriptMessengerDialog;
 
-class AInterfaceToMessageWindow : public AScriptInterface
+class AMsg_SI : public AScriptInterface
 {
   Q_OBJECT
 
 public:
-  AInterfaceToMessageWindow(AScriptManager *ScriptManager, QWidget *parent);
-  AInterfaceToMessageWindow(const AInterfaceToMessageWindow& other);
-  ~AInterfaceToMessageWindow();
+  AMsg_SI(AScriptManager *ScriptManager, QWidget *parent);
+  AMsg_SI(const AMsg_SI& other);
+  ~AMsg_SI();
 
   bool IsMultithreadCapable() const override {return true;}
 

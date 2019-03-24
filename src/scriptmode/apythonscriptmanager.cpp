@@ -3,8 +3,8 @@
 
 #include "apythonscriptmanager.h"
 #include "ascriptinterface.h"
-#include "amathscriptinterface.h"
-#include "acorescriptinterface.h"
+#include "amath_si.h"
+#include "acore_si.h"
 
 APythonScriptManager::APythonScriptManager(TRandom2 *RandGen) :
   AScriptManager(RandGen)
@@ -60,13 +60,13 @@ void APythonScriptManager::RegisterCoreInterfaces(bool bCore, bool bMath)
 {
     if (bCore)
     {
-        ACoreScriptInterface* coreObj = new ACoreScriptInterface(this);
+        ACore_SI* coreObj = new ACore_SI(this);
         RegisterInterface(coreObj, "core");
     }
 
     if (bMath)
     {
-        AMathScriptInterface* mathObj = new AMathScriptInterface(RandGen);
+        AMath_SI* mathObj = new AMath_SI(RandGen);
         RegisterInterface(mathObj, "MATH");
     }
 }

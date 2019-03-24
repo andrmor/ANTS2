@@ -6,9 +6,9 @@
 #include "aconfiguration.h"
 #include "ajavascriptmanager.h"
 #include "interfacetoglobscript.h"
-#include "ainterfacetoaddobjscript.h"
+#include "ageo_si.h"
 #include "histgraphinterfaces.h"
-#include "ainterfacetottree.h"
+#include "atree_si.h"
 #include "scriptminimizer.h"
 #include "aglobalsettings.h"
 #include "afiletools.h"
@@ -18,12 +18,12 @@
 #include "asandwich.h"
 #include "amessageoutput.h"
 #include "amessage.h"
-#include "ainterfacetodeposcript.h"
-#include "ainterfacetophotonscript.h"
-#include "ainterfacetomultithread.h"
-#include "ainterfacetowebsocket.h"
-#include "awebserverinterface.h"
-#include "aparticletrackinghistoryinterface.h"
+#include "adepo_si.h"
+#include "aphoton_si.h"
+#include "athreads_si.h"
+#include "aweb_si.h"
+#include "aserver_si.h"
+#include "atracklog_si.h"
 #include "asim_si.h"
 
 #ifdef ANTS_FLANN
@@ -42,7 +42,7 @@
 #ifdef GUI
 #include "mainwindow.h"
 #include "exampleswindow.h"
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #endif
 
 //Qt
@@ -240,9 +240,9 @@ int main(int argc, char *argv[])
         SM.RegisterCoreInterfaces();
         AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
         SM.RegisterInterface(conf, "config");
-        AInterfaceToAddObjScript* geo = new AInterfaceToAddObjScript(&Detector);
+        AGeo_SI* geo = new AGeo_SI(&Detector);
         SM.RegisterInterface(geo, "geo");
-        AInterfaceToMinimizerJavaScript* mini = new AInterfaceToMinimizerJavaScript(&SM);
+        AMini_JavaScript_SI* mini = new AMini_JavaScript_SI(&SM);
         SM.RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
         AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
         SM.RegisterInterface(dat, "events");
@@ -264,19 +264,19 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(graph, "graph");
         AInterfaceToHist* hist = new AInterfaceToHist(&TmpHub);
         SM.RegisterInterface(hist, "hist");
-        AInterfaceToTTree* tree = new AInterfaceToTTree(&TmpHub);
+        ATree_SI* tree = new ATree_SI(&TmpHub);
         SM.RegisterInterface(tree, "tree");
-        AInterfaceToPhotonScript* photon = new AInterfaceToPhotonScript(&Config, &EventsDataHub);
+        APhoton_SI* photon = new APhoton_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(photon, "photon");
-        AInterfaceToDepoScript* depo = new AInterfaceToDepoScript(&Detector, &EventsDataHub);
+        ADepo_SI* depo = new ADepo_SI(&Detector, &EventsDataHub);
         SM.RegisterInterface(depo, "depo");
-        AInterfaceToMultiThread* threads = new AInterfaceToMultiThread(&SM);
+        AThreads_SI* threads = new AThreads_SI(&SM);
         SM.RegisterInterface(threads, "threads");
-        AParticleTrackingHistoryInterface* pth = new AParticleTrackingHistoryInterface(EventsDataHub);
+        ATrackLog_SI* pth = new ATrackLog_SI(EventsDataHub);
         SM.RegisterInterface(pth, "tracklog");
-        AInterfaceToWebSocket* web = new AInterfaceToWebSocket(&EventsDataHub);
+        AWeb_SI* web = new AWeb_SI(&EventsDataHub);
         SM.RegisterInterface(web, "web");
-        AWebServerInterface* server = new AWebServerInterface(*Network.WebSocketServer, &EventsDataHub);
+        AServer_SI* server = new AServer_SI(*Network.WebSocketServer, &EventsDataHub);
         SM.RegisterInterface(server, "server");
 #ifdef ANTS_FLANN
         AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);

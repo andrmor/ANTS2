@@ -33,12 +33,12 @@ public:
   QVector<MaterialRecord> Deposition; // extracted data per material - from EnergyVector
 };
 
-class AInterfaceToDepoScript : public AScriptInterface
+class ADepo_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AInterfaceToDepoScript(DetectorClass* Detector, EventsDataClass* EventsDataHub);
-  ~AInterfaceToDepoScript();
+  ADepo_SI(DetectorClass* Detector, EventsDataClass* EventsDataHub);
+  ~ADepo_SI();
 
 private:
   DetectorClass* Detector;

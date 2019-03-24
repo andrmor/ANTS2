@@ -8,7 +8,7 @@
 
 class AScriptInterface;
 class TRandom2;
-class ACoreScriptInterface;
+class ACore_SI;
 class QElapsedTimer;
 
 class AScriptManager : public QObject

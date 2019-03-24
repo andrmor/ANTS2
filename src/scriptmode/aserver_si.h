@@ -9,13 +9,13 @@
 class AWebSocketSessionServer;
 class EventsDataClass;
 
-class AWebServerInterface: public AScriptInterface
+class AServer_SI: public AScriptInterface
 {
   Q_OBJECT
 
 public:
-    AWebServerInterface(AWebSocketSessionServer& Server, EventsDataClass* EventsDataHub);
-    ~AWebServerInterface() {}
+    AServer_SI(AWebSocketSessionServer& Server, EventsDataClass* EventsDataHub);
+    ~AServer_SI() {}
 
 public slots:
     void           SendText(const QString& message);

@@ -3,7 +3,7 @@
 #include "ascriptinterface.h"
 
 #ifdef GUI
-#include "ainterfacetomessagewindow.h"
+#include "amsg_si.h"
 #endif
 
 #include <QDebug>
@@ -38,7 +38,7 @@ void AScriptManager::hideMsgDialogs()
 {
   for (int i=0; i<interfaces.size(); i++)
   {
-      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
       if (t)  t->HideWidget();
     }
 }
@@ -47,7 +47,7 @@ void AScriptManager::restoreMsgDialogs()
 {
   for (int i=0; i<interfaces.size(); i++)
   {
-      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
       if (t) t->RestorelWidget();
   }
 }
@@ -56,7 +56,7 @@ void AScriptManager::deleteMsgDialogs()
 {
   for (int i=0; i<interfaces.size(); i++)
   {
-      AInterfaceToMessageWindow* t = dynamic_cast<AInterfaceToMessageWindow*>(interfaces[i]);
+      AMsg_SI* t = dynamic_cast<AMsg_SI*>(interfaces[i]);
       if (t)
       {
           // *** !!! t->deleteDialog(); //need by GenScriptWindow ?

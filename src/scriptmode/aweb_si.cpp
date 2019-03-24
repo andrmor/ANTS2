@@ -1,4 +1,4 @@
-#include "ainterfacetowebsocket.h"
+#include "aweb_si.h"
 #include "anetworkmodule.h"
 #include "awebsocketstandalonemessanger.h"
 #include "awebsocketsession.h"
@@ -11,29 +11,29 @@
 #include <QJsonDocument>
 #include <QFile>
 
-AInterfaceToWebSocket::AInterfaceToWebSocket(EventsDataClass *EventsDataHub) :
+AWeb_SI::AWeb_SI(EventsDataClass *EventsDataHub) :
     AScriptInterface(), EventsDataHub(EventsDataHub) {}
 
-AInterfaceToWebSocket::AInterfaceToWebSocket(const AInterfaceToWebSocket &other)
+AWeb_SI::AWeb_SI(const AWeb_SI &other)
 {
     compatibilitySocket = 0;
     socket = 0;
     EventsDataHub = other.EventsDataHub;
 }
 
-AInterfaceToWebSocket::~AInterfaceToWebSocket()
+AWeb_SI::~AWeb_SI()
 {
     if (compatibilitySocket) compatibilitySocket->deleteLater();
     if (socket) socket->deleteLater();
 }
 
-void AInterfaceToWebSocket::ForceStop()
+void AWeb_SI::ForceStop()
 {
     if (socket) socket->ExternalAbort();
     if (compatibilitySocket) compatibilitySocket->externalAbort();
 }
 
-void AInterfaceToWebSocket::SetTimeout(int milliseconds)
+void AWeb_SI::SetTimeout(int milliseconds)
 {
     TimeOut = milliseconds;
 
@@ -41,7 +41,7 @@ void AInterfaceToWebSocket::SetTimeout(int milliseconds)
     if (compatibilitySocket) compatibilitySocket->setTimeout(milliseconds);
 }
 
-const QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
+const QString AWeb_SI::SendTextMessage(const QString &Url, const QVariant& message, bool WaitForAnswer)
 {
     if (!compatibilitySocket)
     {
@@ -59,7 +59,7 @@ const QString AInterfaceToWebSocket::SendTextMessage(const QString &Url, const Q
     return compatibilitySocket->getReceivedMessage();
 }
 
-int AInterfaceToWebSocket::Ping(const QString &Url)
+int AWeb_SI::Ping(const QString &Url)
 {
     if (!compatibilitySocket)
     {
@@ -76,7 +76,7 @@ int AInterfaceToWebSocket::Ping(const QString &Url)
     return ping;
 }
 
-const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerOnConnection)
+const QString AWeb_SI::Connect(const QString &Url, bool GetAnswerOnConnection)
 {
     if (!socket)
     {
@@ -96,12 +96,12 @@ const QString AInterfaceToWebSocket::Connect(const QString &Url, bool GetAnswerO
     }
 }
 
-void AInterfaceToWebSocket::Disconnect()
+void AWeb_SI::Disconnect()
 {
     if (socket) socket->Disconnect();
 }
 
-int AInterfaceToWebSocket::GetAvailableThreads(const QString &IP, int port, bool ShowOutput)
+int AWeb_SI::GetAvailableThreads(const QString &IP, int port, bool ShowOutput)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);
 
@@ -129,7 +129,7 @@ int AInterfaceToWebSocket::GetAvailableThreads(const QString &IP, int port, bool
     return availableThreads;
 }
 
-const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, int threads, bool ShowOutput)
+const QString AWeb_SI::OpenSession(const QString &IP, int port, int threads, bool ShowOutput)
 {
     QString url = "ws://" + IP + ':' + QString::number(port);
     RequestedThreads = threads;
@@ -197,7 +197,7 @@ const QString AInterfaceToWebSocket::OpenSession(const QString &IP, int port, in
     return QString("Connected to ants2 server with ticket ") + ticket;
 }
 
-bool AInterfaceToWebSocket::SendConfig(QVariant config)
+bool AWeb_SI::SendConfig(QVariant config)
 {
     if (!socket)
     {
@@ -226,17 +226,17 @@ bool AInterfaceToWebSocket::SendConfig(QVariant config)
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteSimulatePhotonSources(const QString& SimTreeFileNamePattern, bool ShowOutput)
+bool AWeb_SI::RemoteSimulatePhotonSources(const QString& SimTreeFileNamePattern, bool ShowOutput)
 {
     return remoteSimulate(true, SimTreeFileNamePattern, ShowOutput);
 }
 
-bool AInterfaceToWebSocket::RemoteSimulateParticleSources(const QString &SimTreeFileNamePattern, bool ShowOutput)
+bool AWeb_SI::RemoteSimulateParticleSources(const QString &SimTreeFileNamePattern, bool ShowOutput)
 {
     return remoteSimulate(false, SimTreeFileNamePattern, ShowOutput);
 }
 
-bool AInterfaceToWebSocket::remoteSimulate(bool bPhotonSource, const QString& LocalSimTreeFileName, bool ShowOutput)
+bool AWeb_SI::remoteSimulate(bool bPhotonSource, const QString& LocalSimTreeFileName, bool ShowOutput)
 {
     if (!socket)
     {
@@ -305,7 +305,7 @@ bool AInterfaceToWebSocket::remoteSimulate(bool bPhotonSource, const QString& Lo
     return true;
 }
 
-bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo, bool ShowOutput)
+bool AWeb_SI::RemoteReconstructEvents(int eventsFrom, int eventsTo, bool ShowOutput)
 {
     if (!socket)
     {
@@ -385,7 +385,7 @@ bool AInterfaceToWebSocket::RemoteReconstructEvents(int eventsFrom, int eventsTo
     return true;
 }
 
-const QString AInterfaceToWebSocket::SendText(const QString &message)
+const QString AWeb_SI::SendText(const QString &message)
 {
     if (!socket)
     {
@@ -403,7 +403,7 @@ const QString AInterfaceToWebSocket::SendText(const QString &message)
     }
 }
 
-const QString AInterfaceToWebSocket::SendTicket(const QString &ticket)
+const QString AWeb_SI::SendTicket(const QString &ticket)
 {
     QString m = "__";
     m += "{\"ticket\" : \"";
@@ -413,7 +413,7 @@ const QString AInterfaceToWebSocket::SendTicket(const QString &ticket)
     return SendText(m);
 }
 
-const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
+const QString AWeb_SI::SendObject(const QVariant &object)
 {
     if (object.type() != QMetaType::QVariantMap)
     {
@@ -426,7 +426,7 @@ const QString AInterfaceToWebSocket::SendObject(const QVariant &object)
     return sendQJsonObject(js);
 }
 
-const QString AInterfaceToWebSocket::sendQJsonObject(const QJsonObject& json)
+const QString AWeb_SI::sendQJsonObject(const QJsonObject& json)
 {
     if (!socket)
     {
@@ -444,7 +444,7 @@ const QString AInterfaceToWebSocket::sendQJsonObject(const QJsonObject& json)
     }
 }
 
-const QString AInterfaceToWebSocket::sendQByteArray(const QByteArray &ba)
+const QString AWeb_SI::sendQByteArray(const QByteArray &ba)
 {
     if (!socket)
     {
@@ -462,7 +462,7 @@ const QString AInterfaceToWebSocket::sendQByteArray(const QByteArray &ba)
     }
 }
 
-const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
+const QString AWeb_SI::SendFile(const QString &fileName)
 {
     if (!socket)
     {
@@ -480,7 +480,7 @@ const QString AInterfaceToWebSocket::SendFile(const QString &fileName)
     }
 }
 
-const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
+const QString AWeb_SI::ResumeWaitForAnswer()
 {
     if (!socket)
     {
@@ -498,7 +498,7 @@ const QString AInterfaceToWebSocket::ResumeWaitForAnswer()
     }
 }
 
-const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
+const QVariant AWeb_SI::GetBinaryReplyAsObject()
 {
     if (!socket)
     {
@@ -513,7 +513,7 @@ const QVariant AInterfaceToWebSocket::GetBinaryReplyAsObject()
     return vm;
 }
 
-bool AInterfaceToWebSocket::SaveBinaryReplyToFile(const QString &fileName)
+bool AWeb_SI::SaveBinaryReplyToFile(const QString &fileName)
 {
     if (!socket)
     {

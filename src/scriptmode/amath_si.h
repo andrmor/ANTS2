@@ -7,14 +7,14 @@
 
 class TRandom2;
 
-class AMathScriptInterface : public AScriptInterface
+class AMath_SI : public AScriptInterface
 {
   Q_OBJECT
   Q_PROPERTY(double pi READ pi)
   double pi() const { return 3.141592653589793238462643383279502884; }
 
 public:
-  AMathScriptInterface(TRandom2* RandGen);
+  AMath_SI(TRandom2* RandGen);
   void setRandomGen(TRandom2* RandGen);
 
   virtual bool IsMultithreadCapable() const override {return true;}

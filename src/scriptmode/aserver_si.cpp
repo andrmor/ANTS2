@@ -1,4 +1,4 @@
-#include "awebserverinterface.h"
+#include "aserver_si.h"
 #include "awebsocketsessionserver.h"
 #include "eventsdataclass.h"
 
@@ -7,33 +7,33 @@
 #include <QJsonDocument>
 #include <QFile>
 
-AWebServerInterface::AWebServerInterface(AWebSocketSessionServer &Server, EventsDataClass *EventsDataHub) :
+AServer_SI::AServer_SI(AWebSocketSessionServer &Server, EventsDataClass *EventsDataHub) :
     AScriptInterface(), Server(Server), EventsDataHub(EventsDataHub)
 {
-    QObject::connect(&Server, &AWebSocketSessionServer::requestAbort, this, &AWebServerInterface::AbortScriptEvaluation);
+    QObject::connect(&Server, &AWebSocketSessionServer::requestAbort, this, &AServer_SI::AbortScriptEvaluation);
 }
 
-void AWebServerInterface::SendText(const QString &message)
+void AServer_SI::SendText(const QString &message)
 {
     Server.ReplyWithText(message);
 }
 
-void AWebServerInterface::SendFile(const QString &fileName)
+void AServer_SI::SendFile(const QString &fileName)
 {
     Server.ReplyWithBinaryFile(fileName);
 }
 
-void AWebServerInterface::SendObject(const QVariant &object)
+void AServer_SI::SendObject(const QVariant &object)
 {
     Server.ReplyWithBinaryObject(object);
 }
 
-void AWebServerInterface::SendObjectAsJSON(const QVariant &object)
+void AServer_SI::SendObjectAsJSON(const QVariant &object)
 {
     Server.ReplyWithBinaryObject_asJSON(object);
 }
 
-void AWebServerInterface::SendReconstructionData()
+void AServer_SI::SendReconstructionData()
 {
     QByteArray ba;
     EventsDataHub->packReconstructedToByteArray(ba);
@@ -41,17 +41,17 @@ void AWebServerInterface::SendReconstructionData()
     Server.ReplyWithQByteArray(ba);
 }
 
-bool AWebServerInterface::IsBufferEmpty() const
+bool AServer_SI::IsBufferEmpty() const
 {
     return Server.isBinaryEmpty();
 }
 
-void AWebServerInterface::ClearBuffer()
+void AServer_SI::ClearBuffer()
 {
     Server.clearBinary();
 }
 
-const QVariant AWebServerInterface::GetBufferAsObject() const
+const QVariant AServer_SI::GetBufferAsObject() const
 {
     const QByteArray& ba = Server.getBinary();
     QJsonDocument doc =  QJsonDocument::fromBinaryData(ba);
@@ -61,7 +61,7 @@ const QVariant AWebServerInterface::GetBufferAsObject() const
     return vm;
 }
 
-void AWebServerInterface::GetBufferAsEvents()
+void AServer_SI::GetBufferAsEvents()
 {
     const QByteArray& ba = Server.getBinary();
 
@@ -71,7 +71,7 @@ void AWebServerInterface::GetBufferAsEvents()
     else Server.sendOK();
 }
 
-bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
+bool AServer_SI::SaveBufferToFile(const QString &fileName)
 {
     const QByteArray& ba = Server.getBinary();
     qDebug() << "Preparing to save, ba size = " << ba.size();
@@ -87,12 +87,12 @@ bool AWebServerInterface::SaveBufferToFile(const QString &fileName)
     return true;
 }
 
-void AWebServerInterface::SendProgressReport(int percents)
+void AServer_SI::SendProgressReport(int percents)
 {
     Server.ReplyProgress(percents);
 }
 
-void AWebServerInterface::SetAcceptExternalProgressReport(bool flag)
+void AServer_SI::SetAcceptExternalProgressReport(bool flag)
 {
     Server.SetCanRetranslateProgress(flag);
 }

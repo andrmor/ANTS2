@@ -1,8 +1,8 @@
-#include "aparticletrackinghistoryinterface.h"
+#include "atracklog_si.h"
 #include "eventsdataclass.h"
 #include "ahistoryrecords.h"
 
-AParticleTrackingHistoryInterface::AParticleTrackingHistoryInterface(EventsDataClass &EventsDataHub) :
+ATrackLog_SI::ATrackLog_SI(EventsDataClass &EventsDataHub) :
     EventsDataHub(EventsDataHub), EventHistory(EventsDataHub.EventHistory)
 {
     H["countParticles"] = "Number of entries in the log";
@@ -26,7 +26,7 @@ AParticleTrackingHistoryInterface::AParticleTrackingHistoryInterface(EventsDataC
     H["saveHistoryToTree"] = "Save particle tracking log to a CERN root tree";
 }
 
-QVariantList AParticleTrackingHistoryInterface::getAllDefinedTerminatorTypes()
+QVariantList ATrackLog_SI::getAllDefinedTerminatorTypes()
 {
     const QStringList defined = EventHistoryStructure::getAllDefinedTerminationTypes();
     QVariantList l;
@@ -35,13 +35,13 @@ QVariantList AParticleTrackingHistoryInterface::getAllDefinedTerminatorTypes()
     return l;
 }
 
-int AParticleTrackingHistoryInterface::getTermination(int iParticle)
+int ATrackLog_SI::getTermination(int iParticle)
 {
     if (!checkParticle(iParticle)) return -1;
     return EventHistory.at(iParticle)->Termination;
 }
 
-QVariantList AParticleTrackingHistoryInterface::getDirection(int iParticle)
+QVariantList ATrackLog_SI::getDirection(int iParticle)
 {
     QVariantList vl;
     if (checkParticle(iParticle))
@@ -49,7 +49,7 @@ QVariantList AParticleTrackingHistoryInterface::getDirection(int iParticle)
     return vl;
 }
 
-QVariantList AParticleTrackingHistoryInterface::getInitialPosition(int iParticle)
+QVariantList ATrackLog_SI::getInitialPosition(int iParticle)
 {
     QVariantList vl;
     if (checkParticle(iParticle))
@@ -57,7 +57,7 @@ QVariantList AParticleTrackingHistoryInterface::getInitialPosition(int iParticle
     return vl;
 }
 
-int AParticleTrackingHistoryInterface::getParticleId(int iParticle)
+int ATrackLog_SI::getParticleId(int iParticle)
 {
     if (!checkParticle(iParticle)) return -1;
     return EventHistory.at(iParticle)->ParticleId;
@@ -69,49 +69,49 @@ int AParticleTrackingHistoryInterface::getParticleId(int iParticle)
 //    return EventHistory.at(i)->index;
 //}
 
-bool AParticleTrackingHistoryInterface::isSecondary(int iParticle)
+bool ATrackLog_SI::isSecondary(int iParticle)
 {
     if (!checkParticle(iParticle)) return false;
     return EventHistory.at(iParticle)->isSecondary();
 }
 
-int AParticleTrackingHistoryInterface::getParentIndex(int iParticle)
+int ATrackLog_SI::getParentIndex(int iParticle)
 {
     if (!checkParticle(iParticle)) return -1;
     return EventHistory.at(iParticle)->SecondaryOf;
 }
 
-double AParticleTrackingHistoryInterface::getInitialEnergy(int iParticle)
+double ATrackLog_SI::getInitialEnergy(int iParticle)
 {
     if (!checkParticle(iParticle)) return -1;
     return EventHistory.at(iParticle)->initialEnergy;
 }
 
-int AParticleTrackingHistoryInterface::countRecords(int iParticle)
+int ATrackLog_SI::countRecords(int iParticle)
 {
     if (!checkParticle(iParticle)) return 0;
     return EventHistory.at(iParticle)->Deposition.size();
 }
 
-int AParticleTrackingHistoryInterface::getRecordMaterial(int iParticle, int iRecord)
+int ATrackLog_SI::getRecordMaterial(int iParticle, int iRecord)
 {
     if (!checkParticleAndMaterial(iParticle, iRecord)) return -1;
     return EventHistory.at(iParticle)->Deposition.at(iRecord).MaterialId;
 }
 
-double AParticleTrackingHistoryInterface::getRecordDepositedEnergy(int iParticle, int iRecord)
+double ATrackLog_SI::getRecordDepositedEnergy(int iParticle, int iRecord)
 {
     if (!checkParticleAndMaterial(iParticle, iRecord)) return -1;
     return EventHistory.at(iParticle)->Deposition.at(iRecord).DepositedEnergy;
 }
 
-double AParticleTrackingHistoryInterface::getRecordDistance(int iParticle, int iRecord)
+double ATrackLog_SI::getRecordDistance(int iParticle, int iRecord)
 {
     if (!checkParticleAndMaterial(iParticle, iRecord)) return -1;
     return EventHistory.at(iParticle)->Deposition.at(iRecord).Distance;
 }
 
-bool AParticleTrackingHistoryInterface::checkParticle(int i)
+bool ATrackLog_SI::checkParticle(int i)
 {
     if (i<0 || i >= EventHistory.size())
     {
@@ -121,7 +121,7 @@ bool AParticleTrackingHistoryInterface::checkParticle(int i)
     return true;
 }
 
-bool AParticleTrackingHistoryInterface::checkParticleAndMaterial(int i, int m)
+bool ATrackLog_SI::checkParticleAndMaterial(int i, int m)
 {
     if (i<0 || i >= EventHistory.size())
     {
@@ -136,7 +136,7 @@ bool AParticleTrackingHistoryInterface::checkParticleAndMaterial(int i, int m)
     return true;
 }
 
-void AParticleTrackingHistoryInterface::saveHistoryToTree(QString fileName)
+void ATrackLog_SI::saveHistoryToTree(QString fileName)
 {
     EventsDataHub.saveEventHistoryToTree(fileName.toLatin1().data());
 }

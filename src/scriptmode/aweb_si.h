@@ -13,14 +13,14 @@ class AWebSocketStandaloneMessanger;
 class AWebSocketSession;
 class EventsDataClass;
 
-class AInterfaceToWebSocket: public AScriptInterface
+class AWeb_SI: public AScriptInterface
 {
   Q_OBJECT
 
 public:
-    AInterfaceToWebSocket(EventsDataClass* EventsDataHub);
-    AInterfaceToWebSocket(const AInterfaceToWebSocket& other);
-    ~AInterfaceToWebSocket();
+    AWeb_SI(EventsDataClass* EventsDataHub);
+    AWeb_SI(const AWeb_SI& other);
+    ~AWeb_SI();
 
     virtual bool IsMultithreadCapable() const {return true;}
     virtual void ForceStop();

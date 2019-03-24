@@ -328,11 +328,9 @@ SOURCES += main.cpp \
     common/aparticle.cpp \
     modules/amaterialparticlecolection.cpp\
     common/ascriptvalueconverter.cpp \
-    scriptmode/ainterfacetowebsocket.cpp \
     common/ainternetbrowser.cpp \
     Net/aroothttpserver.cpp \
     Net/anetworkmodule.cpp \
-    scriptmode/ainterfacetophotonscript.cpp \
     common/aphotonhistorylog.cpp \
     common/amonitor.cpp \
     common/aroothistappenders.cpp \
@@ -340,10 +338,8 @@ SOURCES += main.cpp \
     common/apeakfinder.cpp \
     common/amaterialcomposition.cpp \
     common/aneutroninteractionelement.cpp \
-    scriptmode/ainterfacetodeposcript.cpp \
     scriptmode/localscriptinterfaces.cpp \
     scriptmode/histgraphinterfaces.cpp \
-    scriptmode/ainterfacetomultithread.cpp \
     scriptmode/arootgraphrecord.cpp \
     scriptmode/aroothistrecord.cpp \
     common/arootobjcollection.cpp \
@@ -356,14 +352,11 @@ SOURCES += main.cpp \
     modules/apmhub.cpp \
     common/apmtype.cpp \
     modules/aoneevent.cpp \
-    scriptmode/ainterfacetottree.cpp \
     common/aroottreerecord.cpp \
-    scriptmode/ainterfacetoaddobjscript.cpp \
     scriptmode/ainterfacetogstylescript.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
-    scriptmode/awebserverinterface.cpp \
     common/agammarandomgenerator.cpp \
     Net/agridrunner.cpp \
     Net/aremoteserverrecord.cpp \
@@ -372,7 +365,6 @@ SOURCES += main.cpp \
     OpticalOverrides/ascriptopticaloverride.cpp \
     common/atracerstateful.cpp \
     common/aphoton.cpp \
-    scriptmode/amathscriptinterface.cpp \
     OpticalOverrides/fsnpopticaloverride.cpp \
     OpticalOverrides/awaveshifteroverride.cpp \
     OpticalOverrides/spectralbasicopticaloverride.cpp \
@@ -383,15 +375,25 @@ SOURCES += main.cpp \
     modules/afileparticlegenerator.cpp \
     scriptmode/aparticlegeneratorinterface.cpp \
     common/aparticlerecord.cpp \
-    scriptmode/acorescriptinterface.cpp \
     modules/asourceparticlegenerator.cpp \
-    scriptmode/aparticletrackinghistoryinterface.cpp \
     common/aisotopeabundancehandler.cpp \
     common/aisotope.cpp \
     common/achemicalelement.cpp \
     Simulation/ag4simulationsettings.cpp \
     gui/ageant4configdialog.cpp \
-    scriptmode/asim_si.cpp
+    scriptmode/asim_si.cpp \
+    scriptmode/adepo_si.cpp \
+    scriptmode/amath_si.cpp \
+    scriptmode/atree_si.cpp \
+    scriptmode/aphoton_si.cpp \
+    scriptmode/agui_si.cpp \
+    scriptmode/acore_si.cpp \
+    scriptmode/ageo_si.cpp \
+    scriptmode/aserver_si.cpp \
+    scriptmode/aweb_si.cpp \
+    scriptmode/athreads_si.cpp \
+    scriptmode/amsg_si.cpp \
+    scriptmode/atracklog_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -471,12 +473,10 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticle.h \
     modules/amaterialparticlecolection.h\
     common/ascriptvalueconverter.h \
-    scriptmode/ainterfacetowebsocket.h \
     common/ainternetbrowser.h \
     Net/aroothttpserver.h \
     Net/anetworkmodule.h \
     SplineLibrary/eiquadprog.hpp \
-    scriptmode/ainterfacetophotonscript.h \
     common/aphotonhistorylog.h \
     common/amonitor.h \
     common/aroothistappenders.h \
@@ -484,11 +484,9 @@ HEADERS  += common/CorrelationFilters.h \
     common/apeakfinder.h \
     common/amaterialcomposition.h \
     common/aneutroninteractionelement.h \
-    scriptmode/ainterfacetodeposcript.h \
     scriptmode/localscriptinterfaces.h \
     scriptmode/histgraphinterfaces.h \
     common/amessageoutput.h \
-    scriptmode/ainterfacetomultithread.h \
     scriptmode/ascriptinterfacefactory.h \
     scriptmode/arootgraphrecord.h \
     common/arootobjcollection.h \
@@ -502,21 +500,17 @@ HEADERS  += common/CorrelationFilters.h \
     modules/apmhub.h \
     common/apmtype.h \
     modules/aoneevent.h \
-    scriptmode/ainterfacetottree.h \
     common/aroottreerecord.h \
-    scriptmode/ainterfacetoaddobjscript.h \
     scriptmode/ainterfacetogstylescript.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
-    scriptmode/awebserverinterface.h \
     Net/agridrunner.h \
     Net/aremoteserverrecord.h \
     common/atrackbuildoptions.h \
     OpticalOverrides/aopticaloverridescriptinterface.h \
     OpticalOverrides/ascriptopticaloverride.h \
     common/atracerstateful.h \
-    scriptmode/amathscriptinterface.h \
     OpticalOverrides/fsnpopticaloverride.h \
     OpticalOverrides/awaveshifteroverride.h \
     OpticalOverrides/spectralbasicopticaloverride.h \
@@ -528,15 +522,25 @@ HEADERS  += common/CorrelationFilters.h \
     modules/afileparticlegenerator.h \
     scriptmode/aparticlegeneratorinterface.h \
     common/aparticlerecord.h \
-    scriptmode/acorescriptinterface.h \
     modules/asourceparticlegenerator.h \
-    scriptmode/aparticletrackinghistoryinterface.h \
     common/aisotopeabundancehandler.h \
     common/aisotope.h \
     common/achemicalelement.h \
     Simulation/ag4simulationsettings.h \
     gui/ageant4configdialog.h \
-    scriptmode/asim_si.h
+    scriptmode/asim_si.h \
+    scriptmode/adepo_si.h \
+    scriptmode/amath_si.h \
+    scriptmode/atree_si.h \
+    scriptmode/aphoton_si.h \
+    scriptmode/agui_si.h \
+    scriptmode/acore_si.h \
+    scriptmode/ageo_si.h \
+    scriptmode/aserver_si.h \
+    scriptmode/aweb_si.h \
+    scriptmode/athreads_si.h \
+    scriptmode/amsg_si.h \
+    scriptmode/atracklog_si.h
 
 # --- SIM ---
 ants2_SIM {
@@ -639,10 +643,8 @@ ants2_GUI {
     gui/aneutronreactionsconfigurator.cpp \
     gui/aneutronreactionwidget.cpp \
     gui/aneutroninfodialog.cpp \
-    scriptmode/ainterfacetomessagewindow.cpp \
     gui/GraphWindowTools/atoolboxscene.cpp \
     scriptmode/ascriptmessengerdialog.cpp \
-    scriptmode/ainterfacetoguiscript.cpp \
     gui/atextedit.cpp \
     gui/alineedit.cpp \
     gui/awebsocketserverdialog.cpp \
@@ -699,10 +701,8 @@ HEADERS  += gui/mainwindow.h \
     gui/aneutronreactionsconfigurator.h \
     gui/aneutronreactionwidget.h \
     gui/aneutroninfodialog.h \
-    scriptmode/ainterfacetomessagewindow.h \
     gui/GraphWindowTools/atoolboxscene.h \
     scriptmode/ascriptmessengerdialog.h \
-    scriptmode/ainterfacetoguiscript.h \
     gui/atextedit.h \
     gui/alineedit.h \
     gui/MainWindowTools/slabdelegate.h \

@@ -1,23 +1,23 @@
-#include "aparticlegeneratorinterface.h"
+#include "aparticlegenerator_si.h"
 #include "amaterialparticlecolection.h"
 #include "aparticlerecord.h"
 
 #include "TMath.h"
 #include "TRandom2.h"
 
-AParticleGeneratorInterface::AParticleGeneratorInterface(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen) :
+AParticleGenerator_SI::AParticleGenerator_SI(const AMaterialParticleCollection & MpCollection, TRandom2 *RandGen) :
     MpCollection(MpCollection), RandGen(RandGen)
 {
     H["AddParticle"] = "Adds particle to track to this event";
     H["AddParticleIsotropic"] = "Adds particle to track to this event. The particle's direction is randomly generated (isotropic)";
 }
 
-void AParticleGeneratorInterface::configure(QVector<AParticleRecord*> * GeneratedParticles)
+void AParticleGenerator_SI::configure(QVector<AParticleRecord*> * GeneratedParticles)
 {
     GP = GeneratedParticles;
 }
 
-void AParticleGeneratorInterface::AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time)
+void AParticleGenerator_SI::AddParticle(int type, double energy, double x, double y, double z, double i, double k, double j, double time)
 {
     if (type < 0 || type >= MpCollection.countParticles())
         abort("Invalid particle Id");
@@ -32,7 +32,7 @@ void AParticleGeneratorInterface::AddParticle(int type, double energy, double x,
     }
 }
 
-void AParticleGeneratorInterface::AddParticleIsotropic(int type, double energy, double x, double y, double z, double time)
+void AParticleGenerator_SI::AddParticleIsotropic(int type, double energy, double x, double y, double z, double time)
 {
     if (type < 0 || type >= MpCollection.countParticles())
         abort("Invalid particle Id");

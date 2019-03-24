@@ -27,13 +27,14 @@
 #include "atree_si.h"
 #include "atracklog_si.h"
 #include "asim_si.h"
+#include "aconfig_si.h"
 
 #ifdef ANTS_FLANN
-  #include "ainterfacetoknnscript.h"
+  #include "aknn_si.h"
 #endif
 
 #ifdef ANTS_FANN
-  #include "ainterfacetoannscript.h"
+  #include "AAnn_SI.h"
 #endif
 
 void MainWindow::createPythonScriptWindow()
@@ -48,7 +49,7 @@ void MainWindow::createPythonScriptWindow()
   // interface objects are owned after this by the ScriptManager!
   PythonScriptWindow->RegisterCoreInterfaces();
 
-  AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
+  AConfig_SI* conf = new AConfig_SI(Config);
   QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
   PythonScriptWindow->RegisterInterface(conf, "config");
 
@@ -107,12 +108,12 @@ void MainWindow::createPythonScriptWindow()
   ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
-  AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
+  AKnn_SI* knn = new AKnn_SI(ReconstructionManager->KNNmodule);
   PythonScriptWindow->RegisterInterface(knn, "knn");
 #endif
 
 #ifdef ANTS_FANN
-  //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+  //AAnn_SI* ann = new AAnn_SI();
   //PythonScriptWindow->RegisterInterface(ann, "ann");
 #endif
 

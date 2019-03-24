@@ -6,6 +6,7 @@
 #include "localscriptinterfaces.h"
 #include "acore_si.h"
 #include "amath_si.h"
+#include "aconfig_si.h"
 #include "histgraphinterfaces.h"
 #include "interfacetoglobscript.h"
 #include "amessage.h"
@@ -887,7 +888,7 @@ void AScriptWindow::updateJsonTree()
 
   for (int i=0; i<ScriptManager->interfaces.size(); i++)
     {
-      AInterfaceToConfig* inter = dynamic_cast<AInterfaceToConfig*>(ScriptManager->interfaces[i]);
+      AConfig_SI* inter = dynamic_cast<AConfig_SI*>(ScriptManager->interfaces[i]);
       if (!inter) continue;
 
       QJsonObject json = inter->Config->JSON;

@@ -3,15 +3,16 @@
 
 #include "localscriptinterfaces.h"
 
+#include <QObject>
 #include <QVariant>
 
 class NNmoduleClass;
 
-class AInterfaceToKnnScript : public AScriptInterface
+class AKnn_SI : public AScriptInterface
 {
   Q_OBJECT
 public:
-  AInterfaceToKnnScript(NNmoduleClass *knnModule);
+  AKnn_SI(NNmoduleClass *knnModule);
 
 public slots:
   // Main functionality

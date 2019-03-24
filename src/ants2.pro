@@ -93,9 +93,9 @@ ants2_flann {
 
     HEADERS += modules/nnmoduleclass.h
     SOURCES += modules/nnmoduleclass.cpp
-
-    HEADERS += scriptmode/ainterfacetoknnscript.h
-    SOURCES += scriptmode/ainterfacetoknnscript.cpp
+      #interface to script module
+    HEADERS += scriptmode/aknn_si.h
+    SOURCES += scriptmode/aknn_si.cpp
 }
 #----------
 
@@ -119,8 +119,8 @@ ants2_fann {
     HEADERS += gui/neuralnetworkswindow.h
     SOURCES += gui/neuralnetworkswindow.cpp
       #interface to script module
-    HEADERS += scriptmode/ainterfacetoannscript.h
-    SOURCES += scriptmode/ainterfacetoannscript.cpp
+    HEADERS += scriptmode/aann_si.h
+    SOURCES += scriptmode/aann_si.cpp
 }
 #---------
 
@@ -353,7 +353,6 @@ SOURCES += main.cpp \
     common/apmtype.cpp \
     modules/aoneevent.cpp \
     common/aroottreerecord.cpp \
-    scriptmode/ainterfacetogstylescript.cpp \
     Net/awebsocketsessionserver.cpp \
     Net/awebsocketstandalonemessanger.cpp \
     Net/awebsocketsession.cpp \
@@ -373,7 +372,6 @@ SOURCES += main.cpp \
     common/aparticlesourcerecord.cpp \
     modules/ascriptparticlegenerator.cpp \
     modules/afileparticlegenerator.cpp \
-    scriptmode/aparticlegeneratorinterface.cpp \
     common/aparticlerecord.cpp \
     modules/asourceparticlegenerator.cpp \
     common/aisotopeabundancehandler.cpp \
@@ -393,7 +391,10 @@ SOURCES += main.cpp \
     scriptmode/aweb_si.cpp \
     scriptmode/athreads_si.cpp \
     scriptmode/amsg_si.cpp \
-    scriptmode/atracklog_si.cpp
+    scriptmode/atracklog_si.cpp \
+    scriptmode/aparticlegenerator_si.cpp \
+    scriptmode/agstyle_si.cpp \
+    scriptmode/aconfig_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -501,7 +502,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/apmtype.h \
     modules/aoneevent.h \
     common/aroottreerecord.h \
-    scriptmode/ainterfacetogstylescript.h \
     Net/awebsocketsessionserver.h \
     Net/awebsocketstandalonemessanger.h \
     Net/awebsocketsession.h \
@@ -520,7 +520,6 @@ HEADERS  += common/CorrelationFilters.h \
     common/aparticlegun.h \
     modules/ascriptparticlegenerator.h \
     modules/afileparticlegenerator.h \
-    scriptmode/aparticlegeneratorinterface.h \
     common/aparticlerecord.h \
     modules/asourceparticlegenerator.h \
     common/aisotopeabundancehandler.h \
@@ -540,7 +539,10 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/aweb_si.h \
     scriptmode/athreads_si.h \
     scriptmode/amsg_si.h \
-    scriptmode/atracklog_si.h
+    scriptmode/atracklog_si.h \
+    scriptmode/aparticlegenerator_si.h \
+    scriptmode/agstyle_si.h \
+    scriptmode/aconfig_si.h
 
 # --- SIM ---
 ants2_SIM {

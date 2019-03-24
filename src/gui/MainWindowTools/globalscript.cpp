@@ -20,6 +20,7 @@
 #include "atree_si.h"
 #include "atracklog_si.h"
 #include "asim_si.h"
+#include "aconfig_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -32,11 +33,11 @@
 #include "checkupwindowclass.h"
 
 #ifdef ANTS_FLANN
-  #include "ainterfacetoknnscript.h"
+  #include "aknn_si.h"
 #endif
 
 #ifdef ANTS_FANN
-  #include "ainterfacetoannscript.h"
+  #include "AAnn_SI.h"
 #endif
 
 #include <QDebug>
@@ -60,7 +61,7 @@ void MainWindow::createScriptWindow()
     AThreads_SI* threads = new AThreads_SI(SM);
     ScriptWindow->RegisterInterface(threads, "threads");
 
-    AInterfaceToConfig* conf = new AInterfaceToConfig(Config);
+    AConfig_SI* conf = new AConfig_SI(Config);
     QObject::connect(conf, SIGNAL(requestReadRasterGeometry()), GeometryWindow, SLOT(readRasterWindowProperties()));
     ScriptWindow->RegisterInterface(conf, "config");
 
@@ -123,12 +124,12 @@ void MainWindow::createScriptWindow()
     ScriptWindow->RegisterInterface(pth, "tracklog");
 
 #ifdef ANTS_FLANN
-    AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager->KNNmodule);
+    AKnn_SI* knn = new AKnn_SI(ReconstructionManager->KNNmodule);
     ScriptWindow->RegisterInterface(knn, "knn");
 #endif
 
 #ifdef ANTS_FANN
-    //AInterfaceToANNScript* ann = new AInterfaceToANNScript();
+    //AAnn_SI* ann = new AAnn_SI();
     //ScriptWindow->RegisterInterface(ann, "ann");
 #endif
 

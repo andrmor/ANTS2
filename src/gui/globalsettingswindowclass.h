@@ -5,7 +5,7 @@
 
 class MainWindow;
 class ANetworkModule;
-class AInterfaceToGStyleScript;
+class AGStyle_SI;
 
 namespace Ui {
   class GlobalSettingsWindowClass;
@@ -22,7 +22,7 @@ public:
   void updateGUI();
   void SetTab(int iTab);
 
-  AInterfaceToGStyleScript* GStyleInterface = 0;  // if created -> owned by the script manager
+  AGStyle_SI* GStyleInterface = 0;  // if created -> owned by the script manager
 
 protected:
     bool event(QEvent *event);

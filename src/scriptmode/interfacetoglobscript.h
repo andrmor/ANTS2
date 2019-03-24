@@ -33,49 +33,6 @@ class QJsonValue;
 
 // ====== interfaces which do not require GUI ======
 
-// ---- C O N F I G U R A T I O N ----
-class AInterfaceToConfig : public AScriptInterface
-{
-  Q_OBJECT
-
-public:
-  AInterfaceToConfig(AConfiguration* config);
-  AInterfaceToConfig(const AInterfaceToConfig &other);
-  ~AInterfaceToConfig(){}
-
-  virtual bool IsMultithreadCapable() const override {return true;}
-
-  AConfiguration* Config;
-  QString LastError;
-
-public slots:
-  bool Load(QString FileName);
-  bool Save(QString FileName);
-
-  const QVariant GetConfig() const;
-  bool SetConfig(const QVariant& conf);
-
-  void ExportToGDML(QString FileName);
-
-  bool Replace(QString Key, QVariant val);
-  QVariant GetKeyValue(QString Key);
-
-  QString GetLastError();
-
-  void RebuildDetector();
-  void UpdateGui();
-
-signals:
-  void requestReadRasterGeometry();
-
-private:
-  bool modifyJsonValue(QJsonObject& obj, const QString& path, const QJsonValue& newValue);
-  void find(const QJsonObject &obj, QStringList Keys, QStringList& Found, QString Path = "");
-  bool keyToNameAndIndex(QString Key, QString &Name, QVector<int> &Indexes);
-  bool expandKey(QString &Key);
-
-};
-
 // ---- R E C O N S T R U C T I O N ----
 class InterfaceToReconstructor : public AScriptInterface
 {

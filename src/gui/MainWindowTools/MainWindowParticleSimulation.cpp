@@ -889,7 +889,7 @@ void MainWindow::updateFileParticleGeneratorGui()
 
 #include "ajavascriptmanager.h"
 #include "ascriptwindow.h"
-#include "aparticlegeneratorinterface.h"
+#include "aparticlegenerator_si.h"
 #include "amath_si.h"
 
 void MainWindow::updateScriptParticleGeneratorGui()
@@ -904,7 +904,7 @@ void MainWindow::on_pbParticleGenerationScript_clicked()
     AScriptWindow* sw = new AScriptWindow(sm, true, this);
     sw->EnableAcceptReject();
 
-    AParticleGeneratorInterface* gen = new AParticleGeneratorInterface(*Detector->MpCollection, Detector->RandGen);
+    AParticleGenerator_SI* gen = new AParticleGenerator_SI(*Detector->MpCollection, Detector->RandGen);
     QVector<AParticleRecord*> GP;
     gen->configure(&GP);
     gen->setObjectName("gen");

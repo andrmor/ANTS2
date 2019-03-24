@@ -4,7 +4,7 @@
 #include "anetworkmodule.h"
 #include "ajavascriptmanager.h"
 #include "amessage.h"
-#include "ainterfacetogstylescript.h"
+#include "agstyle_si.h"
 
 #ifdef GUI
 #include "globalsettingswindowclass.h"
@@ -90,7 +90,7 @@ AGlobalSettings::AGlobalSettings()
     {
         //running root TStyle script
         AJavaScriptManager* SM = new AJavaScriptManager(0);
-        AInterfaceToGStyleScript* GStyleInterface  = new  AInterfaceToGStyleScript(); //deleted by the SM
+        AGStyle_SI* GStyleInterface  = new  AGStyle_SI(); //deleted by the SM
         SM->RegisterInterfaceAsGlobal(GStyleInterface);
         SM->Evaluate(RootStyleScript);
         SM->deleteLater();

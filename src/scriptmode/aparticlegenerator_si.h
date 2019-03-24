@@ -3,18 +3,19 @@
 
 #include "ascriptinterface.h"
 
+#include <QObject>
 #include <QVector>
 
 class AParticleRecord;
 class AMaterialParticleCollection;
 class TRandom2;
 
-class AParticleGeneratorInterface : public AScriptInterface
+class AParticleGenerator_SI : public AScriptInterface
 {
     Q_OBJECT
 
 public:
-    AParticleGeneratorInterface(const AMaterialParticleCollection & MpCollection, TRandom2 * RandGen);
+    AParticleGenerator_SI(const AMaterialParticleCollection & MpCollection, TRandom2 * RandGen);
 
     void configure(QVector<AParticleRecord*> * GeneratedParticles);
 

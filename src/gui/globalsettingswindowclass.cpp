@@ -8,7 +8,7 @@
 #include "amessage.h"
 #include "anetworkmodule.h"
 #include "geometrywindowclass.h"
-#include "ainterfacetogstylescript.h"
+#include "agstyle_si.h"
 
 //Qt
 #include <QFileDialog>
@@ -155,7 +155,7 @@ void GlobalSettingsWindowClass::on_pbgStyleScript_clicked()
                               "Script to set ROOT's gStyle",
                               example);
 
-    GStyleInterface = new AInterfaceToGStyleScript();
+    GStyleInterface = new AGStyle_SI();
     MW->GenScriptWindow->RegisterInterfaceAsGlobal(GStyleInterface);
     MW->GenScriptWindow->UpdateGui();
 

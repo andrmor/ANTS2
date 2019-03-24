@@ -8,6 +8,8 @@
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "aweb_si.h"
+#include "aconfig_si.h"
+
 #ifdef GUI
 #include "amsg_si.h"
 #endif
@@ -25,8 +27,8 @@ public:
         const AMath_SI* math = dynamic_cast<const AMath_SI*>(other);
         if (math) return new AMath_SI(*math);
 
-        const AInterfaceToConfig* config = dynamic_cast<const AInterfaceToConfig*>(other);
-        if (config) return new AInterfaceToConfig(*config);
+        const AConfig_SI* config = dynamic_cast<const AConfig_SI*>(other);
+        if (config) return new AConfig_SI(*config);
 
         const AMini_JavaScript_SI* mini = dynamic_cast<const AMini_JavaScript_SI*>(other);
         if (mini) return new AMini_JavaScript_SI(*mini);

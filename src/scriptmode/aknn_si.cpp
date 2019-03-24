@@ -1,10 +1,10 @@
-#include "ainterfacetoknnscript.h"
+#include "aknn_si.h"
 #include "nnmoduleclass.h"
 
 #include <QDebug>
 #include <limits>
 
-AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModule(knnModule)
+AKnn_SI::AKnn_SI(NNmoduleClass* knnModule) : knnModule(knnModule)
 {
     H["getNeighbours"] = "Returns array of [eventIndex, distance] - there will be numNeighbours elements";
     H["SetSignalNormalizationType"] = "Set pre-processing of event signal before setting as calibration or processing by knn:\n"
@@ -14,7 +14,7 @@ AInterfaceToKnnScript::AInterfaceToKnnScript(NNmoduleClass* knnModule) : knnModu
             "filterOutEventsWithSmallerDistance option sets which events to cut - with smaller or large value than the limit.";
 }
 
-QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
+QVariant AKnn_SI::getNeighbours(int ievent, int numNeighbours)
 {    
     QVariant res = knnModule->ScriptInterfacer->getNeighbours(ievent, numNeighbours);
     if (res == QVariantList())
@@ -24,7 +24,7 @@ QVariant AInterfaceToKnnScript::getNeighbours(int ievent, int numNeighbours)
     return res;
 }
 
-QVariant AInterfaceToKnnScript::getNeighboursDirect(QVariant onePoint, int numNeighbours)
+QVariant AKnn_SI::getNeighboursDirect(QVariant onePoint, int numNeighbours)
 {
   QVariantList VarList = onePoint.toList();
   if (VarList.isEmpty())
@@ -46,7 +46,7 @@ QVariant AInterfaceToKnnScript::getNeighboursDirect(QVariant onePoint, int numNe
   return res;
 }
 
-void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance)
+void AKnn_SI::filterByDistance(int numNeighbours, double distanceLimit, bool filterOutEventsWithSmallerDistance)
 {
     bool ok = knnModule->ScriptInterfacer->filterByDistance(numNeighbours, distanceLimit, filterOutEventsWithSmallerDistance);
     if (!ok)
@@ -56,29 +56,29 @@ void AInterfaceToKnnScript::filterByDistance(int numNeighbours, double distanceL
     }
 }
 
-void AInterfaceToKnnScript::SetSignalNormalizationType(int type_0None_1sum_2quadraSum)
+void AKnn_SI::SetSignalNormalizationType(int type_0None_1sum_2quadraSum)
 {
   knnModule->ScriptInterfacer->SetSignalNormalization(type_0None_1sum_2quadraSum);
 }
 
-void AInterfaceToKnnScript::clearCalibrationEvents()
+void AKnn_SI::clearCalibrationEvents()
 {
   knnModule->ScriptInterfacer->clearCalibration();
 }
 
-QString AInterfaceToKnnScript::setGoodScanEventsAsCalibration()
+QString AKnn_SI::setGoodScanEventsAsCalibration()
 {
   knnModule->ScriptInterfacer->setCalibration(true);
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
-QString AInterfaceToKnnScript::setGoodReconstructedEventsAsCalibration()
+QString AKnn_SI::setGoodReconstructedEventsAsCalibration()
 {
   knnModule->ScriptInterfacer->setCalibration(false);
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
-QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
+QString AKnn_SI::setCalibrationDirect(QVariant arrayOfArrays)
 {
     QVariantList VarList = arrayOfArrays.toList();
     if (VarList.isEmpty())
@@ -124,7 +124,7 @@ QString AInterfaceToKnnScript::setCalibrationDirect(QVariant arrayOfArrays)
   return knnModule->ScriptInterfacer->ErrorString;
 }
 
-QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit, float maxSignal)
+QVariant AKnn_SI::evaluatePhPerPhE(int numNeighbours, float upperDistanceLimit, float maxSignal)
 {
     QVector<float> phe = knnModule->ScriptInterfacer->evaluatePhPerPhE(numNeighbours, upperDistanceLimit, maxSignal);
     const QString& error = knnModule->ScriptInterfacer->ErrorString;
@@ -140,32 +140,32 @@ QVariant AInterfaceToKnnScript::evaluatePhPerPhE(int numNeighbours, float upperD
     return vl;
 }
 
-int AInterfaceToKnnScript::countCalibrationEvents()
+int AKnn_SI::countCalibrationEvents()
 {
   return knnModule->ScriptInterfacer->countCalibrationEvents();
 }
 
-double AInterfaceToKnnScript::getCalibrationEventX(int ievent)
+double AKnn_SI::getCalibrationEventX(int ievent)
 {
   return knnModule->ScriptInterfacer->getCalibrationEventX(ievent);
 }
 
-double AInterfaceToKnnScript::getCalibrationEventY(int ievent)
+double AKnn_SI::getCalibrationEventY(int ievent)
 {
   return knnModule->ScriptInterfacer->getCalibrationEventX(ievent);
 }
 
-double AInterfaceToKnnScript::getCalibrationEventZ(int ievent)
+double AKnn_SI::getCalibrationEventZ(int ievent)
 {
   return knnModule->ScriptInterfacer->getCalibrationEventX(ievent);
 }
 
-double AInterfaceToKnnScript::getCalibrationEventEnergy(int ievent)
+double AKnn_SI::getCalibrationEventEnergy(int ievent)
 {
   return knnModule->ScriptInterfacer->getCalibrationEventE(ievent);
 }
 
-QVariant AInterfaceToKnnScript::getCalibrationEventXYZE(int ievent)
+QVariant AKnn_SI::getCalibrationEventXYZE(int ievent)
 {
   QVariantList l;
   l << knnModule->ScriptInterfacer->getCalibrationEventX(ievent) <<
@@ -175,12 +175,12 @@ QVariant AInterfaceToKnnScript::getCalibrationEventXYZE(int ievent)
   return l;
 }
 
-QVariant AInterfaceToKnnScript::getCalibrationEventSignals(int ievent)
+QVariant AKnn_SI::getCalibrationEventSignals(int ievent)
 {
     return knnModule->ScriptInterfacer->getCalibrationEventSignals(ievent);
 }
 
-QString AInterfaceToKnnScript::getErrorString()
+QString AKnn_SI::getErrorString()
 {
     return knnModule->ScriptInterfacer->ErrorString;
 }

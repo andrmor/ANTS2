@@ -1,7 +1,7 @@
 #include "ascriptparticlegenerator.h"
 #include "aparticlerecord.h"
 #include "ajsontools.h"
-#include "aparticlegeneratorinterface.h"
+#include "aparticlegenerator_si.h"
 #include "amath_si.h"
 
 #include <QScriptEngine>
@@ -25,7 +25,7 @@ bool AScriptParticleGenerator::Init()
             //qDebug() << "Creating script infrastructure";
         ScriptEngine = new QScriptEngine();
         ScriptEngine->setProcessEventsInterval(processInterval);
-        ScriptInterface = new AParticleGeneratorInterface(MpCollection, RandGen);
+        ScriptInterface = new AParticleGenerator_SI(MpCollection, RandGen);
 
         ScriptInterface->setObjectName("gen");
         QScriptValue val = ScriptEngine->newQObject(ScriptInterface, QScriptEngine::QtOwnership);

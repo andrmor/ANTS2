@@ -25,12 +25,13 @@
 #include "aserver_si.h"
 #include "atracklog_si.h"
 #include "asim_si.h"
+#include "aconfig_si.h"
 
 #ifdef ANTS_FLANN
-  #include "ainterfacetoknnscript.h"
+  #include "aknn_si.h"
 #endif
 #ifdef ANTS_FANN
-  #include "ainterfacetoannscript.h"
+  #include "AAnn_SI.h"
 #endif
 
 // SIM
@@ -238,7 +239,7 @@ int main(int argc, char *argv[])
         AJavaScriptManager SM(Detector.RandGen);
         Network.SetScriptManager(&SM);
         SM.RegisterCoreInterfaces();
-        AInterfaceToConfig* conf = new AInterfaceToConfig(&Config);
+        AConfig_SI* conf = new AConfig_SI(&Config);
         SM.RegisterInterface(conf, "config");
         AGeo_SI* geo = new AGeo_SI(&Detector);
         SM.RegisterInterface(geo, "geo");
@@ -279,7 +280,7 @@ int main(int argc, char *argv[])
         AServer_SI* server = new AServer_SI(*Network.WebSocketServer, &EventsDataHub);
         SM.RegisterInterface(server, "server");
 #ifdef ANTS_FLANN
-        AInterfaceToKnnScript* knn = new AInterfaceToKnnScript(ReconstructionManager.KNNmodule);
+        AKnn_SI* knn = new AKnn_SI(ReconstructionManager.KNNmodule);
         SM.RegisterInterface(knn, "knn");
 #endif
 #ifdef ANTS_FANN

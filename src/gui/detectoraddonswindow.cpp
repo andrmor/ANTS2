@@ -130,69 +130,73 @@ void DetectorAddOnsWindow::SetTab(int tab)
 
 void DetectorAddOnsWindow::on_pbConvertToDummies_clicked()
 {
-  QList<int> ToAdd;
-  bool ok = ExtractNumbersFromQString(ui->lePMlist->text(), &ToAdd);
-  if (!ok)
+    QList<int> ToAdd;
+    bool ok = ExtractNumbersFromQString(ui->lePMlist->text(), &ToAdd);
+    if (!ok)
     {
-      message("Input error!", this);
-      return;
-    }
-
-  int iMaxPM = MW->PMs->count()-1;
-  for (int i=0; i<ToAdd.size(); i++)
-    if (ToAdd[i] >iMaxPM )
-      {
-        message("Range error!", this);
+        message("Input error!", this);
         return;
-      }
-
-  //---converting PMs to dummies---
-  bool SawLower = false;
-  bool SawUpper = false;
-  qSort(ToAdd.begin(), ToAdd.end()); //sorted - starts from smallest
-  for (int iadd=ToAdd.size()-1; iadd>-1; iadd--)
-    {
-       //adding dummy
-       PMdummyStructure dpm;
-
-       int ipm = ToAdd[iadd];
-//       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
-
-       const APm &PM = MW->PMs->at(ipm);
-       dpm.r[0] = PM.x;
-       dpm.r[1] = PM.y;
-       dpm.r[2] = PM.z;
-
-       dpm.Angle[0] = PM.phi;
-       dpm.Angle[1] = PM.theta;
-       dpm.Angle[2] = PM.psi;
-
-       dpm.PMtype = PM.type;
-       dpm.UpperLower = PM.upperLower;
-
-       Detector->PMdummies.append(dpm);
-//       qDebug()<<"dummy added";
-
-       //deleting PM          
-       int ul, index;
-       Detector->findPM(ipm, ul, index);
-       Detector->PMarrays[ul].PositionsAnglesTypes.remove(index);
-//       qDebug()<<"PM removed";
-       if (ul == 0) SawUpper = true;
-       if (ul == 1) SawLower = true;
     }
-//  qDebug()<<"All list done!";
 
-  //updating array type  
-  if (SawUpper)
-    if (MW->PMArrayType(0) == 0) MW->SetPMarrayType(0, 1);
-  if (SawLower)
-    if (MW->PMArrayType(1) == 0) MW->SetPMarrayType(1, 1);
+    int iMaxPM = MW->PMs->count()-1;
+    for (int & i : ToAdd)
+        if (i < 0 || i > iMaxPM)
+        {
+            message("Range error!", this);
+            return;
+        }
 
-  MW->updatePMArrayDataIndication();
-  MW->NumberOfPMsHaveChanged();
-  //DetectorAddOnsWindow::UpdateDummyPMindication();
-  MW->ReconstructDetector();
+    bool SawLower = false;
+    bool SawUpper = false;
+    qSort(ToAdd.begin(), ToAdd.end()); //sorted - starts from smallest
+
+    for (int iadd=ToAdd.size()-1; iadd>-1; iadd--)
+    {
+        //adding dummy
+        PMdummyStructure dpm;
+
+        int ipm = ToAdd[iadd];
+        //       qDebug()<<"PM->dummy  ToAddindex="<<iadd<<"pm number="<<ipm;
+
+        const APm &PM = MW->PMs->at(ipm);
+        dpm.r[0] = PM.x;
+        dpm.r[1] = PM.y;
+        dpm.r[2] = PM.z;
+
+        dpm.Angle[0] = PM.phi;
+        dpm.Angle[1] = PM.theta;
+        dpm.Angle[2] = PM.psi;
+
+        dpm.PMtype = PM.type;
+        dpm.UpperLower = PM.upperLower;
+
+        Detector->PMdummies.append(dpm);
+        //       qDebug()<<"dummy added";
+
+        //deleting PM
+        int ul, index;
+        Detector->findPM(ipm, ul, index);
+        if (index == -1)
+        {
+            message("Something went wrong...", this);
+            return;
+        }
+        Detector->PMarrays[ul].PositionsAnglesTypes.remove(index);
+        //       qDebug()<<"PM removed";
+        if (ul == 0) SawUpper = true;
+        if (ul == 1) SawLower = true;
+    }
+    //  qDebug()<<"All list done!";
+
+    //updating array type
+    if (SawUpper)
+        if (MW->PMArrayType(0) == 0) MW->SetPMarrayType(0, 1);
+    if (SawLower)
+        if (MW->PMArrayType(1) == 0) MW->SetPMarrayType(1, 1);
+
+    MW->updatePMArrayDataIndication();
+    MW->NumberOfPMsHaveChanged();
+    MW->ReconstructDetector();
 }
 
 void DetectorAddOnsWindow::on_sbDummyPMindex_valueChanged(int arg1)

@@ -765,20 +765,38 @@ int DetectorClass::pmCount() const
 
 void DetectorClass::findPM(int ipm, int &ul, int &index)
 {
-  if (ipm<PMarrays[0].PositionsAnglesTypes.size())
+    if (PMarrays[0].fActive)
     {
-      ul=0;
-      index = ipm;
-      return;
+        if (ipm < PMarrays[0].PositionsAnglesTypes.size())
+        {
+            ul = 0;
+            index = ipm;
+            return;
+        }
+        if (PMarrays[1].fActive)
+        {
+            index = ipm - PMarrays[0].PositionsAnglesTypes.size();
+            if (index < PMarrays[1].PositionsAnglesTypes.size())
+            {
+                ul = 1;
+                return;
+            }
+        }
     }
-  index = ipm - PMarrays[0].PositionsAnglesTypes.size();
-  if (index<PMarrays[1].PositionsAnglesTypes.size())
+    else
     {
-      ul=1;
-      return;
+        if (PMarrays[1].fActive)
+        {
+            if (ipm < PMarrays[1].PositionsAnglesTypes.size())
+            {
+                ul = 1;
+                index = ipm;
+                return;
+            }
+        }
     }
-  index = -1; //bad ipm
-  return;
+    index = -1; //bad ipm
+    return;
 }
 
 const QString DetectorClass::removePMtype(int itype)

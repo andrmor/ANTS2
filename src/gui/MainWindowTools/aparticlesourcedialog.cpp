@@ -16,14 +16,16 @@
 #include <QFileDialog>
 //#include <QMenuBar>
 //#include <QMenu>
-//#include <QMessageBox>
+#include <QMessageBox>
+#include <QCloseEvent>
+#include <QApplication>
 
 #include "TGeoManager.h"
 #include "TH1D.h"
 
 AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSourceRecord * Rec) :
     QDialog(&MW),
-    MW(MW), Rec(Rec->clone()),
+    MW(MW), Rec(Rec->clone()), OriginalRec(Rec),
     ui(new Ui::AParticleSourceDialog)
 {
     ui->setupUi(this);
@@ -72,6 +74,8 @@ AParticleSourceDialog::AParticleSourceDialog(MainWindow & MW, const AParticleSou
         UpdateParticleInfo();
     }
 
+    on_cobGunSourceType_currentIndexChanged(ui->cobGunSourceType->currentIndex());
+
 //    QMenuBar* mb = new QMenuBar(this);
 //    QMenu* fileMenu = mb->addMenu("&File");
 //    fileMenu->addAction("Load source", this, &AParticleSourceDialog::loadSource);
@@ -90,6 +94,30 @@ AParticleSourceRecord *AParticleSourceDialog::getResult()
     AParticleSourceRecord* tmp = Rec;
     Rec = 0;
     return tmp;
+}
+
+void AParticleSourceDialog::closeEvent(QCloseEvent *e)
+{
+    on_pbUpdateRecord_clicked();
+
+    QJsonObject jo, jn;
+    Rec->writeToJson(jo, *MW.MpCollection);
+    OriginalRec->writeToJson(jn, *MW.MpCollection);
+    if (jo != jn)
+    {
+        QMessageBox msgBox(this);
+        msgBox.setText("The source has been modified.");
+        msgBox.setInformativeText("Discard all the changes?");
+        msgBox.setStandardButtons(QMessageBox::Discard | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Discard);
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::No)
+        {
+            e->ignore();
+            return;
+        }
+    }
+    QDialog::closeEvent(e);
 }
 
 void AParticleSourceDialog::on_pbAccept_clicked()
@@ -138,6 +166,9 @@ void AParticleSourceDialog::on_cobGunSourceType_currentIndexChanged(int index)
     ui->lGun1DSize->setText(s[0]);
     ui->lGun2DSize->setText(s[1]);
     ui->lGun3DSize->setText(s[2]);
+
+    bool bPoint = (index == 0);
+    ui->labDimensions->setVisible(!bPoint);
 
     bool b1 = !s[0].isEmpty();
     ui->lGun1DSize->setVisible(b1);

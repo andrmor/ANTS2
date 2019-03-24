@@ -159,7 +159,7 @@
        <item>
         <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>     </string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -168,7 +168,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="labDimensions">
      <property name="font">
       <font>
        <weight>75</weight>
@@ -262,7 +262,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="hsDimensions">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -543,7 +543,7 @@ If material with this name does not exist, this limitation is not applied.</stri
       </font>
      </property>
      <property name="text">
-      <string>Collimation direction and cone, degrees:</string>
+      <string>Collimation direction (polar system) and cone, degrees:</string>
      </property>
     </widget>
    </item>
@@ -1089,9 +1089,7 @@ If material with this name does not exist, this limitation is not applied.</stri
        <zorder>fLinkedParticle</zorder>
        <zorder>verticalSpacer</zorder>
        <zorder>frSecondary</zorder>
-       <zorder>horizontalLayoutWidget</zorder>
        <zorder>label_11</zorder>
-       <zorder>horizontalLayoutWidget_2</zorder>
       </widget>
      </item>
     </layout>

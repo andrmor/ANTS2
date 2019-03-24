@@ -21,6 +21,9 @@ public:
 
     AParticleSourceRecord* getResult(); //transfers ownership
 
+protected:
+    virtual void closeEvent(QCloseEvent * e) override;
+
 private slots:
     void on_pbAccept_clicked();
     void on_pbReject_clicked();
@@ -40,10 +43,14 @@ private slots:
     void on_pbGunLoadSpectrum_clicked();
     void on_pbDeleteSpectrum_clicked();
 
+signals:
+    void delayClose();
+
 private:
     MainWindow& MW;
 
     AParticleSourceRecord* Rec;
+    const AParticleSourceRecord* OriginalRec;
 
     Ui::AParticleSourceDialog *ui;
 

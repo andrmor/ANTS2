@@ -4,8 +4,7 @@
 #include "ascriptinterface.h"
 
 #include <QObject>
-
-#include "Rtypes.h"
+#include <QString>
 
 class AGStyle_SI : public AScriptInterface
 {
@@ -60,7 +59,7 @@ public slots:
   void SetLabelColor(int color = 1, QString axis = "X");
   void SetLabelFont(int font = 62, QString axis = "X");
   void SetLabelOffset(float offset = 0.005f, QString axis = "X");
-  void SetLabelSize(float size = 0.04f, Option_t* axis = "X");
+  void SetLabelSize(float size = 0.04f, QString axis = "X");
   void SetLegendBorderSize(int size = 4);
   void SetLegendFillColor(int color = 0);
   void SetLegendFont(int font = 62);

@@ -97,7 +97,7 @@ void AGStyle_SI::SetLabelFont(int font, QString axis) {gStyle->SetLabelFont(font
 
 void AGStyle_SI::SetLabelOffset(float offset, QString axis) {gStyle->SetLabelOffset(offset, axis.toLocal8Bit());}
 
-void AGStyle_SI::SetLabelSize(float size, Option_t *axis) {gStyle->SetLabelSize(size, axis);}
+void AGStyle_SI::SetLabelSize(float size, QString axis) {gStyle->SetLabelSize(size, axis.toLocal8Bit());}
 
 void AGStyle_SI::SetLegendBorderSize(int size) {gStyle->SetLegendBorderSize(size);}
 

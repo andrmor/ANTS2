@@ -443,24 +443,33 @@ void OutputWindow::ResetViewport()
   double Xmax = -1e10;
   double Ymin =  1e10;
   double Ymax = -1e10;
-  for (int ipm=0; ipm<MW->PMs->count(); ipm++)
-    {
-      double x = MW->PMs->at(ipm).x;
-      double y = MW->PMs->at(ipm).y;
-      int type = MW->PMs->at(ipm).type;
-      double size = MW->PMs->getType(type)->SizeX;
+  for (int ipm = 0; ipm < MW->PMs->count(); ipm++)
+  {
+      const double & x =    MW->PMs->at(ipm).x;
+      double         y =   -MW->PMs->at(ipm).y;
+      const int & type =    MW->PMs->at(ipm).type;
+      const double & size = MW->PMs->getType(type)->SizeX;
 
-      if (x-size < Xmin) Xmin = x-size;
-      if (x+size > Xmax) Xmax = x+size;
-      if (y-size < Ymin) Ymin = y-size;
-      if (y+size > Ymax) Ymax = y+size;
-    }
+      if (x - size < Xmin) Xmin = x - size;
+      if (x + size > Xmax) Xmax = x + size;
+      if (y - size < Ymin) Ymin = y - size;
+      if (y + size > Ymax) Ymax = y + size;
+  }
 
-  double Xdelta = Xmax-Xmin;
-  double Ydelta = Ymax-Ymin;
+  double Xdelta = Xmax - Xmin;
+  double Ydelta = Ymax - Ymin;
 
-  scene->setSceneRect((Xmin - 0.95*Xdelta)*GVscale, (Ymin - 0.95*Ydelta)*GVscale, (Xmax-Xmin + 1.9*Xdelta)*GVscale, (Ymax-Ymin + 1.9*Ydelta)*GVscale);
-  gvOut->fitInView( (Xmin - 0.01*Xdelta)*GVscale, (Ymin - 0.01*Ydelta)*GVscale, (Xmax-Xmin + 0.02*Xdelta)*GVscale, (Ymax-Ymin + 0.02*Ydelta)*GVscale, Qt::KeepAspectRatio);
+  double frac = 1.05;
+  scene->setSceneRect( (Xmin - frac*Xdelta)*GVscale,
+                       (Ymin - frac*Ydelta)*GVscale,
+                       ( (2.0*frac + 1.0) * Xdelta)*GVscale,
+                       ( (2.0*frac + 1.0) * Ydelta)*GVscale );
+
+  gvOut->fitInView( (Xmin - 0.01*Xdelta)*GVscale,
+                    (Ymin - 0.01*Ydelta)*GVscale,
+                    (1.02*Xdelta)*GVscale,
+                    (1.02*Ydelta)*GVscale,
+                    Qt::KeepAspectRatio);
 }
 
 void OutputWindow::InitWindow()

@@ -15,7 +15,7 @@ class ASim_SI : public AScriptInterface
   Q_OBJECT
 
 public:
-  ASim_SI(ASimulationManager* SimulationManager, EventsDataClass* EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent = true);
+  ASim_SI(ASimulationManager* SimulationManager, EventsDataClass* EventsDataHub, AConfiguration* Config, bool fGuiPresent = true);
   ~ASim_SI(){}
 
   virtual void ForceStop();
@@ -55,7 +55,6 @@ private:
   EventsDataClass* EventsDataHub;
   AConfiguration* Config;
 
-  int RecNumThreads;
   bool fGuiPresent;
 
   QVariant getMonitorData1D(QString monitor, QString whichOne);

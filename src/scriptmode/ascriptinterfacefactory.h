@@ -9,6 +9,7 @@
 #include "histgraphinterfaces.h"
 #include "aweb_si.h"
 #include "aconfig_si.h"
+#include "aevents_si.h"
 
 #ifdef GUI
 #include "amsg_si.h"
@@ -33,8 +34,8 @@ public:
         const AMini_JavaScript_SI* mini = dynamic_cast<const AMini_JavaScript_SI*>(other);
         if (mini) return new AMini_JavaScript_SI(*mini);
 
-        const AInterfaceToData* events = dynamic_cast<const AInterfaceToData*>(other);
-        if (events) return new AInterfaceToData(*events);
+        const AEvents_SI* events = dynamic_cast<const AEvents_SI*>(other);
+        if (events) return new AEvents_SI(*events);
 
         const AInterfaceToLRF* lrf = dynamic_cast<const AInterfaceToLRF*>(other);
         if (lrf) return new AInterfaceToLRF(*lrf);

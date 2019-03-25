@@ -211,11 +211,11 @@ ants2_Python{
                 INCLUDEPATH += /usr/include/PythonQt5/
                 LIBS += -lPythonQt-Qt5-Python3.6
             } else {
-                LIBS += $$system(python3.5-config --libs)
-                QMAKE_CXXFLAGS += $$system(python3.5-config --includes)
+                LIBS += $$system(python3-config --libs)
+                QMAKE_CXXFLAGS += $$system(python3-config --includes)
 
-                INCLUDEPATH += /home/andr/Work/PythonQt/src
-                LIBS += -L/home/andr/Work/PythonQt/lib -lPythonQt
+                INCLUDEPATH += /usr/include/PythonQt5/
+                LIBS += -lPythonQt-Qt5-Python3.6
             }
     }
 
@@ -394,7 +394,9 @@ SOURCES += main.cpp \
     scriptmode/atracklog_si.cpp \
     scriptmode/aparticlegenerator_si.cpp \
     scriptmode/agstyle_si.cpp \
-    scriptmode/aconfig_si.cpp
+    scriptmode/aconfig_si.cpp \
+    scriptmode/aevents_si.cpp \
+    scriptmode/arec_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -542,7 +544,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/atracklog_si.h \
     scriptmode/aparticlegenerator_si.h \
     scriptmode/agstyle_si.h \
-    scriptmode/aconfig_si.h
+    scriptmode/aconfig_si.h \
+    scriptmode/aevents_si.h \
+    scriptmode/arec_si.h
 
 # --- SIM ---
 ants2_SIM {

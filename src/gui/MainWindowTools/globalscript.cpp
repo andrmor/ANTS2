@@ -21,6 +21,8 @@
 #include "atracklog_si.h"
 #include "asim_si.h"
 #include "aconfig_si.h"
+#include "aevents_si.h"
+#include "arec_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -72,15 +74,15 @@ void MainWindow::createScriptWindow()
     AMini_JavaScript_SI* mini = new AMini_JavaScript_SI(SM);
     ScriptWindow->RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
 
-    AInterfaceToData* dat = new AInterfaceToData(Config, EventsDataHub);
+    AEvents_SI* dat = new AEvents_SI(Config, EventsDataHub);
     QObject::connect(dat, SIGNAL(RequestEventsGuiUpdate()), Rwindow, SLOT(onRequestEventsGuiUpdate()));
     ScriptWindow->RegisterInterface(dat, "events");
 
-    ASim_SI* sim = new ASim_SI(SimulationManager, EventsDataHub, Config, GlobSet.RecNumTreads);
+    ASim_SI* sim = new ASim_SI(SimulationManager, EventsDataHub, Config);
     QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
     ScriptWindow->RegisterInterface(sim, "sim");
 
-    InterfaceToReconstructor* rec = new InterfaceToReconstructor(ReconstructionManager, Config, EventsDataHub, TmpHub, GlobSet.RecNumTreads);
+    ARec_SI* rec = new ARec_SI(ReconstructionManager, Config, EventsDataHub, TmpHub);
     QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->RegisterInterface(rec, "rec");

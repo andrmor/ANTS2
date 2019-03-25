@@ -17,8 +17,8 @@
 #include "TH2D.h"
 #include "TAxis.h"
 
-ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, int RecNumThreads, bool fGuiPresent)
-  : SimulationManager(SimulationManager), EventsDataHub(EventsDataHub), Config(Config), RecNumThreads(RecNumThreads), fGuiPresent(fGuiPresent)
+ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsDataHub, AConfiguration* Config, bool fGuiPresent)
+  : SimulationManager(SimulationManager), EventsDataHub(EventsDataHub), Config(Config), fGuiPresent(fGuiPresent)
 {
   Description = "Access to simulator";
 
@@ -44,7 +44,7 @@ void ASim_SI::ForceStop()
 
 bool ASim_SI::RunPhotonSources(int NumThreads)
 {
-    if (NumThreads == -1) NumThreads = RecNumThreads;
+    if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
     sim["Mode"] = "PointSim";
     Config->JSON["SimulationConfig"] = sim;
@@ -61,7 +61,7 @@ bool ASim_SI::RunPhotonSources(int NumThreads)
 
 bool ASim_SI::RunParticleSources(int NumThreads)
 {
-    if (NumThreads == -1) NumThreads = RecNumThreads;
+    if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
     sim["Mode"] = "SourceSim";
     Config->JSON["SimulationConfig"] = sim;

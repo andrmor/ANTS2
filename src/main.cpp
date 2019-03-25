@@ -26,6 +26,8 @@
 #include "atracklog_si.h"
 #include "asim_si.h"
 #include "aconfig_si.h"
+#include "aevents_si.h"
+#include "arec_si.h"
 
 #ifdef ANTS_FLANN
   #include "aknn_si.h"
@@ -245,14 +247,14 @@ int main(int argc, char *argv[])
         SM.RegisterInterface(geo, "geo");
         AMini_JavaScript_SI* mini = new AMini_JavaScript_SI(&SM);
         SM.RegisterInterface(mini, "mini");  //mini should be before sim to handle abort correctly
-        AInterfaceToData* dat = new AInterfaceToData(&Config, &EventsDataHub);
+        AEvents_SI* dat = new AEvents_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(dat, "events");
 #ifdef SIM
-        ASim_SI* sim = new ASim_SI(&SimulationManager, &EventsDataHub, &Config, GlobSet.RecNumTreads, false);
+        ASim_SI* sim = new ASim_SI(&SimulationManager, &EventsDataHub, &Config, false);
         QObject::connect(sim, SIGNAL(requestStopSimulation()), &SimulationManager, SLOT(StopSimulation()));
         SM.RegisterInterface(sim, "sim");
 #endif
-        InterfaceToReconstructor* rec = new InterfaceToReconstructor(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub, GlobSet.RecNumTreads);
+        ARec_SI* rec = new ARec_SI(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub);
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         SM.RegisterInterface(rec, "rec");
         AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);

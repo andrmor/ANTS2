@@ -307,7 +307,6 @@ SOURCES += main.cpp \
     modules/lrf_v2/lrffactory.cpp \
     modules/lrf_v2/alrffitsettings.cpp \
     CUDA/cudamanagerclass.cpp \
-    scriptmode/interfacetoglobscript.cpp \
     scriptmode/scriptminimizer.cpp \
     scriptmode/ascriptexample.cpp \
     scriptmode/ascriptexampledatabase.cpp \
@@ -396,7 +395,12 @@ SOURCES += main.cpp \
     scriptmode/agstyle_si.cpp \
     scriptmode/aconfig_si.cpp \
     scriptmode/aevents_si.cpp \
-    scriptmode/arec_si.cpp
+    scriptmode/arec_si.cpp \
+    scriptmode/apms_si.cpp \
+    scriptmode/alrf_si.cpp \
+    scriptmode/ageowin_si.cpp \
+    scriptmode/agraphwin_si.cpp \
+    scriptmode/aoutwin_si.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -443,7 +447,6 @@ HEADERS  += common/CorrelationFilters.h \
     modules/lrf_v2/lrffactory.h \
     modules/lrf_v2/alrffitsettings.h \
     CUDA/cudamanagerclass.h \
-    scriptmode/interfacetoglobscript.h \
     scriptmode/scriptminimizer.h \
     scriptmode/ascriptexample.h \
     scriptmode/ascriptexampledatabase.h \
@@ -546,7 +549,12 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/agstyle_si.h \
     scriptmode/aconfig_si.h \
     scriptmode/aevents_si.h \
-    scriptmode/arec_si.h
+    scriptmode/arec_si.h \
+    scriptmode/apms_si.h \
+    scriptmode/alrf_si.h \
+    scriptmode/ageowin_si.h \
+    scriptmode/agraphwin_si.h \
+    scriptmode/aoutwin_si.h
 
 # --- SIM ---
 ants2_SIM {

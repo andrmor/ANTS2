@@ -4,12 +4,13 @@
 #include "ascriptinterface.h"
 #include "acore_si.h"
 #include "amath_si.h"
-#include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "aweb_si.h"
 #include "aconfig_si.h"
 #include "aevents_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
 
 #ifdef GUI
 #include "amsg_si.h"
@@ -37,11 +38,11 @@ public:
         const AEvents_SI* events = dynamic_cast<const AEvents_SI*>(other);
         if (events) return new AEvents_SI(*events);
 
-        const AInterfaceToLRF* lrf = dynamic_cast<const AInterfaceToLRF*>(other);
-        if (lrf) return new AInterfaceToLRF(*lrf);
+        const ALrf_SI* lrf = dynamic_cast<const ALrf_SI*>(other);
+        if (lrf) return new ALrf_SI(*lrf);
 
-        const AInterfaceToPMs* pms = dynamic_cast<const AInterfaceToPMs*>(other);
-        if (pms) return new AInterfaceToPMs(*pms);
+        const APms_SI* pms = dynamic_cast<const APms_SI*>(other);
+        if (pms) return new APms_SI(*pms);
 
         const AInterfaceToHist* hist = dynamic_cast<const AInterfaceToHist*>(other);
         if (hist) return new AInterfaceToHist(*hist);

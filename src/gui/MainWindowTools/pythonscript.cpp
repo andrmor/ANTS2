@@ -4,7 +4,6 @@
 #include "detectorclass.h"
 #include "eventsdataclass.h"
 #include "aglobalsettings.h"
-#include "interfacetoglobscript.h"
 #include "amsg_si.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
@@ -30,6 +29,11 @@
 #include "aconfig_si.h"
 #include "aevents_si.h"
 #include "arec_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
+#include "ageowin_si.h"
+#include "agraphwin_si.h"
+#include "aoutwin_si.h"
 
 #ifdef ANTS_FLANN
   #include "aknn_si.h"
@@ -75,12 +79,12 @@ void MainWindow::createPythonScriptWindow()
   QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
   PythonScriptWindow->RegisterInterface(rec, "rec");
 
-  AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
+  ALrf_SI* lrf = new ALrf_SI(Config, EventsDataHub);
   PythonScriptWindow->RegisterInterface(lrf, "lrf");
-  ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
+  ALrfRaim_SI* newLrf = new ALrfRaim_SI(Detector, EventsDataHub);
   PythonScriptWindow->RegisterInterface(newLrf, "newLrf");
 
-  AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
+  APms_SI* pmS = new APms_SI(Config);
   PythonScriptWindow->RegisterInterface(pmS, "pms");
 
   AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
@@ -124,10 +128,10 @@ void MainWindow::createPythonScriptWindow()
   AGeoWin_SI* geowin = new AGeoWin_SI(this, SimulationManager);
   PythonScriptWindow->RegisterInterface(geowin, "geowin");
 
-  InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
+  AGraphWin_SI* grwin = new AGraphWin_SI(this);
   PythonScriptWindow->RegisterInterface(grwin, "grwin");
 
-  AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
+  AOutWin_SI* out = new AOutWin_SI(this);
   PythonScriptWindow->RegisterInterface(out, "outwin");
 
   PythonScriptWindow->SetShowEvaluationResult(true);

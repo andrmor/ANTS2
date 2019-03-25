@@ -5,7 +5,6 @@
 #include "tmpobjhubclass.h"
 #include "aconfiguration.h"
 #include "ajavascriptmanager.h"
-#include "interfacetoglobscript.h"
 #include "ageo_si.h"
 #include "histgraphinterfaces.h"
 #include "atree_si.h"
@@ -28,6 +27,8 @@
 #include "aconfig_si.h"
 #include "aevents_si.h"
 #include "arec_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
 
 #ifdef ANTS_FLANN
   #include "aknn_si.h"
@@ -257,11 +258,11 @@ int main(int argc, char *argv[])
         ARec_SI* rec = new ARec_SI(&ReconstructionManager, &Config, &EventsDataHub, &TmpHub);
         QObject::connect(rec, SIGNAL(RequestStopReconstruction()), &ReconstructionManager, SLOT(requestStop()));
         SM.RegisterInterface(rec, "rec");
-        AInterfaceToLRF* lrf = new AInterfaceToLRF(&Config, &EventsDataHub);
+        ALrf_SI* lrf = new ALrf_SI(&Config, &EventsDataHub);
         SM.RegisterInterface(lrf, "lrf");
-        ALrfScriptInterface* newLrf = new ALrfScriptInterface(&Detector, &EventsDataHub);
+        ALrfRaim_SI* newLrf = new ALrfRaim_SI(&Detector, &EventsDataHub);
         SM.RegisterInterface(newLrf, "newLrf");
-        AInterfaceToPMs* pmS = new AInterfaceToPMs(&Config);
+        APms_SI* pmS = new APms_SI(&Config);
         SM.RegisterInterface(pmS, "pms");
         AInterfaceToGraph* graph = new AInterfaceToGraph(&TmpHub);
         SM.RegisterInterface(graph, "graph");

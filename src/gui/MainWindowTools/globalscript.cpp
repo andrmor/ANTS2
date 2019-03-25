@@ -3,7 +3,6 @@
 #include "aglobalsettings.h"
 #include "detectorclass.h"
 #include "eventsdataclass.h"
-#include "interfacetoglobscript.h"
 #include "scriptminimizer.h"
 #include "histgraphinterfaces.h"
 #include "ageo_si.h"
@@ -23,6 +22,11 @@
 #include "aconfig_si.h"
 #include "aevents_si.h"
 #include "arec_si.h"
+#include "apms_si.h"
+#include "alrf_si.h"
+#include "ageowin_si.h"
+#include "agraphwin_si.h"
+#include "aoutwin_si.h"
 
 #include "mainwindow.h"
 #include "graphwindowclass.h"
@@ -87,12 +91,12 @@ void MainWindow::createScriptWindow()
     QObject::connect(rec, SIGNAL(RequestUpdateGuiForManifest()), Rwindow, SLOT(onManifestItemsGuiUpdate()));
     ScriptWindow->RegisterInterface(rec, "rec");
 
-    AInterfaceToLRF* lrf = new AInterfaceToLRF(Config, EventsDataHub);
+    ALrf_SI* lrf = new ALrf_SI(Config, EventsDataHub);
     ScriptWindow->RegisterInterface(lrf, "lrf");
-    ALrfScriptInterface* newLrf = new ALrfScriptInterface(Detector, EventsDataHub);
+    ALrfRaim_SI* newLrf = new ALrfRaim_SI(Detector, EventsDataHub);
     ScriptWindow->RegisterInterface(newLrf, "newLrf");
 
-    AInterfaceToPMs* pmS = new AInterfaceToPMs(Config);
+    APms_SI* pmS = new APms_SI(Config);
     ScriptWindow->RegisterInterface(pmS, "pms");
 
     AInterfaceToGraph* graph = new AInterfaceToGraph(TmpHub);
@@ -140,13 +144,13 @@ void MainWindow::createScriptWindow()
     AGeoWin_SI* geowin = new AGeoWin_SI(this, SimulationManager);
     ScriptWindow->RegisterInterface(geowin, "geowin");
 
-    InterfaceToGraphWin* grwin = new InterfaceToGraphWin(this);
+    AGraphWin_SI* grwin = new AGraphWin_SI(this);
     ScriptWindow->RegisterInterface(grwin, "grwin");
 
     AGui_SI* gui = new AGui_SI(SM);
     ScriptWindow->RegisterInterface(gui, "gui");
 
-    AInterfaceToOutputWin* out = new AInterfaceToOutputWin(this);
+    AOutWin_SI* out = new AOutWin_SI(this);
     ScriptWindow->RegisterInterface(out, "outwin");
 
     // window inits

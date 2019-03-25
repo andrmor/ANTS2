@@ -8,7 +8,6 @@
 #include "amath_si.h"
 #include "aconfig_si.h"
 #include "histgraphinterfaces.h"
-#include "interfacetoglobscript.h"
 #include "amessage.h"
 #include "ascriptexampleexplorer.h"
 #include "aconfiguration.h"

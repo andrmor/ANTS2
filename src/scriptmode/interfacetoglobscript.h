@@ -156,6 +156,8 @@ public slots:
   double GetTrueZ(int ievent, int iPoint = 0);
   double GetTrueEnergy(int ievent, int iPoint = 0);
   const QVariant GetTruePoints(int ievent);
+  const QVariant GetTruePointsXYZE(int ievent);
+  const QVariant GetTruePointsXYZEiMat(int ievent);
   bool IsTrueGoodEvent(int ievent);
   int  GetTrueNumberPoints(int ievent);
 

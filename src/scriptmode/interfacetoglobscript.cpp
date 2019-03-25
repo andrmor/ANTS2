@@ -70,6 +70,9 @@ AInterfaceToData::AInterfaceToData(AConfiguration *Config, EventsDataClass* Even
 
   H["GetTruePoints"] = "Return array of true (scan) points for the event. Array elements are [x, y, z, energy]";
   H["GetTrueNumberPoints"] = "Return number of true (scan) points for the given event";
+
+
+  DepRem["GetTruePoints"] = "Use GetTruePointsXYZE() or GetTruePointsXYZEiMat instead";
 }
 
 double AInterfaceToData::GetPMsignal(int ievent, int ipm)
@@ -280,6 +283,7 @@ bool AInterfaceToData::checkTrueDataRequest(int ievent, int iPoint)
       abort("Wrong event number "+QString::number(ievent)+" Events available: "+QString::number(numEvents));
       return false;
     }
+  if (iPoint == -1) return true;
   if (iPoint<0 || iPoint >= EventsDataHub->Scan.at(ievent)->Points.size())
   {
       abort( QString("Bad scan point number: event #%1 has %2 point(s)").arg(ievent).arg( EventsDataHub->Scan.at(ievent)->Points.size() ));
@@ -434,7 +438,7 @@ double AInterfaceToData::GetTrueEnergy(int ievent, int iPoint)
 
 const QVariant AInterfaceToData::GetTruePoints(int ievent)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkTrueDataRequest(ievent, -1)) return 0; //anyway aborted
 
   QVariantList list;
   const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
@@ -450,6 +454,49 @@ const QVariant AInterfaceToData::GetTruePoints(int ievent)
   return list;
 }
 
+const QVariant AInterfaceToData::GetTruePointsXYZE(int ievent)
+{
+    if (!checkTrueDataRequest(ievent, -1)) return 0; //anyway aborted
+
+    QVariantList list;
+    const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
+    for (int i=0; i<p.size(); i++)
+    {
+        QVariantList el;
+        el << p.at(i).r[0];
+        el << p.at(i).r[1];
+        el << p.at(i).r[2];
+        el << p.at(i).energy;
+        list.push_back(el);
+    }
+    return list;
+}
+
+const QVariant AInterfaceToData::GetTruePointsXYZEiMat(int ievent)
+{
+    if (!checkTrueDataRequest(ievent, -1)) return 0; //anyway aborted
+
+    QVariantList list;
+    const APositionEnergyBuffer& p = EventsDataHub->Scan.at(ievent)->Points;
+    for (int i=0; i<p.size(); i++)
+    {
+        int iMat = -1;
+        TGeoManager* GeoManager = Config->GetDetector()->GeoManager;
+        TGeoNode* node = GeoManager->FindNode(p.at(i).r[0], p.at(i).r[1], p.at(i).r[2]);
+        if (node)
+            iMat = node->GetVolume()->GetMaterial()->GetIndex();
+
+        QVariantList el;
+        el << p.at(i).r[0];
+        el << p.at(i).r[1];
+        el << p.at(i).r[2];
+        el << p.at(i).energy;
+        el << iMat;
+        list.push_back(el);
+    }
+    return list;
+}
+
 bool AInterfaceToData::IsTrueGoodEvent(int ievent)
 {
   if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
@@ -458,7 +505,7 @@ bool AInterfaceToData::IsTrueGoodEvent(int ievent)
 
 int AInterfaceToData::GetTrueNumberPoints(int ievent)
 {
-  if (!checkTrueDataRequest(ievent)) return 0; //anyway aborted
+  if (!checkTrueDataRequest(ievent, -1)) return 0; //anyway aborted
   return EventsDataHub->Scan.at(ievent)->Points.size();
 }
 

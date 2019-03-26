@@ -50,35 +50,37 @@ void AG4SimulationSettings::readFromJson(const QJsonObject &json)
 
 const QString AG4SimulationSettings::getPrimariesFileName(int iThreadNum) const
 {
-    QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
-    if (!Path.endsWith('/')) Path += '/';
-    return Path + QString("primaries-%1.txt").arg(iThreadNum);
+    return getPath() + QString("primaries-%1.txt").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getDepositionFileName(int iThreadNum) const
 {
-    QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
-    if (!Path.endsWith('/')) Path += '/';
-    return Path + QString("deposition-%1.txt").arg(iThreadNum);
+    return getPath() + QString("deposition-%1.txt").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
 {
-    QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
-    if (!Path.endsWith('/')) Path += '/';
-    return Path + QString("receipt-%1.txt").arg(iThreadNum);
+    return getPath() + QString("receipt-%1.txt").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const
 {
-    QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
-    if (!Path.endsWith('/')) Path += '/';
-    return Path + QString("aga-%1.json").arg(iThreadNum);
+    return getPath() + QString("aga-%1.json").arg(iThreadNum);
+}
+
+const QString AG4SimulationSettings::getTracksFileName(int iThreadNum) const
+{
+    return getPath() + QString("tracks-%1.txt").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getGdmlFileName() const
 {
+    return getPath() + "Detector.gdml";
+}
+
+const QString AG4SimulationSettings::getPath() const
+{
     QString Path = AGlobalSettings::getInstance().G4ExchangeFolder;
     if (!Path.endsWith('/')) Path += '/';
-    return Path + "Detector.gdml";
+    return Path;
 }

@@ -125,7 +125,7 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
 if (bGeant4ParticleSim)
 {
-    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount);
+    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, simSettings.TrackBuildOptions.MaxParticleTracks);
     if (!bOK)
     {
         ErrorString = "Failed to create Ants2 <-> Geant4 interface files";

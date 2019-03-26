@@ -23,7 +23,11 @@ public:
     const QString getDepositionFileName(int iThreadNum) const;
     const QString getReceitFileName(int iThreadNum) const;
     const QString getConfigFileName(int iThreadNum) const;
+    const QString getTracksFileName(int iThreadNum) const;
     const QString getGdmlFileName() const;
+
+private:
+    const QString getPath() const;
 
 };
 

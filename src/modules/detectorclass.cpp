@@ -1205,7 +1205,7 @@ void DetectorClass::updatePreprocessingAddMultySize()
 }
 
 #include "ag4simulationsettings.h"
-bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads)
+bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, int numTracksToBuild)
 {
     QString gdmlName = G4SimSet.getGdmlFileName();
     QString err = exportToGDML(gdmlName);
@@ -1242,6 +1242,9 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
         json["File_Primaries"] = G4SimSet.getPrimariesFileName(i);
         json["File_Deposition"] = G4SimSet.getDepositionFileName(i);
         json["File_Receipt"] = G4SimSet.getReceitFileName(i);
+
+        json["MaxEventsForTrackExport"] = numTracksToBuild;  // ***!!! split accordig to numThreads!
+        json["File_Tracks"] = G4SimSet.getTracksFileName(i);
 
         SaveJsonToFile(json, G4SimSet.getConfigFileName(i));
     }

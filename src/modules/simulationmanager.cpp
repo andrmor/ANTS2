@@ -125,7 +125,9 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
 if (bGeant4ParticleSim)
 {
-    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, simSettings.TrackBuildOptions.MaxParticleTracks);
+    int numTracks = (simSettings.TrackBuildOptions.bBuildParticleTracks ? simSettings.TrackBuildOptions.MaxParticleTracks : 0);
+
+    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, numTracks);
     if (!bOK)
     {
         ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
@@ -1999,6 +2001,7 @@ bool ParticleSourceSimulator::generateAndTrackPhotons()
     return true;
 }
 
+#include "atrackingdataimporter.h"
 bool ParticleSourceSimulator::geant4TrackAndProcess()
 {
     const QString exe = AGlobalSettings::getInstance().G4antsExec;
@@ -2118,6 +2121,14 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     }
 
     inFile.close();
+
+
+    //read tracks
+    ATrackingDataImporter ti(simSettings->TrackBuildOptions, 0, &tracks);
+    QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
+    ErrorString = ti.processFile(TrackingFileName, eventBegin, 1000);
+    if (!ErrorString.isEmpty()) return false;
+
     return true;
 }
 

@@ -400,7 +400,9 @@ SOURCES += main.cpp \
     scriptmode/alrf_si.cpp \
     scriptmode/ageowin_si.cpp \
     scriptmode/agraphwin_si.cpp \
-    scriptmode/aoutwin_si.cpp
+    scriptmode/aoutwin_si.cpp \
+    common/atrackinghistory.cpp \
+    Simulation/atrackingdataimporter.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -554,7 +556,9 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/alrf_si.h \
     scriptmode/ageowin_si.h \
     scriptmode/agraphwin_si.h \
-    scriptmode/aoutwin_si.h
+    scriptmode/aoutwin_si.h \
+    common/atrackinghistory.h \
+    Simulation/atrackingdataimporter.h
 
 # --- SIM ---
 ants2_SIM {

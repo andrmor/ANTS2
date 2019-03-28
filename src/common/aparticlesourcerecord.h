@@ -7,6 +7,7 @@
 class TH1D;
 class QJsonObject;
 class AMaterialParticleCollection;
+class TRandom2;
 
 struct GunParticleStruct
 {
@@ -26,7 +27,7 @@ struct GunParticleStruct
 
     GunParticleStruct * clone() const;
 
-    double  generateEnergy() const;
+    double  generateEnergy(TRandom2 *RandGen) const;
     bool    loadSpectrum(const QString& fileName);
 
     void writeToJson(QJsonObject & json, const AMaterialParticleCollection & MpCollection) const;

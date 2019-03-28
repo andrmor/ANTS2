@@ -21,8 +21,8 @@ public:
   virtual void ForceStop();
 
 public slots:
-  bool RunPhotonSources(int NumThreads = -1);
-  bool RunParticleSources(int NumThreads = -1);
+  bool RunPhotonSources(int NumThreads = -1, bool AllowGuiUpdate = false);
+  bool RunParticleSources(int NumThreads = -1, bool AllowGuiUpdate = false);
 
   void SetSeed(long seed);
   long GetSeed();

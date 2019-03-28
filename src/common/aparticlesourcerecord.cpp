@@ -3,12 +3,14 @@
 #include "afiletools.h"
 #include "ajsontools.h"
 #include "aparticle.h" //---
+#include "acommonfunctions.h"
 
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonArray>
 
 #include "TH1D.h"
+#include "TRandom2.h"
 
 GunParticleStruct * GunParticleStruct::clone() const
 {
@@ -25,11 +27,12 @@ GunParticleStruct * GunParticleStruct::clone() const
     return gp;
 }
 
-double GunParticleStruct::generateEnergy() const
+double GunParticleStruct::generateEnergy(TRandom2 * RandGen) const
 {
     if (bUseFixedEnergy || !spectrum)
         return energy;
-    return spectrum->GetRandom();
+    //return spectrum->GetRandom();
+    return GetRandomFromHist(spectrum, RandGen);
 }
 
 bool GunParticleStruct::loadSpectrum(const QString &fileName)

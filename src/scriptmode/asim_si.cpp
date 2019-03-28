@@ -42,15 +42,17 @@ void ASim_SI::ForceStop()
   emit requestStopSimulation();
 }
 
-bool ASim_SI::RunPhotonSources(int NumThreads)
+bool ASim_SI::RunPhotonSources(int NumThreads, bool AllowGuiUpdate)
 {
+    bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+
     if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
     sim["Mode"] = "PointSim";
     Config->JSON["SimulationConfig"] = sim;
-    Config->AskForSimulationGuiUpdate();
-    //SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, false);
+    if (bGuiUpdate) Config->AskForSimulationGuiUpdate();
+
+    SimulationManager->StartSimulation(Config->JSON, NumThreads, bGuiUpdate);
     do
     {
         QThread::usleep(100);
@@ -60,23 +62,23 @@ bool ASim_SI::RunPhotonSources(int NumThreads)
     return SimulationManager->fSuccess;
 }
 
-bool ASim_SI::RunParticleSources(int NumThreads)
+bool ASim_SI::RunParticleSources(int NumThreads, bool AllowGuiUpdate)
 {
+    bool bGuiUpdate = fGuiPresent && AllowGuiUpdate;
+
     if (NumThreads == -1) NumThreads = AGlobalSettings::getInstance().RecNumTreads;
     QJsonObject sim = Config->JSON["SimulationConfig"].toObject();
     sim["Mode"] = "SourceSim";
     Config->JSON["SimulationConfig"] = sim;
-    Config->AskForSimulationGuiUpdate();
-    //SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, false);
+    if (bGuiUpdate) Config->AskForSimulationGuiUpdate();
 
+    SimulationManager->StartSimulation(Config->JSON, NumThreads, bGuiUpdate);
     do
     {
         QThread::usleep(100);
         qApp->processEvents();
     }
     while (!SimulationManager->fFinished);
-
     return SimulationManager->fSuccess;
 }
 

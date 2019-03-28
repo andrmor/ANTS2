@@ -5,37 +5,51 @@
 #include <QVector>
 #include <vector>
 
-class ATrackingHistory;
+class AEventTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
 
 class ATrackingDataImporter
 {
 public:
-    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<ATrackingHistory*> * History, QVector<TrackHolderClass*> * Tracks);
+    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord*> * History, QVector<TrackHolderClass*> * Tracks);
 
     const QString processFile(const QString & FileName, int StartEvent, int numEvents);
 
 private:
-    std::vector<ATrackingHistory*> * History = 0;
-    QVector<TrackHolderClass*> * Tracks = 0;
     const ATrackBuildOptions & TrackBuildOptions;
+    std::vector<AEventTrackingRecord*> * History = nullptr; // if 0 - do not collect history
+    QVector<TrackHolderClass*> * Tracks = nullptr;      // if 0 - do not extract tracks
 
     QString currentLine;
+    AEventTrackingRecord * CurrentHistoryRecord = nullptr;
+    TrackHolderClass * CurrentTrack = nullptr;
 
     void processNewEvent();
-    void processNewParticle();
+    void processNewTrack();
     void processNewStep();
 
-    enum Status {Init, ExpectingTrack, TrackStarted, TrackOngoing};
+    enum Status {ExpectingEvent, ExpectingTrack, ExpectingStep, TrackOngoing};
 
-    Status CurrentStatus = Init;
+    Status CurrentStatus = ExpectingEvent;
     int ExpectedEvent;
 
     QString Error;
 
-private:
-    TrackHolderClass * CurrentTrack = nullptr;
+};
+
+class ATrackingImportStateMachine
+{
+public:
+    ATrackingImportStateMachine(QString & Error) : Error(Error) {}
+    virtual ~ATrackingImportStateMachine(){}
+
+    virtual void processNewEvent() = 0;
+    virtual void processNewParticle() = 0;
+    virtual void processNewStep() = 0;
+
+protected:
+    QString & Error;
 };
 
 #endif // ATRACKINGDATAIMPORTER_H

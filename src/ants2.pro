@@ -401,8 +401,8 @@ SOURCES += main.cpp \
     scriptmode/ageowin_si.cpp \
     scriptmode/agraphwin_si.cpp \
     scriptmode/aoutwin_si.cpp \
-    common/atrackinghistory.cpp \
-    Simulation/atrackingdataimporter.cpp
+    Simulation/atrackingdataimporter.cpp \
+    common/aeventtrackingrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -557,8 +557,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/ageowin_si.h \
     scriptmode/agraphwin_si.h \
     scriptmode/aoutwin_si.h \
-    common/atrackinghistory.h \
-    Simulation/atrackingdataimporter.h
+    Simulation/atrackingdataimporter.h \
+    common/aeventtrackingrecord.h
 
 # --- SIM ---
 ants2_SIM {

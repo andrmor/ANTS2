@@ -1,13 +1,13 @@
 #include "atrackingdataimporter.h"
-#include "atrackinghistory.h"
+#include "aeventtrackingrecord.h"
 #include "atrackrecords.h"
 #include "atrackbuildoptions.h"
 
 #include <QFile>
 #include <QTextStream>
 
-ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<ATrackingHistory*> * History, QVector<TrackHolderClass*> * Tracks) :
-    TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
+ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord *> * History, QVector<TrackHolderClass *> * Tracks) :
+TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
 
 const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent, int numEvents)
 {
@@ -18,15 +18,18 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
         return "Failed to open file " + FileName;
 
     ExpectedEvent = StartEvent;
-    CurrentStatus = Init;
+    CurrentStatus = ExpectingEvent;
+    CurrentHistoryRecord = AEventTrackingRecord::create();
+    CurrentTrack = nullptr;
 
     QTextStream in(&file);
     while (!in.atEnd())
     {
         currentLine = in.readLine();
+        if (currentLine.isEmpty()) continue;
 
         if (currentLine.startsWith('#')) processNewEvent();
-        else if (currentLine.startsWith('>')) processNewParticle();
+        else if (currentLine.startsWith('>')) processNewTrack();
         else processNewStep();
 
         if (!Error.isEmpty()) return Error;
@@ -37,25 +40,37 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
 void ATrackingDataImporter::processNewEvent()
 {
     currentLine.remove(0, 1);
-
     int evId = currentLine.toInt();
 
-    switch (CurrentStatus)
+    if (CurrentStatus == ExpectingStep)
     {
-    case Init:
-        if (evId != ExpectedEvent)
-        {
-            Error = QString("Expected event #%1, but received #%2").arg(ExpectedEvent).arg(evId);
-            return;
-        }
-        ExpectedEvent++;
-        CurrentStatus = ExpectingTrack;
-    break;
-
+        Error = "Unexpected start of event - single step in one record";
+        return;
     }
+
+    if (evId != ExpectedEvent)
+    {
+        Error = QString("Expected event #%1, but received #%2").arg(ExpectedEvent).arg(evId);
+        return;
+    }
+
+    if (Tracks && CurrentTrack)
+    {
+        *Tracks << CurrentTrack;
+        CurrentTrack = nullptr;
+    }
+
+    if (History)
+    {
+        if (CurrentStatus != ExpectingEvent) // enough CurrHist exists?
+            History->push_back(CurrentHistoryRecord);
+        CurrentHistoryRecord = AEventTrackingRecord::create();
+    }
+    ExpectedEvent++;
 }
 
-void ATrackingDataImporter::processNewParticle()
+
+void ATrackingDataImporter::processNewTrack()
 {
     currentLine.remove(0, 1);
     //Id ParentId PartId x y z E
@@ -67,9 +82,15 @@ void ATrackingDataImporter::processNewParticle()
         return;
     }
 
-    if (History)
+    if (CurrentStatus == ExpectingEvent)
     {
-
+        Error = "Unexpected start of track - was expecting event";
+        return;
+    }
+    if (CurrentStatus == ExpectingStep)
+    {
+        Error = "Unexpected start of track - was expecting 1st step";
+        return;
     }
 
     if (Tracks)
@@ -82,6 +103,19 @@ void ATrackingDataImporter::processNewParticle()
 
         CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble(), 0) );  // time? ***!!!
     }
+
+    if (History)
+    {
+        if (CurrentStatus == ExpectingTrack)
+        {
+            // start new record
+        }
+        else // TrackOngoing
+        {
+            //add to previous record
+        }
+    }
+
 
 }
 

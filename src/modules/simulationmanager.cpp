@@ -88,8 +88,9 @@ ASimulatorRunner::~ASimulatorRunner()
     threads.clear();
 }
 
-bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
+bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
 {
+  bRunFromGui = bFromGui;
   threadCount = std::max(threadCount, 1);
   //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
 
@@ -324,7 +325,7 @@ void ASimulatorRunner::simulate()
     usPerEvent = 0;
     simState = SRunning;
     //qDebug()<<"Emitting update ready to reset progress";
-    emit updateReady(0, 0);
+    if (bRunFromGui) emit updateReady(0, 0);
     startTime.restart();    
     if(backgroundWorker)
     {        
@@ -367,7 +368,7 @@ void ASimulatorRunner::simulate()
     simState = SFinished;
     progress = 100;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
-    emit updateReady(100.0, usPerEvent);
+    if (bRunFromGui) emit updateReady(100.0, usPerEvent);
 
     //Dump data in dataHub
     dataHub->fSimulatedData = true;
@@ -2124,10 +2125,13 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
 
 
     //read tracks
-    ATrackingDataImporter ti(simSettings->TrackBuildOptions, 0, &tracks);
-    QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
-    ErrorString = ti.processFile(TrackingFileName, eventBegin, 1000);
-    if (!ErrorString.isEmpty()) return false;
+    if (simSettings->TrackBuildOptions.bBuildParticleTracks)
+    {
+        ATrackingDataImporter ti(simSettings->TrackBuildOptions, 0, &tracks);
+        QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
+        ErrorString = ti.processFile(TrackingFileName, eventBegin, 1000);
+        if (!ErrorString.isEmpty()) return false;
+    }
 
     return true;
 }
@@ -2144,18 +2148,14 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
 
     Runner = new ASimulatorRunner(Detector, EventsDataHub);
 
-    //QObject::connect(Runner, SIGNAL(simulationFinished()), this, SLOT(onSimulationFinished()));
     QObject::connect(Runner, &ASimulatorRunner::simulationFinished, this, &ASimulationManager::onSimulationFinished);
-    //QObject::connect(this, SIGNAL(RequestStopSimulation()), Runner, SLOT(requestStop()), Qt::DirectConnection);
     QObject::connect(this, &ASimulationManager::RequestStopSimulation, Runner, &ASimulatorRunner::requestStop, Qt::DirectConnection);
 
     Runner->moveToThread(&simRunnerThread); //Move to background thread, as it always runs synchronously even in MT
-    //QObject::connect(&simRunnerThread, SIGNAL(started()), Runner, SLOT(simulate())); //Connect thread to simulation start
     QObject::connect(&simRunnerThread, &QThread::started, Runner, &ASimulatorRunner::simulate); //Connect thread to simulation start
 
     //GUI update
     simTimerGuiUpdate.setInterval(1000);
-    //QObject::connect(&simTimerGuiUpdate, SIGNAL(timeout()), Runner, SLOT(updateGui()), Qt::DirectConnection);
     QObject::connect(&simTimerGuiUpdate, &QTimer::timeout, Runner, &ASimulatorRunner::updateGui, Qt::DirectConnection);
     QObject::connect(Runner, &ASimulatorRunner::updateReady, this, &ASimulationManager::ProgressReport);
 }
@@ -2184,7 +2184,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         threads = MaxThreads;
     }
 
-    bool bOK = Runner->setup(json, threads);
+    bool bOK = Runner->setup(json, threads, fFromGui);
     if (!bOK)
     {
         QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
@@ -2192,7 +2192,7 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     else
     {
         simRunnerThread.start();
-        simTimerGuiUpdate.start();
+        if (fStartedFromGui) simTimerGuiUpdate.start();
     }
 }
 
@@ -2235,7 +2235,7 @@ void ASimulationManager::onSimulationFinished()
     fSuccess = Runner->wasSuccessful();
     fHardAborted = Runner->wasHardAborted();
 
-    //clear data containers
+    //clear data containers -> they will be loaded with new data from workers
     clearEnergyVector();
     SiPMpixels.clear();
     clearTracks();
@@ -2252,7 +2252,7 @@ void ASimulationManager::onSimulationFinished()
             PointSourceSimulator *lastPointSrcSimulator = static_cast< PointSourceSimulator *>(simulators.last());
             EventsDataHub->ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
 
-            if (fStartedFromGui) SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
+            SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
         }
         else if (LastSimType == 1)
         {
@@ -2280,8 +2280,8 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    Detector->BuildDetector();
-    emit SimulationFinished();
+    Detector->BuildDetector(true, true);  // ***!!! before it was necessary! - check is it still the case
+    if (fStartedFromGui) emit SimulationFinished();
 
     clearEnergyVector(); // main window copied if needed
     SiPMpixels.clear();  // main window copied if needed

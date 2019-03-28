@@ -116,7 +116,7 @@ public:
     explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, QObject *parent = 0);
     virtual ~ASimulatorRunner();
 
-    bool setup(QJsonObject &json, int threadCount);
+    bool setup(QJsonObject &json, int threadCount, bool bFromGui);
     void updateGeoManager();
     //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
@@ -147,7 +147,7 @@ private:
     //Manager's state
     enum State simState;
     bool fStopRequested;
-    //TRandom2 *randGen;
+    bool bRunFromGui;
 
     //Threads
     QVector<Simulator *> workers;

@@ -49,7 +49,8 @@ bool ASim_SI::RunPhotonSources(int NumThreads)
     sim["Mode"] = "PointSim";
     Config->JSON["SimulationConfig"] = sim;
     Config->AskForSimulationGuiUpdate();
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
+    //SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
+    SimulationManager->StartSimulation(Config->JSON, NumThreads, false);
     do
     {
         QThread::usleep(100);
@@ -66,7 +67,8 @@ bool ASim_SI::RunParticleSources(int NumThreads)
     sim["Mode"] = "SourceSim";
     Config->JSON["SimulationConfig"] = sim;
     Config->AskForSimulationGuiUpdate();
-    SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
+    //SimulationManager->StartSimulation(Config->JSON, NumThreads, fGuiPresent);
+    SimulationManager->StartSimulation(Config->JSON, NumThreads, false);
 
     do
     {
@@ -229,11 +231,4 @@ QVariant ASim_SI::getMonitorXY(QString monitor)
 void ASim_SI::SetGeant4Executable(QString FileName)
 {
     AGlobalSettings::getInstance().G4antsExec = FileName;
-}
-
-void ASim_SI::RunSim_Geant4(int numThreads, bool OnlyGenerateFiles)
-{
-    SimulationManager->Runner->setG4Sim();
-    SimulationManager->Runner->setG4Sim_OnlyGenerateFiles(OnlyGenerateFiles);
-    RunParticleSources(numThreads);
 }

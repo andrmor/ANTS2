@@ -81,7 +81,12 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       double time = ParticleStack->at(0)->time;         //particle creation time - not modified!
 
       //initializing GeoManager navigator
-      TGeoNavigator *navigator = GeoManager->GetCurrentNavigator();
+      TGeoNavigator * navigator = GeoManager->GetCurrentNavigator();
+      if (!navigator)
+      {
+          qDebug() << "Tracking: Current navigator does not exist, creating new";
+          navigator = GeoManager->AddNavigator();
+      }
       navigator->SetCurrentPoint(r);
       navigator->SetCurrentDirection(v);
       navigator->FindNode();

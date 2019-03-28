@@ -131,14 +131,16 @@ bool DetectorClass::MakeDetectorFromJson(QJsonObject &json)
   return BuildDetector();
 }
 
-bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
-{  
+bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate, bool bSkipAllUpdates)
+{
+  if (bSkipAllUpdates) SkipSimGuiUpdate = true;
+
     //qDebug() << "Remake detector triggered"  ;
   if (Config->JSON.isEmpty())
-    {
+  {
       qCritical() << "!!!Cannot construct detector: Config is empty";
       return false;
-    }
+  }
 
   int numPMs = pmCount(); //number of PMs before new detector is constructed
 
@@ -149,10 +151,10 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
   //handling GDML if present
   QJsonObject js = Config->JSON["DetectorConfig"].toObject();
   if (js.contains("GDML"))
-    {
+  {
       QString gdml = js["GDML"].toString();
       fOK = importGDML(gdml);  //if failed, it is reported and sandwich is rebuilt
-    }
+  }
 
   Config->UpdateSimSettingsOfDetector(); //otherwise some sim data will be lost due to remake of PMs and MPcollection
 
@@ -161,12 +163,12 @@ bool DetectorClass::BuildDetector(bool SkipSimGuiUpdate)
       LRFs->clear(PMs->count()); // clear LRFs if number of PMs changed
       updatePreprocessingAddMultySize();
       PMgroups->onNumberOfPMsChanged();
-      emit requestGroupsGuiUpdate();
+      if (!bSkipAllUpdates) emit requestGroupsGuiUpdate();
       //emit requestClearPreprocessingSettings();
   }
 
   //request GUI update
-  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
+  if (!bSkipAllUpdates)  Config->AskForDetectorGuiUpdate(); //save in batch mode too, just emits a signal
   if (!SkipSimGuiUpdate) Config->AskForSimulationGuiUpdate();
   //emit requestClearEventsData();
 

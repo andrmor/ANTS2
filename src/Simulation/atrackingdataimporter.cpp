@@ -67,6 +67,7 @@ void ATrackingDataImporter::processNewEvent()
         CurrentHistoryRecord = AEventTrackingRecord::create();
     }
     ExpectedEvent++;
+    CurrentStatus = ExpectingTrack;
 }
 
 
@@ -116,7 +117,7 @@ void ATrackingDataImporter::processNewTrack()
         }
     }
 
-
+    CurrentStatus = ExpectingStep;
 }
 
 void ATrackingDataImporter::processNewStep()
@@ -146,6 +147,8 @@ void ATrackingDataImporter::processNewStep()
 
         CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble(), 0);  // time? ***!!!
     }
+
+    CurrentStatus = TrackOngoing;
 }
 
 

@@ -146,19 +146,18 @@ void EventsDataClass::purge1e10events()
   bool fTime = ( TimedEvents.size() == Events.size() );
 
   int i = 0;
-  while (i<Scan.size())
-    {
-      //qDebug() << Scan.at(i)->Points[0].r[0] << Scan.at(i)->Points[0].r[1];
-      if (Scan.at(i)->Points[0].r[0] == 1e10 && Scan.at(i)->Points[0].r[1] == 1e10 )
-        {
+  while (i < Scan.size())  // reverse order? ***!!!
+  {
+      if (Scan.at(i)->Points.size() != 0 && Scan.at(i)->Points[0].r[0] == 1e10 && Scan.at(i)->Points[0].r[1] == 1e10 )
+      {
           //qDebug() << "Found one";
           Scan.removeAt(i);
           Events.removeAt(i);
           if (fTime) TimedEvents.removeAt(i);
-        }
+      }
       else
         i++;
-    }
+  }
 }
 
 bool EventsDataClass::BlurReconstructionData(int type, double sigma, TRandom2* RandGen, int igroup)

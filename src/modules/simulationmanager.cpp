@@ -2288,8 +2288,9 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    //Detector->BuildDetector(true, true);  // ***!!! before it was necessary! - check is it still the case
-    Detector->GeoManager->CleanGarbage();
+    Detector->BuildDetector(true, true);  // <- still needed on Windows
+    //Detector->GeoManager->CleanGarbage();
+
     if (fStartedFromGui) emit SimulationFinished();
 
     clearEnergyVector(); // main window copied if needed

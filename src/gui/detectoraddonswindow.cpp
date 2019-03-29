@@ -1038,8 +1038,8 @@ void DetectorAddOnsWindow::on_pmParseInGeometryFromGDML_clicked()
     }
     else Detector->fWorldSizeFixed = false;
 
-    Detector->GeoManager->GetCurrentNavigator()->FindNode(0,0,0);
-    //qDebug() << "----------------------------"<<Detector->GeoManager->GetCurrentNavigator()->GetPath();
+    Detector->GeoManager->FindNode(0,0,0);
+    //qDebug() << "----------------------------"<<Detector->GeoManager->GetPath();
 
     Detector->writeToJson(MW->Config->JSON);
     //SaveJsonToFile(MW->Config->JSON, "D:/temp/CONFIGJSON.json");

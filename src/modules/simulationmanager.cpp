@@ -58,8 +58,12 @@ static void *SimulationManagerRunWorker(void *workerSimulator)
     //if (simulator->getDetector()->GeoManager->GetListOfNavigators())
     //  qDebug() << nameID<<"|||||||||||| already defined navigators:"<<simulator->getDetector()->GeoManager->GetListOfNavigators()->GetEntries();
 
-    //TGeoNavigator *navigator = simulator->getDetector()->GeoManager->AddNavigator();
-    simulator->getDetector()->GeoManager->AddNavigator();
+    //simulator->getDetector()->GeoManager->AddNavigator();
+    if (!simulator->getDetector()->GeoManager->GetCurrentNavigator())
+    {
+        qDebug() << "No current navigator for this thread, adding one";
+        simulator->getDetector()->GeoManager->AddNavigator();
+    }
 
     //qDebug() << nameID<<"Navigator added";
     //qDebug() << nameID<<"List?"<< simulator->getDetector()->GeoManager->GetListOfNavigators();  /// List contains one navigator now
@@ -2284,7 +2288,7 @@ void ASimulationManager::onSimulationFinished()
         EventsDataHub->purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
-    Detector->BuildDetector(true, true);  // ***!!! before it was necessary! - check is it still the case
+    //Detector->BuildDetector(true, true);  // ***!!! before it was necessary! - check is it still the case
     if (fStartedFromGui) emit SimulationFinished();
 
     clearEnergyVector(); // main window copied if needed

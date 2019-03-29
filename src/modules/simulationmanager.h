@@ -177,7 +177,7 @@ private:
     QString ErrorString;
 
     bool bNextSimExternal = false;
-    bool bOnlyFileExport = true;
+    bool bOnlyFileExport = false;
 
 public slots:
     void simulate();

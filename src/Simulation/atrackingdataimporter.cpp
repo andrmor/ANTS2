@@ -5,6 +5,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord *> * History, QVector<TrackHolderClass *> * Tracks) :
 TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
@@ -34,11 +35,19 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
 
         if (!Error.isEmpty()) return Error;
     }
+    if (Tracks && CurrentTrack)
+    {
+        //qDebug() << "Sending last track - file at end";
+        *Tracks << CurrentTrack;
+        CurrentTrack = nullptr;
+    }
+    //if (History) ...
     return "";
 }
 
 void ATrackingDataImporter::processNewEvent()
 {
+    //qDebug() << "EV-->"<<currentLine;
     currentLine.remove(0, 1);
     int evId = currentLine.toInt();
 
@@ -56,6 +65,7 @@ void ATrackingDataImporter::processNewEvent()
 
     if (Tracks && CurrentTrack)
     {
+        //qDebug() << "  Sending previous track to Track container";
         *Tracks << CurrentTrack;
         CurrentTrack = nullptr;
     }
@@ -73,6 +83,7 @@ void ATrackingDataImporter::processNewEvent()
 
 void ATrackingDataImporter::processNewTrack()
 {
+    //qDebug() << "NT:"<<currentLine;
     currentLine.remove(0, 1);
     //Id ParentId PartId x y z E
     //0      1      2    3 4 5 6
@@ -96,8 +107,13 @@ void ATrackingDataImporter::processNewTrack()
 
     if (Tracks)
     {
-        if (CurrentTrack) *Tracks << CurrentTrack;
+        if (CurrentTrack)
+        {
+            //qDebug() << "  Sending previous track to Track container";
+            *Tracks << CurrentTrack;
+        }
 
+        //qDebug() << "  Creating new track and its firt node";
         CurrentTrack = new TrackHolderClass();
         CurrentTrack->UserIndex = 22;
         TrackBuildOptions.applyToParticleTrack(CurrentTrack, f.at(2).toInt());
@@ -122,6 +138,7 @@ void ATrackingDataImporter::processNewTrack()
 
 void ATrackingDataImporter::processNewStep()
 {
+    //qDebug() << "PS:"<<currentLine;
     //x y z dE proc {secondaries}
     //0 1 2 3    4    5...
 
@@ -145,10 +162,9 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
 
+        //qDebug() << "  Adding node";
         CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble(), 0);  // time? ***!!!
     }
 
     CurrentStatus = TrackOngoing;
 }
-
-

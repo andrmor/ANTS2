@@ -9,7 +9,7 @@ ARootObjBase::ARootObjBase(TObject *object, const QString &title, const QString 
 
 ARootObjBase::~ARootObjBase()
 {
-    qDebug() << "-------------->Destructor for "<<Title << " Obj:"<<Object;
+    //qDebug() << "-------------->Destructor for "<<Title << " Obj:"<<Object;
     delete Object;
 }
 

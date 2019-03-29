@@ -574,8 +574,8 @@ public:
     dx1(15), dx2(5), dy1(10), dy2(20), dz(10) {}
   virtual ~AGeoTrd2() {}
 
-  virtual const QString getShapeType() {return "AGeoTrd2";}
-  virtual const QString getShapeTemplate() {return "AGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
+  virtual const QString getShapeType() {return "TGeoTrd2";}
+  virtual const QString getShapeTemplate() {return "TGeoTrd2( dx1, dx2, dy1, dy2, dz )";}
   virtual const QString getHelp();
 
   virtual bool readFromString(QString GenerationString);

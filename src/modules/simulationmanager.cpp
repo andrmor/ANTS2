@@ -172,7 +172,11 @@ else
       else //Particle simulator
       {
           ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, i);
-          if (bGeant4ParticleSim && bOnlyFileExport) pss->setOnlySavePrimaries();
+          if (bGeant4ParticleSim && bOnlyFileExport)
+          {
+              qDebug() << "--- only file export, external/internal sim will not be started! ---";
+              pss->setOnlySavePrimaries();
+          }
           worker = pss;
       }
       bOnlyFileExport = false; //single session trigger from script

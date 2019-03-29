@@ -10609,7 +10609,7 @@ Right click: toggle build particle tracks. Also switch off building photon track
            </font>
           </property>
           <property name="text">
-           <string>Trace particles in Geant4</string>
+           <string>Track particles in Geant4</string>
           </property>
          </widget>
          <widget class="QPushButton" name="pbGoToConfigueG4ants">

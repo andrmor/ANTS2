@@ -61,7 +61,7 @@ static void *SimulationManagerRunWorker(void *workerSimulator)
     //simulator->getDetector()->GeoManager->AddNavigator();
     if (!simulator->getDetector()->GeoManager->GetCurrentNavigator())
     {
-        qDebug() << "No current navigator for this thread, adding one";
+        //qDebug() << "No current navigator for this thread, adding one";
         simulator->getDetector()->GeoManager->AddNavigator();
     }
 

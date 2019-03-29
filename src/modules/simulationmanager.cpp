@@ -2289,6 +2289,7 @@ void ASimulationManager::onSimulationFinished()
     }
 
     //Detector->BuildDetector(true, true);  // ***!!! before it was necessary! - check is it still the case
+    Detector->GeoManager->CleanGarbage();
     if (fStartedFromGui) emit SimulationFinished();
 
     clearEnergyVector(); // main window copied if needed

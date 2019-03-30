@@ -13,6 +13,7 @@
 #include <QVector>
 #include <QObject>
 #include <TString.h>
+#include <vector>
 
 class TTree;
 class APmHub;
@@ -20,6 +21,7 @@ struct AScanRecord;
 struct AReconRecord;
 class TRandom2;
 class QJsonObject;
+class AEventTrackingRecord;
 
 class EventsDataClass : public QObject
 {
@@ -48,8 +50,9 @@ public:
 
 #ifdef SIM
     // Logs
-    QVector<EventHistoryStructure*> EventHistory;
-    void saveEventHistoryToTree(const QString& fileName) const;
+    std::vector<AEventTrackingRecord *> TrackingHistory; // for now only for Geant4 delegated sims
+      QVector<EventHistoryStructure*> EventHistory; // to be replaced with TrackingHistory everywhere
+      void saveEventHistoryToTree(const QString& fileName) const;
     QVector<GeneratedPhotonsHistoryStructure> GeneratedPhotonsHistory;
 
     //Detection statistics

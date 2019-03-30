@@ -3,6 +3,7 @@
 #include "apositionenergyrecords.h"
 #include "apreprocessingsettings.h"
 #include "apmhub.h"
+#include "aeventtrackingrecord.h"
 
 //Root
 #include "TTree.h"
@@ -63,6 +64,8 @@ void EventsDataClass::clear()
   TimedEvents.clear();  
   fLoadedEventsHaveEnergyInfo = false;
 #ifdef SIM
+  for (auto* pr : TrackingHistory) delete pr;
+  TrackingHistory.clear();
   for (int i=0; i<EventHistory.size(); i++) delete EventHistory[i];
   EventHistory.clear();
   GeneratedPhotonsHistory.clear();
@@ -364,6 +367,7 @@ void EventsDataClass::squeeze()
     for (int i=0; i<ReconstructionData.size(); i++) ReconstructionData[i].squeeze();
     ReconstructionData.squeeze();
 #ifdef SIM
+    TrackingHistory.shrink_to_fit();
     EventHistory.squeeze();
     GeneratedPhotonsHistory.squeeze();
 #endif

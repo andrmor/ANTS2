@@ -127,7 +127,7 @@ void MainWindow::on_pobTest_2_clicked()
             auto * er = EventsDataHub->TrackingHistory.at(i);
             if (!er) qDebug() << "Empty!!!";
             else
-                for (auto * pr : er->PrimaryParticleRecords)
+                for (auto * pr : er->getPrimaryParticleRecords())
                 {
                     QString str;
                     pr->logToString(str, 0, pn, true);

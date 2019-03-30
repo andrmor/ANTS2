@@ -18,11 +18,11 @@ public:
     int   countSecondaries() const;
     void  logToString(QString & str, int offset) const;
 
+public:
     float   Position[3];
     float   Time;
     float   DepositedEnergy;
     QString Process;          //step defining process
-
 private:
     std::vector<AParticleTrackingRecord *> Secondaries; //secondaries created in this step - does not own
 
@@ -49,6 +49,8 @@ public:
 
     void logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
 
+    ~AParticleTrackingRecord();
+
     // prevent creation on the stack and copy/move
 private:
     AParticleTrackingRecord(int   particleId, float startEnergy, float * startPosition, float time);
@@ -64,15 +66,18 @@ private:
     AParticleTrackingRecord(AParticleTrackingRecord &&) = delete;
     AParticleTrackingRecord & operator=(AParticleTrackingRecord &&) = delete;
 
-public:
-    ~AParticleTrackingRecord();
+    const std::vector<ATrackingStepData *> & getSteps() const {return Steps;}
+    const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
+    const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
+public:
     int     ParticleId;                       // ants ID of the particle
     float   StartEnergy;                      // initial kinetic energy
     float   StartPosition[3];                 // initial position
     float   StartTime;                        // time of creation
-    std::vector<ATrackingStepData *> Steps;   // tracking steps
 
+private:
+    std::vector<ATrackingStepData *> Steps;   // tracking steps
     AParticleTrackingRecord * SecondaryOf = nullptr;    // 0 means primary
     std::vector<AParticleTrackingRecord *> Secondaries; // vector of secondaries
 
@@ -87,6 +92,10 @@ public:
     bool   isEmpty() const {return PrimaryParticleRecords.empty();}
     int    countPrimaries() const;
 
+    const std::vector<AParticleTrackingRecord *> getPrimaryParticleRecords() const {return PrimaryParticleRecords;}
+
+    ~AEventTrackingRecord();
+
     // prevent creation on the stack and copy/move
 private:
     AEventTrackingRecord();
@@ -96,9 +105,7 @@ private:
     AEventTrackingRecord(AEventTrackingRecord &&) = delete;
     AEventTrackingRecord & operator=(AEventTrackingRecord &&) = delete;
 
-public:
-    ~AEventTrackingRecord();
-
+private:
     std::vector<AParticleTrackingRecord *> PrimaryParticleRecords;
 
 };

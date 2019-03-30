@@ -201,7 +201,7 @@ public:
 
     char progress;
 
-    QVector<TrackHolderClass*> tracks;  //temporary container for tracks, they are transferred (amd merged) to GeoManager after simulation is finished
+    QVector<TrackHolderClass*> tracks;  //temporary container for track data
 
     virtual int getEventCount() const = 0;
     virtual int getTotalEventCount() const = 0;

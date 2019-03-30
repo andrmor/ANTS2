@@ -29,12 +29,13 @@ int ATrackingStepData::countSecondaries() const
     return static_cast<int>(Secondaries.size());
 }
 
-const QString ATrackingStepData::toString(int offset) const
+void ATrackingStepData::logToString(QString & str, int offset) const
 {
-    QString s = QString(' ').repeated(offset) + QString("Pos=(%1,%2,%3)  Time=%4  dE=%5  %6").arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time).arg(DepositedEnergy).arg(Process);
-    if (Secondaries.size() > 0) s += QString("  #Secondaries:%1").arg(Secondaries.size());
-    s += '\n';
-    return s;
+    str += QString(' ').repeated(offset);
+    str += QString("%1 dE=%2 at (%3, %4, %5) %6").arg(Process).arg(DepositedEnergy).arg(Position[0]).arg(Position[1]).arg(Position[2]).arg(Time);
+    if (Secondaries.size() > 0)
+        str += QString("  #sec:%1").arg(Secondaries.size());
+    str += '\n';
 }
 
 // ============= Track ==============
@@ -112,32 +113,22 @@ int AParticleTrackingRecord::countSecondaries() const
     return static_cast<int>(Secondaries.size());
 }
 
-const QString AParticleTrackingRecord::toString(int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const
+void AParticleTrackingRecord::logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const
 {
-    QString s = QString(' ').repeated(offset) + '>';
-    s += (ParticleId > -1 && ParticleId < ParticleNames.size() ? ParticleNames.at(ParticleId) : "unknown");
-    s += QString("  E=%1  Pos=(%2,%3,%4)  Time=%5\n").arg(StartEnergy).arg(StartPosition[0]).arg(StartPosition[1]).arg(StartPosition[2]).arg(StartTime);
+    str += QString(' ').repeated(offset) + '>';
+    str += (ParticleId > -1 && ParticleId < ParticleNames.size() ? ParticleNames.at(ParticleId) : "unknown");
+    str += QString("  E=%1  at (%2, %3, %4) %5\n").arg(StartEnergy).arg(StartPosition[0]).arg(StartPosition[1]).arg(StartPosition[2]).arg(StartTime);
 
-    //offset += 2;
-    size_t SecIndex = 0;
     for (auto* st : Steps)
     {
-        s += st->toString(offset);
+        st->logToString(str, offset);
         if (bExpandSecondaries)
         {
-            const size_t numSec = st->Secondaries.size();
-            for (size_t iSec = 0; iSec<numSec; iSec++)
-            {
-                if (SecIndex < Secondaries.size())
-                {
-                    s += Secondaries.at(SecIndex)->toString(offset + 2, ParticleNames, bExpandSecondaries);
-                    SecIndex++;
-                }
-                else qDebug() << "Wrong secondary index SecIndex detected!";
-            }
+            const std::vector<AParticleTrackingRecord *> & StepSecondaries = st->getSecondaries();
+            for (auto * sec : StepSecondaries)
+                sec->logToString(str, offset + 4, ParticleNames, bExpandSecondaries);
         }
     }
-    return s;
 }
 
 // ============= Event ==============

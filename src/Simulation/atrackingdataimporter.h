@@ -40,22 +40,8 @@ private:
     void processNewTrack();
     void processNewStep();
 
-    bool isPromisesFailed();
+    bool isErrorInPromises();
 
-};
-
-class ATrackingImportStateMachine
-{
-public:
-    ATrackingImportStateMachine(QString & Error) : Error(Error) {}
-    virtual ~ATrackingImportStateMachine(){}
-
-    virtual void processNewEvent() = 0;
-    virtual void processNewParticle() = 0;
-    virtual void processNewStep() = 0;
-
-protected:
-    QString & Error;
 };
 
 #endif // ATRACKINGDATAIMPORTER_H

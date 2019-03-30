@@ -121,7 +121,7 @@ void MainWindow::on_pobTest_2_clicked()
         qDebug() << "TrackingHistory is empty!";
     else
     {
-        for (int i = 0; i<EventsDataHub->TrackingHistory.size(); i++)
+        for (size_t i = 0; i<EventsDataHub->TrackingHistory.size(); i++)
         {
             Owindow->OutText( QString("Event #%1").arg(i) );
             auto * er = EventsDataHub->TrackingHistory.at(i);
@@ -129,7 +129,9 @@ void MainWindow::on_pobTest_2_clicked()
             else
                 for (auto * pr : er->PrimaryParticleRecords)
                 {
-                    Owindow->OutText(pr->toString(0, pn, true));
+                    QString str;
+                    pr->logToString(str, 0, pn, true);
+                    Owindow->OutText(str);
                 }
         }
     }

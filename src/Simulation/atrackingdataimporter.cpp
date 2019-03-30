@@ -29,8 +29,6 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
         currentLine = in.readLine();
         if (currentLine.isEmpty()) continue;
 
-        qDebug() << currentLine;
-
         if (currentLine.startsWith('#')) processNewEvent();
         else if (currentLine.startsWith('>')) processNewTrack();
         else processNewStep();
@@ -44,7 +42,7 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
         *Tracks << CurrentTrack;
         CurrentTrack = nullptr;
     }
-    if (isPromisesFailed()) return Error;
+    if (isErrorInPromises()) return Error;
 
     return "";
 }
@@ -67,7 +65,7 @@ void ATrackingDataImporter::processNewEvent()
         return;
     }
 
-    if (isPromisesFailed()) return; // container of promises should be empty at the end of event
+    if (isErrorInPromises()) return; // container of promises should be empty at the end of event
 
     if (Tracks && CurrentTrack)
     {
@@ -232,7 +230,7 @@ void ATrackingDataImporter::processNewStep()
     CurrentStatus = TrackOngoing;
 }
 
-bool ATrackingDataImporter::isPromisesFailed()
+bool ATrackingDataImporter::isErrorInPromises()
 {
     if (!PromisedSecondaries.isEmpty())
     {

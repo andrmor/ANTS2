@@ -12,16 +12,20 @@ public:
     ATrackingStepData(float * position, float time, float depositedEnergy, const QString & process);
     ATrackingStepData(float x, float y, float z, float time, float depositedEnergy, const QString & process);
 
-    void addSecondary(AParticleTrackingRecord * sec);
-
-    float  Position[3];
-    float  Time;
-    float  DepositedEnergy;
-    QString Process;                                    //step defining process
-    std::vector<AParticleTrackingRecord *> Secondaries; //secondaries created in this step - does not own
+    void  addSecondary(AParticleTrackingRecord * sec);
+    const std::vector<AParticleTrackingRecord *> & getSecondaries() {return Secondaries;}
 
     int   countSecondaries() const;
-    const QString toString(int offset) const;
+    void  logToString(QString & str, int offset) const;
+
+    float   Position[3];
+    float   Time;
+    float   DepositedEnergy;
+    QString Process;          //step defining process
+
+private:
+    std::vector<AParticleTrackingRecord *> Secondaries; //secondaries created in this step - does not own
+
 };
 
 class AParticleTrackingRecord
@@ -35,8 +39,7 @@ public:
                                            float  StartY,
                                            float  StartZ,
                                            float  Time);
-
-    static AParticleTrackingRecord* create(); // avoid if possible: empty record - ParticleId will be set to -1
+    static AParticleTrackingRecord* create(); // avoid if possible: empty record -> ParticleId will be set to -1
 
     void update(int particleId, float  startEnergy, float  startX, float  startY, float  startZ, float  time);
     void addStep(ATrackingStepData * step);
@@ -44,7 +47,7 @@ public:
     void addSecondary(AParticleTrackingRecord * sec);
     int  countSecondaries() const;
 
-    const QString toString(int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
+    void logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
 
     // prevent creation on the stack and copy/move
 private:

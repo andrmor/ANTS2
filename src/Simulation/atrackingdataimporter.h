@@ -1,10 +1,9 @@
 #ifndef ATRACKINGDATAIMPORTER_H
 #define ATRACKINGDATAIMPORTER_H
 
-#include <QString>
-#include <QVector>
-#include <QMap>
 #include <vector>
+#include <QString>
+#include <QMap>
 
 class AEventTrackingRecord;
 class AParticleTrackingRecord;
@@ -14,14 +13,14 @@ class ATrackBuildOptions;
 class ATrackingDataImporter
 {
 public:
-    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord*> * History, QVector<TrackHolderClass*> * Tracks);
+    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord*> * History, std::vector<TrackHolderClass *> * Tracks);
 
     const QString processFile(const QString & FileName, int StartEvent);
 
 private:
     const ATrackBuildOptions & TrackBuildOptions;
-    std::vector<AEventTrackingRecord*> * History = nullptr; // if 0 - do not collect history
-    QVector<TrackHolderClass*> * Tracks = nullptr;          // if 0 - do not extract tracks
+    std::vector<AEventTrackingRecord *> * History = nullptr; // if 0 - do not collect history
+    std::vector<TrackHolderClass *> * Tracks = nullptr;      // if 0 - do not extract tracks
 
     QString currentLine;
     AEventTrackingRecord * CurrentEventRecord = nullptr;      // history of the current event

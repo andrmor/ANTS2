@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <vector>
 
 class TGeoManager;
 class TRandom2;
@@ -39,7 +40,7 @@ public:
       //configure all
     void configure(const GeneralSimSettings *simSet,                 
                    bool fbuildTrackes,
-                   QVector<TrackHolderClass*> *tracks,
+                   std::vector<TrackHolderClass *> * tracks,
                    bool fremoveEmptyTracks = true);
 
 
@@ -67,8 +68,8 @@ private:
     int MaxTracks = 10;
     int ParticleTracksAdded = 0;
     bool RemoveTracksIfNoEnergyDepo;
-    QVector<TrackHolderClass*> TrackCandidates;
-    QVector<TrackHolderClass*> *Tracks;
+    std::vector<TrackHolderClass *> TrackCandidates;
+    std::vector<TrackHolderClass *> * Tracks;
 
     //int Id;
     //double energy, time;

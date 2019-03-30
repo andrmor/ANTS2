@@ -183,7 +183,7 @@ void AGeoWin_SI::ShowTruePositions()
 void AGeoWin_SI::ShowTracks(int num, int OnlyColor)
 {
   Detector->GeoManager->ClearTracks();
-  if (SimManager->Tracks.isEmpty()) return;
+  if (SimManager->Tracks.empty()) return;
 
   for (int iTr=0; iTr<SimManager->Tracks.size() && iTr<num; iTr++)
   {

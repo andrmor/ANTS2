@@ -4,6 +4,7 @@
 #include "localscriptinterfaces.h"
 #include "generalsimsettings.h"
 #include <QVector>
+#include <vector>
 #include <QVariant>
 
 class AConfiguration;
@@ -88,7 +89,7 @@ private:
     int TrackColor;
     int TrackWidth;
     int MaxNumberTracks;
-    QVector<TrackHolderClass *> Tracks;
+    std::vector<TrackHolderClass *> Tracks;
     AOneEvent* Event;
 
     void clearTrackHolder();

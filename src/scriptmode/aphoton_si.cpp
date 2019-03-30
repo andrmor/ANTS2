@@ -468,9 +468,9 @@ QString APhoton_SI::PrintAllDefinedProcessTypes()
 
 void APhoton_SI::clearTrackHolder()
 {
-    for(int i=0; i<Tracks.size(); i++) delete Tracks[i];
+    for (size_t i=0; i<Tracks.size(); i++) delete Tracks[i];
     Tracks.clear();
-    Tracks.squeeze();
+    Tracks.shrink_to_fit();
 }
 
 bool APhoton_SI::initTracer()

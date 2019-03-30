@@ -37,7 +37,7 @@ PrimaryParticleTracker::PrimaryParticleTracker(TGeoManager *geoManager,
   counter = -1;
 }
 
-void PrimaryParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, QVector<TrackHolderClass*> *tracks, bool fremoveEmptyTracks)
+void PrimaryParticleTracker::configure(const GeneralSimSettings* simSet, bool fbuildTracks, std::vector<TrackHolderClass *> * tracks, bool fremoveEmptyTracks)
 {
   SimSet = simSet;
   BuildTracks = fbuildTracks;
@@ -711,7 +711,7 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       if (bBuildThisTrack)
         {
           track->Nodes.append(TrackNodeStruct(r, time));          
-          TrackCandidates.append(track);
+          TrackCandidates.push_back(track);
           ParticleTracksAdded++;
         }
       //finalizing diagnostics
@@ -733,14 +733,14 @@ bool PrimaryParticleTracker::TrackParticlesOnStack(int eventId)
       if (RemoveTracksIfNoEnergyDepo && EnergyVector->isEmpty() )
       {
           //clear all particle tracks - there were no energy deposition - nothing will be added to GeoManager later
-          for (int i=0; i<TrackCandidates.size(); i++)
+          for (size_t i = 0; i < TrackCandidates.size(); i++)
               delete TrackCandidates.at(i);
           ParticleTracksAdded -= TrackCandidates.size();
       }
       else
       {
-          for (int i = 0; i < TrackCandidates.size(); i++)
-              Tracks->append(TrackCandidates.at(i));
+          for (size_t i = 0; i < TrackCandidates.size(); i++)
+              Tracks->push_back(TrackCandidates.at(i));
       }
       TrackCandidates.clear();
   }// delete later when creating GeoManager tracks

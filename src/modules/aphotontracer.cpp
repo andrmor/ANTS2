@@ -44,7 +44,7 @@ APhotonTracer::~APhotonTracer()
     delete p;
 }
 
-void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, QVector<TrackHolderClass*> *tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
+void APhotonTracer::configure(const GeneralSimSettings *simSet, AOneEvent* oneEvent, bool fBuildTracks, std::vector<TrackHolderClass *> * tracks)//bool fWave, bool fAngle,  bool fArea, int MaxTrans, bool fTracks, bool fFastTracks, bool fAccelQE, double maxQE, QVector<double> *MaxQEwave)
 {
    SimSet = simSet;
    OneEvent = oneEvent;
@@ -543,7 +543,7 @@ void APhotonTracer::AppendTrack()
       else track->Color = kRed;
 */
 
-      Tracks->append(track);
+      Tracks->push_back(track);
       PhotonTracksAdded++;
     }
 }

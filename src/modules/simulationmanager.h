@@ -8,6 +8,7 @@
 #include "atrackbuildoptions.h"
 
 #include <QVector>
+#include <vector>
 #include <QObject>
 #include <QTime>
 #include <QTimer>
@@ -74,7 +75,7 @@ public:
     QVector< QBitArray > SiPMpixels;
     QVector<AEnergyDepositionCell*> EnergyVector;
 
-    QVector<TrackHolderClass*> Tracks;
+    std::vector<TrackHolderClass *> Tracks;
 
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
 
@@ -201,7 +202,7 @@ public:
 
     char progress;
 
-    QVector<TrackHolderClass*> tracks;  //temporary container for track data
+    std::vector<TrackHolderClass *> tracks;  //temporary container for track data
 
     virtual int getEventCount() const = 0;
     virtual int getTotalEventCount() const = 0;

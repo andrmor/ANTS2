@@ -2271,7 +2271,10 @@ void ASimulationManager::onSimulationFinished()
 
         for (Simulator * sim : simulators)
         {
-            Tracks += sim->tracks;
+            //Tracks += sim->tracks;
+            Tracks.insert( Tracks.end(),
+                           std::make_move_iterator(sim->tracks.begin()),
+                           std::make_move_iterator(sim->tracks.end()) );
             sim->tracks.clear();  //to avoid delete objects on simulator delete
         }
     }

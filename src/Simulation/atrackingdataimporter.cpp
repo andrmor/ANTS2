@@ -7,7 +7,9 @@
 #include <QTextStream>
 #include <QDebug>
 
-ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord *> * History, QVector<TrackHolderClass *> * Tracks) :
+ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
+                                             std::vector<AEventTrackingRecord *> * History,
+                                             std::vector<TrackHolderClass *> * Tracks) :
 TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
 
 const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent)
@@ -39,7 +41,7 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
     if (Tracks && CurrentTrack)
     {
         //qDebug() << "Sending last track - file at end";
-        *Tracks << CurrentTrack;
+        Tracks->push_back( CurrentTrack );
         CurrentTrack = nullptr;
     }
     if (isErrorInPromises()) return Error;
@@ -70,7 +72,7 @@ void ATrackingDataImporter::processNewEvent()
     if (Tracks && CurrentTrack)
     {
         //qDebug() << "  Sending previous track to Track container";
-        *Tracks << CurrentTrack;
+        Tracks->push_back( CurrentTrack );
         CurrentTrack = nullptr;
     }
 
@@ -113,7 +115,7 @@ void ATrackingDataImporter::processNewTrack()
         if (CurrentTrack)
         {
             //qDebug() << "  Sending previous track to Track container";
-            *Tracks << CurrentTrack;
+            Tracks->push_back( CurrentTrack );
         }
 
         //qDebug() << "  Creating new track and its firt node";

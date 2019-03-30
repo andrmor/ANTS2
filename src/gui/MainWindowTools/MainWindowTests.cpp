@@ -107,6 +107,8 @@ void MainWindow::on_pobTest_clicked()
 #include "outputwindow.h"
 void MainWindow::on_pobTest_2_clicked()
 {
+    SimulationManager->clearTracks();
+
     ATrackingDataImporter di(SimulationManager->TrackBuildOptions, &EventsDataHub->TrackingHistory, nullptr);
     QString err = di.processFile("D:/DOWNLOADS/tracks-0.txt", 0);
     if (!err.isEmpty())
@@ -132,6 +134,8 @@ void MainWindow::on_pobTest_2_clicked()
                     QString str;
                     pr->logToString(str, 0, pn, true);
                     Owindow->OutText(str);
+
+                    pr->makeTrack(SimulationManager->Tracks, SimulationManager->TrackBuildOptions, true);
                 }
         }
     }

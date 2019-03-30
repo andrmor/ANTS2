@@ -77,7 +77,9 @@ public:
 
     std::vector<TrackHolderClass *> Tracks;
 
-    void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);   
+    void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);
+
+    void clearTracks();
 
     // Next three: Simulators use their own local copies constructed using configuration in JSON
     ASourceParticleGenerator*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
@@ -91,7 +93,6 @@ private:
     DetectorClass* Detector; //alias
 
     void clearEnergyVector();
-    void clearTracks();
 
 public slots:
     void onSimulationFinished(); //processing of simulation results!

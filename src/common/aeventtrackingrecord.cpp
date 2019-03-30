@@ -1,4 +1,6 @@
 #include "aeventtrackingrecord.h"
+#include "atrackrecords.h"
+#include "atrackbuildoptions.h"
 
 #include <QStringList>
 #include <QDebug>
@@ -129,6 +131,22 @@ void AParticleTrackingRecord::logToString(QString & str, int offset, const QStri
                 sec->logToString(str, offset + 4, ParticleNames, bExpandSecondaries);
         }
     }
+}
+
+void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const
+{
+    TrackHolderClass * tr = new TrackHolderClass();
+    tr->Nodes.append( TrackNodeStruct(StartPosition[0], StartPosition[1], StartPosition[2], StartTime) );
+    tr->UserIndex = 22;
+    TrackBuildOptions.applyToParticleTrack(tr, ParticleId);
+    Tracks.push_back(tr);
+
+    for (ATrackingStepData * step : Steps)
+        tr->Nodes.append( TrackNodeStruct(step->Position[0], step->Position[1], step->Position[2], step->Time) );
+
+    if (bWithSecondaries)
+        for (AParticleTrackingRecord * sec : Secondaries)
+            sec->makeTrack(Tracks, TrackBuildOptions, bWithSecondaries);
 }
 
 // ============= Event ==============

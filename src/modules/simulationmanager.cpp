@@ -2226,7 +2226,7 @@ void ASimulationManager::clearEnergyVector()
 
 void ASimulationManager::clearTracks()
 {
-    for (int i=0; i<Tracks.size(); i++) delete Tracks[i];
+    for (auto * tr : Tracks) delete tr;
     Tracks.clear();
 }
 

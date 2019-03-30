@@ -5,6 +5,8 @@
 #include <vector>
 
 class AParticleTrackingRecord;
+class TrackHolderClass;
+class ATrackBuildOptions;
 
 class ATrackingStepData
 {
@@ -47,7 +49,12 @@ public:
     void addSecondary(AParticleTrackingRecord * sec);
     int  countSecondaries() const;
 
+    const std::vector<ATrackingStepData *> & getSteps() const {return Steps;}
+    const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
+    const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
+
     void logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
+    void makeTrack(std::vector<TrackHolderClass *> & Tracks, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     ~AParticleTrackingRecord();
 
@@ -65,10 +72,6 @@ private:
     AParticleTrackingRecord & operator=(const AParticleTrackingRecord &) = delete;
     AParticleTrackingRecord(AParticleTrackingRecord &&) = delete;
     AParticleTrackingRecord & operator=(AParticleTrackingRecord &&) = delete;
-
-    const std::vector<ATrackingStepData *> & getSteps() const {return Steps;}
-    const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
-    const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
 public:
     int     ParticleId;                       // ants ID of the particle

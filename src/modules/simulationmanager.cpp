@@ -2137,7 +2137,7 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     {
         ATrackingDataImporter ti(simSettings->TrackBuildOptions, 0, &tracks);
         QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
-        ErrorString = ti.processFile(TrackingFileName, eventBegin, 1000);
+        ErrorString = ti.processFile(TrackingFileName, eventBegin);
         if (!ErrorString.isEmpty()) return false;
     }
 

@@ -9,6 +9,11 @@ class AParticleTrackingRecord;
 class ATrackingStepData
 {
 public:
+    ATrackingStepData(float * position, float time, float depositedEnergy, const QString & process);
+    ATrackingStepData(float x, float y, float z, float time, float depositedEnergy, const QString & process);
+
+    void addSecondary(AParticleTrackingRecord * sec);
+
     float  Position[3];
     float  Time;
     float  DepositedEnergy;
@@ -22,9 +27,18 @@ public:
 class AParticleTrackingRecord
 {
 public:
-    static AParticleTrackingRecord* create(int ParticleId, double StartEnergy, double * StartPosition, double Time, AParticleTrackingRecord * SecondaryOf = nullptr);
-    static AParticleTrackingRecord* create(int ParticleId, float  StartEnergy, float  * StartPosition, float  Time, AParticleTrackingRecord * SecondaryOf = nullptr);
+    static AParticleTrackingRecord* create(int ParticleId, double StartEnergy, double * StartPosition, double Time);
+    static AParticleTrackingRecord* create(int ParticleId, float  StartEnergy, float  * StartPosition, float  Time);
+    static AParticleTrackingRecord* create(int    ParticleId,
+                                           float  StartEnergy,
+                                           float  StartX,
+                                           float  StartY,
+                                           float  StartZ,
+                                           float  Time);
 
+    static AParticleTrackingRecord* create(); // avoid if possible: empty record - ParticleId will be set to -1
+
+    void update(int particleId, float  startEnergy, float  startX, float  startY, float  startZ, float  time);
     void addStep(ATrackingStepData * step);
 
     void addSecondary(AParticleTrackingRecord * sec);
@@ -34,7 +48,13 @@ public:
 
     // prevent creation on the stack and copy/move
 private:
-    AParticleTrackingRecord(int ParticleId, float StartEnergy, float * StartPosition, float Time, AParticleTrackingRecord * SecondaryOf = nullptr);
+    AParticleTrackingRecord(int   particleId, float startEnergy, float * startPosition, float time);
+    AParticleTrackingRecord(int   particleId,
+                            float startEnergy,
+                            float startX,
+                            float startY,
+                            float startZ,
+                            float time);
 
     AParticleTrackingRecord(const AParticleTrackingRecord &) = delete;
     AParticleTrackingRecord & operator=(const AParticleTrackingRecord &) = delete;
@@ -61,8 +81,8 @@ public:
     static AEventTrackingRecord* create();
     void   addPrimaryRecord(AParticleTrackingRecord * rec);
 
-    bool   isEmpty() {return PrimaryParticleRecords.empty();}
-    int    countPrimaries();
+    bool   isEmpty() const {return PrimaryParticleRecords.empty();}
+    int    countPrimaries() const;
 
     // prevent creation on the stack and copy/move
 private:

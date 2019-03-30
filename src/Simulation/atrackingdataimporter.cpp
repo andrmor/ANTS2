@@ -10,7 +10,7 @@
 ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord *> * History, QVector<TrackHolderClass *> * Tracks) :
 TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
 
-const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent, int numEvents)
+const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent)
 {
     Error.clear();
 
@@ -20,7 +20,7 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
 
     ExpectedEvent = StartEvent;
     CurrentStatus = ExpectingEvent;
-    CurrentHistoryRecord = AEventTrackingRecord::create();
+    CurrentEventRecord = AEventTrackingRecord::create();
     CurrentTrack = nullptr;
 
     QTextStream in(&file);
@@ -29,19 +29,23 @@ const QString ATrackingDataImporter::processFile(const QString &FileName, int St
         currentLine = in.readLine();
         if (currentLine.isEmpty()) continue;
 
+        qDebug() << currentLine;
+
         if (currentLine.startsWith('#')) processNewEvent();
         else if (currentLine.startsWith('>')) processNewTrack();
         else processNewStep();
 
         if (!Error.isEmpty()) return Error;
     }
+
     if (Tracks && CurrentTrack)
     {
         //qDebug() << "Sending last track - file at end";
         *Tracks << CurrentTrack;
         CurrentTrack = nullptr;
     }
-    //if (History) ...
+    if (isPromisesFailed()) return Error;
+
     return "";
 }
 
@@ -63,6 +67,8 @@ void ATrackingDataImporter::processNewEvent()
         return;
     }
 
+    if (isPromisesFailed()) return; // container of promises should be empty at the end of event
+
     if (Tracks && CurrentTrack)
     {
         //qDebug() << "  Sending previous track to Track container";
@@ -72,9 +78,8 @@ void ATrackingDataImporter::processNewEvent()
 
     if (History)
     {
-        if (CurrentStatus != ExpectingEvent) // enough CurrHist exists?
-            History->push_back(CurrentHistoryRecord);
-        CurrentHistoryRecord = AEventTrackingRecord::create();
+        CurrentEventRecord = AEventTrackingRecord::create();
+        History->push_back(CurrentEventRecord);
     }
     ExpectedEvent++;
     CurrentStatus = ExpectingTrack;
@@ -96,12 +101,12 @@ void ATrackingDataImporter::processNewTrack()
 
     if (CurrentStatus == ExpectingEvent)
     {
-        Error = "Unexpected start of track - was expecting event";
+        Error = "Unexpected start of track - waiting new event";
         return;
     }
     if (CurrentStatus == ExpectingStep)
     {
-        Error = "Unexpected start of track - was expecting 1st step";
+        Error = "Unexpected start of track - waiting for 1st step";
         return;
     }
 
@@ -123,13 +128,43 @@ void ATrackingDataImporter::processNewTrack()
 
     if (History)
     {
-        if (CurrentStatus == ExpectingTrack)
+        if (!CurrentEventRecord)
         {
-            // start new record
+            Error = "Attempt to start new track when event record does not exist";
+            return;
         }
-        else // TrackOngoing
+
+        // if parent track == 0 create new primary record in this event
+        // else pointer to empty an record should be in the list of promised secondaries -> update the record
+        int trIndex = f.at(0).toInt();
+        int parTrIndex = f.at(1).toInt();
+        if (parTrIndex == 0)
         {
-            //add to previous record
+            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2).toInt(),
+                                                                          f.at(6).toFloat(),
+                                                                          f.at(3).toFloat(),
+                                                                          f.at(4).toFloat(),
+                                                                          f.at(5).toFloat(),
+                                                                          0); // time!!!
+            CurrentParticleRecord = r;
+            CurrentEventRecord->addPrimaryRecord(r);
+        }
+        else
+        {
+            AParticleTrackingRecord * secrec = PromisedSecondaries[trIndex];
+            if (!secrec)
+            {
+                Error = "Promised secondary not found!";
+                return;
+            }
+            secrec->update(f.at(2).toInt(),
+                           f.at(6).toFloat(),
+                           f.at(3).toFloat(),
+                           f.at(4).toFloat(),
+                           f.at(5).toFloat(),
+                           0); // time!!!
+            CurrentParticleRecord = secrec;
+            PromisedSecondaries.remove(trIndex);
         }
     }
 
@@ -149,22 +184,60 @@ void ATrackingDataImporter::processNewStep()
         return;
     }
 
-    if (History)
-    {
-
-    }
-
     if (Tracks)
     {
         if (!CurrentTrack)
         {
-            Error = "Track not started!";
+            Error = "Track not started while attempting to add step";
             return;
         }
-
         //qDebug() << "  Adding node";
         CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble(), 0);  // time? ***!!!
     }
 
+    if (History)
+    {
+        if (!CurrentParticleRecord)
+        {
+            Error = "Attempt to add step when particle record does not exist";
+            return;
+        }
+
+        ATrackingStepData * step = new ATrackingStepData(f.at(0).toFloat(),
+                                                         f.at(1).toFloat(),
+                                                         f.at(2).toFloat(),
+                                                         0,
+                                                         f.at(3).toFloat(),
+                                                         f.at(4));
+        CurrentParticleRecord->addStep(step);
+
+        if (f.size() > 5) // time!!!
+        {
+            for (int i=5; i<f.size(); i++)
+            {
+                int index = f.at(i).toInt();
+                if (PromisedSecondaries.contains(index))
+                {
+                    Error = QString("Error: secondary with index %1 was already promised").arg(index);
+                    return;
+                }
+                AParticleTrackingRecord * sr = AParticleTrackingRecord::create(); //empty!
+                step->addSecondary(sr);
+                CurrentParticleRecord->addSecondary(sr);
+                PromisedSecondaries.insert(index, sr);
+            }
+        }
+    }
+
     CurrentStatus = TrackOngoing;
+}
+
+bool ATrackingDataImporter::isPromisesFailed()
+{
+    if (!PromisedSecondaries.isEmpty())
+    {
+        Error = "Untreated promises of secondaries remained on event finish!";
+        return true;
+    }
+    return false;
 }

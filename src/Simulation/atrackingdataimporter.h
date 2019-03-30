@@ -3,9 +3,11 @@
 
 #include <QString>
 #include <QVector>
+#include <QMap>
 #include <vector>
 
 class AEventTrackingRecord;
+class AParticleTrackingRecord;
 class TrackHolderClass;
 class ATrackBuildOptions;
 
@@ -14,20 +16,18 @@ class ATrackingDataImporter
 public:
     ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord*> * History, QVector<TrackHolderClass*> * Tracks);
 
-    const QString processFile(const QString & FileName, int StartEvent, int numEvents);
+    const QString processFile(const QString & FileName, int StartEvent);
 
 private:
     const ATrackBuildOptions & TrackBuildOptions;
     std::vector<AEventTrackingRecord*> * History = nullptr; // if 0 - do not collect history
-    QVector<TrackHolderClass*> * Tracks = nullptr;      // if 0 - do not extract tracks
+    QVector<TrackHolderClass*> * Tracks = nullptr;          // if 0 - do not extract tracks
 
     QString currentLine;
-    AEventTrackingRecord * CurrentHistoryRecord = nullptr;
+    AEventTrackingRecord * CurrentEventRecord = nullptr;      // history of the current event
+    AParticleTrackingRecord * CurrentParticleRecord = nullptr;  // current particle - can be primary or secondary
+    QMap<int, AParticleTrackingRecord *> PromisedSecondaries;   // <index in file, secondary AEventTrackingRecord *>
     TrackHolderClass * CurrentTrack = nullptr;
-
-    void processNewEvent();
-    void processNewTrack();
-    void processNewStep();
 
     enum Status {ExpectingEvent, ExpectingTrack, ExpectingStep, TrackOngoing};
 
@@ -35,6 +35,12 @@ private:
     int ExpectedEvent;
 
     QString Error;
+
+    void processNewEvent();
+    void processNewTrack();
+    void processNewStep();
+
+    bool isPromisesFailed();
 
 };
 

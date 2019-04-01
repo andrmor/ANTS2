@@ -673,6 +673,7 @@ void OutputWindow::addPMitems(const QVector<float> *vector, float MaxSignal, Dyn
 
 void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, DynamicPassivesHandler *Passives)
 {
+    const int prec = ui->sbDecimalPrecision->value();
   for (int ipm=0; ipm<MW->PMs->count(); ipm++)
     {
       const APm &PM = MW->PMs->at(ipm);
@@ -681,7 +682,7 @@ void OutputWindow::addTextitems(const QVector<float> *vector, float MaxSignal, D
 
       float sig = ( vector ? vector->at(ipm) : 0 );
       //qDebug()<<"sig="<<sig;
-      QString text = QString::number(sig, 'g', 6);
+      QString text = QString::number(sig, 'g', prec);
       //text = "<CENTER>" + text + "</CENTER>";
 
       //color correction for dark blue

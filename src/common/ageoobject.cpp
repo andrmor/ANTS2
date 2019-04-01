@@ -538,7 +538,7 @@ bool AGeoObject::isContainsLocked()
   return false;
 }
 
-bool AGeoObject::isDisabled()
+bool AGeoObject::isDisabled() const
 {
     if (ObjectType->isWorld()) return false;
 
@@ -892,7 +892,7 @@ void AGeoObject::updateWorldSize(double &XYm, double &Zm)
         HostedObjects[i]->updateWorldSize(XYm, Zm);
 }
 
-bool AGeoObject::isMaterialInUse(int imat)
+bool AGeoObject::isMaterialInUse(int imat) const
 {
     //qDebug() << Name << "--->"<<Material;
 
@@ -909,6 +909,23 @@ bool AGeoObject::isMaterialInUse(int imat)
 
     for (int i=0; i<HostedObjects.size(); i++)
         if (HostedObjects[i]->isMaterialInUse(imat)) return true;
+
+    return false;
+}
+
+bool AGeoObject::isMaterialInActiveUse(int imat) const
+{
+    if (!fActive) return false;
+
+    if (ObjectType->isMonitor()) return false; //monitors are always made of Container's material and cannot host objects
+    if (Material == imat)
+    {
+        if ( !ObjectType->isGridElement() && !ObjectType->isCompositeContainer() )
+            return true;
+    }
+
+    for (int i=0; i<HostedObjects.size(); i++)
+        if (HostedObjects[i]->isMaterialInActiveUse(imat)) return true;
 
     return false;
 }

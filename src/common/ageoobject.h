@@ -84,7 +84,7 @@ public:
   void changeLineWidthRecursive(int delta);
   bool isNameExists(const QString name);
   bool isContainsLocked();
-  bool isDisabled();
+  bool isDisabled() const;
   void enableUp();
   bool isFirstSlab(); //slab or lightguide
   bool isLastSlab();  //slab or lightguide
@@ -107,7 +107,8 @@ public:
   void updateStack();  //called on one object of the set - it is used to calculate positions of other members!
   void clearAll();
   void updateWorldSize(double& XYm, double& Zm);
-  bool isMaterialInUse(int imat);
+  bool isMaterialInUse(int imat) const;  //including disabled objects
+  bool isMaterialInActiveUse(int imat) const;  //excluding disabled objects
 
   //service propertie
   QString tmpContName; //used only during load:

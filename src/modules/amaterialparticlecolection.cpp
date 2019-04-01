@@ -964,3 +964,37 @@ int AMaterialParticleCollection::WaveToIndex(double wavelength) const
     if (iwave < 0) iwave = 0;
     return iwave;
 }
+
+#include "ageoobject.h"
+void AMaterialParticleCollection::CheckReadyForGeant4Sim(QString & Errors, QString & Warnings, const AGeoObject * World) const
+{
+    int numPart = countParticles();
+    for (int iM = 0; iM<MaterialCollectionData.size(); iM++)
+    {
+        const AMaterial * mat = MaterialCollectionData.at(iM);
+        if (!World->isMaterialInActiveUse(iM)) continue;
+
+        bool bCompoDefined = mat->ChemicalComposition.isDefined();
+        bool bNeedComposition = false;
+
+        for (int iP = 0; iP<numPart; iP++)
+        {
+            const MatParticleStructure & mp = mat->MatParticle.at(iP);
+            if (!mp.TrackingAllowed) Warnings += QString("\n%1: Tracking disabled for %2 - not yet implemented in G4ants\n").arg(mat->name).arg(getParticleName(iP));
+
+            if (!mp.MaterialIsTransparent && !bCompoDefined)
+            {
+                bNeedComposition = true;
+                continue;
+            }
+        }
+
+        if (!bCompoDefined)
+        {
+            if (bNeedComposition)
+                Errors += QString("\nComposition not defined for %1, while needed for tracking!\n").arg(mat->name);
+            else
+                Warnings += QString("\nComposition not defined for %1\n Since material is transparent for all particles, assuming it is vacuum\n").arg(mat->name);
+        }
+    }
+}

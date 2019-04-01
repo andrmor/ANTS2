@@ -11,6 +11,7 @@
 
 class GeneralSimSettings;
 class ATracerStateful;
+class AGeoObject;
 
 class AMaterialParticleCollection : public QObject
 {
@@ -92,6 +93,7 @@ public:
   //general purpose requests
   void   GetWave(bool& wavelengthResolved, double& waveFrom, double& waveTo, double& waveStep, int& waveNodes) const;
   bool   IsWaveResolved() const {return WavelengthResolved;}
+  void   CheckReadyForGeant4Sim(QString & Errors, QString & Warnings, const AGeoObject * World) const;
 
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);

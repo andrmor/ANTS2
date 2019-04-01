@@ -31,6 +31,7 @@ public:
     const QString print() const;
 
     void clear();
+    bool isDefined() const {return !ElementComposition.isEmpty();}
 
     void writeToJson(QJsonObject& json) const;
     const QJsonObject writeToJson() const;

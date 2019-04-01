@@ -794,6 +794,19 @@ void MainWindow::on_pbEditParticleSource_clicked()
     if (ui->pbGunShowSource->isChecked()) ShowParticleSource_noFocus();
 }
 
+#include "ageoobject.h"
+void containsMonsGrids(const AGeoObject * obj, bool & bGrid, bool & bMon)
+{
+    if (obj->isDisabled()) return;
+
+    if (obj->ObjectType->isMonitor()) bMon = true;
+    if (obj->ObjectType->isGrid()) bGrid = true;
+
+    for (const AGeoObject * o : obj->HostedObjects)
+        containsMonsGrids(o, bGrid, bMon);
+}
+
+#include "asandwich.h"
 void MainWindow::on_pbParticleSourcesSimulate_clicked()
 {
     MainWindow::writeSimSettingsToJson(Config->JSON);
@@ -801,6 +814,52 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
     ELwindow->QuickSave(0);
     fStartedFromGUI = true;
     fSimDataNotSaved = false; // to disable the warning
+
+    //-- test G4 settings
+    if (G4SimSet.bTrackParticles)
+    {
+        QString Errors, Warnings, txt;
+
+        if (G4SimSet.SensitiveVolumes.isEmpty())
+            txt += "Sensitive volumes are not set!\n"
+                       "Geant4 simulation will not collect any deposition information\n"
+                       "There will be no photon generation in Ants2\n\n";
+
+        bool bMonitors = false;
+        bool bGrids = false;
+        containsMonsGrids(Detector->Sandwich->World, bGrids, bMonitors);
+        if (bMonitors)
+            Warnings+= "\nConfig contains active Monitor(s).\n"
+                       "Monitors will be treated as normal volumes\n";
+        if (bGrids)
+            Warnings+= "\nConfig contains optical grids.\n"
+                       "The grid will NOT be expanded:\n"
+                       "Geant4 will see only the elementary cell of the grid.\n";
+
+        MpCollection->CheckReadyForGeant4Sim(Errors, Warnings, Detector->Sandwich->World);
+
+        if (!Errors.isEmpty())
+        {
+            txt += QStringLiteral("\nERRORS:\n");
+            txt += Errors;
+            txt += '\n';
+        }
+
+        if (!Warnings.isEmpty())
+        {
+            txt += QStringLiteral("\nWarnings:\n");
+            txt += Warnings;
+        }
+
+        QMessageBox msgBox;
+        msgBox.setText(txt);
+        msgBox.setInformativeText("Start simulation?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Cancel) return;
+    }
+    //
 
     startSimulation(Config->JSON);
 }

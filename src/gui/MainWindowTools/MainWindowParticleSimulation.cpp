@@ -851,7 +851,7 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
             txt += Warnings;
         }
 
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setText(txt);
         msgBox.setInformativeText("Start simulation?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);

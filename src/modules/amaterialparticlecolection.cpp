@@ -994,7 +994,7 @@ void AMaterialParticleCollection::CheckReadyForGeant4Sim(QString & Errors, QStri
             if (bNeedComposition)
                 Errors += QString("\nComposition not defined for %1, while needed for tracking!\n").arg(mat->name);
             else
-                Warnings += QString("\nComposition not defined for %1\n Since material is transparent for all particles, assuming it is vacuum\n").arg(mat->name);
+                Warnings += QString("\nComposition not defined for %1\nIn Ants2 this material is transparent for all particles\n -> making it Geant4-compatible vacuum\n").arg(mat->name);
         }
     }
 }

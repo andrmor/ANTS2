@@ -1206,6 +1206,17 @@ void DetectorClass::updatePreprocessingAddMultySize()
     }
 }
 
+void removeOldFile(const QString & fileName, const QString & txt)
+{
+    QFile f(fileName);
+    if (f.exists())
+    {
+        //qDebug() << "Removing old file with" << txt << ":" << fileName;
+        bool bOK = f.remove();
+        if (!bOK) qWarning() << "Was unable to remove old file with" << txt << ":" << fileName;
+    }
+}
+
 #include "ag4simulationsettings.h"
 bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, int numTracksToBuild)
 {
@@ -1241,12 +1252,23 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
     {
         json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
 
-        json["File_Primaries"] = G4SimSet.getPrimariesFileName(i);
-        json["File_Deposition"] = G4SimSet.getDepositionFileName(i);
-        json["File_Receipt"] = G4SimSet.getReceitFileName(i);
+        QString primFN = G4SimSet.getPrimariesFileName(i);
+        json["File_Primaries"] = primFN;
+        removeOldFile(primFN, "primaries");
+
+        QString depoFN = G4SimSet.getDepositionFileName(i);
+        json["File_Deposition"] = depoFN;
+        removeOldFile(depoFN, "deposition");
+
+        QString recFN = G4SimSet.getReceitFileName(i);
+        json["File_Receipt"] = recFN;
+        removeOldFile(recFN, "receipt");
 
         json["MaxEventsForTrackExport"] = numTracksToBuild;  // ***!!! split accordig to numThreads!
-        json["File_Tracks"] = G4SimSet.getTracksFileName(i);
+
+        QString tracFN = G4SimSet.getTracksFileName(i);
+        json["File_Tracks"] = tracFN;
+        removeOldFile(tracFN, "tracking");
 
         SaveJsonToFile(json, G4SimSet.getConfigFileName(i));
     }

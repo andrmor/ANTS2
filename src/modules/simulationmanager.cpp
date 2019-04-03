@@ -2023,11 +2023,21 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     //QObject::connect(G4antsProcess, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [&isRunning](){isRunning = false; qDebug() << "----FINISHED!-----";});//this, &MainWindow::on_cameraControlExit);
     bG4isRunning = true;
         G4antsProcess->start(exe, ar);
-        G4antsProcess->waitForFinished(-1);
+        bool bStartedOK = G4antsProcess->waitForStarted(1000);
+        if (bStartedOK) G4antsProcess->waitForFinished(-1);
     bG4isRunning = false;
 
     QString err = G4antsProcess->errorString();
+
+    if (!bStartedOK)
+    {
+        ErrorString = "Failed to start G4ants executable\n" + err;
+        return false;
+    }
+
     QProcess::ExitStatus exitStat = G4antsProcess->exitStatus();
+
+    //qDebug() << "g4---->"<<err<<(int)exitStat;
 
     delete G4antsProcess; G4antsProcess = 0;
     if (fHardAbortWasTriggered) return false;
@@ -2039,7 +2049,6 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     }
     if (exitStat == QProcess::CrashExit)
     {
-        qWarning() << "QProcess returned error string:"<<err;
         ErrorString = "G4ants executable crashed:\nCheck that it was compiled with correct environment variables.\nDo you use the correct version of Geant4?";
         return false;
     }

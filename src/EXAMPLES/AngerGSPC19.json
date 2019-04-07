@@ -1206,7 +1206,7 @@
         },
         "FixedWorldSizes": {
             "WorldSizeFixed": true,
-            "XY": 147,
+            "XY": 175,
             "Z": 80
         },
         "IndividualPMoverrides": {
@@ -1614,14 +1614,14 @@
             ],
             "IgnoreThresholds": {
                 "Activated": false,
-                "Max": 1e+10,
+                "Max": 10000000000,
                 "Min": 1
             },
             "LoadFirst": -1,
             "LoadedEnergy": {
                 "Activated": false,
                 "Add": 0,
-                "Channel": 0,
+                "Channel": 19,
                 "Multi": 1
             },
             "LoadedPosition": {
@@ -1714,6 +1714,22 @@
                                 "Charge": 1,
                                 "Mass": 3,
                                 "Name": "triton",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
                                 "Type": 1
                             },
                             "DataSource": "",
@@ -2326,6 +2342,22 @@
                             "TotalInteraction": [
                             ],
                             "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
                         }
                     ],
                     "PrimScintDecay": [
@@ -2928,6 +2960,22 @@
                             "TotalInteraction": [
                             ],
                             "TrackingAllowed": false
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
                         }
                     ],
                     "PrimScintDecay": [
@@ -3036,6 +3084,22 @@
                                 "Charge": 1,
                                 "Mass": 3,
                                 "Name": "triton",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
                                 "Type": 1
                             },
                             "DataSource": "",
@@ -3173,11 +3237,11 @@
                                         ],
                                         [
                                             1.10304e-08,
-                                            3.0023058148034995e-20
+                                            3.002305814803499e-20
                                         ],
                                         [
                                             1.21669e-08,
-                                            2.858645305619438e-20
+                                            2.8586453056194387e-20
                                         ],
                                         [
                                             1.34206e-08,
@@ -3185,19 +3249,19 @@
                                         ],
                                         [
                                             1.48034e-08,
-                                            2.5916068783393454e-20
+                                            2.5916068783393457e-20
                                         ],
                                         [
                                             1.6328600000000002e-08,
-                                            2.4675936585943186e-20
+                                            2.4675936585943183e-20
                                         ],
                                         [
                                             1.80111e-08,
-                                            2.3495216849544785e-20
+                                            2.3495216849544782e-20
                                         ],
                                         [
                                             1.9866900000000003e-08,
-                                            2.2370968364213166e-20
+                                            2.2370968364213163e-20
                                         ],
                                         [
                                             2.19139e-08,
@@ -3217,7 +3281,7 @@
                                         ],
                                         [
                                             3.2440000000000005e-08,
-                                            1.7506911293469987e-20
+                                            1.750691129346999e-20
                                         ],
                                         [
                                             3.5782499999999996e-08,
@@ -3225,7 +3289,7 @@
                                         ],
                                         [
                                             3.94694e-08,
-                                            1.5871597987897806e-20
+                                            1.587159798789781e-20
                                         ],
                                         [
                                             4.35362e-08,
@@ -3237,7 +3301,7 @@
                                         ],
                                         [
                                             5.29701e-08,
-                                            1.3700396043199696e-20
+                                            1.37003960431997e-20
                                         ],
                                         [
                                             5.8428e-08,
@@ -3257,7 +3321,7 @@
                                         ],
                                         [
                                             8.64931e-08,
-                                            1.0721584620861238e-20
+                                            1.0721584620861236e-20
                                         ],
                                         [
                                             9.54051e-08,
@@ -3273,7 +3337,7 @@
                                         ],
                                         [
                                             1.2803900000000003e-07,
-                                            8.81207986310645e-21
+                                            8.812079863106448e-21
                                         ],
                                         [
                                             1.41232e-07,
@@ -3281,7 +3345,7 @@
                                         ],
                                         [
                                             1.5578400000000001e-07,
-                                            7.988929028454631e-21
+                                            7.98892902845463e-21
                                         ],
                                         [
                                             1.71835e-07,
@@ -3289,7 +3353,7 @@
                                         ],
                                         [
                                             1.8954000000000002e-07,
-                                            7.242661449046293e-21
+                                            7.242661449046294e-21
                                         ],
                                         [
                                             2.0907e-07,
@@ -3309,7 +3373,7 @@
                                         ],
                                         [
                                             3.09494e-07,
-                                            5.66791355995523e-21
+                                            5.667913559955231e-21
                                         ],
                                         [
                                             3.4138300000000003e-07,
@@ -3341,7 +3405,7 @@
                                         ],
                                         [
                                             6.78223e-07,
-                                            3.828786098318466e-21
+                                            3.828786098318465e-21
                                         ],
                                         [
                                             7.48105e-07,
@@ -3349,7 +3413,7 @@
                                         ],
                                         [
                                             8.25188e-07,
-                                            3.4711348428746395e-21
+                                            3.471134842874639e-21
                                         ],
                                         [
                                             9.10213e-07,
@@ -3409,7 +3473,7 @@
                                         ],
                                         [
                                             3.59256e-06,
-                                            1.6635606914816995e-21
+                                            1.6635606914816994e-21
                                         ],
                                         [
                                             3.962720000000001e-06,
@@ -3417,11 +3481,11 @@
                                         ],
                                         [
                                             4.37103e-06,
-                                            1.5081588679168008e-21
+                                            1.5081588679168006e-21
                                         ],
                                         [
                                             4.82141e-06,
-                                            1.4359815504438155e-21
+                                            1.4359815504438154e-21
                                         ],
                                         [
                                             5.31819e-06,
@@ -3433,7 +3497,7 @@
                                         ],
                                         [
                                             6.4705900000000005e-06,
-                                            1.2395439512362608e-21
+                                            1.2395439512362607e-21
                                         ],
                                         [
                                             7.1373e-06,
@@ -3441,7 +3505,7 @@
                                         ],
                                         [
                                             7.87271e-06,
-                                            1.1237437689137883e-21
+                                            1.1237437689137881e-21
                                         ],
                                         [
                                             8.68389e-06,
@@ -3449,11 +3513,11 @@
                                         ],
                                         [
                                             9.57865e-06,
-                                            1.0187625371130852e-21
+                                            1.018762537113085e-21
                                         ],
                                         [
                                             1.05656e-05,
-                                            9.700090239111679e-22
+                                            9.700090239111677e-22
                                         ],
                                         [
                                             1.16543e-05,
@@ -3469,11 +3533,11 @@
                                         ],
                                         [
                                             1.56406e-05,
-                                            7.9723052639895995e-22
+                                            7.972305263989599e-22
                                         ],
                                         [
                                             1.72522e-05,
-                                            7.590771377368553e-22
+                                            7.590771377368554e-22
                                         ],
                                         [
                                             1.90298e-05,
@@ -3493,7 +3557,7 @@
                                         ],
                                         [
                                             2.5300000000000002e-05,
-                                            6.268038221785941e-22
+                                            6.2680382217859415e-22
                                         ],
                                         [
                                             2.79068e-05,
@@ -3505,7 +3569,7 @@
                                         ],
                                         [
                                             3.3954e-05,
-                                            5.410428173249448e-22
+                                            5.410428173249449e-22
                                         ],
                                         [
                                             3.74525e-05,
@@ -3557,11 +3621,11 @@
                                         ],
                                         [
                                             0.000124079,
-                                            2.8311812783866983e-22
+                                            2.831181278386698e-22
                                         ],
                                         [
                                             0.00013686400000000002,
-                                            2.695608421261484e-22
+                                            2.6956084212614837e-22
                                         ],
                                         [
                                             0.000150966,
@@ -3585,11 +3649,11 @@
                                         ],
                                         [
                                             0.00024650700000000003,
-                                            2.008192786376796e-22
+                                            2.0081927863767963e-22
                                         ],
                                         [
                                             0.000271906,
-                                            1.912089320326061e-22
+                                            1.9120893203260609e-22
                                         ],
                                         [
                                             0.000299923,
@@ -3601,11 +3665,11 @@
                                         ],
                                         [
                                             0.000364913,
-                                            1.650687265564034e-22
+                                            1.6506872655640337e-22
                                         ],
                                         [
                                             0.000402512,
-                                            1.5717554368323228e-22
+                                            1.5717554368323226e-22
                                         ],
                                         [
                                             0.000443986,
@@ -3629,7 +3693,7 @@
                                         ],
                                         [
                                             0.000724969,
-                                            1.1710042838882852e-22
+                                            1.1710042838882854e-22
                                         ],
                                         [
                                             0.000799668,
@@ -3641,7 +3705,7 @@
                                         ],
                                         [
                                             0.000979764,
-                                            1.020696688138489e-22
+                                            1.0206966881384891e-22
                                         ]
                                     ],
                                     "IsotopeRecords": [
@@ -7224,6 +7288,22 @@
                                 ]
                             ],
                             "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
                         }
                     ],
                     "PrimScintDecay": [
@@ -7617,7 +7697,7 @@
                     },
                     "Comments": "",
                     "Density": 1,
-                    "ElDriftVelo": 1e+10,
+                    "ElDriftVelo": 10000000000,
                     "MatParticles": [
                         {
                             "*Particle": {
@@ -7690,6 +7770,22 @@
                             "TotalInteraction": [
                             ],
                             "TrackingAllowed": false
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
                         }
                     ],
                     "PrimScintDecay": [
@@ -8282,6 +8378,22 @@
                                 "Charge": 1,
                                 "Mass": 3,
                                 "Name": "triton",
+                                "Type": 1
+                            },
+                            "DataSource": "",
+                            "DataString": "",
+                            "IntrEnergyRes": 0,
+                            "MatIsTransparent": true,
+                            "PrimScintPhYield": 0,
+                            "TotalInteraction": [
+                            ],
+                            "TrackingAllowed": true
+                        },
+                        {
+                            "*Particle": {
+                                "Charge": -1,
+                                "Mass": 0,
+                                "Name": "e-",
                                 "Type": 1
                             },
                             "DataSource": "",
@@ -9032,7 +9144,7 @@
                     ]
                 },
                 "SiPMproperties": {
-                    "DarkCountRate": 1e+07,
+                    "DarkCountRate": 10000000,
                     "PixelsX": 50,
                     "PixelsY": 50,
                     "RecoveryTime": 50
@@ -9063,6 +9175,12 @@
                 "Mass": 3,
                 "Name": "triton",
                 "Type": 1
+            },
+            {
+                "Charge": -1,
+                "Mass": 0,
+                "Name": "e-",
+                "Type": 1
             }
         ],
         "Sandwich": {
@@ -9079,15 +9197,15 @@
                         "angle": 0,
                         "shape": 0,
                         "sides": 6,
-                        "size1": 280,
-                        "size2": 280
+                        "size1": 300,
+                        "size2": 300
                     },
                     "color": 2,
                     "fActive": true,
                     "fCenter": true,
                     "height": 27,
-                    "material": 4,
-                    "name": "PrScint",
+                    "material": 2,
+                    "name": "Box",
                     "style": 1,
                     "width": 1
                 },
@@ -9096,8 +9214,8 @@
                         "angle": 0,
                         "shape": 0,
                         "sides": 6,
-                        "size1": 280,
-                        "size2": 280
+                        "size1": 300,
+                        "size2": 300
                     },
                     "color": 4,
                     "fActive": true,
@@ -9113,8 +9231,8 @@
                         "angle": 0,
                         "shape": 0,
                         "sides": 6,
-                        "size1": 280,
-                        "size2": 280
+                        "size1": 300,
+                        "size2": 300
                     },
                     "color": 7,
                     "fActive": true,
@@ -9127,7 +9245,7 @@
                 }
             ],
             "State": "CommonShape",
-            "WorldMaterial": 2,
+            "WorldMaterial": 0,
             "WorldTree": [
                 {
                     "Container": "",
@@ -9142,12 +9260,38 @@
                 {
                     "Container": "World",
                     "Locked": false,
-                    "Name": "PrScint",
+                    "Name": "Box",
                     "ObjectType": {
                         "Type": "Slab"
                     },
                     "fActive": true,
                     "fExpanded": true
+                },
+                {
+                    "Container": "Box",
+                    "Locked": false,
+                    "Material": 4,
+                    "Name": "PrScint",
+                    "ObjectType": {
+                        "Type": "Single"
+                    },
+                    "Phi": 0,
+                    "Psi": 0,
+                    "Shape": "TGeoBBox",
+                    "ShapeSpecific": {
+                        "dx": 140,
+                        "dy": 140,
+                        "dz": 13.5
+                    },
+                    "Theta": 0,
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0,
+                    "color": 1,
+                    "fActive": true,
+                    "fExpanded": true,
+                    "style": 1,
+                    "width": 1
                 },
                 {
                     "Container": "PrScint",
@@ -10416,7 +10560,7 @@
             {
                 "Chi2": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "Correlation": {
@@ -10468,13 +10612,13 @@
                 },
                 "LoadedEnergy": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "MultipleScanEvents": false,
                 "ReconstructedEnergy": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 },
                 "SpatialCustom": {
@@ -10502,7 +10646,7 @@
                 },
                 "SumSignal": {
                     "Active": false,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0,
                     "UseGains": false,
                     "UsePassives": true
@@ -10510,23 +10654,22 @@
                 "kNN": {
                     "Active": false,
                     "AverageOver": 10,
-                    "Max": 1e+10,
+                    "Max": 10000000000,
                     "Min": 0
                 }
             }
         ],
         "LRFmakeJson": {
-            "ANTS2build": 1802,
             "AdjustGains": true,
             "Compression_k": 5,
             "Compression_lam": 50,
             "Compression_r0": 150,
             "DataSelector": 0,
+            "EnergyNormalization": 1,
             "FitOnlyLast": false,
             "ForceInZ": 0,
             "ForceNonIncreasingInR": false,
             "ForceNonNegative": false,
-            "ForceTopDown": false,
             "ForceZeroDeriv": true,
             "GroupToMake": 0,
             "GroupingOption": "Individual",
@@ -10577,7 +10720,7 @@
                         "IgnoreBySignal": false,
                         "IgnoreDistance": 100,
                         "IgnoreFar": false,
-                        "IgnoreThresholdHigh": 1e+10,
+                        "IgnoreThresholdHigh": 10000000000,
                         "IgnoreThresholdLow": 5,
                         "StretchX": 1.3,
                         "StretchY": 1.3,
@@ -10599,8 +10742,8 @@
                     "DistanceLimit": 80,
                     "IgnoreByDistance": true,
                     "IgnoreBySignal": false,
-                    "SignalLimitHigh": 1e+10,
-                    "SignalLimitLow": -1e+10
+                    "SignalLimitHigh": 10000000000,
+                    "SignalLimitLow": -10000000000
                 },
                 "General": {
                     "IncludePassives": false,
@@ -10623,80 +10766,80 @@
             {
                 "CutOffs": [
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ],
                     [
-                        -1e+10,
-                        1e+10
+                        -10000000000,
+                        10000000000
                     ]
                 ],
                 "Gains": [
@@ -10781,16 +10924,17 @@
             "AreaConfig": {
                 "AreaResolved": false
             },
-            "DetStatNumBins": 2000,
+            "DetStatNumBins": 100,
             "Geant4SimulationSettings": {
                 "Commands": [
                     "/process/em/fluo true",
                     "/process/em/auger true",
                     "/process/em/augerCascade true",
                     "/process/em/pixe true",
-                    "/run/setCut 0.01 mm"
+                    "/run/setCut 0.1 mm"
                 ],
                 "SensitiveVolumes": [
+                    "PrScint"
                 ],
                 "TrackParticles": false
             },
@@ -10930,7 +11074,7 @@
             "SourceControlOptions": {
                 "AllowMultipleParticles": false,
                 "AverageParticlesPerEvent": 0.1,
-                "ClusterMergeRadius": 1,
+                "ClusterMergeRadius": 2,
                 "DoS1": false,
                 "DoS2": true,
                 "EventsToDo": 10,

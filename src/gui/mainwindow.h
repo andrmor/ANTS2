@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "aguiwindow.h"
 #include "scanfloodstructure.h"
 #include "ag4simulationsettings.h"
 
@@ -69,7 +70,7 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public AGuiWindow
 {
     Q_OBJECT
     

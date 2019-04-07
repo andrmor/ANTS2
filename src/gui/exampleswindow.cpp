@@ -17,7 +17,7 @@
 #include <QDateTime>
 
 ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::ExamplesWindow)
 {  
   MW = mw;
@@ -25,6 +25,8 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
   this->setFixedSize(this->size());
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::Tool;
+  windowFlags |= Qt::WindowStaysOnTopHint;
   windowFlags |= Qt::WindowCloseButtonHint;
   this->setWindowFlags( windowFlags );
 
@@ -76,22 +78,6 @@ void ExamplesWindow::SaveConfig(QString fileName, bool DetConstructor, bool SimS
 void ExamplesWindow::on_cbDoNotShowExamplesOnStart_toggled(bool checked)
 {
   MW->GlobSet.ShowExamplesOnStart = !checked;
-}
-
-bool ExamplesWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide)
-    {
-      MW->WindowNavigator->HideWindowTriggered("examples");
-    }
-  if (event->type() == QEvent::Show)
-    {
-      MW->WindowNavigator->ShowWindowTriggered("examples");
-    }
-
-  return QMainWindow::event(event);
 }
 
 void ExamplesWindow::BuildExampleRecord()

@@ -1,6 +1,6 @@
 #--------------ANTS2--------------
 ANTS2_MAJOR = 4
-ANTS2_MINOR = 15
+ANTS2_MINOR = 16
 
 #Optional libraries
 #CONFIG += ants2_cuda        #enable CUDA support - need NVIDIA GPU and drivers (CUDA toolkit) installed!
@@ -402,7 +402,8 @@ SOURCES += main.cpp \
     scriptmode/agraphwin_si.cpp \
     scriptmode/aoutwin_si.cpp \
     Simulation/atrackingdataimporter.cpp \
-    common/aeventtrackingrecord.cpp
+    common/aeventtrackingrecord.cpp \
+    gui/aguiwindow.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -558,7 +559,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/agraphwin_si.h \
     scriptmode/aoutwin_si.h \
     Simulation/atrackingdataimporter.h \
-    common/aeventtrackingrecord.h
+    common/aeventtrackingrecord.h \
+    gui/aguiwindow.h
 
 # --- SIM ---
 ants2_SIM {

@@ -290,12 +290,6 @@ void MainWindow::closeEvent(QCloseEvent *)
        delete lrfwindow->parent();
        lrfwindow = 0;
    }
-   if (WindowNavigator)
-   {
-       qDebug() << "<-Deleting WindowNavigator";
-       delete WindowNavigator->parent();
-       WindowNavigator = 0;
-   }
    if (GeometryWindow)
      {
        qDebug() << "<-Deleting Geometry Window";
@@ -363,6 +357,14 @@ void MainWindow::closeEvent(QCloseEvent *)
        RemoteWindow = 0;
    }
    //Gain evaluation window is deleted in ReconstructionWindow destructor!
+
+   // should be deleted last
+   if (WindowNavigator)
+   {
+       qDebug() << "<-Deleting WindowNavigator";
+       delete WindowNavigator->parent();
+       WindowNavigator = 0;
+   }
    qDebug() << "<MainWindow close event processing finished";
 }
 
@@ -374,7 +376,6 @@ bool MainWindow::event(QEvent *event)
      {
 //       qDebug()<<"Main window HIDE event";
        WindowNavigator->HideWindowTriggered("main");
-       //MainWindow::on_actionWindow_navigator_triggered();
        return true; //stop hadling
      }
 
@@ -398,12 +399,10 @@ bool MainWindow::event(QEvent *event)
             if (this->isMinimized())
               {
                 WindowNavigator->TriggerHideButton();
-               // WindowNavigator->HideWindowTriggered("main");
               }
             else
               {
                 WindowNavigator->TriggerShowButton();
-               // WindowNavigator->ShowWindowTriggered("main");
                 if (this->isVisible()) this->activateWindow();
               }
             return true;

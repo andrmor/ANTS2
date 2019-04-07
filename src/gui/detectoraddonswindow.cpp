@@ -40,12 +40,17 @@
 #include "TGeoCompositeShape.h"
 
 DetectorAddOnsWindow::DetectorAddOnsWindow(MainWindow *parent, DetectorClass *detector) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::DetectorAddOnsWindow)
 {
   MW = parent;
   Detector = detector;
   ui->setupUi(this);
+
+  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::Tool;
+  windowFlags |= Qt::WindowCloseButtonHint;
+  this->setWindowFlags( windowFlags );
 
   ui->pbBackToSandwich->setEnabled(false);
 

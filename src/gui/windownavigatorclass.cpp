@@ -33,6 +33,7 @@ WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
   windowFlags |= Qt::WindowStaysOnTopHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   MainOn = false;
@@ -179,6 +180,7 @@ void WindowNavigatorClass::setProgress(int percent)
 
 void WindowNavigatorClass::HideWindowTriggered(QString w)
 {
+  if (MW->ShutDown) return;
   if (DisableBSupdate) return;
 
   if (w == "main") MainOn = false;
@@ -207,6 +209,8 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
 
 void WindowNavigatorClass::ShowWindowTriggered(QString w)
 {
+    if (MW->ShutDown) return;
+
   if (w == "main") MainOn = true;
   if (w == "recon") ReconOn = true;
   if (w == "out") OutOn = true;

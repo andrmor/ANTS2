@@ -52,7 +52,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
                        AReconstructionManager *ReconstructionManager,
                        ANetworkModule* Net,
                        TmpObjHubClass *TmpHub) :
-    QMainWindow(), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
+    AGuiWindow(nullptr), Detector(Detector), EventsDataHub(EventsDataHub), RootApp(RootApp),
     SimulationManager(SimulationManager), ReconstructionManager(ReconstructionManager),
     NetModule(Net), TmpHub(TmpHub), GlobSet(AGlobalSettings::getInstance()),
     ui(new Ui::MainWindow)
@@ -153,6 +153,14 @@ MainWindow::MainWindow(DetectorClass *Detector,
     qDebug()<<">Creating remote simulation/reconstruction window";
     RemoteWindow = new ARemoteWindow(this);
     ServerDialog = new AWebSocketServerDialog(this);
+
+    qDebug() << ">Registering windows with window navigator";
+    //main window does not need registration
+    ELwindow->connectToNavigator(WindowNavigator, "examples");
+    Rwindow->connectToNavigator(WindowNavigator, "recon");
+    Owindow->connectToNavigator(WindowNavigator, "out");
+    DAwindow->connectToNavigator(WindowNavigator, "");
+
     qDebug()<<">All windows created";
 
     //root update cycle

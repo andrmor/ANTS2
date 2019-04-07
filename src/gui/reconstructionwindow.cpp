@@ -81,8 +81,7 @@
 
 ReconstructionWindow::~ReconstructionWindow()
 {
-  if (vo) delete vo;
-  vo = 0;
+  if (vo) delete vo; vo = 0;
   if (dialog)
     {
       disconnect(vo, SIGNAL(PMselectionChanged(QVector<int>)), this, SLOT(onSelectionChange(QVector<int>)));
@@ -1344,23 +1343,6 @@ void ReconstructionWindow::on_sbZshift_valueChanged(int arg1)
 void ReconstructionWindow::on_cobHowToAverageZ_currentIndexChanged(int index)
 {
   ui->fAverageZ->setVisible((bool)index);
-}
-
-bool ReconstructionWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide)
-    {      
-      MW->WindowNavigator->HideWindowTriggered("recon");
-      return true;
-    }
-  if (event->type() == QEvent::Show)
-    {
-      MW->WindowNavigator->ShowWindowTriggered("recon");
-    }
-
-  return QMainWindow::event(event);
 }
 
 bool ReconstructionWindow::ShowVsXY(QString strIn) //false - error

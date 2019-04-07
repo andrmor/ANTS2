@@ -161,17 +161,24 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   GraphWindow->switchOffBasket();
 
   QJsonObject json;
-  addWindow("Main", this, json);
-  addWindow("Recon", Rwindow, json);
-  addWindow("Out", Owindow, json);
+
+  static_cast<AGuiWindow*>(this)->    writeToJson("Main", json);
+  static_cast<AGuiWindow*>(Rwindow)-> writeToJson("Recon", json);
+  static_cast<AGuiWindow*>(ELwindow)->writeToJson("ExLoad", json);
+  static_cast<AGuiWindow*>(Owindow)-> writeToJson("Out", json);
+  static_cast<AGuiWindow*>(DAwindow)->writeToJson("DA", json);
+
+  //addWindow("Main", this, json);
+  //addWindow("Recon", Rwindow, json);
+  //addWindow("Out", Owindow, json);
   addWindow("LRF", lrfwindow, json);
   addWindow("newLRF", (QMainWindow*)newLrfWindow, json);
   addWindow("Navi", WindowNavigator, json);
   addWindow("Material", MIwindow, json);
-  addWindow("ExLoad", ELwindow, json);
+  //addWindow("ExLoad", ELwindow, json);
   addWindow("Geom", GeometryWindow, json);
   addWindow("Graph", GraphWindow, json);
-  addWindow("DA", DAwindow, json);
+  //addWindow("DA", DAwindow, json);
   addWindow("ScriptWindow", ScriptWindow, json);
   addWindow("RemoteWindow", RemoteWindow, json);
   if (PythonScriptWindow) addWindow("PythonScriptWindow", PythonScriptWindow, json);
@@ -240,21 +247,28 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       QJsonObject json;
       bool ok = LoadJsonFromFile(json, fileName);
       if (!ok)
-        {
+      {
           qDebug() << "Config of window positions/sizes: empty json";
           return;
-        }
-      readXYwindow("Main", this, false, json);
-      readXYwindow("Recon", Rwindow, false, json);
-      readXYwindow("Out", Owindow, true, json);
+      }
+
+      static_cast<AGuiWindow*>(this)->    readFromJson("Main", json);
+      static_cast<AGuiWindow*>(Rwindow)-> readFromJson("Recon", json);
+      static_cast<AGuiWindow*>(ELwindow)->readFromJson("ExLoad", json);
+      static_cast<AGuiWindow*>(Owindow)-> readFromJson("Out", json);
+      static_cast<AGuiWindow*>(DAwindow)->readFromJson("DA", json);
+
+      //readXYwindow("Main", this, false, json);
+      //readXYwindow("Recon", Rwindow, false, json);
+      //readXYwindow("Out", Owindow, true, json);
       readXYwindow("LRF", lrfwindow, false, json);
       readXYwindow("newLRF", (QMainWindow*)newLrfWindow, true, json);
       readXYwindow("Navi", WindowNavigator, false, json);
       readXYwindow("Material", MIwindow, true, json);
-      readXYwindow("ExLoad", ELwindow, false, json);
+      //readXYwindow("ExLoad", ELwindow, false, json);
       readXYwindow("Geom", GeometryWindow, true, json);
       readXYwindow("Graph", GraphWindow, true, json);
-      readXYwindow("DA", DAwindow, true, json);
+      //readXYwindow("DA", DAwindow, true, json);
       if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
       if (json.contains("RemoteWindow")) readXYwindow("RemoteWindow", RemoteWindow, true, json);
       if (json.contains("PythonScriptWindow") && PythonScriptWindow) readXYwindow("PythonScriptWindow", PythonScriptWindow, true, json);

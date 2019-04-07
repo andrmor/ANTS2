@@ -1,7 +1,7 @@
 #ifndef EXAMPLESWINDOW_H
 #define EXAMPLESWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class MainWindow;
 
@@ -20,7 +20,7 @@ struct DetectorExampleStructure
   DetectorExampleStructure(){;}
 };
 
-class ExamplesWindow : public QMainWindow
+class ExamplesWindow : public AGuiWindow
 {
   Q_OBJECT
   
@@ -74,9 +74,6 @@ private slots:
   void on_actionQuick_load_3_hovered();
 
   void on_actionCreate_new_detector_triggered();
-
-protected:
-    bool event(QEvent *event);
 
 private:
   Ui::ExamplesWindow *ui;

@@ -1,7 +1,7 @@
 #ifndef DETECTORADDONSWINDOW_H
 #define DETECTORADDONSWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class MainWindow;
 class DetectorClass;
@@ -13,7 +13,7 @@ namespace Ui {
   class DetectorAddOnsWindow;
 }
 
-class DetectorAddOnsWindow : public QMainWindow
+class DetectorAddOnsWindow : public AGuiWindow
 {
   Q_OBJECT
   

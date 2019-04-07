@@ -36,7 +36,7 @@
 #include <QFileDialog>
 
 OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-    QMainWindow(parent),
+    AGuiWindow(parent),
     ui(new Ui::OutputWindow)
 {
     MW = mw;
@@ -45,10 +45,11 @@ OutputWindow::OutputWindow(QWidget *parent, MainWindow *mw, EventsDataClass *eve
     ui->setupUi(this);
     bForbidUpdate = false;
 
-    this->setWindowTitle("Output");
+    this->setWindowTitle("Results/Output");
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     modelPMhits = 0;
@@ -420,8 +421,10 @@ void OutputWindow::updateSignalTableWidth()
   ui->layPMhitsTable->invalidate();
 }
 
-void OutputWindow::resizeEvent(QResizeEvent *)
+void OutputWindow::resizeEvent(QResizeEvent * event)
 {
+    AGuiWindow::resizeEvent(event);
+
   if (!this->isVisible()) return;
 
   int GVsize = ui->tabwinDiagnose->height()-28;//325;
@@ -765,16 +768,6 @@ void OutputWindow::on_tabwinDiagnose_currentChanged(int index)
   ui->frEventNumber->setVisible( index != 3);
   ui->pbClearText->setVisible( index==0 || index==3 );
   gvOut->update();
-}
-
-bool OutputWindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("out");
-  if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("out");
-
-  return QMainWindow::event(event);
 }
 
 void OutputWindow::on_pbWaveSpectrum_clicked()

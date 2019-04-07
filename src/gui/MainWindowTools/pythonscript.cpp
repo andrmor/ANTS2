@@ -40,7 +40,7 @@
 #endif
 
 #ifdef ANTS_FANN
-  #include "AAnn_SI.h"
+  #include "aann_si.h"
 #endif
 
 void MainWindow::createPythonScriptWindow()

@@ -1,7 +1,7 @@
 #ifndef OUTPUTWINDOW_H
 #define OUTPUTWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QGraphicsScene>
 
 class MainWindow;
@@ -15,7 +15,7 @@ namespace Ui {
 class OutputWindow;
 }
 
-class OutputWindow : public QMainWindow
+class OutputWindow : public AGuiWindow
 {
     Q_OBJECT
     
@@ -88,9 +88,6 @@ private slots:
     void on_pbShowWavelength_clicked();
     void on_pbSaveLog_clicked();
     void on_pbHelpWithSaveToTree_clicked();
-
-protected:
-    bool event(QEvent *event);   
 
 private:
     Ui::OutputWindow *ui;

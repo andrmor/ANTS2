@@ -162,11 +162,13 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
 
   QJsonObject json;
 
-  static_cast<AGuiWindow*>(this)->    writeToJson("Main", json);
-  static_cast<AGuiWindow*>(Rwindow)-> writeToJson("Recon", json);
-  static_cast<AGuiWindow*>(ELwindow)->writeToJson("ExLoad", json);
-  static_cast<AGuiWindow*>(Owindow)-> writeToJson("Out", json);
-  static_cast<AGuiWindow*>(DAwindow)->writeToJson("DA", json);
+  static_cast<AGuiWindow*>(this)->          writeToJson("Main", json);
+  static_cast<AGuiWindow*>(Rwindow)->       writeToJson("Recon", json);
+  static_cast<AGuiWindow*>(ELwindow)->      writeToJson("ExLoad", json);
+  static_cast<AGuiWindow*>(Owindow)->       writeToJson("Out", json);
+  static_cast<AGuiWindow*>(DAwindow)->      writeToJson("DA", json);
+  static_cast<AGuiWindow*>(GeometryWindow)->writeToJson("Geom", json);
+  static_cast<AGuiWindow*>(GraphWindow)->   writeToJson("Graph", json);
 
   //addWindow("Main", this, json);
   //addWindow("Recon", Rwindow, json);
@@ -176,8 +178,8 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
   addWindow("Navi", WindowNavigator, json);
   addWindow("Material", MIwindow, json);
   //addWindow("ExLoad", ELwindow, json);
-  addWindow("Geom", GeometryWindow, json);
-  addWindow("Graph", GraphWindow, json);
+  //addWindow("Geom", GeometryWindow, json);
+  //addWindow("Graph", GraphWindow, json);
   //addWindow("DA", DAwindow, json);
   addWindow("ScriptWindow", ScriptWindow, json);
   addWindow("RemoteWindow", RemoteWindow, json);
@@ -252,11 +254,13 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           return;
       }
 
-      static_cast<AGuiWindow*>(this)->    readFromJson("Main", json);
-      static_cast<AGuiWindow*>(Rwindow)-> readFromJson("Recon", json);
-      static_cast<AGuiWindow*>(ELwindow)->readFromJson("ExLoad", json);
-      static_cast<AGuiWindow*>(Owindow)-> readFromJson("Out", json);
-      static_cast<AGuiWindow*>(DAwindow)->readFromJson("DA", json);
+      static_cast<AGuiWindow*>(this)->          readFromJson("Main", json);
+      static_cast<AGuiWindow*>(Rwindow)->       readFromJson("Recon", json);
+      static_cast<AGuiWindow*>(ELwindow)->      readFromJson("ExLoad", json);
+      static_cast<AGuiWindow*>(Owindow)->       readFromJson("Out", json);
+      static_cast<AGuiWindow*>(DAwindow)->      readFromJson("DA", json);
+      static_cast<AGuiWindow*>(GeometryWindow)->readFromJson("Geom", json);
+      static_cast<AGuiWindow*>(GraphWindow)->   readFromJson("Graph", json);
 
       //readXYwindow("Main", this, false, json);
       //readXYwindow("Recon", Rwindow, false, json);
@@ -266,8 +270,8 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
       readXYwindow("Navi", WindowNavigator, false, json);
       readXYwindow("Material", MIwindow, true, json);
       //readXYwindow("ExLoad", ELwindow, false, json);
-      readXYwindow("Geom", GeometryWindow, true, json);
-      readXYwindow("Graph", GraphWindow, true, json);
+      //readXYwindow("Geom", GeometryWindow, true, json);
+      //readXYwindow("Graph", GraphWindow, true, json);
       //readXYwindow("DA", DAwindow, true, json);
       if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
       if (json.contains("RemoteWindow")) readXYwindow("RemoteWindow", RemoteWindow, true, json);

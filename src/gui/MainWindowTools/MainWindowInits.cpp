@@ -160,6 +160,8 @@ MainWindow::MainWindow(DetectorClass *Detector,
     Rwindow->connectToNavigator(WindowNavigator, "recon");
     Owindow->connectToNavigator(WindowNavigator, "out");
     DAwindow->connectToNavigator(WindowNavigator, "");
+    GeometryWindow->connectToNavigator(WindowNavigator, "geometry");
+    GraphWindow->connectToNavigator(WindowNavigator, "graph");
 
     qDebug()<<">All windows created";
 

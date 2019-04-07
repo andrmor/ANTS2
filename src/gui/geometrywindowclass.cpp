@@ -21,7 +21,7 @@
 #include "TVirtualGeoTrack.h"
 
 GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent), MW(mw),
+  AGuiWindow(parent), MW(mw),
   ui(new Ui::GeometryWindowClass)
 {    
   ui->setupUi(this);
@@ -30,6 +30,7 @@ GeometryWindowClass::GeometryWindowClass(QWidget *parent, MainWindow *mw) :
   windowFlags |= Qt::WindowCloseButtonHint;
   windowFlags |= Qt::WindowMinimizeButtonHint;
   windowFlags |= Qt::WindowMaximizeButtonHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   this->setMinimumWidth(200);
@@ -190,24 +191,12 @@ bool GeometryWindowClass::IsWorldVisible()
     return ui->cbShowTop->isChecked();
 }
 
-void GeometryWindowClass::resizeEvent(QResizeEvent *)
-{
-  //if (RasterWindow) RasterWindow->ForceResize();
-  //ShowGeometry(true, false);
-}
-
 bool GeometryWindowClass::event(QEvent *event)
 {
-  if (MW->WindowNavigator)
-    {
-      if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("geometry");
-      else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("geometry");
-    }
-
   if (event->type() == QEvent::WindowActivate)
       RasterWindow->UpdateRootCanvas();
 
-  return QMainWindow::event(event);
+  return AGuiWindow::event(event);
 }
 
 void GeometryWindowClass::ShowPMnumbers()

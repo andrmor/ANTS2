@@ -8,6 +8,7 @@ class WindowNavigatorClass;
 
 class AGuiWindow : public QMainWindow
 {
+    Q_OBJECT
 public:
     AGuiWindow(QWidget * parent);
 

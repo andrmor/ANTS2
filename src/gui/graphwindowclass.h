@@ -1,7 +1,7 @@
 #ifndef GRAPHWINDOWCLASS_H
 #define GRAPHWINDOWCLASS_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QVariantList>
 
 #include "TMathBase.h"
@@ -55,7 +55,7 @@ namespace Ui {
 class GraphWindowClass;
 }
 
-class GraphWindowClass : public QMainWindow
+class GraphWindowClass : public AGuiWindow
 {
     Q_OBJECT
 

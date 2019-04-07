@@ -42,10 +42,12 @@ void AGuiWindow::readFromJson(const QString & winName, const QJsonObject & json)
 
     resize(WinSize_W, WinSize_H);
     move(WinPos_X, WinPos_Y);
+
     if (bWinVisible) show();
     else hide();
 }
 
+//#include <QApplication>
 bool AGuiWindow::event(QEvent *event)
 {
     if (WNav)
@@ -55,13 +57,15 @@ bool AGuiWindow::event(QEvent *event)
             bWinVisible = false;
             bWinGeomUpdateAllowed = false;
             WNav->HideWindowTriggered(IdStr);
-            return true;
+            //return true;
         }
         else if (event->type() == QEvent::Show)
         {
+            //qApp->processEvents();
             WNav->ShowWindowTriggered(IdStr);
             bWinGeomUpdateAllowed = true;
             bWinVisible = true;
+            //return true;
         }
     }
     return QMainWindow::event(event);
@@ -69,13 +73,15 @@ bool AGuiWindow::event(QEvent *event)
 
 void AGuiWindow::resizeEvent(QResizeEvent * event)
 {
-    if (event && bWinGeomUpdateAllowed)
+    //if (event && bWinGeomUpdateAllowed)
+    if (bWinGeomUpdateAllowed)
     {
-        WinSize_W = event->size().width();
-        WinSize_H = event->size().height();
+        //WinSize_W = event->size().width();
+        WinSize_W = width();
+        //WinSize_H = event->size().height();
+        WinSize_H = height();
         //qDebug() << "Resize to " << WinSize_W << WinSize_H;
     }
-
     QMainWindow::resizeEvent(event);
 }
 
@@ -83,10 +89,11 @@ void AGuiWindow::moveEvent(QMoveEvent * event)
 {
     if (bWinGeomUpdateAllowed)
     {
-        WinPos_X = event->pos().x();
-        WinPos_Y = event->pos().y();
+        //WinPos_X = event->pos().x();
+        WinPos_X = x();
+        //WinPos_Y = event->pos().y();
+        WinPos_Y = y();
         //qDebug() << "Move to" << WinPos_X << WinPos_Y;
     }
-
     QMainWindow::moveEvent(event);
 }

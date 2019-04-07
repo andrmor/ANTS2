@@ -78,7 +78,7 @@
 #include "TPavesText.h"
 
 GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
-  QMainWindow(parent), MW(mw),
+  AGuiWindow(parent), MW(mw),
   ui(new Ui::GraphWindowClass)
 { 
   //setting UI
@@ -93,6 +93,7 @@ GraphWindowClass::GraphWindowClass(QWidget *parent, MainWindow* mw) :
   windowFlags |= Qt::WindowCloseButtonHint;
   windowFlags |= Qt::WindowMinimizeButtonHint;
   windowFlags |= Qt::WindowMaximizeButtonHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   //input boxes format validators
@@ -703,16 +704,10 @@ void GraphWindowClass::mouseMoveEvent(QMouseEvent *event)
 
 bool GraphWindowClass::event(QEvent *event)
 {
-  if (MW->WindowNavigator)
-    {
-      if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("graph");
-      else if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("graph");
-    }
-
   if (event->type() == QEvent::WindowActivate)
       RasterWindow->UpdateRootCanvas();
 
-  return QMainWindow::event(event);
+  return AGuiWindow::event(event);
 }
 
 void GraphWindowClass::closeEvent(QCloseEvent *)

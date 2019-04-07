@@ -1,7 +1,7 @@
 #ifndef GEOMETRYWINDOWCLASS_H
 #define GEOMETRYWINDOWCLASS_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include "TMathBase.h"
 
 class MainWindow;
@@ -11,7 +11,7 @@ namespace Ui {
   class GeometryWindowClass;
 }
 
-class GeometryWindowClass : public QMainWindow
+class GeometryWindowClass : public AGuiWindow
 {
   Q_OBJECT
 
@@ -58,7 +58,6 @@ public:
   void ShowGeometry(bool ActivateWindow = true, bool SAME = true, bool ColorUpdateAllowed = true);
 
 protected:
-    void resizeEvent(QResizeEvent *event);
     bool event(QEvent *event);
 
 public slots:

@@ -90,10 +90,10 @@ void ATrackingDataImporter::processNewTrack()
 {
     //qDebug() << "NT:"<<currentLine;
     currentLine.remove(0, 1);
-    //Id ParentId PartId x y z E
-    //0      1      2    3 4 5 6
+    //Id ParentId PartId x y z time E
+    //0      1      2    3 4 5   6  7
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() != 7)
+    if (f.size() != 8)
     {
         Error = "Bad format in new track line";
         return;
@@ -123,7 +123,7 @@ void ATrackingDataImporter::processNewTrack()
         CurrentTrack->UserIndex = 22;
         TrackBuildOptions.applyToParticleTrack(CurrentTrack, f.at(2).toInt());
 
-        CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble(), 0) );  // time? ***!!!
+        CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble()) ); //need time?
     }
 
     if (History)
@@ -140,12 +140,12 @@ void ATrackingDataImporter::processNewTrack()
         int parTrIndex = f.at(1).toInt();
         if (parTrIndex == 0)
         {
-            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2).toInt(),
-                                                                          f.at(6).toFloat(),
-                                                                          f.at(3).toFloat(),
-                                                                          f.at(4).toFloat(),
-                                                                          f.at(5).toFloat(),
-                                                                          0); // time!!!
+            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2).toInt(),    // pId
+                                                                          f.at(7).toFloat(),  // E
+                                                                          f.at(3).toFloat(),  // X
+                                                                          f.at(4).toFloat(),  // Y
+                                                                          f.at(5).toFloat(),  // Z
+                                                                          f.at(6).toFloat()); // time
             CurrentParticleRecord = r;
             CurrentEventRecord->addPrimaryRecord(r);
         }
@@ -157,12 +157,12 @@ void ATrackingDataImporter::processNewTrack()
                 Error = "Promised secondary not found!";
                 return;
             }
-            secrec->update(f.at(2).toInt(),
-                           f.at(6).toFloat(),
-                           f.at(3).toFloat(),
-                           f.at(4).toFloat(),
-                           f.at(5).toFloat(),
-                           0); // time!!!
+            secrec->update(f.at(2).toInt(),    // pId
+                           f.at(7).toFloat(),  // E
+                           f.at(3).toFloat(),  // X
+                           f.at(4).toFloat(),  // Y
+                           f.at(5).toFloat(),  // Z
+                           f.at(6).toFloat()); // time
             CurrentParticleRecord = secrec;
             PromisedSecondaries.remove(trIndex);
         }
@@ -174,11 +174,11 @@ void ATrackingDataImporter::processNewTrack()
 void ATrackingDataImporter::processNewStep()
 {
     //qDebug() << "PS:"<<currentLine;
-    //x y z dE proc {secondaries}
-    //0 1 2 3    4    5...
+    //x y z time dE proc {secondaries}
+    //0 1 2   3  4   5       ...
 
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
-    if (f.size() < 5)
+    if (f.size() < 6)
     {
         Error = "Bad format in track line";
         return;
@@ -192,7 +192,7 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
         //qDebug() << "  Adding node";
-        CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble(), 0);  // time? ***!!!
+        CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble());  // need time?
     }
 
     if (History)
@@ -203,17 +203,17 @@ void ATrackingDataImporter::processNewStep()
             return;
         }
 
-        ATrackingStepData * step = new ATrackingStepData(f.at(0).toFloat(),
-                                                         f.at(1).toFloat(),
-                                                         f.at(2).toFloat(),
-                                                         0,
-                                                         f.at(3).toFloat(),
-                                                         f.at(4));
+        ATrackingStepData * step = new ATrackingStepData(f.at(0).toFloat(), // X
+                                                         f.at(1).toFloat(), // Y
+                                                         f.at(2).toFloat(), // Z
+                                                         f.at(3).toFloat(), // time
+                                                         f.at(4).toFloat(), // depoE
+                                                         f.at(5));          // pr
         CurrentParticleRecord->addStep(step);
 
-        if (f.size() > 5) // time!!!
+        if (f.size() > 6)
         {
-            for (int i=5; i<f.size(); i++)
+            for (int i=6; i<f.size(); i++)
             {
                 int index = f.at(i).toInt();
                 if (PromisedSecondaries.contains(index))

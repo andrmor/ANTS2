@@ -851,13 +851,16 @@ void MainWindow::on_pbParticleSourcesSimulate_clicked()
             txt += Warnings;
         }
 
-        QMessageBox msgBox(this);
-        msgBox.setText(txt);
-        msgBox.setInformativeText("Start simulation?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Yes);
-        int ret = msgBox.exec();
-        if (ret == QMessageBox::Cancel) return;
+        if (!txt.isEmpty())
+        {
+            QMessageBox msgBox(this);
+            msgBox.setText(txt);
+            msgBox.setInformativeText("Start simulation?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::Cancel) return;
+        }
     }
     //
 

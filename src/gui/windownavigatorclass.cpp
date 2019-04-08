@@ -392,6 +392,8 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
     {
       MW->GeometryWindow->showNormal();
       MW->GeometryWindow->raise();
+      MW->GeometryWindow->ShowGeometry();
+      MW->GeometryWindow->DrawTracks();
     }
   if (GraphOn)
     if (MW->GraphWindow)

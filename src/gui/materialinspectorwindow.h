@@ -1,7 +1,7 @@
 #ifndef MATERIALINSPECTORWINDOW_H
 #define MATERIALINSPECTORWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class QTextStream;
 class MainWindow;
@@ -19,7 +19,7 @@ namespace Ui {
 class MaterialInspectorWindow;
 }
 
-class MaterialInspectorWindow : public QMainWindow
+class MaterialInspectorWindow : public AGuiWindow
 {
     Q_OBJECT
 

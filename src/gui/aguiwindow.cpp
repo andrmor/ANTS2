@@ -18,11 +18,11 @@ void AGuiWindow::connectToNavigator(WindowNavigatorClass * wNav, const QString &
 void AGuiWindow::writeToJson(const QString & winName, QJsonObject & json) const
 {
     QJsonObject js;
-    js["X"] = WinPos_X;
-    js["Y"] = WinPos_Y;
-    js["W"] = WinSize_W;
-    js["H"] = WinSize_H;
-    js["Vis"] = bWinVisible;
+    js["x"] = WinPos_X;
+    js["y"] = WinPos_Y;
+    js["w"] = WinSize_W;
+    js["h"] = WinSize_H;
+    js["vis"] = bWinVisible;
 
     json[winName] = js;
 }
@@ -34,11 +34,11 @@ void AGuiWindow::readFromJson(const QString & winName, const QJsonObject & json)
     QJsonObject js;
     parseJson(json, winName, js);
 
-    parseJson(js, "X", WinPos_X);
-    parseJson(js, "Y", WinPos_Y);
-    parseJson(js, "W", WinSize_W);
-    parseJson(js, "H", WinSize_H);
-    parseJson(js, "Vis", bWinVisible);
+    parseJson(js, "x", WinPos_X);
+    parseJson(js, "y", WinPos_Y);
+    parseJson(js, "w", WinSize_W);
+    parseJson(js, "h", WinSize_H);
+    parseJson(js, "vis", bWinVisible);
 
     resize(WinSize_W, WinSize_H);
     move(WinPos_X, WinPos_Y);

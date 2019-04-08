@@ -162,28 +162,35 @@ void MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered()
 
   QJsonObject json;
 
-  static_cast<AGuiWindow*>(this)->          writeToJson("Main", json);
-  static_cast<AGuiWindow*>(Rwindow)->       writeToJson("Recon", json);
-  static_cast<AGuiWindow*>(ELwindow)->      writeToJson("ExLoad", json);
-  static_cast<AGuiWindow*>(Owindow)->       writeToJson("Out", json);
-  static_cast<AGuiWindow*>(DAwindow)->      writeToJson("DA", json);
-  static_cast<AGuiWindow*>(GeometryWindow)->writeToJson("Geom", json);
-  static_cast<AGuiWindow*>(GraphWindow)->   writeToJson("Graph", json);
+  static_cast<AGuiWindow*>(this)->           writeToJson("Main", json);
+  static_cast<AGuiWindow*>(Rwindow)->        writeToJson("Recon", json);
+  static_cast<AGuiWindow*>(ELwindow)->       writeToJson("ExLoad", json);
+  static_cast<AGuiWindow*>(Owindow)->        writeToJson("Out", json);
+  static_cast<AGuiWindow*>(DAwindow)->       writeToJson("DA", json);
+  static_cast<AGuiWindow*>(GeometryWindow)-> writeToJson("Geom", json);
+  static_cast<AGuiWindow*>(GraphWindow)->    writeToJson("Graph", json);
+  static_cast<AGuiWindow*>(lrfwindow)->      writeToJson("LRF", json);
+  static_cast<AGuiWindow*>(MIwindow)->       writeToJson("Material", json);
+  static_cast<AGuiWindow*>(ScriptWindow)->   writeToJson("ScriptWindow", json);
+  if (PythonScriptWindow)static_cast<AGuiWindow*>(PythonScriptWindow)->writeToJson("PythonScriptWindow", json);
+  static_cast<AGuiWindow*>(WindowNavigator)->writeToJson("Navi", json);
+  static_cast<AGuiWindow*>(RemoteWindow)->   writeToJson("RemoteWindow", json);
+  static_cast<AGuiWindow*>(newLrfWindow)->   writeToJson("newLRF", json);
 
   //addWindow("Main", this, json);
   //addWindow("Recon", Rwindow, json);
   //addWindow("Out", Owindow, json);
-  addWindow("LRF", lrfwindow, json);
-  addWindow("newLRF", (QMainWindow*)newLrfWindow, json);
-  addWindow("Navi", WindowNavigator, json);
-  addWindow("Material", MIwindow, json);
+  //addWindow("LRF", lrfwindow, json);
+  //addWindow("newLRF", (QMainWindow*)newLrfWindow, json);
+  //addWindow("Navi", WindowNavigator, json);
+  //addWindow("Material", MIwindow, json);
   //addWindow("ExLoad", ELwindow, json);
   //addWindow("Geom", GeometryWindow, json);
   //addWindow("Graph", GraphWindow, json);
   //addWindow("DA", DAwindow, json);
-  addWindow("ScriptWindow", ScriptWindow, json);
-  addWindow("RemoteWindow", RemoteWindow, json);
-  if (PythonScriptWindow) addWindow("PythonScriptWindow", PythonScriptWindow, json);
+  //addWindow("ScriptWindow", ScriptWindow, json);
+  //addWindow("RemoteWindow", RemoteWindow, json);
+  //if (PythonScriptWindow) addWindow("PythonScriptWindow", PythonScriptWindow, json);
 
   if (GenScriptWindow)
     {
@@ -254,28 +261,35 @@ void MainWindow::on_actionLoad_positions_and_status_of_all_windows_triggered()
           return;
       }
 
-      static_cast<AGuiWindow*>(this)->          readFromJson("Main", json);
-      static_cast<AGuiWindow*>(Rwindow)->       readFromJson("Recon", json);
-      static_cast<AGuiWindow*>(ELwindow)->      readFromJson("ExLoad", json);
-      static_cast<AGuiWindow*>(Owindow)->       readFromJson("Out", json);
-      static_cast<AGuiWindow*>(DAwindow)->      readFromJson("DA", json);
-      static_cast<AGuiWindow*>(GeometryWindow)->readFromJson("Geom", json);
-      static_cast<AGuiWindow*>(GraphWindow)->   readFromJson("Graph", json);
+      static_cast<AGuiWindow*>(this)->           readFromJson("Main", json);
+      static_cast<AGuiWindow*>(Rwindow)->        readFromJson("Recon", json);
+      static_cast<AGuiWindow*>(ELwindow)->       readFromJson("ExLoad", json);
+      static_cast<AGuiWindow*>(Owindow)->        readFromJson("Out", json);
+      static_cast<AGuiWindow*>(DAwindow)->       readFromJson("DA", json);
+      static_cast<AGuiWindow*>(GeometryWindow)-> readFromJson("Geom", json);
+      static_cast<AGuiWindow*>(GraphWindow)->    readFromJson("Graph", json);
+      static_cast<AGuiWindow*>(lrfwindow)->      readFromJson("LRF", json);
+      static_cast<AGuiWindow*>(MIwindow)->       readFromJson("Material", json);
+      static_cast<AGuiWindow*>(ScriptWindow)->   readFromJson("ScriptWindow", json);
+      if (PythonScriptWindow) static_cast<AGuiWindow*>(PythonScriptWindow)->readFromJson("PythonScriptWindow", json);
+      static_cast<AGuiWindow*>(WindowNavigator)->readFromJson("Navi", json);
+      static_cast<AGuiWindow*>(RemoteWindow)->   readFromJson("RemoteWindow", json);
+      static_cast<AGuiWindow*>(newLrfWindow)->   readFromJson("newLRF", json);
 
       //readXYwindow("Main", this, false, json);
       //readXYwindow("Recon", Rwindow, false, json);
       //readXYwindow("Out", Owindow, true, json);
-      readXYwindow("LRF", lrfwindow, false, json);
-      readXYwindow("newLRF", (QMainWindow*)newLrfWindow, true, json);
-      readXYwindow("Navi", WindowNavigator, false, json);
-      readXYwindow("Material", MIwindow, true, json);
+      //readXYwindow("LRF", lrfwindow, false, json);
+      //readXYwindow("newLRF", (QMainWindow*)newLrfWindow, true, json);
+      //readXYwindow("Navi", WindowNavigator, false, json);
+      //readXYwindow("Material", MIwindow, true, json);
       //readXYwindow("ExLoad", ELwindow, false, json);
       //readXYwindow("Geom", GeometryWindow, true, json);
       //readXYwindow("Graph", GraphWindow, true, json);
       //readXYwindow("DA", DAwindow, true, json);
-      if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
-      if (json.contains("RemoteWindow")) readXYwindow("RemoteWindow", RemoteWindow, true, json);
-      if (json.contains("PythonScriptWindow") && PythonScriptWindow) readXYwindow("PythonScriptWindow", PythonScriptWindow, true, json);
+      //if (json.contains("ScriptWindow")) readXYwindow("ScriptWindow", ScriptWindow, true, json);
+      //if (json.contains("RemoteWindow")) readXYwindow("RemoteWindow", RemoteWindow, true, json);
+      //if (json.contains("PythonScriptWindow") && PythonScriptWindow) readXYwindow("PythonScriptWindow", PythonScriptWindow, true, json);
 
       if (json.contains("Script"))
         {

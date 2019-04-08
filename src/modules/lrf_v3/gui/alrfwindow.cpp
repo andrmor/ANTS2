@@ -43,9 +43,15 @@ namespace Widgets = LRF::LrfWindowWidgets;
 using namespace LRF;
 
 ALrfWindow::ALrfWindow(QWidget *parent, MainWindow *mw, ARepository *lrf_repo) :
-  QMainWindow(parent), mw(mw), repo(lrf_repo)
+  AGuiWindow(parent), mw(mw), repo(lrf_repo)
 {
   setupUi(this);
+
+  Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+  windowFlags |= Qt::WindowCloseButtonHint;
+  windowFlags |= Qt::Tool;
+  this->setWindowFlags( windowFlags );
+
   connect(repo, &ARepository::currentLrfsChangedReadyStatus, this, &ALrfWindow::onReadyStatusChanged);
   lw_instructions->setDragEnabled(false);
 
@@ -188,16 +194,6 @@ void ALrfWindow::on_pbUpdateInstructionsJson_clicked()
     writeInstructionsToJson(js);
     repo->setNextUpdateConfig(js);
     mw->Config->UpdateLRFv3makeJson();
-}
-
-bool ALrfWindow::event(QEvent *event)
-{
-    if (!mw->WindowNavigator) return QMainWindow::event(event);
-
-    if (event->type() == QEvent::Hide) mw->WindowNavigator->HideWindowTriggered("newLrf");
-    if (event->type() == QEvent::Show) mw->WindowNavigator->ShowWindowTriggered("newLrf");
-
-    return QMainWindow::event(event);
 }
 
 void ALrfWindow::setSplitterRightColumn(QWidget *new_widget)

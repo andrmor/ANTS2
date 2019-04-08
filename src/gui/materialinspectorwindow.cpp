@@ -45,7 +45,7 @@
 #endif
 
 MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw, DetectorClass* detector) :
-    QMainWindow(parent),
+    AGuiWindow(parent),
     ui(new Ui::MaterialInspectorWindow)
 {
     MW = mw;
@@ -59,6 +59,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
 
     Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
     windowFlags |= Qt::WindowCloseButtonHint;
+    windowFlags |= Qt::Tool;
     this->setWindowFlags( windowFlags );
 
     SetWasModified(false);
@@ -1316,52 +1317,10 @@ void MaterialInspectorWindow::on_pbWasModified_clicked()
 
 bool MaterialInspectorWindow::event(QEvent * e)
 {
- //  if (!MW->isVisible()) return QMainWindow::event(e); //if we are closing the application
-
-    switch(e->type())
-    {
-      /*
-        case QEvent::WindowActivate :
-         {
-            //focussed!
-//            qDebug()<<"in";
-            if (MW->GeometryWindow->isVisible())
-               {
-                 MaterialStructure& tmpMaterial = MW->MaterialCollection->tmpMaterial;
-                 QString name = tmpMaterial.name;
-                 int size = MW->MaterialCollection->size();
-                 bool flagFound = false;
-                 int index;
-                 for (index = 0; index < size; index++)
-                    if (!name.compare( (*MW->MaterialCollection)[index]->name,Qt::CaseSensitive)) {flagFound = true; break;}
-
-                 if (!flagFound) index = 111111;
-                 MW->ColorVolumes(2, index);
-                 //MW->ShowGeometry(2);
-                 MW->ShowGeometry(false, true, false);
-                 //this->raise();
-               }
-            break ;
-          }
-        case QEvent::WindowDeactivate :
-            // lost focus
-            if (DoNotDefocus) break;            
-//            qDebug()<<"out!";
-            //if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(3);
-            if (MW->GeometryWindow->isVisible()) MW->ShowGeometry(false, true, true);
-            break;
-*/
-      case QEvent::Hide :
-        if (MW->WindowNavigator) MW->WindowNavigator->HideWindowTriggered("mat");
+    if (e->type() == QEvent::Hide)
         if (OptionsConfigurator->isVisible()) OptionsConfigurator->hide();
-        break;
-      case QEvent::Show :
-        if (MW->WindowNavigator) MW->WindowNavigator->ShowWindowTriggered("mat");
-        break;
-      default:
-        break;
-    } ;
-    return QMainWindow::event(e);
+
+    return AGuiWindow::event(e);
 }
 
 void MaterialInspectorWindow::on_pbGammaDiagnosticsPhComptRation_clicked()

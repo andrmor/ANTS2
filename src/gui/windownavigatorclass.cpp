@@ -23,7 +23,7 @@
 
 
 WindowNavigatorClass::WindowNavigatorClass(QWidget *parent, MainWindow *mw) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::WindowNavigatorClass)
 {
   ui->setupUi(this);

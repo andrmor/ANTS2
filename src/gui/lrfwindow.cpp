@@ -40,7 +40,7 @@
 #include "TGraph2D.h"
 
 LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDataHub) :
-  QMainWindow(parent),
+  AGuiWindow(parent),
   ui(new Ui::LRFwindow)
 {
   MW = mw;
@@ -57,6 +57,7 @@ LRFwindow::LRFwindow(QWidget *parent, MainWindow *mw, EventsDataClass *eventsDat
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::WindowCloseButtonHint;
+  windowFlags |= Qt::Tool;
   this->setWindowFlags( windowFlags );
 
   StopSignal = false;
@@ -143,16 +144,6 @@ void LRFwindow::on_pbStopLRFmake_clicked()
   StopSignal = true;
   ui->pbStopLRFmake->setText("stopping...");
   SensLRF->requestStop();
-}
-
-bool LRFwindow::event(QEvent *event)
-{
-  if (!MW->WindowNavigator) return QMainWindow::event(event);
-
-  if (event->type() == QEvent::Hide) MW->WindowNavigator->HideWindowTriggered("lrf");
-  if (event->type() == QEvent::Show) MW->WindowNavigator->ShowWindowTriggered("lrf");
-
-  return QMainWindow::event(event);
 }
 
 void LRFwindow::on_pbUpdateGUI_clicked()

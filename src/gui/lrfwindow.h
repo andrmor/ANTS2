@@ -1,7 +1,7 @@
 #ifndef LRFWINDOW_H
 #define LRFWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QVector>
 #include <QTimer>
 
@@ -19,7 +19,7 @@ namespace Ui {
   class LRFwindow;
 }
 
-class LRFwindow : public QMainWindow
+class LRFwindow : public AGuiWindow
 {
   Q_OBJECT
   
@@ -108,9 +108,6 @@ private slots:
   void on_cbEnergyScalling_toggled(bool checked);
 
   void on_cb_data_selector_currentIndexChanged(int index);
-
-protected:
-    bool event(QEvent *event);
 
 private:
     Ui::LRFwindow *ui;

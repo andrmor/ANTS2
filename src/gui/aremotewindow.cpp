@@ -15,9 +15,17 @@
 #include <QDebug>
 
 ARemoteWindow::ARemoteWindow(MainWindow *MW) :
+    AGuiWindow(MW),
     MW(MW), ui(new Ui::ARemoteWindow)
 {
     ui->setupUi(this);
+
+    Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
+    windowFlags |= Qt::WindowCloseButtonHint;
+    //windowFlags |= Qt::WindowStaysOnTopHint;
+    windowFlags |= Qt::Tool;
+    this->setWindowFlags( windowFlags );
+
     ui->lwServers->setViewMode(QListView::ListMode);
     //ui->lwServers->setDragDropMode(QAbstractItemView::InternalMove);
     //ui->lwServers->setDragEnabled(true);

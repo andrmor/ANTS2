@@ -1,7 +1,7 @@
 #ifndef AREMOTEWINDOW_H
 #define AREMOTEWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QVector>
 #include <QWidget>
 #include <QFrame>
@@ -15,7 +15,7 @@ class ARemoteServerRecord;
 class AServerDelegate;
 class AGridRunner;
 
-class ARemoteWindow : public QMainWindow
+class ARemoteWindow : public AGuiWindow
 {
     Q_OBJECT
 

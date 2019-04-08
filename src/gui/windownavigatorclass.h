@@ -1,7 +1,7 @@
 #ifndef WINDOWNAVIGATORCLASS_H
 #define WINDOWNAVIGATORCLASS_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 
 class MainWindow;
 
@@ -16,7 +16,7 @@ namespace Ui {
 
 class QTime;
 
-class WindowNavigatorClass : public QMainWindow
+class WindowNavigatorClass : public AGuiWindow
 {
   Q_OBJECT
   

@@ -11,7 +11,7 @@ CONFIG += ants2_RootServer  #enable cern CERN ROOT html server
 #CONFIG += ants2_Python      #enable Python scripting
 #CONFIG += ants2_NCrystal    #enable NCrystal library (neutron scattering): see https://github.com/mctools/ncrystal
 
-# You may need to modify paths CERN ROOT and the enabled libraries! See the corresponding sections below
+# You may need to modify paths for CERN ROOT and the enabled libraries! See the corresponding sections below
 
 #Optional features enabled in Docker version   
 ants2_docker {
@@ -383,13 +383,11 @@ SOURCES += main.cpp \
     scriptmode/amath_si.cpp \
     scriptmode/atree_si.cpp \
     scriptmode/aphoton_si.cpp \
-    scriptmode/agui_si.cpp \
     scriptmode/acore_si.cpp \
     scriptmode/ageo_si.cpp \
     scriptmode/aserver_si.cpp \
     scriptmode/aweb_si.cpp \
     scriptmode/athreads_si.cpp \
-    scriptmode/amsg_si.cpp \
     scriptmode/atracklog_si.cpp \
     scriptmode/aparticlegenerator_si.cpp \
     scriptmode/agstyle_si.cpp \
@@ -398,12 +396,8 @@ SOURCES += main.cpp \
     scriptmode/arec_si.cpp \
     scriptmode/apms_si.cpp \
     scriptmode/alrf_si.cpp \
-    scriptmode/ageowin_si.cpp \
-    scriptmode/agraphwin_si.cpp \
-    scriptmode/aoutwin_si.cpp \
     Simulation/atrackingdataimporter.cpp \
-    common/aeventtrackingrecord.cpp \
-    gui/aguiwindow.cpp
+    common/aeventtrackingrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -540,13 +534,11 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/amath_si.h \
     scriptmode/atree_si.h \
     scriptmode/aphoton_si.h \
-    scriptmode/agui_si.h \
     scriptmode/acore_si.h \
     scriptmode/ageo_si.h \
     scriptmode/aserver_si.h \
     scriptmode/aweb_si.h \
     scriptmode/athreads_si.h \
-    scriptmode/amsg_si.h \
     scriptmode/atracklog_si.h \
     scriptmode/aparticlegenerator_si.h \
     scriptmode/agstyle_si.h \
@@ -555,12 +547,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/arec_si.h \
     scriptmode/apms_si.h \
     scriptmode/alrf_si.h \
-    scriptmode/ageowin_si.h \
-    scriptmode/agraphwin_si.h \
-    scriptmode/aoutwin_si.h \
     Simulation/atrackingdataimporter.h \
-    common/aeventtrackingrecord.h \
-    gui/aguiwindow.h
+    common/aeventtrackingrecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -675,7 +663,13 @@ ants2_GUI {
     gui/aserverdelegate.cpp \
     gui/MainWindowTools/aopticaloverridedialog.cpp \
     gui/MainWindowTools/aopticaloverridetester.cpp \
-    gui/MainWindowTools/aparticlesourcedialog.cpp
+    scriptmode/amsg_si.cpp \
+    scriptmode/agui_si.cpp \
+    scriptmode/ageowin_si.cpp \
+    scriptmode/agraphwin_si.cpp \
+    scriptmode/aoutwin_si.cpp \
+    gui/MainWindowTools/aparticlesourcedialog.cpp \
+    gui/aguiwindow.cpp
 
 HEADERS  += gui/mainwindow.h \
     gui/materialinspectorwindow.h \
@@ -733,7 +727,13 @@ HEADERS  += gui/mainwindow.h \
     gui/aserverdelegate.h \
     gui/MainWindowTools/aopticaloverridedialog.h \
     gui/MainWindowTools/aopticaloverridetester.h \
-    gui/MainWindowTools/aparticlesourcedialog.h
+    scriptmode/amsg_si.h \
+    scriptmode/agui_si.h \
+    scriptmode/ageowin_si.h \
+    scriptmode/agraphwin_si.h \
+    scriptmode/aoutwin_si.h \
+    gui/MainWindowTools/aparticlesourcedialog.h \
+    gui/aguiwindow.h
 
 FORMS += gui/mainwindow.ui \
     gui/materialinspectorwindow.ui \

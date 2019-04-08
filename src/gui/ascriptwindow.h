@@ -1,7 +1,7 @@
 #ifndef ASCRIPTWINDOW_H
 #define ASCRIPTWINDOW_H
 
-#include <QMainWindow>
+#include "aguiwindow.h"
 #include <QSet>
 #include <QHash>
 #include <QString>
@@ -26,7 +26,7 @@ namespace Ui {
 class AScriptWindow;
 }
 
-class AScriptWindow : public QMainWindow
+class AScriptWindow : public AGuiWindow
 {
     Q_OBJECT
 

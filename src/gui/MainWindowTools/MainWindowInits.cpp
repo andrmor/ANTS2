@@ -162,6 +162,12 @@ MainWindow::MainWindow(DetectorClass *Detector,
     DAwindow->connectToNavigator(WindowNavigator, "");
     GeometryWindow->connectToNavigator(WindowNavigator, "geometry");
     GraphWindow->connectToNavigator(WindowNavigator, "graph");
+    lrfwindow->connectToNavigator(WindowNavigator, "lrf");
+    MIwindow->connectToNavigator(WindowNavigator, "mat");
+    //ScriptWindow and PythonScriptWindow are already processed
+    WindowNavigator->connectToNavigator(WindowNavigator, ""); //paranoic
+    RemoteWindow->connectToNavigator(WindowNavigator, "");
+    newLrfWindow->connectToNavigator(WindowNavigator, "newLrf");
 
     qDebug()<<">All windows created";
 

@@ -51,7 +51,7 @@
 #include <QHeaderView>
 
 AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWidget *parent) :
-    QMainWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
+    AGuiWindow(parent), ScriptManager(ScriptManager), bLightMode(LightMode),
     ui(new Ui::AScriptWindow), GlobSet(AGlobalSettings::getInstance())
 {
     if ( dynamic_cast<AJavaScriptManager*>(ScriptManager) )
@@ -70,6 +70,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
         //not a standalone window
         Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
         windowFlags |= Qt::WindowCloseButtonHint;
+        windowFlags |= Qt::Tool;
         this->setWindowFlags( windowFlags );
     }
 
@@ -1160,17 +1161,17 @@ bool AScriptWindow::event(QEvent *e)
             case QEvent::Hide :
                 //qDebug() << "Script window: hide event";
                 ScriptManager->hideMsgDialogs();
-                emit WindowHidden( ScriptLanguage == _JavaScript_ ? "script" : "python" );
+                //emit WindowHidden( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             case QEvent::Show :
                 //qDebug() << "Script window: show event";
                 ScriptManager->restoreMsgDialogs();
-                emit WindowShown( ScriptLanguage == _JavaScript_ ? "script" : "python" );
+                //emit WindowShown( ScriptLanguage == _JavaScript_ ? "script" : "python" );
                 break;
             default:;
         };
 
-    return QMainWindow::event(e) ;
+    return AGuiWindow::event(e);
 }
 
 void AScriptWindow::receivedOnAbort()

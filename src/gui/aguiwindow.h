@@ -26,8 +26,8 @@ protected:
 
     int WinPos_X = 40;
     int WinPos_Y = 40;
-    int WinSize_W = 600;
-    int WinSize_H = 800;
+    int WinSize_W = 800;
+    int WinSize_H = 600;
     bool bWinVisible = true;
     bool bWinMaximized = false;
 

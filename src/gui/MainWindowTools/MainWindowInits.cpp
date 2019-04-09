@@ -31,6 +31,7 @@
 #include "anetworkmodule.h"
 #include "awebsocketserverdialog.h"
 #include "aremotewindow.h"
+#include "aisotopeabundancehandler.h"
 
 #ifdef ANTS_FANN
 #include "neuralnetworksmodule.h"
@@ -287,7 +288,7 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
      << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui
      << ui->pbInitializeScanFloodNoise << ui->pbUpdateScanFloodTabWidget << ui->fScanFloodTotProb
-     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication
+     << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication << ui->frIon
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
@@ -302,7 +303,15 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->fAngular->setEnabled(ui->cbAngularSensitive->isChecked());    
     ui->fScanSecond->setEnabled(ui->cbSecondAxis->isChecked());
     ui->fScanThird->setEnabled(ui->cbThirdAxis->isChecked());
-    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());    
+    ui->fPreprocessing->setEnabled(ui->cbPMsignalPreProcessing->isChecked());
+    QStringList slParts;
+    slParts << "gamma" << "neutron" << "e-" << "e+" << "proton" << "custom_particle";
+    ui->cobAddNewParticle->addItems(slParts);
+    const AIsotopeAbundanceHandler & IsoAbHandler = AGlobalSettings::getInstance().getIsotopeAbundanceHandler();
+    QStringList slIons =  IsoAbHandler.getListOfElements();
+    ui->cobAddIon->addItems(slIons);
+    ui->cobAddIon->setMaxVisibleItems(10);
+    ui->cobAddIon->setCurrentText("He");
     qDebug() << ">GUI initialized";
 
     //change font size for all windows

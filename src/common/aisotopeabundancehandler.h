@@ -18,6 +18,9 @@ public:
     bool isNaturalAbundanceTableEmpty() const {return NaturalAbundancies.isEmpty();}
     bool isElementExist(const QString& elSymbol) const {return AllPossibleElements.contains(elSymbol);}
 
+    const QStringList getListOfElements() const;
+    int getZ(const QString & Symbol) const;
+
     const QString fillIsotopesWithNaturalAbundances(AChemicalElement & element) const;
 
     TGeoElement* generateTGeoElement(const AChemicalElement *el, const TString &matName) const; //does not own!

@@ -237,9 +237,6 @@ private slots:
     void on_cbRingsArray_stateChanged(int arg1);
     void on_pbRefreshOverrides_clicked();
     void on_pbStartMaterialInspector_clicked();
-    void on_pbAddparticleToActive_clicked();
-    void on_cobParticleToInspect_currentIndexChanged(int index);
-    void on_leParticleName_editingFinished();
     void on_pbRefreshParticles_clicked();
     void on_cbSecondAxis_toggled(bool checked);
     void on_cbThirdAxis_toggled(bool checked);
@@ -634,6 +631,12 @@ private slots:
     void on_cbGeant4ParticleTracking_toggled(bool checked);
 
     void on_pbG4Settings_clicked();
+
+    void on_pbAddNewParticle_clicked();
+
+    void on_pbAddIon_clicked();
+
+    void on_pbRenameParticle_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

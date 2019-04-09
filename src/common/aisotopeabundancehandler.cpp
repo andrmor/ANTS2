@@ -12,6 +12,7 @@ AIsotopeAbundanceHandler::AIsotopeAbundanceHandler(const QString & NaturalAbunda
 {
     QVector<QString> all;
     all << "H"<<"He"<<"Li"<<"Be"<<"B"<<"C"<<"N"<<"O"<<"F"<<"Ne"<<"Na"<<"Mg"<<"Al"<<"Si"<<"P"<<"S"<<"Cl"<<"Ar"<<"K"<<"Ca"<<"Sc"<<"Ti"<<"V"<<"Cr"<<"Mn"<<"Fe"<<"Co"<<"Ni"<<"Cu"<<"Zn"<<"Ga"<<"Ge"<<"As"<<"Se"<<"Br"<<"Kr"<<"Rb"<<"Sr"<<"Y"<<"Zr"<<"Nb"<<"Mo"<<"Tc"<<"Ru"<<"Rh"<<"Pd"<<"Ag"<<"Cd"<<"In"<<"Sn"<<"Sb"<<"Te"<<"I"<<"Xe"<<"Cs"<<"Ba"<<"La"<<"Ce"<<"Pr"<<"Nd"<<"Pm"<<"Sm"<<"Eu"<<"Gd"<<"Tb"<<"Dy"<<"Ho"<<"Er"<<"Tm"<<"Yb"<<"Lu"<<"Hf"<<"Ta"<<"W"<<"Re"<<"Os"<<"Ir"<<"Pt"<<"Au"<<"Hg"<<"Tl"<<"Pb"<<"Bi"<<"Po"<<"At"<<"Rn"<<"Fr"<<"Ra"<<"Ac"<<"Th"<<"Pa"<<"U"<<"Np"<<"Pu"<<"Am"<<"Cm"<<"Bk"<<"Cf"<<"Es";
+    all << "Fm"<<"Md"<<"No"<<"Lr"<<"Rf"<<"Db"<<"Sg"<<"Bh"<<"Hs";
 
     for (const QString& s : all)
         AllPossibleElements << s;
@@ -20,6 +21,16 @@ AIsotopeAbundanceHandler::AIsotopeAbundanceHandler(const QString & NaturalAbunda
         SymbolToNumber.insert(all.at(i), i+1);
 
     configureNaturalAbunances();
+}
+
+const QStringList AIsotopeAbundanceHandler::getListOfElements() const
+{
+    return SymbolToNumber.keys();
+}
+
+int AIsotopeAbundanceHandler::getZ(const QString &Symbol) const
+{
+    return SymbolToNumber[Symbol];
 }
 
 void AIsotopeAbundanceHandler::configureNaturalAbunances()

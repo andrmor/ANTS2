@@ -53,12 +53,8 @@ bool GunParticleStruct::loadSpectrum(const QString &fileName)
 
 void GunParticleStruct::writeToJson(QJsonObject &json, const AMaterialParticleCollection &MpCollection) const
 {
-    const AParticle* p = MpCollection.getParticle(ParticleId); // TODO matColl -> partToJson
-    QJsonObject jparticle;
-        jparticle["name"] = p->ParticleName;
-        jparticle["type"] = p->type;
-        jparticle["charge"] = p->charge;
-        jparticle["mass"] = p->mass;
+    const AParticle* p = MpCollection.getParticle(ParticleId);
+    QJsonObject jparticle = p->writeToJson();
     json["Particle"] = jparticle;
 
     json["StatWeight"] = StatWeight;
@@ -85,13 +81,17 @@ bool GunParticleStruct::readFromJson(const QJsonObject &json, AMaterialParticleC
         qWarning()<<"Particle data not given in the particle source file";
         return false;
     }
+    AParticle part;
+    part.readFromJson(jparticle);
+    /*
     QString name = jparticle["name"].toString();
     int type = jparticle["type"].toInt();
     int charge = jparticle["charge"].toInt();
     double mass = jparticle["mass"].toDouble();
-    //looking for this particle in the collection and create if necessary
     AParticle::ParticleType Type = static_cast<AParticle::ParticleType>(type);
-    ParticleId = MpCollection.FindCreateParticle(name, Type, charge, mass);
+    */
+    //looking for this particle in the collection and create if necessary
+    ParticleId = MpCollection.findOrAddParticle(part);
     //qDebug()<<"Added gun particle with particle Id"<<ParticleId<<ParticleCollection->at(ParticleId)->ParticleName;
 
     parseJson(json, "StatWeight",  StatWeight );

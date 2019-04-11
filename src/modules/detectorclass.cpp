@@ -1226,9 +1226,21 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
 
     QJsonObject json;
 
-    const QStringList Particles = MpCollection->getListOfParticleNames();
     QJsonArray Parr;
-    for (auto & pname : Particles ) Parr << pname;
+    //const QStringList Particles = MpCollection->getListOfParticleNames();
+    //for (auto & pname : Particles ) Parr << pname;
+    const int numPart = MpCollection->countParticles();
+    for (int iP=0; iP<numPart; iP++)
+    {
+        const AParticle * part = MpCollection->getParticle(iP);
+        if (part->isIon())
+        {
+            QJsonArray ar;
+            ar << part->ParticleName << part->ionZ << part->ionA;
+            Parr << ar;
+        }
+        else Parr << part->ParticleName;
+    }
     json["Particles"] = Parr;
 
     const QStringList Materials = MpCollection->getListOfMaterialNames();

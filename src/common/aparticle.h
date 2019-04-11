@@ -23,6 +23,8 @@ public:
   int ionZ = -1;
   int ionA = -1;
 
+  bool isIon() const {return ionZ != -1;}
+
   void writeToJson(QJsonObject &json) const;
   const QJsonObject writeToJson() const;
   void readFromJson(const QJsonObject &json);

@@ -58,9 +58,8 @@ public:
   int getParticleId(QString name) const;
   const QString getParticleName(int particleIndex) const;
   AParticle::ParticleType getParticleType(int particleIndex) const;
-  int getParticleCharge(int particleIndex) const;
-  double getParticleMass(int particleIndex) const;
   const AParticle* getParticle(int particleIndex) const;
+  AParticle* getParticle(int particleIndex);
   const QStringList getListOfParticleNames() const;
 
   //Material handling
@@ -72,8 +71,8 @@ public:
   bool isNCrystalInUse() const;
 
   //Particles handling
-  bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
-  bool UpdateParticle(int particleId, QString name, AParticle::ParticleType type, int charge, double mass);
+  //bool AddParticle(QString name, AParticle::ParticleType type, int charge, double mass);
+  //bool AddParticle(QString name, AParticle::ParticleType type, double mass);
   QVector<AParticle*>* getParticleCollection() {return &ParticleCollection;}
   int getNeutronIndex() const; //returns -1 if not in the collection
 
@@ -97,8 +96,8 @@ public:
 
 public:
   void ConvertToStandardWavelengthes(QVector<double> *sp_x, QVector<double> *sp_y, QVector<double> *y);
-  int FindCreateParticle(QString Name, AParticle::ParticleType Type, int Charge, double Mass, bool fOnlyFind = false);
-  int findOrCreateParticle(QJsonObject &json);
+  int findOrAddParticle(const AParticle & particle);
+  int findOrAddParticle(const QJsonObject & json);
 
   const QString CheckMaterial(const AMaterial *mat, int iPart) const; //"" - check passed, otherwise error
   const QString CheckMaterial(int iMat, int iPart) const;       //"" - check passed, otherwise error

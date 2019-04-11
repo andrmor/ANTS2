@@ -1,4 +1,3 @@
-//ANTS2
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "amaterialparticlecolection.h"
@@ -10,12 +9,12 @@
 #include "aconfiguration.h"
 #include "atrackrecords.h"
 #include "simulationmanager.h"
+#include "aglobalsettings.h"
+#include "aisotopeabundancehandler.h"
 
-//Qt
 #include <QMessageBox>
 #include <QDebug>
 
-//Root
 #include "TColor.h"
 #include "TROOT.h"
 
@@ -36,6 +35,7 @@ void MainWindow::ListActiveParticles()
 
 void MainWindow::on_pbShowColorCoding_pressed()
 {
+  ui->lwParticles->clearSelection();
   for (int i=0; i<ui->lwParticles->count(); i++)
     {
       //TColor* rc = gROOT->GetColor(i +1 +ui->sbParticleTrackColorIndexAdd->value());
@@ -78,7 +78,7 @@ void updateParticleCOB(QComboBox* cob, DetectorClass* Detector)
 void MainWindow::on_pbRefreshParticles_clicked()
 {
   QList< QComboBox* > cobs;
-  cobs << ui->cobParticleToInspect << ui->cobParticleToStack;
+  cobs << ui->cobParticleToStack;
   foreach (QComboBox* cob, cobs)
     updateParticleCOB(cob, Detector);
 
@@ -87,82 +87,31 @@ void MainWindow::on_pbRefreshParticles_clicked()
 
 void MainWindow::on_lwParticles_currentRowChanged(int currentRow)
 {
-   if (currentRow<0) return;
+    if (currentRow < 0) return;
 
-   ui->cobParticleToInspect->setCurrentIndex(currentRow);
-   MainWindow::on_cobParticleToInspect_currentIndexChanged(ui->cobParticleToInspect->currentIndex()); //refresh indication
-}
-
-void MainWindow::on_leParticleName_editingFinished()
-{
-    ui->cobParticleToInspect->setCurrentIndex(-1);
-}
-
-void MainWindow::on_pbAddparticleToActive_clicked()
-{
-  QString name = ui->leParticleName->text();
-  int charge = ui->ledParticleCharge->text().toInt();
-  double mass = ui->ledMass->text().toDouble();
-  AParticle::ParticleType type;
-
-  if (charge == 0)
-    if (name != "gamma" && name != "neutron")
-      {
-        message("Only 'gamma' and 'neutron' can be neutral!", this);
-        ui->ledParticleCharge->setText( "1" );
-        return;
-      }
-
-  if (name == "gamma")
+    if (currentRow < Detector->MpCollection->countParticles())
     {
-      type = AParticle::_gamma_; charge = 0; mass = 0;
-    }
-  else if (name == "neutron")
-    {
-      type = AParticle::_neutron_; charge = 0; mass = 1;
-    }
-  else type = AParticle::_charged_;
+        const AParticle* p = Detector->MpCollection->getParticle(currentRow);
+        ui->leParticleName->setText(p->ParticleName);
+        ui->leiIonZ->setText(QString::number(p->ionZ));
+        ui->leiMass->setText(QString::number(p->ionA));
 
-  int Id = MpCollection->getParticleId(name);
-  if (Id != -1)
-    {
-      //particle with this name NOT found
-      switch( QMessageBox::information( this, "", "Particle with this name alredy exists!\n"
-                                                  "Note that 'gamma' and 'neutron' are reserved and cannot be modified", "Update", "Cancel",0, 1 ) )
-        {
-        case 0:
-          MpCollection->UpdateParticle(Id, name, type, charge, mass);
-          ui->cobParticleToInspect->setCurrentIndex(Id);
-        default:
-          break;
-        }
-    }
-  else
-    {
-      //new particle
-      bool fOk = MpCollection->AddParticle(name, type, charge, mass);
-      if (fOk) ui->cobParticleToInspect->setCurrentIndex(ui->cobParticleToInspect->count()-1);
-      onRequestDetectorGuiUpdate();
-    }
-}
+        bool bIon = (p->ionZ != -1);
+        ui->frIon->setVisible(bIon);
 
-void MainWindow::on_cobParticleToInspect_currentIndexChanged(int index)
-{
-    if (index<0) return;
-    if (index > Detector->MpCollection->countParticles()-1)
-      {
-        qWarning() << "Bad particle index:"<<index;
-        return;
-      }
-    const AParticle* p = Detector->MpCollection->getParticle(index);
-    ui->leParticleName->setText(p->ParticleName);
-    ui->ledParticleCharge->setText(QString::number(p->charge));
-    ui->ledMass->setText(QString::number(p->mass));
+        bool bCanRename = !bIon &&
+                          p->type != AParticle::_gamma_ &&
+                          p->type != AParticle::_neutron_ &&
+                          p->ParticleName != "e-" &&
+                          p->ParticleName != "e+";
+        ui->leParticleName->setReadOnly(!bCanRename);
+        ui->pbRenameParticle->setEnabled(bCanRename);
+    }
 }
 
 void MainWindow::on_pbRemoveParticle_clicked()
 {
-    int Id = ui->cobParticleToInspect->currentIndex();
+    int Id = ui->lwParticles->currentRow();
     if (Id == -1)
     {
         message("Select one of the defined particles", this);
@@ -179,3 +128,91 @@ void MainWindow::on_pbRemoveParticle_clicked()
   QString err = Config->RemoveParticle(Id); //all updates are automatic, including GUI
   if (!err.isEmpty()) message(err, this);
 }
+
+void MainWindow::on_pbRenameParticle_clicked()
+{
+    int Id = ui->lwParticles->currentRow();
+    if (Id == -1)
+    {
+        message("Select one of the defined particles", this);
+        return;
+    }
+
+    AParticle* p = Detector->MpCollection->getParticle(Id);
+    QString newName = ui->leParticleName->text();
+    if (newName == p->ParticleName)
+    {
+        message("Particle name is the same", this);
+        return;
+    }
+
+    p->ParticleName = newName;
+    onRequestDetectorGuiUpdate();
+    ui->lwParticles->setCurrentRow(Id);
+}
+
+void MainWindow::on_pbAddNewParticle_clicked()
+{
+    QString name = ui->cobAddNewParticle->currentText();
+    if (name.isEmpty())
+    {
+        message("Select first a particle to add", this);
+        return;
+    }
+
+    int Id = MpCollection->getParticleId(name);
+    if (Id != -1)
+    {
+        message( QString("Particle %1 already exists").arg(name), this);
+        return;
+    }
+
+    AParticle p(name, AParticle::_charged_);
+    //MainWindowInits.cpp Line approx. 300:  "gamma" << "neutron" << "e-" << "e+" << "proton" << "custom_particle";
+    if (name == "gamma")
+        p.type = AParticle::_gamma_;
+    else if (name == "neutron")
+        p.type = AParticle::_neutron_;
+
+    MpCollection->findOrAddParticle(p);
+    onRequestDetectorGuiUpdate();
+    ui->lwParticles->setCurrentRow(ui->lwParticles->count()-1);
+}
+
+void MainWindow::on_pbAddIon_clicked()
+{
+    QString name = ui->cobAddIon->currentText();
+    if (name.isEmpty())
+    {
+        message("Select symbol", this);
+        return;
+    }
+    QString massStr = ui->leiAddIonMass->text();
+    int mass = massStr.toInt();
+    if (massStr.isEmpty() || mass == 0)
+    {
+        message("Enter mass of the ion", this);
+        return;
+    }
+
+    int Z = GlobSet.getIsotopeAbundanceHandler().getZ(name);
+    if (Z == 0)
+    {
+        message(QString("Symbol '%1' is not a valid element").arg(name), this);
+        return;
+    }
+
+    name += massStr;
+    int Id = MpCollection->getParticleId(name);
+    if (Id != -1)
+    {
+        message( QString("Particle name %1 already defined").arg(name), this);
+        return;
+    }
+
+    AParticle p(name, AParticle::_charged_, Z, mass);
+    MpCollection->findOrAddParticle(p);
+    onRequestDetectorGuiUpdate();
+    ui->lwParticles->setCurrentRow(ui->lwParticles->count()-1);
+}
+

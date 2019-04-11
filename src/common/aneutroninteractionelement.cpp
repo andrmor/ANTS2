@@ -28,7 +28,7 @@ const QJsonObject AAbsorptionGeneratedParticle::writeToJson(AMaterialParticleCol
 void AAbsorptionGeneratedParticle::readFromJson(const QJsonObject &json, AMaterialParticleCollection *MpCollection)
 {
     QJsonObject jsp = json["Particle"].toObject();
-    ParticleId = MpCollection->findOrCreateParticle(jsp);
+    ParticleId = MpCollection->findOrAddParticle(jsp);
     parseJson(json, "Energy", Energy);
     parseJson(json, "OpositeDirectionWithPrevious", bOpositeDirectionWithPrevious);
 }

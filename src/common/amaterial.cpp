@@ -595,7 +595,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
       QJsonObject jMatParticle = jParticleEntries[index].toObject();
 
       QJsonObject jparticle = jMatParticle["*Particle"].toObject();
-      int ip = MpCollection->findOrCreateParticle(jparticle);
+      int ip = MpCollection->findOrAddParticle(jparticle);
 
       parseJson(jMatParticle, "TrackingAllowed", MatParticle[ip].TrackingAllowed);
       parseJson(jMatParticle, "MatIsTransparent", MatParticle[ip].MaterialIsTransparent);

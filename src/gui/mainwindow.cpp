@@ -223,7 +223,7 @@ void MainWindow::closeEvent(QCloseEvent *)
        }
    */
 
-   ui->pbAddparticleToActive->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
+   ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
    qDebug() << "<Preparing graph window for shutdown";
    GraphWindow->close();

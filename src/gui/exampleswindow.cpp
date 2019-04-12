@@ -22,7 +22,7 @@ ExamplesWindow::ExamplesWindow(QWidget *parent, MainWindow *mw) :
 {  
   MW = mw;
   ui->setupUi(this);
-  this->setFixedSize(this->size());
+  //this->setFixedSize(this->size());
 
   Qt::WindowFlags windowFlags = (Qt::Window | Qt::CustomizeWindowHint);
   windowFlags |= Qt::Tool;
@@ -344,21 +344,6 @@ QString ExamplesWindow::getQuickSlotMessage(int i)
     if (fi.exists())
         s = "Saved at " + fi.lastModified().toString("hh:mm:ss  on  dd MMM yyyy");
     return s;
-}
-
-void ExamplesWindow::on_pbQuickSave1_clicked()
-{
-  QuickSave(1);
-}
-
-void ExamplesWindow::on_pbQuickSave2_clicked()
-{
-  QuickSave(2);
-}
-
-void ExamplesWindow::on_pbQuickSave3_clicked()
-{
-  QuickSave(3);
 }
 
 void ExamplesWindow::QuickSave(int i)

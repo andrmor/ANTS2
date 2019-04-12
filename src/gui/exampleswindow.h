@@ -37,42 +37,26 @@ public:
 
 private slots:
   void on_cbDoNotShowExamplesOnStart_toggled(bool checked);
-
   void on_lwMainType_currentRowChanged(int currentRow);
-
   void on_lwSubType_currentRowChanged(int currentRow);
-
   void on_lwExample_currentRowChanged(int currentRow);
-
   void on_pbLoadExample_clicked();
-
   void on_lwExample_doubleClicked(const QModelIndex &index);
-
   void on_pbSaveSessings_clicked();
-
   void on_pbLoadSettings_clicked();
-
   void on_pbLoadLast_clicked();
-
-  void on_pbQuickSave1_clicked();
-  void on_pbQuickSave2_clicked();
-  void on_pbQuickSave3_clicked();
-
   void on_actionQuick_save_1_triggered();
   void on_actionQuick_save_2_triggered();
   void on_actionQuick_save_3_triggered();
-
   void on_actionQuick_load_1_triggered();
   void on_actionQuick_load_2_triggered();
   void on_actionQuick_load_3_triggered();
-
   void on_actionQuick_save_1_hovered();
   void on_actionQuick_save_2_hovered();
   void on_actionQuick_save_3_hovered();
   void on_actionQuick_load_1_hovered();
   void on_actionQuick_load_2_hovered();
   void on_actionQuick_load_3_hovered();
-
   void on_actionCreate_new_detector_triggered();
 
 private:

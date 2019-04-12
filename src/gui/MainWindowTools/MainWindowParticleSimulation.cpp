@@ -873,10 +873,12 @@ void MainWindow::on_pbGenerateFromFile_Help_clicked()
 {
     QString s = "File should contain particle records, one line per particle.\n\n"
                 "Record format:\n"
-                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ  *\n\n"
+                "ParticleId  Energy  StartX  StartY  StartZ  DirX  DirY  DirZ Time *\n\n"
                 "where optional '*' indicates that the event is not finished:\n"
-                "the next particle will be generated within the same event.\n\n"
-                "If a line does not start with an integer, it is ignored.";
+                "the next particle will be generated within the same event.\n"
+                "Energy in keV, position in mm, direction is unitary vector and time in ns.\n\n"
+                "If a line does not start with an integer, it is ignored,\n"
+                "but it is recommended to start comments with '#' symbol.";
     message(s, this);
 }
 

@@ -1,9 +1,12 @@
-format: particleId energy x y z vx vy vz      if line ends with *, the next particle is added to the same event
-separators can be any number of spaces or tabs
-comments are ignored
+# format:
+# particleId energy x y z vx vy vz time 
+# Energy in keV, position in mm, direction is unitary vector, time in ns.
+# If line ends with *, the next particle is added to the same event.
+# Separators can be any number of spaces or tabs.
+# Comments are ignored.
   
-0  120  5  0 -10   0  0     1
-2  250  5  0 -10   1  0     1
-1  115  5  0 -10   0  1     1
-0  511  10 10 0    1  0.25  1 *
-0  511  10 10 0   -1 -0.25 -1
+0  120  5  0 -10   0  0     1 0
+0  250  5  0 -10   1  0     1 1000
+0  115  5  0 -10   0  1     1 0
+0  511  10 10 0    1  0.25  1 0 *
+0  511  10 10 0   -1 -0.25 -1 0

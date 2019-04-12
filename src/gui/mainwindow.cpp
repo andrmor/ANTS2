@@ -5016,3 +5016,11 @@ void MainWindow::on_pbSetAllInherited_clicked()
     PMs->resetOverrides();
     ReconstructDetector(true);
 }
+
+#include "afileparticlegenerator.h"
+void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
+{
+    QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
+    SimulationManager->FileParticleGenerator->SetFileName(epff);
+    updateFileParticleGeneratorGui();
+}

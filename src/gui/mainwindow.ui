@@ -10234,6 +10234,19 @@ double events:</string>
            <string/>
           </property>
          </widget>
+         <widget class="QPushButton" name="pbLoadExampleFileFromFileGen">
+          <property name="geometry">
+           <rect>
+            <x>431</x>
+            <y>61</y>
+            <width>71</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Example</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">

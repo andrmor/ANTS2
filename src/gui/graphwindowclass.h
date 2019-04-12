@@ -146,6 +146,7 @@ public:
 
     bool Extraction();
 
+    bool isBasketOn() const;
     void switchOffBasket();
     void ClearBasket();
     TObject *GetMainPlottedObject();

@@ -18,7 +18,7 @@ public:
     void readFromJson(const QString & winName, const QJsonObject & json);
 
 protected:
-    bool event(QEvent *event) override;
+    bool event(QEvent * event) override;
     void resizeEvent(QResizeEvent * event) override;
     void moveEvent(QMoveEvent * event) override;
 

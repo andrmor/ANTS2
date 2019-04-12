@@ -183,6 +183,8 @@ void WindowNavigatorClass::HideWindowTriggered(QString w)
   if (MW->ShutDown) return;
   if (DisableBSupdate) return;
 
+  //qDebug() << "WinNav: hide win"<<w;
+
   if (w == "main") MainOn = false;
   if (w == "recon") ReconOn = false;
   if (w == "out") OutOn = false;
@@ -396,10 +398,10 @@ void WindowNavigatorClass::on_pbMaxAll_clicked()
       MW->GeometryWindow->DrawTracks();
     }
   if (GraphOn)
-    if (MW->GraphWindow)
     {
       MW->GraphWindow->showNormal();
       MW->GraphWindow->raise();
+      MW->GraphWindow->UpdateRootCanvas();
     }
   if (ScriptOn)
     if (MW->ScriptWindow)

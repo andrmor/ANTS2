@@ -225,6 +225,21 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    ui->pbShowColorCoding->setFocus(); //to finish editing whatever QLineEdit the user can be in - they call on_editing_finish
 
+   if (GraphWindow->isBasketOn())
+   {
+       bool bVis = GraphWindow->isVisible();
+       GraphWindow->showNormal();
+       GraphWindow->switchOffBasket();
+       GraphWindow->setVisible(bVis);
+   }
+
+   //if checked, save windows' status
+   if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
+     {
+       qDebug()<<"<Saving position/status of all windows";
+       MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
+     }
+
    qDebug() << "<Preparing graph window for shutdown";
    GraphWindow->close();
    GraphWindow->ClearDrawObjects_OnShutDown(); //to avoid any attempts to redraw deleted objects
@@ -246,13 +261,6 @@ void MainWindow::closeEvent(QCloseEvent *)
 
    qDebug()<<"<Saving ANTS configuration";
    ELwindow->QuickSave(0);
-
-   //if checked, save windows' status
-   if (ui->actionSave_Load_windows_status_on_Exit_Init->isChecked())
-     {
-       qDebug()<<"<Saving position/status of all windows";
-       MainWindow::on_actionSave_position_and_stratus_of_all_windows_triggered();
-     }
 
    qDebug() << "<Stopping Root update timer-based cycle";
    RootUpdateTimer->stop();
@@ -398,7 +406,9 @@ bool MainWindow::event(QEvent *event)
          {
             if (this->isMinimized())
               {
+                //qDebug() << "main: minimized, so hiding all other windows";
                 WindowNavigator->TriggerHideButton();
+                //qDebug() << "main done";
               }
             else
               {

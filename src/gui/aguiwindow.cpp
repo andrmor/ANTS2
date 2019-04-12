@@ -50,22 +50,38 @@ void AGuiWindow::readFromJson(const QString & winName, const QJsonObject & json)
 //#include <QApplication>
 bool AGuiWindow::event(QEvent *event)
 {
+    if (event->type() == QEvent::WindowStateChange)
+    {
+        if( windowState() == Qt::WindowMinimized )
+        {
+            //qDebug() << IdStr<<"Minimized!";
+            event->accept();
+            return true;
+        }
+        else if( windowState() == Qt::WindowNoState )
+        {
+            //qDebug() << IdStr<<"Restored!";
+        }
+        //qDebug() << windowState();
+    }
+
     if (WNav)
     {
         if (event->type() == QEvent::Hide)
         {
+            //qDebug() << IdStr<<"----Hide event"<<isVisible();
             bWinVisible = false;
             bWinGeomUpdateAllowed = false;
             WNav->HideWindowTriggered(IdStr);
-            //return true;
+            return true;
         }
         else if (event->type() == QEvent::Show)
         {
-            //qApp->processEvents();
+            //qDebug() << IdStr<<"----Show event";
             WNav->ShowWindowTriggered(IdStr);
             bWinGeomUpdateAllowed = true;
             bWinVisible = true;
-            //return true;
+            return true;
         }
     }
     return QMainWindow::event(event);

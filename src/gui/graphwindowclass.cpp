@@ -3661,6 +3661,11 @@ bool GraphWindowClass::Extraction()
     return !IsExtractionCanceled();  //returns false = canceled
 }
 
+bool GraphWindowClass::isBasketOn() const
+{
+    return ui->cbShowBasket->isChecked();
+}
+
 Double_t GauseWithBase(Double_t *x, Double_t *par)
 {
    return par[0]*exp(par[1]*(x[0]+par[2])*(x[0]+par[2])) + par[3]*x[0] + par[4];   // [0]*exp([1]*(x+[2])^2) + [3]*x + [4]

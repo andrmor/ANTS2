@@ -2208,12 +2208,8 @@ void MainWindow::on_pbIndRestoreArea_clicked()
 {
     int ipm = ui->sbIndPMnumber->value();
     QVector<QVector<double> > tmp;
-    tmp.resize(0);
-
     PMs->setArea(ipm, &tmp, 123.0, 123.0); //strange step deliberately
     ReconstructDetector(true);
-
-    MainWindow::on_pbIndPMshowInfo_clicked();
 }
 
 void MainWindow::on_pbIndShowArea_clicked()
@@ -5013,4 +5009,10 @@ void MainWindow::on_pbG4Settings_clicked()
         //update sim setgtings
         on_pbUpdateSimConfig_clicked();
     }
+}
+
+void MainWindow::on_pbSetAllInherited_clicked()
+{
+    PMs->resetOverrides();
+    ReconstructDetector(true);
 }

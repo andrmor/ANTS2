@@ -1979,13 +1979,8 @@ bool ParticleSourceSimulator::choosePrimariesForThisEvent(int numPrimaries)
 
         //adding particles to the stack
         for (AParticleRecord * p : GeneratedParticles)
-        {
-            if (iPart > 0 && timeRange != 0)
-                p->time = timeFrom + timeRange*RandGen->Rndm();  // what about file or script generation? *** !!!
-
             ParticleStack << p;
-        }
-        //clear and delete QVector with generated event
+
         GeneratedParticles.clear(); //do not delete particles - they were transferred to the ParticleStack!
     }
     return true;

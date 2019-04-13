@@ -571,7 +571,7 @@ void OutputWindow::updateMonitors()
         for (int i=0; i<numMonitors; i++)
         {
             const AGeoObject* obj = MW->Detector->Sandwich->MonitorsRecords.at(i);
-            ui->cobMonitor->addItem(obj->Name);
+            ui->cobMonitor->addItem( QString("%1   index=%2").arg(obj->Name).arg(i));
         }
         if (oldNum>-1 && oldNum<numMonitors) ui->cobMonitor->setCurrentIndex(oldNum);
 

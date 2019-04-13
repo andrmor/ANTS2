@@ -29,6 +29,7 @@ public:
   bool readShapeFromString(QString GenerationString, bool OnlyCheck = false); // using parameter values taken from gui generation string
   void DeleteMaterialIndex(int imat);
   void makeItWorld();
+  int  getMaterial() const;
 
   //json for a single object
   void writeToJson(QJsonObject& json);
@@ -145,10 +146,10 @@ class ATypeObject
 public:
     virtual ~ATypeObject() {}
 
-    bool isHandlingStatic() const   {return Handling == "Static";}
+    bool isHandlingStatic() const   {return Handling == "Static";}      //World
     bool isHandlingStandard() const {return Handling == "Standard";}
-    bool isHandlingSet() const      {return Handling == "Set";}
-    bool isHandlingArray() const    {return Handling == "Array";}
+    bool isHandlingSet() const      {return Handling == "Set";}         //Group, Stack, Composite container
+    bool isHandlingArray() const    {return Handling == "Array";}       //Array
 
     bool isWorld() const            {return Type == "World";}
     bool isSlab() const             {return Type == "Slab" || Type == "Lightguide";}  //lightguide is also Slab!
@@ -307,7 +308,7 @@ public:
     bool isParticleInUse(int partId) const;
 
     //runtime
-    int index;  //index of monitor to fill and acess statistics
+    int index;  //index of monitor to fill and access statistics
 };
 
 

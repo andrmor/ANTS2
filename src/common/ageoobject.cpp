@@ -182,6 +182,13 @@ void AGeoObject::makeItWorld()
     Container = 0;
 }
 
+int AGeoObject::getMaterial() const
+{
+    if (ObjectType->isHandlingArray() || ObjectType->isHandlingSet())
+        return Container->getMaterial();
+    return Material;
+}
+
 void AGeoObject::writeToJson(QJsonObject &json)
 {
   json["Name"] = Name;

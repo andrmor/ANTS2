@@ -25,7 +25,7 @@ public slots:
   bool RunParticleSources(int NumThreads = -1, bool AllowGuiUpdate = false);
 
   void SetSeed(long seed);
-  long GetSeed();
+  long GetSeed() const;
 
   void ClearCustomNodes();
   void AddCustomNode(double x, double y, double z);
@@ -35,16 +35,21 @@ public slots:
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);
 
-  int countMonitors();
-  int getMonitorHits(QString monitor);
-
+  int countMonitors() const;
+  int getMonitorHits(QString monitor); //this and next: cannot be const beacuse of abort()
+  int getMonitorHits(int index);
   QVariant getMonitorTime(QString monitor);
+  QVariant getMonitorTime(int index);
   QVariant getMonitorAngular(QString monitor);
+  QVariant getMonitorAngular(int index);
   QVariant getMonitorWave(QString monitor);
+  QVariant getMonitorWave(int index);
   QVariant getMonitorEnergy(QString monitor);
+  QVariant getMonitorEnergy(int index);
   QVariant getMonitorXY(QString monitor);
+  QVariant getMonitorXY(int index);
 
-  void SetGeant4Executable(QString FileName);
+  void SetGeant4Executable(QString FileName) const;
 
 signals:
   void requestStopSimulation();
@@ -56,7 +61,9 @@ private:
 
   bool fGuiPresent;
 
-  QVariant getMonitorData1D(QString monitor, QString whichOne);
+  enum dataType {dat_time, dat_angle, dat_wave, dat_energy};
+  QVariant getMonitorData1D(const QString & monitor, dataType type) const;
+  QVariant getMonitorData1D(int index, dataType type) const;
 };
 
 #endif // ASIM_SI_H

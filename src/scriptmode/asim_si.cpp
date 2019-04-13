@@ -87,7 +87,7 @@ void ASim_SI::SetSeed(long seed)
   Config->GetDetector()->RandGen->SetSeed(seed);
 }
 
-long ASim_SI::GetSeed()
+long ASim_SI::GetSeed() const
 {
     return Config->GetDetector()->RandGen->GetSeed();
 }
@@ -129,7 +129,7 @@ bool ASim_SI::SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons
   return EventsDataHub->saveSimulationAsText(fileName, IncludeTruePositionAndNumPhotons, IncludeTruePositionAndNumPhotons);
 }
 
-int ASim_SI::countMonitors()
+int ASim_SI::countMonitors() const
 {
     if (!EventsDataHub->SimStat) return 0;
     return EventsDataHub->SimStat->Monitors.size();
@@ -152,22 +152,40 @@ int ASim_SI::getMonitorHits(QString monitor)
     return 0;
 }
 
-QVariant ASim_SI::getMonitorData1D(QString monitor, QString whichOne)
+int ASim_SI::getMonitorHits(int index)
+{
+    if (!EventsDataHub->SimStat)
+    {
+        abort("Collect simulation statistics is OFF");
+        return 0;
+    }
+    if (index < 0 || index >= EventsDataHub->SimStat->Monitors.size())
+    {
+        abort("Bad monitor index");
+        return 0;
+    }
+
+    const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(index);
+    return mon->getHits();
+}
+
+QVariant ASim_SI::getMonitorData1D(const QString &monitor, dataType type) const
 {
   QVariantList vl;
   if (!EventsDataHub->SimStat) return vl;
   for (int i=0; i<EventsDataHub->SimStat->Monitors.size(); i++)
   {
-      const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+      const AMonitor * mon = EventsDataHub->SimStat->Monitors.at(i);
       if (mon->getName() == monitor)
       {
-          TH1D* h;
-          if      (whichOne == "time")   h = mon->getTime();
-          else if (whichOne == "angle")  h = mon->getAngle();
-          else if (whichOne == "wave")   h = mon->getWave();
-          else if (whichOne == "energy") h = mon->getEnergy();
-          else return vl;
-
+          TH1D* h = nullptr;
+          switch (type)
+          {
+              case dat_time:   h = mon->getTime(); break;
+              case dat_angle:  h = mon->getAngle(); break;
+              case dat_wave:   h = mon->getWave(); break;
+              case dat_energy: h = mon->getEnergy(); break;
+          }
           if (!h) return vl;
 
           TAxis* axis = h->GetXaxis();
@@ -178,29 +196,78 @@ QVariant ASim_SI::getMonitorData1D(QString monitor, QString whichOne)
               el << h->GetBinContent(i);
               vl.push_back(el);
           }
+          break;
       }
   }
   return vl;
 }
 
+QVariant ASim_SI::getMonitorData1D(int index, dataType type) const
+{
+    QVariantList vl;
+    if (!EventsDataHub->SimStat) return vl;
+    if (index < 0 || index >= EventsDataHub->SimStat->Monitors.size()) return vl;
+
+    const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(index);
+    TH1D* h = nullptr;
+    switch (type)
+    {
+        case dat_time:   h = mon->getTime(); break;
+        case dat_angle:  h = mon->getAngle(); break;
+        case dat_wave:   h = mon->getWave(); break;
+        case dat_energy: h = mon->getEnergy(); break;
+    }
+    if (!h) return vl;
+
+    TAxis* axis = h->GetXaxis();
+    for (int i=1; i<axis->GetNbins()+1; i++)
+    {
+        QVariantList el;
+        el << axis->GetBinCenter(i);
+        el << h->GetBinContent(i);
+        vl.push_back(el);
+    }
+    return vl;
+}
+
 QVariant ASim_SI::getMonitorTime(QString monitor)
 {
-    return getMonitorData1D(monitor, "time");
+    return getMonitorData1D(monitor, dat_time);
+}
+
+QVariant ASim_SI::getMonitorTime(int index)
+{
+    return getMonitorData1D(index, dat_time);
 }
 
 QVariant ASim_SI::getMonitorAngular(QString monitor)
 {
-  return getMonitorData1D(monitor, "angle");
+    return getMonitorData1D(monitor, dat_angle);
+}
+
+QVariant ASim_SI::getMonitorAngular(int index)
+{
+    return getMonitorData1D(index, dat_angle);
 }
 
 QVariant ASim_SI::getMonitorWave(QString monitor)
 {
-  return getMonitorData1D(monitor, "wave");
+    return getMonitorData1D(monitor, dat_wave);
+}
+
+QVariant ASim_SI::getMonitorWave(int index)
+{
+    return getMonitorData1D(index, dat_wave);
 }
 
 QVariant ASim_SI::getMonitorEnergy(QString monitor)
 {
-  return getMonitorData1D(monitor, "energy");
+    return getMonitorData1D(monitor, dat_energy);
+}
+
+QVariant ASim_SI::getMonitorEnergy(int index)
+{
+    return getMonitorData1D(index, dat_energy);
 }
 
 QVariant ASim_SI::getMonitorXY(QString monitor)
@@ -213,24 +280,46 @@ QVariant ASim_SI::getMonitorXY(QString monitor)
       if (mon->getName() == monitor)
       {
           TH2D* h = mon->getXY();
-
           TAxis* axisX = h->GetXaxis();
           TAxis* axisY = h->GetYaxis();
           for (int ix=1; ix<axisX->GetNbins()+1; ix++)
-            for (int iy=1; iy<axisY->GetNbins()+1; iy++)
-          {
-              QVariantList el;
-              el << axisX->GetBinCenter(ix);
-              el << axisY->GetBinCenter(iy);
-              el << h->GetBinContent( h->GetBin(ix,iy) );
-              vl.push_back(el);
-          }
+              for (int iy=1; iy<axisY->GetNbins()+1; iy++)
+              {
+                  QVariantList el;
+                  el << axisX->GetBinCenter(ix);
+                  el << axisY->GetBinCenter(iy);
+                  el << h->GetBinContent( h->GetBin(ix,iy) );
+                  vl.push_back(el);
+              }
+          break;
       }
   }
   return vl;
 }
 
-void ASim_SI::SetGeant4Executable(QString FileName)
+QVariant ASim_SI::getMonitorXY(int index)
+{
+    QVariantList vl;
+    if (!EventsDataHub->SimStat) return vl;
+    if (index < 0 || index >= EventsDataHub->SimStat->Monitors.size()) return vl;
+
+    const AMonitor * mon = EventsDataHub->SimStat->Monitors.at(index);
+    TH2D* h = mon->getXY();
+    TAxis* axisX = h->GetXaxis();
+    TAxis* axisY = h->GetYaxis();
+    for (int ix=1; ix<axisX->GetNbins()+1; ix++)
+        for (int iy=1; iy<axisY->GetNbins()+1; iy++)
+        {
+            QVariantList el;
+            el << axisX->GetBinCenter(ix);
+            el << axisY->GetBinCenter(iy);
+            el << h->GetBinContent( h->GetBin(ix,iy) );
+            vl.push_back(el);
+        }
+    return vl;
+}
+
+void ASim_SI::SetGeant4Executable(QString FileName) const
 {
     AGlobalSettings::getInstance().G4antsExec = FileName;
 }

@@ -490,7 +490,7 @@ void ASandwich::addTGeoVolumeRecursively(AGeoObject* obj, TGeoVolume* parent, TG
         if (obj->ObjectType->isMonitor())
           {
             if (obj->Container)
-              iMat = obj->Container->Material;
+              iMat = obj->Container->getMaterial();
             else qWarning() << "Monitor without container detected!";
             //qDebug() << "Monitor:"<<obj->Name<<"mat:"<<iMat;
           }

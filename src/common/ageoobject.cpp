@@ -182,6 +182,11 @@ void AGeoObject::makeItWorld()
     Container = 0;
 }
 
+bool AGeoObject::isWorld() const
+{
+    return ObjectType->isWorld();
+}
+
 int AGeoObject::getMaterial() const
 {
     if (ObjectType->isHandlingArray() || ObjectType->isHandlingSet())
@@ -1245,6 +1250,11 @@ double AGeoBox::maxSize()
     return sqrt(3.0)*m;
 }
 
+double AGeoBox::minSize()
+{
+    return std::min(dx, dy);
+}
+
 TGeoShape *AGeoBox::createGeoShape(const QString shapeName)
 {  
   return (shapeName.isEmpty()) ? new TGeoBBox(dx, dy, dz) : new TGeoBBox(shapeName.toLatin1().data(), dx, dy, dz);
@@ -1794,6 +1804,11 @@ double AGeoTube::maxSize()
 {
     double m = std::max(rmax, dz);
     return sqrt(3.0)*m;
+}
+
+double AGeoTube::minSize()
+{
+    return rmax;
 }
 
 void AGeoTube::writeToJson(QJsonObject &json)

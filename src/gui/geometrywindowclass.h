@@ -64,7 +64,8 @@ public slots:
     void on_pbShowGeometry_clicked();
     void DrawTracks();
     void ShowPMnumbers();
-    void ShowTextOnPMs(QVector<QString> strData, Color_t color);
+    void ShowMonitorIndexes();
+    void ShowText(const QVector<QString> & strData, Color_t color, bool onPMs = true); //false - on monitors
     void on_pbTop_clicked();
     void on_pbFront_clicked();
     void onRasterWindowChange(double centerX, double centerY, double hWidth, double hHeight, double phi, double theta);
@@ -95,6 +96,8 @@ private slots:
     void on_actionSet_line_width_for_objects_triggered();
     void on_actionDecrease_line_width_triggered();
     void on_pbWebViewer_clicked();
+
+    void on_pbShowMonitorIndexes_clicked();
 
 private:
   Ui::GeometryWindowClass *ui;

@@ -29,6 +29,7 @@ public:
   bool readShapeFromString(QString GenerationString, bool OnlyCheck = false); // using parameter values taken from gui generation string
   void DeleteMaterialIndex(int imat);
   void makeItWorld();
+  bool isWorld() const;
   int  getMaterial() const;
 
   //json for a single object
@@ -136,7 +137,6 @@ public:
 
   static AGeoShape* GeoShapeFactory(const QString ShapeType);  // SHAPE FACTORY !!!
   static QList<AGeoShape*> GetAvailableShapes();               // list of available shapes for generation of help and highlighter: do not forget to add new here!
-
 };
 
 // ============== Object type ==============
@@ -332,6 +332,7 @@ public:
   virtual double getHeight() {return 0;}  //if 0, cannot be used for stack  ***!!!
   virtual void setHeight(double /*dz*/) {}
   virtual double maxSize() {return 0;} //for world size evaluation
+  virtual double minSize() {return 0;} //for monitors only!
 
   //json
   virtual void writeToJson(QJsonObject& /*json*/) {}
@@ -619,6 +620,7 @@ public:
   virtual void setHeight(double dz) {this->dz = dz;}
   virtual const QString getGenerationString() const;
   virtual double maxSize();
+  virtual double minSize() override;
 
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);
@@ -774,6 +776,7 @@ public:
   virtual void setHeight(double dz) {this->dz = dz;}
   virtual const QString getGenerationString() const;
   virtual double maxSize();
+  virtual double minSize() override;
 
   virtual void writeToJson(QJsonObject& json);
   virtual void readFromJson(QJsonObject& json);

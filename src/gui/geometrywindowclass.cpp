@@ -10,6 +10,7 @@
 #include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amessage.h"
+#include "asandwich.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -201,40 +202,107 @@ bool GeometryWindowClass::event(QEvent *event)
 
 void GeometryWindowClass::ShowPMnumbers()
 {
-   QVector<QString> tmp(0);
-   for (int i=0; i<MW->PMs->count(); i++) tmp.append( QString::number(i) );
-
-   ShowTextOnPMs(tmp, kBlack);
+   QVector<QString> tmp;
+   for (int i=0; i<MW->PMs->count(); i++)
+       tmp.append( QString::number(i) );
+   ShowText(tmp, kBlack, true);
 }
 
-void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
+void GeometryWindowClass::ShowMonitorIndexes()
 {
-    //protection
-    int numPMs = MW->PMs->count();
-    if (strData.size() != numPMs)
-      {
-        message("Mismatch between the text vector and number of PMs!", this);
+    QVector<QString> tmp;
+    const QVector<const AGeoObject*> & MonitorsRecords = MW->Detector->Sandwich->MonitorsRecords;
+    for (int i=0; i<MonitorsRecords.size(); i++)
+        tmp.append( QString::number(i) );
+    ShowText(tmp, kBlue, false);
+}
+
+#include "ageoobject.h"
+#include "TGeoNode.h"
+bool findMotherNodeFor(const TGeoNode * node, const TGeoNode * startNode, const TGeoNode* & foundNode)
+{
+    TGeoVolume * startVol = startNode->GetVolume();
+    //qDebug() << "    Starting from"<<startVol->GetName();
+    TObjArray * nList = startVol->GetNodes();
+    if (!nList) return false;
+    int numNodes = nList->GetEntries();
+    //qDebug() << "    Num nodes:"<< numNodes;
+    for (int inod=0; inod<numNodes; inod++)
+    {
+        TGeoNode * n = (TGeoNode*)nList->At(inod);
+        //qDebug() << "    Checking "<< n->GetName();
+        if (n == node)
+        {
+            //qDebug() << "    Match!";
+            foundNode = startNode;
+            return true;
+        }
+        //qDebug() << "    Sending down the line";
+        bool bFound = findMotherNodeFor(node, n, foundNode);
+        //qDebug() << "    Found?"<<bFound;
+        if (bFound) return true;
+    }
+    return false;
+}
+
+void findMotherNode(const TGeoNode * node, const TGeoNode* & motherNode)
+{
+    //qDebug() << "--- search for " << node->GetName();
+    TObjArray* allNodes = gGeoManager->GetListOfNodes();
+    //qDebug() << allNodes->GetEntries();
+    if (allNodes->GetEntries() != 1) return; // should be only World
+    TGeoNode * worldNode = (TGeoNode*)allNodes->At(0);
+    //qDebug() << worldNode->GetName();
+
+    motherNode = worldNode;
+    if (node == worldNode) return; //already there
+
+    bool bOK = findMotherNodeFor(node, worldNode, motherNode);
+//    if (bOK)
+//        qDebug() << "--- found mother node:"<<motherNode->GetName();
+//    else qDebug() << "--- search failed!";
+}
+
+void GeometryWindowClass::ShowText(const QVector<QString> &strData, Color_t color, bool onPMs)
+{
+    const APmHub & PMs = *MW->PMs;
+    const QVector<const AGeoObject*> & Mons = MW->Detector->Sandwich->MonitorsRecords;
+
+    int numObj = ( onPMs ? PMs.count() : Mons.size() );
+    if (strData.size() != numObj)
+    {
+        message("Show text: mismatch in vector size", this);
         return;
-      }
+    }
+    //qDebug() << "Objects:"<<numObj;
 
     MW->Detector->GeoManager->ClearTracks();
-    if (!isVisible()) show();
+    if (!isVisible()) showNormal();
 
     //font size
-      //checking minimum PM size
+      //checking minimum size
     double minSize = 1e10;
-    for (int i=0; i<numPMs; i++)
-      {
-        int typ = MW->PMs->at(i).type;
-        APmType tp = *MW->PMs->getType(typ);
-        if (tp.SizeX<minSize) minSize = tp.SizeX;
-        int shape = tp.Shape; //0 box, 1 round, 2 hexa
-        if (shape == 0)
-          if (tp.SizeY<minSize) minSize = tp.SizeY;
-      }
+    for (int i = 0; i < numObj; i++)
+    {
+        if (onPMs)
+        {
+            int typ = MW->PMs->at(i).type;
+            APmType tp = *MW->PMs->getType(typ);
+            if (tp.SizeX<minSize) minSize = tp.SizeX;
+            int shape = tp.Shape; //0 box, 1 round, 2 hexa
+            if (shape == 0)
+              if (tp.SizeY<minSize) minSize = tp.SizeY;
+        }
+        else
+        {
+            double msize = Mons.at(i)->Shape->minSize();
+            if (msize < minSize) minSize = msize;
+        }
+    }
+
       //max number of digits
     int symbols = 0;
-    for (int i=0; i<numPMs; i++)
+    for (int i=0; i<numObj; i++)
         if (strData[i].size() > symbols) symbols = strData[i].size();
     if (symbols == 0) symbols++;
 //        qDebug()<<"Max number of symbols"<<symbols;
@@ -338,13 +406,61 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
     QVector<QString> SymbolMap(0);
     SymbolMap <<"0"<<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"."<<"-";
 
-    for (int ipm=0; ipm<MW->PMs->count(); ipm++)
-      {
-        double Xcenter = MW->PMs->X(ipm);
-        double Ycenter = MW->PMs->Y(ipm);
-        double Zcenter = MW->PMs->Z(ipm);
+    for (int iObj = 0; iObj < numObj; iObj++)
+    {
+        double Xcenter = 0;
+        double Ycenter = 0;
+        double Zcenter = 0;
+        if (onPMs)
+        {
+            Xcenter = PMs.at(iObj).x;
+            Ycenter = PMs.at(iObj).y;
+            Zcenter = PMs.at(iObj).z;
+        }
+        else
+        {
+            const TGeoNode * n = MW->Detector->Sandwich->MonitorNodes.at(iObj);
+            //qDebug() << "\nProcessing monitor"<<n->GetName();
 
-        QString str = strData[ipm];
+            double pos[3], master[3];
+            pos[0] = 0;
+            pos[1] = 0;
+            pos[2] = 0;
+
+            TGeoVolume * motherVol = n->GetMotherVolume();
+            while (motherVol)
+            {
+                //qDebug() << "  Mother vol is:"<< motherVol->GetName();
+                n->LocalToMaster(pos, master);
+                pos[0] = master[0];
+                pos[1] = master[1];
+                pos[2] = master[2];
+                //qDebug() << "  Position:"<<pos[0]<<pos[1]<<pos[2];
+
+                const TGeoNode * motherNode = nullptr;
+                findMotherNode(n, motherNode);
+                if (!motherNode)
+                {
+                    //qDebug() << "  Mother node not found!";
+                    break;
+                }
+                if (motherNode == n)
+                {
+                    //qDebug() << "  strange - world passed";
+                    break;
+                }
+
+                n = motherNode;
+
+                motherVol = n->GetMotherVolume();
+                //qDebug() << "  Continue search: current node:"<<n->GetName();
+            }
+            Xcenter = pos[0];
+            Ycenter = pos[1];
+            Zcenter = pos[2];
+        }
+
+        QString str = strData[iObj];
         if (str.isEmpty()) continue;
         int numDigits = str.size();
         if (str.right(1) == "F") numDigits--;
@@ -379,7 +495,8 @@ void GeometryWindowClass::ShowTextOnPMs(QVector<QString> strData, Color_t color)
                 track->AddPoint(x, y, Zcenter, 0);
               }
           }
-      }
+        //break;
+    }
 
     ShowGeometry(false);
     MW->Detector->GeoManager->DrawTracks();
@@ -487,6 +604,11 @@ void GeometryWindowClass::on_cbColor_toggled(bool checked)
 void GeometryWindowClass::on_pbShowPMnumbers_clicked()
 {
   ShowPMnumbers();
+}
+
+void GeometryWindowClass::on_pbShowMonitorIndexes_clicked()
+{
+    ShowMonitorIndexes();
 }
 
 void GeometryWindowClass::on_pbShowTracks_clicked()

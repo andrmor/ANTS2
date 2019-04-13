@@ -3434,7 +3434,7 @@ void MainWindow::on_pbShowRelGains_clicked()
       tmp.append( QString::number(relStr, 'g', 3) );
     }
 
-  GeometryWindow->ShowTextOnPMs(tmp, kRed);
+  GeometryWindow->ShowText(tmp, kRed);
 }
 
 void MainWindow::on_pbSaveResults_clicked()

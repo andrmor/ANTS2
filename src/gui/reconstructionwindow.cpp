@@ -2203,7 +2203,7 @@ void ReconstructionWindow::on_pbShowAllGainsForGroup_clicked()
       else str = "";
       tmp.append( str );
     }
-  MW->GeometryWindow->ShowTextOnPMs(tmp, kBlue);
+  MW->GeometryWindow->ShowText(tmp, kBlue);
 }
 
 void ReconstructionWindow::on_pbGainsToUnity_clicked()
@@ -6193,7 +6193,7 @@ void ReconstructionWindow::on_pbShowUnassigned_clicked()
    MW->GeometryWindow->show();
    MW->GeometryWindow->raise();
    MW->GeometryWindow->activateWindow();
-   MW->GeometryWindow->ShowTextOnPMs(tmp, kBlack);
+   MW->GeometryWindow->ShowText(tmp, kBlack);
 }
 
 void ReconstructionWindow::on_lwPMgroups_activated(const QModelIndex &index)
@@ -6300,7 +6300,7 @@ void ReconstructionWindow::showSensorGroup(int igroup)
     MW->GeometryWindow->show();
     MW->GeometryWindow->raise();
     MW->GeometryWindow->activateWindow();
-    MW->GeometryWindow->ShowTextOnPMs(tmp, kRed);
+    MW->GeometryWindow->ShowText(tmp, kRed);
 }
 
 void ReconstructionWindow::on_leSpF_LimitToObject_textChanged(const QString &/*arg1*/)

@@ -164,7 +164,7 @@ void ALrfWindow::onRequestShowPMs(QString selection)
        Text[ipm] = QString::number(ipm);
    }
 
-   mw->GeometryWindow->ShowTextOnPMs(Text, kBlack);
+   mw->GeometryWindow->ShowText(Text, kBlack);
 }
 
 void ALrfWindow::onReadyStatusChanged(bool fReady)
@@ -227,7 +227,7 @@ void ALrfWindow::addWidgetToInstructionList(QListWidget *list, Widgets::AInstruc
   widget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
   connect(widget, &Widgets::AInstructionListWidgetItem::requestShowPMs, this, &ALrfWindow::onRequestShowPMs);
   connect(widget, &Widgets::AInstructionListWidgetItem::requestShowTextOnSensors, [=](QVector<QString> text) {
-    mw->GeometryWindow->ShowTextOnPMs(text, kBlack);
+    mw->GeometryWindow->ShowText(text, kBlack);
   });
 
   connect(widget, &LrfWindowWidgets::AInstructionListWidgetItem::elementChanged, this, &ALrfWindow::on_pbUpdateInstructionsJson_clicked);

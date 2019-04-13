@@ -13,6 +13,7 @@ class TGeoManager;
 class TGeoVolume;
 class AMaterialParticleCollection;
 class AGridElementRecord;
+class TGeoNode;
 
 struct APMandDummy
 {
@@ -93,6 +94,8 @@ public:
 
   // pointers to monitors
   QVector<const AGeoObject*> MonitorsRecords;
+  QVector<QString> MonitorIdNames; //runtime
+  QVector<TGeoNode *> MonitorNodes; //runtime
 
   // available after calculation of Z of layers
   double Z_UpperBound, Z_LowerBound;

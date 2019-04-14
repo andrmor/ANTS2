@@ -174,13 +174,15 @@ void AGeo_SI::Monitor(QString name, int shape, double size1, double size2, QStri
 
 void AGeo_SI::Monitor_ConfigureForPhotons(QString MonitorName, QVariant Position, QVariant Time, QVariant Angle, QVariant Wave)
 {
-    AGeoObject* o = 0;
+    AGeoObject* o = nullptr;
     for (AGeoObject* obj : GeoObjects)
+    {
         if (obj->Name == MonitorName)
         {
             o = obj;
             break;
         }
+    }
 
     if (!o)
     {

@@ -1,0 +1,16 @@
+//load default startup detector configuration!
+var monCounter = 0
+function addMonitor(posAr, z)
+{
+       var name = "m" + monCounter
+       geo.Monitor( name,  1,  80, 80,  "UpWin",  posAr[0],  posAr[1],  z,  0,  0,  0,  true,  true,  true )
+       geo.Monitor_ConfigureForPhotons( name,  [100, 100],  [100,0,0], [91,0,90], [100,0,0] )
+       monCounter++
+}
+
+geo.ClearAll()
+var positions = [ [-50,100], [50,100],  [-100,0], [0,0], [100,0], [-50,-100], [50, -100]]
+
+for (var i=0; i<positions.length; i++)
+       addMonitor(positions[i], 0)
+geo.UpdateGeometry( )

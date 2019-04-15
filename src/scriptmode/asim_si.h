@@ -38,6 +38,7 @@ public slots:
   int countMonitors() const;
   int getMonitorHits(QString monitor); //this and next: cannot be const beacuse of abort()
   int getMonitorHits(int index);
+  QVariantList getMonitorHitsAll();
   QVariant getMonitorTime(QString monitor);
   QVariant getMonitorTime(int index);
   QVariant getMonitorAngular(QString monitor);

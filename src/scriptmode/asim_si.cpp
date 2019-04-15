@@ -169,6 +169,24 @@ int ASim_SI::getMonitorHits(int index)
     return mon->getHits();
 }
 
+QVariantList ASim_SI::getMonitorHitsAll()
+{
+    QVariantList vl;
+    if (!EventsDataHub->SimStat)
+    {
+        abort("Collect simulation statistics is OFF");
+        return vl;
+    }
+
+    const int num = EventsDataHub->SimStat->Monitors.size();
+    for (int i=0; i<num; i++)
+    {
+        const AMonitor* mon = EventsDataHub->SimStat->Monitors.at(i);
+        vl.append(mon->getHits());
+    }
+    return vl;
+}
+
 QVariant ASim_SI::getMonitorData1D(const QString &monitor, dataType type) const
 {
   QVariantList vl;

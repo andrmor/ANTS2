@@ -131,7 +131,7 @@ public:
 
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
-    QVector<QVector3D*> CustomScanNodes;
+    QVector<QVector<double> * > CustomScanNodes;
     InterfaceToNodesScript* NodesScriptInterface = 0; // if created -> managed by the script manager
     QString NodesScript;
 

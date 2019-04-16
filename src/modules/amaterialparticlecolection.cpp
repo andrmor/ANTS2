@@ -59,6 +59,11 @@ void AMaterialParticleCollection::GetWave(bool &wavelengthResolved, double &wave
     waveNodes = WaveNodes;
 }
 
+double AMaterialParticleCollection::getDriftSpeed(int iMat) const
+{
+    return 0.01 * MaterialCollectionData.at(iMat)->e_driftVelocity; //given in cm/us - returns in mm/ns
+}
+
 void AMaterialParticleCollection::UpdateRuntimePropertiesAndWavelengthBinning(GeneralSimSettings *SimSet, TRandom2* RandGen, int numThreads)
 {
   AMaterialParticleCollection::SetWave(SimSet->fWaveResolved, SimSet->WaveFrom, SimSet->WaveTo, SimSet->WaveStep, SimSet->WaveNodes);

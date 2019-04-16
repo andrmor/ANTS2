@@ -26,9 +26,9 @@ void InterfaceToPMscript::PM(double x, double y, double z, QString type, double 
   arr.append(el);
 }
 
-InterfaceToNodesScript::InterfaceToNodesScript(QVector<QVector3D*> & nodes) : nodes(nodes)
+InterfaceToNodesScript::InterfaceToNodesScript(QVector<QVector<double> *> & nodes) : nodes(nodes)
 {
-    H["node"] = "Adds a node with (x,y,z) coordinates";
+    H["node"] = "Adds a node with (x,y,z, time) coordinates";
     H["clear"] = "clear all nodes";
 }
 
@@ -38,7 +38,9 @@ void InterfaceToNodesScript::clear()
     nodes.clear();
 }
 
-void InterfaceToNodesScript::node(double x, double y, double z)
+void InterfaceToNodesScript::node(double x, double y, double z, double time)
 {
-    nodes.append( new QVector3D(x,y,z) );
+    QVector<double>* vec = new QVector<double>();
+    *vec << x << y << z << time;
+    nodes.append( vec );
 }

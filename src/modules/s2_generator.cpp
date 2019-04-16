@@ -118,8 +118,10 @@ bool S2_Generator::Generate() //uses MW->EnergyVector as the input parameter
             GeoManager->SetCurrentDirection(0,0,1.);  //up
             GeoManager->FindNextBoundaryAndStep();
             double Step = GeoManager->GetStep();
-            double DriftVelocity = 0.01 * (*MaterialCollection)[ThisMatIndex]->e_driftVelocity;//given in cm/us - need in mm/ns
-            time += Step / DriftVelocity;
+            //double DriftVelocity = 0.01 * (*MaterialCollection)[ThisMatIndex]->e_driftSpeed;//given in cm/us - need in mm/ns
+            double DriftVelocity = MaterialCollection->getDriftSpeed(ThisMatIndex);
+            if (DriftVelocity != 0)
+                time += Step / DriftVelocity;
             VolName = GeoManager->GetCurrentVolume()->GetName();
 //            qDebug()<<"Found new volume: "<<VolName<<" drifted: "<<Step<<"new time: "<<time;          
             if (GeoManager->IsOutside()) break;

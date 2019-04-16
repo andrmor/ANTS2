@@ -120,11 +120,9 @@ public:
 
     bool setup(QJsonObject &json, int threadCount, bool bFromGui);
     void updateGeoManager();
-    //void setWorkersSeed(int rngSeed); //even with same seed, threadCount must be the same for same results!!!
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
     void updateStats();
     double getProgress() const { return progress; }
-    //double getmsPerEvent() const { return usPerEvent; }
     bool wasSuccessful() const;
     bool wasHardAborted() const;
     bool isFinished() const {return simState == SFinished;}
@@ -133,7 +131,6 @@ public:
     //Use as read-only. Anything else is undefined behaviour! If your toast gets burnt, it's not my fault!
     //Also remember that simulators will be deleted on setup()!
     QVector<Simulator *> getWorkers() { return workers; }
-    //const Simulator *getLastWorker() const; //Not needed since we create only the necessary workers
 
     //Use this with caution too, e.g. after simulation finished! We need to expose this to clear memory after simulation,
     //since we provide extra information of simulators to the outside (and it's actually used). In a way this is a hack
@@ -277,13 +274,12 @@ private:
     bool SimulateCustomNodes();
 
     //utilities
-    //bool ReadPhotonSimOptions(QJsonObject &json);
-    int PhotonsToRun();
-    void GenerateTraceNphotons(AScanRecord *scs, int iPoint = 0);
-    bool FindSecScintBounds(double *r, double *z1, double *z2);
-    void OneNode(double *r);
+    int  PhotonsToRun();
+    void GenerateTraceNphotons(AScanRecord *scs, double time0 = 0, int iPoint = 0);
+    bool FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double &driftSpeedInSecScint);
+    void OneNode(double *r, double time0 = 0);
     void doLRFsimulatedEvent(double *r);
-    void GenerateFromSecond(AScanRecord *scs);
+    void GenerateFromSecond(AScanRecord *scs, double time0);
     bool isInsideLimitingObject(double *r);
     virtual void ReserveSpace(int expectedNumEvents);
 

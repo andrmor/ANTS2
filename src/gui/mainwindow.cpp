@@ -4087,7 +4087,11 @@ void MainWindow::on_pbLoadNodes_clicked()
     {
       clearCustomScanNodes();
       for (int i=0; i<x.size(); i++)
-          CustomScanNodes.append( new QVector3D(x[i], y[i], z[i]));
+      {
+          QVector<double> * vec = new QVector<double>();
+          *vec << x[i] << y[i] << z[i] << 0;
+          CustomScanNodes.append( vec );
+      }
       on_pbUpdateSimConfig_clicked();
     }
   UpdateCustomScanNodesIndication();
@@ -4099,7 +4103,7 @@ void MainWindow::on_pbShowNodes_clicked()
    clearGeoMarkers();
    GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
    for (int i=0; i<CustomScanNodes.size(); i++)
-     marks->SetNextPoint(CustomScanNodes[i]->x(), CustomScanNodes[i]->y(), CustomScanNodes[i]->z());
+     marks->SetNextPoint(CustomScanNodes[i]->at(0), CustomScanNodes[i]->at(1), CustomScanNodes[i]->at(2));
    GeoMarkers.append(marks);
    GeometryWindow->ShowGeometry();
 }

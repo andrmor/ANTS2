@@ -1003,27 +1003,31 @@ bool PointSourceSimulator::SimulateCustomNodes()
   QJsonArray arr;
   arr = simOptions["Nodes"].toArray();
 
+  double time0;
   int nodeCount = (eventEnd - eventBegin);
   int currentNode = eventBegin;
   eventCurrent = 0;
   double updateFactor = 100.0 / ( NumRuns*nodeCount );
   for (int inode = 0; inode < nodeCount; inode++)
-    {
+  {
       double r[3];
       QJsonArray el = arr[currentNode].toArray();
       if (el.size()<3)
-        {
+      {
           r[0] = 1.23456789;
           r[1] = 1.23456789;
           r[2] = 1.23456789;
-          qDebug()<<"Custom Node"<<currentNode<<"is not (x,y,z).";
-        }
+          time0 = 0;
+          qWarning()<<"Custom Node"<<currentNode<<"is not (x,y,z).";
+      }
       else
-        {
+      {
           r[0] = el[0].toDouble();
           r[1] = el[1].toDouble();
           r[2] = el[2].toDouble();
-        }
+          if (el.size() == 4) time0 = el[3].toDouble();
+          else time0 = 0;
+      }
 
       //root bug fix
       if (r[0] == 0 && r[1] == 0 && r[2] == 0) r[0] = 0.001;
@@ -1037,15 +1041,15 @@ bool PointSourceSimulator::SimulateCustomNodes()
         }
 
       for (int irun = 0; irun<NumRuns; irun++)
-        {
-          OneNode(r); //takes care of the number of runs
+      {
+          OneNode(r, time0); //takes care of the number of runs
           eventCurrent++;
           progress = eventCurrent * updateFactor;
           if(fStopRequested) return false;
-        }
+      }
       currentNode++;
-    }
-   return true;
+  }
+  return true;
 }
 
 int PointSourceSimulator::PhotonsToRun()
@@ -1070,15 +1074,15 @@ int PointSourceSimulator::PhotonsToRun()
     return numPhotons;
 }
 
-void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
+void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0, int iPoint)
 //scs contains coordinates and number of photons to run
 //iPoint - number of this scintillation center (can be not zero when e.g. double events are simulated)
 {
     //if secondary scintillation, finding the secscint boundaries
-    double z1, z2;
+    double z1, z2, timeOfDrift, driftSpeedSecScint;
     if (scs->ScintType == 2)
     {
-        if (!FindSecScintBounds(scs->Points[iPoint].r, &z1, &z2))
+        if (!FindSecScintBounds(scs->Points[iPoint].r, z1, z2, timeOfDrift, driftSpeedSecScint))
         {
             scs->zStop = scs->Points[iPoint].r[2];
             return; //no sec_scintillator for these XY, so no photon generation
@@ -1141,7 +1145,14 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         if (!fUseGivenWaveIndex) photonGenerator->GenerateWave(&PhotonOnStart, thisMatIndex);//if directly given wavelength -> waveindex is already set in PhotonOnStart
         photonGenerator->GenerateTime(&PhotonOnStart, thisMatIndex);
 
-        if (scs->ScintType == 2) PhotonOnStart.r[2] = z1 + (z2-z1)*RandGen->Rndm();
+        if (scs->ScintType == 2)
+        {
+            const double dist = (z2 - z1) * RandGen->Rndm();
+            PhotonOnStart.r[2] = z1 + dist;
+            PhotonOnStart.time = time0 + timeOfDrift;
+            if (driftSpeedSecScint != 0)
+                PhotonOnStart.time += dist / driftSpeedSecScint;
+        }
 
         PhotonOnStart.SimStat = OneEvent->SimStat;
 
@@ -1155,28 +1166,34 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, int iPoint)
         scs->Points[iPoint].r[2] = z1;
         scs->zStop = z2;
     }
-
-    //if (fUpdateGUI) DotsTGeo->append(DotsTGeoStruct(scs->Points[iPoint].r, kBlack)); //moved to particular generation methods
 }
 
-bool PointSourceSimulator::FindSecScintBounds(double *r, double *z1, double *z2)
+bool PointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
 {
     TString VolName;
     TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
 
     navigator->SetCurrentPoint(r);
     navigator->SetCurrentDirection(0, 0, 1.0);
-    navigator->FindNode();
+    navigator->FindNode(); // TODO check node does not exist ***!!!
     int FoundWhere = 0;  //if found on way up = 1,  if found on way down = -1
+    double dTime = 0;
+    double iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
     do
     {
         //going up until exit geometry or find SecScint
         navigator->FindNextBoundaryAndStep();
+        double Step = navigator->GetStep();
+        double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat);
+        iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex(); //next mat
+        if (DriftVelocity != 0)
+            dTime += Step / DriftVelocity;
         VolName = navigator->GetCurrentVolume()->GetName();
         //     qDebug()<<VolName;
         if (VolName == "SecScint")
         {
             FoundWhere = 1;
+            timeOfDrift = dTime;
             break;
         }
     }
@@ -1184,12 +1201,18 @@ bool PointSourceSimulator::FindSecScintBounds(double *r, double *z1, double *z2)
 
     if (FoundWhere == 0)
     {
+        dTime = 0;
         //      qDebug()<<"Exited geometry on the way up";
         //going down until find SecScint or exit geometry again
         navigator->SetCurrentDirection(0, 0, -1.0);
         do
         {
             navigator->FindNextBoundaryAndStep();
+            double Step = navigator->GetStep();
+            double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat);
+            iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex(); //next mat
+            if (DriftVelocity != 0)
+                dTime += Step / DriftVelocity;
             VolName = navigator->GetCurrentVolume()->GetName();
             //         qDebug()<<VolName;
             if (navigator->IsOutside())
@@ -1200,19 +1223,21 @@ bool PointSourceSimulator::FindSecScintBounds(double *r, double *z1, double *z2)
         }
         while (VolName != "SecScint");
         FoundWhere = -1;
+        timeOfDrift = dTime;
     }
 
     //  qDebug()<<"Found SecSci on the way down";
-    if (FoundWhere == 1) *z1 = navigator->GetCurrentPoint()[2];
-    else *z2 = navigator->GetCurrentPoint()[2];
+    driftSpeedInSecScint = detector->MpCollection->getDriftSpeed(iMat);
+    if (FoundWhere == 1) z1 = navigator->GetCurrentPoint()[2];
+    else z2 = navigator->GetCurrentPoint()[2];
     navigator->FindNextBoundary(); //does not step - we are still inside SecScint!
     double SecScintWidth = navigator->GetStep();
-    if (FoundWhere == 1) *z2 = *z1 + SecScintWidth;
-    else *z1 = *z2 - SecScintWidth;
+    if (FoundWhere == 1) z2 = z1 + SecScintWidth;
+    else z1 = z2 - SecScintWidth;
     return true;
 }
 
-void PointSourceSimulator::OneNode(double *r)
+void PointSourceSimulator::OneNode(double *r, double time0)
 {
   if (simSettings->fLRFsim)
     {
@@ -1230,7 +1255,7 @@ void PointSourceSimulator::OneNode(double *r)
   scs->Points[0].energy = PhotonsToRun(); //number of photons to run
 
   bool fNormal = true;  //true - proceed as it is event without noise
-  if (fBadEventsOn) // *** !!! to change hit manipulations to OneEvent
+  if (fBadEventsOn)
     {
       double random = RandGen->Rndm();
       if ( random > BadEventTotalProbability); //noise was NOT triggered - proceeding with normal event
@@ -1318,13 +1343,13 @@ void PointSourceSimulator::OneNode(double *r)
               {
                 fNormal = false;
                 //first event
-                GenerateTraceNphotons(scs);
+                GenerateTraceNphotons(scs, time0);
                 if (ScintType == 2)
                   if (scs->Points[0].r[2] == scs->zStop) break; //if was outside of SecScint area, removing bad event status - this will be 0 hits "outside" event
 
                 //second event
                 scs->Points.AddPoint(0,0,0, PhotonsToRun()); //adding second point in scan object
-                GenerateFromSecond(scs);
+                GenerateFromSecond(scs, time0);
                 break;
               }
 
@@ -1340,20 +1365,20 @@ void PointSourceSimulator::OneNode(double *r)
 
                 //first point
                 scs->Points[0].energy = num1;
-                GenerateTraceNphotons(scs);
+                GenerateTraceNphotons(scs, time0);
                 if (ScintType == 2)
                   if (scs->Points[0].r[2] == scs->zStop) break;//if was outside of SecScint area, rmoving bad event status - this will be 0 hits "outside" event
 
                 //second point
                 scs->Points.AddPoint(0,0,0, num2); //adding second point in scan object
-                GenerateFromSecond(scs);
+                GenerateFromSecond(scs, time0);
                 break;
               }
             }
         }
     }
 
-  if (fNormal) GenerateTraceNphotons(scs); //no noise or additive noise
+  if (fNormal) GenerateTraceNphotons(scs, time0); //no noise or additive noise
 
   OneEvent->HitsToSignal();
   dataHub->Events.append(OneEvent->PMsignals);
@@ -1390,7 +1415,7 @@ void PointSourceSimulator::doLRFsimulatedEvent(double *r)
   dataHub->Scan.append(ss);
 }
 
-void PointSourceSimulator::GenerateFromSecond(AScanRecord *scs)
+void PointSourceSimulator::GenerateFromSecond(AScanRecord *scs, double time0)
 {
     do
     {
@@ -1402,7 +1427,7 @@ void PointSourceSimulator::GenerateFromSecond(AScanRecord *scs)
         }
         while (fLimitNodesToObject && !isInsideLimitingObject(scs->Points[1].r));
 
-        GenerateTraceNphotons(scs, 1); //with secondary, actually no tracing if not found!
+        GenerateTraceNphotons(scs, time0, 1); //with secondary, actually no tracing if not found!
         //qDebug()<<scs->r[0]<<scs->r[1]<<scs->r[2]<<"      "<<scs->zStop;
     }
     while (ScintType == 2 && scs->Points[1].r[2] == scs->zStop); //when not equal, SecScint volume was found

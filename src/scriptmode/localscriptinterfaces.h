@@ -27,14 +27,14 @@ class InterfaceToNodesScript : public AScriptInterface
 {
     Q_OBJECT
 public:
-    InterfaceToNodesScript(QVector<QVector3D *> & nodes);
+    InterfaceToNodesScript(QVector<QVector<double> *> & nodes);
 
 private:
-    QVector<QVector3D*> & nodes;
+    QVector<QVector<double> * > & nodes;
 
 public slots:
     void clear();
-    void node(double x, double y, double z);
+    void node(double x, double y, double z, double time = 0);
 };
 
 #endif // LOCALSCRIPTINTERFACES_H

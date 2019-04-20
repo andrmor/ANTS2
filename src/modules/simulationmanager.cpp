@@ -154,17 +154,21 @@ else
   if (modeSetup == "PointSim")
   {
       const QJsonObject psc = jsSimSet["PointSourcesConfig"].toObject();
-      if (psc["ControlOptions"].toObject()["Single_Scan_Flood"] == 3)
+
+      int simMode = psc["ControlOptions"].toObject()["Single_Scan_Flood"].toInt();
+
+      if (simMode != 4) simMan->clearNodes(); // script will have the nodes already defined
+
+      if (simMode == 3)
       {
           QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
-          //qDebug() << "------------"<<fileName;
           const QString err = simMan->loadNodesFromFile(fileName);
           if (!err.isEmpty())
           {
               ErrorString = err;
               return false;
           }
-          qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
+          //qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
       }
   }
 
@@ -752,6 +756,9 @@ bool PointSourceSimulator::setup(QJsonObject &json)
             //totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
             totalEventCount = simMan->Nodes.size();
             break;
+      case 4:
+            totalEventCount = simMan->Nodes.size();
+            break;
         default:
             ErrorString = "Unknown or not implemented simulation mode: "+QString().number(PointSimMode);
             return false;
@@ -771,6 +778,7 @@ void PointSourceSimulator::simulate()
         case 1: fSuccess = SimulateRegularGrid(); break;
         case 2: fSuccess = SimulateFlood(); break;
         case 3: fSuccess = SimulateCustomNodes(); break;
+        case 4: fSuccess = SimulateCustomNodes(); break;
         default: fSuccess = false; break;
     }
     if (fHardAbortWasTriggered) fSuccess = false;
@@ -2027,8 +2035,6 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
         threads = MaxThreads;
     }
-
-    clearNodes();
 
     bool bOK = Runner->setup(json, threads, fFromGui);
     if (!bOK)

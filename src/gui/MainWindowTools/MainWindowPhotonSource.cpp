@@ -221,18 +221,6 @@ void MainWindow::SimPointSourcesConfigToJson(QJsonObject &jsonMaster)
 
   // custom nodes
   QJsonObject ndjson;
-        ndjson["Script"] = NodesScript;
-        QJsonArray arr;
-        for (int i=0; i<CustomScanNodes.size(); i++)
-        {
-          QJsonArray el;
-          for (double & d : *CustomScanNodes.at(i))
-          //el << CustomScanNodes[i]->x() << CustomScanNodes[i]->y() << CustomScanNodes[i]->z();
-            el << d;
-          if (el.size() == 3) el << 0; // if 3, add time=0
-          arr.append(el);
-        }
-      ndjson["Nodes"] = arr;
       ndjson["FileWithNodes"] = ui->leNodesFromFile->text();
   json["CustomNodesOptions"] = ndjson;
 

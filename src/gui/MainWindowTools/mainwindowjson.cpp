@@ -520,27 +520,7 @@ if (scj.contains("CustomDistrib"))
   //Custom nodes
   QJsonObject njson = pojs["CustomNodesOptions"].toObject();
   JsonToLineEditText(njson, "FileWithNodes", ui->leNodesFromFile);
-  NodesScript.clear();
-  parseJson(njson, "Script", NodesScript);
-  QJsonArray arr;
-  parseJson(njson, "Nodes", arr);
-  clearCustomScanNodes();
-  for (int i=0; i<arr.size(); i++)
-  {
-      QJsonArray el = arr[i].toArray();
-      if (el.size()<3)
-        {
-          qWarning() << "Error in custom nodes array";
-          break;
-        }
-      QVector<double> * vec = new QVector<double>();
-      *vec << el[0].toDouble() << el[1].toDouble() << el[2].toDouble();
-      if (el.size() > 3) *vec << el[3].toDouble();
-      else *vec << 0;
-      //CustomScanNodes.append( new QVector3D(el[0].toDouble(), el[1].toDouble(), el[2].toDouble()));
-      CustomScanNodes.append( vec );
-  }
-  ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
+
   ui->labPhTracksOn->setVisible(SimulationManager->TrackBuildOptions.bBuildPhotonTracks);
 
     //PARTICLE SOURCES

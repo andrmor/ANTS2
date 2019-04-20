@@ -101,7 +101,6 @@ MainWindow::~MainWindow()
     qDebug() << "<-Clearing containers with dynamic objects";
     clearGeoMarkers();
     clearEnergyVector();
-    clearCustomScanNodes();
 
     qDebug() << "<-Deleting ui";
     delete ui;
@@ -457,12 +456,6 @@ void MainWindow::clearGeoMarkers(int All_Rec_True)
   }
 
   if (All_Rec_True == 0) GeoMarkers.clear();
-}
-
-void MainWindow::clearCustomScanNodes()
-{
-  for (int i=0; i<CustomScanNodes.size(); i++) delete CustomScanNodes[i];
-  CustomScanNodes.clear();
 }
 
 void MainWindow::ShowGeoMarkers()
@@ -4049,71 +4042,6 @@ void MainWindow::on_pbLoadPMtype_clicked()
   MainWindow::ReconstructDetector(); //rebuild detector
 }
 
-void MainWindow::on_pbLoadNodes_clicked()
-{
-  QFileDialog fileDialog;
-  QString fileName = fileDialog.getOpenFileName(this, "Load custom nodes", GlobSet.LastOpenDir, "Text files (*.txt);; All files (*.*)");
-  if (fileName.isEmpty()) return;
-  GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
-
-  QVector<double> x, y, z;
-  int err = LoadDoubleVectorsFromFile(fileName, &x, &y, &z);
-  if (err == 0)
-    {
-      clearCustomScanNodes();
-      for (int i=0; i<x.size(); i++)
-      {
-          QVector<double> * vec = new QVector<double>();
-          *vec << x[i] << y[i] << z[i] << 0;
-          CustomScanNodes.append( vec );
-      }
-      on_pbUpdateSimConfig_clicked();
-    }
-  UpdateCustomScanNodesIndication();
-}
-
-void MainWindow::on_pbShowNodes_clicked()
-{
-   Detector->GeoManager->ClearTracks();  
-   clearGeoMarkers();
-   GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-   for (int i=0; i<CustomScanNodes.size(); i++)
-     marks->SetNextPoint(CustomScanNodes[i]->at(0), CustomScanNodes[i]->at(1), CustomScanNodes[i]->at(2));
-   GeoMarkers.append(marks);
-   GeometryWindow->ShowGeometry();
-}
-
-void MainWindow::on_pbRunNodeScript_clicked()
-{
-  extractGeometryOfLocalScriptWindow();
-  delete GenScriptWindow; GenScriptWindow = 0;
-
-  AJavaScriptManager* jsm = new AJavaScriptManager(Detector->RandGen);
-  GenScriptWindow = new AScriptWindow(jsm, true, this);
-  GenScriptWindow->ConfigureForLightMode(&NodesScript, "Custom nodes", "clear();\nfor (var i=0; i<5; i++)\n  node(i*10, (i-2)*20, 0)\n\nnode(40, -20, 0)");
-
-  NodesScriptInterface = new InterfaceToNodesScript(CustomScanNodes);
-  GenScriptWindow->RegisterInterfaceAsGlobal(NodesScriptInterface);
-  GenScriptWindow->RegisterCoreInterfaces();
-  connect(GenScriptWindow, &AScriptWindow::success, this, &MainWindow::NodesScriptSuccess);
-
-  recallGeometryOfLocalScriptWindow();
-  GenScriptWindow->UpdateGui();
-  GenScriptWindow->show();
-}
-
-void MainWindow::NodesScriptSuccess()
-{
-  on_pbUpdateSimConfig_clicked();
-  UpdateCustomScanNodesIndication();
-}
-
-void MainWindow::UpdateCustomScanNodesIndication()
-{
-  ui->lScriptNodes->setText( QString::number(CustomScanNodes.size()) );
-  on_pbShowNodes_clicked();
-}
-
 void MainWindow::on_actionOpen_settings_triggered()
 {   
    GlobSetWindow->showNormal();
@@ -5039,8 +4967,15 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
         Detector->GeoManager->ClearTracks();
         clearGeoMarkers();
         GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
-        for (const ANodeRecord * n : SimulationManager->Nodes)
-            marks->SetNextPoint(n->getX(), n->getY(), n->getZ());
+        for (ANodeRecord * topNode : SimulationManager->Nodes)
+        {
+            ANodeRecord * node = topNode;
+            while (node)
+            {
+                marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
+                node = node->getLinkedNode();
+            }
+        }
         GeoMarkers.append(marks);
         GeometryWindow->ShowGeometry();
     }

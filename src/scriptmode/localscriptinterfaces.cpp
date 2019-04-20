@@ -25,22 +25,3 @@ void InterfaceToPMscript::PM(double x, double y, double z, QString type, double 
   el<<x<<y<<z<<type<<phi<<theta<<psi;
   arr.append(el);
 }
-
-InterfaceToNodesScript::InterfaceToNodesScript(QVector<QVector<double> *> & nodes) : nodes(nodes)
-{
-    H["node"] = "Adds a node with (x,y,z, time) coordinates";
-    H["clear"] = "clear all nodes";
-}
-
-void InterfaceToNodesScript::clear()
-{
-    for (int i=0; i<nodes.size(); i++) delete nodes.at(i);
-    nodes.clear();
-}
-
-void InterfaceToNodesScript::node(double x, double y, double z, double time)
-{
-    QVector<double>* vec = new QVector<double>();
-    *vec << x << y << z << time;
-    nodes.append( vec );
-}

@@ -7622,7 +7622,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
            </font>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="tabSinglePoint">
            <attribute name="title">
@@ -8867,88 +8867,11 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <attribute name="title">
             <string>File</string>
            </attribute>
-           <widget class="QPushButton" name="pbRunNodeScript">
-            <property name="geometry">
-             <rect>
-              <x>49</x>
-              <y>76</y>
-              <width>201</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Use script to define nodes</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_184">
-            <property name="geometry">
-             <rect>
-              <x>41</x>
-              <y>98</y>
-              <width>100</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Nodes defined:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="QLabel" name="lScriptNodes">
-            <property name="geometry">
-             <rect>
-              <x>150</x>
-              <y>100</y>
-              <width>47</width>
-              <height>13</height>
-             </rect>
-            </property>
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbShowNodes">
-            <property name="geometry">
-             <rect>
-              <x>305</x>
-              <y>93</y>
-              <width>191</width>
-              <height>23</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Show nodes</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pbLoadNodes">
-            <property name="geometry">
-             <rect>
-              <x>259</x>
-              <y>77</y>
-              <width>201</width>
-              <height>31</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Load from text file</string>
-            </property>
-           </widget>
            <widget class="QPushButton" name="pbNodesFromFileChange">
             <property name="geometry">
              <rect>
               <x>420</x>
-              <y>30</y>
+              <y>50</y>
               <width>81</width>
               <height>22</height>
              </rect>
@@ -8961,7 +8884,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>30</y>
+              <y>50</y>
               <width>400</width>
               <height>22</height>
              </rect>
@@ -8971,7 +8894,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
             <property name="geometry">
              <rect>
               <x>10</x>
-              <y>10</y>
+              <y>30</y>
               <width>181</width>
               <height>17</height>
              </rect>
@@ -8983,7 +8906,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QPushButton" name="pbNodesFromFileHelp">
             <property name="geometry">
              <rect>
-              <x>420</x>
+              <x>422</x>
               <y>4</y>
               <width>80</width>
               <height>22</height>
@@ -8996,14 +8919,14 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <widget class="QPushButton" name="pbNodesFromFileCheckShow">
             <property name="geometry">
              <rect>
-              <x>90</x>
-              <y>53</y>
-              <width>141</width>
-              <height>22</height>
+              <x>112</x>
+              <y>80</y>
+              <width>291</width>
+              <height>24</height>
              </rect>
             </property>
             <property name="text">
-             <string>Check and show</string>
+             <string>Check file and show nodes</string>
             </property>
            </widget>
           </widget>
@@ -9011,6 +8934,25 @@ Second click will trigger strong abort mode, which will result in loss of all si
            <attribute name="title">
             <string>Script</string>
            </attribute>
+           <widget class="QLabel" name="label_150">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>20</y>
+              <width>391</width>
+              <height>71</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Use script unit 'sim' to define nodes, e.g.
+sim.AddNode(x,y,z)
+and then start simulation with
+sim.RunPhotonSources()</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
           </widget>
          </widget>
          <widget class="QPushButton" name="pbSimulate">

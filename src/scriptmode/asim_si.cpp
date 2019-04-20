@@ -5,6 +5,7 @@
 #include "aconfiguration.h"
 #include "detectorclass.h"
 #include "amonitor.h"
+#include "anoderecord.h"
 
 #include <QJsonObject>
 #include <QApplication>
@@ -37,6 +38,12 @@ ASim_SI::ASim_SI(ASimulationManager* SimulationManager, EventsDataClass *EventsD
   H["getMonitorHits"] = "returns the number of detected hits by the monitor with the given name";
 }
 
+bool ASim_SI::InitOnRun()
+{
+    SimulationManager->clearNodes();
+    return true;
+}
+
 void ASim_SI::ForceStop()
 {
   emit requestStopSimulation();
@@ -59,6 +66,9 @@ bool ASim_SI::RunPhotonSources(int NumThreads, bool AllowGuiUpdate)
         qApp->processEvents();
     }
     while (!SimulationManager->fFinished);
+
+    if (!SimulationManager->fSuccess)
+        abort(SimulationManager->Runner->getErrorMessages());
     return SimulationManager->fSuccess;
 }
 
@@ -92,31 +102,37 @@ long ASim_SI::GetSeed() const
     return Config->GetDetector()->RandGen->GetSeed();
 }
 
-void ASim_SI::ClearCustomNodes()
+void ASim_SI::ClearNodes()
 {
-    Config->ClearCustomNodes();
+    SimulationManager->clearNodes();
 }
 
-void ASim_SI::AddCustomNode(double x, double y, double z)
+int ASim_SI::CountNodes(bool onlyTop)
 {
-    Config->AddCustomNode(x, y, z);
+    if (onlyTop) return SimulationManager->Nodes.size();
+
+    int counter = 0;
+    for (ANodeRecord * rec : SimulationManager->Nodes)
+        counter += 1 + rec->getNumberOfLinkedNodes();
+    return counter;
 }
 
-QVariant ASim_SI::GetCustomNodes()
+void ASim_SI::AddNode(double X, double Y, double Z, double Time, int numPhotons)
 {
-    QJsonArray arr = Config->GetCustomNodes();
-    QVariant vr = arr.toVariantList();
-    return vr;
+    ANodeRecord * n = ANodeRecord::createS(X, Y, Z, Time, numPhotons);
+    SimulationManager->Nodes.push_back(n);
 }
 
-bool ASim_SI::SetCustomNodes(QVariant ArrayOfArray3)
+void ASim_SI::AddSubNode(double X, double Y, double Z, double Time, int numPhotons)
 {
-    QString type = ArrayOfArray3.typeName();
-    if (type != "QVariantList") return false;
-
-    QVariantList vl = ArrayOfArray3.toList();
-    QJsonArray ar = QJsonArray::fromVariantList(vl);
-    return Config->SetCustomNodes(ar);
+    int nodes = SimulationManager->Nodes.size();
+    if (nodes == 0)
+        abort("Cannot add a subnode: Container with nodes is empty");
+    else
+    {
+        ANodeRecord * n = ANodeRecord::createS(X, Y, Z, Time, numPhotons);
+        SimulationManager->Nodes[nodes-1]->addLinkedNode(n);
+    }
 }
 
 bool ASim_SI::SaveAsTree(QString fileName)

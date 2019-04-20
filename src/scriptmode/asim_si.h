@@ -18,7 +18,8 @@ public:
   ASim_SI(ASimulationManager* SimulationManager, EventsDataClass* EventsDataHub, AConfiguration* Config, bool fGuiPresent = true);
   ~ASim_SI(){}
 
-  virtual void ForceStop();
+  virtual bool InitOnRun() override;
+  virtual void ForceStop() override;
 
 public slots:
   bool RunPhotonSources(int NumThreads = -1, bool AllowGuiUpdate = false);
@@ -27,10 +28,10 @@ public slots:
   void SetSeed(long seed);
   long GetSeed() const;
 
-  void ClearCustomNodes();
-  void AddCustomNode(double x, double y, double z);
-  QVariant GetCustomNodes();
-  bool SetCustomNodes(QVariant ArrayOfArray3);
+  void ClearNodes();
+  int  CountNodes(bool onlyTop);
+  void AddNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
+  void AddSubNode(double X, double Y, double Z, double Time = 0, int numPhotons = -1);
 
   bool SaveAsTree(QString fileName);
   bool SaveAsText(QString fileName, bool IncludeTruePositionAndNumPhotons = true);

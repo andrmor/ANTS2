@@ -30,12 +30,6 @@ public:
   bool LoadConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true, QJsonObject *jsout = 0);
   bool SaveConfig(QString fileName, bool DetConstructor = true, bool SimSettings = true, bool ReconstrSettings = true);
 
-  //Simulation module specific
-  void ClearCustomNodes();
-  QJsonArray GetCustomNodes();
-  void AddCustomNode(double x, double y, double z);
-  bool SetCustomNodes(QJsonArray arr);
-
   //remove particle
   const QString RemoveParticle(int particleId);  //returns "" on sucess, otherwise gives error string
 

@@ -47,7 +47,6 @@ class ParticleSourceSimulator;
 class TmpObjHubClass;
 class ASlabListWidget;
 class InterfaceToPMscript;
-class InterfaceToNodesScript;
 class QMessageBox;
 class QListWidgetItem;
 class QFile;
@@ -130,10 +129,6 @@ public:
 
     InterfaceToPMscript* PMscriptInterface = 0;       // if created -> managed by the script manager
 
-    QVector<QVector<double> * > CustomScanNodes;
-    InterfaceToNodesScript* NodesScriptInterface = 0; // if created -> managed by the script manager
-    QString NodesScript;
-
     //critical - updates
     void NumberOfPMsHaveChanged();
 
@@ -215,7 +210,6 @@ public slots:
     void on_pbParticleSourcesSimulate_clicked();    
     void RefreshPhotSimOnTimer(int Progress, double msPerEv);
     void PMscriptSuccess();
-    void NodesScriptSuccess();
     void onGDMLstatusChage(bool fGDMLactivated);
     void updateLoaded(int events, int progress);
     void on_pbSingleSourceShow_clicked();
@@ -385,14 +379,12 @@ public:
     void writeLoadExpDataConfigToJson(QJsonObject &json);
     bool readLoadExpDataConfigFromJson(QJsonObject &json);
     void clearGeoMarkers(int All_Rec_True = 0);
-    void clearCustomScanNodes();
     void setFontSizeAllWindows(int size);
     void writeExtraGuiToJson(QJsonObject &json);
     void readExtraGuiFromJson(QJsonObject &json);
     void SaveSimulationDataTree();
     void SaveSimulationDataAsText();
     void setFloodZposition(double Z);
-    void UpdateCustomScanNodesIndication();
     void CalculateIndividualQEPDE(); //Public for use in scripting
     void clearEnergyVector();
     void ShowSource(const AParticleSourceRecord *p, bool clear = true);
@@ -500,9 +492,6 @@ private slots:
 
 private slots:
     void on_pbGDML_clicked();
-    void on_pbLoadNodes_clicked();
-    void on_pbShowNodes_clicked();
-    void on_pbRunNodeScript_clicked();
     void on_cobPMdeviceType_activated(const QString &arg1);
     void on_pbShowColorCoding_pressed();
     void on_pbShowColorCoding_released();

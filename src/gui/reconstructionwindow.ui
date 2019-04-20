@@ -206,9 +206,9 @@
        <widget class="QPushButton" name="pbEnergySpectrum2">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>153</y>
-          <width>131</width>
+          <x>11</x>
+          <y>151</y>
+          <width>147</width>
           <height>23</height>
          </rect>
         </property>
@@ -219,9 +219,9 @@
        <widget class="QPushButton" name="pbChi2Spectrum2">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>180</y>
-          <width>131</width>
+          <x>11</x>
+          <y>178</y>
+          <width>147</width>
           <height>23</height>
          </rect>
         </property>
@@ -272,7 +272,7 @@
         <property name="geometry">
          <rect>
           <x>200</x>
-          <y>147</y>
+          <y>145</y>
           <width>101</width>
           <height>22</height>
          </rect>
@@ -292,7 +292,7 @@
         <property name="geometry">
          <rect>
           <x>329</x>
-          <y>145</y>
+          <y>143</y>
           <width>160</width>
           <height>26</height>
          </rect>
@@ -575,7 +575,7 @@
         <property name="geometry">
          <rect>
           <x>180</x>
-          <y>151</y>
+          <y>149</y>
           <width>18</width>
           <height>13</height>
          </rect>
@@ -588,7 +588,7 @@
         <property name="geometry">
          <rect>
           <x>327</x>
-          <y>175</y>
+          <y>171</y>
           <width>97</width>
           <height>17</height>
          </rect>
@@ -629,54 +629,6 @@
          </rect>
         </property>
         <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QSpinBox" name="sbLimitNumberEvents">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>262</x>
-          <y>28</y>
-          <width>70</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="maximum">
-         <number>10000000</number>
-        </property>
-        <property name="value">
-         <number>1000</number>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_80">
-        <property name="geometry">
-         <rect>
-          <x>338</x>
-          <y>31</y>
-          <width>51</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>events.</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="cbLimitNumberEvents">
-        <property name="geometry">
-         <rect>
-          <x>182</x>
-          <y>31</y>
-          <width>50</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Only</string>
-        </property>
-        <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
@@ -789,7 +741,7 @@
         <property name="geometry">
          <rect>
           <x>179</x>
-          <y>193</y>
+          <y>191</y>
           <width>140</width>
           <height>17</height>
          </rect>
@@ -849,7 +801,7 @@
         <property name="geometry">
          <rect>
           <x>179</x>
-          <y>174</y>
+          <y>170</y>
           <width>145</width>
           <height>17</height>
          </rect>
@@ -868,7 +820,7 @@
         <property name="geometry">
          <rect>
           <x>327</x>
-          <y>193</y>
+          <y>191</y>
           <width>100</width>
           <height>17</height>
          </rect>
@@ -912,62 +864,11 @@
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="lShowFirst">
-        <property name="geometry">
-         <rect>
-          <x>219</x>
-          <y>33</y>
-          <width>47</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>first</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSpinBox" name="sbShowEventsEvery">
-        <property name="geometry">
-         <rect>
-          <x>462</x>
-          <y>28</y>
-          <width>50</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>1 - every good event is shown; 2 - only every second; 3 - every third, etc</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_85">
-        <property name="geometry">
-         <rect>
-          <x>376</x>
-          <y>29</y>
-          <width>81</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Show every:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
        <widget class="QPushButton" name="pbPMTcol">
         <property name="geometry">
          <rect>
           <x>263</x>
-          <y>192</y>
+          <y>190</y>
           <width>30</width>
           <height>19</height>
          </rect>
@@ -1035,7 +936,7 @@
         <property name="geometry">
          <rect>
           <x>438</x>
-          <y>175</y>
+          <y>171</y>
           <width>70</width>
           <height>17</height>
          </rect>
@@ -1048,7 +949,7 @@
         <property name="geometry">
          <rect>
           <x>438</x>
-          <y>193</y>
+          <y>191</y>
           <width>70</width>
           <height>17</height>
          </rect>
@@ -1056,6 +957,84 @@
         <property name="text">
          <string>Invert Y</string>
         </property>
+       </widget>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>176</x>
+          <y>27</y>
+          <width>337</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="cbLimitNumberEvents">
+           <property name="text">
+            <string>Only</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lShowFirst">
+           <property name="text">
+            <string>first</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbLimitNumberEvents">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="maximum">
+            <number>1000000</number>
+           </property>
+           <property name="value">
+            <number>1000</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_80">
+           <property name="text">
+            <string>events.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_85">
+           <property name="text">
+            <string>Show every</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sbShowEventsEvery">
+           <property name="toolTip">
+            <string>1 - every good event is shown; 2 - only every second; 3 - every third, etc</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>10000</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <zorder>line_40</zorder>
        <zorder>label_16</zorder>

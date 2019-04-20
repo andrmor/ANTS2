@@ -280,14 +280,12 @@ MainWindow::MainWindow(DetectorClass *Detector,
     ui->tabWidget->setCurrentIndex(0);
     MainWindow::on_pbElUpdateIndication_clicked();
     ui->twSourcePhotonsParticles->setCurrentIndex(0);
-    MainWindow::PointSource_InitTabWidget();
     QList<QWidget*> invis;
     invis << ui->pbRefreshParticles << ui->pbRefreshOverrides << ui->pbUpdatePreprocessingSettings
      << ui->pbRefreshStack << ui->pbShowPMsArrayRegularData << ui->pbRefreshPMArrayData << ui->pbUpdateElectronics
      << ui->pbRefreshPMproperties << ui->pbUpdatePMproperties << ui->pbRefreshMaterials << ui->pbStopLoad
      << ui->pbIndPMshowInfo << ui->pbUpdateToFixedZ << ui->pbUpdateSimConfig
-     << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui
-     << ui->pbInitializeScanFloodNoise << ui->pbUpdateScanFloodTabWidget << ui->fScanFloodTotProb
+     << ui->pbUpdateToFullCustom << ui->pbElUpdateIndication << ui->pbUnlockGui << ui->fScanFloodTotProb
      << ui->fSecondaryScintLoadProfile << ui->pbUpdateSourcesIndication << ui->frIon
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;

@@ -918,10 +918,6 @@ void OutputWindow::ShowOneEventLog(int iev)
 
   int precision = MW->GlobSet.TextLogPrecision;
   QString str = "Event# " + QString::number(iev);
-
-  if (!EventsDataHub->isScanEmpty())
-      if ( !EventsDataHub->Scan[iev]->GoodEvent )
-        str += "       'Bad' event: " + MW->NoiseTypeDescriptions[EventsDataHub->Scan[iev]->EventType].replace("\n", " ");
   OutText(str);
 
   QString str2;

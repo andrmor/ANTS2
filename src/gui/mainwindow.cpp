@@ -1134,9 +1134,6 @@ void MainWindow::on_cbLRFs_toggled(bool checked)
 {
    if (checked) ui->twOption->setTabIcon(7, Rwindow->YellowIcon);
    else         ui->twOption->setTabIcon(7, QIcon());
-
-   if (checked) ui->cbScanFloodAddNoise->setChecked(false);
-   ui->cbScanFloodAddNoise->setEnabled(!checked);
 }
 
 void MainWindow::on_cbAreaSensitive_toggled(bool checked)
@@ -2808,16 +2805,6 @@ void MainWindow::on_pbScanDistrDelete_clicked()
   MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
-void MainWindow::on_pbUpdateScanFloodTabWidget_clicked()
-{
-  MainWindow::PointSource_UpdateTabWidget();
-}
-
-void MainWindow::on_pbInitializeScanFloodNoise_clicked()
-{
-  MainWindow::PointSource_InitTabWidget();
-}
-
 void MainWindow::on_twSingleScan_currentChanged(int index)
 {  
   ui->frLimitNodesTo->setVisible( index != 0 );
@@ -3728,19 +3715,12 @@ void MainWindow::on_pbYellow_clicked()
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(2, QIcon());
 
-   if (ui->cbScanFloodAddNoise->isChecked() && ui->leoScanFloodNoiseProbability->text()!="0")
+   if (ui->cobScintTypePointSource->currentIndex() != 0 )
      {
        fYellow = true;
        ui->twAdvSimOpt->tabBar()->setTabIcon(3, Rwindow->YellowIcon);
      }
    else ui->twAdvSimOpt->tabBar()->setTabIcon(3, QIcon());
-
-   if (ui->cobScintTypePointSource->currentIndex() != 0 )
-     {
-       fYellow = true;
-       ui->twAdvSimOpt->tabBar()->setTabIcon(4, Rwindow->YellowIcon);
-     }
-   else ui->twAdvSimOpt->tabBar()->setTabIcon(4, QIcon());
 
    ui->labAdvancedOn->setVisible(fYellow);
 }
@@ -3870,7 +3850,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     qApp->processEvents();
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, SimulationManager, 0);
 
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
@@ -5027,4 +5007,45 @@ void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
     QString epff = GlobSet.ExamplesDir + "/ExampleParticlesFromFile.dat";
     SimulationManager->FileParticleGenerator->SetFileName(epff);
     updateFileParticleGeneratorGui();
+}
+
+#include "anoderecord.h"
+void MainWindow::on_pbNodesFromFileHelp_clicked()
+{
+    QString s;
+    s = "Each line in the file represents a single node:\n"
+        "x y z time [number] [*]\n"
+        "\n"
+        "'number' is optional:\n"
+        "   if present, the provided integer value overrides the standard number of photons\n"
+        "optional '*':\n"
+        "   indicates that the next line does not start a new event,\n"
+        "   and the next node is added to the same event.";
+    message(s, this);
+}
+
+void MainWindow::on_pbNodesFromFileChange_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Select a file with nodes data", GlobSet.LastOpenDir, "Data files (*.dat *.txt);;All files (*)");
+    if (fileName.isEmpty()) return;
+    GlobSet.LastOpenDir = QFileInfo(fileName).absolutePath();
+    ui->leNodesFromFile->setText(fileName);
+    on_pbUpdateSimConfig_clicked();
+}
+
+void MainWindow::on_pbNodesFromFileCheckShow_clicked()
+{
+    QString fileName = ui->leNodesFromFile->text();
+    QString err = SimulationManager->loadNodesFromFile(fileName);
+    if (!err.isEmpty()) message(err, this);
+    else
+    {
+        Detector->GeoManager->ClearTracks();
+        clearGeoMarkers();
+        GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
+        for (const ANodeRecord * n : SimulationManager->Nodes)
+            marks->SetNextPoint(n->getX(), n->getY(), n->getZ());
+        GeoMarkers.append(marks);
+        GeometryWindow->ShowGeometry();
+    }
 }

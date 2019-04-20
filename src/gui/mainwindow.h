@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "aguiwindow.h"
-#include "scanfloodstructure.h"
 #include "ag4simulationsettings.h"
 
 #include <QMainWindow>
@@ -184,8 +183,6 @@ public:
     double WaveFrom, WaveTo, WaveStep;
     int WaveNodes;
 
-    QVector<QString> NoiseTypeDescriptions;
-
     TH1D *histSecScint = 0;
 
     int ScriptWinX, ScriptWinY, ScriptWinW, ScriptWinH;
@@ -330,9 +327,6 @@ private slots:
     void on_pbScanDistrLoad_clicked();
     void on_pbScanDistrShow_clicked();
     void on_pbScanDistrDelete_clicked();
-    void on_pbUpdateScanFloodTabWidget_clicked();
-    void on_pbInitializeScanFloodNoise_clicked();
-    void on_tabwidScanFlood_cellChanged(int row, int column);
     void on_actionWindow_navigator_triggered();
     void on_actionGeometry_triggered();
     void on_actionReconstructor_triggered();
@@ -407,9 +401,6 @@ public:
 
 private:
     bool startupDetector();  //on ANTS start load/create detector
-    void PointSource_UpdateTabWidget();
-    void PointSource_InitTabWidget();
-    void PointSource_ReadTabWidget();
     void CheckSetMaterial(const QString name, QComboBox* cob, QVector<QString>* vec);
     void ToggleUpperLowerPMs();
     void PopulatePMarray(int ul, double z, int istart);
@@ -426,11 +417,6 @@ private:
     QStringList LoadedEventFiles, LoadedTreeFiles;
 
     QString CheckerScript;
-
-    QVector<ScanFloodStructure> ScanFloodNoise;
-    bool NoiseTableLocked;
-    double ScanFloodNoiseProbability = 0;
-
     QString PreprocessingFileName;
 
     int PreviousNumberPMs = 0;
@@ -641,6 +627,12 @@ private slots:
     void on_pbSetAllInherited_clicked();
 
     void on_pbLoadExampleFileFromFileGen_clicked();
+
+    void on_pbNodesFromFileHelp_clicked();
+
+    void on_pbNodesFromFileChange_clicked();
+
+    void on_pbNodesFromFileCheckShow_clicked();
 
 public slots:
     void on_pbRebuildDetector_clicked();

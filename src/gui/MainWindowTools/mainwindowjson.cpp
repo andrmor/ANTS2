@@ -456,29 +456,7 @@ if (scj.contains("CustomDistrib"))
   ui->cobFixedDirOrCone->setCurrentIndex(0); //compatibility
   JsonToComboBox(pdj, "Fixed_or_Cone", ui->cobFixedDirOrCone);
   JsonToCheckbox(pdj, "Random", ui->cbRandomDir);
-  //bad event config
-  QJsonObject bej = pojs["BadEventOptions"].toObject();
-  JsonToCheckbox(bej, "BadEvents", ui->cbScanFloodAddNoise);
-  JsonToLineEditDouble(bej, "Probability", ui->leoScanFloodNoiseProbability);
-  JsonToLineEditDouble(bej, "SigmaDouble", ui->ledScanFloodNoiseOffset);
-  MainWindow::PointSource_InitTabWidget();
-  if (bej.contains("NoiseArray"))
-    {
-      QJsonArray ar = bej["NoiseArray"].toArray();
-      if (ar.size() == 6)
-        {
-          for (int ic=0; ic<6; ic++)
-            {
-              QJsonObject js = ar[ic].toObject();
-              ScanFloodNoise[ic].Active = js["Active"].toBool();
-              //ScanFloodNoise[ic].Description = js["Description"].toString(); //keep standart description!
-              ScanFloodNoise[ic].Probability = js["Probability"].toDouble();
-              ScanFloodNoise[ic].AverageValue = js["AverageValue"].toDouble();
-              ScanFloodNoise[ic].Spread = js["Spread"].toDouble();
-            }
-        }      
-      MainWindow::PointSource_UpdateTabWidget();
-    }
+
   //Single position options
   QJsonObject spj = pojs["SinglePositionOptions"].toObject();
   JsonToLineEditDouble(spj, "SingleX", ui->ledSingleX);
@@ -542,6 +520,7 @@ if (scj.contains("CustomDistrib"))
   JsonToLineEditDouble(fj, "Zto", ui->ledScanFloodZto);
   //Custom nodes
   QJsonObject njson = pojs["CustomNodesOptions"].toObject();
+  JsonToLineEditText(njson, "FileWithNodes", ui->leNodesFromFile);
   NodesScript.clear();
   parseJson(njson, "Script", NodesScript);
   QJsonArray arr;

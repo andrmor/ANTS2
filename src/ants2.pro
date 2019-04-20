@@ -397,7 +397,8 @@ SOURCES += main.cpp \
     scriptmode/apms_si.cpp \
     scriptmode/alrf_si.cpp \
     Simulation/atrackingdataimporter.cpp \
-    common/aeventtrackingrecord.cpp
+    common/aeventtrackingrecord.cpp \
+    Simulation/anoderecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -548,7 +549,8 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/apms_si.h \
     scriptmode/alrf_si.h \
     Simulation/atrackingdataimporter.h \
-    common/aeventtrackingrecord.h
+    common/aeventtrackingrecord.h \
+    Simulation/anoderecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -567,7 +569,6 @@ ants2_SIM {
     modules/ageometrytester.cpp
 
     HEADERS  += common/agridelementrecord.h \
-    common/scanfloodstructure.h \
     common/aphoton.h \
     common/ageomarkerclass.h \
     common/atrackrecords.h \

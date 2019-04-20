@@ -26,6 +26,7 @@
 #include "afiletools.h"
 #include "aconfiguration.h"
 #include "aglobalsettings.h"
+#include "anoderecord.h"
 
 #include <memory>
 
@@ -76,10 +77,9 @@ static void *SimulationManagerRunWorker(void *workerSimulator)
     return NULL;
 }
 
-ASimulatorRunner::ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, QObject *parent) : QObject(parent)
+ASimulatorRunner::ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, ASimulationManager *simMan, QObject *parent) :
+    QObject(parent), detector(detector), dataHub(dataHub), simMan(simMan)
 {
-    this->detector = detector;
-    this->dataHub = dataHub;
     startTime.start(); //can restart be done without start() ?
     simState = SClean;
 }
@@ -150,6 +150,24 @@ else
 #endif
 }
 
+  // Custom nodes - if load from file
+  if (modeSetup == "PointSim")
+  {
+      const QJsonObject psc = jsSimSet["PointSourcesConfig"].toObject();
+      if (psc["ControlOptions"].toObject()["Single_Scan_Flood"] == 3)
+      {
+          QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
+          //qDebug() << "------------"<<fileName;
+          const QString err = simMan->loadNodesFromFile(fileName);
+          if (!err.isEmpty())
+          {
+              ErrorString = err;
+              return false;
+          }
+          qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
+      }
+  }
+
   dataHub->clear();
   dataHub->initializeSimStat(detector->Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
 
@@ -172,10 +190,10 @@ else
   {
       Simulator *worker;
       if (modeSetup == "PointSim") //Photon simulator
-          worker = new PointSourceSimulator(detector, i);
+          worker = new PointSourceSimulator(detector, simMan, i);
       else //Particle simulator
       {
-          ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, i);
+          ParticleSourceSimulator* pss = new ParticleSourceSimulator(detector, simMan, i);
           if (bGeant4ParticleSim && bOnlyFileExport)
           {
               qDebug() << "--- only file export, external/internal sim will not be started! ---";
@@ -438,14 +456,9 @@ void ASimulatorRunner::updateGui()
 /******************************************************************************\
 *                  Simulator base class (per-thread instance)                  |
 \******************************************************************************/
-Simulator::Simulator(const DetectorClass *detector, const int ID)
-{
-    this->ID = ID;
-    this->detector = detector;
-    this->simSettings = 0;
-    eventBegin = 0;
-    eventEnd = 0;
-    progress = 0;
+Simulator::Simulator(const DetectorClass *detector, ASimulationManager *simMan, const int ID) :
+    detector(detector), simMan(simMan), simSettings(0), ID(ID)
+{    
     RandGen = new TRandom2();    
     dataHub = new EventsDataClass(ID);
     OneEvent = new AOneEvent(detector->PMs, RandGen, dataHub->SimStat);
@@ -571,12 +584,8 @@ void Simulator::updateMaxTracks(int maxPhotonTracks, int /*maxParticleTracks*/)
 /******************************************************************************\
 *                          Point Source Simulator                              |
 \******************************************************************************/
-PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, int ID) :
-    Simulator(detector, ID)
-{  
-    CustomHist = 0;
-    totalEventCount = 0;
-}
+PointSourceSimulator::PointSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID) :
+    Simulator(detector, simMan, ID) {}
 
 PointSourceSimulator::~PointSourceSimulator()
 {
@@ -708,25 +717,6 @@ bool PointSourceSimulator::setup(QJsonObject &json)
           }
       }
 
-    //Read noise options
-    QJsonObject njson = js["BadEventOptions"].toObject();
-    fBadEventsOn = njson["BadEvents"].toBool();
-    BadEventTotalProbability = njson["Probability"].toDouble();
-    SigmaDouble = njson["SigmaDouble"].toDouble();
-    QJsonArray njsonArr = njson["NoiseArray"].toArray();
-    BadEventConfig.clear();
-    for (int iChan=0; iChan<njsonArr.size(); iChan++)
-    {
-        ScanFloodStructure s;
-        QJsonObject chanjson = njsonArr[iChan].toObject();
-        s.Active = chanjson["Active"].toBool();
-        s.Description = chanjson["Description"].toString();
-        s.Probability = chanjson["Probability"].toDouble();
-        s.AverageValue = chanjson["AverageValue"].toDouble();
-        s.Spread = chanjson["Spread"].toDouble();
-        BadEventConfig.append(s);
-    }
-
     //calculating eventCount and storing settings specific to each simulation mode
     switch (PointSimMode)
     {
@@ -759,8 +749,8 @@ bool PointSourceSimulator::setup(QJsonObject &json)
             break;
       case 3:
             simOptions = js["CustomNodesOptions"].toObject();
-            //totalEventCount = simOptions["NumberNodes"].toInt();//progress reporting knows we do NumRuns per each node
-            totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
+            //totalEventCount = simOptions["Nodes"].toArray().size();//progress reporting knows we do NumRuns per each node
+            totalEventCount = simMan->Nodes.size();
             break;
         default:
             ErrorString = "Unknown or not implemented simulation mode: "+QString().number(PointSimMode);
@@ -795,29 +785,22 @@ void PointSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
 
 bool PointSourceSimulator::SimulateSingle()
 {
-    double r[3]; //node position
-    r[0] = simOptions["SingleX"].toDouble();
-    r[1] = simOptions["SingleY"].toDouble();
-    r[2] = simOptions["SingleZ"].toDouble();
-
-    //root bug fix
-    if (r[0] == 0 && r[1] == 0 && r[2] == 0)
-    {
-        r[0] = 0.001;
-        r[1] = 0.001;
-    }
+    double x = simOptions["SingleX"].toDouble();
+    double y = simOptions["SingleY"].toDouble();
+    double z = simOptions["SingleZ"].toDouble();
+    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(x, y, z));
 
     int eventsToDo = eventEnd - eventBegin; //runs are split between the threads, since node position is fixed for all
     double updateFactor = (eventsToDo<1) ? 100.0 : 100.0/eventsToDo;
     progress = 0;
     eventCurrent = 0;
     for (int irun = 0; irun<eventsToDo; ++irun)
-      {
-        OneNode(r);
+    {
+        OneNode(*node);
         eventCurrent = irun;
         progress = irun * updateFactor;
         if(fStopRequested) return false;
-      }
+    }
     return true;
 }
 
@@ -853,14 +836,9 @@ bool PointSourceSimulator::SimulateRegularGrid()
             RegGridNodes[ic] = 1; //1 is disabled axis
             RegGridFlagPositive[ic] = true;
         }
-        /*QJsonObject adjson = rsdataArr[ic].toObject();
-        RegGridStep[ic][0] = adjson["dX"].toDouble(0);
-        RegGridStep[ic][1] = adjson["dY"].toDouble(0);
-        RegGridStep[ic][2] = adjson["dZ"].toDouble(0);
-        RegGridNodes[ic] = adjson["Nodes"].toInt(1); //1 is disabled axis
-        RegGridFlagPositive[ic] = adjson["Option"].toInt(1);*/
     }
 
+    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(0, 0, 0));
     int currentNode = 0;
     eventCurrent = 0;
     double updateFactor = 100.0/( NumRuns*(eventEnd - eventBegin) );
@@ -877,29 +855,25 @@ bool PointSourceSimulator::SimulateRegularGrid()
                   }
 
                 //calculating node coordinates
-                double r[3];
-                for (int i=0; i<3; i++) r[i] = RegGridOrigin[i];
+                for (int i=0; i<3; i++) node->R[i] = RegGridOrigin[i];
                 //shift from the origin
                 for (int axis=0; axis<3; axis++)
                 { //going axis by axis
                     double ioffset = 0;
                     if (!RegGridFlagPositive[axis]) ioffset = -0.5*( RegGridNodes[axis] - 1 );
-                    for (int i=0; i<3; i++) r[i] += (ioffset + iAxis[axis]) * RegGridStep[axis][i];
+                    for (int i=0; i<3; i++) node->R[i] += (ioffset + iAxis[axis]) * RegGridStep[axis][i];
                 }
-                if (fLimitNodesToObject && !isInsideLimitingObject(r))
+                if (fLimitNodesToObject && !isInsideLimitingObject(node->R))
                   { //shift to unrealistic position to supress this mode
-                    r[0] = 1e10;
-                    r[1] = 1e10;
-                    r[2] = 1e10;
+                    node->R[0] = 1e10;
+                    node->R[1] = 1e10;
+                    node->R[2] = 1e10;
                   }
-
-                //root bug fix
-                if (r[0] == 0 && r[1] == 0 && r[2] == 0) r[0] = 0.001;
 
                 //running this node              
                 for (int irun = 0; irun<NumRuns; irun++)
                   {
-                    OneNode(r);
+                    OneNode(*node);
                     eventCurrent++;
                     progress = eventCurrent * updateFactor;
                     if(fStopRequested) return false;
@@ -950,6 +924,7 @@ bool PointSourceSimulator::SimulateFlood()
     }
 
     //Do flood
+    std::unique_ptr<ANodeRecord> node(ANodeRecord::createS(0, 0, 0));
     int nodeCount = (eventEnd - eventBegin);
     eventCurrent = 0;
     int WatchdogThreshold = 100000;
@@ -959,22 +934,22 @@ bool PointSourceSimulator::SimulateFlood()
         if(fStopRequested) return false;
 
         //choosing node coordinates
-        double r[3];
-        r[0] = Xfrom + (Xto-Xfrom)*RandGen->Rndm();
-        r[1] = Yfrom + (Yto-Yfrom)*RandGen->Rndm();
+        //double r[3];
+        node->R[0] = Xfrom + (Xto-Xfrom)*RandGen->Rndm();
+        node->R[1] = Yfrom + (Yto-Yfrom)*RandGen->Rndm();
         //running this node
         if (Shape == 1)
         {
-            double r2  = (r[0] - CenterX)*(r[0] - CenterX) + (r[1] - CenterY)*(r[1] - CenterY);
+            double r2  = (node->R[0] - CenterX)*(node->R[0] - CenterX) + (node->R[1] - CenterY)*(node->R[1] - CenterY);
             if ( r2 > Rad2out || r2 < Rad2in )
             {
                 inode--;
                 continue;
             }
         }
-        if (Zoption == 0) r[2] = Zfixed;
-        else r[2] = Zfrom + (Zto-Zfrom)*RandGen->Rndm();
-        if (fLimitNodesToObject && !isInsideLimitingObject(r))
+        if (Zoption == 0) node->R[2] = Zfixed;
+        else node->R[2] = Zfrom + (Zto-Zfrom)*RandGen->Rndm();
+        if (fLimitNodesToObject && !isInsideLimitingObject(node->R))
         {
             WatchdogThreshold--;
             if (WatchdogThreshold < 0 && inode == 0)
@@ -989,7 +964,7 @@ bool PointSourceSimulator::SimulateFlood()
 
         for (int irun = 0; irun<NumRuns; irun++)
           {
-            OneNode(r);            
+            OneNode(*node);
             eventCurrent++;
             progress = eventCurrent * updateFactor;
             if(fStopRequested) return false;
@@ -1000,49 +975,21 @@ bool PointSourceSimulator::SimulateFlood()
 
 bool PointSourceSimulator::SimulateCustomNodes()
 {
-  QJsonArray arr;
-  arr = simOptions["Nodes"].toArray();
-
-  double time0;
   int nodeCount = (eventEnd - eventBegin);
   int currentNode = eventBegin;
   eventCurrent = 0;
   double updateFactor = 100.0 / ( NumRuns*nodeCount );
+  std::unique_ptr<ANodeRecord> outNode(ANodeRecord::createS(1e10, 1e10, 1e10));
+
   for (int inode = 0; inode < nodeCount; inode++)
   {
-      double r[3];
-      QJsonArray el = arr[currentNode].toArray();
-      if (el.size()<3)
-      {
-          r[0] = 1.23456789;
-          r[1] = 1.23456789;
-          r[2] = 1.23456789;
-          time0 = 0;
-          qWarning()<<"Custom Node"<<currentNode<<"is not (x,y,z).";
-      }
-      else
-      {
-          r[0] = el[0].toDouble();
-          r[1] = el[1].toDouble();
-          r[2] = el[2].toDouble();
-          if (el.size() == 4) time0 = el[3].toDouble();
-          else time0 = 0;
-      }
-
-      //root bug fix
-      if (r[0] == 0 && r[1] == 0 && r[2] == 0) r[0] = 0.001;
-
-      if (fLimitNodesToObject && !isInsideLimitingObject(r))
-        { //shift node coordinates to unrealistic position to suppress it
-          r[0] = 1e10;
-          r[1] = 1e10;
-          r[2] = 1e10;
-          qDebug()<<"Point is outside of priScint";
-        }
+      const ANodeRecord * thisNode = simMan->Nodes.at(currentNode);
+      bool bInside = !(fLimitNodesToObject && !isInsideLimitingObject(thisNode->R));
 
       for (int irun = 0; irun<NumRuns; irun++)
       {
-          OneNode(r, time0); //takes care of the number of runs
+          OneNode( bInside ? *thisNode : *outNode );
+          //OneNode(r, time0); //takes care of the number of runs
           eventCurrent++;
           progress = eventCurrent * updateFactor;
           if(fStopRequested) return false;
@@ -1240,10 +1187,10 @@ bool PointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z
 void PointSourceSimulator::OneNode(double *r, double time0)
 {
   if (simSettings->fLRFsim)
-    {
+  {
       doLRFsimulatedEvent(r); //note: simulation of "bad" events disabled in this case!
       return;
-    }
+  }
 
   AScanRecord* scs = new AScanRecord();
   scs->ScintType = ScintType;
@@ -1254,131 +1201,7 @@ void PointSourceSimulator::OneNode(double *r, double time0)
   OneEvent->clearHits(); //cleaning the PMhits
   scs->Points[0].energy = PhotonsToRun(); //number of photons to run
 
-  bool fNormal = true;  //true - proceed as it is event without noise
-  if (fBadEventsOn)
-    {
-      double random = RandGen->Rndm();
-      if ( random > BadEventTotalProbability); //noise was NOT triggered - proceeding with normal event
-      else  //noise was triggered
-        {
-          scs->GoodEvent = false;
-          int ichan; //which noise channel?
-          //              qDebug()<<"Number of noice mechanisms:"<<ScanFloodNoise.size();
-          for (ichan = 0; ichan<BadEventConfig.size(); ichan++)
-            {
-              if (!BadEventConfig[ichan].Active) continue;
-              if (random <= BadEventConfig[ichan].Probability) break; //this one is triggered
-              random -= BadEventConfig[ichan].Probability;
-            }
-          //qDebug()<<"Noise channel chosen:"<<ichan;
-          scs->EventType = ichan;
-
-          //doing bad event
-          switch (ichan)
-            {
-            case 0:  //just signal in a random PM
-              {
-                int ipm = RandGen->Rndm()*detector->PMs->count();
-                //                  qDebug()<<"noise in PM#"<<ipm;
-                int hits = RandGen->Gaus(BadEventConfig[ichan].AverageValue, BadEventConfig[ichan].Spread);
-                OneEvent->addHits(ipm, hits);
-                if (simSettings->fTimeResolved)
-                  {
-                    //int itime = RandGen->Rndm()*detector->PMs->getTimeBins();
-                    int itime = RandGen->Rndm() * simSettings->TimeBins;
-                    OneEvent->addTimedHits( itime, ipm, hits);
-                  }
-                fNormal = false;
-                scs->Points[0].energy = 0;
-                break;
-              }
-            case 1:  //signal in a random PM on top of normal signal
-              {
-                int ipm = RandGen->Rndm()*detector->PMs->count();
-                //                    qDebug()<<"noise in PM#"<<ipm;
-                int hits = RandGen->Gaus(BadEventConfig[ichan].AverageValue, BadEventConfig[ichan].Spread);
-                OneEvent->addHits(ipm, hits);
-                if (simSettings->fTimeResolved)
-                  {
-                    //int itime = RandGen->Rndm()*detector->PMs->getTimeBins();
-                    int itime = RandGen->Rndm() * simSettings->TimeBins;
-                    OneEvent->addTimedHits( itime, ipm, hits);
-                  }
-                break; //going "normal" after this
-              }
-            case 2:  //random signals in all PMs
-              {
-                for (int ipm = 0; ipm < detector->PMs->count(); ipm++)
-                  {
-                    int hits = RandGen->Gaus(BadEventConfig[ichan].AverageValue, BadEventConfig[ichan].Spread);
-                    OneEvent->addHits(ipm, hits);
-                    if (simSettings->fTimeResolved)
-                      {
-                        //int itime = RandGen->Rndm()*detector->PMs->getTimeBins();
-                        int itime = RandGen->Rndm() * simSettings->TimeBins;
-                        OneEvent->addTimedHits( itime, ipm, hits);
-                      }
-                  }
-                fNormal = false;
-                scs->Points[0].energy = 0;
-                break;
-              }
-            case 3:  //random signals in all PMs + normal event
-              {
-                for (int ipm = 0; ipm < detector->PMs->count(); ipm++)
-                  {
-                    int hits = RandGen->Gaus(BadEventConfig[ichan].AverageValue, BadEventConfig[ichan].Spread);
-                    OneEvent->addHits(ipm, hits);
-                    if (simSettings->fTimeResolved)
-                      {
-                        //int itime = RandGen->Rndm()*detector->PMs->getTimeBins();
-                        int itime = RandGen->Rndm() * simSettings->TimeBins;
-                        OneEvent->addTimedHits( itime, ipm, hits);
-                      }
-                  }
-                break; //going "normal" after this
-              }
-
-            case 4:  //double event
-              {
-                fNormal = false;
-                //first event
-                GenerateTraceNphotons(scs, time0);
-                if (ScintType == 2)
-                  if (scs->Points[0].r[2] == scs->zStop) break; //if was outside of SecScint area, removing bad event status - this will be 0 hits "outside" event
-
-                //second event
-                scs->Points.AddPoint(0,0,0, PhotonsToRun()); //adding second point in scan object
-                GenerateFromSecond(scs, time0);
-                break;
-              }
-
-            case 5:  //double event, shared energy
-              {
-                fNormal = false;
-                //splitting #of photons between two positions
-                int num1 = scs->Points[0].energy * RandGen->Gaus(BadEventConfig[ichan].AverageValue, BadEventConfig[ichan].Spread);
-                if (num1 > scs->Points[0].energy) num1 = scs->Points[0].energy;
-                if (num1 <0) num1 = 0;
-                int num2 = scs->Points[0].energy - num1;
-                //qDebug()<<"num1,num2 ="<<num1<<num2;
-
-                //first point
-                scs->Points[0].energy = num1;
-                GenerateTraceNphotons(scs, time0);
-                if (ScintType == 2)
-                  if (scs->Points[0].r[2] == scs->zStop) break;//if was outside of SecScint area, rmoving bad event status - this will be 0 hits "outside" event
-
-                //second point
-                scs->Points.AddPoint(0,0,0, num2); //adding second point in scan object
-                GenerateFromSecond(scs, time0);
-                break;
-              }
-            }
-        }
-    }
-
-  if (fNormal) GenerateTraceNphotons(scs, time0); //no noise or additive noise
+  GenerateTraceNphotons(scs, time0); //no noise or additive noise
 
   OneEvent->HitsToSignal();
   dataHub->Events.append(OneEvent->PMsignals);
@@ -1386,7 +1209,33 @@ void PointSourceSimulator::OneNode(double *r, double time0)
   dataHub->Scan.append(scs);
 }
 
-void PointSourceSimulator::doLRFsimulatedEvent(double *r)
+void PointSourceSimulator::OneNode(const ANodeRecord & node)
+{
+    if (!simSettings->fLRFsim)
+    {
+        AScanRecord* scs = new AScanRecord();
+        scs->ScintType = ScintType;
+        for (int i=0; i<3; i++)
+            scs->Points[0].r[i] = node.R[i];
+
+        OneEvent->clearHits(); //cleaning the PMhits
+        scs->Points[0].energy = PhotonsToRun(); //number of photons to run
+
+        GenerateTraceNphotons(scs, node.Time); //no noise or additive noise
+
+        OneEvent->HitsToSignal();
+        dataHub->Events.append(OneEvent->PMsignals);
+        if (simSettings->fTimeResolved) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
+        dataHub->Scan.append(scs);
+    }
+    else
+    {
+        doLRFsimulatedEvent(node.R); //note: simulation of "bad" events disabled in this case!
+        return;
+    }
+}
+
+void PointSourceSimulator::doLRFsimulatedEvent(const double *r)
 {
   // NumPhotElPerLrfUnity - scaling: LRF of 1.0 corresponds to NumPhotElPerLrfUnity photo-electrons
 
@@ -1415,25 +1264,7 @@ void PointSourceSimulator::doLRFsimulatedEvent(double *r)
   dataHub->Scan.append(ss);
 }
 
-void PointSourceSimulator::GenerateFromSecond(AScanRecord *scs, double time0)
-{
-    do
-    {
-        do
-        {
-            scs->Points[1].r[0] = scs->Points[0].r[0] + RandGen->Gaus(0, SigmaDouble);
-            scs->Points[1].r[1] = scs->Points[0].r[1] + RandGen->Gaus(0, SigmaDouble);
-            scs->Points[1].r[2] = scs->Points[0].r[2] + RandGen->Gaus(0, SigmaDouble);
-        }
-        while (fLimitNodesToObject && !isInsideLimitingObject(scs->Points[1].r));
-
-        GenerateTraceNphotons(scs, time0, 1); //with secondary, actually no tracing if not found!
-        //qDebug()<<scs->r[0]<<scs->r[1]<<scs->r[2]<<"      "<<scs->zStop;
-    }
-    while (ScintType == 2 && scs->Points[1].r[2] == scs->zStop); //when not equal, SecScint volume was found
-}
-
-bool PointSourceSimulator::isInsideLimitingObject(double *r)
+bool PointSourceSimulator::isInsideLimitingObject(const double *r)
 {
 //    TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
 //    navigator->SetCurrentPoint(r);
@@ -1455,11 +1286,10 @@ void PointSourceSimulator::ReserveSpace(int expectedNumEvents)
 /******************************************************************************\
 *                         Particle Source Simulator                            |
 \******************************************************************************/
-ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, int ID) :
-    Simulator(detector, ID)
+ParticleSourceSimulator::ParticleSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID) :
+    Simulator(detector, simMan, ID)
 {
-    totalEventCount = 0;
-
+    if (simMan == 0) qDebug() << "simMan is nullptr" ;
     detector->MpCollection->updateRandomGenForThread(ID, RandGen);
 
     ParticleTracker = new PrimaryParticleTracker(detector->GeoManager,
@@ -2183,7 +2013,7 @@ ASimulationManager::ASimulationManager(EventsDataClass* EventsDataHub, DetectorC
     ScriptParticleGenerator = new AScriptParticleGenerator(*Detector->MpCollection, Detector->RandGen);
     ScriptParticleGenerator->SetProcessInterval(200);
 
-    Runner = new ASimulatorRunner(Detector, EventsDataHub);
+    Runner = new ASimulatorRunner(Detector, EventsDataHub, this);
 
     QObject::connect(Runner, &ASimulatorRunner::simulationFinished, this, &ASimulationManager::onSimulationFinished);
     QObject::connect(this, &ASimulationManager::RequestStopSimulation, Runner, &ASimulatorRunner::requestStop, Qt::DirectConnection);
@@ -2203,6 +2033,7 @@ ASimulationManager::~ASimulationManager()
 
     clearEnergyVector();
     clearTracks();
+    clearNodes();
 
     delete ScriptParticleGenerator;
     delete FileParticleGenerator;
@@ -2220,6 +2051,8 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
         qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
         threads = MaxThreads;
     }
+
+    clearNodes();
 
     bool bOK = Runner->setup(json, threads, fFromGui);
     if (!bOK)
@@ -2257,6 +2090,61 @@ void ASimulationManager::clearTracks()
 {
     for (auto * tr : Tracks) delete tr;
     Tracks.clear();
+}
+
+void ASimulationManager::clearNodes()
+{
+    qDebug() << "Nodes cleared!";
+    for (auto * n : Nodes) delete n;
+    Nodes.clear();
+}
+
+const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
+{
+    clearNodes();
+
+    QFile file(fileName);
+    if(!file.open(QIODevice::ReadOnly | QFile::Text))
+        return "Failed to open file "+fileName;
+
+    QTextStream in(&file);
+    ANodeRecord * prevNode = nullptr;
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (line.startsWith('#')) continue; //comment
+        QStringList sl = line.split(' ', QString::SkipEmptyParts);
+        if (sl.isEmpty()) continue; //alow empty lines
+        // x y z time num *
+        // 0 1 2   3   4  5
+        int size = sl.size();
+        if (size < 4) return "Unexpected format of line: cannot find x y z t information";
+        bool bOK;
+        double x = sl.at(0).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
+        double y = sl.at(1).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
+        double z = sl.at(2).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
+        double t = sl.at(3).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
+        int    n = -1;
+        if (sl.size() > 4)
+        {
+               n = sl.at(4).toInt(&bOK);
+               if (!bOK) return "Bad format of line: conversion to number failed";
+        }
+        bool   a = false; // append?
+        if (sl.size() > 5)
+               if (sl.at(5) == '*')
+               {
+                   if (!prevNode) return "'*' cannot be at the first node record";
+                   a = true;
+               }
+
+         ANodeRecord * node = ANodeRecord::createS(x, y, z, t, n);
+         if (a) prevNode->addLinkedNode(node);
+         else Nodes.push_back(node);
+    }
+
+    file.close();
+    return "";
 }
 
 void ASimulationManager::onSimulationFinished()

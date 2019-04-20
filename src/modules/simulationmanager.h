@@ -2,7 +2,6 @@
 #define SIMULATION_MANAGER_H
 
 #include "generalsimsettings.h"
-#include "scanfloodstructure.h"
 #include "aphoton.h"
 #include "dotstgeostruct.h"
 #include "atrackbuildoptions.h"
@@ -43,6 +42,7 @@ class ASimulatorRunner;
 class GeoMarkerClass;
 class AParticleGun;
 class QProcess;
+class ANodeRecord;
 
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
 class TThread;
@@ -76,10 +76,14 @@ public:
     QVector<AEnergyDepositionCell*> EnergyVector;
 
     std::vector<TrackHolderClass *> Tracks;
+    std::vector<ANodeRecord *> Nodes;
 
     void StartSimulation(QJsonObject &json, int threads, bool fStartedFromGui);
 
     void clearTracks();
+    void clearNodes();
+
+    const QString loadNodesFromFile(const QString & fileName);
 
     // Next three: Simulators use their own local copies constructed using configuration in JSON
     ASourceParticleGenerator*     ParticleSources = 0;         //used to update JSON on config changes and in GUI to configure
@@ -115,10 +119,11 @@ public:
     enum State { SClean, SSetup, SRunning, SFinished/*, SStopRequest*/ };
     QString modeSetup;
 
-    explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, QObject *parent = 0);
+    explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, ASimulationManager* simMan, QObject *parent = 0);
     virtual ~ASimulatorRunner();
 
-    bool setup(QJsonObject &json, int threadCount, bool bFromGui);
+    bool setup(QJsonObject &json, int threadCount, bool bFromGui); // main processing of the configuration is here
+
     void updateGeoManager();
     bool getStoppedByUser() const { return fStopRequested; /*simState == SStopRequest;*/ }
     void updateStats();
@@ -158,8 +163,9 @@ private:
     Simulator *backgroundWorker;
 
     //External settings
-    DetectorClass *detector;
-    EventsDataClass *dataHub;
+    DetectorClass *detector = 0;
+    EventsDataClass *dataHub = 0;
+    ASimulationManager *simMan = 0;
     GeneralSimSettings simSettings;
 
     //Time
@@ -191,14 +197,14 @@ signals:
 class Simulator
 {
 public:
-    Simulator(const DetectorClass *detector, const int ID);
+    Simulator(const DetectorClass *detector, ASimulationManager *simMan, const int ID);
     virtual ~Simulator();
 
     const DetectorClass *getDetector() { return detector; }
     const QString getErrorString() const { return ErrorString; }
     virtual int getEventsDone() const = 0;
 
-    char progress;
+    char progress = 0;
 
     std::vector<TrackHolderClass *> tracks;  //temporary container for track data
 
@@ -227,6 +233,7 @@ protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
     const DetectorClass *detector;          // external
+    const ASimulationManager *simMan;       // external
     const GeneralSimSettings *simSettings;  // external
     TRandom2 *RandGen;                      // local
     AOneEvent* OneEvent;                    // local         //PM hit data for one event is stored here
@@ -238,9 +245,9 @@ protected:
     int ID;
 
     //state control
-    int eventBegin;
+    int eventBegin = 0;
     int eventCurrent; //to be updated by implementor, or override getEventsDone()
-    int eventEnd;
+    int eventEnd = 0;
 
     //control settings
     bool fUpdateGUI;
@@ -255,7 +262,7 @@ private:
 class PointSourceSimulator : public Simulator
 {
 public:
-    explicit PointSourceSimulator(const DetectorClass *detector, int ID);
+    explicit PointSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID);
     ~PointSourceSimulator();
 
     virtual int getEventCount() const;
@@ -278,17 +285,17 @@ private:
     void GenerateTraceNphotons(AScanRecord *scs, double time0 = 0, int iPoint = 0);
     bool FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double &driftSpeedInSecScint);
     void OneNode(double *r, double time0 = 0);
-    void doLRFsimulatedEvent(double *r);
-    void GenerateFromSecond(AScanRecord *scs, double time0);
-    bool isInsideLimitingObject(double *r);
+    void OneNode(const ANodeRecord & node);
+    void doLRFsimulatedEvent(const double *r);
+    bool isInsideLimitingObject(const double *r);
     virtual void ReserveSpace(int expectedNumEvents);
 
     QJsonObject simOptions;
-    TH1I *CustomHist; //custom photon generation distribution
+    TH1I * CustomHist = 0; //custom photon generation distribution
 
     APhoton PhotonOnStart; //properties of the photon which are used to initiate Photon_Tracker
 
-    int totalEventCount;
+    int totalEventCount = 0;
 
     int PointSimMode;            // 0-Single 1-Scan 2-Flood    
     int ScintType;               // 1 - primary, 2 - secondary
@@ -313,23 +320,13 @@ private:
 
     //wavelength and time options
     bool fUseGivenWaveIndex;
-    //bool fAutomaticWaveTime = false;
     double iFixedWaveIndex;
-    //double DecayTime;
-    //int iMatIndex;
-
-    //bad events options
-    QVector<ScanFloodStructure> BadEventConfig;
-    bool fBadEventsOn;
-    double BadEventTotalProbability;
-    double SigmaDouble; //Gaussian distribution is used to position second event
-
 };
 
 class ParticleSourceSimulator : public Simulator
 {
 public:
-    explicit ParticleSourceSimulator(const DetectorClass *detector, int ID);
+    explicit ParticleSourceSimulator(const DetectorClass *detector, ASimulationManager *simMan, int ID);
     ~ParticleSourceSimulator();
 
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }
@@ -376,7 +373,7 @@ private:
     //local use - container which particle generator fills for each event; the particles are deleted by the tracker
     QVector<AParticleRecord*> GeneratedParticles;
 
-    int totalEventCount;
+    int totalEventCount = 0;
     double timeFrom, timeRange;
     double updateFactor;
 

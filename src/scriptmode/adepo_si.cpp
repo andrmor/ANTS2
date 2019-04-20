@@ -222,7 +222,7 @@ bool ADepo_SI::doTracking(bool bDoTracks)
     simSettings.TrackBuildOptions.bBuildParticleTracks = bDoTracks;
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0);
+    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0, 0);
     pss->setSimSettings(&simSettings);
     pss->setup(json);
     pss->initSimStat();

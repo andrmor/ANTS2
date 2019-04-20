@@ -39,7 +39,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabConfig">
      <attribute name="title">
@@ -7622,7 +7622,7 @@ Second click will trigger strong abort mode, which will result in loss of all si
            </font>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabSinglePoint">
            <attribute name="title">

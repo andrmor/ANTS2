@@ -37,3 +37,15 @@ void ANodeRecord::addLinkedNode(ANodeRecord * node)
     while (n->LinkedNode) n = n->LinkedNode;
     n->LinkedNode = node;
 }
+
+int ANodeRecord::getNumberOfLinkedNodes()
+{
+    int counter = 0;
+    ANodeRecord * node = this;
+    while (node->LinkedNode)
+    {
+        counter++;
+        node = node->LinkedNode;
+    }
+    return counter;
+}

@@ -11,6 +11,7 @@ public:
 
     void addLinkedNode(ANodeRecord * node); // ownership is transferred to the chain of linked node of this node
 
+    int    getNumberOfLinkedNodes();
     double getX() const {return R[0];}
     double getY() const {return R[1];}
     double getZ() const {return R[2];}
@@ -35,7 +36,7 @@ public:
     double Time = 0;
     int    NumPhot = -1; // -1 means no override
 
-    const ANodeRecord * getLinkedNode() const {return LinkedNode;}
+    ANodeRecord * getLinkedNode() const {return LinkedNode;}
 
 private:
     ANodeRecord * LinkedNode = nullptr;

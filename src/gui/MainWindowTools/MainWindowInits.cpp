@@ -290,7 +290,6 @@ MainWindow::MainWindow(DetectorClass *Detector,
      << ui->sbPMtype << ui->fUpperLowerArrays << ui->sbPMtypeForGroup
      << ui->pbRebuildDetector << ui->fReloadRequired << ui->pbYellow << ui->pbGDML << ui->fGunMultipleEvents;
     for (int i=0;i<invis.length();i++) invis[i]->setVisible(false);
-    ui->frLimitNodesTo->setVisible( ui->twSingleScan->currentIndex()!=0 );
     QList<QWidget*> disables;
     disables << ui->fFixedDir << ui->fFixedWorldSize;
     for (int i=0;i<disables.length();i++) disables[i]->setEnabled(false);

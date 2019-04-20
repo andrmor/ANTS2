@@ -799,7 +799,7 @@ bool PointSourceSimulator::SimulateSingle()
         OneNode(*node);
         eventCurrent = irun;
         progress = irun * updateFactor;
-        if(fStopRequested) return false;
+        if (fStopRequested) return false;
     }
     return true;
 }
@@ -863,12 +863,6 @@ bool PointSourceSimulator::SimulateRegularGrid()
                     if (!RegGridFlagPositive[axis]) ioffset = -0.5*( RegGridNodes[axis] - 1 );
                     for (int i=0; i<3; i++) node->R[i] += (ioffset + iAxis[axis]) * RegGridStep[axis][i];
                 }
-                if (fLimitNodesToObject && !isInsideLimitingObject(node->R))
-                  { //shift to unrealistic position to supress this mode
-                    node->R[0] = 1e10;
-                    node->R[1] = 1e10;
-                    node->R[2] = 1e10;
-                  }
 
                 //running this node              
                 for (int irun = 0; irun<NumRuns; irun++)
@@ -979,17 +973,14 @@ bool PointSourceSimulator::SimulateCustomNodes()
   int currentNode = eventBegin;
   eventCurrent = 0;
   double updateFactor = 100.0 / ( NumRuns*nodeCount );
-  std::unique_ptr<ANodeRecord> outNode(ANodeRecord::createS(1e10, 1e10, 1e10));
 
   for (int inode = 0; inode < nodeCount; inode++)
   {
-      const ANodeRecord * thisNode = simMan->Nodes.at(currentNode);
-      bool bInside = !(fLimitNodesToObject && !isInsideLimitingObject(thisNode->R));
+      ANodeRecord * thisNode = simMan->Nodes.at(currentNode);
 
       for (int irun = 0; irun<NumRuns; irun++)
       {
-          OneNode( bInside ? *thisNode : *outNode );
-          //OneNode(r, time0); //takes care of the number of runs
+          OneNode(*thisNode);
           eventCurrent++;
           progress = eventCurrent * updateFactor;
           if(fStopRequested) return false;
@@ -1184,84 +1175,69 @@ bool PointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z
     return true;
 }
 
-void PointSourceSimulator::OneNode(double *r, double time0)
+void PointSourceSimulator::OneNode(ANodeRecord & node)
 {
-  if (simSettings->fLRFsim)
-  {
-      doLRFsimulatedEvent(r); //note: simulation of "bad" events disabled in this case!
-      return;
-  }
+    ANodeRecord * thisNode = &node;
+    std::unique_ptr<ANodeRecord> outNode(ANodeRecord::createS(1e10, 1e10, 1e10)); // if outside will use this instead of thisNode
 
-  AScanRecord* scs = new AScanRecord();
-  scs->ScintType = ScintType;
-  scs->Points[0].r[0] = r[0];
-  scs->Points[0].r[1] = r[1];
-  scs->Points[0].r[2] = r[2];
+    const int numPoints = 1 + thisNode->getNumberOfLinkedNodes();
+    OneEvent->clearHits();
+    AScanRecord* sr = new AScanRecord();
+    sr->Points.Reinitialize(numPoints);
+    sr->ScintType = ScintType;
 
-  OneEvent->clearHits(); //cleaning the PMhits
-  scs->Points[0].energy = PhotonsToRun(); //number of photons to run
-
-  GenerateTraceNphotons(scs, time0); //no noise or additive noise
-
-  OneEvent->HitsToSignal();
-  dataHub->Events.append(OneEvent->PMsignals);
-  if (simSettings->fTimeResolved) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
-  dataHub->Scan.append(scs);
-}
-
-void PointSourceSimulator::OneNode(const ANodeRecord & node)
-{
-    if (!simSettings->fLRFsim)
+    for (int iPoint = 0; iPoint < numPoints; iPoint++)
     {
-        AScanRecord* scs = new AScanRecord();
-        scs->ScintType = ScintType;
-        for (int i=0; i<3; i++)
-            scs->Points[0].r[i] = node.R[i];
+        const bool bInside = !(fLimitNodesToObject && !isInsideLimitingObject(thisNode->R));
+        if (bInside)
+        {
+            for (int i=0; i<3; i++) sr->Points[iPoint].r[i] = thisNode->R[i];
+            sr->Points[iPoint].energy = (thisNode->NumPhot == -1 ? PhotonsToRun() : thisNode->NumPhot);
+        }
+        else
+        {
+            for (int i=0; i<3; i++) sr->Points[iPoint].r[i] =  outNode->R[i];
+            sr->Points[iPoint].energy = 0;
+        }
 
-        OneEvent->clearHits(); //cleaning the PMhits
-        scs->Points[0].energy = PhotonsToRun(); //number of photons to run
+        if (!simSettings->fLRFsim)
+        {
+            GenerateTraceNphotons(sr, thisNode->Time);
+        }
+        else
+        {
+            if (bInside)
+            {
+                // NumPhotElPerLrfUnity - scaling: LRF of 1.0 corresponds to NumPhotElPerLrfUnity photo-electrons
+                int numPhots = sr->Points[iPoint].energy;  // photons (before scaling) to generate at this node
+                double energy = 1.0 * numPhots / simSettings->NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
 
-        GenerateTraceNphotons(scs, node.Time); //no noise or additive noise
+                //Generating events
+                for (int ipm = 0; ipm < detector->PMs->count(); ipm++)
+                {
+                    double avSignal = detector->LRFs->getLRF(ipm, thisNode->R) * energy;
+                    double avPhotEl = avSignal * simSettings->NumPhotElPerLrfUnity;
+                    double numPhotEl = RandGen->Poisson(avPhotEl);
 
-        OneEvent->HitsToSignal();
-        dataHub->Events.append(OneEvent->PMsignals);
-        if (simSettings->fTimeResolved) dataHub->TimedEvents.append(OneEvent->TimedPMsignals);
-        dataHub->Scan.append(scs);
+                    double signal = numPhotEl / simSettings->NumPhotElPerLrfUnity;  // back to LRF units
+                    OneEvent->PMsignals[ipm] += signal;
+                }
+            }
+            //if outside nothing to do
+        }
+
+        //if exists, continue to work with the linked node(s)
+        thisNode = thisNode->getLinkedNode();
     }
-    else
-    {
-        doLRFsimulatedEvent(node.R); //note: simulation of "bad" events disabled in this case!
-        return;
-    }
-}
+    while (thisNode);
 
-void PointSourceSimulator::doLRFsimulatedEvent(const double *r)
-{
-  // NumPhotElPerLrfUnity - scaling: LRF of 1.0 corresponds to NumPhotElPerLrfUnity photo-electrons
+    if (!simSettings->fLRFsim) OneEvent->HitsToSignal();
 
-  int numPhots = PhotonsToRun();  // photons (before scaling) to generate at this node
-  double energy = 1.0 * numPhots / simSettings->NumPhotsForLrfUnity; // NumPhotsForLRFunity corresponds to the total number of photons per event for unitary LRF
+    dataHub->Events.append(OneEvent->PMsignals);
+    if (simSettings->fTimeResolved)
+        dataHub->TimedEvents.append(OneEvent->TimedPMsignals);  //LRF sim for time-resolved will give all zeroes!
 
-  //Generating events
-  QVector<float> ev;
-  for (int ipm = 0; ipm < detector->PMs->count(); ipm++)
-    {
-      double avSignal = detector->LRFs->getLRF(ipm, r) * energy;
-      double avPhotEl = avSignal * simSettings->NumPhotElPerLrfUnity;
-      double numPhotEl = RandGen->Poisson(avPhotEl);
-
-      double signal = numPhotEl / simSettings->NumPhotElPerLrfUnity;  // back to LRF units
-      ev << signal;
-    }
-  dataHub->Events.append(ev); // *** NO TIMED EVENTS !!!
-
-  //Populating Scan
-  AScanRecord* ss = new AScanRecord();
-  ss->Points[0].r[0] = r[0];
-  ss->Points[0].r[1] = r[1];
-  ss->Points[0].r[2] = r[2];
-  ss->Points[0].energy = numPhots;
-  dataHub->Scan.append(ss);
+    dataHub->Scan.append(sr);
 }
 
 bool PointSourceSimulator::isInsideLimitingObject(const double *r)
@@ -2094,7 +2070,6 @@ void ASimulationManager::clearTracks()
 
 void ASimulationManager::clearNodes()
 {
-    qDebug() << "Nodes cleared!";
     for (auto * n : Nodes) delete n;
     Nodes.clear();
 }
@@ -2109,6 +2084,7 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
 
     QTextStream in(&file);
     ANodeRecord * prevNode = nullptr;
+    bool bAppendNext = false;
     while (!in.atEnd())
     {
         QString line = in.readLine();
@@ -2130,17 +2106,12 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
                n = sl.at(4).toInt(&bOK);
                if (!bOK) return "Bad format of line: conversion to number failed";
         }
-        bool   a = false; // append?
-        if (sl.size() > 5)
-               if (sl.at(5) == '*')
-               {
-                   if (!prevNode) return "'*' cannot be at the first node record";
-                   a = true;
-               }
 
-         ANodeRecord * node = ANodeRecord::createS(x, y, z, t, n);
-         if (a) prevNode->addLinkedNode(node);
-         else Nodes.push_back(node);
+        ANodeRecord * node = ANodeRecord::createS(x, y, z, t, n);
+        if (bAppendNext) prevNode->addLinkedNode(node);
+        else Nodes.push_back(node);
+        prevNode = node;
+        bAppendNext = (sl.size() > 5 && sl.at(5) == '*');
     }
 
     file.close();

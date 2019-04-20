@@ -284,9 +284,7 @@ private:
     int  PhotonsToRun();
     void GenerateTraceNphotons(AScanRecord *scs, double time0 = 0, int iPoint = 0);
     bool FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double &driftSpeedInSecScint);
-    void OneNode(double *r, double time0 = 0);
-    void OneNode(const ANodeRecord & node);
-    void doLRFsimulatedEvent(const double *r);
+    void OneNode(ANodeRecord & node);
     bool isInsideLimitingObject(const double *r);
     virtual void ReserveSpace(int expectedNumEvents);
 

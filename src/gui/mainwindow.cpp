@@ -2805,11 +2805,6 @@ void MainWindow::on_pbScanDistrDelete_clicked()
   MainWindow::on_pbUpdateSimConfig_clicked();
 }
 
-void MainWindow::on_twSingleScan_currentChanged(int index)
-{  
-  ui->frLimitNodesTo->setVisible( index != 0 );
-}
-
 void MainWindow::on_cobSecScintillationGenType_currentIndexChanged(int index)
 {
   if (index == 3) ui->fSecondaryScintLoadProfile->setVisible(true);
@@ -5017,10 +5012,11 @@ void MainWindow::on_pbNodesFromFileHelp_clicked()
         "x y z time [number] [*]\n"
         "\n"
         "'number' is optional:\n"
-        "   if present, the provided integer value overrides the standard number of photons\n"
+        "   if present, the provided integer value\n"
+        "   overrides the standard number of photons\n"
         "optional '*':\n"
         "   indicates that the next line does not start a new event,\n"
-        "   and the next node is added to the same event.";
+        "   i.e. the next node is added to the same event.";
     message(s, this);
 }
 

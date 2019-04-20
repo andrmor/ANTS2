@@ -337,7 +337,6 @@ private slots:
     void on_actionSave_position_and_stratus_of_all_windows_triggered();
     void on_actionLoad_positions_and_status_of_all_windows_triggered();
     void on_actionMaterial_inspector_window_triggered();
-    void on_twSingleScan_currentChanged(int index);
     void on_cbEnableElNoise_toggled(bool checked);
     void on_actionExamples_triggered();
     void on_cobSecScintillationGenType_currentIndexChanged(int index);

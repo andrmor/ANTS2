@@ -1039,7 +1039,7 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0,
     PhotonOnStart.r[1] = scs->Points[iPoint].r[1];
     PhotonOnStart.r[2] = scs->Points[iPoint].r[2];
     PhotonOnStart.scint_type = scs->ScintType;
-    PhotonOnStart.time = 0;
+    PhotonOnStart.time = time0;
 
     //================================
     for (int i=0; i<scs->Points[iPoint].energy; i++)
@@ -1074,7 +1074,7 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0,
         //else it is already set
 
         //configure  wavelength index and emission time
-        PhotonOnStart.time = 0;   //reset time offset to zero
+        PhotonOnStart.time = time0;   //reset time offset
         TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
 
         int thisMatIndex;
@@ -2090,7 +2090,8 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
 
     QTextStream in(&file);
     ANodeRecord * prevNode = nullptr;
-    bool bAppendNext = false;
+    bool bAppendThis = false;
+
     while (!in.atEnd())
     {
         QString line = in.readLine();
@@ -2098,26 +2099,41 @@ const QString ASimulationManager::loadNodesFromFile(const QString &fileName)
         QStringList sl = line.split(' ', QString::SkipEmptyParts);
         if (sl.isEmpty()) continue; //alow empty lines
         // x y z time num *
-        // 0 1 2   3   4  5
+        // 0 1 2   3   4  last
         int size = sl.size();
-        if (size < 4) return "Unexpected format of line: cannot find x y z t information";
+        if (size < 3) return "Unexpected format of line: cannot find x y z t information:\n" + line;
+
+        bool bAppendNext = false; // bAppendNext will be in effect for the next node, not this!
+        if (sl.last() == '*')
+        {
+            bAppendNext = true;
+            sl.removeLast();
+        }
+
         bool bOK;
-        double x = sl.at(0).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
-        double y = sl.at(1).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
-        double z = sl.at(2).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
-        double t = sl.at(3).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed";
-        int    n = -1;
+        double x = sl.at(0).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed:\n" + line;
+        double y = sl.at(1).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed:\n" + line;
+        double z = sl.at(2).toDouble(&bOK); if (!bOK) return "Bad format of line: conversion to number failed:\n" + line;
+
+        double t = 0;
+        if (sl.size() > 3)
+        {
+            t = sl.at(3).toDouble(&bOK);
+            if (!bOK) return "Bad format of line: conversion to number failed:\n" + line;
+        }
+
+        int n = -1;
         if (sl.size() > 4)
         {
-               n = sl.at(4).toInt(&bOK);
-               if (!bOK) return "Bad format of line: conversion to number failed";
+            n = sl.at(4).toInt(&bOK);
+            if (!bOK) return "Bad format of line: conversion to int failed:\n" + line;
         }
 
         ANodeRecord * node = ANodeRecord::createS(x, y, z, t, n);
-        if (bAppendNext) prevNode->addLinkedNode(node);
+        if (bAppendThis) prevNode->addLinkedNode(node);
         else Nodes.push_back(node);
         prevNode = node;
-        bAppendNext = (sl.size() > 5 && sl.at(5) == '*');
+        bAppendThis = bAppendNext;
     }
 
     file.close();

@@ -50,6 +50,7 @@ public slots:
   void SetShowOnlyFirstEvents(bool fOn, int number = -1);
   void ShowTruePositions();
   void ShowTracks(int num, int OnlyColor = -1);
+  void ShowCustomNodes(int firstN = -1);
   void ShowSPS_position();
   void ShowTracksMovie(int num, int steps, int msDelay, double dTheta, double dPhi, double rotSteps, int color = -1);
 

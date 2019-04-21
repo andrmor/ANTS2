@@ -4932,19 +4932,20 @@ void MainWindow::on_pbLoadExampleFileFromFileGen_clicked()
     updateFileParticleGeneratorGui();
 }
 
-#include "anoderecord.h"
 void MainWindow::on_pbNodesFromFileHelp_clicked()
 {
     QString s;
-    s = "Each line in the file represents a single node:\n"
-        "x y z time [number] [*]\n"
-        "\n"
-        "'number' is optional:\n"
-        "   if present, the provided integer value\n"
-        "   overrides the standard number of photons\n"
-        "optional '*':\n"
-        "   indicates that the next line does not start a new event,\n"
-        "   i.e. the next node is added to the same event.";
+    s = "Each line in the file represents a single node.\n"
+        "The format is:\n\n"
+        "X Y Z [Time] [PhotNumberOverride] [*]\n\n"
+        "Arguments:\n\n"
+        "XYZ - position of the node\n\n"
+        "Optional arguments:\n\n"
+        "Time - photon generation time (0 is default)\n\n"
+        "PhotNumberOverride - the provided integer value\n"
+        "   overrides the standard number of photons configured for nodes.\n\n"
+        "* - if present, the next node will be added to the same event.\n"
+        "   '*' should be in the last position of the line.";
     message(s, this);
 }
 
@@ -4957,10 +4958,14 @@ void MainWindow::on_pbNodesFromFileChange_clicked()
     on_pbUpdateSimConfig_clicked();
 }
 
+#include "anoderecord.h"
 void MainWindow::on_pbNodesFromFileCheckShow_clicked()
 {
     QString fileName = ui->leNodesFromFile->text();
     QString err = SimulationManager->loadNodesFromFile(fileName);
+
+    int numTop = 0;
+    int numTotal = 0;
     if (!err.isEmpty()) message(err, this);
     else
     {
@@ -4969,14 +4974,18 @@ void MainWindow::on_pbNodesFromFileCheckShow_clicked()
         GeoMarkerClass* marks = new GeoMarkerClass("Nodes", 6, 2, kBlack);
         for (ANodeRecord * topNode : SimulationManager->Nodes)
         {
+            numTop++;
             ANodeRecord * node = topNode;
             while (node)
             {
-                marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
+                numTotal++;
+                if (numTotal < 10000) marks->SetNextPoint(node->getX(), node->getY(), node->getZ());
                 node = node->getLinkedNode();
             }
         }
         GeoMarkers.append(marks);
         GeometryWindow->ShowGeometry();
     }
+
+    message(QString("The file containes %1 top nodes\n(%2 nodes counting subnodes)").arg(numTop).arg(numTotal), this);
 }

@@ -60,7 +60,7 @@ const QString AG4SimulationSettings::getDepositionFileName(int iThreadNum) const
 
 const QString AG4SimulationSettings::getReceitFileName(int iThreadNum) const
 {
-    return getPath() + QString("receipt-%1.txt").arg(iThreadNum);
+    return getPath() + QString("receipt-%1.json").arg(iThreadNum);
 }
 
 const QString AG4SimulationSettings::getConfigFileName(int iThreadNum) const

@@ -1888,17 +1888,24 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
     }
 
     // read receipt file, stop if not "OK"
-    QString receipe = simSettings->G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
-    QString res;
-    bool bOK = LoadTextFromFile(receipe, res);
+    QString receipeFileName = simSettings->G4SimSet.getReceitFileName(ID); // FilePath + QString("receipt-%1.txt").arg(ID);
+    QJsonObject jrec;
+    bool bOK = LoadJsonFromFile(jrec, receipeFileName);
+    //qDebug() << jrec;
     if (!bOK)
     {
         ErrorString = "Could not read the receipt file";
         return false;
     }
-    if (!res.startsWith("OK"))
+    if (!jrec.contains("Success"))
     {
-        ErrorString = res;
+        ErrorString = "Unknown format of receipt file";
+        return false;
+    }
+    bool bStatus = jrec["Success"].toBool();
+    if (!bStatus)
+    {
+        parseJson(jrec, "Error", ErrorString);
         return false;
     }
 

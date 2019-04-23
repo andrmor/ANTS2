@@ -459,6 +459,10 @@ AInterfaceToGraph::AInterfaceToGraph(TmpObjHubClass *TmpHub)
     H["SetMarkerProperties"] = "Default marker properties are 1, 20, 1";
     H["SetLineProperties"] = "Default line properties are 1, 1, 2";
     H["Draw"] = "Draws the graph (use \"APL\" options if in doubt)";
+
+    H["AddPoints"] = "Can add arrays of point using two options:\n"
+            "1. Provide two arrays - one for X and one for Y coordinates of the points;\n"
+            "2. Provide an array of [x,y] arrays of points.";
 }
 
 AInterfaceToGraph::AInterfaceToGraph(const AInterfaceToGraph &other) :

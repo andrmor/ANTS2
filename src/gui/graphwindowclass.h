@@ -260,8 +260,8 @@ private slots:
     void on_actionToggle_toolbar_triggered(bool checked);
 
 private:
-    Ui::GraphWindowClass *ui;
     MainWindow *MW;
+    Ui::GraphWindowClass *ui;
     RasterWindowGraphClass *RasterWindow = 0;
     //QWidget *QWinContainer = 0;
     bool ExtractionCanceled = false;

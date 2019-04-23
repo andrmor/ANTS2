@@ -415,7 +415,7 @@ const QString AWeb_SI::SendTicket(const QString &ticket)
 
 const QString AWeb_SI::SendObject(const QVariant &object)
 {
-    if (object.type() != QMetaType::QVariantMap)
+    if (object.type() != QVariant::Map)
     {
         abort("Argument type of SendObject() method should be object!");
         return "";

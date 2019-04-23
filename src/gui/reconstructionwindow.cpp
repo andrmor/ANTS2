@@ -81,7 +81,8 @@
 
 ReconstructionWindow::~ReconstructionWindow()
 {
-  if (vo) delete vo; vo = 0;
+  if (vo) delete vo;
+  vo = 0;
   if (dialog)
     {
       disconnect(vo, SIGNAL(PMselectionChanged(QVector<int>)), this, SLOT(onSelectionChange(QVector<int>)));

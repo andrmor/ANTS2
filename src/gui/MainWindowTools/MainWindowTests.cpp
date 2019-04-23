@@ -353,7 +353,7 @@ void MainWindow::on_pbShowEnergyDeposition_clicked()
   double Length = 0;
 
   //info on this particle starts at i
-  for (i; i<EnergyVector.size();i++)
+  for (; i<EnergyVector.size(); i++)
     {
       if (EnergyVector[i]->index != index) break; //another particle starts here
 

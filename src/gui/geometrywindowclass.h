@@ -100,8 +100,8 @@ private slots:
     void on_pbShowMonitorIndexes_clicked();
 
 private:
-  Ui::GeometryWindowClass *ui;
   MainWindow* MW;
+  Ui::GeometryWindowClass *ui;
   RasterWindowBaseClass *RasterWindow = 0;
 
   bool TMPignore = false;

@@ -1116,70 +1116,35 @@ void PointSourceSimulator::GenerateTraceNphotons(AScanRecord *scs, double time0,
 
 bool PointSourceSimulator::FindSecScintBounds(double *r, double & z1, double & z2, double & timeOfDrift, double & driftSpeedInSecScint)
 {
-    TString VolName;
     TGeoNavigator *navigator = detector->GeoManager->GetCurrentNavigator();
-
     navigator->SetCurrentPoint(r);
     navigator->SetCurrentDirection(0, 0, 1.0);
-    navigator->FindNode(); // TODO check node does not exist ***!!!
-    int FoundWhere = 0;  //if found on way up = 1,  if found on way down = -1
-    double dTime = 0;
+    TGeoNode * node = navigator->FindNode();
+    if (!node) return false;
+
+    timeOfDrift = 0;
     double iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();
+    //going up until exit geometry or find SecScint
     do
     {
-        //going up until exit geometry or find SecScint
         navigator->FindNextBoundaryAndStep();
-        double Step = navigator->GetStep();
-        double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat);
-        iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex(); //next mat
+        if (navigator->IsOutside()) return false;
+
+        double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat); // still previous iMat
+        iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex();    // next iMat
         if (DriftVelocity != 0)
-            dTime += Step / DriftVelocity;
-        VolName = navigator->GetCurrentVolume()->GetName();
-        //     qDebug()<<VolName;
-        if (VolName == "SecScint")
         {
-            FoundWhere = 1;
-            timeOfDrift = dTime;
-            break;
-        }
-    }
-    while (!navigator->IsOutside());
-
-    if (FoundWhere == 0)
-    {
-        dTime = 0;
-        //      qDebug()<<"Exited geometry on the way up";
-        //going down until find SecScint or exit geometry again
-        navigator->SetCurrentDirection(0, 0, -1.0);
-        do
-        {
-            navigator->FindNextBoundaryAndStep();
             double Step = navigator->GetStep();
-            double DriftVelocity = detector->MpCollection->getDriftSpeed(iMat);
-            iMat = navigator->GetCurrentVolume()->GetMaterial()->GetIndex(); //next mat
-            if (DriftVelocity != 0)
-                dTime += Step / DriftVelocity;
-            VolName = navigator->GetCurrentVolume()->GetName();
-            //         qDebug()<<VolName;
-            if (navigator->IsOutside())
-            {
-                //             qDebug()<<"SecScint not found for this XY!";
-                return false;
-            }
+            timeOfDrift += Step / DriftVelocity;
         }
-        while (VolName != "SecScint");
-        FoundWhere = -1;
-        timeOfDrift = dTime;
     }
+    while (navigator->GetCurrentVolume()->GetName() != SecScintName);
 
-    //  qDebug()<<"Found SecSci on the way down";
     driftSpeedInSecScint = detector->MpCollection->getDriftSpeed(iMat);
-    if (FoundWhere == 1) z1 = navigator->GetCurrentPoint()[2];
-    else z2 = navigator->GetCurrentPoint()[2];
+    z1 = navigator->GetCurrentPoint()[2];
     navigator->FindNextBoundary(); //does not step - we are still inside SecScint!
     double SecScintWidth = navigator->GetStep();
-    if (FoundWhere == 1) z2 = z1 + SecScintWidth;
-    else z1 = z2 - SecScintWidth;
+    z2 = z1 + SecScintWidth;
     return true;
 }
 

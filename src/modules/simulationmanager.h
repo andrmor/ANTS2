@@ -299,6 +299,8 @@ private:
     int ScintType;               // 1 - primary, 2 - secondary
     int NumRuns;                 // multiple runs per node
 
+    TString SecScintName = "SecScint";
+
     //bool fOnlyPrimScint; //do not create event outside of prim scintillator
     bool fLimitNodesToObject;
     TString LimitNodesToObject;

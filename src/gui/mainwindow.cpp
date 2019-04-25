@@ -511,9 +511,11 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     ui->cobMaterialForOverrides->clear();
     ui->cobMaterialTo->clear();
     ui->cobMaterialForWaveTests->clear();
-    int numMats = MpCollection->countMaterials();
-    for (int i=0; i<numMats; i++)
-        AddMaterialToCOBs( (*MpCollection)[i]->name );
+    const QStringList mn = MpCollection->getListOfMaterialNames();
+    ui->cobMatPM->addItems(mn);
+    ui->cobMaterialForOverrides->addItems(mn);
+    ui->cobMaterialTo->addItems(mn);
+    ui->cobMaterialForWaveTests->addItems(mn);
 
     MIwindow->UpdateActiveMaterials();
     Owindow->UpdateMaterials();
@@ -521,22 +523,13 @@ void MainWindow::on_pbRefreshMaterials_clicked()
     DoNotUpdateGeometry = tmpBool;
 
     //restore override material selection
+    int numMats = MpCollection->countMaterials();
     if (OvFrom>-1 && OvTo>-1)
         if (OvFrom<numMats && OvTo<numMats)
           {
             ui->cobMaterialForOverrides->setCurrentIndex(OvFrom);
             ui->cobMaterialTo->setCurrentIndex(OvTo);
           }
-}
-
-void MainWindow::AddMaterialToCOBs(QString s)
-{    
-    ui->cobMatPM->addItem(s);
-    ui->cobMaterialForOverrides->addItem(s);
-    ui->cobMaterialTo->addItem(s);
-    ui->cobMaterialForWaveTests->addItem(s);
-
-    MIwindow->AddMatToCobs(s);
 }
 
 void MainWindow::UpdateMaterialListEdit()

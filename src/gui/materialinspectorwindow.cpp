@@ -132,7 +132,6 @@ void MaterialInspectorWindow::SetWasModified(bool flag)
   QString s = " ";
   if (flag) s = "<html><head/><body><p><span style=\" font-size:10pt; color:#ff0000;\">Material was modified: Click one of above to confirm</span></p></body></html>";
   ui->labMatWasModified->setText(s);
-
 }
 
 void MaterialInspectorWindow::UpdateActiveMaterials()
@@ -141,9 +140,8 @@ void MaterialInspectorWindow::UpdateActiveMaterials()
 
     int current = ui->cobActiveMaterials->currentIndex();
 
-    ui->cobActiveMaterials->clear();    
-    for (int i=0;i<MW->MpCollection->countMaterials();i++)
-        ui->cobActiveMaterials->addItem( (*MW->MpCollection)[i]->name);
+    ui->cobActiveMaterials->clear();
+    ui->cobActiveMaterials->addItems(MW->MpCollection->getListOfMaterialNames());
 
     if (current>-1 && current<ui->cobActiveMaterials->count())
     {
@@ -176,20 +174,19 @@ void MaterialInspectorWindow::on_pbAddToActive_clicked()
     QString name = MW->MpCollection->tmpMaterial.name;
     int index = MW->MpCollection->FindMaterial(name);
     if (index > -1)
-      {
+    {
 //        qDebug()<<"This name already in use! index = "<<index;
         switch( QMessageBox::information( this, "", "Update properties for material "+name+"?", "Overwrite", "Cancel", 0, 1 ) )
           {
            case 0:  break;  //overwrite
            default: return; //cancel
           }        
-      }
+    }
     else
-      {
+    {
         //new material
         index = MW->MpCollection->countMaterials(); //then it will be appended, so index is = current size
-        MW->AddMaterialToCOBs(MW->MpCollection->tmpMaterial.name);
-      }
+    }
     MW->MpCollection->CopyTmpToMaterialCollection(); //if absent, new material is created!
     MW->UpdateMaterialListEdit();
 

@@ -193,9 +193,6 @@ public:
 
     void ShowGeoMarkers(); //Show dots on ALREADY PREPARED geometry window!
 
-    //handling of material COBs
-    void AddMaterialToCOBs(QString s);
-
     void CheckPresenseOfSecScintillator();
     void DeleteLoadedEvents(bool KeepFileList = false);       
     void SavePreprocessingAddMulti(QString fileName);

@@ -25,7 +25,7 @@ AMaterial::AMaterial()
 
 double AMaterial::getPhotonYield(int iParticle) const
 {
-    if (iParticle == -1) return PhotonYieldDefault;
+    if (iParticle < 0 || iParticle >= MatParticle.size()) return PhotonYieldDefault;
 
     const double & py = MatParticle.at(iParticle).PhYield;
     if (py == -1) return PhotonYieldDefault;
@@ -323,6 +323,8 @@ void AMaterial::writeToJson(QJsonObject &json, AMaterialParticleCollection* MpCo
   json["RayleighWave"] = rayleighWave;
   json["ReemissionProb"] = reemissionProb;
 
+  json["PhotonYieldDefault"] = PhotonYieldDefault;
+
   json["PrimScint_Model"] = PriScintModel;
   {
     QJsonArray ar;
@@ -457,6 +459,7 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
   parseJson(json, "RayleighMFP", rayleighMFP);
   parseJson(json, "RayleighWave", rayleighWave);
   parseJson(json, "ReemissionProb", reemissionProb);
+  //PhotonYieldDefault for compatibility at the end
 
   parseJson(json, "PrimScint_Model", PriScintModel);
   if (json.contains("PrimScint_Tau")) //compatibility
@@ -660,6 +663,24 @@ bool AMaterial::readFromJson(QJsonObject &json, AMaterialParticleCollection *MpC
           }
       }
     }
+
+  if (!parseJson(json, "PhotonYieldDefault", PhotonYieldDefault))
+  {
+      //qDebug() << "Compatibility mode: no PhotonYieldDefault found";
+      PhotonYieldDefault = 0;
+      if (numParticles != 0)
+      {
+          bool bAllSame = true;
+          for (int iP = 1; iP < numParticles; iP++)
+              if (MatParticle.at(iP).PhYield != MatParticle.at(0).PhYield)
+              {
+                  bAllSame = false;
+                  break;
+              }
+          if (bAllSame) PhotonYieldDefault = MatParticle.at(0).PhYield;
+      }
+  }
+
   return true;
 }
 

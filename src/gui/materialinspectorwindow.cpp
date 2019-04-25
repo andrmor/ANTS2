@@ -368,25 +368,18 @@ void MaterialInspectorWindow::UpdateIndicationTmpMaterial()
     ui->cobParticle->clear();    
     int lastSelected_cobYieldForParticle = ui->cobYieldForParticle->currentIndex();
     ui->cobYieldForParticle->clear();
-    int numPart = Detector->MpCollection->countParticles();
-    for (int i=0; i<numPart; i++)
-      {
-        const QString name = Detector->MpCollection->getParticleName(i);
-        ui->cobParticle->addItem(name);
-        ui->cobYieldForParticle->addItem(name);
-      }
-    if (lastSelected_cobYieldForParticle<0) lastSelected_cobYieldForParticle = 0;
-    if (lastSelected_cobYieldForParticle<numPart) ui->cobYieldForParticle->setCurrentIndex(lastSelected_cobYieldForParticle);
 
-    int iPartForYield = ui->cobYieldForParticle->currentIndex();
-    if (iPartForYield<0)
-      {
-        iPartForYield = 0;
-        ui->cobYieldForParticle->setCurrentIndex(0);
-      }
-    double val = tmpMaterial.MatParticle.at(iPartForYield).PhYield;
+    const QStringList PartList = Detector->MpCollection->getListOfParticleNames();
+    ui->cobParticle->addItems(PartList);
+    ui->cobYieldForParticle->addItems(QStringList() << PartList << "Undefined");
+
+    int numPart = Detector->MpCollection->countParticles();
+    if (lastSelected_cobYieldForParticle < 0) lastSelected_cobYieldForParticle = 0;
+    if (lastSelected_cobYieldForParticle > numPart) //can be "Undefined"
+        lastSelected_cobYieldForParticle = 0;
+    ui->cobYieldForParticle->setCurrentIndex(lastSelected_cobYieldForParticle);
+    double val = tmpMaterial.getPhotonYield(lastSelected_cobYieldForParticle);
     ui->ledPrimaryYield->setText(QString::number(val));
-    ui->cbSameYieldForAll->setChecked( isAllSameYield(val) );
 
     LastSelectedParticle = tmp;
     if (LastSelectedParticle < numPart) ui->cobParticle->setCurrentIndex(LastSelectedParticle);
@@ -511,12 +504,9 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
     tmpMaterial.PriScintModel = ui->cobPriT_model->currentIndex();
 
     double prYield = ui->ledPrimaryYield->text().toDouble();
-    if (ui->cbSameYieldForAll->isChecked())
-      {
-        for (int iP=0; iP<MW->MpCollection->countParticles(); iP++)
-          tmpMaterial.MatParticle[iP].PhYield = prYield;
-      }
-    else tmpMaterial.MatParticle[ui->cobYieldForParticle->currentIndex()].PhYield = prYield;
+    int iP = ui->cobYieldForParticle->currentIndex();
+    if (iP > -1 && iP < tmpMaterial.MatParticle.size()) tmpMaterial.MatParticle[iP].PhYield = prYield;
+    else tmpMaterial.PhotonYieldDefault = prYield;
 
     const int ParticleId = ui->cobParticle->currentIndex();
     tmpMaterial.MatParticle[ParticleId].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
@@ -1034,15 +1024,6 @@ bool MaterialInspectorWindow::importXCOM(QTextStream &in, int particleId)
   //      qDebug()<<tmpMaterial.MatParticle[particleId].InteractionDataX.size();
 
   MaterialInspectorWindow::on_pbWasModified_clicked();
-  return true;
-}
-
-bool MaterialInspectorWindow::isAllSameYield(double val)
-{  
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-
-  for (int iP=0; iP<MW->MpCollection->countParticles(); iP++)
-      if (tmpMaterial.MatParticle.at(iP).PhYield != val) return false;
   return true;
 }
 
@@ -2041,14 +2022,14 @@ void MaterialInspectorWindow::on_pbShowXCOMdata_clicked()
 
 void MaterialInspectorWindow::on_cobYieldForParticle_activated(int index)
 {
-  const AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  ui->ledPrimaryYield->setText( QString::number(tmpMaterial.MatParticle.at(index).PhYield) );
+    const AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+    ui->ledPrimaryYield->setText( QString::number(tmpMaterial.getPhotonYield(index)) );
 }
 
 void MaterialInspectorWindow::on_ledPrimaryYield_textChanged(const QString &arg1)
 {
-    if (arg1.toDouble() != MW->MpCollection->tmpMaterial.MatParticle.at(ui->cobYieldForParticle->currentIndex()).PhYield)
-      on_pbWasModified_clicked();
+    //if (arg1.toDouble() != MW->MpCollection->tmpMaterial.getPhotonYield(ui->cobYieldForParticle->currentIndex()));
+    //    on_pbWasModified_clicked();
 }
 
 bool MaterialInspectorWindow::doLoadCrossSection(ANeutronInteractionElement *element, QString fileName)
@@ -3006,4 +2987,16 @@ void MaterialInspectorWindow::on_pbNew_clicked()
         ui->cobActiveMaterials->setCurrentIndex(index);
         on_cobActiveMaterials_activated(index);
     }
+}
+
+void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
+{
+    if (!confirm("Set the same primary yield value for all particles?", this)) return;
+
+    AMaterial & tmpMaterial = MW->MpCollection->tmpMaterial;
+    double prYield = ui->ledPrimaryYield->text().toDouble();
+    for (int iP = 0; iP < tmpMaterial.MatParticle.size(); iP++)
+            tmpMaterial.MatParticle[iP].PhYield = prYield;
+    tmpMaterial.PhotonYieldDefault = prYield;
+    on_pbWasModified_clicked();
 }

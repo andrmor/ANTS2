@@ -168,6 +168,8 @@ private slots:
 
     void on_pbComputeRangeCharged_clicked();
 
+    void on_pbCopyPrYieldToAll_clicked();
+
 private:
     Ui::MaterialInspectorWindow *ui;
     MainWindow* MW;
@@ -190,7 +192,6 @@ private:
     void showProcessIntCoefficient(int particleId, int TermScenario);
     TGraph* constructInterpolationGraph(QVector<double> X, QVector<double> Y);
     bool importXCOM(QTextStream &in, int particleId);
-    bool isAllSameYield(double val);
 
     bool autoLoadCrossSection(ANeutronInteractionElement *element, QString target); //target = "absorption" or "elastic scattering" - replace with dynamic_cast!!!
     bool doLoadCrossSection(ANeutronInteractionElement *element, QString fileName);

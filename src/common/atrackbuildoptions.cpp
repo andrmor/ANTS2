@@ -150,6 +150,12 @@ void ATrackBuildOptions::readFromJson(const QJsonObject &json)
 
 void ATrackBuildOptions::applyToParticleTrack(TrackHolderClass *track, int ParticleId) const
 {
+    if (ParticleId < 0)
+    {
+        TA_DefaultParticle.setTrackAttributes(track);
+        return;
+    }
+
     if ( ParticleId < CustomParticle_Attributes.size() && CustomParticle_Attributes.at(ParticleId) )
     {
         //custom properties defined for this particle

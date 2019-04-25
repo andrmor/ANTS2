@@ -20,7 +20,16 @@
 
 AMaterial::AMaterial()
 {
-  clear();
+    clear();
+}
+
+double AMaterial::getPhotonYield(int iParticle) const
+{
+    if (iParticle == -1) return PhotonYieldDefault;
+
+    const double & py = MatParticle.at(iParticle).PhYield;
+    if (py == -1) return PhotonYieldDefault;
+    return py;
 }
 
 double AMaterial::getRefractiveIndex(int iWave) const

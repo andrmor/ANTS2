@@ -43,6 +43,9 @@ public:
   QVector<APair_ValueAndWeight> PriScint_Raise;
   int PriScintModel = 0; //0=sum, 1=Shao
 
+  double PhotonYieldDefault = 0;
+  double getPhotonYield(int iParticle) const;
+
   double SecScintDecayTime;
   QString Comments;
 

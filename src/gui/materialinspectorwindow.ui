@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>768</height>
+    <width>636</width>
+    <height>791</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -130,6 +130,19 @@
          <string>leName</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_22">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -412,74 +425,60 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="frame_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
+          <property name="topMargin">
+           <number>0</number>
           </property>
-          <property name="minimumSize">
-           <size>
-            <width>452</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <widget class="QLineEdit" name="leChemicalComposition">
-           <property name="geometry">
-            <rect>
-             <x>1</x>
-             <y>1</y>
-             <width>450</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="toolTip">
-            <string>Elemental composition with the relative molar fractions.
+          <item>
+           <widget class="QLabel" name="label_37">
+            <property name="text">
+             <string>Molar:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leChemicalComposition">
+            <property name="toolTip">
+             <string>Elemental composition with the relative molar fractions.
 Can be used to automatically configure gamma interaction cross-sections and neutron scattering data.</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pbModifyChemicalComposition">
-           <property name="geometry">
-            <rect>
-             <x>2</x>
-             <y>0</y>
-             <width>452</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </widget>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbModifyChemicalComposition">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Change</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -584,1041 +583,1421 @@ Can be used to automatically configure gamma interaction cross-sections and neut
          </layout>
         </item>
        </layout>
-       <zorder>label_64</zorder>
-       <zorder>frame_2</zorder>
-       <zorder>label_12</zorder>
-       <zorder>label_17</zorder>
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Optical</string>
        </attribute>
-       <widget class="QGroupBox" name="gbPrimary">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>222</y>
-          <width>481</width>
-          <height>188</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="title">
-         <string>Primary scintillation</string>
-        </property>
-        <widget class="QLabel" name="label_20">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>104</y>
-           <width>71</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>photons / keV</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledPrimaryYield">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>104</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_16">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>104</y>
-           <width>80</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Photon yield:</string>
-         </property>
-        </widget>
-        <widget class="QCheckBox" name="cbSameYieldForAll">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>125</y>
-           <width>141</width>
-           <height>17</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Same for all particles</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledIntEnergyRes">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>150</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Intrinsic energy resolution to be used in particle simulations for this material (the ratio of the FWHM of the distribution and the average number of the emitted photons)</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_58">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>27</x>
-           <y>142</y>
-           <width>110</width>
-           <height>41</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Intrinsic energy
-resolution:</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbDeletePrimSpectrum">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>16</y>
-           <width>20</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadPrimSpectrum">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>16</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbShowPrimSpectrum">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>149</x>
-           <y>16</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_8">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>51</y>
-           <width>111</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Emission decay time:</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lePriT">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>50</y>
-           <width>171</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_5">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>18</y>
-           <width>120</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Emission spectrum:</string>
-         </property>
-        </widget>
-        <widget class="QFrame" name="frYieldSame">
-         <property name="geometry">
-          <rect>
-           <x>287</x>
-           <y>99</y>
-           <width>161</width>
-           <height>31</height>
-          </rect>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <widget class="QComboBox" name="cobYieldForParticle">
-          <property name="geometry">
-           <rect>
-            <x>33</x>
-            <y>4</y>
-            <width>100</width>
-            <height>20</height>
-           </rect>
-          </property>
+       <layout class="QVBoxLayout" name="verticalLayout_20">
+        <item>
+         <widget class="QLabel" name="label_41">
           <property name="font">
            <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_48">
-          <property name="geometry">
-           <rect>
-            <x>8</x>
-            <y>7</y>
-            <width>30</width>
-            <height>13</height>
-           </rect>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
+            <weight>75</weight>
+            <bold>true</bold>
            </font>
           </property>
           <property name="text">
-           <string>for:</string>
+           <string>Optical properties</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
-         <zorder>label_48</zorder>
-         <zorder>cobYieldForParticle</zorder>
-        </widget>
-        <widget class="QPushButton" name="pbPriThelp">
-         <property name="geometry">
-          <rect>
-           <x>349</x>
-           <y>49</y>
-           <width>31</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>?</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_24">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>74</y>
-           <width>111</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Emission raise time:</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="lePriT_raise">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>73</y>
-           <width>171</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_28">
-         <property name="geometry">
-          <rect>
-           <x>325</x>
-           <y>51</y>
-           <width>21</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>ns</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_29">
-         <property name="geometry">
-          <rect>
-           <x>325</x>
-           <y>74</y>
-           <width>21</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>ns</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbPriT_test">
-         <property name="geometry">
-          <rect>
-           <x>400</x>
-           <y>50</y>
-           <width>71</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Test</string>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="cobPriT_model">
-         <property name="geometry">
-          <rect>
-           <x>401</x>
-           <y>73</y>
-           <width>69</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <item>
-          <property name="text">
-           <string>Sum</string>
+        </item>
+        <item>
+         <widget class="Line" name="line_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Shao</string>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_27">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_15">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Refractive index:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_13">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>    vs. wavelength:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_48">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Bulk absorption:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>    vs. wavelength:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_56">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_46">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Rayleigh MFP:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_63">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_57">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Reemission probability:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_27">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>21</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>    vs. wavelength:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_17">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_25">
+              <item>
+               <widget class="QLineEdit" name="ledN">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_20">
+              <item>
+               <widget class="QPushButton" name="pbShowNlambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadNlambda">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDeleteNlambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_18">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_55">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_21">
+              <item>
+               <widget class="QLineEdit" name="ledAbs">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_23">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>mm-1</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_19">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_22">
+              <item>
+               <widget class="QPushButton" name="pbShowABSlambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadABSlambda">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDeleteABSlambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_20">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_65">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_23">
+              <item>
+               <widget class="QLineEdit" name="ledRayleigh">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>Keep empty if there is no Rayleigh scattering in this material</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_47">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>mm at</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="ledRayleighWave">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_49">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>nm</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbRemoveRayleigh">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_21">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_66">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>3</height>
+               </size>
+              </property>
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <item>
+               <widget class="QLineEdit" name="ledReemissionProbability">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>Use to define a waveshifter. Value should be from 0 to 1</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_25">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_24">
+              <item>
+               <widget class="QPushButton" name="pbShowReemProbLambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadReemisProbLambda">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDeleteReemisProbLambda">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_26">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_23">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-         </item>
-        </widget>
-        <widget class="QLabel" name="labModel">
-         <property name="geometry">
-          <rect>
-           <x>350</x>
-           <y>76</y>
-           <width>47</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>model:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-        <zorder>label_20</zorder>
-        <zorder>label_16</zorder>
-        <zorder>label_58</zorder>
-        <zorder>label_8</zorder>
-        <zorder>label_5</zorder>
-        <zorder>pbLoadPrimSpectrum</zorder>
-        <zorder>pbShowPrimSpectrum</zorder>
-        <zorder>pbDeletePrimSpectrum</zorder>
-        <zorder>ledPrimaryYield</zorder>
-        <zorder>lePriT</zorder>
-        <zorder>ledIntEnergyRes</zorder>
-        <zorder>cbSameYieldForAll</zorder>
-        <zorder>frYieldSame</zorder>
-        <zorder>pbPriThelp</zorder>
-        <zorder>label_24</zorder>
-        <zorder>lePriT_raise</zorder>
-        <zorder>label_28</zorder>
-        <zorder>label_29</zorder>
-        <zorder>pbPriT_test</zorder>
-        <zorder>cobPriT_model</zorder>
-        <zorder>labModel</zorder>
-       </widget>
-       <widget class="QGroupBox" name="gbOptical">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>5</y>
-          <width>481</width>
-          <height>214</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="title">
-         <string>Optical properties</string>
-        </property>
-        <widget class="QPushButton" name="pbRemoveRayleigh">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>380</x>
-           <y>130</y>
-           <width>20</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbDeleteABSlambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>97</y>
-           <width>20</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_3">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>77</y>
-           <width>111</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Bulk absorption:</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledAbs">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>75</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledRayleighWave">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>131</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_47">
-         <property name="geometry">
-          <rect>
-           <x>222</x>
-           <y>134</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>mm at</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_14">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>97</y>
-           <width>91</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>vs. wavelength:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_57">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>163</y>
-           <width>120</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Reemission probability:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_49">
-         <property name="geometry">
-          <rect>
-           <x>357</x>
-           <y>134</y>
-           <width>25</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>nm</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>20</y>
-           <width>101</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Refractive index:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_23">
-         <property name="geometry">
-          <rect>
-           <x>222</x>
-           <y>77</y>
-           <width>46</width>
-           <height>13</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>mm-1</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_46">
-         <property name="geometry">
-          <rect>
-           <x>28</x>
-           <y>131</y>
-           <width>111</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Rayleigh MFP:</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadNlambda">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>41</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledReemissionProbability">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>162</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Use to define a waveshifter. Value should be from 0 to 1</string>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadABSlambda">
-         <property name="geometry">
-          <rect>
-           <x>220</x>
-           <y>97</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_13">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>41</y>
-           <width>91</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>vs. wavelength:</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbDeleteNlambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>290</x>
-           <y>41</y>
-           <width>20</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbShowNlambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>41</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledRayleigh">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>131</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>Keep empty if there is no Rayleigh scattering in this material</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbShowABSlambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>97</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="ledN">
-         <property name="geometry">
-          <rect>
-           <x>150</x>
-           <y>20</y>
-           <width>60</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbShowReemProbLambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>149</x>
-           <y>184</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Show</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbLoadReemisProbLambda">
-         <property name="geometry">
-          <rect>
-           <x>219</x>
-           <y>184</y>
-           <width>62</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Load</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_27">
-         <property name="geometry">
-          <rect>
-           <x>59</x>
-           <y>184</y>
-           <width>91</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>vs. wavelength:</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbDeleteReemisProbLambda">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>289</x>
-           <y>184</y>
-           <width>20</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </widget>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_44">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Primary scintillation</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_10">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_34">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_18">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Emission spectrum:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Emission decay time:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_24">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Emission raise time:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_16">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Photon yield:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_58">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Intrinsic energy resolution:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_19">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_28">
+              <item>
+               <widget class="QPushButton" name="pbShowPrimSpectrum">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadPrimSpectrum">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDeletePrimSpectrum">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_27">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_29">
+              <item>
+               <widget class="QLineEdit" name="lePriT">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_28">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>ns               </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbPriThelp">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>?</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbPriT_test">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Test</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_28">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_30">
+              <item>
+               <widget class="QLineEdit" name="lePriT_raise">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_29">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>ns</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="labModel">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>   Model:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cobPriT_model">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Sum</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Shao</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_29">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_32">
+              <item>
+               <widget class="QComboBox" name="cobYieldForParticle">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_52">
+                <property name="text">
+                 <string>:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="ledPrimaryYield">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_20">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>photons / keV</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cbSameYieldForAll">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>S</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="frYieldSame">
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_31">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <spacer name="horizontalSpacer_30">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_33">
+              <item>
+               <widget class="QLineEdit" name="ledIntEnergyRes">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>21</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>Intrinsic energy resolution to be used in particle simulations for this material (the ratio of the FWHM of the distribution and the average number of the emitted photons)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_32">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_33">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -2735,6 +3114,12 @@ resolution:</string>
                    </item>
                    <item>
                     <widget class="QTableWidget" name="tabwNeutron">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="contextMenuPolicy">
                       <enum>Qt::CustomContextMenu</enum>
                      </property>
@@ -2771,7 +3156,7 @@ resolution:</string>
                      <item>
                       <widget class="QCheckBox" name="cbAllowAbsentCsData">
                        <property name="text">
-                        <string>Assume zero value for missing cross-section data</string>
+                        <string>Assume zero value for missing  data</string>
                        </property>
                       </widget>
                      </item>
@@ -2847,132 +3232,188 @@ resolution:</string>
        <attribute name="title">
         <string>Secondary scint</string>
        </attribute>
-       <widget class="QGroupBox" name="gbSecondary">
-        <property name="geometry">
-         <rect>
-          <x>70</x>
-          <y>30</y>
-          <width>323</width>
-          <height>149</height>
-         </rect>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>350</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Energy per e/ion pair:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="ledW"/>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_26">
-           <property name="text">
-            <string>eV</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>e drift velocity:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="ledEDriftVelocity"/>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="label_45">
-           <property name="text">
-            <string>cm/us</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Photons per electron:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="ledSecYield"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Emission decay time:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="ledSecT"/>
-         </item>
-         <item row="3" column="2">
-          <widget class="QLabel" name="label_25">
-           <property name="text">
-            <string>ns</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Emission spectrum:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
-           <item>
-            <widget class="QPushButton" name="pbShowSecSpectrum">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Show</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pbLoadSecSpectrum">
-             <property name="text">
-              <string>Load</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="4" column="2">
-          <widget class="QPushButton" name="pbDeleteSecSpectrum">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>20</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_14">
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_17">
+          <item>
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_11">
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Energy per e-/ion pair:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>e- drift speed:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Photons per e-:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_19">
+              <property name="text">
+               <string>Emission decay time:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Emission spectrum:</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_12">
+            <item>
+             <widget class="QLineEdit" name="ledW"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ledEDriftVelocity"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ledSecYield"/>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ledSecT"/>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QPushButton" name="pbShowSecSpectrum">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Show</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbLoadSecSpectrum">
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_13">
+            <item>
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>eV</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_45">
+              <property name="text">
+               <string>cm/us</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_34">
+              <property name="text">
+               <string> </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>ns</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbDeleteSecSpectrum">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_17">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -3020,8 +3461,8 @@ resolution:</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>541</width>
-     <height>21</height>
+     <width>636</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLibrary">
@@ -3103,13 +3544,8 @@ resolution:</string>
   <tabstop>leName</tabstop>
   <tabstop>cobActiveMaterials</tabstop>
   <tabstop>ledDensity</tabstop>
-  <tabstop>ledN</tabstop>
   <tabstop>ledAbs</tabstop>
   <tabstop>lePriT</tabstop>
-  <tabstop>ledW</tabstop>
-  <tabstop>ledEDriftVelocity</tabstop>
-  <tabstop>ledSecYield</tabstop>
-  <tabstop>ledSecT</tabstop>
   <tabstop>pbShowSecSpectrum</tabstop>
   <tabstop>pbShowNlambda</tabstop>
   <tabstop>pbLoadNlambda</tabstop>
@@ -3121,7 +3557,6 @@ resolution:</string>
   <tabstop>pbLoadPrimSpectrum</tabstop>
   <tabstop>pbDeletePrimSpectrum</tabstop>
   <tabstop>pbLoadSecSpectrum</tabstop>
-  <tabstop>pbDeleteSecSpectrum</tabstop>
   <tabstop>cbTrackingAllowed</tabstop>
   <tabstop>pbImportXCOM</tabstop>
   <tabstop>cobParticle</tabstop>
@@ -3147,8 +3582,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>260</y>
+     <x>373</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3163,8 +3598,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>270</y>
+     <x>464</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3179,8 +3614,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>322</y>
+     <x>464</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3195,8 +3630,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>348</y>
+     <x>464</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3211,8 +3646,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>296</y>
+     <x>464</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3227,8 +3662,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>260</y>
+     <x>373</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3243,8 +3678,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>270</y>
+     <x>464</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3259,8 +3694,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>296</y>
+     <x>464</x>
+     <y>459</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3275,8 +3710,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>322</y>
+     <x>464</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3291,8 +3726,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>348</y>
+     <x>464</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3307,8 +3742,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>470</x>
-     <y>238</y>
+     <x>619</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3323,8 +3758,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>92</x>
-     <y>264</y>
+     <x>103</x>
+     <y>300</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3339,8 +3774,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>470</x>
-     <y>238</y>
+     <x>619</x>
+     <y>270</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3355,8 +3790,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>290</x>
-     <y>240</y>
+     <x>417</x>
+     <y>271</y>
     </hint>
     <hint type="destinationlabel">
      <x>323</x>
@@ -3371,8 +3806,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>70</x>
-     <y>285</y>
+     <x>86</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3387,8 +3822,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>138</x>
-     <y>326</y>
+     <x>154</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3403,8 +3838,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>70</x>
-     <y>285</y>
+     <x>86</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3419,43 +3854,11 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>138</x>
-     <y>326</y>
+     <x>154</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
-     <y>121</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>leChemicalComposition</sender>
-   <signal>editingFinished()</signal>
-   <receiver>pbUpdateTmpMaterial</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>226</x>
-     <y>359</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>530</x>
-     <y>121</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>leChemicalComposition</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>pbWasModified</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>447</x>
-     <y>359</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>163</x>
      <y>121</y>
     </hint>
    </hints>
@@ -3471,8 +3874,8 @@ resolution:</string>
      <y>709</y>
     </hint>
     <hint type="destinationlabel">
-     <x>404</x>
-     <y>711</y>
+     <x>533</x>
+     <y>709</y>
     </hint>
    </hints>
   </connection>
@@ -3484,11 +3887,11 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>556</y>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
-     <x>381</x>
-     <y>116</y>
+     <x>630</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3499,8 +3902,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>574</y>
+     <x>232</x>
+     <y>602</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3515,12 +3918,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>574</y>
+     <x>250</x>
+     <y>602</y>
     </hint>
     <hint type="destinationlabel">
-     <x>361</x>
-     <y>113</y>
+     <x>630</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3531,8 +3934,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>211</x>
-     <y>602</y>
+     <x>222</x>
+     <y>630</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3547,8 +3950,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>493</y>
+     <x>208</x>
+     <y>530</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3564,7 +3967,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>397</y>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3580,7 +3983,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>366</y>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3595,8 +3998,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>362</x>
-     <y>366</y>
+     <x>373</x>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3612,7 +4015,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>366</y>
+     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>530</x>
@@ -3627,8 +4030,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>213</x>
-     <y>310</y>
+     <x>224</x>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3643,8 +4046,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>202</x>
-     <y>255</y>
+     <x>213</x>
+     <y>283</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -3659,8 +4062,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>205</x>
-     <y>397</y>
+     <x>216</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3676,7 +4079,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>310</y>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3692,7 +4095,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>255</y>
+     <y>283</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -3708,7 +4111,7 @@ resolution:</string>
    <hints>
     <hint type="sourcelabel">
      <x>321</x>
-     <y>574</y>
+     <y>602</y>
     </hint>
     <hint type="destinationlabel">
      <x>362</x>
@@ -3723,12 +4126,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>519</y>
+     <x>225</x>
+     <y>553</y>
     </hint>
     <hint type="destinationlabel">
-     <x>90</x>
-     <y>104</y>
+     <x>100</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3739,12 +4142,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>468</x>
-     <y>525</y>
+     <x>479</x>
+     <y>553</y>
     </hint>
     <hint type="destinationlabel">
-     <x>428</x>
-     <y>105</y>
+     <x>630</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3755,8 +4158,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>525</y>
+     <x>472</x>
+     <y>553</y>
     </hint>
     <hint type="destinationlabel">
      <x>93</x>
@@ -3771,12 +4174,12 @@ resolution:</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>54</x>
-     <y>322</y>
+     <x>70</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
-     <x>446</x>
-     <y>325</y>
+     <x>615</x>
+     <y>369</y>
     </hint>
    </hints>
   </connection>
@@ -3787,12 +4190,12 @@ resolution:</string>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>336</x>
-     <y>318</y>
+     <x>615</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
-     <x>116</x>
-     <y>340</y>
+     <x>131</x>
+     <y>444</y>
     </hint>
    </hints>
   </connection>
@@ -3803,12 +4206,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>286</x>
-     <y>275</y>
+     <x>398</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
-     <x>397</x>
-     <y>118</y>
+     <x>630</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3819,8 +4222,8 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>272</x>
-     <y>280</y>
+     <x>398</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
      <x>71</x>
@@ -3835,12 +4238,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>145</x>
-     <y>383</y>
+     <x>205</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
-     <x>99</x>
-     <y>107</y>
+     <x>109</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3851,12 +4254,12 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>367</x>
-     <y>368</y>
+     <x>497</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
-     <x>42</x>
-     <y>112</y>
+     <x>52</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -3867,12 +4270,44 @@ resolution:</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>379</x>
-     <y>319</y>
+     <x>615</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
-     <x>19</x>
-     <y>102</y>
+     <x>29</x>
+     <y>140</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leChemicalComposition</sender>
+   <signal>editingFinished()</signal>
+   <receiver>pbUpdateTmpMaterial</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>237</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>530</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leChemicalComposition</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>pbWasModified</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>441</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>163</x>
+     <y>121</y>
     </hint>
    </hints>
   </connection>

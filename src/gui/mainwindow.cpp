@@ -3816,6 +3816,32 @@ void MainWindow::simulationFinished()
         WindowNavigator->BusyOff(false);
     }
 
+    //warning for G4ants sim
+    if (ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->fSuccess)
+    {
+        QString s;
+        double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
+        if (totalEdepo == 0)
+            s += "Total energy deposition in sensitive volumes is zero!\n\n";
+
+        if (SimulationManager->DepoByNotRegistered > 0)
+        {
+            //double limit = 0.001;
+            //if (SimulationManager->DepoByNotRegistered > limit * totalEdepo)
+            {
+                s += QString("Deposition by not registered particles constitutes\n");
+                s += QString::number(100.0 * SimulationManager->DepoByNotRegistered / totalEdepo, 'g', 4) + " %";
+                s += "\nof the total energy deposition in the sensitive volume(s).\n\n";
+                s += "The following not registered particles were seen during Geant4 simulation:\n";
+                for (const QString & pn : SimulationManager->SeenNonRegisteredParticles)
+                    s += pn + ", ";
+                s.chop(2);
+            }
+            qDebug() << SimulationManager->SeenNonRegisteredParticles;
+            message(s, this);
+        }
+    }
+
     fStartedFromGUI = false;
     fSimDataNotSaved = true;
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";

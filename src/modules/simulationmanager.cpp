@@ -400,17 +400,23 @@ void ASimulatorRunner::simulate()
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
     if (bRunFromGui) emit updateReady(100.0, usPerEvent);
 
-    //Dump data in dataHub
+    //Merging data from the workers
     dataHub->fSimulatedData = true;
     dataHub->LastSimSet = simSettings;
     ErrorString.clear();
-    //qDebug() << "SimRunner: Collecting data from workers";
+    simMan->SeenNonRegisteredParticles.clear();
+    simMan->DepoByNotRegistered = 0;
+    simMan->DepoByRegistered = 0;
     for(int i = 0; i < workers.count(); i++)
     {
         workers[i]->appendToDataHub(dataHub);
         QString err = workers.at(i)->getErrorString();
         if (!err.isEmpty())
             ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
+
+        simMan->SeenNonRegisteredParticles += workers[i]->SeenNonRegisteredParticles;
+        simMan->DepoByNotRegistered += workers[i]->DepoByNotRegistered;
+        simMan->DepoByRegistered += workers[i]->DepoByRegistered;
     }
 
     //qDebug()<<"Sim runner reports simulation finished!";
@@ -1874,6 +1880,15 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
         return false;
     }
 
+    // for warning generation
+    parseJson(jrec, "DepoByRegistered", DepoByRegistered);
+    parseJson(jrec, "DepoByNotRegistered", DepoByNotRegistered);
+    QJsonArray arNP;
+    parseJson(jrec, "SeenNotRegisteredParticles", arNP);
+    SeenNonRegisteredParticles.clear();
+    for (int i=0; i<arNP.size(); i++)
+        SeenNonRegisteredParticles.insert(arNP.at(i).toString());
+
     //read and process depo data
     QString DepoFileName = simSettings->G4SimSet.getDepositionFileName(ID); // FilePath + QString("deposition-%1.txt").arg(ID);
     QFile inFile(DepoFileName);
@@ -1912,7 +1927,7 @@ bool ParticleSourceSimulator::geant4TrackAndProcess()
 
             //qDebug() << ID << "->"<<line;
             //pId mId dE x y z t
-            // 0   1   2 3 4 5 6
+            // 0   1   2 3 4 5 6     // pId can be = -1 !
             //populating energy vector data
             QStringList fields = line.split(' ', QString::SkipEmptyParts);
             if (fields.isEmpty()) break; //last event had no depo - end of file reached

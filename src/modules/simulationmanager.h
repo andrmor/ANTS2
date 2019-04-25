@@ -7,6 +7,7 @@
 #include "atrackbuildoptions.h"
 
 #include <QVector>
+#include <QSet>
 #include <vector>
 #include <QObject>
 #include <QTime>
@@ -91,6 +92,11 @@ public:
     AScriptParticleGenerator* ScriptParticleGenerator = 0; //only for gui, simulation threads use their own
 
     ATrackBuildOptions TrackBuildOptions;
+
+    //for G4ants sims
+    QSet<QString> SeenNonRegisteredParticles;
+    double DepoByNotRegistered;
+    double DepoByRegistered;
 
 private:
     EventsDataClass* EventsDataHub; //alias
@@ -256,7 +262,11 @@ protected:
     bool fSuccess;  //Implementors should set this flag at end of simulation()
     bool fHardAbortWasTriggered;
 
-private:
+public:
+    //for G4ants sim
+    QSet<QString> SeenNonRegisteredParticles;
+    double DepoByNotRegistered;
+    double DepoByRegistered;
 };
 
 class PointSourceSimulator : public Simulator
@@ -392,6 +402,7 @@ private:
     bool bOnlySavePrimariesToFile = false;
     QProcess * G4antsProcess = 0;
     bool bG4isRunning = false;
+
 };
 
 #endif // SIMULATION_MANAGER_H

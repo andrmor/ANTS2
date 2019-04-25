@@ -89,7 +89,7 @@
            <rect>
             <x>70</x>
             <y>0</y>
-            <width>58</width>
+            <width>66</width>
             <height>17</height>
            </rect>
           </property>
@@ -102,7 +102,7 @@
            <rect>
             <x>4</x>
             <y>0</y>
-            <width>59</width>
+            <width>65</width>
             <height>17</height>
            </rect>
           </property>
@@ -133,7 +133,7 @@
            <rect>
             <x>70</x>
             <y>0</y>
-            <width>56</width>
+            <width>65</width>
             <height>17</height>
            </rect>
           </property>
@@ -146,7 +146,7 @@
            <rect>
             <x>4</x>
             <y>0</y>
-            <width>57</width>
+            <width>66</width>
             <height>17</height>
            </rect>
           </property>
@@ -188,7 +188,7 @@
           <rect>
            <x>11</x>
            <y>174</y>
-           <width>122</width>
+           <width>127</width>
            <height>17</height>
           </rect>
          </property>
@@ -557,7 +557,7 @@
           <rect>
            <x>11</x>
            <y>353</y>
-           <width>67</width>
+           <width>75</width>
            <height>17</height>
           </rect>
          </property>
@@ -568,9 +568,9 @@
         <widget class="QPushButton" name="pbAddToBasket">
          <property name="geometry">
           <rect>
-           <x>73</x>
+           <x>85</x>
            <y>348</y>
-           <width>68</width>
+           <width>55</width>
            <height>27</height>
           </rect>
          </property>
@@ -608,7 +608,7 @@
           <rect>
            <x>22</x>
            <y>194</y>
-           <width>111</width>
+           <width>118</width>
            <height>17</height>
           </rect>
          </property>
@@ -1806,7 +1806,7 @@ to the basket.</string>
      <x>0</x>
      <y>0</y>
      <width>987</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuExport">

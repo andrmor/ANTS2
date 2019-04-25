@@ -53,7 +53,7 @@ MaterialInspectorWindow::MaterialInspectorWindow(QWidget* parent, MainWindow *mw
     ui->setupUi(this);
     this->move(15,15);
     //this->setFixedSize(this->size());
-    this->setFixedWidth(this->width());
+    //this->setFixedWidth(this->width());
     bClearInProgress = false;
     NeutronInfoDialog = 0;
 
@@ -403,6 +403,21 @@ void MaterialInspectorWindow::updateWarningIcons()
     else ui->twProperties->setTabIcon(0, QIcon());
 }
 
+void MaterialInspectorWindow::updateEnableStatus()
+{
+    bool TrackingAllowed = ui->cbTrackingAllowed->isChecked();
+    bool MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
+
+    ui->cbTransparentMaterial->setEnabled(TrackingAllowed);
+    ui->fEnDepProps->setEnabled(TrackingAllowed && !MaterialIsTransparent);
+
+    ui->swMainMatParticle->setEnabled(!MaterialIsTransparent); // need?
+
+    QFont font = ui->cbTransparentMaterial->font();
+    font.setBold(MaterialIsTransparent);
+    ui->cbTransparentMaterial->setFont(font);
+}
+
 void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
 {
   //    qDebug() << "on_pbUpdateIndication_clicked";
@@ -420,21 +435,14 @@ void MaterialInspectorWindow::on_pbUpdateInteractionIndication_clicked()
   }
 
   const MatParticleStructure& mp = tmpMaterial.MatParticle.at(particleId);
+  bool TrackingAllowed = mp.TrackingAllowed;
+  bool MaterialIsTransparent = mp.MaterialIsTransparent;
+  ui->cbTrackingAllowed->setChecked(TrackingAllowed);
+  ui->cbTransparentMaterial->setChecked(MaterialIsTransparent);
+  updateEnableStatus();
 
   LastSelectedParticle = particleId;
-  bool TrackingAllowed = mp.TrackingAllowed;
-  ui->cbTrackingAllowed->setChecked(TrackingAllowed);
-  ui->fEnDepProps->setEnabled(TrackingAllowed);
-
-  bool MaterialIsTransparent = mp.MaterialIsTransparent;
-  ui->cbTransparentMaterial->setChecked(MaterialIsTransparent);
-  ui->swMainMatParticle->setEnabled(!MaterialIsTransparent);
-  QFont font = ui->cbTransparentMaterial->font();
-  font.setBold(MaterialIsTransparent);
-  ui->cbTransparentMaterial->setFont(font);
-
   ui->ledIntEnergyRes->setText( QString::number(mp.IntrEnergyRes) );
-
   ui->pbShowTotalInteraction->setEnabled(true);
 
   const AParticle::ParticleType type = Detector->MpCollection->getParticleType(particleId);
@@ -507,6 +515,7 @@ void MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked()
 
     const int ParticleId = ui->cobParticle->currentIndex();
     tmpMaterial.MatParticle[ParticleId].TrackingAllowed = ui->cbTrackingAllowed->isChecked();
+    tmpMaterial.MatParticle[ParticleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
     tmpMaterial.MatParticle[ParticleId].bCaptureEnabled = ui->cbCapture->isChecked();
     tmpMaterial.MatParticle[ParticleId].bElasticEnabled = ui->cbEnableScatter->isChecked();
 
@@ -1356,18 +1365,6 @@ void MaterialInspectorWindow::on_leName_editingFinished()
   MaterialInspectorWindow::on_pbUpdateTmpMaterial_clicked();
 }
 
-void MaterialInspectorWindow::on_cbTrackingAllowed_toggled(bool checked)
-{  
-  ui->fEnDepProps->setEnabled(checked);
-
-  QFont font = ui->cbTrackingAllowed->font();
-  font.setBold(checked);
-  ui->cbTrackingAllowed->setFont(font);
-
-  //ui->lineClear->setVisible(checked);
-  ui->fEnDepProps->setVisible(checked);  
-}
-
 void MaterialInspectorWindow::on_leName_textChanged(const QString& /*name*/)
 {
     //on text change - on chage this is a signal that it will be another material. These properties are recalculated anyway on
@@ -1438,15 +1435,6 @@ void MaterialInspectorWindow::on_ledGammaDiagnosticsEnergy_editingFinished()
 
   ui->leoGammaDiagnosticsCoefficient->setText(str);
   ui->leoMFPgamma->setText(str1);
-}
-
-void MaterialInspectorWindow::on_cbTransparentMaterial_clicked()
-{
-  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
-  int particleId = ui->cobParticle->currentIndex();
-  tmpMaterial.MatParticle[particleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
-  on_pbUpdateInteractionIndication_clicked();
-  on_pbWasModified_clicked();
 }
 
 void MaterialInspectorWindow::on_pbComments_clicked()
@@ -2996,4 +2984,22 @@ void MaterialInspectorWindow::on_pbCopyPrYieldToAll_clicked()
             tmpMaterial.MatParticle[iP].PhYield = prYield;
     tmpMaterial.PhotonYieldDefault = prYield;
     on_pbWasModified_clicked();
+}
+
+void MaterialInspectorWindow::on_cbTrackingAllowed_clicked()
+{
+    updateEnableStatus();
+}
+
+void MaterialInspectorWindow::on_cbTransparentMaterial_clicked()
+{
+    updateEnableStatus();
+
+    /*
+  AMaterial& tmpMaterial = MW->MpCollection->tmpMaterial;
+  int particleId = ui->cobParticle->currentIndex();
+  tmpMaterial.MatParticle[particleId].MaterialIsTransparent = ui->cbTransparentMaterial->isChecked();
+  on_pbUpdateInteractionIndication_clicked();
+  on_pbWasModified_clicked();
+    */
 }

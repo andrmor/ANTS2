@@ -7,20 +7,20 @@
 				"Energy": 2730,
 				"OpositeDirectionWithPrevious": false,
 				"Particle": {
-					"Charge": 1,
-					"Mass": 3,
-					"Name": "triton",
-					"Type": 1
+                    "A": -1,
+                    "Name": "triton",
+                    "Type": 1,
+                    "Z": -1
 				}
 			},
 			{
 				"Energy": 2050,
 				"OpositeDirectionWithPrevious": true,
 				"Particle": {
-					"Charge": 2,
-					"Mass": 4,
-					"Name": "alpha",
-					"Type": 1
+                    "A": -1,
+                    "Name": "alpha",
+                    "Type": 1,
+                    "Z": -1
 				}
 			}
 		]

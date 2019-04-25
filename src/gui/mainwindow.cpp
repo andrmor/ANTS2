@@ -3747,6 +3747,8 @@ void MainWindow::simulationFinished()
         ui->pbStopScan->setEnabled(false);
         ui->pbStopScan->setText("stop");
 
+        MIwindow->UpdateActiveMaterials(); //to update tmpMaterial
+
         if (!SimulationManager->fSuccess)
         {
             //qDebug() << "Sim manager reported fail!";

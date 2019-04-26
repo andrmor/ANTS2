@@ -1,5 +1,6 @@
 #include "asim_si.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
+#include "asimulatorrunner.h"
 #include "eventsdataclass.h"
 #include "aglobalsettings.h"
 #include "aconfiguration.h"

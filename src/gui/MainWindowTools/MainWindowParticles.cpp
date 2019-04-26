@@ -8,7 +8,7 @@
 #include "amessage.h"
 #include "aconfiguration.h"
 #include "atrackrecords.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "aglobalsettings.h"
 #include "aisotopeabundancehandler.h"
 

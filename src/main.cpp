@@ -39,7 +39,7 @@
 
 // SIM
 #ifdef SIM
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #endif
 
 // GUI
@@ -61,6 +61,7 @@
 #include <QtMessageHandler>
 #include <QCommandLineParser>
 #include <QHostAddress>
+#include <QTime>
 
 //Root
 #include "TApplication.h"

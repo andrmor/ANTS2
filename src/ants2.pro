@@ -396,9 +396,7 @@ SOURCES += main.cpp \
     scriptmode/arec_si.cpp \
     scriptmode/apms_si.cpp \
     scriptmode/alrf_si.cpp \
-    Simulation/atrackingdataimporter.cpp \
-    common/aeventtrackingrecord.cpp \
-    Simulation/anoderecord.cpp
+    common/aeventtrackingrecord.cpp
 
 HEADERS  += common/CorrelationFilters.h \
     common/jsonparser.h \
@@ -548,9 +546,7 @@ HEADERS  += common/CorrelationFilters.h \
     scriptmode/arec_si.h \
     scriptmode/apms_si.h \
     scriptmode/alrf_si.h \
-    Simulation/atrackingdataimporter.h \
-    common/aeventtrackingrecord.h \
-    Simulation/anoderecord.h
+    common/aeventtrackingrecord.h
 
 # --- SIM ---
 ants2_SIM {
@@ -561,12 +557,18 @@ ants2_SIM {
     modules/s1_generator.cpp \
     modules/photon_generator.cpp \
     modules/s2_generator.cpp \
-    modules/simulationmanager.cpp \
     OpticalOverrides/phscatclaudiomodel.cpp \
     OpticalOverrides/scatteronmetal.cpp \
     modules/aphotontracer.cpp \
     modules/acompton.cpp \
-    modules/ageometrytester.cpp
+    modules/ageometrytester.cpp \
+    Simulation/atrackingdataimporter.cpp \
+    Simulation/anoderecord.cpp \
+    Simulation/asimulationmanager.cpp \
+    Simulation/asimulatorrunner.cpp \
+    Simulation/asimulator.cpp \
+    Simulation/apointsourcesimulator.cpp \
+    Simulation/aparticlesourcesimulator.cpp
 
     HEADERS  += common/agridelementrecord.h \
     common/aphoton.h \
@@ -580,12 +582,18 @@ ants2_SIM {
     modules/s1_generator.h \
     modules/photon_generator.h \
     modules/s2_generator.h \
-    modules/simulationmanager.h \
     OpticalOverrides/phscatclaudiomodel.h \
     OpticalOverrides/scatteronmetal.h \
     modules/aphotontracer.h \
     modules/acompton.h \
-    modules/ageometrytester.h
+    modules/ageometrytester.h \
+    Simulation/atrackingdataimporter.h \
+    Simulation/anoderecord.h \
+    Simulation/asimulationmanager.h \
+    Simulation/asimulatorrunner.h \
+    Simulation/asimulator.h \
+    Simulation/apointsourcesimulator.h \
+    Simulation/aparticlesourcesimulator.h
 }
 
 # --- GUI ---

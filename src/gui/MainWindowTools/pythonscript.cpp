@@ -15,7 +15,7 @@
 #include "reconstructionwindow.h"
 #include "areconstructionmanager.h"
 #include "windownavigatorclass.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "lrfwindow.h"
 #include "ascriptwindow.h"
 #include "checkupwindowclass.h"

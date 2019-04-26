@@ -1,6 +1,6 @@
 #include "ageowin_si.h"
 #include "mainwindow.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "geometrywindowclass.h"
 #include "reconstructionwindow.h"
 #include "detectorclass.h"
@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QThread>
+#include <QTime>
 
 #include "TGeoManager.h"
 #include "TVirtualGeoTrack.h"

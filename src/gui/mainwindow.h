@@ -43,7 +43,7 @@ class TApplication;
 class Viewer2DarrayObject;
 class DetectorClass;
 class ASimulatorRunner;
-class ParticleSourceSimulator;
+class AParticleSourceSimulator;
 class TmpObjHubClass;
 class ASlabListWidget;
 class InterfaceToPMscript;
@@ -480,7 +480,7 @@ private slots:
 public:
     void startSimulation(QJsonObject &json);
 private:
-    ParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings); //Single thread only!
+    AParticleSourceSimulator *setupParticleTestSimulation(GeneralSimSettings &simSettings); //Single thread only!
 signals:
     void StopRequested();
 private slots:

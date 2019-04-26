@@ -22,7 +22,7 @@
 #include "acommonfunctions.h"
 #include "guiutils.h"
 #include "aparticlesourcedialog.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "exampleswindow.h"
 #include "aconfiguration.h"
 

@@ -102,7 +102,7 @@ void MainWindow::on_pobTest_clicked()
 
 //include <QElapsedTimer>
 #include "atrackingdataimporter.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "aeventtrackingrecord.h"
 #include "outputwindow.h"
 void MainWindow::on_pobTest_2_clicked()

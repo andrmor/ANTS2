@@ -4,7 +4,7 @@
 #include "aglobalsettings.h"
 #include "ajsontools.h"
 #include "amessage.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 
 //Qt
 #include <QDebug>

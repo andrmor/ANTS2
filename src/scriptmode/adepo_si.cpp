@@ -2,7 +2,7 @@
 #include "eventsdataclass.h"
 #include "aenergydepositioncell.h"
 #include "aparticlerecord.h"
-#include "simulationmanager.h"
+#include "aparticlesourcesimulator.h"
 #include "asandwich.h"
 #include "atrackrecords.h"
 
@@ -222,7 +222,7 @@ bool ADepo_SI::doTracking(bool bDoTracks)
     simSettings.TrackBuildOptions.bBuildParticleTracks = bDoTracks;
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, 0, 0);
+    AParticleSourceSimulator *pss = new AParticleSourceSimulator(Detector, 0, 0);
     pss->setSimSettings(&simSettings);
     pss->setup(json);
     pss->initSimStat();

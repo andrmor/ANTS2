@@ -24,7 +24,9 @@
 #include "gainevaluatorwindowclass.h"
 #include "credits.h"
 #include "detectorclass.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
+#include "asimulatorrunner.h"
+#include "aparticlesourcesimulator.h"
 #include "areconstructionmanager.h"
 #include "apmtype.h"
 #include "globalsettingswindowclass.h"
@@ -3812,7 +3814,7 @@ void MainWindow::simulationFinished()
     }
 
     //warning for G4ants sim
-    if (ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->fSuccess)
+    if (ui->twSourcePhotonsParticles->currentIndex()==1 && ui->cbGeant4ParticleTracking->isChecked() && SimulationManager->fSuccess)
     {
         QString s;
         double totalEdepo = SimulationManager->DepoByRegistered + SimulationManager->DepoByNotRegistered;
@@ -3842,7 +3844,7 @@ void MainWindow::simulationFinished()
     //qDebug() << "---Procedure triggered by SimulationFinished signal has ended successfully---";
 }
 
-ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
+AParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSettings &simSettings) //Single thread only!
 {
     //============ prepare config ============
     QJsonObject json;
@@ -3859,7 +3861,7 @@ ParticleSourceSimulator *MainWindow::setupParticleTestSimulation(GeneralSimSetti
     qApp->processEvents();
 
     //========== prepare simulator ==========
-    ParticleSourceSimulator *pss = new ParticleSourceSimulator(Detector, SimulationManager, 0);
+    AParticleSourceSimulator *pss = new AParticleSourceSimulator(Detector, SimulationManager, 0);
 
     pss->setSimSettings(&simSettings);
     //pss->setupStandalone(json);
@@ -3874,7 +3876,7 @@ void MainWindow::on_pbTrackStack_clicked()
     fSimDataNotSaved = false; // to disable the warning
     MainWindow::ClearData();
     GeneralSimSettings simSettings;
-    ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
+    AParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
     EventsDataHub->SimStat->initialize(Detector->Sandwich->MonitorsRecords);
 
     //============ run stack =========
@@ -3944,7 +3946,7 @@ void MainWindow::on_pbGenerateLight_clicked()
     fSimDataNotSaved = false; // to disable the warning
     MainWindow::ClearData();
     GeneralSimSettings simSettings;
-    ParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
+    AParticleSourceSimulator *pss = setupParticleTestSimulation(simSettings);
     Detector->PMs->configure(&simSettings); //also configures accelerators!!!
     bool fOK = pss->standaloneGenerateLight(&EnergyVector);
 

@@ -17,7 +17,7 @@
 #include "eventsdataclass.h"
 #include "tmpobjhubclass.h"
 #include "reconstructionwindow.h"
-#include "simulationmanager.h"
+#include "asimulationmanager.h"
 #include "aparticlerecord.h"
 
 #include <QJsonObject>

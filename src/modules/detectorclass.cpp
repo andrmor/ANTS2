@@ -1218,7 +1218,7 @@ void removeOldFile(const QString & fileName, const QString & txt)
 }
 
 #include "ag4simulationsettings.h"
-bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, int numTracksToBuild)
+bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4SimSet, int numThreads, bool bBuildTracks, bool bLogHistory, int maxTracks)
 {
     QString gdmlName = G4SimSet.getGdmlFileName();
     QString err = exportToGDML(gdmlName);
@@ -1260,6 +1260,10 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
 
     json["GuiMode"] = false;
 
+    json["LogHistory"] = bLogHistory;
+    json["BuildTracks"] = bBuildTracks;
+    if (bBuildTracks) json["MaxTracks"] = maxTracks;
+
     for (int i=0; i<numThreads; i++)
     {
         json["Seed"] = static_cast<int>(RandGen->Rndm()*10000000);
@@ -1275,8 +1279,6 @@ bool DetectorClass::generateG4interfaceFiles(const AG4SimulationSettings & G4Sim
         QString recFN = G4SimSet.getReceitFileName(i);
         json["File_Receipt"] = recFN;
         removeOldFile(recFN, "receipt");
-
-        json["MaxEventsForTrackExport"] = numTracksToBuild;  // ***!!! split accordig to numThreads!
 
         QString tracFN = G4SimSet.getTracksFileName(i);
         json["File_Tracks"] = tracFN;

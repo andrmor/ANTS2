@@ -124,6 +124,7 @@ class ASimulatorRunner : public QObject
 public:
     enum State { SClean, SSetup, SRunning, SFinished/*, SStopRequest*/ };
     QString modeSetup;
+    GeneralSimSettings simSettings; //to move to simManager
 
     explicit ASimulatorRunner(DetectorClass *detector, EventsDataClass *dataHub, ASimulationManager* simMan, QObject *parent = 0);
     virtual ~ASimulatorRunner();
@@ -172,7 +173,6 @@ private:
     DetectorClass *detector = 0;
     EventsDataClass *dataHub = 0;
     ASimulationManager *simMan = 0;
-    GeneralSimSettings simSettings;
 
     //Time
     QTime startTime;

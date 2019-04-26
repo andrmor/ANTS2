@@ -130,9 +130,11 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount, bool bFromGui)
 
 if (bGeant4ParticleSim)
 {
-    int numTracks = (simSettings.TrackBuildOptions.bBuildParticleTracks ? simSettings.TrackBuildOptions.MaxParticleTracks : 0);
+    bool bBuildTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
+    bool bLogHistory = simSettings.fLogsStat;
+    int  maxTracks = simSettings.TrackBuildOptions.MaxParticleTracks / threadCount + 1;
 
-    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, numTracks);
+    bool bOK = detector->generateG4interfaceFiles(simSettings.G4SimSet, threadCount, bBuildTracks, bLogHistory, maxTracks);
     if (!bOK)
     {
         ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
@@ -2173,6 +2175,12 @@ void ASimulationManager::onSimulationFinished()
                            std::make_move_iterator(sim->tracks.begin()),
                            std::make_move_iterator(sim->tracks.end()) );
             sim->tracks.clear();  //to avoid delete objects on simulator delete
+        }
+        while (Tracks.size() > Runner->simSettings.TrackBuildOptions.MaxParticleTracks)
+        {
+            if (Tracks.empty()) break;
+            delete Tracks.at(Tracks.size()-1);
+            Tracks.resize(Tracks.size()-1); // max number of resizes will be small (~ num treads)
         }
     }
 

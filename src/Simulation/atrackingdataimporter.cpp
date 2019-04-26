@@ -8,9 +8,10 @@
 #include <QDebug>
 
 ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
+                                             const QStringList & ParticleNames,
                                              std::vector<AEventTrackingRecord *> * History,
                                              std::vector<TrackHolderClass *> * Tracks) :
-TrackBuildOptions(TrackBuildOptions), History(History), Tracks(Tracks) {}
+TrackBuildOptions(TrackBuildOptions), ParticleNames(ParticleNames), History(History), Tracks(Tracks) {}
 
 const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent)
 {
@@ -90,8 +91,8 @@ void ATrackingDataImporter::processNewTrack()
 {
     //qDebug() << "NT:"<<currentLine;
     currentLine.remove(0, 1);
-    //Id ParentId PartId x y z time E
-    //0      1      2    3 4 5   6  7
+    //Id ParentId Part x y z time E
+    //0      1     2   3 4 5   6  7
     QStringList f = currentLine.split(' ', QString::SkipEmptyParts);
     if (f.size() != 8)
     {
@@ -121,7 +122,7 @@ void ATrackingDataImporter::processNewTrack()
         //qDebug() << "  Creating new track and its firt node";
         CurrentTrack = new TrackHolderClass();
         CurrentTrack->UserIndex = 22;
-        TrackBuildOptions.applyToParticleTrack(CurrentTrack, f.at(2).toInt());
+        TrackBuildOptions.applyToParticleTrack( CurrentTrack, ParticleNames.indexOf(f.at(2)) );
 
         CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble()) ); //need time?
     }
@@ -140,7 +141,7 @@ void ATrackingDataImporter::processNewTrack()
         int parTrIndex = f.at(1).toInt();
         if (parTrIndex == 0)
         {
-            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2).toInt(),    // pId
+            AParticleTrackingRecord * r = AParticleTrackingRecord::create(f.at(2),            // p_name
                                                                           f.at(7).toFloat(),  // E
                                                                           f.at(3).toFloat(),  // X
                                                                           f.at(4).toFloat(),  // Y
@@ -157,7 +158,7 @@ void ATrackingDataImporter::processNewTrack()
                 Error = "Promised secondary not found!";
                 return;
             }
-            secrec->update(f.at(2).toInt(),    // pId
+            secrec->update(f.at(2),            // p_name
                            f.at(7).toFloat(),  // E
                            f.at(3).toFloat(),  // X
                            f.at(4).toFloat(),  // Y

@@ -42,15 +42,15 @@ void ATrackingStepData::logToString(QString & str, int offset) const
 
 // ============= Track ==============
 
-AParticleTrackingRecord::AParticleTrackingRecord(int particleId, float startEnergy, float * startPosition, float time) :
-    ParticleId(particleId), StartEnergy(startEnergy), StartTime(time)
+AParticleTrackingRecord::AParticleTrackingRecord(const QString & particle, float startEnergy, float * startPosition, float time) :
+    ParticleName(particle), StartEnergy(startEnergy), StartTime(time)
 {
     for (int i=0; i<3; i++)
         StartPosition[i] = startPosition[i];
 }
 
-AParticleTrackingRecord::AParticleTrackingRecord(int particleId,  float startEnergy, float startX, float startY, float startZ, float time) :
-    ParticleId(particleId), StartEnergy(startEnergy), StartTime(time)
+AParticleTrackingRecord::AParticleTrackingRecord(const QString & particle,  float startEnergy, float startX, float startY, float startZ, float time) :
+    ParticleName(particle), StartEnergy(startEnergy), StartTime(time)
 {
     StartPosition[0] = startX;
     StartPosition[1] = startY;
@@ -63,30 +63,30 @@ AParticleTrackingRecord::~AParticleTrackingRecord()
     for (auto* sec  : Secondaries) delete sec;
 }
 
-AParticleTrackingRecord *AParticleTrackingRecord::create(int ParticleId, double StartEnergy, double * StartPosition, double Time)
+AParticleTrackingRecord *AParticleTrackingRecord::create(const QString & Particle, double StartEnergy, double * StartPosition, double Time)
 {
     float pos[3];
     for (int i=0; i<3; i++) pos[i] = static_cast<float>(StartPosition[i]);
 
-    return new AParticleTrackingRecord(ParticleId,
+    return new AParticleTrackingRecord(Particle,
                                        static_cast<float>(StartEnergy),
                                        pos,
                                        static_cast<float>(Time));
 }
 
-AParticleTrackingRecord *AParticleTrackingRecord::create(int ParticleId, float StartEnergy, float StartX, float StartY, float StartZ, float Time)
+AParticleTrackingRecord *AParticleTrackingRecord::create(const QString & Particle, float StartEnergy, float StartX, float StartY, float StartZ, float Time)
 {
-    return new AParticleTrackingRecord(ParticleId, StartEnergy, StartX, StartY, StartZ, Time);
+    return new AParticleTrackingRecord(Particle, StartEnergy, StartX, StartY, StartZ, Time);
 }
 
 AParticleTrackingRecord *AParticleTrackingRecord::create()
 {
-    return new AParticleTrackingRecord(-1, 0, 0, 0, 0, 0);
+    return new AParticleTrackingRecord("undefined", 0, 0, 0, 0, 0);
 }
 
-void AParticleTrackingRecord::update(int particleId, float startEnergy, float startX, float startY, float startZ, float time)
+void AParticleTrackingRecord::update(const QString & particle, float startEnergy, float startX, float startY, float startZ, float time)
 {
-    ParticleId       = particleId;
+    ParticleName     = particle;
     StartEnergy      = startEnergy;
     StartPosition[0] = startX;
     StartPosition[1] = startY;
@@ -94,9 +94,9 @@ void AParticleTrackingRecord::update(int particleId, float startEnergy, float st
     StartTime        = time;
 }
 
-AParticleTrackingRecord *AParticleTrackingRecord::create(int ParticleId, float StartEnergy, float *StartPosition, float Time)
+AParticleTrackingRecord *AParticleTrackingRecord::create(const QString & Particle, float StartEnergy, float *StartPosition, float Time)
 {
-    return new AParticleTrackingRecord(ParticleId, StartEnergy, StartPosition, Time);
+    return new AParticleTrackingRecord(Particle, StartEnergy, StartPosition, Time);
 }
 
 void AParticleTrackingRecord::addStep(ATrackingStepData * step)
@@ -118,7 +118,8 @@ int AParticleTrackingRecord::countSecondaries() const
 void AParticleTrackingRecord::logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const
 {
     str += QString(' ').repeated(offset) + '>';
-    str += (ParticleId > -1 && ParticleId < ParticleNames.size() ? ParticleNames.at(ParticleId) : "unknown");
+    //str += (ParticleId > -1 && ParticleId < ParticleNames.size() ? ParticleNames.at(ParticleId) : "unknown");
+    str += ParticleName;
     str += QString("  E=%1  at (%2, %3, %4) %5\n").arg(StartEnergy).arg(StartPosition[0]).arg(StartPosition[1]).arg(StartPosition[2]).arg(StartTime);
 
     for (auto* st : Steps)
@@ -133,12 +134,12 @@ void AParticleTrackingRecord::logToString(QString & str, int offset, const QStri
     }
 }
 
-void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const
+void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const
 {
     TrackHolderClass * tr = new TrackHolderClass();
     tr->Nodes.append( TrackNodeStruct(StartPosition[0], StartPosition[1], StartPosition[2], StartTime) );
     tr->UserIndex = 22;
-    TrackBuildOptions.applyToParticleTrack(tr, ParticleId);
+    TrackBuildOptions.applyToParticleTrack(tr, ParticleNames.indexOf(ParticleName));
     Tracks.push_back(tr);
 
     for (ATrackingStepData * step : Steps)
@@ -146,7 +147,7 @@ void AParticleTrackingRecord::makeTrack(std::vector<TrackHolderClass *> & Tracks
 
     if (bWithSecondaries)
         for (AParticleTrackingRecord * sec : Secondaries)
-            sec->makeTrack(Tracks, TrackBuildOptions, bWithSecondaries);
+            sec->makeTrack(Tracks, ParticleNames, TrackBuildOptions, bWithSecondaries);
 }
 
 // ============= Event ==============

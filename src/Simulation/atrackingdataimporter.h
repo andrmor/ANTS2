@@ -13,12 +13,16 @@ class ATrackBuildOptions;
 class ATrackingDataImporter
 {
 public:
-    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions, std::vector<AEventTrackingRecord*> * History, std::vector<TrackHolderClass *> * Tracks);
+    ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
+                          const QStringList & ParticleNames,
+                          std::vector<AEventTrackingRecord*> * History,
+                          std::vector<TrackHolderClass *> * Tracks);
 
     const QString processFile(const QString & FileName, int StartEvent);
 
 private:
     const ATrackBuildOptions & TrackBuildOptions;
+    const QStringList ParticleNames;
     std::vector<AEventTrackingRecord *> * History = nullptr; // if 0 - do not collect history
     std::vector<TrackHolderClass *> * Tracks = nullptr;      // if 0 - do not extract tracks
 

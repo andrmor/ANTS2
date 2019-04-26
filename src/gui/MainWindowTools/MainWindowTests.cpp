@@ -109,7 +109,8 @@ void MainWindow::on_pobTest_2_clicked()
 {
     SimulationManager->clearTracks();
 
-    ATrackingDataImporter di(SimulationManager->TrackBuildOptions, &EventsDataHub->TrackingHistory, nullptr);
+    const QStringList pn = MpCollection->getListOfParticleNames();
+    ATrackingDataImporter di(SimulationManager->TrackBuildOptions, pn, &EventsDataHub->TrackingHistory, nullptr);
     QString err = di.processFile("D:/DOWNLOADS/tracks-0.txt", 0);
     if (!err.isEmpty())
     {
@@ -118,7 +119,6 @@ void MainWindow::on_pobTest_2_clicked()
     }
 
     Owindow->OutTextClear();
-    QStringList pn = MpCollection->getListOfParticleNames();
     if (EventsDataHub->TrackingHistory.size() == 0)
         qDebug() << "TrackingHistory is empty!";
     else
@@ -135,7 +135,7 @@ void MainWindow::on_pobTest_2_clicked()
                     pr->logToString(str, 0, pn, true);
                     Owindow->OutText(str);
 
-                    pr->makeTrack(SimulationManager->Tracks, SimulationManager->TrackBuildOptions, true);
+                    pr->makeTrack(SimulationManager->Tracks, pn, SimulationManager->TrackBuildOptions, true);
                 }
         }
     }

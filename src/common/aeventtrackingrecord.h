@@ -33,9 +33,9 @@ private:
 class AParticleTrackingRecord
 {
 public:
-    static AParticleTrackingRecord* create(int ParticleId, double StartEnergy, double * StartPosition, double Time);
-    static AParticleTrackingRecord* create(int ParticleId, float  StartEnergy, float  * StartPosition, float  Time);
-    static AParticleTrackingRecord* create(int    ParticleId,
+    static AParticleTrackingRecord* create(const QString & Particle, double StartEnergy, double * StartPosition, double Time);
+    static AParticleTrackingRecord* create(const QString & Particle, float  StartEnergy, float  * StartPosition, float  Time);
+    static AParticleTrackingRecord* create(const QString & Particle,
                                            float  StartEnergy,
                                            float  StartX,
                                            float  StartY,
@@ -43,7 +43,7 @@ public:
                                            float  Time);
     static AParticleTrackingRecord* create(); // avoid if possible: empty record -> ParticleId will be set to -1
 
-    void update(int particleId, float  startEnergy, float  startX, float  startY, float  startZ, float  time);
+    void update(const QString & particle, float  startEnergy, float  startX, float  startY, float  startZ, float  time);
     void addStep(ATrackingStepData * step);
 
     void addSecondary(AParticleTrackingRecord * sec);
@@ -54,14 +54,14 @@ public:
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
     void logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
-    void makeTrack(std::vector<TrackHolderClass *> & Tracks, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
+    void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     ~AParticleTrackingRecord();
 
     // prevent creation on the stack and copy/move
 private:
-    AParticleTrackingRecord(int   particleId, float startEnergy, float * startPosition, float time);
-    AParticleTrackingRecord(int   particleId,
+    AParticleTrackingRecord(const QString & particle, float startEnergy, float * startPosition, float time);
+    AParticleTrackingRecord(const QString & particle,
                             float startEnergy,
                             float startX,
                             float startY,
@@ -74,7 +74,8 @@ private:
     AParticleTrackingRecord & operator=(AParticleTrackingRecord &&) = delete;
 
 public:
-    int     ParticleId;                       // ants ID of the particle
+    //int     ParticleId;                       // ants ID of the particle
+    QString ParticleName;                     //
     float   StartEnergy;                      // initial kinetic energy
     float   StartPosition[3];                 // initial position
     float   StartTime;                        // time of creation

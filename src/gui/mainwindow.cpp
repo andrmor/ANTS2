@@ -3832,7 +3832,7 @@ void MainWindow::simulationFinished()
                     s += pn + ", ";
                 s.chop(2);
             }
-            qDebug() << SimulationManager->SeenNonRegisteredParticles;
+            //qDebug() << SimulationManager->SeenNonRegisteredParticles;
             message(s, this);
         }
     }

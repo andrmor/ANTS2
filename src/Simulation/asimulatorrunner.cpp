@@ -70,17 +70,9 @@ ASimulatorRunner::~ASimulatorRunner()
     threads.clear();
 }
 
-bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
+bool ASimulatorRunner::setup(int threadCount, bool bPhotonSourceSim)
 {
-    threadCount = std::max(threadCount, 1);
     //qDebug() << "\n\n is multi?"<< detector->GeoManager->IsMultiThread();
-
-    if (!json.contains("SimulationConfig"))
-    {
-        simMan.ErrorString = "Json does not contain simulation config!";
-        return false;
-    }
-    QJsonObject jsSimSet = json["SimulationConfig"].toObject();
     totalEventCount = 0;
     lastProgress = 0;
     lastEventsDone = 0;
@@ -88,108 +80,37 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
     usPerEvent = 0;
     fStopRequested = false;
 
-    bool fRunThreads = threadCount > 0;
-    bool bOK = simSettings.readFromJson(jsSimSet);
-    if (!bOK)
-    {
-        simMan.ErrorString = simSettings.ErrorString;
-        return false;
-    }
-
-    bool bGeant4ParticleSim = simSettings.G4SimSet.bTrackParticles;
-    if (bNextSimExternal)
-    {
-        bGeant4ParticleSim = true; // override for script use
-        bNextSimExternal= false; //single session trigger
-    }
-
-    modeSetup = jsSimSet["Mode"].toString();
-
-    if (bGeant4ParticleSim)
-    {
-        bool bBuildTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
-        bool bLogHistory = simSettings.fLogsStat;
-        int  maxTracks = simSettings.TrackBuildOptions.MaxParticleTracks / threadCount + 1;
-
-        bool bOK = detector.generateG4interfaceFiles(simSettings.G4SimSet, threadCount, bBuildTracks, bLogHistory, maxTracks);
-        if (!bOK)
-        {
-            simMan.ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
-            return false;
-        }
-    }
-    else
-    {
-#ifndef __USE_ANTS_NCRYSTAL__
-        if ( modeSetup != "PointSim" && detector.MpCollection->isNCrystalInUse())
-        {
-            simMan.ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
-            return false;
-        }
-#endif
-    }
-
-    // Custom nodes - if load from file
-    if (modeSetup == "PointSim")
-    {
-        const QJsonObject psc = jsSimSet["PointSourcesConfig"].toObject();
-
-        int simMode = psc["ControlOptions"].toObject()["Single_Scan_Flood"].toInt();
-
-        if (simMode != 4) simMan.clearNodes(); // script will have the nodes already defined
-
-        if (simMode == 3)
-        {
-            QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
-            const QString err = simMan.loadNodesFromFile(fileName);
-            if (!err.isEmpty())
-            {
-                simMan.ErrorString = err;
-                return false;
-            }
-            //qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
-        }
-    }
-
     dataHub.clear();
-    dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simSettings.DetStatNumBins, (simSettings.fWaveResolved ? simSettings.WaveNodes : 0) );
+    dataHub.initializeSimStat(detector.Sandwich->MonitorsRecords, simMan.simSettings.DetStatNumBins, (simMan.simSettings.fWaveResolved ? simMan.simSettings.WaveNodes : 0) );
 
-    //qDebug() << "-------------";
-    //qDebug() << "Setup to run with "<<(fRunTThreads ? "TThreads" : "QThread");
-    //qDebug() << "Simulation mode:" << modeSetup;
-    //qDebug() << "Monitors:"<<dataHub->SimStat->Monitors.size();
-
-    //qDebug() << "Updating PMs module according to sim settings";
-    detector.PMs->configure(&simSettings); //Setup pms module and QEaccelerator if needed
-    //qDebug() << "Updating MaterialColecftion module according to sim settings";
-    detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
-
-    simMan.ErrorString = detector.MpCollection->CheckOverrides();
-    if (!simMan.ErrorString.isEmpty()) return false;
+    detector.PMs->configure(&simMan.simSettings); //Setup pms module and QEaccelerator if needed
+    detector.MpCollection->UpdateRuntimePropertiesAndWavelengthBinning(&simMan.simSettings, detector.RandGen, threadCount); //update wave-resolved properties of materials and runtime properties for neutrons
 
     clearWorkers();
+
+    bool fRunThreads = threadCount > 0;
 
     for (int i = 0; i < threadCount; i++)
     {
         ASimulator *worker;
-        if (modeSetup == "PointSim") //Photon simulator
-            worker = new APointSourceSimulator(&detector, &simMan, i);
+
+        if (bPhotonSourceSim) worker = new APointSourceSimulator(&detector, &simMan, i);
         else //Particle simulator
         {
             AParticleSourceSimulator* pss = new AParticleSourceSimulator(&detector, &simMan, i);
-            if (bGeant4ParticleSim && bOnlyFileExport)
+            if (simMan.simSettings.TrackBuildOptions.bBuildParticleTracks && simMan.isG4Sim_OnlyGenerateFiles())
             {
                 qDebug() << "--- only file export, external/internal sim will not be started! ---";
                 pss->setOnlySavePrimaries();
             }
             worker = pss;
         }
-        bOnlyFileExport = false; //single session trigger from script
+        simMan.setG4Sim_OnlyGenerateFiles(false); //this is single trigger flag
 
-        worker->setSimSettings(&simSettings);
-        int seed = detector.RandGen->Rndm() * 100000;
+        worker->setSimSettings(&simMan.simSettings);
+        int seed = detector.RandGen->Rndm() * 10000000;
         worker->setRngSeed(seed);
-        bool bOK = worker->setup(jsSimSet);
+        bool bOK = worker->setup(simMan.jsSimSet);
         if (!bOK)
         {
             simMan.ErrorString = worker->getErrorString();
@@ -201,10 +122,8 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 
         worker->divideThreadWork(i, threadCount);
         int workerEventCount = worker->getEventCount();
-        //Let's not create more than the necessary number of workers, but require at least 1
-        if (workerEventCount == 0 && i != 0)
+        if (workerEventCount == 0 && i != 0) // require at least 1 worker, even if no work assigned
         {
-            //qDebug()<<"Worker ("<<(i+1)<<") discarded, no job assigned";
             delete worker;
             break;
         }
@@ -227,10 +146,8 @@ bool ASimulatorRunner::setup(QJsonObject &json, int threadCount)
 #endif
     }
     else  backgroundWorker = workers.last();
-    simState = SSetup;
-    //qDebug() << "\n and now multi?"<< detector->GeoManager->IsMultiThread();
-    //qDebug() << "Num of workers:"<< workers.size();
 
+    simState = SSetup;
     return true;
 }
 
@@ -356,7 +273,7 @@ void ASimulatorRunner::simulate()
 
     //Merging data from the workers
     dataHub.fSimulatedData = true;
-    dataHub.LastSimSet = simSettings;
+    dataHub.LastSimSet = simMan.simSettings;
     simMan.ErrorString.clear();
     simMan.SeenNonRegisteredParticles.clear();
     simMan.DepoByNotRegistered = 0;

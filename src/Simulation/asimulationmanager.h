@@ -1,6 +1,7 @@
 #ifndef ASIMULATIONMANAGER_H
 #define ASIMULATIONMANAGER_H
 
+#include "generalsimsettings.h"
 #include "atrackbuildoptions.h"
 
 #include <QObject>
@@ -19,7 +20,8 @@ class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
 
-class QJsonObject;
+//class QJsonObject;
+#include <QJsonObject>  // temporary
 
 class ASimulationManager : public QObject
 {
@@ -32,10 +34,8 @@ public:
     bool isSimulationFinished() const {return fFinished;}
     bool isSimulationAborted() const;
 
-    int LastSimType; // -1 - undefined, 0 - PointSources, 1 - ParticleSources
-
     //last event info
-    QVector< QBitArray > SiPMpixels;
+    QVector<QBitArray> SiPMpixels;
     QVector<AEnergyDepositionCell *> EnergyVector;
 
     std::vector<TrackHolderClass *> Tracks;
@@ -52,6 +52,9 @@ public:
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);
 
+    void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
+    bool isG4Sim_OnlyGenerateFiles() const {return bOnlyFileExport;}
+
     // Next three: Simulator workers use their own local copies constructed using configuration json
     ASourceParticleGenerator * ParticleSources = 0;         //used to update json on config changes and in GUI to configure
     AFileParticleGenerator   * FileParticleGenerator = 0;   //only for gui, simulation threads use their own
@@ -66,20 +69,26 @@ public:
 
     QString ErrorString; //temporary public!
 
+    GeneralSimSettings simSettings;
+    QJsonObject jsSimSet;   // to be removed
+    bool bPhotonSourceSim;  // if false -> particle source sim
+
 private:
     EventsDataClass & EventsDataHub;
     DetectorClass   & Detector;
 
     ASimulatorRunner * Runner;
-
     QThread simRunnerThread;
     QTimer simTimerGuiUpdate;
 
     int  MaxThreads = -1;
     bool fStartedFromGui = false;
     bool fHardAborted = false;
-    bool fFinished;
-    bool fSuccess;
+    bool fFinished = true;
+    bool fSuccess = false;
+
+    // G4ants
+    bool bOnlyFileExport = false; // single trigger flag
 
 public slots:
     void onSimulationFinished(); //processing of simulation results!
@@ -93,8 +102,10 @@ signals:
     void updateReady(int Progress, double msPerEvent);
     void RequestStopSimulation();
     void SimulationFinished();
-
     void ProgressReport(int percents);
+
+private:
+    bool setup(const QJsonObject & json, int threads);
 };
 
 #endif // ASIMULATIONMANAGER_H

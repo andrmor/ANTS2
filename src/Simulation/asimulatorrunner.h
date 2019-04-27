@@ -1,25 +1,22 @@
 #ifndef ASIMULATORRUNNER_H
 #define ASIMULATORRUNNER_H
 
-#include "generalsimsettings.h" //to be moved
-
 #include <QObject>
+#include <QVector>
 #include <QTime>
 #include <QString>
+
+#include "RVersion.h"
 
 class DetectorClass;
 class EventsDataClass;
 class ASimulationManager;
 class ASimulator;
 
-class QJsonObject; // move?
-
-#include "RVersion.h"
-
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,11,1)
-class TThread;
+    class TThread;
 #else
-namespace std { class thread;}
+    namespace std { class thread;}
 #endif
 
 class ASimulatorRunner : public QObject
@@ -27,44 +24,31 @@ class ASimulatorRunner : public QObject
     Q_OBJECT
 public:
     enum State { SClean, SSetup, SRunning, SFinished };
-    QString modeSetup;
-    GeneralSimSettings simSettings; //to move to simManager
 
     ASimulatorRunner(DetectorClass & detector, EventsDataClass & dataHub, ASimulationManager & simMan);
     virtual ~ASimulatorRunner();
 
-    bool setup(QJsonObject & json, int threadCount); // main processing of the configuration is here
+    bool setup(int threadCount, bool bPhotonSourceSim); // if bPhotonSourceSim==false -> it is particle source sim
 
-    void updateGeoManager();
+    void updateGeoManager();  //obsolete?
     bool isStoppedByUser() const { return fStopRequested; }
     void updateStats();
-    double getProgress() const { return progress; }
+    //double getProgress() const { return progress; }
     bool wasSuccessful() const;
     bool wasHardAborted() const;
     bool isFinished() const {return simState == SFinished;}
-    void setFinished() {simState = SFinished;}
-    //Use as read-only. Anything else is undefined behaviour! If your toast gets burnt, it's not my fault!
-    //Also remember that simulators will be deleted on setup()!
+    void setFinished() {simState = SFinished;}    
     QVector<ASimulator *> getWorkers() { return workers; }
     State getSimState() const {return simState;}
-
-    //Use this with caution too, e.g. after simulation finished! We need to expose this to clear memory after simulation,
-    //since we provide extra information of simulators to the outside (and it's actually used). In a way this is a hack
-    //that should be improved, maybe through external container (EventDataHub is not enough or suitable for this)
     void clearWorkers();
-
-    void setG4Sim() {bNextSimExternal = true;}
-    void setG4Sim_OnlyGenerateFiles(bool flag) {bOnlyFileExport = flag;}
 
 private:
     DetectorClass      & detector;
     EventsDataClass    & dataHub;
     ASimulationManager & simMan;
 
-    //Manager's state
     enum State simState;
     bool fStopRequested;
-    //bool bRunFromGui;
 
     //Threads
     QVector<ASimulator *> workers;
@@ -73,9 +57,7 @@ private:
 #else
     QVector<std::thread *> threads;
 #endif
-    ASimulator * backgroundWorker;
-
-
+    ASimulator * backgroundWorker; // obsolete?
 
     //Time
     QTime startTime;
@@ -83,10 +65,6 @@ private:
     int totalEventCount;
     int lastProgress;
     int lastEventsDone;
-
-
-    bool bNextSimExternal = false;
-    bool bOnlyFileExport = false;
 
 public:
     //Stats for gui report

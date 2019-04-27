@@ -11,6 +11,7 @@
 #include "apointsourcesimulator.h"
 #include "aparticlesourcesimulator.h"
 #include "aoneevent.h"
+#include "amaterialparticlecolection.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -64,17 +65,20 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     fSuccess = false;
     fStartedFromGui = fFromGui;
 
+    threads = std::max(threads, 1); // TODO check we still can run in "0" threads
+
     if (MaxThreads > 0 && threads > MaxThreads)
     {
         qDebug() << "Simulation manager: Enforcing max threads to " << MaxThreads;
         threads = MaxThreads;
     }
 
-    bool bOK = Runner->setup(json, threads);
+    // reading simulation settings
+    bool     bOK = setup(json, threads);
+    if (bOK) bOK = Runner->setup(threads, bPhotonSourceSim);
+
     if (!bOK)
-    {
         QTimer::singleShot(100, this, &ASimulationManager::onSimFailedToStart); // timer is to allow the start cycle to finish in the main thread
-    }
     else
     {
         simRunnerThread.start();
@@ -82,7 +86,71 @@ void ASimulationManager::StartSimulation(QJsonObject& json, int threads, bool fF
     }
 }
 
+bool ASimulationManager::setup(const QJsonObject & json, int threads)
+{
+    if ( !json.contains("SimulationConfig") )
+    {
+        ErrorString = "Json does not contain simulation config!";
+        return false;
+    }
 
+    jsSimSet = json["SimulationConfig"].toObject();
+    if ( !simSettings.readFromJson(jsSimSet) )
+    {
+        ErrorString = simSettings.ErrorString;
+        return false;
+    }
+
+    ErrorString = Detector.MpCollection->CheckOverrides();
+    if (!ErrorString.isEmpty()) return false;
+
+    QString mode = jsSimSet["Mode"].toString();
+    bPhotonSourceSim = ( mode == "PointSim" );
+
+    // handling of custom nodes
+    if (bPhotonSourceSim)
+    {
+        const QJsonObject psc = jsSimSet["PointSourcesConfig"].toObject();
+        int simMode = psc["ControlOptions"].toObject()["Single_Scan_Flood"].toInt();
+        if (simMode != 4) clearNodes(); // script will have the nodes already defined
+        if (simMode == 3)
+        {
+            QString fileName = psc["CustomNodesOptions"].toObject()["FileWithNodes"].toString();
+            const QString err = loadNodesFromFile(fileName);
+            if (!err.isEmpty())
+            {
+                ErrorString = err;
+                return false;
+            }
+            //qDebug() << "Custom nodes loaded from files, top nodes:"<<simMan->Nodes.size();
+        }
+    }
+    else // particle source sim
+    {
+        if (simSettings.G4SimSet.bTrackParticles)
+        {
+            const bool & bBuildTracks = simSettings.TrackBuildOptions.bBuildParticleTracks;
+            const bool & bLogHistory = simSettings.fLogsStat;
+            int maxTracks = simSettings.TrackBuildOptions.MaxParticleTracks / threads + 1;
+
+            bool bOK = Detector.generateG4interfaceFiles(simSettings.G4SimSet, threads, bBuildTracks, bLogHistory, maxTracks);
+            if (!bOK)
+            {
+                ErrorString = "Failed to create Ants2 <-> Geant4 interface files";
+                return false;
+            }
+        }
+
+#ifndef __USE_ANTS_NCRYSTAL__
+        if (Detector.MpCollection->isNCrystalInUse())
+        {
+            ErrorString = "NCrystal library is in use by material collection, but ANTS2 was compiled without this library!";
+            return false;
+        }
+#endif
+    }
+    return true;
+}
 
 void ASimulationManager::onSimFailedToStart()
 {
@@ -111,21 +179,17 @@ void ASimulationManager::onSimulationFinished()
     SiPMpixels.clear();
     clearTracks();
 
-    if (Runner->modeSetup == "PointSim") LastSimType = 0; //was Point sources sim
-    else if (Runner->modeSetup == "SourceSim") LastSimType = 1; //was Particle sources sim
-    else LastSimType = -1;
-
     QVector<ASimulator *> simulators = Runner->getWorkers();
     if (!simulators.isEmpty() && !fHardAborted)
     {
-        if (LastSimType == 0)
+        if (bPhotonSourceSim)
         {
             APointSourceSimulator *lastPointSrcSimulator = static_cast< APointSourceSimulator *>(simulators.last());
             EventsDataHub.ScanNumberOfRuns = lastPointSrcSimulator->getNumRuns();
 
             SiPMpixels = lastPointSrcSimulator->getLastEvent()->SiPMpixels; //only makes sense if there was only 1 event
         }
-        else if (LastSimType == 1)
+        else
         {
             AParticleSourceSimulator *lastPartSrcSimulator = static_cast< AParticleSourceSimulator *>(simulators.last());
             EnergyVector = lastPartSrcSimulator->getEnergyVector();
@@ -140,7 +204,7 @@ void ASimulationManager::onSimulationFinished()
                            std::make_move_iterator(sim->tracks.end()) );
             sim->tracks.clear();  //to avoid delete objects on simulator delete
         }
-        while (Tracks.size() > Runner->simSettings.TrackBuildOptions.MaxParticleTracks)
+        while (Tracks.size() > simSettings.TrackBuildOptions.MaxParticleTracks)
         {
             if (Tracks.empty()) break;
             delete Tracks.at(Tracks.size()-1);
@@ -148,15 +212,14 @@ void ASimulationManager::onSimulationFinished()
         }
     }
 
-    //Raimundo's comment: This is part of a hack. Check this function declaration in .h for more details.
     Runner->clearWorkers();
 
     if (fHardAborted)
         EventsDataHub.clear(); //data are not valid!
     else
     {
-        //before was limited to the mode whenlocations are limited to a certain object in the detector geometry
-        //scan and custom nodes might have nodes outside of the limiting object - they are still present but marked with 1e10 X and Y true coordinates
+        // scan and custom nodes might have nodes outside of the limiting object -
+        // they are still present but marked with 1e10 X and Y true coordinates
         EventsDataHub.purge1e10events(); //purging events with "true" positions x==1e10 && y==1e10
     }
 
@@ -169,7 +232,6 @@ void ASimulationManager::onSimulationFinished()
     SiPMpixels.clear();  // main window copied if needed
     //qDebug() << "SimManager: Sim finished";
 }
-
 
 void ASimulationManager::clearTracks()
 {

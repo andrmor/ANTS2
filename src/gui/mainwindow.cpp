@@ -3759,7 +3759,7 @@ void MainWindow::simulationFinished()
         }
 
         bool showTracks = false;
-        if (SimulationManager->LastSimType == 0) //PointSources sim
+        if (SimulationManager->bPhotonSourceSim)
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
             clearGeoMarkers();
@@ -3768,7 +3768,7 @@ void MainWindow::simulationFinished()
             if (ui->twSingleScan->currentIndex() == 0 && SimulationManager->isSimulationSuccess())
                 if (EventsDataHub->Events.size() == 1) Owindow->SiPMpixels = SimulationManager->SiPMpixels;
         }
-        if (SimulationManager->LastSimType == 1) //ParticleSources sim
+        else
         {
             showTracks = SimulationManager->TrackBuildOptions.bBuildParticleTracks || SimulationManager->TrackBuildOptions.bBuildPhotonTracks;
             clearEnergyVector();

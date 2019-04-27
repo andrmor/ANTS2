@@ -266,6 +266,7 @@ void ASimulatorRunner::simulate()
         for (int i=0; i<threads.size(); i++) delete threads[i];
         threads.clear();
     }
+
     simState = SFinished;
     progress = 100;
     usPerEvent = startTime.elapsed() / (double)totalEventCount;
@@ -278,16 +279,15 @@ void ASimulatorRunner::simulate()
     simMan.SeenNonRegisteredParticles.clear();
     simMan.DepoByNotRegistered = 0;
     simMan.DepoByRegistered = 0;
-    for(int i = 0; i < workers.count(); i++)
+    simMan.clearTrackingHistory();
+    for (int i = 0; i < workers.count(); i++)
     {
         workers[i]->appendToDataHub(&dataHub);
+        workers[i]->mergeData();
+
         QString err = workers.at(i)->getErrorString();
         if (!err.isEmpty())
             simMan.ErrorString += QString("Thread %1 reported error: %2\n").arg(i).arg(err);
-
-        simMan.SeenNonRegisteredParticles += workers[i]->SeenNonRegisteredParticles;
-        simMan.DepoByNotRegistered += workers[i]->DepoByNotRegistered;
-        simMan.DepoByRegistered += workers[i]->DepoByRegistered;
     }
 
     //qDebug()<<"Sim runner reports simulation finished!";

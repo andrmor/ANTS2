@@ -75,6 +75,7 @@ AScriptWindow::AScriptWindow(AScriptManager* ScriptManager, bool LightMode, QWid
     }
 
     QObject::connect(ScriptManager, &AScriptManager::showMessage, this, &AScriptWindow::ShowText);
+    QObject::connect(ScriptManager, &AScriptManager::showPlainTextMessage, this, &AScriptWindow::ShowPlainText);
     QObject::connect(ScriptManager, &AScriptManager::requestHighlightErrorLine, this, &AScriptWindow::HighlightErrorLine);
     QObject::connect(ScriptManager, &AScriptManager::clearText, this, &AScriptWindow::ClearText);
     //retranslators:
@@ -556,8 +557,14 @@ void AScriptWindow::EnableAcceptReject()
 
 void AScriptWindow::ShowText(QString text)
 {
-  pteOut->appendHtml(text);
-  qApp->processEvents();
+    pteOut->appendHtml(text);
+    qApp->processEvents();
+}
+
+void AScriptWindow::ShowPlainText(QString text)
+{
+    pteOut->appendPlainText(text);
+    qApp->processEvents();
 }
 
 void AScriptWindow::ClearText()

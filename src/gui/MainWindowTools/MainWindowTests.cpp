@@ -101,47 +101,8 @@ void MainWindow::on_pobTest_clicked()
 }
 
 //include <QElapsedTimer>
-#include "atrackingdataimporter.h"
-#include "asimulationmanager.h"
-#include "aeventtrackingrecord.h"
-#include "outputwindow.h"
 void MainWindow::on_pobTest_2_clicked()
 {
-    SimulationManager->clearTracks();
-
-    const QStringList pn = MpCollection->getListOfParticleNames();
-    ATrackingDataImporter di(SimulationManager->TrackBuildOptions, pn, &EventsDataHub->TrackingHistory, nullptr, 0);
-    QString err = di.processFile("D:/DOWNLOADS/tracks-0.txt", 0);
-    if (!err.isEmpty())
-    {
-        qDebug() << err;
-        return;
-    }
-
-    Owindow->OutTextClear();
-    if (EventsDataHub->TrackingHistory.size() == 0)
-        qDebug() << "TrackingHistory is empty!";
-    else
-    {
-        for (size_t i = 0; i<EventsDataHub->TrackingHistory.size(); i++)
-        {
-            Owindow->OutText( QString("Event #%1").arg(i) );
-            auto * er = EventsDataHub->TrackingHistory.at(i);
-            if (!er) qDebug() << "Empty!!!";
-            else
-                for (auto * pr : er->getPrimaryParticleRecords())
-                {
-                    QString str;
-                    pr->logToString(str, 0, pn, true);
-                    Owindow->OutText(str);
-
-                    pr->makeTrack(SimulationManager->Tracks, pn, SimulationManager->TrackBuildOptions, true);
-                }
-        }
-    }
-    Owindow->SetTab(0);
-    Owindow->showNormal();
-
 //    std::vector<mydata> v;
 //    v.push_back( mydata(1.0, 100.0) );
 

@@ -68,7 +68,8 @@ public slots:
     void updateJsonTree();
 
     void HighlightErrorLine(int line);
-    void ShowText(QString text); //shows text in the output box
+    void ShowText(QString text); //shows html-formatted text in the output box
+    void ShowPlainText(QString text); //shows plain text in the output box
     void ClearText(); //clears text in the output box
     void on_pbRunScript_clicked();
     void onF1pressed(QString text);

@@ -12,6 +12,7 @@
 #include "aparticlesourcesimulator.h"
 #include "aoneevent.h"
 #include "amaterialparticlecolection.h"
+#include "aeventtrackingrecord.h"
 
 #include <QDebug>
 #include <QJsonObject>
@@ -48,6 +49,7 @@ ASimulationManager::~ASimulationManager()
     clearEnergyVector();
     clearTracks();
     clearNodes();
+    clearTrackingHistory();
 
     delete ScriptParticleGenerator;
     delete FileParticleGenerator;
@@ -204,7 +206,7 @@ void ASimulationManager::onSimulationFinished()
                            std::make_move_iterator(sim->tracks.end()) );
             sim->tracks.clear();  //to avoid delete objects on simulator delete
         }
-        while (Tracks.size() > simSettings.TrackBuildOptions.MaxParticleTracks)
+        while (Tracks.size() > simSettings.TrackBuildOptions.MaxParticleTracks)  // obsolete?
         {
             if (Tracks.empty()) break;
             delete Tracks.at(Tracks.size()-1);
@@ -249,6 +251,12 @@ void ASimulationManager::clearEnergyVector()
 {
     for (int i=0; i<EnergyVector.size(); i++) delete EnergyVector[i];
     EnergyVector.clear();
+}
+
+void ASimulationManager::clearTrackingHistory()
+{
+    for (auto & r : TrackingHistory) delete r;
+    TrackingHistory.clear();
 }
 
 const QString ASimulationManager::loadNodesFromFile(const QString &fileName)

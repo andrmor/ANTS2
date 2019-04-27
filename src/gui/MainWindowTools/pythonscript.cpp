@@ -26,6 +26,7 @@
 #include "atree_si.h"
 #include "atracklog_si.h"
 #include "asim_si.h"
+#include "apthistory_si.h"
 #include "aconfig_si.h"
 #include "aevents_si.h"
 #include "arec_si.h"
@@ -74,6 +75,9 @@ void MainWindow::createPythonScriptWindow()
   ASim_SI* sim = new ASim_SI(SimulationManager, EventsDataHub, Config);
   QObject::connect(sim, SIGNAL(requestStopSimulation()), SimulationManager, SLOT(StopSimulation()));
   PythonScriptWindow->RegisterInterface(sim, "sim");
+
+  APTHistory_SI * ptHistory = new APTHistory_SI(*SimulationManager);
+  ScriptWindow->RegisterInterface(ptHistory, "ptHistory");
 
   ARec_SI* rec = new ARec_SI(ReconstructionManager, Config, EventsDataHub, TmpHub);
   QObject::connect(rec, SIGNAL(RequestStopReconstruction()), ReconstructionManager, SLOT(requestStop()));

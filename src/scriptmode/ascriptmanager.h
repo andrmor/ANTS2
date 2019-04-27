@@ -88,6 +88,7 @@ signals:
     void            onFinish(QString eval);
 
     void            showMessage(QString message);
+    void            showPlainTextMessage(QString message);
     void            clearText();
     void            requestHighlightErrorLine(int lineNumber);
 

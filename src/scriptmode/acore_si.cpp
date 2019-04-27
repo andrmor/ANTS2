@@ -100,6 +100,16 @@ void ACore_SI::print(QString text)
     emit ScriptManager->showMessage(text);
 }
 
+void ACore_SI::printPlain(QString text)
+{
+    emit ScriptManager->showPlainTextMessage(text);
+}
+
+void ACore_SI::printHTML(QString text)
+{
+    emit ScriptManager->showMessage(text);
+}
+
 void ACore_SI::clearText()
 {
     emit ScriptManager->clearText();

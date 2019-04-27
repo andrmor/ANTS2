@@ -25,6 +25,7 @@ public:
     virtual bool setup(QJsonObject & json);
     virtual void simulate();
     virtual void appendToDataHub(EventsDataClass * dataHub);
+    virtual void mergeData() override {}
 
     int getNumRuns() const {return NumRuns;}
 

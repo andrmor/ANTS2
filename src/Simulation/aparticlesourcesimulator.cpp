@@ -319,6 +319,25 @@ void AParticleSourceSimulator::appendToDataHub(EventsDataClass *dataHub)
     dataHub->ScanNumberOfRuns = 1;
 }
 
+void AParticleSourceSimulator::mergeData()
+{
+    simMan->SeenNonRegisteredParticles += SeenNonRegisteredParticles;
+    SeenNonRegisteredParticles.clear();
+
+    simMan->DepoByNotRegistered += DepoByNotRegistered;
+    DepoByNotRegistered = 0;
+
+    simMan->DepoByRegistered += DepoByRegistered;
+    DepoByRegistered = 0;
+
+    simMan->TrackingHistory.insert(
+          simMan->TrackingHistory.end(),
+          std::make_move_iterator(TrackingHistory.begin()),
+          std::make_move_iterator(TrackingHistory.end())
+        );
+    TrackingHistory.clear();
+}
+
 bool AParticleSourceSimulator::standaloneTrackStack(QVector<AParticleRecord *> *particleStack)
 {
     if (particleStack->isEmpty())
@@ -667,7 +686,9 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     }
 
     // for warning generation
+    DepoByRegistered = 0;
     parseJson(jrec, "DepoByRegistered", DepoByRegistered);
+    DepoByNotRegistered = 0;
     parseJson(jrec, "DepoByNotRegistered", DepoByNotRegistered);
     QJsonArray arNP;
     parseJson(jrec, "SeenNotRegisteredParticles", arNP);
@@ -749,9 +770,13 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
 
 
     //read tracks
-    if (simSettings->TrackBuildOptions.bBuildParticleTracks)
+    if (simSettings->TrackBuildOptions.bBuildParticleTracks || simSettings->fLogsStat)
     {
-        ATrackingDataImporter ti(simSettings->TrackBuildOptions, detector->MpCollection->getListOfParticleNames(), 0, &tracks, maxParticleTracks);
+        ATrackingDataImporter ti(simSettings->TrackBuildOptions,
+                                 detector->MpCollection->getListOfParticleNames(),
+                                 (simSettings->fLogsStat ? &TrackingHistory : nullptr),
+                                 (simSettings->TrackBuildOptions.bBuildParticleTracks ? &tracks : nullptr),
+                                 maxParticleTracks);
         QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
         ErrorString = ti.processFile(TrackingFileName, eventBegin);
         if (!ErrorString.isEmpty()) return false;

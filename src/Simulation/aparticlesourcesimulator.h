@@ -3,6 +3,8 @@
 
 #include "asimulator.h"
 
+#include <vector>
+
 #include <QVector>
 
 class AEnergyDepositionCell;
@@ -12,6 +14,7 @@ class S1_Generator;
 class S2_Generator;
 class AParticleGun;
 class QProcess;
+class AEventTrackingRecord;
 
 class AParticleSourceSimulator : public ASimulator
 {
@@ -22,24 +25,25 @@ public:
     const QVector<AEnergyDepositionCell*> &getEnergyVector() const { return EnergyVector; }
     void ClearEnergyVectorButKeepObjects() {EnergyVector.resize(0);} //to avoid clear of objects stored in the vector
 
-    virtual int getEventCount() const { return eventEnd - eventBegin; }
-    virtual int getEventsDone() const { return eventCurrent - eventBegin; }
-    virtual int getTotalEventCount() const { return totalEventCount; }
-    virtual bool setup(QJsonObject &json);
-    virtual void updateGeoManager();
-    virtual void simulate();
-    virtual void appendToDataHub(EventsDataClass *dataHub);
+    virtual int getEventCount() const override { return eventEnd - eventBegin; }
+    virtual int getEventsDone() const override { return eventCurrent - eventBegin; }
+    virtual int getTotalEventCount() const override { return totalEventCount; }
+    virtual bool setup(QJsonObject & json) override;
+    virtual void updateGeoManager() override;
+    virtual void simulate() override;
+    virtual void appendToDataHub(EventsDataClass * dataHub) override;
+    virtual void mergeData() override;
 
     //test purposes - direct tracking with provided stack or photon generation from provided energy deposition
     bool standaloneTrackStack(QVector<AParticleRecord*>* particleStack);
     bool standaloneGenerateLight(QVector<AEnergyDepositionCell*>* energyVector);
 
-    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;}
+    void setOnlySavePrimaries() {bOnlySavePrimariesToFile = true;} // for G4ants mode
 
     virtual void hardAbort() override;
 
 protected:
-    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
+    virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks) override;
 
 private:
     void EnergyVectorToScan();
@@ -82,6 +86,10 @@ private:
     bool bOnlySavePrimariesToFile = false;
     QProcess * G4antsProcess = 0;
     bool bG4isRunning = false;
+    QSet<QString> SeenNonRegisteredParticles;
+    double DepoByNotRegistered;
+    double DepoByRegistered;
+    std::vector<AEventTrackingRecord *> TrackingHistory;
 
 };
 

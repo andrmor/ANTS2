@@ -4,6 +4,8 @@
 #include "generalsimsettings.h"
 #include "atrackbuildoptions.h"
 
+#include <vector>
+
 #include <QObject>
 #include <QString>
 #include <QTimer>
@@ -19,6 +21,7 @@ class ANodeRecord;
 class ASourceParticleGenerator;
 class AFileParticleGenerator;
 class AScriptParticleGenerator;
+class AEventTrackingRecord;
 
 //class QJsonObject;
 #include <QJsonObject>  // temporary
@@ -41,6 +44,8 @@ public:
     std::vector<TrackHolderClass *> Tracks;
     std::vector<ANodeRecord *> Nodes;
 
+    std::vector<AEventTrackingRecord *> TrackingHistory;
+
     void StartSimulation(QJsonObject & json, int threads, bool fStartedFromGui);
 
     const QString & getErrorString() {return ErrorString;}
@@ -48,6 +53,7 @@ public:
     void clearTracks();
     void clearNodes();
     void clearEnergyVector();
+    void clearTrackingHistory();
 
     void setMaxThreads(int maxThreads) {MaxThreads = maxThreads;}
     const QString loadNodesFromFile(const QString & fileName);

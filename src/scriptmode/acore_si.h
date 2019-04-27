@@ -34,6 +34,8 @@ public slots:
 
   //output part of the script window
   void print(QString text);
+  void printPlain(QString text);
+  void printHTML(QString text);
   void clearText();
   QString str(double value, int precision);
   bool strIncludes(QString str, QString pattern);

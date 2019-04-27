@@ -53,7 +53,7 @@ public:
     const AParticleTrackingRecord * getSecondaryOf() const {return SecondaryOf;}
     const std::vector<AParticleTrackingRecord *> & getSecondaries() const {return Secondaries;}
 
-    void logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const;
+    void logToString(QString & str, int offset, bool bExpandSecondaries) const;
     void makeTrack(std::vector<TrackHolderClass *> & Tracks, const QStringList & ParticleNames, const ATrackBuildOptions & TrackBuildOptions, bool bWithSecondaries) const;
 
     ~AParticleTrackingRecord();

@@ -2,7 +2,6 @@
 #include "atrackrecords.h"
 #include "atrackbuildoptions.h"
 
-#include <QStringList>
 #include <QDebug>
 
 // ============= Step ==============
@@ -115,7 +114,7 @@ int AParticleTrackingRecord::countSecondaries() const
     return static_cast<int>(Secondaries.size());
 }
 
-void AParticleTrackingRecord::logToString(QString & str, int offset, const QStringList & ParticleNames, bool bExpandSecondaries) const
+void AParticleTrackingRecord::logToString(QString & str, int offset, bool bExpandSecondaries) const
 {
     str += QString(' ').repeated(offset) + '>';
     //str += (ParticleId > -1 && ParticleId < ParticleNames.size() ? ParticleNames.at(ParticleId) : "unknown");
@@ -129,7 +128,7 @@ void AParticleTrackingRecord::logToString(QString & str, int offset, const QStri
         {
             const std::vector<AParticleTrackingRecord *> & StepSecondaries = st->getSecondaries();
             for (auto * sec : StepSecondaries)
-                sec->logToString(str, offset + 4, ParticleNames, bExpandSecondaries);
+                sec->logToString(str, offset + 4, bExpandSecondaries);
         }
     }
 }

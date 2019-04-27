@@ -50,6 +50,7 @@ public:
     virtual bool setup(QJsonObject & json);
     virtual void simulate() = 0;
     virtual void appendToDataHub(EventsDataClass * dataHub);
+    virtual void mergeData() = 0;
 
     virtual void hardAbort();
 
@@ -59,7 +60,7 @@ protected:
     virtual void updateMaxTracks(int maxPhotonTracks, int maxParticleTracks);
 
     const DetectorClass *detector;          // external
-    const ASimulationManager *simMan;       // external
+    ASimulationManager *simMan;             // external
     const GeneralSimSettings *simSettings;  // external
     TRandom2 *RandGen;                      // local
     AOneEvent* OneEvent;                    // local         //PM hit data for one event is stored here
@@ -85,11 +86,6 @@ protected:
     int maxPhotonTracks = 1000;
     int maxParticleTracks = 1000;
 
-public:
-    //for G4ants sim
-    QSet<QString> SeenNonRegisteredParticles;
-    double DepoByNotRegistered;
-    double DepoByRegistered;
 };
 
 #endif // ASIMULATOR_H

@@ -751,7 +751,7 @@ bool AParticleSourceSimulator::geant4TrackAndProcess()
     //read tracks
     if (simSettings->TrackBuildOptions.bBuildParticleTracks)
     {
-        ATrackingDataImporter ti(simSettings->TrackBuildOptions, detector->MpCollection->getListOfParticleNames(), 0, &tracks);
+        ATrackingDataImporter ti(simSettings->TrackBuildOptions, detector->MpCollection->getListOfParticleNames(), 0, &tracks, maxParticleTracks);
         QString TrackingFileName = simSettings->G4SimSet.getTracksFileName(ID);
         ErrorString = ti.processFile(TrackingFileName, eventBegin);
         if (!ErrorString.isEmpty()) return false;

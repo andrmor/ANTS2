@@ -16,7 +16,8 @@ public:
     ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
                           const QStringList & ParticleNames,
                           std::vector<AEventTrackingRecord*> * History,
-                          std::vector<TrackHolderClass *> * Tracks);
+                          std::vector<TrackHolderClass *> * Tracks,
+                          int maxTracks);
 
     const QString processFile(const QString & FileName, int StartEvent);
 
@@ -25,6 +26,7 @@ private:
     const QStringList ParticleNames;
     std::vector<AEventTrackingRecord *> * History = nullptr; // if 0 - do not collect history
     std::vector<TrackHolderClass *> * Tracks = nullptr;      // if 0 - do not extract tracks
+    int MaxTracks = 1000;
 
     QString currentLine;
     AEventTrackingRecord * CurrentEventRecord = nullptr;      // history of the current event

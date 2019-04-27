@@ -85,11 +85,9 @@ void ASimulator::divideThreadWork(int threadId, int threadCount)
     //  qDebug()<<"Thread"<<threadId<<"/"<<threadCount<<": eventBegin"<<eventBegin<<": eventEnd"<<eventEnd<<": eventCount"<<getEventCount()<<"/"<<getTotalEventCount();
 
     //dividing track building
-    int maxPhotonTracks;
     if (simSettings->TrackBuildOptions.bBuildPhotonTracks)
         maxPhotonTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxPhotonTracks );
     else maxPhotonTracks = 0;
-    int maxParticleTracks;
     if (simSettings->TrackBuildOptions.bBuildParticleTracks)
         maxParticleTracks = ceil( 1.0 * getEventCount() / getTotalEventCount() * simSettings->TrackBuildOptions.MaxParticleTracks );
     else maxParticleTracks = 0;

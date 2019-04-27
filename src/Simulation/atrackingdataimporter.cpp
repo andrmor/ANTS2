@@ -10,8 +10,9 @@
 ATrackingDataImporter::ATrackingDataImporter(const ATrackBuildOptions & TrackBuildOptions,
                                              const QStringList & ParticleNames,
                                              std::vector<AEventTrackingRecord *> * History,
-                                             std::vector<TrackHolderClass *> * Tracks) :
-TrackBuildOptions(TrackBuildOptions), ParticleNames(ParticleNames), History(History), Tracks(Tracks) {}
+                                             std::vector<TrackHolderClass *> * Tracks,
+                                             int maxTracks) :
+TrackBuildOptions(TrackBuildOptions), ParticleNames(ParticleNames), History(History), Tracks(Tracks), MaxTracks(maxTracks) {}
 
 const QString ATrackingDataImporter::processFile(const QString &FileName, int StartEvent)
 {
@@ -117,14 +118,23 @@ void ATrackingDataImporter::processNewTrack()
         {
             //qDebug() << "  Sending previous track to Track container";
             Tracks->push_back( CurrentTrack );
+            CurrentTrack = nullptr;
         }
 
-        //qDebug() << "  Creating new track and its firt node";
-        CurrentTrack = new TrackHolderClass();
-        CurrentTrack->UserIndex = 22;
-        TrackBuildOptions.applyToParticleTrack( CurrentTrack, ParticleNames.indexOf(f.at(2)) );
+        if ((int)Tracks->size() > MaxTracks)
+        {
+            //qDebug() << "Limit reached, not reading new tracks anymore";
+            Tracks = nullptr;
+        }
+        else
+        {
+            //qDebug() << "  Creating new track and its firt node";
+            CurrentTrack = new TrackHolderClass();
+            CurrentTrack->UserIndex = 22;
+            TrackBuildOptions.applyToParticleTrack( CurrentTrack, ParticleNames.indexOf(f.at(2)) );
 
-        CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble()) ); //need time?
+            CurrentTrack->Nodes.append( TrackNodeStruct(f.at(3).toDouble(), f.at(4).toDouble(), f.at(5).toDouble()) ); //need time?
+        }
     }
 
     if (History)
@@ -192,8 +202,12 @@ void ATrackingDataImporter::processNewStep()
             Error = "Track not started while attempting to add step";
             return;
         }
-        //qDebug() << "  Adding node";
-        CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble());  // need time?
+
+        if (f.at(5) != "T") // skip Transportation (escape out of world is marked with "O")
+        {
+            //qDebug() << "  Adding node";
+            CurrentTrack->Nodes << TrackNodeStruct(f.at(0).toDouble(), f.at(1).toDouble(), f.at(2).toDouble());  // need time?
+        }
     }
 
     if (History)

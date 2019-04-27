@@ -82,6 +82,9 @@ protected:
     bool fSuccess;  //Implementors should set this flag at end of simulation()
     bool fHardAbortWasTriggered;
 
+    int maxPhotonTracks = 1000;
+    int maxParticleTracks = 1000;
+
 public:
     //for G4ants sim
     QSet<QString> SeenNonRegisteredParticles;

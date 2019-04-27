@@ -110,7 +110,7 @@ void MainWindow::on_pobTest_2_clicked()
     SimulationManager->clearTracks();
 
     const QStringList pn = MpCollection->getListOfParticleNames();
-    ATrackingDataImporter di(SimulationManager->TrackBuildOptions, pn, &EventsDataHub->TrackingHistory, nullptr);
+    ATrackingDataImporter di(SimulationManager->TrackBuildOptions, pn, &EventsDataHub->TrackingHistory, nullptr, 0);
     QString err = di.processFile("D:/DOWNLOADS/tracks-0.txt", 0);
     if (!err.isEmpty())
     {
